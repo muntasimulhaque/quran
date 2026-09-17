@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.muntasimulhaque.quran.data.ContentDatabase
+import io.github.muntasimulhaque.quran.data.PageFontStore
 import io.github.muntasimulhaque.quran.data.PagePosition
 import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.ReadingState
@@ -23,6 +24,7 @@ import kotlinx.coroutines.launch
 class ReaderViewModel(application: Application) : AndroidViewModel(application) {
 
     private val readingState = ReadingState(application)
+    private val pageFonts = PageFontStore(application)
     private var contentDatabase: ContentDatabase? = null
 
     var surahs by mutableStateOf<List<Surah>>(emptyList())
@@ -37,6 +39,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         private set
 
     val content: ContentDatabase? get() = contentDatabase
+    val fonts: PageFontStore get() = pageFonts
 
     init {
         viewModelScope.launch {

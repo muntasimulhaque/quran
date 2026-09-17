@@ -21,6 +21,16 @@ import java.nio.file.StandardCopyOption
  */
 class Fetch(private val root: File) {
 
+    /**
+     * Large datasets that are unpacked once they are verified, so the app and
+     * the asset pack can read plain files. The key is the manifest id and the
+     * value is the directory that receives the zip's contents.
+     */
+    private val unpackTargets = mapOf(
+        "mushaf-fonts-v2" to "content/work/fonts-v2/fonts/pages",
+        "quran-font-hafs" to "content/work/fonts-hafs",
+    )
+
     fun run(): Int {
         val manifest = loadManifest(root)
         var failures = 0
@@ -29,6 +39,7 @@ class Fetch(private val root: File) {
             val file = File(root, dataset.path)
             if (file.exists() && sha256(file) == dataset.sha256) {
                 println("fetch: have ${dataset.id}")
+                unpack(dataset.id, file)
                 continue
             }
             val assetUrl = dataset.assetUrl
@@ -47,6 +58,7 @@ class Fetch(private val root: File) {
                     failures++
                 } else {
                     println("fetch: ${dataset.id} verified (${file.length()} bytes)")
+                    unpack(dataset.id, file)
                 }
             } catch (error: Exception) {
                 println("fetch: ${dataset.id} failed: ${error.message}")
@@ -61,6 +73,24 @@ class Fetch(private val root: File) {
             println("fetch: $manual dataset(s) need a manual download; the app build needs only the assets above")
         }
         return 0
+    }
+
+    private fun unpack(id: String, archive: File) {
+        val targetPath = unpackTargets[id] ?: return
+        if (!isZip(archive)) return
+        val target = File(root, targetPath)
+        val expected = when (id) {
+            "mushaf-fonts-v2" -> 604
+            "quran-font-hafs" -> 1
+            else -> return
+        }
+        val present = target.walkTopDown().count { it.isFile && it.name.endsWith(".ttf") }
+        if (present == expected) {
+            println("fetch: $id already unpacked ($present fonts)")
+            return
+        }
+        println("fetch: unpacking $id to $targetPath")
+        extract(archive, target)
     }
 
     private fun download(url: String, destination: File) {

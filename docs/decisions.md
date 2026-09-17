@@ -348,6 +348,35 @@ Git LFS (extra setup and storage quota for every contributor), and
 downloading the fonts from the original QUL page on every build (needs an
 account and is not reproducible).
 
+## D-018: The 604 page fonts ship in the base app
+
+Date: the first session.
+
+Three deliveries were measured against the real bundle:
+
+- Fonts in the base: base module 144.7 MB compressed (the database is
+  13.3 MB of it), one install, no extra library, no added permission (the
+  only entry is the app private DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+  from androidx core), and a release APK is a complete, sideloadable
+  Quran. Built release: 151,980,003 bytes, 947 ms cold start on the API
+  35 emulator, no crash.
+- Install-time asset pack: the same total install size as the base, one
+  more module, no user benefit.
+- Fast-follow asset pack: a 14.9 MB base listing and a 129.8 MB pack
+  after install. It requires Play Core, which pulls WorkManager and Room
+  and merges five permissions (FOREGROUND_SERVICE,
+  FOREGROUND_SERVICE_DATA_SYNC, WAKE_LOCK, ACCESS_NETWORK_STATE,
+  RECEIVE_BOOT_COMPLETED), and the first R8 release crashed inside
+  WorkManager until keep rules were added. Fixable, but it buys a smaller
+  store listing with library weight, permissions, a preparing state, and
+  a release APK that is incomplete outside Play.
+
+Decision: the fonts ship in the base. The app stays one self-contained
+install of about 145 MB, dependency free beyond AndroidX, permission
+clean, side loadable, and offline. Audio packs are a separate decision
+when the recitations land, because their size and the wish to choose
+reciters actually change the question.
+
 ## D-017: Signing uses the shared upload keystore
 
 Date: the first session.

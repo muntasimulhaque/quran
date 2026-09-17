@@ -34,9 +34,12 @@ The app now runs on the reader-first skeleton:
   Literata, Amiri Quran, and the KFGQPC Mushaf typefaces
 - position and mode are remembered with DataStore
 
-The app declares no permissions and no network access. The debug APK is
-large only because the 604 page fonts are bundled; Play delivery will move
-them into an install-time asset pack when the Play packaging starts.
+The app declares no permissions and no network access. The release APK is about 145 MB because the 604 page fonts and the
+content database ship inside it. That makes it a complete, sideloadable
+Quran: one install, offline from the first second, no Play delivery
+library, and no permissions beyond the app private one from androidx
+core. The smaller-listing alternative, a fast-follow pack, was measured
+and rejected for its library weight and five merged permissions (D-018).
 
 ## The content
 

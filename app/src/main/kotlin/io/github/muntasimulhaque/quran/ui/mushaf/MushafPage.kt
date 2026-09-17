@@ -7,7 +7,9 @@ import android.graphics.Paint
 import android.graphics.Typeface
 import android.util.LruCache
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +17,8 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
@@ -28,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.data.ContentDatabase
+import io.github.muntasimulhaque.quran.data.PageFontStore
 import io.github.muntasimulhaque.quran.data.Word
 import io.github.muntasimulhaque.quran.ui.theme.Gold
 import io.github.muntasimulhaque.quran.ui.theme.PaperBackground
@@ -43,10 +48,7 @@ private const val LINE_HEIGHT_RATIO = 1.644f
 private const val BASMALA = "\u0628\u0650\u0633\u0652\u0645\u0650 \u0671\u0644\u0644\u0651\u064e\u0647\u0650 " +
     "\u0671\u0644\u0631\u0651\u064e\u062d\u0652\u0645\u064e\u0670\u0646\u0650 \u0671\u0644\u0631\u0651\u064e\u062d\u0650\u064a\u0645\u0650"
 
-/**
- * A small LRU of rendered pages: the current page and its neighbours, so a
- * page turn is a texture draw instead of a render.
- */
+/** A small LRU of rendered pages, so a page turn is a texture draw. */
 private object PageBitmaps {
     private val cache = LruCache<Int, Bitmap>(5)
 
@@ -55,7 +57,12 @@ private object PageBitmaps {
 }
 
 @Composable
-fun MushafPage(content: ContentDatabase, page: Int, modifier: Modifier = Modifier) {
+fun MushafPage(
+    content: ContentDatabase,
+    fonts: PageFontStore,
+    page: Int,
+    modifier: Modifier = Modifier,
+) {
     val context = LocalContext.current
     val density = LocalDensity.current
     BoxWithConstraints(
@@ -73,14 +80,29 @@ fun MushafPage(content: ContentDatabase, page: Int, modifier: Modifier = Modifie
                 return@produceState
             }
             val rendered = withContext(Dispatchers.Default) {
-                renderPage(context, content, page, widthPx)
+                renderPage(context, fonts, content, page, widthPx)
             }
-            PageBitmaps.put(page, rendered)
+            if (rendered != null) PageBitmaps.put(page, rendered)
             value = rendered
         }
-        bitmap?.let {
+        val rendered = bitmap
+        if (rendered == null) {
+            // Defensive only, a page font is a build artifact; the reader must
+            // never crash because one could not be read.
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = "This page cannot be shown right now.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        } else {
             Image(
-                bitmap = it.asImageBitmap(),
+                bitmap = rendered.asImageBitmap(),
                 contentDescription = null,
                 modifier = Modifier.fillMaxWidth().align(Alignment.Center),
             )
@@ -88,7 +110,14 @@ fun MushafPage(content: ContentDatabase, page: Int, modifier: Modifier = Modifie
     }
 }
 
-private fun renderPage(context: Context, content: ContentDatabase, page: Int, widthPx: Int): Bitmap {
+private fun renderPage(
+    context: Context,
+    fonts: PageFontStore,
+    content: ContentDatabase,
+    page: Int,
+    widthPx: Int,
+): Bitmap? {
+    val pageTypeface = fonts.typeface(page) ?: return null
     val textWidth = widthPx * 0.94f
     val fontPx = textWidth / EM_PER_LINE
     val lineHeight = fontPx * LINE_HEIGHT_RATIO
@@ -98,7 +127,7 @@ private fun renderPage(context: Context, content: ContentDatabase, page: Int, wi
     canvas.drawColor(PaperBackground.toArgb())
 
     val pagePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        typeface = Typeface.createFromAsset(context.assets, "fonts/pages/p$page.ttf")
+        typeface = pageTypeface
         textSize = fontPx
         color = PaperInk.toArgb()
     }

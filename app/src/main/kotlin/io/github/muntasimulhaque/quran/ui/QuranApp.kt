@@ -79,7 +79,11 @@ private fun ReaderScreen(viewModel: ReaderViewModel, content: ContentDatabase) {
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
             ) { index ->
-                MushafPage(content = content, page = index + 1)
+                MushafPage(
+                    content = content,
+                    fonts = viewModel.fonts,
+                    page = index + 1,
+                )
             }
             ReadingMode.Study -> StudyPage(
                 content = content,

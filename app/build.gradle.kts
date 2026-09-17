@@ -44,19 +44,24 @@ val canSignRelease = keystoreStoreFile != null &&
     releaseKeystore.containsKey("keyAlias") &&
     releaseKeystore.containsKey("keyPassword")
 
-val preparedAssets = layout.buildDirectory.dir("generated/quranAssets")
+// The base app carries the content database, its fingerprint, the study
+// font, and the 604 Mushaf page fonts. One self-contained install, no
+// permissions, no Play delivery library; a release APK from GitHub is a
+// complete Quran. The rejected alternative (fonts in a fast-follow pack)
+// is recorded in decisions D-018.
+val contentAssets = layout.buildDirectory.dir("generated/contentAssets")
 
-val prepareAppAssets = tasks.register("prepareAppAssets") {
+val prepareContentAssets = tasks.register("prepareContentAssets") {
     group = "content"
-    description = "Copies the content database and extracts the fonts into app assets."
+    description = "Copies the content database, its version, and the study font into base assets."
     dependsOn(":tools:fetchAssets")
     inputs.file(rootProject.file("content/quran.db"))
     inputs.file(rootProject.file("content/build-report.json"))
-    inputs.file(rootProject.file("content/raw/qul/qpc-v2-font.zip"))
-    inputs.file(rootProject.file("content/raw/qul/qpc-hafs-font.zip"))
-    outputs.dir(preparedAssets)
+    inputs.dir(rootProject.file("content/work/fonts-hafs"))
+    inputs.dir(rootProject.file("content/work/fonts-v2"))
+    outputs.dir(contentAssets)
     doLast {
-        val out = preparedAssets.get().asFile
+        val out = contentAssets.get().asFile
         out.deleteRecursively()
         val content = File(out, "content").apply { mkdirs() }
         rootProject.file("content/quran.db").copyTo(File(content, "quran.db"), overwrite = true)
@@ -65,15 +70,15 @@ val prepareAppAssets = tasks.register("prepareAppAssets") {
             .find(report)?.groupValues?.get(1)
             ?: throw GradleException("content/build-report.json has no databaseSha256")
         File(content, "version.txt").writeText(hash)
-        val pages = File(out, "fonts/pages").apply { mkdirs() }
+        val studyFont = rootProject.file("content/work/fonts-hafs").walkTopDown()
+            .firstOrNull { it.isFile && it.name.endsWith(".ttf") }
+            ?: throw GradleException("the study font is missing; run ./gradlew :tools:run --args=fetch")
+        val fonts = File(out, "fonts").apply { mkdirs() }
+        studyFont.copyTo(File(fonts, studyFont.name), overwrite = true)
+        val pages = File(fonts, "pages").apply { mkdirs() }
         project.copy {
-            from(project.zipTree(rootProject.file("content/raw/qul/qpc-v2-font.zip"))) { include("*.ttf") }
+            from(rootProject.file("content/work/fonts-v2/fonts/pages")) { include("*.ttf") }
             into(pages)
-        }
-        val study = File(out, "fonts").apply { mkdirs() }
-        project.copy {
-            from(project.zipTree(rootProject.file("content/raw/qul/qpc-hafs-font.zip"))) { include("*.ttf") }
-            into(study)
         }
     }
 }
@@ -115,7 +120,7 @@ android {
     buildFeatures {
         compose = true
     }
-    sourceSets.getByName("main").assets.directories.add(preparedAssets.get().asFile.absolutePath)
+    sourceSets.getByName("main").assets.directories.add(contentAssets.get().asFile.absolutePath)
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false
@@ -123,7 +128,7 @@ android {
 }
 
 tasks.named("preBuild") {
-    dependsOn(prepareAppAssets)
+    dependsOn(prepareContentAssets)
 }
 
 kotlin {

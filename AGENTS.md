@@ -242,3 +242,6 @@ implement it and update this list.
   normalize only the derived search columns.
 - Never delete or replace the `qpc-v2-fonts` Release asset. Its SHA-256 is
   pinned in `content/manifest.json`, and a fresh clone fetches it from there.
+- Play Core's asset delivery drags WorkManager, Room, and five merged
+  permissions, and its R8 release needs extra keep rules. The page fonts
+  ship in the base instead (D-018); reopen only with the owner.
