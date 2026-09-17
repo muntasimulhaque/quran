@@ -18,7 +18,10 @@ On Google Play as **Quran: The Noble Book** (coming soon).
 Planning and foundation. The working rules are in [AGENTS.md](AGENTS.md),
 the settled choices and their reasons in [docs/decisions.md](docs/decisions.md),
 and the exact content provenance in
-[docs/content-sources.md](docs/content-sources.md). No app code yet.
+[docs/content-sources.md](docs/content-sources.md). The Mushaf rendering
+prototype has passed: QPC V2 glyph text renders page-for-page with the
+printed Mushaf, and D-011 records the resulting architecture. No app code
+yet.
 
 ## The content
 

@@ -179,21 +179,35 @@ chrome gets out of the way.
   remove-animations setting.
 - Icons: a custom line set drawn for this app, no Material defaults.
 
-## D-011: Mushaf rendering is QPC V2 glyphs, contingent on the prototype
+## D-011: Mushaf rendering is text-native QPC V2 glyphs, with a page bitmap cache
 
-Date: the first session.
+Date: the first session. Confirmed by prototype.
 
-The plan is text-native Mushaf rendering: QPC V2 glyph words (QUL 61),
-QPC V2 page fonts (QUL 249), and the KFGQPC V2 layout (QUL 10), with word
-hit rectangles precomputed in `tools/` so tap, highlight, and audio sync
-never depend on runtime text measurement.
+The prototype rendered pages 1, 2, 3, 42, 293, 400, 500 and 604 from the
+QPC V2 glyph data on an API 35 Pixel 4 emulator, in a throwaway Compose
+app outside the repository. What it proved:
 
-This is the one architectural choice held open. Before the app build
-starts, a throwaway prototype renders a sample of pages on the owner's
-device and measures fidelity, frame times, and memory. If it passes, this
-decision is final. If it fails, the fallback is the KFGQPC page images
-with the same hit rectangles and the same word and ayah model, and this
-entry is updated with the reason.
+The page fonts are pre-justified. A full page's lines each sum to about
+39,000 font units at 2,500 units per em, which is 15.6 em per line, so no
+justification engine is needed: concatenating the word glyphs at one font
+size fills the line exactly. The word text is a sequence of one or more
+Arabic presentation form codepoints, and the same codepoints map to
+different glyphs on every page, so the page font is the coordinate that
+makes them meaningful. Pages 1 and 2 use 8 lines and are centered; every
+other page uses 15 justified lines. A page renders to a bitmap in 9 to
+120 ms on the software emulator, font load is 2 to 21 ms per page, and
+the app sits near 50 MB PSS.
+
+The decision: Mushaf mode renders the glyph text natively and caches each
+page as a bitmap, rendered off the main thread, with neighbor pages
+pre-warmed. The page image fallback is dropped. Word-level styling spans
+are safe because a word is a complete glyph or glyph sequence; sub-word
+spans are still forbidden.
+
+Tajweed stays out of launch scope, unchanged: the V4 tajweed fonts remain
+disabled upstream pending proofreading (D-005 of the QUL record), and any
+future tajweed mode would use the font's own embedded color, never
+sub-word spans.
 
 ## D-012: English UI, Arabic content, RTL stays on
 

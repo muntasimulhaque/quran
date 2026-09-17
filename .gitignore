@@ -23,3 +23,6 @@ content/packs/
 # OS noise
 .DS_Store
 Thumbs.db
+
+# Content working files
+content/work/
