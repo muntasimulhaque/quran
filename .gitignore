@@ -1,0 +1,25 @@
+# Android and Gradle
+local.properties
+.gradle/
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# IntelliJ and Android Studio
+.idea/
+*.iml
+
+# Keystores and secrets
+*.jks
+*.keystore
+keystore.properties
+
+# Content working files
+content/raw/
+content/audio/
+content/packs/
+
+# OS noise
+.DS_Store
+Thumbs.db
