@@ -25,6 +25,7 @@ data class Dataset(
     val path: String,
     val bytes: Long,
     val sha256: String,
+    val assetUrl: String? = null,
 )
 
 private val json = Json { ignoreUnknownKeys = true }

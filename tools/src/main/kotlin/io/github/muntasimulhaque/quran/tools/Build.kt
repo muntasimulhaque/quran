@@ -25,7 +25,7 @@ import java.sql.Connection
 class Build(private val root: File) {
 
     private val verify = File(root, "content/work/verify")
-    private val output = File(root, "content/build")
+    private val output = File(root, "content")
     private val problems = mutableListOf<String>()
 
     private data class Word(

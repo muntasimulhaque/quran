@@ -109,6 +109,26 @@ module build files, never here):
 ./gradlew :core:test :data:testDebugUnitTest :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
 ```
 
+Content pipeline, from the repository root. Keep every one of these green
+at every step:
+
+```bash
+./gradlew :tools:run --args="fetch"      # brings the font pack to a new machine, hash-checked
+./gradlew :tools:run --args="verify"     # checksums and structure of every source
+./gradlew :tools:run --args="audit"      # letter-level audit against Tanzil
+./gradlew :tools:run --args="build"      # writes content/quran.db, deterministic
+./gradlew :tools:run --args="fonts"      # font coverage for every codepoint
+./gradlew :tools:run --args="checkdb"    # verifies the committed database and its report
+```
+
+- The first build on a machine that lacks the page fonts runs `fetch`
+  once (about a minute) and is offline after that. The font pack lives on
+  the `qpc-v2-fonts` GitHub Release, pinned by SHA-256 in
+  `content/manifest.json`; never delete or replace it.
+- The committed `content/quran.db` is the shipped content. A local rebuild
+  must reproduce its SHA-256 exactly; if it does not, stop and find out
+  why before committing anything.
+
 - Verify by process exit code, never by grepping piped output.
 - `local.properties` is gitignored; recreate it with the machine's SDK
   path when it is lost.
@@ -158,7 +178,7 @@ Where truth lives, by question (filled in as code lands):
 | `data/` | Room user database, read-only content database access, repositories, preferences |
 | `app/` | Compose UI, host, Media3 service, Glance widget, notifications |
 | `tools/` | offline pipeline: content fetch, verify, audit, database build, font checks, golden renders |
-| `content/` | `manifest.json`, downloaded source artifacts, built content database |
+| `content/` | `quran.db` (the built, committed content database), `manifest.json`, `audit-report.md`, `build-report.json`; raw downloads under `raw/` are local and gitignored |
 | `docs/` | `decisions.md`, `content-sources.md`, privacy page, bundled font licenses |
 | `play-store/` | listing kit, screenshots per form factor, hand-off AAB |
 | `.github/workflows/` | `build.yml`, `screenshots.yml` |
@@ -215,3 +235,5 @@ implement it and update this list.
   ayah is the one the reader should see.
 - The KFGQPC source text is not NFC-normalized and must stay as published;
   normalize only the derived search columns.
+- Never delete or replace the `qpc-v2-fonts` Release asset. Its SHA-256 is
+  pinned in `content/manifest.json`, and a fresh clone fetches it from there.

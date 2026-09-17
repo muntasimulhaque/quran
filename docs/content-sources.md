@@ -68,11 +68,14 @@ independent copy of the translation we ship.
 3. `tools/build` writes the read-only content database with precomputed
    normalized search columns, page and line geometry, joined translation,
    word-by-word, and group-resolved tafsir rows, and the four recitations
-   with segments. First full run: 43,933,696 bytes, 6236 ayahs, 77432
-   words, deterministic, sha256
+   with segments. The database ships at `content/quran.db` (committed),
+   43,933,696 bytes, deterministic, sha256
    `00f9afa5f844e77138fd13a1929dc8e5300331f3b2c1f64e4d5af44a0e347d57`.
-   `tools/fonts` then proves coverage: 628,169 study codepoints and 88,186
-   glyph codepoints across 604 pages, all drawable.
+   `tools/fonts` proves coverage: 628,169 study codepoints and 88,186
+   glyph codepoints across 604 pages, all drawable. `tools/fetch` brings
+   the page fonts to a new machine from their GitHub Release asset and
+   checks the pinned hash; `tools/checkdb` verifies the committed database
+   against `content/build-report.json`.
 4. `tools/fonts` proves that every codepoint used by the Quran text is
    drawable by the bundled fonts, and extracts the page font set.
 5. `tools/packs` builds the recitation asset packs from the verified

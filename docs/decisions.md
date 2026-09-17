@@ -317,3 +317,33 @@ Three data-shape traps surfaced during this work and are now guarded:
 The built database is a build artifact under `content/build/`, currently
 gitignored. Whether the repository commits the built database, the raw
 sources, or both is decided when the app module lands.
+
+## D-016: The database is committed, the page fonts live in a Release
+
+Date: the first session.
+
+The built content database ships in the repository at `content/quran.db`
+(43,933,696 bytes, sha256 `00f9afa5...`). A fresh clone can build the app
+immediately, and the exact shipped content is guaranteed for everyone.
+
+`content/build-report.json` records the database's size, hash, and row
+counts, and `tools checkdb` verifies the committed database against it
+without needing any raw source, so drift is detectable in a fresh clone
+and in CI.
+
+The 604 page fonts (136 MB zipped, 208 MB unpacked) ship as a GitHub
+Release asset on the `qpc-v2-fonts` release, pinned by SHA-256 in
+`content/manifest.json`. `tools fetch` downloads any dataset that carries
+an `assetUrl`, verifies the pinned hash, and does nothing when the file is
+already present and correct. The first build on a new machine fetches the
+pack once, about a minute; every build after that is offline. Copying the
+zip by hand into `content/raw/qul/` is an equally valid route, because
+fetch verifies before it uses.
+
+The release asset must never be deleted or replaced: the pinned hash is
+the only guard between a fresh clone and silent drift.
+
+Rejected: committing the 208 MB of fonts (heavy clones and heavy history),
+Git LFS (extra setup and storage quota for every contributor), and
+downloading the fonts from the original QUL page on every build (needs an
+account and is not reproducible).

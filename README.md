@@ -32,8 +32,12 @@ The content database is now built and reproducible: 6,236 ayahs, 77,432
 words, 6,236 translations, both tafsirs with group resolution, four
 recitations with segments, and search columns, at 43,933,696 bytes with
 sha256 `00f9afa5f844e77138fd13a1929dc8e5300331f3b2c1f64e4d5af44a0e347d57`,
-byte-identical across rebuilds. Font coverage is proven for every study
-text codepoint and every Mushaf page glyph. No app code yet.
+byte-identical across rebuilds. It ships in the repository at
+`content/quran.db`, and `tools checkdb` verifies it without any raw
+sources. Font coverage is proven for every study text codepoint and every
+Mushaf page glyph. The 604 page fonts are published once as a GitHub
+Release asset; `tools fetch` downloads them on a new machine and checks
+the pinned SHA-256. No app code yet.
 
 ## The content
 

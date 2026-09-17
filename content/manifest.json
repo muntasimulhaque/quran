@@ -14,7 +14,8 @@
       "usedFor": "Canonical Arabic text and word positions",
       "path": "content/raw/qul/kfgqpc-hafs-word-by-word.sqlite.zip",
       "bytes": 1581385,
-      "sha256": "64b59c7ae3dae32f3650c534cb5a40c91089e0a6319372ded9500181a3cc6a47"
+      "sha256": "64b59c7ae3dae32f3650c534cb5a40c91089e0a6319372ded9500181a3cc6a47",
+      "assetUrl": null
     },
     {
       "id": "mushaf-glyph-v2",
@@ -28,7 +29,8 @@
       "usedFor": "Mushaf mode glyph codes",
       "path": "content/raw/qul/qpc-v2-glyph-word-by-word.sqlite.zip",
       "bytes": 1197952,
-      "sha256": "a766a033cad47b36f00f493f5f0541d5f07e1336857eaa6feba92465af3f68bb"
+      "sha256": "a766a033cad47b36f00f493f5f0541d5f07e1336857eaa6feba92465af3f68bb",
+      "assetUrl": null
     },
     {
       "id": "mushaf-layout-v2",
@@ -42,7 +44,8 @@
       "usedFor": "Mushaf page, line and word geometry",
       "path": "content/raw/qul/kfgqpc-v2-layout.sqlite.zip",
       "bytes": 99483,
-      "sha256": "697cbc7f16db1f56b6d95c4d11a9eea074ad4759babd2d75abcad5738e2fdf96"
+      "sha256": "697cbc7f16db1f56b6d95c4d11a9eea074ad4759babd2d75abcad5738e2fdf96",
+      "assetUrl": null
     },
     {
       "id": "mushaf-fonts-v2",
@@ -56,7 +59,8 @@
       "usedFor": "Mushaf page fonts",
       "path": "content/raw/qul/qpc-v2-font.zip",
       "bytes": 136208148,
-      "sha256": "9ead3836904f22324b5805c079c2911e13f384f2ca820254a36b8a22c28de555"
+      "sha256": "9ead3836904f22324b5805c079c2911e13f384f2ca820254a36b8a22c28de555",
+      "assetUrl": "https://github.com/muntasimulhaque/quran/releases/download/qpc-v2-fonts/qpc-v2-font.zip"
     },
     {
       "id": "quran-font-hafs",
@@ -70,7 +74,8 @@
       "usedFor": "Study mode Arabic font",
       "path": "content/raw/qul/qpc-hafs-font.zip",
       "bytes": 147220,
-      "sha256": "f1e3d78acbf8a6db4a1ec1cf3ef10031a7e3914106c472ee23c49708caf04670"
+      "sha256": "f1e3d78acbf8a6db4a1ec1cf3ef10031a7e3914106c472ee23c49708caf04670",
+      "assetUrl": null
     },
     {
       "id": "word-by-word-english",
@@ -84,7 +89,8 @@
       "usedFor": "Word-by-word English meanings",
       "path": "content/raw/qul/english-word-by-word.sqlite.zip",
       "bytes": 1091543,
-      "sha256": "5dea0d7a5b0648180e9f6277bad406153b234bedb0f498b4fb76424686c72bc1"
+      "sha256": "5dea0d7a5b0648180e9f6277bad406153b234bedb0f498b4fb76424686c72bc1",
+      "assetUrl": null
     },
     {
       "id": "translation-saheeh",
@@ -98,7 +104,8 @@
       "usedFor": "English translation with footnotes",
       "path": "content/raw/quranenc/english_saheeh.zip",
       "bytes": 518866,
-      "sha256": "16a234782e0d43f2c1e31177941d65f5b9e813679edb0b4737a0589627fa7ac2"
+      "sha256": "16a234782e0d43f2c1e31177941d65f5b9e813679edb0b4737a0589627fa7ac2",
+      "assetUrl": null
     },
     {
       "id": "saheeh-qul-crosscheck",
@@ -112,7 +119,8 @@
       "usedFor": "Independent copy of the translation for cross-checking",
       "path": "content/raw/qul/saheeh-qul-crosscheck.sqlite.zip",
       "bytes": 440323,
-      "sha256": "a2650dc10f20b721e7a84a6349d0d6d511ff2a22f9df2b492f958424482d7a91"
+      "sha256": "a2650dc10f20b721e7a84a6349d0d6d511ff2a22f9df2b492f958424482d7a91",
+      "assetUrl": null
     },
     {
       "id": "tafsir-ibn-kathir-en",
@@ -126,7 +134,8 @@
       "usedFor": "English tafsir",
       "path": "content/raw/qul/tafsir-ibn-kathir-english.sqlite.zip",
       "bytes": 3855680,
-      "sha256": "5a1627854be5da065aecafd91a68834f931e7113977af5cbc4a2c6c9e7a326ce"
+      "sha256": "5a1627854be5da065aecafd91a68834f931e7113977af5cbc4a2c6c9e7a326ce",
+      "assetUrl": null
     },
     {
       "id": "tafsir-as-sadi-ar",
@@ -140,7 +149,8 @@
       "usedFor": "Arabic tafsir, full ayah coverage via passage ranges",
       "path": "content/raw/quranenc/arabic_saadi.json",
       "bytes": 19513113,
-      "sha256": "6edf25ae9c8c4d88b5533d2f5f5d247f88d91050067d4b937d6e43734ddbf738"
+      "sha256": "6edf25ae9c8c4d88b5533d2f5f5d247f88d91050067d4b937d6e43734ddbf738",
+      "assetUrl": null
     },
     {
       "id": "surah-info-en",
@@ -154,7 +164,8 @@
       "usedFor": "Surah introductions",
       "path": "content/raw/qul/surah-info-english.json",
       "bytes": 301035,
-      "sha256": "70914e97c5514fe589f5641489bbb6248bc90e66c330707dbf117b75294f522e"
+      "sha256": "70914e97c5514fe589f5641489bbb6248bc90e66c330707dbf117b75294f522e",
+      "assetUrl": null
     },
     {
       "id": "metadata-surah-names",
@@ -168,7 +179,8 @@
       "usedFor": "Surah names in Arabic and Latin",
       "path": "content/raw/qul/surah-names.json",
       "bytes": 3719,
-      "sha256": "e0118c8aab8a25aa81b9e722479a2875520285d00a34a213331cefc8b0670ded"
+      "sha256": "e0118c8aab8a25aa81b9e722479a2875520285d00a34a213331cefc8b0670ded",
+      "assetUrl": null
     },
     {
       "id": "metadata-ayah",
@@ -182,7 +194,8 @@
       "usedFor": "Ayah text and counts",
       "path": "content/raw/qul/ayah-metadata.json",
       "bytes": 411137,
-      "sha256": "aaa50987d2407c3cb9dcefe6bc36d39d7124d3d2f7c1d0641f792552e2973339"
+      "sha256": "aaa50987d2407c3cb9dcefe6bc36d39d7124d3d2f7c1d0641f792552e2973339",
+      "assetUrl": null
     },
     {
       "id": "metadata-sajda",
@@ -196,7 +209,8 @@
       "usedFor": "Sajdah ayat",
       "path": "content/raw/qul/sajda.json",
       "bytes": 364,
-      "sha256": "71ba5b44aeda0e153e10bcad1d2e1dd8b17256b4b781d0f63aa9d3f73219b57b"
+      "sha256": "71ba5b44aeda0e153e10bcad1d2e1dd8b17256b4b781d0f63aa9d3f73219b57b",
+      "assetUrl": null
     },
     {
       "id": "metadata-juz",
@@ -210,7 +224,8 @@
       "usedFor": "Juz boundaries",
       "path": "content/raw/qul/juz.json",
       "bytes": 1323,
-      "sha256": "c4d0a2d49bae035201cde5b7f330afe312e6c23872a71399fa8c8d2c5d592a21"
+      "sha256": "c4d0a2d49bae035201cde5b7f330afe312e6c23872a71399fa8c8d2c5d592a21",
+      "assetUrl": null
     },
     {
       "id": "metadata-hizb",
@@ -224,7 +239,8 @@
       "usedFor": "Hizb boundaries",
       "path": "content/raw/qul/hizb.json",
       "bytes": 1894,
-      "sha256": "9e513bbab1ec1b77aad05be29836b6dd4adf81483756021aeff1d66ada015d22"
+      "sha256": "9e513bbab1ec1b77aad05be29836b6dd4adf81483756021aeff1d66ada015d22",
+      "assetUrl": null
     },
     {
       "id": "metadata-rub",
@@ -238,7 +254,8 @@
       "usedFor": "Quarter-hizb boundaries",
       "path": "content/raw/qul/rub.json",
       "bytes": 5358,
-      "sha256": "8d60aa266393e46af95f86d93c2529e629e328ab258174e1614ed04606f2e62d"
+      "sha256": "8d60aa266393e46af95f86d93c2529e629e328ab258174e1614ed04606f2e62d",
+      "assetUrl": null
     },
     {
       "id": "metadata-manzil",
@@ -252,7 +269,8 @@
       "usedFor": "Manzil boundaries",
       "path": "content/raw/qul/manzil.json",
       "bytes": 794,
-      "sha256": "20f34088834dbcc7188fdc14f13a721f7687bd210a8c95d3ba2f66104532c0ec"
+      "sha256": "20f34088834dbcc7188fdc14f13a721f7687bd210a8c95d3ba2f66104532c0ec",
+      "assetUrl": null
     },
     {
       "id": "metadata-ruku",
@@ -266,7 +284,8 @@
       "usedFor": "Ruku sections",
       "path": "content/raw/qul/ruku.json",
       "bytes": 11860,
-      "sha256": "6a83fd5e56bdc90c38fcb331fd32faebab1bdcf0ab8ae8e7937cab32feef2dc7"
+      "sha256": "6a83fd5e56bdc90c38fcb331fd32faebab1bdcf0ab8ae8e7937cab32feef2dc7",
+      "assetUrl": null
     },
     {
       "id": "mutashabihat",
@@ -280,7 +299,8 @@
       "usedFor": "Similar ayat, version 2 feature",
       "path": "content/raw/qul/mutashabihat.json",
       "bytes": 39009,
-      "sha256": "2ac8d84e90cf885980ee91756e77240c6bb69b701b4b202d3df282bd2a9181c1"
+      "sha256": "2ac8d84e90cf885980ee91756e77240c6bb69b701b4b202d3df282bd2a9181c1",
+      "assetUrl": null
     },
     {
       "id": "topics",
@@ -294,7 +314,8 @@
       "usedFor": "Topic index, version 2 feature",
       "path": "content/raw/qul/topics.sqlite.zip",
       "bytes": 145471,
-      "sha256": "836ad98b66736b576c2316e2c0a7a11b7a2f48f6b07ff0cdcf3fb15d574d2e11"
+      "sha256": "836ad98b66736b576c2316e2c0a7a11b7a2f48f6b07ff0cdcf3fb15d574d2e11",
+      "assetUrl": null
     },
     {
       "id": "recitation-minshawi",
@@ -308,7 +329,8 @@
       "usedFor": "Recitation with word segments",
       "path": "content/raw/qul/recitation-minshawi.sqlite.zip",
       "bytes": 504515,
-      "sha256": "1ecc86377e0e58342d9168a066bd3ac02311bcb76d4a9eb3e066f88b9ffdfc58"
+      "sha256": "1ecc86377e0e58342d9168a066bd3ac02311bcb76d4a9eb3e066f88b9ffdfc58",
+      "assetUrl": null
     },
     {
       "id": "recitation-husary",
@@ -322,7 +344,8 @@
       "usedFor": "Recitation with word segments",
       "path": "content/raw/qul/recitation-husary-muallim.sqlite.zip",
       "bytes": 521149,
-      "sha256": "98b41ab7dd4ebe60e75511f572faa166535478d4c0b24a343e79b4bfeef50dc7"
+      "sha256": "98b41ab7dd4ebe60e75511f572faa166535478d4c0b24a343e79b4bfeef50dc7",
+      "assetUrl": null
     },
     {
       "id": "recitation-husary-muallim",
@@ -336,7 +359,8 @@
       "usedFor": "Teaching recitation with word segments",
       "path": "content/raw/qul/recitation-husary-murattal.sqlite.zip",
       "bytes": 522738,
-      "sha256": "b6e014c49049b5f43d34fec2bcab8c7799ee79c8a1760ae3d19996d1014624f6"
+      "sha256": "b6e014c49049b5f43d34fec2bcab8c7799ee79c8a1760ae3d19996d1014624f6",
+      "assetUrl": null
     },
     {
       "id": "recitation-husary-mujawwad",
@@ -350,7 +374,8 @@
       "usedFor": "Recitation with word segments",
       "path": "content/raw/qul/recitation-husary-mujawwad.sqlite.zip",
       "bytes": 551539,
-      "sha256": "aefd508eb138e0ed7eb0c80e97ea6a0afc43fd3160e91439b71fee460fcedea9"
+      "sha256": "aefd508eb138e0ed7eb0c80e97ea6a0afc43fd3160e91439b71fee460fcedea9",
+      "assetUrl": null
     },
     {
       "id": "tanzil-uthmani",
@@ -364,7 +389,8 @@
       "usedFor": "Independent audit reference",
       "path": "content/raw/tanzil/quran-uthmani.xml",
       "bytes": 1541387,
-      "sha256": "8c5aeae20363a98f6963720d29fce040ca8b56a8e75f8b564c257fce7f6d0417"
+      "sha256": "8c5aeae20363a98f6963720d29fce040ca8b56a8e75f8b564c257fce7f6d0417",
+      "assetUrl": null
     }
   ]
 }
