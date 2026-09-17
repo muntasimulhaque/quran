@@ -71,7 +71,15 @@ dead letter.
 9. **Reader first.** The app opens where the reader left off. There is no
    home screen, no dashboard, and no permanent tab bar; index, search,
    library, and settings are sheets raised from a slim bar.
-10. **Daily reading, not engagement.** A daily portion, a quiet reminder,
+10. **Simple to the bone.** Any age, any device. Nothing stands between a
+    person and the Quran: no account, no setup wizard beyond one optional
+    first screen, no dialog before reading, no feature that asks a choice
+    before the text. If a feature adds friction, it is cut. Every added
+    choice must earn its place against the reading itself.
+11. **Fast to the point of invisible.** Cold start lands on readable text
+    with no spinner. A page turn is a pre-rendered swipe, not a render.
+    Nothing blocks the main thread, ever.
+12. **Daily reading, not engagement.** A daily portion, a quiet reminder,
     and a widget. No streaks, no badges, no social, no guilt.
 11. **No AI attribution anywhere.** No `Co-Authored-By` trailers, no
     "generated with" footers, no name in contributors, commits, or code.

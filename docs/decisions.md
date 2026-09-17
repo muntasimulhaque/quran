@@ -92,10 +92,29 @@ explicitly republishable edition exists.
 
 Date: the first session.
 
-Ibn Kathir (English, QUL resource 35) and Tafsir As-Sa'di (Arabic, QUL
-resource 24). Both are ayah-linked, group-aware tafsirs from QUL. The
-tafsir reader must resolve grouped commentary, where several ayahs share
-one entry, exactly as QUL's data model describes.
+Ibn Kathir (English, QUL resource 35) is ayah-linked and group-aware. Its
+export leaves 4334 ayah rows without their own text, but every one of them
+resolves through `group_ayah_key` to one of the 1902 passages that carry
+text, so the English tafsir covers all 6236 ayahs through groups and the
+verify step proves it.
+
+The Arabic tafsir is As-Sa'di from QuranEnc (`arabic_saadi`, version
+1.0.0, downloaded from the range API), not from the QUL export. The QUL
+export leaves 59 ayahs with no passage to resolve to, a dead end the app
+must never show; the QuranEnc edition covers all 6236 ayahs through 6514
+passage ranges. This also keeps both tafsir sources and the translation
+under the same QuranEnc republishing terms.
+
+The QUL As-Sa'di export stays in the raw folder as a cross-check only.
+
+An English translation of As-Sa'di does exist: "Tafseer as-Sa'di", 10
+volumes, translated by Nasiruddin al-Khattab, edited by Huda Khattab,
+English Edition 1, 2018, International Islamic Publishing House, and its
+copyright page reserves all rights. There is no licensed digital edition;
+the only digital copies are unofficial scans, and OCR of a scan would
+introduce exactly the errors this app promises never to have. Rejected.
+If the owner ever wants it, the path is a written request to
+editorial@iiph.com and a digital text supplied by the publisher.
 
 ## D-006: The Arabic text runs on the KFGQPC spine, audited against Tanzil
 
@@ -226,3 +245,31 @@ The app targets all ages with a standard content rating and is not
 enrolled in the Play Families program, because it is a general reading
 app with no child-directed design, no ads, and no data collection. The
 Data safety declaration is "no data collected or shared".
+
+## D-014: The text audit gate
+
+Date: the first session.
+
+The content pipeline audits the canonical KFGQPC word text against the
+independent Tanzil Uthmani 1.1 edition, ayah by ayah, at letter level:
+diacritics, Quranic signs, tatweel and the alef, waw, yeh and heh forms
+are folded away by `core.Arabic.skeleton`, so only the letter body is
+compared. The audit fails the build on any unexplained difference.
+
+Result of the first full run: 6236 ayahs compared, 6235 letter-identical,
+zero unexplained differences. Two notes, both recorded in
+`content/audit-report.md`:
+
+- 2:72 is an accepted orthographic variant: the hamza of
+  fa-iddarra'tum is a standalone letter in the KFGQPC edition and a
+  combining mark in the Tanzil edition. Both are attested Uthmani
+  orthography. It is allowlisted by ayah reference with a written reason,
+  and the allowlist must stay this short.
+- 37:130 is a segmentation note only: the letters agree, the two editions
+  break the ayah into words differently. Word breaks never affect the
+  canonical text; they affect word-by-word pairing, which is built from
+  the KFGQPC side.
+
+Word totals also agree: 77432 KFGQPC words against 77433 Tanzil tokens
+after removing the 6236 ayah number markers from one side and the pause
+mark tokens from the other; the one-word gap is the 37:130 break.

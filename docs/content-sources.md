@@ -24,7 +24,7 @@ verifies structure and records checksums; it never needs your login.
 | 5 | QPC Hafs font | font/245 | ttf | Study mode Arabic font |
 | 6 | English Word by Word Translation | translation/92 | sqlite | Word-by-word meanings |
 | 7 | Tafsir Ibn Kathir (English) | tafsir/35 | sqlite | English tafsir |
-| 8 | Tafseer Al Saadi (Arabic) | tafsir/24 | sqlite | Arabic tafsir |
+| 8 | Tafseer Al Saadi (Arabic) | tafsir/24 | sqlite | Cross-check only; the shipped Arabic tafsir is the QuranEnc edition below |
 | 9 | Surah Info, English | surah-info/3 | json | Surah introductions and context |
 | 10 | Surah names | quran-metadata/70 | json | Arabic and translated surah names |
 | 11 | Ayah | quran-metadata/69 | json | Ayah numbering and page mapping |
@@ -50,6 +50,7 @@ independent copy of the translation we ship.
 | Source | What | Where | License and credit |
 |---|---|---|---|
 | QuranEnc | Saheeh International, `english_saheeh`, version 1.1.2, with footnotes | https://quranenc.com/downloads/sqlite/english_saheeh.zip | Republishing allowed with: no modification, credit Noor International Center and QuranEnc.com, show the version, keep the footnotes, send corrections, update to the latest version, no inappropriate ads |
+| QuranEnc | Tafsir As-Sa'di, `arabic_saadi`, version 1.0.0, passage ranges covering all 6236 ayahs | https://quranenc.com/api/v1/tafsir/range/arabic_saadi/1/1/114/6 | Same QuranEnc republishing terms, credited to QuranEnc.com |
 | Tanzil | Uthmani text, version 1.1, used only as the audit reference | https://tanzil.net/download/ | Verbatim copy allowed, no changes, credit Tanzil and link tanzil.net; the owner joins the Tanzil text mailing list for critical updates |
 | KFGQPC | Uthmanic Hafs and QPC V2 fonts, already in the list above | qul.tarteel.ai | Distributed free by the King Fahd Glorious Quran Printing Complex; use, copy, and distribute unmodified; bundled byte-for-byte with the notice |
 | Google Fonts | Literata, Inter, Amiri Quran | fonts.google.com | SIL Open Font License; license files bundled in `docs/` |
@@ -61,7 +62,9 @@ independent copy of the translation we ship.
    and fails the build on any drift.
 2. `tools/audit` compares the KFGQPC word text against Tanzil at word
    level, lists every difference in `content/audit-report.md`, and fails
-   unless each difference is either zero or explicitly recorded.
+   unless each difference is either zero or explicitly recorded. First run:
+   6235 of 6236 ayahs letter-identical, one accepted orthographic variant
+   at 2:72, one segmentation note at 37:130, zero unexplained differences.
 3. `tools/build` writes the read-only content database with precomputed
    normalized search columns, page and line geometry, word hit rectangles
    for Mushaf mode, and joined translation, word-by-word, and tafsir rows.
