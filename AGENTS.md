@@ -179,9 +179,9 @@ Where truth lives, by question (filled in as code lands):
 
 | Path | What is there |
 | --- | --- |
-| `core/` | pure JVM Kotlin, zero `android.*` imports: references, search normalization, portion planner, models |
-| `data/` | Room user database, read-only content database access, repositories, preferences |
-| `app/` | Compose UI, host, Media3 service, Glance widget, notifications |
+| `core/` | pure JVM Kotlin, zero `android.*` imports: references, search normalization, rich text parsing, models |
+| `data/` | read-only content database access, page font store, preferences, models |
+| `app/` | Compose UI: reader, study card, sheets, theme, fonts |
 | `tools/` | offline pipeline: content fetch, verify, audit, database build, font checks, golden renders |
 | `content/` | `quran.db` (the built, committed content database), `manifest.json`, `audit-report.md`, `build-report.json`; raw downloads under `raw/` are local and gitignored |
 | `docs/` | `decisions.md`, `content-sources.md`, privacy page, bundled font licenses |
@@ -204,6 +204,9 @@ Terms this project uses as private vocabulary.
 - **the reference**: an ayah key in `surah:ayah` form, for example 2:255.
 - **the portion**: the reader's chosen daily amount. Never called a
   streak.
+- **the study card**: the bottom sheet one ayah opens: its text, the
+  translation with footnotes, and the Words, Ibn Kathir, and As-Sa'di
+  panels.
 - **the pack**: a Play asset pack, one per reciter; the app reads it, the
   app never downloads it.
 
@@ -240,6 +243,13 @@ implement it and update this list.
   ayah is the one the reader should see.
 - The KFGQPC source text is not NFC-normalized and must stay as published;
   normalize only the derived search columns.
+- The tafsir source carries Arabic presentation forms and an Urdu heh.
+  Display text unfolds presentation forms with NFKC (the Prophet's ligature
+  U+FDFA is preserved), and Arabic letters Amiri Quran lacks fall back to
+  the bundled Hafs font per codepoint. `tools fonts` mirrors that rule, so
+  no codepoint can reach the screen as tofu.
+- The reader never sees the raw tafsir HTML: `core/RichText.kt` parses it.
+  Change the parser and the gate together.
 - Never delete or replace the `qpc-v2-fonts` Release asset. Its SHA-256 is
   pinned in `content/manifest.json`, and a fresh clone fetches it from there.
 - Play Core's asset delivery drags WorkManager, Room, and five merged

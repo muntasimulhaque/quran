@@ -4,6 +4,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import java.io.File
 
 /**
@@ -113,18 +114,69 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
             }
         }
 
-    fun translations(ayahNumbers: List<Int>): Map<Int, String> {
+    fun translations(ayahNumbers: List<Int>): Map<Int, TranslationText> {
         if (ayahNumbers.isEmpty()) return emptyMap()
         val placeholders = ayahNumbers.joinToString(",") { "?" }
         return database.rawQuery(
-            "SELECT ayah_number, text FROM translation WHERE ayah_number IN ($placeholders)",
+            "SELECT ayah_number, text, footnotes FROM translation WHERE ayah_number IN ($placeholders)",
             ayahNumbers.map { it.toString() }.toTypedArray(),
         ).use { cursor ->
-            val out = HashMap<Int, String>(ayahNumbers.size)
-            while (cursor.moveToNext()) out[cursor.getInt(0)] = cursor.getString(1)
+            val out = HashMap<Int, TranslationText>(ayahNumbers.size)
+            while (cursor.moveToNext()) {
+                out[cursor.getInt(0)] = TranslationText(
+                    text = cursor.getString(1),
+                    footnotes = footnotes(cursor.getString(2)),
+                )
+            }
             out
         }
     }
+
+    private fun footnotes(json: String?): List<Footnote> {
+        if (json.isNullOrBlank() || json == "[]") return emptyList()
+        val array = runCatching { JSONArray(json) }.getOrNull() ?: return emptyList()
+        return buildList(array.length()) {
+            for (index in 0 until array.length()) {
+                val entry = array.optJSONObject(index) ?: continue
+                val number = entry.optString("n").toIntOrNull() ?: continue
+                add(Footnote(number = number, text = entry.optString("text")))
+            }
+        }
+    }
+
+    fun wordMeanings(ayahNumber: Int): List<WordMeaning> =
+        database.rawQuery(
+            "SELECT text, translation FROM word WHERE ayah_number = ? AND marker = 0 ORDER BY position",
+            arrayOf(ayahNumber.toString()),
+        ).use { cursor ->
+            buildList(cursor.count) {
+                while (cursor.moveToNext()) {
+                    add(
+                        WordMeaning(
+                            word = cursor.getString(0),
+                            meaning = cursor.getString(1)?.trim()?.takeIf { it.isNotEmpty() },
+                        ),
+                    )
+                }
+            }
+        }
+
+    fun tafsir(ayahNumber: Int, source: String): TafsirPassage? =
+        database.rawQuery(
+            "SELECT p.source, p.surah, p.from_ayah, p.to_ayah, p.text FROM tafsir_ayah a " +
+                "JOIN tafsir_passage p ON p.source = a.source AND p.source_id = a.passage_id " +
+                "WHERE a.source = ? AND a.ayah_number = ?",
+            arrayOf(source, ayahNumber.toString()),
+        ).use { cursor ->
+            if (!cursor.moveToFirst()) return null
+            TafsirPassage(
+                source = cursor.getString(0),
+                surah = cursor.getInt(1),
+                fromAyah = cursor.getInt(2),
+                toAyah = cursor.getInt(3),
+                text = cursor.getString(4),
+            )
+        }
 
     fun pagePosition(page: Int): PagePosition? =
         database.rawQuery(

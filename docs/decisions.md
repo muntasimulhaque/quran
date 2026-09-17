@@ -393,3 +393,40 @@ the upload key can be reset with Google if it is ever lost.
 
 Verified on the first release build: the APK is signed, certificate
 SHA-256 `537d09d20300129e973b7945316bfe24cfadcfbc77eec5229cbf30170d9de521`.
+
+## D-019: The study card is how one ayah opens
+
+Date: the second session.
+
+Tapping an ayah in study mode opens one bottom sheet built from four
+pieces, in this order: the reference, the five actions, the Arabic ayah,
+and the selected panel. The actions are pills: Copy, Share, Words, Ibn
+Kathir, As-Sa'di. The three reading pills behave as tabs and swap the
+panel under the ayah; tapping the active one returns to the translation.
+Copy and Share write the Arabic, the translation without its footnote
+markers, and the reference; a dangling `[7]` in a shared message would
+confuse the reader on the other end. The sheet opens expanded and wraps
+its content height, so a short ayah gives a short card.
+
+Text rendering rules this decision fixes:
+
+- Translation footnote markers become superscripts in the primary color,
+  and every ayah with footnotes shows them underneath with a hanging
+  indent. The reader never sees brackets in the running text.
+- The tafsir HTML is parsed by `core/RichText.kt` (paragraphs, headings,
+  line breaks, bold, italic, Arabic quotes) into runs; the gate checks
+  every run against the font it will be drawn with.
+- Arabic outside the Mushaf is Amiri Quran. A codepoint Amiri cannot draw
+  falls back per codepoint to the bundled Hafs font. The tafsir source's
+  pre-shaped presentation forms are unfolded at display time with NFKC,
+  except the Prophet's ligature, which is kept as one glyph.
+- The study page lives in the same pager as the Mushaf page, so swiping
+  moves both modes and they share the reader's position.
+
+Verified on the emulator: 1:1 and 33:21-22 render their translation,
+footnotes, word-by-word meanings, Ibn Kathir (including its Arabic hadith
+quotes and the Urdu blessing), and As-Sa'di Arabic with its Quran quotes
+set apart; copy and share produce the expected text; the study page
+swipes to the next page; `tools fonts` checks 12,865,369 reading
+codepoints across translation, both tafsirs, word meanings, and surah
+names, and fails if any codepoint has no bundled font.

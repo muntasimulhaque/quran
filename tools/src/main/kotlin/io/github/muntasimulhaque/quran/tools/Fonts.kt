@@ -1,5 +1,8 @@
 package io.github.muntasimulhaque.quran.tools
 
+import io.github.muntasimulhaque.quran.core.RichText
+import io.github.muntasimulhaque.quran.core.TextBlockKind
+import io.github.muntasimulhaque.quran.core.TextRun
 import java.awt.Font
 import java.io.File
 import java.util.TreeMap
@@ -21,6 +24,7 @@ class Fonts(private val root: File) {
     fun run(): Int {
         checkUnicodeCoverage()
         checkGlyphCoverage()
+        checkReadingFonts()
         if (problems.isEmpty()) {
             println("fonts: all coverage checks passed")
             return 0
@@ -107,6 +111,93 @@ class Fonts(private val root: File) {
     private fun loadFont(directory: File): Font {
         val file = directory.walkTopDown().firstOrNull { it.isFile && it.name.endsWith(".ttf") }
             ?: error("no ttf under ${directory.absolutePath}")
+        return Font.createFont(Font.TRUETYPE_FONT, file)
+    }
+
+    /**
+     * The app draws four voices: Inter for interface and headings, Literata for
+     * English reading, Amiri Quran for Arabic outside the Mushaf, and the Hafs
+     * font for the canonical words already checked above. Every run the reader
+     * will actually see is probed against the font it will be drawn with,
+     * script by script, so a tofu box can never reach a screen.
+     */
+    private fun checkReadingFonts() {
+        val database = File(root, "content/quran.db")
+        if (!database.exists()) {
+            problems += "content/quran.db is missing; run build before fonts"
+            return
+        }
+        val literata = loadFontFile(File(root, "app/src/main/res/font/literata_variable.ttf"))
+        val amiri = loadFontFile(File(root, "app/src/main/res/font/amiri_quran.ttf"))
+        val hafs = loadFontFile(File(root, "content/work/fonts-hafs/UthmanicHafs_V22.ttf"))
+        val inter = loadFontFile(File(root, "app/src/main/res/font/inter_variable.ttf"))
+
+        val uncovered = TreeMap<String, Int>()
+        var codepoints = 0
+
+        fun probe(font: Font, text: String, label: String) {
+            for (codepoint in text.codePoints()) {
+                if (codepoint <= 32) continue
+                codepoints++
+                if (!font.canDisplay(codepoint)) {
+                    uncovered.merge("$label U+${codepoint.toString(16).uppercase()}", 1, Int::plus)
+                }
+            }
+        }
+
+        fun probeRuns(runs: List<TextRun>, latin: Font, label: String) {
+            for (run in runs) {
+                if (run.marker != null) continue
+                if (!run.arabic) {
+                    probe(latin, run.text, label)
+                    continue
+                }
+                // Arabic is drawn in Amiri Quran, and a letter Amiri does not
+                // have falls back to the bundled Hafs font, exactly as the app
+                // does it. Anything neither font can draw fails the gate.
+                for (codepoint in run.text.codePoints()) {
+                    if (codepoint <= 32) continue
+                    codepoints++
+                    if (!amiri.canDisplay(codepoint) && !hafs.canDisplay(codepoint)) {
+                        uncovered.merge("$label U+${codepoint.toString(16).uppercase()}", 1, Int::plus)
+                    }
+                }
+            }
+        }
+
+        openSqlite(database).use { connection ->
+            connection.each("SELECT text, footnotes FROM translation") { rs ->
+                probeRuns(RichText.footnotes(rs.getString(1) ?: ""), literata, "translation")
+                probeRuns(RichText.runs(rs.getString(2) ?: ""), literata, "footnote")
+            }
+            connection.each("SELECT text FROM tafsir_passage WHERE source='ibn-kathir'") { rs ->
+                for (block in RichText.parseHtml(rs.getString(1) ?: "")) {
+                    val latin = if (block.kind == TextBlockKind.HEADING) inter else literata
+                    probeRuns(block.runs, latin, "ibn-kathir")
+                }
+            }
+            connection.each("SELECT text FROM tafsir_passage WHERE source='as-sadi'") { rs ->
+                probeRuns(RichText.quotes(rs.getString(1) ?: ""), amiri, "as-sadi")
+            }
+            connection.each("SELECT translation FROM word WHERE marker=0") { rs ->
+                val meaning = rs.getString(1)
+                if (!meaning.isNullOrBlank()) probe(literata, meaning, "word")
+            }
+            connection.each("SELECT name_simple, name_latin FROM surah") { rs ->
+                probe(inter, rs.getString(1) ?: "", "surah")
+                probe(inter, rs.getString(2) ?: "", "surah")
+            }
+        }
+
+        if (uncovered.isNotEmpty()) {
+            val sample = uncovered.entries.take(12).joinToString(" ") { "${it.key}(x${it.value})" }
+            problems += "reading fonts cannot draw ${uncovered.size} codepoints: $sample"
+        }
+        println("fonts: reading text codepoints checked: $codepoints")
+    }
+
+    private fun loadFontFile(file: File): Font {
+        if (!file.exists()) error("missing font ${file.absolutePath}")
         return Font.createFont(Font.TRUETYPE_FONT, file)
     }
 

@@ -31,10 +31,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.ui.index.IndexSheet
 import io.github.muntasimulhaque.quran.ui.mushaf.MushafPage
+import io.github.muntasimulhaque.quran.ui.study.AyahSheet
 import io.github.muntasimulhaque.quran.ui.study.StudyPage
 import io.github.muntasimulhaque.quran.ui.theme.QuranTheme
 
@@ -54,6 +56,7 @@ fun QuranApp(viewModel: ReaderViewModel = viewModel()) {
 @Composable
 private fun ReaderScreen(viewModel: ReaderViewModel, content: ContentDatabase) {
     var indexOpen by remember { mutableStateOf(false) }
+    var selectedAyah by remember { mutableStateOf<Ayah?>(null) }
     val pagerState = rememberPagerState(
         initialPage = (viewModel.page - 1).coerceIn(0, 603),
         pageCount = { 604 },
@@ -85,11 +88,16 @@ private fun ReaderScreen(viewModel: ReaderViewModel, content: ContentDatabase) {
                     page = index + 1,
                 )
             }
-            ReadingMode.Study -> StudyPage(
-                content = content,
-                page = viewModel.page,
+            ReadingMode.Study -> HorizontalPager(
+                state = pagerState,
                 modifier = Modifier.fillMaxSize(),
-            )
+            ) { index ->
+                StudyPage(
+                    content = content,
+                    page = index + 1,
+                    onAyah = { selectedAyah = it },
+                )
+            }
         }
         ReaderTopBar(
             title = viewModel.position?.surah
@@ -116,6 +124,16 @@ private fun ReaderScreen(viewModel: ReaderViewModel, content: ContentDatabase) {
             },
         )
     }
+
+    selectedAyah?.let { ayah ->
+        AyahSheet(
+            content = content,
+            ayah = ayah,
+            surahName = viewModel.surahs.firstOrNull { it.number == ayah.surah }?.nameSimple
+                ?: "Surah ${ayah.surah}",
+            onDismiss = { selectedAyah = null },
+        )
+    }
 }
 
 @Composable
@@ -128,6 +146,7 @@ private fun ReaderTopBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background)
             .windowInsetsPadding(WindowInsets.statusBars)
             .padding(horizontal = 20.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,

@@ -33,6 +33,20 @@ data class Ayah(
     val text: String,
 )
 
+data class Footnote(val number: Int, val text: String)
+
+data class TranslationText(val text: String, val footnotes: List<Footnote>)
+
+data class WordMeaning(val word: String, val meaning: String?)
+
+data class TafsirPassage(
+    val source: String,
+    val surah: Int,
+    val fromAyah: Int,
+    val toAyah: Int,
+    val text: String,
+)
+
 data class PagePosition(
     val surah: Int,
     val juz: Int,
