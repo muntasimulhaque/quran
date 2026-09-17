@@ -154,6 +154,11 @@ at every step:
    explicitly when nothing changed and why. Never capture a listing set
    by hand.
 
+Signing is probed from the shared upload keystore in the owner's vault
+(decisions D-017); an absent keystore produces an unsigned release build,
+never a failed one. The keystore and its properties never enter the
+repository, and CI reads them from secrets.
+
 ## Content rules
 
 - Every dataset in `content/manifest.json` records: source name, URL,

@@ -18,6 +18,16 @@ tasks.named<JavaExec>("run") {
     workingDir = rootProject.projectDir
 }
 
+tasks.register<JavaExec>("fetchAssets") {
+    group = "content"
+    description = "Downloads and verifies large raw content assets such as the page fonts."
+    mainClass.set("io.github.muntasimulhaque.quran.tools.MainKt")
+    classpath = sourceSets["main"].runtimeClasspath
+    args = listOf("fetch")
+    workingDir = rootProject.projectDir
+    jvmArgs = listOf("-Djava.awt.headless=true")
+}
+
 dependencies {
     implementation(project(":core"))
     implementation(libs.kotlinx.serialization.json)

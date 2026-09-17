@@ -347,3 +347,20 @@ Rejected: committing the 208 MB of fonts (heavy clones and heavy history),
 Git LFS (extra setup and storage quota for every contributor), and
 downloading the fonts from the original QUL page on every build (needs an
 account and is not reproducible).
+
+## D-017: Signing uses the shared upload keystore
+
+Date: the first session.
+
+The owner confirmed the app signs with the shared upload keystore in the
+vault (the `Google Play Signing Key` folder under `My Apps` on D:, the
+same upload key the family's other apps use). The build probes each drive
+and each layout the folder has worn, and resolves the store file against
+the properties file's own directory when the recorded drive letter is
+wrong. The keystore and its properties never enter the repository; CI
+gets them from secrets. An absent keystore means an unsigned release
+build, never a failed one. Play App Signing holds the app signing key, so
+the upload key can be reset with Google if it is ever lost.
+
+Verified on the first release build: the APK is signed, certificate
+SHA-256 `537d09d20300129e973b7945316bfe24cfadcfbc77eec5229cbf30170d9de521`.
