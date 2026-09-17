@@ -276,6 +276,32 @@ class Verify(private val root: File) {
                 "SELECT COUNT(*) FROM verses WHERE segments IS NULL OR segments NOT LIKE '[%'",
             )
             if (badSegments != 0L) fail(id, "$badSegments recitation rows have no segments")
+            // The export's ayah_number column is a global counter. The real
+            // surah and ayah are the three-digit groups in the file name, so
+            // they are checked against the surah column and for full coverage.
+            val seen = HashSet<String>(7000)
+            val counts = surahVerseCounts()
+            var badFile = 0
+            var badCounter = 0
+            connection.each("SELECT surah_number, ayah_number, audio_url FROM verses") { rs ->
+                val file = (rs.getString(3) ?: "").substringAfterLast('/')
+                val match = Regex("^(\\d{3})(\\d{3})\\.[a-z0-9]+$").find(file)
+                if (match == null) {
+                    badFile++
+                    return@each
+                }
+                val surah = match.groupValues[1].toInt()
+                val ayah = match.groupValues[2].toInt()
+                if (surah != rs.getInt(1)) {
+                    badFile++
+                    return@each
+                }
+                if (globalIndex(counts, surah, ayah) != rs.getInt(2)) badCounter++
+                seen += "$surah:$ayah"
+            }
+            if (badFile != 0) fail(id, "$badFile rows whose file name does not match their surah")
+            if (badCounter != 0) fail(id, "$badCounter rows whose ayah_number is not the global ayah index")
+            if (seen.size != 6236) fail(id, "file names cover ${seen.size} ayahs, expected 6236")
         }
     }
 

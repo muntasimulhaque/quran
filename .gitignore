@@ -15,14 +15,13 @@ captures/
 *.keystore
 keystore.properties
 
-# Content working files
+# Content working files (raw downloads, extraction, built database)
 content/raw/
 content/audio/
 content/packs/
+content/work/
+content/build/
 
 # OS noise
 .DS_Store
 Thumbs.db
-
-# Content working files
-content/work/

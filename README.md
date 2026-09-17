@@ -26,7 +26,14 @@ independent Tanzil edition, with one documented orthographic variant and
 zero unexplained differences ([report](content/audit-report.md)). The
 Mushaf rendering prototype passed as well: QPC V2 glyph text renders
 page-for-page with the printed Mushaf, and D-011 records the resulting
-architecture. No app code yet.
+architecture.
+
+The content database is now built and reproducible: 6,236 ayahs, 77,432
+words, 6,236 translations, both tafsirs with group resolution, four
+recitations with segments, and search columns, at 43,933,696 bytes with
+sha256 `00f9afa5f844e77138fd13a1929dc8e5300331f3b2c1f64e4d5af44a0e347d57`,
+byte-identical across rebuilds. Font coverage is proven for every study
+text codepoint and every Mushaf page glyph. No app code yet.
 
 ## The content
 

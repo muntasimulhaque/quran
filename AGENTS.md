@@ -208,3 +208,10 @@ implement it and update this list.
 - Emulator screenshots and local captures prove nothing about Arabic
   shaping. Shaping and glyph fidelity are verified from CI artifacts and
   golden renders.
+- The QUL recitation export's `ayah_number` is a global 1..6236 counter;
+  the real surah and ayah are the three-digit groups in the audio file
+  name. Use the file name, and let verify check the counter.
+- As-Sa'di's passage ranges overlap. The shortest passage containing an
+  ayah is the one the reader should see.
+- The KFGQPC source text is not NFC-normalized and must stay as published;
+  normalize only the derived search columns.

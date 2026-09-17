@@ -273,3 +273,47 @@ zero unexplained differences. Two notes, both recorded in
 Word totals also agree: 77432 KFGQPC words against 77433 Tanzil tokens
 after removing the 6236 ayah number markers from one side and the pause
 mark tokens from the other; the one-word gap is the 37:130 break.
+
+## D-015: The content database and its build
+
+Date: the first session.
+
+`./gradlew :tools:run --args=build` writes `content/build/quran.db` from
+the verified sources. Tables: `surah`, `ayah`, `word`, `page_line`,
+`translation`, `tafsir_passage`, `tafsir_ayah`, `surah_info`,
+`recitation`, `recitation_ayah`, `meta`.
+
+Properties proven by the first full run:
+
+- Deterministic: two consecutive builds produced byte-identical files,
+  43,933,696 bytes, sha256
+  `00f9afa5f844e77138fd13a1929dc8e5300331f3b2c1f64e4d5af44a0e347d57`.
+- Search columns are precomputed with `core.Arabic.normalizeForSearch` on
+  the ayah text, the word text, and the translation, so a query typed at
+  runtime meets an index built with the same rules.
+- Tafsir resolution: Ibn Kathir's 1902 passages map all 6236 ayahs through
+  their group keys; As-Sa'di's 6514 overlapping passages resolve to the
+  shortest passage containing each ayah, which is the most specific one.
+- Recitations: four reciters with 6236 rows each, segments included, and
+  audio paths relative to the pack root.
+- Fonts: 628,169 study codepoints covered by Uthmanic Hafs; 88,186 glyph
+  codepoints across 604 pages covered by their page fonts.
+
+Three data-shape traps surfaced during this work and are now guarded:
+
+1. The QUL recitation export's `ayah_number` column is a global 1..6236
+   counter, not a per-surah ayah number. The real coordinates are the
+   three-digit surah and ayah in the audio file name (002001.mp3). Verify
+   checks both the file name against the surah column and the counter
+   against the global index, and the build derives the join from the
+   file name.
+2. As-Sa'di's range API returns overlapping passages, so a naive mapping
+   violates the primary key and can attach the wrong commentary. The
+   shortest passage containing the ayah wins.
+3. The KFGQPC source text is not NFC-normalized, and it must never be:
+   normalization happens only on derived search columns, never on the
+   text that is displayed.
+
+The built database is a build artifact under `content/build/`, currently
+gitignored. Whether the repository commits the built database, the raw
+sources, or both is decided when the app module lands.

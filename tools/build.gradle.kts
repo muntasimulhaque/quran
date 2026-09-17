@@ -10,6 +10,7 @@ kotlin {
 
 application {
     mainClass.set("io.github.muntasimulhaque.quran.tools.MainKt")
+    applicationDefaultJvmArgs = listOf("-Djava.awt.headless=true")
 }
 
 tasks.named<JavaExec>("run") {
