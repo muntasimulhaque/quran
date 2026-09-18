@@ -80,6 +80,7 @@ class PlaybackController(
                 unavailable = packageToFetch == null,
                 pendingDownloadSurah = if (packageToFetch == null) null else location.ayah.surah,
                 pendingDownloadBytes = packageToFetch?.bytes ?: 0,
+                pendingIsContinuation = false,
                 downloadProgress = null,
                 downloadFailed = false,
             )
@@ -94,6 +95,7 @@ class PlaybackController(
                 unavailable = packageToFetch == null,
                 pendingDownloadSurah = if (packageToFetch == null) null else location.ayah.surah,
                 pendingDownloadBytes = packageToFetch?.bytes ?: 0,
+                pendingIsContinuation = false,
                 downloadProgress = null,
                 downloadFailed = false,
             )
@@ -148,6 +150,29 @@ class PlaybackController(
         downloadJob = null
         _state.value = _state.value.copy(
             pendingDownloadSurah = null,
+            pendingIsContinuation = false,
+            downloadProgress = null,
+            downloadFailed = false,
+        )
+    }
+
+    /**
+     * The surah ended and the next one is not on the device. Offer it, with its
+     * size, instead of leaving the reader at a silent stop or fetching it
+     * behind their back.
+     */
+    private fun offerNextSurah() {
+        val surah = _state.value.surah ?: return
+        val recitation = recitationId ?: return
+        val next = surah + 1
+        if (next > 114) return
+        val packageToFetch = manifest.packageFor(recitation, next) ?: return
+        val first = content?.ayahsOfSurah(next)?.firstOrNull()?.number ?: return
+        requestedAyah = first
+        _state.value = _state.value.copy(
+            pendingDownloadSurah = next,
+            pendingDownloadBytes = packageToFetch.bytes,
+            pendingIsContinuation = true,
             downloadProgress = null,
             downloadFailed = false,
         )
@@ -228,6 +253,10 @@ class PlaybackController(
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             publish(controller)
             maybeAppendNextSurah()
+        }
+
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            if (playbackState == Player.STATE_ENDED) offerNextSurah()
         }
     }
 

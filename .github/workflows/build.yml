@@ -1,0 +1,57 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  gates:
+    name: Gates and debug build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - uses: android-actions/setup-android@v3
+      - name: Accept SDK licenses
+        run: yes | sdkmanager --licenses > /dev/null 2>&1 || true
+
+      # The font pack is fetched from the project's own Release; caching it
+      # keeps repeat runs fast.
+      - name: Cache content work
+        uses: actions/cache@v4
+        with:
+          path: content/work
+          key: content-work-${{ hashFiles('content/manifest.json') }}
+
+      - name: Core tests
+        run: ./gradlew :core:test --console=plain
+
+      - name: Database check
+        run: ./gradlew :tools:run --args="checkdb" --console=plain
+
+      - name: Search check
+        run: ./gradlew :tools:run --args="search" --console=plain
+
+      - name: Lint
+        run: ./gradlew :app:lintDebug --console=plain
+
+      - name: Debug build
+        run: ./gradlew :app:assembleDebug --console=plain
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: quran-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
+
+# verify, audit, and fonts are owner-machine gates: they need the raw QUL and
+# QuranEnc exports, which are not in the repository. Run them locally with
+# ./gradlew :tools:run --args="verify|audit|fonts" before a release.

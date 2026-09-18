@@ -16,6 +16,8 @@ data class PlaybackUiState(
     /** The surah waiting for the reader's download approval. */
     val pendingDownloadSurah: Int? = null,
     val pendingDownloadBytes: Long = 0,
+    /** True when the offer comes from the end of the previous surah. */
+    val pendingIsContinuation: Boolean = false,
     /** 0..1 while downloading, null when idle. */
     val downloadProgress: Float? = null,
     val downloadFailed: Boolean = false,

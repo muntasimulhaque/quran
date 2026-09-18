@@ -116,7 +116,7 @@ fun PlaybackBar(
             when {
                 state.downloadFailed -> PillText("Retry", onDownload)
                 downloading -> TransportButton(Transport.Close, "Cancel download", onClose)
-                needsDownload -> PillText("Download", onDownload)
+                needsDownload -> PillText(if (state.pendingIsContinuation) "Continue" else "Download", onDownload)
                 state.unavailable -> TransportButton(Transport.Close, "Close", onClose)
                 else -> {
                     TransportButton(Transport.Previous, "Previous ayah", onPrevious)

@@ -151,7 +151,8 @@ private fun ReaderScreen(
                     pendingLabel = playback.pendingDownloadSurah?.let { surah ->
                         val name = viewModel.surahs.firstOrNull { it.number == surah }?.nameSimple
                             ?: "Surah $surah"
-                        "$name  ·  ${formatBytes(playback.pendingDownloadBytes)}"
+                        val size = formatBytes(playback.pendingDownloadBytes)
+                        if (playback.pendingIsContinuation) "Continue to $name  ·  $size" else "$name  ·  $size"
                     },
                     onToggle = { viewModel.togglePlayback() },
                     onNext = { viewModel.nextAyah() },
