@@ -207,6 +207,8 @@ Terms this project uses as private vocabulary.
 - **the study card**: the bottom sheet one ayah opens: its text, the
   translation with footnotes, and the Words, Ibn Kathir, and As-Sa'di
   panels.
+- **the search sheet**: one field over the Arabic text, the translation,
+  and the surah names; results stay in Mushaf order.
 - **the pack**: a Play asset pack, one per reciter; the app reads it, the
   app never downloads it.
 
@@ -250,6 +252,11 @@ implement it and update this list.
   no codepoint can reach the screen as tofu.
 - The reader never sees the raw tafsir HTML: `core/RichText.kt` parses it.
   Change the parser and the gate together.
+- English search is diacritic-insensitive: the translation writes Allāh and
+  ʿĪsā, so `core/Search.normalizeEnglish` folds every string on both sides
+  and the app matches over an in-memory folded index, never over raw
+  offsets. `tools search` audits every non-ASCII translation codepoint and
+  the Arabic round trip; change the fold and the gate together.
 - Never delete or replace the `qpc-v2-fonts` Release asset. Its SHA-256 is
   pinned in `content/manifest.json`, and a fresh clone fetches it from there.
 - Play Core's asset delivery drags WorkManager, Room, and five merged

@@ -36,6 +36,7 @@ import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.ui.index.IndexSheet
 import io.github.muntasimulhaque.quran.ui.mushaf.MushafPage
+import io.github.muntasimulhaque.quran.ui.search.SearchSheet
 import io.github.muntasimulhaque.quran.ui.study.AyahSheet
 import io.github.muntasimulhaque.quran.ui.study.StudyPage
 import io.github.muntasimulhaque.quran.ui.theme.QuranTheme
@@ -56,6 +57,7 @@ fun QuranApp(viewModel: ReaderViewModel = viewModel()) {
 @Composable
 private fun ReaderScreen(viewModel: ReaderViewModel, content: ContentDatabase) {
     var indexOpen by remember { mutableStateOf(false) }
+    var searchOpen by remember { mutableStateOf(false) }
     var selectedAyah by remember { mutableStateOf<Ayah?>(null) }
     val pagerState = rememberPagerState(
         initialPage = (viewModel.page - 1).coerceIn(0, 603),
@@ -105,6 +107,7 @@ private fun ReaderScreen(viewModel: ReaderViewModel, content: ContentDatabase) {
                 ?: "Quran",
             mode = viewModel.mode,
             onIndex = { indexOpen = true },
+            onSearch = { searchOpen = true },
             onMode = {
                 viewModel.switchMode(
                     if (viewModel.mode == ReadingMode.Mushaf) ReadingMode.Study else ReadingMode.Mushaf,
@@ -125,6 +128,22 @@ private fun ReaderScreen(viewModel: ReaderViewModel, content: ContentDatabase) {
         )
     }
 
+    if (searchOpen) {
+        SearchSheet(
+            content = content,
+            onDismiss = { searchOpen = false },
+            onAyah = { ayah, page ->
+                searchOpen = false
+                viewModel.goToPage(page)
+                selectedAyah = ayah
+            },
+            onSurah = { surah ->
+                searchOpen = false
+                viewModel.jumpToSurah(surah.number)
+            },
+        )
+    }
+
     selectedAyah?.let { ayah ->
         AyahSheet(
             content = content,
@@ -141,6 +160,7 @@ private fun ReaderTopBar(
     title: String,
     mode: ReadingMode,
     onIndex: () -> Unit,
+    onSearch: () -> Unit,
     onMode: () -> Unit,
 ) {
     Row(
@@ -158,7 +178,9 @@ private fun ReaderTopBar(
         )
         Spacer(Modifier.weight(1f))
         BarAction("Index", onIndex)
-        Spacer(Modifier.padding(horizontal = 6.dp))
+        Spacer(Modifier.padding(horizontal = 4.dp))
+        BarAction("Search", onSearch)
+        Spacer(Modifier.padding(horizontal = 4.dp))
         BarAction(if (mode == ReadingMode.Mushaf) "Study" else "Mushaf", onMode)
     }
 }

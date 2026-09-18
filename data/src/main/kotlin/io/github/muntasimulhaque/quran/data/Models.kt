@@ -20,6 +20,7 @@ data class PageLine(
 
 data class Word(
     val id: Int,
+    val position: Int,
     val text: String,
     val glyph: String,
     val translation: String?,
@@ -46,6 +47,19 @@ data class TafsirPassage(
     val toAyah: Int,
     val text: String,
 )
+
+sealed interface SearchHit {
+
+    data class SurahHit(val surah: Surah) : SearchHit
+
+    data class AyahHit(
+        val ayah: Ayah,
+        val page: Int,
+        val translation: String?,
+        val words: List<Word>,
+        val matchedPositions: Set<Int>,
+    ) : SearchHit
+}
 
 data class PagePosition(
     val surah: Int,

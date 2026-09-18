@@ -430,3 +430,35 @@ set apart; copy and share produce the expected text; the study page
 swipes to the next page; `tools fonts` checks 12,865,369 reading
 codepoints across translation, both tafsirs, word meanings, and surah
 names, and fails if any codepoint has no bundled font.
+
+## D-020: Search is one field, two languages, no tafsir yet
+
+Date: the second session.
+
+Search lives in a full-height bottom sheet with one field on top. The
+query language is detected, not chosen: any Arabic letter means the query
+is Arabic, everything else is English. Arabic terms run through the same
+`Arabic.normalizeForSearch` that built the ayah column, so marks and
+letter forms never stand between the reader and the text. English terms
+run through `Search.normalizeEnglish` over a folded copy of the whole
+translation held in memory for the session, because the translation
+writes Allāh, ʿĪsā and Mūsā while readers type allah, isa and musa.
+Surah names match the same way, and a Latin query can return surahs above
+the ayah results.
+
+Results stay in Mushaf order, cap at 200, and mark matched words as whole
+words: Arabic through the word table's positions, English through folded
+word tokens. Nothing is ever styled inside a word. Tapping a result jumps
+to the page and opens the study card for that ayah, so search is a way
+into the text, not a list beside it.
+
+Tafsir search is deliberately not here yet: the tafsir tables carry no
+normalized column, and adding one means rebuilding the content database
+and its pinned hash. That is a separate decision when the owner wants it.
+
+Verified: `tools search` passes 63 Arabic round trips, audits all 16
+distinct non-ASCII codepoints of the translation into clean ASCII folds,
+and proves plain words (allah, mercy, moses, paradise, pharaoh) match. On
+the emulator: mercy returns 144 matches, allah 200+, allah mercy 55 with
+both words highlighted, kahf returns Surah Al-Kahf, and a result tap on
+2:64 lands on its page with the study card open.

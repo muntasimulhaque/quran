@@ -2,6 +2,8 @@ package io.github.muntasimulhaque.quran.data
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import io.github.muntasimulhaque.quran.core.Search
+import io.github.muntasimulhaque.quran.core.SearchQuery
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -77,7 +79,7 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
 
     fun words(firstId: Int, lastId: Int): List<Word> =
         database.rawQuery(
-            "SELECT id, text, glyph, translation FROM word WHERE id BETWEEN ? AND ? ORDER BY id",
+            "SELECT id, position, text, glyph, translation FROM word WHERE id BETWEEN ? AND ? ORDER BY id",
             arrayOf(firstId.toString(), lastId.toString()),
         ).use { cursor ->
             buildList(cursor.count) {
@@ -85,9 +87,10 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
                     add(
                         Word(
                             id = cursor.getInt(0),
-                            text = cursor.getString(1),
-                            glyph = cursor.getString(2),
-                            translation = if (cursor.isNull(3)) null else cursor.getString(3),
+                            position = cursor.getInt(1),
+                            text = cursor.getString(2),
+                            glyph = cursor.getString(3),
+                            translation = if (cursor.isNull(4)) null else cursor.getString(4),
                         ),
                     )
                 }
@@ -177,6 +180,173 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
                 text = cursor.getString(4),
             )
         }
+
+    /**
+     * One search across what is indexed: the Arabic text (SQL, on the
+     * normalized column), the translation (folded in memory so "allah" finds
+     * "Allāh"), and the surah names. Results stay in Mushaf order.
+     */
+    fun search(query: SearchQuery, limit: Int): List<SearchHit> {
+        val hits = mutableListOf<SearchHit>()
+        if (!query.arabic) hits += surahHits(query.terms)
+        hits += if (query.arabic) arabicHits(query.terms, limit) else englishHits(query.terms, limit)
+        return hits
+    }
+
+    private data class HitRow(
+        val number: Int,
+        val surah: Int,
+        val ayah: Int,
+        val verseKey: String,
+        val text: String,
+        val page: Int,
+        val translation: String?,
+    )
+
+    private fun arabicHits(terms: List<String>, limit: Int): List<SearchHit.AyahHit> {
+        val condition = terms.joinToString(" AND ") { "a.text_search LIKE ? ESCAPE '\\'" }
+        val rows = readHits(
+            "FROM ayah a LEFT JOIN translation t ON t.ayah_number = a.number WHERE $condition " +
+                "ORDER BY a.number LIMIT ?",
+            terms.map { Search.pattern(it) } + limit.toString(),
+        )
+        val matched = matchedWords(rows.map { it.number }, terms)
+        val words = wordsByAyah(rows.map { it.number })
+        return rows.map { row ->
+            SearchHit.AyahHit(
+                ayah = row.ayah(),
+                page = row.page,
+                translation = row.translation,
+                words = words[row.number].orEmpty(),
+                matchedPositions = matched[row.number].orEmpty(),
+            )
+        }
+    }
+
+    /**
+     * The whole translation, folded once per session: about a megabyte, and
+     * the price of matching a reader's plain typing against a scholar's
+     * transliteration. Rebuilt with the database, not with each query.
+     */
+    private val englishIndex: List<Pair<Int, String>> by lazy {
+        database.rawQuery(
+            "SELECT ayah_number, text FROM translation ORDER BY ayah_number",
+            null,
+        ).use { cursor ->
+            buildList(cursor.count) {
+                while (cursor.moveToNext()) {
+                    add(cursor.getInt(0) to Search.normalizeEnglish(cursor.getString(1)))
+                }
+            }
+        }
+    }
+
+    private val surahIndex: List<Surah> by lazy { surahs() }
+
+    private fun englishHits(terms: List<String>, limit: Int): List<SearchHit.AyahHit> {
+        val numbers = englishIndex.asSequence()
+            .filter { (_, text) -> terms.all { text.contains(it) } }
+            .map { (number, _) -> number }
+            .take(limit)
+            .toList()
+        if (numbers.isEmpty()) return emptyList()
+        val rows = readHits(
+            "FROM ayah a JOIN translation t ON t.ayah_number = a.number " +
+                "WHERE a.number IN (${numbers.joinToString(",")}) ORDER BY a.number",
+            emptyList(),
+        )
+        return rows.map { row ->
+            SearchHit.AyahHit(
+                ayah = row.ayah(),
+                page = row.page,
+                translation = row.translation,
+                words = emptyList(),
+                matchedPositions = emptySet(),
+            )
+        }
+    }
+
+    private fun readHits(fromWhere: String, args: List<String>): List<HitRow> =
+        database.rawQuery(
+            "SELECT a.number, a.surah, a.ayah, a.verse_key, a.text, a.page, t.text $fromWhere",
+            args.toTypedArray(),
+        ).use { cursor ->
+            buildList(cursor.count) {
+                while (cursor.moveToNext()) {
+                    add(
+                        HitRow(
+                            number = cursor.getInt(0),
+                            surah = cursor.getInt(1),
+                            ayah = cursor.getInt(2),
+                            verseKey = cursor.getString(3),
+                            text = cursor.getString(4),
+                            page = cursor.getInt(5),
+                            translation = cursor.getString(6),
+                        ),
+                    )
+                }
+            }
+        }
+
+    private fun HitRow.ayah() = Ayah(
+        number = number,
+        surah = surah,
+        ayah = ayah,
+        verseKey = verseKey,
+        text = text,
+    )
+
+    private fun surahHits(terms: List<String>): List<SearchHit.SurahHit> =
+        surahIndex.asSequence()
+            .filter { surah ->
+                val simple = Search.normalizeEnglish(surah.nameSimple)
+                val latin = Search.normalizeEnglish(surah.nameLatin)
+                terms.all { term -> simple.contains(term) || latin.contains(term) }
+            }
+            .take(8)
+            .map { SearchHit.SurahHit(it) }
+            .toList()
+
+    private fun matchedWords(numbers: List<Int>, terms: List<String>): Map<Int, Set<Int>> {
+        if (numbers.isEmpty()) return emptyMap()
+        val inClause = numbers.joinToString(",")
+        val condition = terms.joinToString(" OR ") { "text_search LIKE ? ESCAPE '\\'" }
+        val args = numbers.map { it.toString() } + terms.map { Search.pattern(it) }
+        return database.rawQuery(
+            "SELECT ayah_number, position FROM word WHERE ayah_number IN ($inClause) AND ($condition)",
+            args.toTypedArray(),
+        ).use { cursor ->
+            val out = HashMap<Int, MutableSet<Int>>()
+            while (cursor.moveToNext()) {
+                out.getOrPut(cursor.getInt(0)) { mutableSetOf() }.add(cursor.getInt(1))
+            }
+            out
+        }
+    }
+
+    private fun wordsByAyah(numbers: List<Int>): Map<Int, List<Word>> {
+        if (numbers.isEmpty()) return emptyMap()
+        val inClause = numbers.joinToString(",")
+        return database.rawQuery(
+            "SELECT ayah_number, id, position, text, glyph, translation FROM word " +
+                "WHERE ayah_number IN ($inClause) AND marker = 0 ORDER BY ayah_number, position",
+            numbers.map { it.toString() }.toTypedArray(),
+        ).use { cursor ->
+            val out = HashMap<Int, MutableList<Word>>()
+            while (cursor.moveToNext()) {
+                out.getOrPut(cursor.getInt(0)) { mutableListOf() }.add(
+                    Word(
+                        id = cursor.getInt(1),
+                        position = cursor.getInt(2),
+                        text = cursor.getString(3),
+                        glyph = cursor.getString(4),
+                        translation = if (cursor.isNull(5)) null else cursor.getString(5),
+                    ),
+                )
+            }
+            out
+        }
+    }
 
     fun pagePosition(page: Int): PagePosition? =
         database.rawQuery(
