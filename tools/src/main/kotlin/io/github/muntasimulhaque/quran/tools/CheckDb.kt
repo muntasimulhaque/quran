@@ -37,7 +37,7 @@ class CheckDb(private val root: File) {
         val report = Json.parseToJsonElement(reportFile.readText()).jsonObject
         val database = File(root, "content/quran.db")
         if (!database.exists()) {
-            println("checkdb: content/quran.db is missing")
+            println("checkdb: content/quran.db is missing; run ./gradlew :tools:run --args=fetch")
             return 2
         }
         var failures = 0

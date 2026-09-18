@@ -44,6 +44,9 @@ jobs:
       - name: Core tests
         run: ./gradlew :core:test --console=plain
 
+      - name: Fetch content
+        run: ./gradlew :tools:run --args="fetch" --console=plain
+
       - name: Database check
         run: ./gradlew :tools:run --args="checkdb" --console=plain
 
