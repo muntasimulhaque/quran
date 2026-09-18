@@ -295,3 +295,56 @@ implement it and update this list.
 - Play Core's asset delivery drags WorkManager, Room, and five merged
   permissions, and its R8 release needs extra keep rules. The page fonts
   ship in the base instead (D-018); reopen only with the owner.
+
+## Where the project stands (end of the fifth session)
+
+Shipped and verified: the reading surface (tap for chrome, long press for an
+ayah, per surah study, footnotes behind their markers, a word by word aid in
+English and Bengali), search across every installed source with an in-memory
+tafsir index, settings with themes, sizes, dim, reciters, and content packs,
+ten Gradle modules with one way dependencies, the content pipeline that
+splits the Quran into packs (core ten megabytes, everything else on demand),
+the app icon, the store kit, and a signed release bundle at about 147 MB.
+CI is green: core tests, lint, database and catalog checks, search round
+trips in three scripts, ten data tests, eleven app tests, and a screenshot
+tour whose PNGs are uploaded as artifacts.
+
+## Next session: the remaining queue, in order
+
+1. **Instant launch and the performance pass.** Paint the last read page from
+   a disk bitmap on the first frame, add a baseline profile, run
+   Macrobenchmark for startup and page turns in CI, and measure on a real
+   device instead of the software rendered emulator. Budget to hold: under
+   300 ms to the first painted page on a warm start, under 800 ms on the very
+   first launch.
+2. **Accessibility and world readiness.** TalkBack reading of the Mushaf page
+   as text with one node per ayah, a contrast and touch target audit, font
+   scale behaviour in the study view, and externalising the interface strings
+   out of Kotlin so the UI can be translated.
+3. **Trust work.** Export and import of saved ayahs and notes, so a reader can
+   move their own work to a new phone.
+4. **Release engineering.** A tag driven workflow that builds the signed
+   bundle, verifies it, and attaches it to a draft GitHub release with
+   checksums, plus keeping `play-store/RELEASE.md` true.
+5. **Robustness and security review.** Exported components, backup rules, R8
+   output, cleartext policy, corrupt or truncated pack handling, and an in app
+   content self check that verifies installed pack hashes.
+6. **Polish backlog.** The page turn shadow and haptic, a dim preview in the
+   settings swatches, and any edge the screenshot tour reveals.
+7. **Content backlog.** More translations and tafsirs as packs (the pipeline
+   now makes each one a dataset entry, a pack definition, and a Release), and
+   a second mushaf script if a font and layout are chosen.
+
+## Traps worth remembering
+
+* QUL downloads need an account, so their datasets are placed by hand into
+  `content/raw/qul/` and pinned by `tools verify`.
+* Pack downloads are content addressed: `pack-<id>-<hash8>`, and the content
+  database lives at `content-db-<hash8>`. Never replace an existing tag; the
+  catalog and old build reports depend on it.
+* `content/packs/` and `content/quran.db` are generated, never committed.
+* A debug build carries every pack in `assets/packs/` for offline work; a
+  release build carries only the core pack, and that is enforced by variant,
+  not by a condition.
+* The screen dim is ink over the glass (`drawWithContent`), never an overlay
+  that could swallow a touch.

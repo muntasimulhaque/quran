@@ -101,3 +101,41 @@ request. No ads, no trackers, no account.
 3. Build the bundle: `./gradlew :app:bundleRelease` (signed from the
    shared upload keystore when it is present).
 4. Upload to the internal track, check the size report, then promote.
+
+## Assets in this folder
+
+| File | Size | Use |
+|---|---|---|
+| `icon-512.png` | 512 x 512 | store icon |
+| `feature-graphic-1024x500.png` | 1024 x 500 | feature graphic |
+| `screenshots/*.png` | 1080 x 1920 | phone screenshots, captured by the screenshot test on a real Android system |
+
+Screenshots: the Mushaf page, the summoned chrome, the study reading, an
+ayah's actions, the ayah card, search, the surah list, and settings.
+
+## What the app carries, and what a reader adds
+
+The app ships the Quran text and its page layout only: about ten megabytes,
+a complete offline Mushaf that needs no network and no account. Everything
+else is added by the reader, from the project's own GitHub Releases, with the
+size shown before a byte moves and a SHA-256 check before it is used:
+
+| Language | Translation | Tafsir | Word by word |
+|---|---|---|---|
+| English | Saheeh International (2.2 MB) | Ibn Kathir (23 MB) | 4.6 MB |
+| Arabic | the Quran itself | As-Sa'di (15 MB) | |
+| Bengali | Taisirul Quran (5.1 MB) | Ibn Kathir (47 MB) | 6.5 MB |
+
+Recitations: Minshawi and Husary, one surah at a time (0.2 to 122 MB each),
+plus 1.7 MB of timing data per reciter.
+
+## Store answers to have ready
+
+* **Is the app free?** Yes, and open source (MIT).
+* **Does it show ads?** No, and it has no analytics and no accounts.
+* **Why does it need the internet permission?** To download a content pack
+  or a surah's recitation that the reader asks for, from the project's own
+  releases. Nothing is fetched at launch, nothing automatically, and there is
+  no other host.
+* **Data safety**: no data collected, no data shared, nothing stored off the
+  device. Notes and bookmarks stay in the app's private storage.
