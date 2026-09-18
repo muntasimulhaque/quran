@@ -91,6 +91,7 @@ fun AyahSheet(
     note: String?,
     onToggleSave: () -> Unit,
     onSaveNote: (String?) -> Unit,
+    onPlay: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -201,6 +202,7 @@ fun AyahSheet(
                         ActionPill(label = if (isSaved) "Saved" else "Save", selected = isSaved) {
                             onToggleSave()
                         }
+                        ActionPill(label = "Play", selected = false) { onPlay() }
                         ActionPill(label = "Note", selected = panel == AyahPanel.Note) {
                             panel = if (panel == AyahPanel.Note) null else AyahPanel.Note
                         }

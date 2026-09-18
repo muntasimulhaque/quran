@@ -37,29 +37,41 @@ import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.ui.browse.BrowseSheet
 import io.github.muntasimulhaque.quran.ui.mushaf.MushafPage
+import io.github.muntasimulhaque.quran.ui.playback.PlaybackBar
+import io.github.muntasimulhaque.quran.ui.playback.RecitationSheet
+import io.github.muntasimulhaque.quran.ui.playback.shortReciterName
 import io.github.muntasimulhaque.quran.ui.search.SearchSheet
 import io.github.muntasimulhaque.quran.ui.study.AyahSheet
 import io.github.muntasimulhaque.quran.ui.study.StudyPage
 import io.github.muntasimulhaque.quran.ui.theme.QuranTheme
 
 @Composable
-fun QuranApp(viewModel: ReaderViewModel = viewModel()) {
+fun QuranApp(
+    viewModel: ReaderViewModel = viewModel(),
+    onPlaybackPermission: () -> Unit = {},
+) {
     QuranTheme {
         val content = viewModel.content
         if (!viewModel.ready || content == null) {
             // The cold start paints the paper instantly; the content opens behind it.
             Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
         } else {
-            ReaderScreen(viewModel, content)
+            ReaderScreen(viewModel, content, onPlaybackPermission)
         }
     }
 }
 
 @Composable
-private fun ReaderScreen(viewModel: ReaderViewModel, content: ContentDatabase) {
+private fun ReaderScreen(
+    viewModel: ReaderViewModel,
+    content: ContentDatabase,
+    onPlaybackPermission: () -> Unit,
+) {
     val saved by viewModel.saved.collectAsStateWithLifecycle()
+    val playback by viewModel.playbackState.collectAsStateWithLifecycle()
     var browseOpen by remember { mutableStateOf(false) }
     var searchOpen by remember { mutableStateOf(false) }
+    var recitationsOpen by remember { mutableStateOf(false) }
     var selectedAyah by remember { mutableStateOf<Ayah?>(null) }
     val pagerState = rememberPagerState(
         initialPage = (viewModel.page - 1).coerceIn(0, 603),
@@ -99,6 +111,8 @@ private fun ReaderScreen(viewModel: ReaderViewModel, content: ContentDatabase) {
                 StudyPage(
                     content = content,
                     page = index + 1,
+                    playingAyah = playback.ayahNumber,
+                    playingWord = playback.wordPosition,
                     onAyah = { selectedAyah = it },
                 )
             }
@@ -116,7 +130,31 @@ private fun ReaderScreen(viewModel: ReaderViewModel, content: ContentDatabase) {
                 )
             },
         )
-        ReaderBottomPill(viewModel)
+        if (playback.ayahNumber != null || playback.unavailable) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .windowInsetsPadding(WindowInsets.navigationBars)
+                    .padding(bottom = 14.dp),
+                contentAlignment = Alignment.BottomCenter,
+            ) {
+                PlaybackBar(
+                    state = playback,
+                    reciterName = shortReciterName(
+                        viewModel.recitation,
+                        viewModel.recitations.firstOrNull { it.id == viewModel.recitation }?.name.orEmpty(),
+                    ),
+                    reference = playback.reference,
+                    onToggle = { viewModel.togglePlayback() },
+                    onNext = { viewModel.nextAyah() },
+                    onPrevious = { viewModel.previousAyah() },
+                    onReciter = { recitationsOpen = true },
+                    onClose = { viewModel.stopPlayback() },
+                )
+            }
+        } else {
+            ReaderBottomPill(viewModel)
+        }
     }
 
     if (browseOpen) {
@@ -154,6 +192,19 @@ private fun ReaderScreen(viewModel: ReaderViewModel, content: ContentDatabase) {
         )
     }
 
+    if (recitationsOpen) {
+        RecitationSheet(
+            recitations = viewModel.recitations,
+            selected = viewModel.recitation,
+            availability = { viewModel.recitationAvailability() },
+            onSelect = { id ->
+                viewModel.selectRecitation(id)
+                recitationsOpen = false
+            },
+            onDismiss = { recitationsOpen = false },
+        )
+    }
+
     selectedAyah?.let { ayah ->
         val savedRow = saved.firstOrNull { it.ayahNumber == ayah.number }
         AyahSheet(
@@ -165,6 +216,12 @@ private fun ReaderScreen(viewModel: ReaderViewModel, content: ContentDatabase) {
             note = savedRow?.note,
             onToggleSave = { viewModel.toggleSaved(ayah) },
             onSaveNote = { note -> viewModel.setNote(ayah, note) },
+            onPlay = {
+                onPlaybackPermission()
+                viewModel.playAyah(ayah.number)
+                // The reader wants to follow the reciter, not stare at the card.
+                selectedAyah = null
+            },
             onDismiss = { selectedAyah = null },
         )
     }

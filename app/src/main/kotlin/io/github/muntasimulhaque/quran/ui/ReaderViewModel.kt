@@ -13,12 +13,20 @@ import io.github.muntasimulhaque.quran.data.PageFontStore
 import io.github.muntasimulhaque.quran.data.PagePosition
 import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.ReadingState
+import io.github.muntasimulhaque.quran.data.Recitation
+import io.github.muntasimulhaque.quran.data.RecitationStore
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.data.SavedStore
 import io.github.muntasimulhaque.quran.data.Surah
+import io.github.muntasimulhaque.quran.playback.PlaybackController
+import io.github.muntasimulhaque.quran.playback.PlaybackUiState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Holds the one decision the reader should never have to make twice: where
@@ -30,6 +38,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     private val readingState = ReadingState(application)
     private val pageFonts = PageFontStore(application)
     private val savedStore = SavedStore(application)
+    private val playback = PlaybackController(application, viewModelScope)
     private var contentDatabase: ContentDatabase? = null
 
     var surahs by mutableStateOf<List<Surah>>(emptyList())
@@ -42,23 +51,45 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         private set
     var ready by mutableStateOf(false)
         private set
+    var recitation by mutableStateOf("minshawi")
+        private set
+    var recitations by mutableStateOf<List<Recitation>>(emptyList())
+        private set
 
     val content: ContentDatabase? get() = contentDatabase
     val fonts: PageFontStore get() = pageFonts
     val saved: StateFlow<List<SavedAyah>> = savedStore.saved
+    val playbackState: StateFlow<PlaybackUiState> = playback.state
 
     init {
         viewModelScope.launch {
             val database = ContentDatabase.open(getApplication())
             contentDatabase = database
+            playback.attach(database)
             surahs = database.surahs()
+            recitations = database.recitations()
             val snapshot = readingState.snapshot.first()
             page = snapshot.page
             mode = snapshot.mode
+            recitation = snapshot.recitation
             position = database.pagePosition(page)
             ready = true
         }
         viewModelScope.launch { savedStore.load() }
+        // The reader follows the recitation: a new ayah moves the page.
+        viewModelScope.launch {
+            playback.state
+                .map { it.ayahNumber to it.isPlaying }
+                .distinctUntilChanged()
+                .collect { (ayahNumber, playing) ->
+                    val database = contentDatabase
+                    if (!playing || ayahNumber == null || database == null) return@collect
+                    val target = withContext(Dispatchers.IO) {
+                        database.ayahsWithPages(listOf(ayahNumber)).firstOrNull()?.page
+                    }
+                    if (target != null) goToPage(target)
+                }
+        }
     }
 
     fun goToPage(newPage: Int) {
@@ -90,6 +121,36 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
     fun removeSaved(ayahNumber: Int) {
         viewModelScope.launch { savedStore.remove(ayahNumber) }
+    }
+
+    fun playAyah(ayahNumber: Int) {
+        viewModelScope.launch { playback.play(recitation, ayahNumber) }
+    }
+
+    fun togglePlayback() = playback.toggle()
+
+    fun nextAyah() = playback.next()
+
+    fun previousAyah() = playback.previous()
+
+    fun stopPlayback() = playback.stop()
+
+    fun selectRecitation(id: String) {
+        if (id == recitation) return
+        recitation = id
+        viewModelScope.launch { readingState.setRecitation(id) }
+        val current = playback.state.value.ayahNumber ?: return
+        viewModelScope.launch { playback.play(id, current) }
+    }
+
+    /** Which recitations have their audio on this device right now. */
+    suspend fun recitationAvailability(): Map<String, Boolean> = withContext(Dispatchers.IO) {
+        val database = contentDatabase ?: return@withContext emptyMap()
+        val store = RecitationStore(getApplication())
+        recitations.associate { recitation ->
+            val path = database.recitationAyah(recitation.id, 1)?.audioPath
+            recitation.id to store.isAvailable(path)
+        }
     }
 
     override fun onCleared() {

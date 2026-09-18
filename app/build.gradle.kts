@@ -93,6 +93,7 @@ android {
         targetSdk = 37
         versionCode = 1
         versionName = "0.1"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
@@ -121,6 +122,11 @@ android {
         compose = true
     }
     sourceSets.getByName("main").assets.directories.add(contentAssets.get().asFile.absolutePath)
+    // The development audio sample ships in debug builds only, so the player
+    // can be exercised without bundling gigabytes into anything shipped.
+    sourceSets.getByName("debug").assets.directories.add(
+        layout.buildDirectory.dir("generated/audioDevAssets").get().asFile.absolutePath,
+    )
     dependenciesInfo {
         includeInApk = false
         includeInBundle = false
@@ -129,6 +135,16 @@ android {
 
 tasks.named("preBuild") {
     dependsOn(prepareContentAssets)
+}
+
+val copyAudioDevAssets = tasks.register<Sync>("copyAudioDevAssets") {
+    val audioDev = rootProject.file("content/work/audio-dev")
+    if (audioDev.isDirectory) from(audioDev)
+    into(layout.buildDirectory.dir("generated/audioDevAssets/audio-dev"))
+}
+
+tasks.named("preBuild") {
+    dependsOn(copyAudioDevAssets)
 }
 
 kotlin {
@@ -147,5 +163,9 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.session)
     implementation(project(":data"))
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
 }

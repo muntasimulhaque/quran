@@ -17,6 +17,7 @@ enum class ReadingMode { Mushaf, Study }
 data class ReadingSnapshot(
     val page: Int,
     val mode: ReadingMode,
+    val recitation: String,
 )
 
 /**
@@ -32,6 +33,7 @@ class ReadingState(private val context: Context) {
                 "study" -> ReadingMode.Study
                 else -> ReadingMode.Mushaf
             },
+            recitation = preferences[RECITATION] ?: "minshawi",
         )
     }
 
@@ -43,8 +45,13 @@ class ReadingState(private val context: Context) {
         context.readingStore.edit { it[MODE] = if (mode == ReadingMode.Study) "study" else "mushaf" }
     }
 
+    suspend fun setRecitation(recitation: String) {
+        context.readingStore.edit { it[RECITATION] = recitation }
+    }
+
     private companion object {
         val PAGE = intPreferencesKey("page")
         val MODE = stringPreferencesKey("mode")
+        val RECITATION = stringPreferencesKey("recitation")
     }
 }

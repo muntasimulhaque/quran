@@ -495,3 +495,57 @@ unsave from the card, a note written and shown under the ayah in the
 Saved tab, the row opening its card and showing the saved state, the note
 surviving a force-stop and relaunch, and Remove returning to the empty
 state.
+
+## D-022: Recitation is a Media3 service over per-ayah files
+
+Date: the second session.
+
+The canonical text has word timings for four recitations (Minshawi
+murattal, Husary murattal, Husary Muallim, Husary mujawwad) that QUL
+publishes as per-ayah MP3s on `audio-cdn.tarteel.ai`. The app plays those
+files through a Media3 `MediaSessionService`: one notification, one
+foreground service with type mediaPlayback, and the three permissions the
+owner approved in D-007. The app itself never touches the network.
+
+Playback builds a playlist one surah at a time from the files actually on
+the device, appends the next surah as the reader reaches the end, and
+follows the recitation: the study page moves to the playing ayah, the
+ayah is tinted, and the word being recited is marked in lapis from the
+segments. The playback pill carries the reciter, the reference, and
+previous, play/pause, next, and stop; tapping the reciter opens the
+picker, which names the recitations and marks the ones missing from the
+device. The chosen reciter is remembered with the reading position.
+
+Development runs on a sample: `tools audio` downloads 24 spread ayahs for
+every recitation (17 MB) into `content/work/audio-dev`, and only debug
+builds bundle it. Release builds carry no audio yet, so the playback pill
+says "Not on this device"; that is deliberate until the delivery
+decision below.
+
+Measured with a sampled HEAD sweep of the real CDN (312 files per
+reciter, no failures):
+
+| Recitation | Hours | Estimated size |
+| --- | --- | --- |
+| Minshawi murattal | 28.6 | ~1.58 GB |
+| Husary murattal | 42.2 | ~2.36 GB |
+| Husary Muallim | 47.1 | ~2.62 GB |
+| Husary mujawwad | 61.2 | ~3.32 GB |
+
+The delivery decision is the owner's, and is the only open item in this
+decision. The options on the table: an install-time Play asset pack (one
+large install, no extra permissions, no library), or a pack published as
+a GitHub Release asset that the reader imports once (small Play download,
+no INTERNET permission, one manual step). The import path reads a ZIP
+through the storage picker and writes the files into app storage; no
+network code exists in either option.
+
+Verified on the emulator: playback starts from the study card and the
+card closes so the reader follows; the notification appears with the
+reference and the reciter; the playlist crosses from Al-Fatihah into
+Al-Baqarah unattended; the page follows, the ayah is tinted, and the
+recited word is marked; the reciter picker lists all four with the
+playing one marked and switching restarts at the same ayah; and the
+release build starts in 1.5 s with no crashes. The instrumented search
+test (`app/src/androidTest`, 3 of 3) and the saved-store test
+(`:data:connectedDebugAndroidTest`, 6 of 6) are green.

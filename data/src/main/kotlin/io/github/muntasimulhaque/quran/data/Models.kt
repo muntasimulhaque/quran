@@ -50,6 +50,24 @@ data class TafsirPassage(
     val text: String,
 )
 
+data class Recitation(
+    val id: String,
+    val name: String,
+    val credit: String,
+)
+
+data class WordSegment(
+    val wordFrom: Int,
+    val wordTo: Int,
+    val startMs: Long,
+    val endMs: Long,
+)
+
+data class RecitationAyah(
+    val audioPath: String,
+    val segments: List<WordSegment>,
+)
+
 sealed interface SearchHit {
 
     data class SurahHit(val surah: Surah) : SearchHit

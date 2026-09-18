@@ -165,8 +165,7 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
         }
 
     /** The ayahs behind a list of numbers, each with the page it lives on. */
-    fun ayahsWithPages(numbers: List<Int>): List<AyahLocation> {
-        if (numbers.isEmpty()) return emptyList()
+    fun ayahsWithPages(numbers: List<Int>): List<AyahLocation> {        if (numbers.isEmpty()) return emptyList()
         val inClause = numbers.joinToString(",")
         return database.rawQuery(
             "SELECT number, surah, ayah, verse_key, text, page FROM ayah " +
@@ -192,6 +191,51 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
         }
     }
 
+    fun ayahsOfSurah(surah: Int): List<Ayah> =
+        database.rawQuery(
+            "SELECT number, surah, ayah, verse_key, text FROM ayah WHERE surah = ? ORDER BY ayah",
+            arrayOf(surah.toString()),
+        ).use { cursor ->
+            buildList(cursor.count) {
+                while (cursor.moveToNext()) {
+                    add(
+                        Ayah(
+                            number = cursor.getInt(0),
+                            surah = cursor.getInt(1),
+                            ayah = cursor.getInt(2),
+                            verseKey = cursor.getString(3),
+                            text = cursor.getString(4),
+                        ),
+                    )
+                }
+            }
+        }
+
+    /** The words of a set of ayahs, in order, markers excluded. */
+    fun wordsForAyahs(numbers: List<Int>): Map<Int, List<Word>> {
+        if (numbers.isEmpty()) return emptyMap()
+        val inClause = numbers.joinToString(",")
+        return database.rawQuery(
+            "SELECT ayah_number, id, position, text, glyph, translation FROM word " +
+                "WHERE ayah_number IN ($inClause) AND marker = 0 ORDER BY ayah_number, position",
+            null,
+        ).use { cursor ->
+            val out = HashMap<Int, MutableList<Word>>()
+            while (cursor.moveToNext()) {
+                out.getOrPut(cursor.getInt(0)) { mutableListOf() }.add(
+                    Word(
+                        id = cursor.getInt(1),
+                        position = cursor.getInt(2),
+                        text = cursor.getString(3),
+                        glyph = cursor.getString(4),
+                        translation = if (cursor.isNull(5)) null else cursor.getString(5),
+                    ),
+                )
+            }
+            out
+        }
+    }
+
     fun tafsir(ayahNumber: Int, source: String): TafsirPassage? =
         database.rawQuery(
             "SELECT p.source, p.surah, p.from_ayah, p.to_ayah, p.text FROM tafsir_ayah a " +
@@ -213,8 +257,7 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
      * One search across what is indexed: the Arabic text (SQL, on the
      * normalized column), the translation (folded in memory so "allah" finds
      * "Allāh"), and the surah names. Results stay in Mushaf order.
-     */
-    fun search(query: SearchQuery, limit: Int): List<SearchHit> {
+     */    fun search(query: SearchQuery, limit: Int): List<SearchHit> {
         val hits = mutableListOf<SearchHit>()
         if (!query.arabic) hits += surahHits(query.terms)
         hits += if (query.arabic) arabicHits(query.terms, limit) else englishHits(query.terms, limit)
@@ -339,10 +382,9 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
         if (numbers.isEmpty()) return emptyMap()
         val inClause = numbers.joinToString(",")
         val condition = terms.joinToString(" OR ") { "text_search LIKE ? ESCAPE '\\'" }
-        val args = numbers.map { it.toString() } + terms.map { Search.pattern(it) }
         return database.rawQuery(
             "SELECT ayah_number, position FROM word WHERE ayah_number IN ($inClause) AND ($condition)",
-            args.toTypedArray(),
+            terms.map { Search.pattern(it) }.toTypedArray(),
         ).use { cursor ->
             val out = HashMap<Int, MutableSet<Int>>()
             while (cursor.moveToNext()) {
@@ -358,7 +400,7 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
         return database.rawQuery(
             "SELECT ayah_number, id, position, text, glyph, translation FROM word " +
                 "WHERE ayah_number IN ($inClause) AND marker = 0 ORDER BY ayah_number, position",
-            numbers.map { it.toString() }.toTypedArray(),
+            null,
         ).use { cursor ->
             val out = HashMap<Int, MutableList<Word>>()
             while (cursor.moveToNext()) {
@@ -388,6 +430,56 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
     fun firstPageOfSurah(surah: Int): Int =
         database.rawQuery("SELECT MIN(page) FROM ayah WHERE surah = ?", arrayOf(surah.toString()))
             .use { cursor -> if (cursor.moveToFirst()) cursor.getInt(0) else 1 }
+
+    fun recitations(): List<Recitation> =
+        database.rawQuery(
+            "SELECT id, name, credit FROM recitation ORDER BY id",
+            null,
+        ).use { cursor ->
+            buildList(cursor.count) {
+                while (cursor.moveToNext()) {
+                    add(
+                        Recitation(
+                            id = cursor.getString(0),
+                            name = cursor.getString(1),
+                            credit = cursor.getString(2),
+                        ),
+                    )
+                }
+            }
+        }
+
+    fun recitationAyah(recitation: String, ayahNumber: Int): RecitationAyah? =
+        database.rawQuery(
+            "SELECT audio_path, segments FROM recitation_ayah " +
+                "WHERE recitation = ? AND ayah_number = ?",
+            arrayOf(recitation, ayahNumber.toString()),
+        ).use { cursor ->
+            if (!cursor.moveToFirst()) return null
+            RecitationAyah(
+                audioPath = cursor.getString(0),
+                segments = segments(cursor.getString(1)),
+            )
+        }
+
+    private fun segments(json: String?): List<WordSegment> {
+        if (json.isNullOrBlank() || json == "[]") return emptyList()
+        val array = runCatching { JSONArray(json) }.getOrNull() ?: return emptyList()
+        return buildList(array.length()) {
+            for (index in 0 until array.length()) {
+                val entry = array.optJSONArray(index) ?: continue
+                if (entry.length() < 4) continue
+                add(
+                    WordSegment(
+                        wordFrom = entry.optInt(0),
+                        wordTo = entry.optInt(1),
+                        startMs = entry.optLong(2),
+                        endMs = entry.optLong(3),
+                    ),
+                )
+            }
+        }
+    }
 
     fun close() = database.close()
 

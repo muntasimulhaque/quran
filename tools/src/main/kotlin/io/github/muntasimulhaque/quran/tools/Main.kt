@@ -12,12 +12,13 @@ fun main(args: Array<String>) {
         "verify" -> Verify(root).run()
         "audit" -> Audit(root).run()
         "search" -> SearchCheck(root).run()
+        "audio" -> Audio(root).sample()
         "build" -> Build(root).run()
         "fonts" -> Fonts(root).run()
         "fetch" -> Fetch(root).run()
         "checkdb" -> CheckDb(root).run()
         "help", "--help" -> {
-            println("usage: tools <verify|audit|search|build|fonts|fetch|checkdb>")
+            println("usage: tools <verify|audit|search|audio|build|fonts|fetch|checkdb>")
             0
         }
         else -> {
