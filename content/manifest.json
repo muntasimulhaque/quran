@@ -391,6 +391,54 @@
       "bytes": 1541387,
       "sha256": "8c5aeae20363a98f6963720d29fce040ca8b56a8e75f8b564c257fce7f6d0417",
       "assetUrl": null
+    },
+    {
+      "id": "translation-taisirul-quran-bn",
+      "name": "Taisirul Quran (Bengali)",
+      "source": "Quranic Universal Library (QUL) by Tarteel",
+      "url": "https://qul.tarteel.ai/resources/translation/184",
+      "resourceId": "184",
+      "format": "sqlite",
+      "license": "Distributed via QUL",
+      "credit": "Professor Muhammad Mozammel Haque, via QUL",
+      "usedFor": "Bengali translation pack",
+      "path": "content/raw/qul/bengali-taisirul-quran.sqlite.zip",
+      "bytes": 0,
+      "sha256": "",
+      "assetUrl": null,
+      "pending": true
+    },
+    {
+      "id": "tafsir-ibn-kathir-bn",
+      "name": "Tafsir Ibn Kathir (Bengali)",
+      "source": "Quranic Universal Library (QUL) by Tarteel",
+      "url": "https://qul.tarteel.ai/resources/tafsir/31",
+      "resourceId": "31",
+      "format": "sqlite",
+      "license": "Distributed via QUL",
+      "credit": "Tafsir Ibn Kathir (Bengali), via QUL",
+      "usedFor": "Bengali tafsir pack",
+      "path": "content/raw/qul/tafsir-ibn-kathir-bengali.sqlite.zip",
+      "bytes": 0,
+      "sha256": "",
+      "assetUrl": null,
+      "pending": true
+    },
+    {
+      "id": "word-by-word-bengali",
+      "name": "Bengali word by word",
+      "source": "Quranic Universal Library (QUL) by Tarteel",
+      "url": "https://qul.tarteel.ai/resources/translation/94",
+      "resourceId": "94",
+      "format": "sqlite",
+      "license": "Distributed via QUL",
+      "credit": "Bengali word by word, via QUL",
+      "usedFor": "Bengali word meanings pack (optional)",
+      "path": "content/raw/qul/bengali-word-by-word.sqlite.zip",
+      "bytes": 0,
+      "sha256": "",
+      "assetUrl": null,
+      "pending": true
     }
   ]
 }

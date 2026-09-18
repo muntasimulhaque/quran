@@ -392,6 +392,7 @@ fun ReaderScreen(
             translationPack = viewModel.translationPacks.firstOrNull { it.id == settings.translationPack },
             tafsirPacks = viewModel.enabledTafsirPacks,
             textSize = settings.textSize,
+            wordLanguage = viewModel.selectedTranslation?.language ?: "en",
             isSaved = savedRow != null,
             note = savedRow?.note,
             onToggleSave = { viewModel.toggleSaved(ayah) },

@@ -26,6 +26,8 @@ data class Dataset(
     val bytes: Long,
     val sha256: String,
     val assetUrl: String? = null,
+    /** Listed so the reader knows what to download; not required by the build yet. */
+    val pending: Boolean = false,
 )
 
 private val json = Json { ignoreUnknownKeys = true }

@@ -89,6 +89,7 @@ fun AyahCard(
     translationPack: ContentPack?,
     tafsirPacks: List<ContentPack>,
     textSize: TextSize,
+    wordLanguage: String,
     isSaved: Boolean,
     note: String?,
     onToggleSave: () -> Unit,
@@ -113,7 +114,7 @@ fun AyahCard(
     }
     val words by produceState<List<WordMeaning>>(initialValue = emptyList(), ayah.number, door) {
         if (door == Door.Words) {
-            value = withContext(Dispatchers.IO) { content.wordMeanings(ayah.number) }
+            value = withContext(Dispatchers.IO) { content.wordMeanings(ayah.number, wordLanguage) }
         }
     }
     val tafsir by produceState<TafsirView?>(initialValue = null, ayah.number, door) {

@@ -27,6 +27,9 @@ class ContentDatabase private constructor(
     /** The schema of one installed pack, quoted for SQL. */
     private fun schema(id: String): String = "\"" + id.replace("\"", "") + "\""
 
+    /** The word list that speaks a language, when the reader has it. */
+    private fun wordsPack(language: String): String = "words-"
+
     private fun has(id: String): Boolean = id in installedPacks && id != PackCatalog.CORE_ID
 
     fun installedPack(id: String): Boolean = id == PackCatalog.CORE_ID || has(id)
@@ -245,11 +248,11 @@ class ContentDatabase private constructor(
         }
     }
 
-    /** The word by word meanings, when the reader has that pack. */
-    fun wordMeanings(ayahNumber: Int): List<WordMeaning> {
-        val meanings = if (installedPack(WORDS_PACK)) {
+    /** The word by word meanings, in the reader's language when that pack is here. */
+    fun wordMeanings(ayahNumber: Int, language: String = "en"): List<WordMeaning> {
+        val meanings = if (installedPack(wordsPack(language))) {
             database.rawQuery(
-                "SELECT position, meaning FROM ${schema(WORDS_PACK)}.word_meaning " +
+                "SELECT position, meaning FROM ${schema(wordsPack(language))}.word_meaning " +
                     "WHERE ayah_number = ? ORDER BY position",
                 arrayOf(ayahNumber.toString()),
             ).use { cursor ->

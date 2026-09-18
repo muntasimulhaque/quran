@@ -25,6 +25,10 @@ class Verify(private val root: File) {
         for (dataset in manifest.datasets) {
             val file = File(root, dataset.path)
             if (!file.exists()) {
+                if (dataset.pending) {
+                    println("verify: waiting for a manual download: ${dataset.id} -> ${dataset.path}")
+                    continue
+                }
                 failures += "${dataset.id}: file is missing: ${dataset.path}"
                 continue
             }

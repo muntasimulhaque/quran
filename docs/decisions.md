@@ -850,3 +850,27 @@ shown again, on any device, for that reader.
 choice (Off, Dim, Darker) lays a translucent black over the reading surface
 without blocking a single touch, and it is remembered like every other
 setting.
+
+## D-034: Bengali arrives as two packs, and word meanings are their own thing
+
+Date: the fifth session. The owner chose Taisirul Quran (Professor Mozammel
+Haque) as the Bengali translation and Tafsir Ibn Kathir (Bengali) as the
+Bengali tafsir, and asked whether either carries word by word.
+
+**Word by word is never part of a translation.** Saheeh International is a
+sentence translation; the word meanings the app shows today come from QUL's
+English Word by Word dataset, which is its own resource and its own pack
+(`words-en`, 4.6 MB with the surah introductions). Taisirul Quran is the
+same: a translation, no word meanings inside it. QUL keeps a Bengali word
+list as its own dataset (resource 94), so if Bengali readers want word
+meanings, that is a third pack, listed in the manifest as pending.
+
+**The app now picks the word list by language.** The meaning panel asks for
+the word pack that speaks the language of the chosen translation, and falls
+back to English when that language has none. So the day a Bengali word pack
+is installed, the card fills itself without a code change.
+
+**Both Bengali packs are on demand**, like every other translation and
+tafsir: nothing is bundled, the size is shown before a byte moves, the file
+is verified by SHA-256, and removing it removes the content. In the settings
+sheet they appear under a Bengali heading, between English and Arabic.
