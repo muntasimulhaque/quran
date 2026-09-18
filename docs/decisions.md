@@ -767,3 +767,35 @@ without any of them touching the reader who does not want them.
 
 The single database of D-028 stays useful as the build's working form and is
 still fetched from its own Release for CI, but the app no longer ships it.
+
+## D-031: Ten small modules with one-way dependencies
+
+Date: the fourth session. The owner asked for an engineering architecture as
+careful as the design: almost everything a plugin, giant files split into
+small clean pieces.
+
+What changed: the single app module became ten. `:core` stays pure Kotlin.
+`:data` owns content and memory: the pack catalog and store, the content
+database, settings, saved ayahs, recitation files and downloads. A new
+`:content-assets` owns the fonts. `:ui-kit` owns the theme, the icons, and
+the rich text views. Six feature modules each own one surface:
+`:feature-mushaf`, `:feature-study`, `:feature-search`, `:feature-browse`,
+`:feature-playback`, `:feature-settings`. `:app` keeps the wiring: the
+activity, the view model that holds the reader's state, the screen that
+composes the features, and the manifest where the permissions are audited.
+
+The rule that makes it real: dependencies point one way. Features depend on
+`ui-kit`, `data`, `content-assets`, and `core`, never on each other and never
+on `app`. Gradle refuses to build a cycle, so the rule enforces itself, and
+`docs/architecture.md` records it for readers.
+
+What it cost: two feature composables had to stop taking the view model.
+`SettingsSheet` now receives `AppSettings`, the pack list, and a record of
+thirteen callbacks; `StudyList` receives the surah, its ayah numbers, the
+settings, and a `loadRow` function. That is the point: a feature that cannot
+see the app is a feature that can be read, tested, and previewed on its own.
+The split also exposed dead code, which is gone.
+
+What it buys: every feature is now small (one or two files), the boundaries
+are physical rather than aspirational, and the next work (a second mushaf
+script, another feature) has a place to live that is not the app module.

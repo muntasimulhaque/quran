@@ -44,16 +44,14 @@ val canSignRelease = keystoreStoreFile != null &&
     releaseKeystore.containsKey("keyAlias") &&
     releaseKeystore.containsKey("keyPassword")
 
-// The base app carries the content database, its fingerprint, the study
-// font, and the 604 Mushaf page fonts. One self-contained install, no
-// permissions, no Play delivery library; a release APK from GitHub is a
-// complete Quran. The rejected alternative (fonts in a fast-follow pack)
-// is recorded in decisions D-018.
+// The fonts, the core pack, and the catalog are owned by :content-assets;
+// this module generates the runtime assets (the page fonts, the study font,
+// the core pack, the catalog, and the recitation manifest) and wires them in.
 val contentAssets = layout.buildDirectory.dir("generated/contentAssets")
 
 val prepareContentAssets = tasks.register("prepareContentAssets") {
     group = "content"
-    description = "Copies the core pack, the pack catalog, and the fonts into base assets."
+    description = "Copies the core pack, the pack catalog, the fonts, and the recitation manifest."
     dependsOn(":tools:fetchAssets")
     inputs.file(rootProject.file("content/build-report.json"))
     inputs.file(rootProject.file("content/catalog.json"))
@@ -97,6 +95,12 @@ val prepareContentAssets = tasks.register("prepareContentAssets") {
             manifest.copyTo(File(recitations, "manifest.json"), overwrite = true)
         }
     }
+}
+
+val copyAudioDevAssets = tasks.register<Sync>("copyAudioDevAssets") {
+    val audioDev = rootProject.file("content/work/audio-dev")
+    if (audioDev.isDirectory) from(audioDev)
+    into(layout.buildDirectory.dir("generated/audioDevAssets/audio-dev"))
 }
 
 android {
@@ -150,17 +154,7 @@ android {
 }
 
 tasks.named("preBuild") {
-    dependsOn(prepareContentAssets)
-}
-
-val copyAudioDevAssets = tasks.register<Sync>("copyAudioDevAssets") {
-    val audioDev = rootProject.file("content/work/audio-dev")
-    if (audioDev.isDirectory) from(audioDev)
-    into(layout.buildDirectory.dir("generated/audioDevAssets/audio-dev"))
-}
-
-tasks.named("preBuild") {
-    dependsOn(copyAudioDevAssets)
+    dependsOn(prepareContentAssets, copyAudioDevAssets)
 }
 
 kotlin {
@@ -182,6 +176,14 @@ dependencies {
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.session)
     implementation(project(":data"))
+    implementation(project(":content-assets"))
+    implementation(project(":ui-kit"))
+    implementation(project(":feature-mushaf"))
+    implementation(project(":feature-study"))
+    implementation(project(":feature-search"))
+    implementation(project(":feature-browse"))
+    implementation(project(":feature-playback"))
+    implementation(project(":feature-settings"))
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(platform(libs.androidx.compose.bom))

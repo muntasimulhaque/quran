@@ -205,3 +205,13 @@ data class AyahHeader(
     val page: Int,
     val juz: Int,
 )
+
+/** One downloaded surah of one reciter, offered for removal. */
+data class DownloadedSurah(val surah: Int, val name: String, val bytes: Long)
+
+/** Everything one study row needs: the ayah, its words, and its translation. */
+data class StudyRow(
+    val ayah: Ayah,
+    val words: List<Word>,
+    val translation: TranslationText?,
+)

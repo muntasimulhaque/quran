@@ -49,13 +49,16 @@ import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.browse.BrowseSheet
 import io.github.muntasimulhaque.quran.ui.mushaf.MushafPage
 import io.github.muntasimulhaque.quran.ui.playback.PlaybackBar
-import io.github.muntasimulhaque.quran.ui.playback.formatBytes
-import io.github.muntasimulhaque.quran.ui.playback.shortReciterName
+import io.github.muntasimulhaque.quran.ui.kit.formatBytes
+import io.github.muntasimulhaque.quran.ui.kit.shortReciterName
 import io.github.muntasimulhaque.quran.ui.search.SearchSheet
+import io.github.muntasimulhaque.quran.ui.settings.PackSetupState
+import io.github.muntasimulhaque.quran.ui.settings.SettingsActions
 import io.github.muntasimulhaque.quran.ui.settings.SettingsSheet
 import io.github.muntasimulhaque.quran.ui.study.AyahCard
 import io.github.muntasimulhaque.quran.ui.study.StudyList
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
+import io.github.muntasimulhaque.quran.ui.theme.PagePalette
 import io.github.muntasimulhaque.quran.ui.theme.LocalPageThemeName
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -145,12 +148,17 @@ fun ReaderScreen(
                 val surah = viewModel.surahOf(settings.ayah)
                 if (surah != null) {
                     StudyList(
-                        viewModel = viewModel,
                         content = content,
                         surah = surah,
                         ayahs = viewModel.ayahNumbersOfSurah(surah.number),
+                        settings = settings,
+                        loadRow = { number -> viewModel.studyRow(number, settings.translationPack) },
+                        hasTranslation = viewModel.installedTranslationPacks.isNotEmpty(),
+                        nextSurahName = viewModel.surahs
+                            .firstOrNull { it.number == surah.number + 1 }?.nameSimple,
                         selected = selected,
-                        playback = playback,
+                        playingAyah = playback.ayahNumber,
+                        playingWord = playback.wordPosition,
                         onAyah = { ayah ->
                             selected = ayah
                             chrome = false
@@ -163,6 +171,7 @@ fun ReaderScreen(
                         },
                         onNextSurah = { number -> viewModel.jumpToSurah(number) },
                         onAddContent = { sheet = ReaderSheet.Settings },
+                        onPlaceChanged = { ayah -> viewModel.onStudySettled(ayah) },
                         contentPaddingTop = 64.dp,
                         contentPaddingBottom = 120.dp,
                     )
@@ -276,7 +285,36 @@ fun ReaderScreen(
             },
         )
         ReaderSheet.Settings -> SettingsSheet(
-            viewModel = viewModel,
+            settings = settings,
+            packs = viewModel.packs,
+            packSetup = viewModel.packSetup?.let { setup ->
+                PackSetupState(
+                    packId = setup.pack.id,
+                    name = setup.pack.name,
+                    bytes = setup.pack.bytes,
+                    progress = setup.progress,
+                    failed = setup.failed,
+                )
+            },
+            recitations = viewModel.recitations,
+            surahs = viewModel.surahs,
+            downloadedSurahs = { recitation -> viewModel.downloadedSurahs(recitation) },
+            actions = SettingsActions(
+                onTheme = { viewModel.setTheme(it) },
+                onTextSize = { viewModel.setTextSize(it) },
+                onKeepAwake = { viewModel.setKeepAwake(it) },
+                onFollowReciter = { viewModel.setFollowReciter(it) },
+                onShowFootnotes = { viewModel.setShowFootnotes(it) },
+                onSelectRecitation = { viewModel.selectRecitation(it) },
+                onTranslationPack = { viewModel.setTranslationPack(it) },
+                onToggleTafsir = { viewModel.toggleTafsirPack(it) },
+                onInstallPack = { viewModel.installPack(it) },
+                onRemovePack = { viewModel.removePack(it) },
+                onPackSetupCancel = { viewModel.cancelPackSetup() },
+                onRemoveDownloads = { recitation, surah ->
+                    viewModel.removeDownloads(recitation, surah)
+                },
+            ),
             onDismiss = { sheet = ReaderSheet.None },
         )
     }
@@ -311,7 +349,7 @@ fun ReaderScreen(
 private fun MushafReader(
     viewModel: ReaderViewModel,
     content: ContentDatabase,
-    palette: io.github.muntasimulhaque.quran.ui.mushaf.PagePalette,
+    palette: PagePalette,
     themeKey: String,
     selected: Ayah?,
     playback: PlaybackUiState,

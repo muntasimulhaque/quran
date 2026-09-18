@@ -13,6 +13,7 @@ import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ContentPack
+import io.github.muntasimulhaque.quran.data.DownloadedSurah
 import io.github.muntasimulhaque.quran.data.PackCatalog
 import io.github.muntasimulhaque.quran.data.PackDownloader
 import io.github.muntasimulhaque.quran.data.PackStore
@@ -26,6 +27,7 @@ import io.github.muntasimulhaque.quran.data.RecitationStore
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.data.SavedStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
+import io.github.muntasimulhaque.quran.data.StudyRow
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TranslationText
@@ -43,18 +45,6 @@ import kotlinx.coroutines.withContext
 import java.util.LinkedHashMap
 
 /** One row of the study list: a surah's opening, or an ayah. */
-sealed interface StudyItem {
-    data class Header(val surah: Surah, val firstAyah: Int) : StudyItem
-    data class AyahItem(val header: AyahHeader) : StudyItem
-}
-
-/** Everything one study row needs, loaded off the main thread. */
-data class StudyRow(
-    val ayah: Ayah,
-    val words: List<Word>,
-    val translation: TranslationText?,
-)
-
 /**
  * Holds the reader's place, their choices, and the content they read.
  *
@@ -94,11 +84,8 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         private set
     var position by mutableStateOf<PagePosition?>(null)
         private set
-    var studyItems by mutableStateOf<List<StudyItem>>(emptyList())
-        private set
     var headers by mutableStateOf<List<AyahHeader>>(emptyList())
         private set
-    private var itemIndexByAyah = IntArray(6237) { 1 }
 
     val content: ContentDatabase? get() = contentDatabase
     val fonts: PageFontStore get() = pageFonts
@@ -144,7 +131,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             surahs = database.surahs()
             packs = database.packs()
             recitations = database.recitations()
-            buildStudyList(database)
+            loadHeaders(database)
             applySettings(settingsStore.settings.first(), database)
             ready = true
         }
@@ -189,26 +176,9 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         if (previous.translationPack != next.translationPack) clearRowCache()
     }
 
-    private fun buildStudyList(database: ContentDatabase) {
-        val headerRows = database.ayahHeaders()
-        headers = headerRows
-        val byNumber = surahs.associateBy { it.number }
-        val items = ArrayList<StudyItem>(headerRows.size + 114)
-        val indexByAyah = IntArray(6237) { 1 }
-        var currentSurah = -1
-        for (header in headerRows) {
-            if (header.surah != currentSurah) {
-                currentSurah = header.surah
-                byNumber[currentSurah]?.let { items += StudyItem.Header(it, header.number) }
-            }
-            indexByAyah[header.number] = items.size
-            items += StudyItem.AyahItem(header)
-        }
-        studyItems = items
-        itemIndexByAyah = indexByAyah
+    private fun loadHeaders(database: ContentDatabase) {
+        headers = database.ayahHeaders()
     }
-
-    fun studyIndexOf(ayah: Int): Int = itemIndexByAyah.getOrElse(ayah.coerceIn(1, 6236)) { 1 }
 
     /**
      * The surah of an ayah, from the header list already in memory. The list
@@ -487,14 +457,21 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     fun cancelDownload() = playback.cancelDownload()
 
     /** Surah to bytes on disk for one reciter, among the published packages. */
-    suspend fun downloadedSurahs(recitation: String): Map<Int, Long> = withContext(Dispatchers.IO) {
-        val folder = reciterFolder(recitation) ?: return@withContext emptyMap()
-        manifest.surahs(recitation)
-            .mapNotNull { surah ->
-                val bytes = recitationStore.bytesForSurah(folder, surah)
-                if (bytes > 0) surah to bytes else null
+    suspend fun downloadedSurahs(recitation: String): List<DownloadedSurah> = withContext(Dispatchers.IO) {
+        val folder = reciterFolder(recitation) ?: return@withContext emptyList()
+        val byNumber = surahs.associateBy { it.number }
+        manifest.surahs(recitation).mapNotNull { surah ->
+            val bytes = recitationStore.bytesForSurah(folder, surah)
+            if (bytes <= 0) {
+                null
+            } else {
+                DownloadedSurah(
+                    surah = surah,
+                    name = byNumber[surah]?.nameSimple ?: "Surah $surah",
+                    bytes = bytes,
+                )
             }
-            .toMap()
+        }.sortedBy { it.surah }
     }
 
     suspend fun downloadedTotals(): Map<String, Pair<Int, Long>> = withContext(Dispatchers.IO) {
