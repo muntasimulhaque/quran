@@ -820,3 +820,33 @@ bulk, by design, because the app must render the Book with no network and no
 downloads), the release bundle is 147.4 MB, and the shipped content inside
 both is ten megabytes of Quran text and page layout. The debug APK carries
 every pack so development and tests run offline.
+
+## D-033: Content is grouped by language, and the night has a dimmer
+
+Date: the fifth session. The owner asked that translations and tafsirs be
+categorized by language, chose the three pieces of trust work worth doing
+now, and asked which Bengali translations exist before choosing one.
+
+**Content by language.** The settings sheet lists what can be added under
+language headings, English first, then Arabic, then the rest by name. Under
+English today: Saheeh International, Ibn Kathir, and the word by word list
+with the surah introductions. Under Arabic: As-Sa'di. A second translation in
+any language slots under its own heading with no code change, because the
+catalog already carries each pack's language.
+
+**An about page with credits and licenses.** The settings sheet opens a page
+that names every pack in the catalog with its credit and license, the four
+font families with their terms, the two reciters, and the app's own promises
+(no ads, no trackers, no accounts; network only for a pack or a surah the
+reader asked for). The page is built from the catalog, so it cannot drift
+from what the app can actually offer.
+
+**One quiet hint, once.** The long press is the richest gesture in the app
+and the least visible. After the first page appears, a small card says
+"Press and hold any ayah for its actions" for eight seconds, and it is never
+shown again, on any device, for that reader.
+
+**A screen dimmer.** Night themes plus a black room still glare. A three way
+choice (Off, Dim, Darker) lays a translucent black over the reading surface
+without blocking a single touch, and it is remembered like every other
+setting.

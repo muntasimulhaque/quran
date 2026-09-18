@@ -290,6 +290,17 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch { settingsStore.setShowFootnotes(show) }
     }
 
+    fun setDimLevel(level: Int) {
+        settings = settings.copy(dimLevel = level.coerceIn(0, 2))
+        viewModelScope.launch { settingsStore.setDimLevel(level) }
+    }
+
+    fun markLongPressHintShown() {
+        if (settings.longPressHintShown) return
+        settings = settings.copy(longPressHintShown = true)
+        viewModelScope.launch { settingsStore.setLongPressHintShown() }
+    }
+
     fun setTranslationPack(pack: String) {
         settings = settings.copy(translationPack = pack)
         viewModelScope.launch { settingsStore.setTranslationPack(pack) }

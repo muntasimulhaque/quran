@@ -34,6 +34,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalView
@@ -51,6 +55,8 @@ import io.github.muntasimulhaque.quran.ui.mushaf.MushafPage
 import io.github.muntasimulhaque.quran.ui.playback.PlaybackBar
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.shortReciterName
+import io.github.muntasimulhaque.quran.ui.reader.Icon
+import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.search.SearchSheet
 import io.github.muntasimulhaque.quran.ui.settings.PackSetupState
 import io.github.muntasimulhaque.quran.ui.settings.SettingsActions
@@ -123,7 +129,17 @@ fun ReaderScreen(
     Box(
         Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(MaterialTheme.colorScheme.background)
+            .drawWithContent {
+                drawContent()
+                // The dim never blocks a touch: it is ink over the glass.
+                val dim = when (settings.dimLevel) {
+                    1 -> 0.18f
+                    2 -> 0.34f
+                    else -> 0f
+                }
+                if (dim > 0f) drawRect(Color.Black.copy(alpha = dim))
+            },
     ) {
         when (settings.mode) {
             ReadingMode.Mushaf -> MushafReader(
@@ -188,6 +204,52 @@ fun ReaderScreen(
             onSettings = { sheet = ReaderSheet.Settings },
             modifier = Modifier.align(Alignment.TopCenter),
         )
+
+        // The long press is the richest gesture in the app and the least
+        // visible, so it is said once, quietly, and then never again.
+        if (!settings.longPressHintShown) {
+            var hintVisible by remember { mutableStateOf(false) }
+            LaunchedEffect(Unit) {
+                delay(1400)
+                hintVisible = true
+                delay(8000)
+                hintVisible = false
+                viewModel.markLongPressHintShown()
+            }
+            AnimatedVisibility(
+                visible = hintVisible,
+                enter = fadeIn() + slideInVertically { it / 3 },
+                exit = fadeOut(),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 96.dp),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp)
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(MaterialTheme.colorScheme.surface)
+                        .clickable {
+                            hintVisible = false
+                            viewModel.markLongPressHintShown()
+                        }
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    IconGlyph(
+                        icon = Icon.More,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Text(
+                        text = "Press and hold any ayah for its actions",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(start = 12.dp),
+                    )
+                }
+            }
+        }
 
         val bottomItems = selected != null || playback.isAnything() || chrome
         AnimatedVisibility(
@@ -305,6 +367,7 @@ fun ReaderScreen(
                 onKeepAwake = { viewModel.setKeepAwake(it) },
                 onFollowReciter = { viewModel.setFollowReciter(it) },
                 onShowFootnotes = { viewModel.setShowFootnotes(it) },
+                onDimLevel = { viewModel.setDimLevel(it) },
                 onSelectRecitation = { viewModel.selectRecitation(it) },
                 onTranslationPack = { viewModel.setTranslationPack(it) },
                 onToggleTafsir = { viewModel.toggleTafsirPack(it) },

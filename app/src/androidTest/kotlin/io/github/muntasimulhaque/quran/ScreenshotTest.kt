@@ -14,6 +14,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -134,6 +135,13 @@ class ScreenshotTest {
         rule.onNodeWithContentDescription("Settings").performClick()
         waitFor("Appearance")
         capture("06-settings")
+        rule.onNodeWithText("Credits and licenses").performScrollTo().performClick()
+        rule.waitUntil(timeoutMillis = 10_000) {
+            rule.onAllNodesWithText("QPC V2 page fonts").fetchSemanticsNodes().isNotEmpty()
+        }
+        Thread.sleep(500)
+        capture("12-credits")
+        back()
         back()
 
         // Browse: the surahs, the juz, and the saved.

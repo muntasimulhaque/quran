@@ -70,6 +70,7 @@ data class SettingsActions(
     val onKeepAwake: (Boolean) -> Unit = {},
     val onFollowReciter: (Boolean) -> Unit = {},
     val onShowFootnotes: (Boolean) -> Unit = {},
+    val onDimLevel: (Int) -> Unit = {},
     val onSelectRecitation: (String) -> Unit = {},
     val onTranslationPack: (String) -> Unit = {},
     val onToggleTafsir: (String) -> Unit = {},
@@ -109,6 +110,16 @@ fun SettingsSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     var downloadsOpen by remember { mutableStateOf(false) }
+    var aboutOpen by remember { mutableStateOf(false) }
+
+    if (aboutOpen) {
+        AboutSheet(
+            packs = packs,
+            version = "0.1",
+            onDismiss = { aboutOpen = false },
+        )
+        return
+    }
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -131,6 +142,7 @@ fun SettingsSheet(
             Group("Appearance")
             ThemeRow(settings.theme) { actions.onTheme(it) }
             TextSizeRow(settings.textSize) { actions.onTextSize(it) }
+            DimRow(settings.dimLevel) { actions.onDimLevel(it) }
 
             Group("Reading")
             ToggleRow(
@@ -222,25 +234,36 @@ fun SettingsSheet(
             )
             packs
                 .filter { it.type == PackType.Translation || it.type == PackType.Tafsir || it.type == PackType.Words }
-                .forEach { pack ->
-                    PackRow(
-                        pack = pack,
-                        selected = when (pack.type) {
-                            PackType.Translation -> pack.id == settings.translationPack
-                            PackType.Tafsir -> pack.id in settings.tafsirPacks
-                            else -> true
-                        },
-                        setup = packSetup?.takeIf { it.packId == pack.id },
-                        onInstall = { actions.onInstallPack(pack.id) },
-                        onRemove = { actions.onRemovePack(pack.id) },
-                        onSelect = {
-                            when (pack.type) {
-                                PackType.Translation -> actions.onTranslationPack(pack.id)
-                                PackType.Tafsir -> actions.onToggleTafsir(pack.id)
-                                else -> Unit
-                            }
-                        },
+                .groupBy { it.language }
+                .entries
+                .sortedBy { (language, _) -> languageOrder(language) }
+                .forEach { (language, group) ->
+                    Text(
+                        text = languageName(language),
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = 12.dp, bottom = 2.dp),
                     )
+                    group.forEach { pack ->
+                        PackRow(
+                            pack = pack,
+                            selected = when (pack.type) {
+                                PackType.Translation -> pack.id == settings.translationPack
+                                PackType.Tafsir -> pack.id in settings.tafsirPacks
+                                else -> true
+                            },
+                            setup = packSetup?.takeIf { it.packId == pack.id },
+                            onInstall = { actions.onInstallPack(pack.id) },
+                            onRemove = { actions.onRemovePack(pack.id) },
+                            onSelect = {
+                                when (pack.type) {
+                                    PackType.Translation -> actions.onTranslationPack(pack.id)
+                                    PackType.Tafsir -> actions.onToggleTafsir(pack.id)
+                                    else -> Unit
+                                }
+                            },
+                        )
+                    }
                 }
 
             Group("About")
@@ -248,6 +271,7 @@ fun SettingsSheet(
             AboutRow("Ads and trackers", "None, and none ever")
             AboutRow("Source code", "github.com/muntasimulhaque/quran")
             AboutRow("Privacy", "Nothing leaves this device unless you ask it to")
+            TextRow("Credits and licenses") { aboutOpen = true }
         }
     }
 }
@@ -593,4 +617,167 @@ private fun languageName(code: String): String = when (code) {
     "ar" -> "Arabic"
     "en" -> "English"
     else -> code
+}
+
+/** The dim choices, named the way a reader thinks of them. */
+@Composable
+private fun DimRow(level: Int, onLevel: (Int) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 22.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = "Screen dim",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = "Softens the page for night reading",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(50))
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+                .padding(3.dp),
+        ) {
+            listOf(0 to "Off", 1 to "Dim", 2 to "Darker").forEach { (value, label) ->
+                val active = value == level
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(
+                            if (active) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f) else Color.Transparent,
+                        )
+                        .clickable { onLevel(value) }
+                        .padding(horizontal = 12.dp, vertical = 7.dp),
+                ) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (active) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Credits and licenses: who made the text, the translations, the tafsirs, the
+ * fonts, and the recitations this app carries, and under what terms. Every
+ * pack in the catalog appears with its own credit and license, so the page
+ * cannot drift from what is installed.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AboutSheet(
+    packs: List<ContentPack>,
+    version: String,
+    onDismiss: () -> Unit,
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .imePadding()
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = 34.dp),
+        ) {
+            Text(
+                text = "Quran: The Noble Book",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(start = 22.dp, end = 22.dp),
+            )
+            Text(
+                text = "Version $version  \u00B7  no ads, no trackers, no accounts",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = 4.dp),
+            )
+
+            Group("Content")
+            packs.forEach { pack ->
+                Column(Modifier.padding(start = 22.dp, end = 22.dp, bottom = 12.dp)) {
+                    Text(
+                        text = "${pack.name}  \u00B7  ${languageName(pack.language)}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Text(
+                        text = pack.credit,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        text = pack.license,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                    )
+                }
+            }
+
+            Group("Fonts")
+            Credit("QPC V2 page fonts", "King Fahd Glorious Quran Printing Complex, unmodified", "Study and Mushaf text")
+            Credit("Amiri Quran", "Khaled Hosny, SIL Open Font License 1.1", "Ornaments and Arabic outside the Mushaf")
+            Credit("Literata", "TypeTogether, SIL Open Font License 1.1", "Translations and tafsir")
+            Credit("Inter", "Rasmus Andersson, SIL Open Font License 1.1", "The interface")
+
+            Group("Recitations")
+            Credit("Minshawi", "Muhammad Siddiq Al-Minshawi, via the Quranic Universal Library", "Murattal")
+            Credit("Husary", "Mahmoud Khalil Al-Husary, via the Quranic Universal Library", "Murattal")
+
+            Group("The app")
+            AboutRow("Source code", "github.com/muntasimulhaque/quran")
+            AboutRow("License", "MIT")
+            AboutRow("Privacy", "Nothing leaves this device unless you ask it to")
+            AboutRow("Network", "Only to fetch a pack or a surah you asked for")
+        }
+    }
+}
+
+@Composable
+private fun Credit(title: String, credit: String, use: String) {
+    Column(Modifier.padding(start = 22.dp, end = 22.dp, bottom = 10.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            text = credit,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = use,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+        )
+    }
+}
+
+/**
+ * The order languages appear in: the interface's own language first, then the
+ * language of the Quran's revelation, then the rest by name.
+ */
+private fun languageOrder(language: String): String = when (language) {
+    "en" -> "0"
+    "ar" -> "1"
+    else -> "2" + languageName(language)
 }
