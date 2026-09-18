@@ -62,6 +62,7 @@ class SearchCheck(private val root: File) {
         }
 
         auditNonAscii(nonAscii)
+        auditScriptRoundTrip("content/quran.db", "bn")
         auditPlainWords(translations)
 
         if (problems.isEmpty()) {
@@ -79,6 +80,9 @@ class SearchCheck(private val root: File) {
     private fun auditNonAscii(nonAscii: TreeMap<Int, Int>) {
         for ((codepoint, count) in nonAscii) {
             if (RichText.isArabic(codepoint)) continue
+            // Scripts that are not Latin are not expected to fold to ASCII;
+            // they are checked by their own round trip below.
+            if (!isLatinFolding(codepoint)) continue
             val folded = Search.normalizeEnglish(String(Character.toChars(codepoint)))
             // The ayn and hamza marks are meant to disappear from a query.
             val isMark = codepoint == 0x02BF || codepoint == 0x02BE
@@ -92,6 +96,56 @@ class SearchCheck(private val root: File) {
     }
 
     /** The words a reader types without diacritics must find the text. */
+    /**
+     * A second script must round trip like the first: the longest word of a
+     * sample of its ayahs, normalized the way a query is, must find its own
+     * ayah. This is what makes a Bengali (or Urdu, or Turkish) translation
+     * searchable the day it is installed.
+     */
+    private fun auditScriptRoundTrip(path: String, language: String) {
+        openSqlite(File(root, path)).use { connection ->
+            val rows = ArrayList<Pair<Int, String>>()
+            connection.prepareStatement(
+                "SELECT t.ayah_number, t.text FROM translation t " +
+                    "JOIN pack p ON p.id = t.pack WHERE p.language = ? ORDER BY t.ayah_number",
+            ).use { statement ->
+                statement.setString(1, language)
+                statement.executeQuery().use { rs ->
+                    while (rs.next()) rows += rs.getInt(1) to (rs.getString(2) ?: "")
+                }
+            }
+            if (rows.isEmpty()) {
+                println("search: no $language translation in the database")
+                return
+            }
+            var checked = 0
+            for ((number, text) in rows.filter { it.first % 97 == 1 }) {
+                // The same shape the app gives a query in this script.
+                val term = longestWord(Search.normalizeForIndex(text), minimum = 3) ?: continue
+                if (term.codePoints().noneMatch { it > 127 }) continue
+                checked++
+                if (!exists(
+                        connection,
+                        "SELECT 1 FROM translation WHERE ayah_number = ? AND text_search LIKE ? ESCAPE '\\'",
+                        listOf(number.toString(), Search.pattern(term)),
+                    )
+                ) {
+                    problems += "$language search missed ayah $number for its own word $term"
+                }
+            }
+            println("search: $checked $language round trips passed")
+        }
+    }
+
+    /** Codepoints whose job is to fold to a plain Latin letter. */
+    private fun isLatinFolding(codepoint: Int): Boolean = when (codepoint) {
+        in 0x00A0..0x024F -> true // Latin-1 supplement and Latin extended A/B
+        in 0x1E00..0x1EFF -> true // Latin extended additional
+        0x2018, 0x2019, 0x201C, 0x201D -> true // typographic quotes
+        in 0x2010..0x2015 -> true // typographic dashes
+        else -> false
+    }
+
     private fun auditPlainWords(translations: List<Pair<Int, String>>) {
         for (word in listOf("allah", "mercy", "moses", "paradise", "pharaoh")) {
             val matches = translations.count { (_, text) -> text.contains(word) }
