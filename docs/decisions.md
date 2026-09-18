@@ -799,3 +799,24 @@ The split also exposed dead code, which is gone.
 What it buys: every feature is now small (one or two files), the boundaries
 are physical rather than aspirational, and the next work (a second mushaf
 script, another feature) has a place to live that is not the app module.
+
+## D-032: What a build carries is decided by its variant
+
+Date: the fourth session, after the module split. The first release bundle
+after the split still contained all seven packs, forty-seven megabytes the
+reader never asked for. The cause was a condition inside the asset task that
+looked at the names of the requested tasks, and a task whose output was
+already generated for a debug run was considered up to date, so its debug
+outputs went into a release bundle.
+
+The fix is structural, not another condition: the main assets hold the core
+pack, the catalog, the fonts, and the recitation manifest, and only the debug
+variant's own asset directory holds the rest. One build can no longer
+inherit the other's packs, whatever order the tasks run in, and the rule is
+visible in the build file instead of hidden in a boolean.
+
+The sizes now: the release APK is 143.8 MB (the Mushaf page fonts are the
+bulk, by design, because the app must render the Book with no network and no
+downloads), the release bundle is 147.4 MB, and the shipped content inside
+both is ten megabytes of Quran text and page layout. The debug APK carries
+every pack so development and tests run offline.

@@ -47,7 +47,12 @@ val canSignRelease = keystoreStoreFile != null &&
 // The fonts, the core pack, and the catalog are owned by :content-assets;
 // this module generates the runtime assets (the page fonts, the study font,
 // the core pack, the catalog, and the recitation manifest) and wires them in.
+//
+// The packs a build carries are decided by its variant, not by a condition:
+// the main assets hold the core pack and the catalog, and only the debug
+// variant adds the rest, so a release bundle cannot contain them by accident.
 val contentAssets = layout.buildDirectory.dir("generated/contentAssets")
+val devPackAssets = layout.buildDirectory.dir("generated/devPackAssets")
 
 val prepareContentAssets = tasks.register("prepareContentAssets") {
     group = "content"
@@ -60,6 +65,7 @@ val prepareContentAssets = tasks.register("prepareContentAssets") {
     inputs.dir(rootProject.file("content/work/fonts-hafs"))
     inputs.dir(rootProject.file("content/work/fonts-v2"))
     outputs.dir(contentAssets)
+    outputs.dir(devPackAssets)
     doLast {
         val out = contentAssets.get().asFile
         out.deleteRecursively()
@@ -70,14 +76,13 @@ val prepareContentAssets = tasks.register("prepareContentAssets") {
         packs.resolve("core.db").copyTo(File(content, "core.db"), overwrite = true)
         rootProject.file("content/catalog.json").copyTo(File(content, "catalog.json"), overwrite = true)
         // Development builds carry every pack, so the whole app works with no
-        // network at all while it is being built and tested.
-        if (gradle.startParameter.taskNames.any { it.contains("Debug", ignoreCase = true) } ||
-            gradle.startParameter.taskNames.any { it.contains("androidTest", ignoreCase = true) }
-        ) {
-            val devPacks = File(out, "packs").apply { mkdirs() }
-            packs.listFiles { file -> file.name.endsWith(".db") }?.forEach { pack ->
-                pack.copyTo(File(devPacks, pack.name), overwrite = true)
-            }
+        // network at all while it is being built and tested. They are written
+        // to the debug variant's own asset directory, never to the main one.
+        val devPacks = devPackAssets.get().asFile
+        devPacks.deleteRecursively()
+        File(devPacks, "packs").mkdirs()
+        packs.listFiles { file -> file.name.endsWith(".db") }?.forEach { pack ->
+            pack.copyTo(File(File(devPacks, "packs"), pack.name), overwrite = true)
         }
         val studyFont = rootProject.file("content/work/fonts-hafs").walkTopDown()
             .firstOrNull { it.isFile && it.name.endsWith(".ttf") }
@@ -142,6 +147,8 @@ android {
         compose = true
     }
     sourceSets.getByName("main").assets.directories.add(contentAssets.get().asFile.absolutePath)
+    // The packs that exist only for development, on the debug variant alone.
+    sourceSets.getByName("debug").assets.directories.add(devPackAssets.get().asFile.absolutePath)
     // The development audio sample ships in debug builds only, so the player
     // can be exercised without bundling gigabytes into anything shipped.
     sourceSets.getByName("debug").assets.directories.add(
