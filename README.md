@@ -41,6 +41,10 @@ library, and no permissions beyond the app private one from androidx
 core. The smaller-listing alternative, a fast-follow pack, was measured
 and rejected for its library weight and five merged permissions (D-018).
 
+## Privacy
+
+The app collects nothing. The policy is [online](https://muntasimulhaque.github.io/quran/privacy.html) and [in this repo](docs/privacy.html).
+
 ## The content
 
 The Arabic text is the KFGQPC Hafs text used with the King Fahd Glorious
