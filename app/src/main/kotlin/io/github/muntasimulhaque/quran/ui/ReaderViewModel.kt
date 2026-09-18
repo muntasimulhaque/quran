@@ -32,6 +32,7 @@ import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TranslationText
 import io.github.muntasimulhaque.quran.data.Word
+import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.playback.PlaybackController
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.mushaf.PageRenderer
@@ -290,6 +291,11 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch { settingsStore.setShowFootnotes(show) }
     }
 
+    fun setWordByWord(show: Boolean) {
+        settings = settings.copy(wordByWord = show)
+        viewModelScope.launch { settingsStore.setWordByWord(show) }
+    }
+
     fun setDimLevel(level: Int) {
         settings = settings.copy(dimLevel = level.coerceIn(0, 2))
         viewModelScope.launch { settingsStore.setDimLevel(level) }
@@ -422,7 +428,13 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         val ayah = database.ayah(ayahNumber) ?: return null
         val words = database.wordsForAyahs(listOf(ayahNumber))[ayahNumber].orEmpty()
         val translation = database.translations(listOf(ayahNumber), pack)[ayahNumber]
-        val row = StudyRow(ayah, words, translation)
+        val language = packs.firstOrNull { it.id == pack }?.language ?: "en"
+        val meanings = if (settings.wordByWord) {
+            database.wordMeanings(ayahNumber, language)
+        } else {
+            emptyList()
+        }
+        val row = StudyRow(ayah, words, translation, meanings)
         synchronized(rowCache) { rowCache[ayahNumber] = row }
         return row
     }

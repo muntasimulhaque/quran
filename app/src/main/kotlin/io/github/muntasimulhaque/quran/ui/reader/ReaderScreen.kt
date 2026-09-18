@@ -367,6 +367,7 @@ fun ReaderScreen(
                 onKeepAwake = { viewModel.setKeepAwake(it) },
                 onFollowReciter = { viewModel.setFollowReciter(it) },
                 onShowFootnotes = { viewModel.setShowFootnotes(it) },
+                onWordByWord = { viewModel.setWordByWord(it) },
                 onDimLevel = { viewModel.setDimLevel(it) },
                 onSelectRecitation = { viewModel.selectRecitation(it) },
                 onTranslationPack = { viewModel.setTranslationPack(it) },
@@ -393,7 +394,14 @@ fun ReaderScreen(
             tafsirPacks = viewModel.enabledTafsirPacks,
             textSize = settings.textSize,
             wordLanguage = viewModel.selectedTranslation?.language ?: "en",
+            hasWords = viewModel.packs.any {
+                it.id == ContentDatabase.wordsPackId(viewModel.selectedTranslation?.language ?: "en") && it.installed
+            } || viewModel.packs.any { it.id == ContentDatabase.WORDS_PACK && it.installed },
             isSaved = savedRow != null,
+            onAddContent = {
+                cardAyah = null
+                sheet = ReaderSheet.Settings
+            },
             note = savedRow?.note,
             onToggleSave = { viewModel.toggleSaved(ayah) },
             onSaveNote = { note -> viewModel.setNote(ayah, note) },

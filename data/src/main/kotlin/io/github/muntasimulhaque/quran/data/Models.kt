@@ -214,4 +214,5 @@ data class StudyRow(
     val ayah: Ayah,
     val words: List<Word>,
     val translation: TranslationText?,
+    val meanings: List<WordMeaning> = emptyList(),
 )

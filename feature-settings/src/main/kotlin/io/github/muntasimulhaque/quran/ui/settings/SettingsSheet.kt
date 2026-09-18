@@ -70,6 +70,7 @@ data class SettingsActions(
     val onKeepAwake: (Boolean) -> Unit = {},
     val onFollowReciter: (Boolean) -> Unit = {},
     val onShowFootnotes: (Boolean) -> Unit = {},
+    val onWordByWord: (Boolean) -> Unit = {},
     val onDimLevel: (Int) -> Unit = {},
     val onSelectRecitation: (String) -> Unit = {},
     val onTranslationPack: (String) -> Unit = {},
@@ -155,6 +156,11 @@ fun SettingsSheet(
                 subtitle = "The page moves with the recitation",
                 checked = settings.followReciter,
             ) { actions.onFollowReciter(it) }
+            ToggleRow(
+                title = "Show word meanings",
+                subtitle = "Each word with its meaning, under the ayah",
+                checked = settings.wordByWord,
+            ) { actions.onWordByWord(it) }
             ToggleRow(
                 title = "Show footnotes",
                 subtitle = "Translator notes under each ayah",
@@ -300,15 +306,13 @@ private fun PackRow(
                 )
                 Text(
                     text = buildString {
-                        append(languageName(pack.language))
-                        append(' ')
                         append(
                             when (pack.type) {
-                                PackType.Translation -> "translation"
-                                PackType.Tafsir -> "tafsir"
-                                PackType.Words -> "word by word"
-                                PackType.Recitation -> "recitation"
-                                PackType.Script -> "script"
+                                PackType.Translation -> "Translation"
+                                PackType.Tafsir -> "Tafsir"
+                                PackType.Words -> "Word by word"
+                                PackType.Recitation -> "Recitation"
+                                PackType.Script -> "Script"
                             },
                         )
                         if (pack.shipped) {
@@ -615,8 +619,21 @@ private fun AboutRow(title: String, value: String) {
 
 private fun languageName(code: String): String = when (code) {
     "ar" -> "Arabic"
+    "bn" -> "Bengali"
+    "de" -> "German"
     "en" -> "English"
-    else -> code
+    "es" -> "Spanish"
+    "fa" -> "Persian"
+    "fr" -> "French"
+    "hi" -> "Hindi"
+    "id" -> "Indonesian"
+    "ml" -> "Malayalam"
+    "ru" -> "Russian"
+    "sw" -> "Swahili"
+    "ta" -> "Tamil"
+    "tr" -> "Turkish"
+    "ur" -> "Urdu"
+    else -> code.uppercase()
 }
 
 /** The dim choices, named the way a reader thinks of them. */

@@ -856,6 +856,9 @@ class ContentDatabase private constructor(
 
         fun reciterPack(recitation: String): String = RECITER_PREFIX + recitation
 
+        /** The id of the word list that speaks a language. */
+        fun wordsPackId(language: String): String = "words-"
+
         /**
          * Opens the reader's library: the core pack, which ships inside the
          * app, and every pack this device has installed. A pack that is not

@@ -63,6 +63,36 @@
             "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-tafsir-as-sadi-ar-5945528b/tafsir-as-sadi-ar.db"
         },
         {
+            "id": "translation-taisirul-quran-bn",
+            "type": "translation",
+            "name": "Taisirul Quran",
+            "language": "bn",
+            "credit": "Professor Muhammad Mozammel Haque, via the Quranic Universal Library",
+            "license": "See docs/content-sources.md",
+            "version": "QUL",
+            "shipped": false,
+            "ayahs": 6236,
+            "bytes": 5226496,
+            "sha256": "729c83aa09012e3a59a5afe1aa1f2e48fba4b1ca84e273b83e5d1352f21ff9c4",
+            "tag": "pack-translation-taisirul-quran-bn-729c83aa",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-translation-taisirul-quran-bn-729c83aa/translation-taisirul-quran-bn.db"
+        },
+        {
+            "id": "tafsir-ibn-kathir-bn",
+            "type": "tafsir",
+            "name": "Ibn Kathir",
+            "language": "bn",
+            "credit": "Tafsir Ibn Kathir (Bengali), via the Quranic Universal Library",
+            "license": "See docs/content-sources.md",
+            "version": "QUL",
+            "shipped": false,
+            "ayahs": 6236,
+            "bytes": 49381376,
+            "sha256": "cffe559d86eddf6b5a9f4d87c494dffa8fff2c37fff0c8bfde8f9835f7ae0593",
+            "tag": "pack-tafsir-ibn-kathir-bn-cffe559d",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-tafsir-ibn-kathir-bn-cffe559d/tafsir-ibn-kathir-bn.db"
+        },
+        {
             "id": "reciter-minshawi",
             "type": "recitation",
             "name": "Minshawi",

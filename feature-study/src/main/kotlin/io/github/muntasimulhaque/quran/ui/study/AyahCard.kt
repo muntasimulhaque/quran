@@ -90,11 +90,13 @@ fun AyahCard(
     tafsirPacks: List<ContentPack>,
     textSize: TextSize,
     wordLanguage: String,
+    hasWords: Boolean,
     isSaved: Boolean,
     note: String?,
     onToggleSave: () -> Unit,
     onSaveNote: (String?) -> Unit,
     onPlay: () -> Unit,
+    onAddContent: () -> Unit,
     onCopy: (String) -> Unit,
     onShare: (String) -> Unit,
     onDismiss: () -> Unit,
@@ -222,14 +224,23 @@ fun AyahCard(
 
             Spacer(Modifier.height(18.dp))
 
-            DoorRow(
-                title = "Word by word",
-                subtitle = "",
-                open = door == Door.Words,
-                onClick = { door = if (door == Door.Words) null else Door.Words },
-            )
-            if (door == Door.Words) {
-                WordsPanel(words, hafs, textSize, Modifier.padding(horizontal = 22.dp, vertical = 6.dp))
+            if (hasWords) {
+                DoorRow(
+                    title = "Word by word",
+                    subtitle = "",
+                    open = door == Door.Words,
+                    onClick = { door = if (door == Door.Words) null else Door.Words },
+                )
+                if (door == Door.Words) {
+                    WordsPanel(words, hafs, textSize, Modifier.padding(horizontal = 22.dp, vertical = 6.dp))
+                }
+            } else {
+                DoorRow(
+                    title = "Add word by word",
+                    subtitle = "",
+                    open = false,
+                    onClick = onAddContent,
+                )
             }
             tafsirPacks.sortedBy { it.language }.forEach { pack ->
                 val open = (door as? Door.Tafsir)?.pack?.id == pack.id

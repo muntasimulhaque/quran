@@ -68,6 +68,21 @@ class Build(private val root: File) {
             insertTranslation(connection, translation)
             insertTafsirIbnKathir(connection, ayahNumbers)
             insertTafsirSaadi(connection, ayahNumbers)
+            // The Bengali library, built only when its sources are present, so
+            // a fresh clone without them still produces a complete English app.
+            if (sourceDb("translation-taisirul-quran-bn") != null) {
+                val bengali = readQulTranslation("translation-taisirul-quran-bn", ayahNumbers)
+                insertTranslation(connection, bengali, packId = "translation-taisirul-quran-bn")
+                println("build: Taisirul Quran (Bengali): ${bengali.size} ayahs")
+            } else {
+                println("build: skipping translation-taisirul-quran-bn (source not present)")
+            }
+            insertTafsirIbnKathir(
+                connection,
+                ayahNumbers,
+                datasetId = "tafsir-ibn-kathir-bn",
+                packId = "tafsir-ibn-kathir-bn",
+            )
             insertRecitations(connection, manifest, ayahNumbers)
             insertSurahInfo(connection)
             insertPacks(connection, manifest)
@@ -201,6 +216,28 @@ class Build(private val root: File) {
                 val raw = rs.getString(2) ?: ""
                 val text = raw.replace(Regex("^\\(\\d+\\)\\s*"), "")
                 out[rs.getInt(1)] = Translation(rs.getInt(1), text, rs.getString(3) ?: "")
+            }
+        }
+        return out
+    }
+
+    /**
+     * The QUL translation shape: one row per ayah with its key and its text.
+     * It is the same exporter that produced the tafsir files, so a second
+     * translation is another file, not another parser.
+     */
+    private fun readQulTranslation(datasetId: String, ayahNumbers: Map<String, Int>): Map<Int, Translation> {
+        val out = HashMap<Int, Translation>(7000)
+        openSqlite(sourceDb(datasetId)).use { connection ->
+            connection.each("SELECT ayah_key, text FROM translation ORDER BY ayah_key") { rs ->
+                val key = rs.getString(1) ?: return@each
+                val text = sanitize(rs.getString(2) ?: "")
+                if (text.isBlank()) return@each
+                val surah = key.substringBefore(':').toIntOrNull() ?: return@each
+                val ayah = key.substringAfter(':').toIntOrNull() ?: return@each
+                val first = ayahNumbers["$surah:1"] ?: return@each
+                val number = first + ayah - 1
+                out[number] = Translation(number, text, "")
             }
         }
         return out
@@ -415,6 +452,8 @@ class Build(private val root: File) {
             Pack("translation-saheeh-en", "translation", "Saheeh International", "en", "1.1.2"),
             Pack("tafsir-ibn-kathir-en", "tafsir", "Ibn Kathir", "en", "QUL"),
             Pack("tafsir-as-sadi-ar", "tafsir", "As-Sa'di", "ar", "1.0.0"),
+            Pack("translation-taisirul-quran-bn", "translation", "Taisirul Quran", "bn", "QUL"),
+            Pack("tafsir-ibn-kathir-bn", "tafsir", "Ibn Kathir", "bn", "QUL"),
         )
         connection.prepareStatement(
             "INSERT INTO pack(id, type, name, language, credit, license, version, builtin, ayahs, bytes) " +
@@ -557,7 +596,11 @@ class Build(private val root: File) {
         }
     }
 
-    private fun insertTranslation(connection: Connection, translations: Map<Int, Translation>) {
+    private fun insertTranslation(
+        connection: Connection,
+        translations: Map<Int, Translation>,
+        packId: String = "translation-saheeh-en",
+    ) {
         connection.prepareStatement(
             "INSERT INTO translation(pack, ayah_number, text, footnotes, text_search) VALUES(?,?,?,?,?)",
         ).use { statement ->
@@ -566,7 +609,7 @@ class Build(private val root: File) {
                     fail("ayah $number has no translation")
                     continue
                 }
-                statement.setString(1, "translation-saheeh-en")
+                statement.setString(1, packId)
                 statement.setInt(2, number)
                 statement.setString(3, translation.text)
                 statement.setString(4, footnotesJson(translation.footnotes))
@@ -602,8 +645,18 @@ class Build(private val root: File) {
         val text: String,
     )
 
-    private fun insertTafsirIbnKathir(connection: Connection, ayahNumbers: Map<String, Int>) {
-        val db = sourceDb("tafsir-ibn-kathir-en")
+    private fun insertTafsirIbnKathir(
+        connection: Connection,
+        ayahNumbers: Map<String, Int>,
+        datasetId: String = "tafsir-ibn-kathir-en",
+        packId: String = "tafsir-ibn-kathir-en",
+    ) {
+        val source = sourceDir(datasetId).walkTopDown().firstOrNull { it.isFile && it.name.endsWith(".db") }
+        if (source == null) {
+            println("build: skipping $datasetId (source not present)")
+            return
+        }
+        val db = source
         val passageIds = HashMap<String, Int>(2000)
         connection.prepareStatement(
             "INSERT INTO tafsir_passage(pack, source_id, surah, from_ayah, to_ayah, text, text_search) " +
@@ -630,7 +683,7 @@ class Build(private val root: File) {
                         if (row.text.isBlank()) continue
                         val id = nextId++
                         passageIds[row.key] = id
-                        insertPassage.setString(1, "tafsir-ibn-kathir-en")
+                        insertPassage.setString(1, packId)
                         insertPassage.setInt(2, id)
                         insertPassage.setInt(3, row.from.substringBefore(':').toInt())
                         insertPassage.setInt(4, row.from.substringAfter(':').toInt())
@@ -643,11 +696,11 @@ class Build(private val root: File) {
                     for (row in rows) {
                         val target = if (passageIds.containsKey(row.key)) row.key else row.group
                         val passage = passageIds[target] ?: run {
-                            fail("Ibn Kathir: ${row.key} does not resolve to a passage")
+                            fail("$datasetId: ${row.key} does not resolve to a passage")
                             continue
                         }
                         val number = ayahNumbers[row.key] ?: continue
-                        insertMapping.setString(1, "tafsir-ibn-kathir-en")
+                        insertMapping.setString(1, packId)
                         insertMapping.setInt(2, number)
                         insertMapping.setInt(3, passage)
                         insertMapping.addBatch()

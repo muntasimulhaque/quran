@@ -1,6 +1,8 @@
 package io.github.muntasimulhaque.quran.tools
 
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
@@ -21,11 +23,8 @@ class CheckDb(private val root: File) {
         Expectation("ayah", 6236),
         Expectation("word", 83_668),
         Expectation("page_line", 9046),
-        Expectation("translation", 6236),
-        Expectation("tafsir_ayah", 12_472),
         Expectation("recitation_ayah", 24_944),
         Expectation("surah_info", 114),
-        Expectation("pack", 3),
     )
 
     fun run(): Int {
@@ -61,7 +60,9 @@ class CheckDb(private val root: File) {
                 }
             }
             // Every pack must cover every ayah, or the reader would meet a
-            // silent hole when that pack is chosen.
+            // silent hole when that pack is chosen. The number of packs is not
+            // pinned: a pack is content, not structure, and the catalog below
+            // is what proves the library is complete.
             val packs = mutableListOf<Pair<String, String>>()
             connection.each("SELECT id, type FROM pack ORDER BY id") { rs ->
                 packs += rs.getString(1) to rs.getString(2)
@@ -75,6 +76,43 @@ class CheckDb(private val root: File) {
                 }
             }
             println("checkdb: ${packs.size} pack(s): " + packs.joinToString { it.first })
+
+            // The catalog the app reads must describe exactly these packs, and
+            // the pack files it points at must be the ones on this machine.
+            val catalogFile = File(root, "content/catalog.json")
+            if (catalogFile.exists()) {
+                val entries = Json.parseToJsonElement(catalogFile.readText()).jsonObject["packs"]
+                    ?.jsonArray ?: JsonArray(emptyList())
+                // The database carries the text packs (translations and tafsirs);
+                // the catalog also names the core, the word lists, and reciters.
+                val catalogIds = entries
+                    .map { it.jsonObject }
+                    .filter { it["type"]?.jsonPrimitive?.content in listOf("translation", "tafsir") }
+                    .mapNotNull { it["id"]?.jsonPrimitive?.content }
+                if (catalogIds.toSet() != packs.map { it.first }.toSet()) {
+                    println(
+                        "checkdb: the catalog names $catalogIds, the database has " +
+                            packs.map { it.first },
+                    )
+                    failures++
+                }
+                for (entry in entries) {
+                    val pack = entry.jsonObject
+                    val id = pack["id"]?.jsonPrimitive?.content ?: continue
+                    val file = File(root, "content/packs/$id.db")
+                    val expectedHash = pack["sha256"]?.jsonPrimitive?.content
+                    if (!file.exists()) {
+                        println("checkdb: pack file content/packs/$id.db is missing")
+                        failures++
+                        continue
+                    }
+                    if (expectedHash != null && sha256(file) != expectedHash) {
+                        println("checkdb: pack file content/packs/$id.db does not match the catalog hash")
+                        failures++
+                    }
+                }
+                println("checkdb: catalog matches, ${entries.size} pack file(s) verified")
+            }
         }
         if (failures != 0) {
             println("checkdb: $failures problem(s)")

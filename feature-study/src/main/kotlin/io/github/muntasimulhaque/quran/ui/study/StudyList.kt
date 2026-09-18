@@ -61,6 +61,7 @@ import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.Footnote
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.TextSize
+import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.StudyRow
 import io.github.muntasimulhaque.quran.ui.rich.FootnoteList
@@ -181,6 +182,7 @@ fun StudyList(
                     hafs = hafs,
                     textSize = settings.textSize,
                     showFootnotes = settings.showFootnotes,
+                    wordByWord = settings.wordByWord,
                     isSelected = selected?.number == number,
                     playingAyah = playingAyah,
                     playingWord = playingWord,
@@ -419,6 +421,7 @@ private fun AyahBlock(
     hafs: FontFamily,
     textSize: TextSize,
     showFootnotes: Boolean,
+    wordByWord: Boolean,
     isSelected: Boolean,
     playingAyah: Int?,
     playingWord: Int?,
@@ -465,6 +468,9 @@ private fun AyahBlock(
                 textAlign = TextAlign.Right,
                 modifier = Modifier.fillMaxWidth(),
             )
+            if (wordByWord && row.meanings.any { it.meaning != null }) {
+                WordByWord(row.meanings, hafs, textSize)
+            }
             row.translation?.let { translation ->
                 TranslationBody(
                     runs = remember(translation.text) { RichText.footnotes(translation.text) },
@@ -524,3 +530,38 @@ private fun arabic(
 
 private const val BASMALLAH = "\u0628\u0650\u0633\u0652\u0645\u0650 \u0671\u0644\u0644\u0651\u064e\u0647\u0650 " +
     "\u0671\u0644\u0631\u0651\u064e\u062d\u0652\u0645\u064e\u0670\u0646\u0650 \u0671\u0644\u0631\u0651\u064e\u062d\u0650\u064a\u0645\u0650"
+
+/**
+ * Word by word, under the ayah: each word with the meaning the word list
+ * gives it. This is the reading aid for a reader who is learning the Arabic,
+ * and it is off until they ask for it.
+ */
+@Composable
+private fun WordByWord(meanings: List<WordMeaning>, hafs: FontFamily, textSize: TextSize) {
+    androidx.compose.foundation.layout.FlowRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        meanings.forEach { meaning ->
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = meaning.word,
+                    style = TextStyle(
+                        fontFamily = hafs,
+                        fontSize = (textSize.arabicSp - 4).sp,
+                        lineHeight = (textSize.arabicLineSp - 12).sp,
+                        color = MaterialTheme.colorScheme.onBackground,
+                    ),
+                )
+                Text(
+                    text = meaning.meaning.orEmpty(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.62f),
+                )
+            }
+        }
+    }
+}

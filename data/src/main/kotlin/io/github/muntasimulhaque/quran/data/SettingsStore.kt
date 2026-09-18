@@ -47,6 +47,7 @@ data class AppSettings(
     val showFootnotes: Boolean = false,
     val translationPack: String = "",
     val tafsirPacks: Set<String> = emptySet(),
+    val wordByWord: Boolean = false,
     /** 0 is off, 1 is dim, 2 is darker. */
     val dimLevel: Int = 0,
     val longPressHintShown: Boolean = false,
@@ -80,6 +81,7 @@ class SettingsStore(private val context: Context) {
             showFootnotes = preferences[SHOW_FOOTNOTES] ?: false,
             translationPack = preferences[TRANSLATION_PACK] ?: "",
             tafsirPacks = preferences[TAFSIR_PACKS] ?: emptySet(),
+            wordByWord = preferences[WORD_BY_WORD] ?: false,
             dimLevel = preferences[DIM_LEVEL] ?: 0,
             longPressHintShown = preferences[HINT_SHOWN] ?: false,
         )
@@ -129,6 +131,10 @@ class SettingsStore(private val context: Context) {
         context.settingsStore.edit { it[SHOW_FOOTNOTES] = show }
     }
 
+    suspend fun setWordByWord(show: Boolean) {
+        context.settingsStore.edit { it[WORD_BY_WORD] = show }
+    }
+
     suspend fun setDimLevel(level: Int) {
         context.settingsStore.edit { it[DIM_LEVEL] = level.coerceIn(0, 2) }
     }
@@ -157,6 +163,7 @@ class SettingsStore(private val context: Context) {
         val SHOW_FOOTNOTES = booleanPreferencesKey("show_footnotes")
         val TRANSLATION_PACK = stringPreferencesKey("translation_pack")
         val TAFSIR_PACKS = stringSetPreferencesKey("tafsir_packs")
+        val WORD_BY_WORD = booleanPreferencesKey("word_by_word")
         val DIM_LEVEL = intPreferencesKey("dim_level")
         val HINT_SHOWN = booleanPreferencesKey("hint_shown")
     }

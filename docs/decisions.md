@@ -874,3 +874,36 @@ is installed, the card fills itself without a code change.
 tafsir: nothing is bundled, the size is shown before a byte moves, the file
 is verified by SHA-256, and removing it removes the content. In the settings
 sheet they appear under a Bengali heading, between English and Arabic.
+
+## D-035: Word by word is a reading aid, per language, off until asked for
+
+Date: the fifth session. The owner asked whether word by word is offered at
+all, whether it should be, and how.
+
+**What exists.** Word meanings are their own dataset, not part of any
+translation, in QUL and now in the app: the English word list with the surah
+introductions is a pack (4.6 MB), and the Bengali one is listed and waiting
+for its download. Tafsir Ibn Kathir in Bengali and Taisirul Quran in Bengali
+are now built, published, and installable: verified end to end on a release
+build, where Taisirul Quran downloaded over the network, verified its hash,
+installed, and appeared as the Bengali translation in the study reading.
+
+**Should we offer it.** Yes, for three reasons. It is the one aid that helps
+a reader who cannot read Arabic at all, which is most readers. It costs
+nothing to the reader who does not want it, because it is a pack. And it
+makes a language pair complete: a Bengali translation plus Bengali word
+meanings is a Bengali reading of the Quran, not a Bengali sentence next to
+an Arabic puzzle.
+
+**How it is offered, in three places, none of them in the way.**
+
+1. Under each language in Settings, with its size, as it already is.
+2. In the ayah card: when the word list for the reader's language is not
+   installed, the door says "Add word by word" and opens the content list;
+   when it is installed, the door opens the panel of words with meanings.
+3. In the study reading: a new switch, "Show word meanings", off by default,
+   lays each word with its meaning under the ayah, so a learner reads the
+   Arabic word by word, ayah after ayah, instead of opening a card for every
+   verse. The switch only does something when a word list is installed, and
+   the app picks the list that speaks the language of the chosen translation,
+   falling back to English.

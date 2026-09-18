@@ -403,10 +403,9 @@
       "credit": "Professor Muhammad Mozammel Haque, via QUL",
       "usedFor": "Bengali translation pack",
       "path": "content/raw/qul/bengali-taisirul-quran.sqlite.zip",
-      "bytes": 0,
-      "sha256": "",
-      "assetUrl": null,
-      "pending": true
+      "bytes": 547196,
+      "sha256": "6d87d89b3ba55027d2b368eb9130ee57f20c13fe3c1192c4d80f2a02592e1e2f",
+      "assetUrl": null
     },
     {
       "id": "tafsir-ibn-kathir-bn",
@@ -419,10 +418,9 @@
       "credit": "Tafsir Ibn Kathir (Bengali), via QUL",
       "usedFor": "Bengali tafsir pack",
       "path": "content/raw/qul/tafsir-ibn-kathir-bengali.sqlite.zip",
-      "bytes": 0,
-      "sha256": "",
-      "assetUrl": null,
-      "pending": true
+      "bytes": 4723385,
+      "sha256": "72a4e609b5b8dad46156a06160df133f85da5450f8b1c6eca9a45dea5351a97f",
+      "assetUrl": null
     },
     {
       "id": "word-by-word-bengali",
