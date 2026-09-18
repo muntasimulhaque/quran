@@ -20,6 +20,10 @@ jobs:
           cache: gradle
 
       - uses: android-actions/setup-android@v3
+        with:
+          # The action's default 'tools' package no longer exists in the SDK
+          # repository; platform-tools is all this build needs from it.
+          packages: platform-tools
       - name: Accept SDK licenses
         run: yes | sdkmanager --licenses > /dev/null 2>&1 || true
 
