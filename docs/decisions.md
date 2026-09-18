@@ -462,3 +462,36 @@ and proves plain words (allah, mercy, moses, paradise, pharaoh) match. On
 the emulator: mercy returns 144 matches, allah 200+, allah mercy 55 with
 both words highlighted, kahf returns Surah Al-Kahf, and a result tap on
 2:64 lands on its page with the study card open.
+
+## D-021: Bookmarks and notes are one saved row per ayah
+
+Date: the second session.
+
+Saving and noting are one act with two depths. The study card gains a
+Save pill that toggles, and a Note pill that opens an editor inside the
+card; saving a note saves the ayah with it. There is no separate
+notebook, no folders, and no second list: the row is the ayah, its
+optional note, and when it was saved. A blank note clears the note and
+keeps the ayah; removing the row removes both.
+
+The store is hand-rolled SQLite in `data/SavedStore.kt`: one table, one
+schema version, no code generation, no KSP, and no dependency on the
+content database, so a content rebuild can never disturb the reader's own
+work. It exposes a `StateFlow` so the card and the list are always in
+step, and its ordering is newest first with the ayah number as the
+tiebreaker.
+
+The surah index grew into the browse sheet to hold them: one sheet, two
+tabs, Surahs and Saved. The top bar action was renamed from Index to
+Browse. Saved rows show the reference, the Arabic ayah, and the note;
+tapping one jumps to the page and opens its card; Remove drops it.
+
+The behavior is pinned by six instrumented tests
+(`data/src/androidTest/.../SavedStoreTest.kt`, run with
+`./gradlew :data:connectedDebugAndroidTest`): toggle, note kept with its
+ayah, blank note clears without dropping the ayah, newest first,
+surviving reopening, and removal. Verified on the emulator: save and
+unsave from the card, a note written and shown under the ayah in the
+Saved tab, the row opening its card and showing the saved state, the note
+surviving a force-stop and relaunch, and Remove returning to the empty
+state.

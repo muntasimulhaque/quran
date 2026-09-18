@@ -34,6 +34,8 @@ data class Ayah(
     val text: String,
 )
 
+data class AyahLocation(val ayah: Ayah, val page: Int)
+
 data class Footnote(val number: Int, val text: String)
 
 data class TranslationText(val text: String, val footnotes: List<Footnote>)

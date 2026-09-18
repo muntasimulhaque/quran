@@ -107,6 +107,7 @@ module build files, never here):
 
 ```bash
 ./gradlew :core:test :data:testDebugUnitTest :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
+./gradlew :data:connectedDebugAndroidTest   # SavedStore, on a device or emulator
 ```
 
 Content pipeline, from the repository root. Keep every one of these green
@@ -116,6 +117,7 @@ at every step:
 ./gradlew :tools:run --args="fetch"      # brings the font pack to a new machine, hash-checked
 ./gradlew :tools:run --args="verify"     # checksums and structure of every source
 ./gradlew :tools:run --args="audit"      # letter-level audit against Tanzil
+./gradlew :tools:run --args="search"     # Arabic round trips and English folding
 ./gradlew :tools:run --args="build"      # writes content/quran.db, deterministic
 ./gradlew :tools:run --args="fonts"      # font coverage for every codepoint
 ./gradlew :tools:run --args="checkdb"    # verifies the committed database and its report
@@ -180,7 +182,7 @@ Where truth lives, by question (filled in as code lands):
 | Path | What is there |
 | --- | --- |
 | `core/` | pure JVM Kotlin, zero `android.*` imports: references, search normalization, rich text parsing, models |
-| `data/` | read-only content database access, page font store, preferences, models |
+| `data/` | read-only content database access, the saved-ayah user database, page font store, preferences, models; instrumented tests in `data/src/androidTest` |
 | `app/` | Compose UI: reader, study card, sheets, theme, fonts |
 | `tools/` | offline pipeline: content fetch, verify, audit, database build, font checks, golden renders |
 | `content/` | `quran.db` (the built, committed content database), `manifest.json`, `audit-report.md`, `build-report.json`; raw downloads under `raw/` are local and gitignored |
@@ -257,6 +259,10 @@ implement it and update this list.
   and the app matches over an in-memory folded index, never over raw
   offsets. `tools search` audits every non-ASCII translation codepoint and
   the Arabic round trip; change the fold and the gate together.
+- The user database (`saved.db`) is hand-rolled SQLite, separate from the
+  content database and never touched by a content rebuild. A schema change
+  means bumping `DATABASE_VERSION` and writing the migration in the same
+  session; `SavedStoreTest` pins the behavior.
 - Never delete or replace the `qpc-v2-fonts` Release asset. Its SHA-256 is
   pinned in `content/manifest.json`, and a fresh clone fetches it from there.
 - Play Core's asset delivery drags WorkManager, Room, and five merged

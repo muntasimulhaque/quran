@@ -164,6 +164,34 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
             }
         }
 
+    /** The ayahs behind a list of numbers, each with the page it lives on. */
+    fun ayahsWithPages(numbers: List<Int>): List<AyahLocation> {
+        if (numbers.isEmpty()) return emptyList()
+        val inClause = numbers.joinToString(",")
+        return database.rawQuery(
+            "SELECT number, surah, ayah, verse_key, text, page FROM ayah " +
+                "WHERE number IN ($inClause) ORDER BY number",
+            null,
+        ).use { cursor ->
+            buildList(cursor.count) {
+                while (cursor.moveToNext()) {
+                    add(
+                        AyahLocation(
+                            ayah = Ayah(
+                                number = cursor.getInt(0),
+                                surah = cursor.getInt(1),
+                                ayah = cursor.getInt(2),
+                                verseKey = cursor.getString(3),
+                                text = cursor.getString(4),
+                            ),
+                            page = cursor.getInt(5),
+                        ),
+                    )
+                }
+            }
+        }
+    }
+
     fun tafsir(ayahNumber: Int, source: String): TafsirPassage? =
         database.rawQuery(
             "SELECT p.source, p.surah, p.from_ayah, p.to_ayah, p.text FROM tafsir_ayah a " +

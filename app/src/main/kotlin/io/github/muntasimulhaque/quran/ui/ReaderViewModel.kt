@@ -7,12 +7,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.PageFontStore
 import io.github.muntasimulhaque.quran.data.PagePosition
 import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.ReadingState
+import io.github.muntasimulhaque.quran.data.SavedAyah
+import io.github.muntasimulhaque.quran.data.SavedStore
 import io.github.muntasimulhaque.quran.data.Surah
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -25,6 +29,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
     private val readingState = ReadingState(application)
     private val pageFonts = PageFontStore(application)
+    private val savedStore = SavedStore(application)
     private var contentDatabase: ContentDatabase? = null
 
     var surahs by mutableStateOf<List<Surah>>(emptyList())
@@ -40,6 +45,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
     val content: ContentDatabase? get() = contentDatabase
     val fonts: PageFontStore get() = pageFonts
+    val saved: StateFlow<List<SavedAyah>> = savedStore.saved
 
     init {
         viewModelScope.launch {
@@ -52,6 +58,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             position = database.pagePosition(page)
             ready = true
         }
+        viewModelScope.launch { savedStore.load() }
     }
 
     fun goToPage(newPage: Int) {
@@ -71,6 +78,18 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     fun jumpToSurah(surah: Int) {
         val target = contentDatabase?.firstPageOfSurah(surah) ?: return
         goToPage(target)
+    }
+
+    fun toggleSaved(ayah: Ayah) {
+        viewModelScope.launch { savedStore.toggle(ayah.number) }
+    }
+
+    fun setNote(ayah: Ayah, note: String?) {
+        viewModelScope.launch { savedStore.setNote(ayah.number, note) }
+    }
+
+    fun removeSaved(ayahNumber: Int) {
+        viewModelScope.launch { savedStore.remove(ayahNumber) }
     }
 
     override fun onCleared() {

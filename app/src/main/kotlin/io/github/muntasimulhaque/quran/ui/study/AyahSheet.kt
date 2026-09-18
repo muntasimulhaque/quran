@@ -16,11 +16,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -37,6 +40,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -54,11 +60,12 @@ import io.github.muntasimulhaque.quran.ui.rich.ArabicBody
 import io.github.muntasimulhaque.quran.ui.rich.FootnoteList
 import io.github.muntasimulhaque.quran.ui.rich.RichBlocks
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
+import io.github.muntasimulhaque.quran.ui.theme.LatinReading
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
-private enum class AyahPanel { Words, IbnKathir, Saadi }
+private enum class AyahPanel { Words, IbnKathir, Saadi, Note }
 
 private data class TafsirView(
     val title: String,
@@ -80,6 +87,10 @@ fun AyahSheet(
     content: ContentDatabase,
     ayah: Ayah,
     surahName: String,
+    isSaved: Boolean,
+    note: String?,
+    onToggleSave: () -> Unit,
+    onSaveNote: (String?) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -162,7 +173,9 @@ fun AyahSheet(
     ) {
         LazyColumn(
             state = listState,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .imePadding(),
         ) {
             item(key = "header") {
                 Column(
@@ -185,6 +198,12 @@ fun AyahSheet(
                         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
+                        ActionPill(label = if (isSaved) "Saved" else "Save", selected = isSaved) {
+                            onToggleSave()
+                        }
+                        ActionPill(label = "Note", selected = panel == AyahPanel.Note) {
+                            panel = if (panel == AyahPanel.Note) null else AyahPanel.Note
+                        }
                         ActionPill(label = if (copied) "Copied" else "Copy", selected = copied) {
                             copyToClipboard(context, shareText)
                             copied = true
@@ -238,6 +257,17 @@ fun AyahSheet(
                         AyahPanel.Words -> WordsPanel(words, hafs)
                         AyahPanel.IbnKathir -> tafsir?.let { TafsirPanel(it, arabic = false) }
                         AyahPanel.Saadi -> tafsir?.let { TafsirPanel(it, arabic = true) }
+                        AyahPanel.Note -> NoteEditor(
+                            initial = note,
+                            onSave = { text ->
+                                onSaveNote(text)
+                                panel = null
+                            },
+                            onClear = {
+                                onSaveNote(null)
+                                panel = null
+                            },
+                        )
                     }
                 }
             }
@@ -248,8 +278,7 @@ fun AyahSheet(
 }
 
 @Composable
-private fun TafsirPanel(view: TafsirView, arabic: Boolean) {
-    Column(
+private fun TafsirPanel(view: TafsirView, arabic: Boolean) {    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 8.dp),
@@ -275,6 +304,73 @@ private fun TafsirPanel(view: TafsirView, arabic: Boolean) {
             val blocks = remember(view.passage.text) { RichText.parseHtml(view.passage.text) }
             RichBlocks(blocks)
         }
+    }
+}
+
+/** The reader's own words about one ayah; saving a note also saves the ayah. */
+@Composable
+private fun NoteEditor(initial: String?, onSave: (String?) -> Unit, onClear: () -> Unit) {
+    var draft by remember(initial) { mutableStateOf(initial.orEmpty()) }
+    val focus = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        delay(180)
+        focus.requestFocus()
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 6.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "Note",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Spacer(Modifier.weight(1f))
+            if (!initial.isNullOrBlank()) {
+                Text(
+                    text = "Clear",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .clickable(onClick = onClear)
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                )
+            }
+            Spacer(Modifier.padding(horizontal = 4.dp))
+            ActionPill(label = "Save note", selected = true) {
+                onSave(draft.trim().takeIf { it.isNotEmpty() })
+            }
+        }
+        BasicTextField(
+            value = draft,
+            onValueChange = { draft = it },
+            textStyle = LatinReading.copy(
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 16.sp,
+                lineHeight = 24.sp,
+            ),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 120.dp)
+                .padding(top = 12.dp)
+                .focusRequester(focus),
+            decorationBox = { inner ->
+                Box {
+                    if (draft.isEmpty()) {
+                        Text(
+                            text = "Write a note for this ayah",
+                            style = LatinReading.copy(fontSize = 16.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
+                        )
+                    }
+                    inner()
+                }
+            },
+        )
     }
 }
 
