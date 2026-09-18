@@ -258,9 +258,6 @@ class ContentDatabase private constructor(
         return null
     }
 
-    /** True when any word list is here, whatever language it speaks. */
-    fun hasWordList(): Boolean = installedPacks.any { it.startsWith(WORDS_PREFIX) }
-
     /** The words of a set of ayahs, in order, markers excluded. */
     fun wordsForAyahs(numbers: List<Int>): Map<Int, List<Word>> {
         if (numbers.isEmpty()) return emptyMap()
@@ -833,7 +830,6 @@ class ContentDatabase private constructor(
     companion object {
         const val WORDS_PACK = "words-en"
         const val SURAH_INFO = "words-en"
-        const val WORDS_PREFIX = "words-"
         const val RECITER_PREFIX = "reciter-"
 
         fun reciterPack(recitation: String): String = RECITER_PREFIX + recitation

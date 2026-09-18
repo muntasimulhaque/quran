@@ -28,13 +28,6 @@ class RecitationStore(private val context: Context) {
         return null
     }
 
-    /** True when the first ayah of a recitation can be played. */
-    fun isAvailable(audioPath: String?): Boolean =
-        !audioPath.isNullOrBlank() && uri(audioPath) != null
-
-    /** Where an import should place its files, mirroring the audio paths. */
-    fun importDirectory(): File = imported.apply { mkdirs() }
-
     /** The ayah files of one surah for one reciter folder, for sizes and removal. */
     fun filesForSurah(folder: String, surah: Int): List<File> {
         val directory = File(imported, folder)

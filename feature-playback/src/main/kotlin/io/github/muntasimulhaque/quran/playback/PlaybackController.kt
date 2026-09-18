@@ -61,9 +61,6 @@ class PlaybackController(
         startTicker()
     }
 
-    fun segmentsFor(ayahNumber: Int): List<io.github.muntasimulhaque.quran.data.WordSegment> =
-        if (segmentedAyah == ayahNumber) segments else emptyList()
-
     suspend fun play(recitation: String, ayahNumber: Int) {
         val database = content ?: return
         val location = withContext(Dispatchers.IO) {

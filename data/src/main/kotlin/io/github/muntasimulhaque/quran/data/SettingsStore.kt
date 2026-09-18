@@ -87,11 +87,6 @@ class SettingsStore(private val context: Context) {
         )
     }
 
-    /** The page to open on when no ayah has ever been stored (an upgrade). */
-    val legacyPage: Flow<Int?> = context.settingsStore.data.map { preferences ->
-        preferences[LEGACY_PAGE]
-    }
-
     suspend fun setAyah(ayah: Int) {
         context.settingsStore.edit { it[AYAH] = ayah.coerceIn(1, 6236) }
     }
@@ -153,7 +148,6 @@ class SettingsStore(private val context: Context) {
 
     private companion object {
         val AYAH = intPreferencesKey("ayah")
-        val LEGACY_PAGE = intPreferencesKey("page")
         val MODE = stringPreferencesKey("mode")
         val THEME = stringPreferencesKey("theme")
         val TEXT_SIZE = intPreferencesKey("text_size")

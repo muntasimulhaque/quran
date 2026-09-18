@@ -30,8 +30,6 @@ class RecitationManifest private constructor(
 
     fun surahs(recitation: String): Set<Int> = surahsOf(recitation)
 
-    fun packageCount(recitation: String): Int = surahsOf(recitation).size
-
     /** The reciters whose packages are actually published. */
     fun publishedRecitations(): Set<String> = packages.keys.map { it.first }.toSet()
 

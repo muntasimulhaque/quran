@@ -108,15 +108,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     val saved: StateFlow<List<SavedAyah>> = savedStore.saved
     val playbackState: StateFlow<PlaybackUiState> = playback.state
 
-    /** Only reciters whose packages are published, so nothing dead is offered. */
-    val availableRecitations: List<Recitation>
-        get() = recitations.filter { it.id in manifest.publishedRecitations() }
-
     val translationPacks: List<ContentPack> get() = packs.filter { it.type == PackType.Translation }
     val tafsirPacks: List<ContentPack> get() = packs.filter { it.type == PackType.Tafsir }
     val installedTranslationPacks: List<ContentPack>
         get() = translationPacks.filter { it.installed }
-    val installedTafsirPacks: List<ContentPack> get() = tafsirPacks.filter { it.installed }
     val enabledTafsirPacks: List<ContentPack>
         get() = tafsirPacks.filter { it.id in settings.tafsirPacks && it.installed }
 
