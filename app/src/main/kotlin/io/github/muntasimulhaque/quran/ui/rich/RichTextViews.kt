@@ -15,8 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -24,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextIndent
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -47,7 +50,7 @@ fun TranslationBody(
     runs: List<TextRun>,
     modifier: Modifier = Modifier,
     textSize: TextSize? = null,
-    highlight: List<IntRange> = emptyList(),
+    onFootnote: ((Int) -> Unit)? = null,
 ) {
     val base = if (textSize == null) {
         LatinReading
@@ -60,6 +63,7 @@ fun TranslationBody(
             arabicSize = (textSize?.arabicSp ?: 18).sp,
             markerSize = (textSize?.latinSp ?: 11).sp,
             quoteColor = null,
+            onFootnote = onFootnote,
         ),
         style = base,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -205,22 +209,35 @@ private fun annotated(
     arabicSize: TextUnit,
     markerSize: TextUnit,
     quoteColor: Color?,
+    onFootnote: ((Int) -> Unit)? = null,
 ): AnnotatedString {
-    val primary = MaterialTheme.colorScheme.onSurfaceVariant
+    val markerColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val primary = markerColor
     val context = LocalContext.current
     val arabicFonts = remember(context) { ArabicFonts(context) }
     return buildAnnotatedString {
         runs.forEach { run ->
             val marker = run.marker
             if (marker != null) {
-                withStyle(
-                    SpanStyle(
-                        color = primary,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = markerSize,
-                        baselineShift = BaselineShift.Superscript,
-                    ),
-                ) { append(marker.toString()) }
+                val style = SpanStyle(
+                    color = markerColor.copy(alpha = 0.75f),
+                    fontWeight = FontWeight.Medium,
+                    fontSize = markerSize,
+                    baselineShift = BaselineShift.Superscript,
+                )
+                if (onFootnote == null) {
+                    withStyle(style) { append(marker.toString()) }
+                } else {
+                    // The marker is a door: tapping it opens the translator's
+                    // note without moving the reader out of the sentence.
+                    withLink(
+                        LinkAnnotation.Clickable(
+                            tag = "footnote-$marker",
+                            styles = TextLinkStyles(style = style),
+                            linkInteractionListener = { onFootnote(marker) },
+                        ),
+                    ) { withStyle(style) { append(marker.toString()) } }
+                }
             } else if (run.arabic) {
                 val color = if (run.quote) quoteColor ?: primary else Color.Unspecified
                 var index = 0

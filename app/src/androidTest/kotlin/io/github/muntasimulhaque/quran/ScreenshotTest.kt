@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.swipeDown
@@ -162,7 +163,11 @@ class ScreenshotTest {
         capture("04-study-surah-opening")
 
         // An ayah, its actions, and its card.
-        rule.onNodeWithText("the Entirely Merciful", substring = true).performClick()
+        // The Arabic line sits at the top of the block; the markers, which
+        // are links, sit lower, and a link would take the press instead.
+        rule.onNodeWithText("1:1").performTouchInput {
+            longClick(Offset(centerX, top + height * 0.15f))
+        }
         Thread.sleep(600)
         capture("10-ayah-actions")
         rule.onNodeWithContentDescription("More").performClick()

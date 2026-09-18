@@ -80,15 +80,13 @@ fun MushafPage(
                     val scale = size.width.toFloat() / page.widthPx
                     val top = ((size.height - page.heightPx * scale) / 2f).coerceAtLeast(0f)
                     detectTapGestures(
-                        onTap = { offset ->
-                            val ayah = page.ayahAt(
-                                x = offset.x / scale,
-                                y = (offset.y - top) / scale,
-                                slop = slop / scale,
-                            )
-                            if (ayah != null) onAyahState.value(ayah) else onBackgroundState.value()
+                        onTap = {
+                            // A tap anywhere belongs to the reading: it brings
+                            // the chrome, or puts it away.
+                            onBackgroundState.value()
                         },
                         onLongPress = { offset ->
+                            // A long press asks about the ayah under the finger.
                             val ayah = page.ayahAt(
                                 x = offset.x / scale,
                                 y = (offset.y - top) / scale,

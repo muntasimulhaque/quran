@@ -194,6 +194,13 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         return surahByNumber[number]
     }
 
+    /** The ayah numbers of one surah, in order, from the same memory. */
+    fun ayahNumbersOfSurah(surah: Int): List<Int> {
+        val first = contentDatabase?.firstAyahOfSurah(surah) ?: return emptyList()
+        val count = surahByNumber[surah]?.versesCount ?: return emptyList()
+        return (first until first + count).toList()
+    }
+
     private val surahByNumber: Map<Int, Surah> get() = surahs.associateBy { it.number }
 
     /**

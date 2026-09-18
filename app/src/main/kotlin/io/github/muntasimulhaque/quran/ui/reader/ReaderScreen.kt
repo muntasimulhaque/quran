@@ -140,23 +140,32 @@ fun ReaderScreen(
                     touch++
                 },
             )
-            ReadingMode.Study -> StudyList(
-                viewModel = viewModel,
-                selected = selected,
-                playback = playback,
-                onAyah = { ayah ->
-                    selected = if (selected?.number == ayah.number) null else ayah
-                    chrome = false
-                    touch++
-                },
-                onBackgroundTap = {
-                    chrome = !chrome
-                    selected = null
-                    touch++
-                },
-                contentPaddingTop = 64.dp,
-                contentPaddingBottom = 120.dp,
-            )
+            ReadingMode.Study -> {
+                val surah = viewModel.surahOf(settings.ayah)
+                if (surah != null) {
+                    StudyList(
+                        viewModel = viewModel,
+                        content = content,
+                        surah = surah,
+                        ayahs = viewModel.ayahNumbersOfSurah(surah.number),
+                        selected = selected,
+                        playback = playback,
+                        onAyah = { ayah ->
+                            selected = ayah
+                            chrome = false
+                            touch++
+                        },
+                        onBackgroundTap = {
+                            chrome = !chrome
+                            selected = null
+                            touch++
+                        },
+                        onNextSurah = { number -> viewModel.jumpToSurah(number) },
+                        contentPaddingTop = 64.dp,
+                        contentPaddingBottom = 120.dp,
+                    )
+                }
+            }
         }
 
         ReaderTopBar(

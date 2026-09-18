@@ -44,9 +44,10 @@ words. Everything else is a guest.
   pre-rendered, so a turn is a texture draw, never a render.
 * While the reader swipes, the moving page casts a soft shadow on the page
   under it, and a light haptic marks the settle.
-* A **tap** on a word selects that ayah and shows its action row: save,
-  play, copy, share, and more. A second tap closes the row.
-* A **long press** does the same as a tap. Nothing depends on a long press.
+* A **tap** anywhere belongs to the reading: it brings the chrome, or puts
+  it away. No tap ever opens a panel by surprise.
+* A **long press** on an ayah asks about that ayah: it washes the ayah, hums
+  once, and shows one row of actions (save, play, copy, share, more).
 * While a recitation plays, the current word carries a soft lapis wash and
   the current ayah a fainter one. Nothing else moves.
 
@@ -63,15 +64,17 @@ Revealed by a tap on the paper, faded out after seven seconds of no touch.
 
 ## 3. Study mode
 
-A continuous scroll through the whole Quran, not a pagination of Mushaf
-pages. The reader can begin at Al-Fatihah and read to An-Nas without ever
-meeting a page break, which is how a translation is read.
+One surah at a time, scrolled continuously, ending where the surah ends. The
+reader is never slid into the next surah without a word: the end of a surah
+says so, and offers the next one. The surah is the unit the Quran itself
+gives, and readers read it as one.
 
 * A surah opens with an ornament: the Arabic name in gold Amiri, the simple
   name, and one quiet line of metadata (place of revelation, ayah count).
 * Each ayah is Arabic first (KFGQPC Hafs, right aligned), then the
-  translation (Literata), then its footnotes in small muted type behind a
-  hairline. No chips, no badges, no boxes around text.
+  translation (Literata). Footnote markers are quiet superscripts, and a tap
+  on a marker opens that note in its own sheet, so the reading is never
+  interrupted by a wall of notes it did not ask for.
 * The ayah's reference sits under its translation in small muted type, the
   way a printed study Quran numbers verses.
 * Tapping any ayah opens its card. The card is the only place features live.
@@ -131,8 +134,9 @@ One sheet, grouped, nothing hidden:
 
 * **Appearance**: Paper, Sepia, Night, Black, shown as swatches; text size
   for study mode; the reading page follows the theme too.
-* **Reading**: follow the reciter, keep the screen awake, show footnotes in
-  the flow.
+* **Reading**: follow the reciter, keep the screen awake, and an optional
+  switch that shows footnotes under each ayah instead of behind their
+  markers.
 * **Recitation**: the reciter, and the downloaded surahs, with sizes.
 * **Content**: enabled translation and tafsir packs, each with its own
   toggle, and a door to more packs when any exist.

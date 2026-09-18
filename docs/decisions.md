@@ -692,3 +692,45 @@ and every release rebuilds against exactly the database the report names.
 What it costs: one download per machine, cached by the pipeline, verified
 byte for byte. This supersedes the "database committed" half of D-016; the
 fonts stay in their own Release for the same reason.
+
+## D-029: The reader's hands, the surah as the unit, and notes behind their markers
+
+Date: the fourth session. The owner reviewed the rethink and decided four
+things about how the app should feel, plus one about what it ships.
+
+**A tap belongs to the reading.** Tapping anywhere on the page brings the
+chrome or puts it away; no tap opens a panel by surprise. Asking about a
+particular ayah is a long press: the ayah washes, the phone hums once, and
+one row of actions appears (save, play, copy, share, more). This is the
+model the owner asked for, and it is why nothing jumps under a reader's
+finger while they are following the text.
+
+**Study mode reads one surah at a time.** The owner asked whether a
+continuous Quran or a surah-bounded scroll is better. A surah is the unit
+the Quran itself gives, and readers read it as one: Al-Mulk, Ya-Sin, Al-Kahf
+on a Friday. A scroll that never stops hides that structure and slides the
+reader into the next surah without a word. So the study view scrolls
+continuously through the current surah, then says "<name> complete" and
+offers a single door: continue to the next surah. Al-Fatihah through An-Nas
+still works end to end; it simply pauses where the Book pauses.
+
+**Footnotes wait behind their markers.** No footnote text is shown in the
+reading by default. A small muted superscript marks where a note belongs,
+and tapping that marker opens the note in its own sheet with its ayah
+reference. The setting that used to show a footnote block under every ayah
+still exists, off by default, for readers who prefer a study page.
+
+**The screen stays awake while reading**, as the owner confirmed.
+
+**What ships, and what arrives on demand.** The app carries only the Quran
+text and its page layout (the page fonts, the Hafs study font, the words,
+the page geometry, and the navigation data). No translation and no tafsir
+ship inside the app. Saheeh International and Ibn Kathir are offered as the
+first downloads, and every later translation, tafsir, word list, script, or
+reciter arrives the same way: from the project's own Releases, on the
+reader's word, with the size shown before a byte moves, verified by SHA-256,
+removable at any time.
+
+This is the decision that turns the pack work from a later nicety into the
+next thing to build, and it is why the shipped app becomes much smaller:
+the reader downloads the depth they want instead of carrying everyone's.

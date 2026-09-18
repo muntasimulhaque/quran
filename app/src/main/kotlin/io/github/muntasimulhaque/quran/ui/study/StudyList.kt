@@ -12,12 +12,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,9 +36,12 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -45,75 +54,84 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.Spacer
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
+import io.github.muntasimulhaque.quran.data.Footnote
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
-import io.github.muntasimulhaque.quran.ui.StudyItem
 import io.github.muntasimulhaque.quran.ui.StudyRow
 import io.github.muntasimulhaque.quran.ui.rich.FootnoteList
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
+import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.MushafHighlight
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
- * The study reading: one continuous scroll through the whole Quran, ayah
- * after ayah, from Al-Fatihah to An-Nas, with surah openings like a printed
- * study edition. Nothing is paginated here, because a translation is read as
- * a book, and a page break in the middle of an ayah is a page break in the
- * middle of a thought.
+ * The study reading of one surah: its opening, then a continuous scroll
+ * through every ayah to the end of the surah, and a quiet closing line that
+ * offers the next surah.
+ *
+ * A surah is the unit the Quran itself gives, and readers read it as one:
+ * this view ends where the surah ends, instead of sliding into the next one
+ * without a word. Tapping the paper brings the chrome; a long press asks
+ * about the ayah under the finger.
  */
 @Composable
 fun StudyList(
     viewModel: ReaderViewModel,
+    content: ContentDatabase,
+    surah: Surah,
+    ayahs: List<Int>,
     selected: Ayah?,
     playback: PlaybackUiState,
     onAyah: (Ayah) -> Unit,
     onBackgroundTap: () -> Unit,
+    onNextSurah: (Int) -> Unit,
     contentPaddingTop: Dp,
     contentPaddingBottom: Dp,
     modifier: Modifier = Modifier,
 ) {
     val settings = viewModel.settings
-    val items = viewModel.studyItems
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
     val hafs = remember {
         FontFamily(Font(path = "fonts/UthmanicHafs_V22.ttf", assetManager = context.assets))
     }
     val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = viewModel.studyIndexOf(settings.ayah),
+        initialFirstVisibleItemIndex = ayahs.indexOf(settings.ayah).coerceAtLeast(0),
     )
+    var footnote by remember { mutableStateOf<OpenFootnote?>(null) }
 
     // The reader's place is written down when the scroll rests.
-    LaunchedEffect(listState) {
+    LaunchedEffect(listState, surah.number) {
         snapshotFlow { listState.isScrollInProgress to listState.firstVisibleItemIndex }
             .collect { (scrolling, index) ->
                 if (!scrolling) {
-                    val item = items.getOrNull(index)
-                    if (item is StudyItem.AyahItem) viewModel.onStudySettled(item.header.number)
+                    ayahs.getOrNull(index)?.let { viewModel.onStudySettled(it) }
                 }
             }
     }
 
-    // A jump from a sheet moves the list; the list never moves itself.
-    LaunchedEffect(settings.ayah) {
-        val target = viewModel.studyIndexOf(settings.ayah)
-        val current = listState.firstVisibleItemIndex
-        if (target < current || target > current + 2) {
-            listState.scrollToItem(target)
+    // A jump moves the list; the list never moves itself.
+    LaunchedEffect(settings.ayah, surah.number, ayahs) {
+        val target = ayahs.indexOf(settings.ayah)
+        if (target >= 0) {
+            val current = listState.firstVisibleItemIndex
+            if (target < current || target > current + 2) listState.scrollToItem(target)
         }
     }
 
     // The playing ayah comes back into view when the reciter moves on.
-    LaunchedEffect(playback.ayahNumber) {
+    LaunchedEffect(playback.ayahNumber, ayahs) {
         val ayahNumber = playback.ayahNumber ?: return@LaunchedEffect
         if (!settings.followReciter) return@LaunchedEffect
-        val target = viewModel.studyIndexOf(ayahNumber)
+        val target = ayahs.indexOf(ayahNumber)
+        if (target < 0) return@LaunchedEffect
         val current = listState.firstVisibleItemIndex
         if (target < current || target > current + 3) listState.animateScrollToItem(target)
     }
@@ -128,45 +146,102 @@ fun StudyList(
                 // belongs to its ayah, and every ayah consumes its own taps.
                 detectTapGestures(onTap = { onBackgroundTap() })
             },
-        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = contentPaddingTop, bottom = contentPaddingBottom),
+        contentPadding = PaddingValues(
+            start = 20.dp,
+            end = 20.dp,
+            top = contentPaddingTop,
+            bottom = contentPaddingBottom,
+        ),
     ) {
-        items(
-            count = items.size,
-            key = { index ->
-                when (val item = items[index]) {
-                    is StudyItem.Header -> "s${item.surah.number}"
-                    is StudyItem.AyahItem -> "a${item.header.number}"
-                }
-            },
-        ) { index ->
-            when (val item = items[index]) {
-                is StudyItem.Header -> SurahOpening(
-                    surah = item.surah,
-                    content = viewModel.content,
-                    onBackgroundTap = onBackgroundTap,
-                )
-                is StudyItem.AyahItem -> {
-                    val number = item.header.number
-                    val row by produceState<StudyRow?>(initialValue = null, number, settings.translationPack) {
-                        value = withContext(Dispatchers.IO) {
-                            viewModel.studyRow(number, settings.translationPack)
-                        }
-                    }
-                    row?.let {
-                        AyahBlock(
-                            row = it,
-                            hafs = hafs,
-                            textSize = settings.textSize,
-                            showFootnotes = settings.showFootnotes,
-                            isSelected = selected?.number == number,
-                            playingAyah = playback.ayahNumber,
-                            playingWord = playback.wordPosition,
-                            onAyah = onAyah,
-                            onBackgroundTap = onBackgroundTap,
-                        )
-                    }
+        item(key = "surah-${surah.number}") {
+            SurahOpening(
+                surah = surah,
+                content = content,
+                onBackgroundTap = onBackgroundTap,
+            )
+        }
+        items(ayahs.size, key = { "ayah-${ayahs[it]}" }) { index ->
+            val number = ayahs[index]
+            val row by produceState<StudyRow?>(initialValue = null, number, settings.translationPack) {
+                value = withContext(Dispatchers.IO) {
+                    viewModel.studyRow(number, settings.translationPack)
                 }
             }
+            row?.let {
+                AyahBlock(
+                    row = it,
+                    hafs = hafs,
+                    textSize = settings.textSize,
+                    showFootnotes = settings.showFootnotes,
+                    isSelected = selected?.number == number,
+                    playingAyah = playback.ayahNumber,
+                    playingWord = playback.wordPosition,
+                    onAyah = onAyah,
+                    onBackgroundTap = onBackgroundTap,
+                    onFootnote = { number ->
+                        val note = it.translation?.footnotes?.firstOrNull { footnote -> footnote.number == number }
+                        if (note != null) {
+                            footnote = OpenFootnote(note, "${it.ayah.surah}:${it.ayah.ayah}")
+                        }
+                    },
+                )
+            }
+        }
+        item(key = "end-${surah.number}") {
+            SurahEnd(
+                surah = surah,
+                nextSurahName = viewModel.surahs.firstOrNull { it.number == surah.number + 1 }?.nameSimple,
+                onNextSurah = onNextSurah,
+                onBackgroundTap = onBackgroundTap,
+            )
+        }
+    }
+
+    footnote?.let { open ->
+        FootnoteSheet(
+            footnote = open.note,
+            surahName = surah.nameSimple,
+            reference = open.reference,
+            onDismiss = { footnote = null },
+        )
+    }
+}
+
+/** A footnote the reader opened, with the ayah it belongs to. */
+private data class OpenFootnote(val note: Footnote, val reference: String)
+
+/** The footnote of one ayah, opened from the marker the reader tapped. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FootnoteSheet(
+    footnote: Footnote,
+    surahName: String,
+    reference: String,
+    onDismiss: () -> Unit,
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .imePadding()
+                .padding(start = 22.dp, end = 22.dp, bottom = 34.dp),
+        ) {
+            Text(
+                text = "Footnote ${footnote.number}  \u00B7  $surahName $reference",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                text = footnote.text,
+                style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(top = 12.dp),
+            )
         }
     }
 }
@@ -188,7 +263,7 @@ private fun SurahOpening(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 40.dp, bottom = 14.dp)
+            .padding(top = 34.dp, bottom = 14.dp)
             .clickable(onClick = onBackgroundTap),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -197,7 +272,7 @@ private fun SurahOpening(
             style = TextStyle(
                 fontFamily = Amiri,
                 fontSize = 34.sp,
-                color = io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette.current.ornament,
+                color = LocalPagePalette.current.ornament,
             ),
         )
         Text(
@@ -252,6 +327,57 @@ private fun SurahOpening(
     }
 }
 
+/** The end of a surah, and the door to the next one. */
+@Composable
+private fun SurahEnd(
+    surah: Surah,
+    nextSurahName: String?,
+    onNextSurah: (Int) -> Unit,
+    onBackgroundTap: () -> Unit,
+) {
+    val next = surah.number + 1
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 30.dp, bottom = 20.dp)
+            .clickable(onClick = onBackgroundTap),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(
+            Modifier
+                .fillMaxWidth(0.22f)
+                .height(1.dp)
+                .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)),
+        )
+        Text(
+            text = "${surah.nameSimple} complete",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+            modifier = Modifier.padding(top = 16.dp),
+        )
+        if (next <= 114 && nextSurahName != null) {
+            Text(
+                text = "Continue to $nextSurahName",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .padding(top = 10.dp)
+                    .clip(RoundedCornerShape(50))
+                    .clickable { onNextSurah(next) }
+                    .padding(horizontal = 18.dp, vertical = 10.dp),
+            )
+        } else if (next > 114) {
+            Text(
+                text = "This is the end of the Quran",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(top = 10.dp),
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun AyahBlock(
     row: StudyRow,
@@ -263,7 +389,9 @@ private fun AyahBlock(
     playingWord: Int?,
     onAyah: (Ayah) -> Unit,
     onBackgroundTap: () -> Unit,
+    onFootnote: (Int) -> Unit,
 ) {
+    val haptics = LocalHapticFeedback.current
     val playing = row.ayah.number == playingAyah
     val wash = when {
         isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.07f)
@@ -282,11 +410,17 @@ private fun AyahBlock(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(14.dp))
                 .background(wash)
-                .clickable { onAyah(row.ayah) }
+                .combinedClickable(
+                    onClick = onBackgroundTap,
+                    onLongClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onAyah(row.ayah)
+                    },
+                )
                 .padding(horizontal = 8.dp, vertical = 7.dp),
         ) {
             Text(
-                text = arabic(row, playing, playingWord, hafs, textSize),
+                text = arabic(row, playing, playingWord, hafs),
                 style = TextStyle(
                     fontFamily = hafs,
                     fontSize = textSize.arabicSp.sp,
@@ -301,9 +435,13 @@ private fun AyahBlock(
                     runs = remember(translation.text) { RichText.footnotes(translation.text) },
                     modifier = Modifier.padding(top = 12.dp),
                     textSize = textSize,
+                    onFootnote = onFootnote,
                 )
                 if (showFootnotes) {
-                    FootnoteList(translation.footnotes, quiet = true)
+                    FootnoteList(
+                        footnotes = translation.footnotes,
+                        quiet = true,
+                    )
                 }
             }
             Row(
@@ -329,7 +467,6 @@ private fun arabic(
     playing: Boolean,
     playingWord: Int?,
     hafs: FontFamily,
-    textSize: TextSize,
 ): AnnotatedString {
     val words = row.words
     if (words.isEmpty()) return AnnotatedString(row.ayah.text)
