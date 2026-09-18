@@ -15,7 +15,6 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
-import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Rule
@@ -80,7 +79,10 @@ class ScreenshotTest {
         rule.onAllNodesWithContentDescription("Mushaf page").fetchSemanticsNodes().isNotEmpty()
 
     private fun back() {
-        Espresso.pressBack()
+        // A raw back key is used instead of Espresso: it needs no window
+        // focus, which a freshly opened sheet does not always have.
+        InstrumentationRegistry.getInstrumentation()
+            .sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK)
         Thread.sleep(700)
     }
 
