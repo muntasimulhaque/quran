@@ -32,6 +32,7 @@ class Fetch(private val root: File) {
         var failures = 0
         var manual = 0
         failures += fetchContentDatabase()
+        failures += fetchPacks()
         for (dataset in manifest.datasets) {
             val file = File(root, dataset.path)
             if (file.exists() && sha256(file) == dataset.sha256) {
@@ -95,6 +96,56 @@ class Fetch(private val root: File) {
         }
         println("fetch: unpacking $id to $targetPath")
         extract(archive, target)
+    }
+
+    /**
+     * Every pack the catalog names, so a fresh clone (and CI) can build the
+     * app with the exact pack files the catalog pins, including the core pack
+     * the app ships.
+     */
+    private fun fetchPacks(): Int {
+        val catalogFile = File(root, "content/catalog.json")
+        if (!catalogFile.exists()) {
+            println("fetch: content/catalog.json is missing; cannot know which packs to fetch")
+            return 1
+        }
+        // A plain text walk keeps this independent of the app's JSON shapes.
+        val text = catalogFile.readText()
+        val entries = Regex("\\{[^{}]*\"id\"\\s*:\\s*\"([^\"]+)\"[^{}]*\\}").findAll(text)
+        var failures = 0
+        for (match in entries) {
+            val entry = match.value
+            val id = Regex("\"id\"\\s*:\\s*\"([^\"]+)\"").find(entry)?.groupValues?.get(1) ?: continue
+            val hash = Regex("\"sha256\"\\s*:\\s*\"([0-9a-f]{64})\"").find(entry)?.groupValues?.get(1) ?: continue
+            val url = Regex("\"url\"\\s*:\\s*\"([^\"]+)\"").find(entry)?.groupValues?.get(1) ?: continue
+            val target = File(root, "content/packs/$id.db")
+            if (target.exists() && sha256(target) == hash) {
+                println("fetch: have pack $id")
+                continue
+            }
+            println("fetch: downloading pack $id")
+            failures += try {
+                try {
+                    download(url, target)
+                } catch (direct: Exception) {
+                    println("fetch: pack $id direct download failed (${direct.message ?: "error"}); trying gh")
+                    downloadWithGh(url, target)
+                }
+                val actual = sha256(target)
+                if (actual != hash) {
+                    println("fetch: pack $id hash $actual does not match $hash; deleted")
+                    target.delete()
+                    1
+                } else {
+                    println("fetch: pack $id verified (${target.length()} bytes)")
+                    0
+                }
+            } catch (error: Exception) {
+                println("fetch: pack $id failed: ${error.message ?: error::class.java.simpleName}")
+                1
+            }
+        }
+        return failures
     }
 
     /**

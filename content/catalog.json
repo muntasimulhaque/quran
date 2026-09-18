@@ -13,7 +13,9 @@
             "shipped": true,
             "ayahs": 6236,
             "bytes": 10010624,
-            "sha256": "47e10d5ace089ca835a424957099cb3d3cd219b1a2dd7326eab3618298def662"
+            "sha256": "47e10d5ace089ca835a424957099cb3d3cd219b1a2dd7326eab3618298def662",
+            "tag": "pack-core-47e10d5a",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-47e10d5a/core.db"
         },
         {
             "id": "translation-saheeh-en",

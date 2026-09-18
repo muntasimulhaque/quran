@@ -170,8 +170,6 @@ class Packs(private val root: File) {
         for (entry in entries) {
             val pack = entry.jsonObject
             val id = pack["id"]?.jsonPrimitive?.content ?: continue
-            val shipped = pack["shipped"]?.jsonPrimitive?.content?.toBoolean() ?: false
-            if (shipped) continue
             val tag = pack["tag"]?.jsonPrimitive?.content ?: continue
             val file = File(directory, "$id.db")
             if (!file.exists()) {
@@ -289,10 +287,8 @@ class Packs(private val root: File) {
             put("ayahs", pack.ayahs)
             put("bytes", file.length())
             put("sha256", hash)
-            if (!pack.shipped) {
-                put("tag", tag)
-                put("url", "https://github.com/muntasimulhaque/quran/releases/download/$tag/${pack.id}.db")
-            }
+            put("tag", tag)
+            put("url", "https://github.com/muntasimulhaque/quran/releases/download/$tag/${pack.id}.db")
         }
     }
 
