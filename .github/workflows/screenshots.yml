@@ -80,8 +80,9 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
           disable-animations: true
           script: |
-            ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest --console=plain
-            ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.WordByWordTest --console=plain
+            # One Gradle run: a second connectedAndroidTest invocation replaces
+            # the previous run's additional output, and the screenshots with it.
+            ./gradlew :app:connectedDebugAndroidTest --console=plain \n              -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest,io.github.muntasimulhaque.quran.WordByWordTest
             mkdir -p store-shots
             find app/build/outputs/connected_android_test_additional_output -type f -name '*.png' -exec cp {} store-shots/ ';'
             for f in store-shots/*.png; do mv "$f" "store-shots/${{ matrix.name }}_$(basename "$f")"; done
