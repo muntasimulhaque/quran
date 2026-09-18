@@ -296,18 +296,40 @@ implement it and update this list.
   permissions, and its R8 release needs extra keep rules. The page fonts
   ship in the base instead (D-018); reopen only with the owner.
 
-## Where the project stands (end of the fifth session)
+## Where the project stands (end of the sixth session)
 
-Shipped and verified: the reading surface (tap for chrome, long press for an
-ayah, per surah study, footnotes behind their markers, a word by word aid in
-English and Bengali), search across every installed source with an in-memory
-tafsir index, settings with themes, sizes, dim, reciters, and content packs,
-ten Gradle modules with one way dependencies, the content pipeline that
-splits the Quran into packs (core ten megabytes, everything else on demand),
-the app icon, the store kit, and a signed release bundle at about 147 MB.
-CI is green: core tests, lint, database and catalog checks, search round
-trips in three scripts, ten data tests, eleven app tests, and a screenshot
-tour whose PNGs are uploaded as artifacts.
+**Submitted to Google Play for review.** The app is complete: the reading
+surface (tap for chrome, long press for an ayah), per surah study, footnotes
+behind their markers, a word by word aid in English and Bengali, search
+across every installed source, settings with themes, sizes, dim, and content
+packs, ten Gradle modules with one way dependencies, the pack pipeline (the
+app ships a ten megabyte core pack and adds translations, tafsirs, word
+lists, and recitations on demand), the app icon, the store kit with
+screenshots for phone, 7 inch, and 10 inch tablets, a privacy policy served
+by GitHub Pages at https://muntasimulhaque.github.io/quran/privacy.html, and
+a signed release bundle of about 147 MB.
+
+CI is green on every push: core tests, lint, database and catalog checks,
+search round trips in three scripts, ten data tests, eleven app tests, and a
+three form factor screenshot capture whose PNGs are uploaded as artifacts.
+
+Housekeeping at the end of the session: the throwaway prototype, every build
+output, the extracted raw sources, and the 3.8 GB of working recitation audio
+packages were deleted, freeing about 8 GB. The store screenshots in
+`play-store/screenshots/` were kept on the owner's instruction.
+
+### How to regenerate what cleanup removed
+
+| Removed | Bring it back with |
+|---|---|
+| `app/build` and every module's `build/` | any `./gradlew` build; the store bundle is `./gradlew :app:bundleRelease` |
+| `content/work/verify` (extracted raw sources) | `./gradlew :tools:run --args="verify"` |
+| `content/work/audio-packs` (3.8 GB, all published) | `./gradlew :tools:run --args="audio packs"` |
+| `content/work/fonts-*` | `./gradlew :tools:run --args="fetch"` |
+
+Kept on purpose: `content/raw/` (the owner's manual QUL and QuranEnc exports,
+the provenance of every pack), `content/packs/` and `content/quran.db` (the
+Release assets, pinned by the catalog), and `play-store/screenshots/`.
 
 ## Next session: the remaining queue, in order
 
@@ -331,10 +353,9 @@ tour whose PNGs are uploaded as artifacts.
    content self check that verifies installed pack hashes.
 6. **Polish backlog.** The page turn shadow and haptic, a dim preview in the
    settings swatches, and any edge the screenshot tour reveals.
-7. **Content backlog.** More translations and tafsirs as packs (the pipeline
-   now makes each one a dataset entry, a pack definition, and a Release), and
-   a second mushaf script if a font and layout are chosen.
-
+7. **Content backlog.** More translations and tafsirs as packs (each one is a
+   dataset entry, a pack definition, and a Release), and a second mushaf
+   script if a font and layout are chosen.
 ## Traps worth remembering
 
 * QUL downloads need an account, so their datasets are placed by hand into

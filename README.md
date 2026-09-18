@@ -1,63 +1,104 @@
 # Quran: The Noble Book
 
-A free, open-source, fully offline Quran reader for Android.
+A free, open source Quran reader for Android. It opens on the page you left,
+turns like paper, and keeps the Quran text itself at the center: no ads, no
+trackers, no accounts, nothing collected, ever.
 
-Read the Mushaf page by page, or study ayah by ayah with the Saheeh
-International translation, word-by-word meanings, Tafsir Ibn Kathir, and
-Tafsir As-Sa'di, with recitation by Sheikh Muhammad Siddiq Al-Minshawi
-and Sheikh Mahmoud Khalil Al-Husary.
+**Status:** submitted to Google Play for review. The listing, icon, feature
+graphic, and screenshots are in [`play-store/`](play-store/).
 
-No ads, no trackers, no accounts, and no internet access, ever. The app
-does not declare the `INTERNET` permission, so it is incapable of opening
-a connection.
+## What it does
 
-On Google Play as **Quran: The Noble Book** (coming soon).
-
-## Status
-
-Foundation, content pipeline, and the first working app skeleton.
-
-All 26 source datasets pass checksum and structural verification, the text
-audit passes with 6235 of 6236 ayahs letter-identical and zero unexplained
-differences, and the content database is reproducible and committed at
-`content/quran.db`.
-
-The app now runs on the reader-first skeleton:
-
-- opens where the reader left off, in the remembered mode
-- Mushaf mode renders the real QPC V2 pages, swiped page by page, with an
-  LRU page cache so a turn is a texture draw
-- study mode shows the page's ayahs with the Saheeh International
-  translation
-- an Index sheet jumps to any surah by number, name, place, and length
-- the manuscript theme: paper, ink, lapis chrome, gold ornaments, Inter,
-  Literata, Amiri Quran, and the KFGQPC Mushaf typefaces
-- position and mode are remembered with DataStore
-
-The app declares no permissions and no network access. The release APK is about 145 MB because the 604 page fonts and the
-content database ship inside it. That makes it a complete, sideloadable
-Quran: one install, offline from the first second, no Play delivery
-library, and no permissions beyond the app private one from androidx
-core. The smaller-listing alternative, a fast-follow pack, was measured
-and rejected for its library weight and five merged permissions (D-018).
-
-## Privacy
-
-The app collects nothing. The policy is [online](https://muntasimulhaque.github.io/quran/privacy.html) and [in this repo](docs/privacy.html).
+- **Mushaf mode.** The page of the Madinah Mushaf, drawn glyph by glyph from
+  the QPC V2 page fonts, with the printed page's own furniture: surah names,
+  juz and hizb, and the page number in a gold medallion. A swipe turns the
+  page. A tap brings quiet chrome; a long press asks about the ayah under
+  your finger.
+- **Study mode.** One surah at a time, scrolls continuously to the end of the
+  surah and offers the next. Arabic, then the translation, then footnotes
+  behind their markers. An optional word by word aid puts each word's meaning
+  beneath it.
+- **The ayah card.** Save, note, copy, share, play from this ayah, word by
+  word, and every tafsir you have installed.
+- **Search.** Arabic text, every enabled translation and tafsir, word
+  meanings, surah names, and references like `2:255`. Results are exact and
+  instant, even over a forty megabyte tafsir.
+- **Recitation.** Minshawi and Husary, one surah at a time. The page follows
+  the reciter and the word being recited is washed as it is read.
+- **A library you choose.** The app ships the Quran text and its page layout
+  and nothing else. Translations, tafsirs, word lists, and recitations are
+  added when the reader wants them, from the project's own Releases, with the
+  size shown first and the file verified by SHA-256.
 
 ## The content
 
 The Arabic text is the KFGQPC Hafs text used with the King Fahd Glorious
 Quran Printing Complex fonts, audited word by word against the Tanzil
 Project text. The translation is Saheeh International, issued by Noor
-International Center and distributed by QuranEnc.com, version 1.1.2.
-Scripts, layouts, tafsirs, metadata, and recitations come from the
-Quranic Universal Library (QUL) by Tarteel. Every dataset carries its
-source, version, and credit, and every license is honored.
+International Center and distributed by QuranEnc.com. Scripts, layouts,
+tafsirs, metadata, and recitations come from the Quranic Universal Library
+(QUL) by Tarteel. Every dataset carries its source, version, and credit, and
+every license is honored: see [`docs/content-sources.md`](docs/content-sources.md).
+
+The library today, language by language:
+
+| Language | Translation | Tafsir | Word by word |
+|---|---|---|---|
+| English | Saheeh International | Ibn Kathir | yes |
+| Arabic | the Quran itself | As-Sa'di | |
+| Bengali | Taisirul Quran | Ibn Kathir | yes |
+
+## How it is built
+
+The app is ten small Gradle modules with one way dependencies, and a JVM
+content pipeline. The rules are in [`docs/architecture.md`](docs/architecture.md);
+the design constitution is in [`docs/design.md`](docs/design.md); the reasons
+behind every decision are in [`docs/decisions.md`](docs/decisions.md).
+
+```
+:core :data :content-assets :ui-kit
+:feature-mushaf :feature-study :feature-search :feature-browse
+:feature-playback :feature-settings
+:app            the wiring: activity, view model, screen, manifest
+:tools          the content pipeline (verify, audit, build, packs, audio)
+```
+
+## Building it
+
+```bash
+# A fresh clone needs the content packs, the database, and the fonts.
+./gradlew :tools:run --args="fetch"          # downloads and verifies them
+
+./gradlew :core:test                          # the pure Kotlin tests
+./gradlew :app:assembleDebug                  # a debug APK (carries every pack)
+./gradlew :app:bundleRelease                  # the signed release bundle
+```
+
+The release bundle carries only the core pack, ten megabytes of Quran text and
+page layout; the 604 page fonts are the bulk of the app, because it must
+render the Book with no network.
+
+The content pipeline, run on the maintainer's machine where the raw sources
+live:
+
+```bash
+./gradlew :tools:run --args="verify"   # every source hash and structure
+./gradlew :tools:run --args="audit"    # letter by letter against Tanzil
+./gradlew :tools:run --args="build"    # the database and the packs
+./gradlew :tools:run --args="checkdb"  # the committed database and catalog
+./gradlew :tools:run --args="search"   # Arabic, Bengali, and Latin search
+./gradlew :tools:run --args="packs"    # pack files and the catalog
+./gradlew :tools:run --args="audio"    # recitation packages
+```
+
+## Privacy
+
+The app collects nothing. The policy is [online](https://muntasimulhaque.github.io/quran/privacy.html)
+and [in this repo](docs/privacy.html). The one network use is a content pack
+or a recitation package the reader asks for, from the project's own Releases.
 
 ## License
 
-The code is MIT: see [LICENSE](LICENSE). The Quran text,
-translation, tafsir, fonts, and recitations are not ours to license and
-keep their own terms and credits, recorded in
-[docs/content-sources.md](docs/content-sources.md).
+The code is MIT: see [LICENSE](LICENSE). The Quran text, translation, tafsir,
+fonts, and recitations are not ours to license and keep their own terms and
+credits, recorded in [`docs/content-sources.md`](docs/content-sources.md).
