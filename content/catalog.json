@@ -1,0 +1,79 @@
+{
+    "version": 1,
+    "baseUrl": "https://github.com/muntasimulhaque/quran/releases/download",
+    "packs": [
+        {
+            "id": "core",
+            "type": "script",
+            "name": "Quran text and page layout",
+            "language": "ar",
+            "credit": "KFGQPC Hafs word by word, QPC V2 layout, audited against Tanzil Uthmani",
+            "license": "See docs/content-sources.md",
+            "version": "1",
+            "shipped": true,
+            "ayahs": 6236,
+            "bytes": 10010624,
+            "sha256": "47e10d5ace089ca835a424957099cb3d3cd219b1a2dd7326eab3618298def662"
+        },
+        {
+            "id": "translation-saheeh-en",
+            "type": "translation",
+            "name": "Saheeh International",
+            "language": "en",
+            "credit": "Noor International Center, via QuranEnc",
+            "license": "See docs/content-sources.md",
+            "version": "1.1.2",
+            "shipped": false,
+            "ayahs": 6236,
+            "bytes": 2269184,
+            "sha256": "4ed8d99e22ea80e15837d55a3f2a0ac91c8d78ecd61e779f9c28831b187914e9",
+            "tag": "pack-translation-saheeh-en-4ed8d99e",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-translation-saheeh-en-4ed8d99e/translation-saheeh-en.db"
+        },
+        {
+            "id": "tafsir-ibn-kathir-en",
+            "type": "tafsir",
+            "name": "Ibn Kathir",
+            "language": "en",
+            "credit": "Tafsir Ibn Kathir, via the Quranic Universal Library",
+            "license": "See docs/content-sources.md",
+            "version": "QUL",
+            "shipped": false,
+            "ayahs": 6236,
+            "bytes": 23945216,
+            "sha256": "b54c27063236ee19616e719f7e3020f527854fc80885e623e495e015391274d3",
+            "tag": "pack-tafsir-ibn-kathir-en-b54c2706",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-tafsir-ibn-kathir-en-b54c2706/tafsir-ibn-kathir-en.db"
+        },
+        {
+            "id": "tafsir-as-sadi-ar",
+            "type": "tafsir",
+            "name": "As-Sa'di",
+            "language": "ar",
+            "credit": "Tafsir As-Sa'di, via QuranEnc",
+            "license": "See docs/content-sources.md",
+            "version": "1.0.0",
+            "shipped": false,
+            "ayahs": 6236,
+            "bytes": 15859712,
+            "sha256": "5945528bd8ed6a173c56c5d65138ceff9bcce2f8e9fe36e266aa43e3c85b6f50",
+            "tag": "pack-tafsir-as-sadi-ar-5945528b",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-tafsir-as-sadi-ar-5945528b/tafsir-as-sadi-ar.db"
+        },
+        {
+            "id": "words-en",
+            "type": "words",
+            "name": "Word by word",
+            "language": "en",
+            "credit": "Quran.com word by word, via the Quranic Universal Library",
+            "license": "See docs/content-sources.md",
+            "version": "QUL",
+            "shipped": false,
+            "ayahs": 6236,
+            "bytes": 3891200,
+            "sha256": "22e9504de83ce8468155121ceca4d5389e96d136f0d9ef1daed2735ba1fb62aa",
+            "tag": "pack-words-en-22e9504d",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-words-en-22e9504d/words-en.db"
+        }
+    ]
+}

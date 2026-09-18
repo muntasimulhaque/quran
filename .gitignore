@@ -29,3 +29,6 @@ Thumbs.db
 # The content database is a derived artifact: it lives in the project's
 # Releases, addressed by its own hash, and is fetched by tools fetch.
 content/quran.db
+
+# Pack files are content-addressed Release assets, not repository files.
+content/packs/

@@ -15,10 +15,15 @@ fun main(args: Array<String>) {
         "audio" -> Audio(root).run(args.drop(1))
         "build" -> Build(root).run()
         "fonts" -> Fonts(root).run()
+        "packs" -> when (args.getOrNull(1)) {
+            "publish" -> Packs(root).publish()
+            else -> Packs(root).run()
+        }
         "fetch" -> Fetch(root).run()
         "checkdb" -> CheckDb(root).run()
         "help", "--help" -> {
-            println("usage: tools <verify|audit|search|audio|build|fonts|fetch|checkdb>")
+            println("usage: tools <verify|audit|search|audio|build|fonts|fetch|checkdb|packs>")
+        println("       tools packs [build|publish]")
             0
         }
         else -> {
