@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mode_mushaf">Mushaf</string>
+    <string name="mode_study">Study</string>
+</resources>

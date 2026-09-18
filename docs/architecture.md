@@ -48,8 +48,9 @@ other.
    function. That is why a feature can be read top to bottom, tested, and
    previewed with made-up data.
 2. **One file, one job.** No file in a feature passes a few hundred lines
-   without being asked why. The biggest today is the settings sheet at 596
-   lines, and it is a list of rows; `ContentDatabase` at 889 lines is the one
+   without being asked why. The settings sheet was split into a frame, its
+   rows, and the about and credits sheet; the reader screen keeps the shell
+   and hands the pager to a function of its own. `ContentDatabase` is the one
    honest exception, because every query in the app lives in one auditable
    place, and splitting it by table would scatter the transaction rules.
 3. **No Android framework above the data line.** `core` is pure Kotlin, so
@@ -59,9 +60,11 @@ other.
    (`PackDownloader`, `RecitationDownloader`) and happen only when the app
    asks on the reader's behalf, after the size has been shown.
 5. **Resources stay where they are read.** The fonts live in
-   `content-assets`, the strings and the theme in `app`, and a feature that
-   needs a font imports it from the module that owns it. Assets are read at
-   runtime through `context.assets`, which the APK merges from every module.
+   `content-assets`, and every sentence the reader can see lives in a
+   `strings.xml` in the module that draws it: `app` for the shell, each
+   feature for its own surface, `ui-kit` for the two mode names. Nothing in
+   Kotlin carries user facing English. Assets are read at runtime through
+   `context.assets`, which the APK merges from every module.
 
 ## Why this shape
 
@@ -83,10 +86,19 @@ other.
 
 ## What is measured, not assumed
 
-* `:core:test` runs the normalizer, parser, and search primitives.
-* `:data:connectedDebugAndroidTest` runs the saved-store and manifest
-  contracts.
-* `:app:connectedDebugAndroidTest` runs the search suite against the
-  shipped content, and the screenshot tour that walks every surface.
-* CI runs all of it, plus lint, plus the content gates that can run without
-  the raw sources, and uploads the screenshots as build artifacts.
+* `:core:test` runs the normalizer, parser, search primitives, and the scan
+  that refuses an em dash anywhere in the repository.
+* `:data:testDebugUnitTest` runs the pack id contract, and
+  `:data:connectedDebugAndroidTest` runs the saved store, its export and
+  import, and the recitation manifest.
+* `:app:connectedDebugAndroidTest` runs the search suite against the shipped
+  content, the word by word aid in both languages, and the screenshot tour
+  that walks every surface, waiting for the screen to settle before it keeps
+  a frame.
+* CI runs all of it, plus lint (clean, with nothing suppressed), plus the
+  content gates that can run without the raw sources, and uploads the
+  screenshots as build artifacts.
+* The performance numbers are measured, not assumed: a launch in a minified
+  release build on a software rendered emulator reaches its first frame at
+  about 780 ms warm, and the page picture is on disk before the content
+  database opens.

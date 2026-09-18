@@ -147,6 +147,8 @@ data class SearchRequest(
     val tafsirPacks: List<String> = emptyList(),
     val packNames: Map<String, String> = emptyMap(),
     val packLanguages: Map<String, String> = emptyMap(),
+    /** The word list to read meanings from; English when the reader has none of their language. */
+    val wordsPack: String = "words-en",
     val limit: Int = 200,
 )
 
@@ -196,14 +198,12 @@ data class ContentPack(
     val installed: Boolean = false,
 )
 
-/** A light row for building the study list without reading every text. */
-data class AyahHeader(
-    val number: Int,
-    val surah: Int,
-    val ayah: Int,
-    val verseKey: String,
-    val page: Int,
+/** The first ayah of one juz, with the reference it lands on. */
+data class JuzStart(
     val juz: Int,
+    val ayah: Int,
+    val surah: Int,
+    val verseKey: String,
 )
 
 /** One downloaded surah of one reciter, offered for removal. */

@@ -1,3 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Quran</string>
+
+    <string name="first_paint_title">القرآن</string>
+    <string name="first_paint_subtitle">The Noble Book</string>
+    <string name="reader_fallback_title">Quran</string>
+    <string name="surah_fallback_name">Surah %1$d</string>
+    <string name="juz_label">Juz %1$d</string>
+
+    <string name="hint_long_press_ayah">Press and hold any ayah for its actions</string>
+
+    <string name="action_browse">Browse the Quran</string>
+    <string name="action_search">Search</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_listen">Listen</string>
+    <string name="action_saved">Saved</string>
+    <string name="action_save">Save</string>
+    <string name="action_play">Play</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_share">Share</string>
+    <string name="action_more">More</string>
+    <string name="action_retry">Retry</string>
+    <string name="action_close">Close</string>
+    <string name="action_cancel">Cancel</string>
+
+    <string name="clip_label_ayah">Ayah</string>
+
+    <string name="pack_preparing">Preparing…</string>
+    <string name="pack_downloading">Downloading %1$d%% · %2$s</string>
+    <string name="pack_download_failed">Could not download. Check your connection.</string>
+
+    <string name="playback_continue_to">Continue to %1$s · %2$s</string>
+    <string name="playback_offer">%1$s · %2$s</string>
+
+    <string name="content_problem_title">The Quran text could not be opened</string>
+    <string name="content_problem_body">Something on this device stopped the app from reading its own content. Nothing has been lost: your saved ayahs and settings are untouched.</string>
+    <string name="content_problem_retry">Try again</string>
 </resources>

@@ -1,0 +1,132 @@
+name: release
+
+# A tag builds the signed bundle, proves it, and attaches it to a draft
+# GitHub release with its checksum. The upload keystore comes from repository
+# secrets and never enters the tree; without the secrets the workflow still
+# builds, and says out loud that the bundle is unsigned.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bundle:
+    name: Signed bundle and draft release
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Accept SDK licenses
+        run: yes | sdkmanager --licenses > /dev/null 2>&1 || true
+
+      - name: Cache content work
+        uses: actions/cache@v4
+        with:
+          path: |
+            content/work
+            content/quran.db
+          key: content-work-${{ hashFiles('content/manifest.json', 'content/build-report.json') }}
+
+      # A tag that does not name the version the app carries would ship a
+      # bundle whose store version no one asked for.
+      - name: Check the tag against the app version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          carried=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
+          if [ "$tag" != "$carried" ]; then
+            echo "::error::tag ${GITHUB_REF_NAME} names $tag but the app carries $carried"
+            exit 1
+          fi
+
+      - name: Core tests
+        run: ./gradlew :core:test :data:testDebugUnitTest --console=plain
+
+      - name: Fetch content
+        run: ./gradlew :tools:run --args="fetch" --console=plain
+
+      - name: Content gates
+        run: |
+          ./gradlew :tools:run --args="checkdb" --console=plain
+          ./gradlew :tools:run --args="search" --console=plain
+
+      - name: Write the upload keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.UPLOAD_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.UPLOAD_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.UPLOAD_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "No keystore secret is configured; the bundle will be unsigned."
+            exit 0
+          fi
+          mkdir -p "$RUNNER_TEMP/signing"
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/signing/upload.jks"
+          {
+            echo "storeFile=$RUNNER_TEMP/signing/upload.jks"
+            echo "storePassword=$STORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > "$RUNNER_TEMP/signing/keystore.properties"
+
+      - name: Build the bundle
+        run: |
+          if [ -f "$RUNNER_TEMP/signing/keystore.properties" ]; then
+            ./gradlew :app:bundleRelease \
+              -Pquran.keystore="$RUNNER_TEMP/signing/keystore.properties" --console=plain
+          else
+            ./gradlew :app:bundleRelease --console=plain
+          fi
+
+      - name: Verify the signature
+        run: |
+          bundle=app/build/outputs/bundle/release/app-release.aab
+          if [ -f "$RUNNER_TEMP/signing/keystore.properties" ]; then
+            jarsigner -verify -verbose -certs "$bundle" | tail -n 5
+          else
+            echo "The bundle is unsigned because no keystore secret is configured."
+          fi
+
+      - name: Checksum the bundle
+        run: |
+          bundle=app/build/outputs/bundle/release/app-release.aab
+          sha256sum "$bundle" | sed "s| .*|  quran-${GITHUB_REF_NAME}.aab|" | tee "$RUNNER_TEMP/quran.aab.sha256"
+          cp "$bundle" "$RUNNER_TEMP/quran-${GITHUB_REF_NAME}.aab"
+
+      - name: Draft the release
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          gh release create "$tag" \
+            --draft \
+            --title "Quran $tag" \
+            --generate-notes || true
+          gh release upload "$tag" \
+            "$RUNNER_TEMP/quran-${tag}.aab" \
+            "$RUNNER_TEMP/quran.aab.sha256" \
+            --clobber
+          gh release view "$tag" --json url,tagName,isDraft,name > "$RUNNER_TEMP/release.json"
+          cat "$RUNNER_TEMP/release.json"
+
+      - name: Upload the bundle as an artifact too
+        uses: actions/upload-artifact@v4
+        with:
+          name: quran-release-bundle
+          path: |
+            ${{ runner.temp }}/quran-${{ github.ref_name }}.aab
+            ${{ runner.temp }}/quran.aab.sha256

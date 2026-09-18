@@ -101,8 +101,10 @@ dead letter.
   hand-off.
 - **Small pieces.** Files under 400 lines, functions under 40. Split
   early; a name that says the idea beats a name that says the screen.
-- **User-facing strings** live in `app/src/main/res/values/strings.xml`,
-  nowhere else. Colors live in the theme, nowhere else.
+- **User-facing strings** live in a `strings.xml` in the module that
+  draws them, nowhere in Kotlin: `app` for the shell, each feature for its
+  own surface, `ui-kit` for the two mode names. Arabic content stays data.
+  Colors live in the theme, nowhere else.
 
 ## Build, test, verify
 
@@ -191,12 +193,14 @@ Where truth lives, by question (filled in as code lands):
 | --- | --- |
 | `core/` | pure JVM Kotlin, zero `android.*` imports: references, search normalization, rich text parsing, models |
 | `data/` | read-only content database access, the saved-ayah user database, page font store, preferences, models; instrumented tests in `data/src/androidTest` |
-| `app/` | Compose UI: reader, study card, sheets, theme, fonts, playback service |
+| `app/` | the shell: activity, view model, the screen that composes the features, the shell's strings |
+| `feature-*/` | one reading surface each (mushaf, study, search, browse, playback, settings), each owning its own strings and icons |
+| `ui-kit/` | the shared look: theme and palettes, the hand-drawn icons, the rich text views, the small formatters |
 | `tools/` | offline pipeline: content fetch, verify, audit, database build, font checks, golden renders |
 | `content/` | `quran.db` (the built, committed content database), `recitation-manifest.json` (published recitation packages with their sizes and hashes), `manifest.json`, `audit-report.md`, `build-report.json`; raw downloads under `raw/` are local and gitignored |
 | `docs/` | `decisions.md`, `content-sources.md`, privacy page, bundled font licenses |
 | `play-store/` | listing kit, screenshots per form factor, hand-off AAB |
-| `.github/workflows/` | `build.yml`, `screenshots.yml` |
+| `.github/workflows/` | `build.yml`, `screenshots.yml`, `release.yml` |
 
 ## Glossary
 
@@ -240,6 +244,17 @@ implement it and update this list.
 
 ## Traps with no code home
 
+- The launch picture (`feature-mushaf/PageCache`, `cacheDir/last-page`) is
+  keyed by page, pixel width, and theme name. A launch at another width or in
+  another theme must miss it, not stretch it. Nothing depends on it: a miss is
+  the old first paint.
+- A screen capture on a software rendered emulator can lag the composition by
+  seconds. The screenshot tour waits for two identical frames before it keeps
+  one; never replace that with a fixed sleep.
+- The pack catalog's license line is the licenses of the datasets that pack is
+  built from, joined with ` · `, and the app splits on that separator to show
+  one per line. `tools/PackSources.kt` is the only mapping from pack to
+  dataset; do not hand-write a license into the catalog again.
 - Android's text shaper breaks Arabic letter joining at any style boundary
   inside a word. Never color or style part of a word. Word-level
   boundaries are safe; glyph words are safest.
@@ -296,66 +311,65 @@ implement it and update this list.
   permissions, and its R8 release needs extra keep rules. The page fonts
   ship in the base instead (D-018); reopen only with the owner.
 
-## Where the project stands (end of the sixth session)
+## Where the project stands (end of the seventh session)
 
-**Submitted to Google Play for review.** The app is complete: the reading
-surface (tap for chrome, long press for an ayah), per surah study, footnotes
-behind their markers, a word by word aid in English and Bengali, search
-across every installed source, settings with themes, sizes, dim, and content
-packs, ten Gradle modules with one way dependencies, the pack pipeline (the
-app ships a ten megabyte core pack and adds translations, tafsirs, word
-lists, and recitations on demand), the app icon, the store kit with
-screenshots for phone, 7 inch, and 10 inch tablets, a privacy policy served
-by GitHub Pages at https://muntasimulhaque.github.io/quran/privacy.html, and
-a signed release bundle of about 147 MB.
+**Submitted to Google Play for review, and audited end to end.** The reading
+surface, both modes, the ayah card, search over every installed source, the
+settings sheet, the pack pipeline, the store kit, and the privacy page are as
+they were; the seventh session was about making all of it faster, quieter, and
+true.
 
-CI is green on every push: core tests, lint, database and catalog checks,
-search round trips in three scripts, ten data tests, eleven app tests, and a
-three form factor screenshot capture whose PNGs are uploaded as artifacts.
+What changed: a launch paints the page the reader left from a cached bitmap
+before the content database opens (781 ms to the window, 930 ms fully drawn on
+a software rendered emulator, in a minified release build with a baseline
+profile); the Mushaf page carries one TalkBack node per ayah with an action of
+its own; every control is a real 48 dp target and no muted text is below
+4.5:1; the interface speaks through string resources, one per module, so a
+second language is a folder and a translator; saved ayahs and notes export and
+import as one small document; the app can read its own content back and name a
+damaged pack, and a core pack that cannot be opened offers a way forward
+instead of a crash; a `v<version>` tag builds, verifies, and drafts a release;
+the page turns with a shadow and a settle tick; the night themes own their
+washes and their system bar icons; the credits screen prints the real
+license of every dataset a pack contains.
 
-Housekeeping at the end of the session: the throwaway prototype, every build
-output, the extracted raw sources, and the 3.8 GB of working recitation audio
-packages were deleted, freeing about 8 GB. The store screenshots in
-`play-store/screenshots/` were kept on the owner's instruction.
+The bugs of the session are recorded in D-044: a word list that ignored its
+language, a tafsir index that never warmed, a search excerpt that could cut
+the passage it was built around, a far jump that animated page by page, two
+lookups rebuilding work on the hot path, and the store screenshots that never
+showed the chrome.
 
-### How to regenerate what cleanup removed
-
-| Removed | Bring it back with |
-|---|---|
-| `app/build` and every module's `build/` | any `./gradlew` build; the store bundle is `./gradlew :app:bundleRelease` |
-| `content/work/verify` (extracted raw sources) | `./gradlew :tools:run --args="verify"` |
-| `content/work/audio-packs` (3.8 GB, all published) | `./gradlew :tools:run --args="audio packs"` |
-| `content/work/fonts-*` | `./gradlew :tools:run --args="fetch"` |
-
-Kept on purpose: `content/raw/` (the owner's manual QUL and QuranEnc exports,
-the provenance of every pack), `content/packs/` and `content/quran.db` (the
-Release assets, pinned by the catalog), and `play-store/screenshots/`.
+CI is green on every push: core tests (37, including the em dash scan), data
+unit and instrumented tests (13, with export and import), app instrumented
+tests (11, with the screenshot tour), lint with no warnings, database and
+catalog checks, search round trips in three scripts, and three form factor
+screenshots whose PNGs are uploaded as artifacts.
 
 ## Next session: the remaining queue, in order
 
-1. **Instant launch and the performance pass.** Paint the last read page from
-   a disk bitmap on the first frame, add a baseline profile, run
-   Macrobenchmark for startup and page turns in CI, and measure on a real
-   device instead of the software rendered emulator. Budget to hold: under
-   300 ms to the first painted page on a warm start, under 800 ms on the very
-   first launch.
-2. **Accessibility and world readiness.** TalkBack reading of the Mushaf page
-   as text with one node per ayah, a contrast and touch target audit, font
-   scale behaviour in the study view, and externalising the interface strings
-   out of Kotlin so the UI can be translated.
-3. **Trust work.** Export and import of saved ayahs and notes, so a reader can
-   move their own work to a new phone.
-4. **Release engineering.** A tag driven workflow that builds the signed
-   bundle, verifies it, and attaches it to a draft GitHub release with
-   checksums, plus keeping `play-store/RELEASE.md` true.
-5. **Robustness and security review.** Exported components, backup rules, R8
-   output, cleartext policy, corrupt or truncated pack handling, and an in app
-   content self check that verifies installed pack hashes.
-6. **Polish backlog.** The page turn shadow and haptic, a dim preview in the
-   settings swatches, and any edge the screenshot tour reveals.
-7. **Content backlog.** More translations and tafsirs as packs (each one is a
-   dataset entry, a pack definition, and a Release), and a second mushaf
-   script if a font and layout are chosen.
+1. **Measure on real hardware.** The numbers in D-037 come from a software
+   rendered emulator, the slowest Android this app will run on. A
+   Macrobenchmark module for startup and page turns, run on a phone, is the
+   only way to hold the budget the design document sets (under 300 ms to the
+   first painted page on a warm start) and to prove the baseline profile is
+   pulling its weight.
+2. **The second language.** The strings are ready for one; the reader is not.
+   A translation pass needs a translator for the interface, a `values-xx`
+   folder, and the same care the Arabic content gets: a real review, not a
+   machine.
+3. **Content backlog.** More translations and tafsirs as packs (each one is a
+   dataset entry in `PackSources`, a pack definition, and a Release), and a
+   second mushaf script if a font and layout are chosen.
+4. **Instant launch, second step.** A pre-rendered bitmap of the *next* page
+   in the direction the reader was reading, so the first swipe after a launch
+   is also a texture draw.
+5. **Trust work, second step.** A merge preview before an import applies
+   ("12 saved ayahs, 3 notes"), and a way to move a single note into the
+   reader's own file rather than the whole document.
+6. **Robustness, second step.** A pack that fails verification at download
+   time should say which check failed (size, hash, or unpack) rather than one
+   line for all three, and the content self check should offer the removal it
+   recommends.
 ## Traps worth remembering
 
 * QUL downloads need an account, so their datasets are placed by hand into

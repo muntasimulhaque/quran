@@ -8,7 +8,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.muntasimulhaque.quran.data.Ayah
-import io.github.muntasimulhaque.quran.data.AyahHeader
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.ContentDatabase
@@ -17,6 +16,7 @@ import io.github.muntasimulhaque.quran.data.DownloadedSurah
 import io.github.muntasimulhaque.quran.data.PackCatalog
 import io.github.muntasimulhaque.quran.data.PackDownloader
 import io.github.muntasimulhaque.quran.data.PackStore
+import io.github.muntasimulhaque.quran.data.PackVerifier
 import io.github.muntasimulhaque.quran.data.PageFontStore
 import io.github.muntasimulhaque.quran.data.PagePosition
 import io.github.muntasimulhaque.quran.data.PackType
@@ -30,13 +30,16 @@ import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.StudyRow
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.TextSize
-import io.github.muntasimulhaque.quran.data.TranslationText
-import io.github.muntasimulhaque.quran.data.Word
-import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.playback.PlaybackController
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
+import io.github.muntasimulhaque.quran.ui.settings.ContentCheck
+import io.github.muntasimulhaque.quran.ui.settings.DataNotice
+import io.github.muntasimulhaque.quran.ui.mushaf.PageKey
 import io.github.muntasimulhaque.quran.ui.mushaf.PageRenderer
+import io.github.muntasimulhaque.quran.ui.mushaf.StartupPage
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
@@ -80,13 +83,25 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     var ready by mutableStateOf(false)
         private set
 
+    /** True when the content itself could not be opened on this device. */
+    var failure by mutableStateOf(false)
+        private set
+
     /** The Mushaf page of the reader's place, kept in step with the pager. */
     var page by mutableIntStateOf(1)
         private set
     var position by mutableStateOf<PagePosition?>(null)
         private set
-    var headers by mutableStateOf<List<AyahHeader>>(emptyList())
+
+    /**
+     * The page picture from the last session. It is loaded before anything
+     * else and shown until the reader's page paints, so a launch lands on the
+     * page the reader left instead of on a blank sheet.
+     */
+    var startupPage by mutableStateOf<StartupPage?>(null)
         private set
+
+    private var pageCacheJob: Job? = null
 
     val content: ContentDatabase? get() = contentDatabase
     val fonts: PageFontStore get() = pageFonts
@@ -108,6 +123,13 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     val selectedTranslation: ContentPack?
         get() = translationPacks.firstOrNull { it.id == settings.translationPack && it.installed }
 
+    /**
+     * The language the word by word aid should speak: the language of the
+     * reading the reader chose, so the meanings under an ayah and the words in
+     * a card match the translation beside them.
+     */
+    val wordLanguage: String get() = selectedTranslation?.language ?: "en"
+
     /** A pack the reader asked for, while it downloads. */
     data class PackSetup(
         val pack: ContentPack,
@@ -118,32 +140,24 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     var packSetup by mutableStateOf<PackSetup?>(null)
         private set
 
+    /** What the last export or import did, said once under the rows. */
+    var dataNotice by mutableStateOf<DataNotice?>(null)
+        private set
+
+    /** What the content self check is doing, or what it found. */
+    var contentCheck by mutableStateOf<ContentCheck?>(null)
+        private set
+
     private val rowCache = object : LinkedHashMap<Int, StudyRow>(64, 0.75f, true) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Int, StudyRow>?): Boolean = size > 160
     }
 
     init {
-        viewModelScope.launch {
-            catalog = PackCatalog.load(getApplication())
-            installed = store.installed()
-            val database = ContentDatabase.open(getApplication(), catalog, installed)
-            contentDatabase = database
-            playback.attach(database)
-            surahs = database.surahs()
-            packs = database.packs()
-            recitations = database.recitations()
-            loadHeaders(database)
-            applySettings(settingsStore.settings.first(), database)
-            ready = true
-        }
+        // The page picture comes first: it is the reader's place, and it must
+        // be ready before the content database has even opened.
+        viewModelScope.launch { startupPage = renderer.loadStartupPage() }
+        openLibrary()
         viewModelScope.launch { savedStore.load() }
-        // Warm the tafsir search index once the reader is reading.
-        viewModelScope.launch {
-            val database = contentDatabase ?: return@launch
-            withContext(Dispatchers.IO) {
-                database.prewarmSearch(settingsStore.settings.first().tafsirPacks.toList())
-            }
-        }
         viewModelScope.launch {
             settingsStore.settings.collect { next ->
                 val database = contentDatabase
@@ -168,6 +182,47 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    /**
+     * Opens the reader's library, or reports that it could not be opened. A
+     * failure here is the one thing that would keep the reader from the text,
+     * so it is a calm screen with one way forward, never a crash.
+     */
+    private fun openLibrary() {
+        viewModelScope.launch {
+            failure = false
+            val application = getApplication<Application>()
+            catalog = PackCatalog.load(application)
+            installed = store.installed()
+            val opened = runCatching { ContentDatabase.open(application, catalog, installed) }
+            val database = opened.getOrElse {
+                android.util.Log.e(TAG, "the content library could not be opened", it)
+                failure = true
+                return@launch
+            }
+            contentDatabase = database
+            playback.attach(database)
+            // The reader's settings are read once, and everything that follows
+            // uses that same value: the store is not read twice for one launch.
+            val stored = settingsStore.settings.first()
+            settings = stored
+            surahs = database.surahs()
+            indexSurahs()
+            packs = database.packs()
+            recitations = database.recitations()
+            setPlace(stored.ayah, database, persist = false)
+            ready = true
+            // The tafsir index is the one thing a first search would wait for,
+            // so it is built now, on a worker, while the reader is reading.
+            withContext(Dispatchers.IO) { database.prewarmSearch(stored.tafsirPacks.toList()) }
+        }
+    }
+
+    /** After the content could not be opened, this tries again from the start. */
+    fun retryOpen() {
+        if (ready) return
+        openLibrary()
+    }
+
     private suspend fun applySettings(next: AppSettings, database: ContentDatabase) {
         val previous = settings
         settings = next
@@ -181,27 +236,51 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    private fun loadHeaders(database: ContentDatabase) {
-        headers = database.ayahHeaders()
+    /**
+     * The surah of every ayah and the first ayah of every surah, computed
+     * once from the surah table's own counts. The Quran's ayah numbering is a
+     * single ascending run, so this is arithmetic, not a query: the study
+     * list asks for it on every scroll and the top bar asks on every tap.
+     */
+    private fun indexSurahs() {
+        val byAyah = IntArray(TOTAL_AYAHS + 1)
+        val firstAyah = IntArray(115)
+        var next = 1
+        for (surah in surahs) {
+            firstAyah[surah.number] = next
+            val end = (next + surah.versesCount).coerceAtMost(TOTAL_AYAHS + 1)
+            for (number in next until end) byAyah[number] = surah.number
+            next = end
+        }
+        surahAt = byAyah
+        firstAyahOf = firstAyah
+        surahIndexByNumber = null
     }
 
+    private var surahAt: IntArray = IntArray(0)
+    private var firstAyahOf: IntArray = IntArray(0)
+
     /**
-     * The surah of an ayah, from the header list already in memory. The list
-     * is in ayah order, so this is one array read and never touches disk.
+     * The surah of an ayah, from the index already in memory. One array read,
+     * and never a disk lookup.
      */
     fun surahOf(ayah: Int): Surah? {
-        val number = headers.getOrNull(ayah.coerceIn(1, 6236) - 1)?.surah ?: return null
+        val clamped = ayah.coerceIn(1, TOTAL_AYAHS)
+        val number = surahAt.getOrNull(clamped) ?: 0
         return surahByNumber[number]
     }
 
     /** The ayah numbers of one surah, in order, from the same memory. */
     fun ayahNumbersOfSurah(surah: Int): List<Int> {
-        val first = contentDatabase?.firstAyahOfSurah(surah) ?: return emptyList()
+        val first = firstAyahOf.getOrNull(surah)?.takeIf { it > 0 } ?: return emptyList()
         val count = surahByNumber[surah]?.versesCount ?: return emptyList()
         return (first until first + count).toList()
     }
 
-    private val surahByNumber: Map<Int, Surah> get() = surahs.associateBy { it.number }
+    private val surahByNumber: Map<Int, Surah>
+        get() = surahIndexByNumber ?: surahs.associateBy { it.number }.also { surahIndexByNumber = it }
+
+    private var surahIndexByNumber: Map<Int, Surah>? = null
 
     /**
      * Moves the reader's place: the page follows the ayah, and the ayah is
@@ -214,7 +293,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         if (persist && settings.ayah != clamped) settingsStore.setAyah(clamped)
     }
 
-    fun onPageSettled(page: Int) {
+    fun onPageSettled(page: Int, widthPx: Int, theme: String) {
         val database = contentDatabase ?: return
         this.page = page
         position = database.pagePosition(page)
@@ -223,6 +302,20 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             settings = settings.copy(ayah = ayah)
             viewModelScope.launch { settingsStore.setAyah(ayah) }
         }
+        // The page picture is written once the reader rests, not while they
+        // swipe: a settle that is followed by another cancels the write.
+        if (widthPx > 0) {
+            pageCacheJob?.cancel()
+            pageCacheJob = viewModelScope.launch {
+                delay(PAGE_CACHE_DELAY_MS)
+                renderer.rememberStartupPage(PageKey(page, widthPx, theme))
+            }
+        }
+    }
+
+    /** The picture has been replaced by the real page; it can be let go. */
+    fun releaseStartupPage() {
+        startupPage = null
     }
 
     /** The reader scrolled the study list and stopped. */
@@ -419,7 +512,8 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         withContext(Dispatchers.IO) { fresh.prewarmSearch(settings.tafsirPacks.toList()) }
     }
 
-    fun selectRecitation(id: String) {        if (id == settings.recitation) return
+    fun selectRecitation(id: String) {
+        if (id == settings.recitation) return
         settings = settings.copy(recitation = id)
         viewModelScope.launch { settingsStore.setRecitation(id) }
         val current = playback.state.value.ayahNumber ?: return
@@ -449,6 +543,45 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
     fun toggleSaved(ayah: Ayah) {
         viewModelScope.launch { savedStore.toggle(ayah.number) }
+    }
+
+    fun hasSavedAyahs(): Boolean = saved.value.isNotEmpty()
+
+    /** The reader's saved work as a document, or null when there is none. */
+    suspend fun exportSavedJson(): String? =
+        if (saved.value.isEmpty()) null else savedStore.exportJson()
+
+    /** Reads a document the reader chose and merges it into their own rows. */
+    fun importSaved(text: String?) {
+        if (text == null) {
+            dataNotice = DataNotice.ImportFailed
+            return
+        }
+        viewModelScope.launch {
+            dataNotice = savedStore.importJson(text).fold(
+                onSuccess = { added ->
+                    if (added > 0) DataNotice.Imported(added) else DataNotice.NothingImported
+                },
+                onFailure = { DataNotice.ImportFailed },
+            )
+        }
+    }
+
+    fun reportDataNotice(notice: DataNotice?) {
+        dataNotice = notice
+    }
+
+    /**
+     * Reads every installed pack back and compares it with the fingerprint
+     * the catalog recorded. This is the reader's own second look at the
+     * library, not something that runs on its own.
+     */
+    fun checkContent() {
+        viewModelScope.launch {
+            contentCheck = ContentCheck.Running
+            val damaged = PackVerifier(getApplication()).damaged(packs)
+            contentCheck = ContentCheck.Done(damaged)
+        }
     }
 
     fun setNote(ayah: Ayah, note: String?) {
@@ -525,8 +658,18 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         contentDatabase?.recitationAyah(recitation, 1)?.audioPath?.substringBeforeLast('/')
 
     override fun onCleared() {
+        savedStore.close()
         contentDatabase?.close()
         contentDatabase = null
-        super.onCleared()
+    }
+
+    private companion object {
+        const val TAG = "ReaderViewModel"
+
+        /** The Quran's ayah count; the numbering is one ascending run. */
+        const val TOTAL_AYAHS = 6236
+
+        /** How long a settled page waits before its picture is written. */
+        const val PAGE_CACHE_DELAY_MS = 350L
     }
 }

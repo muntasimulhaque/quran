@@ -12,13 +12,20 @@ plugins {
 // against each layout it has worn rather than one path that a tidy-up turns
 // into a silent unsigned build. When the file is absent (a fresh clone, CI),
 // the release build degrades to unsigned instead of failing.
+//
+// A build can also point at a keystore properties file of its own with
+// `-Pquran.keystore=<file>`; the release workflow uses that to sign from
+// repository secrets that exist only inside the runner.
 val keystoreLayouts = listOf(
     "BSCPLC/DM (Development)/Personal Docs/Pers/My Apps/Google Play Signing Key/keystore.properties",
     "BSCPLC/DM (Development)/Personal Docs/Pers/Google Play Signing Key/keystore.properties",
 )
-val keystoreFile = listOf("D:", "E:")
-    .flatMap { drive -> keystoreLayouts.map { file("$drive/GDrive/$it") } }
-    .firstOrNull { it.exists() }
+val keystoreFile: java.io.File? = (project.findProperty("quran.keystore") as String?)
+    ?.let { file(it) }
+    ?.takeIf { it.isFile }
+    ?: listOf("D:", "E:")
+        .flatMap { drive -> keystoreLayouts.map { file("$drive/GDrive/$it") } }
+        .firstOrNull { it.exists() }
 
 val releaseKeystore = Properties()
 if (keystoreFile != null) {
@@ -145,6 +152,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     sourceSets.getByName("main").assets.directories.add(contentAssets.get().asFile.absolutePath)
     // The packs that exist only for development, on the debug variant alone.

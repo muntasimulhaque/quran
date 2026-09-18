@@ -3,6 +3,7 @@ package io.github.muntasimulhaque.quran
 import android.graphics.Bitmap
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithText
@@ -38,10 +39,28 @@ class ScreenshotTest {
     @get:Rule
     val rule = createAndroidComposeRule<MainActivity>()
 
+    /**
+     * Waits until the screen has stopped changing, then keeps the frame. The
+     * emulator draws in software, so a frame that includes a newly summoned
+     * control can take seconds to appear; a fixed sleep would photograph the
+     * frame before it.
+     */
     private fun capture(name: String) {
         rule.waitForIdle()
-        Thread.sleep(450)
-        val bitmap = androidx.test.runner.screenshot.Screenshot.capture().bitmap
+        var previous: Bitmap? = null
+        repeat(20) {
+            Thread.sleep(400)
+            val bitmap = androidx.test.runner.screenshot.Screenshot.capture().bitmap
+            if (previous != null && previous.sameAs(bitmap)) {
+                write(name, bitmap)
+                return
+            }
+            previous = bitmap
+        }
+        previous?.let { write(name, it) }
+    }
+
+    private fun write(name: String, bitmap: Bitmap) {
         val directory = screenshotDirectory()
         directory.mkdirs()
         File(directory, "$name.png").outputStream().use { output ->
@@ -65,19 +84,24 @@ class ScreenshotTest {
         return base
     }
 
-    private fun mushafPage() = rule.onAllNodesWithContentDescription("Mushaf page").onFirst()
+    private fun mushafPage() = rule.onAllNodes(hasContentDescription("Mushaf page", substring = true)).onFirst()
 
     private fun studyPage() = rule.onAllNodesWithContentDescription("Study page").onFirst()
 
     private fun waitForAReading() {
         rule.waitUntil(timeoutMillis = 30_000) {
-            rule.onAllNodesWithContentDescription("Mushaf page").fetchSemanticsNodes().isNotEmpty() ||
+            rule.onAllNodes(hasContentDescription("Mushaf page", substring = true))
+                .fetchSemanticsNodes().isNotEmpty() ||
                 rule.onAllNodesWithContentDescription("Study page").fetchSemanticsNodes().isNotEmpty()
         }
+        // The window is not ready for a gesture in the frame it appears in;
+        // the first tap of a run must not be swallowed by startup.
+        Thread.sleep(1_500)
     }
 
     private fun inMushaf(): Boolean =
-        rule.onAllNodesWithContentDescription("Mushaf page").fetchSemanticsNodes().isNotEmpty()
+        rule.onAllNodes(hasContentDescription("Mushaf page", substring = true))
+            .fetchSemanticsNodes().isNotEmpty()
 
     private fun back() {
         // A raw back key is used instead of Espresso: it needs no window
@@ -98,10 +122,26 @@ class ScreenshotTest {
 
     /** A tap on the paper brings the chrome up; the states are remembered. */
     private fun revealChrome() {
-        if (chromeIsUp()) return
-        val node = if (inMushaf()) mushafPage() else studyPage()
-        node.performTouchInput { click(Offset(width / 2f, height * 0.05f)) }
-        Thread.sleep(700)
+        repeat(3) {
+            if (chromeIsUp()) return
+            val node = if (inMushaf()) mushafPage() else studyPage()
+            node.performTouchInput { click(Offset(width / 2f, height * 0.5f)) }
+            runCatching {
+                rule.waitUntil(timeoutMillis = 4_000) { chromeIsUp() }
+            }
+        }
+    }
+
+    /** And a tap puts it away again, for the captures that want the page bare. */
+    private fun hideChrome() {
+        repeat(3) {
+            if (!chromeIsUp()) return
+            val node = if (inMushaf()) mushafPage() else studyPage()
+            node.performTouchInput { click(Offset(width / 2f, height * 0.5f)) }
+            runCatching {
+                rule.waitUntil(timeoutMillis = 4_000) { !chromeIsUp() }
+            }
+        }
     }
 
     @Test
@@ -114,6 +154,7 @@ class ScreenshotTest {
             rule.onNodeWithContentDescription("Mushaf").performClick()
             Thread.sleep(1_000)
         }
+        hideChrome()
         capture("01-mushaf")
 
         // The chrome over the page.

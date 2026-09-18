@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The manuscript mark: a gold eight point star on lapis, in the safe zone. -->
+<!--
+  The manuscript mark: a gold eight point star on lapis, in the safe zone.
+  The monochrome layer lets Android 13 and later draw a themed icon from the
+  same drawing, so the app belongs on a themed home screen too.
+-->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/icon_background" />
     <foreground android:drawable="@mipmap/ic_launcher_fg" />
+    <monochrome android:drawable="@mipmap/ic_launcher_fg" />
 </adaptive-icon>

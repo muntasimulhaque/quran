@@ -96,6 +96,11 @@ class PackStore(private val context: Context) {
         return target
     }
 
+    /** Forgets the copied core pack, so the next open copies it from the app again. */
+    fun discardCore() {
+        File(context.filesDir, "content").deleteRecursively()
+    }
+
     fun fileFor(id: String): File = File(packDirectory(id), "$id.db")
 
     fun installed(): Set<String> = packRoot().listFiles()

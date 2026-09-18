@@ -149,6 +149,11 @@ object Search {
      * A readable window of [text] around the first match of [terms], with the
      * matched ranges rebased onto the window. Used for tafsir results, where
      * the passage can be many pages long and only the sentence matters.
+     *
+     * The window is widened, never narrowed, to the nearest word boundaries,
+     * and it always contains the first match: a highlight that points at
+     * nothing, or a sentence that starts in the middle of a word, would be
+     * worse than a window a few characters wider than asked for.
      */
     fun excerpt(
         text: String,
@@ -159,12 +164,14 @@ object Search {
         val ranges = matchRanges(text, terms, arabic)
         if (ranges.isEmpty() || text.length <= window * 2) return text to ranges
         val first = ranges.first().first
+        val last = ranges.last().last + 1
         var start = (first - window).coerceAtLeast(0)
-        var end = (first + window).coerceAtMost(text.length)
-        // Do not cut a word in half at either edge.
-        while (start > 0 && !text[start - 1].isWhitespace()) start++
-        while (end < text.length && !text[end].isWhitespace()) end--
-        if (start > end) return text to ranges
+        var end = (last + window).coerceAtMost(text.length)
+        while (start > 0 && !text[start - 1].isWhitespace()) start--
+        while (end < text.length && !text[end].isWhitespace()) end++
+        start = minOf(start, first)
+        end = maxOf(end, last)
+        if (start >= end) return text to ranges
         val prefix = if (start > 0) "... " else ""
         val suffix = if (end < text.length) " ..." else ""
         val rebased = ranges.filter { it.first >= start && it.last < end }

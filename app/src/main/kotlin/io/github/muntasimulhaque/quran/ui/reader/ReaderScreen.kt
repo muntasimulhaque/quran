@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -37,21 +38,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.size
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.core.net.toUri
+import io.github.muntasimulhaque.quran.BuildConfig
+import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
+import io.github.muntasimulhaque.quran.ui.rememberSavedTransfer
 import io.github.muntasimulhaque.quran.ui.browse.BrowseSheet
 import io.github.muntasimulhaque.quran.ui.mushaf.MushafPage
+import io.github.muntasimulhaque.quran.ui.mushaf.PAGE_ASPECT
 import io.github.muntasimulhaque.quran.ui.playback.PlaybackBar
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.shortReciterName
@@ -67,7 +76,9 @@ import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.PagePalette
 import io.github.muntasimulhaque.quran.ui.theme.LocalPageThemeName
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import kotlin.math.min
 
 /** How long the chrome stays after a touch before it steps back. */
 private const val CHROME_MILLIS = 7000L
@@ -98,6 +109,8 @@ fun ReaderScreen(
     var sheet by remember { mutableStateOf(ReaderSheet.None) }
     var touch by remember { mutableIntStateOf(0) }
     val context = androidx.compose.ui.platform.LocalContext.current
+    val clipLabel = stringResource(R.string.clip_label_ayah)
+    val transfer = rememberSavedTransfer(viewModel)
 
     // Reading with the screen awake is part of reading.
     val view = LocalView.current
@@ -113,7 +126,7 @@ fun ReaderScreen(
     fun copyAyah(text: String) {
         val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE)
             as android.content.ClipboardManager
-        clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Ayah", text))
+        clipboard.setPrimaryClip(android.content.ClipData.newPlainText(clipLabel, text))
     }
 
     fun shareAyah(text: String) {
@@ -123,6 +136,14 @@ fun ReaderScreen(
         }
         runCatching {
             context.startActivity(android.content.Intent.createChooser(intent, null))
+        }
+    }
+
+    fun openLink(target: String) {
+        runCatching {
+            context.startActivity(
+                android.content.Intent(android.content.Intent.ACTION_VIEW, target.toUri()),
+            )
         }
     }
 
@@ -197,7 +218,7 @@ fun ReaderScreen(
 
         ReaderTopBar(
             title = surahName(viewModel, settings.ayah),
-            detail = viewModel.position?.let { "Juz ${it.juz}" },
+            detail = viewModel.position?.let { stringResource(R.string.juz_label, it.juz) },
             visible = chrome,
             onBrowse = { sheet = ReaderSheet.Browse },
             onSearch = { sheet = ReaderSheet.Search },
@@ -242,7 +263,7 @@ fun ReaderScreen(
                         modifier = Modifier.size(18.dp),
                     )
                     Text(
-                        text = "Press and hold any ayah for its actions",
+                        text = stringResource(R.string.hint_long_press_ayah),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(start = 12.dp),
@@ -299,7 +320,6 @@ fun ReaderScreen(
             content = content,
             surahs = viewModel.surahs,
             saved = saved,
-            headers = viewModel.headers,
             translationPack = settings.translationPack,
             onDismiss = { sheet = ReaderSheet.None },
             onAyah = { ayahNumber ->
@@ -316,7 +336,6 @@ fun ReaderScreen(
             content = content,
             surahs = viewModel.surahs,
             saved = saved,
-            headers = viewModel.headers,
             translationPack = settings.translationPack,
             startOnSaved = true,
             onDismiss = { sheet = ReaderSheet.None },
@@ -336,6 +355,7 @@ fun ReaderScreen(
             tafsirPacks = viewModel.enabledTafsirPacks.map { it.id },
             packNames = viewModel.packs.associate { it.id to it.name },
             packLanguages = viewModel.packs.associate { it.id to it.language },
+            wordsPack = content.meaningPack(viewModel.wordLanguage) ?: ContentDatabase.WORDS_PACK,
             onDismiss = { sheet = ReaderSheet.None },
             onAyah = { ayah, _ ->
                 sheet = ReaderSheet.None
@@ -360,6 +380,10 @@ fun ReaderScreen(
             },
             recitations = viewModel.recitations,
             surahs = viewModel.surahs,
+            savedCount = saved.size,
+            dataNotice = viewModel.dataNotice,
+            contentCheck = viewModel.contentCheck,
+            version = BuildConfig.VERSION_NAME,
             downloadedSurahs = { recitation -> viewModel.downloadedSurahs(recitation) },
             actions = SettingsActions(
                 onTheme = { viewModel.setTheme(it) },
@@ -378,8 +402,15 @@ fun ReaderScreen(
                 onRemoveDownloads = { recitation, surah ->
                     viewModel.removeDownloads(recitation, surah)
                 },
+                onExport = transfer.onExport,
+                onImport = transfer.onImport,
+                onCheckContent = { viewModel.checkContent() },
+                onOpenLink = { url -> openLink(url) },
             ),
-            onDismiss = { sheet = ReaderSheet.None },
+            onDismiss = {
+                sheet = ReaderSheet.None
+                transfer.onNoticeShown()
+            },
         )
     }
 
@@ -389,14 +420,12 @@ fun ReaderScreen(
             content = content,
             ayah = ayah,
             surahName = viewModel.surahs.firstOrNull { it.number == ayah.surah }?.nameSimple
-                ?: "Surah ${ayah.surah}",
+                ?: stringResource(R.string.surah_fallback_name, ayah.surah),
             translationPack = viewModel.translationPacks.firstOrNull { it.id == settings.translationPack },
             tafsirPacks = viewModel.enabledTafsirPacks,
             textSize = settings.textSize,
-            wordLanguage = viewModel.selectedTranslation?.language ?: "en",
-            hasWords = viewModel.packs.any {
-                it.id == ContentDatabase.wordsPackId(viewModel.selectedTranslation?.language ?: "en") && it.installed
-            } || viewModel.packs.any { it.id == ContentDatabase.WORDS_PACK && it.installed },
+            wordLanguage = viewModel.wordLanguage,
+            hasWords = content.meaningPack(viewModel.wordLanguage) != null,
             isSaved = savedRow != null,
             onAddContent = {
                 cardAyah = null
@@ -428,47 +457,88 @@ private fun MushafReader(
     onAyah: (Ayah) -> Unit,
     onBackgroundTap: () -> Unit,
 ) {
-    val pagerState = rememberPagerState(
-        initialPage = (viewModel.page - 1).coerceIn(0, 603),
-        pageCount = { 604 },
-    )
-
-    LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.settledPage }.collect { settled ->
-            viewModel.onPageSettled(settled + 1)
-        }
-    }
-    // A jump from the cards or the sheets moves the pager; a swipe never
-    // moves the pager from here.
-    LaunchedEffect(viewModel.page) {
-        val target = (viewModel.page - 1).coerceIn(0, 603)
-        if (pagerState.currentPage != target) pagerState.animateScrollToPage(target)
-    }
-
-    HorizontalPager(
-        state = pagerState,
-        modifier = Modifier
-            .fillMaxSize()
-            .semantics(mergeDescendants = false) { },
-        beyondViewportPageCount = 1,
-    ) { index ->
-        MushafPage(
-            content = content,
-            fonts = viewModel.fonts,
-            renderer = viewModel.renderer,
-            page = index + 1,
-            palette = palette,
-            themeKey = themeKey,
-            selectedAyah = selected?.number,
-            playingAyah = playback.ayahNumber,
-            playingWord = playback.wordPosition,
-            onAyah = onAyah,
-            onLongPressAyah = onAyah,
-            onBackgroundTap = onBackgroundTap,
-            modifier = Modifier.padding(
-                top = 0.dp,
-            ),
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val density = LocalDensity.current
+        val availableWidth = with(density) { maxWidth.toPx() }
+        val availableHeight = with(density) { maxHeight.toPx() }
+        // The page's height follows from its width; every page is rendered at
+        // the width it will actually be drawn at, and never larger.
+        val pageWidth = min(availableWidth, availableHeight / PAGE_ASPECT).toInt().coerceAtLeast(1)
+        val pagerState = rememberPagerState(
+            initialPage = (viewModel.page - 1).coerceIn(0, 603),
+            pageCount = { 604 },
         )
+        val haptics = LocalHapticFeedback.current
+        val startup = viewModel.startupPage
+
+        LaunchedEffect(pagerState) {
+            snapshotFlow { pagerState.settledPage }.collect { settled ->
+                viewModel.onPageSettled(settled + 1, pageWidth, themeKey)
+            }
+        }
+        // A page that has stopped moving marks its settle with one light tick.
+        LaunchedEffect(pagerState) {
+            snapshotFlow { pagerState.isScrollInProgress }
+                .distinctUntilChanged()
+                .collect { scrolling ->
+                    if (!scrolling) haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                }
+        }
+        // A jump from the cards or the sheets moves the pager; a swipe never
+        // moves the pager from here. A far jump lands at once: animating
+        // across three hundred pages would render all of them on the way.
+        LaunchedEffect(viewModel.page) {
+            val target = (viewModel.page - 1).coerceIn(0, 603)
+            val current = pagerState.currentPage
+            if (current == target) return@LaunchedEffect
+            if (kotlin.math.abs(target - current) > 2) {
+                pagerState.scrollToPage(target)
+            } else {
+                pagerState.animateScrollToPage(target)
+            }
+        }
+        // Once the first real page is on screen the picture has served its
+        // purpose and its memory is given back.
+        LaunchedEffect(pagerState.settledPage, startup) {
+            if (startup != null && startup.page == pagerState.settledPage + 1) {
+                delay(600)
+                viewModel.releaseStartupPage()
+            }
+        }
+
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .fillMaxSize()
+                .semantics(mergeDescendants = false) { },
+            beyondViewportPageCount = 1,
+        ) { index ->
+            // How far this page is from the reader's finger: the page being
+            // turned lifts and casts a shadow while it follows the finger.
+            // The offset is a lambda so the read happens in the draw phase,
+            // where a swipe costs a redraw instead of a recomposition.
+            MushafPage(
+                content = content,
+                fonts = viewModel.fonts,
+                renderer = viewModel.renderer,
+                page = index + 1,
+                pageWidth = pageWidth,
+                palette = palette,
+                themeKey = themeKey,
+                selectedAyah = selected?.number,
+                playingAyah = playback.ayahNumber,
+                playingWord = playback.wordPosition,
+                onLongPressAyah = onAyah,
+                onBackgroundTap = onBackgroundTap,
+                dragOffset = {
+                    (pagerState.currentPage - index) + pagerState.currentPageOffsetFraction
+                },
+                active = index == pagerState.currentPage,
+                placeholder = startup
+                    ?.takeIf { it.page == index + 1 && it.widthPx == pageWidth && it.theme == themeKey }
+                    ?.bitmap,
+            )
+        }
     }
 }
 
@@ -506,9 +576,9 @@ private fun ReaderTopBar(
         ) {
             ReadingTitle(surah = title, detail = detail)
             Row(Modifier.weight(1f), horizontalArrangement = Arrangement.End) {
-                IconButton(Icon.Browse, "Browse the Quran", onBrowse)
-                IconButton(Icon.Search, "Search", onSearch)
-                IconButton(Icon.Settings, "Settings", onSettings)
+                IconButton(Icon.Browse, stringResource(R.string.action_browse), onBrowse)
+                IconButton(Icon.Search, stringResource(R.string.action_search), onSearch)
+                IconButton(Icon.Settings, stringResource(R.string.action_settings), onSettings)
             }
         }
     }
@@ -559,9 +629,13 @@ private fun BottomStack(
                     )
                     Text(
                         text = when {
-                            setup.failed -> "Could not download. Check your connection."
-                            setup.progress == null -> "Preparing..."
-                            else -> "Downloading ${(setup.progress * 100).toInt()}%  \u00B7  ${formatBytes(setup.pack.bytes)}"
+                            setup.failed -> stringResource(R.string.pack_download_failed)
+                            setup.progress == null -> stringResource(R.string.pack_preparing)
+                            else -> stringResource(
+                                R.string.pack_downloading,
+                                (setup.progress * 100).toInt(),
+                                formatBytes(setup.pack.bytes),
+                            )
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -569,7 +643,7 @@ private fun BottomStack(
                 }
                 if (setup.failed) {
                     Text(
-                        text = "Retry",
+                        text = stringResource(R.string.action_retry),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
@@ -579,7 +653,7 @@ private fun BottomStack(
                     )
                 }
                 Text(
-                    text = if (setup.failed) "Close" else "Cancel",
+                    text = stringResource(if (setup.failed) R.string.action_close else R.string.action_cancel),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
@@ -593,7 +667,7 @@ private fun BottomStack(
             AyahActions(
                 ayah = ayah,
                 surahName = viewModel.surahs.firstOrNull { it.number == ayah.surah }?.nameSimple
-                    ?: "Surah ${ayah.surah}",
+                    ?: stringResource(R.string.surah_fallback_name, ayah.surah),
                 isSaved = saved.any { it.ayahNumber == ayah.number },
                 onSave = {
                     viewModel.toggleSaved(ayah)
@@ -623,9 +697,13 @@ private fun BottomStack(
                 reference = playback.reference,
                 pendingLabel = playback.pendingDownloadSurah?.let { surah ->
                     val name = viewModel.surahs.firstOrNull { it.number == surah }?.nameSimple
-                        ?: "Surah $surah"
+                        ?: stringResource(R.string.surah_fallback_name, surah)
                     val size = formatBytes(playback.pendingDownloadBytes)
-                    if (playback.pendingIsContinuation) "Continue to $name  \u00B7  $size" else "$name  \u00B7  $size"
+                    if (playback.pendingIsContinuation) {
+                        stringResource(R.string.playback_continue_to, name, size)
+                    } else {
+                        stringResource(R.string.playback_offer, name, size)
+                    }
                 },
                 onToggle = { viewModel.togglePlayback() },
                 onNext = { viewModel.nextAyah() },
@@ -677,11 +755,11 @@ private fun ReaderBottomBar(
             .padding(horizontal = 10.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        LabeledIconButton(Icon.Listen, "Listen", onListen, active = listenActive)
+        LabeledIconButton(Icon.Listen, stringResource(R.string.action_listen), onListen, active = listenActive)
         Row(Modifier.weight(1f), horizontalArrangement = Arrangement.Center) {
             ModeSwitch(mode, onMode)
         }
-        LabeledIconButton(Icon.Bookmark, "Saved", onSaved)
+        LabeledIconButton(Icon.Bookmark, stringResource(R.string.action_saved), onSaved)
     }
 }
 
@@ -689,8 +767,9 @@ private fun ReaderBottomBar(
 internal fun PlaybackUiState.isAnything(): Boolean =
     ayahNumber != null || unavailable || pendingDownloadSurah != null || downloadFailed
 
+@Composable
 private fun surahName(viewModel: ReaderViewModel, ayah: Int): String =
-    viewModel.surahOf(ayah)?.nameSimple ?: "Quran"
+    viewModel.surahOf(ayah)?.nameSimple ?: stringResource(R.string.reader_fallback_title)
 
 @Composable
 private fun AyahActions(
@@ -722,10 +801,15 @@ private fun AyahActions(
                 color = MaterialTheme.colorScheme.onSurface,
             )
         }
-        TextAction(if (isSaved) "Saved" else "Save", if (isSaved) Icon.BookmarkFilled else Icon.Bookmark, onSave, active = isSaved)
-        TextAction("Play", Icon.Play, onPlay)
-        TextAction("Copy", Icon.Copy, onCopy)
-        TextAction("Share", Icon.Share, onShare)
-        TextAction("More", Icon.More, onMore)
+        TextAction(
+            label = stringResource(if (isSaved) R.string.action_saved else R.string.action_save),
+            icon = if (isSaved) Icon.BookmarkFilled else Icon.Bookmark,
+            onClick = onSave,
+            active = isSaved,
+        )
+        TextAction(stringResource(R.string.action_play), Icon.Play, onPlay)
+        TextAction(stringResource(R.string.action_copy), Icon.Copy, onCopy)
+        TextAction(stringResource(R.string.action_share), Icon.Share, onShare)
+        TextAction(stringResource(R.string.action_more), Icon.More, onMore)
     }
 }

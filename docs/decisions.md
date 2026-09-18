@@ -934,3 +934,231 @@ order the ayah is recited instead of backwards.
 International and Ibn Kathir in English, As-Sa'di in Arabic, Taisirul Quran
 and Ibn Kathir in Bengali, word lists in English and Bengali, and the two
 reciters with per surah audio.
+
+## D-037: A launch lands on the page the reader left
+
+Date: the seventh session. The owner asked for the best app there can be:
+faster than anything, polished to the level of the best work Apple and
+Google ship, and readable before any of that matters.
+
+**What the app did.** On a cold start it showed the paper and the name of the
+Book while the content database opened, then rendered the page from its fonts
+and queries. The splash was honest but it was still a waiting room.
+
+**What it does now.** After the reader rests on a page, the rendered bitmap
+is written to the app's cache, keyed by page, pixel width, and theme. On the
+next launch that picture is decoded first, before the content database opens,
+and it is painted as the first frame. The real page replaces it as soon as it
+is drawn, with no blank frame in between: the same picture is handed to the
+pager as the placeholder for that page until the render lands. A jump of more
+than two pages now lands at once instead of animating across three hundred
+pages and rendering each one on the way.
+
+**What it costs.** One bitmap on disk (a page of text is about seventy
+kilobytes) and one in memory for a few hundred milliseconds. A page is only
+written once the reader has rested on it for a third of a second, so swiping
+through the Quran never touches the disk. If the picture is missing, stale,
+or for a different width or theme, the app simply draws the page the way it
+always did. The cache is a cache in the strict sense: nothing depends on it.
+
+**Measured on the software rendered emulator**, which is the slowest Android
+this app will ever run on: a released, minified build shows its window at 781
+ms and reports fully drawn at 930 ms on a warm start, 889 ms and 1.10 s on the
+very first launch after install, and the first photographed frame after the
+system splash is already the Mushaf page. A phone with a real GPU and a warm
+ART profile is faster than that by a wide margin.
+
+## D-038: The page reads itself aloud, and every control is a real target
+
+Date: the seventh session, the accessibility pass.
+
+**A picture of text is not a text.** Mushaf mode draws a bitmap, so a screen
+reader had one node for the whole page. That is not reading, it is being told
+a page exists. The page now carries one invisible node per ayah, laid over the
+words it names, in Mushaf order, each with its reference and its text, and an
+action that opens the ayah's own row of actions. A TalkBack reader can move
+ayah by ayah, hear each one, and act on it, exactly as a sighted reader does
+with a long press. The nodes carry no pointer input, so a touch still belongs
+to the page, and only the page the reader is on exposes them.
+
+**Forty eight points, everywhere.** An audit against the design document's own
+rule found the small text actions, the transport controls, the mode switch,
+the browse tabs, the settings segments, and the pack actions all under the
+minimum. Every one of them is now a real 48 dp target, and the ones that show
+only a glyph now say what they are: the text size steps name their place in
+the scale instead of reading "alef" five times. A switch row is now the whole
+row, so the label and the switch are one node, which is how a screen reader
+expects to meet a setting.
+
+**Color is never the only signal**, and muted text is never below 4.5:1. The
+quietest text on the page was an ayah reference at 2.8:1; the secondary tone
+now comes from the theme's own `onSurfaceVariant`, which meets the target in
+all four themes by construction.
+
+## D-039: Every sentence is a resource, in the module that shows it
+
+Date: the seventh session, before the interface can be translated into a
+second language.
+
+**The rule changed.** This file used to say that user facing strings live in
+the app module's `strings.xml`. The code had already outgrown that: a feature
+module cannot read another module's string resources, and a feature that took
+its own strings as parameters was still holding English inside Kotlin. The
+rule is now the one the code can keep: every sentence a reader can see is a
+resource in the module that draws it, and no Kotlin file carries user facing
+English. `app` keeps the shell's strings, each feature keeps its own, and
+`ui-kit` keeps the two names of the reading modes.
+
+**Only English ships.** Arabic is content, not a locale, and there is still no
+localization infrastructure. What changed is that adding a second language is
+now a `values-xx/` folder and a translator, not a hunt through a codebase.
+
+## D-040: The reader's own work can leave the phone, and nothing else can
+
+Date: the seventh session, the trust work.
+
+**Saved ayahs and notes are the reader's work.** They lived in a private
+database that only the app could read, which is good until the reader changes
+phones. There are now two doors in Settings, under the reader's own heading:
+Export writes a small JSON document through the system file picker, and Import
+merges one back. The document names its own format and version, refuses
+anything else, clamps a note to a sane length, brings a date from the future
+back to now so one bad file cannot pin itself to the top of the list, keeps
+the reader's own note when both sides have one, and reports what it did in one
+line.
+
+**What this changed about backup.** The app already refused Android's cloud
+backup and device transfer; now it says so in the two rule files Android 12
+and later read, so the refusal is explicit rather than incidental, and the
+export door is the only way the reader's work moves. The privacy policy was
+already true; now the manifest proves it.
+
+## D-041: The app checks its own content, and a bad file cannot crash it
+
+Date: the seventh session, the robustness pass.
+
+**A damaged pack should be found, not suffered.** Every pack is verified when
+it arrives; the app can now look a second time, on the reader's word, from
+Settings: "Check installed content" reads each installed pack back and
+compares it with the fingerprint the catalog recorded, then names anything
+that no longer matches so the reader can remove and add it again. Nothing runs
+on its own, and nothing is fetched.
+
+**The one thing that could keep a reader from the text** is a core pack that
+cannot be opened. That is now caught: the copy is discarded and written again
+from the app's own signed assets, once, and if that also fails the reader gets
+one calm screen with one action instead of a crash. The screen says what
+happened, that their saved ayahs and settings are untouched, and offers to try
+again.
+
+**And the smaller doors are closed.** The manifest declares that the app
+speaks no cleartext, the backup rules exclude everything, every pack download
+verifies its SHA-256 before it is used, and a downloaded archive entry with a
+path separator is refused. Lint is clean, with no warnings suppressed.
+
+## D-042: A tag builds the release
+
+Date: the seventh session, the release engineering.
+
+**What was missing.** The runbook said how to build and upload by hand, and
+the numbers it mentioned could drift from what the app actually carried. There
+is now a `release` workflow: a `v<version>` tag checks itself against the
+`versionName` the app carries (a tag that names a version the app does not
+have is a red build, not a wrong bundle), runs the core tests and the content
+gates, writes the upload keystore from repository secrets into a file the
+build is pointed at with `-Pquran.keystore`, builds the signed bundle, proves
+the signature with `jarsigner`, writes a SHA-256, and attaches both to a draft
+GitHub release. Without the secrets it still builds, and says out loud that
+the bundle is unsigned. The keystore never enters the tree, and the owner's
+machine keeps working exactly as before.
+
+## D-043: The theme owns the washes, and the system bars follow the theme
+
+Date: the seventh session, the polish pass.
+
+**Two colors left over from the first page.** The selection wash and the
+recitation wash were constants in `ui-kit`, the same lapis on paper and on a
+black room, where a dark blue wash on a dark ground is invisible. They are now
+part of the page palette, so each of the four themes sets its own, and the
+page, the study reading, and search all take them from the theme instead of
+carrying a color of their own. The night themes get a light lapis, the day
+themes keep the deep one, and the recitation wash stays stronger than the wash
+under a chosen ayah so the two never read as the same thing.
+
+**The status and navigation bars belong to the reader's choice**, not to the
+system's idea of day and night. They were dark on dark in the night themes
+because the platform decided from the system setting; the app now sets the
+icon appearance from the theme it is actually drawing, and the launch window
+has a dark twin for a reader whose system is dark. The page turn also casts a
+shadow that follows the finger and marks its settle with one light tick, which
+is what the design document promised and the code had not done.
+
+**And the type scale is complete.** Only seven of Material's fifteen styles
+were defined, so any surface that asked for one of the others drew in the
+platform's own font. Every style the app can ask for is now the interface's
+voice, and a heading in a tafsir can no longer arrive in Roboto.
+
+**The credits screen shows the real licenses.** The catalog handed every pack
+the same line, "See docs/content-sources.md", which is a note to go and read a
+file, not a credit. The pack to dataset mapping now lives in one place in the
+pipeline (`PackSources`), the catalog carries the licenses of the datasets a
+pack actually contains, one per line, and the English word list's surah
+introductions and the cross-check dataset are credited where they belong. The
+pack files were rebuilt to prove it: their hashes and byte counts did not
+move, so every published Release still resolves to exactly the file the
+catalog names.
+
+## D-044: What the audit found and fixed
+
+Date: the seventh session, the correctness pass. These are bugs, not choices,
+and they are recorded because a reader would have met every one of them.
+
+**The word list ignored its language.** `wordsPackId("bn")` returned
+`"words-"`, so a Bengali reader who had installed the Bengali word list was
+shown "Add word by word" and an empty panel. The card now asks the database
+which installed list speaks the language of the chosen translation, falls back
+to English when that language has none, and search reads meanings from the
+same list, so a Bengali reader can find a Bengali meaning.
+
+**The tafsir index was never warmed.** The coroutine that prewarms it started
+before the database existed and returned immediately, so the first search paid
+for the whole index. It is now built after the library opens, on a worker,
+while the reader is reading, which is what the design always said.
+
+**A search excerpt could cut a word or lose its own match.** The window walked
+forward from a word boundary instead of backward, and could end up excluding
+the passage it was built around. It now widens to whole words, always contains
+the first match, and a test pins the rule.
+
+**A far jump animated across three hundred pages**, rendering each one on the
+way. A jump of more than two pages now lands at once.
+
+**Two duplicate lookups on the hot path.** The surah of an ayah was resolved
+by rebuilding a 114 entry map on every call, and the study list read the whole
+ayah table (6236 rows) at startup to answer questions that are arithmetic.
+Both are gone: the surahs are indexed once, and the reader's library no longer
+reads a table it does not need. The same pass removed a page render's
+duplicate in-flight work, which is now one shared bitmap that every asker
+waits on instead of a polling loop.
+
+**A tafsir door said "English" for every language**, so the Bengali Ibn Kathir
+was labelled English.
+
+**The saved list read one row at a time**, with a "Loading..." line where the
+ayah should be. It now reads every visible row in two batched queries and
+shows the ayah itself, which is what a reader recognises before its reference.
+
+**The store set never showed the chrome.** The screenshot tour tapped the
+page and photographed it 450 ms later, which the software rendered emulator
+had not drawn yet, so the capture that was meant to show the summoned chrome
+was byte for byte the bare page (the committed set proves it: the two files
+were identical). The tour now waits for the screen to stop changing before it
+keeps a frame, and it retries a gesture that did not land. The capture also
+no longer runs before the window is ready, which is what swallowed the first
+tap of every run.
+
+**And the little ones**: a `super` call lint says is empty, an unused legacy
+page setting, an unused header drawing routine in the page renderer, two dead
+translation lookups, a duplicated import, a "1 surahs" plural, a percentage
+that could print a localized separator inside a store-facing sentence, and a
+study list that said "Tap any ayah" where the gesture is a long press.

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -37,9 +36,11 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -57,7 +58,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.layout.Spacer
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
@@ -67,11 +67,11 @@ import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.StudyRow
+import io.github.muntasimulhaque.quran.feature.study.R
 import io.github.muntasimulhaque.quran.ui.rich.FootnoteList
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
-import io.github.muntasimulhaque.quran.ui.theme.MushafHighlight
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -107,6 +107,7 @@ fun StudyList(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    val pageDescription = stringResource(R.string.study_page_description)
     val hafs = remember {
         FontFamily(Font(path = "fonts/UthmanicHafs_V22.ttf", assetManager = context.assets))
     }
@@ -148,7 +149,7 @@ fun StudyList(
         state = listState,
         modifier = modifier
             .fillMaxSize()
-            .semantics { contentDescription = "Study page" }
+            .semantics { contentDescription = pageDescription }
             .pointerInput(Unit) {
                 // The paper around the text brings the chrome; the text itself
                 // belongs to its ayah, and every ayah consumes its own taps.
@@ -169,7 +170,7 @@ fun StudyList(
             )
             if (!hasTranslation) {
                 AddContent(
-                    text = "Add a translation to read this surah in your language",
+                    text = stringResource(R.string.study_add_translation),
                     onClick = onAddContent,
                 )
             }
@@ -245,7 +246,7 @@ private fun FootnoteSheet(
                 .padding(start = 22.dp, end = 22.dp, bottom = 34.dp),
         ) {
             Text(
-                text = "Footnote ${footnote.number}  \u00B7  $surahName $reference",
+                text = stringResource(R.string.study_footnote_title, footnote.number, surahName, reference),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -279,7 +280,7 @@ private fun AddContent(text: String, onClick: () -> Unit) {
             modifier = Modifier.weight(1f),
         )
         Text(
-            text = "Add",
+            text = stringResource(R.string.study_action_add),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary,
         )
@@ -322,8 +323,15 @@ private fun SurahOpening(
             modifier = Modifier.padding(top = 6.dp),
         )
         Text(
-            text = "${if (surah.revelationPlace.equals("makkah", true)) "Makkah" else "Madinah"}  \u00B7  " +
-                "${surah.versesCount} ayahs",
+            text = stringResource(
+                R.string.study_surah_meta,
+                if (surah.revelationPlace.equals("makkah", true)) {
+                    stringResource(R.string.study_place_makkah)
+                } else {
+                    stringResource(R.string.study_place_madinah)
+                },
+                surah.versesCount,
+            ),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
             modifier = Modifier.padding(top = 4.dp),
@@ -353,7 +361,11 @@ private fun SurahOpening(
             )
         }
         Text(
-            text = if (expanded) "Hide" else "About this surah",
+            text = if (expanded) {
+                stringResource(R.string.study_hide)
+            } else {
+                stringResource(R.string.study_about_surah)
+            },
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier
@@ -390,14 +402,14 @@ private fun SurahEnd(
                 .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)),
         )
         Text(
-            text = "${surah.nameSimple} complete",
+            text = stringResource(R.string.study_surah_complete, surah.nameSimple),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
             modifier = Modifier.padding(top = 16.dp),
         )
         if (next <= 114 && nextSurahName != null) {
             Text(
-                text = "Continue to $nextSurahName",
+                text = stringResource(R.string.study_continue_to, nextSurahName),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
@@ -408,7 +420,7 @@ private fun SurahEnd(
             )
         } else if (next > 114) {
             Text(
-                text = "This is the end of the Quran",
+                text = stringResource(R.string.study_end_of_quran),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(top = 10.dp),
@@ -433,10 +445,11 @@ private fun AyahBlock(
     onFootnote: (Int) -> Unit,
 ) {
     val haptics = LocalHapticFeedback.current
+    val palette = LocalPagePalette.current
     val playing = row.ayah.number == playingAyah
     val wash = when {
         isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.07f)
-        playing -> MushafHighlight.copy(alpha = 0.07f)
+        playing -> palette.highlight.copy(alpha = palette.highlight.alpha * 0.55f)
         else -> androidx.compose.ui.graphics.Color.Transparent
     }
     // The padding belongs to the paper, so the gaps between ayahs still
@@ -461,7 +474,7 @@ private fun AyahBlock(
                 .padding(horizontal = 8.dp, vertical = 7.dp),
         ) {
             Text(
-                text = arabic(row, playing, playingWord, hafs),
+                text = arabic(row, playing, playingWord, hafs, palette.highlight),
                 style = TextStyle(
                     fontFamily = hafs,
                     fontSize = textSize.arabicSp.sp,
@@ -511,6 +524,7 @@ private fun arabic(
     playing: Boolean,
     playingWord: Int?,
     hafs: FontFamily,
+    wash: Color,
 ): AnnotatedString {
     val words = row.words
     if (words.isEmpty()) return AnnotatedString(row.ayah.text)
@@ -520,7 +534,7 @@ private fun arabic(
             if (playing && word.position == playingWord) {
                 withStyle(
                     SpanStyle(
-                        background = MushafHighlight.copy(alpha = 0.22f),
+                        background = wash,
                         color = MaterialTheme.colorScheme.onBackground,
                     ),
                 ) { append(word.text) }

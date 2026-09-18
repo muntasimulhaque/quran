@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONObject
 
 data class SavedAyah(
     val ayahNumber: Int,
@@ -62,6 +64,70 @@ class SavedStore(context: Context) {
         delete(ayahNumber)
         refresh()
     }
+
+    /**
+     * The reader's saved ayahs and notes as one small JSON document, so their
+     * own work can move to another phone. Nothing leaves the device on its
+     * own: this only runs when the reader asks for the file.
+     */
+    suspend fun exportJson(): String = withContext(Dispatchers.IO) {
+        val array = JSONArray()
+        for (row in _saved.value.sortedBy { it.ayahNumber }) {
+            array.put(
+                JSONObject().apply {
+                    put(FIELD_AYAH, row.ayahNumber)
+                    if (row.note != null) put(FIELD_NOTE, row.note)
+                    put(FIELD_CREATED, row.createdAt)
+                },
+            )
+        }
+        JSONObject()
+            .put(FIELD_FORMAT, FORMAT)
+            .put(FIELD_VERSION, FORMAT_VERSION)
+            .put(FIELD_SAVED, array)
+            .toString(2)
+    }
+
+    /**
+     * Merges a document written by [exportJson]: an ayah that is already here
+     * keeps its own note, and a date in the future is brought back to now so
+     * one bad file cannot pin itself to the top of the list forever.
+     */
+    suspend fun importJson(json: String): Result<Int> = withContext(Dispatchers.IO) {
+        val root = runCatching { JSONObject(json) }.getOrNull()
+            ?: return@withContext Result.failure(IllegalArgumentException("not a saved ayahs file"))
+        if (root.optString(FIELD_FORMAT) != FORMAT) {
+            return@withContext Result.failure(IllegalArgumentException("not a saved ayahs file"))
+        }
+        val rows = root.optJSONArray(FIELD_SAVED)
+            ?: return@withContext Result.failure(IllegalArgumentException("no saved ayahs"))
+        val now = System.currentTimeMillis()
+        var added = 0
+        for (index in 0 until rows.length()) {
+            val entry = rows.optJSONObject(index) ?: continue
+            val number = entry.optInt(FIELD_AYAH, 0)
+            if (number !in 1..6236) continue
+            val note = entry.optString(FIELD_NOTE).trim().take(MAX_NOTE_LENGTH).takeIf { it.isNotEmpty() }
+            val created = entry.optLong(FIELD_CREATED, now).coerceIn(0L, now)
+            if (exists(number)) {
+                if (note != null && currentNote(number) == null) {
+                    val values = ContentValues().apply { put(COLUMN_NOTE, note) }
+                    database().update(TABLE, values, "$COLUMN_AYAH = ?", arrayOf(number.toString()))
+                }
+                continue
+            }
+            write(number, note, created)
+            added++
+        }
+        refresh()
+        Result.success(added)
+    }
+
+    private fun currentNote(ayahNumber: Int): String? =
+        database().rawQuery(
+            "SELECT $COLUMN_NOTE FROM $TABLE WHERE $COLUMN_AYAH = ?",
+            arrayOf(ayahNumber.toString()),
+        ).use { cursor -> if (cursor.moveToFirst() && !cursor.isNull(0)) cursor.getString(0) else null }
 
     fun close() = helper.close()
 
@@ -130,5 +196,14 @@ class SavedStore(context: Context) {
         const val COLUMN_AYAH = "ayah_number"
         const val COLUMN_NOTE = "note"
         const val COLUMN_CREATED = "created_at"
+        const val FIELD_FORMAT = "format"
+        const val FIELD_VERSION = "version"
+        const val FIELD_SAVED = "saved"
+        const val FIELD_AYAH = "ayah"
+        const val FIELD_NOTE = "note"
+        const val FIELD_CREATED = "createdAt"
+        const val FORMAT = "quran-saved-ayahs"
+        const val FORMAT_VERSION = 1
+        const val MAX_NOTE_LENGTH = 10_000
     }
 }

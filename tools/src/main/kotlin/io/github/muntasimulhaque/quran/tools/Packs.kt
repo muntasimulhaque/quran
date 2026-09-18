@@ -37,11 +37,14 @@ class Packs(private val root: File) {
         val name: String,
         val language: String,
         val credit: String,
-        val license: String,
         val version: String,
         val shipped: Boolean,
         val ayahs: Int,
     )
+
+    /** The licenses the pack's own datasets carry, as the manifest records them. */
+    private fun licenseOf(manifest: Manifest, id: String): String =
+        PackSources.licenses(manifest, id).joinToString(SEPARATOR).ifEmpty { NO_LICENSE }
 
     private val packs = listOf(
         Pack(
@@ -50,7 +53,6 @@ class Packs(private val root: File) {
             name = "Quran text and page layout",
             language = "ar",
             credit = "KFGQPC Hafs word by word, QPC V2 layout, audited against Tanzil Uthmani",
-            license = "See docs/content-sources.md",
             version = "1",
             shipped = true,
             ayahs = 6236,
@@ -61,7 +63,6 @@ class Packs(private val root: File) {
             name = "Saheeh International",
             language = "en",
             credit = "Noor International Center, via QuranEnc",
-            license = "See docs/content-sources.md",
             version = "1.1.2",
             shipped = false,
             ayahs = 6236,
@@ -72,7 +73,6 @@ class Packs(private val root: File) {
             name = "Ibn Kathir",
             language = "en",
             credit = "Tafsir Ibn Kathir, via the Quranic Universal Library",
-            license = "See docs/content-sources.md",
             version = "QUL",
             shipped = false,
             ayahs = 6236,
@@ -83,7 +83,6 @@ class Packs(private val root: File) {
             name = "As-Sa'di",
             language = "ar",
             credit = "Tafsir As-Sa'di, via QuranEnc",
-            license = "See docs/content-sources.md",
             version = "1.0.0",
             shipped = false,
             ayahs = 6236,
@@ -94,7 +93,6 @@ class Packs(private val root: File) {
             name = "Taisirul Quran",
             language = "bn",
             credit = "Professor Muhammad Mozammel Haque, via the Quranic Universal Library",
-            license = "See docs/content-sources.md",
             version = "QUL",
             shipped = false,
             ayahs = 6236,
@@ -105,7 +103,6 @@ class Packs(private val root: File) {
             name = "Ibn Kathir",
             language = "bn",
             credit = "Tafsir Ibn Kathir (Bengali), via the Quranic Universal Library",
-            license = "See docs/content-sources.md",
             version = "QUL",
             shipped = false,
             ayahs = 6236,
@@ -116,7 +113,6 @@ class Packs(private val root: File) {
             name = "Minshawi",
             language = "ar",
             credit = "Muhammad Siddiq Al-Minshawi, via the Quranic Universal Library",
-            license = "See docs/content-sources.md",
             version = "QUL",
             shipped = false,
             ayahs = 6236,
@@ -127,7 +123,6 @@ class Packs(private val root: File) {
             name = "Husary",
             language = "ar",
             credit = "Mahmoud Khalil Al-Husary, via the Quranic Universal Library",
-            license = "See docs/content-sources.md",
             version = "QUL",
             shipped = false,
             ayahs = 6236,
@@ -138,7 +133,6 @@ class Packs(private val root: File) {
             name = "Word by word",
             language = "en",
             credit = "Quran.com word by word, via the Quranic Universal Library",
-            license = "See docs/content-sources.md",
             version = "QUL",
             shipped = false,
             ayahs = 6236,
@@ -149,7 +143,6 @@ class Packs(private val root: File) {
             name = "Word by word",
             language = "bn",
             credit = "Bengali word by word, via the Quranic Universal Library",
-            license = "See docs/content-sources.md",
             version = "QUL",
             shipped = false,
             ayahs = 6236,
@@ -161,6 +154,7 @@ class Packs(private val root: File) {
             println("packs: content/quran.db is missing; run tools build first")
             return 2
         }
+        val manifest = loadManifest(root)
         directory.mkdirs()
         val entries = mutableListOf<JsonObject>()
         openSqlite(database).use { source ->
@@ -168,7 +162,7 @@ class Packs(private val root: File) {
                 val file = File(directory, "${pack.id}.db")
                 if (file.exists()) file.delete()
                 buildPack(source, file, pack)
-                entries += catalogEntry(pack, file)
+                entries += catalogEntry(pack, file, licenseOf(manifest, pack.id))
                 println(
                     "packs: ${pack.id} ${file.length() / 1024} KB sha256 ${sha256(file).substring(0, 12)}" +
                         if (pack.shipped) " (shipped)" else "",
@@ -308,7 +302,7 @@ class Packs(private val root: File) {
             target.autoCommit = true
         }
     }
-    private fun catalogEntry(pack: Pack, file: File): JsonObject {
+    private fun catalogEntry(pack: Pack, file: File, license: String): JsonObject {
         val hash = sha256(file)
         val tag = "pack-${pack.id}-${hash.substring(0, 8)}"
         return buildJsonObject {
@@ -317,7 +311,7 @@ class Packs(private val root: File) {
             put("name", pack.name)
             put("language", pack.language)
             put("credit", pack.credit)
-            put("license", pack.license)
+            put("license", license)
             put("version", pack.version)
             put("shipped", pack.shipped)
             put("ayahs", pack.ayahs)
@@ -338,5 +332,11 @@ class Packs(private val root: File) {
 
     private companion object {
         const val REPO = "muntasimulhaque/quran"
+
+        /** Two licenses of one pack read as one line. */
+        const val SEPARATOR = " · "
+
+        /** Only reached when a pack has no dataset recorded. */
+        const val NO_LICENSE = "See docs/content-sources.md"
     }
 }

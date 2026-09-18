@@ -3,7 +3,6 @@ package io.github.muntasimulhaque.quran.ui.reader
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,9 +10,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +25,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -31,6 +33,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.ReadingMode
+import io.github.muntasimulhaque.quran.uikit.R
 
 /** Every glyph the interface needs, drawn by hand so nothing is borrowed. */
 enum class Icon {
@@ -50,8 +53,6 @@ enum class Icon {
     Listen,
     Chevron,
 }
-
-private val StrokeWidth = 1.7f
 
 @Composable
 fun IconGlyph(
@@ -181,7 +182,10 @@ private fun playPath(w: Float, h: Float, offset: Offset = Offset.Zero, flip: Boo
         close()
     }
 
-/** An icon button: 48 dp of touch, 22 dp of ink, one spoken label. */
+/**
+ * An icon button: 48 dp of touch, 22 dp of ink, one spoken label. The touch
+ * target is the smallest the guidelines allow, never the size of the icon.
+ */
 @Composable
 fun IconButton(
     icon: Icon,
@@ -219,6 +223,7 @@ fun LabeledIconButton(
 ) {
     Column(
         modifier = Modifier
+            .minimumInteractiveComponentSize()
             .clip(RoundedCornerShape(14.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 4.dp)
@@ -239,11 +244,11 @@ fun LabeledIconButton(
         )
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium.copy(fontSize = 10.sp),
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
             color = if (active) {
                 MaterialTheme.colorScheme.primary
             } else {
-                MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                MaterialTheme.colorScheme.onSurfaceVariant
             },
             modifier = Modifier.padding(top = 2.dp),
         )
@@ -259,8 +264,12 @@ fun ModeSwitch(mode: ReadingMode, onMode: (ReadingMode) -> Unit) {
             .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.06f))
             .padding(3.dp),
     ) {
-        ModeSegment("Mushaf", mode == ReadingMode.Mushaf) { onMode(ReadingMode.Mushaf) }
-        ModeSegment("Study", mode == ReadingMode.Study) { onMode(ReadingMode.Study) }
+        ModeSegment(stringResource(R.string.mode_mushaf), mode == ReadingMode.Mushaf) {
+            onMode(ReadingMode.Mushaf)
+        }
+        ModeSegment(stringResource(R.string.mode_study), mode == ReadingMode.Study) {
+            onMode(ReadingMode.Study)
+        }
     }
 }
 
@@ -268,16 +277,15 @@ fun ModeSwitch(mode: ReadingMode, onMode: (ReadingMode) -> Unit) {
 private fun ModeSegment(label: String, selected: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
+            .minimumInteractiveComponentSize()
             .clip(RoundedCornerShape(50))
             .background(
                 if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f) else Color.Transparent,
             )
-            .clickable(onClick = onClick)
-            .semantics {
-                contentDescription = label
-                role = Role.Tab
-            }
-            .padding(horizontal = 16.dp, vertical = 7.dp),
+            .selectable(selected = selected, role = Role.Tab, onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 7.dp)
+            .semantics { contentDescription = label },
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             text = label,
@@ -285,20 +293,21 @@ private fun ModeSegment(label: String, selected: Boolean, onClick: () -> Unit) {
             color = if (selected) {
                 MaterialTheme.colorScheme.primary
             } else {
-                MaterialTheme.colorScheme.onBackground.copy(alpha = 0.66f)
+                MaterialTheme.colorScheme.onSurfaceVariant
             },
         )
     }
 }
 
-/** One quiet text action, for the ayah bar. */
+/** One quiet text action with an icon above it, for the ayah bar. */
 @Composable
 fun TextAction(label: String, icon: Icon, onClick: () -> Unit, active: Boolean = false) {
     Column(
         modifier = Modifier
+            .minimumInteractiveComponentSize()
             .clip(RoundedCornerShape(14.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .padding(horizontal = 6.dp, vertical = 4.dp)
             .semantics {
                 contentDescription = label
                 role = Role.Button
@@ -316,11 +325,11 @@ fun TextAction(label: String, icon: Icon, onClick: () -> Unit, active: Boolean =
         )
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium.copy(fontSize = 10.sp),
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
             color = if (active) {
                 MaterialTheme.colorScheme.primary
             } else {
-                MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                MaterialTheme.colorScheme.onSurfaceVariant
             },
             modifier = Modifier.padding(top = 2.dp),
         )
@@ -340,7 +349,7 @@ fun ReadingTitle(surah: String, detail: String?) {
             Text(
                 text = detail,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 8.dp, bottom = 1.dp),
             )
         }

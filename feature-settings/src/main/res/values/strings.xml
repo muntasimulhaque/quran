@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Settings</string>
+    <string name="settings_group_appearance">Appearance</string>
+    <string name="settings_group_reading">Reading</string>
+    <string name="settings_group_recitation">Recitation</string>
+    <string name="settings_group_content">Content</string>
+    <string name="settings_group_data">Your saved ayahs</string>
+    <string name="settings_group_about">About</string>
+
+    <string name="settings_theme_paper">Paper</string>
+    <string name="settings_theme_sepia">Sepia</string>
+    <string name="settings_theme_night">Night</string>
+    <string name="settings_theme_black">Black</string>
+
+    <string name="settings_dim_title">Screen dim</string>
+    <string name="settings_dim_subtitle">Softens the page for night reading</string>
+    <string name="settings_dim_off">Off</string>
+    <string name="settings_dim_dim">Dim</string>
+    <string name="settings_dim_darker">Darker</string>
+
+    <string name="settings_keep_awake_title">Keep the screen awake</string>
+    <string name="settings_keep_awake_subtitle">The page stays lit while you read</string>
+    <string name="settings_follow_title">Follow the reciter</string>
+    <string name="settings_follow_subtitle">The page moves with the recitation</string>
+    <string name="settings_words_title">Show word meanings</string>
+    <string name="settings_words_subtitle">Each word with its meaning, under the ayah</string>
+    <string name="settings_footnotes_title">Show footnotes</string>
+    <string name="settings_footnotes_subtitle">Translator notes under each ayah</string>
+
+    <string name="settings_text_size_option">Text size %1$d of %2$d</string>
+
+    <string name="settings_downloaded_hide">Hide downloaded surahs</string>
+    <string name="settings_downloaded_show">Manage downloaded surahs</string>
+    <string name="settings_downloaded_empty">No surahs downloaded for this reciter yet.</string>
+
+    <string name="settings_content_intro">The Quran text and its page layout are in the app. Everything else is added when you want it, and can be removed at any time.</string>
+    <string name="pack_type_translation">Translation</string>
+    <string name="pack_type_tafsir">Tafsir</string>
+    <string name="pack_type_words">Word by word</string>
+    <string name="pack_type_recitation">Recitation</string>
+    <string name="pack_type_script">Script</string>
+    <string name="pack_included_suffix">included</string>
+    <string name="pack_action_add">Add</string>
+    <string name="pack_action_use">Use</string>
+    <string name="pack_action_remove">Remove</string>
+    <string name="pack_action_retry">Retry</string>
+    <string name="pack_action_selected">Selected</string>
+    <string name="pack_action_on">On</string>
+    <string name="pack_included">Included</string>
+    <string name="pack_preparing">Preparing…</string>
+    <string name="pack_downloading">Downloading %1$d%%</string>
+    <string name="pack_installed">%1$s · %2$s</string>
+
+    <string name="settings_check_content">Check installed content</string>
+    <string name="settings_check_content_subtitle">Reads every installed pack and compares it with its recorded fingerprint</string>
+    <string name="settings_check_running">Checking installed content…</string>
+    <string name="settings_check_ok">Everything installed is intact.</string>
+    <string name="settings_check_damaged">Damaged and best removed: %1$s</string>
+
+    <string name="settings_export">Export saved ayahs and notes</string>
+    <string name="settings_export_subtitle">Writes a file you can move to another phone.</string>
+    <string name="settings_export_done">Exported %1$d saved ayahs.</string>
+    <string name="settings_import">Import saved ayahs and notes</string>
+    <string name="settings_import_subtitle">Merges a file exported from this app</string>
+    <string name="settings_import_done">Imported %1$d saved ayahs.</string>
+    <string name="settings_import_none">Already up to date. Nothing new to import.</string>
+    <string name="settings_import_failed">That file could not be read.</string>
+    <string name="settings_export_empty">Nothing is saved yet, so there is nothing to export.</string>
+
+    <string name="settings_version">Version</string>
+    <string name="settings_license_label">License</string>
+    <string name="settings_ads">Ads and trackers</string>
+    <string name="settings_ads_none">None, and none ever</string>
+    <string name="settings_source">Source code</string>
+    <string name="settings_privacy">Privacy policy</string>
+    <string name="settings_rights">Corrections and rights</string>
+    <string name="settings_credits">Credits and licenses</string>
+
+    <string name="about_title">Quran: The Noble Book</string>
+    <string name="about_subtitle">Version %1$s · no ads, no trackers, no accounts</string>
+    <string name="about_group_content">Content</string>
+    <string name="about_group_fonts">Fonts</string>
+    <string name="about_group_recitations">Recitations</string>
+    <string name="about_group_app">The app</string>
+    <string name="about_license">MIT</string>
+    <string name="about_pack_title">%1$s · %2$s</string>
+
+    <string name="credit_page_fonts">QPC V2 page fonts</string>
+    <string name="credit_page_fonts_by">King Fahd Glorious Quran Printing Complex, unmodified</string>
+    <string name="credit_page_fonts_use">Study and Mushaf text</string>
+    <string name="credit_amiri">Amiri Quran</string>
+    <string name="credit_amiri_by">Khaled Hosny, SIL Open Font License 1.1</string>
+    <string name="credit_amiri_use">Ornaments and Arabic outside the Mushaf</string>
+    <string name="credit_literata">Literata</string>
+    <string name="credit_literata_by">TypeTogether, SIL Open Font License 1.1</string>
+    <string name="credit_literata_use">Translations and tafsir</string>
+    <string name="credit_inter">Inter</string>
+    <string name="credit_inter_by">Rasmus Andersson, SIL Open Font License 1.1</string>
+    <string name="credit_inter_use">The interface</string>
+    <string name="credit_minshawi">Minshawi</string>
+    <string name="credit_minshawi_by">Muhammad Siddiq Al-Minshawi, via the Quranic Universal Library</string>
+    <string name="credit_minshawi_use">Murattal</string>
+    <string name="credit_husary">Husary</string>
+    <string name="credit_husary_by">Mahmoud Khalil Al-Husary, via the Quranic Universal Library</string>
+    <string name="credit_husary_use">Murattal</string>
+</resources>

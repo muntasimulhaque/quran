@@ -7,7 +7,6 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.util.LruCache
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.res.ResourcesCompat
 import io.github.muntasimulhaque.quran.content.R
@@ -16,8 +15,8 @@ import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.PageFontStore
 import io.github.muntasimulhaque.quran.ui.theme.PagePalette
 import io.github.muntasimulhaque.quran.data.PageWord
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.roundToInt
@@ -33,9 +32,15 @@ class RenderedPage(
     val words: List<WordBox>,
     private val ayahBoxes: Map<Int, List<RectF>>,
     private val ayahs: Map<Int, Ayah>,
+    val palette: PagePalette,
 ) {
     val widthPx: Int get() = bitmap.width
     val heightPx: Int get() = bitmap.height
+
+    /** The page's ayahs in Mushaf order: reading order, for both readers. */
+    val ayahOrder: List<Ayah> = ayahs.values.sortedBy { it.number }
+
+    val ayahNumbers: Set<Int> get() = ayahBoxes.keys
 
     /** The ayah under a touch, with a little slack around each word. */
     fun ayahAt(x: Float, y: Float, slop: Float): Ayah? {
@@ -46,24 +51,41 @@ class RenderedPage(
     private fun ayahNumberAt(x: Float, y: Float, slop: Float): Int? {
         var best: Int? = null
         var bestDistance = Float.MAX_VALUE
-        for ((ayah, boxes) in ayahBoxes) {
-            for (box in boxes) {
-                if (x >= box.left - slop && x <= box.right + slop &&
-                    y >= box.top - slop && y <= box.bottom + slop
-                ) {
-                    return ayah
+        for (ayah in ayahOrder) {
+            when (val hit = under(ayah.number, x, y, slop)) {
+                is Hit.Exact -> return ayah.number
+                is Hit.Near -> if (hit.distance < bestDistance) {
+                    bestDistance = hit.distance
+                    best = ayah.number
                 }
-                val dx = maxOf(box.left - x, 0f, x - box.right)
-                val dy = maxOf(box.top - y, 0f, y - box.bottom)
-                val distance = dx * dx + dy * dy
-                if (distance < bestDistance) {
-                    bestDistance = distance
-                    best = ayah
-                }
+                is Hit.Far -> Unit
             }
         }
         val limit = slop * 3f
         return if (bestDistance <= limit * limit) best else null
+    }
+
+    private sealed interface Hit {
+        data object Exact : Hit
+        data class Near(val distance: Float) : Hit
+        data object Far : Hit
+    }
+
+    private fun under(ayah: Int, x: Float, y: Float, slop: Float): Hit {
+        val boxes = ayahBoxes[ayah] ?: return Hit.Far
+        var best = Float.MAX_VALUE
+        for (box in boxes) {
+            if (x >= box.left - slop && x <= box.right + slop &&
+                y >= box.top - slop && y <= box.bottom + slop
+            ) {
+                return Hit.Exact
+            }
+            val dx = maxOf(box.left - x, 0f, x - box.right)
+            val dy = maxOf(box.top - y, 0f, y - box.bottom)
+            val distance = dx * dx + dy * dy
+            if (distance < best) best = distance
+        }
+        return Hit.Near(best)
     }
 
     /** The word box for one word of one ayah, for the recitation wash. */
@@ -119,12 +141,31 @@ class PageRenderer(private val context: Context) {
             if (evicted) oldValue.bitmap.recycle()
         }
     }
-    private val inFlight = ConcurrentHashMap<PageKey, Boolean>()
+    private val inFlight = ConcurrentHashMap<PageKey, CompletableDeferred<RenderedPage?>>()
+    private val lastPage = PageCache(context)
     private var hafs: Typeface? = null
     private var amiri: Typeface? = null
 
     fun peek(key: PageKey): RenderedPage? = synchronized(cache) { cache.get(key) }
 
+    /** The picture of the page the reader left, for the first frame of a launch. */
+    suspend fun loadStartupPage(): StartupPage? = withContext(Dispatchers.IO) { lastPage.load() }
+
+    /**
+     * Writes the page the reader has settled on, so the next launch can paint
+     * it before anything else is ready. A newer settle cancels the write
+     * before it starts, so swiping through the Quran never touches the disk.
+     */
+    suspend fun rememberStartupPage(key: PageKey) {
+        val rendered = peek(key) ?: return
+        withContext(Dispatchers.IO) { lastPage.save(key.page, key.widthPx, key.theme, rendered.bitmap) }
+    }
+
+    /**
+     * One render per page, shared by everyone who asks: a swipe and the
+     * prefetch behind it wait on the same bitmap instead of racing to draw it
+     * twice, and every waiter is woken when it lands.
+     */
     suspend fun get(
         key: PageKey,
         content: ContentDatabase,
@@ -132,23 +173,25 @@ class PageRenderer(private val context: Context) {
         palette: PagePalette,
     ): RenderedPage? {
         peek(key)?.let { return it }
-        // One render per page: a swipe and a prefetch ask the same question.
-        val claimed = inFlight.putIfAbsent(key, true) == null
-        if (!claimed) {
-            while (inFlight.containsKey(key)) {
-                kotlinx.coroutines.delay(16)
-                peek(key)?.let { return it }
-            }
-            return peek(key)
-        }
+        val gate = CompletableDeferred<RenderedPage?>()
+        val claimed = inFlight.putIfAbsent(key, gate) == null
+        if (!claimed) return inFlight[key]?.await()
         return try {
-            val rendered = withContext(Dispatchers.Default) {
-                render(content, fonts, key, palette)
-            }
+            val rendered = withContext(Dispatchers.Default) { render(content, fonts, key, palette) }
             if (rendered != null) synchronized(cache) { cache.put(key, rendered) }
+            gate.complete(rendered)
             rendered
+        } catch (cancelled: kotlinx.coroutines.CancellationException) {
+            gate.complete(null)
+            throw cancelled
+        } catch (error: Throwable) {
+            // A page that cannot be drawn shows its paper rather than taking
+            // the whole reading surface down with it.
+            android.util.Log.w(TAG, "page ${key.page} could not be rendered", error)
+            gate.complete(null)
+            null
         } finally {
-            inFlight.remove(key)
+            inFlight.remove(key, gate)
         }
     }
 
@@ -267,38 +310,7 @@ class PageRenderer(private val context: Context) {
                 }
             }
         }
-        return RenderedPage(bitmap, words, ayahBoxes, ayahs)
-    }
-
-    private fun drawHeader(
-        canvas: Canvas,
-        content: ContentDatabase,
-        page: Int,
-        widthPx: Int,
-        band: Float,
-        textWidth: Float,
-        fontPx: Float,
-        paint: Paint,
-    ) {
-        val ayahs = content.ayahsForPage(page)
-        val first = ayahs.firstOrNull() ?: return
-        val last = ayahs.lastOrNull()
-        val position = content.pagePosition(page)
-        val name = buildString {
-            append(content.surah(first.surah)?.nameArabic ?: "")
-            if (last != null && last.surah != first.surah) {
-                append("  \u00B7  ")
-                append(content.surah(last.surah)?.nameArabic ?: "")
-            }
-        }
-        paint.textSize = fontPx * HEADER_RATIO
-        val metrics = paint.fontMetrics
-        val baseline = band - (band - (metrics.descent - metrics.ascent)) / 2f - metrics.descent
-        canvas.drawText(name, widthPx / 2f, baseline, paint)
-        val juz = position?.juz ?: 1
-        paint.textAlign = Paint.Align.LEFT
-        canvas.drawText("${ARABIC_JUZ} ${arabicDigits(juz)}", (widthPx - textWidth) / 2f, baseline, paint)
-        paint.textAlign = Paint.Align.CENTER
+        return RenderedPage(bitmap, words, ayahBoxes, ayahs, palette)
     }
 
     private fun drawFooter(
@@ -351,6 +363,7 @@ class PageRenderer(private val context: Context) {
             ?: Typeface.SERIF
 
     private companion object {
+        const val TAG = "PageRenderer"
         const val CACHE_PAGES = 6
 
         /** A full line of glyphs sums to this many em. */

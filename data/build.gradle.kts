@@ -29,6 +29,7 @@ dependencies {
     api(project(":core"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.datastore.preferences)
+    testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.runner)
 }

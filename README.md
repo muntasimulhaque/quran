@@ -4,20 +4,26 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** submitted to Google Play for review. The listing, icon, feature
-graphic, and screenshots are in [`play-store/`](play-store/).
+**Status:** submitted to Google Play for review; the seventh session's audit
+is in the tree, unbuilt and unpublished, waiting for the owner's word. The
+listing, icon, feature graphic, and screenshots are in
+[`play-store/`](play-store/).
 
 ## What it does
 
 - **Mushaf mode.** The page of the Madinah Mushaf, drawn glyph by glyph from
   the QPC V2 page fonts, with the printed page's own furniture: surah names,
   juz and hizb, and the page number in a gold medallion. A swipe turns the
-  page. A tap brings quiet chrome; a long press asks about the ayah under
-  your finger.
+  page, with the shadow of a sheet of paper and a light tick as it settles. A
+  tap brings quiet chrome; a long press asks about the ayah under your finger.
+  Every ayah is a node a screen reader can read and act on.
+- **A launch that lands on the page.** The page the reader left is kept as a
+  picture and painted before the content database opens, so the app arrives
+  already showing the Book instead of a splash.
 - **Study mode.** One surah at a time, scrolls continuously to the end of the
   surah and offers the next. Arabic, then the translation, then footnotes
   behind their markers. An optional word by word aid puts each word's meaning
-  beneath it.
+  beneath it, in the language of the translation above it.
 - **The ayah card.** Save, note, copy, share, play from this ayah, word by
   word, and every tafsir you have installed.
 - **Search.** Arabic text, every enabled translation and tafsir, word
@@ -25,10 +31,17 @@ graphic, and screenshots are in [`play-store/`](play-store/).
   instant, even over a forty megabyte tafsir.
 - **Recitation.** Minshawi and Husary, one surah at a time. The page follows
   the reciter and the word being recited is washed as it is read.
+- **Your own work, yours to move.** Saved ayahs and notes export to a file and
+  import back on another phone, through the system's own file picker.
 - **A library you choose.** The app ships the Quran text and its page layout
   and nothing else. Translations, tafsirs, word lists, and recitations are
   added when the reader wants them, from the project's own Releases, with the
-  size shown first and the file verified by SHA-256.
+  size shown first and the file verified by SHA-256. The app can also read
+  every installed pack back and tell you if one no longer matches what was
+  published.
+- **Readable in every room, on every setting.** Four themes, a screen dimmer,
+  a text size scale, secondary text above 4.5:1 contrast in all four themes,
+  and every control a real 48 dp target.
 
 ## The content
 
@@ -51,7 +64,9 @@ The library today, language by language:
 ## How it is built
 
 The app is ten small Gradle modules with one way dependencies, and a JVM
-content pipeline. The rules are in [`docs/architecture.md`](docs/architecture.md);
+content pipeline. Every sentence the reader can see lives in a `strings.xml`
+in the module that draws it, so the interface can be translated without
+hunting through Kotlin. The rules are in [`docs/architecture.md`](docs/architecture.md);
 the design constitution is in [`docs/design.md`](docs/design.md); the reasons
 behind every decision are in [`docs/decisions.md`](docs/decisions.md).
 
@@ -70,6 +85,7 @@ behind every decision are in [`docs/decisions.md`](docs/decisions.md).
 ./gradlew :tools:run --args="fetch"          # downloads and verifies them
 
 ./gradlew :core:test                          # the pure Kotlin tests
+./gradlew :data:testDebugUnitTest             # pack ids and the saved store's shape
 ./gradlew :app:assembleDebug                  # a debug APK (carries every pack)
 ./gradlew :app:bundleRelease                  # the signed release bundle
 ```
@@ -96,6 +112,8 @@ live:
 The app collects nothing. The policy is [online](https://muntasimulhaque.github.io/quran/privacy.html)
 and [in this repo](docs/privacy.html). The one network use is a content pack
 or a recitation package the reader asks for, from the project's own Releases.
+Android's cloud backup and device transfer are refused explicitly, so the
+reader's saved ayahs and notes stay on the device until they export them.
 
 ## License
 

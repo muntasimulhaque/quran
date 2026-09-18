@@ -132,15 +132,20 @@ Searched, in one pass:
 
 One sheet, grouped, nothing hidden:
 
-* **Appearance**: Paper, Sepia, Night, Black, shown as swatches; text size
-  for study mode; the reading page follows the theme too.
-* **Reading**: follow the reciter, keep the screen awake, and an optional
-  switch that shows footnotes under each ayah instead of behind their
+* **Appearance**: Paper, Sepia, Night, Black, shown as swatches that also
+  preview the screen dim; text size for study mode; the reading page follows
+  the theme too.
+* **Reading**: follow the reciter, keep the screen awake, show word meanings,
+  and a switch that shows footnotes under each ayah instead of behind their
   markers.
 * **Recitation**: the reciter, and the downloaded surahs, with sizes.
 * **Content**: enabled translation and tafsir packs, each with its own
-  toggle, and a door to more packs when any exist.
-* **About**: version, "no ads, no trackers", privacy policy, source code.
+  toggle, the size before a byte moves, and a self check that reads every
+  installed pack back and names anything damaged.
+* **Your saved ayahs**: export the reader's saved ayahs and notes to a file,
+  and import one back on another phone.
+* **About**: version, "no ads, no trackers", privacy policy, source code,
+  corrections and rights, and the full credits and licenses.
 
 ## 8. Typography
 
@@ -173,9 +178,14 @@ Two families, four surfaces:
   in warm ink on a dark ground, never a bright page in a dark room.
 
 Gold is the only ornament color and never carries meaning by itself. The
-lapis accent is the only interactive color. Body text meets or exceeds
-4.5:1 contrast on its ground in all four themes; large display text meets
-3:1.
+lapis accent is the only interactive color, and its two washes belong to the
+theme: a lapis that reads as ink on paper reads as nothing at all on a night
+ground, so each theme sets its own, and the wash under a recited word is
+stronger than the wash under a chosen ayah. Body text meets or exceeds 4.5:1
+contrast on its ground in all four themes; large display text meets 3:1.
+Secondary text takes its tone from the theme rather than from an alpha that
+happens to look quiet, so the contrast survives every theme and every
+surface.
 
 ## 10. Motion
 
@@ -191,12 +201,15 @@ lapis accent is the only interactive color. Body text meets or exceeds
 ## 11. Accessibility
 
 * Every control has a 48 dp target and a spoken label; icons never stand
-  alone without a content description.
-* The Mushaf page is a picture of text, so it carries a semantics layer:
-  TalkBack reads the page as its ayah text, and each ayah has its own node
-  with its reference, so a screen reader can read, select, and act on it.
-* The study list is real text: it scales with the system font setting inside
-  a sane range, and every ayah is one accessibility node with a clear label.
+  alone without a content description. The text size steps name their place
+  in the scale, and a switch row is one labelled node rather than an
+  unlabelled switch beside a label.
+* The Mushaf page is a picture of text, so it carries a semantics layer: one
+  node per ayah, in page order, each with its reference and its text and an
+  action that opens that ayah's row of actions. A screen reader can read the
+  page, ayah by ayah, and act on any of them.
+* The study list is real text: it scales with the system font setting, and
+  every ayah is one accessibility node with a clear label.
 * The reading direction is right to left for Arabic runs and left to right
   for the interface; nothing is mirrored by hand.
 * Color is never the only signal; the played word is also marked in
@@ -217,28 +230,36 @@ lapis accent is the only interactive color. Body text meets or exceeds
 Rules: no disk or database work on the main thread, ever. Every index is
 built off the main thread after first paint. Every bitmap render happens on
 a worker and lands in a cache keyed by page, width, and theme. No work is
-done for a page the reader cannot see.
+done for a page the reader cannot see. The page the reader left is kept as a
+picture on disk and is the first thing painted on the next launch, so a
+launch is the Book rather than a wait. The measured numbers, from a minified
+release build on a software rendered emulator (the slowest Android this app
+will ever run on), are in D-037.
 
 ## 13. Content packs
 
-The app ships one complete, verified Quran: the QPC V2 page script, KFGQPC
-Hafs, Saheeh International, Ibn Kathir, As-Sa'di, Minshawi, and Husary. That
-is the default library, and it is offline and complete.
+The app ships the Quran text and its page layout and nothing else: the QPC V2
+page script and glyph system, the KFGQPC Hafs study font, and the navigation
+data. Ten megabytes, complete, offline, and enough to read the Book end to
+end. The page fonts ship in the base app rather than an asset pack (D-018).
 
-Everything beyond it is a pack. A pack is a signed file with a manifest and
-a payload, keyed by SHA-256, downloaded only on the reader's word, from the
-project's own releases, and removable without touching the built-in
-library. Translations, tafsirs, scripts, and recitations all use the same
+Everything else is a pack. A pack is a file with a manifest and a payload,
+keyed by SHA-256, downloaded only on the reader's word, from the project's
+own releases, and removable without touching the built-in library.
+Translations, tafsirs, scripts, word lists, and recitations all use the same
 shape, so the code learns the pack model once.
 
 The seams exist from today, even with one pack of each kind:
 
 * `pack` tables and pack columns in the content database, so a second
   translation is additive, never a schema change.
-* A pack registry in the app, listing built-in and installed packs and the
-  reader's choices.
+* A pack catalog in the app, listing built-in and installed packs, the
+  reader's choices, and the license of every dataset a pack is built from.
 * Search reads the enabled packs, so a new pack is searchable the day it is
   installed.
+* The app can read every installed pack back and compare it with the
+  fingerprint the catalog recorded, and it names anything that no longer
+  matches.
 
 ## 14. What this design removed
 

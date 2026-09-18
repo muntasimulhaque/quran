@@ -1,11 +1,11 @@
 package io.github.muntasimulhaque.quran.ui.theme
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import io.github.muntasimulhaque.quran.data.AppTheme
 
@@ -62,17 +62,43 @@ private val BlackScheme = darkColorScheme(
 )
 
 /** The Mushaf page colors, which turn over with the theme. */
-private val PaperPage = PagePalette(PaperBackground, PaperInk, Gold)
-private val SepiaPage = PagePalette(SepiaBackground, SepiaInk, SepiaGold)
-private val NightPage = PagePalette(NightBackground, NightInk, NightGold)
-private val BlackPage = PagePalette(BlackBackground, BlackInk, BlackGold)
+private val PaperPage = PagePalette(
+    paper = PaperBackground,
+    ink = PaperInk,
+    ornament = Gold,
+    selection = Color(0x1F1B4D7A),
+    highlight = Color(0x381B4D7A),
+)
 
-/** The wash under a selected ayah, and the one that follows the reciter. */
-val MushafSelection = Color(0x1F1B4D7A)
-val MushafHighlight = Color(0xFF2E6FA8)
+private val SepiaPage = PagePalette(
+    paper = SepiaBackground,
+    ink = SepiaInk,
+    ornament = SepiaGold,
+    selection = Color(0x221B4D7A),
+    highlight = Color(0x3D1B4D7A),
+)
+
+private val NightPage = PagePalette(
+    paper = NightBackground,
+    ink = NightInk,
+    ornament = NightGold,
+    selection = Color(0x2E7FB2E5),
+    highlight = Color(0x477FB2E5),
+)
+
+private val BlackPage = PagePalette(
+    paper = BlackBackground,
+    ink = BlackInk,
+    ornament = BlackGold,
+    selection = Color(0x337FB2E5),
+    highlight = Color(0x4D7FB2E5),
+)
 
 val LocalPagePalette = staticCompositionLocalOf { PaperPage }
 val LocalPageThemeName = staticCompositionLocalOf { "paper" }
+
+/** True for the two themes that turn the page over into the dark. */
+fun AppTheme.isDark(): Boolean = this == AppTheme.Night || this == AppTheme.Black
 
 @Composable
 fun QuranTheme(theme: AppTheme = AppTheme.Paper, content: @Composable () -> Unit) {

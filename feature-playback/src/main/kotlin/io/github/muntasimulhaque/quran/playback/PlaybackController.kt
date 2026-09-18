@@ -3,7 +3,6 @@ package io.github.muntasimulhaque.quran.playback
 import android.content.ComponentName
 import android.content.Context
 import androidx.core.content.ContextCompat
-import androidx.core.content.getSystemService
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player

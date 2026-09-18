@@ -2,7 +2,6 @@ package io.github.muntasimulhaque.quran.ui.search
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -30,7 +29,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +36,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -57,9 +57,10 @@ import io.github.muntasimulhaque.quran.data.SearchHit
 import io.github.muntasimulhaque.quran.data.SearchRequest
 import io.github.muntasimulhaque.quran.data.SearchResults
 import io.github.muntasimulhaque.quran.data.Surah
+import io.github.muntasimulhaque.quran.feature.search.R
 import io.github.muntasimulhaque.quran.ui.rich.HighlightedText
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
-import io.github.muntasimulhaque.quran.ui.theme.MushafHighlight
+import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -80,6 +81,7 @@ fun SearchSheet(
     tafsirPacks: List<String>,
     packNames: Map<String, String>,
     packLanguages: Map<String, String>,
+    wordsPack: String,
     onDismiss: () -> Unit,
     onAyah: (Ayah, Int) -> Unit,
     onSurah: (Surah) -> Unit,
@@ -120,6 +122,7 @@ fun SearchSheet(
                     tafsirPacks = tafsirPacks,
                     packNames = packNames,
                     packLanguages = packLanguages,
+                    wordsPack = wordsPack,
                     limit = LIMIT,
                 ),
             )
@@ -214,7 +217,7 @@ private fun SearchField(
                     Box {
                         if (value.isEmpty()) {
                             Text(
-                                text = "Search the Quran",
+                                text = stringResource(R.string.search_hint),
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
                             )
@@ -225,7 +228,7 @@ private fun SearchField(
             )
         }
         Text(
-            text = "Close",
+            text = stringResource(R.string.search_close),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier
@@ -239,24 +242,52 @@ private fun SearchField(
 
 @Composable
 private fun StatusLine(query: SearchQuery?, results: SearchResults, searching: Boolean) {
+    val total = results.counts.total
+    val counts = results.counts
+    val partSurahs = if (counts.surahs > 0) {
+        pluralStringResource(R.plurals.search_part_surah_names, counts.surahs, counts.surahs)
+    } else {
+        null
+    }
+    val partText = if (counts.arabic > 0) {
+        pluralStringResource(R.plurals.search_part_text, counts.arabic, counts.arabic)
+    } else {
+        null
+    }
+    val partTranslation = if (counts.translation > 0) {
+        pluralStringResource(R.plurals.search_part_translation, counts.translation, counts.translation)
+    } else {
+        null
+    }
+    val partWords = if (counts.words > 0) {
+        pluralStringResource(R.plurals.search_part_words, counts.words, counts.words)
+    } else {
+        null
+    }
+    val partTafsir = if (counts.tafsir > 0) {
+        pluralStringResource(R.plurals.search_part_tafsir, counts.tafsir, counts.tafsir)
+    } else {
+        null
+    }
+    val capped = if (results.capped) stringResource(R.string.search_status_capped, LIMIT) else null
     val message = when {
-        query == null -> "The Arabic text, translations, tafsirs, word meanings, surah names, and references like 2:255."
-        searching && results.hits.isEmpty() -> "Searching..."
-        results.counts.total == 0 -> "No matches."
+        query == null -> stringResource(R.string.search_status_prompt)
+        searching && results.hits.isEmpty() -> stringResource(R.string.search_status_searching)
+        total == 0 -> stringResource(R.string.search_status_no_matches)
         else -> buildString {
-            append(if (results.counts.total == 1) "1 match" else "${results.counts.total} matches")
-            val parts = buildList {
-                if (results.counts.surahs > 0) add("${results.counts.surahs} surah name${if (results.counts.surahs == 1) "" else "s"}")
-                if (results.counts.arabic > 0) add("${results.counts.arabic} in the text")
-                if (results.counts.translation > 0) add("${results.counts.translation} in the translation")
-                if (results.counts.words > 0) add("${results.counts.words} in word meanings")
-                if (results.counts.tafsir > 0) add("${results.counts.tafsir} in tafsir")
-            }
+            append(pluralStringResource(R.plurals.search_matches, total, total))
+            val parts = listOfNotNull(
+                partSurahs,
+                partText,
+                partTranslation,
+                partWords,
+                partTafsir,
+                capped,
+            )
             if (parts.isNotEmpty()) {
                 append("  \u00B7  ")
                 append(parts.joinToString(", "))
             }
-            if (results.capped) append("  \u00B7  the first $LIMIT shown")
         }
     }
     Text(
@@ -278,7 +309,7 @@ private fun ReferenceRow(ayah: Ayah, onAyah: (Ayah, Int) -> Unit) {
     ) {
         Column(Modifier.weight(1f)) {
             Text(
-                text = "Go to",
+                text = stringResource(R.string.search_label_go_to),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -290,7 +321,7 @@ private fun ReferenceRow(ayah: Ayah, onAyah: (Ayah, Int) -> Unit) {
             )
         }
         Text(
-            text = "Open",
+            text = stringResource(R.string.search_action_open),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary,
         )
@@ -308,7 +339,7 @@ private fun SurahRow(surah: Surah, onSurah: (Surah) -> Unit) {
     ) {
         Column(Modifier.weight(1f)) {
             Text(
-                text = "Surah",
+                text = stringResource(R.string.search_label_surah),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
             )
@@ -319,7 +350,11 @@ private fun SurahRow(surah: Surah, onSurah: (Surah) -> Unit) {
                 modifier = Modifier.padding(top = 4.dp),
             )
             Text(
-                text = "${surah.versesCount} ayahs  \u00B7  ${placeName(surah.revelationPlace)}",
+                text = stringResource(
+                    R.string.search_surah_meta,
+                    surah.versesCount,
+                    placeName(surah.revelationPlace),
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 2.dp),
@@ -382,7 +417,7 @@ private fun AyahRow(
         }
         hit.wordMeaning?.let { meaning ->
             Text(
-                text = "Word meaning: $meaning",
+                text = stringResource(R.string.search_word_meaning, meaning),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 6.dp),
@@ -399,24 +434,20 @@ private fun TafsirRow(hit: SearchHit.TafsirHitResult, onAyah: (Ayah, Int) -> Uni
             .clickable { onAyah(hit.ayah, hit.page) }
             .padding(horizontal = 22.dp, vertical = 14.dp),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = hit.packName,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Text(
-                text = "  \u00B7  ${hit.surahName} ${
-                    if (hit.fromAyah == hit.toAyah) {
-                        "${hit.surah}:${hit.fromAyah}"
-                    } else {
-                        "${hit.surah}:${hit.fromAyah}-${hit.toAyah}"
-                    }
-                }",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+        Text(
+            text = stringResource(
+                R.string.search_tafsir_range,
+                hit.packName,
+                hit.surahName,
+                if (hit.fromAyah == hit.toAyah) {
+                    "${hit.surah}:${hit.fromAyah}"
+                } else {
+                    "${hit.surah}:${hit.fromAyah}-${hit.toAyah}"
+                },
+            ),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
+        )
         Spacer(Modifier.height(8.dp))
         HighlightedText(
             text = hit.text,
@@ -433,7 +464,8 @@ private fun arabic(hit: SearchHit.AyahHit, hafs: FontFamily, terms: List<String>
     val text = hit.ayah.text
     val ranges = remember(text, terms) { Search.matchRanges(text, terms, arabic = true) }
     if (ranges.isEmpty()) return AnnotatedString(text)
-    val wash = MushafHighlight.copy(alpha = 0.18f)
+    val base = LocalPagePalette.current.highlight
+    val wash = base.copy(alpha = base.alpha.coerceAtLeast(0.25f))
     return buildAnnotatedString {
         var index = 0
         for (range in ranges) {
@@ -449,5 +481,10 @@ private fun arabic(hit: SearchHit.AyahHit, hafs: FontFamily, terms: List<String>
     }
 }
 
+@Composable
 private fun placeName(place: String): String =
-    if (place.equals("makkah", true)) "Makkah" else "Madinah"
+    if (place.equals("makkah", true)) {
+        stringResource(R.string.search_place_makkah)
+    } else {
+        stringResource(R.string.search_place_madinah)
+    }

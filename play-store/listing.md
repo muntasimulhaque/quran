@@ -100,16 +100,35 @@ footnotes, word by word, Ibn Kathir and As-Sa'di, search, bookmarks and
 notes, and recitations by Minshawi and Husary downloaded per surah on
 request. No ads, no trackers, no account.
 
+## Release notes (ready for the next release, 455 characters)
+
+Faster, quieter, truer. The app now opens on the page you left, painted
+before anything else loads. The Mushaf page reads aloud to a screen reader,
+ayah by ayah. Your saved ayahs and notes export to a file and import back on
+another phone. Settings can read your installed content back and tell you if
+a pack no longer matches what was published. Footnotes, dim, and the four
+themes are unchanged and better behaved. Every control is a real touch
+target.
+
 ## Before each release
 
 1. Raise `versionCode` by 1 and `versionName` by 0.1 in
    `app/build.gradle.kts` and update the version line at the top of this
-   file.
+   file. The release workflow refuses a tag that does not name the version
+   the app carries, so this step comes first.
 2. Run the owner-machine gates: `./gradlew :tools:run --args="verify"`,
    `audit`, `fonts`, and the instrumented tests on an emulator.
-3. Build the bundle: `./gradlew :app:bundleRelease` (signed from the
-   shared upload keystore when it is present).
-4. Upload to the internal track, check the size report, then promote.
+3. Tag it, and let the workflow do the rest:
+   `git tag v<version> && git push origin v<version>`. The `release`
+   workflow runs the tests and the content gates, builds the signed bundle
+   from repository secrets, verifies the signature, and drafts a GitHub
+   release with the bundle and its SHA-256 attached.
+4. Download the draft's bundle, upload it to the internal track, check the
+   size report, then promote. Delete the draft's assets once Play has it.
+
+Signing is optional in the workflow: without the four repository secrets
+(`UPLOAD_KEYSTORE_BASE64`, `UPLOAD_KEYSTORE_PASSWORD`, `UPLOAD_KEY_ALIAS`,
+`UPLOAD_KEY_PASSWORD`) it still builds, and says the bundle is unsigned.
 
 ## Assets in this folder
 

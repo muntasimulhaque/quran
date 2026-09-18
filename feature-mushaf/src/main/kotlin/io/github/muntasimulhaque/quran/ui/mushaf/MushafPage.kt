@@ -1,9 +1,13 @@
 package io.github.muntasimulhaque.quran.ui.mushaf
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
@@ -11,24 +15,28 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.PageFontStore
+import io.github.muntasimulhaque.quran.feature.mushaf.R
 import io.github.muntasimulhaque.quran.ui.theme.PagePalette
-import io.github.muntasimulhaque.quran.ui.theme.MushafHighlight
-import io.github.muntasimulhaque.quran.ui.theme.MushafSelection
-import kotlin.math.min
+import kotlin.math.roundToInt
 
 /**
  * One page of the Mushaf, drawn whole: the paper, the glyphs, the page's own
@@ -38,6 +46,10 @@ import kotlin.math.min
  * touch math works in page pixels, so a tap lands on the word under the
  * finger however the screen is sized. The page never scales with the reader's
  * text size: its lines are justified to the page, not the screen.
+ *
+ * The page is a picture of text, so it also carries a reading of itself for
+ * TalkBack: one invisible node per ayah, in page order, each with its
+ * reference and its text.
  */
 @Composable
 fun MushafPage(
@@ -45,71 +57,160 @@ fun MushafPage(
     fonts: PageFontStore,
     renderer: PageRenderer,
     page: Int,
+    /** The pixel width the page is drawn at, decided once for the whole pager. */
+    pageWidth: Int,
     palette: PagePalette,
     themeKey: String,
     selectedAyah: Int?,
     playingAyah: Int?,
     playingWord: Int?,
-    onAyah: (Ayah) -> Unit,
     onLongPressAyah: (Ayah) -> Unit,
     onBackgroundTap: () -> Unit,
     modifier: Modifier = Modifier,
+    /** How far this page is from the reader's finger, for the turn shadow. */
+    dragOffset: () -> Float = { 0f },
+    /** True for the page the reader is on, whose ayah nodes are exposed. */
+    active: Boolean = true,
+    /** The picture of this page from the last session, until it is rendered. */
+    placeholder: Bitmap? = null,
 ) {
     BoxWithConstraints(modifier.fillMaxSize()) {
         val density = LocalDensity.current
         val availableWidth = with(density) { maxWidth.toPx() }
         val availableHeight = with(density) { maxHeight.toPx() }
-        // The page's height follows from its width; render at the width it
-        // will actually be drawn at, never larger.
-        val pageWidth = min(availableWidth, availableHeight / PAGE_ASPECT).toInt().coerceAtLeast(1)
         val key = PageKey(page, pageWidth, themeKey)
 
         val rendered by produceState(initialValue = renderer.peek(key), key, palette) {
             value = renderer.get(key, content, fonts, palette)
         }
-        val onAyahState = rememberUpdatedState(onAyah)
         val onLongState = rememberUpdatedState(onLongPressAyah)
         val onBackgroundState = rememberUpdatedState(onBackgroundTap)
+        val haptics = LocalHapticFeedback.current
         val slop = with(density) { 6.dp.toPx() }
+        val ayahActions = stringResource(R.string.mushaf_ayah_actions)
+        val plainDescription = stringResource(R.string.mushaf_page_description, page)
+        val described = rendered?.let {
+            stringResource(R.string.mushaf_page_description_ayahs, page, it.ayahOrder.size)
+        }
 
-        Canvas(
+        // The page lifts while it is being dragged, as paper would, and the
+        // shadow it casts follows the finger and settles with it. The offset
+        // is read inside the layer, so a swipe redraws and never recomposes.
+        Box(
             Modifier
                 .fillMaxSize()
-                .semantics { contentDescription = "Mushaf page" }
-                .pointerInput(rendered, key) {
-                    val page = rendered ?: return@pointerInput
-                    val scale = size.width.toFloat() / page.widthPx
-                    val top = ((size.height - page.heightPx * scale) / 2f).coerceAtLeast(0f)
-                    detectTapGestures(
-                        onTap = {
-                            // A tap anywhere belongs to the reading: it brings
-                            // the chrome, or puts it away.
-                            onBackgroundState.value()
-                        },
-                        onLongPress = { offset ->
-                            // A long press asks about the ayah under the finger.
-                            val ayah = page.ayahAt(
-                                x = offset.x / scale,
-                                y = (offset.y - top) / scale,
-                                slop = slop / scale,
-                            )
-                            if (ayah != null) onLongState.value(ayah) else onBackgroundState.value()
-                        },
-                    )
+                .graphicsLayer {
+                    val lift = dragOffset().coerceIn(0f, 1f)
+                    shadowElevation = if (lift > 0f) with(density) { 14.dp.toPx() } * lift else 0f
+                    shape = RectangleShape
+                    clip = false
                 },
         ) {
-            val page = rendered ?: return@Canvas
-            val scale = size.width / page.widthPx
-            val top = ((size.height - page.heightPx * scale) / 2f).coerceAtLeast(0f)
-            withTransform({
-                translate(0f, top)
-                scale(scale, scale, pivot = Offset.Zero)
-            }) {
-                drawImage(
-                    image = page.bitmap.asImageBitmap(),
-                    dstSize = androidx.compose.ui.unit.IntSize(page.widthPx, page.heightPx),
+            Canvas(
+                Modifier
+                    .fillMaxSize()
+                    .semantics {
+                        contentDescription = described ?: plainDescription
+                    }
+                    .pointerInput(rendered, key) {
+                        val page = rendered ?: return@pointerInput
+                        val scale = size.width.toFloat() / page.widthPx
+                        val top = ((size.height - page.heightPx * scale) / 2f).coerceAtLeast(0f)
+                        detectTapGestures(
+                            onTap = {
+                                // A tap anywhere belongs to the reading: it
+                                // brings the chrome, or puts it away.
+                                onBackgroundState.value()
+                            },
+                            onLongPress = { offset ->
+                                // A long press asks about the ayah under the
+                                // finger: the ayah washes and the phone hums.
+                                val ayah = page.ayahAt(
+                                    x = offset.x / scale,
+                                    y = (offset.y - top) / scale,
+                                    slop = slop / scale,
+                                )
+                                if (ayah != null) {
+                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onLongState.value(ayah)
+                                } else {
+                                    onBackgroundState.value()
+                                }
+                            },
+                        )
+                    },
+            ) {
+                val page = rendered
+                if (page == null) {
+                    // The page picture from the last session, at the same
+                    // width and in the same colors, so the first frame of a
+                    // launch is already the page the reader left.
+                    if (placeholder != null) {
+                        val scale = size.width / placeholder.width
+                        val top = ((size.height - placeholder.height * scale) / 2f).coerceAtLeast(0f)
+                        withTransform({
+                            translate(0f, top)
+                            scale(scale, scale, pivot = Offset.Zero)
+                        }) {
+                            drawImage(
+                                image = placeholder.asImageBitmap(),
+                                dstSize = androidx.compose.ui.unit.IntSize(
+                                    placeholder.width,
+                                    placeholder.height,
+                                ),
+                            )
+                        }
+                    }
+                    return@Canvas
+                }
+                val scale = size.width / page.widthPx
+                val top = ((size.height - page.heightPx * scale) / 2f).coerceAtLeast(0f)
+                withTransform({
+                    translate(0f, top)
+                    scale(scale, scale, pivot = Offset.Zero)
+                }) {
+                    drawImage(
+                        image = page.bitmap.asImageBitmap(),
+                        dstSize = androidx.compose.ui.unit.IntSize(page.widthPx, page.heightPx),
+                    )
+                    drawWashes(page, selectedAyah, playingAyah, playingWord)
+                }
+            }
+        }
+
+        // One node per ayah, in page order, over the words they name. They
+        // carry no pointer input, so a touch still belongs to the page.
+        if (active && rendered != null && availableWidth > 0f && availableHeight > 0f) {
+            val read = rendered ?: return@BoxWithConstraints
+            val scale = availableWidth / read.widthPx
+            val top = ((availableHeight - read.heightPx * scale) / 2f).coerceAtLeast(0f)
+            for (ayah in read.ayahOrder) {
+                val box = read.ayahBox(ayah.number) ?: continue
+                val width = box.width() * scale
+                val height = box.height() * scale
+                if (width <= 0f || height <= 0f) continue
+                val x = (box.left * scale).roundToInt()
+                val y = (top + box.top * scale).roundToInt()
+                val description = stringResource(
+                    R.string.mushaf_ayah_node,
+                    ayah.verseKey,
+                    ayah.text,
                 )
-                drawWashes(page, selectedAyah, playingAyah, playingWord)
+                Box(
+                    Modifier
+                        .offset { IntOffset(x, y) }
+                        .size(
+                            width = with(density) { width.toDp() },
+                            height = with(density) { height.toDp() },
+                        )
+                        .semantics {
+                            contentDescription = description
+                            onClick(label = ayahActions) {
+                                onLongState.value(ayah)
+                                true
+                            }
+                        },
+                )
             }
         }
     }
@@ -124,7 +225,7 @@ private fun DrawScope.drawWashes(
     if (selectedAyah != null) {
         for (box in page.ayahLineBoxes(selectedAyah)) {
             drawRoundRect(
-                color = MushafSelection,
+                color = page.palette.selection,
                 topLeft = Offset(box.left, box.top),
                 size = Size(box.width(), box.height()),
                 cornerRadius = CornerRadius(box.height() * 0.18f),
@@ -133,7 +234,7 @@ private fun DrawScope.drawWashes(
     } else if (playingAyah != null) {
         for (box in page.ayahLineBoxes(playingAyah)) {
             drawRoundRect(
-                color = MushafHighlight.copy(alpha = 0.09f),
+                color = page.palette.highlight.copy(alpha = page.palette.highlight.alpha * 0.42f),
                 topLeft = Offset(box.left, box.top),
                 size = Size(box.width(), box.height()),
                 cornerRadius = CornerRadius(box.height() * 0.18f),
@@ -144,7 +245,7 @@ private fun DrawScope.drawWashes(
         page.wordBox(playingAyah, playingWord)?.let { word ->
             val pad = (word.bottom - word.top) * 0.08f
             drawRoundRect(
-                color = MushafHighlight.copy(alpha = 0.22f),
+                color = page.palette.highlight,
                 topLeft = Offset(word.left - pad, word.top + pad * 0.5f),
                 size = Size(word.right - word.left + pad * 2, word.bottom - word.top - pad),
                 cornerRadius = CornerRadius(pad * 2.4f),

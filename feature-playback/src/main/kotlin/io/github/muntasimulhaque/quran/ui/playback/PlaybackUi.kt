@@ -2,7 +2,6 @@ package io.github.muntasimulhaque.quran.ui.playback
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,20 +11,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,13 +25,14 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
-import kotlinx.coroutines.launch
 
 /**
  * The playback pill. It speaks in four voices: asking to download a surah,
@@ -85,10 +77,13 @@ fun PlaybackBar(
                 )
                 Text(
                     text = when {
-                        state.downloadFailed -> "Download failed"
-                        downloading -> "Downloading ${((state.downloadProgress ?: 0f) * 100).toInt()}%"
+                        state.downloadFailed -> stringResource(R.string.playback_download_failed)
+                        downloading -> stringResource(
+                            R.string.playback_downloading,
+                            ((state.downloadProgress ?: 0f) * 100).toInt(),
+                        )
                         needsDownload -> pendingLabel.orEmpty()
-                        state.unavailable -> "Not available yet"
+                        state.unavailable -> stringResource(R.string.playback_unavailable)
                         else -> reference.orEmpty()
                     },
                     style = MaterialTheme.typography.bodySmall,
@@ -97,15 +92,44 @@ fun PlaybackBar(
             }
             Spacer(Modifier.padding(horizontal = 6.dp))
             when {
-                state.downloadFailed -> PillText("Retry", onDownload)
-                downloading -> TransportButton(Transport.Close, "Cancel download", onClose)
-                needsDownload -> PillText(if (state.pendingIsContinuation) "Continue" else "Download", onDownload)
-                state.unavailable -> TransportButton(Transport.Close, "Close", onClose)
+                state.downloadFailed -> PillText(stringResource(R.string.playback_retry), onDownload)
+                downloading -> TransportButton(
+                    Transport.Close,
+                    stringResource(R.string.playback_cancel_download),
+                    onClose,
+                )
+                needsDownload -> PillText(
+                    stringResource(
+                        if (state.pendingIsContinuation) R.string.playback_continue else R.string.playback_download,
+                    ),
+                    onDownload,
+                )
+                state.unavailable -> TransportButton(
+                    Transport.Close,
+                    stringResource(R.string.playback_close),
+                    onClose,
+                )
                 else -> {
-                    TransportButton(Transport.Previous, "Previous ayah", onPrevious)
-                    TransportButton(if (state.isPlaying) Transport.Pause else Transport.Play, "Play or pause", onToggle)
-                    TransportButton(Transport.Next, "Next ayah", onNext)
-                    TransportButton(Transport.Close, "Stop", onClose)
+                    TransportButton(
+                        Transport.Previous,
+                        stringResource(R.string.playback_previous_ayah),
+                        onPrevious,
+                    )
+                    TransportButton(
+                        if (state.isPlaying) Transport.Pause else Transport.Play,
+                        stringResource(R.string.playback_play_pause),
+                        onToggle,
+                    )
+                    TransportButton(
+                        Transport.Next,
+                        stringResource(R.string.playback_next_ayah),
+                        onNext,
+                    )
+                    TransportButton(
+                        Transport.Close,
+                        stringResource(R.string.playback_stop),
+                        onClose,
+                    )
                 }
             }
         }
@@ -129,6 +153,7 @@ fun PlaybackBar(
 private fun PillText(label: String, onClick: () -> Unit) {
     Box(
         modifier = Modifier
+            .minimumInteractiveComponentSize()
             .clip(RoundedCornerShape(50))
             .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f))
             .clickable(onClick = onClick)
@@ -150,13 +175,14 @@ private fun TransportButton(kind: Transport, description: String, onClick: () ->
     val tint = MaterialTheme.colorScheme.onSurfaceVariant
     Box(
         modifier = Modifier
+            .minimumInteractiveComponentSize()
             .clip(RoundedCornerShape(50))
             .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 6.dp)
             .semantics {
                 contentDescription = description
                 role = Role.Button
             },
+        contentAlignment = Alignment.Center,
     ) {
         androidx.compose.foundation.Canvas(Modifier.size(20.dp)) {
             val w = size.width

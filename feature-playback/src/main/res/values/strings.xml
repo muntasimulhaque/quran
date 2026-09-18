@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="playback_download_failed">Download failed</string>
+    <string name="playback_downloading">Downloading %1$d%%</string>
+    <string name="playback_unavailable">Not available yet</string>
+    <string name="playback_retry">Retry</string>
+    <string name="playback_continue">Continue</string>
+    <string name="playback_download">Download</string>
+    <string name="playback_cancel_download">Cancel download</string>
+    <string name="playback_close">Close</string>
+    <string name="playback_stop">Stop</string>
+    <string name="playback_previous_ayah">Previous ayah</string>
+    <string name="playback_play_pause">Play or pause</string>
+    <string name="playback_next_ayah">Next ayah</string>
+</resources>

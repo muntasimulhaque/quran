@@ -85,4 +85,50 @@ class SavedStoreTest {
         store.remove(1)
         assertTrue(store.saved.value.isEmpty())
     }
+
+    @Test
+    fun exportAndImportRoundTripToAnotherPhone() = runBlocking {
+        store.setNote(262, "The Throne verse")
+        store.toggle(1)
+        val document = store.exportJson()
+        store.close()
+
+        context.deleteDatabase("saved.db")
+        val fresh = SavedStore(context)
+        fresh.load()
+        assertTrue(fresh.saved.value.isEmpty())
+        val imported = fresh.importJson(document)
+        assertEquals(2, imported.getOrThrow())
+        assertEquals(setOf(262, 1), fresh.saved.value.map { it.ayahNumber }.toSet())
+        assertEquals("The Throne verse", fresh.saved.value.first { it.ayahNumber == 262 }.note)
+        fresh.close()
+    }
+
+    @Test
+    fun importKeepsTheExistingNoteAndIgnoresJunk() = runBlocking {
+        store.setNote(262, "mine")
+        val document = """
+            {
+              "format": "quran-saved-ayahs",
+              "version": 1,
+              "saved": [
+                { "ayah": 262, "note": "theirs", "createdAt": 1 },
+                { "ayah": 999999, "note": "out of range" },
+                { "ayah": 2, "note": "kept" }
+              ]
+            }
+        """.trimIndent()
+        val imported = store.importJson(document)
+        assertEquals(1, imported.getOrThrow())
+        assertEquals("mine", store.saved.value.first { it.ayahNumber == 262 }.note)
+        assertEquals("kept", store.saved.value.first { it.ayahNumber == 2 }.note)
+    }
+
+    @Test
+    fun aForeignFileIsRefusedWithoutTouchingAnything() = runBlocking {
+        store.toggle(1)
+        val refused = store.importJson("{ \"format\": \"something-else\" }")
+        assertTrue(refused.isFailure)
+        assertEquals(listOf(1), store.saved.value.map { it.ayahNumber })
+    }
 }

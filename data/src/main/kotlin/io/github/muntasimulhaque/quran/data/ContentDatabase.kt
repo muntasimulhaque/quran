@@ -7,7 +7,6 @@ import io.github.muntasimulhaque.quran.core.SearchQuery
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
-import java.io.File
 
 /**
  * The read-only content database.
@@ -106,18 +105,6 @@ class ContentDatabase private constructor(
             }
         }
 
-    fun words(firstId: Int, lastId: Int): List<Word> =
-        database.rawQuery(
-            "SELECT id, position, text, glyph FROM word WHERE id BETWEEN ? AND ? ORDER BY id",
-            arrayOf(firstId.toString(), lastId.toString()),
-        ).use { cursor ->
-            buildList(cursor.count) {
-                while (cursor.moveToNext()) {
-                    add(wordOf(cursor, offset = 0))
-                }
-            }
-        }
-
     /** Every glyph on one page, in reading order, markers included. */
     fun pageWords(page: Int): List<PageWord> =
         database.rawQuery(
@@ -195,28 +182,6 @@ class ContentDatabase private constructor(
         text = cursor.getString(4),
     )
 
-    /** Every ayah's place, without its text: the study list's skeleton. */
-    fun ayahHeaders(): List<AyahHeader> =
-        database.rawQuery(
-            "SELECT number, surah, ayah, verse_key, page, juz FROM ayah ORDER BY number",
-            null,
-        ).use { cursor ->
-            buildList(cursor.count) {
-                while (cursor.moveToNext()) {
-                    add(
-                        AyahHeader(
-                            number = cursor.getInt(0),
-                            surah = cursor.getInt(1),
-                            ayah = cursor.getInt(2),
-                            verseKey = cursor.getString(3),
-                            page = cursor.getInt(4),
-                            juz = cursor.getInt(5),
-                        ),
-                    )
-                }
-            }
-        }
-
     fun translations(ayahNumbers: List<Int>, pack: String): Map<Int, TranslationText> {
         if (ayahNumbers.isEmpty() || !installedPack(pack)) return emptyMap()
         val placeholders = ayahNumbers.joinToString(",") { "?" }
@@ -248,11 +213,16 @@ class ContentDatabase private constructor(
         }
     }
 
-    /** The word by word meanings, in the reader's language when that pack is here. */
+    /**
+     * The word by word meanings, in the reader's language when that pack is
+     * here and in English when it is not, so a reader who has any word list
+     * always sees meanings rather than empty slots.
+     */
     fun wordMeanings(ayahNumber: Int, language: String = "en"): List<WordMeaning> {
-        val meanings = if (installedPack(wordsPack(language))) {
+        val chosen = meaningPack(language)
+        val meanings = if (chosen != null) {
             database.rawQuery(
-                "SELECT position, meaning FROM ${schema(wordsPack(language))}.word_meaning " +
+                "SELECT position, meaning FROM ${schema(chosen)}.word_meaning " +
                     "WHERE ayah_number = ? ORDER BY position",
                 arrayOf(ayahNumber.toString()),
             ).use { cursor ->
@@ -276,6 +246,20 @@ class ContentDatabase private constructor(
             }
         }
     }
+
+    /**
+     * The installed word list that speaks a language, falling back to English
+     * when that language has none, so meanings are never silently absent.
+     */
+    fun meaningPack(language: String): String? {
+        val preferred = wordsPack(language)
+        if (installedPack(preferred)) return preferred
+        if (preferred != WORDS_PACK && installedPack(WORDS_PACK)) return WORDS_PACK
+        return null
+    }
+
+    /** True when any word list is here, whatever language it speaks. */
+    fun hasWordList(): Boolean = installedPacks.any { it.startsWith(WORDS_PREFIX) }
 
     /** The words of a set of ayahs, in order, markers excluded. */
     fun wordsForAyahs(numbers: List<Int>): Map<Int, List<Word>> {
@@ -332,22 +316,31 @@ class ContentDatabase private constructor(
             PagePosition(cursor.getInt(0), cursor.getInt(1), cursor.getInt(2))
         }
 
-    fun firstPageOfSurah(surah: Int): Int =
-        database.rawQuery("SELECT MIN(page) FROM ayah WHERE surah = ?", arrayOf(surah.toString()))
-            .use { cursor -> if (cursor.moveToFirst()) cursor.getInt(0) else 1 }
-
     fun firstAyahOfSurah(surah: Int): Int =
         database.rawQuery("SELECT MIN(number) FROM ayah WHERE surah = ?", arrayOf(surah.toString()))
             .use { cursor -> if (cursor.moveToFirst()) cursor.getInt(0) else 1 }
 
-    /** The first ayah of each juz, for the juz list. */
-    fun juzStarts(): List<Int> =
+    /**
+     * The first ayah of each juz, with the reference it lands on, for the juz
+     * list. SQLite's bare columns beside MIN() come from the matching row, so
+     * the whole list is one query.
+     */
+    fun juzStarts(): List<JuzStart> =
         database.rawQuery(
-            "SELECT MIN(number) FROM ayah GROUP BY juz ORDER BY juz",
+            "SELECT juz, MIN(number), surah, ayah, verse_key FROM ayah GROUP BY juz ORDER BY juz",
             null,
         ).use { cursor ->
             buildList(cursor.count) {
-                while (cursor.moveToNext()) add(cursor.getInt(0))
+                while (cursor.moveToNext()) {
+                    add(
+                        JuzStart(
+                            juz = cursor.getInt(0),
+                            ayah = cursor.getInt(1),
+                            surah = cursor.getInt(2),
+                            verseKey = cursor.getString(4),
+                        ),
+                    )
+                }
             }
         }
 
@@ -457,8 +450,8 @@ class ContentDatabase private constructor(
         val arabicNumbers = arabicMatches(query, limit).also { counts[0] = it.size }
         val arabicWords = matchedWords(arabicNumbers, query.terms)
 
-        // Word meanings, English only, a single word finding its ayahs.
-        val wordMatches = wordMeaningMatches(query, limit)
+        // Word meanings, in the reader's language, a single word finding its ayahs.
+        val wordMatches = wordMeaningMatches(query, limit, request.wordsPack)
         counts[3] = wordMatches.size
 
         // Translations: the enabled packs, each with exact highlight ranges.
@@ -641,11 +634,11 @@ class ContentDatabase private constructor(
         }
     }
 
-    private fun wordMeaningMatches(query: SearchQuery, limit: Int): Map<Int, String> {
-        if (query.arabic || !installedPack(WORDS_PACK)) return emptyMap()
+    private fun wordMeaningMatches(query: SearchQuery, limit: Int, wordsPack: String): Map<Int, String> {
+        if (query.arabic || !installedPack(wordsPack)) return emptyMap()
         val condition = query.terms.joinToString(" AND ") { "meaning_search LIKE ? ESCAPE '\\'" }
         return database.rawQuery(
-            "SELECT ayah_number, meaning FROM ${schema(WORDS_PACK)}.word_meaning WHERE $condition " +
+            "SELECT ayah_number, meaning FROM ${schema(wordsPack)}.word_meaning WHERE $condition " +
                 "ORDER BY ayah_number LIMIT ?",
             (query.terms.map { Search.pattern(it) } + (limit * 4).toString()).toTypedArray(),
         ).use { cursor ->
@@ -673,18 +666,6 @@ class ContentDatabase private constructor(
             }
         }
     }
-
-    private fun translationMatches(number: Int, pack: String, terms: List<String>): Boolean {
-        val condition = terms.joinToString(" AND ") { "text_search LIKE ? ESCAPE '\\'" }
-        val args = (listOf(pack, number.toString()) + terms.map { Search.pattern(it) }).toTypedArray()
-        return database.rawQuery(
-            "SELECT 1 FROM translation WHERE pack = ? AND ayah_number = ? AND ($condition)",
-            args,
-        ).use { it.moveToFirst() }
-    }
-
-    private fun translation(number: Int, pack: String): TranslationText? =
-        translations(listOf(number), pack)[number]
 
     private fun loadRows(numbers: Collection<Int>): Map<Int, Row> {
         if (numbers.isEmpty()) return emptyMap()
@@ -852,18 +833,24 @@ class ContentDatabase private constructor(
     companion object {
         const val WORDS_PACK = "words-en"
         const val SURAH_INFO = "words-en"
+        const val WORDS_PREFIX = "words-"
         const val RECITER_PREFIX = "reciter-"
 
         fun reciterPack(recitation: String): String = RECITER_PREFIX + recitation
 
         /** The id of the word list that speaks a language. */
-        fun wordsPackId(language: String): String = "words-"
+        fun wordsPackId(language: String): String = "words-$language"
 
         /**
          * Opens the reader's library: the core pack, which ships inside the
          * app, and every pack this device has installed. A pack that is not
          * installed is simply not there, so no query can reach content the
          * reader does not have.
+         *
+         * A copy of the core pack that cannot be opened is discarded and
+         * copied again from the app itself, once. If that also fails, the
+         * app is told the content is unavailable rather than crashing on a
+         * corrupted file.
          */
         suspend fun open(
             context: Context,
@@ -872,13 +859,13 @@ class ContentDatabase private constructor(
         ): ContentDatabase = withContext(Dispatchers.IO) {
             val store = PackStore(context)
             val core = catalog.get(PackCatalog.CORE_ID)
-                ?: throw IllegalStateException("the catalog has no core pack")
-            val coreFile = store.coreFile(core)
-            val database = SQLiteDatabase.openDatabase(
-                coreFile.path,
-                null,
-                SQLiteDatabase.OPEN_READONLY,
-            )
+                ?: throw ContentUnavailableException("the catalog has no core pack")
+            val database = openCore(store, core)
+                ?: run {
+                    store.discardCore()
+                    openCore(store, core)
+                }
+                ?: throw ContentUnavailableException("the Quran text could not be opened")
             for (id in installed) {
                 if (id == PackCatalog.CORE_ID) continue
                 val file = store.fileFor(id)
@@ -891,5 +878,16 @@ class ContentDatabase private constructor(
             }
             ContentDatabase(database, catalog.withInstalled(installed), installed)
         }
+
+        private fun openCore(store: PackStore, core: ContentPack): SQLiteDatabase? = runCatching {
+            SQLiteDatabase.openDatabase(
+                store.coreFile(core).path,
+                null,
+                SQLiteDatabase.OPEN_READONLY,
+            )
+        }.getOrNull()
     }
 }
+
+/** The Quran text could not be opened, so the reader is offered a way back. */
+class ContentUnavailableException(message: String) : Exception(message)

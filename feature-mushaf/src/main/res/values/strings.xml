@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mushaf_page_description">Mushaf page %1$d</string>
+    <string name="mushaf_page_description_ayahs">Mushaf page %1$d, %2$d ayahs</string>
+    <string name="mushaf_ayah_node">%1$s. %2$s</string>
+    <string name="mushaf_ayah_actions">Ayah actions</string>
+</resources>

@@ -1,5 +1,6 @@
 package io.github.muntasimulhaque.quran.ui.study
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -38,6 +38,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -52,6 +53,8 @@ import io.github.muntasimulhaque.quran.data.TafsirPassage
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TranslationText
 import io.github.muntasimulhaque.quran.data.WordMeaning
+import io.github.muntasimulhaque.quran.feature.study.R
+import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconButton
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
@@ -109,10 +112,15 @@ fun AyahCard(
     var door by remember(ayah.number) { mutableStateOf<Door?>(null) }
     var editingNote by remember(ayah.number) { mutableStateOf(false) }
 
+    // A card with no translation chosen is not a failure: it is a reader who
+    // has not chosen one yet, so the card offers the door instead of a line
+    // that sounds like a bug.
+    var translationReady by remember(ayah.number, translationPack?.id) { mutableStateOf(false) }
     val translation by produceState<TranslationText?>(initialValue = null, ayah.number, translationPack?.id) {
         value = withContext(Dispatchers.IO) {
             translationPack?.let { content.translations(listOf(ayah.number), it.id)[ayah.number] }
         }
+        translationReady = true
     }
     val words by produceState<List<WordMeaning>>(initialValue = emptyList(), ayah.number, door) {
         if (door == Door.Words) {
@@ -187,12 +195,22 @@ fun AyahCard(
                 }
                 IconButton(
                     icon = if (isSaved) Icon.BookmarkFilled else Icon.Bookmark,
-                    description = if (isSaved) "Saved" else "Save this ayah",
+                    description = stringResource(
+                        if (isSaved) R.string.card_cd_saved else R.string.card_cd_save,
+                    ),
                     onClick = onToggleSave,
                     active = isSaved,
                 )
-                IconButton(Icon.Copy, "Copy the ayah", onClick = { onCopy(shareText) })
-                IconButton(Icon.Share, "Share the ayah", onClick = { onShare(shareText) })
+                IconButton(
+                    icon = Icon.Copy,
+                    description = stringResource(R.string.card_cd_copy),
+                    onClick = { onCopy(shareText) },
+                )
+                IconButton(
+                    icon = Icon.Share,
+                    description = stringResource(R.string.card_cd_share),
+                    onClick = { onShare(shareText) },
+                )
             }
 
             Text(
@@ -215,18 +233,26 @@ fun AyahCard(
                     modifier = Modifier.padding(horizontal = 22.dp),
                     textSize = textSize,
                 )
-            } ?: Text(
-                text = "This ayah has no text in the chosen translation.",
-                style = LatinReading.copy(fontSize = 15.sp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 22.dp),
-            )
+            } ?: when {
+                translationPack == null -> AddTranslation(
+                    text = stringResource(R.string.card_add_translation),
+                    onClick = onAddContent,
+                    modifier = Modifier.padding(horizontal = 22.dp),
+                )
+                translationReady -> Text(
+                    text = stringResource(R.string.card_no_translation),
+                    style = LatinReading.copy(fontSize = 15.sp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 22.dp),
+                )
+                else -> Unit
+            }
 
             Spacer(Modifier.height(18.dp))
 
             if (hasWords) {
                 DoorRow(
-                    title = "Word by word",
+                    title = stringResource(R.string.card_word_by_word),
                     subtitle = "",
                     open = door == Door.Words,
                     onClick = { door = if (door == Door.Words) null else Door.Words },
@@ -236,7 +262,7 @@ fun AyahCard(
                 }
             } else {
                 DoorRow(
-                    title = "Add word by word",
+                    title = stringResource(R.string.card_add_word_by_word),
                     subtitle = "",
                     open = false,
                     onClick = onAddContent,
@@ -246,7 +272,7 @@ fun AyahCard(
                 val open = (door as? Door.Tafsir)?.pack?.id == pack.id
                 DoorRow(
                     title = pack.name,
-                    subtitle = if (pack.language == "ar") "Arabic" else "English",
+                    subtitle = languageName(pack.language),
                     open = open,
                     onClick = { door = if (open) null else Door.Tafsir(pack) },
                 )
@@ -255,7 +281,7 @@ fun AyahCard(
                         val view = tafsir
                         if (view == null) {
                             Text(
-                                text = "Opening ${pack.name}...",
+                                text = stringResource(R.string.card_opening_pack, pack.name),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -285,7 +311,7 @@ fun AyahCard(
             translation?.footnotes?.takeIf { it.isNotEmpty() }?.let { footnotes ->
                 Column(Modifier.padding(horizontal = 22.dp, vertical = 6.dp)) {
                     Text(
-                        text = "Translator notes",
+                        text = stringResource(R.string.card_translator_notes),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     )
@@ -296,6 +322,31 @@ fun AyahCard(
             Spacer(Modifier.height(18.dp))
             PlayButton(onPlay, Modifier.padding(horizontal = 22.dp))
         }
+    }
+}
+
+@Composable
+private fun AddTranslation(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.05f))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = stringResource(R.string.study_action_add),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+        )
     }
 }
 
@@ -316,7 +367,7 @@ private fun PlayButton(onPlay: () -> Unit, modifier: Modifier = Modifier) {
             modifier = Modifier.heightIn(min = 16.dp).widthIn(min = 16.dp),
         )
         Text(
-            text = "Play from this ayah",
+            text = stringResource(R.string.card_play_from_ayah),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(start = 10.dp),
@@ -457,7 +508,7 @@ private fun NoteBlock(
                     .padding(horizontal = 22.dp, vertical = 14.dp),
             ) {
                 Text(
-                    text = "Add a note",
+                    text = stringResource(R.string.card_add_note),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f),
@@ -470,7 +521,7 @@ private fun NoteBlock(
                     .padding(horizontal = 22.dp, vertical = 14.dp),
             ) {
                 Text(
-                    text = "Your note",
+                    text = stringResource(R.string.card_your_note),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -500,14 +551,14 @@ private fun NoteEditor(initial: String?, onSave: (String) -> Unit, onClear: () -
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "Note",
+                text = stringResource(R.string.card_note_label),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.weight(1f),
             )
             if (!initial.isNullOrBlank()) {
                 Text(
-                    text = "Clear",
+                    text = stringResource(R.string.action_clear),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
@@ -517,7 +568,7 @@ private fun NoteEditor(initial: String?, onSave: (String) -> Unit, onClear: () -
                 )
             }
             Text(
-                text = "Save",
+                text = stringResource(R.string.action_save),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
@@ -544,7 +595,7 @@ private fun NoteEditor(initial: String?, onSave: (String) -> Unit, onClear: () -
                 Box {
                     if (draft.isEmpty()) {
                         Text(
-                            text = "Write a note for this ayah",
+                            text = stringResource(R.string.card_note_hint),
                             style = LatinReading.copy(fontSize = 16.sp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                         )

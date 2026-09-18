@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="browse_title">Browse</string>
+    <string name="browse_tab_surahs">Surahs</string>
+    <string name="browse_tab_juz">Juz</string>
+    <string name="browse_tab_saved">Saved</string>
+
+    <string name="place_makkah">Makkah</string>
+    <string name="place_madinah">Madinah</string>
+    <string name="surah_meta_place_ayahs">%1$s  ·  %2$d ayahs</string>
+    <string name="juz_title">Juz %1$d</string>
+    <string name="juz_starts_at">%1$s  ·  starts at %2$s</string>
+
+    <string name="saved_empty_title">Nothing saved yet</string>
+    <string name="saved_empty_body">Press and hold any ayah while reading, then Save. Your saved ayahs and notes appear here, newest first.</string>
+    <string name="saved_reference_fallback">Ayah %1$d</string>
+    <string name="action_open">Open</string>
+    <string name="action_remove">Remove</string>
+</resources>

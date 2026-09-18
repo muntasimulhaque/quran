@@ -22,7 +22,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -32,27 +31,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.RichText
-import io.github.muntasimulhaque.quran.data.AyahHeader
 import io.github.muntasimulhaque.quran.data.ContentDatabase
+import io.github.muntasimulhaque.quran.data.JuzStart
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.data.Surah
-import io.github.muntasimulhaque.quran.ui.rich.HighlightedText
+import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.LatinReading
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-private enum class BrowseTab(val label: String) {
-    Surahs("Surahs"),
-    Juz("Juz"),
-    Saved("Saved"),
+private enum class BrowseTab(val labelRes: Int) {
+    Surahs(R.string.browse_tab_surahs),
+    Juz(R.string.browse_tab_juz),
+    Saved(R.string.browse_tab_saved),
 }
 
 /**
@@ -66,7 +67,6 @@ fun BrowseSheet(
     content: ContentDatabase,
     surahs: List<Surah>,
     saved: List<SavedAyah>,
-    headers: List<AyahHeader>,
     translationPack: String,
     startOnSaved: Boolean = false,
     onDismiss: () -> Unit,
@@ -78,7 +78,7 @@ fun BrowseSheet(
     var tab by remember {
         mutableStateOf(if (startOnSaved) BrowseTab.Saved else BrowseTab.Surahs)
     }
-    val juzStarts by produceState(initialValue = emptyList<Int>(), content) {
+    val juzStarts by produceState(initialValue = emptyList<JuzStart>(), content) {
         value = withContext(Dispatchers.IO) { content.juzStarts() }
     }
 
@@ -93,7 +93,7 @@ fun BrowseSheet(
                 .imePadding(),
         ) {
             Text(
-                text = "Browse",
+                text = stringResource(R.string.browse_title),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = 8.dp),
@@ -122,7 +122,7 @@ fun BrowseSheet(
                             .padding(horizontal = 16.dp, vertical = 8.dp),
                     ) {
                         Text(
-                            text = entry.label,
+                            text = stringResource(entry.labelRes),
                             style = MaterialTheme.typography.labelMedium,
                             color = if (active) {
                                 MaterialTheme.colorScheme.primary
@@ -141,14 +141,13 @@ fun BrowseSheet(
                     }
                 }
                 BrowseTab.Juz -> LazyColumn(contentPadding = PaddingValues(bottom = 28.dp)) {
-                    itemsIndexedCompat(juzStarts) { index, firstAyah ->
-                        val header = headers.firstOrNull { it.number == firstAyah }
-                        val surah = header?.let { h -> surahs.firstOrNull { it.number == h.surah } }
+                    itemsIndexedCompat(juzStarts) { index, start ->
+                        val surah = surahs.firstOrNull { it.number == start.surah }
                         JuzRow(
-                            juz = index + 1,
-                            reference = header?.verseKey ?: "",
+                            juz = start.juz,
+                            reference = start.verseKey,
                             surahName = surah?.nameSimple ?: "",
-                            onJuz = { onSurah(header?.surah ?: 1) },
+                            onJuz = { onSurah(start.surah) },
                         )
                     }
                 }
@@ -194,7 +193,11 @@ private fun SurahRow(surah: Surah, onClick: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = "${placeName(surah.revelationPlace)}  \u00B7  ${surah.versesCount} ayahs",
+                text = stringResource(
+                    R.string.surah_meta_place_ayahs,
+                    placeName(surah.revelationPlace),
+                    surah.versesCount,
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 2.dp),
@@ -219,17 +222,17 @@ private fun JuzRow(juz: Int, reference: String, surahName: String, onJuz: () -> 
         Text(
             text = juz.toString(),
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(end = 16.dp),
         )
         Column(Modifier.weight(1f)) {
             Text(
-                text = "Juz $juz",
+                text = stringResource(R.string.juz_title, juz),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = if (reference.isEmpty()) "" else "$surahName  \u00B7  starts at $reference",
+                text = if (reference.isEmpty()) "" else stringResource(R.string.juz_starts_at, surahName, reference),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 2.dp),
@@ -254,13 +257,12 @@ private fun SavedList(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = "Nothing saved yet",
+                text = stringResource(R.string.saved_empty_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = "Tap any ayah while reading, then Save. Your saved ayahs and notes " +
-                    "appear here, newest first.",
+                text = stringResource(R.string.saved_empty_body),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp),
@@ -268,12 +270,32 @@ private fun SavedList(
         }
         return
     }
+    val context = LocalContext.current
+    val hafs = remember {
+        FontFamily(Font(path = "fonts/UthmanicHafs_V22.ttf", assetManager = context.assets))
+    }
+    // Every saved ayah is read in two batched queries, once, so the list
+    // never opens on a row that is still looking for its text.
+    val texts by produceState<Map<Int, SavedText>>(emptyMap(), saved, translationPack) {
+        value = withContext(Dispatchers.IO) {
+            val numbers = saved.map { it.ayahNumber }
+            val ayahs = content.ayahsWithPages(numbers).associateBy { it.ayah.number }
+            val translations = content.translations(numbers, translationPack)
+            numbers.associateWith { number ->
+                SavedText(
+                    reference = ayahs[number]?.ayah?.verseKey ?: "Ayah $number",
+                    arabic = ayahs[number]?.ayah?.text.orEmpty(),
+                    translation = translations[number]?.text?.let { RichText.plain(it) },
+                )
+            }
+        }
+    }
     LazyColumn(contentPadding = PaddingValues(bottom = 28.dp)) {
         items(saved, key = { it.ayahNumber }) { row ->
             SavedRow(
-                content = content,
                 saved = row,
-                translationPack = translationPack,
+                text = texts[row.ayahNumber],
+                hafs = hafs,
                 onAyah = onAyah,
                 onRemove = onRemove,
             )
@@ -281,25 +303,21 @@ private fun SavedList(
     }
 }
 
+/** What one saved row shows, read with its neighbours. */
+private data class SavedText(
+    val reference: String,
+    val arabic: String,
+    val translation: String?,
+)
+
 @Composable
 private fun SavedRow(
-    content: ContentDatabase,
     saved: SavedAyah,
-    translationPack: String,
+    text: SavedText?,
+    hafs: FontFamily,
     onAyah: (Int) -> Unit,
     onRemove: (Int) -> Unit,
 ) {
-    val context = LocalContext.current
-    val hafs = remember {
-        FontFamily(Font(path = "fonts/UthmanicHafs_V22.ttf", assetManager = context.assets))
-    }
-    val row by produceState<Pair<String, String?>?>(initialValue = null, saved.ayahNumber, translationPack) {
-        value = withContext(Dispatchers.IO) {
-            val ayah = content.ayah(saved.ayahNumber) ?: return@withContext null
-            val translation = content.translations(listOf(saved.ayahNumber), translationPack)[saved.ayahNumber]
-            ayah.verseKey to translation?.text?.let { RichText.plain(it) }
-        }
-    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -308,20 +326,20 @@ private fun SavedRow(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = row?.first ?: "Ayah ",
+                text = text?.reference ?: stringResource(R.string.saved_reference_fallback, saved.ayahNumber),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.weight(1f),
             )
             Text(
-                text = "Open",
+                text = stringResource(R.string.action_open),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                text = "Remove",
+                text = stringResource(R.string.action_remove),
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
                     .padding(start = 14.dp)
                     .clip(RoundedCornerShape(50))
@@ -329,7 +347,24 @@ private fun SavedRow(
                     .padding(horizontal = 6.dp, vertical = 2.dp),
             )
         }
-        row?.second?.let { translation ->
+        text?.arabic?.takeIf { it.isNotEmpty() }?.let { arabic ->
+            Text(
+                text = arabic,
+                style = TextStyle(
+                    fontFamily = hafs,
+                    fontSize = 20.sp,
+                    lineHeight = 38.sp,
+                    color = MaterialTheme.colorScheme.onSurface,
+                ),
+                textAlign = TextAlign.Right,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 6.dp),
+            )
+        }
+        text?.translation?.let { translation ->
             Text(
                 text = translation,
                 style = LatinReading.copy(fontSize = 15.sp, lineHeight = 23.sp),
@@ -338,12 +373,7 @@ private fun SavedRow(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(top = 6.dp),
             )
-        } ?: Text(
-            text = "Loading...",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 6.dp),
-        )
+        }
         saved.note?.takeIf { it.isNotBlank() }?.let { note ->
             Text(
                 text = note,
@@ -362,5 +392,10 @@ private fun SavedRow(
     }
 }
 
+@Composable
 private fun placeName(place: String): String =
-    if (place.equals("makkah", true)) "Makkah" else "Madinah"
+    if (place.equals("makkah", true)) {
+        stringResource(R.string.place_makkah)
+    } else {
+        stringResource(R.string.place_madinah)
+    }
