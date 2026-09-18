@@ -1,10 +1,6 @@
 package io.github.muntasimulhaque.quran.tools
 
 import java.io.File
-import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
@@ -50,7 +46,14 @@ class Fetch(private val root: File) {
             }
             println("fetch: downloading ${dataset.id} from $assetUrl")
             try {
-                download(assetUrl, file)
+                try {
+                    download(assetUrl, file)
+                } catch (direct: Exception) {
+                    // This machine's JVM cannot always reach the release CDN host;
+                    // the GitHub CLI can, and it is already part of the pipeline.
+                    println("fetch: ${dataset.id} direct download failed (${direct.message ?: direct::class.java.simpleName}); trying gh")
+                    downloadWithGh(assetUrl, file)
+                }
                 val actual = sha256(file)
                 if (actual != dataset.sha256) {
                     println("fetch: ${dataset.id} hash $actual does not match ${dataset.sha256}; deleted")
@@ -61,7 +64,7 @@ class Fetch(private val root: File) {
                     unpack(dataset.id, file)
                 }
             } catch (error: Exception) {
-                println("fetch: ${dataset.id} failed: ${error.message}")
+                println("fetch: ${dataset.id} failed: ${error.message ?: error::class.java.simpleName}")
                 failures++
             }
         }
@@ -93,22 +96,52 @@ class Fetch(private val root: File) {
         extract(archive, target)
     }
 
+    /**
+     * Downloads a Release asset with the GitHub CLI, which reaches hosts this
+     * JVM cannot. The URL carries the tag and the asset name; gh needs no
+     * credentials for a public release when GH_TOKEN is present.
+     */
+    private fun downloadWithGh(url: String, destination: File) {
+        val marker = "/releases/download/"
+        val index = url.indexOf(marker)
+        if (index < 0) throw IllegalStateException("no gh path for $url")
+        val rest = url.substring(index + marker.length)
+        val tag = rest.substringBefore('/')
+        val asset = rest.substringAfter('/')
+        val directory = destination.parentFile ?: throw IllegalStateException("no directory for $destination")
+        directory.mkdirs()
+        val process = ProcessBuilder(
+            "gh", "release", "download", tag,
+            "--pattern", asset,
+            "--dir", directory.path,
+            "--clobber",
+        ).redirectErrorStream(true).start()
+        val output = process.inputStream.bufferedReader().readText()
+        if (process.waitFor() != 0) {
+            throw IllegalStateException("gh failed: ${output.take(200)}")
+        }
+        if (!destination.exists()) throw IllegalStateException("gh left no file at $destination")
+    }
+
     private fun download(url: String, destination: File) {
         destination.parentFile?.mkdirs()
         val temporary = File(destination.parentFile, destination.name + ".part")
-        val client = HttpClient.newBuilder()
-            .followRedirects(HttpClient.Redirect.NORMAL)
-            .build()
-        val request = HttpRequest.newBuilder(URI(url)).GET().build()
-        val response = client.send(request, HttpResponse.BodyHandlers.ofFile(temporary.toPath()))
-        if (response.statusCode() != 200) {
-            throw IllegalStateException("HTTP ${response.statusCode()} for $url")
+        val connection = java.net.URL(url).openConnection() as java.net.HttpURLConnection
+        connection.instanceFollowRedirects = true
+        connection.connectTimeout = 20_000
+        connection.readTimeout = 120_000
+        connection.connect()
+        if (connection.responseCode !in 200..299) {
+            throw IllegalStateException("HTTP ${connection.responseCode} for $url")
         }
+        connection.inputStream.use { input ->
+            temporary.outputStream().buffered().use { output -> input.copyTo(output) }
+        }
+        connection.disconnect()
         Files.move(
             temporary.toPath(),
             destination.toPath(),
             StandardCopyOption.REPLACE_EXISTING,
-            StandardCopyOption.ATOMIC_MOVE,
         )
     }
 }

@@ -10,7 +10,7 @@ kotlin {
 
 application {
     mainClass.set("io.github.muntasimulhaque.quran.tools.MainKt")
-    applicationDefaultJvmArgs = listOf("-Djava.awt.headless=true")
+    applicationDefaultJvmArgs = listOf("-Djava.awt.headless=true", "-Djava.net.preferIPv4Stack=true")
 }
 
 tasks.named<JavaExec>("run") {
@@ -25,7 +25,7 @@ tasks.register<JavaExec>("fetchAssets") {
     classpath = sourceSets["main"].runtimeClasspath
     args = listOf("fetch")
     workingDir = rootProject.projectDir
-    jvmArgs = listOf("-Djava.awt.headless=true")
+    jvmArgs = listOf("-Djava.awt.headless=true", "-Djava.net.preferIPv4Stack=true")
 }
 
 dependencies {

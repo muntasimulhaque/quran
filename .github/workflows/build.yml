@@ -10,6 +10,10 @@ jobs:
   gates:
     name: Gates and debug build
     runs-on: ubuntu-latest
+    env:
+      # Lets the fetch tool fall back to the GitHub CLI if the release CDN
+      # host is unreachable.
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
 
