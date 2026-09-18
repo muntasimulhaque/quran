@@ -135,9 +135,20 @@ class Packs(private val root: File) {
         Pack(
             id = "words-en",
             type = "words",
-            name = "Word by word and surah introductions",
+            name = "Word by word",
             language = "en",
             credit = "Quran.com word by word, via the Quranic Universal Library",
+            license = "See docs/content-sources.md",
+            version = "QUL",
+            shipped = false,
+            ayahs = 6236,
+        ),
+        Pack(
+            id = "words-bn",
+            type = "words",
+            name = "Word by word",
+            language = "bn",
+            credit = "Bengali word by word, via the Quranic Universal Library",
             license = "See docs/content-sources.md",
             version = "QUL",
             shipped = false,
@@ -269,12 +280,15 @@ class Packs(private val root: File) {
                     }
                     "words" -> {
                         statement.execute(
-                            "CREATE TABLE word_meaning AS SELECT id AS word_id, ayah_number, position, " +
-                                "translation AS meaning, translation_search AS meaning_search " +
-                                "FROM src.word WHERE marker = 0 AND translation IS NOT NULL",
+                            "CREATE TABLE word_meaning AS SELECT word_id, ayah_number, position, meaning, " +
+                                "meaning_search FROM src.word_meaning WHERE language = '${pack.language}'",
                         )
                         statement.execute("CREATE INDEX word_meaning_ayah ON word_meaning(ayah_number, position)")
-                        statement.execute("CREATE TABLE surah_info AS SELECT * FROM src.surah_info")
+                        // The surah introductions travel with the English list,
+                        // so a second language does not carry them twice.
+                        if (pack.language == "en") {
+                            statement.execute("CREATE TABLE surah_info AS SELECT * FROM src.surah_info")
+                        }
                     }
                     "recitation" -> {
                         val reciter = pack.id.removePrefix("reciter-")

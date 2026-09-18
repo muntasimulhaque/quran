@@ -174,7 +174,11 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         if (previous.ayah != next.ayah || !ready) {
             setPlace(next.ayah, database, persist = false)
         }
-        if (previous.translationPack != next.translationPack) clearRowCache()
+        if (previous.translationPack != next.translationPack ||
+            previous.wordByWord != next.wordByWord
+        ) {
+            clearRowCache()
+        }
     }
 
     private fun loadHeaders(database: ContentDatabase) {

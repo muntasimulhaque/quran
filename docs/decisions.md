@@ -907,3 +907,30 @@ an Arabic puzzle.
    verse. The switch only does something when a word list is installed, and
    the app picks the list that speaks the language of the chosen translation,
    falling back to English.
+
+## D-036: Word meanings speak one language per pack, and Arabic words read right to left
+
+Date: the fifth session, after the owner downloaded the Bengali word list.
+
+**One pack per language, one table for all of them.** The build no longer
+keeps a single meaning column on each word. Word meanings live in a
+`word_meaning` table keyed by (language, word), filled from every word list
+the build has, and each `words-<language>` pack carries one language. English
+is 4.6 MB, Bengali is 6.5 MB, and a third language costs one dataset entry
+and one pack definition, with no schema change and no code change in the app:
+the app already asks for the list that speaks the language of the chosen
+translation.
+
+**A real bug the Bengali library exposed.** `wordsPack(language)` ignored its
+argument and always returned the English pack id, so meanings silently never
+appeared for Bengali. It was found by following the feature end to end rather
+than by reading the code, and it is now covered by an instrumented test.
+
+**Right to left, like the Book.** The word by word aid lays the Arabic words
+right to left, each with its meaning beneath it, so the row reads in the
+order the ayah is recited instead of backwards.
+
+**The books now in the library**, all on demand, none inside the app: Saheeh
+International and Ibn Kathir in English, As-Sa'di in Arabic, Taisirul Quran
+and Ibn Kathir in Bengali, word lists in English and Bengali, and the two
+reciters with per surah audio.

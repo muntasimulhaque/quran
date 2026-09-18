@@ -433,10 +433,9 @@
       "credit": "Bengali word by word, via QUL",
       "usedFor": "Bengali word meanings pack (optional)",
       "path": "content/raw/qul/bengali-word-by-word.sqlite.zip",
-      "bytes": 0,
-      "sha256": "",
-      "assetUrl": null,
-      "pending": true
+      "bytes": 1305276,
+      "sha256": "d8132d6a49f6c00b40ec94b41a1c16ff43d7f8f33b5026ee98f9667d99d1e294",
+      "assetUrl": null
     }
   ]
 }

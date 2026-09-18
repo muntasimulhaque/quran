@@ -125,7 +125,7 @@
         {
             "id": "words-en",
             "type": "words",
-            "name": "Word by word and surah introductions",
+            "name": "Word by word",
             "language": "en",
             "credit": "Quran.com word by word, via the Quranic Universal Library",
             "license": "See docs/content-sources.md",
@@ -136,6 +136,21 @@
             "sha256": "6cebd465493683ccc00de0f8a490d7b7f962a8ec2f0ff0f510d87035c433190e",
             "tag": "pack-words-en-6cebd465",
             "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-words-en-6cebd465/words-en.db"
+        },
+        {
+            "id": "words-bn",
+            "type": "words",
+            "name": "Word by word",
+            "language": "bn",
+            "credit": "Bengali word by word, via the Quranic Universal Library",
+            "license": "See docs/content-sources.md",
+            "version": "QUL",
+            "shipped": false,
+            "ayahs": 6236,
+            "bytes": 6819840,
+            "sha256": "657797a6acb644953ff117cf5d1da33c79e8bd2f0394f412fd490f2d8062833b",
+            "tag": "pack-words-bn-657797a6",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-words-bn-657797a6/words-bn.db"
         }
     ]
 }

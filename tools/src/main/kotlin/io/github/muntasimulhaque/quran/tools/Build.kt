@@ -53,7 +53,10 @@ class Build(private val root: File) {
         assignGeometry(words, pageLines)
         val ayahNumbers = indexAyahs(words)
         val translation = readTranslation()
-        val wordTranslations = readWordTranslations()
+        val wordLists = buildMap {
+            put("en", readWordList("word-by-word-english"))
+            put("bn", readWordList("word-by-word-bengali"))
+        }
         val surahs = readSurahs()
         val navigation = readNavigation(ayahNumbers)
 
@@ -63,7 +66,7 @@ class Build(private val root: File) {
             connection.autoCommit = false
             schema(connection)
             insertSurahs(connection, surahs)
-            val inserted = insertAyahsAndWords(connection, words, ayahNumbers, wordTranslations, navigation)
+            val inserted = insertAyahsAndWords(connection, words, ayahNumbers, wordLists, navigation)
             insertPageLines(connection, pageLines)
             insertTranslation(connection, translation)
             insertTafsirIbnKathir(connection, ayahNumbers)
@@ -243,9 +246,13 @@ class Build(private val root: File) {
         return out
     }
 
-    private fun readWordTranslations(): Map<String, String> {
+    private fun readWordList(datasetId: String): Map<String, String> {
+        if (sourceDb(datasetId) == null) {
+            println("build: skipping $datasetId (source not present)")
+            return emptyMap()
+        }
         val out = HashMap<String, String>(90_000)
-        openSqlite(sourceDb("word-by-word-english")).use { connection ->
+        openSqlite(sourceDb(datasetId)).use { connection ->
             connection.each("SELECT surah_number, ayah_number, word_number, text FROM word_translation") { rs ->
                 out["${rs.getInt(1)}:${rs.getInt(2)}:${rs.getString(3)}"] = rs.getString(4) ?: ""
             }
@@ -363,12 +370,17 @@ class Build(private val root: File) {
             statement.execute(
                 "CREATE TABLE word (id INTEGER PRIMARY KEY, ayah_number INTEGER NOT NULL, surah INTEGER NOT NULL, " +
                     "ayah INTEGER NOT NULL, position INTEGER NOT NULL, marker INTEGER NOT NULL, text TEXT NOT NULL, " +
-                    "glyph TEXT NOT NULL, text_search TEXT NOT NULL, translation TEXT, translation_search TEXT, " +
+                    "glyph TEXT NOT NULL, text_search TEXT NOT NULL, " +
                     "page INTEGER NOT NULL, " +
                     "line INTEGER NOT NULL, line_position INTEGER NOT NULL)",
             )
             statement.execute("CREATE INDEX word_ref ON word(surah, ayah, position)")
             statement.execute("CREATE INDEX word_page ON word(page, line, line_position)")
+            statement.execute(
+                "CREATE TABLE word_meaning (word_id INTEGER NOT NULL, ayah_number INTEGER NOT NULL, " +
+                    "position INTEGER NOT NULL, language TEXT NOT NULL, meaning TEXT NOT NULL, " +
+                    "meaning_search TEXT NOT NULL, PRIMARY KEY (language, word_id))",
+            )
             statement.execute(
                 "CREATE TABLE page_line (page INTEGER NOT NULL, line INTEGER NOT NULL, type TEXT NOT NULL, " +
                     "centered INTEGER NOT NULL, first_word_id INTEGER NOT NULL, last_word_id INTEGER NOT NULL, " +
@@ -516,7 +528,7 @@ class Build(private val root: File) {
         connection: Connection,
         words: List<Word>,
         ayahNumbers: Map<String, Int>,
-        wordTranslations: Map<String, String>,
+        wordLists: Map<String, Map<String, String>>,
         nav: Navigation,
     ): Int {
         val grouped = LinkedHashMap<String, MutableList<Word>>(7000)
@@ -551,9 +563,32 @@ class Build(private val root: File) {
             statement.executeBatch()
         }
 
+        for ((language, list) in wordLists) {
+            if (list.isEmpty()) continue
+            connection.prepareStatement(
+                "INSERT INTO word_meaning(word_id, ayah_number, position, language, meaning, meaning_search) " +
+                    "VALUES(?,?,?,?,?,?)",
+            ).use { meanings ->
+                for (word in words) {
+                    if (word.marker) continue
+                    val meaning = list["${word.surah}:${word.ayah}:${word.position}"] ?: continue
+                    if (meaning.isBlank()) continue
+                    meanings.setInt(1, word.id)
+                    meanings.setInt(2, ayahNumbers["${word.surah}:${word.ayah}"] ?: 0)
+                    meanings.setInt(3, word.position)
+                    meanings.setString(4, language)
+                    meanings.setString(5, meaning)
+                    meanings.setString(6, Search.normalizeForIndex(meaning))
+                    meanings.addBatch()
+                }
+                meanings.executeBatch()
+            }
+            println("build: word meanings in $language: ${list.size}")
+        }
+
         connection.prepareStatement(
             "INSERT INTO word(id, ayah_number, surah, ayah, position, marker, text, glyph, text_search, " +
-                "translation, translation_search, page, line, line_position) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                "page, line, line_position) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
         ).use { statement ->
             for (word in words) {
                 statement.setInt(1, word.id)
@@ -565,12 +600,9 @@ class Build(private val root: File) {
                 statement.setString(7, word.text)
                 statement.setString(8, word.glyph)
                 statement.setString(9, if (word.marker) "" else Search.normalizeForIndex(word.text))
-                val meaning = wordTranslations["${word.surah}:${word.ayah}:${word.position}"]
-                statement.setString(10, meaning)
-                statement.setString(11, meaning?.let { Search.normalizeForIndex(it) })
-                statement.setInt(12, word.page)
-                statement.setInt(13, word.line)
-                statement.setInt(14, word.linePosition)
+                statement.setInt(10, word.page)
+                statement.setInt(11, word.line)
+                statement.setInt(12, word.linePosition)
                 statement.addBatch()
             }
             statement.executeBatch()

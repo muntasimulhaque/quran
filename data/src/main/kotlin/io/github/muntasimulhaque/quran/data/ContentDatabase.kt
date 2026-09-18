@@ -28,7 +28,7 @@ class ContentDatabase private constructor(
     private fun schema(id: String): String = "\"" + id.replace("\"", "") + "\""
 
     /** The word list that speaks a language, when the reader has it. */
-    private fun wordsPack(language: String): String = "words-"
+    private fun wordsPack(language: String): String = "words-$language"
 
     private fun has(id: String): Boolean = id in installedPacks && id != PackCatalog.CORE_ID
 
