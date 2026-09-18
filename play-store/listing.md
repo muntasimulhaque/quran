@@ -64,15 +64,24 @@ QuranEnc. Full credits and licenses are in the app and in the repository.
   after the reader taps Play and approves the shown size. Nothing is sent
   beyond that request. No analytics, no crash reporting, no advertising.
 - Privacy policy URL:
-  https://github.com/muntasimulhaque/quran/blob/main/docs/privacy.md
+  https://muntasimulhaque.github.io/quran/privacy.html
 
-## Graphics needed before publishing
+## Graphics
 
-- App icon 512 x 512 PNG. Not made yet; the app currently uses the
-  default Android icon. This is the next design task.
-- Feature graphic 1024 x 500 PNG. Not made yet.
-- Phone screenshots, 8 of them, 1080 x 1920 or larger:
-  1. Mushaf page (Al-Fatihah, paper theme)
+The icon and the feature graphic are made; the screenshots are captured by the
+screenshot test on a real Android system, one folder per form factor Play asks
+for.
+
+- App icon: `icon-512.png`
+- Feature graphic: `feature-graphic-1024x500.png`
+- Phone screenshots: `screenshots/phone/` (1080 x 1920), eight of them
+- 7 inch tablet screenshots: `screenshots/tablet7/` (1200 x 1920)
+- 10 inch tablet screenshots: `screenshots/tablet10/` (2560 x 1800)
+
+The `.github/workflows/screenshots.yml` workflow runs the capture test on
+three emulator profiles (phone, 7 inch, 10 inch) and uploads each set as its
+own artifact, so the store images always match the shipped build. Run it from
+the Actions tab, or let it run when the UI changes.
   2. Study page with translation and footnotes
   3. Study card with the action pills
   4. Ibn Kathir tafsir
@@ -108,10 +117,13 @@ request. No ads, no trackers, no account.
 |---|---|---|
 | `icon-512.png` | 512 x 512 | store icon |
 | `feature-graphic-1024x500.png` | 1024 x 500 | feature graphic |
-| `screenshots/*.png` | 1080 x 1920 | phone screenshots, captured by the screenshot test on a real Android system |
+| `screenshots/phone/*.png` | 1080 x 1920 | phone screenshots (8) |
+| `screenshots/tablet7/*.png` | 1200 x 1920 | 7 inch tablet screenshots |
+| `screenshots/tablet10/*.png` | 2560 x 1800 | 10 inch tablet screenshots |
 
 Screenshots: the Mushaf page, the summoned chrome, the study reading, an
-ayah's actions, the ayah card, search, the surah list, and settings.
+ayah's actions, the ayah card, search, the surah list, and settings. The
+tablet sets are produced by the same test on the taller and wider profiles.
 
 ## What the app carries, and what a reader adds
 

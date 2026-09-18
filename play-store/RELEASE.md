@@ -66,7 +66,7 @@ Everything the listing needs is in this folder:
 | Feature graphic | `feature-graphic-1024x500.png` |
 | Phone screenshots | `screenshots/` |
 | Data safety | nothing collected or shared; see `listing.md` and `docs/privacy.md` |
-| Privacy policy | `https://github.com/muntasimulhaque/quran/blob/main/docs/privacy.md` |
+| Privacy policy | `https://muntasimulhaque.github.io/quran/privacy.html` |
 
 ## 6. After the upload
 

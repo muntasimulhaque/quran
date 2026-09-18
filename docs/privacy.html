@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy: Quran: The Noble Book</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 680px; margin: 40px auto; padding: 0 20px; line-height: 1.6; color: #333; }
+  h1 { color: #1b4d7a; } h2 { color: #1b4d7a; margin-top: 1.6em; }
+  .updated { color: #888; font-size: .9em; }
+  code { background: #f4f1ea; padding: 1px 4px; border-radius: 3px; }
+  footer { margin-top: 3em; color: #888; font-size: .9em; }
+</style>
+</head>
+<body>
+<h1>Privacy Policy: Quran: The Noble Book</h1>
+<p class="updated">Last updated: September 18, 2026</p>
+
+<p>Quran: The Noble Book is a reader for the Quran. It collects nothing. There
+are no accounts, no ads, no trackers, no analytics, and no crash reporting. It
+is free and open source.</p>
+
+<h2>What leaves the device</h2>
+<p>Almost nothing. The app has one network use, and it happens only when the
+reader asks for it: downloading a content pack (a translation, a tafsir, a word
+list, a reciter's timings) or a recitation package for one surah, from the
+project's own GitHub Releases at <code>github.com/muntasimulhaque/quran</code>.
+That request carries nothing but the request itself: no account, no identifier,
+and no usage data. GitHub, like every web server, sees the connecting IP
+address; the app sends nothing else, and the project stores nothing.</p>
+
+<p>Nothing is downloaded at launch. Nothing is downloaded automatically. A
+download starts only after the reader sees the item's name and size and taps
+to accept it. Every pack and every recitation package is verified against a
+SHA-256 recorded at build time, and anything that fails the check is
+discarded.</p>
+
+<h2>What stays on the device</h2>
+<ul>
+  <li>The reading position, the theme, the text size, the chosen translation,
+      tafsir, and reciter, bookmarks, and notes are stored in the app's private
+      storage and never leave it.</li>
+  <li>Downloaded packs and recitation packages live in the app's private
+      storage. Removing a pack, or a surah, deletes its files.</li>
+  <li>The app works fully offline: the Quran text and its page layout ship
+      inside the app, and so do search, bookmarks, and notes. Anything the
+      reader has already added works with no connection.</li>
+</ul>
+
+<h2>Permissions</h2>
+<ul>
+  <li><code>INTERNET</code>: the one use described above.</li>
+  <li><code>POST_NOTIFICATIONS</code>: the media notification while a
+      recitation plays.</li>
+  <li><code>FOREGROUND_SERVICE</code> and
+      <code>FOREGROUND_SERVICE_MEDIA_PLAYBACK</code>: keeping a recitation
+      playing with the screen off.</li>
+</ul>
+<p>Nothing else is declared.</p>
+
+<h2>Children's privacy</h2>
+<p>The app is suitable for all ages. It has no user accounts, no user to user
+features, no advertising, and no purchases, and it collects no personal
+information from anyone, including children.</p>
+
+<h2>Changes</h2>
+<p>If this policy ever changes, the change will appear on this page and in the
+project's repository history.</p>
+
+<footer>
+<p>Source code: <a href="https://github.com/muntasimulhaque/quran">github.com/muntasimulhaque/quran</a></p>
+</footer>
+</body>
+</html>
