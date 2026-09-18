@@ -25,6 +25,7 @@ class CheckDb(private val root: File) {
         Expectation("tafsir_ayah", 12_472),
         Expectation("recitation_ayah", 24_944),
         Expectation("surah_info", 114),
+        Expectation("pack", 3),
     )
 
     fun run(): Int {
@@ -59,6 +60,21 @@ class CheckDb(private val root: File) {
                     failures++
                 }
             }
+            // Every pack must cover every ayah, or the reader would meet a
+            // silent hole when that pack is chosen.
+            val packs = mutableListOf<Pair<String, String>>()
+            connection.each("SELECT id, type FROM pack ORDER BY id") { rs ->
+                packs += rs.getString(1) to rs.getString(2)
+            }
+            for ((id, type) in packs) {
+                val table = if (type == "translation") "translation" else "tafsir_ayah"
+                val rows = connection.scalarLong("SELECT COUNT(*) FROM $table WHERE pack = ?", id)
+                if (rows != 6236L) {
+                    println("checkdb: pack $id covers $rows ayahs through $table, expected 6236")
+                    failures++
+                }
+            }
+            println("checkdb: ${packs.size} pack(s): " + packs.joinToString { it.first })
         }
         if (failures != 0) {
             println("checkdb: $failures problem(s)")

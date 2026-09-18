@@ -32,6 +32,9 @@ class RecitationManifest private constructor(
 
     fun packageCount(recitation: String): Int = surahsOf(recitation).size
 
+    /** The reciters whose packages are actually published. */
+    fun publishedRecitations(): Set<String> = packages.keys.map { it.first }.toSet()
+
     companion object {
         fun load(context: Context): RecitationManifest {
             val json = runCatching {

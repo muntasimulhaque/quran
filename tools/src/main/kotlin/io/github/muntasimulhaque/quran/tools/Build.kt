@@ -1,6 +1,7 @@
 package io.github.muntasimulhaque.quran.tools
 
 import io.github.muntasimulhaque.quran.core.Arabic
+import io.github.muntasimulhaque.quran.core.Search
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -69,6 +70,7 @@ class Build(private val root: File) {
             insertTafsirSaadi(connection, ayahNumbers)
             insertRecitations(connection, manifest, ayahNumbers)
             insertSurahInfo(connection)
+            insertPacks(connection, manifest)
             insertMeta(connection, manifest, inserted)
             connection.commit()
             connection.autoCommit = true
@@ -324,7 +326,8 @@ class Build(private val root: File) {
             statement.execute(
                 "CREATE TABLE word (id INTEGER PRIMARY KEY, ayah_number INTEGER NOT NULL, surah INTEGER NOT NULL, " +
                     "ayah INTEGER NOT NULL, position INTEGER NOT NULL, marker INTEGER NOT NULL, text TEXT NOT NULL, " +
-                    "glyph TEXT NOT NULL, text_search TEXT NOT NULL, translation TEXT, page INTEGER NOT NULL, " +
+                    "glyph TEXT NOT NULL, text_search TEXT NOT NULL, translation TEXT, translation_search TEXT, " +
+                    "page INTEGER NOT NULL, " +
                     "line INTEGER NOT NULL, line_position INTEGER NOT NULL)",
             )
             statement.execute("CREATE INDEX word_ref ON word(surah, ayah, position)")
@@ -335,19 +338,24 @@ class Build(private val root: File) {
                     "surah INTEGER NOT NULL, PRIMARY KEY (page, line))",
             )
             statement.execute(
-                "CREATE TABLE translation (ayah_number INTEGER PRIMARY KEY, text TEXT NOT NULL, " +
-                    "footnotes TEXT NOT NULL, text_search TEXT NOT NULL)",
+                "CREATE TABLE pack (id TEXT PRIMARY KEY, type TEXT NOT NULL, name TEXT NOT NULL, " +
+                    "language TEXT NOT NULL, credit TEXT NOT NULL, license TEXT NOT NULL, version TEXT NOT NULL, " +
+                    "builtin INTEGER NOT NULL, ayahs INTEGER NOT NULL, bytes INTEGER NOT NULL)",
             )
             statement.execute(
-                "CREATE TABLE tafsir_passage (source TEXT NOT NULL, source_id INTEGER NOT NULL, surah INTEGER NOT NULL, " +
-                    "from_ayah INTEGER NOT NULL, to_ayah INTEGER NOT NULL, text TEXT NOT NULL, " +
-                    "PRIMARY KEY (source, source_id))",
+                "CREATE TABLE translation (pack TEXT NOT NULL, ayah_number INTEGER NOT NULL, text TEXT NOT NULL, " +
+                    "footnotes TEXT NOT NULL, text_search TEXT NOT NULL, PRIMARY KEY (pack, ayah_number))",
             )
             statement.execute(
-                "CREATE TABLE tafsir_ayah (source TEXT NOT NULL, ayah_number INTEGER NOT NULL, " +
-                    "passage_id INTEGER NOT NULL, PRIMARY KEY (source, ayah_number))",
+                "CREATE TABLE tafsir_passage (pack TEXT NOT NULL, source_id INTEGER NOT NULL, surah INTEGER NOT NULL, " +
+                    "from_ayah INTEGER NOT NULL, to_ayah INTEGER NOT NULL, text TEXT NOT NULL, text_search TEXT NOT NULL, " +
+                    "PRIMARY KEY (pack, source_id))",
             )
-            statement.execute("CREATE INDEX tafsir_ayah_passage ON tafsir_ayah(passage_id)")
+            statement.execute(
+                "CREATE TABLE tafsir_ayah (pack TEXT NOT NULL, ayah_number INTEGER NOT NULL, " +
+                    "passage_id INTEGER NOT NULL, PRIMARY KEY (pack, ayah_number))",
+            )
+            statement.execute("CREATE INDEX tafsir_ayah_passage ON tafsir_ayah(pack, passage_id)")
             statement.execute(
                 "CREATE TABLE surah_info (surah INTEGER PRIMARY KEY, text TEXT NOT NULL)",
             )
@@ -377,6 +385,70 @@ class Build(private val root: File) {
             put("tafsir_english", "Tafsir Ibn Kathir, via the Quranic Universal Library")
             put("tafsir_arabic", "Tafsir As-Sa'di, QuranEnc arabic_saadi version 1.0.0")
             put("reciters", "Muhammad Siddiq Al-Minshawi, Mahmoud Khalil Al-Husary")
+            put("packs", "translation-saheeh-en tafsir-ibn-kathir-en tafsir-as-sadi-ar")
+            statement.executeBatch()
+        }
+    }
+
+    /**
+     * The packs this build carries. A pack is a unit of content the reader
+     * can turn on, and later replace or add to: a translation, a tafsir, a
+     * script. Installed packs outside the build carry the same shape, so the
+     * app needs one vocabulary for all of them.
+     */
+    private fun insertPacks(connection: Connection, manifest: Manifest) {
+        fun creditOf(id: String): String =
+            manifest.datasets.firstOrNull { it.id == id }?.credit.orEmpty()
+
+        fun licenseOf(id: String): String =
+            manifest.datasets.firstOrNull { it.id == id }?.license.orEmpty()
+
+        data class Pack(
+            val id: String,
+            val type: String,
+            val name: String,
+            val language: String,
+            val version: String,
+        )
+
+        val packs = listOf(
+            Pack("translation-saheeh-en", "translation", "Saheeh International", "en", "1.1.2"),
+            Pack("tafsir-ibn-kathir-en", "tafsir", "Ibn Kathir", "en", "QUL"),
+            Pack("tafsir-as-sadi-ar", "tafsir", "As-Sa'di", "ar", "1.0.0"),
+        )
+        connection.prepareStatement(
+            "INSERT INTO pack(id, type, name, language, credit, license, version, builtin, ayahs, bytes) " +
+                "VALUES(?,?,?,?,?,?,?,?,?,?)",
+        ).use { statement ->
+            for (pack in packs) {
+                val bytes = when (pack.type) {
+                    "translation" -> connection.scalarLong(
+                        "SELECT SUM(LENGTH(text)) FROM translation WHERE pack = ?", pack.id,
+                    )
+                    else -> connection.scalarLong(
+                        "SELECT SUM(LENGTH(text)) FROM tafsir_passage WHERE pack = ?", pack.id,
+                    )
+                }
+                val ayahs = when (pack.type) {
+                    "translation" -> connection.scalarLong(
+                        "SELECT COUNT(*) FROM translation WHERE pack = ?", pack.id,
+                    )
+                    else -> connection.scalarLong(
+                        "SELECT COUNT(*) FROM tafsir_ayah WHERE pack = ?", pack.id,
+                    )
+                }
+                statement.setString(1, pack.id)
+                statement.setString(2, pack.type)
+                statement.setString(3, pack.name)
+                statement.setString(4, pack.language)
+                statement.setString(5, creditOf(pack.id).ifEmpty { "Built in" })
+                statement.setString(6, licenseOf(pack.id).ifEmpty { "See docs/content-sources.md" })
+                statement.setString(7, pack.version)
+                statement.setInt(8, 1)
+                statement.setInt(9, ayahs.toInt())
+                statement.setInt(10, bytes.toInt())
+                statement.addBatch()
+            }
             statement.executeBatch()
         }
     }
@@ -434,7 +506,7 @@ class Build(private val root: File) {
                 statement.setInt(12, nav.sajdah[number])
                 statement.setString(13, nav.sajdahType[number])
                 statement.setString(14, text)
-                statement.setString(15, Arabic.normalizeForSearch(text))
+                statement.setString(15, Search.normalizeForIndex(text))
                 statement.addBatch()
             }
             statement.executeBatch()
@@ -442,7 +514,7 @@ class Build(private val root: File) {
 
         connection.prepareStatement(
             "INSERT INTO word(id, ayah_number, surah, ayah, position, marker, text, glyph, text_search, " +
-                "translation, page, line, line_position) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                "translation, translation_search, page, line, line_position) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         ).use { statement ->
             for (word in words) {
                 statement.setInt(1, word.id)
@@ -453,11 +525,13 @@ class Build(private val root: File) {
                 statement.setInt(6, if (word.marker) 1 else 0)
                 statement.setString(7, word.text)
                 statement.setString(8, word.glyph)
-                statement.setString(9, if (word.marker) "" else Arabic.normalizeForSearch(word.text))
-                statement.setString(10, wordTranslations["${word.surah}:${word.ayah}:${word.position}"])
-                statement.setInt(11, word.page)
-                statement.setInt(12, word.line)
-                statement.setInt(13, word.linePosition)
+                statement.setString(9, if (word.marker) "" else Search.normalizeForIndex(word.text))
+                val meaning = wordTranslations["${word.surah}:${word.ayah}:${word.position}"]
+                statement.setString(10, meaning)
+                statement.setString(11, meaning?.let { Search.normalizeForIndex(it) })
+                statement.setInt(12, word.page)
+                statement.setInt(13, word.line)
+                statement.setInt(14, word.linePosition)
                 statement.addBatch()
             }
             statement.executeBatch()
@@ -485,17 +559,18 @@ class Build(private val root: File) {
 
     private fun insertTranslation(connection: Connection, translations: Map<Int, Translation>) {
         connection.prepareStatement(
-            "INSERT INTO translation(ayah_number, text, footnotes, text_search) VALUES(?,?,?,?)",
+            "INSERT INTO translation(pack, ayah_number, text, footnotes, text_search) VALUES(?,?,?,?,?)",
         ).use { statement ->
             for (number in 1..6236) {
                 val translation = translations[number] ?: run {
                     fail("ayah $number has no translation")
                     continue
                 }
-                statement.setInt(1, number)
-                statement.setString(2, translation.text)
-                statement.setString(3, footnotesJson(translation.footnotes))
-                statement.setString(4, translation.text.lowercase(java.util.Locale.ROOT))
+                statement.setString(1, "translation-saheeh-en")
+                statement.setInt(2, number)
+                statement.setString(3, translation.text)
+                statement.setString(4, footnotesJson(translation.footnotes))
+                statement.setString(5, Search.normalizeForIndex(translation.text))
                 statement.addBatch()
             }
             statement.executeBatch()
@@ -531,10 +606,11 @@ class Build(private val root: File) {
         val db = sourceDb("tafsir-ibn-kathir-en")
         val passageIds = HashMap<String, Int>(2000)
         connection.prepareStatement(
-            "INSERT INTO tafsir_passage(source, source_id, surah, from_ayah, to_ayah, text) VALUES(?,?,?,?,?,?)",
+            "INSERT INTO tafsir_passage(pack, source_id, surah, from_ayah, to_ayah, text, text_search) " +
+                "VALUES(?,?,?,?,?,?,?)",
         ).use { insertPassage ->
             connection.prepareStatement(
-                "INSERT INTO tafsir_ayah(source, ayah_number, passage_id) VALUES(?,?,?)",
+                "INSERT INTO tafsir_ayah(pack, ayah_number, passage_id) VALUES(?,?,?)",
             ).use { insertMapping ->
                 var nextId = 1
                 openSqlite(db).use { source ->
@@ -554,12 +630,13 @@ class Build(private val root: File) {
                         if (row.text.isBlank()) continue
                         val id = nextId++
                         passageIds[row.key] = id
-                        insertPassage.setString(1, "ibn-kathir")
+                        insertPassage.setString(1, "tafsir-ibn-kathir-en")
                         insertPassage.setInt(2, id)
                         insertPassage.setInt(3, row.from.substringBefore(':').toInt())
                         insertPassage.setInt(4, row.from.substringAfter(':').toInt())
                         insertPassage.setInt(5, row.to.substringAfter(':').toInt())
                         insertPassage.setString(6, sanitize(row.text))
+                        insertPassage.setString(7, Search.normalizeForIndex(sanitize(row.text)))
                         insertPassage.addBatch()
                     }
                     insertPassage.executeBatch()
@@ -570,7 +647,7 @@ class Build(private val root: File) {
                             continue
                         }
                         val number = ayahNumbers[row.key] ?: continue
-                        insertMapping.setString(1, "ibn-kathir")
+                        insertMapping.setString(1, "tafsir-ibn-kathir-en")
                         insertMapping.setInt(2, number)
                         insertMapping.setInt(3, passage)
                         insertMapping.addBatch()
@@ -590,7 +667,8 @@ class Build(private val root: File) {
             else -> JsonArray(emptyList())
         }
         connection.prepareStatement(
-            "INSERT INTO tafsir_passage(source, source_id, surah, from_ayah, to_ayah, text) VALUES(?,?,?,?,?,?)",
+            "INSERT INTO tafsir_passage(pack, source_id, surah, from_ayah, to_ayah, text, text_search) " +
+                "VALUES(?,?,?,?,?,?,?)",
         ).use { insertPassage ->
             data class Entry(val id: Int, val surah: Int, val from: Int, val to: Int, val text: String)
             val entries = ArrayList<Entry>(6600)
@@ -602,12 +680,13 @@ class Build(private val root: File) {
                 val to = o["to_aya"]?.jsonPrimitive?.intOrNull ?: continue
                 val text = o["text"]?.jsonPrimitive?.contentOrNull ?: ""
                 entries += Entry(id, surah, from, to, text)
-                insertPassage.setString(1, "as-sadi")
+                insertPassage.setString(1, "tafsir-as-sadi-ar")
                 insertPassage.setInt(2, id)
                 insertPassage.setInt(3, surah)
                 insertPassage.setInt(4, from)
                 insertPassage.setInt(5, to)
                 insertPassage.setString(6, sanitize(text))
+                insertPassage.setString(7, Search.normalizeForIndex(sanitize(text)))
                 insertPassage.addBatch()
             }
             insertPassage.executeBatch()
@@ -627,14 +706,14 @@ class Build(private val root: File) {
                 }
             }
             connection.prepareStatement(
-                "INSERT INTO tafsir_ayah(source, ayah_number, passage_id) VALUES(?,?,?)",
+                "INSERT INTO tafsir_ayah(pack, ayah_number, passage_id) VALUES(?,?,?)",
             ).use { insertMapping ->
                 for (number in 1..6236) {
                     val passage = chosen[number] ?: run {
                         fail("As-Sa'di: ayah $number has no passage")
                         continue
                     }
-                    insertMapping.setString(1, "as-sadi")
+                    insertMapping.setString(1, "tafsir-as-sadi-ar")
                     insertMapping.setInt(2, number)
                     insertMapping.setInt(3, passage.first)
                     insertMapping.addBatch()

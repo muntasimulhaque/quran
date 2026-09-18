@@ -1,8 +1,11 @@
 package io.github.muntasimulhaque.quran.ui.rich
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,6 +32,7 @@ import io.github.muntasimulhaque.quran.core.TextBlock
 import io.github.muntasimulhaque.quran.core.TextBlockKind
 import io.github.muntasimulhaque.quran.core.TextRun
 import io.github.muntasimulhaque.quran.data.Footnote
+import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.Inter
 import io.github.muntasimulhaque.quran.ui.theme.LatinReading
@@ -39,31 +43,93 @@ import io.github.muntasimulhaque.quran.ui.theme.LatinReading
  * styling ever inside a word.
  */
 @Composable
-fun TranslationBody(runs: List<TextRun>, modifier: Modifier = Modifier) {
+fun TranslationBody(
+    runs: List<TextRun>,
+    modifier: Modifier = Modifier,
+    textSize: TextSize? = null,
+    highlight: List<IntRange> = emptyList(),
+) {
+    val base = if (textSize == null) {
+        LatinReading
+    } else {
+        LatinReading.copy(fontSize = textSize.latinSp.sp, lineHeight = textSize.latinLineSp.sp)
+    }
     Text(
-        text = annotated(runs, arabicSize = 18.sp, markerSize = 11.sp, quoteColor = null),
-        style = LatinReading,
+        text = annotated(
+            runs,
+            arabicSize = (textSize?.arabicSp ?: 18).sp,
+            markerSize = (textSize?.latinSp ?: 11).sp,
+            quoteColor = null,
+        ),
+        style = base,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier.fillMaxWidth(),
+    )
+}
+
+/**
+ * A plain sentence with the matched words washed in the accent color. Used by
+ * search results, where the text is a snippet rather than rich runs.
+ */
+@Composable
+fun HighlightedText(
+    text: String,
+    ranges: List<IntRange>,
+    modifier: Modifier = Modifier,
+    style: TextStyle = LatinReading,
+    color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    maxLines: Int = 4,
+) {
+    val wash = MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
+    val weight = FontWeight.Medium
+    Text(
+        text = buildAnnotatedString {
+            var index = 0
+            for (range in ranges) {
+                val from = range.first.coerceIn(index, text.length)
+                val to = (range.last + 1).coerceIn(from, text.length)
+                if (from > index) append(text.substring(index, from))
+                if (to > from) {
+                    withStyle(SpanStyle(background = wash, fontWeight = weight)) {
+                        append(text.substring(from, to))
+                    }
+                }
+                index = to
+            }
+            if (index < text.length) append(text.substring(index))
+        },
+        style = style,
+        color = color,
+        maxLines = maxLines,
+        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
         modifier = modifier.fillMaxWidth(),
     )
 }
 
 /** The footnote list of one ayah, hung under its translation. */
 @Composable
-fun FootnoteList(footnotes: List<Footnote>, modifier: Modifier = Modifier) {
+fun FootnoteList(footnotes: List<Footnote>, modifier: Modifier = Modifier, quiet: Boolean = false) {
     if (footnotes.isEmpty()) return
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .padding(top = if (quiet) 6.dp else 12.dp),
+        verticalArrangement = Arrangement.spacedBy(if (quiet) 22.dp else 8.dp),
     ) {
-        val primary = MaterialTheme.colorScheme.primary
+        if (quiet) {
+            Box(
+                Modifier
+                    .fillMaxWidth(0.14f)
+                    .height(1.dp)
+                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
+            )
+        }
+        val primary = MaterialTheme.colorScheme.onSurfaceVariant
         footnotes.forEach { footnote ->
             Text(
                 text = buildAnnotatedString {
                     withStyle(
-                        SpanStyle(color = primary, fontWeight = FontWeight.Medium, fontSize = 12.sp),
+                        SpanStyle(color = primary.copy(alpha = 0.8f), fontWeight = FontWeight.Medium, fontSize = 11.sp),
                     ) { append(footnote.number.toString()) }
                     append("  ")
                     append(footnote.text)
@@ -76,7 +142,7 @@ fun FootnoteList(footnotes: List<Footnote>, modifier: Modifier = Modifier) {
                             textIndent = TextIndent(firstLine = 0.sp, restLine = 14.sp),
                         ),
                     ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.86f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                 modifier = Modifier.fillMaxWidth(),
             )
         }
@@ -140,7 +206,7 @@ private fun annotated(
     markerSize: TextUnit,
     quoteColor: Color?,
 ): AnnotatedString {
-    val primary = MaterialTheme.colorScheme.primary
+    val primary = MaterialTheme.colorScheme.onSurfaceVariant
     val context = LocalContext.current
     val arabicFonts = remember(context) { ArabicFonts(context) }
     return buildAnnotatedString {

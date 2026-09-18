@@ -586,3 +586,88 @@ and unpacked, and playback started at 36:2, continued through the surah,
 moved the page, and marked the recited word. Instrumented tests pin the
 manifest contract and the per-surah file accounting
 (`RecitationManifestTest`, 4 of 4).
+
+## D-024: The page is the interface; the chrome is summoned
+
+Date: the third session. The owner asked for a full rethink toward the
+simplest, most beautiful reader possible, in the spirit of the best work
+Apple has shipped, and approved the direction in one line: make it the best
+app ever, and I will review the screenshots.
+
+What the reader sees: a Mushaf page that fills the screen, with no header,
+no footer, and no counter over it. One tap on the paper fades in a quiet
+chrome at the top and bottom edges, which steps back on its own after seven
+seconds. A tap on a word selects that ayah and shows one row of actions:
+save, play, copy, share, and more. A tap on the page's own margins, head
+band, or foot band brings the chrome instead. A long press does the same as
+a tap, so nothing is hidden behind an undiscoverable gesture.
+
+Why: every control that sits over the text competes with the text. The page
+of the Quran is the message; the app is a servant of it. A reader who wants
+to act on an ayah taps the ayah, and a reader who wants to navigate taps the
+paper. There is nothing else to learn.
+
+What the reader pays: one extra tap to reach navigation, in exchange for a
+page with nothing on it. The chrome remembers nothing between taps; it is
+always the same three doors at the top (browse, search, settings) and the
+same three at the foot (listen, mushaf or study, saved).
+
+## D-025: Study mode is one continuous scroll
+
+Date: the third session, same review.
+
+What the reader sees: the whole Quran as one vertical scroll, ayah after
+ayah, from Al-Fatihah to An-Nas. A surah opens with its ornament, its name,
+its place and ayah count, a quiet "About this surah" door, and the
+basmallah. Tapping any ayah selects it; the card holds the depth.
+
+Why: the previous study view was a pagination of Mushaf pages, which cut
+ayahs in half at page boundaries and made a translation read like a tablet
+of fragments. A translation is read as a book, and a thought should not be
+interrupted by a page break that exists only for the Mushaf's geometry.
+
+What the reader pays: study mode no longer mirrors the printed page; it is
+its own reading of the same text. The place is shared: the app stores the
+ayah, and the Mushaf derives its page from it.
+
+## D-026: Content is packs, and the reader chooses which are on
+
+Date: the third session, same review. The owner asked whether the app could
+be modular underneath: mushaf style, fonts, translations, tafsirs, and
+reciters as interchangeable pieces, downloaded when the reader wants them.
+
+What ships: the same complete, verified library as before (QPC V2 page
+script, KFGQPC Hafs, Saheeh International, Ibn Kathir, As-Sa'di, Minshawi,
+Husary), now described by a `pack` table. Translations and tafsirs live in
+pack-namespaced tables (`translation.pack`, `tafsir_passage.pack`,
+`tafsir_ayah.pack`), so a second translation is a new row, never a schema
+change. The settings sheet lists the packs that are on, and search reads
+exactly those. Recitations already worked this way, one package per surah.
+
+What this buys: the app can offer a second translation or a third tafsir as
+a download without touching the reader, the schema, or the search code. What
+it costs today: one rebuild of the content database
+(63,832,064 bytes, sha256 `e9a05ddd9b456a28e8cffa83dc2909159ce7b488bfb53c5ba14f2a43eaa8792a`),
+which every gate re-verified.
+
+## D-027: Search reads every enabled source, and stays instant
+
+Date: the third session, same review. The owner asked that everything about
+the Quran be searchable, and that search never lag.
+
+What the reader sees: one field. Arabic text, every enabled translation,
+every enabled tafsir, word by word meanings, surah names in Latin and
+Arabic, and references typed as numbers ("2:255", "2:255", "surah 2"). The
+result line says where the matches were found, and matched words are washed
+exactly where they appear.
+
+How it stays fast: index columns are folded once at build time by the same
+normalizer the query goes through (`Search.normalizeForIndex`), so matching
+is a plain scan with no per-keystroke index build. Tafsir, the largest
+corpus, is loaded once into a folded in-memory index in the background after
+the first page appears; a warm search over all sources measured 1.09 s on
+the emulator and about a tenth of that on a phone. Every row a search
+touches is read in one batched query per table, never one query per hit.
+
+What is not done yet: no fuzzy matching, no ranking beyond Mushaf order, and
+no search inside a single surah scope. All three are additive later.

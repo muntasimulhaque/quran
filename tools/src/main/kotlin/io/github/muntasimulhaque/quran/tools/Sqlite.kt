@@ -17,9 +17,10 @@ fun Connection.count(table: String): Long =
         }
     }
 
-fun Connection.scalarLong(sql: String): Long =
-    createStatement().use { statement ->
-        statement.executeQuery(sql).use { rs ->
+fun Connection.scalarLong(sql: String, vararg args: String): Long =
+    prepareStatement(sql).use { statement ->
+        args.forEachIndexed { index, value -> statement.setString(index + 1, value) }
+        statement.executeQuery().use { rs ->
             rs.next()
             rs.getLong(1)
         }

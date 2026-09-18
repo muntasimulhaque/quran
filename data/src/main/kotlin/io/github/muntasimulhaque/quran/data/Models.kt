@@ -1,5 +1,7 @@
 package io.github.muntasimulhaque.quran.data
 
+import io.github.muntasimulhaque.quran.core.SearchQuery
+
 data class Surah(
     val number: Int,
     val nameArabic: String,
@@ -7,6 +9,7 @@ data class Surah(
     val nameLatin: String,
     val revelationPlace: String,
     val versesCount: Int,
+    val bismillahPre: Boolean = false,
 )
 
 data class PageLine(
@@ -24,6 +27,15 @@ data class Word(
     val text: String,
     val glyph: String,
     val translation: String?,
+)
+
+/** One glyph on a Mushaf page, with the ayah and word it belongs to. */
+data class PageWord(
+    val id: Int,
+    val ayah: Int,
+    val position: Int,
+    val marker: Boolean,
+    val glyph: String,
 )
 
 data class Ayah(
@@ -72,17 +84,121 @@ sealed interface SearchHit {
 
     data class SurahHit(val surah: Surah) : SearchHit
 
+    /** A direct hit on a reference the reader typed; always first. */
+    data class ReferenceHit(val ayah: Ayah, val page: Int) : SearchHit
+
+    /**
+     * One ayah, with every source that matched it. A row can carry the Arabic
+     * match, the selected translation, a word meaning, and one tafsir at once.
+     */
     data class AyahHit(
         val ayah: Ayah,
         val page: Int,
-        val translation: String?,
-        val words: List<Word>,
-        val matchedPositions: Set<Int>,
+        val arabicMatchedWords: Set<Int>,
+        val translation: TranslationHit?,
+        val wordMeaning: String?,
+    ) : SearchHit
+
+    /** A tafsir passage, which usually spans several ayahs. */
+    data class TafsirHitResult(
+        val pack: String,
+        val packName: String,
+        val surah: Int,
+        val surahName: String,
+        val fromAyah: Int,
+        val toAyah: Int,
+        val ayah: Ayah,
+        val page: Int,
+        val text: String,
+        val ranges: List<IntRange>,
     ) : SearchHit
 }
+
+/** A matched translation, with the ranges to mark inside it. */
+data class TranslationHit(
+    val pack: String,
+    val packName: String,
+    val text: String,
+    val ranges: List<IntRange>,
+    val footnotes: List<Footnote>,
+)
+
+/** How many matches each source produced, for the one line summary. */
+data class SearchCounts(
+    val arabic: Int = 0,
+    val translation: Int = 0,
+    val tafsir: Int = 0,
+    val words: Int = 0,
+    val surahs: Int = 0,
+) {
+    val total: Int get() = arabic + translation + tafsir + words + surahs
+}
+
+data class SearchResults(
+    val hits: List<SearchHit> = emptyList(),
+    val counts: SearchCounts = SearchCounts(),
+    val capped: Boolean = false,
+)
+
+/** Everything one search reads, already resolved against the reader's choices. */
+data class SearchRequest(
+    val query: SearchQuery,
+    val translationPacks: List<String> = emptyList(),
+    val tafsirPacks: List<String> = emptyList(),
+    val packNames: Map<String, String> = emptyMap(),
+    val packLanguages: Map<String, String> = emptyMap(),
+    val limit: Int = 200,
+)
 
 data class PagePosition(
     val surah: Int,
     val juz: Int,
     val hizb: Int,
+)
+
+enum class PackType {
+    Translation,
+    Tafsir,
+    Script,
+    Recitation,
+    Words;
+
+    companion object {
+        fun of(raw: String): PackType = when (raw) {
+            "translation" -> Translation
+            "tafsir" -> Tafsir
+            "script" -> Script
+            "recitation" -> Recitation
+            "words" -> Words
+            else -> Translation
+        }
+    }
+}
+
+/**
+ * One unit of content the reader can turn on: a translation, a tafsir, a
+ * script, a recitation. The built-in library is a set of packs; a downloaded
+ * pack is another, with the same shape.
+ */
+data class ContentPack(
+    val id: String,
+    val type: PackType,
+    val name: String,
+    val language: String,
+    val credit: String,
+    val license: String,
+    val version: String,
+    val builtIn: Boolean,
+    val ayahs: Int,
+    val bytes: Long,
+)
+
+/** A light row for building the study list without reading every text. */
+data class AyahHeader(
+    val number: Int,
+    val surah: Int,
+    val ayah: Int,
+    val verseKey: String,
+    val page: Int,
+    val juz: Int,
 )

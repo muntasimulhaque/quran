@@ -1,198 +1,158 @@
 package io.github.muntasimulhaque.quran.ui.mushaf
 
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Typeface
-import android.util.LruCache
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.core.content.res.ResourcesCompat
-import io.github.muntasimulhaque.quran.R
+import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.PageFontStore
-import io.github.muntasimulhaque.quran.data.Word
-import io.github.muntasimulhaque.quran.ui.theme.Gold
-import io.github.muntasimulhaque.quran.ui.theme.PaperBackground
-import io.github.muntasimulhaque.quran.ui.theme.PaperInk
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlin.math.roundToInt
+import io.github.muntasimulhaque.quran.ui.theme.MushafHighlight
+import io.github.muntasimulhaque.quran.ui.theme.MushafSelection
+import kotlin.math.min
 
-// The page fonts are pre-justified: a full line's glyphs sum to 15.6 em, and
-// the line height follows the font's own vertical metrics.
-private const val EM_PER_LINE = 15.6f
-private const val LINE_HEIGHT_RATIO = 1.644f
-private const val BASMALA = "\u0628\u0650\u0633\u0652\u0645\u0650 \u0671\u0644\u0644\u0651\u064e\u0647\u0650 " +
-    "\u0671\u0644\u0631\u0651\u064e\u062d\u0652\u0645\u064e\u0670\u0646\u0650 \u0671\u0644\u0631\u0651\u064e\u062d\u0650\u064a\u0645\u0650"
-
-/** A small LRU of rendered pages, so a page turn is a texture draw. */
-private object PageBitmaps {
-    private val cache = LruCache<Int, Bitmap>(5)
-
-    fun get(page: Int): Bitmap? = cache.get(page)
-    fun put(page: Int, bitmap: Bitmap) = cache.put(page, bitmap)
-}
-
+/**
+ * One page of the Mushaf, drawn whole: the paper, the glyphs, the page's own
+ * furniture, and the washes that mark a selected or recited ayah.
+ *
+ * The page is rendered at the exact pixel width it will be shown at, and the
+ * touch math works in page pixels, so a tap lands on the word under the
+ * finger however the screen is sized. The page never scales with the reader's
+ * text size: its lines are justified to the page, not the screen.
+ */
 @Composable
 fun MushafPage(
     content: ContentDatabase,
     fonts: PageFontStore,
+    renderer: PageRenderer,
     page: Int,
+    palette: PagePalette,
+    themeKey: String,
+    selectedAyah: Int?,
+    playingAyah: Int?,
+    playingWord: Int?,
+    onAyah: (Ayah) -> Unit,
+    onLongPressAyah: (Ayah) -> Unit,
+    onBackgroundTap: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val density = LocalDensity.current
-    BoxWithConstraints(
-        modifier
-            .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.statusBars)
-            .windowInsetsPadding(WindowInsets.navigationBars)
-            .padding(start = 14.dp, end = 14.dp, top = 52.dp, bottom = 66.dp),
-    ) {
-        val widthPx = with(density) { maxWidth.toPx() }.roundToInt()
-        val bitmap by produceState(initialValue = PageBitmaps.get(page), page, widthPx) {
-            val cached = PageBitmaps.get(page)
-            if (cached != null) {
-                value = cached
-                return@produceState
-            }
-            val rendered = withContext(Dispatchers.Default) {
-                renderPage(context, fonts, content, page, widthPx)
-            }
-            if (rendered != null) PageBitmaps.put(page, rendered)
-            value = rendered
+    BoxWithConstraints(modifier.fillMaxSize()) {
+        val density = LocalDensity.current
+        val availableWidth = with(density) { maxWidth.toPx() }
+        val availableHeight = with(density) { maxHeight.toPx() }
+        // The page's height follows from its width; render at the width it
+        // will actually be drawn at, never larger.
+        val pageWidth = min(availableWidth, availableHeight / PAGE_ASPECT).toInt().coerceAtLeast(1)
+        val key = PageKey(page, pageWidth, themeKey)
+
+        val rendered by produceState(initialValue = renderer.peek(key), key, palette) {
+            value = renderer.get(key, content, fonts, palette)
         }
-        val rendered = bitmap
-        if (rendered == null) {
-            // Defensive only, a page font is a build artifact; the reader must
-            // never crash because one could not be read.
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Text(
-                    text = "This page cannot be shown right now.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+        val onAyahState = rememberUpdatedState(onAyah)
+        val onLongState = rememberUpdatedState(onLongPressAyah)
+        val onBackgroundState = rememberUpdatedState(onBackgroundTap)
+        val slop = with(density) { 6.dp.toPx() }
+
+        Canvas(
+            Modifier
+                .fillMaxSize()
+                .semantics { contentDescription = "Mushaf page" }
+                .pointerInput(rendered, key) {
+                    val page = rendered ?: return@pointerInput
+                    val scale = size.width.toFloat() / page.widthPx
+                    val top = ((size.height - page.heightPx * scale) / 2f).coerceAtLeast(0f)
+                    detectTapGestures(
+                        onTap = { offset ->
+                            val ayah = page.ayahAt(
+                                x = offset.x / scale,
+                                y = (offset.y - top) / scale,
+                                slop = slop / scale,
+                            )
+                            if (ayah != null) onAyahState.value(ayah) else onBackgroundState.value()
+                        },
+                        onLongPress = { offset ->
+                            val ayah = page.ayahAt(
+                                x = offset.x / scale,
+                                y = (offset.y - top) / scale,
+                                slop = slop / scale,
+                            )
+                            if (ayah != null) onLongState.value(ayah) else onBackgroundState.value()
+                        },
+                    )
+                },
+        ) {
+            val page = rendered ?: return@Canvas
+            val scale = size.width / page.widthPx
+            val top = ((size.height - page.heightPx * scale) / 2f).coerceAtLeast(0f)
+            withTransform({
+                translate(0f, top)
+                scale(scale, scale, pivot = Offset.Zero)
+            }) {
+                drawImage(
+                    image = page.bitmap.asImageBitmap(),
+                    dstSize = androidx.compose.ui.unit.IntSize(page.widthPx, page.heightPx),
                 )
+                drawWashes(page, selectedAyah, playingAyah, playingWord)
             }
-        } else {
-            Image(
-                bitmap = rendered.asImageBitmap(),
-                contentDescription = null,
-                modifier = Modifier.fillMaxWidth().align(Alignment.Center),
+        }
+    }
+}
+
+private fun DrawScope.drawWashes(
+    page: RenderedPage,
+    selectedAyah: Int?,
+    playingAyah: Int?,
+    playingWord: Int?,
+) {
+    if (selectedAyah != null) {
+        for (box in page.ayahLineBoxes(selectedAyah)) {
+            drawRoundRect(
+                color = MushafSelection,
+                topLeft = Offset(box.left, box.top),
+                size = Size(box.width(), box.height()),
+                cornerRadius = CornerRadius(box.height() * 0.18f),
+            )
+        }
+    } else if (playingAyah != null) {
+        for (box in page.ayahLineBoxes(playingAyah)) {
+            drawRoundRect(
+                color = MushafHighlight.copy(alpha = 0.09f),
+                topLeft = Offset(box.left, box.top),
+                size = Size(box.width(), box.height()),
+                cornerRadius = CornerRadius(box.height() * 0.18f),
+            )
+        }
+    }
+    if (playingAyah != null && playingWord != null) {
+        page.wordBox(playingAyah, playingWord)?.let { word ->
+            val pad = (word.bottom - word.top) * 0.08f
+            drawRoundRect(
+                color = MushafHighlight.copy(alpha = 0.22f),
+                topLeft = Offset(word.left - pad, word.top + pad * 0.5f),
+                size = Size(word.right - word.left + pad * 2, word.bottom - word.top - pad),
+                cornerRadius = CornerRadius(pad * 2.4f),
             )
         }
     }
 }
 
-private fun renderPage(
-    context: Context,
-    fonts: PageFontStore,
-    content: ContentDatabase,
-    page: Int,
-    widthPx: Int,
-): Bitmap? {
-    val pageTypeface = fonts.typeface(page) ?: return null
-    val textWidth = widthPx * 0.94f
-    val fontPx = textWidth / EM_PER_LINE
-    val lineHeight = fontPx * LINE_HEIGHT_RATIO
-    val height = (lineHeight * 15f).roundToInt()
-    val bitmap = Bitmap.createBitmap(widthPx, height, Bitmap.Config.ARGB_8888)
-    val canvas = Canvas(bitmap)
-    canvas.drawColor(PaperBackground.toArgb())
-
-    val pagePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        typeface = pageTypeface
-        textSize = fontPx
-        color = PaperInk.toArgb()
-    }
-    val studyPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        typeface = Typeface.createFromAsset(context.assets, "fonts/UthmanicHafs_V22.ttf")
-        color = PaperInk.toArgb()
-        textAlign = Paint.Align.CENTER
-    }
-    val ornamentPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        typeface = ResourcesCompat.getFont(context, R.font.amiri_quran)
-        textSize = fontPx * 0.9f
-        color = Gold.toArgb()
-        textAlign = Paint.Align.CENTER
-    }
-    val rulePaint = Paint().apply {
-        color = Gold.toArgb()
-        strokeWidth = 1.5f
-        alpha = 140
-    }
-
-    val lines = content.pageLines(page)
-    val ayahLines = lines.filter { it.type == "ayah" }
-    val wordsById = HashMap<Int, Word>()
-    if (ayahLines.isNotEmpty()) {
-        val first = ayahLines.minOf { it.firstWordId }
-        val last = ayahLines.maxOf { it.lastWordId }
-        for (word in content.words(first, last)) wordsById[word.id] = word
-    }
-    val side = (widthPx - textWidth) / 2f
-
-    for (line in lines) {
-        val slotTop = (line.line - 1) * lineHeight
-        when (line.type) {
-            "surah_name" -> {
-                val name = content.surah(line.surah)?.nameArabic ?: ""
-                val metrics = ornamentPaint.fontMetrics
-                val baseline = slotTop + (lineHeight - (metrics.descent - metrics.ascent)) / 2f - metrics.ascent
-                canvas.drawText(name, widthPx / 2f, baseline, ornamentPaint)
-                canvas.drawLine(
-                    side + textWidth * 0.28f,
-                    slotTop + lineHeight * 0.84f,
-                    side + textWidth * 0.72f,
-                    slotTop + lineHeight * 0.84f,
-                    rulePaint,
-                )
-            }
-            "basmallah" -> {
-                studyPaint.textSize = fontPx * 0.8f
-                val metrics = studyPaint.fontMetrics
-                val baseline = slotTop + (lineHeight - (metrics.descent - metrics.ascent)) / 2f - metrics.ascent
-                canvas.drawText(BASMALA, widthPx / 2f, baseline, studyPaint)
-            }
-            else -> {
-                val words = buildString {
-                    for (id in line.firstWordId..line.lastWordId) {
-                        wordsById[id]?.let { append(it.glyph) }
-                    }
-                }
-                pagePaint.textAlign = if (line.centered) Paint.Align.CENTER else Paint.Align.RIGHT
-                val metrics = pagePaint.fontMetrics
-                val baseline = slotTop + (lineHeight - (metrics.descent - metrics.ascent)) / 2f - metrics.ascent
-                val x = if (line.centered) widthPx / 2f else side + textWidth
-                canvas.drawText(words, x, baseline, pagePaint)
-            }
-        }
-    }
-    return bitmap
-}
+/** Height divided by width of a rendered page, from the renderer's metrics. */
+const val PAGE_ASPECT: Float = 1.586f

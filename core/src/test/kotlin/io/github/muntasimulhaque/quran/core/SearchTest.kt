@@ -61,4 +61,61 @@ class SearchTest {
         assertEquals("%a\\_b%", Search.pattern("a_b"))
         assertEquals("%a\\\\b%", Search.pattern("a\\b"))
     }
+
+    @Test
+    fun `references are read from every form a reader types`() {
+        assertEquals(Search.Reference(2, 255), Search.reference("2:255"))
+        assertEquals(Search.Reference(2, 255), Search.reference("2.255"))
+        assertEquals(Search.Reference(2, 255), Search.reference("2 255"))
+        assertEquals(Search.Reference(2, 255), Search.reference("surah 2:255"))
+        assertEquals(Search.Reference(2, 255), Search.reference("Sura 2 255"))
+        assertEquals(Search.Reference(36, null), Search.reference("36"))
+        assertEquals(Search.Reference(36, null), Search.reference("surah 36"))
+        assertEquals(Search.Reference(1, 1), Search.reference("\u0661:\u0661"))
+        assertNull(Search.reference("115"))
+        assertNull(Search.reference("mercy"))
+        assertNull(Search.reference("255"))
+        assertNull(Search.reference("2:"))
+    }
+
+    @Test
+    fun `arabic matches ignore diacritics and letter forms`() {
+        val text = "\u0671\u0644\u0631\u0651\u064e\u062d\u0652\u0645\u064e\u0670\u0646\u0650 \u0671\u0644\u0631\u0651\u064e\u062d\u0650\u064a\u0645\u0650"
+        val ranges = Search.matchRanges(text, listOf("\u0627\u0644\u0631\u062d\u0645\u0646"), arabic = true)
+        assertEquals(1, ranges.size)
+        assertEquals(0, ranges.first().first)
+    }
+
+    @Test
+    fun `english matches ignore transliteration marks`() {
+        val text = "In the name of All\u0101h, the Entirely Merciful"
+        val ranges = Search.matchRanges(text, listOf("allah"), arabic = false)
+        assertEquals(1, ranges.size)
+        assertEquals("All\u0101h", text.substring(ranges.first().first, ranges.first().last + 1))
+    }
+
+    @Test
+    fun `match ranges cover whole visible words and merge`() {
+        val text = "mercy, mercy and mercy"
+        val ranges = Search.matchRanges(text, listOf("mercy"), arabic = false)
+        assertEquals(3, ranges.size)
+        assertEquals("mercy", text.substring(ranges[1].first, ranges[1].last + 1))
+    }
+
+    @Test
+    fun `an excerpt centers the match and rebases the ranges`() {
+        val text = "a ".repeat(400) + "needle" + " b".repeat(400)
+        val (excerpt, ranges) = Search.excerpt(text, listOf("needle"), arabic = false, window = 60)
+        assertTrue(excerpt.contains("needle"))
+        assertEquals(1, ranges.size)
+        assertEquals("needle", excerpt.substring(ranges.first().first, ranges.first().last + 1))
+        assertTrue(excerpt.length < 200)
+    }
+
+    @Test
+    fun `the index shape answers both scripts`() {
+        assertEquals("\u0628\u0633\u0645 \u0627\u0644\u0644\u0647", Search.normalizeForIndex("\u0628\u0650\u0633\u0652\u0645\u0650 \u0671\u0644\u0644\u0651\u064e\u0647\u0650"))
+        assertEquals("allah", Search.normalizeForIndex("All\u0101h"))
+        assertEquals("allah", Search.normalizeForIndex("Allah"))
+    }
 }
