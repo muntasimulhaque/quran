@@ -39,14 +39,18 @@ dead letter.
 
 ## Hard constraints (non-negotiable)
 
-1. **Offline forever.** No `INTERNET` permission, ever. `INTERNET` stays
-   zero in the merged manifest. Content and audio are bundled and
-   delivered through Play asset packs; the app is incapable of opening a
-   connection. No WebView.
-2. **Permissions: media and notifications only.** The self-declared
-   permissions are exactly `POST_NOTIFICATIONS`, `FOREGROUND_SERVICE`, and
-   `FOREGROUND_SERVICE_MEDIA_PLAYBACK`, and they exist only for recitation
-   playback and the daily reminder. Library-merged permissions are
+1. **Offline except one thing.** The app holds `INTERNET` for exactly one
+   use, approved by the owner and recorded in D-023: downloading a
+   recitation package for one surah, from the project's own GitHub
+   Releases, only after the reader taps Play and then approves the shown
+   size. Nothing is fetched at launch, nothing is fetched automatically,
+   no other host is ever contacted, and there is no analytics or telemetry
+   of any kind. Everything else in the app works with no connection at
+   all. No WebView.
+2. **Permissions: media, notifications, and that one network use.** The
+   self-declared permissions are exactly `INTERNET` (the download above),
+   `POST_NOTIFICATIONS`, `FOREGROUND_SERVICE`, and
+   `FOREGROUND_SERVICE_MEDIA_PLAYBACK`. Library-merged permissions are
    documented, not fought. A new permission needs the owner's sign-off
    written here first.
 3. **No ads, no trackers, no analytics, no accounts.** AndroidX, Kotlin,
@@ -119,7 +123,9 @@ at every step:
 ./gradlew :tools:run --args="verify"     # checksums and structure of every source
 ./gradlew :tools:run --args="audit"      # letter-level audit against Tanzil
 ./gradlew :tools:run --args="search"     # Arabic round trips and English folding
-./gradlew :tools:run --args="audio"      # the development recitation sample (debug only)
+./gradlew :tools:run --args="audio sample"  # the development recitation sample (debug only)
+./gradlew :tools:run --args="audio packs"   # one ZIP per reciter per surah, plus the manifest
+./gradlew :tools:run --args="audio publish" # uploads the packages to their GitHub Releases
 ./gradlew :tools:run --args="build"      # writes content/quran.db, deterministic
 ./gradlew :tools:run --args="fonts"      # font coverage for every codepoint
 ./gradlew :tools:run --args="checkdb"    # verifies the committed database and its report
@@ -187,7 +193,7 @@ Where truth lives, by question (filled in as code lands):
 | `data/` | read-only content database access, the saved-ayah user database, page font store, preferences, models; instrumented tests in `data/src/androidTest` |
 | `app/` | Compose UI: reader, study card, sheets, theme, fonts, playback service |
 | `tools/` | offline pipeline: content fetch, verify, audit, database build, font checks, golden renders |
-| `content/` | `quran.db` (the built, committed content database), `manifest.json`, `audit-report.md`, `build-report.json`; raw downloads under `raw/` are local and gitignored |
+| `content/` | `quran.db` (the built, committed content database), `recitation-manifest.json` (published recitation packages with their sizes and hashes), `manifest.json`, `audit-report.md`, `build-report.json`; raw downloads under `raw/` are local and gitignored |
 | `docs/` | `decisions.md`, `content-sources.md`, privacy page, bundled font licenses |
 | `play-store/` | listing kit, screenshots per form factor, hand-off AAB |
 | `.github/workflows/` | `build.yml`, `screenshots.yml` |
@@ -275,6 +281,15 @@ implement it and update this list.
 - The development audio sample lives in `content/work/audio-dev` and is
   bundled into debug builds only; release builds carry no audio until the
   owner decides how the recitations are delivered (D-022).
+- `content/recitation-manifest.json` is the contract between the packaging
+  tool and the app: one ZIP per reciter per surah, with its byte size and
+  SHA-256. The app unpacks a package only when the hash matches, and the
+  downloader refuses any entry with a path separator. Never delete or
+  replace the `recitation-minshawi` and `recitation-husary` Releases: their
+  assets are pinned by those hashes.
+- Downloaded packages are flat ayah files named `SSSAAA.mp3` inside one
+  folder per reciter. Removing a surah deletes only files with that
+  surah's prefix in that folder, and nothing else.
 - Never delete or replace the `qpc-v2-fonts` Release asset. Its SHA-256 is
   pinned in `content/manifest.json`, and a fresh clone fetches it from there.
 - Play Core's asset delivery drags WorkManager, Room, and five merged

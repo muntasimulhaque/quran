@@ -35,6 +35,24 @@ class RecitationStore(private val context: Context) {
     /** Where an import should place its files, mirroring the audio paths. */
     fun importDirectory(): File = imported.apply { mkdirs() }
 
+    /** The ayah files of one surah for one reciter folder, for sizes and removal. */
+    fun filesForSurah(folder: String, surah: Int): List<File> {
+        val directory = File(imported, folder)
+        val prefix = "%03d".format(surah)
+        return directory.listFiles { file ->
+            file.isFile && file.name.startsWith(prefix) && file.name.endsWith(".mp3")
+        }?.toList().orEmpty()
+    }
+
+    fun bytesForSurah(folder: String, surah: Int): Long =
+        filesForSurah(folder, surah).sumOf { it.length() }
+
+    fun removeSurah(folder: String, surah: Int): Int {
+        val files = filesForSurah(folder, surah)
+        files.forEach { it.delete() }
+        return files.size
+    }
+
     private fun assetExists(path: String): Boolean = assetCache.getOrPut(path) {
         runCatching { context.assets.open(path).close() }.isSuccess
     }

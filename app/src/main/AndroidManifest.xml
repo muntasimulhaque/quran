@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- The three permissions the reader agreed to, and nothing else. The app
-         never opens a network connection. -->
+    <!-- The reader approved one network use and only one: downloading
+         recitation packages from the project's own release page, when they ask
+         to play a surah. No analytics, no other host, nothing at launch. -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />

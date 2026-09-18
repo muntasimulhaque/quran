@@ -37,8 +37,11 @@ import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.ui.browse.BrowseSheet
 import io.github.muntasimulhaque.quran.ui.mushaf.MushafPage
+import io.github.muntasimulhaque.quran.ui.playback.DownloadedSurah
 import io.github.muntasimulhaque.quran.ui.playback.PlaybackBar
 import io.github.muntasimulhaque.quran.ui.playback.RecitationSheet
+import io.github.muntasimulhaque.quran.ui.playback.ReciterSummary
+import io.github.muntasimulhaque.quran.ui.playback.formatBytes
 import io.github.muntasimulhaque.quran.ui.playback.shortReciterName
 import io.github.muntasimulhaque.quran.ui.search.SearchSheet
 import io.github.muntasimulhaque.quran.ui.study.AyahSheet
@@ -130,7 +133,7 @@ private fun ReaderScreen(
                 )
             },
         )
-        if (playback.ayahNumber != null || playback.unavailable) {
+        if (playback.ayahNumber != null || playback.unavailable || playback.pendingDownloadSurah != null || playback.downloadFailed) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -145,11 +148,23 @@ private fun ReaderScreen(
                         viewModel.recitations.firstOrNull { it.id == viewModel.recitation }?.name.orEmpty(),
                     ),
                     reference = playback.reference,
+                    pendingLabel = playback.pendingDownloadSurah?.let { surah ->
+                        val name = viewModel.surahs.firstOrNull { it.number == surah }?.nameSimple
+                            ?: "Surah $surah"
+                        "$name  ·  ${formatBytes(playback.pendingDownloadBytes)}"
+                    },
                     onToggle = { viewModel.togglePlayback() },
                     onNext = { viewModel.nextAyah() },
                     onPrevious = { viewModel.previousAyah() },
                     onReciter = { recitationsOpen = true },
-                    onClose = { viewModel.stopPlayback() },
+                    onDownload = { viewModel.confirmDownload() },
+                    onClose = {
+                        if (playback.pendingDownloadSurah != null || playback.downloadFailed) {
+                            viewModel.cancelDownload()
+                        } else {
+                            viewModel.stopPlayback()
+                        }
+                    },
                 )
             }
         } else {
@@ -196,11 +211,25 @@ private fun ReaderScreen(
         RecitationSheet(
             recitations = viewModel.recitations,
             selected = viewModel.recitation,
-            availability = { viewModel.recitationAvailability() },
+            summaries = {
+                val totals = viewModel.downloadedTotals()
+                viewModel.recitations.map { recitation ->
+                    val (count, bytes) = totals[recitation.id] ?: (0 to 0L)
+                    ReciterSummary(recitation, count, bytes)
+                }
+            },
+            downloads = { recitation ->
+                viewModel.downloadedSurahs(recitation).entries.sortedBy { it.key }.map { (surah, bytes) ->
+                    val name = viewModel.surahs.firstOrNull { it.number == surah }?.nameSimple
+                        ?: "Surah $surah"
+                    DownloadedSurah(surah, name, bytes)
+                }
+            },
             onSelect = { id ->
                 viewModel.selectRecitation(id)
                 recitationsOpen = false
             },
+            onRemove = { surah -> viewModel.removeDownloads(viewModel.recitation, surah) },
             onDismiss = { recitationsOpen = false },
         )
     }

@@ -57,6 +57,7 @@ val prepareContentAssets = tasks.register("prepareContentAssets") {
     dependsOn(":tools:fetchAssets")
     inputs.file(rootProject.file("content/quran.db"))
     inputs.file(rootProject.file("content/build-report.json"))
+    inputs.file(rootProject.file("content/recitation-manifest.json"))
     inputs.dir(rootProject.file("content/work/fonts-hafs"))
     inputs.dir(rootProject.file("content/work/fonts-v2"))
     outputs.dir(contentAssets)
@@ -79,6 +80,11 @@ val prepareContentAssets = tasks.register("prepareContentAssets") {
         project.copy {
             from(rootProject.file("content/work/fonts-v2/fonts/pages")) { include("*.ttf") }
             into(pages)
+        }
+        val manifest = rootProject.file("content/recitation-manifest.json")
+        if (manifest.exists()) {
+            val recitations = File(out, "recitations").apply { mkdirs() }
+            manifest.copyTo(File(recitations, "manifest.json"), overwrite = true)
         }
     }
 }

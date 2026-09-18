@@ -11,6 +11,8 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.RecitationAyah
+import io.github.muntasimulhaque.quran.data.RecitationDownloader
+import io.github.muntasimulhaque.quran.data.RecitationManifest
 import io.github.muntasimulhaque.quran.data.RecitationStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -40,6 +42,8 @@ class PlaybackController(
 ) {
 
     private val store = RecitationStore(context)
+    private val manifest = RecitationManifest.load(context)
+    private val downloader = RecitationDownloader(context)
     private var content: ContentDatabase? = null
     private var controller: MediaController? = null
     private var loadedThroughSurah = 0
@@ -47,6 +51,8 @@ class PlaybackController(
     private var segments: List<io.github.muntasimulhaque.quran.data.WordSegment> = emptyList()
     private var segmentedAyah: Int? = null
     private var ticker: Job? = null
+    private var downloadJob: Job? = null
+    private var requestedAyah: Int? = null
 
     private val _state = MutableStateFlow(PlaybackUiState())
     val state: StateFlow<PlaybackUiState> = _state.asStateFlow()
@@ -65,13 +71,34 @@ class PlaybackController(
             database.ayahsWithPages(listOf(ayahNumber)).firstOrNull()
         } ?: return
         recitationId = recitation
+        requestedAyah = ayahNumber
         val items = withContext(Dispatchers.IO) { itemsFor(recitation, location.ayah.surah) }
         if (items.isEmpty()) {
-            _state.value = _state.value.copy(recitation = recitation, unavailable = true)
+            val packageToFetch = manifest.packageFor(recitation, location.ayah.surah)
+            _state.value = _state.value.copy(
+                recitation = recitation,
+                unavailable = packageToFetch == null,
+                pendingDownloadSurah = if (packageToFetch == null) null else location.ayah.surah,
+                pendingDownloadBytes = packageToFetch?.bytes ?: 0,
+                downloadProgress = null,
+                downloadFailed = false,
+            )
             return
         }
         val index = items.indexOfFirst { it.mediaId == mediaId(location.ayah.number, location.ayah.surah) }
-            .coerceAtLeast(0)
+        if (index < 0) {
+            // The surah is not fully on the device; ask before fetching it.
+            val packageToFetch = manifest.packageFor(recitation, location.ayah.surah)
+            _state.value = _state.value.copy(
+                recitation = recitation,
+                unavailable = packageToFetch == null,
+                pendingDownloadSurah = if (packageToFetch == null) null else location.ayah.surah,
+                pendingDownloadBytes = packageToFetch?.bytes ?: 0,
+                downloadProgress = null,
+                downloadFailed = false,
+            )
+            return
+        }
         val player = connect()
         withContext(Dispatchers.Main) {
             player.setMediaItems(items, index, 0L)
@@ -79,7 +106,57 @@ class PlaybackController(
             player.play()
         }
         loadedThroughSurah = location.ayah.surah
-        _state.value = _state.value.copy(recitation = recitation, unavailable = false)
+        _state.value = _state.value.copy(
+            recitation = recitation,
+            unavailable = false,
+            pendingDownloadSurah = null,
+            downloadProgress = null,
+            downloadFailed = false,
+        )
+    }
+
+    /** Downloads the pending surah, verifies it, and starts playing where the reader asked. */
+    fun confirmDownload() {
+        val recitation = _state.value.recitation ?: recitationId ?: return
+        val surah = _state.value.pendingDownloadSurah ?: return
+        val ayah = requestedAyah ?: return
+        val packageToFetch = manifest.packageFor(recitation, surah) ?: return
+        downloadJob?.cancel()
+        downloadJob = scope.launch {
+            _state.value = _state.value.copy(downloadProgress = 0f, downloadFailed = false)
+            val folder = withContext(Dispatchers.IO) { folderFor(recitation, surah) }
+            if (folder == null) {
+                _state.value = _state.value.copy(downloadProgress = null, downloadFailed = true)
+                return@launch
+            }
+            val result = downloader.download(packageToFetch, folder) { read, total ->
+                _state.value = _state.value.copy(
+                    downloadProgress = if (total > 0) (read.toFloat() / total).coerceIn(0f, 1f) else null,
+                )
+            }
+            if (result.isSuccess) {
+                _state.value = _state.value.copy(pendingDownloadSurah = null, downloadProgress = null)
+                play(recitation, ayah)
+            } else {
+                _state.value = _state.value.copy(downloadProgress = null, downloadFailed = true)
+            }
+        }
+    }
+
+    fun cancelDownload() {
+        downloadJob?.cancel()
+        downloadJob = null
+        _state.value = _state.value.copy(
+            pendingDownloadSurah = null,
+            downloadProgress = null,
+            downloadFailed = false,
+        )
+    }
+
+    private fun folderFor(recitation: String, surah: Int): String? {
+        val database = content ?: return null
+        val first = database.ayahsOfSurah(surah).firstOrNull() ?: return null
+        return database.recitationAyah(recitation, first.number)?.audioPath?.substringBeforeLast('/')
     }
 
     fun toggle() {

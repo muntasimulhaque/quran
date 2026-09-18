@@ -12,7 +12,7 @@ fun main(args: Array<String>) {
         "verify" -> Verify(root).run()
         "audit" -> Audit(root).run()
         "search" -> SearchCheck(root).run()
-        "audio" -> Audio(root).sample()
+        "audio" -> Audio(root).run(args.drop(1))
         "build" -> Build(root).run()
         "fonts" -> Fonts(root).run()
         "fetch" -> Fetch(root).run()

@@ -549,3 +549,40 @@ playing one marked and switching restarts at the same ayah; and the
 release build starts in 1.5 s with no crashes. The instrumented search
 test (`app/src/androidTest`, 3 of 3) and the saved-store test
 (`:data:connectedDebugAndroidTest`, 6 of 6) are green.
+
+## D-023: Recitation is downloaded per surah, on the reader's word
+
+Date: the second session. Approved by the owner in these words: nothing
+ships by default; playing an ayah downloads only that surah, for the
+chosen reciter; other surahs wait until the reader asks for them; and
+`INTERNET` is approved for exactly this. This decision resolves the
+delivery question D-018 left open.
+
+What the reader sees: tapping Play on a surah that is not on the device
+shows the surah's name and size in the playback pill with a Download
+button. Tapping it downloads that one package, shows progress, verifies
+its SHA-256 against `content/recitation-manifest.json`, unpacks it into
+the app's private storage, and starts playing where the reader asked.
+Nothing is downloaded at launch, nothing automatically, and never more
+than one surah at a time. The Recitations sheet lists the reciters with
+their downloaded counts and sizes, and removing a surah deletes only its
+files for that reciter.
+
+What the reader pays: a surah is about 13 MB on average at the published
+bitrate. Al-Fatihah is 0.7 MB, Al-Mulk 6 MB, Ya-Sin 14 MB, Al-Kahf 31 MB,
+Yusuf 40 MB, and Al-Baqarah 122 MB, which is the only giant. The two
+published recitations total 1.53 GB (Minshawi) and 2.19 GB (Husary).
+
+How it is built: `tools audio packs` downloads the verified per-ayah MP3s
+from QUL's CDN, builds one ZIP per reciter per surah, and rewrites the
+manifest with each package's byte size and SHA-256. `tools audio publish`
+uploads them to the `recitation-minshawi` and `recitation-husary` GitHub
+Releases, 114 assets each, resumable in batches. The app knows one URL
+pattern and one host, sends no identifiers, and has no analytics.
+
+Verified end to end on the emulator: Play on Ya-Sin 36:2 showed
+"Ya-Sin · 14 MB", the download ran with progress, the package verified
+and unpacked, and playback started at 36:2, continued through the surah,
+moved the page, and marked the recited word. Instrumented tests pin the
+manifest contract and the per-surah file accounting
+(`RecitationManifestTest`, 4 of 4).

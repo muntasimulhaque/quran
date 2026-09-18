@@ -14,6 +14,7 @@ import io.github.muntasimulhaque.quran.data.PagePosition
 import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.ReadingState
 import io.github.muntasimulhaque.quran.data.Recitation
+import io.github.muntasimulhaque.quran.data.RecitationManifest
 import io.github.muntasimulhaque.quran.data.RecitationStore
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.data.SavedStore
@@ -39,6 +40,8 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     private val pageFonts = PageFontStore(application)
     private val savedStore = SavedStore(application)
     private val playback = PlaybackController(application, viewModelScope)
+    private val manifest = RecitationManifest.load(application)
+    private val recitationStore = RecitationStore(application)
     private var contentDatabase: ContentDatabase? = null
 
     var surahs by mutableStateOf<List<Surah>>(emptyList())
@@ -152,6 +155,45 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             recitation.id to store.isAvailable(path)
         }
     }
+
+    /** Surah to bytes on disk for one reciter, among the published packages. */
+    suspend fun downloadedSurahs(recitation: String): Map<Int, Long> = withContext(Dispatchers.IO) {
+        val folder = reciterFolder(recitation) ?: return@withContext emptyMap()
+        manifest.surahs(recitation)
+            .mapNotNull { surah ->
+                val bytes = recitationStore.bytesForSurah(folder, surah)
+                if (bytes > 0) surah to bytes else null
+            }
+            .toMap()
+    }
+
+    /** Reciter id to (downloaded surahs, bytes) for the picker. */
+    suspend fun downloadedTotals(): Map<String, Pair<Int, Long>> = withContext(Dispatchers.IO) {
+        recitations.associate { recitation ->
+            val folder = reciterFolder(recitation.id)
+            val found = if (folder == null) {
+                emptyList()
+            } else {
+                manifest.surahs(recitation.id).mapNotNull { surah ->
+                    val bytes = recitationStore.bytesForSurah(folder, surah)
+                    if (bytes > 0) bytes else null
+                }
+            }
+            recitation.id to (found.size to found.sum())
+        }
+    }
+
+    suspend fun removeDownloads(recitation: String, surah: Int): Boolean = withContext(Dispatchers.IO) {
+        val folder = reciterFolder(recitation) ?: return@withContext false
+        recitationStore.removeSurah(folder, surah) > 0
+    }
+
+    private fun reciterFolder(recitation: String): String? =
+        contentDatabase?.recitationAyah(recitation, 1)?.audioPath?.substringBeforeLast('/')
+
+    fun confirmDownload() = playback.confirmDownload()
+
+    fun cancelDownload() = playback.cancelDownload()
 
     override fun onCleared() {
         contentDatabase?.close()
