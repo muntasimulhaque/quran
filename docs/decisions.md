@@ -671,3 +671,24 @@ touches is read in one batched query per table, never one query per hit.
 
 What is not done yet: no fuzzy matching, no ranking beyond Mushaf order, and
 no search inside a single surah scope. All three are additive later.
+
+## D-028: The content database lives in a Release, addressed by its hash
+
+Date: the third session, after the pack work rebuilt the database and pushed
+it past the sixty-megabyte mark. GitHub warns above fifty megabytes, and
+every content rebuild would add another blob of that size to the history of
+a project meant to stay thin and readable.
+
+What changed: `content/quran.db` is no longer in git. Its SHA-256 and byte
+count stay in `content/build-report.json`, which is small and is the pin;
+`tools fetch` reads that pin, and if the database is missing or does not
+match, downloads it from the project's own Release tagged
+`content-db-<first eight hex of the hash>`, verifies the hash, and only then
+puts it in place. The tag makes the asset content-addressed: a new build is a
+new tag, never a replaced file, and an old pin keeps resolving.
+
+What this buys: the repository stays small and every clone, every CI run,
+and every release rebuilds against exactly the database the report names.
+What it costs: one download per machine, cached by the pipeline, verified
+byte for byte. This supersedes the "database committed" half of D-016; the
+fonts stay in their own Release for the same reason.

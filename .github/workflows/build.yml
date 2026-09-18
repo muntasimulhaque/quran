@@ -36,8 +36,10 @@ jobs:
       - name: Cache content work
         uses: actions/cache@v4
         with:
-          path: content/work
-          key: content-work-${{ hashFiles('content/manifest.json') }}
+          path: |
+            content/work
+            content/quran.db
+          key: content-work-${{ hashFiles('content/manifest.json', 'content/build-report.json') }}
 
       - name: Core tests
         run: ./gradlew :core:test --console=plain
@@ -91,8 +93,10 @@ jobs:
       - name: Cache content work
         uses: actions/cache@v4
         with:
-          path: content/work
-          key: content-work-${{ hashFiles('content/manifest.json') }}
+          path: |
+            content/work
+            content/quran.db
+          key: content-work-${{ hashFiles('content/manifest.json', 'content/build-report.json') }}
 
       # Hardware acceleration is not available on the runners, so the emulator
       # runs on the software renderer. It is slow, and it still renders every

@@ -70,7 +70,8 @@ independent copy of the translation we ship.
    word-by-word, and group-resolved tafsir rows, and the four recitations
    with segments. The database ships at `content/quran.db` (committed),
    43,933,696 bytes, deterministic, sha256
-   `00f9afa5f844e77138fd13a1929dc8e5300331f3b2c1f64e4d5af44a0e347d57`.
+   `e9a05ddd9b456a28e8cffa83dc2909159ce7b488bfb53c5ba14f2a43eaa8792a` (63,832,064 bytes),
+   fetched from the `content-db-e9a05ddd` Release and verified by `tools fetch`.
    `tools/fonts` proves coverage: 628,169 study codepoints and 88,186
    glyph codepoints across 604 pages, all drawable. `tools/fetch` brings
    the page fonts to a new machine from their GitHub Release asset and

@@ -31,6 +31,7 @@ class Fetch(private val root: File) {
         val manifest = loadManifest(root)
         var failures = 0
         var manual = 0
+        failures += fetchContentDatabase()
         for (dataset in manifest.datasets) {
             val file = File(root, dataset.path)
             if (file.exists() && sha256(file) == dataset.sha256) {
@@ -94,6 +95,52 @@ class Fetch(private val root: File) {
         }
         println("fetch: unpacking $id to $targetPath")
         extract(archive, target)
+    }
+
+    /**
+     * The built content database is a derived artifact, so it lives in the
+     * project's Releases, addressed by its own hash, and never in git. The
+     * build report is the pin: whatever hash it names is what must be here.
+     */
+    private fun fetchContentDatabase(): Int {
+        val report = File(root, "content/build-report.json")
+        if (!report.exists()) {
+            println("fetch: content/build-report.json is missing; cannot know which database to fetch")
+            return 1
+        }
+        val text = report.readText()
+        val hash = Regex("\"databaseSha256\"\\s*:\\s*\"([0-9a-f]{64})\"")
+            .find(text)?.groupValues?.get(1) ?: return 1
+        val bytes = Regex("\"databaseBytes\"\\s*:\\s*(\\d+)")
+            .find(text)?.groupValues?.get(1)?.toLongOrNull()
+        val file = File(root, "content/quran.db")
+        if (file.exists() && sha256(file) == hash) {
+            println("fetch: have content-db $hash")
+            return 0
+        }
+        val tag = "content-db-" + hash.substring(0, 8)
+        val url = "https://github.com/muntasimulhaque/quran/releases/download/$tag/quran.db"
+        println("fetch: downloading content-db from $url")
+        return try {
+            try {
+                download(url, file)
+            } catch (direct: Exception) {
+                println("fetch: content-db direct download failed (${direct.message ?: direct::class.java.simpleName}); trying gh")
+                downloadWithGh(url, file)
+            }
+            val actual = sha256(file)
+            if (actual != hash) {
+                println("fetch: content-db hash $actual does not match $hash; deleted")
+                file.delete()
+                1
+            } else {
+                println("fetch: content-db verified (${file.length()} bytes" + (bytes?.let { ", expected $it" } ?: "") + ")")
+                0
+            }
+        } catch (error: Exception) {
+            println("fetch: content-db failed: ${error.message ?: error::class.java.simpleName}")
+            1
+        }
     }
 
     /**

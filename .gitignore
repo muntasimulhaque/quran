@@ -25,3 +25,7 @@ content/build/
 # OS noise
 .DS_Store
 Thumbs.db
+
+# The content database is a derived artifact: it lives in the project's
+# Releases, addressed by its own hash, and is fetched by tools fetch.
+content/quran.db
