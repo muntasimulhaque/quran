@@ -45,8 +45,8 @@ data class AppSettings(
     val keepAwake: Boolean = true,
     val followReciter: Boolean = true,
     val showFootnotes: Boolean = false,
-    val translationPack: String = "translation-saheeh-en",
-    val tafsirPacks: Set<String> = setOf("tafsir-ibn-kathir-en"),
+    val translationPack: String = "",
+    val tafsirPacks: Set<String> = emptySet(),
 )
 
 /**
@@ -75,8 +75,8 @@ class SettingsStore(private val context: Context) {
             keepAwake = preferences[KEEP_AWAKE] ?: true,
             followReciter = preferences[FOLLOW_RECITER] ?: true,
             showFootnotes = preferences[SHOW_FOOTNOTES] ?: false,
-            translationPack = preferences[TRANSLATION_PACK] ?: "translation-saheeh-en",
-            tafsirPacks = preferences[TAFSIR_PACKS] ?: setOf("tafsir-ibn-kathir-en"),
+            translationPack = preferences[TRANSLATION_PACK] ?: "",
+            tafsirPacks = preferences[TAFSIR_PACKS] ?: emptySet(),
         )
     }
 

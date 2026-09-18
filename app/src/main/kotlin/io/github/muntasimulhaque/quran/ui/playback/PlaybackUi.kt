@@ -56,6 +56,7 @@ fun shortReciterName(id: String, fallback: String): String = when (id) {
 fun formatBytes(bytes: Long): String = when {
     bytes <= 0 -> ""
     bytes < 1024 * 1024 -> "${(bytes + 512) / 1024} KB"
+    bytes < 10 * 1024 * 1024 -> "%.1f MB".format(bytes / 1048576.0)
     else -> "%.0f MB".format(bytes / 1048576.0)
 }
 

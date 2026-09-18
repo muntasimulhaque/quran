@@ -53,6 +53,14 @@ class RecitationStore(private val context: Context) {
         return files.size
     }
 
+    /** Removes every downloaded surah of one reciter, for removing a reciter pack. */
+    fun removeAll(folder: String): Int {
+        val directory = File(imported, folder)
+        val files = directory.listFiles()?.size ?: 0
+        directory.deleteRecursively()
+        return files
+    }
+
     private fun assetExists(path: String): Boolean = assetCache.getOrPut(path) {
         runCatching { context.assets.open(path).close() }.isSuccess
     }

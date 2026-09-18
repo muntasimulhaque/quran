@@ -171,7 +171,7 @@ class ScreenshotTest {
         Thread.sleep(600)
         capture("10-ayah-actions")
         rule.onNodeWithContentDescription("More").performClick()
-        waitFor("Word by word")
+        Thread.sleep(1_200)
         capture("11-ayah-card")
         back()
 

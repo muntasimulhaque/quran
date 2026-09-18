@@ -61,19 +61,49 @@
             "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-tafsir-as-sadi-ar-5945528b/tafsir-as-sadi-ar.db"
         },
         {
+            "id": "reciter-minshawi",
+            "type": "recitation",
+            "name": "Minshawi",
+            "language": "ar",
+            "credit": "Muhammad Siddiq Al-Minshawi, via the Quranic Universal Library",
+            "license": "See docs/content-sources.md",
+            "version": "QUL",
+            "shipped": false,
+            "ayahs": 6236,
+            "bytes": 1769472,
+            "sha256": "344bb83830884838bd7f6b55156dd7c84edc7ffd16d80ec4a2927b3027351f6a",
+            "tag": "pack-reciter-minshawi-344bb838",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-reciter-minshawi-344bb838/reciter-minshawi.db"
+        },
+        {
+            "id": "reciter-husary",
+            "type": "recitation",
+            "name": "Husary",
+            "language": "ar",
+            "credit": "Mahmoud Khalil Al-Husary, via the Quranic Universal Library",
+            "license": "See docs/content-sources.md",
+            "version": "QUL",
+            "shipped": false,
+            "ayahs": 6236,
+            "bytes": 1728512,
+            "sha256": "e0bf72db25d96beb4010e628871a866e47bb1529d7fed71601134efadbb98e78",
+            "tag": "pack-reciter-husary-e0bf72db",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-reciter-husary-e0bf72db/reciter-husary.db"
+        },
+        {
             "id": "words-en",
             "type": "words",
-            "name": "Word by word",
+            "name": "Word by word and surah introductions",
             "language": "en",
             "credit": "Quran.com word by word, via the Quranic Universal Library",
             "license": "See docs/content-sources.md",
             "version": "QUL",
             "shipped": false,
             "ayahs": 6236,
-            "bytes": 3891200,
-            "sha256": "22e9504de83ce8468155121ceca4d5389e96d136f0d9ef1daed2735ba1fb62aa",
-            "tag": "pack-words-en-22e9504d",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-words-en-22e9504d/words-en.db"
+            "bytes": 4874240,
+            "sha256": "6cebd465493683ccc00de0f8a490d7b7f962a8ec2f0ff0f510d87035c433190e",
+            "tag": "pack-words-en-6cebd465",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-words-en-6cebd465/words-en.db"
         }
     ]
 }

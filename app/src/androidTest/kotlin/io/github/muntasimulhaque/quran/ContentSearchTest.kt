@@ -4,6 +4,8 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.muntasimulhaque.quran.core.Search
 import io.github.muntasimulhaque.quran.data.ContentDatabase
+import io.github.muntasimulhaque.quran.data.PackCatalog
+import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.SearchHit
 import io.github.muntasimulhaque.quran.data.SearchRequest
@@ -31,7 +33,20 @@ class ContentSearchTest {
 
     @Before
     fun setUp() {
-        content = runBlocking { ContentDatabase.open(ApplicationProvider.getApplicationContext()) }
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val catalog = PackCatalog.load(context)
+        val store = PackStore(context)
+        // Development and test builds carry every pack inside the app, so the
+        // library can be assembled with no network at all.
+        for (id in listOf(
+            "translation-saheeh-en",
+            "tafsir-ibn-kathir-en",
+            "tafsir-as-sadi-ar",
+            "words-en",
+        )) {
+            store.install(id)
+        }
+        content = runBlocking { ContentDatabase.open(context, catalog, store.installed()) }
     }
 
     @After
@@ -45,7 +60,7 @@ class ContentSearchTest {
         tafsir: Boolean = true,
         limit: Int = 50,
     ): SearchRequest {
-        val packs = content.packs()
+        val packs = content.packs().filter { it.installed }
         return SearchRequest(
             query = Search.parse(query)!!,
             translationPacks = if (translations) {

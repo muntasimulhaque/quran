@@ -53,11 +53,12 @@ val contentAssets = layout.buildDirectory.dir("generated/contentAssets")
 
 val prepareContentAssets = tasks.register("prepareContentAssets") {
     group = "content"
-    description = "Copies the content database, its version, and the study font into base assets."
+    description = "Copies the core pack, the pack catalog, and the fonts into base assets."
     dependsOn(":tools:fetchAssets")
-    inputs.file(rootProject.file("content/quran.db"))
     inputs.file(rootProject.file("content/build-report.json"))
+    inputs.file(rootProject.file("content/catalog.json"))
     inputs.file(rootProject.file("content/recitation-manifest.json"))
+    inputs.dir(rootProject.file("content/packs"))
     inputs.dir(rootProject.file("content/work/fonts-hafs"))
     inputs.dir(rootProject.file("content/work/fonts-v2"))
     outputs.dir(contentAssets)
@@ -65,12 +66,21 @@ val prepareContentAssets = tasks.register("prepareContentAssets") {
         val out = contentAssets.get().asFile
         out.deleteRecursively()
         val content = File(out, "content").apply { mkdirs() }
-        rootProject.file("content/quran.db").copyTo(File(content, "quran.db"), overwrite = true)
-        val report = rootProject.file("content/build-report.json").readText()
-        val hash = Regex("\"databaseSha256\"\\s*:\\s*\"([0-9a-f]+)\"")
-            .find(report)?.groupValues?.get(1)
-            ?: throw GradleException("content/build-report.json has no databaseSha256")
-        File(content, "version.txt").writeText(hash)
+        // The app ships the Quran text and its page layout, and nothing else:
+        // one small pack, plus the catalog of what can be downloaded.
+        val packs = rootProject.file("content/packs")
+        packs.resolve("core.db").copyTo(File(content, "core.db"), overwrite = true)
+        rootProject.file("content/catalog.json").copyTo(File(content, "catalog.json"), overwrite = true)
+        // Development builds carry every pack, so the whole app works with no
+        // network at all while it is being built and tested.
+        if (gradle.startParameter.taskNames.any { it.contains("Debug", ignoreCase = true) } ||
+            gradle.startParameter.taskNames.any { it.contains("androidTest", ignoreCase = true) }
+        ) {
+            val devPacks = File(out, "packs").apply { mkdirs() }
+            packs.listFiles { file -> file.name.endsWith(".db") }?.forEach { pack ->
+                pack.copyTo(File(devPacks, pack.name), overwrite = true)
+            }
+        }
         val studyFont = rootProject.file("content/work/fonts-hafs").walkTopDown()
             .firstOrNull { it.isFile && it.name.endsWith(".ttf") }
             ?: throw GradleException("the study font is missing; run ./gradlew :tools:run --args=fetch")

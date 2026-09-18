@@ -13,6 +13,9 @@ import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ContentPack
+import io.github.muntasimulhaque.quran.data.PackCatalog
+import io.github.muntasimulhaque.quran.data.PackDownloader
+import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.PageFontStore
 import io.github.muntasimulhaque.quran.data.PagePosition
 import io.github.muntasimulhaque.quran.data.PackType
@@ -67,7 +70,11 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     private val playback = PlaybackController(application, viewModelScope)
     private val manifest = RecitationManifest.load(application)
     private val recitationStore = RecitationStore(application)
+    private val store = PackStore(application)
+    private val downloader = PackDownloader(application)
     private var contentDatabase: ContentDatabase? = null
+    private var catalog: PackCatalog = PackCatalog.parse("{}")
+    private var installed: Set<String> = emptySet()
 
     val renderer = PageRenderer(application)
 
@@ -104,8 +111,24 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
     val translationPacks: List<ContentPack> get() = packs.filter { it.type == PackType.Translation }
     val tafsirPacks: List<ContentPack> get() = packs.filter { it.type == PackType.Tafsir }
+    val installedTranslationPacks: List<ContentPack>
+        get() = translationPacks.filter { it.installed }
+    val installedTafsirPacks: List<ContentPack> get() = tafsirPacks.filter { it.installed }
     val enabledTafsirPacks: List<ContentPack>
-        get() = tafsirPacks.filter { it.id in settings.tafsirPacks }
+        get() = tafsirPacks.filter { it.id in settings.tafsirPacks && it.installed }
+
+    val selectedTranslation: ContentPack?
+        get() = translationPacks.firstOrNull { it.id == settings.translationPack && it.installed }
+
+    /** A pack the reader asked for, while it downloads. */
+    data class PackSetup(
+        val pack: ContentPack,
+        val progress: Float?,
+        val failed: Boolean = false,
+    )
+
+    var packSetup by mutableStateOf<PackSetup?>(null)
+        private set
 
     private val rowCache = object : LinkedHashMap<Int, StudyRow>(64, 0.75f, true) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Int, StudyRow>?): Boolean = size > 160
@@ -113,7 +136,9 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
     init {
         viewModelScope.launch {
-            val database = ContentDatabase.open(getApplication())
+            catalog = PackCatalog.load(getApplication())
+            installed = store.installed()
+            val database = ContentDatabase.open(getApplication(), catalog, installed)
             contentDatabase = database
             playback.attach(database)
             surahs = database.surahs()
@@ -310,6 +335,99 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch { settingsStore.setTafsirPacks(next) }
     }
 
+    /**
+     * Brings a pack onto the device, or turns it on when it is already here.
+     * A download never starts without the reader having seen the size, and
+     * the pack is verified before it joins the library.
+     */
+    fun installPack(id: String) {
+        val pack = catalog.get(id) ?: return
+        if (pack.installed) {
+            selectPack(pack)
+            return
+        }
+        viewModelScope.launch {
+            packSetup = PackSetup(pack, progress = 0f)
+            if (store.install(id)) {
+                finishInstall(pack)
+                return@launch
+            }
+            val result = downloader.download(pack) { read, total ->
+                packSetup = PackSetup(
+                    pack,
+                    progress = if (total > 0) (read.toFloat() / total).coerceIn(0f, 1f) else null,
+                )
+            }
+            if (result.isSuccess) {
+                finishInstall(pack)
+            } else {
+                packSetup = PackSetup(pack, progress = null, failed = true)
+            }
+        }
+    }
+
+    private suspend fun finishInstall(pack: ContentPack) {
+        packSetup = null
+        reopenLibrary()
+        selectPack(catalog.get(pack.id)?.copy(installed = true) ?: pack.copy(installed = true))
+        val waiting = pendingPlayAyah
+        if (pack.type == PackType.Recitation && waiting != null) {
+            pendingPlayAyah = null
+            playback.play(settings.recitation, waiting)
+        }
+    }
+
+    private var pendingPlayAyah: Int? = null
+
+    private fun selectPack(pack: ContentPack) {
+        when (pack.type) {
+            PackType.Translation -> setTranslationPack(pack.id)
+            PackType.Tafsir -> if (pack.id !in settings.tafsirPacks) toggleTafsirPack(pack.id)
+            PackType.Recitation -> Unit
+            else -> Unit
+        }
+    }
+
+    fun cancelPackSetup() {
+        packSetup = null
+    }
+
+    fun removePack(id: String) {
+        val pack = catalog.get(id) ?: return
+        if (pack.shipped) return
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                store.remove(id)
+                if (pack.type == PackType.Recitation) {
+                    val folder = contentDatabase?.recitationAyah(pack.id.removePrefix("reciter-"), 1)?.audioPath
+                        ?.substringBeforeLast('/')
+                    if (folder != null) recitationStore.removeAll(folder)
+                }
+            }
+            if (settings.translationPack == id) setTranslationPack("")
+            if (id in settings.tafsirPacks) toggleTafsirPack(id)
+            reopenLibrary()
+        }
+    }
+
+    /**
+     * Reopens the library with exactly the packs on the device. Attaching a
+     * pack is instant, and the reader's place, notes, and settings are
+     * untouched.
+     */
+    private suspend fun reopenLibrary() {
+        val application = getApplication<Application>()
+        installed = withContext(Dispatchers.IO) { store.installed() }
+        val fresh = withContext(Dispatchers.IO) { ContentDatabase.open(application, catalog, installed) }
+        contentDatabase?.close()
+        contentDatabase = fresh
+        playback.attach(fresh)
+        packs = fresh.packs()
+        clearRowCache()
+        // The tafsir search index changes with the packs, so it is rebuilt.
+        withContext(Dispatchers.IO) { fresh.prewarmSearch(settings.tafsirPacks.toList()) }
+    }
+
     fun selectRecitation(id: String) {        if (id == settings.recitation) return
         settings = settings.copy(recitation = id)
         viewModelScope.launch { settingsStore.setRecitation(id) }
@@ -345,6 +463,14 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun playAyah(ayahNumber: Int) {
+        val reciterPack = ContentDatabase.reciterPack(settings.recitation)
+        if (reciterPack !in installed) {
+            // The reciter's timings are a pack of their own; without it there
+            // is nothing to play and nowhere to look for the audio.
+            pendingPlayAyah = ayahNumber
+            installPack(reciterPack)
+            return
+        }
         viewModelScope.launch { playback.play(settings.recitation, ayahNumber) }
     }
 

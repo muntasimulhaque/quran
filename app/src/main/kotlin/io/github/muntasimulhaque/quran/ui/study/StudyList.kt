@@ -93,6 +93,7 @@ fun StudyList(
     onAyah: (Ayah) -> Unit,
     onBackgroundTap: () -> Unit,
     onNextSurah: (Int) -> Unit,
+    onAddContent: () -> Unit,
     contentPaddingTop: Dp,
     contentPaddingBottom: Dp,
     modifier: Modifier = Modifier,
@@ -159,6 +160,12 @@ fun StudyList(
                 content = content,
                 onBackgroundTap = onBackgroundTap,
             )
+            if (viewModel.installedTranslationPacks.isEmpty()) {
+                AddContent(
+                    text = "Add a translation to read this surah in your language",
+                    onClick = onAddContent,
+                )
+            }
         }
         items(ayahs.size, key = { "ayah-${ayahs[it]}" }) { index ->
             val number = ayahs[index]
@@ -243,6 +250,33 @@ private fun FootnoteSheet(
                 modifier = Modifier.padding(top = 12.dp),
             )
         }
+    }
+}
+
+/** A quiet door to the packs the reader does not have yet. */
+@Composable
+private fun AddContent(text: String, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 22.dp, vertical = 4.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.05f))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = "Add",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+        )
     }
 }
 

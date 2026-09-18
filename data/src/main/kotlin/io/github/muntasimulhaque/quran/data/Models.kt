@@ -176,9 +176,9 @@ enum class PackType {
 }
 
 /**
- * One unit of content the reader can turn on: a translation, a tafsir, a
- * script, a recitation. The built-in library is a set of packs; a downloaded
- * pack is another, with the same shape.
+ * One unit of content the reader can have, or not have: the core text and
+ * page layout, a translation, a tafsir, a word list, a script. The catalog
+ * in the app says what exists; the store says what is on this device.
  */
 data class ContentPack(
     val id: String,
@@ -188,9 +188,12 @@ data class ContentPack(
     val credit: String,
     val license: String,
     val version: String,
-    val builtIn: Boolean,
+    val shipped: Boolean,
     val ayahs: Int,
     val bytes: Long,
+    val sha256: String = "",
+    val url: String? = null,
+    val installed: Boolean = false,
 )
 
 /** A light row for building the study list without reading every text. */

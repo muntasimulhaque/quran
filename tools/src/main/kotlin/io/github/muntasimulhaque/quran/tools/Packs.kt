@@ -89,9 +89,31 @@ class Packs(private val root: File) {
             ayahs = 6236,
         ),
         Pack(
+            id = "reciter-minshawi",
+            type = "recitation",
+            name = "Minshawi",
+            language = "ar",
+            credit = "Muhammad Siddiq Al-Minshawi, via the Quranic Universal Library",
+            license = "See docs/content-sources.md",
+            version = "QUL",
+            shipped = false,
+            ayahs = 6236,
+        ),
+        Pack(
+            id = "reciter-husary",
+            type = "recitation",
+            name = "Husary",
+            language = "ar",
+            credit = "Mahmoud Khalil Al-Husary, via the Quranic Universal Library",
+            license = "See docs/content-sources.md",
+            version = "QUL",
+            shipped = false,
+            ayahs = 6236,
+        ),
+        Pack(
             id = "words-en",
             type = "words",
-            name = "Word by word",
+            name = "Word by word and surah introductions",
             language = "en",
             credit = "Quran.com word by word, via the Quranic Universal Library",
             license = "See docs/content-sources.md",
@@ -232,6 +254,19 @@ class Packs(private val root: File) {
                                 "FROM src.word WHERE marker = 0 AND translation IS NOT NULL",
                         )
                         statement.execute("CREATE INDEX word_meaning_ayah ON word_meaning(ayah_number, position)")
+                        statement.execute("CREATE TABLE surah_info AS SELECT * FROM src.surah_info")
+                    }
+                    "recitation" -> {
+                        val reciter = pack.id.removePrefix("reciter-")
+                        statement.execute(
+                            "CREATE TABLE recitation AS SELECT id, name, credit FROM src.recitation " +
+                                "WHERE id = '$reciter'",
+                        )
+                        statement.execute(
+                            "CREATE TABLE recitation_ayah AS SELECT ayah_number, audio_path, segments " +
+                                "FROM src.recitation_ayah WHERE recitation = '$reciter'",
+                        )
+                        statement.execute("CREATE INDEX recitation_ayah_ayah ON recitation_ayah(ayah_number)")
                     }
                 }
             }

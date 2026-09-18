@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.AppTheme
+import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.TextSize
@@ -114,13 +115,15 @@ fun SettingsSheet(
             ) { viewModel.setShowFootnotes(it) }
 
             Group("Recitation")
-            viewModel.availableRecitations.forEach { recitation ->
-                val summary = ReciterSummary(recitation, 0, 0)
-                ChoiceRow(
-                    title = shortReciterName(recitation.id, recitation.name),
-                    subtitle = recitation.credit,
-                    selected = recitation.id == settings.recitation,
-                ) { viewModel.selectRecitation(recitation.id) }
+            viewModel.packs.filter { it.type == PackType.Recitation }.forEach { pack ->
+                PackRow(
+                    pack = pack,
+                    selected = pack.id == ContentDatabase.reciterPack(settings.recitation),
+                    setup = viewModel.packSetup?.takeIf { it.pack.id == pack.id },
+                    onInstall = { viewModel.installPack(pack.id) },
+                    onRemove = { viewModel.removePack(pack.id) },
+                    onSelect = { viewModel.selectRecitation(pack.id.removePrefix(ContentDatabase.RECITER_PREFIX)) },
+                )
             }
             TextRow(
                 title = if (downloadsOpen) "Hide downloaded surahs" else "Manage downloaded surahs",
@@ -183,32 +186,152 @@ fun SettingsSheet(
 
             Group("Content")
             Text(
-                text = "What the reader sees and searches. Everything ships with the app; " +
-                    "nothing here needs a download.",
+                text = "The Quran text and its page layout are in the app. Everything else " +
+                    "is added when you want it, and can be removed at any time.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = 8.dp),
             )
-            viewModel.translationPacks.forEach { pack ->
-                ChoiceRow(
-                    title = pack.name,
-                    subtitle = "${languageName(pack.language)} translation  \u00B7  built in",
-                    selected = pack.id == settings.translationPack,
-                ) { viewModel.setTranslationPack(pack.id) }
-            }
-            viewModel.tafsirPacks.forEach { pack ->
-                ToggleRow(
-                    title = pack.name,
-                    subtitle = "${languageName(pack.language)} tafsir  \u00B7  built in",
-                    checked = pack.id in settings.tafsirPacks,
-                ) { viewModel.toggleTafsirPack(pack.id) }
-            }
+            viewModel.packs
+                .filter { it.type == PackType.Translation || it.type == PackType.Tafsir || it.type == PackType.Words }
+                .forEach { pack ->
+                    PackRow(
+                        pack = pack,
+                        selected = when (pack.type) {
+                            PackType.Translation -> pack.id == settings.translationPack
+                            PackType.Tafsir -> pack.id in settings.tafsirPacks
+                            else -> true
+                        },
+                        setup = viewModel.packSetup?.takeIf { it.pack.id == pack.id },
+                        onInstall = { viewModel.installPack(pack.id) },
+                        onRemove = { viewModel.removePack(pack.id) },
+                        onSelect = {
+                            when (pack.type) {
+                                PackType.Translation -> viewModel.setTranslationPack(pack.id)
+                                PackType.Tafsir -> viewModel.toggleTafsirPack(pack.id)
+                                else -> Unit
+                            }
+                        },
+                    )
+                }
 
             Group("About")
             AboutRow("Version", "0.1")
             AboutRow("Ads and trackers", "None, and none ever")
             AboutRow("Source code", "github.com/muntasimulhaque/quran")
             AboutRow("Privacy", "Nothing leaves this device unless you ask it to")
+        }
+    }
+}
+
+/** One pack: what it is, what it costs, and the one action it needs. */
+@Composable
+private fun PackRow(
+    pack: ContentPack,
+    selected: Boolean,
+    setup: ReaderViewModel.PackSetup?,
+    onInstall: () -> Unit,
+    onRemove: () -> Unit,
+    onSelect: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 22.dp, vertical = 10.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = pack.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    text = buildString {
+                        append(languageName(pack.language))
+                        append(' ')
+                        append(
+                            when (pack.type) {
+                                PackType.Translation -> "translation"
+                                PackType.Tafsir -> "tafsir"
+                                PackType.Words -> "word by word"
+                                PackType.Recitation -> "recitation"
+                                PackType.Script -> "script"
+                            },
+                        )
+                        if (pack.shipped) {
+                            append("  \u00B7  included")
+                        } else {
+                            append("  \u00B7  ${formatBytes(pack.bytes)}")
+                        }
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            when {
+                setup?.failed == true -> Text(
+                    text = "Retry",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .clickable(onClick = onInstall)
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                )
+                setup != null -> Text(
+                    text = if (setup.progress == null) {
+                        "Preparing..."
+                    } else {
+                        "Downloading ${(setup.progress * 100).toInt()}%"
+                    },
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                !pack.installed -> Text(
+                    text = "Add",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .clickable(onClick = onInstall)
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                )
+                pack.shipped -> Text(
+                    text = "Included",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                else -> Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (selected) {
+                        Text(
+                            text = if (pack.type == PackType.Tafsir) "On" else "Selected",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    } else if (pack.type == PackType.Translation || pack.type == PackType.Tafsir) {
+                        Text(
+                            text = "Use",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .clickable(onClick = onSelect)
+                                .padding(horizontal = 10.dp, vertical = 8.dp),
+                        )
+                    }
+                    Text(
+                        text = "Remove",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .clip(RoundedCornerShape(50))
+                            .clickable(onClick = onRemove)
+                            .padding(horizontal = 8.dp, vertical = 8.dp),
+                    )
+                }
+            }
         }
     }
 }

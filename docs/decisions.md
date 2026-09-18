@@ -734,3 +734,36 @@ removable at any time.
 This is the decision that turns the pack work from a later nicety into the
 next thing to build, and it is why the shipped app becomes much smaller:
 the reader downloads the depth they want instead of carrying everyone's.
+
+## D-030: The app ships the Book only; the depth arrives on demand
+
+Date: the fourth session, the owner's words: only the Quran text and its page
+layout ship inside the app, and everything else is downloaded when the reader
+wants it.
+
+What ships: one pack of about ten megabytes holding the Quran text, its
+words, its page geometry, the navigation data, and the 604 page fonts. That
+is a complete, offline Mushaf: the app opens, turns pages, keeps the reader's
+place, saves ayahs, and writes notes without a single byte from the network.
+
+What arrives on demand, each with its size shown before anything moves and
+its SHA-256 verified before it is used: Saheeh International (2.2 MB), Ibn
+Kathir (23 MB), As-Sa'di (15 MB), the word by word list with the surah
+introductions (4.7 MB), each reciter's timing data (1.7 MB), and each
+surah's audio when a reciter is actually played.
+
+How it works: the content build splits the audited database into one SQLite
+file per pack. The app opens the core pack read-only and attaches every
+installed pack as its own schema, so a translation query can only ever reach
+a translation the reader has, and removing a pack removes the content with
+the file. Packs are published to content-addressed Releases
+(`pack-<id>-<hash8>`), and `content/catalog.json` is the menu the app reads.
+
+What it costs: a new reader who wants English has one extra step, and the
+app must say so kindly (the study view offers "Add a translation" where the
+translation would be). What it buys: an app that is smaller, a repository
+with no giant file in it, and a library that can grow by dozens of packs
+without any of them touching the reader who does not want them.
+
+The single database of D-028 stays useful as the build's working form and is
+still fetched from its own Release for CI, but the app no longer ships it.

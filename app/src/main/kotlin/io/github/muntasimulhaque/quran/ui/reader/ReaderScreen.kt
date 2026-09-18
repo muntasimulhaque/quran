@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -161,6 +162,7 @@ fun ReaderScreen(
                             touch++
                         },
                         onNextSurah = { number -> viewModel.jumpToSurah(number) },
+                        onAddContent = { sheet = ReaderSheet.Settings },
                         contentPaddingTop = 64.dp,
                         contentPaddingBottom = 120.dp,
                     )
@@ -431,6 +433,52 @@ private fun BottomStack(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         val scope = rememberCoroutineScope()
+        viewModel.packSetup?.let { setup ->
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(start = 18.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.padding(end = 12.dp)) {
+                    Text(
+                        text = setup.pack.name,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    Text(
+                        text = when {
+                            setup.failed -> "Could not download. Check your connection."
+                            setup.progress == null -> "Preparing..."
+                            else -> "Downloading ${(setup.progress * 100).toInt()}%  \u00B7  ${formatBytes(setup.pack.bytes)}"
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                if (setup.failed) {
+                    Text(
+                        text = "Retry",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .clickable { viewModel.installPack(setup.pack.id) }
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                    )
+                }
+                Text(
+                    text = if (setup.failed) "Close" else "Cancel",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .clickable { viewModel.cancelPackSetup() }
+                        .padding(horizontal = 10.dp, vertical = 8.dp),
+                )
+            }
+        }
         selected?.let { ayah ->
             AyahActions(
                 ayah = ayah,

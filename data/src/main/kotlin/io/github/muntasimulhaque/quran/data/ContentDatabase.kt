@@ -10,42 +10,32 @@ import org.json.JSONArray
 import java.io.File
 
 /**
- * The read-only content database. It is copied once from the app's assets
- * into private storage, named by the content version, and opened read-only.
- * A new content version replaces the old copy on the next launch.
+ * The read-only content database.
  *
- * Content is read through packs: a translation, a tafsir, or a word list is
- * chosen by pack id, so a second pack is another row, never another schema.
+ * The main file is the core pack: the Quran text, its words, and its page
+ * layout. Every other pack (a translation, a tafsir, a word list, a reciter's
+ * timings) is attached beside it as its own schema, so a reader's library is
+ * exactly the packs on the device and nothing else. A pack that is not
+ * installed is not attached, and a query for it never runs.
  */
-class ContentDatabase private constructor(private val database: SQLiteDatabase) {
+class ContentDatabase private constructor(
+    private val database: SQLiteDatabase,
+    private val catalog: PackCatalog,
+    val installedPacks: Set<String>,
+) {
+
+    /** The schema of one installed pack, quoted for SQL. */
+    private fun schema(id: String): String = "\"" + id.replace("\"", "") + "\""
+
+    private fun has(id: String): Boolean = id in installedPacks && id != PackCatalog.CORE_ID
+
+    fun installedPack(id: String): Boolean = id == PackCatalog.CORE_ID || has(id)
+
+    fun catalog(): PackCatalog = catalog
 
     // ----------------------------------------------------------------- packs
 
-    fun packs(): List<ContentPack> =
-        database.rawQuery(
-            "SELECT id, type, name, language, credit, license, version, builtin, ayahs, bytes " +
-                "FROM pack ORDER BY type, id",
-            null,
-        ).use { cursor ->
-            buildList(cursor.count) {
-                while (cursor.moveToNext()) {
-                    add(
-                        ContentPack(
-                            id = cursor.getString(0),
-                            type = PackType.of(cursor.getString(1)),
-                            name = cursor.getString(2),
-                            language = cursor.getString(3),
-                            credit = cursor.getString(4),
-                            license = cursor.getString(5),
-                            version = cursor.getString(6),
-                            builtIn = cursor.getInt(7) == 1,
-                            ayahs = cursor.getInt(8),
-                            bytes = cursor.getLong(9),
-                        ),
-                    )
-                }
-            }
-        }
+    fun packs(): List<ContentPack> = catalog.all()
 
     // --------------------------------------------------------------- reading
 
@@ -83,9 +73,13 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
     )
 
     /** The English introduction to a surah, when the content carries one. */
-    fun surahInfo(surah: Int): String? =
-        database.rawQuery("SELECT text FROM surah_info WHERE surah = ?", arrayOf(surah.toString()))
-            .use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
+    fun surahInfo(surah: Int): String? {
+        if (!installedPack(SURAH_INFO)) return null
+        return database.rawQuery(
+            "SELECT text FROM ${schema(SURAH_INFO)}.surah_info WHERE surah = ?",
+            arrayOf(surah.toString()),
+        ).use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
+    }
 
     fun pageLines(page: Int): List<PageLine> =
         database.rawQuery(
@@ -111,7 +105,7 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
 
     fun words(firstId: Int, lastId: Int): List<Word> =
         database.rawQuery(
-            "SELECT id, position, text, glyph, translation FROM word WHERE id BETWEEN ? AND ? ORDER BY id",
+            "SELECT id, position, text, glyph FROM word WHERE id BETWEEN ? AND ? ORDER BY id",
             arrayOf(firstId.toString(), lastId.toString()),
         ).use { cursor ->
             buildList(cursor.count) {
@@ -156,7 +150,7 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
         position = cursor.getInt(offset + 1),
         text = cursor.getString(offset + 2),
         glyph = cursor.getString(offset + 3),
-        translation = if (cursor.isNull(offset + 4)) null else cursor.getString(offset + 4),
+        translation = null,
     )
 
     /**
@@ -221,12 +215,12 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
         }
 
     fun translations(ayahNumbers: List<Int>, pack: String): Map<Int, TranslationText> {
-        if (ayahNumbers.isEmpty()) return emptyMap()
+        if (ayahNumbers.isEmpty() || !installedPack(pack)) return emptyMap()
         val placeholders = ayahNumbers.joinToString(",") { "?" }
-        val args = (listOf(pack) + ayahNumbers.map { it.toString() }).toTypedArray()
         return database.rawQuery(
-            "SELECT ayah_number, text, footnotes FROM translation WHERE pack = ? AND ayah_number IN ($placeholders)",
-            args,
+            "SELECT ayah_number, text, footnotes FROM ${schema(pack)}.translation " +
+                "WHERE ayah_number IN ($placeholders)",
+            ayahNumbers.map { it.toString() }.toTypedArray(),
         ).use { cursor ->
             val out = HashMap<Int, TranslationText>(ayahNumbers.size)
             while (cursor.moveToNext()) {
@@ -251,29 +245,41 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
         }
     }
 
-    fun wordMeanings(ayahNumber: Int): List<WordMeaning> =
-        database.rawQuery(
-            "SELECT text, translation FROM word WHERE ayah_number = ? AND marker = 0 ORDER BY position",
+    /** The word by word meanings, when the reader has that pack. */
+    fun wordMeanings(ayahNumber: Int): List<WordMeaning> {
+        val meanings = if (installedPack(WORDS_PACK)) {
+            database.rawQuery(
+                "SELECT position, meaning FROM ${schema(WORDS_PACK)}.word_meaning " +
+                    "WHERE ayah_number = ? ORDER BY position",
+                arrayOf(ayahNumber.toString()),
+            ).use { cursor ->
+                val out = HashMap<Int, String>(cursor.count)
+                while (cursor.moveToNext()) out[cursor.getInt(0)] = cursor.getString(1)
+                out
+            }
+        } else {
+            emptyMap()
+        }
+        return database.rawQuery(
+            "SELECT text, position FROM word WHERE ayah_number = ? AND marker = 0 ORDER BY position",
             arrayOf(ayahNumber.toString()),
         ).use { cursor ->
             buildList(cursor.count) {
                 while (cursor.moveToNext()) {
-                    add(
-                        WordMeaning(
-                            word = cursor.getString(0),
-                            meaning = cursor.getString(1)?.trim()?.takeIf { it.isNotEmpty() },
-                        ),
-                    )
+                    val text = cursor.getString(0)
+                    val position = cursor.getInt(1)
+                    add(WordMeaning(text, meanings[position]?.trim()?.takeIf { it.isNotEmpty() }))
                 }
             }
         }
+    }
 
     /** The words of a set of ayahs, in order, markers excluded. */
     fun wordsForAyahs(numbers: List<Int>): Map<Int, List<Word>> {
         if (numbers.isEmpty()) return emptyMap()
         val inClause = numbers.joinToString(",")
         return database.rawQuery(
-            "SELECT ayah_number, id, position, text, glyph, translation FROM word " +
+            "SELECT ayah_number, id, position, text, glyph FROM word " +
                 "WHERE ayah_number IN ($inClause) AND marker = 0 ORDER BY ayah_number, position",
             null,
         ).use { cursor ->
@@ -285,22 +291,25 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
         }
     }
 
-    fun tafsir(ayahNumber: Int, pack: String): TafsirPassage? =
-        database.rawQuery(
-            "SELECT p.pack, p.surah, p.from_ayah, p.to_ayah, p.text FROM tafsir_ayah a " +
-                "JOIN tafsir_passage p ON p.pack = a.pack AND p.source_id = a.passage_id " +
-                "WHERE a.pack = ? AND a.ayah_number = ?",
-            arrayOf(pack, ayahNumber.toString()),
+    fun tafsir(ayahNumber: Int, pack: String): TafsirPassage? {
+        if (!installedPack(pack)) return null
+        val schema = schema(pack)
+        return database.rawQuery(
+            "SELECT p.surah, p.from_ayah, p.to_ayah, p.text FROM $schema.tafsir_ayah a " +
+                "JOIN $schema.tafsir_passage p ON p.source_id = a.passage_id " +
+                "WHERE a.ayah_number = ?",
+            arrayOf(ayahNumber.toString()),
         ).use { cursor ->
             if (!cursor.moveToFirst()) return null
             TafsirPassage(
-                source = cursor.getString(0),
-                surah = cursor.getInt(1),
-                fromAyah = cursor.getInt(2),
-                toAyah = cursor.getInt(3),
-                text = cursor.getString(4),
+                source = pack,
+                surah = cursor.getInt(0),
+                fromAyah = cursor.getInt(1),
+                toAyah = cursor.getInt(2),
+                text = cursor.getString(3),
             )
         }
+    }
 
     /**
      * Builds the tafsir search index ahead of the first query. Called after
@@ -373,28 +382,20 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
     // -------------------------------------------------------------- reciters
 
     fun recitations(): List<Recitation> =
-        database.rawQuery(
-            "SELECT id, name, credit FROM recitation ORDER BY id",
-            null,
-        ).use { cursor ->
-            buildList(cursor.count) {
-                while (cursor.moveToNext()) {
-                    add(
-                        Recitation(
-                            id = cursor.getString(0),
-                            name = cursor.getString(1),
-                            credit = cursor.getString(2),
-                        ),
-                    )
-                }
-            }
+        catalog.ofType(PackType.Recitation).map { pack ->
+            Recitation(
+                id = pack.id.removePrefix(RECITER_PREFIX),
+                name = pack.name,
+                credit = pack.credit,
+            )
         }
 
-    fun recitationAyah(recitation: String, ayahNumber: Int): RecitationAyah? =
-        database.rawQuery(
-            "SELECT audio_path, segments FROM recitation_ayah " +
-                "WHERE recitation = ? AND ayah_number = ?",
-            arrayOf(recitation, ayahNumber.toString()),
+    fun recitationAyah(recitation: String, ayahNumber: Int): RecitationAyah? {
+        val pack = reciterPack(recitation)
+        if (!installedPack(pack)) return null
+        return database.rawQuery(
+            "SELECT audio_path, segments FROM ${schema(pack)}.recitation_ayah WHERE ayah_number = ?",
+            arrayOf(ayahNumber.toString()),
         ).use { cursor ->
             if (!cursor.moveToFirst()) return null
             RecitationAyah(
@@ -402,6 +403,7 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
                 segments = segments(cursor.getString(1)),
             )
         }
+    }
 
     private fun segments(json: String?): List<WordSegment> {
         if (json.isNullOrBlank() || json == "[]") return emptyList()
@@ -461,7 +463,7 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
         val translationByNumber = LinkedHashMap<Int, String>()
         if (!query.arabic && translationPacks.isNotEmpty()) {
             for (pack in translationPacks) {
-                val numbers = packMatches("translation", pack, query.terms, limit)
+                val numbers = packMatches(pack, query.terms, limit)
                 counts[1] += numbers.size
                 for (number in numbers) translationByNumber.putIfAbsent(number, pack)
             }
@@ -501,6 +503,7 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
         val passageAyahs = LinkedHashMap<String, Int>()
         val matchedPassages = ArrayList<Pair<String, PassageRow>>()
         for (pack in request.tafsirPacks) {
+            if (!installedPack(pack)) continue
             val passages = tafsirMatches(pack, query, limit)
             counts[2] += passages.size
             for (passage in passages) {
@@ -636,10 +639,10 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
     }
 
     private fun wordMeaningMatches(query: SearchQuery, limit: Int): Map<Int, String> {
-        if (query.arabic) return emptyMap()
-        val condition = query.terms.joinToString(" AND ") { "translation_search LIKE ? ESCAPE '\\'" }
+        if (query.arabic || !installedPack(WORDS_PACK)) return emptyMap()
+        val condition = query.terms.joinToString(" AND ") { "meaning_search LIKE ? ESCAPE '\\'" }
         return database.rawQuery(
-            "SELECT ayah_number, translation FROM word WHERE marker = 0 AND $condition " +
+            "SELECT ayah_number, meaning FROM ${schema(WORDS_PACK)}.word_meaning WHERE $condition " +
                 "ORDER BY ayah_number LIMIT ?",
             (query.terms.map { Search.pattern(it) } + (limit * 4).toString()).toTypedArray(),
         ).use { cursor ->
@@ -653,12 +656,14 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
         }
     }
 
-    private fun packMatches(table: String, pack: String, terms: List<String>, limit: Int): List<Int> {
+    /** Matches inside one installed pack's own schema. */
+    private fun packMatches(schemaId: String, terms: List<String>, limit: Int): List<Int> {
+        if (!installedPack(schemaId)) return emptyList()
         val condition = terms.joinToString(" AND ") { "text_search LIKE ? ESCAPE '\\'" }
-        val args = (listOf(pack) + terms.map { Search.pattern(it) } + limit.toString()).toTypedArray()
         return database.rawQuery(
-            "SELECT ayah_number FROM $table WHERE pack = ? AND ($condition) ORDER BY ayah_number LIMIT ?",
-            args,
+            "SELECT ayah_number FROM ${schema(schemaId)}.translation WHERE $condition " +
+                "ORDER BY ayah_number LIMIT ?",
+            (terms.map { Search.pattern(it) } + limit.toString()).toTypedArray(),
         ).use { cursor ->
             buildList(cursor.count) {
                 while (cursor.moveToNext()) add(cursor.getInt(0))
@@ -736,31 +741,27 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
 
         fun ensure(wanted: Set<String>) {
             if (wanted == packs && entries.isNotEmpty()) return
-            val placeholders = wanted.joinToString(",") { "?" }
-            entries = if (wanted.isEmpty()) {
-                emptyList()
-            } else {
+            val loaded = ArrayList<TafsirEntry>()
+            for (id in wanted) {
+                if (!installedPack(id)) continue
                 database.rawQuery(
-                    "SELECT pack, source_id, surah, from_ayah, to_ayah, text_search " +
-                        "FROM tafsir_passage WHERE pack IN ($placeholders)",
-                    wanted.toTypedArray(),
+                    "SELECT source_id, surah, from_ayah, to_ayah, text_search " +
+                        "FROM ${schema(id)}.tafsir_passage",
+                    null,
                 ).use { cursor ->
-                    buildList(cursor.count) {
-                        while (cursor.moveToNext()) {
-                            add(
-                                TafsirEntry(
-                                    pack = cursor.getString(0),
-                                    sourceId = cursor.getInt(1),
-                                    surah = cursor.getInt(2),
-                                    fromAyah = cursor.getInt(3),
-                                    toAyah = cursor.getInt(4),
-                                    folded = cursor.getString(5) ?: "",
-                                ),
-                            )
-                        }
+                    while (cursor.moveToNext()) {
+                        loaded += TafsirEntry(
+                            pack = id,
+                            sourceId = cursor.getInt(0),
+                            surah = cursor.getInt(1),
+                            fromAyah = cursor.getInt(2),
+                            toAyah = cursor.getInt(3),
+                            folded = cursor.getString(4) ?: "",
+                        )
                     }
                 }
             }
+            entries = loaded
             packs = wanted
         }
 
@@ -814,13 +815,13 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
 
     /** The originals of the matched passages, read in one query per pack. */
     private fun passageTexts(pack: String, sourceIds: List<Int>): Map<Int, String> {
-        if (sourceIds.isEmpty()) return emptyMap()
+        if (sourceIds.isEmpty() || !installedPack(pack)) return emptyMap()
         val out = HashMap<Int, String>(sourceIds.size)
         for (chunk in sourceIds.chunked(400)) {
             val placeholders = chunk.joinToString(",") { "?" }
             database.rawQuery(
-                "SELECT source_id, text FROM tafsir_passage WHERE pack = ? AND source_id IN ($placeholders)",
-                (listOf(pack) + chunk.map { it.toString() }).toTypedArray(),
+                "SELECT source_id, text FROM ${schema(pack)}.tafsir_passage WHERE source_id IN ($placeholders)",
+                chunk.map { it.toString() }.toTypedArray(),
             ).use { cursor ->
                 while (cursor.moveToNext()) out[cursor.getInt(0)] = cursor.getString(1)
             }
@@ -846,29 +847,43 @@ class ContentDatabase private constructor(private val database: SQLiteDatabase) 
     fun close() = database.close()
 
     companion object {
-        suspend fun open(context: Context): ContentDatabase = withContext(Dispatchers.IO) {
-            val version = context.assets.open("content/version.txt")
-                .bufferedReader().use { it.readText().trim() }
-            val directory = File(context.filesDir, "content").apply { mkdirs() }
-            val target = File(directory, "quran-$version.db")
-            if (!target.exists() || target.length() == 0L) {
-                val temporary = File(directory, "quran-$version.db.part")
-                context.assets.open("content/quran.db").use { input ->
-                    temporary.outputStream().buffered().use { output -> input.copyTo(output) }
-                }
-                if (!temporary.renameTo(target)) {
-                    temporary.copyTo(target, overwrite = true)
-                    temporary.delete()
-                }
-                directory.listFiles { file -> file.name != target.name }?.forEach { it.delete() }
-            }
-            ContentDatabase(
-                SQLiteDatabase.openDatabase(
-                    target.path,
-                    null,
-                    SQLiteDatabase.OPEN_READONLY,
-                ),
+        const val WORDS_PACK = "words-en"
+        const val SURAH_INFO = "words-en"
+        const val RECITER_PREFIX = "reciter-"
+
+        fun reciterPack(recitation: String): String = RECITER_PREFIX + recitation
+
+        /**
+         * Opens the reader's library: the core pack, which ships inside the
+         * app, and every pack this device has installed. A pack that is not
+         * installed is simply not there, so no query can reach content the
+         * reader does not have.
+         */
+        suspend fun open(
+            context: Context,
+            catalog: PackCatalog,
+            installed: Set<String>,
+        ): ContentDatabase = withContext(Dispatchers.IO) {
+            val store = PackStore(context)
+            val core = catalog.get(PackCatalog.CORE_ID)
+                ?: throw IllegalStateException("the catalog has no core pack")
+            val coreFile = store.coreFile(core)
+            val database = SQLiteDatabase.openDatabase(
+                coreFile.path,
+                null,
+                SQLiteDatabase.OPEN_READONLY,
             )
+            for (id in installed) {
+                if (id == PackCatalog.CORE_ID) continue
+                val file = store.fileFor(id)
+                if (!file.exists()) continue
+                runCatching {
+                    database.execSQL("ATTACH DATABASE ? AS \"" + id.replace("\"", "") + "\"", arrayOf(file.path))
+                }.onFailure {
+                    android.util.Log.w("ContentDatabase", "pack $id could not be attached", it)
+                }
+            }
+            ContentDatabase(database, catalog.withInstalled(installed), installed)
         }
     }
 }
