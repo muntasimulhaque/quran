@@ -34,4 +34,4 @@ content/quran.db
 content/packs/
 
 # The hand-off bundle: a large binary that lives here only until Play has it.
-releases/
+play-store/*.aab
