@@ -99,6 +99,12 @@ dead letter.
 - **Store text is plain prose.** Play Console mangles quotes, markdown,
   and dashes. Release notes fit the 500-character field, counted before
   hand-off.
+- **Release notes are handed over bare.** In chat the notes are pasted as the
+  raw paragraph and nothing else: no blockquote, no code fence, no quotes, no
+  label on the same line. Anything wrapped around them arrives in Play
+  Console as literal characters, and the owner then pastes a paragraph full of
+  `>` or backticks into the store. The heading, the size, and the file name
+  go on their own lines above or below the paragraph, never touching it.
 - **Small pieces.** Files under 400 lines, functions under 40. Split
   early; a name that says the idea beats a name that says the screen.
 - **User-facing strings** live in a `strings.xml` in the module that
@@ -187,7 +193,8 @@ does not tell you, and each one costs a failed command to rediscover:
 5. Build the signed AAB, verify it with `jarsigner -verify`, copy it to
    `play-store/aab/quran-<version>-vc<code>.aab`, and hand it over in chat with
    the notes pasted verbatim. Delete the copy once the owner confirms the
-   Play submission.
+   Play submission. Hand the notes over as a bare paragraph: no blockquote, no
+   fence, no wrapping quotes, nothing on the same line as the text.
 6. Screenshots: refresh the CI set whenever visible UI changed, and say
    explicitly when nothing changed and why. Never capture a listing set
    by hand.
