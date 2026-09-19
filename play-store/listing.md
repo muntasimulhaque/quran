@@ -118,15 +118,15 @@ What each set shows, in order:
 15. Translations, with more than one able to be on
 16. The word by word aid in Bangla
 
-## Release notes (0.5, 235 characters)
+## Release notes (0.5, shipped, 235 characters)
 
 Search results no longer show raw markup where a tafsir was matched; every result now reads as plain prose, and a matched word stays highlighted. The surah introduction in study mode reads as prose too. No ads, no trackers, no account.
 
-## Release notes (0.4, 423 characters)
+## Release notes (0.4, shipped, 423 characters)
 
 Fixed a crash when adding a translation, tafsir, or word list. Tapping such a row now adds it and turns it on, and removing one downloaded surah works. The page no longer lifts with a shadow during a turn, the top bar hides while you scroll, and the Mushaf and study icons were redrawn to match. Appearance can follow your phone dark mode. Last Read, search filters, and alphabetical lists. No ads, no trackers, no account.
 
-## Release notes (0.3, 496 characters)
+## Release notes (0.3, shipped, 496 characters)
 
 The reading place no longer jumps back when you come from another surah. The mode switch is one icon in the top bar that offers the other view, and the bottom bar is gone: Saved sits in Browse beside the surahs and juz, and listening is the play action on any ayah. Browse has a Last read tab with your last twenty places. More than one translation may be on at once, text sizes gained a smaller step and lost the largest, and the download offer can be dismissed. No ads, no trackers, no account.
 

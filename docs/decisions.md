@@ -1677,3 +1677,33 @@ clears a dialog before the tour starts; and the leg now requires the full
 sixteen frames instead of one, so a run that stopped early is not a green
 tick. The set was recaptured and every frame matches the artifact byte for
 byte.
+
+## D-056: The release hand-off, 0.5
+
+Date: the twelfth session, the release session. Version 0.5 (versionCode 5)
+went to Google Play for review, and 0.4 (versionCode 4) went in the same
+session before it.
+
+**What the hand-off was.** Version 0.5, notes at 235 characters, one unbroken
+paragraph, pasted bare in chat with the size and the checksum and nothing
+wrapped around the text. The bundle: 147,673,787 bytes, SHA-256
+`9bf77817f6a9df05d0964d4683e944b043e008c34afd12516d16903ebf08bdd5`, signed
+with the shared upload key (D-017), carrying only the core pack. It was built
+and signed by the new `signed-bundle` job (D-054), pulled from the run's
+artifact with one `gh run download`, and verified here with `jarsigner` before
+being handed over. The hand-off copy was deleted once the owner confirmed the
+submission.
+
+**0.4 and 0.5 in one session, and why.** The reader's report was fixed and
+raised to 0.4; while collecting the store screenshots for it, a real bug
+surfaced (raw tafsir markup in search results, D-055), so the fix went out as
+0.5 rather than reopening a submission Play already held. Two releases, one
+session, and the same signed bundle path for both.
+
+**The screenshot leg was fixed twice over.** The first 0.5 capture came back
+with an Android dialog in every 10-inch frame and the tour on the wrong
+screens, and the workflow still reported success. The capture now refuses to
+keep a frame a system dialog is sitting over, the workflow clears one before
+the tour starts, and a leg must produce all sixteen frames. The set was
+recaptured, and every frame of all three form factors was verified byte for
+byte against the artifacts before it replaced the committed set.

@@ -566,53 +566,66 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the twelfth session)
 
-The session ends on 0.5 (versionCode 5), not 0.4: 0.4 was already handed to
-Play, and collecting the store screenshots then found a real bug (D-055), so
-the fix ships as the next number. Search no longer shows raw tafsir markup,
-the surah introduction reads as prose, and a content gate now checks every
-excerpt for both.
+**0.5 (versionCode 5) is submitted to Google Play for review**, and 0.4
+(versionCode 4) is with Play from the same session. What 0.5 handed over:
+147,673,787 bytes, SHA-256
+`9bf77817f6a9df05d0964d4683e944b043e008c34afd12516d16903ebf08bdd5`, signed with
+the owner's upload key, carrying only the core pack. The hand-off copy was
+deleted once the submission was confirmed; `play-store/aab/` keeps its own
+note.
 
-**0.3 (versionCode 3) is submitted to Google Play.** What was handed over: 147,657,235
-bytes, SHA-256
-`4b43a694ba565f776901000f7ec87b644be82e9b9153b4d023b830db189b1b27`, signed
-with the owner's upload key, carrying only the core pack. The hand-off copy was
-deleted after the submission; `play-store/aab/` keeps its own note.
+**The reader's report (D-053).** The owner read 0.3 on a phone and reported
+twelve things, two of them the same crash: a duplicate string name shared by
+two modules (`pack_downloading`, with different format arguments) threw on
+the main thread from `stringResource`, so tapping Add on a translation,
+tafsir, or word list crashed the app, and behind that crash sat a pack row
+whose tap was wrapped in `if (pack.installed)`, so a pack the reader did not
+have could only be reached through the button that crashed. The turn no
+longer lifts the page or casts a shadow; the study chrome steps aside while
+scrolling; the two reading mode icons were redrawn as one pair; Appearance
+gained automatic night mode; Settings has one pack row for every list, where
+tapping a name or a mark installs or turns on what it names; a downloaded
+surah's Remove removes; Last Read reads as a surah name with its ayah under
+it and the Browse tabs are centered; search has a filter row of sources, all
+on until turned off; languages, pack names, and reciters are alphabetical;
+and the app says Bangla wherever it names the language.
 
-The tenth session's eleven items are in that release (D-051): the reading place
-no longer jumps back, the mode switch is one icon in the top bar that offers the
-other mode, the bottom bar and its Listen and Saved doors are gone, Last Read is
-a Browse tab with twenty places kept, the audio offer has a "Not now" close,
-the hub chevrons point right, choice marks sit at the left, translations are
-checks like tafsirs (more than one may be on, each named under the ayah), the
-size scale lost its top step and gained a smaller one, Show footnotes is gone,
-and export and import are removed from the app entirely.
+**Signing moved into CI and stays private (D-054).** A `signed-bundle` job in
+`build.yml` signs on every push to `main` from the four family secrets
+(`KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`), never
+on a pull request, and leaves the bundle and its checksum in the run's own
+artifacts: private, one `gh run download` away, and deleted by GitHub after
+two weeks. It fails when the secrets are absent rather than producing an
+unsigned artifact, and it reads `jarsigner`'s words rather than its exit
+code, because an unsigned file exits 0 and says so only in prose.
+`release.yml` was deleted: it was a second signing path whose four secret
+names never existed, so a tag would have attached an unsigned bundle to a
+draft release.
 
-The pre-flight found three faults older than the session, all fixed (D-052):
-`tools fonts` had been reading a content shape that stopped existing at the pack
-split (unnoticed because CI cannot run it), its first honest run surfaced an
-undocumented decision (Bangla is drawn by Android's own Noto, now an explicit
-allow-list), and the word by word test could fail on a Compose threading race.
-The gate's numbers are current: 23,012,137 reading codepoints, 29 datasets
-verified, 0 unexplained audit differences.
+**A real bug the screenshots found (D-055).** Collecting the store set is what
+surfaced it: the tablet search frame showed the reader `</p><h2>` inside a
+tafsir result, because a tafsir is stored as a small HTML subset for its own
+panels and search cut its excerpt from that stored form for a view with no
+parser. `RichText.plain` is now the readable form of anything, and
+`Search.excerpt` matches on that same form, so the highlight still lands; the
+surah introduction had the same defect and the same fix. `tools search` now
+audits every excerpt it can produce (465 of them) and all 114 introductions
+for markup and for a highlight that lands, in CI's content gates.
 
-The suite is green locally: core tests, data unit tests, the data
-instrumented tests (16, including the six `LastReadStoreTest` cases), the app
-instrumented tests (11, with the screenshot tour and the word by word aid),
-lint with no issues, and the owner machine gates (`verify`, `audit`, `fonts`,
-`checkdb`, `search`). CI runs the JVM suite and the content gates, the data
-instrumented tests on one phone profile, and the app instrumented tests on the
-three store form factors.
+**A screenshot leg can pass while holding a photograph of Android.** The
+first 0.5 capture came back with "Pixel Launcher isn't responding" in all
+sixteen 10-inch frames, the tour on the wrong screens after it because the
+dialog had swallowed the taps, and the workflow still green. The capture now
+checks the window list before keeping a frame and fails rather than write a
+dialog into the store listing, the workflow clears a dialog before the tour
+starts, and a leg must now produce all sixteen frames.
 
-**The twelfth session is the owner's read of 0.3 on a phone (D-053).** Twelve
-items, two of them the same crash: the turn no longer lifts the page or casts a
-shadow; the study chrome steps aside while scrolling; the two reading mode
-icons were redrawn as one pair; Appearance gained automatic night mode;
-Settings has one pack row for every list, so tapping a name or a mark installs
-or turns on what it names; a downloaded surah's Remove removes; Last Read
-reads as a surah name with its ayah under it, the Browse tabs are centered, and
-the tab says Last Read; search has a filter row of sources, all on until turned
-off; languages, pack names, and reciters are alphabetical; and the app says
-Bangla wherever it names the language.
+**The store set is eight frames per form factor from the next session on**
+(the owner's rule, queue item 9). This session's set is sixteen per form
+factor, 48 images in all, every one verified byte for byte against the
+capture run's artifacts.
 
-
-
+The suite is green locally and in CI: core tests (51), data unit tests, the
+data instrumented tests (16), the app instrumented tests (11, the screenshot
+tour included), lint with no issues, and the owner-machine gates (`verify`,
+`audit`, `fonts`, `checkdb`, `search`).
