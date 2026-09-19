@@ -599,7 +599,7 @@ private fun NoteEditor(initial: String?, onSave: (String) -> Unit, onClear: () -
                 )
             }
             Text(
-                text = stringResource(R.string.action_save),
+                text = stringResource(R.string.study_note_save),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier

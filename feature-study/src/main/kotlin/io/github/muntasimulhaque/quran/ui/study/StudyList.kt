@@ -73,6 +73,7 @@ import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.withContext
 
 /**
@@ -98,6 +99,7 @@ fun StudyList(
     playingWord: Int?,
     onAyah: (Ayah) -> Unit,
     onBackgroundTap: () -> Unit,
+    onScrolled: () -> Unit,
     onNextSurah: (Int) -> Unit,
     onAddContent: () -> Unit,
     onPlaceChanged: (Int) -> Unit,
@@ -145,6 +147,7 @@ fun StudyList(
         pageDescription = pageDescription,
         onAyah = onAyah,
         onBackgroundTap = onBackgroundTap,
+        onScrolled = onScrolled,
         onNextSurah = onNextSurah,
         onAddContent = onAddContent,
         onPlaceChanged = onPlaceChanged,
@@ -173,6 +176,7 @@ private fun StudyRows(
     pageDescription: String,
     onAyah: (Ayah) -> Unit,
     onBackgroundTap: () -> Unit,
+    onScrolled: () -> Unit,
     onNextSurah: (Int) -> Unit,
     onAddContent: () -> Unit,
     onPlaceChanged: (Int) -> Unit,
@@ -185,6 +189,14 @@ private fun StudyRows(
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = AyahList.indexOf(ayahs, settings.ayah),
     )
+
+    // Moving the page means reading, and reading wants the page: the chrome
+    // is told to step aside as soon as the list is moving under a finger.
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.isScrollInProgress }
+            .distinctUntilChanged()
+            .collect { scrolling -> if (scrolling) onScrolled() }
+    }
 
     // The reader's place is written down when a drag of their own ends, and
     // never by a scroll the app started. The flag is cleared on the write, so

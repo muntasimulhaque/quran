@@ -4,19 +4,19 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 0.3 (versionCode 3) is submitted to Google Play for review. The
-signed bundle was 147,657,235 bytes, verified with `jarsigner`, and carries
-only the core pack: the Quran text and its page layout, with everything else
-added from the project's own Releases when a reader asks for it. The listing,
-icon, feature graphic, and screenshots per form factor are in
-[`play-store/`](play-store/), refreshed from CI.
+**Status:** 0.3 (versionCode 3) is submitted to Google Play, and a session of
+reader corrections is in the tree. The signed bundle was 147,657,235 bytes,
+verified with `jarsigner`, and carries only the core pack: the Quran text and
+its page layout, with everything else added from the project's own Releases
+when a reader asks for it. The listing, icon, feature graphic, and screenshots
+per form factor are in [`play-store/`](play-store/), refreshed from CI.
 
 ## What it does
 
 - **Mushaf mode.** The page of the Madinah Mushaf, drawn glyph by glyph from
   the QPC V2 page fonts, with the printed page's own furniture: surah names,
   juz and hizb, and the page number in a gold medallion. A swipe turns the
-  page, with the shadow of a sheet of paper and a light tick as it settles. A
+  page, with a light tick as the turn settles. A
   tap brings quiet chrome; a long press asks about the ayah under your finger.
   Every ayah is a node a screen reader can read and act on.
 - **A launch that lands on the page.** The page the reader left is kept as a
@@ -38,8 +38,9 @@ icon, feature graphic, and screenshots per form factor are in
   every tafsir you have installed. It offers to add what it does not have yet
   rather than showing an empty panel.
 - **Search.** Arabic text, every enabled translation and tafsir, word
-  meanings, surah names, and references like `2:255`. Results are exact and
-  instant, even over a forty megabyte tafsir.
+  meanings, surah names, and references like `2:255`, with a filter row under
+  the field for narrowing the sources when a query returns too much. Results
+  are exact and instant, even over a forty megabyte tafsir.
 - **Recitation.** Minshawi and Husary, one surah at a time, asked for once: one
   offer names the reciter, the surah, and the size, the reciter can be swapped
   in that offer, and the word being recited is washed as it is read. The page
@@ -51,7 +52,8 @@ icon, feature graphic, and screenshots per form factor are in
   size shown first and the file verified by SHA-256. The app can also read
   every installed pack back and tell you if one no longer matches what was
   published.
-- **Readable in every room, on every setting.** Four themes, a size of your own
+- **Readable in every room, on every setting.** Four themes, an automatic night
+  mode that follows the system when the reader asks it to, a size of your own
   for the Quran text, the translation, the tafsir, and the word by word aid, a
   settings hub with the state of each choice on its row, secondary text above
   4.5:1 contrast in all four themes, and every control a real 48 dp target.
@@ -74,7 +76,7 @@ The library today, language by language:
 |---|---|---|---|
 | English | Saheeh International | Ibn Kathir | yes |
 | Arabic | the Quran itself | As-Sa'di | |
-| Bengali | Taisirul Quran | Ibn Kathir | yes |
+| Bangla | Taisirul Quran | Ibn Kathir | yes |
 
 ## How it is built
 
@@ -117,7 +119,7 @@ live:
 ./gradlew :tools:run --args="audit"    # letter by letter against Tanzil
 ./gradlew :tools:run --args="build"    # the database and the packs
 ./gradlew :tools:run --args="checkdb"  # the committed database and catalog
-./gradlew :tools:run --args="search"   # Arabic, Bengali, and Latin search
+./gradlew :tools:run --args="search"   # Arabic, Bangla, and Latin search
 ./gradlew :tools:run --args="packs"    # pack files and the catalog
 ./gradlew :tools:run --args="audio"    # recitation packages
 ```

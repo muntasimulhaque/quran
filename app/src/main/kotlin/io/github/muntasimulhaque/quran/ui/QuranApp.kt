@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -34,25 +35,37 @@ import io.github.muntasimulhaque.quran.ui.reader.ReaderScreen
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.LocalPageThemeName
+import io.github.muntasimulhaque.quran.data.isDark
+import io.github.muntasimulhaque.quran.data.resolved
 import io.github.muntasimulhaque.quran.ui.theme.QuranTheme
-import io.github.muntasimulhaque.quran.ui.theme.isDark
+
 
 /**
  * The app: one theme, one screen, and a first paint that is never blank. The
  * reader's page is painted from the picture the last session left on disk,
  * and the content opens behind it.
+ *
+ * The theme is resolved once, here, from the reader's choice and, when they
+ * asked for it, the system's own day and night. Everything below reads the
+ * resolved theme, including the launch picture, so a launch in the night
+ * never paints the day's page for a frame.
  */
 @Composable
 fun QuranApp(
     viewModel: ReaderViewModel = viewModel(),
     onPlaybackPermission: () -> Unit = {},
 ) {
-    QuranTheme(viewModel.settings.theme) {
+    val settings = viewModel.settings
+    val theme = settings.theme.resolved(
+        autoNight = settings.autoNight,
+        systemDark = isSystemInDarkTheme(),
+    )
+    QuranTheme(theme) {
         // The status and navigation bars belong to the theme the reader
         // chose, not to the system's own idea of day and night: on a night
         // page the icons must be light, or they vanish into it.
         val view = LocalView.current
-        val dark = viewModel.settings.theme.isDark()
+        val dark = theme.isDark()
         LaunchedEffect(dark) {
             val window = (view.context as? Activity)?.window ?: return@LaunchedEffect
             WindowCompat.getInsetsController(window, view).apply {

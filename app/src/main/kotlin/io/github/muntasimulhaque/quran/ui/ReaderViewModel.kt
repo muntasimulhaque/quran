@@ -386,6 +386,16 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch { settingsStore.setTheme(theme) }
     }
 
+    /**
+     * The page follows the system's own day and night. The choice of page is
+     * kept, not cleared: turning the switch off returns the reader to the
+     * page they had, which is the page the night was standing in for.
+     */
+    fun setAutoNight(follow: Boolean) {
+        settings = settings.copy(autoNight = follow)
+        viewModelScope.launch { settingsStore.setAutoNight(follow) }
+    }
+
     /** One kind of text changes size; nothing else moves with it. */
     fun setTypeSize(role: TypeRole, step: Float) {
         val value = TextSize.step(step)

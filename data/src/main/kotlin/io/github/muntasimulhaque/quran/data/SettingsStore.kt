@@ -19,6 +19,25 @@ enum class ReadingMode { Mushaf, Study }
 
 enum class AppTheme { Paper, Sepia, Night, Black }
 
+/** True for the two themes that turn the page over into the dark. */
+fun AppTheme.isDark(): Boolean = this == AppTheme.Night || this == AppTheme.Black
+
+/**
+ * The page the reader actually reads on, once the system has a say.
+ *
+ * With automatic night mode off, the choice is the choice. With it on, the
+ * system's dark mode selects Night, and a light system day shows the page the
+ * reader chose; a reader whose own choice is a night page is shown Paper in
+ * the light, because a switch that changed nothing by day would not be a
+ * switch at all.
+ */
+fun AppTheme.resolved(autoNight: Boolean, systemDark: Boolean): AppTheme = when {
+    !autoNight -> this
+    systemDark -> AppTheme.Night
+    isDark() -> AppTheme.Paper
+    else -> this
+}
+
 /**
  * Everything the reader has chosen, in one place: where they are, how the
  * page looks, how big each kind of text is, which reciter they hear, and
@@ -29,6 +48,8 @@ data class AppSettings(
     val ayah: Int = 1,
     val mode: ReadingMode = ReadingMode.Mushaf,
     val theme: AppTheme = AppTheme.Paper,
+    /** When on, the page turns over with the system's own day and night. */
+    val autoNight: Boolean = false,
     val arabicSize: Float = TextSize.DEFAULT,
     val translationSize: Float = TextSize.DEFAULT,
     val tafsirSize: Float = TextSize.DEFAULT,
@@ -83,6 +104,7 @@ class SettingsStore(private val context: Context) {
                 "black" -> AppTheme.Black
                 else -> AppTheme.Paper
             },
+            autoNight = preferences[AUTO_NIGHT] ?: false,
             arabicSize = sizeOf(choices, ARABIC_SIZE, legacy),
             translationSize = sizeOf(choices, TRANSLATION_SIZE, legacy),
             tafsirSize = sizeOf(choices, TAFSIR_SIZE, legacy),
@@ -114,6 +136,10 @@ class SettingsStore(private val context: Context) {
                 AppTheme.Black -> "black"
             }
         }
+    }
+
+    suspend fun setAutoNight(follow: Boolean) {
+        context.settingsStore.edit { it[AUTO_NIGHT] = follow }
     }
 
     suspend fun setTypeSize(role: TypeRole, value: Float) {
@@ -197,6 +223,7 @@ class SettingsStore(private val context: Context) {
         val AYAH = intPreferencesKey("ayah")
         val MODE = stringPreferencesKey("mode")
         val THEME = stringPreferencesKey("theme")
+        val AUTO_NIGHT = booleanPreferencesKey("auto_night")
         val TEXT_SIZE = floatPreferencesKey("text_size")
         val ARABIC_SIZE = floatPreferencesKey("arabic_size")
         val TRANSLATION_SIZE = floatPreferencesKey("translation_size")

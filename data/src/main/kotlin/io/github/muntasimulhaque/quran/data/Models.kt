@@ -152,6 +152,26 @@ data class SearchResults(
     val capped: Boolean = false,
 )
 
+/**
+ * Which sources one search reads. Everything is on until the reader turns it
+ * off: the promise of the search sheet is one field over everything the
+ * reader has, and the filters are there for the reader who is drowning in
+ * results, not for one who is looking.
+ */
+data class SearchSources(
+    val text: Boolean = true,
+    val surahs: Boolean = true,
+    val references: Boolean = true,
+    val words: Boolean = true,
+    val translations: Boolean = true,
+    val tafsirs: Boolean = true,
+) {
+    /** The whole library, which is where every search starts. */
+    companion object {
+        val ALL = SearchSources()
+    }
+}
+
 /** Everything one search reads, already resolved against the reader's choices. */
 data class SearchRequest(
     val query: SearchQuery,
@@ -161,6 +181,8 @@ data class SearchRequest(
     val packLanguages: Map<String, String> = emptyMap(),
     /** The word list to read meanings from; English when the reader has none of their language. */
     val wordsPack: String = "words-en",
+    /** The sources the reader has not filtered out. */
+    val sources: SearchSources = SearchSources.ALL,
     val limit: Int = 200,
 )
 

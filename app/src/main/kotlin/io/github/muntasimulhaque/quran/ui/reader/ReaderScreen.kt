@@ -193,6 +193,15 @@ fun ReaderScreen(
                             selected = null
                             touch++
                         },
+                        onScrolled = {
+                            // The text is what the reader is looking at; the
+                            // chrome steps out of its way the moment the page
+                            // starts moving under a finger.
+                            if (chrome) {
+                                chrome = false
+                                touch++
+                            }
+                        },
                         onNextSurah = { number -> viewModel.jumpToSurah(number) },
                         onAddContent = { sheet = ReaderSheet.Settings },
                         onPlaceChanged = { ayah -> viewModel.onStudySettled(ayah) },
@@ -354,6 +363,7 @@ fun ReaderScreen(
             downloadedSurahs = { recitation -> viewModel.downloadedSurahs(recitation) },
             actions = SettingsActions(
                 onTheme = { viewModel.setTheme(it) },
+                onAutoNight = { viewModel.setAutoNight(it) },
                 onTypeSize = { role, step -> viewModel.setTypeSize(role, step) },
                 onKeepAwake = { viewModel.setKeepAwake(it) },
                 onFollowReciter = { viewModel.setFollowReciter(it) },
@@ -472,10 +482,6 @@ private fun MushafReader(
                 .semantics(mergeDescendants = false) { },
             beyondViewportPageCount = 1,
         ) { index ->
-            // How far this page is from the reader's finger: the page being
-            // turned lifts and casts a shadow while it follows the finger.
-            // The offset is a lambda so the read happens in the draw phase,
-            // where a swipe costs a redraw instead of a recomposition.
             MushafPage(
                 content = content,
                 fonts = viewModel.fonts,
@@ -489,9 +495,6 @@ private fun MushafReader(
                 playingWord = playback.wordPosition,
                 onLongPressAyah = onAyah,
                 onBackgroundTap = onBackgroundTap,
-                dragOffset = {
-                    (pagerState.currentPage - index) + pagerState.currentPageOffsetFraction
-                },
                 active = index == pagerState.currentPage,
                 placeholder = startup
                     ?.takeIf { it.page == index + 1 && it.widthPx == pageWidth && it.theme == themeKey }
@@ -612,9 +615,9 @@ private fun BottomStack(
                     Text(
                         text = when {
                             setup.failed -> stringResource(R.string.pack_download_failed)
-                            setup.progress == null -> stringResource(R.string.pack_preparing)
+                            setup.progress == null -> stringResource(R.string.reader_pack_preparing)
                             else -> stringResource(
-                                R.string.pack_downloading,
+                                R.string.reader_pack_downloading,
                                 (setup.progress * 100).toInt(),
                                 formatBytes(setup.pack.bytes),
                             )

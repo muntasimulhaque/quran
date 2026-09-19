@@ -71,12 +71,12 @@ class Build(private val root: File) {
             insertTranslation(connection, translation)
             insertTafsirIbnKathir(connection, ayahNumbers)
             insertTafsirSaadi(connection, ayahNumbers)
-            // The Bengali library, built only when its sources are present, so
+            // The Bangla library, built only when its sources are present, so
             // a fresh clone without them still produces a complete English app.
             if (sourceDb("translation-taisirul-quran-bn") != null) {
-                val bengali = readQulTranslation("translation-taisirul-quran-bn", ayahNumbers)
-                insertTranslation(connection, bengali, packId = "translation-taisirul-quran-bn")
-                println("build: Taisirul Quran (Bengali): ${bengali.size} ayahs")
+                val bangla = readQulTranslation("translation-taisirul-quran-bn", ayahNumbers)
+                insertTranslation(connection, bangla, packId = "translation-taisirul-quran-bn")
+                println("build: Taisirul Quran (Bangla): ${bangla.size} ayahs")
             } else {
                 println("build: skipping translation-taisirul-quran-bn (source not present)")
             }

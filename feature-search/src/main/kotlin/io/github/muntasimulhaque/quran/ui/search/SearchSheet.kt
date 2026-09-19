@@ -4,6 +4,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,6 +18,8 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -38,6 +42,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -56,6 +61,7 @@ import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.SearchHit
 import io.github.muntasimulhaque.quran.data.SearchRequest
 import io.github.muntasimulhaque.quran.data.SearchResults
+import io.github.muntasimulhaque.quran.data.SearchSources
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.search.R
 import io.github.muntasimulhaque.quran.ui.rich.HighlightedText
@@ -96,17 +102,18 @@ fun SearchSheet(
     var text by remember { mutableStateOf("") }
     var results by remember { mutableStateOf(SearchResults()) }
     var searching by remember { mutableStateOf(false) }
+    var sources by remember { mutableStateOf(SearchSources.ALL) }
     val queryTerms = remember(text) { Search.parse(text)?.terms.orEmpty() }
     LaunchedEffect(sheetState.currentValue) {
         if (sheetState.currentValue == SheetValue.Expanded) focus.requestFocus()
     }
 
     /*
-     * One search per settled keystroke: a new query cancels the one before it
-     * instead of queueing behind it, so the reader always sees the results of
-     * what they last typed.
+     * One search per settled keystroke, or per changed filter: a new query
+     * cancels the one before it instead of queueing behind it, so the reader
+     * always sees the results of what they last asked for.
      */
-    LaunchedEffect(text, content) {
+    LaunchedEffect(text, content, sources) {
         val query = Search.parse(text)
         if (query == null) {
             results = SearchResults()
@@ -123,6 +130,7 @@ fun SearchSheet(
                     packNames = packNames,
                     packLanguages = packLanguages,
                     wordsPack = wordsPack,
+                    sources = sources,
                     limit = LIMIT,
                 ),
             )
@@ -148,6 +156,12 @@ fun SearchSheet(
                     if (text.isEmpty()) onDismiss() else text = ""
                 },
                 focus = focus,
+            )
+            FilterRow(
+                sources = sources,
+                hasTranslations = translationPacks.isNotEmpty(),
+                hasTafsirs = tafsirPacks.isNotEmpty(),
+                onChange = { sources = it },
             )
             StatusLine(query = Search.parse(text), results = results, searching = searching)
             LazyColumn(
@@ -178,6 +192,81 @@ private fun key(hit: SearchHit): String = when (hit) {
     is SearchHit.SurahHit -> "surah-${hit.surah.number}"
     is SearchHit.AyahHit -> "ayah-${hit.ayah.number}"
     is SearchHit.TafsirHitResult -> "tafsir-${hit.pack}-${hit.surah}-${hit.fromAyah}"
+}
+
+/**
+ * The filter row under the field: chips for the sources a query reads, each
+ * one on until the reader turns it off. It is a quiet line, not a mode: it
+ * never hides the field and never asks for a confirmation, so a reader who
+ * ignores it searches exactly as before.
+ *
+ * A source the reader does not have (a translation they have not added, a
+ * tafsir that is not installed) is not offered, rather than offered and
+ * empty.
+ */
+@Composable
+private fun FilterRow(
+    sources: SearchSources,
+    hasTranslations: Boolean,
+    hasTafsirs: Boolean,
+    onChange: (SearchSources) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(start = 22.dp, end = 22.dp, top = 4.dp, bottom = 2.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        FilterChip(stringResource(R.string.search_filter_text), sources.text) {
+            onChange(sources.copy(text = it))
+        }
+        FilterChip(stringResource(R.string.search_filter_surahs), sources.surahs) {
+            onChange(sources.copy(surahs = it))
+        }
+        FilterChip(stringResource(R.string.search_filter_references), sources.references) {
+            onChange(sources.copy(references = it))
+        }
+        if (hasTranslations) {
+            FilterChip(stringResource(R.string.search_filter_translations), sources.translations) {
+                onChange(sources.copy(translations = it))
+            }
+            FilterChip(stringResource(R.string.search_filter_words), sources.words) {
+                onChange(sources.copy(words = it))
+            }
+        }
+        if (hasTafsirs) {
+            FilterChip(stringResource(R.string.search_filter_tafsirs), sources.tafsirs) {
+                onChange(sources.copy(tafsirs = it))
+            }
+        }
+    }
+}
+
+/** One source, on or off, as a chip the reader taps. */
+@Composable
+private fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit) {
+    Text(
+        text = label,
+        style = MaterialTheme.typography.labelMedium,
+        color = if (on) {
+            MaterialTheme.colorScheme.onPrimary
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        },
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(
+                if (on) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f)
+                },
+            )
+            .toggleable(value = on, role = Role.Checkbox, onValueChange = onChange)
+            .padding(horizontal = 12.dp, vertical = 7.dp),
+    )
 }
 
 @Composable

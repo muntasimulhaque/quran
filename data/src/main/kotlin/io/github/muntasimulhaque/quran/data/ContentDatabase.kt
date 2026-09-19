@@ -471,10 +471,11 @@ class ContentDatabase private constructor(
     fun search(request: SearchRequest): SearchResults {
         val query = request.query
         val limit = request.limit
+        val sources = request.sources
         val leading = ArrayList<SearchHit>(9)
         val counts = intArrayOf(0, 0, 0, 0, 0) // arabic, translation, tafsir, words, surahs
 
-        val reference = Search.reference(query.input)
+        val reference = if (sources.references) Search.reference(query.input) else null
         if (reference != null) {
             val number = referenceAyahNumber(reference)
             if (number != null) {
@@ -482,18 +483,28 @@ class ContentDatabase private constructor(
             }
         }
 
-        leading += surahHits(query).also { counts[4] = it.size }
+        if (sources.surahs) {
+            leading += surahHits(query).also { counts[4] = it.size }
+        }
 
         // The Arabic text, matched on the normalized column.
-        val arabicNumbers = arabicMatches(query, limit).also { counts[0] = it.size }
+        val arabicNumbers = if (sources.text) {
+            arabicMatches(query, limit).also { counts[0] = it.size }
+        } else {
+            emptyList()
+        }
         val arabicWords = matchedWords(arabicNumbers, query.terms)
 
         // Word meanings, in the reader's language, a single word finding its ayahs.
-        val wordMatches = wordMeaningMatches(query, limit, request.wordsPack)
+        val wordMatches = if (sources.words) {
+            wordMeaningMatches(query, limit, request.wordsPack)
+        } else {
+            emptyMap()
+        }
         counts[3] = wordMatches.size
 
         // Translations: the enabled packs, each with exact highlight ranges.
-        val translationPacks = request.translationPacks
+        val translationPacks = if (sources.translations) request.translationPacks else emptyList()
         val translationByNumber = LinkedHashMap<Int, String>()
         if (!query.arabic && translationPacks.isNotEmpty()) {
             for (pack in translationPacks) {
@@ -533,10 +544,11 @@ class ContentDatabase private constructor(
         // index holds the enabled packs, folded, so this stays a memory scan,
         // and the passages and their ayahs are read in two batched queries.
         val tafsirHits = ArrayList<SearchHit.TafsirHitResult>()
-        synchronized(tafsirIndex) { tafsirIndex.ensure(request.tafsirPacks.toSet()) }
+        val tafsirPacks = if (sources.tafsirs) request.tafsirPacks else emptyList()
+        synchronized(tafsirIndex) { tafsirIndex.ensure(tafsirPacks.toSet()) }
         val passageAyahs = LinkedHashMap<String, Int>()
         val matchedPassages = ArrayList<Pair<String, PassageRow>>()
-        for (pack in request.tafsirPacks) {
+        for (pack in tafsirPacks) {
             if (!installedPack(pack)) continue
             val passages = tafsirMatches(pack, query, limit)
             counts[2] += passages.size

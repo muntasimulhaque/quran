@@ -213,9 +213,49 @@ fun MarkRow(
 }
 
 /**
+ * One pack in a list of choices: a mark for its state, its name, and the one
+ * action it needs. The mark and the name are one control, so a reader who
+ * taps the name of a pack they do not have yet is asking for it, with the
+ * size already on the row in front of them; a reader who taps a name they do
+ * have turns it on or off. The action at the right is the same door for a
+ * reader who looks for a button instead of a row.
+ *
+ * Radios for a reciter, checks for translations, tafsirs, and word lists:
+ * one reciter is heard at a time, while more than one reading may be on.
+ */
+@Composable
+fun PackChoiceRow(
+    pack: ContentPack,
+    subtitle: String,
+    selected: Boolean,
+    radio: Boolean,
+    setup: PackSetupState?,
+    onActivate: () -> Unit,
+    onInstall: () -> Unit,
+    onRemove: () -> Unit,
+) {
+    val busy = setup?.packId == pack.id && setup.failed.not()
+    SettingRow(
+        title = pack.name,
+        subtitle = subtitle,
+        selected = selected,
+        role = if (radio) Role.RadioButton else Role.Checkbox,
+        // A pack that is not here yet cannot be turned on: its row is the
+        // door that brings it here instead, and nothing looks selectable
+        // while it is on its way in.
+        onClick = if (pack.installed && !busy) onActivate else onInstall,
+        trailing = { PackTrailing(pack, setup, onInstall, onRemove) },
+    ) { Mark(selected = selected, radio = radio) }
+}
+
+/**
  * A row with a mark at its left, the way a list of choices is read: the mark
  * comes before the name, so the eye lands on the state first and the name
  * reads as the thing it belongs to. The whole row is one tappable control.
+ *
+ * The mark and the name keep a clear gap between them: a radio set against
+ * the word it selects reads as one crowded glyph, and the reader has to look
+ * twice to see which mark belongs to which name.
  */
 @Composable
 private fun SettingRow(
@@ -232,14 +272,14 @@ private fun SettingRow(
             .fillMaxWidth()
             .minimumInteractiveComponentSize()
             .selectable(selected = selected, role = role, onClick = onClick)
-            .padding(start = 12.dp, end = 14.dp, top = 10.dp, bottom = 10.dp),
+            .padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         mark()
         Column(
             Modifier
                 .weight(1f)
-                .padding(start = 4.dp),
+                .padding(start = 16.dp),
         ) {
             Text(
                 text = title,
@@ -251,10 +291,11 @@ private fun SettingRow(
                     text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 1.dp),
                 )
             }
         }
-        trailing()
+        Box(Modifier.padding(start = 12.dp)) { trailing() }
     }
 }
 
@@ -353,115 +394,74 @@ fun ValueRow(title: String, value: String) {
     }
 }
 
-/** One pack: what it is, what it costs, and the one action it needs. */
+/**
+ * The action one pack row carries: Add when it is not here, Retry when a
+ * download failed, its progress while it is on its way, Remove once it is. A
+ * row already in use shows nothing else, because the mark at the left already
+ * says what state it is in.
+ */
 @Composable
-fun PackRow(
+private fun PackTrailing(
     pack: ContentPack,
-    selected: Boolean,
     setup: PackSetupState?,
     onInstall: () -> Unit,
     onRemove: () -> Unit,
-    onSelect: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 22.dp, vertical = 8.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(
-                    text = pack.name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Text(
-                    text = packSubtitle(pack),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            when {
-                setup?.failed == true -> PackAction(stringResource(R.string.pack_action_retry), onInstall)
-                setup != null -> Text(
-                    text = if (setup.progress == null) {
-                        stringResource(R.string.pack_preparing)
-                    } else {
-                        stringResource(R.string.pack_downloading, (setup.progress * 100).toInt())
-                    },
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 12.dp),
-                )
-                !pack.installed -> PackAction(stringResource(R.string.pack_action_add), onInstall)
-                pack.shipped -> Text(
-                    text = stringResource(R.string.pack_included),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 12.dp),
-                )
-                else -> Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (selected) {
-                        Text(
-                            text = if (pack.type == PackType.Tafsir) {
-                                stringResource(R.string.pack_action_on)
-                            } else {
-                                stringResource(R.string.pack_action_selected)
-                            },
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(horizontal = 6.dp),
-                        )
-                    } else if (pack.type == PackType.Translation || pack.type == PackType.Tafsir) {
-                        PackAction(stringResource(R.string.pack_action_use), onSelect)
-                    }
-                    Text(
-                        text = stringResource(R.string.pack_action_remove),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .minimumInteractiveComponentSize()
-                            .clip(RoundedCornerShape(50))
-                            .clickable(onClick = onRemove)
-                            .padding(horizontal = 8.dp),
-                    )
-                }
-            }
-        }
+    when {
+        setup?.packId == pack.id && setup.failed ->
+            PackActionText(stringResource(R.string.pack_action_retry), onInstall)
+
+        setup?.packId == pack.id -> Text(
+            text = if (setup.progress == null) {
+                stringResource(R.string.settings_pack_preparing)
+            } else {
+                stringResource(R.string.settings_pack_downloading, (setup.progress * 100).toInt())
+            },
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        !pack.installed -> PackActionText(stringResource(R.string.pack_action_add), onInstall)
+
+        pack.shipped -> Text(
+            text = stringResource(R.string.pack_included),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        else -> Text(
+            text = stringResource(R.string.pack_action_remove),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .minimumInteractiveComponentSize()
+                .clip(RoundedCornerShape(50))
+                .clickable(onClick = onRemove)
+                .padding(horizontal = 10.dp),
+        )
     }
 }
 
+/**
+ * One quiet action on a pack row. The touch target is the smallest a finger
+ * needs, so a tap that lands near the word lands on it.
+ */
 @Composable
-private fun PackAction(label: String, onClick: () -> Unit) {
-    Text(
-        text = label,
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.primary,
+internal fun PackActionText(label: String, onClick: () -> Unit) {
+    Box(
         modifier = Modifier
             .minimumInteractiveComponentSize()
             .clip(RoundedCornerShape(50))
             .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp),
-    )
-}
-
-@Composable
-private fun packSubtitle(pack: ContentPack): String {
-    val type = stringResource(
-        when (pack.type) {
-            PackType.Translation -> R.string.pack_type_translation
-            PackType.Tafsir -> R.string.pack_type_tafsir
-            PackType.Words -> R.string.pack_type_words
-            PackType.Recitation -> R.string.pack_type_recitation
-            PackType.Script -> R.string.pack_type_script
-        },
-    )
-    val detail = if (pack.shipped) {
-        stringResource(R.string.pack_included_suffix)
-    } else {
-        formatBytes(pack.bytes)
+            .padding(horizontal = 10.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+        )
     }
-    return stringResource(R.string.pack_installed, type, detail)
 }
 
 /** The four grounds, as swatches: each one is the page it will paint. */
@@ -542,8 +542,7 @@ fun AppTheme.name(): String = stringResource(
  * The size of one kind of text: the row names what it sizes, the steps grow,
  * and the value on the right says exactly what it comes to. The sample is
  * drawn in the script of the text it sizes, so Arabic is judged as Arabic.
- */
-@Composable
+ */@Composable
 fun SizeRow(role: TypeRole, step: Float, onChange: (Float) -> Unit) {
     val label = stringResource(
         when (role) {

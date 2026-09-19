@@ -96,7 +96,7 @@ independent copy of the translation we ship.
 - Fonts: KFGQPC (used unmodified, with notice) and the OFL fonts with
   their license files.
 
-## Pending: the Bengali library
+## Pending: the Bangla library
 
 Three datasets are listed in `content/manifest.json` with `pending: true`,
 which means the pipeline knows they exist and prints where to get them, and
@@ -105,18 +105,18 @@ hand from QUL, because QUL downloads need an account.
 
 | Dataset | QUL page | Save as |
 |---|---|---|
-| Taisirul Quran (Professor Mozammel Haque), Bengali translation | https://qul.tarteel.ai/resources/translation/184 | `content/raw/qul/bengali-taisirul-quran.sqlite.zip` |
-| Tafsir Ibn Kathir (Bengali) | https://qul.tarteel.ai/resources/tafsir/31 | `content/raw/qul/tafsir-ibn-kathir-bengali.sqlite.zip` |
-| Bengali word by word (optional, for word meanings in Bengali) | https://qul.tarteel.ai/resources/translation/94 | `content/raw/qul/bengali-word-by-word.sqlite.zip` |
+| Taisirul Quran (Professor Mozammel Haque), Bangla translation | https://qul.tarteel.ai/resources/translation/184 | `content/raw/qul/bengali-taisirul-quran.sqlite.zip` |
+| Tafsir Ibn Kathir (Bangla) | https://qul.tarteel.ai/resources/tafsir/31 | `content/raw/qul/tafsir-ibn-kathir-bengali.sqlite.zip` |
+| Bangla word by word (optional, for word meanings in Bangla) | https://qul.tarteel.ai/resources/translation/94 | `content/raw/qul/bengali-word-by-word.sqlite.zip` |
 
 On each page choose the **SQLite database** download. Once the files are in
 place, run `./gradlew :tools:run --args="verify"` (which checks them and
 prints their pinned hashes), then `build`, `packs`, and `packs publish`.
-The app then offers them under a **Bengali** heading in Settings, on demand,
+The app then offers them under a **Bangla** heading in Settings, on demand,
 with the size shown before anything is downloaded.
 
 Note on word by word: a translation does not carry word meanings. QUL keeps
 them as their own dataset per language (English is resource 92, which the app
-already ships as the `words-en` pack; Bengali is resource 94). The app picks
+already ships as the `words-en` pack; Bangla is resource 94). The app picks
 the word list that matches the language of the chosen translation, and falls
 back to English when that language has none.

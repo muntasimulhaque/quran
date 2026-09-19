@@ -3,7 +3,7 @@
     <string name="browse_title">Browse</string>
     <string name="browse_tab_surahs">Surahs</string>
     <string name="browse_tab_juz">Juz</string>
-    <string name="browse_tab_last_read">Last read</string>
+    <string name="browse_tab_last_read">Last Read</string>
     <string name="browse_tab_saved">Saved</string>
 
     <string name="place_makkah">Makkah</string>
@@ -15,6 +15,7 @@
     <string name="last_read_empty_title">No reading places yet</string>
     <string name="last_read_empty_body">The ayahs you read are kept here, newest first, so you can come back to a place you left.</string>
     <string name="last_read_detail">Read in %1$s · %2$s</string>
+    <string name="last_read_ayah_label">Ayah %1$d</string>
     <string name="last_read_mode_mushaf">the Mushaf</string>
     <string name="last_read_mode_study">study</string>
     <string name="last_read_just_now">just now</string>

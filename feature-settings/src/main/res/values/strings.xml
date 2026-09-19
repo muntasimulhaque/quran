@@ -12,6 +12,9 @@
     <string name="settings_theme_sepia">Sepia</string>
     <string name="settings_theme_night">Night</string>
     <string name="settings_theme_black">Black</string>
+    <string name="settings_auto_night_title">Follow the system dark mode</string>
+    <string name="settings_auto_night_subtitle">Night when your phone is in dark mode, your page otherwise</string>
+    <string name="settings_summary_theme_auto">%1$s · auto</string>
 
 
 
@@ -39,14 +42,11 @@
     <string name="pack_type_script">Script</string>
     <string name="pack_included_suffix">included</string>
     <string name="pack_action_add">Add</string>
-    <string name="pack_action_use">Use</string>
     <string name="pack_action_remove">Remove</string>
     <string name="pack_action_retry">Retry</string>
-    <string name="pack_action_selected">Selected</string>
-    <string name="pack_action_on">On</string>
     <string name="pack_included">Included</string>
-    <string name="pack_preparing">Preparing…</string>
-    <string name="pack_downloading">Downloading %1$d%%</string>
+    <string name="settings_pack_preparing">Preparing…</string>
+    <string name="settings_pack_downloading">Downloading %1$d%%</string>
     <string name="pack_installed">%1$s · %2$s</string>
 
     <string name="settings_check_content">Check installed content</string>
@@ -108,6 +108,7 @@
     <string name="settings_words_off">Hidden</string>
     <string name="settings_group_theme">The page</string>
     <string name="settings_theme_note">The whole app follows this: the page, the sheets, and the bars.</string>
+    <string name="settings_theme_note_auto">The whole app follows your phone right now: the page, the sheets, and the bars. The page above is what you read by day.</string>
     <string name="settings_group_sizes">Text size</string>
     <string name="settings_size_arabic">Quran text</string>
     <string name="settings_size_translation">Translation</string>

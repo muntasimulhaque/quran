@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 0.3 (versionCode 3)
+Version: 0.4 (versionCode 4)
 
 ## Listing
 
@@ -85,10 +85,12 @@ for.
 - 7 inch tablet screenshots: `screenshots/tablet7/` (800 x 1280)
 - 10 inch tablet screenshots: `screenshots/tablet10/` (2560 x 1800)
 
-The set was refreshed in the tenth session from the `Capture store screenshots`
-workflow, for all three form factors, after the chrome, the browse sheet, the
-translations page, and the text sizes page changed. The tour now covers the
-Last read tab and the translations page.
+The set was refreshed in the twelfth session from the `Capture store
+screenshots` workflow, for all three form factors, after the turn lost its
+shadow, the study chrome learned to step aside while scrolling, the two mode
+icons were redrawn, the browse tabs were centered, Last Read gained its named
+rows, and search gained its filter row. The tour covers the Last Read tab, the
+translations page, and the word by word aid in Bangla.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
@@ -103,18 +105,22 @@ What each set shows, in order:
 2. The chrome: the mode switch, Browse, Search, and Settings
 3. The study reading with its translation
 4. The surah opening
-5. Search with the matched word marked
+5. Search with the matched word marked, and the filter row under the field
 6. The settings hub
 7. Browse, Surahs
 8. Browse, Juz
-9. Browse, Last read
+9. Browse, Last Read
 10. An ayah's actions
 11. The ayah card
 12. Credits and licenses
 13. About
 14. Browse, Saved
 15. Translations, with more than one able to be on
-16. The word by word aid in Bengali
+16. The word by word aid in Bangla
+
+## Release notes (0.4, 423 characters)
+
+Fixed a crash when adding a translation, tafsir, or word list. Tapping such a row now adds it and turns it on, and removing one downloaded surah works. The page no longer lifts with a shadow during a turn, the top bar hides while you scroll, and the Mushaf and study icons were redrawn to match. Appearance can follow your phone dark mode. Last Read, search filters, and alphabetical lists. No ads, no trackers, no account.
 
 ## Release notes (0.3, 496 characters)
 
@@ -176,7 +182,7 @@ size shown before a byte moves and a SHA-256 check before it is used:
 |---|---|---|---|
 | English | Saheeh International (2.2 MB) | Ibn Kathir (23 MB) | 4.6 MB |
 | Arabic | the Quran itself | As-Sa'di (15 MB) | |
-| Bengali | Taisirul Quran (5.1 MB) | Ibn Kathir (47 MB) | 6.5 MB |
+| Bangla | Taisirul Quran (5.1 MB) | Ibn Kathir (47 MB) | 6.5 MB |
 
 Recitations: Minshawi and Husary, one surah at a time (0.2 to 122 MB each),
 plus 1.7 MB of timing data per reciter.

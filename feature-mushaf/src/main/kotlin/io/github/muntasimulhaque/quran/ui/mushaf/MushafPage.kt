@@ -16,11 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.withTransform
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -47,6 +45,10 @@ import kotlin.math.roundToInt
  * finger however the screen is sized. The page never scales with the reader's
  * text size: its lines are justified to the page, not the screen.
  *
+ * A turn is a plain horizontal slide with no lift and no cast shadow: the
+ * page is the Book, not a sheet being picked up, and an edge lifted off the
+ * paper draws the eye away from the text it is carrying.
+ *
  * The page is a picture of text, so it also carries a reading of itself for
  * TalkBack: one invisible node per ayah, in page order, each with its
  * reference and its text.
@@ -67,8 +69,6 @@ fun MushafPage(
     onLongPressAyah: (Ayah) -> Unit,
     onBackgroundTap: () -> Unit,
     modifier: Modifier = Modifier,
-    /** How far this page is from the reader's finger, for the turn shadow. */
-    dragOffset: () -> Float = { 0f },
     /** True for the page the reader is on, whose ayah nodes are exposed. */
     active: Boolean = true,
     /** The picture of this page from the last session, until it is rendered. */
@@ -93,19 +93,7 @@ fun MushafPage(
             stringResource(R.string.mushaf_page_description_ayahs, page, it.ayahOrder.size)
         }
 
-        // The page lifts while it is being dragged, as paper would, and the
-        // shadow it casts follows the finger and settles with it. The offset
-        // is read inside the layer, so a swipe redraws and never recomposes.
-        Box(
-            Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    val lift = dragOffset().coerceIn(0f, 1f)
-                    shadowElevation = if (lift > 0f) with(density) { 14.dp.toPx() } * lift else 0f
-                    shape = RectangleShape
-                    clip = false
-                },
-        ) {
+        Box(Modifier.fillMaxSize()) {
             Canvas(
                 Modifier
                     .fillMaxSize()

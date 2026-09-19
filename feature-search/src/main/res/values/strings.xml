@@ -15,6 +15,14 @@
     <string name="search_place_makkah">Makkah</string>
     <string name="search_place_madinah">Madinah</string>
 
+    <string name="search_filter">Filter</string>
+    <string name="search_filter_text">Quran text</string>
+    <string name="search_filter_surahs">Surah names</string>
+    <string name="search_filter_references">References</string>
+    <string name="search_filter_translations">Translations</string>
+    <string name="search_filter_words">Word meanings</string>
+    <string name="search_filter_tafsirs">Tafsirs</string>
+
     <plurals name="search_matches">
         <item quantity="one">1 match</item>
         <item quantity="other">%1$d matches</item>

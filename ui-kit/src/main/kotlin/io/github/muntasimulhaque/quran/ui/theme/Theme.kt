@@ -97,9 +97,6 @@ private val BlackPage = PagePalette(
 val LocalPagePalette = staticCompositionLocalOf { PaperPage }
 val LocalPageThemeName = staticCompositionLocalOf { "paper" }
 
-/** True for the two themes that turn the page over into the dark. */
-fun AppTheme.isDark(): Boolean = this == AppTheme.Night || this == AppTheme.Black
-
 @Composable
 fun QuranTheme(theme: AppTheme = AppTheme.Paper, content: @Composable () -> Unit) {
     val colors = when (theme) {

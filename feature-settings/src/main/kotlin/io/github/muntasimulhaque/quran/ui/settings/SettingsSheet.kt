@@ -36,6 +36,7 @@ import io.github.muntasimulhaque.quran.feature.settings.R
  */
 data class SettingsActions(
     val onTheme: (AppTheme) -> Unit = {},
+    val onAutoNight: (Boolean) -> Unit = {},
     val onTypeSize: (TypeRole, Float) -> Unit = { _, _ -> },
     val onKeepAwake: (Boolean) -> Unit = {},
     val onFollowReciter: (Boolean) -> Unit = {},
@@ -133,7 +134,11 @@ fun SettingsSheet(
             } else {
                 PageHeader(title = open.title(), onBack = { page = null })
                 when (open) {
-                    SettingsPage.Appearance -> AppearancePage(settings, actions.onTheme)
+                    SettingsPage.Appearance -> AppearancePage(
+                        settings = settings,
+                        onTheme = actions.onTheme,
+                        onAutoNight = actions.onAutoNight,
+                    )
                     SettingsPage.Text -> TextPage(settings, preview) { role, step ->
                         actions.onTypeSize(role, step)
                     }
@@ -142,7 +147,6 @@ fun SettingsSheet(
                         settings = settings,
                         packs = packs,
                         packSetup = packSetup,
-                        recitations = recitations,
                         downloadedSurahs = downloadedSurahs,
                         actions = actions,
                     )

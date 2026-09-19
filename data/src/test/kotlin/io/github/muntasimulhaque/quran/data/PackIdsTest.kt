@@ -6,7 +6,7 @@ import org.junit.Test
 /**
  * The ids that name a pack are the contract between the catalog, the content
  * build, and the app. The word list is the one that has been wrong before:
- * it ignored its language, so a Bengali reader who had installed the Bengali
+ * it ignored its language, so a Bangla reader who had installed the Bangla
  * word list was shown an empty meaning panel.
  */
 class PackIdsTest {

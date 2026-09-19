@@ -7,7 +7,7 @@ package io.github.muntasimulhaque.quran.ui.kit
  */
 fun languageName(code: String): String = when (code) {
     "ar" -> "Arabic"
-    "bn" -> "Bengali"
+    "bn" -> "Bangla"
     "de" -> "German"
     "en" -> "English"
     "es" -> "Spanish"
@@ -28,3 +28,11 @@ fun languageName(code: String): String = when (code) {
     "zh" -> "Chinese"
     else -> code.uppercase()
 }
+
+/**
+ * The key languages are sorted by: the lowercased name the reader reads, so a
+ * list of languages is alphabetical in the interface's own alphabet rather
+ * than in ISO codes, which would scatter the list for no reason a reader can
+ * see.
+ */
+fun languageSortKey(code: String): String = languageName(code).lowercase()

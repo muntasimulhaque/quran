@@ -31,8 +31,11 @@ import io.github.muntasimulhaque.quran.ui.theme.LatinReading
 import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 
 /**
- * Where the reader has been reading, newest first, each row carrying its own
- * moment so a place can be recognised by when it was left.
+ * Where the reader has been reading, newest first. Each row names the place
+ * the way a reader says it: the surah's own name on the first line, the ayah
+ * under it ("Al-Fatihah" then "Ayah 1"), and the mode and the moment as the
+ * quiet third line, so a place is recognised by its name first and by when it
+ * was left second.
  */
 @Composable
 internal fun LastReadList(
@@ -52,8 +55,9 @@ internal fun LastReadList(
         items(places, key = { it.ayahNumber }) { place ->
             val text = texts[place.ayahNumber]
             AyahRow(
-                reference = text?.reference
+                surah = text?.surahName
                     ?: stringResource(R.string.saved_reference_fallback, place.ayahNumber),
+                ayah = text?.ayahLabel,
                 arabic = text?.arabic.orEmpty(),
                 translation = text?.translation,
                 detail = stringResource(
@@ -78,10 +82,12 @@ private fun readingModeName(mode: ReadingMode): String = stringResource(
 
 /** What one saved row shows, read with its neighbours. */
 internal data class AyahText(
-    val reference: String,
-    val page: Int,
     val arabic: String,
     val translation: String?,
+    /** The surah as a reader says it, the way a place is named out loud. */
+    val surahName: String? = null,
+    /** "Ayah 31": the other half of the same name. */
+    val ayahLabel: String? = null,
 )
 
 @Composable
@@ -102,7 +108,8 @@ internal fun SavedList(
         items(saved, key = { it.ayahNumber }) { row ->
             val text = texts[row.ayahNumber]
             AyahRow(
-                reference = text?.reference ?: stringResource(R.string.saved_reference_fallback, row.ayahNumber),
+                surah = text?.surahName ?: stringResource(R.string.saved_reference_fallback, row.ayahNumber),
+                ayah = text?.ayahLabel,
                 arabic = text?.arabic.orEmpty(),
                 translation = text?.translation,
                 note = row.note,
@@ -116,7 +123,8 @@ internal fun SavedList(
 /** A saved ayah or a place left behind: the same row, in two lists. */
 @Composable
 private fun AyahRow(
-    reference: String,
+    surah: String,
+    ayah: String?,
     arabic: String,
     translation: String?,
     note: String? = null,
@@ -131,12 +139,23 @@ private fun AyahRow(
             .padding(horizontal = 22.dp, vertical = 12.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = reference,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.weight(1f),
-            )
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = surah,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (!ayah.isNullOrBlank()) {
+                    Text(
+                        text = ayah,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 1.dp),
+                    )
+                }
+            }
             Text(
                 text = stringResource(R.string.action_open),
                 style = MaterialTheme.typography.labelMedium,

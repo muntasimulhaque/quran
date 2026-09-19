@@ -22,8 +22,12 @@
     <string name="action_cancel">Cancel</string>
 
 
-    <string name="pack_preparing">Preparing…</string>
-    <string name="pack_downloading">Downloading %1$d%% · %2$s</string>
+    <!-- The reader's own pack progress. The name carries the module that
+         draws it, so two modules can never both own a `pack_downloading`
+         with different format arguments and have one silently replace the
+         other at merge time. -->
+    <string name="reader_pack_preparing">Preparing…</string>
+    <string name="reader_pack_downloading">Downloading %1$d%% · %2$s</string>
     <string name="pack_download_failed">Could not download. Check your connection.</string>
 
     <string name="playback_continue_to">Continue to %1$s · %2$s</string>

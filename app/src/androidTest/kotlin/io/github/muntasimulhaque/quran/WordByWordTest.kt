@@ -59,7 +59,7 @@ class WordByWordTest {
 
     @Test
     fun wordMeaningsFollowTheTranslationLanguage() {
-        // The first Bengali meaning of Al-Fatihah 1:1, from the word list. The
+        // The first Bangla meaning of Al-Fatihah 1:1, from the word list. The
         // wait is generous on purpose: a software-rendered emulator takes its
         // time opening the content library, and a slow machine is not a
         // failing reading aid.

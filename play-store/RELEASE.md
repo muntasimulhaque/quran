@@ -11,7 +11,7 @@ the owner's first tag.
 ./gradlew :tools:run --args="verify"     # every source hash, structural checks
 ./gradlew :tools:run --args="build"      # the database and the packs
 ./gradlew :tools:run --args="checkdb"    # the committed database and the catalog
-./gradlew :tools:run --args="search"     # Arabic, Bengali, and Latin search
+./gradlew :tools:run --args="search"     # Arabic, Bangla, and Latin search
 ./gradlew :tools:run --args="packs"      # pack files and the catalog
 ./gradlew :app:lintDebug
 ```

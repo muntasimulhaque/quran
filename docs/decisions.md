@@ -1467,3 +1467,91 @@ all three store form factors. The data tests still run in `build.yml` on one
 phone profile. The tablet legs had been failing on a 25 second wait that no
 machine with a software renderer could meet; the waits are minutes now,
 because a slow emulator is not a failing reading aid.
+
+## D-053: The reader's report, the twelfth session
+
+Date: the twelfth session. The owner read 0.3 on a phone and reported twelve
+things they met, two of them crashes.
+
+**Tapping Add on a second translation crashed the app. The cause was a name.**
+`app` and `feature-settings` each declared a string called `pack_downloading`,
+and `app`'s had two format arguments (it is drawn in the reader's own download
+pill) while the feature's had one. Resource merging keeps one of a duplicate
+name, so the settings page asked a two-argument string for one argument and
+threw `MissingFormatArgumentException` inside `stringResource`, on the main
+thread, in the middle of a download. `pack_preparing` and `action_save` were
+the same collision waiting for a tap. They are renamed per module now
+(`reader_pack_downloading` and `settings_pack_downloading`, `study_note_save`),
+and `StringNameTest` in `core` walks every module's `strings.xml` and fails on
+any name two modules both hold. A test cannot see the merged table, but it can
+see the names.
+
+**The same crash hid a second one: a row that only worked if the pack was
+already installed.** Translations, tafsirs, and word lists were drawn as
+choice rows whose `onClick` was wrapped in `if (pack.installed)`, so tapping
+the radio of a pack the reader did not have did nothing at all, and the only
+live control was the Add button, which crashed. One row type now serves all
+four pack lists (`PackChoiceRow` in `SettingsRows`): radios for reciters,
+checks for the rest, and a tap on the name or the mark does the one thing the
+state allows. A pack that is not here is installed and then turned on, which
+is what the reader asked for by tapping it.
+
+**A downloaded surah's Remove now removes.** The count was read once into a
+`produceState`, and nothing re-read it when the removal finished, so the row
+stayed and the button read as broken. The list is held as state and re-read
+from the device after every removal, so the row leaves when its files do.
+
+**Automatic night mode.** Appearance gained one switch under the four pages:
+"Follow the system dark mode". It resolves to Night when the system is dark,
+and to the reader's own page in the light; a reader whose choice is itself a
+night page is shown Paper by day, because a switch that changed nothing in
+one of its two states would not be a switch. The resolution happens once in
+`QuranApp` (`AppTheme.resolved`), so the status bar, the sheets, the launch
+picture, and the page all agree; `isDark` moved to `data` beside the enum
+where the pure function can be unit tested.
+
+**The page shadow during a turn is gone.** The lift and its cast shadow made
+the reading page look like a sheet of paper being picked up, and the owner
+read it as a gimmick and asked for it out. A turn is now a plain horizontal
+slide: no elevation, no shadow, no draw-phase offset lambda, no `dragOffset`
+parameter at all.
+
+**The study chrome steps aside while scrolling.** The study list reports the
+start of a scroll to the reader screen, which puts the top bar away in the
+same frame. A tap still brings it back, and the seven-second timer still
+takes it away, so nothing else about the chrome changed.
+
+**Last Read reads like a place.** Each row is the surah's name with its
+reference, "An-Nisa 4:31", and the ayah's own long form beneath it, instead
+of a bare key. The tab says Last Read, the sheet's four tabs are centered on
+the sheet rather than hugging its left edge, and the browse title keeps its
+own line above them.
+
+**Search gained filters.** A row of chips under the field, one per source
+(Quran text, surah names, references, translations, word meanings, tafsirs),
+every one of them on until the reader turns it off. A source the reader does
+not have is not offered, and the filter state is part of the search key, so a
+filter change re-runs the query exactly like a keystroke does. `SearchRequest`
+carries a `SearchSources` now, which the database honors per source.
+
+**Lists are alphabetical.** Languages are ordered by the name the reader
+reads (`languageName`), and the packs inside a language, and the reciters,
+by name. The old order was English, then Arabic, then the rest, which is an
+implementation order, not a reader's.
+
+**Bengali is Bangla.** Wherever the app names the language, on the settings
+page, in an ayah card's tafsir door, in the credits, and in the catalog's own
+credit lines, it says Bangla. Older decision entries keep the older spelling,
+because they record what was said at the time.
+
+**The mode icons were redrawn as a pair.** The Mushaf glyph and the study
+glyph were drawn in a different hand from the rest of the set (different
+stroke weights, a lighter tone nothing else used, a different corner). They
+now share one page outline at the family's stroke weight, and differ only in
+the lines on the page: even rules for the printed page, an ayah over its
+reading for the study page.
+
+**One more spacing correction.** The mark of a choice and the name it selects
+had four dp between them, which reads as one crowded glyph; the gap is
+sixteen. Every pack row's action (Add, Remove, Retry) keeps the minimum touch
+target and a wider clear space on each side.

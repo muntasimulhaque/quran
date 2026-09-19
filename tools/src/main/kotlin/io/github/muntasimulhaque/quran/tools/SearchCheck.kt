@@ -99,7 +99,7 @@ class SearchCheck(private val root: File) {
     /**
      * A second script must round trip like the first: the longest word of a
      * sample of its ayahs, normalized the way a query is, must find its own
-     * ayah. This is what makes a Bengali (or Urdu, or Turkish) translation
+     * ayah. This is what makes a Bangla (or Urdu, or Turkish) translation
      * searchable the day it is installed.
      */
     private fun auditScriptRoundTrip(path: String, language: String) {

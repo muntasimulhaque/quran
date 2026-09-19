@@ -306,8 +306,8 @@ implement it and update this list.
   same gate also pointed at `app/src/main/res/font`, which moved to
   `content-assets/src/main/res/font`.
 - Reading text in a script no bundled face carries is a **decision**, not a
-  tofu bug: Android draws Bengali with the platform's Noto, which is why the
-  Bengali packs render. `tools fonts` now names every such script in one
+  tofu bug: Android draws Bangla with the platform's own Noto Sans Bengali,
+  which is why the Bangla packs render. `tools fonts` now names every such script in one
   allow-list; a new script fails the gate until someone writes it down.
 - `createEmptyComposeRule()` beside your own `ActivityScenario` can compose on
   a thread with no looper, and the study list's prefetch scheduler throws
@@ -363,6 +363,15 @@ implement it and update this list.
   no codepoint can reach the screen as tofu.
 - The reader never sees the raw tafsir HTML: `core/RichText.kt` parses it.
   Change the parser and the gate together.
+- Two modules that declare the same string name is a crash, not a merge: the
+  resource table keeps one of them, and `stringResource` then throws
+  `MissingFormatArgumentException` on the main thread when the arguments do
+  not match the copy that survived. `pack_downloading` was declared by the
+  app (two arguments) and by `feature-settings` (one), so tapping Add on a
+  translation crashed on the download. Names shared across modules are fine
+  only when the whole declaration is identical; `StringNameTest` in `core`
+  fails the build on any other case, and it cannot see the merged table, only
+  the names.
 - English search is diacritic-insensitive: the translation writes Allāh and
   ʿĪsā, so `core/Search.normalizeEnglish` folds every string on both sides
   and the app matches over an in-memory folded index, never over raw
@@ -495,10 +504,10 @@ fetching them again; the space is worth less than the time.
   release build carries only the core pack, and that is enforced by variant,
   not by a condition.
 
-## Where the project stands (end of the eleventh session)
+## Where the project stands (end of the twelfth session)
 
-**Submitted to Google Play for review, 0.3 (versionCode 3).** What Play has:
-147,657,235 bytes, SHA-256
+**0.3 (versionCode 3) is submitted to Google Play.** What was handed over: 147,657,235
+bytes, SHA-256
 `4b43a694ba565f776901000f7ec87b644be82e9b9153b4d023b830db189b1b27`, signed
 with the owner's upload key, carrying only the core pack. The hand-off copy was
 deleted after the submission; `play-store/aab/` keeps its own note.
@@ -515,17 +524,29 @@ and export and import are removed from the app entirely.
 The pre-flight found three faults older than the session, all fixed (D-052):
 `tools fonts` had been reading a content shape that stopped existing at the pack
 split (unnoticed because CI cannot run it), its first honest run surfaced an
-undocumented decision (Bengali is drawn by Android's own Noto, now an explicit
+undocumented decision (Bangla is drawn by Android's own Noto, now an explicit
 allow-list), and the word by word test could fail on a Compose threading race.
 The gate's numbers are current: 23,012,137 reading codepoints, 29 datasets
 verified, 0 unexplained audit differences.
 
-The suite is green locally and in CI: core tests, data unit tests, the data
+The suite is green locally: core tests, data unit tests, the data
 instrumented tests (16, including the six `LastReadStoreTest` cases), the app
 instrumented tests (11, with the screenshot tour and the word by word aid),
-lint with no issues, the six content gates, and three form factor screenshot
-sets captured by the `screenshots` workflow, whose AVDs are cached per form
-factor and whose boot wait waits for storage rather than sleeping.
+lint with no issues, and the owner machine gates (`verify`, `audit`, `fonts`,
+`checkdb`, `search`). CI runs the JVM suite and the content gates, the data
+instrumented tests on one phone profile, and the app instrumented tests on the
+three store form factors.
+
+**The twelfth session is the owner's read of 0.3 on a phone (D-053).** Twelve
+items, two of them the same crash: the turn no longer lifts the page or casts a
+shadow; the study chrome steps aside while scrolling; the two reading mode
+icons were redrawn as one pair; Appearance gained automatic night mode;
+Settings has one pack row for every list, so tapping a name or a mark installs
+or turns on what it names; a downloaded surah's Remove removes; Last Read
+reads as a surah name with its ayah under it, the Browse tabs are centered, and
+the tab says Last Read; search has a filter row of sources, all on until turned
+off; languages, pack names, and reciters are alphabetical; and the app says
+Bangla wherever it names the language.
 
 
 

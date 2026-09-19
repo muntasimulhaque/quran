@@ -86,6 +86,7 @@ fun BrowseSheet(
     }
     // Every list that needs the ayah's own text reads it in one pass: the
     // reader never sees a row that is still looking for what it says.
+    val ayahLabel = stringResource(R.string.last_read_ayah_label)
     val texts by produceState<Map<Int, AyahText>>(
         initialValue = emptyMap(),
         saved,
@@ -97,12 +98,16 @@ fun BrowseSheet(
             if (numbers.isEmpty()) return@withContext emptyMap()
             val ayahs = content.ayahsWithPages(numbers).associateBy { it.ayah.number }
             val translations = content.translations(numbers, translationPack)
+            val surahs = content.surahs().associateBy { it.number }
             numbers.associateWith { number ->
+                val ayah = ayahs[number]?.ayah
                 AyahText(
-                    reference = ayahs[number]?.ayah?.verseKey ?: "Ayah $number",
-                    page = ayahs[number]?.page ?: 1,
-                    arabic = ayahs[number]?.ayah?.text.orEmpty(),
+                    arabic = ayah?.text.orEmpty(),
                     translation = translations[number]?.text?.let { RichText.plain(it) },
+                    // The reader's own way of naming the place: the surah as
+                    // they know it, and the ayah's own number under it.
+                    surahName = ayah?.let { surahs[it.surah]?.nameSimple },
+                    ayahLabel = ayah?.let { ayahLabel.format(it.ayah) },
                 )
             }
         }
@@ -124,38 +129,47 @@ fun BrowseSheet(
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = 8.dp),
             )
+            // The tabs are centered on the sheet: a bar of four choices
+            // reads as one control, and a control that hugs the left edge
+            // reads as the start of a list.
             Row(
                 modifier = Modifier
-                    .padding(horizontal = 22.dp)
-                    .clip(RoundedCornerShape(50))
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-                    .padding(3.dp),
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                    .fillMaxWidth()
+                    .padding(horizontal = 22.dp),
+                horizontalArrangement = Arrangement.Center,
             ) {
-                BrowseTab.entries.forEach { entry ->
-                    val active = entry == tab
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .background(
-                                if (active) {
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+                        .padding(3.dp),
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    BrowseTab.entries.forEach { entry ->
+                        val active = entry == tab
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .background(
+                                    if (active) {
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                                    } else {
+                                        androidx.compose.ui.graphics.Color.Transparent
+                                    },
+                                )
+                                .clickable { tab = entry }
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                        ) {
+                            Text(
+                                text = stringResource(entry.labelRes),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = if (active) {
+                                    MaterialTheme.colorScheme.primary
                                 } else {
-                                    androidx.compose.ui.graphics.Color.Transparent
+                                    MaterialTheme.colorScheme.onSurfaceVariant
                                 },
                             )
-                            .clickable { tab = entry }
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
-                    ) {
-                        Text(
-                            text = stringResource(entry.labelRes),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = if (active) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            },
-                        )
+                        }
                     }
                 }
             }

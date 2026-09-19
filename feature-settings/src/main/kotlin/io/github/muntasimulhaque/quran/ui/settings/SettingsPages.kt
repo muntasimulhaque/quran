@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,11 +15,13 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -35,6 +38,7 @@ import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.languageName
+import io.github.muntasimulhaque.quran.ui.kit.languageSortKey
 import io.github.muntasimulhaque.quran.ui.rich.ArabicFonts
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import androidx.compose.ui.platform.LocalContext
@@ -57,6 +61,20 @@ fun SettingsPage.title(): String = stringResource(
 )
 
 /**
+ * The page a choice reads as, with the automatic switch said in the same
+ * breath, so the hub row never claims a page the reader is not on.
+ */
+@Composable
+private fun themeSummary(settings: AppSettings): String {
+    val name = settings.theme.name()
+    return if (settings.autoNight) {
+        stringResource(R.string.settings_summary_theme_auto, name)
+    } else {
+        name
+    }
+}
+
+/**
  * The hub: one row per category, each carrying where it stands, so a reader
  * can see their own setup at a glance and open only what they came to change.
  */
@@ -72,7 +90,7 @@ fun SettingsHub(
     Column(modifier.fillMaxWidth()) {
         PageRow(
             title = stringResource(R.string.settings_title_appearance),
-            summary = settings.theme.name(),
+            summary = themeSummary(settings),
         ) { onOpen(SettingsPage.Appearance) }
         PageRow(
             title = stringResource(R.string.settings_title_text),
@@ -167,14 +185,32 @@ internal fun activeWordsPack(settings: AppSettings, packs: List<ContentPack>): S
     return null
 }
 
-/** The appearance page: the four grounds, and nothing else to decide. */
+/**
+ * The appearance page: the four grounds, and the switch that lets the system
+ * choose between the day and the night halves of them.
+ */
 @Composable
-fun AppearancePage(settings: AppSettings, onTheme: (io.github.muntasimulhaque.quran.data.AppTheme) -> Unit) {
+fun AppearancePage(
+    settings: AppSettings,
+    onTheme: (io.github.muntasimulhaque.quran.data.AppTheme) -> Unit,
+    onAutoNight: (Boolean) -> Unit,
+) {
     Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_theme))
         ThemeRow(settings.theme, onTheme)
+        ToggleRow(
+            title = stringResource(R.string.settings_auto_night_title),
+            subtitle = stringResource(R.string.settings_auto_night_subtitle),
+            checked = settings.autoNight,
+        ) { onAutoNight(it) }
         Text(
-            text = stringResource(R.string.settings_theme_note),
+            text = stringResource(
+                if (settings.autoNight) {
+                    R.string.settings_theme_note_auto
+                } else {
+                    R.string.settings_theme_note
+                },
+            ),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = 10.dp),
@@ -270,62 +306,32 @@ fun RecitersPage(
     settings: AppSettings,
     packs: List<ContentPack>,
     packSetup: PackSetupState?,
-    recitations: List<Recitation>,
     downloadedSurahs: suspend (String) -> List<DownloadedSurah>,
     actions: SettingsActions,
 ) {
     Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_reciters))
-        packs.filter { it.type == PackType.Recitation }.forEach { pack ->
-            val id = pack.id.removePrefix(ContentDatabase.RECITER_PREFIX)
-            val selected = pack.id == ContentDatabase.reciterPack(settings.recitation)
-            ChoiceRow(
-                title = recitations.firstOrNull { it.id == id }?.name ?: pack.name,
-                subtitle = reciterSubtitle(pack),
-                selected = selected,
-                onClick = { actions.onSelectRecitation(id) },
-                trailing = {
-                    when {
-                        packSetup?.packId == pack.id && packSetup.failed ->
-                            PackActionText(stringResource(R.string.pack_action_retry)) {
-                                actions.onInstallPack(pack.id)
-                            }
-                        packSetup?.packId == pack.id -> Text(
-                            text = stringResource(
-                                R.string.pack_downloading,
-                                ((packSetup.progress ?: 0f) * 100).toInt(),
-                            ),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        !pack.installed -> PackActionText(stringResource(R.string.pack_action_add)) {
-                            actions.onInstallPack(pack.id)
-                        }
-                        else -> PackActionText(stringResource(R.string.pack_action_remove)) {
-                            actions.onRemovePack(pack.id)
-                        }
-                    }
-                },
-            )
-            if (pack.installed) {
-                ReciterDownloads(id, downloadedSurahs, actions)
+        packs.filter { it.type == PackType.Recitation }
+            .sortedBy { it.name.lowercase() }
+            .forEach { pack ->
+                val id = pack.id.removePrefix(ContentDatabase.RECITER_PREFIX)
+                val selected = pack.id == ContentDatabase.reciterPack(settings.recitation)
+                PackChoiceRow(
+                    pack = pack,
+                    subtitle = reciterSubtitle(pack),
+                    selected = selected,
+                    radio = true,
+                    setup = packSetup?.takeIf { it.packId == pack.id },
+                    onActivate = { actions.onSelectRecitation(id) },
+                    onInstall = { actions.onInstallPack(pack.id) },
+                    onRemove = { actions.onRemovePack(pack.id) },
+                )
+                if (pack.installed) {
+                    ReciterDownloads(id, downloadedSurahs, actions)
+                }
             }
-        }
         Spacer(Modifier.height(12.dp))
     }
-}
-
-@Composable
-private fun PackActionText(label: String, onClick: () -> Unit) {
-    Text(
-        text = label,
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier
-            .padding(horizontal = 3.dp)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 9.dp),
-    )
 }
 
 @Composable
@@ -335,7 +341,12 @@ private fun reciterSubtitle(pack: ContentPack): String = when {
     else -> stringResource(R.string.settings_reciter_size, formatBytes(pack.bytes))
 }
 
-/** The downloaded surahs of one reciter, with what each one weighs. */
+/**
+ * The downloaded surahs of one reciter, with what each one weighs. A surah
+ * removed disappears from the list in the same frame, because the list the
+ * reader sees is the list the removal changed: a row that stayed after its
+ * Remove was tapped would read as a button that did nothing.
+ */
 @Composable
 private fun ReciterDownloads(
     recitation: String,
@@ -344,14 +355,16 @@ private fun ReciterDownloads(
 ) {
     val scope = rememberCoroutineScope()
     var open by remember(recitation) { mutableStateOf(false) }
-    val downloaded by produceState(initialValue = emptyList<DownloadedSurah>(), recitation) {
-        value = downloadedSurahs(recitation).sortedBy { it.surah }
+    var downloaded by remember(recitation) { mutableStateOf<List<DownloadedSurah>?>(null) }
+    LaunchedEffect(recitation) {
+        downloaded = downloadedSurahs(recitation).sortedBy { it.surah }
     }
+    val rows = downloaded ?: return
     Text(
         text = if (open) {
             stringResource(R.string.settings_downloaded_hide)
         } else {
-            stringResource(R.string.settings_downloaded_show, downloaded.size)
+            stringResource(R.string.settings_downloaded_show, rows.size)
         },
         style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.primary,
@@ -361,7 +374,7 @@ private fun ReciterDownloads(
             .padding(vertical = 6.dp),
     )
     if (!open) return
-    if (downloaded.isEmpty()) {
+    if (rows.isEmpty()) {
         Text(
             text = stringResource(R.string.settings_downloaded_empty),
             style = MaterialTheme.typography.bodySmall,
@@ -370,12 +383,12 @@ private fun ReciterDownloads(
         )
         return
     }
-    downloaded.forEach { row ->
-        androidx.compose.foundation.layout.Row(
+    rows.forEach { row ->
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 22.dp, end = 16.dp, top = 3.dp, bottom = 3.dp),
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                .padding(start = 22.dp, end = 12.dp, top = 2.dp, bottom = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = row.name,
@@ -389,7 +402,12 @@ private fun ReciterDownloads(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             PackActionText(stringResource(R.string.pack_action_remove)) {
-                scope.launch { actions.onRemoveDownloads(recitation, row.surah) }
+                scope.launch {
+                    actions.onRemoveDownloads(recitation, row.surah)
+                    // Whatever the removal did, the list is read from the
+                    // device again: the row goes when its files are gone.
+                    downloaded = downloadedSurahs(recitation).sortedBy { it.surah }
+                }
             }
         }
     }
@@ -417,12 +435,15 @@ fun TranslationsPage(
             modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = 6.dp),
         )
         LanguageGroups(packs, PackType.Translation) { pack ->
-            MarkRow(
-                title = pack.name,
+            PackChoiceRow(
+                pack = pack,
                 subtitle = translationSubtitle(pack),
                 selected = pack.installed && pack.id in settings.translationPacks,
-                onClick = { if (pack.installed) actions.onToggleTranslation(pack.id) },
-                trailing = { PackTrailing(pack, packSetup, actions) },
+                radio = false,
+                setup = packSetup?.takeIf { it.packId == pack.id },
+                onActivate = { actions.onToggleTranslation(pack.id) },
+                onInstall = { actions.onInstallPack(pack.id) },
+                onRemove = { actions.onRemovePack(pack.id) },
             )
         }
         Spacer(Modifier.height(12.dp))
@@ -446,11 +467,15 @@ fun TafsirsPage(
             modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = 6.dp),
         )
         LanguageGroups(packs, PackType.Tafsir) { pack ->
-            MarkRow(
-                title = pack.name,
+            PackChoiceRow(
+                pack = pack,
                 subtitle = translationSubtitle(pack),
                 selected = pack.installed && pack.id in settings.tafsirPacks,
-                onClick = { if (pack.installed) actions.onToggleTafsir(pack.id) },                trailing = { PackTrailing(pack, packSetup, actions) },
+                radio = false,
+                setup = packSetup?.takeIf { it.packId == pack.id },
+                onActivate = { actions.onToggleTafsir(pack.id) },
+                onInstall = { actions.onInstallPack(pack.id) },
+                onRemove = { actions.onRemovePack(pack.id) },
             )
         }
         Spacer(Modifier.height(12.dp))
@@ -480,39 +505,21 @@ fun WordsPage(
         )
         val active = activeWordsPack(settings, packs)
         LanguageGroups(packs, PackType.Words) { pack ->
-            PackRow(
+            PackChoiceRow(
                 pack = pack,
+                subtitle = translationSubtitle(pack),
                 selected = pack.id == active && settings.wordByWord,
+                radio = false,
                 setup = packSetup?.takeIf { it.packId == pack.id },
+                // Turning the switch on is part of choosing a word list: a
+                // reader who taps one wants to see meanings, not a pack with
+                // nothing to show.
+                onActivate = { actions.onWordByWord(true) },
                 onInstall = { actions.onInstallPack(pack.id) },
                 onRemove = { actions.onRemovePack(pack.id) },
-                onSelect = { actions.onWordByWord(true) },
             )
         }
         Spacer(Modifier.height(12.dp))
-    }
-}
-
-@Composable
-private fun PackTrailing(
-    pack: ContentPack,
-    setup: PackSetupState?,
-    actions: SettingsActions,
-) {
-    when {
-        setup?.packId == pack.id && setup.failed ->
-            PackActionText(stringResource(R.string.pack_action_retry)) { actions.onInstallPack(pack.id) }
-        setup?.packId == pack.id -> Text(
-            text = stringResource(R.string.pack_downloading, ((setup.progress ?: 0f) * 100).toInt()),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        !pack.installed -> PackActionText(stringResource(R.string.pack_action_add)) {
-            actions.onInstallPack(pack.id)
-        }
-        else -> PackActionText(stringResource(R.string.pack_action_remove)) {
-            actions.onRemovePack(pack.id)
-        }
     }
 }
 
@@ -526,7 +533,11 @@ private fun translationSubtitle(pack: ContentPack): String {
     return stringResource(R.string.pack_installed, languageName(pack.language), detail)
 }
 
-/** The packs of one kind, grouped by the language they speak. */
+/**
+ * The packs of one kind, grouped by the language they speak and alphabetical
+ * inside each group. A list of choices is read, not searched: the reader
+ * looks for a name, so names are in one order everywhere in the app.
+ */
 @Composable
 private fun LanguageGroups(
     packs: List<ContentPack>,
@@ -545,7 +556,7 @@ private fun LanguageGroups(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = 12.dp, bottom = 2.dp),
             )
-            group.forEach { pack -> row(pack) }
+            group.sortedBy { it.name.lowercase() }.forEach { pack -> row(pack) }
         }
 }
 
@@ -592,11 +603,9 @@ fun AboutPage(
 }
 
 /**
- * The order languages appear in: the interface's own language first, then the
- * language of the Quran's revelation, then the rest by name.
+ * The order languages appear in: by the name the reader reads, so the list is
+ * alphabetical (Arabic, Bangla, English) and a reader looking for one knows
+ * where to look. The order is the display name, never the ISO code, because
+ * the code would sort English after Arabic for the wrong reason.
  */
-internal fun languageOrder(language: String): String = when (language) {
-    "en" -> "0"
-    "ar" -> "1"
-    else -> "2" + languageName(language)
-}
+internal fun languageOrder(language: String): String = languageSortKey(language)

@@ -22,6 +22,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -127,43 +128,41 @@ fun IconGlyph(
                 drawLine(tint, Offset(w * 0.26f, h * 0.26f), Offset(w * 0.74f, h * 0.74f), w * 0.09f)
                 drawLine(tint, Offset(w * 0.74f, h * 0.26f), Offset(w * 0.26f, h * 0.74f), w * 0.09f)
             }
-            // The printed page: a leaf of paper with the Mushaf's own ruled
-            // lines on it, drawn a little wider than tall, as a page is.
+            // The two reading modes are one pair, so they are drawn as one
+            // pair: the same page in the same hand, and only the lines on it
+            // differ. The Mushaf is the printed page, its rules running the
+            // full width of the text block; the study page is an ayah with
+            // its reading set in under it, so every second rule is short.
+            // Both use the width and the corner the other glyphs use, and
+            // neither leans on a lighter tone that nothing else in the set
+            // carries.
             Icon.MushafPage -> {
-                drawRoundRect(
-                    color = tint,
-                    topLeft = Offset(w * 0.2f, h * 0.13f),
-                    size = Size(w * 0.6f, h * 0.74f),
-                    cornerRadius = CornerRadius(w * 0.07f),
-                    style = Stroke(w * 0.075f),
-                )
-                for (index in 0 until 5) {
-                    val y = h * (0.29f + index * 0.13f)
+                pageOutline(tint)
+                for (index in 0 until 4) {
+                    val y = h * (0.33f + index * 0.155f)
                     drawLine(
                         color = tint,
-                        start = Offset(w * 0.31f, y),
-                        end = Offset(w * (if (index == 4) 0.51f else 0.69f), y),
-                        strokeWidth = w * 0.055f,
+                        start = Offset(w * 0.29f, y),
+                        end = Offset(w * 0.71f, y),
+                        strokeWidth = w * 0.075f,
                     )
                 }
             }
-            // The study page: every ayah with its reading set underneath it,
-            // which is exactly what the ayah view shows.
             Icon.StudyPage -> {
-                for (index in 0 until 3) {
-                    val top = h * (0.14f + index * 0.29f)
-                    drawRoundRect(
+                pageOutline(tint)
+                for (index in 0 until 2) {
+                    val top = h * (0.32f + index * 0.3f)
+                    drawLine(
                         color = tint,
-                        topLeft = Offset(w * 0.16f, top),
-                        size = Size(w * 0.68f, h * 0.2f),
-                        cornerRadius = CornerRadius(w * 0.05f),
-                        style = Stroke(w * 0.065f),
+                        start = Offset(w * 0.29f, top),
+                        end = Offset(w * 0.71f, top),
+                        strokeWidth = w * 0.075f,
                     )
                     drawLine(
-                        color = tint.copy(alpha = 0.55f),
-                        start = Offset(w * 0.28f, top + h * 0.11f),
-                        end = Offset(w * 0.72f, top + h * 0.11f),
-                        strokeWidth = w * 0.05f,
+                        color = tint,
+                        start = Offset(w * 0.29f, top + h * 0.13f),
+                        end = Offset(w * 0.61f, top + h * 0.13f),
+                        strokeWidth = w * 0.075f,
                     )
                 }
             }
@@ -188,6 +187,18 @@ fun IconGlyph(
             }
         }
     }
+}
+
+private fun DrawScope.pageOutline(tint: Color) {
+    val w = size.width
+    val h = size.height
+    drawRoundRect(
+        color = tint,
+        topLeft = Offset(w * 0.18f, h * 0.12f),
+        size = Size(w * 0.64f, h * 0.76f),
+        cornerRadius = CornerRadius(w * 0.08f),
+        style = Stroke(width = w * 0.085f),
+    )
 }
 
 private fun playPath(w: Float, h: Float, offset: Offset = Offset.Zero, flip: Boolean = false): Path =

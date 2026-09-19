@@ -210,7 +210,14 @@ class ScreenshotTest {
             rule.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty()
         }
         rule.onNode(hasSetTextAction()).performTextInput("mercy")
-        Thread.sleep(1_400)
+        // The first search over a forty megabyte tafsir is the slowest thing
+        // the tour does; the frame is kept once a match is on the screen, not
+        // on a sleep that lands in the middle of the query.
+        rule.waitUntil(timeoutMillis = 30_000) {
+            rule.onAllNodesWithText("matches", substring = true).fetchSemanticsNodes().isNotEmpty() ||
+                rule.onAllNodesWithText("match", substring = true).fetchSemanticsNodes().isNotEmpty()
+        }
+        Thread.sleep(600)
         capture("05-search")
         back()
 
@@ -241,7 +248,7 @@ class ScreenshotTest {
         rule.onNodeWithText("Juz").performClick()
         Thread.sleep(800)
         capture("08-browse-juz")
-        rule.onNodeWithText("Last read").performClick()
+        rule.onNodeWithText("Last Read").performClick()
         Thread.sleep(900)
         capture("09-browse-last-read")
         rule.onAllNodesWithText("Saved").onFirst().performClick()
