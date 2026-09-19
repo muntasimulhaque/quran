@@ -14,8 +14,9 @@ plugins {
 // the release build degrades to unsigned instead of failing.
 //
 // A build can also point at a keystore properties file of its own with
-// `-Pquran.keystore=<file>`; the release workflow uses that to sign from
-// repository secrets that exist only inside the runner.
+// `-Pquran.keystore=<file>`. CI uses that to sign from repository secrets
+// that exist only inside the runner, and the owner's machine uses the vault
+// probe below when the folder is mounted.
 val keystoreLayouts = listOf(
     "BSCPLC/DM (Development)/Personal Docs/Pers/My Apps/Google Play Signing Key/keystore.properties",
     "BSCPLC/DM (Development)/Personal Docs/Pers/Google Play Signing Key/keystore.properties",

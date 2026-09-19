@@ -1555,3 +1555,65 @@ reading for the study page.
 had four dp between them, which reads as one crowded glyph; the gap is
 sixteen. Every pack row's action (Add, Remove, Retry) keeps the minimum touch
 target and a wider clear space on each side.
+
+## D-054: CI signs the bundle, and the artifact stays private
+
+Date: the twelfth session, on the release run.
+
+The family's other five apps sign in CI and post the bundle to a
+`latest-build` Release. This app did not: `build.yml` had no signing step,
+and `release.yml` expected four secrets under different names
+(`UPLOAD_KEYSTORE_BASE64` and friends) that were never created, so a `v*` tag
+would have built quietly and published an unsigned bundle. The owner chose to
+bring this app into the family shape, with one difference: the artifact stays
+private.
+
+**What was built.** A `signed-bundle` job in `build.yml`, running only on a
+push to `main` (never on a pull request, so a fork can never reach the key).
+It takes the four secrets, runs the core tests and the two content gates a
+runner can run, builds `:app:bundleRelease`, and uploads the bundle and its
+`SHA-256` to the run's own artifacts, which only someone signed in to this
+repository can download and which GitHub deletes after two weeks. The four
+secret names are the family's: `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`,
+`KEY_ALIAS`, `KEY_PASSWORD`.
+
+**Why private, and why it matters more here.** A GitHub Release asset is
+public: an unauthenticated request to the family's `latest-build` assets
+follows a redirect and downloads the signed bundle, while the same request to
+an Actions artifact is refused with 401. For a game, a downloadable build is
+harmless. For this app the bundle carries the upload signature and the whole
+content library, and a signed copy sitting publicly where a stale one could be
+picked up by mistake is a risk with no upside. The private artifact costs one
+command (`gh run download <run> -n quran-signed-aab -D play-store/aab`) and
+expires on its own.
+
+**The trap this closes.** `jarsigner -verify` exits 0 on a file that is not
+signed at all and reports it only in its words (`jar is unsigned`), so a
+script that reads the exit code would happily hand over an unsigned bundle.
+The job reads the words and fails when `jar verified` is absent, and prints
+the signing certificate's SHA-256
+(`537d09d20300129e973b7945316bfe24cfadcfbc77eec5229cbf30170d9de521`, the shared
+upload key per D-017) so the log shows which key signed the run. The
+`build.gradle.kts` probe is unchanged: on the owner's machine an absent
+keystore still degrades to an unsigned build rather than failing, because a
+fresh clone must build, and the signature is proved afterwards either way.
+
+**The tag workflow is gone.** `release.yml` was a second signing path that
+could not sign: it read four secret names (`UPLOAD_KEYSTORE_BASE64` and
+friends) that never existed and were not the family's names, so a `v*` tag
+would have built quietly and attached an unsigned bundle to a draft release.
+The owner chose to delete it rather than repair it, which leaves one signing
+path: the `signed-bundle` job in `build.yml`. Tags are labels on commits now,
+and no sibling app has a tag-triggered workflow either.
+
+**Public repos and secrets.** The owner asked whether adding secrets to a
+public repository exposes them. It does not: a GitHub Actions secret is
+write-only, the API returns names and never values (this repo reported
+`total_count: 0` before), and all five sibling repositories are public and
+have held these same four secrets since they were created. The ways a secret
+does leak are a workflow that prints it, a pull request workflow that runs
+fork code with it, a compromised action, and a committed key file; the job
+avoids all four. The owner then set the four secrets from the vault, and the
+key was confirmed as the family's shared upload key before anything was
+written to GitHub: alias `my-key-alias`, certificate SHA-256
+`537d09d20300129e973b7945316bfe24cfadcfbc77eec5229cbf30170d9de521`.

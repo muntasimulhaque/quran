@@ -81,7 +81,7 @@ for.
 
 - App icon: `icon-512.png`
 - Feature graphic: `feature-graphic-1024x500.png`
-- Phone screenshots: `screenshots/phone/` (1080 x 1920), sixteen of them
+- Phone screenshots: `screenshots/phone/` (1080 x 1920), eight of them (the set is sixteen today; the next session trims it to eight, AGENTS.md queue item 9)
 - 7 inch tablet screenshots: `screenshots/tablet7/` (800 x 1280)
 - 10 inch tablet screenshots: `screenshots/tablet10/` (2560 x 1800)
 
@@ -141,21 +141,30 @@ request. No ads, no trackers, no account.
 
 1. Raise `versionCode` by 1 and `versionName` by 0.1 in
    `app/build.gradle.kts` and update the version line at the top of this
-   file. The release workflow refuses a tag that does not name the version
-   the app carries, so this step comes first.
+   file, in the same commit that ends the session.
 2. Run the owner-machine gates: `./gradlew :tools:run --args="verify"`,
-   `audit`, `fonts`, and the instrumented tests on an emulator.
-3. Tag it, and let the workflow do the rest:
-   `git tag v<version> && git push origin v<version>`. The `release`
-   workflow runs the tests and the content gates, builds the signed bundle
-   from repository secrets, verifies the signature, and drafts a GitHub
-   release with the bundle and its SHA-256 attached.
-4. Download the draft's bundle, upload it to the internal track, check the
-   size report, then promote. Delete the draft's assets once Play has it.
+   `audit`, `fonts`, `checkdb`, `search`, and the instrumented tests on an
+   emulator.
+3. Commit and push. The `build` workflow's `signed-bundle` job signs on every
+   push to `main`, checks the content, and leaves the bundle in the run's own
+   artifacts. Pull it down into `play-store/aab/`:
 
-Signing is optional in the workflow: without the four repository secrets
-(`UPLOAD_KEYSTORE_BASE64`, `UPLOAD_KEYSTORE_PASSWORD`, `UPLOAD_KEY_ALIAS`,
-`UPLOAD_KEY_PASSWORD`) it still builds, and says the bundle is unsigned.
+   ```bash
+   gh run list --workflow=build --limit 1
+   gh run download <run-id> -n quran-signed-aab -D play-store/aab
+   ```
+
+   The artifact is private and expires after two weeks, so nothing signed is
+   ever public and nothing signed lingers.
+4. Upload the bundle to the internal track, check the size report, then
+   promote. Delete the copy from `play-store/aab/` once Play has it, so a
+   stale bundle can never be uploaded twice.
+
+The four secrets signing needs (`KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`,
+`KEY_ALIAS`, `KEY_PASSWORD`) are described in `RELEASE.md` step 3c, with
+where each value comes from in the vault. The workflow refuses to publish an
+unsigned bundle: if the secrets are missing it fails instead of handing over
+something Play would reject.
 
 ## Assets in this folder
 

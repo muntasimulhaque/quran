@@ -6,6 +6,19 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Read-only for the whole workflow. The signing job needs nothing beyond a
+# read of the repository to build, and the one artifact it produces is
+# uploaded to the run itself, so no job here writes to the repository.
+permissions:
+  contents: read
+
+# Two pushes to main in the same minute should not race two signing runs
+# against each other; the newer run waits its turn rather than cancelling a
+# run that may be halfway through an upload.
+concurrency:
+  group: build-main
+  cancel-in-progress: false
+
 jobs:
   gates:
     name: Gates and debug build
@@ -124,3 +137,122 @@ jobs:
           script: |
             for i in $(seq 1 60); do adb -s emulator-5554 shell ls /sdcard/Android >/dev/null 2>&1 && break; sleep 2; done
             ./gradlew :data:connectedDebugAndroidTest --console=plain
+
+  # The signed bundle, built here once and handed over to Play from the run's
+  # own artifacts. It runs only on a push to main, never on a pull request:
+  # a pull request from a fork must never be able to reach the upload key,
+  # and the four secrets below are not offered to it by GitHub anyway, so
+  # signing there could only ever produce a confused failure.
+  #
+  # The artifact is private and short lived: only someone signed in to this
+  # repository can download it, and GitHub deletes it on its own after two
+  # weeks. Ask for it where the runbook says to:
+  #
+  #   gh run download <run> -n quran-signed-aab -D play-store/aab
+  #
+  # A bundle that is never handed over expires by itself, so no signed build
+  # can sit around waiting to be uploaded by mistake.
+  signed-bundle:
+    name: Signed bundle
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      # Pinned by commit, not by tag: this job holds the upload key, and a
+      # moved tag on any action here would be a way to reach it.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+        with:
+          packages: platform-tools
+      - name: Accept SDK licenses
+        run: yes | sdkmanager --licenses > /dev/null 2>&1 || true
+
+      - name: Cache content work
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            content/work
+            content/quran.db
+          key: content-work-${{ hashFiles('content/manifest.json', 'content/build-report.json') }}
+
+      # The bundle is only as good as the content inside it, so the two gates
+      # a runner can run come first, exactly as they do in the gates job.
+      - name: Core tests
+        run: ./gradlew :core:test --console=plain
+
+      - name: Fetch content
+        run: ./gradlew :tools:run --args="fetch" --console=plain
+
+      - name: Database check
+        run: ./gradlew :tools:run --args="checkdb" --console=plain
+
+      - name: Search check
+        run: ./gradlew :tools:run --args="search" --console=plain
+
+      # A missing secret is a failure, never a quiet unsigned build: the
+      # artifact this job exists to produce is a signed one, and "it built"
+      # must not be mistaken for "it is signed".
+      #
+      # The values arrive through the environment and are written out as data.
+      # A password pasted into the script text would be a shell word, and one
+      # with a quote or a dollar sign in it would break the command or worse.
+      - name: Decode the upload keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::KEYSTORE_BASE64 is not set, so this build could not be signed."
+            echo "::error::Add the four secrets named in play-store/RELEASE.md, then re-run this workflow."
+            exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/signing"
+          printf '%s' "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/signing/upload.jks"
+          {
+            echo "storeFile=$RUNNER_TEMP/signing/upload.jks"
+            echo "storePassword=$STORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > "$RUNNER_TEMP/signing/keystore.properties"
+
+      - name: Build the signed bundle
+        run: ./gradlew :app:bundleRelease -Pquran.keystore="$RUNNER_TEMP/signing/keystore.properties" --console=plain
+
+      # `jarsigner -verify` exits 0 on an unsigned file and only says so in
+      # its words, so the words are what is read. The fingerprint is printed
+      # so the upload key that signed this run is visible in the log.
+      - name: Prove the signature
+        run: |
+          bundle=app/build/outputs/bundle/release/app-release.aab
+          report="$(jarsigner -verify "$bundle" 2>&1)"
+          printf '%s\n' "$report"
+          if ! printf '%s' "$report" | grep -q "jar verified"; then
+            echo "::error::The bundle is not signed; refusing to hand over an unsigned artifact."
+            exit 1
+          fi
+          keytool -printcert -jarfile "$bundle" | grep -A2 "SHA256:"
+
+      - name: Write the checksum
+        run: |
+          bundle=app/build/outputs/bundle/release/app-release.aab
+          version=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
+          code=$(grep -oP 'versionCode = \K[0-9]+' app/build.gradle.kts)
+          sha256sum "$bundle" | sed "s| .*|  quran-$version-vc$code.aab|" | tee "$RUNNER_TEMP/quran.aab.sha256"
+
+      - name: Upload the signed bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: quran-signed-aab
+          path: |
+            app/build/outputs/bundle/release/app-release.aab
+            ${{ runner.temp }}/quran.aab.sha256
+          retention-days: 14

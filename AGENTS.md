@@ -126,7 +126,10 @@ module build files, never here):
 CI runs the JVM suite and the content gates in `build.yml`, the data
 instrumented tests there too on one phone profile, and the app instrumented
 tests, including the screenshot tour, in `screenshots.yml` on all three store
-form factors. The emulator is cold and software rendered, so the screenshot
+form factors. **The store set is eight frames per form factor** (phone,
+7 inch, 10 inch), never more: the tour and the numbered list in
+`play-store/listing.md` are the same eight, and a change to one is a change
+to the other. The emulator is cold and software rendered, so the screenshot
 workflow caches the AVD per form factor and waits for the emulated storage
 to mount before it starts the test; a fixed sleep is not the answer (the
 tablet legs were failing on waits that were tight for the slowest profile).
@@ -189,20 +192,51 @@ does not tell you, and each one costs a failed command to rediscover:
 2. Release notes go to `play-store/listing.md` as plain flowing text,
    one unbroken line per bullet, under 500 characters.
 3. Run the full CI suite locally.
-4. Commit, push, confirm CI is green.
-5. Build the signed AAB, verify it with `jarsigner -verify`, copy it to
-   `play-store/aab/quran-<version>-vc<code>.aab`, and hand it over in chat with
-   the notes pasted verbatim. Delete the copy once the owner confirms the
-   Play submission. Hand the notes over as a bare paragraph: no blockquote, no
-   fence, no wrapping quotes, nothing on the same line as the text.
-6. Screenshots: refresh the CI set whenever visible UI changed, and say
-   explicitly when nothing changed and why. Never capture a listing set
-   by hand.
+4. Commit, push, confirm CI is green. The `signed-bundle` job in `build.yml`
+   signs on every push to `main` and leaves the bundle in the run's artifacts.
+5. Pull the signed bundle from that run into `play-store/aab/`:
 
-Signing is probed from the shared upload keystore in the owner's vault
-(decisions D-017); an absent keystore produces an unsigned release build,
-never a failed one. The keystore and its properties never enter the
-repository, and CI reads them from secrets.
+   ```bash
+   gh run download <run-id> -n quran-signed-aab -D play-store/aab
+   ```
+
+   The artifact carries the bundle and its `SHA-256`, and GitHub deletes it
+after two weeks, so a signed build is never sitting in public and never
+sitting around. Hand the bundle over in chat with the size, the checksum, and
+the notes pasted verbatim, and delete the copy once the owner confirms the
+Play submission. Hand the notes over as a bare paragraph: no blockquote, no
+fence, no wrapping quotes, nothing on the same line as the text.
+6. Screenshots: **eight per form factor**, so the store set is phone,
+   7 inch, and 10 inch at eight frames each, twenty-four images in all. The
+   tour (`ScreenshotTest`) and the numbered list in `play-store/listing.md`
+   are kept in step with that count, so no frame is captured that the listing
+   does not explain, and none is listed that is not captured. Refresh the CI
+   set whenever visible UI changed, and say explicitly when nothing changed
+   and why. Never capture a listing set by hand: the frames come from the
+   `screenshots` workflow's artifacts.
+
+   The set is the reader's surface, in order: the Mushaf page, the chrome
+   over it, the study reading, the surah opening, search, the settings hub,
+   Browse, and the ayah card. Eight is the number the store shows first and
+   the number a session can keep honest; a ninth has to earn its place
+   against the reading, and the tour is trimmed rather than allowed to grow
+   back.
+
+**Signing, and the trap in it.** The `signed-bundle` job fails when the four
+secrets are absent rather than producing an unsigned artifact, because "it
+built" must not be mistaken for "it is signed". `jarsigner -verify` exits 0
+on an unsigned file and says so only in its words, so the job reads the words
+and prints the signing certificate's SHA-256
+(`537d09d20300129e973b7945316bfe24cfadcfbc77eec5229cbf30170d9de521`, the
+shared upload key per D-017). Signing runs only on a push to `main`, never on
+a pull request, and that job's actions are pinned by commit rather than tag.
+The keystore and its properties never enter the repository. The owner's
+machine can still build from the vault, where Gradle probes each drive and
+layout the folder has worn; an absent keystore there degrades to unsigned,
+never to a failed build.
+
+The four secrets, and where their values come from, are in
+`play-store/RELEASE.md` step 3c.
 
 **A release is not only a version bump.** The version line, the notes, and
 the screenshots must match what is being shipped, and the notes of the
@@ -246,7 +280,7 @@ Where truth lives, by question (filled in as code lands):
 | `content/` | `quran.db` (the built, committed content database), `recitation-manifest.json` (published recitation packages with their sizes and hashes), `manifest.json`, `audit-report.md`, `build-report.json`; raw downloads under `raw/` are local and gitignored |
 | `docs/` | `decisions.md`, `content-sources.md`, privacy page, bundled font licenses |
 | `play-store/` | listing kit, screenshots per form factor, hand-off AAB |
-| `.github/workflows/` | `build.yml`, `screenshots.yml`, `release.yml` |
+| `.github/workflows/` | `build.yml`, `screenshots.yml` |
 
 ## Glossary
 
@@ -448,7 +482,7 @@ fetching them again; the space is worth less than the time.
 
 | Removed | Bring it back with |
 |---|---|
-| `play-store/aab/*.aab` (the hand-off copy) | `./gradlew :app:bundleRelease`, or a `v0.3` tag |
+| `play-store/aab/*.aab` (the hand-off copy) | the `signed-bundle` artifact from the newest `build` run |
 | every `build/` directory | any `./gradlew` build |
 | `content/work/verify` (extracted sources, 288 MB) | `./gradlew :tools:run --args="verify"` |
 | `content/work/fonts-v2`, `qpc-v2-font` (the font packs) | `./gradlew :tools:run --args="fetch"` |
@@ -491,6 +525,17 @@ fetching them again; the space is worth less than the time.
    surface; a short screen recording of a page turn, a mode switch, and the
    ayah card would catch the motion a still cannot, and the pipeline already
    has an emulator to do it on.
+9. **Trim the screenshot tour to eight frames per form factor.** The owner set
+   the number in the twelfth session and said it applies from the next session
+   on, so this session's set is left as it is. The tour captures sixteen today
+   (`01-mushaf` through `15-translations`, plus the word by word aid); the
+   store shows eight. Keeping the eight that carry the reader's surface
+   (the Mushaf page, the chrome, the study reading, the surah opening, search,
+   the settings hub, Browse, the ayah card) means dropping the frames that are
+   one surface's detail rather than a surface: the juz and saved tabs, Last
+   Read, credits, About, the ayah actions, and the translations page. Decide
+   each against the store listing's numbered list, update both together, and
+   re-run `screenshots.yml` for all three form factors.
 
 ## Traps worth remembering
 
