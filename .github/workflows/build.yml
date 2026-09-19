@@ -3,6 +3,37 @@ name: build
 on:
   push:
     branches: [main]
+    # Only rebuild when something that affects the app actually changes, so
+    # doc-only commits (README, AGENTS.md, play-store notes) do not burn an
+    # emulator boot, a signed release build, and the content gates. The same
+    # list covers every module, the build files, and the content the build
+    # reads; a path outside it cannot change the app.
+    #
+    # A version bump lives in app/build.gradle.kts and a catalog change lives
+    # in content/, so both still trigger this, which is what the release
+    # hand-off needs: the bundle is built by the commit that raises the
+    # version, and a later docs-only commit does not build a second one.
+    paths:
+      - "app/**"
+      - "core/**"
+      - "data/**"
+      - "tools/**"
+      - "ui-kit/**"
+      - "content-assets/**"
+      - "feature-*/**"
+      # The catalog, the manifest, the build report, and the recitation
+      # manifest: the content the gates read and the assets the build copies.
+      - "content/*.json"
+      - "*.gradle.kts"
+      - "gradle.properties"
+      - "gradle/**"
+      - ".github/workflows/build.yml"
+  # A pull request runs the whole thing on purpose, with no path filter: a
+  # pull request exists to be verified before it lands, and a filter here
+  # would let a docs-only pull request report nothing at all. There is no
+  # branch protection on this repository, so nothing is waiting on a check
+  # that a filtered pull request would never produce; keep this unfiltered
+  # and leave the saving to pushes.
   pull_request:
   workflow_dispatch:
 

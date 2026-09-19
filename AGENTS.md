@@ -126,7 +126,12 @@ module build files, never here):
 CI runs the JVM suite and the content gates in `build.yml`, the data
 instrumented tests there too on one phone profile, and the app instrumented
 tests, including the screenshot tour, in `screenshots.yml` on all three store
-form factors. **The store set is eight frames per form factor** (phone,
+form factors. `build.yml` filters pushes by path, as the family's other apps
+do, so a doc-only commit (README, AGENTS.md, the play-store notes) triggers
+nothing: an emulator boot, a signed release build, and the content gates are
+too much to spend on a paragraph. A pull request is unfiltered on purpose,
+because a pull request exists to be verified before it lands. **The store set
+is eight frames per form factor** (phone,
 7 inch, 10 inch), never more: the tour and the numbered list in
 `play-store/listing.md` are the same eight, and a change to one is a change
 to the other. The emulator is cold and software rendered, so the screenshot

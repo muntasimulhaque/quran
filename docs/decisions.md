@@ -1719,3 +1719,21 @@ the screenshots and step 7 is the bundle and the set together, with step 6 in
 between only because both downloads come from the same pipeline. The rule is
 also in the traps, where a session looks when it is about to do the work, and
 in `play-store/RELEASE.md` above the upload step.
+
+**A doc-only commit no longer builds anything.** The owner caught this after
+the session's close: `build.yml` had no `paths:` filter, so committing four
+docs files ran an emulator boot for the data instrumented tests, a full R8
+release build, and a signed bundle nobody needed. Every one of the family's
+other five apps filters pushes by path with the comment "so doc-only commits
+(README, AGENTS.md) don't burn a build"; this one simply never had. It does
+now, covering every module, the build files, and the content the build reads
+(`content/*.json`, which is what the gates and the asset copy use). A pull
+request stays unfiltered on purpose: a pull request exists to be verified
+before it lands, and there is no branch protection here, so a filter would
+only let one report nothing.
+
+The version bump and the catalog sit inside the filtered paths on purpose:
+the commit that raises the version is the commit that builds the bundle, and
+a later docs-only commit does not build a second one. Checked against the
+last twelve commits: the four docs-only ones now skip, and every code commit
+still builds.
