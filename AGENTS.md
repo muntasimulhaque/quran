@@ -158,6 +158,24 @@ at every step:
 - Toolchain: JDK 17, current AGP, Kotlin, Gradle, compile and target SDK
   and minSdk as in the build files. The Gradle wrapper is committed.
 
+## Build, test, verify
+
+**Session setup on this machine.** These are environment facts the harness
+does not tell you, and each one costs a failed command to rediscover:
+
+- Gradle needs `JAVA_HOME`, and the shell has no JDK on `PATH`. Prefix every
+  invocation with `export JAVA_HOME="/c/Program Files/Android/Android Studio/jbr"`.
+- `adb` is `C:/Users/user/android-sdk/platform-tools/adb.exe` and the
+  emulator is `C:/Users/user/android-sdk/emulator/emulator.exe` with the AVD
+  `Pixel_4`; neither is on `PATH`. Start it headless with `-no-window -gpu
+  swiftshader_indirect` and wait for `sys.boot_completed` to report `1`.
+- MSYS rewrites `/sdcard/...` style arguments into Windows paths. Prefix
+  `adb shell` and `adb pull` with `MSYS_NO_PATHCONV=1`, and the same for
+  `gh api` (and drop its leading slash).
+- There is no usable `python`/`python3` (the Store alias intercepts them).
+  `node -e` is the scriptable text tool on this machine; use it for small
+  file edits instead of writing a script file.
+
 ## Release hand-off
 
 1. Raise `versionCode` by 1 and `versionName` by 0.1 in the app build
@@ -178,6 +196,19 @@ Signing is probed from the shared upload keystore in the owner's vault
 (decisions D-017); an absent keystore produces an unsigned release build,
 never a failed one. The keystore and its properties never enter the
 repository, and CI reads them from secrets.
+
+**A release is not only a version bump.** The version line, the notes, and
+the screenshots must match what is being shipped, and the notes of the
+release before it are kept under their own heading (`## Release notes (0.2)`)
+rather than replaced. Refresh the committed screenshot set from the CI
+artifacts, never by hand, and use `gh run download <run> -n
+store-screenshots-<form> -D <dir>`.
+
+The content gates that only the owner machine can run (`verify`, `audit`,
+`fonts`) are part of the release, not decoration: a release is the moment to
+run all of them, because a broken one will not fail in CI and will not be
+noticed until it is needed. If one fails, fix it and note the failure here
+before moving on.
 
 ## Content rules
 
@@ -256,13 +287,43 @@ implement it and update this list.
 
 ## Traps with no code home
 
+- A gate that reads the content by table names is reading a **contract**, not
+  a schema: the pack split moved translations, tafsirs, word lists, and surah
+  names into their own `content/packs/*.db` files, and `tools fonts` silently
+  kept asking the old monolith for a `translation` table, a `tafsir_passage`
+  with a `source` column, and a `word.translation`. It had been broken since
+  that split and nothing noticed because it is an owner-machine gate, not a
+  CI gate. When you change the content build's shape, run every
+  `:tools:run --args=...` gate, not just the ones CI runs.
+- A script that has been true for a year is not evidence it still runs. The
+  same gate also pointed at `app/src/main/res/font`, which moved to
+  `content-assets/src/main/res/font`.
+- Reading text in a script no bundled face carries is a **decision**, not a
+  tofu bug: Android draws Bengali with the platform's Noto, which is why the
+  Bengali packs render. `tools fonts` now names every such script in one
+  allow-list; a new script fails the gate until someone writes it down.
+- `createEmptyComposeRule()` beside your own `ActivityScenario` can compose on
+  a thread with no looper, and the study list's prefetch scheduler throws
+  `The current thread must have a looper` on a loaded emulator. The supported
+  pairing is a compose rule that owns the activity; put library preparation in
+  an `ExternalResource` and chain it with `RuleChain.outerRule(...).around(...)`
+  so the app starts after the packs are in place.
 - The launch picture (`feature-mushaf/PageCache`, `cacheDir/last-page`) is
   keyed by page, pixel width, and theme name. A launch at another width or in
   another theme must miss it, not stretch it. Nothing depends on it: a miss is
   the old first paint.
 - A screen capture on a software rendered emulator can lag the composition by
   seconds. The screenshot tour waits for two identical frames before it keeps
-  one; never replace that with a fixed sleep.
+  one; never replace that with a fixed sleep. A test that waits for text does
+  the same: a slow emulator is not a failing reading aid, so the waits are
+  minutes, not seconds.
+- A DataStore is a flow, and re-applying every emission over the in-memory
+  state lets an old stored value overwrite a choice the reader just made. Read
+  it once (while the library opens) and let the view model own the state from
+  then on; that is what stopped the reading place from jumping back.
+- A list that keeps drawing the previous item's data while the next loads will
+  write the previous item's position. Hold the loaded key beside the data and
+  draw nothing until they match.
 - The pack catalog's license line is the licenses of the datasets that pack is
   built from, joined with ` · `, and the app splits on that separator to show
   one per line. `tools/PackSources.kt` is the only mapping from pack to
@@ -275,6 +336,12 @@ implement it and update this list.
 - Emulator screenshots and local captures prove nothing about Arabic
   shaping. Shaping and glyph fidelity are verified from CI artifacts and
   golden renders.
+- An emulator workflow is not a test: it is a machine. Cache the AVD per form
+  factor, wait for `/sdcard/Android` to exist before starting the test (a cold
+  boot reports completion before its storage is mounted, and the test's output
+  directory breaks if it starts first), and keep the app's instrumented tests
+  in that workflow only. Running them in `build.yml` as well pays twice for
+  the same answer and is what pushed the slow tablet leg past its timeout.
 - The QUL recitation export's `ayah_number` is a global 1..6236 counter;
   the real surah and ayah are the three-digit groups in the audio file
   name. Use the file name, and let verify check the counter.
