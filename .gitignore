@@ -33,5 +33,9 @@ content/quran.db
 # Pack files are content-addressed Release assets, not repository files.
 content/packs/
 
-# The hand-off bundles: large binaries that live here only until Play has them.
+# The hand-off bundle, its checksum, and the README that explains the
+# folder: the bundle is a large binary that lives here only until Play has
+# it, and the checksum names it rather than recording anything permanent.
 play-store/aab/*.aab
+play-store/aab/*.sha256
+!play-store/aab/README.md
