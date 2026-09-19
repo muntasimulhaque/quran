@@ -1,7 +1,10 @@
 package io.github.muntasimulhaque.quran.ui.study
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,12 +29,10 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,12 +59,12 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.muntasimulhaque.quran.core.AyahList
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.Footnote
 import io.github.muntasimulhaque.quran.data.Surah
-import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.StudyRow
@@ -89,9 +90,8 @@ import kotlinx.coroutines.withContext
 fun StudyList(
     content: ContentDatabase,
     surah: Surah,
-    ayahs: List<Int>,
+    loadRows: suspend () -> List<StudyRow>,
     settings: AppSettings,
-    loadRow: suspend (Int) -> StudyRow?,
     hasTranslation: Boolean,
     nextSurahName: String?,
     selected: Ayah?,
@@ -111,36 +111,109 @@ fun StudyList(
     val hafs = remember {
         FontFamily(Font(path = "fonts/UthmanicHafs_V22.ttf", assetManager = context.assets))
     }
-    val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = ayahs.indexOf(settings.ayah).coerceAtLeast(0),
-    )
+    // The whole surah arrives at once, so every item has its text before the
+    // list is measured: the reader's place lands exactly, and nothing grows or
+    // shifts under them while they read.
+    val rows by produceState(
+        initialValue = emptyList<StudyRow>(),
+        surah.number,
+        settings.translationPack,
+        settings.wordByWord,
+    ) { value = loadRows() }
+    val ayahs = remember(rows) { rows.map { it.ayah.number } }
     var footnote by remember { mutableStateOf<OpenFootnote?>(null) }
+    if (ayahs.isEmpty()) {
+        // The paper is already there; the text is a frame away.
+        Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
+        return
+    }
+    StudyRows(
+        content = content,
+        surah = surah,
+        rows = rows,
+        ayahs = ayahs,
+        settings = settings,
+        hasTranslation = hasTranslation,
+        nextSurahName = nextSurahName,
+        selected = selected,
+        playingAyah = playingAyah,
+        playingWord = playingWord,
+        hafs = hafs,
+        pageDescription = pageDescription,
+        onAyah = onAyah,
+        onBackgroundTap = onBackgroundTap,
+        onNextSurah = onNextSurah,
+        onAddContent = onAddContent,
+        onPlaceChanged = onPlaceChanged,
+        contentPaddingTop = contentPaddingTop,
+        contentPaddingBottom = contentPaddingBottom,
+        footnote = footnote,
+        onFootnote = { footnote = it },
+        modifier = modifier,
+    )
+}
 
-    // The reader's place is written down when the scroll rests.
+/** The surah's rows, drawn and driven once the text is on hand. */
+@Composable
+private fun StudyRows(
+    content: ContentDatabase,
+    surah: Surah,
+    rows: List<StudyRow>,
+    ayahs: List<Int>,
+    settings: AppSettings,
+    hasTranslation: Boolean,
+    nextSurahName: String?,
+    selected: Ayah?,
+    playingAyah: Int?,
+    playingWord: Int?,
+    hafs: FontFamily,
+    pageDescription: String,
+    onAyah: (Ayah) -> Unit,
+    onBackgroundTap: () -> Unit,
+    onNextSurah: (Int) -> Unit,
+    onAddContent: () -> Unit,
+    onPlaceChanged: (Int) -> Unit,
+    contentPaddingTop: Dp,
+    contentPaddingBottom: Dp,
+    footnote: OpenFootnote?,
+    onFootnote: (OpenFootnote?) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = AyahList.indexOf(ayahs, settings.ayah),
+    )
+
+    // The reader's place is written down when the scroll rests, and only when
+    // the reader moved the list. A jump into the surah, a mode switch, and the
+    // first frame of either are not places of their own: writing them would
+    // drag the reader's place to whatever the list happened to open on.
+    var dragged by remember(surah.number) { mutableStateOf(false) }
+    LaunchedEffect(listState, surah.number) {
+        listState.interactionSource.interactions.collect { interaction ->
+            if (interaction is DragInteraction.Start) dragged = true
+        }
+    }
     LaunchedEffect(listState, surah.number) {
         snapshotFlow { listState.isScrollInProgress to listState.firstVisibleItemIndex }
             .collect { (scrolling, index) ->
-                if (!scrolling) {
-                    ayahs.getOrNull(index)?.let(onPlaceChanged)
-                }
+                if (scrolling || !dragged) return@collect
+                AyahList.ayahAt(ayahs, index)?.let(onPlaceChanged)
             }
     }
 
-    // A jump moves the list; the list never moves itself.
+    // The reader's place moves the list, exactly, and the list never moves
+    // itself. The place is an ayah, so a round trip through the list has to
+    // land on the same item; anything less leaves the place behind.
     LaunchedEffect(settings.ayah, surah.number, ayahs) {
-        val target = ayahs.indexOf(settings.ayah)
-        if (target >= 0) {
-            val current = listState.firstVisibleItemIndex
-            if (target < current || target > current + 2) listState.scrollToItem(target)
-        }
+        val target = AyahList.indexOf(ayahs, settings.ayah)
+        if (target != listState.firstVisibleItemIndex) listState.scrollToItem(target)
     }
 
     // The playing ayah comes back into view when the reciter moves on.
     LaunchedEffect(playingAyah, ayahs) {
         val ayahNumber = playingAyah ?: return@LaunchedEffect
         if (!settings.followReciter) return@LaunchedEffect
-        val target = ayahs.indexOf(ayahNumber)
-        if (target < 0) return@LaunchedEffect
+        val target = AyahList.indexOf(ayahs, ayahNumber)
         val current = listState.firstVisibleItemIndex
         if (target < current || target > current + 3) listState.animateScrollToItem(target)
     }
@@ -175,31 +248,28 @@ fun StudyList(
                 )
             }
         }
-        items(ayahs.size, key = { "ayah-${ayahs[it]}" }) { index ->
-            val number = ayahs[index]
-            val row by produceState<StudyRow?>(initialValue = null, number, settings.translationPack) {
-                value = withContext(Dispatchers.IO) { loadRow(number) }
-            }
-            row?.let {
-                AyahBlock(
-                    row = it,
-                    hafs = hafs,
-                    textSize = settings.textSize,
-                    showFootnotes = settings.showFootnotes,
-                    wordByWord = settings.wordByWord,
-                    isSelected = selected?.number == number,
-                    playingAyah = playingAyah,
-                    playingWord = playingWord,
-                    onAyah = onAyah,
-                    onBackgroundTap = onBackgroundTap,
-                    onFootnote = { number ->
-                        val note = it.translation?.footnotes?.firstOrNull { footnote -> footnote.number == number }
-                        if (note != null) {
-                            footnote = OpenFootnote(note, "${it.ayah.surah}:${it.ayah.ayah}")
-                        }
-                    },
-                )
-            }
+        items(rows.size, key = { "ayah-${rows[it].ayah.number}" }) { index ->
+            val row = rows[index]
+            AyahBlock(
+                row = row,
+                hafs = hafs,
+                settings = settings,
+                showFootnotes = settings.showFootnotes,
+                wordByWord = settings.wordByWord,
+                isSelected = selected?.number == row.ayah.number,
+                playingAyah = playingAyah,
+                playingWord = playingWord,
+                onAyah = onAyah,
+                onBackgroundTap = onBackgroundTap,
+                onFootnote = { number ->
+                    val note = row.translation?.footnotes?.firstOrNull { it.number == number }
+                    if (note != null) {
+                        onFootnote(
+                            OpenFootnote(note, "${row.ayah.surah}:${row.ayah.ayah}"),
+                        )
+                    }
+                },
+            )
         }
         item(key = "end-${surah.number}") {
             SurahEnd(
@@ -216,7 +286,7 @@ fun StudyList(
             footnote = open.note,
             surahName = surah.nameSimple,
             reference = open.reference,
-            onDismiss = { footnote = null },
+            onDismiss = { onFootnote(null) },
         )
     }
 }
@@ -434,7 +504,7 @@ private fun SurahEnd(
 private fun AyahBlock(
     row: StudyRow,
     hafs: FontFamily,
-    textSize: TextSize,
+    settings: AppSettings,
     showFootnotes: Boolean,
     wordByWord: Boolean,
     isSelected: Boolean,
@@ -477,21 +547,23 @@ private fun AyahBlock(
                 text = arabic(row, playing, playingWord, hafs, palette.highlight),
                 style = TextStyle(
                     fontFamily = hafs,
-                    fontSize = textSize.arabicSp.sp,
-                    lineHeight = textSize.arabicLineSp.sp,
+                    fontSize = settings.arabicSp.sp,
+                    lineHeight = settings.arabicLineSp.sp,
                     color = MaterialTheme.colorScheme.onBackground,
                 ),
                 textAlign = TextAlign.Right,
                 modifier = Modifier.fillMaxWidth(),
             )
             if (wordByWord && row.meanings.any { it.meaning != null }) {
-                WordByWord(row.meanings, hafs, textSize)
+                WordByWord(row.meanings, hafs, settings)
             }
             row.translation?.let { translation ->
                 TranslationBody(
                     runs = remember(translation.text) { RichText.footnotes(translation.text) },
                     modifier = Modifier.padding(top = 12.dp),
-                    textSize = textSize,
+                    sizeSp = settings.translationSp,
+                    lineSp = settings.translationLineSp,
+                    arabicSp = settings.arabicSp * 0.8f,
                     onFootnote = onFootnote,
                 )
                 if (showFootnotes) {
@@ -554,7 +626,7 @@ private const val BASMALLAH = "\u0628\u0650\u0633\u0652\u0645\u0650 \u0671\u0644
  * and it is off until they ask for it.
  */
 @Composable
-private fun WordByWord(meanings: List<WordMeaning>, hafs: FontFamily, textSize: TextSize) {
+private fun WordByWord(meanings: List<WordMeaning>, hafs: FontFamily, settings: AppSettings) {
     // Arabic reads right to left, so the words wrap that way too.
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
     androidx.compose.foundation.layout.FlowRow(
@@ -570,8 +642,8 @@ private fun WordByWord(meanings: List<WordMeaning>, hafs: FontFamily, textSize: 
                     text = meaning.word,
                     style = TextStyle(
                         fontFamily = hafs,
-                        fontSize = (textSize.arabicSp - 4).sp,
-                        lineHeight = (textSize.arabicLineSp - 12).sp,
+                        fontSize = settings.wordsSp.sp,
+                        lineHeight = (settings.wordsSp * 1.8f).sp,
                         color = MaterialTheme.colorScheme.onBackground,
                     ),
                 )

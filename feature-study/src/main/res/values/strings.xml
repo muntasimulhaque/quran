@@ -15,7 +15,6 @@
 
     <string name="card_cd_saved">Saved</string>
     <string name="card_cd_save">Save this ayah</string>
-    <string name="card_cd_copy">Copy the ayah</string>
     <string name="card_cd_share">Share the ayah</string>
     <string name="card_no_translation">This ayah has no text in the chosen translation.</string>
     <string name="card_add_translation">Add a translation to read this ayah in your language</string>

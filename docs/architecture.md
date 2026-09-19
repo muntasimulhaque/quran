@@ -43,13 +43,13 @@ other.
 1. **Plain data in, callbacks out.** A feature composable takes values and
    lambdas. It never takes a view model, never touches a database, and never
    looks up state for itself. `SettingsSheet` receives `AppSettings`, the
-   pack list, and a `SettingsActions` record of thirteen lambdas; `StudyList`
-   receives the surah, its ayah numbers, the settings, and a `loadRow`
-   function. That is why a feature can be read top to bottom, tested, and
-   previewed with made-up data.
+   pack list, and a `SettingsActions` record of callbacks; `StudyList`
+   receives the surah, its settings, and a `loadRows` function that answers
+   with a whole surah. That is why a feature can be read top to bottom,
+   tested, and previewed with made-up data.
 2. **One file, one job.** No file in a feature passes a few hundred lines
-   without being asked why. The settings sheet was split into a frame, its
-   rows, and the about and credits sheet; the reader screen keeps the shell
+   without being asked why. The settings feature is a hub, its pages,
+   its rows, and the credits sheet; the reader screen keeps the shell
    and hands the pager to a function of its own. `ContentDatabase` is the one
    honest exception, because every query in the app lives in one auditable
    place, and splitting it by table would scatter the transaction rules.

@@ -1,5 +1,7 @@
 package io.github.muntasimulhaque.quran.ui.study
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,11 +27,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,11 +46,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.RichText
+import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.TafsirPassage
-import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TranslationText
 import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.feature.study.R
@@ -91,7 +91,7 @@ fun AyahCard(
     surahName: String,
     translationPack: ContentPack?,
     tafsirPacks: List<ContentPack>,
-    textSize: TextSize,
+    settings: AppSettings,
     wordLanguage: String,
     hasWords: Boolean,
     isSaved: Boolean,
@@ -100,7 +100,6 @@ fun AyahCard(
     onSaveNote: (String?) -> Unit,
     onPlay: () -> Unit,
     onAddContent: () -> Unit,
-    onCopy: (String) -> Unit,
     onShare: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -202,11 +201,6 @@ fun AyahCard(
                     active = isSaved,
                 )
                 IconButton(
-                    icon = Icon.Copy,
-                    description = stringResource(R.string.card_cd_copy),
-                    onClick = { onCopy(shareText) },
-                )
-                IconButton(
                     icon = Icon.Share,
                     description = stringResource(R.string.card_cd_share),
                     onClick = { onShare(shareText) },
@@ -217,8 +211,8 @@ fun AyahCard(
                 text = ayah.text,
                 style = TextStyle(
                     fontFamily = hafs,
-                    fontSize = (textSize.arabicSp + 2).sp,
-                    lineHeight = (textSize.arabicLineSp + 8).sp,
+                    fontSize = (settings.arabicSp + 2).sp,
+                    lineHeight = (settings.arabicLineSp + 8).sp,
                     color = MaterialTheme.colorScheme.onSurface,
                 ),
                 textAlign = TextAlign.Right,
@@ -231,7 +225,9 @@ fun AyahCard(
                 TranslationBody(
                     runs = remember(body.text) { RichText.footnotes(body.text) },
                     modifier = Modifier.padding(horizontal = 22.dp),
-                    textSize = textSize,
+                    sizeSp = settings.translationSp,
+                    lineSp = settings.translationLineSp,
+                    arabicSp = settings.arabicSp * 0.8f,
                 )
             } ?: when {
                 translationPack == null -> AddTranslation(
@@ -258,7 +254,7 @@ fun AyahCard(
                     onClick = { door = if (door == Door.Words) null else Door.Words },
                 )
                 if (door == Door.Words) {
-                    WordsPanel(words, hafs, textSize, Modifier.padding(horizontal = 22.dp, vertical = 6.dp))
+                    WordsPanel(words, hafs, settings, Modifier.padding(horizontal = 22.dp, vertical = 6.dp))
                 }
             } else {
                 DoorRow(
@@ -286,7 +282,7 @@ fun AyahCard(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         } else {
-                            TafsirPanel(view, arabic = pack.language == "ar")
+                            TafsirPanel(view, arabic = pack.language == "ar", settings = settings)
                         }
                     }
                 }
@@ -419,16 +415,24 @@ private fun DoorRow(
 }
 
 @Composable
-private fun TafsirPanel(view: TafsirView, arabic: Boolean) {
+private fun TafsirPanel(view: TafsirView, arabic: Boolean, settings: AppSettings) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 4.dp),
     ) {
         if (arabic) {
-            ArabicBody(remember(view.passage.text) { RichText.quotes(view.passage.text) })
+            ArabicBody(
+                runs = remember(view.passage.text) { RichText.quotes(view.passage.text) },
+                sizeSp = settings.tafsirSp,
+            )
         } else {
-            RichBlocks(remember(view.passage.text) { RichText.parseHtml(view.passage.text) })
+            RichBlocks(
+                blocks = remember(view.passage.text) { RichText.parseHtml(view.passage.text) },
+                sizeSp = settings.tafsirSp,
+                lineSp = settings.tafsirLineSp,
+                arabicSp = settings.tafsirSp,
+            )
         }
         Text(
             text = view.range,
@@ -443,7 +447,7 @@ private fun TafsirPanel(view: TafsirView, arabic: Boolean) {
 private fun WordsPanel(
     words: List<WordMeaning>,
     hafs: FontFamily,
-    textSize: TextSize,
+    settings: AppSettings,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier.fillMaxWidth()) {
@@ -467,8 +471,8 @@ private fun WordsPanel(
                     text = word.word,
                     style = TextStyle(
                         fontFamily = hafs,
-                        fontSize = (textSize.arabicSp - 2).sp,
-                        lineHeight = (textSize.arabicLineSp - 6).sp,
+                        fontSize = settings.wordsSp.sp,
+                        lineHeight = (settings.wordsSp * 1.8f).sp,
                         color = MaterialTheme.colorScheme.onSurface,
                     ),
                     textAlign = TextAlign.Right,

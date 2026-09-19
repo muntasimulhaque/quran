@@ -130,22 +130,32 @@ Searched, in one pass:
 
 ## 7. Settings
 
-One sheet, grouped, nothing hidden:
+A hub, not a scroll: nine rows, each carrying where it stands right now, each
+opening a page of its own. Back steps out of a page before it closes the
+sheet, and the hub keeps its place while a page is open (D-046).
 
-* **Appearance**: Paper, Sepia, Night, Black, shown as swatches that also
-  preview the screen dim; text size for study mode; the reading page follows
-  the theme too.
-* **Reading**: follow the reciter, keep the screen awake, show word meanings,
-  and a switch that shows footnotes under each ayah instead of behind their
-  markers.
-* **Recitation**: the reciter, and the downloaded surahs, with sizes.
-* **Content**: enabled translation and tafsir packs, each with its own
-  toggle, the size before a byte moves, and a self check that reads every
-  installed pack back and names anything damaged.
-* **Your saved ayahs**: export the reader's saved ayahs and notes to a file,
-  and import one back on another phone.
-* **About**: version, "no ads, no trackers", privacy policy, source code,
-  corrections and rights, and the full credits and licenses.
+* **Appearance**: Paper, Sepia, Night, Black, as swatches that are the page
+  each one paints. The theme is the whole app: the page, the sheets, the bars.
+* **Text**: the Quran text, the translation, the tafsir, and the word by word
+  aid, each with its own five steps, above a sample drawn from the reader's
+  own ayah so a change is judged on the page it is about to change.
+* **Reading**: keep the screen awake, follow the reciter, and show footnotes
+  under each ayah instead of behind their markers.
+* **Reciters**: one reciter is the reader's, a mark says which, each reciter
+  carries its own downloaded surahs with their sizes, and adding a reciter
+  selects it.
+* **Translations**: one is read at a time, grouped by the language it speaks,
+  with the size before a byte moves.
+* **Tafsirs**: as many as the reader wants, grouped by language, each opening
+  from its own door under the ayah.
+* **Word by word**: the switch, and the lists by language. The meaning under
+  an Arabic word is only useful in the language the reader is reading in, so
+  the list follows the chosen translation rather than asking (D-046).
+* **Your saved ayahs**: how many are saved, export to a file, import on
+  another phone.
+* **About**: the version, the credits and licenses, the corrections and
+  rights contact, and a self check that reads every installed pack back and
+  names anything damaged.
 
 ## 8. Typography
 
@@ -160,9 +170,12 @@ One sheet, grouped, nothing hidden:
 Rules:
 
 * Arabic is right aligned and never letter-spaced or scaled horizontally.
-* The study text size follows the reader's setting; the Mushaf page never
-  scales, because its lines are justified to the page, not to the screen.
-* Line height is generous: 1.6x for Arabic, 1.55x for Latin reading text.
+* The study text sizes follow the reader's own four settings; the Mushaf page
+  never scales, because its lines are justified to the page and the page is
+  the printed page, not a reflowed screen.
+* A paragraph takes the line height of the script actually in it: 1.9x for a
+  line that carries Arabic, 1.6x for Latin alone, never the Arabic's room
+  where there is no Arabic (D-049).
 * No more than three sizes of type on one surface: a label, a reading size,
   and a display size.
 * Numbers in references are Latin (2:255) so they can be searched and read

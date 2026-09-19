@@ -100,15 +100,9 @@ footnotes, word by word, Ibn Kathir and As-Sa'di, search, bookmarks and
 notes, and recitations by Minshawi and Husary downloaded per surah on
 request. No ads, no trackers, no account.
 
-## Release notes (ready for the next release, 455 characters)
+## Release notes (ready for the next release, 499 characters)
 
-Faster, quieter, truer. The app now opens on the page you left, painted
-before anything else loads. The Mushaf page reads aloud to a screen reader,
-ayah by ayah. Your saved ayahs and notes export to a file and import back on
-another phone. Settings can read your installed content back and tell you if
-a pack no longer matches what was published. Footnotes, dim, and the four
-themes are unchanged and better behaved. Every control is a real touch
-target.
+Opens on the exact ayah you left, in both reading modes, and paints that page before anything else loads. Settings is a hub: its own page for text sizes, reciters, translations, and tafsirs, each sized as you like. Listening asks once, names the reciter and the size, and lets you swap reciter in the offer. The modes are two drawn icons, and footnotes no longer collide at large sizes. Saved ayahs export and import, and Settings can check every pack on the device. No ads, no trackers, no account.
 
 ## Before each release
 

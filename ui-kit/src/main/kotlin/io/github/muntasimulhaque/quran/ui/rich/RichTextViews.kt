@@ -24,6 +24,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.BaselineShift
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.text.withLink
@@ -35,7 +36,6 @@ import io.github.muntasimulhaque.quran.core.TextBlock
 import io.github.muntasimulhaque.quran.core.TextBlockKind
 import io.github.muntasimulhaque.quran.core.TextRun
 import io.github.muntasimulhaque.quran.data.Footnote
-import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.Inter
 import io.github.muntasimulhaque.quran.ui.theme.LatinReading
@@ -44,24 +44,44 @@ import io.github.muntasimulhaque.quran.ui.theme.LatinReading
  * Draws parsed runs with the manuscript's two voices: Literata for Latin and
  * Amiri Quran for Arabic, footnote markers as quiet superscripts, and no
  * styling ever inside a word.
+ *
+ * A paragraph can carry Arabic at a much larger size than its Latin text, and
+ * a superscript marker that sits above the line. The line height is therefore
+ * taken from the tallest thing on the line, never from the Latin size alone:
+ * otherwise the Arabic and the markers collide with the lines around them as
+ * soon as the reader turns the text up.
  */
 @Composable
 fun TranslationBody(
     runs: List<TextRun>,
     modifier: Modifier = Modifier,
-    textSize: TextSize? = null,
+    sizeSp: Float? = null,
+    lineSp: Float? = null,
+    arabicSp: Float = sizeSp ?: 18f,
     onFootnote: ((Int) -> Unit)? = null,
 ) {
-    val base = if (textSize == null) {
-        LatinReading
+    val latin = sizeSp ?: LatinReading.fontSize.value
+    // Only a paragraph that actually carries Arabic needs the taller line;
+    // giving every Latin paragraph the Arabic's room leaves a translation
+    // floating in white space.
+    val line = if (runs.any { it.arabic }) {
+        maxOf(lineSp ?: latin * 1.6f, arabicSp * 1.9f)
     } else {
-        LatinReading.copy(fontSize = textSize.latinSp.sp, lineHeight = textSize.latinLineSp.sp)
+        lineSp ?: latin * 1.6f
     }
+    val base = LatinReading.copy(
+        fontSize = latin.sp,
+        lineHeight = line.sp,
+        lineHeightStyle = LineHeightStyle(
+            alignment = LineHeightStyle.Alignment.Center,
+            trim = LineHeightStyle.Trim.None,
+        ),
+    )
     Text(
         text = annotated(
             runs,
-            arabicSize = (textSize?.arabicSp ?: 18).sp,
-            markerSize = (textSize?.latinSp ?: 11).sp,
+            arabicSize = arabicSp.sp,
+            markerSize = (latin * 0.65f).sp,
             quoteColor = null,
             onFootnote = onFootnote,
         ),
@@ -112,7 +132,12 @@ fun HighlightedText(
 
 /** The footnote list of one ayah, hung under its translation. */
 @Composable
-fun FootnoteList(footnotes: List<Footnote>, modifier: Modifier = Modifier, quiet: Boolean = false) {
+fun FootnoteList(
+    footnotes: List<Footnote>,
+    modifier: Modifier = Modifier,
+    quiet: Boolean = false,
+    sizeSp: Float = 13f,
+) {
     if (footnotes.isEmpty()) return
     Column(
         modifier = modifier
@@ -133,16 +158,16 @@ fun FootnoteList(footnotes: List<Footnote>, modifier: Modifier = Modifier, quiet
             Text(
                 text = buildAnnotatedString {
                     withStyle(
-                        SpanStyle(color = primary.copy(alpha = 0.8f), fontWeight = FontWeight.Medium, fontSize = 11.sp),
+                        SpanStyle(color = primary.copy(alpha = 0.8f), fontWeight = FontWeight.Medium, fontSize = (sizeSp - 2).sp),
                     ) { append(footnote.number.toString()) }
                     append("  ")
                     append(footnote.text)
                 },
                 style = MaterialTheme.typography.bodySmall
-                    .merge(SpanStyle(fontFamily = Inter))
+                    .merge(SpanStyle(fontFamily = Inter, fontSize = sizeSp.sp))
                     .plus(
                         ParagraphStyle(
-                            lineHeight = 18.sp,
+                            lineHeight = (sizeSp * 1.5f).sp,
                             textIndent = TextIndent(firstLine = 0.sp, restLine = 14.sp),
                         ),
                     ),
@@ -153,31 +178,60 @@ fun FootnoteList(footnotes: List<Footnote>, modifier: Modifier = Modifier, quiet
     }
 }
 
-/** Draws the tafsir's paragraphs and headings. */
+/**
+ * Draws the tafsir's paragraphs and headings. The size the reader chose for
+ * the tafsir moves the whole block, headings included, and the line height
+ * gives the quoted Arabic inside a Latin paragraph room to breathe.
+ */
 @Composable
-fun RichBlocks(blocks: List<TextBlock>, modifier: Modifier = Modifier) {
+fun RichBlocks(
+    blocks: List<TextBlock>,
+    modifier: Modifier = Modifier,
+    sizeSp: Float = 16f,
+    lineSp: Float = 26f,
+    arabicSp: Float = 18f,
+) {
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         blocks.forEach { block ->
+            val line = if (block.runs.any { it.arabic }) {
+                maxOf(lineSp, arabicSp * 1.9f)
+            } else {
+                lineSp
+            }
             when (block.kind) {
                 TextBlockKind.HEADING -> Text(
-                    text = annotated(block.runs, arabicSize = 17.sp, markerSize = 11.sp, quoteColor = null),
+                    text = annotated(
+                        block.runs,
+                        arabicSize = arabicSp.sp,
+                        markerSize = (sizeSp * 0.65f).sp,
+                        quoteColor = null,
+                    ),
                     style = MaterialTheme.typography.titleSmall.copy(
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.SemiBold,
+                        fontSize = (sizeSp + 1).sp,
+                        lineHeight = line.sp,
                     ),
                     modifier = Modifier.fillMaxWidth(),
                 )
                 TextBlockKind.PARAGRAPH -> Text(
                     text = annotated(
                         block.runs,
-                        arabicSize = 18.sp,
-                        markerSize = 11.sp,
+                        arabicSize = arabicSp.sp,
+                        markerSize = (sizeSp * 0.65f).sp,
                         quoteColor = MaterialTheme.colorScheme.onBackground,
                     ),
-                    style = LatinReading,
+                    style = LatinReading.copy(
+                        fontSize = sizeSp.sp,
+                        lineHeight = line.sp,
+                        lineHeightStyle = LineHeightStyle(
+                            alignment = LineHeightStyle.Alignment.Center,
+                            trim = LineHeightStyle.Trim.None,
+                        ),
+                    ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -188,15 +242,15 @@ fun RichBlocks(blocks: List<TextBlock>, modifier: Modifier = Modifier) {
 
 /** Draws the As-Sa'di tafsir: Arabic prose with the Quran quotes set apart. */
 @Composable
-fun ArabicBody(runs: List<TextRun>, modifier: Modifier = Modifier) {
+fun ArabicBody(runs: List<TextRun>, modifier: Modifier = Modifier, sizeSp: Float = 20f) {
     Text(
         text = annotated(
             runs,
-            arabicSize = 20.sp,
-            markerSize = 11.sp,
+            arabicSize = sizeSp.sp,
+            markerSize = (sizeSp * 0.6f).sp,
             quoteColor = MaterialTheme.colorScheme.onBackground,
         ),
-        style = TextStyle(fontFamily = Amiri, fontSize = 20.sp, lineHeight = 36.sp),
+        style = TextStyle(fontFamily = Amiri, fontSize = sizeSp.sp, lineHeight = (sizeSp * 1.9f).sp),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Right,
         modifier = modifier.fillMaxWidth(),

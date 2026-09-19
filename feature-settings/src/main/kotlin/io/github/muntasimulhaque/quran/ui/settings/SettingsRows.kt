@@ -22,20 +22,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.AppTheme
-import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.TextSize
+import io.github.muntasimulhaque.quran.data.TypeRole
+import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
+import io.github.muntasimulhaque.quran.ui.reader.Icon
+import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.BlackBackground
 import io.github.muntasimulhaque.quran.ui.theme.BlackText
 import io.github.muntasimulhaque.quran.ui.theme.NightBackground
@@ -50,10 +54,86 @@ import io.github.muntasimulhaque.quran.ui.theme.SepiaInk
 fun Group(title: String) {
     Text(
         text = title,
-        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+        style = MaterialTheme.typography.labelMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = 22.dp, bottom = 6.dp),
+        modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = 20.dp, bottom = 4.dp),
     )
+}
+
+/**
+ * One category in the settings hub: what it is called, where it stands right
+ * now, and the chevron that says it opens something.
+ */
+@Composable
+fun PageRow(title: String, summary: String?, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .minimumInteractiveComponentSize()
+            .clickable(onClick = onClick)
+            .padding(start = 22.dp, end = 16.dp, top = 12.dp, bottom = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.weight(1f),
+        )
+        if (!summary.isNullOrBlank()) {
+            Text(
+                text = summary,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(end = 10.dp),
+            )
+        }
+        IconGlyph(
+            icon = Icon.Chevron,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(18.dp),
+        )
+    }
+}
+
+/** The head of a page the reader opened: one way back, one name. */
+@Composable
+fun PageHeader(title: String, onBack: () -> Unit) {
+    val back = stringResource(R.string.settings_back)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 6.dp, end = 22.dp, top = 2.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(RoundedCornerShape(50))
+                .clickable(onClick = onBack)
+                .semantics {
+                    contentDescription = back
+                    role = Role.Button
+                },
+            contentAlignment = Alignment.Center,
+        ) {
+            IconGlyph(
+                icon = Icon.Chevron,
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier
+                    .size(22.dp)
+                    // The chevron opens a page pointing down, so going back
+                    // is the same mark turned to point the way it came.
+                    .graphicsLayer(rotationZ = 90f),
+            )
+        }
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(start = 4.dp),
+        )
+    }
 }
 
 @Composable
@@ -90,6 +170,124 @@ fun ToggleRow(
     }
 }
 
+/** One choice among several: the reader takes one, and the mark says which. */
+@Composable
+fun ChoiceRow(
+    title: String,
+    subtitle: String?,
+    selected: Boolean,
+    onClick: () -> Unit,
+    trailing: @Composable () -> Unit = {},
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .minimumInteractiveComponentSize()
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
+            .padding(start = 22.dp, end = 14.dp, top = 10.dp, bottom = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            if (!subtitle.isNullOrBlank()) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        trailing()
+        Mark(selected = selected, radio = true)
+    }
+}
+
+/** A row that can be on or off among many, with a check for its state. */
+@Composable
+fun MarkRow(
+    title: String,
+    subtitle: String?,
+    selected: Boolean,
+    onClick: () -> Unit,
+    trailing: @Composable () -> Unit = {},
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .minimumInteractiveComponentSize()
+            .selectable(selected = selected, role = Role.Checkbox, onClick = onClick)
+            .padding(start = 22.dp, end = 14.dp, top = 10.dp, bottom = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            if (!subtitle.isNullOrBlank()) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        trailing()
+        Mark(selected = selected, radio = false)
+    }
+}
+
+/** The app's own mark: a drawn ring and dot, or a check, never a stock icon. */
+@Composable
+private fun Mark(selected: Boolean, radio: Boolean) {
+    val accent = MaterialTheme.colorScheme.primary
+    Box(
+        modifier = Modifier
+            .padding(start = 10.dp)
+            .size(22.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        androidx.compose.foundation.Canvas(Modifier.size(22.dp)) {
+            val w = size.width
+            val h = size.height
+            if (radio) {
+                drawCircle(
+                    color = if (selected) accent else accent.copy(alpha = 0.35f),
+                    radius = w * 0.42f,
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = w * 0.09f),
+                )
+                if (selected) {
+                    drawCircle(color = accent, radius = w * 0.2f)
+                }
+            } else if (selected) {
+                drawLine(
+                    color = accent,
+                    start = androidx.compose.ui.geometry.Offset(w * 0.16f, h * 0.52f),
+                    end = androidx.compose.ui.geometry.Offset(w * 0.42f, h * 0.78f),
+                    strokeWidth = w * 0.13f,
+                )
+                drawLine(
+                    color = accent,
+                    start = androidx.compose.ui.geometry.Offset(w * 0.42f, h * 0.78f),
+                    end = androidx.compose.ui.geometry.Offset(w * 0.84f, h * 0.22f),
+                    strokeWidth = w * 0.13f,
+                )
+            } else {
+                drawCircle(
+                    color = accent.copy(alpha = 0.35f),
+                    radius = w * 0.42f,
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = w * 0.09f),
+                )
+            }
+        }
+    }
+}
+
 /** A row of two lines that opens a door. */
 @Composable
 fun TextRow(
@@ -118,8 +316,9 @@ fun TextRow(
     }
 }
 
+/** A line the reader cannot change: a version, a size, what stands where. */
 @Composable
-fun AboutRow(title: String, value: String) {
+fun ValueRow(title: String, value: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -251,12 +450,9 @@ private fun packSubtitle(pack: ContentPack): String {
     return stringResource(R.string.pack_installed, type, detail)
 }
 
-/**
- * The four grounds, as swatches. The chosen one carries the reader's dim, so
- * the row shows what the page will actually look like, not just its colors.
- */
+/** The four grounds, as swatches: each one is the page it will paint. */
 @Composable
-fun ThemeRow(selected: AppTheme, dimLevel: Int, onSelect: (AppTheme) -> Unit) {
+fun ThemeRow(selected: AppTheme, onSelect: (AppTheme) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -295,16 +491,6 @@ fun ThemeRow(selected: AppTheme, dimLevel: Int, onSelect: (AppTheme) -> Unit) {
                         style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp),
                         color = ink,
                     )
-                    if (theme == selected && dimLevel > 0) {
-                        // The dim is ink over the glass, exactly as it is on
-                        // the page: the swatch becomes the preview.
-                        Box(
-                            Modifier
-                                .size(46.dp)
-                                .clip(CircleShape)
-                                .background(Color.Black.copy(alpha = dimAlpha(dimLevel))),
-                        )
-                    }
                 }
                 Text(
                     text = theme.name(),
@@ -321,23 +507,6 @@ fun ThemeRow(selected: AppTheme, dimLevel: Int, onSelect: (AppTheme) -> Unit) {
     }
 }
 
-/** How dark the reader asked the glass to be. */
-fun dimAlpha(level: Int): Float = when (level) {
-    1 -> 0.18f
-    2 -> 0.34f
-    else -> 0f
-}
-
-@Composable
-private fun AppTheme.name(): String = stringResource(
-    when (this) {
-        AppTheme.Paper -> R.string.settings_theme_paper
-        AppTheme.Sepia -> R.string.settings_theme_sepia
-        AppTheme.Night -> R.string.settings_theme_night
-        AppTheme.Black -> R.string.settings_theme_black
-    },
-)
-
 fun AppTheme.swatch(): Pair<Color, Color> = when (this) {
     AppTheme.Paper -> PaperBackground to PaperInk
     AppTheme.Sepia -> SepiaBackground to SepiaInk
@@ -346,108 +515,78 @@ fun AppTheme.swatch(): Pair<Color, Color> = when (this) {
 }
 
 @Composable
-fun TextSizeRow(selected: TextSize, onSelect: (TextSize) -> Unit) {
+fun AppTheme.name(): String = stringResource(
+    when (this) {
+        AppTheme.Paper -> R.string.settings_theme_paper
+        AppTheme.Sepia -> R.string.settings_theme_sepia
+        AppTheme.Night -> R.string.settings_theme_night
+        AppTheme.Black -> R.string.settings_theme_black
+    },
+)
+
+/**
+ * The size of one kind of text: the row names what it sizes, the steps grow,
+ * and the value on the right says exactly what it comes to. The sample is
+ * drawn in the script of the text it sizes, so Arabic is judged as Arabic.
+ */
+@Composable
+fun SizeRow(role: TypeRole, step: Int, onChange: (Int) -> Unit) {
+    val label = stringResource(
+        when (role) {
+            TypeRole.Arabic -> R.string.settings_size_arabic
+            TypeRole.Translation -> R.string.settings_size_translation
+            TypeRole.Tafsir -> R.string.settings_size_tafsir
+            TypeRole.Words -> R.string.settings_size_words
+        },
+    )
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 22.dp, vertical = 6.dp),
+            .padding(horizontal = 22.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = "Aa",
-            style = MaterialTheme.typography.titleMedium,
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(end = 12.dp),
+            modifier = Modifier.weight(1f),
         )
         Row(
             modifier = Modifier
-                .weight(1f)
                 .clip(RoundedCornerShape(50))
                 .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
                 .padding(3.dp),
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            horizontalArrangement = Arrangement.spacedBy(1.dp),
         ) {
-            TextSize.entries.forEach { size ->
-                val active = size == selected
+            TextSize.STEPS.indices.forEach { index ->
+                val active = index == step
                 val description = stringResource(
                     R.string.settings_text_size_option,
-                    size.ordinal + 1,
-                    TextSize.entries.size,
+                    index + 1,
+                    TextSize.STEPS.size,
+                    label,
                 )
                 Box(
                     modifier = Modifier
-                        .weight(1f)
-                        .minimumInteractiveComponentSize()
+                        .size(38.dp)
                         .clip(RoundedCornerShape(50))
                         .background(
-                            if (active) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f) else Color.Transparent,
+                            if (active) {
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                            } else {
+                                Color.Transparent
+                            },
                         )
-                        .selectable(selected = active, role = Role.RadioButton) { onSelect(size) }
+                        .selectable(selected = active, role = Role.RadioButton) { onChange(index) }
                         .semantics { contentDescription = description },
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "\u0627",
-                        style = MaterialTheme.typography.titleMedium.copy(fontSize = (12 + size.ordinal * 2).sp),
-                        color = if (active) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                    )
-                }
-            }
-        }
-    }
-}
-
-/** The dim choices, named the way a reader thinks of them. */
-@Composable
-fun DimRow(level: Int, onLevel: (Int) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 22.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(Modifier.weight(1f)) {
-            Text(
-                text = stringResource(R.string.settings_dim_title),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-                text = stringResource(R.string.settings_dim_subtitle),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(50))
-                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-                .padding(3.dp),
-        ) {
-            listOf(
-                0 to stringResource(R.string.settings_dim_off),
-                1 to stringResource(R.string.settings_dim_dim),
-                2 to stringResource(R.string.settings_dim_darker),
-            ).forEach { (value, label) ->
-                val active = value == level
-                Box(
-                    modifier = Modifier
-                        .minimumInteractiveComponentSize()
-                        .clip(RoundedCornerShape(50))
-                        .background(
-                            if (active) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f) else Color.Transparent,
-                        )
-                        .selectable(selected = active, role = Role.RadioButton) { onLevel(value) }
-                        .padding(horizontal = 12.dp, vertical = 7.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.labelMedium,
+                        text = if (role == TypeRole.Arabic) "\u0627" else "A",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontSize = (11 + index * 2).sp,
+                            fontFamily = if (role == TypeRole.Arabic) null else null,
+                        ),
                         color = if (active) {
                             MaterialTheme.colorScheme.primary
                         } else {

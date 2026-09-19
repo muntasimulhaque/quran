@@ -9,19 +9,26 @@ import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.swipeDown
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import androidx.test.core.app.ActivityScenario
+import io.github.muntasimulhaque.quran.data.AppTheme
+import io.github.muntasimulhaque.quran.data.PackStore
+import io.github.muntasimulhaque.quran.data.ReadingMode
+import io.github.muntasimulhaque.quran.data.SettingsStore
+import io.github.muntasimulhaque.quran.data.TextSize
+import io.github.muntasimulhaque.quran.data.TypeRole
+import kotlinx.coroutines.runBlocking
 import java.io.File
 
 /**
@@ -32,12 +39,17 @@ import java.io.File
  * The tour is deliberately small and stable: one page, its chrome, and the
  * study reading. The sheets and the card are covered by the other
  * instrumented tests, which assert behavior rather than looks.
+ *
+ * It prepares its own library and its own settings first, so a photograph
+ * never depends on what the last run left behind: the same frames come out
+ * of a fresh emulator every time. Development builds carry every pack, so
+ * nothing here needs a network.
  */
 @RunWith(AndroidJUnit4::class)
 class ScreenshotTest {
 
     @get:Rule
-    val rule = createAndroidComposeRule<MainActivity>()
+    val rule = createEmptyComposeRule()
 
     /**
      * Waits until the screen has stopped changing, then keeps the frame. The
@@ -146,6 +158,38 @@ class ScreenshotTest {
 
     @Test
     fun walkTheReading() {
+        prepareTheLibrary()
+        ActivityScenario.launch(MainActivity::class.java).use {
+            runTheTour()
+        }
+    }
+
+    /**
+     * The state the tour photographs: the reader's own translation, the word
+     * list that speaks its language, the first tafsir, and the defaults a
+     * fresh install starts from.
+     */
+    private fun prepareTheLibrary() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val store = PackStore(context)
+        store.install("translation-saheeh-en")
+        store.install("words-en")
+        store.install("tafsir-ibn-kathir-en")
+        val settings = SettingsStore(context)
+        runBlocking {
+            settings.setAyah(1)
+            settings.setMode(ReadingMode.Mushaf)
+            settings.setTheme(AppTheme.Paper)
+            settings.setTranslationPack("translation-saheeh-en")
+            settings.setTafsirPacks(setOf("tafsir-ibn-kathir-en"))
+            settings.setWordByWord(true)
+            settings.setShowFootnotes(false)
+            for (role in TypeRole.entries) settings.setTypeSize(role, TextSize.DEFAULT)
+        }
+        Thread.sleep(500)
+    }
+
+    private fun runTheTour() {
         waitForAReading()
 
         // The Mushaf, with nothing over it.
@@ -176,12 +220,17 @@ class ScreenshotTest {
         rule.onNodeWithContentDescription("Settings").performClick()
         waitFor("Appearance")
         capture("06-settings")
-        rule.onNodeWithText("Credits and licenses").performScrollTo().performClick()
+        rule.onNodeWithText("About").performClick()
+        waitFor("Credits and licenses")
+        rule.onNodeWithText("Credits and licenses").performClick()
         rule.waitUntil(timeoutMillis = 10_000) {
             rule.onAllNodesWithText("QPC V2 page fonts").fetchSemanticsNodes().isNotEmpty()
         }
         Thread.sleep(500)
         capture("12-credits")
+        back()
+        Thread.sleep(600)
+        capture("13-about")
         back()
         back()
 

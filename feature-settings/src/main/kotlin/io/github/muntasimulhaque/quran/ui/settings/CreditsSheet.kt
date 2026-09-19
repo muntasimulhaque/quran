@@ -22,18 +22,22 @@ import io.github.muntasimulhaque.quran.ui.kit.languageName
 /** How the catalog joins the licenses of one pack's datasets. */
 private const val LICENSE_SEPARATOR = " · "
 
+/** Where a correction or a rights request is heard. */
+internal const val RIGHTS_URL = "https://github.com/muntasimulhaque/quran/issues"
+
 /**
- * About and credits in one place: what the app is, who made the text, the
- * translations, the tafsirs, the fonts, and the recitations it carries, and
- * under what terms. Every pack in the catalog appears with its own credit and
- * license, so the page cannot drift from what is installed.
+ * Who made the text, the translations, the tafsirs, the fonts, and the
+ * recitations this app carries, and under what terms. Every pack in the
+ * catalog appears with its own credit and license, so the page cannot drift
+ * from what is installed.
  *
- * The three doors at the foot open the browser only when the reader asks for
- * one; nothing here needs a connection to read.
+ * The one door at the foot is the way to reach a person when something in the
+ * text is wrong or when a rights holder asks for a change; nothing here needs
+ * a connection to read.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutSheet(
+fun CreditsSheet(
     packs: List<ContentPack>,
     version: String,
     onOpenLink: (String) -> Unit,
@@ -131,15 +135,13 @@ fun AboutSheet(
             )
 
             Group(stringResource(R.string.about_group_app))
-            AboutRow(stringResource(R.string.settings_version), version)
-            AboutRow(
-                stringResource(R.string.settings_ads),
-                stringResource(R.string.settings_ads_none),
-            )
-            AboutRow(stringResource(R.string.settings_license_label), stringResource(R.string.about_license))
-            TextRow(title = stringResource(R.string.settings_privacy)) { onOpenLink(PRIVACY_URL) }
-            TextRow(title = stringResource(R.string.settings_source)) { onOpenLink(SOURCE_URL) }
-            TextRow(title = stringResource(R.string.settings_rights)) { onOpenLink(RIGHTS_URL) }
+            ValueRow(stringResource(R.string.settings_license_label), stringResource(R.string.about_license))
+            TextRow(
+                title = stringResource(R.string.settings_rights),
+                subtitle = stringResource(R.string.settings_rights_note),
+            ) {
+                onOpenLink(RIGHTS_URL)
+            }
         }
     }
 }

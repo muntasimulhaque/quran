@@ -9,6 +9,8 @@ import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.SettingsStore
+import io.github.muntasimulhaque.quran.data.TextSize
+import io.github.muntasimulhaque.quran.data.TypeRole
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
@@ -41,6 +43,7 @@ class WordByWordTest {
             settings.setTranslationPack("translation-taisirul-quran-bn")
             settings.setWordByWord(true)
             settings.setMode(ReadingMode.Study)
+            for (role in TypeRole.entries) settings.setTypeSize(role, TextSize.DEFAULT)
         }
 
         ActivityScenario.launch(MainActivity::class.java).use {

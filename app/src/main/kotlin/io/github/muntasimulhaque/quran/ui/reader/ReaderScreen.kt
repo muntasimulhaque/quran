@@ -1,5 +1,7 @@
 package io.github.muntasimulhaque.quran.ui.reader
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -26,17 +28,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -109,7 +107,6 @@ fun ReaderScreen(
     var sheet by remember { mutableStateOf(ReaderSheet.None) }
     var touch by remember { mutableIntStateOf(0) }
     val context = androidx.compose.ui.platform.LocalContext.current
-    val clipLabel = stringResource(R.string.clip_label_ayah)
     val transfer = rememberSavedTransfer(viewModel)
 
     // Reading with the screen awake is part of reading.
@@ -121,12 +118,6 @@ fun ReaderScreen(
         if (!chrome) return@LaunchedEffect
         delay(CHROME_MILLIS)
         chrome = false
-    }
-
-    fun copyAyah(text: String) {
-        val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE)
-            as android.content.ClipboardManager
-        clipboard.setPrimaryClip(android.content.ClipData.newPlainText(clipLabel, text))
     }
 
     fun shareAyah(text: String) {
@@ -150,17 +141,7 @@ fun ReaderScreen(
     Box(
         Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .drawWithContent {
-                drawContent()
-                // The dim never blocks a touch: it is ink over the glass.
-                val dim = when (settings.dimLevel) {
-                    1 -> 0.18f
-                    2 -> 0.34f
-                    else -> 0f
-                }
-                if (dim > 0f) drawRect(Color.Black.copy(alpha = dim))
-            },
+            .background(MaterialTheme.colorScheme.background),
     ) {
         when (settings.mode) {
             ReadingMode.Mushaf -> MushafReader(
@@ -187,9 +168,14 @@ fun ReaderScreen(
                     StudyList(
                         content = content,
                         surah = surah,
-                        ayahs = viewModel.ayahNumbersOfSurah(surah.number),
+                        loadRows = {
+                            viewModel.studyRows(
+                                surah = surah.number,
+                                pack = settings.translationPack,
+                                wordByWord = settings.wordByWord,
+                            )
+                        },
                         settings = settings,
-                        loadRow = { number -> viewModel.studyRow(number, settings.translationPack) },
                         hasTranslation = viewModel.installedTranslationPacks.isNotEmpty(),
                         nextSurahName = viewModel.surahs
                             .firstOrNull { it.number == surah.number + 1 }?.nameSimple,
@@ -272,7 +258,13 @@ fun ReaderScreen(
             }
         }
 
-        val bottomItems = selected != null || playback.isAnything() || chrome
+        val bottomItems = selected != null || playback.isAnything() || viewModel.listenOffer != null || chrome
+        ModeHint(
+            mode = settings.mode,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 92.dp),
+        )
         AnimatedVisibility(
             visible = bottomItems,
             enter = fadeIn() + slideInVertically { it / 3 },
@@ -307,7 +299,6 @@ fun ReaderScreen(
                     cardAyah = ayah
                     selected = null
                 },
-                onCopyText = { text -> copyAyah(text) },
                 onShareText = { text -> shareAyah(text) },
                 onTouch = { touch++ },
             )
@@ -379,20 +370,19 @@ fun ReaderScreen(
                 )
             },
             recitations = viewModel.recitations,
-            surahs = viewModel.surahs,
             savedCount = saved.size,
             dataNotice = viewModel.dataNotice,
             contentCheck = viewModel.contentCheck,
             version = BuildConfig.VERSION_NAME,
+            preview = { viewModel.studyRow(settings.ayah, settings.translationPack) },
             downloadedSurahs = { recitation -> viewModel.downloadedSurahs(recitation) },
             actions = SettingsActions(
                 onTheme = { viewModel.setTheme(it) },
-                onTextSize = { viewModel.setTextSize(it) },
+                onTypeSize = { role, step -> viewModel.setTypeSize(role, step) },
                 onKeepAwake = { viewModel.setKeepAwake(it) },
                 onFollowReciter = { viewModel.setFollowReciter(it) },
                 onShowFootnotes = { viewModel.setShowFootnotes(it) },
                 onWordByWord = { viewModel.setWordByWord(it) },
-                onDimLevel = { viewModel.setDimLevel(it) },
                 onSelectRecitation = { viewModel.selectRecitation(it) },
                 onTranslationPack = { viewModel.setTranslationPack(it) },
                 onToggleTafsir = { viewModel.toggleTafsirPack(it) },
@@ -423,7 +413,7 @@ fun ReaderScreen(
                 ?: stringResource(R.string.surah_fallback_name, ayah.surah),
             translationPack = viewModel.translationPacks.firstOrNull { it.id == settings.translationPack },
             tafsirPacks = viewModel.enabledTafsirPacks,
-            textSize = settings.textSize,
+            settings = settings,
             wordLanguage = viewModel.wordLanguage,
             hasWords = content.meaningPack(viewModel.wordLanguage) != null,
             isSaved = savedRow != null,
@@ -439,7 +429,6 @@ fun ReaderScreen(
                 viewModel.playAyah(ayah.number)
                 cardAyah = null
             },
-            onCopy = { text -> copyAyah(text) },
             onShare = { text -> shareAyah(text) },
             onDismiss = { cardAyah = null },
         )
@@ -600,7 +589,6 @@ private fun BottomStack(
     onSaved: () -> Unit,
     onReciter: () -> Unit,
     onMore: (Ayah) -> Unit,
-    onCopyText: (String) -> Unit,
     onShareText: (String) -> Unit,
     onTouch: () -> Unit,
 ) {
@@ -678,18 +666,23 @@ private fun BottomStack(
                     onDeselect()
                 },
                 onMore = { onMore(ayah) },
-                onCopy = {
-                    scope.launch { onCopyText(viewModel.ayahShareText(ayah)) }
-                },
                 onShare = {
                     scope.launch { onShareText(viewModel.ayahShareText(ayah)) }
                 },
             )
         }
 
-        if (playback.isAnything()) {
+        val offer = viewModel.listenOffer
+        if (playback.isAnything() || offer != null) {
             PlaybackBar(
                 state = playback,
+                offer = offer,
+                offerTitle = offer?.let { pending ->
+                    stringResource(R.string.playback_offer, pending.surahName, formatBytes(pending.bytes))
+                }.orEmpty(),
+                onOfferConfirm = { viewModel.confirmListen() },
+                onOfferCancel = { viewModel.cancelListen() },
+                onOfferReciter = { viewModel.chooseListenReciter(it) },
                 reciterName = shortReciterName(
                     settings.recitation,
                     viewModel.recitations.firstOrNull { it.id == settings.recitation }?.name.orEmpty(),
@@ -729,6 +722,42 @@ private fun BottomStack(
                 listenActive = playback.isPlaying,
             )
         }
+    }
+}
+
+/**
+ * The two reading modes are pictures, so their names are said once, quietly,
+ * when the mode changes: a reader who has never seen the switch learns what
+ * each picture means, and then never sees the words again.
+ */
+@Composable
+private fun ModeHint(mode: ReadingMode, modifier: Modifier = Modifier) {
+    var hint by remember { mutableStateOf<String?>(null) }
+    var last by remember { mutableStateOf(mode) }
+    val mushaf = stringResource(io.github.muntasimulhaque.quran.uikit.R.string.mode_mushaf)
+    val study = stringResource(io.github.muntasimulhaque.quran.uikit.R.string.mode_study)
+    LaunchedEffect(mode) {
+        if (mode == last) return@LaunchedEffect
+        last = mode
+        hint = if (mode == ReadingMode.Mushaf) mushaf else study
+        delay(1600)
+        hint = null
+    }
+    AnimatedVisibility(
+        visible = hint != null,
+        enter = fadeIn(),
+        exit = fadeOut(),
+        modifier = modifier,
+    ) {
+        Text(
+            text = hint.orEmpty(),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .clip(RoundedCornerShape(50))
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.92f))
+                .padding(horizontal = 14.dp, vertical = 7.dp),
+        )
     }
 }
 
@@ -779,7 +808,6 @@ private fun AyahActions(
     onSave: () -> Unit,
     onPlay: () -> Unit,
     onMore: () -> Unit,
-    onCopy: () -> Unit,
     onShare: () -> Unit,
 ) {
     Row(
@@ -808,7 +836,6 @@ private fun AyahActions(
             active = isSaved,
         )
         TextAction(stringResource(R.string.action_play), Icon.Play, onPlay)
-        TextAction(stringResource(R.string.action_copy), Icon.Copy, onCopy)
         TextAction(stringResource(R.string.action_share), Icon.Share, onShare)
         TextAction(stringResource(R.string.action_more), Icon.More, onMore)
     }

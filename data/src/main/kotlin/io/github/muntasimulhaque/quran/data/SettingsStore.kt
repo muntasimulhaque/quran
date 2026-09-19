@@ -18,29 +18,20 @@ enum class ReadingMode { Mushaf, Study }
 
 enum class AppTheme { Paper, Sepia, Night, Black }
 
-/** Text size steps, from the smallest comfortable to the largest readable. */
-enum class TextSize(val arabicSp: Int, val latinSp: Int, val arabicLineSp: Int, val latinLineSp: Int) {
-    Small(22, 15, 44, 24),
-    Normal(26, 17, 52, 27),
-    Large(30, 19, 60, 30),
-    Largest(34, 22, 68, 35),
-    ExtraLarge(40, 25, 80, 40);
-
-    companion object {
-        fun of(index: Int): TextSize = entries.getOrElse(index) { Normal }
-    }
-}
-
 /**
  * Everything the reader has chosen, in one place: where they are, how the
- * page looks, which reciter they hear, and which content packs are on. Page
- * is not stored; the ayah is, so both reading modes share one position.
+ * page looks, how big each kind of text is, which reciter they hear, and
+ * which content packs are on. Page is not stored; the ayah is, so both
+ * reading modes share one position.
  */
 data class AppSettings(
     val ayah: Int = 1,
     val mode: ReadingMode = ReadingMode.Mushaf,
     val theme: AppTheme = AppTheme.Paper,
-    val textSize: TextSize = TextSize.Normal,
+    val arabicSize: Int = TextSize.DEFAULT,
+    val translationSize: Int = TextSize.DEFAULT,
+    val tafsirSize: Int = TextSize.DEFAULT,
+    val wordsSize: Int = TextSize.DEFAULT,
     val recitation: String = "minshawi",
     val keepAwake: Boolean = true,
     val followReciter: Boolean = true,
@@ -48,10 +39,23 @@ data class AppSettings(
     val translationPack: String = "",
     val tafsirPacks: Set<String> = emptySet(),
     val wordByWord: Boolean = false,
-    /** 0 is off, 1 is dim, 2 is darker. */
-    val dimLevel: Int = 0,
     val longPressHintShown: Boolean = false,
-)
+) {
+    val arabicSp: Float get() = TextSize.sp(TypeRole.Arabic, arabicSize)
+    val arabicLineSp: Float get() = TextSize.lineSp(TypeRole.Arabic, arabicSize)
+    val translationSp: Float get() = TextSize.sp(TypeRole.Translation, translationSize)
+    val translationLineSp: Float get() = TextSize.lineSp(TypeRole.Translation, translationSize)
+    val tafsirSp: Float get() = TextSize.sp(TypeRole.Tafsir, tafsirSize)
+    val tafsirLineSp: Float get() = TextSize.lineSp(TypeRole.Tafsir, tafsirSize)
+    val wordsSp: Float get() = TextSize.sp(TypeRole.Words, wordsSize)
+
+    fun sizeOf(role: TypeRole): Int = when (role) {
+        TypeRole.Arabic -> arabicSize
+        TypeRole.Translation -> translationSize
+        TypeRole.Tafsir -> tafsirSize
+        TypeRole.Words -> wordsSize
+    }
+}
 
 /**
  * Reads and writes the reader's choices. It stores an ayah, not a page, so
@@ -62,6 +66,9 @@ class SettingsStore(private val context: Context) {
 
     val settings: Flow<AppSettings> = context.settingsStore.data.map { preferences ->
         val ayah = preferences[AYAH] ?: 1
+        // The four sizes arrived after the one size did, so a reader who had
+        // chosen one keeps that choice for every kind of text.
+        val legacy = preferences[TEXT_SIZE]
         AppSettings(
             ayah = ayah.coerceIn(1, 6236),
             mode = when (preferences[MODE]) {
@@ -74,7 +81,12 @@ class SettingsStore(private val context: Context) {
                 "black" -> AppTheme.Black
                 else -> AppTheme.Paper
             },
-            textSize = TextSize.of(preferences[TEXT_SIZE] ?: 1),
+            arabicSize = TextSize.step(preferences[ARABIC_SIZE] ?: legacy ?: TextSize.DEFAULT),
+            translationSize = TextSize.step(
+                preferences[TRANSLATION_SIZE] ?: legacy ?: TextSize.DEFAULT,
+            ),
+            tafsirSize = TextSize.step(preferences[TAFSIR_SIZE] ?: legacy ?: TextSize.DEFAULT),
+            wordsSize = TextSize.step(preferences[WORDS_SIZE] ?: legacy ?: TextSize.DEFAULT),
             recitation = preferences[RECITATION] ?: "minshawi",
             keepAwake = preferences[KEEP_AWAKE] ?: true,
             followReciter = preferences[FOLLOW_RECITER] ?: true,
@@ -82,7 +94,6 @@ class SettingsStore(private val context: Context) {
             translationPack = preferences[TRANSLATION_PACK] ?: "",
             tafsirPacks = preferences[TAFSIR_PACKS] ?: emptySet(),
             wordByWord = preferences[WORD_BY_WORD] ?: false,
-            dimLevel = preferences[DIM_LEVEL] ?: 0,
             longPressHintShown = preferences[HINT_SHOWN] ?: false,
         )
     }
@@ -106,8 +117,12 @@ class SettingsStore(private val context: Context) {
         }
     }
 
-    suspend fun setTextSize(size: TextSize) {
-        context.settingsStore.edit { it[TEXT_SIZE] = size.ordinal }
+    suspend fun setTypeSize(role: TypeRole, step: Int) {
+        val value = TextSize.step(step)
+        context.settingsStore.edit {
+            it[keyOf(role)] = value
+            it.remove(TEXT_SIZE)
+        }
     }
 
     suspend fun setRecitation(recitation: String) {
@@ -130,10 +145,6 @@ class SettingsStore(private val context: Context) {
         context.settingsStore.edit { it[WORD_BY_WORD] = show }
     }
 
-    suspend fun setDimLevel(level: Int) {
-        context.settingsStore.edit { it[DIM_LEVEL] = level.coerceIn(0, 2) }
-    }
-
     suspend fun setLongPressHintShown() {
         context.settingsStore.edit { it[HINT_SHOWN] = true }
     }
@@ -146,11 +157,22 @@ class SettingsStore(private val context: Context) {
         context.settingsStore.edit { it[TAFSIR_PACKS] = packs }
     }
 
+    private fun keyOf(role: TypeRole): Preferences.Key<Int> = when (role) {
+        TypeRole.Arabic -> ARABIC_SIZE
+        TypeRole.Translation -> TRANSLATION_SIZE
+        TypeRole.Tafsir -> TAFSIR_SIZE
+        TypeRole.Words -> WORDS_SIZE
+    }
+
     private companion object {
         val AYAH = intPreferencesKey("ayah")
         val MODE = stringPreferencesKey("mode")
         val THEME = stringPreferencesKey("theme")
         val TEXT_SIZE = intPreferencesKey("text_size")
+        val ARABIC_SIZE = intPreferencesKey("arabic_size")
+        val TRANSLATION_SIZE = intPreferencesKey("translation_size")
+        val TAFSIR_SIZE = intPreferencesKey("tafsir_size")
+        val WORDS_SIZE = intPreferencesKey("words_size")
         val RECITATION = stringPreferencesKey("recitation")
         val KEEP_AWAKE = booleanPreferencesKey("keep_awake")
         val FOLLOW_RECITER = booleanPreferencesKey("follow_reciter")
@@ -158,7 +180,6 @@ class SettingsStore(private val context: Context) {
         val TRANSLATION_PACK = stringPreferencesKey("translation_pack")
         val TAFSIR_PACKS = stringSetPreferencesKey("tafsir_packs")
         val WORD_BY_WORD = booleanPreferencesKey("word_by_word")
-        val DIM_LEVEL = intPreferencesKey("dim_level")
         val HINT_SHOWN = booleanPreferencesKey("hint_shown")
     }
 }

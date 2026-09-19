@@ -1,5 +1,7 @@
 package io.github.muntasimulhaque.quran.ui.playback
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -11,13 +13,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,7 +36,9 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.feature.playback.R
+import io.github.muntasimulhaque.quran.playback.ListenOffer
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
+import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 
 /**
  * The playback pill. It speaks in four voices: asking to download a surah,
@@ -42,6 +48,8 @@ import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 @Composable
 fun PlaybackBar(
     state: PlaybackUiState,
+    offer: ListenOffer?,
+    offerTitle: String,
     reciterName: String,
     reference: String?,
     pendingLabel: String?,
@@ -51,8 +59,22 @@ fun PlaybackBar(
     onReciter: () -> Unit,
     onDownload: () -> Unit,
     onClose: () -> Unit,
+    onOfferConfirm: () -> Unit = {},
+    onOfferCancel: () -> Unit = {},
+    onOfferReciter: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
+    if (offer != null) {
+        ListenOfferBar(
+            offer = offer,
+            title = offerTitle,
+            onConfirm = onOfferConfirm,
+            onCancel = onOfferCancel,
+            onReciter = onOfferReciter,
+            modifier = modifier,
+        )
+        return
+    }
     val downloading = state.downloadProgress != null
     val needsDownload = state.pendingDownloadSurah != null && !downloading
     Column(
@@ -255,3 +277,109 @@ private fun TransportButton(kind: Transport, description: String, onClick: () ->
     }
 }
 
+
+/**
+ * One request, named in full: which reciter, which surah, how much, and the
+ * reciter is changeable without leaving the offer. One tap downloads the word
+ * timings and the audio together, under one progress bar, and then it plays.
+ */
+@Composable
+private fun ListenOfferBar(
+    offer: ListenOffer,
+    title: String,
+    onConfirm: () -> Unit,
+    onCancel: () -> Unit,
+    onReciter: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var chooser by remember { mutableStateOf(false) }
+    val progress = offer.progress
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(50))
+            .background(MaterialTheme.colorScheme.surface),
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 16.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box {
+                Column(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .clickable(enabled = progress == null) { chooser = true }
+                        .padding(horizontal = 4.dp, vertical = 2.dp),
+                ) {
+                    Text(
+                        text = offer.reciterName,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    Text(
+                        text = when {
+                            offer.failed -> stringResource(R.string.playback_download_failed)
+                            progress != null -> stringResource(
+                                R.string.playback_downloading,
+                                (progress * 100).toInt(),
+                            )
+                            else -> title
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                DropdownMenu(expanded = chooser, onDismissRequest = { chooser = false }) {
+                    offer.options.forEach { option ->
+                        DropdownMenuItem(
+                            text = {
+                                Column {
+                                    Text(
+                                        text = option.name,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                    )
+                                    Text(
+                                        text = if (option.bytes > 0L) {
+                                            formatBytes(option.bytes)
+                                        } else {
+                                            stringResource(R.string.playback_reciter_ready)
+                                        },
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            },
+                            onClick = {
+                                chooser = false
+                                onReciter(option.reciter)
+                            },
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.padding(horizontal = 6.dp))
+            when {
+                progress != null -> TransportButton(
+                    Transport.Close,
+                    stringResource(R.string.playback_cancel_download),
+                    onCancel,
+                )
+                offer.failed -> PillText(stringResource(R.string.playback_retry), onConfirm)
+                else -> PillText(stringResource(R.string.playback_download), onConfirm)
+            }
+        }
+        if (progress != null) {
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 8.dp)
+                    .height(2.dp)
+                    .clip(RoundedCornerShape(50)),
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+            )
+        }
+    }
+}

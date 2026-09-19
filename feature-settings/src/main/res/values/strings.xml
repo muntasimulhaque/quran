@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="settings_title">Settings</string>
-    <string name="settings_group_appearance">Appearance</string>
-    <string name="settings_group_reading">Reading</string>
-    <string name="settings_group_recitation">Recitation</string>
-    <string name="settings_group_content">Content</string>
-    <string name="settings_group_data">Your saved ayahs</string>
-    <string name="settings_group_about">About</string>
+
+
+
+
+
+
 
     <string name="settings_theme_paper">Paper</string>
     <string name="settings_theme_sepia">Sepia</string>
     <string name="settings_theme_night">Night</string>
     <string name="settings_theme_black">Black</string>
 
-    <string name="settings_dim_title">Screen dim</string>
-    <string name="settings_dim_subtitle">Softens the page for night reading</string>
-    <string name="settings_dim_off">Off</string>
-    <string name="settings_dim_dim">Dim</string>
-    <string name="settings_dim_darker">Darker</string>
+
+
+
+
+
 
     <string name="settings_keep_awake_title">Keep the screen awake</string>
     <string name="settings_keep_awake_subtitle">The page stays lit while you read</string>
@@ -28,13 +28,12 @@
     <string name="settings_footnotes_title">Show footnotes</string>
     <string name="settings_footnotes_subtitle">Translator notes under each ayah</string>
 
-    <string name="settings_text_size_option">Text size %1$d of %2$d</string>
+    <string name="settings_text_size_option">%3$s size %1$d of %2$d</string>
 
     <string name="settings_downloaded_hide">Hide downloaded surahs</string>
-    <string name="settings_downloaded_show">Manage downloaded surahs</string>
+    <string name="settings_downloaded_show">Downloaded surahs (%1$d)</string>
     <string name="settings_downloaded_empty">No surahs downloaded for this reciter yet.</string>
 
-    <string name="settings_content_intro">The Quran text and its page layout are in the app. Everything else is added when you want it, and can be removed at any time.</string>
     <string name="pack_type_translation">Translation</string>
     <string name="pack_type_tafsir">Tafsir</string>
     <string name="pack_type_words">Word by word</string>
@@ -70,15 +69,15 @@
 
     <string name="settings_version">Version</string>
     <string name="settings_license_label">License</string>
-    <string name="settings_ads">Ads and trackers</string>
-    <string name="settings_ads_none">None, and none ever</string>
-    <string name="settings_source">Source code</string>
-    <string name="settings_privacy">Privacy policy</string>
+
+
+
+
     <string name="settings_rights">Corrections and rights</string>
     <string name="settings_credits">Credits and licenses</string>
 
     <string name="about_title">Quran: The Noble Book</string>
-    <string name="about_subtitle">Version %1$s · no ads, no trackers, no accounts</string>
+    <string name="about_subtitle">Version %1$s</string>
     <string name="about_group_content">Content</string>
     <string name="about_group_fonts">Fonts</string>
     <string name="about_group_recitations">Recitations</string>
@@ -104,4 +103,44 @@
     <string name="credit_husary">Husary</string>
     <string name="credit_husary_by">Mahmoud Khalil Al-Husary, via the Quranic Universal Library</string>
     <string name="credit_husary_use">Murattal</string>
+
+    <string name="settings_title_appearance">Appearance</string>
+    <string name="settings_title_text">Text</string>
+    <string name="settings_title_reading">Reading</string>
+    <string name="settings_title_reciters">Reciters</string>
+    <string name="settings_title_translations">Translations</string>
+    <string name="settings_title_tafsirs">Tafsirs</string>
+    <string name="settings_title_words">Word by word</string>
+    <string name="settings_title_saved">Your saved ayahs</string>
+    <string name="settings_title_about">About</string>
+    <string name="settings_summary_text">Arabic %1$d · translation %2$d</string>
+    <string name="settings_summary_reading">%1$d of 3 on</string>
+    <string name="settings_summary_saved">%1$d saved</string>
+    <string name="settings_version_short">Version %1$s</string>
+    <string name="settings_none_yet">Not added yet</string>
+    <string name="settings_chosen_count">%1$d chosen</string>
+    <string name="settings_words_off">Hidden</string>
+    <string name="settings_group_theme">The page</string>
+    <string name="settings_theme_note">The whole app follows this: the page, the sheets, and the bars.</string>
+    <string name="settings_group_sizes">Text size</string>
+    <string name="settings_size_arabic">Quran text</string>
+    <string name="settings_size_translation">Translation</string>
+    <string name="settings_size_tafsir">Tafsir</string>
+    <string name="settings_size_words">Word by word</string>
+    <string name="settings_group_reciters">Reciters</string>
+    <string name="settings_reciter_installed">Installed · %1$s</string>
+    <string name="settings_reciter_size">%1$s to download</string>
+    <string name="settings_group_translations">Translations</string>
+    <string name="settings_translations_note">One translation is read at a time. Add as many as you like; the mark shows which one is yours.</string>
+    <string name="settings_group_tafsirs">Tafsirs</string>
+    <string name="settings_tafsirs_note">Every tafsir you turn on opens from its own door under the ayah.</string>
+    <string name="settings_group_words">Word by word</string>
+    <string name="settings_words_note">The meanings follow the language of the translation you read.</string>
+    <string name="settings_group_saved">Your saved ayahs</string>
+    <string name="settings_saved_count">Saved ayahs</string>
+    <string name="settings_rights_note">Tell us about a wrong letter, or ask for a dataset to be changed or removed.</string>
+    <string name="settings_group_reading">Behaviour</string>
+    <string name="settings_group_about">The app</string>
+    <string name="settings_group_content">Content on this device</string>
+    <string name="settings_back">Back</string>
 </resources>

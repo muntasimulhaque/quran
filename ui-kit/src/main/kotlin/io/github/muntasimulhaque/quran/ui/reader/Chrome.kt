@@ -45,7 +45,8 @@ enum class Icon {
     Next,
     Previous,
     Close,
-    Copy,
+    MushafPage,
+    StudyPage,
     Share,
     More,
     Listen,
@@ -131,21 +132,45 @@ fun IconGlyph(
                 drawLine(tint, Offset(w * 0.26f, h * 0.26f), Offset(w * 0.74f, h * 0.74f), w * 0.09f)
                 drawLine(tint, Offset(w * 0.74f, h * 0.26f), Offset(w * 0.26f, h * 0.74f), w * 0.09f)
             }
-            Icon.Copy -> {
+            // The printed page: a leaf of paper with the Mushaf's own ruled
+            // lines on it, drawn a little wider than tall, as a page is.
+            Icon.MushafPage -> {
                 drawRoundRect(
-                    tint,
-                    Offset(w * 0.2f, h * 0.16f),
-                    Size(w * 0.5f, h * 0.54f),
-                    CornerRadius(w * 0.09f),
-                    style = Stroke(w * 0.08f),
+                    color = tint,
+                    topLeft = Offset(w * 0.2f, h * 0.13f),
+                    size = Size(w * 0.6f, h * 0.74f),
+                    cornerRadius = CornerRadius(w * 0.07f),
+                    style = Stroke(w * 0.075f),
                 )
-                drawRoundRect(
-                    tint,
-                    Offset(w * 0.34f, h * 0.32f),
-                    Size(w * 0.46f, h * 0.52f),
-                    CornerRadius(w * 0.09f),
-                    style = Stroke(w * 0.08f),
-                )
+                for (index in 0 until 5) {
+                    val y = h * (0.29f + index * 0.13f)
+                    drawLine(
+                        color = tint,
+                        start = Offset(w * 0.31f, y),
+                        end = Offset(w * (if (index == 4) 0.51f else 0.69f), y),
+                        strokeWidth = w * 0.055f,
+                    )
+                }
+            }
+            // The study page: every ayah with its reading set underneath it,
+            // which is exactly what the ayah view shows.
+            Icon.StudyPage -> {
+                for (index in 0 until 3) {
+                    val top = h * (0.14f + index * 0.29f)
+                    drawRoundRect(
+                        color = tint,
+                        topLeft = Offset(w * 0.16f, top),
+                        size = Size(w * 0.68f, h * 0.2f),
+                        cornerRadius = CornerRadius(w * 0.05f),
+                        style = Stroke(w * 0.065f),
+                    )
+                    drawLine(
+                        color = tint.copy(alpha = 0.55f),
+                        start = Offset(w * 0.28f, top + h * 0.11f),
+                        end = Offset(w * 0.72f, top + h * 0.11f),
+                        strokeWidth = w * 0.05f,
+                    )
+                }
             }
             Icon.Share -> {
                 val top = Offset(w * 0.62f, h * 0.22f)
@@ -253,7 +278,12 @@ fun LabeledIconButton(
     }
 }
 
-/** The two reading modes, as one quiet switch. */
+/**
+ * The two reading modes, as one quiet switch. The two words are drawn as two
+ * pictures instead: a page of the Mushaf, and a page of ayahs with their
+ * reading under each one. Both are named for whoever cannot see them, and
+ * the name of the chosen one is said once, above the switch, when it changes.
+ */
 @Composable
 fun ModeSwitch(mode: ReadingMode, onMode: (ReadingMode) -> Unit) {
     Row(
@@ -262,17 +292,26 @@ fun ModeSwitch(mode: ReadingMode, onMode: (ReadingMode) -> Unit) {
             .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.06f))
             .padding(3.dp),
     ) {
-        ModeSegment(stringResource(R.string.mode_mushaf), mode == ReadingMode.Mushaf) {
-            onMode(ReadingMode.Mushaf)
-        }
-        ModeSegment(stringResource(R.string.mode_study), mode == ReadingMode.Study) {
-            onMode(ReadingMode.Study)
-        }
+        ModeSegment(
+            icon = Icon.MushafPage,
+            label = stringResource(R.string.mode_mushaf),
+            selected = mode == ReadingMode.Mushaf,
+        ) { onMode(ReadingMode.Mushaf) }
+        ModeSegment(
+            icon = Icon.StudyPage,
+            label = stringResource(R.string.mode_study),
+            selected = mode == ReadingMode.Study,
+        ) { onMode(ReadingMode.Study) }
     }
 }
 
 @Composable
-private fun ModeSegment(label: String, selected: Boolean, onClick: () -> Unit) {
+private fun ModeSegment(icon: Icon, label: String, selected: Boolean, onClick: () -> Unit) {
+    val tint = if (selected) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
     Box(
         modifier = Modifier
             .minimumInteractiveComponentSize()
@@ -281,19 +320,11 @@ private fun ModeSegment(label: String, selected: Boolean, onClick: () -> Unit) {
                 if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f) else Color.Transparent,
             )
             .selectable(selected = selected, role = Role.Tab, onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 7.dp)
+            .padding(horizontal = 18.dp, vertical = 8.dp)
             .semantics { contentDescription = label },
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = if (selected) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            },
-        )
+        IconGlyph(icon = icon, tint = tint, modifier = Modifier.size(22.dp))
     }
 }
 

@@ -217,7 +217,48 @@ class ContentDatabase private constructor(
      * The word by word meanings, in the reader's language when that pack is
      * here and in English when it is not, so a reader who has any word list
      * always sees meanings rather than empty slots.
+     *
+     * This is the whole surah at once: the study list asks for every ayah it
+     * is about to draw, so it never waits per ayah and never shifts under the
+     * reader while it loads.
      */
+    fun wordMeanings(ayahNumbers: List<Int>, language: String = "en"): Map<Int, List<WordMeaning>> {
+        if (ayahNumbers.isEmpty()) return emptyMap()
+        val chosen = meaningPack(language)
+        val inClause = ayahNumbers.joinToString(",")
+        val meanings = if (chosen != null) {
+            database.rawQuery(
+                "SELECT ayah_number, position, meaning FROM ${schema(chosen)}.word_meaning " +
+                    "WHERE ayah_number IN ($inClause)",
+                null,
+            ).use { cursor ->
+                val out = HashMap<Int, MutableMap<Int, String>>()
+                while (cursor.moveToNext()) {
+                    out.getOrPut(cursor.getInt(0)) { HashMap() }[cursor.getInt(1)] =
+                        cursor.getString(2)
+                }
+                out
+            }
+        } else {
+            emptyMap()
+        }
+        return database.rawQuery(
+            "SELECT ayah_number, text, position FROM word " +
+                "WHERE ayah_number IN ($inClause) AND marker = 0 ORDER BY ayah_number, position",
+            null,
+        ).use { cursor ->
+            val out = HashMap<Int, MutableList<WordMeaning>>(ayahNumbers.size)
+            while (cursor.moveToNext()) {
+                val ayah = cursor.getInt(0)
+                val text = cursor.getString(1)
+                val meaning = meanings[ayah]?.get(cursor.getInt(2))?.trim()?.takeIf { it.isNotEmpty() }
+                out.getOrPut(ayah) { mutableListOf() }.add(WordMeaning(text, meaning))
+            }
+            out
+        }
+    }
+
+    /** The word by word aid for one ayah. */
     fun wordMeanings(ayahNumber: Int, language: String = "en"): List<WordMeaning> {
         val chosen = meaningPack(language)
         val meanings = if (chosen != null) {

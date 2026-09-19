@@ -1162,3 +1162,122 @@ page setting, an unused header drawing routine in the page renderer, two dead
 translation lookups, a duplicated import, a "1 surahs" plural, a percentage
 that could print a localized separator inside a store-facing sentence, and a
 study list that said "Tap any ayah" where the gesture is a long press.
+
+## D-045: The reader's place is one ayah, and the study list stopped losing it
+
+Date: the eighth session. Reported by the owner: "after using the app, when I
+close the app, it starts at the beginning of the surah, not the ayah I was
+on." It was a real bug, and it was the study list's fault.
+
+The study list draws a surah as an opening item, then one item per ayah, then
+a closing line, and it wrote the reader's place from its own scroll position:
+`firstVisibleItemIndex` used directly as an index into the ayahs. Off by one,
+so the place drifted one ayah per settle, and sitting on the opening item
+wrote the *first ayah of the surah*, which is exactly what the owner saw on
+the next launch. Two more faults made it stick: the list wrote the place on
+its first frame, before the jump to the reader's ayah had run, and the jump
+refused to move when the target was fewer than three items away, so the
+stale value won. The emulator said it plainly:
+`compose place=34 initial=27 first=27` then `emit index=0 ayah=8`.
+
+What changed:
+
+- `core/AyahList.kt` is now the only place a list index and an ayah meet, with
+  a test that round trips every ayah of a surah. Nothing else converts one.
+- The list writes the place only when the *reader* moved it: a drag on the
+  list is what marks a scroll as the reader's own, so a jump, a mode switch,
+  and the first frame of either can never record anything.
+- The jump to the reader's place is exact: the list scrolls whenever the
+  measured position differs, with no "close enough" window.
+- The Mushaf writes the place only when the page is a *new* one. Switching
+  from the study view to the Mushaf page containing the reader's ayah keeps
+  the exact ayah, instead of replacing it with the page's first ayah, so a
+  mode switch no longer costs the reader several ayahs.
+- The study view loads a whole surah in one pass (ayahs, words, translation,
+  word meanings: three queries instead of three per ayah). Every item has its
+  text before the list is measured, so the reader's place lands exactly, rows
+  do not grow under the finger while scrolling, and the first frame after a
+  jump is the reader's ayah.
+
+The khatm question the owner raised was answered with a decision not to guess:
+the app opens exactly where the reader was, and a khatm is a commitment the
+app should be *told* about one day, not inferred from how someone arrived at
+an ayah. No khatm machinery ships in this session.
+
+## D-046: Settings is a hub of one row per category
+
+Date: the eighth session, on the owner's instruction: "the settings page is
+cluttered. all the categories should open in their respective pages."
+
+Settings is now a hub of nine rows, each carrying where it stands right now
+("Text · Arabic 30, translation 17", "Reciters · Al-Minshawi", "Your saved
+ayahs · 12 saved"), and each opening a page of its own: Appearance, Text,
+Reading, Reciters, Translations, Tafsirs, Word by word, Your saved ayahs,
+About. Back steps out of a page before it closes the sheet, and the hub keeps
+its own scroll, so closing a page or the credits behind it returns the reader
+to the row they came from.
+
+Three consequences worth recording:
+
+- **Text sizes are per role.** One size for everything meant a reader who
+  needed bigger Arabic got bigger footnotes with it. Arabic, translation,
+  tafsir, and word by word each have their own five steps now (`data/TextSize`,
+  multipliers over a base per role), the old single setting migrates to all
+  four, and the Text page draws the reader's own ayah above the rows so a
+  change is judged on the page it is about to change.
+- **The screen dim is gone**, at the owner's instruction: the field, the
+  setting, the draw pass, the row, the swatch preview, and the trap that
+  documented it. The Night and Black themes cover the need.
+- **About is the app only**: the version, the credits and licenses, and the
+  content self check. The ads-and-trackers, source-code, and privacy rows are
+  gone from it; the store listing carries the policy, and the credits keep one
+  row for corrections and rights, which the content rules require.
+- Translations and tafsirs are separate pages grouped by language, one
+  translation is read at a time (a mark says which), every tafsir can be on at
+  once, and the word list follows the language of the chosen translation
+  rather than asking the reader to pick a language for meanings that would
+  then be in a language they are not reading.
+
+## D-047: One offer for audio, and adding a reciter chooses it
+
+Date: the eighth session, on the owner's report that listening asked twice and
+downloaded a reciter they had not chosen.
+
+Listening needs two things that can each be missing: the reciter's word
+timings (a pack) and the surah's audio (a package). They were asked for
+separately, the first with no visible progress anywhere in the reader, and
+installing a reciter did not select it, so "Add Husary" left playback on
+Minshawi and fetched Minshawi's audio.
+
+Now there is one offer, in the pill: the reciter's name, the surah, and the
+combined size, with the reciter changeable right there (each option with what
+it would cost). One tap downloads what is missing under one progress bar and
+plays. Adding a reciter in Settings selects it, the Reciters page names each
+reciter's downloaded surahs with their sizes, and the player no longer offers
+a download that cannot help: without the timings, the audio is not a fix, and
+the offer that cannot lead anywhere no longer appears.
+
+## D-048: The reading modes are drawn, not named
+
+Date: the eighth session. "The name Mushaf and Study may be wrong... we could
+show icons for these." The segmented switch is now two drawn pictures: a ruled
+page for the Mushaf, and a page with a reading under each ayah for the study
+view. Each is named for TalkBack, and the name of the chosen one is said once,
+quietly, above the switch when the mode changes, so a reader learns the pair
+in one tap and never sees the words again.
+
+In the same pass the ayah's Copy action is gone: the share sheet already
+offers Copy first, so the app was offering the same thing twice.
+
+## D-049: A paragraph's line height comes from what is in it
+
+Date: the eighth session, on the owner's report that footnote markers overlap
+the text at large sizes. A paragraph could carry Arabic at a much larger size
+than its Latin text, and a superscript marker above the line, while its line
+height came from the Latin size alone. Lines collided, and the markers sat in
+the space they needed.
+
+A paragraph now takes the taller of the sizes it actually contains, aligned
+line boxes with no trimming, and markers at 0.65 of the base size. The first
+cut gave every Latin paragraph the Arabic's room, which floated a translation
+in white space; the runs decide, not the setting.

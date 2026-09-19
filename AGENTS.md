@@ -307,45 +307,23 @@ implement it and update this list.
   surah's prefix in that folder, and nothing else.
 - Never delete or replace the `qpc-v2-fonts` Release asset. Its SHA-256 is
   pinned in `content/manifest.json`, and a fresh clone fetches it from there.
+- The study list draws one surah as an opening item, one item per ayah, and a
+  closing line. Its indices and the ayah numbers meet only in `core/AyahList`,
+  which has a round trip test: reading `firstVisibleItemIndex` as an ayah number
+  is what silently moved the reader's place to the start of the surah, and it is
+  the kind of mistake that ships.
+- The study list writes the reader's place only after the reader dragged it, and
+  the Mushaf writes it only when the page is a new one. Anything else lets a
+  jump, a mode switch, or the first frame record a place the reader never chose.
+- Listening needs the reciter's word timings and the surah's audio, and the app
+  asks for both once, in the pill, with the size and the reciter named in the
+  same breath. Adding a reciter in Settings selects it: a reader who downloads
+  Husary means to hear Husary.
 - Play Core's asset delivery drags WorkManager, Room, and five merged
   permissions, and its R8 release needs extra keep rules. The page fonts
   ship in the base instead (D-018); reopen only with the owner.
 
-## Where the project stands (end of the seventh session)
 
-**Submitted to Google Play for review, and audited end to end.** The reading
-surface, both modes, the ayah card, search over every installed source, the
-settings sheet, the pack pipeline, the store kit, and the privacy page are as
-they were; the seventh session was about making all of it faster, quieter, and
-true.
-
-What changed: a launch paints the page the reader left from a cached bitmap
-before the content database opens (781 ms to the window, 930 ms fully drawn on
-a software rendered emulator, in a minified release build with a baseline
-profile); the Mushaf page carries one TalkBack node per ayah with an action of
-its own; every control is a real 48 dp target and no muted text is below
-4.5:1; the interface speaks through string resources, one per module, so a
-second language is a folder and a translator; saved ayahs and notes export and
-import as one small document; the app can read its own content back and name a
-damaged pack, and a core pack that cannot be opened offers a way forward
-instead of a crash; a `v<version>` tag builds, verifies, and drafts a release;
-the page turns with a shadow and a settle tick; the night themes own their
-washes and their system bar icons; the credits screen prints the real
-license of every dataset a pack contains.
-
-The bugs of the session are recorded in D-044: a word list that ignored its
-language, a tafsir index that never warmed, a search excerpt that could cut
-the passage it was built around, a far jump that animated page by page, two
-lookups rebuilding work on the hot path, and the store screenshots that never
-showed the chrome.
-
-CI is green on every push: core tests (37, including the em dash scan), data
-unit and instrumented tests (13, with export and import), app instrumented
-tests (11, with the screenshot tour), lint with no warnings, database and
-catalog checks, search round trips in three scripts, and three form factor
-screenshots whose PNGs are uploaded as artifacts.
-
-## Next session: the remaining queue, in order
 
 1. **Measure on real hardware.** The numbers in D-037 come from a software
    rendered emulator, the slowest Android this app will run on. A
@@ -370,6 +348,15 @@ screenshots whose PNGs are uploaded as artifacts.
    time should say which check failed (size, hash, or unpack) rather than one
    line for all three, and the content self check should offer the removal it
    recommends.
+- **A khatm plan, if the owner wants one.** A khatm is a commitment, not a
+  guess: an explicit plan (a daily portion, a finish date) is the only honest
+  way to keep a linear reading place apart from casual lookups, and it builds
+  on the portion the glossary already describes. The eighth session shipped no
+  heuristic for it (D-045).
+- **A recording of the tour's study frames.** The screenshot set covers the
+  surface; a short screen recording of a page turn, a mode switch, and the
+  ayah card would catch the motion a still cannot, and the pipeline already
+  has an emulator to do it on.
 ## Traps worth remembering
 
 * QUL downloads need an account, so their datasets are placed by hand into
@@ -381,5 +368,39 @@ screenshots whose PNGs are uploaded as artifacts.
 * A debug build carries every pack in `assets/packs/` for offline work; a
   release build carries only the core pack, and that is enforced by variant,
   not by a condition.
-* The screen dim is ink over the glass (`drawWithContent`), never an overlay
-  that could swallow a touch.
+
+## Where the project stands (end of the eighth session)
+
+**Submitted to Google Play for review, and then read as a reader.** The
+eighth session was the owner reading the app and reporting what they met, on
+the instruction to make it the best there is: the place that was lost, the
+settings that were one long scroll, the audio that asked twice and played a
+reciter nobody chose, the sizes that only moved one kind of text, the footnotes
+that collided at large sizes, the Copy button the share sheet already offers,
+and the two words over the reading modes.
+
+What stands now: the reader's place is one ayah, exact, in both modes, written
+only when they move it themselves (D-045); settings is a hub of nine rows with
+the state of each on the row, a page behind each one, and per role text sizes
+(D-046); listening asks once for the timings and the audio together, names the
+size and the reciter in the offer, and lets the reciter be changed right there
+(D-047); the reading modes are two drawn pages named once and then silent
+(D-048); the screen dim is gone; About is the version, the credits, and the
+content check; and a paragraph takes the line height of the script actually in
+it, so the markers never collide (D-049). The study view loads a surah in three
+queries instead of three per ayah, so the first frame after a jump is the
+reader's own ayah and rows never grow under the finger.
+
+The store tour now prepares its own library and its own settings before it
+photographs anything, so the same frames come out of a fresh emulator every
+time, and the set shows the study view with a translation, the word by word
+aid, the tafsir door, and the new settings hub.
+
+CI is green on every push: core tests (42, including the em dash scan and the
+study list round trip), data unit and instrumented tests (13, with export and
+import), app instrumented tests (11, with the deterministic screenshot tour),
+lint with no issues, database and catalog checks, search round trips in three
+scripts, and three form factor screenshots whose PNGs are uploaded as
+artifacts.
+
+

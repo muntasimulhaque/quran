@@ -4,10 +4,10 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** submitted to Google Play for review; the seventh session's audit
-is in the tree, unbuilt and unpublished, waiting for the owner's word. The
-listing, icon, feature graphic, and screenshots are in
-[`play-store/`](play-store/).
+**Status:** submitted to Google Play for review. The eighth session's work,
+the owner's own reading turned into fixes and into a hub of settings pages, is
+in the tree, unpublished, waiting for the owner's word. The listing, icon,
+feature graphic, and screenshots are in [`play-store/`](play-store/).
 
 ## What it does
 
@@ -24,13 +24,16 @@ listing, icon, feature graphic, and screenshots are in
   surah and offers the next. Arabic, then the translation, then footnotes
   behind their markers. An optional word by word aid puts each word's meaning
   beneath it, in the language of the translation above it.
-- **The ayah card.** Save, note, copy, share, play from this ayah, word by
-  word, and every tafsir you have installed.
+- **The ayah card.** Save, note, share, play from this ayah, word by word, and
+  every tafsir you have installed. It offers to add what it does not have yet
+  rather than showing an empty panel.
 - **Search.** Arabic text, every enabled translation and tafsir, word
   meanings, surah names, and references like `2:255`. Results are exact and
   instant, even over a forty megabyte tafsir.
-- **Recitation.** Minshawi and Husary, one surah at a time. The page follows
-  the reciter and the word being recited is washed as it is read.
+- **Recitation.** Minshawi and Husary, one surah at a time, asked for once: one
+  offer names the reciter, the surah, and the size, the reciter can be swapped
+  in that offer, and the word being recited is washed as it is read. The page
+  follows the reciter if you ask it to.
 - **Your own work, yours to move.** Saved ayahs and notes export to a file and
   import back on another phone, through the system's own file picker.
 - **A library you choose.** The app ships the Quran text and its page layout
@@ -39,9 +42,10 @@ listing, icon, feature graphic, and screenshots are in
   size shown first and the file verified by SHA-256. The app can also read
   every installed pack back and tell you if one no longer matches what was
   published.
-- **Readable in every room, on every setting.** Four themes, a screen dimmer,
-  a text size scale, secondary text above 4.5:1 contrast in all four themes,
-  and every control a real 48 dp target.
+- **Readable in every room, on every setting.** Four themes, a size of your own
+  for the Quran text, the translation, the tafsir, and the word by word aid, a
+  settings hub with the state of each choice on its row, secondary text above
+  4.5:1 contrast in all four themes, and every control a real 48 dp target.
 
 ## The content
 

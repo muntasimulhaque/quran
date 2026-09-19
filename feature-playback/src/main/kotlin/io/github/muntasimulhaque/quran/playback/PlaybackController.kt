@@ -70,7 +70,14 @@ class PlaybackController(
         requestedAyah = ayahNumber
         val items = withContext(Dispatchers.IO) { itemsFor(recitation, location.ayah.surah) }
         if (items.isEmpty()) {
+            // Without the reciter's word timings there is no audio to point
+            // at, and downloading the surah would not change that: say so
+            // rather than offer a download that cannot help.
+            val timings = withContext(Dispatchers.IO) {
+                database.recitationAyah(recitation, location.ayah.number)
+            }
             val packageToFetch = manifest.packageFor(recitation, location.ayah.surah)
+                ?.takeIf { timings != null }
             _state.value = _state.value.copy(
                 recitation = recitation,
                 unavailable = packageToFetch == null,
@@ -111,6 +118,24 @@ class PlaybackController(
             downloadProgress = null,
             downloadFailed = false,
         )
+    }
+
+    /**
+     * Fetches one surah's audio package, verified, reporting the bytes as
+     * they land. The app uses this when it is fetching a reciter's timings
+     * too, so one tap can cover both.
+     */
+    suspend fun fetchSurahAudio(
+        recitation: String,
+        surah: Int,
+        onProgress: (Float) -> Unit,
+    ): Boolean {
+        val packageToFetch = manifest.packageFor(recitation, surah) ?: return false
+        val folder = withContext(Dispatchers.IO) { folderFor(recitation, surah) } ?: return false
+        val result = downloader.download(packageToFetch, folder) { read, total ->
+            onProgress(if (total > 0) (read.toFloat() / total).coerceIn(0f, 1f) else 0f)
+        }
+        return result.isSuccess
     }
 
     /** Downloads the pending surah, verifies it, and starts playing where the reader asked. */

@@ -1,10 +1,10 @@
 package io.github.muntasimulhaque.quran.ui
 
-import android.app.Application
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import android.app.Application
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.muntasimulhaque.quran.data.Ayah
@@ -30,7 +30,10 @@ import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.StudyRow
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.TextSize
+import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.playback.PlaybackController
+import io.github.muntasimulhaque.quran.playback.ListenOffer
+import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.settings.ContentCheck
 import io.github.muntasimulhaque.quran.ui.settings.DataNotice
@@ -292,10 +295,15 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         val database = contentDatabase ?: return
         this.page = page
         position = database.pagePosition(page)
-        val ayah = database.firstAyahOfPage(page)
-        if (settings.ayah != ayah) {
-            settings = settings.copy(ayah = ayah)
-            viewModelScope.launch { settingsStore.setAyah(ayah) }
+        // A page the reader turned is a new place. A page they arrived at by
+        // switching modes is not: their ayah is already on it, and the exact
+        // ayah is worth keeping, so the study view opens on the same one.
+        if (database.pageOfAyah(settings.ayah) != page) {
+            val ayah = database.firstAyahOfPage(page)
+            if (settings.ayah != ayah) {
+                settings = settings.copy(ayah = ayah)
+                viewModelScope.launch { settingsStore.setAyah(ayah) }
+            }
         }
         // The page picture is written once the reader rests, not while they
         // swipe: a settle that is followed by another cancels the write.
@@ -363,9 +371,16 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch { settingsStore.setTheme(theme) }
     }
 
-    fun setTextSize(size: TextSize) {
-        settings = settings.copy(textSize = size)
-        viewModelScope.launch { settingsStore.setTextSize(size) }
+    /** One kind of text changes size; nothing else moves with it. */
+    fun setTypeSize(role: TypeRole, step: Int) {
+        val value = TextSize.step(step)
+        settings = when (role) {
+            TypeRole.Arabic -> settings.copy(arabicSize = value)
+            TypeRole.Translation -> settings.copy(translationSize = value)
+            TypeRole.Tafsir -> settings.copy(tafsirSize = value)
+            TypeRole.Words -> settings.copy(wordsSize = value)
+        }
+        viewModelScope.launch { settingsStore.setTypeSize(role, value) }
     }
 
     fun setKeepAwake(keep: Boolean) {
@@ -386,11 +401,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     fun setWordByWord(show: Boolean) {
         settings = settings.copy(wordByWord = show)
         viewModelScope.launch { settingsStore.setWordByWord(show) }
-    }
-
-    fun setDimLevel(level: Int) {
-        settings = settings.copy(dimLevel = level.coerceIn(0, 2))
-        viewModelScope.launch { settingsStore.setDimLevel(level) }
     }
 
     fun markLongPressHintShown() {
@@ -449,20 +459,19 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         packSetup = null
         reopenLibrary()
         selectPack(catalog.get(pack.id)?.copy(installed = true) ?: pack.copy(installed = true))
-        val waiting = pendingPlayAyah
-        if (pack.type == PackType.Recitation && waiting != null) {
-            pendingPlayAyah = null
-            playback.play(settings.recitation, waiting)
-        }
     }
 
-    private var pendingPlayAyah: Int? = null
-
+    /**
+     * Adding a pack is also choosing it: a reader who added a reciter wants
+     * to hear them, and a reader who added a translation wants to read it.
+     * Anything else leaves the app playing a reciter they never picked.
+     */
     private fun selectPack(pack: ContentPack) {
         when (pack.type) {
             PackType.Translation -> setTranslationPack(pack.id)
             PackType.Tafsir -> if (pack.id !in settings.tafsirPacks) toggleTafsirPack(pack.id)
-            PackType.Recitation -> Unit
+            PackType.Recitation ->
+                selectRecitation(pack.id.removePrefix(ContentDatabase.RECITER_PREFIX))
             else -> Unit
         }
     }
@@ -514,6 +523,36 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         val current = playback.state.value.ayahNumber ?: return
         viewModelScope.launch { playback.play(id, current) }
     }
+
+    /**
+     * Every row of one surah in a single pass: the ayahs, their words, the
+     * translation, and the word by word aid. Three queries instead of three
+     * per ayah, and the study list is drawn complete, so the reader's place
+     * lands exactly and nothing shifts under them while they read.
+     */
+    suspend fun studyRows(surah: Int, pack: String, wordByWord: Boolean): List<StudyRow> =
+        withContext(Dispatchers.IO) {
+            val database = contentDatabase ?: return@withContext emptyList()
+            val ayahs = database.ayahsOfSurah(surah)
+            if (ayahs.isEmpty()) return@withContext emptyList()
+            val numbers = ayahs.map { it.number }
+            val words = database.wordsForAyahs(numbers)
+            val translations = database.translations(numbers, pack)
+            val language = packs.firstOrNull { it.id == pack }?.language ?: "en"
+            val meanings = if (wordByWord) {
+                database.wordMeanings(numbers, language)
+            } else {
+                emptyMap()
+            }
+            ayahs.map { ayah ->
+                StudyRow(
+                    ayah = ayah,
+                    words = words[ayah.number].orEmpty(),
+                    translation = translations[ayah.number],
+                    meanings = meanings[ayah.number].orEmpty(),
+                )
+            }
+        }
 
     fun studyRow(ayahNumber: Int, pack: String): StudyRow? {
         val database = contentDatabase ?: return null
@@ -588,16 +627,162 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun playAyah(ayahNumber: Int) {
-        val reciterPack = ContentDatabase.reciterPack(settings.recitation)
-        if (reciterPack !in installed) {
-            // The reciter's timings are a pack of their own; without it there
-            // is nothing to play and nowhere to look for the audio.
-            pendingPlayAyah = ayahNumber
-            installPack(reciterPack)
-            return
+        viewModelScope.launch {
+            val database = contentDatabase ?: return@launch
+            val ayah = database.ayah(ayahNumber) ?: return@launch
+            val recitation = settings.recitation
+            val missing = missingForListen(recitation, ayah)
+            if (missing == null) {
+                playback.play(recitation, ayahNumber)
+                return@launch
+            }
+            listenOffer = offerFor(recitation, ayah, missing)
         }
-        viewModelScope.launch { playback.play(settings.recitation, ayahNumber) }
     }
+
+    /**
+     * Listening needs two things that may both be missing: the reciter's word
+     * timings, and the surah's own audio. They are asked for once, named in
+     * full, with the reciter changeable in the offer itself. Nothing is
+     * fetched until the reader says so.
+     */
+    private suspend fun missingForListen(recitation: String, ayah: Ayah): Long? {
+        val timingsId = ContentDatabase.reciterPack(recitation)
+        val timingsMissing = timingsId !in installed
+        val audioMissing = downloadedSurahs(recitation).none { it.surah == ayah.surah }
+        val audioBytes = manifest.packageFor(recitation, ayah.surah)?.bytes
+        if (!timingsMissing && !audioMissing) return null
+        // A surah with no published package is not a download, it is an
+        // answer: playback says so itself, and the offer stays out of it.
+        if (audioMissing && audioBytes == null) return null
+        val bytes = (if (timingsMissing) catalog.get(timingsId)?.bytes ?: 0L else 0L) +
+            (if (audioMissing) audioBytes ?: 0L else 0L)
+        return bytes.takeIf { it > 0 }
+    }
+
+    private suspend fun offerFor(recitation: String, ayah: Ayah, bytes: Long): ListenOffer {
+        val options = recitations.map { reciter ->
+            ListenOption(
+                reciter = reciter.id,
+                name = reciter.name,
+                bytes = listenBytes(reciter.id, ayah),
+            )
+        }
+        return ListenOffer(
+            reciter = recitation,
+            reciterName = recitations.firstOrNull { it.id == recitation }?.name ?: recitation,
+            surah = ayah.surah,
+            surahName = surahs.firstOrNull { it.number == ayah.surah }?.nameSimple
+                ?: "Surah ${ayah.surah}",
+            ayah = ayah.number,
+            bytes = bytes,
+            options = options,
+        )
+    }
+
+    /** What one reciter would still need for one ayah, in bytes. */
+    private suspend fun listenBytes(recitation: String, ayah: Ayah): Long {
+        val timingsId = ContentDatabase.reciterPack(recitation)
+        val timings = if (timingsId in installed) 0L else catalog.get(timingsId)?.bytes ?: 0L
+        val audio = if (downloadedSurahs(recitation).any { it.surah == ayah.surah }) {
+            0L
+        } else {
+            manifest.packageFor(recitation, ayah.surah)?.bytes ?: 0L
+        }
+        return timings + audio
+    }
+
+    /** The reader approved the offer: fetch the timings and the audio, then play. */
+    fun confirmListen() {
+        val offer = listenOffer ?: return
+        if (offer.progress != null) return
+        listenJob?.cancel()
+        listenJob = viewModelScope.launch { fetchForListen(offer) }
+    }
+
+    private suspend fun fetchForListen(offer: ListenOffer) {
+        val timingsId = ContentDatabase.reciterPack(offer.reciter)
+        val timings = catalog.get(timingsId)
+        val timingsBytes = if (timingsId in installed) 0L else timings?.bytes ?: 0L
+        val audioBytes = if (downloadedSurahs(offer.reciter).any { it.surah == offer.surah }) {
+            0L
+        } else {
+            manifest.packageFor(offer.reciter, offer.surah)?.bytes ?: 0L
+        }
+        val total = (timingsBytes + audioBytes).coerceAtLeast(1L)
+        listenOffer = offer.copy(progress = 0f, failed = false)
+        if (timingsBytes > 0L && timings != null) {
+            val installedTimings = installFromAssetsOrNetwork(timings) { fraction ->
+                setListenProgress(timingsBytes * fraction / total)
+            }
+            if (!installedTimings) {
+                listenOffer = listenOffer?.copy(progress = null, failed = true)
+                return
+            }
+            reopenLibrary()
+            selectRecitation(offer.reciter)
+        }
+        if (audioBytes > 0L) {
+            val fetched = playback.fetchSurahAudio(offer.reciter, offer.surah) { fraction ->
+                setListenProgress((timingsBytes + audioBytes * fraction) / total)
+            }
+            if (!fetched) {
+                listenOffer = listenOffer?.copy(progress = null, failed = true)
+                return
+            }
+        }
+        listenOffer = null
+        playback.play(offer.reciter, offer.ayah)
+    }
+
+    private fun setListenProgress(value: Float) {
+        listenOffer = listenOffer?.copy(progress = value.coerceIn(0f, 1f))
+    }
+
+    /** The reader changed the reciter on the offer: it becomes their reciter. */
+    fun chooseListenReciter(reciter: String) {
+        val offer = listenOffer ?: return
+        if (reciter == offer.reciter || offer.progress != null) return
+        selectRecitation(reciter)
+        viewModelScope.launch {
+            val ayah = contentDatabase?.ayah(offer.ayah) ?: return@launch
+            val bytes = listenBytes(reciter, ayah)
+            // A reciter whose audio is already on the device needs no offer.
+            if (bytes <= 0L) {
+                listenOffer = null
+                playback.play(reciter, offer.ayah)
+                return@launch
+            }
+            listenOffer = offerFor(reciter, ayah, bytes)
+        }
+    }
+
+    fun cancelListen() {
+        listenJob?.cancel()
+        listenJob = null
+        listenOffer = null
+    }
+
+    /** A pack brought onto the device, from the assets when it is there. */
+    private suspend fun installFromAssetsOrNetwork(
+        pack: ContentPack,
+        onProgress: (Float) -> Unit,
+    ): Boolean {
+        if (store.install(pack.id)) return true
+        val result = downloader.download(pack) { read, total ->
+            onProgress(if (total > 0) (read.toFloat() / total).coerceIn(0f, 1f) else 0f)
+        }
+        return result.isSuccess
+    }
+
+    /**
+     * An audio request waiting for the reader's word. It lives in the view
+     * model rather than in the player because it may cover a pack as well as
+     * a surah, and the reader should see one offer, not two.
+     */
+    var listenOffer by mutableStateOf<ListenOffer?>(null)
+        private set
+    private var listenJob: Job? = null
 
     fun togglePlayback() = playback.toggle()
 

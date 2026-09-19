@@ -17,14 +17,12 @@
     <string name="action_saved">Saved</string>
     <string name="action_save">Save</string>
     <string name="action_play">Play</string>
-    <string name="action_copy">Copy</string>
     <string name="action_share">Share</string>
     <string name="action_more">More</string>
     <string name="action_retry">Retry</string>
     <string name="action_close">Close</string>
     <string name="action_cancel">Cancel</string>
 
-    <string name="clip_label_ayah">Ayah</string>
 
     <string name="pack_preparing">Preparing…</string>
     <string name="pack_downloading">Downloading %1$d%% · %2$s</string>
