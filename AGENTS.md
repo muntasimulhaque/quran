@@ -159,7 +159,7 @@ at every step:
 3. Run the full CI suite locally.
 4. Commit, push, confirm CI is green.
 5. Build the signed AAB, verify it with `jarsigner -verify`, copy it to
-   `play-store/quran-<version>-vc<code>.aab`, and hand it over in chat with
+   `play-store/aab/quran-<version>-vc<code>.aab`, and hand it over in chat with
    the notes pasted verbatim. Delete the copy once the owner confirms the
    Play submission.
 6. Screenshots: refresh the CI set whenever visible UI changed, and say
