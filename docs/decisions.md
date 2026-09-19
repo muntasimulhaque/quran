@@ -1665,3 +1665,15 @@ is 0.5 (versionCode 5): same session, next number. The signed bundle comes
 from the `signed-bundle` job in `build.yml`, which is now the only signing
 path (D-054), and the store set is refreshed from the `screenshots` workflow
 for all three form factors.
+
+**A screenshot leg can pass while holding a photograph of Android.** The
+10-inch set came back from the first 0.5 capture with "Pixel Launcher isn't
+responding" in all sixteen frames, and with the tour on the wrong screens
+after it: the dialog had swallowed the taps. The workflow reported success.
+Three things changed. The capture checks the window list before keeping a
+frame, dismisses a dialog and retakes it, and fails the run rather than write
+one into the store listing; the workflow waits for the emulator to settle and
+clears a dialog before the tour starts; and the leg now requires the full
+sixteen frames instead of one, so a run that stopped early is not a green
+tick. The set was recaptured and every frame matches the artifact byte for
+byte.

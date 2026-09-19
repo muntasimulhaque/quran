@@ -377,6 +377,14 @@ implement it and update this list.
 - Emulator screenshots and local captures prove nothing about Arabic
   shaping. Shaping and glyph fidelity are verified from CI artifacts and
   golden renders.
+- A screenshot leg can pass while holding a photograph of Android. A loaded
+  software-rendered emulator raises "Pixel Launcher isn't responding", the
+  dialog sits over every frame after it, and it swallows the taps the tour is
+  making, so the tour ends up on the wrong screens: the 10-inch set once came
+  back with that dialog in all sixteen frames and the workflow still green.
+  The capture checks the window list before keeping a frame and fails the run
+  rather than write a dialog into the store listing, and the leg requires the
+  full sixteen frames instead of one.
 - An emulator workflow is not a test: it is a machine. Cache the AVD per form
   factor, wait for `/sdcard/Android` to exist before starting the test (a cold
   boot reports completion before its storage is mounted, and the test's output
