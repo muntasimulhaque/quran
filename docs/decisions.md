@@ -1832,6 +1832,15 @@ study reading, the surah opening, search, the settings hub, Browse, the ayah
 card), the word-by-word test no longer writes a ninth frame, the workflow's
 count check moved to eight, and `play-store/listing.md` lists the same eight.
 
+**Trimming the tour exposed a real race.** The word-by-word test used to take
+a screenshot after its assertion, and that screenshot was the time the tafsir
+prewarm spent finishing. Without it the test ended while the prewarm was still
+reading a forty megabyte tafsir, the activity closed the database underneath
+it, and the query threw out of the coroutine and took the process down. The
+prewarm is speculative work: if the library closes while it runs there is no
+index to keep, so it now stops where it is and logs it, while a failure with
+the library still open propagates as before.
+
 ## D-058: The release hand-off, 0.6
 
 Date: the thirteenth session, the release session. Version 0.6 (versionCode 6)

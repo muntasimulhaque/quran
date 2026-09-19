@@ -2,6 +2,7 @@ package io.github.muntasimulhaque.quran.data
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import android.util.Log
 import io.github.muntasimulhaque.quran.core.Search
 import io.github.muntasimulhaque.quran.core.SearchQuery
 import kotlinx.coroutines.Dispatchers
@@ -340,9 +341,21 @@ class ContentDatabase private constructor(
      * Builds the tafsir search index ahead of the first query. Called after
      * the first page is on screen, on a worker thread, so the reader's first
      * search never pays for it.
+     *
+     * The build is speculative and it can outlive the library: a reader who
+     * leaves the app, or who adds a pack while it runs, closes this database
+     * underneath it. A query against a closed pool throws, and the index has
+     * nowhere to go then, so the build stops where it is instead of taking
+     * the process down. A failure while the library is open is a real one and
+     * still propagates.
      */
     fun prewarmSearch(tafsirPacks: List<String>) {
-        synchronized(tafsirIndex) { tafsirIndex.ensure(tafsirPacks.toSet()) }
+        try {
+            synchronized(tafsirIndex) { tafsirIndex.ensure(tafsirPacks.toSet()) }
+        } catch (failure: IllegalStateException) {
+            if (!closed) throw failure
+            Log.i(TAG, "the tafsir index stopped early: the library closed", failure)
+        }
     }
 
     fun pagePosition(page: Int): PagePosition? =
@@ -878,9 +891,18 @@ class ContentDatabase private constructor(
             .map { SearchHit.SurahHit(it) }
             .toList()
 
-    fun close() = database.close()
+    fun close() {
+        closed = true
+        database.close()
+    }
+
+    /** True once [close] has run; an in-flight speculative query reads it. */
+    @Volatile
+    private var closed = false
 
     companion object {
+        private const val TAG = "ContentDatabase"
+
         const val WORDS_PACK = "words-en"
         const val SURAH_INFO = "words-en"
         const val RECITER_PREFIX = "reciter-"

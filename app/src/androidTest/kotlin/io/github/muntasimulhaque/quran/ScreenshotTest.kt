@@ -299,7 +299,10 @@ class ScreenshotTest {
         rule.onNodeWithText("1:1").performTouchInput {
             longClick(Offset(centerX, top + height * 0.15f))
         }
-        Thread.sleep(600)
+        // The actions bar slides in over the ayah; the tap on More waits for
+        // it to settle, so the press lands on the control and not on an
+        // animation.
+        Thread.sleep(1_500)
         rule.onNodeWithContentDescription("More").performClick()
         Thread.sleep(1_200)
         capture("08-ayah-card")
