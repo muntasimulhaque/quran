@@ -119,7 +119,7 @@ jobs:
             # A loaded software-rendered emulator can raise "Pixel Launcher
             # isn't responding", and that dialog sits over every frame the
             # tour takes while it steals the taps the tour is making: the
-            # 10-inch set once came out with the dialog in all sixteen frames
+            # 10-inch set once came out with the dialog in all eight frames
             # and the tour on the wrong screens. Wait for the system to settle,
             # then dismiss anything that is still up.
             sleep 20
@@ -145,7 +145,7 @@ jobs:
             # system dialog in a store screenshot is worse than no screenshot.
             # The corner where a dialog's text sits stays the page's own color.
             # Count is checked too, so a leg that captured half the tour fails.
-            test "$(ls store-shots/*.png 2>/dev/null | wc -l)" -ge 16
+            test "$(ls store-shots/*.png 2>/dev/null | wc -l)" -ge 8
 
       - name: Upload screenshots
         if: always()

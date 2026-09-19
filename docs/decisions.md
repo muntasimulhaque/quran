@@ -1737,3 +1737,112 @@ the commit that raises the version is the commit that builds the bundle, and
 a later docs-only commit does not build a second one. Checked against the
 last twelve commits: the four docs-only ones now skip, and every code commit
 still builds.
+
+## D-057: The reader's report, the thirteenth session
+
+Date: the thirteenth session. The owner read 0.5 on a phone and reported
+thirteen things, one of them a download offer that outlived its surah.
+
+**The Mushaf icon is an open book.** The two mode glyphs had drifted into
+lookalikes: two page outlines, both ruled. The Mushaf is now the printed Book
+itself, two leaves meeting at the spine with a line of reading on each, drawn
+at the same stroke weight as the study page beside it, so the pair reads as
+two different things at a glance.
+
+**Last Read names a place, and only a place.** The rows carried the ayah's
+Arabic and its translation, which made the list a second reading surface: the
+reader looking for where they were had to read every row to find it. The
+Arabic and the translation are gone from that list; the surah, the ayah, the
+mode, and the moment stay, and the text is one tap away. Saved rows keep the
+text, because a saved ayah is the thing itself.
+
+**The search filters wrap under a label.** The chips scrolled sideways, which
+hid their own contents: a reader cannot turn off a source they cannot see, and
+a source they cannot see is one they do not know is on. The group now carries
+a "Search in" label and wraps to as many lines as it needs, so every filter is
+visible at once. The label answers the other half of the question, which is
+whether "Translations" beside a search field is a filter or a kind of result.
+
+**The ayah card's footnotes are doors.** The card printed every translator's
+note as a block at the foot of the page while the study reading opened one
+from the marker the reader tapped. The card now opens the same sheet from the
+same marker (`FootnoteSheet` moved to its own file and used by both), so a
+note reads the same wherever it was reached from, and the block is gone.
+
+**The ayah card's doors say that they are doors.** The disclosure arrow was
+14 dp at 70 percent opacity, which was too quiet to be seen without a tap.
+It is 20 dp at full contrast, it turns from down to up when the content
+unfolds, and TalkBack now hears "shown" or "hidden" as the door's state. The
+row that only opens Settings for a missing pack is an action, not a door, and
+says nothing about a state it does not have.
+
+**The word by word aid is set like the reading.** Its Arabic was drawn at a
+flat 14 sp while its Latin meaning sat at 13 or 14, so the word read as a
+footnote to its own meaning. The word is now derived from the meaning at the
+ayah's own ratio to its translation (30 to 17), which comes to about 24.7 sp
+at the middle step, and both scale together with the reader's one choice for
+word meanings. The word is centered over its meaning rather than hung at the
+edge, because the two are one unit. The study reading and the ayah card draw
+the same component (`WordByWord.kt`), so the two surfaces cannot drift apart.
+
+**The reading has a rhythm, and it is named.** The app draws no rules between
+the parts of an ayah, so the gaps are the separators, and they had been nudged
+one at a time. `ui-kit/theme/Space.kt` now names four steps (Tight 4, Line 8,
+Block 16, Section 24) and the study reading, the ayah card, the browse rows,
+and the settings pages use them: 16 dp from the ayah to its word list, 16 from
+the word list to the translation, a line's height from the translation to the
+reference, and a section between two ayahs. Settings rows gained the same
+room, and the Appearance page now sets the swatches and the system switch
+apart as two decisions rather than one crowded group.
+
+**Two settings names say what they do.** "Text" was the font size page and
+"The page" was the theme selector. They are "Font size" and "Theme" now, in
+the hub, on the page, and in the code (`SettingsPage.FontSize`).
+
+**The reciter row says what the download is.** A reciter's 1.6 MB pack is the
+word timings that let the app mark the word being recited; the audio is
+separate and comes one surah at a time. The row said "Installed · 1.6 MB",
+which reads as a surah count that never arrives. It now says "Word timings
+installed · 1.6 MB" (or "1.7 MB of word timings" before it is added), the page
+carries a sentence saying what the timings are for, and the empty list says
+that Play on any ayah adds a surah.
+
+**A download offer belongs to its surah.** The reader could tap Play, leave
+the offer unanswered, move to another surah, and find the first surah's offer
+sitting over the second. `ReaderViewModel.leaveSurah` clears the listen offer
+and the player's pending download whenever the reader's place lands in a
+different surah, from a jump or from a page turn, using the in-memory surah
+index so a page turn pays nothing for the check.
+
+**A finished surah is not still being recited.** The player keeps its last
+media item after `STATE_ENDED`, so the ticker kept marking the final ayah as
+playing while the surah was over and the continuation offer was up. The
+publish path now ignores an ended player, and the ended state clears the
+playing ayah before the next surah is offered. The continuation offer also
+gained the close button the other pills already had, because a request the
+reader has not answered is not a trap.
+
+**One Play, not two.** The ayah card ended with "Play from this ayah", which
+the ayah actions bar already offers. It is removed from the card.
+
+**The store set is eight frames now.** The owner's rule from the twelfth
+session was that the set is the eight frames the listing names, so the tour
+captures exactly those eight in that order (the Mushaf page, the chrome, the
+study reading, the surah opening, search, the settings hub, Browse, the ayah
+card), the word-by-word test no longer writes a ninth frame, the workflow's
+count check moved to eight, and `play-store/listing.md` lists the same eight.
+
+## D-058: The release hand-off, 0.6
+
+Date: the thirteenth session, the release session. Version 0.6 (versionCode 6)
+is handed over for Google Play, and the hand-off is the bundle and the
+screenshots in one message, before the submission, as D-056 settled.
+
+**What the hand-off was.** The version line, the notes, and the set are the
+same release: 0.6 raises the version, `play-store/listing.md` carries the
+notes under their own heading, and the screenshot set is refreshed from the
+`screenshots` workflow's artifacts for all three form factors, each frame
+verified byte for byte against the artifact with `cmp` before it replaced the
+committed set. The signed bundle comes from the `signed-bundle` job in
+`build.yml` (D-054) and is pulled into `play-store/aab/` for the hand-over,
+then deleted once Play has it.

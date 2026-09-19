@@ -20,8 +20,8 @@
     <string name="card_word_by_word">Word by word</string>
     <string name="card_add_word_by_word">Add word by word</string>
     <string name="card_opening_pack">Opening %1$s…</string>
-    <string name="card_translator_notes">Translator notes</string>
-    <string name="card_play_from_ayah">Play from this ayah</string>
+    <string name="card_door_shown">Shown</string>
+    <string name="card_door_hidden">Hidden</string>
     <string name="card_add_note">Add a note</string>
     <string name="card_your_note">Your note</string>
     <string name="card_note_label">Note</string>

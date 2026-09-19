@@ -14,20 +14,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -40,9 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.contentDescription
@@ -63,15 +56,14 @@ import io.github.muntasimulhaque.quran.core.AyahList
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
-import io.github.muntasimulhaque.quran.data.Footnote
 import io.github.muntasimulhaque.quran.data.Surah
-import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.StudyRow
 import io.github.muntasimulhaque.quran.feature.study.R
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
+import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.withContext
@@ -307,45 +299,6 @@ private fun StudyRows(
     }
 }
 
-/** A footnote the reader opened, with the ayah it belongs to. */
-private data class OpenFootnote(val note: Footnote, val reference: String)
-
-/** The footnote of one ayah, opened from the marker the reader tapped. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun FootnoteSheet(
-    footnote: Footnote,
-    surahName: String,
-    reference: String,
-    onDismiss: () -> Unit,
-) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .imePadding()
-                .padding(start = 22.dp, end = 22.dp, bottom = 34.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.study_footnote_title, footnote.number, surahName, reference),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Text(
-                text = footnote.text,
-                style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(top = 12.dp),
-            )
-        }
-    }
-}
-
 /** A quiet door to the packs the reader does not have yet. */
 @Composable
 private fun AddContent(text: String, onClick: () -> Unit) {
@@ -406,7 +359,7 @@ private fun SurahOpening(
             text = surah.nameSimple,
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(top = 6.dp),
+            modifier = Modifier.padding(top = Space.Line),
         )
         Text(
             text = stringResource(
@@ -433,7 +386,7 @@ private fun SurahOpening(
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 18.dp),
+                    .padding(top = Space.Section),
             )
         }
         if (info != null) {
@@ -443,7 +396,7 @@ private fun SurahOpening(
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.78f),
                 maxLines = if (expanded) 40 else 3,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = 18.dp),
+                modifier = Modifier.padding(top = Space.Block),
             )
         }
         Text(
@@ -538,11 +491,12 @@ private fun AyahBlock(
         else -> androidx.compose.ui.graphics.Color.Transparent
     }
     // The padding belongs to the paper, so the gaps between ayahs still
-    // answer a tap with the reading chrome.
+    // answer a tap with the reading chrome. The block is set apart by the
+    // room around it, not by a rule: the app draws no separators.
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 9.dp),
+            .padding(vertical = 12.dp),
     ) {
         Column(
             modifier = Modifier
@@ -556,7 +510,7 @@ private fun AyahBlock(
                         onAyah(row.ayah)
                     },
                 )
-                .padding(horizontal = 8.dp, vertical = 7.dp),
+                .padding(horizontal = 8.dp, vertical = 10.dp),
         ) {
             Text(
                 text = arabic(row, playing, playingWord, hafs, palette.highlight),
@@ -570,7 +524,12 @@ private fun AyahBlock(
                 modifier = Modifier.fillMaxWidth(),
             )
             if (wordByWord && row.meanings.any { it.meaning != null }) {
-                WordByWord(row.meanings, hafs, settings)
+                WordByWord(
+                    meanings = row.meanings,
+                    hafs = hafs,
+                    settings = settings,
+                    modifier = Modifier.padding(top = Space.Block),
+                )
             }
             // More than one translation may be on, and each is drawn in its
             // own column, named, so the reader always knows whose reading
@@ -581,12 +540,14 @@ private fun AyahBlock(
                         text = line.packName,
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f),
-                        modifier = Modifier.padding(top = 12.dp),
+                        modifier = Modifier.padding(top = Space.Block),
                     )
                 }
                 TranslationBody(
                     runs = remember(line.text.text) { RichText.footnotes(line.text.text) },
-                    modifier = Modifier.padding(top = if (row.translations.size > 1) 4.dp else 12.dp),
+                    modifier = Modifier.padding(
+                        top = if (row.translations.size > 1) Space.Tight else Space.Block,
+                    ),
                     sizeSp = settings.translationSp,
                     lineSp = settings.translationLineSp,
                     arabicSp = settings.arabicSp * 0.8f,
@@ -596,7 +557,7 @@ private fun AyahBlock(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp),
+                    .padding(top = Space.Line),
                 horizontalArrangement = Arrangement.Start,
             ) {
                 Text(
@@ -639,41 +600,3 @@ private fun arabic(
 
 private const val BASMALLAH = "\u0628\u0650\u0633\u0652\u0645\u0650 \u0671\u0644\u0644\u0651\u064e\u0647\u0650 " +
     "\u0671\u0644\u0631\u0651\u064e\u062d\u0652\u0645\u064e\u0670\u0646\u0650 \u0671\u0644\u0631\u0651\u064e\u062d\u0650\u064a\u0645\u0650"
-
-/**
- * Word by word, under the ayah: each word with the meaning the word list
- * gives it. This is the reading aid for a reader who is learning the Arabic,
- * and it is off until they ask for it.
- */
-@Composable
-private fun WordByWord(meanings: List<WordMeaning>, hafs: FontFamily, settings: AppSettings) {
-    // Arabic reads right to left, so the words wrap that way too.
-    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-    androidx.compose.foundation.layout.FlowRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        meanings.forEach { meaning ->
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = meaning.word,
-                    style = TextStyle(
-                        fontFamily = hafs,
-                        fontSize = settings.wordsSp.sp,
-                        lineHeight = (settings.wordsSp * 1.8f).sp,
-                        color = MaterialTheme.colorScheme.onBackground,
-                    ),
-                )
-                Text(
-                    text = meaning.meaning.orEmpty(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.62f),
-                )
-            }
-        }
-    }
-    }
-}

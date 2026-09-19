@@ -404,11 +404,6 @@ fun ReaderScreen(
             note = savedRow?.note,
             onToggleSave = { viewModel.toggleSaved(ayah) },
             onSaveNote = { note -> viewModel.setNote(ayah, note) },
-            onPlay = {
-                onPlaybackPermission()
-                viewModel.playAyah(ayah.number)
-                cardAyah = null
-            },
             onShare = { text -> shareAyah(text) },
             onDismiss = { cardAyah = null },
         )

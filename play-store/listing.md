@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 0.5 (versionCode 5)
+Version: 0.6 (versionCode 6)
 
 ## Listing
 
@@ -81,16 +81,15 @@ for.
 
 - App icon: `icon-512.png`
 - Feature graphic: `feature-graphic-1024x500.png`
-- Phone screenshots: `screenshots/phone/` (1080 x 1920), eight of them (the set is sixteen today; the next session trims it to eight, AGENTS.md queue item 9)
-- 7 inch tablet screenshots: `screenshots/tablet7/` (800 x 1280)
-- 10 inch tablet screenshots: `screenshots/tablet10/` (2560 x 1800)
+- Phone screenshots: `screenshots/phone/` (1080 x 1920), eight of them
+- 7 inch tablet screenshots: `screenshots/tablet7/` (800 x 1280), eight of them
+- 10 inch tablet screenshots: `screenshots/tablet10/` (2560 x 1800), eight of them
 
-The set was refreshed in the twelfth session from the `Capture store
-screenshots` workflow, for all three form factors, after the turn lost its
-shadow, the study chrome learned to step aside while scrolling, the two mode
-icons were redrawn, the browse tabs were centered, Last Read gained its named
-rows, and search gained its filter row. The tour covers the Last Read tab, the
-translations page, and the word by word aid in Bangla.
+The set was refreshed in the thirteenth session from the `Capture store
+screenshots` workflow, for all three form factors, and trimmed to the eight
+frames the store lists. The tour now captures exactly those eight, one surface
+each, so no frame is captured that the listing does not explain and none is
+listed that is not captured.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
@@ -105,18 +104,14 @@ What each set shows, in order:
 2. The chrome: the mode switch, Browse, Search, and Settings
 3. The study reading with its translation
 4. The surah opening
-5. Search with the matched word marked, and the filter row under the field
+5. Search with the matched word marked, and the filters under the field
 6. The settings hub
 7. Browse, Surahs
-8. Browse, Juz
-9. Browse, Last Read
-10. An ayah's actions
-11. The ayah card
-12. Credits and licenses
-13. About
-14. Browse, Saved
-15. Translations, with more than one able to be on
-16. The word by word aid in Bangla
+8. The ayah card, with its word by word and tafsir doors
+
+## Release notes (0.6, for this hand-off, 377 characters)
+
+Footnotes in the ayah card open from their marker now, like the study reading. The word by word aid is larger, its Arabic centered over each meaning. Search filters wrap so none are hidden, settings have more room, and reciter rows say what the download is. A download request leaves with its surah, and a finished surah no longer stays marked. No ads, no trackers, no account.
 
 ## Release notes (0.5, shipped, 235 characters)
 
@@ -177,12 +172,12 @@ something Play would reject.
 | `icon-512.png` | 512 x 512 | store icon |
 | `feature-graphic-1024x500.png` | 1024 x 500 | feature graphic |
 | `screenshots/phone/*.png` | 1080 x 1920 | phone screenshots (8) |
-| `screenshots/tablet7/*.png` | 1200 x 1920 | 7 inch tablet screenshots |
-| `screenshots/tablet10/*.png` | 2560 x 1800 | 10 inch tablet screenshots |
+| `screenshots/tablet7/*.png` | 1200 x 1920 | 7 inch tablet screenshots (8) |
+| `screenshots/tablet10/*.png` | 2560 x 1800 | 10 inch tablet screenshots (8) |
 
-Screenshots: the Mushaf page, the summoned chrome, the study reading, an
-ayah's actions, the ayah card, search, the surah list, and settings. The
-tablet sets are produced by the same test on the taller and wider profiles.
+Screenshots: the Mushaf page, the summoned chrome, the study reading, the
+surah opening, search, the settings hub, Browse, and the ayah card. The tablet
+sets are produced by the same test on the taller and wider profiles.
 
 ## What the app carries, and what a reader adds
 

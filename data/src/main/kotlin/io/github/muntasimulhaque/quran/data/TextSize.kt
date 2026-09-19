@@ -48,16 +48,38 @@ object TextSize {
     /** The line height that lets the largest glyph of that text breathe. */
     fun lineSp(role: TypeRole, step: Float): Float = sp(role, step) * ratio(role)
 
+    /**
+     * The meaning under a word in the word by word aid. This is the size the
+     * meaning is read at; the Arabic word above it is derived from it, so the
+     * two can never drift apart.
+     */
+    fun meaningSp(step: Float): Float = MEANING_BASE * step(step)
+
+    /**
+     * The Arabic word in the word by word aid, standing to its meaning as the
+     * ayah stands to its translation (30 to 17). A word list that kept the
+     * old flat 14 sp drew its Arabic smaller than its Latin meaning, which
+     * read as a footnote to itself; the proportion is the one the reading
+     * already uses, so the aid looks like a small copy of the page.
+     */
+    fun wordSp(step: Float): Float = meaningSp(step) * base(TypeRole.Arabic) / base(TypeRole.Translation)
+
     private fun base(role: TypeRole): Float = when (role) {
         TypeRole.Arabic -> 30f
         TypeRole.Translation -> 17f
         TypeRole.Tafsir -> 16f
-        TypeRole.Words -> 14f
+        // The word list is derived from [meaningSp] at the ayah's own ratio;
+        // this entry is that derivation, written as the number it comes to.
+        TypeRole.Words -> MEANING_BASE * 30f / 17f
     }
 
     /** Arabic carries diacritics above and below every line, so it needs more. */
     private fun ratio(role: TypeRole): Float = when (role) {
         TypeRole.Arabic -> 2f
+        TypeRole.Words -> 1.8f
         else -> 1.6f
     }
+
+    /** The size the meaning under a word is read at, before any scaling. */
+    private const val MEANING_BASE = 14f
 }

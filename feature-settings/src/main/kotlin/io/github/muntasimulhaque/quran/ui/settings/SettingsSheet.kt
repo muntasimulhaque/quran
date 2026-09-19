@@ -139,7 +139,7 @@ fun SettingsSheet(
                         onTheme = actions.onTheme,
                         onAutoNight = actions.onAutoNight,
                     )
-                    SettingsPage.Text -> TextPage(settings, preview) { role, step ->
+                    SettingsPage.FontSize -> TextPage(settings, preview) { role, step ->
                         actions.onTypeSize(role, step)
                     }
                     SettingsPage.Reading -> ReadingPage(settings, actions)

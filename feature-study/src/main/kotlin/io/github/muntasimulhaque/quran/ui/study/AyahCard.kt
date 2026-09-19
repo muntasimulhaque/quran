@@ -4,7 +4,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,7 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -39,6 +38,10 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -59,10 +62,10 @@ import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconButton
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.rich.ArabicBody
-import io.github.muntasimulhaque.quran.ui.rich.FootnoteList
 import io.github.muntasimulhaque.quran.ui.rich.RichBlocks
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.theme.LatinReading
+import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -98,7 +101,6 @@ fun AyahCard(
     note: String?,
     onToggleSave: () -> Unit,
     onSaveNote: (String?) -> Unit,
-    onPlay: () -> Unit,
     onAddContent: () -> Unit,
     onShare: (String) -> Unit,
     onDismiss: () -> Unit,
@@ -110,6 +112,7 @@ fun AyahCard(
     }
     var door by remember(ayah.number) { mutableStateOf<Door?>(null) }
     var editingNote by remember(ayah.number) { mutableStateOf(false) }
+    var footnote by remember(ayah.number) { mutableStateOf<OpenFootnote?>(null) }
 
     // Every translation the reader turned on, each read once. A card with no
     // translation chosen is not a failure: it is a reader who has not chosen
@@ -246,11 +249,20 @@ fun AyahCard(
                     modifier = Modifier.padding(
                         start = 22.dp,
                         end = 22.dp,
-                        top = if (lines.size > 1) 4.dp else 0.dp,
+                        top = if (lines.size > 1) Space.Tight else Space.Block,
                     ),
                     sizeSp = settings.translationSp,
                     lineSp = settings.translationLineSp,
                     arabicSp = settings.arabicSp * 0.8f,
+                    onFootnote = { number ->
+                        // A footnote is a door here too: the marker opens the
+                        // note where it stands, the way it does in the study
+                        // reading, instead of the card printing every note as
+                        // a block at the foot of the page.
+                        line.text.footnotes.firstOrNull { it.number == number }?.let { note ->
+                            footnote = OpenFootnote(note, "${ayah.surah}:${ayah.ayah}")
+                        }
+                    },
                 )
             }
             if (lines.isEmpty()) {
@@ -270,7 +282,7 @@ fun AyahCard(
                 }
             }
 
-            Spacer(Modifier.height(18.dp))
+            Spacer(Modifier.height(Space.Section))
 
             if (hasWords) {
                 DoorRow(
@@ -280,13 +292,18 @@ fun AyahCard(
                     onClick = { door = if (door == Door.Words) null else Door.Words },
                 )
                 if (door == Door.Words) {
-                    WordsPanel(words, hafs, settings, Modifier.padding(horizontal = 22.dp, vertical = 6.dp))
+                    WordByWord(
+                        meanings = words,
+                        hafs = hafs,
+                        settings = settings,
+                        modifier = Modifier.padding(horizontal = 22.dp, vertical = Space.Block),
+                    )
                 }
             } else {
                 DoorRow(
                     title = stringResource(R.string.card_add_word_by_word),
                     subtitle = "",
-                    open = false,
+                    open = null,
                     onClick = onAddContent,
                 )
             }
@@ -299,7 +316,7 @@ fun AyahCard(
                     onClick = { door = if (open) null else Door.Tafsir(pack) },
                 )
                 if (open) {
-                    Box(Modifier.padding(horizontal = 22.dp, vertical = 6.dp)) {
+                    Box(Modifier.padding(horizontal = 22.dp, vertical = Space.Line)) {
                         val view = tafsir
                         if (view == null) {
                             Text(
@@ -329,22 +346,16 @@ fun AyahCard(
                     editingNote = false
                 },
             )
-
-            val footnotes = lines.flatMap { it.text.footnotes }
-            if (footnotes.isNotEmpty()) {
-                Column(Modifier.padding(horizontal = 22.dp, vertical = 6.dp)) {
-                    Text(
-                        text = stringResource(R.string.card_translator_notes),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                    )
-                    FootnoteList(footnotes)
-                }
-            }
-
-            Spacer(Modifier.height(18.dp))
-            PlayButton(onPlay, Modifier.padding(horizontal = 22.dp))
         }
+    }
+
+    footnote?.let { open ->
+        FootnoteSheet(
+            footnote = open.note,
+            surahName = surahName,
+            reference = open.reference,
+            onDismiss = { footnote = null },
+        )
     }
 }
 
@@ -374,37 +385,18 @@ private fun AddTranslation(text: String, onClick: () -> Unit, modifier: Modifier
 }
 
 @Composable
-private fun PlayButton(onPlay: () -> Unit, modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(50))
-            .clickable(onClick = onPlay)
-            .padding(horizontal = 18.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-    ) {
-        io.github.muntasimulhaque.quran.ui.reader.IconGlyph(
-            icon = Icon.Play,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.heightIn(min = 16.dp).widthIn(min = 16.dp),
-        )
-        Text(
-            text = stringResource(R.string.card_play_from_ayah),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start = 10.dp),
-        )
-    }
-}
-
-@Composable
 private fun DoorRow(
     title: String,
     subtitle: String,
-    open: Boolean,
+    open: Boolean?,
     onClick: () -> Unit,
 ) {
+    // A door that unfolds says whether its content is shown; the row that
+    // only opens the settings for a missing pack is an action, not a door,
+    // and it says nothing about a state it does not have.
+    val state = open?.let {
+        stringResource(if (it) R.string.card_door_shown else R.string.card_door_hidden)
+    }
     HorizontalDivider(
         modifier = Modifier.padding(horizontal = 22.dp),
         color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
@@ -413,7 +405,11 @@ private fun DoorRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 22.dp, vertical = 14.dp),
+            .semantics {
+                role = Role.Button
+                if (state != null) stateDescription = state
+            }
+            .padding(horizontal = 22.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -430,13 +426,20 @@ private fun DoorRow(
                 modifier = Modifier.padding(end = 10.dp),
             )
         }
+        // The arrow is the door's only sign: a row whose content unfolds
+        // under it has to say so, and it has to say it loudly enough to be
+        // seen without a tap. It points down while the content is hidden and
+        // turns up once the content is under it.
         IconGlyph(
             icon = Icon.Chevron,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            tint = if (open == true) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
             modifier = Modifier
-                .heightIn(min = 14.dp)
-                .widthIn(min = 14.dp)
-                .rotate(if (open) 180f else 0f),
+                .size(20.dp)
+                .rotate(if (open == true) 180f else 0f),
         )
     }
 }
@@ -467,48 +470,6 @@ private fun TafsirPanel(view: TafsirView, arabic: Boolean, settings: AppSettings
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
             modifier = Modifier.padding(top = 12.dp),
         )
-    }
-}
-
-@Composable
-private fun WordsPanel(
-    words: List<WordMeaning>,
-    hafs: FontFamily,
-    settings: AppSettings,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier.fillMaxWidth()) {
-        words.forEachIndexed { index, word ->
-            if (index > 0) {
-                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f))
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = word.meaning.orEmpty(),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(1f),
-                )
-                Text(
-                    text = word.word,
-                    style = TextStyle(
-                        fontFamily = hafs,
-                        fontSize = settings.wordsSp.sp,
-                        lineHeight = (settings.wordsSp * 1.8f).sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    ),
-                    textAlign = TextAlign.Right,
-                    modifier = Modifier
-                        .padding(start = 14.dp)
-                        .widthIn(min = 96.dp),
-                )
-            }
-        }
     }
 }
 

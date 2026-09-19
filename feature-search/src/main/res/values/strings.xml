@@ -15,7 +15,7 @@
     <string name="search_place_makkah">Makkah</string>
     <string name="search_place_madinah">Madinah</string>
 
-    <string name="search_filter">Filter</string>
+    <string name="search_filter">Search in</string>
     <string name="search_filter_text">Quran text</string>
     <string name="search_filter_surahs">Surah names</string>
     <string name="search_filter_references">References</string>

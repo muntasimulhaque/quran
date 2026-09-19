@@ -412,10 +412,11 @@ implement it and update this list.
   making, so the tour ends up on the wrong screens: the 10-inch set once came
   back with that dialog in all sixteen frames and the workflow still green.
   The capture checks the window list before keeping a frame and fails the run
-  rather than write a dialog into the store listing, and the leg requires the
-  full sixteen frames instead of one. Even so, install a set only after
-  comparing every frame with the artifact: the guard catches the dialog, and
-  `cmp` is what catches everything else.
+  rather than write a dialog into the store listing, and the leg requires
+  every frame the tour captures (eight, since the thirteenth session) instead
+  of one. Even so, install a set only after comparing every frame with the
+  artifact: the guard catches the dialog, and `cmp` is what catches everything
+  else.
 - The bundle and the screenshots are one delivery, and the screenshots come
   first. A set refreshed after the owner has submitted has nothing left to be
   used for: the store already holds the old one, so the work is wasted and the
@@ -576,23 +577,6 @@ fetching them again; the space is worth less than the time.
    surface; a short screen recording of a page turn, a mode switch, and the
    ayah card would catch the motion a still cannot, and the pipeline already
    has an emulator to do it on.
-9. **Trim the screenshot tour to eight frames per form factor.** The owner set
-   the number in the twelfth session and said it applies from the next session
-   on, so this session's set is left as it is. The tour captures sixteen today
-   (`01-mushaf` through `15-translations`, plus the word by word aid); the
-   store shows eight. Keeping the eight that carry the reader's surface
-   (the Mushaf page, the chrome, the study reading, the surah opening, search,
-   the settings hub, Browse, the ayah card) means dropping the frames that are
-   one surface's detail rather than a surface: the juz and saved tabs, Last
-   Read, credits, About, the ayah actions, and the translations page. Decide
-   each against the store listing's numbered list, update both together, and
-   re-run `screenshots.yml` for all three form factors.
-
-   Do that trim at the start of a session, not at the end of one: the next
-   release needs the eight-frame set ready before its bundle is handed over,
-   and a tour of sixteen frames halfway through a release is a set nobody can
-   install without deleting half of it first. The workflow's own check
-   (`-ge 16` frames) moves with the tour, to `-ge 8`.
 
 ## Traps worth remembering
 
@@ -606,31 +590,44 @@ fetching them again; the space is worth less than the time.
   release build carries only the core pack, and that is enforced by variant,
   not by a condition.
 
-## Where the project stands (end of the twelfth session)
+## Where the project stands (end of the thirteenth session)
 
-**0.5 (versionCode 5) is submitted to Google Play for review**, and 0.4
-(versionCode 4) is with Play from the same session. What 0.5 handed over:
-147,673,787 bytes, SHA-256
-`9bf77817f6a9df05d0964d4683e944b043e008c34afd12516d16903ebf08bdd5`, signed with
-the owner's upload key, carrying only the core pack. The hand-off copy was
-deleted once the submission was confirmed; `play-store/aab/` keeps its own
-note.
+**0.6 (versionCode 6) is handed over for Google Play.** The session answered
+the reader's second report in full (D-057) and trimmed the store set to the
+eight frames the listing names. The bundle carries only the core pack, the
+Quran text and its page layout, and the screenshots come from the same
+pipeline that built it; both are handed over together, before the submission
+(D-058).
 
-**The reader's report (D-053).** The owner read 0.3 on a phone and reported
-twelve things, two of them the same crash: a duplicate string name shared by
-two modules (`pack_downloading`, with different format arguments) threw on
-the main thread from `stringResource`, so tapping Add on a translation,
-tafsir, or word list crashed the app, and behind that crash sat a pack row
-whose tap was wrapped in `if (pack.installed)`, so a pack the reader did not
-have could only be reached through the button that crashed. The turn no
-longer lifts the page or casts a shadow; the study chrome steps aside while
-scrolling; the two reading mode icons were redrawn as one pair; Appearance
-gained automatic night mode; Settings has one pack row for every list, where
-tapping a name or a mark installs or turns on what it names; a downloaded
-surah's Remove removes; Last Read reads as a surah name with its ayah under
-it and the Browse tabs are centered; search has a filter row of sources, all
-on until turned off; languages, pack names, and reciters are alphabetical;
-and the app says Bangla wherever it names the language.
+**The reader's report (D-057).** The owner read 0.5 on a phone and reported
+thirteen things. The Mushaf icon is an open book now, so the two reading
+modes never read as lookalikes. Last Read names a place and only a place: the
+ayah's Arabic and translation are gone from those rows. The search filters
+wrap under a "Search in" label instead of scrolling sideways, so no filter is
+hidden. The ayah card opens a translator's note from its marker, like the
+study reading, and its disclosure arrows are 20 dp at full contrast with the
+state spoken. The word by word aid is set at the ayah's own ratio to its
+translation (about 24.7 sp for a 14 sp meaning), centered over each meaning,
+and drawn by one shared component in both surfaces. The reading gained a named
+spacing scale (`ui-kit/theme/Space.kt`), and the settings pages gained the same
+room. "Text" became "Font size" and "The page" became "Theme". A reciter's
+row now says that its 1.6 MB download is the word timings, with the audio added
+one surah at a time. A download offer leaves with the surah it belongs to, a
+finished surah is no longer left marked as playing, the continuation offer has
+a close button, and the ayah card no longer repeats the Play action.
+
+**The reader's first report (D-053).** The owner read 0.3 on a phone and
+reported twelve things, two of them the same crash: a duplicate string name
+shared by two modules (`pack_downloading`, with different format arguments)
+threw on the main thread from `stringResource`, so tapping Add on a
+translation, tafsir, or word list crashed the app, and behind that crash sat a
+pack row whose tap was wrapped in `if (pack.installed)`, so a pack the reader
+did not have could only be reached through the button that crashed. The turn
+no longer lifts the page or casts a shadow; the study chrome steps aside while
+scrolling; Appearance gained automatic night mode; Settings has one pack row
+for every list, where tapping a name or a mark installs or turns on what it
+names; a downloaded surah's Remove removes; and the app says Bangla wherever
+it names the language.
 
 **Signing moved into CI and stays private (D-054).** A `signed-bundle` job in
 `build.yml` signs on every push to `main` from the four family secrets
@@ -660,12 +657,8 @@ sixteen 10-inch frames, the tour on the wrong screens after it because the
 dialog had swallowed the taps, and the workflow still green. The capture now
 checks the window list before keeping a frame and fails rather than write a
 dialog into the store listing, the workflow clears a dialog before the tour
-starts, and a leg must now produce all sixteen frames.
-
-**The store set is eight frames per form factor from the next session on**
-(the owner's rule, queue item 9). This session's set is sixteen per form
-factor, 48 images in all, every one verified byte for byte against the
-capture run's artifacts.
+starts, and a leg must now produce every frame the tour captures (eight,
+since the thirteenth session).
 
 The suite is green locally and in CI: core tests (51), data unit tests, the
 data instrumented tests (16), the app instrumented tests (11, the screenshot

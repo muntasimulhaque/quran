@@ -48,15 +48,25 @@ import io.github.muntasimulhaque.quran.ui.theme.PaperBackground
 import io.github.muntasimulhaque.quran.ui.theme.PaperInk
 import io.github.muntasimulhaque.quran.ui.theme.SepiaBackground
 import io.github.muntasimulhaque.quran.ui.theme.SepiaInk
+import io.github.muntasimulhaque.quran.ui.theme.Space
 
-/** A quiet heading over a group of rows. */
+/**
+ * A quiet heading over a group of rows. It opens the group with more room
+ * than the rows keep between themselves, so the heading reads as the name of
+ * what follows rather than as another row.
+ */
 @Composable
 fun Group(title: String) {
     Text(
         text = title,
         style = MaterialTheme.typography.labelMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = 20.dp, bottom = 4.dp),
+        modifier = Modifier.padding(
+            start = 22.dp,
+            end = 22.dp,
+            top = Space.Block + Space.Tight,
+            bottom = Space.Line,
+        ),
     )
 }
 
@@ -71,7 +81,7 @@ fun PageRow(title: String, summary: String?, onClick: () -> Unit) {
             .fillMaxWidth()
             .minimumInteractiveComponentSize()
             .clickable(onClick = onClick)
-            .padding(start = 22.dp, end = 16.dp, top = 12.dp, bottom = 12.dp),
+            .padding(start = 22.dp, end = 16.dp, top = 14.dp, bottom = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -107,7 +117,7 @@ fun PageHeader(title: String, onBack: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 6.dp, end = 22.dp, top = 2.dp, bottom = 8.dp),
+            .padding(start = 6.dp, end = 22.dp, top = 2.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
@@ -151,7 +161,7 @@ fun ToggleRow(
         modifier = Modifier
             .fillMaxWidth()
             .toggleable(value = checked, role = Role.Switch, onValueChange = onChange)
-            .padding(start = 22.dp, end = 12.dp, top = 6.dp, bottom = 6.dp),
+            .padding(start = 22.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
@@ -272,7 +282,7 @@ private fun SettingRow(
             .fillMaxWidth()
             .minimumInteractiveComponentSize()
             .selectable(selected = selected, role = role, onClick = onClick)
-            .padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 10.dp),
+            .padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         mark()
@@ -354,7 +364,7 @@ fun TextRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 22.dp, vertical = 12.dp),
+            .padding(horizontal = 22.dp, vertical = 14.dp),
     ) {
         Text(
             text = title,
@@ -377,7 +387,7 @@ fun ValueRow(title: String, value: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 22.dp, vertical = 8.dp),
+            .padding(horizontal = 22.dp, vertical = 10.dp),
     ) {
         Text(
             text = title,
@@ -470,7 +480,7 @@ fun ThemeRow(selected: AppTheme, onSelect: (AppTheme) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 2.dp),
+            .padding(horizontal = 16.dp, vertical = Space.Tight),
     ) {
         AppTheme.entries.forEach { theme ->
             Column(
@@ -481,7 +491,7 @@ fun ThemeRow(selected: AppTheme, onSelect: (AppTheme) -> Unit) {
                     .selectable(selected = theme == selected, role = Role.RadioButton) {
                         onSelect(theme)
                     }
-                    .padding(horizontal = 6.dp, vertical = 6.dp),
+                    .padding(horizontal = 6.dp, vertical = 8.dp),
             ) {
                 val (ground, ink) = theme.swatch()
                 Box(
@@ -514,7 +524,7 @@ fun ThemeRow(selected: AppTheme, onSelect: (AppTheme) -> Unit) {
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant
                     },
-                    modifier = Modifier.padding(top = 5.dp),
+                    modifier = Modifier.padding(top = Space.Line),
                 )
             }
         }
@@ -555,7 +565,7 @@ fun SizeRow(role: TypeRole, step: Float, onChange: (Float) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 22.dp, vertical = 4.dp),
+            .padding(horizontal = 22.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(

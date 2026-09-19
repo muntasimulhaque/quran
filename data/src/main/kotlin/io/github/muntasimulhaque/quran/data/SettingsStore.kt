@@ -69,6 +69,7 @@ data class AppSettings(
     val tafsirSp: Float get() = TextSize.sp(TypeRole.Tafsir, tafsirSize)
     val tafsirLineSp: Float get() = TextSize.lineSp(TypeRole.Tafsir, tafsirSize)
     val wordsSp: Float get() = TextSize.sp(TypeRole.Words, wordsSize)
+    val wordsMeaningSp: Float get() = TextSize.meaningSp(wordsSize)
 
     fun sizeOf(role: TypeRole): Float = when (role) {
         TypeRole.Arabic -> arabicSize

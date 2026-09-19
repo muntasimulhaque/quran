@@ -277,7 +277,19 @@ class PlaybackController(
         }
 
         override fun onPlaybackStateChanged(playbackState: Int) {
-            if (playbackState == Player.STATE_ENDED) offerNextSurah()
+            if (playbackState != Player.STATE_ENDED) return
+            // The surah ended, so nothing is playing and nothing may stay
+            // marked. The player keeps the last ayah as its current item, and
+            // the next publish would keep drawing it as the reciting ayah
+            // forever; the mark is cleared here, before the next surah is
+            // offered, so the page rests unlit while the reader decides.
+            _state.value = _state.value.copy(
+                isPlaying = false,
+                ayahNumber = null,
+                wordPosition = null,
+                positionMs = 0,
+            )
+            offerNextSurah()
         }
     }
 
@@ -293,6 +305,10 @@ class PlaybackController(
 
     private fun publish(player: Player?) {
         val player = player ?: return
+        // An ended player still carries its last media item, and reading it
+        // would light the final ayah as if it were being recited. When the
+        // surah is over the state says so itself, with no ayah marked.
+        if (player.playbackState == Player.STATE_ENDED) return
         val id = player.currentMediaItem?.mediaId ?: return
         val ayahNumber = id.substringBefore(':').toIntOrNull() ?: return
         val surah = id.substringAfter(':').toIntOrNull()

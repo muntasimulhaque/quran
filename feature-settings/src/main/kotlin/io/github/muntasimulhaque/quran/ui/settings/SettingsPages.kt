@@ -41,16 +41,17 @@ import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.languageSortKey
 import io.github.muntasimulhaque.quran.ui.rich.ArabicFonts
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
+import io.github.muntasimulhaque.quran.ui.theme.Space
 import androidx.compose.ui.platform.LocalContext
 import io.github.muntasimulhaque.quran.core.RichText
 /** The pages the settings hub opens, one at a time. */
-enum class SettingsPage { Appearance, Text, Reading, Reciters, Translations, Tafsirs, Words, About }
+enum class SettingsPage { Appearance, FontSize, Reading, Reciters, Translations, Tafsirs, Words, About }
 
 @Composable
 fun SettingsPage.title(): String = stringResource(
     when (this) {
         SettingsPage.Appearance -> R.string.settings_title_appearance
-        SettingsPage.Text -> R.string.settings_title_text
+        SettingsPage.FontSize -> R.string.settings_title_text
         SettingsPage.Reading -> R.string.settings_title_reading
         SettingsPage.Reciters -> R.string.settings_title_reciters
         SettingsPage.Translations -> R.string.settings_title_translations
@@ -99,7 +100,7 @@ fun SettingsHub(
                 settings.arabicSp.toInt(),
                 settings.translationSp.toInt(),
             ),
-        ) { onOpen(SettingsPage.Text) }
+        ) { onOpen(SettingsPage.FontSize) }
         PageRow(
             title = stringResource(R.string.settings_title_reading),
             summary = stringResource(
@@ -198,6 +199,9 @@ fun AppearancePage(
     Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_theme))
         ThemeRow(settings.theme, onTheme)
+        // The swatches and the switch are two separate decisions, and the
+        // switch is not a fifth swatch: the break between them says so.
+        Spacer(Modifier.height(Space.Section))
         ToggleRow(
             title = stringResource(R.string.settings_auto_night_title),
             subtitle = stringResource(R.string.settings_auto_night_subtitle),
@@ -213,7 +217,12 @@ fun AppearancePage(
             ),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = 10.dp),
+            modifier = Modifier.padding(
+                start = 22.dp,
+                end = 22.dp,
+                top = Space.Block,
+                bottom = Space.Section,
+            ),
         )
     }
 }
@@ -239,7 +248,7 @@ fun TextPage(
         SizeRow(TypeRole.Translation, settings.translationSize) { onSize(TypeRole.Translation, it) }
         SizeRow(TypeRole.Tafsir, settings.tafsirSize) { onSize(TypeRole.Tafsir, it) }
         SizeRow(TypeRole.Words, settings.wordsSize) { onSize(TypeRole.Words, it) }
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(Space.Section))
     }
 }
 
@@ -311,6 +320,12 @@ fun RecitersPage(
 ) {
     Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_reciters))
+        Text(
+            text = stringResource(R.string.settings_reciters_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
+        )
         packs.filter { it.type == PackType.Recitation }
             .sortedBy { it.name.lowercase() }
             .forEach { pack ->
@@ -330,7 +345,7 @@ fun RecitersPage(
                     ReciterDownloads(id, downloadedSurahs, actions)
                 }
             }
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(Space.Section))
     }
 }
 
@@ -369,9 +384,9 @@ private fun ReciterDownloads(
         style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier
-            .padding(start = 22.dp, top = 2.dp, bottom = 4.dp)
+            .padding(start = 22.dp, top = Space.Tight)
             .clickable { open = !open }
-            .padding(vertical = 6.dp),
+            .padding(vertical = Space.Line),
     )
     if (!open) return
     if (rows.isEmpty()) {
@@ -379,7 +394,7 @@ private fun ReciterDownloads(
             text = stringResource(R.string.settings_downloaded_empty),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = 8.dp),
+            modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Block),
         )
         return
     }
@@ -387,7 +402,7 @@ private fun ReciterDownloads(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 22.dp, end = 12.dp, top = 2.dp, bottom = 2.dp),
+                .padding(start = 22.dp, end = 12.dp, top = Space.Line, bottom = Space.Line),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -411,7 +426,7 @@ private fun ReciterDownloads(
             }
         }
     }
-    Spacer(Modifier.height(6.dp))
+    Spacer(Modifier.height(Space.Tight))
 }
 
 /**
@@ -432,7 +447,7 @@ fun TranslationsPage(
             text = stringResource(R.string.settings_translations_note),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = 6.dp),
+            modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
         )
         LanguageGroups(packs, PackType.Translation) { pack ->
             PackChoiceRow(
@@ -446,7 +461,7 @@ fun TranslationsPage(
                 onRemove = { actions.onRemovePack(pack.id) },
             )
         }
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(Space.Section))
     }
 }
 
@@ -464,7 +479,7 @@ fun TafsirsPage(
             text = stringResource(R.string.settings_tafsirs_note),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = 6.dp),
+            modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
         )
         LanguageGroups(packs, PackType.Tafsir) { pack ->
             PackChoiceRow(
@@ -478,7 +493,7 @@ fun TafsirsPage(
                 onRemove = { actions.onRemovePack(pack.id) },
             )
         }
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(Space.Section))
     }
 }
 
@@ -501,7 +516,7 @@ fun WordsPage(
             text = stringResource(R.string.settings_words_note),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = 8.dp, bottom = 4.dp),
+            modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Block, bottom = Space.Tight),
         )
         val active = activeWordsPack(settings, packs)
         LanguageGroups(packs, PackType.Words) { pack ->
@@ -519,7 +534,7 @@ fun WordsPage(
                 onRemove = { actions.onRemovePack(pack.id) },
             )
         }
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(Space.Section))
     }
 }
 
@@ -554,7 +569,7 @@ private fun LanguageGroups(
                 text = languageName(language),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = 12.dp, bottom = 2.dp),
+                modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Block, bottom = Space.Tight),
             )
             group.sortedBy { it.name.lowercase() }.forEach { pack -> row(pack) }
         }
@@ -595,10 +610,10 @@ fun AboutPage(
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = 2.dp, bottom = 4.dp),
+                modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Tight, bottom = Space.Line),
             )
         }
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(Space.Section))
     }
 }
 

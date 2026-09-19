@@ -120,12 +120,22 @@ fun PlaybackBar(
                     stringResource(R.string.playback_cancel_download),
                     onClose,
                 )
-                needsDownload -> PillText(
-                    stringResource(
-                        if (state.pendingIsContinuation) R.string.playback_continue else R.string.playback_download,
-                    ),
-                    onDownload,
-                )
+                needsDownload -> {
+                    PillText(
+                        stringResource(
+                            if (state.pendingIsContinuation) R.string.playback_continue else R.string.playback_download,
+                        ),
+                        onDownload,
+                    )
+                    // A request the reader has not answered is not a trap:
+                    // the same close that ends playback takes the offer away,
+                    // so nothing sits over the reading until it is answered.
+                    TransportButton(
+                        Transport.Close,
+                        stringResource(R.string.playback_close_offer),
+                        onClose,
+                    )
+                }
                 state.unavailable -> TransportButton(
                     Transport.Close,
                     stringResource(R.string.playback_close),

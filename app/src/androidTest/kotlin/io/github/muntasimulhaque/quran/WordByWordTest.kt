@@ -1,6 +1,5 @@
 package io.github.muntasimulhaque.quran
 
-import android.graphics.Bitmap
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -17,8 +16,6 @@ import org.junit.rules.ExternalResource
 import org.junit.rules.RuleChain
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
-import java.io.File
-
 /**
  * The word by word reading aid, end to end: a translation and its word list
  * are installed, the switch is turned on, and the study reading is checked to
@@ -65,26 +62,6 @@ class WordByWordTest {
         // failing reading aid.
         compose.waitUntil(timeoutMillis = 90_000) {
             compose.onAllNodesWithText("নামে", substring = true).fetchSemanticsNodes().isNotEmpty()
-        }
-        capture("word-by-word-bengali")
-    }
-
-    private fun capture(name: String) {
-        compose.waitForIdle()
-        Thread.sleep(400)
-        val bitmap = androidx.test.runner.screenshot.Screenshot.capture().bitmap
-        val given = InstrumentationRegistry.getArguments().getString("additionalTestOutputDir")
-        val directory = if (given.isNullOrBlank()) {
-            File(
-                InstrumentationRegistry.getInstrumentation().targetContext.getExternalFilesDir(null),
-                "screenshots",
-            )
-        } else {
-            File(given)
-        }
-        directory.mkdirs()
-        File(directory, "$name.png").outputStream().use { output ->
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, output)
         }
     }
 }

@@ -33,7 +33,7 @@
 
     <string name="settings_downloaded_hide">Hide downloaded surahs</string>
     <string name="settings_downloaded_show">Downloaded surahs (%1$d)</string>
-    <string name="settings_downloaded_empty">No surahs downloaded for this reciter yet.</string>
+    <string name="settings_downloaded_empty">No surahs downloaded for this reciter yet. Tap Play on any ayah to add one.</string>
 
     <string name="pack_type_translation">Translation</string>
     <string name="pack_type_tafsir">Tafsir</string>
@@ -93,7 +93,7 @@
     <string name="credit_husary_use">Murattal</string>
 
     <string name="settings_title_appearance">Appearance</string>
-    <string name="settings_title_text">Text</string>
+    <string name="settings_title_text">Font size</string>
     <string name="settings_title_reading">Reading</string>
     <string name="settings_title_reciters">Reciters</string>
     <string name="settings_title_translations">Translations</string>
@@ -106,17 +106,18 @@
     <string name="settings_none_yet">Not added yet</string>
     <string name="settings_chosen_count">%1$d chosen</string>
     <string name="settings_words_off">Hidden</string>
-    <string name="settings_group_theme">The page</string>
+    <string name="settings_group_theme">Theme</string>
     <string name="settings_theme_note">The whole app follows this: the page, the sheets, and the bars.</string>
     <string name="settings_theme_note_auto">The whole app follows your phone right now: the page, the sheets, and the bars. The page above is what you read by day.</string>
-    <string name="settings_group_sizes">Text size</string>
+    <string name="settings_group_sizes">Font size</string>
     <string name="settings_size_arabic">Quran text</string>
     <string name="settings_size_translation">Translation</string>
     <string name="settings_size_tafsir">Tafsir</string>
     <string name="settings_size_words">Word by word</string>
     <string name="settings_group_reciters">Reciters</string>
-    <string name="settings_reciter_installed">Installed · %1$s</string>
-    <string name="settings_reciter_size">%1$s to download</string>
+    <string name="settings_reciter_installed">Word timings installed · %1$s</string>
+    <string name="settings_reciter_size">%1$s of word timings</string>
+    <string name="settings_reciters_note">Word timings are what let the app mark the word being recited. The recitations themselves are added one surah at a time, when you tap Play while reading.</string>
     <string name="settings_group_translations">Translations</string>
     <string name="settings_translations_note">More than one may be on. Each one you turn on reads in its own place under the ayah, and the first is the one search reads.</string>
     <string name="settings_group_tafsirs">Tafsirs</string>

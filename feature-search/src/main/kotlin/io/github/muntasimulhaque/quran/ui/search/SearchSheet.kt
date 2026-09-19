@@ -4,10 +4,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -67,6 +66,7 @@ import io.github.muntasimulhaque.quran.feature.search.R
 import io.github.muntasimulhaque.quran.ui.rich.HighlightedText
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
+import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -195,10 +195,16 @@ private fun key(hit: SearchHit): String = when (hit) {
 }
 
 /**
- * The filter row under the field: chips for the sources a query reads, each
- * one on until the reader turns it off. It is a quiet line, not a mode: it
- * never hides the field and never asks for a confirmation, so a reader who
- * ignores it searches exactly as before.
+ * The filter row under the field: a labelled group of chips for the sources a
+ * query reads, each one on until the reader turns it off. It is a quiet line,
+ * not a mode: it never hides the field and never asks for a confirmation, so a
+ * reader who ignores it searches exactly as before.
+ *
+ * The chips wrap instead of scrolling sideways. A row that runs off the edge
+ * hides its own contents: a reader cannot turn off a source they cannot see,
+ * and a source they cannot see is a source they do not know is on. The label
+ * above the group says what the chips are, because "Translations" beside a
+ * search field could as easily be a filter as a result type.
  *
  * A source the reader does not have (a translation they have not added, a
  * tafsir that is not installed) is not offered, rather than offered and
@@ -211,34 +217,44 @@ private fun FilterRow(
     hasTafsirs: Boolean,
     onChange: (SearchSources) -> Unit,
 ) {
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-            .padding(start = 22.dp, end = 22.dp, top = 4.dp, bottom = 2.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+            .padding(start = 22.dp, end = 22.dp, top = Space.Line, bottom = Space.Tight),
     ) {
-        FilterChip(stringResource(R.string.search_filter_text), sources.text) {
-            onChange(sources.copy(text = it))
-        }
-        FilterChip(stringResource(R.string.search_filter_surahs), sources.surahs) {
-            onChange(sources.copy(surahs = it))
-        }
-        FilterChip(stringResource(R.string.search_filter_references), sources.references) {
-            onChange(sources.copy(references = it))
-        }
-        if (hasTranslations) {
-            FilterChip(stringResource(R.string.search_filter_translations), sources.translations) {
-                onChange(sources.copy(translations = it))
+        Text(
+            text = stringResource(R.string.search_filter),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        FlowRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = Space.Line),
+            horizontalArrangement = Arrangement.spacedBy(Space.Line),
+            verticalArrangement = Arrangement.spacedBy(Space.Line),
+        ) {
+            FilterChip(stringResource(R.string.search_filter_text), sources.text) {
+                onChange(sources.copy(text = it))
             }
-            FilterChip(stringResource(R.string.search_filter_words), sources.words) {
-                onChange(sources.copy(words = it))
+            FilterChip(stringResource(R.string.search_filter_surahs), sources.surahs) {
+                onChange(sources.copy(surahs = it))
             }
-        }
-        if (hasTafsirs) {
-            FilterChip(stringResource(R.string.search_filter_tafsirs), sources.tafsirs) {
-                onChange(sources.copy(tafsirs = it))
+            FilterChip(stringResource(R.string.search_filter_references), sources.references) {
+                onChange(sources.copy(references = it))
+            }
+            if (hasTranslations) {
+                FilterChip(stringResource(R.string.search_filter_translations), sources.translations) {
+                    onChange(sources.copy(translations = it))
+                }
+                FilterChip(stringResource(R.string.search_filter_words), sources.words) {
+                    onChange(sources.copy(words = it))
+                }
+            }
+            if (hasTafsirs) {
+                FilterChip(stringResource(R.string.search_filter_tafsirs), sources.tafsirs) {
+                    onChange(sources.copy(tafsirs = it))
+                }
             }
         }
     }
@@ -265,7 +281,7 @@ private fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit) 
                 },
             )
             .toggleable(value = on, role = Role.Checkbox, onValueChange = onChange)
-            .padding(horizontal = 12.dp, vertical = 7.dp),
+            .padding(horizontal = 12.dp, vertical = 9.dp),
     )
 }
 

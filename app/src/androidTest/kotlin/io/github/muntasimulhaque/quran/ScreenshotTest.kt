@@ -36,9 +36,10 @@ import java.io.File
  * device. The PNGs land in the app's external files directory under
  * `screenshots/`, and the pipeline pulls them out for review.
  *
- * The tour is deliberately small and stable: one page, its chrome, and the
- * study reading. The sheets and the card are covered by the other
- * instrumented tests, which assert behavior rather than looks.
+ * The tour is deliberately small: the eight frames the store lists, one
+ * surface each, captured in the order the listing names them. A ninth has to
+ * earn its place against the reading, so the tour is trimmed rather than
+ * allowed to grow back.
  *
  * It prepares its own library and its own settings first, so a photograph
  * never depends on what the last run left behind: the same frames come out
@@ -231,7 +232,7 @@ class ScreenshotTest {
     private fun runTheTour() {
         waitForAReading()
 
-        // The Mushaf, with nothing over it.
+        // 1. The Mushaf, with nothing over it.
         if (!inMushaf()) {
             revealChrome()
             rule.onNodeWithContentDescription("Mushaf").performClick()
@@ -240,11 +241,28 @@ class ScreenshotTest {
         hideChrome()
         capture("01-mushaf")
 
-        // The chrome over the page.
+        // 2. The chrome over the page: the mode switch, Browse, Search, and
+        // Settings, which is every door the reader has.
         revealChrome()
         capture("02-chrome")
 
-        // Search, with a word a reader would type.
+        // 3. The study reading of the same place, with its translation.
+        rule.onNodeWithContentDescription("Study").performClick()
+        rule.waitUntil(timeoutMillis = 15_000) {
+            rule.onAllNodesWithContentDescription("Study page").fetchSemanticsNodes().isNotEmpty()
+        }
+        Thread.sleep(1_200)
+        capture("03-study")
+
+        // 4. The surah opening, which is the top of the study list.
+        rule.onNodeWithContentDescription("Study page")
+            .performTouchInput { swipeDown(startY = height * 0.25f, endY = height * 0.85f, durationMillis = 200) }
+        Thread.sleep(800)
+        capture("04-surah-opening")
+
+        // 5. Search, with a word a reader would type, and the filter group
+        // under the field.
+        revealChrome()
         rule.onNodeWithContentDescription("Search").performClick()
         rule.waitUntil(timeoutMillis = 10_000) {
             rule.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty()
@@ -261,78 +279,30 @@ class ScreenshotTest {
         capture("05-search")
         back()
 
-        // Settings.
+        // 6. The settings hub.
         revealChrome()
         rule.onNodeWithContentDescription("Settings").performClick()
         waitFor("Appearance")
         capture("06-settings")
-        rule.onNodeWithText("About").performClick()
-        waitFor("Credits and licenses")
-        rule.onNodeWithText("Credits and licenses").performClick()
-        rule.waitUntil(timeoutMillis = 10_000) {
-            rule.onAllNodesWithText("QPC V2 page fonts").fetchSemanticsNodes().isNotEmpty()
-        }
-        Thread.sleep(500)
-        capture("12-credits")
-        back()
-        Thread.sleep(600)
-        capture("13-about")
-        back()
         back()
 
-        // Browse: the surahs, the juz, Last read, and the saved.
+        // 7. Browse, the surah list.
         revealChrome()
         rule.onNodeWithContentDescription("Browse the Quran").performClick()
         waitFor("Al-Fatihah")
-        capture("07-browse-surahs")
-        rule.onNodeWithText("Juz").performClick()
-        Thread.sleep(800)
-        capture("08-browse-juz")
-        rule.onNodeWithText("Last Read").performClick()
-        Thread.sleep(900)
-        capture("09-browse-last-read")
-        rule.onAllNodesWithText("Saved").onFirst().performClick()
-        Thread.sleep(800)
-        capture("14-browse-saved")
+        capture("07-browse")
         back()
 
-        // The study reading of the same place.
-        revealChrome()
-        rule.onNodeWithContentDescription("Study").performClick()
-        rule.waitUntil(timeoutMillis = 15_000) {
-            rule.onAllNodesWithContentDescription("Study page").fetchSemanticsNodes().isNotEmpty()
-        }
-        Thread.sleep(1_200)
-        capture("03-study")
-
-        // The translations page, where more than one may now be on.
-        revealChrome()
-        rule.onNodeWithContentDescription("Settings").performClick()
-        waitFor("Translations")
-        rule.onNodeWithText("Translations").performClick()
-        waitFor("Saheeh International")
-        Thread.sleep(700)
-        capture("15-translations")
-        back()
-        back()
-
-        // The surah opening, which is the top of the study list.
-        rule.onNodeWithContentDescription("Study page")
-            .performTouchInput { swipeDown(startY = height * 0.25f, endY = height * 0.85f, durationMillis = 200) }
-        Thread.sleep(800)
-        capture("04-study-surah-opening")
-
-        // An ayah, its actions, and its card.
-        // The Arabic line sits at the top of the block; the markers, which
-        // are links, sit lower, and a link would take the press instead.
+        // 8. An ayah's actions, and the card they open. The Arabic line sits
+        // at the top of the block; the markers, which are links, sit lower,
+        // and a link would take the press instead.
         rule.onNodeWithText("1:1").performTouchInput {
             longClick(Offset(centerX, top + height * 0.15f))
         }
         Thread.sleep(600)
-        capture("10-ayah-actions")
         rule.onNodeWithContentDescription("More").performClick()
         Thread.sleep(1_200)
-        capture("11-ayah-card")
+        capture("08-ayah-card")
         back()
 
         // Leave the app on the Mushaf page for the next run.

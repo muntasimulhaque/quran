@@ -28,6 +28,7 @@ import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.theme.LatinReading
+import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 
 /**
@@ -36,6 +37,11 @@ import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
  * under it ("Al-Fatihah" then "Ayah 1"), and the mode and the moment as the
  * quiet third line, so a place is recognised by its name first and by when it
  * was left second.
+ *
+ * The ayah's own text is deliberately not drawn here. A place is a place:
+ * the reader is looking for where they were, and a list of Arabic lines and
+ * translations makes them read every row to find it. The text is one tap
+ * away, which is the whole point of the row.
  */
 @Composable
 internal fun LastReadList(
@@ -58,8 +64,8 @@ internal fun LastReadList(
                 surah = text?.surahName
                     ?: stringResource(R.string.saved_reference_fallback, place.ayahNumber),
                 ayah = text?.ayahLabel,
-                arabic = text?.arabic.orEmpty(),
-                translation = text?.translation,
+                arabic = "",
+                translation = null,
                 detail = stringResource(
                     R.string.last_read_detail,
                     readingModeName(place.mode),
@@ -136,7 +142,7 @@ private fun AyahRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 22.dp, vertical = 12.dp),
+            .padding(horizontal = 22.dp, vertical = 14.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
@@ -168,7 +174,7 @@ private fun AyahRow(
                 text = detail,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 2.dp),
+                modifier = Modifier.padding(top = Space.Line),
             )
         }
         if (arabic.isNotEmpty()) {
@@ -185,7 +191,7 @@ private fun AyahRow(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 6.dp),
+                    .padding(top = Space.Line),
             )
         }
         translation?.let { body ->
@@ -195,7 +201,7 @@ private fun AyahRow(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = 6.dp),
+                modifier = Modifier.padding(top = Space.Line),
             )
         }
         note?.takeIf { it.isNotBlank() }?.let {
@@ -206,7 +212,7 @@ private fun AyahRow(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
-                    .padding(top = 8.dp)
+                    .padding(top = Space.Block)
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(10.dp))
                     .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.06f))

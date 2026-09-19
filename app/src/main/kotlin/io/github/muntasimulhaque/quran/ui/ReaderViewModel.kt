@@ -293,6 +293,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         if (database.pageOfAyah(settings.ayah) != page) {
             val ayah = database.firstAyahOfPage(page)
             if (settings.ayah != ayah) {
+                leaveSurah(surahOf(ayah)?.number)
                 settings = settings.copy(ayah = ayah)
                 viewModelScope.launch { settingsStore.setAyah(ayah) }
                 notePlace(ayah, ReadingMode.Mushaf)
@@ -364,10 +365,26 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         val database = contentDatabase ?: return
         val clamped = ayah.coerceIn(1, 6236)
         val mode = settings.mode
+        leaveSurah(surahOf(clamped)?.number)
         settings = settings.copy(ayah = clamped)
         viewModelScope.launch {
             setPlace(clamped, database, persist = true)
             lastReadStore.record(clamped, mode)
+        }
+    }
+
+    /**
+     * A download offer belongs to the surah it was asked for. Moving to
+     * another surah takes it away: a request for one surah's audio must never
+     * sit over a different surah, waiting for a tap that no longer means what
+     * its own text said. The surah is read from the in-memory index, so a
+     * page turn pays nothing for the check.
+     */
+    private fun leaveSurah(surah: Int?) {
+        if (surah == null) return
+        listenOffer?.takeIf { it.surah != surah }?.let { cancelListen() }
+        playback.state.value.pendingDownloadSurah?.takeIf { it != surah }?.let {
+            playback.cancelDownload()
         }
     }
 

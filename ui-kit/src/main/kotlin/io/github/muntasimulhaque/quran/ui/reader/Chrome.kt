@@ -129,24 +129,45 @@ fun IconGlyph(
                 drawLine(tint, Offset(w * 0.74f, h * 0.26f), Offset(w * 0.26f, h * 0.74f), w * 0.09f)
             }
             // The two reading modes are one pair, so they are drawn as one
-            // pair: the same page in the same hand, and only the lines on it
-            // differ. The Mushaf is the printed page, its rules running the
-            // full width of the text block; the study page is an ayah with
-            // its reading set in under it, so every second rule is short.
-            // Both use the width and the corner the other glyphs use, and
-            // neither leans on a lighter tone that nothing else in the set
-            // carries.
+            // pair and never as two lookalikes: the Mushaf is the printed
+            // Book itself, open at the spine with a leaf to each side, and
+            // the study page is a single page with an ayah and its reading
+            // set in under it, so every second rule is short. Both use the
+            // stroke weight the other glyphs use, and neither leans on a
+            // lighter tone that nothing else in the set carries.
             Icon.MushafPage -> {
-                pageOutline(tint)
-                for (index in 0 until 4) {
-                    val y = h * (0.33f + index * 0.155f)
-                    drawLine(
-                        color = tint,
-                        start = Offset(w * 0.29f, y),
-                        end = Offset(w * 0.71f, y),
-                        strokeWidth = w * 0.075f,
-                    )
-                }
+                val spine = w * 0.5f
+                val top = h * 0.24f
+                val bottom = h * 0.78f
+                val shoulder = h * 0.32f
+                val outer = w * 0.17f
+                val stroke = w * 0.075f
+                // The two leaves: each runs from the spine's top corner out
+                // to the cover edge and back to the spine's foot.
+                drawPath(
+                    Path().apply {
+                        moveTo(spine, top)
+                        lineTo(outer, shoulder)
+                        lineTo(outer, bottom - h * 0.06f)
+                        lineTo(spine, bottom)
+                    },
+                    tint,
+                    style = Stroke(width = stroke),
+                )
+                drawPath(
+                    Path().apply {
+                        moveTo(spine, top)
+                        lineTo(w - outer, shoulder)
+                        lineTo(w - outer, bottom - h * 0.06f)
+                        lineTo(spine, bottom)
+                    },
+                    tint,
+                    style = Stroke(width = stroke),
+                )
+                // The spine, and one line of reading on each leaf.
+                drawLine(tint, Offset(spine, top), Offset(spine, bottom), stroke)
+                drawLine(tint, Offset(w * 0.28f, h * 0.48f), Offset(w * 0.4f, h * 0.48f), stroke)
+                drawLine(tint, Offset(w * 0.6f, h * 0.48f), Offset(w * 0.72f, h * 0.48f), stroke)
             }
             Icon.StudyPage -> {
                 pageOutline(tint)

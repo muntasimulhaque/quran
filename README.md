@@ -4,12 +4,15 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 0.5 (versionCode 5) is submitted to Google Play for review, and
-0.4 (versionCode 4) is with Play. This session corrected the reader's report,
-moved signing into CI (the `signed-bundle` job signs on every push to `main`
-and leaves the bundle in the run's own private artifact, so nothing signed is
-ever posted publicly), and fixed a real bug the store screenshots surfaced:
-tafsir search results no longer show raw markup. The bundle carries only the
+**Status:** 0.6 (versionCode 6) is handed over for Google Play. This session
+answered the reader's second report: the ayah card's footnotes now open from
+their marker like the study reading, the word by word aid is larger with its
+Arabic centered over each meaning, the search filters wrap under a label so
+none are hidden, settings gained room and clearer names, reciter rows say that
+their download is the word timings while the audio comes per surah, a download
+request leaves with the surah it belongs to, and a finished surah no longer
+leaves its last ayah marked. The store screenshot set is now the eight frames
+the listing names, captured by the tour itself. The bundle carries only the
 core pack, the Quran text and its page layout, with everything else added from
 the project's own Releases when a reader asks for it. The listing, icon,
 feature graphic, and screenshots per form factor are in
