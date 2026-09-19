@@ -48,7 +48,11 @@ class WordByWordTest {
 
         ActivityScenario.launch(MainActivity::class.java).use {
             // The first Bengali meaning of Al-Fatihah 1:1, from the word list.
-            rule.waitUntil(timeoutMillis = 25_000) {
+            // The wait is generous on purpose: a software-rendered emulator
+            // takes its time opening the content library, and a slow machine
+            // is not a failing reading aid. The screenshot tour waits the same
+            // way for the same reason.
+            rule.waitUntil(timeoutMillis = 90_000) {
                 rule.onAllNodesWithText("নামে", substring = true).fetchSemanticsNodes().isNotEmpty()
             }
             capture("word-by-word-bengali")
