@@ -1,6 +1,9 @@
 package io.github.muntasimulhaque.quran.ui.theme
 
 import androidx.compose.material3.Typography
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -24,6 +27,20 @@ val Literata = FontFamily(
 
 /** The display voice of the Mushaf ornaments. */
 val Amiri = FontFamily(Font(R.font.amiri_quran))
+
+/**
+ * The reading voice of the Quran's own text: the KFGQPC Hafs face, the same
+ * one the study reading and the word by word aid are drawn in. It is a font
+ * file rather than a resource, so it is loaded from the assets; use
+ * [rememberHafs] to get the family on a surface that shows an ayah.
+ */
+@Composable
+fun rememberHafs(): FontFamily {
+    val context = LocalContext.current
+    return remember(context) {
+        FontFamily(Font(path = "fonts/UthmanicHafs_V22.ttf", assetManager = context.assets))
+    }
+}
 
 /**
  * Every style the app can ask for, in the interface's own voice. Nothing is

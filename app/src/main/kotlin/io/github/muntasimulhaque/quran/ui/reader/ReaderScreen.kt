@@ -51,11 +51,11 @@ import io.github.muntasimulhaque.quran.BuildConfig
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
+import io.github.muntasimulhaque.quran.data.ReadPlace
 import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
-import io.github.muntasimulhaque.quran.ui.rememberSavedTransfer
 import io.github.muntasimulhaque.quran.ui.browse.BrowseSheet
 import io.github.muntasimulhaque.quran.ui.mushaf.MushafPage
 import io.github.muntasimulhaque.quran.ui.mushaf.PAGE_ASPECT
@@ -84,7 +84,7 @@ import kotlin.math.min
 private const val CHROME_MILLIS = 7000L
 
 /** Which sheet is over the reader, if any. */
-private enum class ReaderSheet { None, Browse, Search, Settings, Saved }
+private enum class ReaderSheet { None, Browse, Search, Settings }
 
 /**
  * The reading screen: one surface, two modes, and chrome that only appears
@@ -102,6 +102,7 @@ fun ReaderScreen(
     val themeKey = LocalPageThemeName.current
     val playback by viewModel.playbackState.collectAsStateWithLifecycle()
     val saved by viewModel.saved.collectAsStateWithLifecycle()
+    val lastRead by viewModel.lastRead.collectAsStateWithLifecycle()
 
     var chrome by remember { mutableStateOf(false) }
     var selected by remember { mutableStateOf<Ayah?>(null) }
@@ -109,7 +110,6 @@ fun ReaderScreen(
     var sheet by remember { mutableStateOf(ReaderSheet.None) }
     var touch by remember { mutableIntStateOf(0) }
     val context = androidx.compose.ui.platform.LocalContext.current
-    val transfer = rememberSavedTransfer(viewModel)
 
     // Reading with the screen awake is part of reading.
     val view = LocalView.current
@@ -173,12 +173,11 @@ fun ReaderScreen(
                         loadRows = {
                             viewModel.studyRows(
                                 surah = surah.number,
-                                pack = settings.translationPack,
                                 wordByWord = settings.wordByWord,
                             )
                         },
                         settings = settings,
-                        hasTranslation = viewModel.installedTranslationPacks.isNotEmpty(),
+                        hasTranslation = viewModel.enabledTranslationPacks.isNotEmpty(),
                         nextSurahName = viewModel.surahs
                             .firstOrNull { it.number == surah.number + 1 }?.nameSimple,
                         selected = selected,
@@ -211,6 +210,8 @@ fun ReaderScreen(
             onBrowse = { sheet = ReaderSheet.Browse },
             onSearch = { sheet = ReaderSheet.Search },
             onSettings = { sheet = ReaderSheet.Settings },
+            mode = settings.mode,
+            onMode = { viewModel.switchMode(it) },
             modifier = Modifier.align(Alignment.TopCenter),
         )
 
@@ -260,13 +261,7 @@ fun ReaderScreen(
             }
         }
 
-        val bottomItems = selected != null || playback.isAnything() || viewModel.listenOffer != null || chrome
-        ModeHint(
-            mode = settings.mode,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 92.dp),
-        )
+        val bottomItems = selected != null || playback.isAnything() || viewModel.listenOffer != null
         AnimatedVisibility(
             visible = bottomItems,
             enter = fadeIn() + slideInVertically { it / 3 },
@@ -278,8 +273,6 @@ fun ReaderScreen(
                 playback = playback,
                 saved = saved,
                 selected = selected,
-                chrome = chrome,
-                settings = settings,
                 onPlay = { ayah ->
                     onPlaybackPermission()
                     viewModel.playAyah(ayah.number)
@@ -288,21 +281,17 @@ fun ReaderScreen(
                     selected = null
                     touch++
                 },
-                onListen = {
-                    val target = selected?.number ?: settings.ayah
-                    onPlaybackPermission()
-                    viewModel.playAyah(target)
-                    selected = null
-                },
-                onMode = { viewModel.switchMode(it) },
-                onSaved = { sheet = ReaderSheet.Saved },
-                onReciter = { sheet = ReaderSheet.Settings },
                 onMore = { ayah ->
                     cardAyah = ayah
                     selected = null
                 },
                 onShareText = { text -> shareAyah(text) },
                 onTouch = { touch++ },
+                onReciter = { sheet = ReaderSheet.Settings },
+                reciterName = shortReciterName(
+                    settings.recitation,
+                    viewModel.recitations.firstOrNull { it.id == settings.recitation }?.name.orEmpty(),
+                ),
             )
         }
     }
@@ -313,7 +302,8 @@ fun ReaderScreen(
             content = content,
             surahs = viewModel.surahs,
             saved = saved,
-            translationPack = settings.translationPack,
+            lastRead = lastRead,
+            translationPack = viewModel.enabledTranslationPacks.firstOrNull()?.id.orEmpty(),
             onDismiss = { sheet = ReaderSheet.None },
             onAyah = { ayahNumber ->
                 sheet = ReaderSheet.None
@@ -324,27 +314,11 @@ fun ReaderScreen(
                 viewModel.jumpToSurah(number)
             },
             onRemove = { viewModel.removeSaved(it) },
-        )
-        ReaderSheet.Saved -> BrowseSheet(
-            content = content,
-            surahs = viewModel.surahs,
-            saved = saved,
-            translationPack = settings.translationPack,
-            startOnSaved = true,
-            onDismiss = { sheet = ReaderSheet.None },
-            onAyah = { ayahNumber ->
-                sheet = ReaderSheet.None
-                viewModel.jumpToAyah(ayahNumber)
-            },
-            onSurah = { number ->
-                sheet = ReaderSheet.None
-                viewModel.jumpToSurah(number)
-            },
-            onRemove = { viewModel.removeSaved(it) },
+            onForget = { viewModel.forgetPlace(it) },
         )
         ReaderSheet.Search -> SearchSheet(
             content = content,
-            translationPacks = viewModel.translationPacks.map { it.id },
+            translationPacks = viewModel.enabledTranslationPacks.map { it.id },
             tafsirPacks = viewModel.enabledTafsirPacks.map { it.id },
             packNames = viewModel.packs.associate { it.id to it.name },
             packLanguages = viewModel.packs.associate { it.id to it.language },
@@ -372,12 +346,10 @@ fun ReaderScreen(
                 )
             },
             recitations = viewModel.recitations,
-            savedCount = saved.size,
-            dataNotice = viewModel.dataNotice,
             contentCheck = viewModel.contentCheck,
             version = BuildConfig.VERSION_NAME,
             preview = {
-                withContext(Dispatchers.IO) { viewModel.studyRow(settings.ayah, settings.translationPack) }
+                withContext(Dispatchers.IO) { viewModel.studyRow(settings.ayah) }
             },
             downloadedSurahs = { recitation -> viewModel.downloadedSurahs(recitation) },
             actions = SettingsActions(
@@ -385,10 +357,9 @@ fun ReaderScreen(
                 onTypeSize = { role, step -> viewModel.setTypeSize(role, step) },
                 onKeepAwake = { viewModel.setKeepAwake(it) },
                 onFollowReciter = { viewModel.setFollowReciter(it) },
-                onShowFootnotes = { viewModel.setShowFootnotes(it) },
                 onWordByWord = { viewModel.setWordByWord(it) },
                 onSelectRecitation = { viewModel.selectRecitation(it) },
-                onTranslationPack = { viewModel.setTranslationPack(it) },
+                onToggleTranslation = { viewModel.toggleTranslationPack(it) },
                 onToggleTafsir = { viewModel.toggleTafsirPack(it) },
                 onInstallPack = { viewModel.installPack(it) },
                 onRemovePack = { viewModel.removePack(it) },
@@ -396,15 +367,10 @@ fun ReaderScreen(
                 onRemoveDownloads = { recitation, surah ->
                     viewModel.removeDownloads(recitation, surah)
                 },
-                onExport = transfer.onExport,
-                onImport = transfer.onImport,
                 onCheckContent = { viewModel.checkContent() },
                 onOpenLink = { url -> openLink(url) },
             ),
-            onDismiss = {
-                sheet = ReaderSheet.None
-                transfer.onNoticeShown()
-            },
+            onDismiss = { sheet = ReaderSheet.None },
         )
     }
 
@@ -415,7 +381,7 @@ fun ReaderScreen(
             ayah = ayah,
             surahName = viewModel.surahs.firstOrNull { it.number == ayah.surah }?.nameSimple
                 ?: stringResource(R.string.surah_fallback_name, ayah.surah),
-            translationPack = viewModel.translationPacks.firstOrNull { it.id == settings.translationPack },
+            translations = viewModel.enabledTranslationPacks,
             tafsirPacks = viewModel.enabledTafsirPacks,
             settings = settings,
             wordLanguage = viewModel.wordLanguage,
@@ -543,6 +509,8 @@ private fun ReaderTopBar(
     onBrowse: () -> Unit,
     onSearch: () -> Unit,
     onSettings: () -> Unit,
+    mode: ReadingMode,
+    onMode: (ReadingMode) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     AnimatedVisibility(
@@ -567,8 +535,34 @@ private fun ReaderTopBar(
                 .padding(start = 20.dp, end = 8.dp, top = 8.dp, bottom = 22.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            ReadingTitle(surah = title, detail = detail)
-            Row(Modifier.weight(1f), horizontalArrangement = Arrangement.End) {
+            ReadingTitle(surah = title, detail = detail, modifier = Modifier.weight(1f))
+            Row(horizontalArrangement = Arrangement.End) {
+                // The switch is one door, not two: it offers the other reading
+                // and never itself, so the bar says where a tap can go rather
+                // than naming where the reader already is.
+                IconButton(
+                    icon = if (mode == ReadingMode.Mushaf) {
+                        Icon.StudyPage
+                    } else {
+                        Icon.MushafPage
+                    },
+                    description = stringResource(
+                        if (mode == ReadingMode.Mushaf) {
+                            io.github.muntasimulhaque.quran.uikit.R.string.mode_study
+                        } else {
+                            io.github.muntasimulhaque.quran.uikit.R.string.mode_mushaf
+                        },
+                    ),
+                    onClick = {
+                        onMode(
+                            if (mode == ReadingMode.Mushaf) {
+                                ReadingMode.Study
+                            } else {
+                                ReadingMode.Mushaf
+                            },
+                        )
+                    },
+                )
                 IconButton(Icon.Browse, stringResource(R.string.action_browse), onBrowse)
                 IconButton(Icon.Search, stringResource(R.string.action_search), onSearch)
                 IconButton(Icon.Settings, stringResource(R.string.action_settings), onSettings)
@@ -584,17 +578,13 @@ private fun BottomStack(
     playback: PlaybackUiState,
     saved: List<SavedAyah>,
     selected: Ayah?,
-    chrome: Boolean,
-    settings: io.github.muntasimulhaque.quran.data.AppSettings,
     onPlay: (Ayah) -> Unit,
     onDeselect: () -> Unit,
-    onListen: () -> Unit,
-    onMode: (ReadingMode) -> Unit,
-    onSaved: () -> Unit,
-    onReciter: () -> Unit,
     onMore: (Ayah) -> Unit,
     onShareText: (String) -> Unit,
     onTouch: () -> Unit,
+    onReciter: () -> Unit,
+    reciterName: String,
 ) {
     Column(
         modifier = Modifier
@@ -687,10 +677,7 @@ private fun BottomStack(
                 onOfferConfirm = { viewModel.confirmListen() },
                 onOfferCancel = { viewModel.cancelListen() },
                 onOfferReciter = { viewModel.chooseListenReciter(it) },
-                reciterName = shortReciterName(
-                    settings.recitation,
-                    viewModel.recitations.firstOrNull { it.id == settings.recitation }?.name.orEmpty(),
-                ),
+                reciterName = reciterName,
                 reference = playback.reference,
                 pendingLabel = playback.pendingDownloadSurah?.let { surah ->
                     val name = viewModel.surahs.firstOrNull { it.number == surah }?.nameSimple
@@ -716,85 +703,6 @@ private fun BottomStack(
                 },
             )
         }
-
-        if (chrome && selected == null) {
-            ReaderBottomBar(
-                mode = settings.mode,
-                onMode = onMode,
-                onListen = onListen,
-                onSaved = onSaved,
-                listenActive = playback.isPlaying,
-            )
-        }
-    }
-}
-
-/**
- * The two reading modes are pictures, so their names are said once, quietly,
- * when the mode changes: a reader who has never seen the switch learns what
- * each picture means, and then never sees the words again.
- */
-@Composable
-private fun ModeHint(mode: ReadingMode, modifier: Modifier = Modifier) {
-    var hint by remember { mutableStateOf<String?>(null) }
-    var shown by remember { mutableStateOf("") }
-    var last by remember { mutableStateOf(mode) }
-    val mushaf = stringResource(io.github.muntasimulhaque.quran.uikit.R.string.mode_mushaf)
-    val study = stringResource(io.github.muntasimulhaque.quran.uikit.R.string.mode_study)
-    LaunchedEffect(mode) {
-        if (mode == last) return@LaunchedEffect
-        last = mode
-        shown = if (mode == ReadingMode.Mushaf) mushaf else study
-        hint = shown
-        delay(1600)
-        hint = null
-    }
-    AnimatedVisibility(
-        visible = hint != null,
-        enter = fadeIn(),
-        exit = fadeOut(),
-        modifier = modifier,
-    ) {
-        Text(
-            text = shown,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-                .clip(RoundedCornerShape(50))
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.92f))
-                .padding(horizontal = 14.dp, vertical = 7.dp),
-        )
-    }
-}
-
-@Composable
-private fun ReaderBottomBar(
-    mode: ReadingMode,
-    onMode: (ReadingMode) -> Unit,
-    onListen: () -> Unit,
-    onSaved: () -> Unit,
-    listenActive: Boolean,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        MaterialTheme.colorScheme.background.copy(alpha = 0f),
-                        MaterialTheme.colorScheme.background.copy(alpha = 0.92f),
-                        MaterialTheme.colorScheme.background,
-                    ),
-                ),
-            )
-            .padding(horizontal = 10.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        LabeledIconButton(Icon.Listen, stringResource(R.string.action_listen), onListen, active = listenActive)
-        Row(Modifier.weight(1f), horizontalArrangement = Arrangement.Center) {
-            ModeSwitch(mode, onMode)
-        }
-        LabeledIconButton(Icon.Bookmark, stringResource(R.string.action_saved), onSaved)
     }
 }
 
@@ -836,7 +744,7 @@ private fun AyahActions(
             )
         }
         TextAction(
-            label = stringResource(if (isSaved) R.string.action_saved else R.string.action_save),
+            label = stringResource(R.string.action_save),
             icon = if (isSaved) Icon.BookmarkFilled else Icon.Bookmark,
             onClick = onSave,
             active = isSaved,

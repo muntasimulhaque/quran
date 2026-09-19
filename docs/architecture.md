@@ -12,8 +12,8 @@ build a cycle, so the rule enforces itself.
                  and the search primitives. No Android, no UI.
 :data            content and memory: the pack catalog and store, the content
                  database (the core pack plus attached packs), the settings,
-                 the saved ayahs and notes, the recitation files and
-                 downloads. No UI.
+                 the saved ayahs and notes, the last-read history, the
+                 recitation files and downloads. No UI.
 :content-assets  no code: the fonts the app is drawn with (Inter, Literata,
                  Amiri Quran). The generated assets (page fonts, study font,
                  core pack, catalog, recitation manifest) are wired in by the
@@ -25,7 +25,7 @@ build a cycle, so the rule enforces itself.
                  bitmaps, the cache, and the washes.
 :feature-study   the per-surah reading and the ayah card.
 :feature-search  the search sheet.
-:feature-browse  the surahs, the juz, and the saved list.
+:feature-browse  the surahs, the juz, the last-read places, and the saved list.
 :feature-playback the player: controller, session service, and the bar.
 :feature-settings the settings sheet, as pure data in and callbacks out.
 :app             the wiring: the activity, the view model that holds the
@@ -89,8 +89,8 @@ other.
 * `:core:test` runs the normalizer, parser, search primitives, and the scan
   that refuses an em dash anywhere in the repository.
 * `:data:testDebugUnitTest` runs the pack id contract, and
-  `:data:connectedDebugAndroidTest` runs the saved store, its export and
-  import, and the recitation manifest.
+  `:data:connectedDebugAndroidTest` runs the saved store, its shape, the
+  last-read history, and the recitation manifest.
 * `:app:connectedDebugAndroidTest` runs the search suite against the shipped
   content, the word by word aid in both languages, and the screenshot tour
   that walks every surface, waiting for the screen to settle before it keeps

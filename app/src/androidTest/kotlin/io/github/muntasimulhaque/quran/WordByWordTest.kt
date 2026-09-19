@@ -40,7 +40,7 @@ class WordByWordTest {
         store.install("words-bn")
         val settings = SettingsStore(context)
         runBlocking {
-            settings.setTranslationPack("translation-taisirul-quran-bn")
+            settings.setTranslationPacks(setOf("translation-taisirul-quran-bn"))
             settings.setWordByWord(true)
             settings.setMode(ReadingMode.Study)
             for (role in TypeRole.entries) settings.setTypeSize(role, TextSize.DEFAULT)

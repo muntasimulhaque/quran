@@ -19,7 +19,9 @@ import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.PackVerifier
 import io.github.muntasimulhaque.quran.data.PageFontStore
 import io.github.muntasimulhaque.quran.data.PagePosition
+import io.github.muntasimulhaque.quran.data.LastReadStore
 import io.github.muntasimulhaque.quran.data.PackType
+import io.github.muntasimulhaque.quran.data.ReadPlace
 import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.Recitation
 import io.github.muntasimulhaque.quran.data.RecitationManifest
@@ -30,13 +32,13 @@ import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.StudyRow
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.TextSize
+import io.github.muntasimulhaque.quran.data.TranslationLine
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.playback.PlaybackController
 import io.github.muntasimulhaque.quran.playback.ListenOffer
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.settings.ContentCheck
-import io.github.muntasimulhaque.quran.ui.settings.DataNotice
 import io.github.muntasimulhaque.quran.ui.mushaf.PageKey
 import io.github.muntasimulhaque.quran.ui.mushaf.PageRenderer
 import io.github.muntasimulhaque.quran.ui.mushaf.StartupPage
@@ -64,6 +66,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     private val settingsStore = SettingsStore(application)
     private val pageFonts = PageFontStore(application)
     private val savedStore = SavedStore(application)
+    private val lastReadStore = LastReadStore(application)
     private val playback = PlaybackController(application, viewModelScope)
     private val manifest = RecitationManifest.load(application)
     private val recitationStore = RecitationStore(application)
@@ -109,22 +112,33 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     val content: ContentDatabase? get() = contentDatabase
     val fonts: PageFontStore get() = pageFonts
     val saved: StateFlow<List<SavedAyah>> = savedStore.saved
+
+    /** Where the reader has been reading, newest first. */
+    val lastRead: StateFlow<List<ReadPlace>> = lastReadStore.places
     val playbackState: StateFlow<PlaybackUiState> = playback.state
 
     val translationPacks: List<ContentPack> get() = packs.filter { it.type == PackType.Translation }
     val tafsirPacks: List<ContentPack> get() = packs.filter { it.type == PackType.Tafsir }
-    val installedTranslationPacks: List<ContentPack>
-        get() = translationPacks.filter { it.installed }
+
+    /**
+     * The translations the reader turned on, in catalog order. More than one
+     * may be on, and each is drawn in its own column under the ayah; the
+     * first is the one search, share, and the word by word aid read.
+     */
+    val enabledTranslationPacks: List<ContentPack>
+        get() = translationPacks.filter { it.installed && it.id in settings.translationPacks }
+
+    /** The first translation turned on, or null when the reader has none. */
+    val selectedTranslation: ContentPack? get() = enabledTranslationPacks.firstOrNull()
+
     val enabledTafsirPacks: List<ContentPack>
         get() = tafsirPacks.filter { it.id in settings.tafsirPacks && it.installed }
 
-    val selectedTranslation: ContentPack?
-        get() = translationPacks.firstOrNull { it.id == settings.translationPack && it.installed }
-
     /**
-     * The language the word by word aid should speak: the language of the
-     * reading the reader chose, so the meanings under an ayah and the words in
-     * a card match the translation beside them.
+     * The word by word aid should speak the language of the reading the reader
+     * chose, so the meanings under an ayah and the words in a card match the
+     * translation beside them. With more than one translation on, the first
+     * one decides.
      */
     val wordLanguage: String get() = selectedTranslation?.language ?: "en"
 
@@ -136,10 +150,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     )
 
     var packSetup by mutableStateOf<PackSetup?>(null)
-        private set
-
-    /** What the last export or import did, said once under the rows. */
-    var dataNotice by mutableStateOf<DataNotice?>(null)
         private set
 
     /** What the content self check is doing, or what it found. */
@@ -156,14 +166,14 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch { startupPage = renderer.loadStartupPage() }
         openLibrary()
         viewModelScope.launch { savedStore.load() }
+        viewModelScope.launch { lastReadStore.load() }
+        // Settings are read once while the library opens. After that the view
+        // model owns them: it writes every change and keeps the in-memory copy
+        // in step, so a late echo of an earlier write can never reach back and
+        // move the reader's place.
         viewModelScope.launch {
             settingsStore.settings.collect { next ->
-                val database = contentDatabase
-                if (database == null) {
-                    settings = next
-                } else {
-                    applySettings(next, database)
-                }
+                if (contentDatabase == null) settings = next
             }
         }
         // The reader follows the recitation when they asked to.
@@ -208,6 +218,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             packs = database.packs()
             recitations = database.recitations()
             setPlace(stored.ayah, database, persist = false)
+            lastReadStore.record(stored.ayah, stored.mode)
             ready = true
             // The tafsir index is the one thing a first search would wait for,
             // so it is built now, on a worker, while the reader is reading.
@@ -221,25 +232,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         openLibrary()
     }
 
-    private suspend fun applySettings(next: AppSettings, database: ContentDatabase) {
-        val previous = settings
-        settings = next
-        if (previous.ayah != next.ayah || !ready) {
-            setPlace(next.ayah, database, persist = false)
-        }
-        if (previous.translationPack != next.translationPack ||
-            previous.wordByWord != next.wordByWord
-        ) {
-            clearRowCache()
-        }
-    }
-
-    /**
-     * The surah of every ayah and the first ayah of every surah, computed
-     * once from the surah table's own counts. The Quran's ayah numbering is a
-     * single ascending run, so this is arithmetic, not a query: the study
-     * list asks for it on every scroll and the top bar asks on every tap.
-     */
     private fun indexSurahs() {
         val byAyah = IntArray(TOTAL_AYAHS + 1)
         val firstAyah = IntArray(115)
@@ -303,6 +295,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             if (settings.ayah != ayah) {
                 settings = settings.copy(ayah = ayah)
                 viewModelScope.launch { settingsStore.setAyah(ayah) }
+                notePlace(ayah, ReadingMode.Mushaf)
             }
         }
         // The page picture is written once the reader rests, not while they
@@ -326,12 +319,30 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         if (settings.ayah == ayah) return
         settings = settings.copy(ayah = ayah)
         viewModelScope.launch { settingsStore.setAyah(ayah) }
+        notePlace(ayah, ReadingMode.Study)
     }
+
+    /**
+     * Notes that the reader rested on this ayah. A scroll writes many of
+     * these in a row, so only the last one inside a short window is kept:
+     * the list is places the reader stopped at, not a log of every ayah their
+     * finger crossed. One place per sitting is the intent, and this is what
+     * makes it true when the reader is scrolling.
+     */
+    private fun notePlace(ayah: Int, mode: ReadingMode) {
+        placeJob?.cancel()
+        placeJob = viewModelScope.launch {
+            delay(PLACE_SETTLE_MS)
+            lastReadStore.record(ayah, mode)
+        }
+    }
+
+    private var placeJob: Job? = null
 
     /** The ayah, its translation, and its reference, for copy and share. */
     suspend fun ayahShareText(ayah: Ayah): String {
         val translation = withContext(Dispatchers.IO) {
-            studyRow(ayah.number, settings.translationPack)?.translation?.text
+            studyRow(ayah.number)?.translations?.firstOrNull()?.text?.text
         }
         val surahName = surahs.firstOrNull { it.number == ayah.surah }?.nameSimple ?: "Surah ${ayah.surah}"
         return buildString {
@@ -352,8 +363,12 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     fun jumpToAyah(ayah: Int) {
         val database = contentDatabase ?: return
         val clamped = ayah.coerceIn(1, 6236)
+        val mode = settings.mode
         settings = settings.copy(ayah = clamped)
-        viewModelScope.launch { setPlace(clamped, database, persist = true) }
+        viewModelScope.launch {
+            setPlace(clamped, database, persist = true)
+            lastReadStore.record(clamped, mode)
+        }
     }
 
     fun jumpToSurah(surah: Int) {
@@ -372,7 +387,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /** One kind of text changes size; nothing else moves with it. */
-    fun setTypeSize(role: TypeRole, step: Int) {
+    fun setTypeSize(role: TypeRole, step: Float) {
         val value = TextSize.step(step)
         settings = when (role) {
             TypeRole.Arabic -> settings.copy(arabicSize = value)
@@ -393,11 +408,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch { settingsStore.setFollowReciter(follow) }
     }
 
-    fun setShowFootnotes(show: Boolean) {
-        settings = settings.copy(showFootnotes = show)
-        viewModelScope.launch { settingsStore.setShowFootnotes(show) }
-    }
-
     fun setWordByWord(show: Boolean) {
         settings = settings.copy(wordByWord = show)
         viewModelScope.launch { settingsStore.setWordByWord(show) }
@@ -409,9 +419,22 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch { settingsStore.setLongPressHintShown() }
     }
 
-    fun setTranslationPack(pack: String) {
-        settings = settings.copy(translationPack = pack)
-        viewModelScope.launch { settingsStore.setTranslationPack(pack) }
+    fun setTranslationPacks(packs: Set<String>) {
+        settings = settings.copy(translationPacks = packs)
+        viewModelScope.launch { settingsStore.setTranslationPacks(packs) }
+    }
+
+    /**
+     * Turns one translation on or off. A reader may read more than one; the
+     * first one on is the one search, share, and the word by word aid read.
+     */
+    fun toggleTranslationPack(pack: String) {
+        val next = if (pack in settings.translationPacks) {
+            settings.translationPacks - pack
+        } else {
+            settings.translationPacks + pack
+        }
+        setTranslationPacks(next)
     }
 
     fun toggleTafsirPack(pack: String) {
@@ -468,7 +491,9 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      */
     private fun selectPack(pack: ContentPack) {
         when (pack.type) {
-            PackType.Translation -> setTranslationPack(pack.id)
+            PackType.Translation -> if (pack.id !in settings.translationPacks) {
+                toggleTranslationPack(pack.id)
+            }
             PackType.Tafsir -> if (pack.id !in settings.tafsirPacks) toggleTafsirPack(pack.id)
             PackType.Recitation ->
                 selectRecitation(pack.id.removePrefix(ContentDatabase.RECITER_PREFIX))
@@ -492,7 +517,9 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
                     if (folder != null) recitationStore.removeAll(folder)
                 }
             }
-            if (settings.translationPack == id) setTranslationPack("")
+            if (id in settings.translationPacks) {
+                setTranslationPacks(settings.translationPacks - id)
+            }
             if (id in settings.tafsirPacks) toggleTafsirPack(id)
             reopenLibrary()
         }
@@ -525,22 +552,22 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
-     * Every row of one surah in a single pass: the ayahs, their words, the
-     * translation, and the word by word aid. Three queries instead of three
-     * per ayah, and the study list is drawn complete, so the reader's place
-     * lands exactly and nothing shifts under them while they read.
+     * Every row of one surah in a single pass: the ayahs, their words, every
+     * translation the reader turned on, and the word by word aid. One query
+     * per source instead of one per ayah, and the study list is drawn
+     * complete, so the reader's place lands exactly and nothing shifts under
+     * them while they read.
      */
-    suspend fun studyRows(surah: Int, pack: String, wordByWord: Boolean): List<StudyRow> =
+    suspend fun studyRows(surah: Int, wordByWord: Boolean): List<StudyRow> =
         withContext(Dispatchers.IO) {
             val database = contentDatabase ?: return@withContext emptyList()
             val ayahs = database.ayahsOfSurah(surah)
             if (ayahs.isEmpty()) return@withContext emptyList()
             val numbers = ayahs.map { it.number }
             val words = database.wordsForAyahs(numbers)
-            val translations = database.translations(numbers, pack)
-            val language = packs.firstOrNull { it.id == pack }?.language ?: "en"
+            val lines = translationLines(database, numbers)
             val meanings = if (wordByWord) {
-                database.wordMeanings(numbers, language)
+                database.wordMeanings(numbers, wordLanguage)
             } else {
                 emptyMap()
             }
@@ -548,25 +575,44 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
                 StudyRow(
                     ayah = ayah,
                     words = words[ayah.number].orEmpty(),
-                    translation = translations[ayah.number],
+                    translations = lines[ayah.number].orEmpty(),
                     meanings = meanings[ayah.number].orEmpty(),
                 )
             }
         }
 
-    fun studyRow(ayahNumber: Int, pack: String): StudyRow? {
+    /**
+     * Every translation the reader turned on for a set of ayahs, each read
+     * from its own pack and named, so a row draws its lines without knowing
+     * which packs are on.
+     */
+    private fun translationLines(
+        database: ContentDatabase,
+        numbers: List<Int>,
+    ): Map<Int, List<TranslationLine>> {
+        val out = HashMap<Int, MutableList<TranslationLine>>(numbers.size)
+        for (pack in enabledTranslationPacks) {
+            val found = database.translations(numbers, pack.id)
+            for ((number, text) in found) {
+                out.getOrPut(number) { mutableListOf() }
+                    .add(TranslationLine(pack.id, pack.name, pack.language, text))
+            }
+        }
+        return out
+    }
+
+    fun studyRow(ayahNumber: Int): StudyRow? {
         val database = contentDatabase ?: return null
         synchronized(rowCache) { rowCache[ayahNumber] }?.let { return it }
         val ayah = database.ayah(ayahNumber) ?: return null
         val words = database.wordsForAyahs(listOf(ayahNumber))[ayahNumber].orEmpty()
-        val translation = database.translations(listOf(ayahNumber), pack)[ayahNumber]
-        val language = packs.firstOrNull { it.id == pack }?.language ?: "en"
+        val translations = translationLines(database, listOf(ayahNumber))[ayahNumber].orEmpty()
         val meanings = if (settings.wordByWord) {
-            database.wordMeanings(ayahNumber, language)
+            database.wordMeanings(ayahNumber, wordLanguage)
         } else {
             emptyList()
         }
-        val row = StudyRow(ayah, words, translation, meanings)
+        val row = StudyRow(ayah, words, translations, meanings)
         synchronized(rowCache) { rowCache[ayahNumber] = row }
         return row
     }
@@ -579,30 +625,9 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch { savedStore.toggle(ayah.number) }
     }
 
-    fun hasSavedAyahs(): Boolean = saved.value.isNotEmpty()
-
-    /** The reader's saved work as a document, or null when there is none. */
-    suspend fun exportSavedJson(): String? =
-        if (saved.value.isEmpty()) null else savedStore.exportJson()
-
-    /** Reads a document the reader chose and merges it into their own rows. */
-    fun importSaved(text: String?) {
-        if (text == null) {
-            dataNotice = DataNotice.ImportFailed
-            return
-        }
-        viewModelScope.launch {
-            dataNotice = savedStore.importJson(text).fold(
-                onSuccess = { added ->
-                    if (added > 0) DataNotice.Imported(added) else DataNotice.NothingImported
-                },
-                onFailure = { DataNotice.ImportFailed },
-            )
-        }
-    }
-
-    fun reportDataNotice(notice: DataNotice?) {
-        dataNotice = notice
+    /** A place the reader is done with, dropped from Last Read. */
+    fun forgetPlace(ayahNumber: Int) {
+        viewModelScope.launch { lastReadStore.remove(ayahNumber) }
     }
 
     /**
@@ -839,6 +864,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
     override fun onCleared() {
         savedStore.close()
+        lastReadStore.close()
         contentDatabase?.close()
         contentDatabase = null
     }
@@ -851,5 +877,12 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
         /** How long a settled page waits before its picture is written. */
         const val PAGE_CACHE_DELAY_MS = 350L
+
+        /**
+         * How long a place waits before it is written down. A reader who is
+         * scrolling passes an ayah every few hundred milliseconds; a place is
+         * where they stopped, so the write waits for them to stop.
+         */
+        const val PLACE_SETTLE_MS = 1_200L
     }
 }

@@ -55,10 +55,14 @@ words. Everything else is a guest.
 
 Revealed by a tap on the paper, faded out after seven seconds of no touch.
 
-* Top edge: the surah name and juz at the left, then three icon buttons at
-  the right: **Browse** (surah and juz lists), **Search**, **Settings**.
-* Bottom edge: a centered two-state control **Mushaf | Study**, with a
-  **Listen** button at its left and a **Saved** button at its right.
+* Top edge: the surah name and juz at the left, then four icon buttons at
+  the right: the **mode switch**, **Browse** (surah, juz, Last Read, and
+  saved lists), **Search**, **Settings**.
+* There is no bottom edge. The bar that held the mode switch, Listen, and
+  Saved is gone: the switch is one door at the top that offers the *other*
+  mode (the icon shown is the mode a tap will reach, never the one the reader
+  is in), Saved lives in Browse with Last Read beside it, and listening is the
+  play action on an ayah and in its card (D-051).
 * The chrome floats on a vertical gradient of the paper color, so the text
   under it stays legible even at its edge.
 
@@ -86,8 +90,11 @@ gives, and readers read it as one.
 One sheet, three depths, no tabs to learn:
 
 1. **Reference and actions.** The reference in small type, then three icon
-   buttons at the right: save, copy, share.
-2. **The ayah.** Arabic in Hafs, then the translation, then footnotes.
+   buttons at the right: save, share, and the deeper doors.
+2. **The ayah.** Arabic in Hafs, then every translation the reader turned on,
+   each named when more than one is on, then footnotes. A footnote marker
+   opens that note in its own sheet; there is no setting that spills every
+   note under every ayah.
 3. **Deeper.** Three quiet rows, each a door: *Word by word*, *Ibn Kathir*,
    *As-Sa'di*. Tapping one unfolds it in place; tapping again closes it.
 4. **Note.** "Add a note" row; when a note exists it shows as its own
@@ -126,33 +133,37 @@ Searched, in one pass:
 
 * **Surahs**: number, simple name, Arabic name, place and ayah count.
 * **Juz**: the thirty parts, each with its first ayah reference.
+* **Last read**: the places the reader has been reading, newest first, each
+  row carrying the ayah, the mode it was read in, and when it was left. One
+  row per ayah, so a place returned to moves up instead of piling up, and the
+  list is capped at twenty (D-051).
 * **Saved**: saved ayahs and notes, newest first, each opening at its ayah.
 
 ## 7. Settings
 
-A hub, not a scroll: nine rows, each carrying where it stands right now, each
-opening a page of its own. Back steps out of a page before it closes the
-sheet, and the hub keeps its place while a page is open (D-046).
+A hub, not a scroll: eight rows, each carrying where it stands right now,
+and each opening a page of its own. Back steps out of a page before it
+closes the sheet, and the hub keeps its place while a page is open (D-046).
 
 * **Appearance**: Paper, Sepia, Night, Black, as swatches that are the page
   each one paints. The theme is the whole app: the page, the sheets, the bars.
 * **Text**: the Quran text, the translation, the tafsir, and the word by word
   aid, each with its own five steps, above a sample drawn from the reader's
-  own ayah so a change is judged on the page it is about to change.
-* **Reading**: keep the screen awake, follow the reciter, and show footnotes
-  under each ayah instead of behind their markers.
-* **Reciters**: one reciter is the reader's, a mark says which, each reciter
-  carries its own downloaded surahs with their sizes, and adding a reciter
-  selects it.
-* **Translations**: one is read at a time, grouped by the language it speaks,
-  with the size before a byte moves.
+  own ayah so a change is judged on the page it is about to change. The five
+  steps are 0.75, 0.85, 1, 1.2, and 1.4 of each face's base.
+* **Reading**: keep the screen awake, and follow the reciter.
+* **Reciters**: one reciter is the reader's, a radio mark at the left says
+  which, each reciter carries its own downloaded surahs with their sizes, and
+  adding a reciter selects it.
+* **Translations**: more than one may be on, grouped by the language each one
+  speaks, with the size before a byte moves. The mark is a check, like every
+  other list where more than one may be on; the first one turned on is the
+  one search and share read.
 * **Tafsirs**: as many as the reader wants, grouped by language, each opening
   from its own door under the ayah.
 * **Word by word**: the switch, and the lists by language. The meaning under
   an Arabic word is only useful in the language the reader is reading in, so
   the list follows the chosen translation rather than asking (D-046).
-* **Your saved ayahs**: how many are saved, export to a file, import on
-  another phone.
 * **About**: the version, the credits and licenses, the corrections and
   rights contact, and a self check that reads every installed pack back and
   names anything damaged.
@@ -278,6 +289,7 @@ The seams exist from today, even with one pack of each kind:
 
 * The always-visible top bar with three text buttons.
 * The bottom pill that recited page, juz, and hizb numbers at all times.
+* The bottom bar's Listen and Saved doors (D-051).
 * The page-locked study view that cut ayahs in half at page boundaries.
 * The row of eight action pills in the ayah card.
 * Footnote number chips and boxed highlight chrome.

@@ -365,7 +365,17 @@ private fun ListenOfferBar(
                     onCancel,
                 )
                 offer.failed -> PillText(stringResource(R.string.playback_retry), onConfirm)
-                else -> PillText(stringResource(R.string.playback_download), onConfirm)
+                else -> {
+                    PillText(stringResource(R.string.playback_download), onConfirm)
+                    // An offer the reader does not want is not a trap: the
+                    // same close that cancels a download takes the offer
+                    // away, so nothing sits over the reading unasked.
+                    TransportButton(
+                        Transport.Close,
+                        stringResource(R.string.playback_close_offer),
+                        onCancel,
+                    )
+                }
             }
         }
         if (progress != null) {

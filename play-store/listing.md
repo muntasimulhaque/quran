@@ -70,7 +70,10 @@ QuranEnc. Full credits and licenses are in the app and in the repository.
 
 The icon and the feature graphic are made; the screenshots are captured by the
 screenshot test on a real Android system, one folder per form factor Play asks
-for.
+for. The tenth session changed the reader's chrome, the browse sheet, the
+translations page, and the text sizes page, so the set must be refreshed from
+the `Capture store screenshots` workflow before the next hand-off; the
+tour itself now photographs the four tab browse sheet.
 
 - App icon: `icon-512.png`
 - Feature graphic: `feature-graphic-1024x500.png`
@@ -83,12 +86,13 @@ three emulator profiles (phone, 7 inch, 10 inch) and uploads each set as its
 own artifact, so the store images always match the shipped build. Run it from
 the Actions tab, or let it run when the UI changes.
   2. Study page with translation and footnotes
-  3. Study card with the action pills
+  3. The ayah card with its actions
   4. Ibn Kathir tafsir
   5. As-Sa'di tafsir
   6. Search results with the matched word marked
-  7. Browse sheet, Saved tab with a note
-  8. Recitation playing with the word marked
+  7. Browse sheet, Last read tab with a place
+  8. Browse sheet, Saved tab with a note
+  9. Recitation playing with the word marked
 - Tablet screenshots: required by Play if the listing targets tablets.
   The layout is responsive Compose; captures still needed.
 - Night and Sepia theme captures are a nice extra.
@@ -100,9 +104,9 @@ footnotes, word by word, Ibn Kathir and As-Sa'di, search, bookmarks and
 notes, and recitations by Minshawi and Husary downloaded per surah on
 request. No ads, no trackers, no account.
 
-## Release notes (ready for the next release, 499 characters)
+## Release notes (ready for the next release, 481 characters)
 
-Opens on the exact ayah you left, in both reading modes, and paints that page before anything else loads. Settings is a hub: its own page for text sizes, reciters, translations, and tafsirs, each sized as you like. Listening asks once, names the reciter and the size, and lets you swap reciter in the offer. The modes are two drawn icons, and footnotes no longer collide at large sizes. Saved ayahs export and import, and Settings can check every pack on the device. No ads, no trackers, no account.
+The reading place no longer jumps back when you come from another surah. The mode switch is one icon in the top bar that offers the other view, and the bottom bar is gone: Saved sits in Browse beside the surahs and juz, and listening is the play action on any ayah. Browse has a Last read tab with your last twenty places. Text sizes gained a smaller step and lost the largest, and the download offer can be dismissed. No ads, no trackers, no account.
 
 ## Before each release
 

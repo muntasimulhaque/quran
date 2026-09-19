@@ -49,7 +49,6 @@ enum class Icon {
     StudyPage,
     Share,
     More,
-    Listen,
     Chevron,
 }
 
@@ -112,10 +111,6 @@ fun IconGlyph(
                 }
             }
             Icon.Play -> drawPath(playPath(w, h), tint)
-            Icon.Listen -> {
-                drawCircle(tint, radius = w * 0.42f, center = Offset(w / 2f, h / 2f), style = Stroke(w * 0.075f))
-                drawPath(playPath(w * 0.7f, h * 0.7f, offset = Offset(w * 0.32f, h * 0.32f)), tint)
-            }
             Icon.Pause -> {
                 drawRoundRect(tint, Offset(w * 0.28f, h * 0.2f), Size(w * 0.16f, h * 0.6f), CornerRadius(w * 0.05f))
                 drawRoundRect(tint, Offset(w * 0.56f, h * 0.2f), Size(w * 0.16f, h * 0.6f), CornerRadius(w * 0.05f))
@@ -236,99 +231,9 @@ fun IconButton(
     }
 }
 
-/** An icon with a small label under it, for the two bottom doors. */
-@Composable
-fun LabeledIconButton(
-    icon: Icon,
-    label: String,
-    onClick: () -> Unit,
-    active: Boolean = false,
-) {
-    Column(
-        modifier = Modifier
-            .minimumInteractiveComponentSize()
-            .clip(RoundedCornerShape(14.dp))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 10.dp, vertical = 4.dp)
-            .semantics {
-                contentDescription = label
-                role = Role.Button
-            },
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        IconGlyph(
-            icon = icon,
-            tint = if (active) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.onBackground.copy(alpha = 0.82f)
-            },
-            modifier = Modifier.size(21.dp),
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-            color = if (active) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            },
-            modifier = Modifier.padding(top = 2.dp),
-        )
-    }
-}
-
 /**
- * The two reading modes, as one quiet switch. The two words are drawn as two
- * pictures instead: a page of the Mushaf, and a page of ayahs with their
- * reading under each one. Both are named for whoever cannot see them, and
- * the name of the chosen one is said once, above the switch, when it changes.
+ * One quiet text action with an icon above it, for the ayah bar.
  */
-@Composable
-fun ModeSwitch(mode: ReadingMode, onMode: (ReadingMode) -> Unit) {
-    Row(
-        modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.06f))
-            .padding(3.dp),
-    ) {
-        ModeSegment(
-            icon = Icon.MushafPage,
-            label = stringResource(R.string.mode_mushaf),
-            selected = mode == ReadingMode.Mushaf,
-        ) { onMode(ReadingMode.Mushaf) }
-        ModeSegment(
-            icon = Icon.StudyPage,
-            label = stringResource(R.string.mode_study),
-            selected = mode == ReadingMode.Study,
-        ) { onMode(ReadingMode.Study) }
-    }
-}
-
-@Composable
-private fun ModeSegment(icon: Icon, label: String, selected: Boolean, onClick: () -> Unit) {
-    val tint = if (selected) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    }
-    Box(
-        modifier = Modifier
-            .minimumInteractiveComponentSize()
-            .clip(RoundedCornerShape(50))
-            .background(
-                if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f) else Color.Transparent,
-            )
-            .selectable(selected = selected, role = Role.Tab, onClick = onClick)
-            .padding(horizontal = 18.dp, vertical = 8.dp)
-            .semantics { contentDescription = label },
-        contentAlignment = Alignment.Center,
-    ) {
-        IconGlyph(icon = icon, tint = tint, modifier = Modifier.size(22.dp))
-    }
-}
-
-/** One quiet text action with an icon above it, for the ayah bar. */
 @Composable
 fun TextAction(label: String, icon: Icon, onClick: () -> Unit, active: Boolean = false) {
     Column(
@@ -367,12 +272,15 @@ fun TextAction(label: String, icon: Icon, onClick: () -> Unit, active: Boolean =
 
 /** The surah and its part, as a quiet line of type. */
 @Composable
-fun ReadingTitle(surah: String, detail: String?) {
-    Row(verticalAlignment = Alignment.Bottom) {
+fun ReadingTitle(surah: String, detail: String?, modifier: Modifier = Modifier) {
+    Row(modifier = modifier, verticalAlignment = Alignment.Bottom) {
         Text(
             text = surah,
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f, fill = false),
         )
         if (!detail.isNullOrBlank()) {
             Text(

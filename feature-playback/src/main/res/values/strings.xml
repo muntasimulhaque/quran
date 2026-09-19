@@ -7,6 +7,7 @@
     <string name="playback_continue">Continue</string>
     <string name="playback_download">Download</string>
     <string name="playback_cancel_download">Cancel download</string>
+    <string name="playback_close_offer">Not now</string>
     <string name="playback_close">Close</string>
     <string name="playback_stop">Stop</string>
     <string name="playback_previous_ayah">Previous ayah</string>

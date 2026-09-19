@@ -3,6 +3,7 @@
     <string name="browse_title">Browse</string>
     <string name="browse_tab_surahs">Surahs</string>
     <string name="browse_tab_juz">Juz</string>
+    <string name="browse_tab_last_read">Last read</string>
     <string name="browse_tab_saved">Saved</string>
 
     <string name="place_makkah">Makkah</string>
@@ -11,9 +12,33 @@
     <string name="juz_title">Juz %1$d</string>
     <string name="juz_starts_at">%1$s  ·  starts at %2$s</string>
 
+    <string name="last_read_empty_title">No reading places yet</string>
+    <string name="last_read_empty_body">The ayahs you read are kept here, newest first, so you can come back to a place you left.</string>
+    <string name="last_read_detail">Read in %1$s · %2$s</string>
+    <string name="last_read_mode_mushaf">the Mushaf</string>
+    <string name="last_read_mode_study">study</string>
+    <string name="last_read_just_now">just now</string>
+    <plurals name="last_read_minutes">
+        <item quantity="one">%1$d minute ago</item>
+        <item quantity="other">%1$d minutes ago</item>
+    </plurals>
+    <plurals name="last_read_hours">
+        <item quantity="one">%1$d hour ago</item>
+        <item quantity="other">%1$d hours ago</item>
+    </plurals>
+    <plurals name="last_read_days">
+        <item quantity="one">%1$d day ago</item>
+        <item quantity="other">%1$d days ago</item>
+    </plurals>
+    <plurals name="last_read_weeks">
+        <item quantity="one">%1$d week ago</item>
+        <item quantity="other">%1$d weeks ago</item>
+    </plurals>
+
     <string name="saved_empty_title">Nothing saved yet</string>
     <string name="saved_empty_body">Press and hold any ayah while reading, then Save. Your saved ayahs and notes appear here, newest first.</string>
     <string name="saved_reference_fallback">Ayah %1$d</string>
     <string name="action_open">Open</string>
     <string name="action_remove">Remove</string>
+    <string name="action_forget">Forget</string>
 </resources>

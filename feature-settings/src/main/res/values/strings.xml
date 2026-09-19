@@ -25,8 +25,6 @@
     <string name="settings_follow_subtitle">The page moves with the recitation</string>
     <string name="settings_words_title">Show word meanings</string>
     <string name="settings_words_subtitle">Each word with its meaning, under the ayah</string>
-    <string name="settings_footnotes_title">Show footnotes</string>
-    <string name="settings_footnotes_subtitle">Translator notes under each ayah</string>
 
     <string name="settings_text_size_option">%3$s size %1$d of %2$d</string>
 
@@ -56,16 +54,6 @@
     <string name="settings_check_running">Checking installed content…</string>
     <string name="settings_check_ok">Everything installed is intact.</string>
     <string name="settings_check_damaged">Damaged and best removed: %1$s</string>
-
-    <string name="settings_export">Export saved ayahs and notes</string>
-    <string name="settings_export_subtitle">Writes a file you can move to another phone.</string>
-    <string name="settings_export_done">Exported %1$d saved ayahs.</string>
-    <string name="settings_import">Import saved ayahs and notes</string>
-    <string name="settings_import_subtitle">Merges a file exported from this app</string>
-    <string name="settings_import_done">Imported %1$d saved ayahs.</string>
-    <string name="settings_import_none">Already up to date. Nothing new to import.</string>
-    <string name="settings_import_failed">That file could not be read.</string>
-    <string name="settings_export_empty">Nothing is saved yet, so there is nothing to export.</string>
 
     <string name="settings_version">Version</string>
     <string name="settings_license_label">License</string>
@@ -111,11 +99,9 @@
     <string name="settings_title_translations">Translations</string>
     <string name="settings_title_tafsirs">Tafsirs</string>
     <string name="settings_title_words">Word by word</string>
-    <string name="settings_title_saved">Your saved ayahs</string>
     <string name="settings_title_about">About</string>
     <string name="settings_summary_text">Arabic %1$d · translation %2$d</string>
-    <string name="settings_summary_reading">%1$d of 3 on</string>
-    <string name="settings_summary_saved">%1$d saved</string>
+    <string name="settings_summary_reading">%1$d of 2 on</string>
     <string name="settings_version_short">Version %1$s</string>
     <string name="settings_none_yet">Not added yet</string>
     <string name="settings_chosen_count">%1$d chosen</string>
@@ -131,13 +117,11 @@
     <string name="settings_reciter_installed">Installed · %1$s</string>
     <string name="settings_reciter_size">%1$s to download</string>
     <string name="settings_group_translations">Translations</string>
-    <string name="settings_translations_note">One translation is read at a time. Add as many as you like; the mark shows which one is yours.</string>
+    <string name="settings_translations_note">More than one may be on. Each one you turn on reads in its own place under the ayah, and the first is the one search reads.</string>
     <string name="settings_group_tafsirs">Tafsirs</string>
     <string name="settings_tafsirs_note">Every tafsir you turn on opens from its own door under the ayah.</string>
     <string name="settings_group_words">Word by word</string>
     <string name="settings_words_note">The meanings follow the language of the translation you read.</string>
-    <string name="settings_group_saved">Your saved ayahs</string>
-    <string name="settings_saved_count">Saved ayahs</string>
     <string name="settings_rights_note">Tell us about a wrong letter, or ask for a dataset to be changed or removed.</string>
     <string name="settings_group_reading">Behaviour</string>
     <string name="settings_group_about">The app</string>

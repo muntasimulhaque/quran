@@ -180,10 +180,9 @@ class ScreenshotTest {
             settings.setAyah(1)
             settings.setMode(ReadingMode.Mushaf)
             settings.setTheme(AppTheme.Paper)
-            settings.setTranslationPack("translation-saheeh-en")
+            settings.setTranslationPacks(setOf("translation-saheeh-en"))
             settings.setTafsirPacks(setOf("tafsir-ibn-kathir-en"))
             settings.setWordByWord(true)
-            settings.setShowFootnotes(false)
             for (role in TypeRole.entries) settings.setTypeSize(role, TextSize.DEFAULT)
         }
         Thread.sleep(500)
@@ -234,7 +233,7 @@ class ScreenshotTest {
         back()
         back()
 
-        // Browse: the surahs, the juz, and the saved.
+        // Browse: the surahs, the juz, Last read, and the saved.
         revealChrome()
         rule.onNodeWithContentDescription("Browse the Quran").performClick()
         waitFor("Al-Fatihah")
@@ -242,9 +241,12 @@ class ScreenshotTest {
         rule.onNodeWithText("Juz").performClick()
         Thread.sleep(800)
         capture("08-browse-juz")
+        rule.onNodeWithText("Last read").performClick()
+        Thread.sleep(900)
+        capture("09-browse-last-read")
         rule.onAllNodesWithText("Saved").onFirst().performClick()
         Thread.sleep(800)
-        capture("09-browse-saved")
+        capture("14-browse-saved")
         back()
 
         // The study reading of the same place.
@@ -255,6 +257,17 @@ class ScreenshotTest {
         }
         Thread.sleep(1_200)
         capture("03-study")
+
+        // The translations page, where more than one may now be on.
+        revealChrome()
+        rule.onNodeWithContentDescription("Settings").performClick()
+        waitFor("Translations")
+        rule.onNodeWithText("Translations").performClick()
+        waitFor("Saheeh International")
+        Thread.sleep(700)
+        capture("15-translations")
+        back()
+        back()
 
         // The surah opening, which is the top of the study list.
         rule.onNodeWithContentDescription("Study page")

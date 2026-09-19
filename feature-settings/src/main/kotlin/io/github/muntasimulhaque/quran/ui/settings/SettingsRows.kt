@@ -91,7 +91,11 @@ fun PageRow(title: String, summary: String?, onClick: () -> Unit) {
         IconGlyph(
             icon = Icon.Chevron,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(18.dp),
+            modifier = Modifier
+                .size(18.dp)
+                // The mark says where a tap goes: a row opens a page, so the
+                // chevron points the way the page slides in, to the right.
+                .graphicsLayer(rotationZ = -90f),
         )
     }
 }
@@ -179,31 +183,14 @@ fun ChoiceRow(
     onClick: () -> Unit,
     trailing: @Composable () -> Unit = {},
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .minimumInteractiveComponentSize()
-            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
-            .padding(start = 22.dp, end = 14.dp, top = 10.dp, bottom = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            if (!subtitle.isNullOrBlank()) {
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-        trailing()
-        Mark(selected = selected, radio = true)
-    }
+    SettingRow(
+        title = title,
+        subtitle = subtitle,
+        selected = selected,
+        role = Role.RadioButton,
+        onClick = onClick,
+        trailing = trailing,
+    ) { Mark(selected = selected, radio = true) }
 }
 
 /** A row that can be on or off among many, with a check for its state. */
@@ -215,15 +202,45 @@ fun MarkRow(
     onClick: () -> Unit,
     trailing: @Composable () -> Unit = {},
 ) {
+    SettingRow(
+        title = title,
+        subtitle = subtitle,
+        selected = selected,
+        role = Role.Checkbox,
+        onClick = onClick,
+        trailing = trailing,
+    ) { Mark(selected = selected, radio = false) }
+}
+
+/**
+ * A row with a mark at its left, the way a list of choices is read: the mark
+ * comes before the name, so the eye lands on the state first and the name
+ * reads as the thing it belongs to. The whole row is one tappable control.
+ */
+@Composable
+private fun SettingRow(
+    title: String,
+    subtitle: String?,
+    selected: Boolean,
+    role: Role,
+    onClick: () -> Unit,
+    trailing: @Composable () -> Unit,
+    mark: @Composable () -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .minimumInteractiveComponentSize()
-            .selectable(selected = selected, role = Role.Checkbox, onClick = onClick)
-            .padding(start = 22.dp, end = 14.dp, top = 10.dp, bottom = 10.dp),
+            .selectable(selected = selected, role = role, onClick = onClick)
+            .padding(start = 12.dp, end = 14.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(Modifier.weight(1f)) {
+        mark()
+        Column(
+            Modifier
+                .weight(1f)
+                .padding(start = 4.dp),
+        ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyLarge,
@@ -238,7 +255,6 @@ fun MarkRow(
             }
         }
         trailing()
-        Mark(selected = selected, radio = false)
     }
 }
 
@@ -247,9 +263,7 @@ fun MarkRow(
 private fun Mark(selected: Boolean, radio: Boolean) {
     val accent = MaterialTheme.colorScheme.primary
     Box(
-        modifier = Modifier
-            .padding(start = 10.dp)
-            .size(22.dp),
+        modifier = Modifier.size(22.dp),
         contentAlignment = Alignment.Center,
     ) {
         androidx.compose.foundation.Canvas(Modifier.size(22.dp)) {
@@ -530,7 +544,7 @@ fun AppTheme.name(): String = stringResource(
  * drawn in the script of the text it sizes, so Arabic is judged as Arabic.
  */
 @Composable
-fun SizeRow(role: TypeRole, step: Int, onChange: (Int) -> Unit) {
+fun SizeRow(role: TypeRole, step: Float, onChange: (Float) -> Unit) {
     val label = stringResource(
         when (role) {
             TypeRole.Arabic -> R.string.settings_size_arabic
@@ -558,8 +572,8 @@ fun SizeRow(role: TypeRole, step: Int, onChange: (Int) -> Unit) {
                 .padding(3.dp),
             horizontalArrangement = Arrangement.spacedBy(1.dp),
         ) {
-            TextSize.STEPS.indices.forEach { index ->
-                val active = index == step
+            TextSize.STEPS.forEachIndexed { index, value ->
+                val active = value == step
                 val description = stringResource(
                     R.string.settings_text_size_option,
                     index + 1,
@@ -577,13 +591,17 @@ fun SizeRow(role: TypeRole, step: Int, onChange: (Int) -> Unit) {
                                 Color.Transparent
                             },
                         )
-                        .selectable(selected = active, role = Role.RadioButton) { onChange(index) }
+                        .selectable(selected = active, role = Role.RadioButton) { onChange(value) }
                         .semantics { contentDescription = description },
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
+                        // The letters run from the smallest step to the
+                        // largest, so the row reads as one scale.
                         text = if (role == TypeRole.Arabic) "\u0627" else "A",
-                        style = MaterialTheme.typography.titleMedium.copy(fontSize = (11 + index * 2).sp),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontSize = (11 + index * 2).sp,
+                        ),
                         color = if (active) {
                             MaterialTheme.colorScheme.primary
                         } else {

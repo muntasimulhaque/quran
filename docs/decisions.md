@@ -1321,3 +1321,85 @@ leaving a 597 MB repository. The provenance (`content/raw/`), the shipped
 assets (`content/quran.db`, `content/packs/`), and the store screenshots were
 kept on purpose, and AGENTS.md carries the table that says how to bring back
 everything that was removed.
+
+## D-051: The reader's report, the tenth session
+
+Date: the tenth session. The owner read the shipped 0.2 and reported what they
+met. Eleven items, and one of them was a bug that had survived two sessions.
+
+**The switcher moved to the top bar, as one door.** It sat in a bottom bar
+that also carried Listen and Saved. The owner asked for the switch beside the
+other icons at the top, and for the bottom bar to go. It is one button now,
+and it offers the *other* mode: the icon shown while reading the Mushaf is the
+study picture, and it becomes the Mushaf picture in study. The mode hint that
+used to name the chosen mode in words is gone with the bar that held the
+switch, because the icon is now the instruction.
+
+**Listen and Saved left the reader's face.** Listening is the play action on
+an ayah and in its card, which the owner pointed out was already there.
+Saved ayahs are one of the Browse tabs, next to Surahs and Juz, where they
+belong. The bottom bar had nothing left to hold, so it is gone, and the
+chrome is a top edge only.
+
+**Last Read is a Browse tab.** The owner asked for the places the reader has
+been reading, so they can come back to an ayah they left. It is a new store
+(`data/LastReadStore`, `last-read.db`, its own database like the reader's
+saved work), written when the reader settles somewhere they chose: a page
+they turned in the Mushaf, a place they stopped at in study, a jump they made
+from a sheet, and the place they open the app on. One row per ayah, so a place
+returned to moves to the top instead of piling up, and the list is capped at
+twenty: one sitting is a handful of places, so that is a fortnight of moving
+around or a month of surah by surah, and still a short scroll of recognisable
+places rather than a log. Each row carries the ayah, the mode it was read in,
+and when it was left ("3 days ago"), and a place can be forgotten.
+
+**The audio offer can be dismissed.** The owner met the download pill and
+could not make it go away. The offer now carries a "Not now" close beside
+Download, which is the same door that cancels a download, so nothing ever sits
+over the reading against the reader's wish. The offer still only appears after
+a tap on Play, still names the reciter and the size, and is still the one
+place the download is approved.
+
+**The reading place stopped oscillating.** Reported as: open the app on the
+last place, go to another surah through Browse, scroll, and the view jumps
+back to the old page before it returns. Two causes:
+
+- The settings DataStore is a flow, and `ReaderViewModel` was re-applying
+  every emission through `applySettings`, which could carry the stored ayah
+  back over a place the reader had just chosen. The view model owns the
+  settings now: it writes every change itself and keeps its in-memory copy in
+  step, and the flow is read once, while the library opens, and never again.
+- The study list kept drawing the previous surah's rows under the new surah's
+  name while the new rows loaded, and its place writer had no guard against
+  its own programmatic scrolls. It now holds the loaded surah with its rows
+  and shows the paper until *this* surah's rows are in hand, and a drag is
+  what marks a write, cleared as it writes.
+
+**Settings corrections.** The hub rows pointed down though the pages slide in
+from the right, so the chevron points right. The mark of every choice moved to
+the left of the name, where the eye lands on the state first. Translations are
+checks, not radios: the owner was right that a reader may read more than one,
+so more than one may be on, each in its own named column under the ayah, and
+the first one turned on is the one search and share read. Tafsirs were already
+checks, and reciters stay radios because one reciter is heard at a time.
+
+**Text sizes.** The largest step, 1.6, was more than anyone reads at, and the
+list had no room below 0.85 for a reader who wants more ayahs on one screen.
+The steps are now 0.75, 0.85, 1, 1.2, 1.4. Sizes are stored as scale factors
+rather than step indices, because an index means something different in a
+different list: a reader who chose 1.6 (the top) lands on 1.4 (the top), not
+on the third of five. The stored value is read off the raw preference map and
+not through a typed key, because 0.2 wrote these as `Int` and reading an `Int`
+through a `Float` key throws; a reader who updates the app must never meet a
+crash for a text size.
+
+**Show footnotes is gone.** A marker opens its note in its own sheet, which is
+the better reading, so the setting that spilled every note under every ayah
+was removed with its field, its row, and its pref.
+
+**Export and import saved ayahs are gone.** The owner asked for the feature
+removed completely, and it is: the two doors, the file plumbing
+(`SavedTransfer.kt`), the JSON writer and reader, the notice type and its
+strings, the Saved settings page and its hub row, and the two instrumented
+tests that pinned them. `SavedStore` keeps saving, notes, and removal, and the
+saved-ayah tests now pin exactly that.

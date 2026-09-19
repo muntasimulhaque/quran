@@ -39,9 +39,8 @@ import io.github.muntasimulhaque.quran.ui.rich.ArabicFonts
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import androidx.compose.ui.platform.LocalContext
 import io.github.muntasimulhaque.quran.core.RichText
-
 /** The pages the settings hub opens, one at a time. */
-enum class SettingsPage { Appearance, Text, Reading, Reciters, Translations, Tafsirs, Words, Saved, About }
+enum class SettingsPage { Appearance, Text, Reading, Reciters, Translations, Tafsirs, Words, About }
 
 @Composable
 fun SettingsPage.title(): String = stringResource(
@@ -53,7 +52,6 @@ fun SettingsPage.title(): String = stringResource(
         SettingsPage.Translations -> R.string.settings_title_translations
         SettingsPage.Tafsirs -> R.string.settings_title_tafsirs
         SettingsPage.Words -> R.string.settings_title_words
-        SettingsPage.Saved -> R.string.settings_title_saved
         SettingsPage.About -> R.string.settings_title_about
     },
 )
@@ -67,7 +65,6 @@ fun SettingsHub(
     settings: AppSettings,
     packs: List<ContentPack>,
     recitations: List<Recitation>,
-    savedCount: Int,
     version: String,
     onOpen: (SettingsPage) -> Unit,
     modifier: Modifier = Modifier,
@@ -89,8 +86,7 @@ fun SettingsHub(
             title = stringResource(R.string.settings_title_reading),
             summary = stringResource(
                 R.string.settings_summary_reading,
-                listOf(settings.keepAwake, settings.followReciter, settings.showFootnotes)
-                    .count { it },
+                listOf(settings.keepAwake, settings.followReciter).count { it },
             ),
         ) { onOpen(SettingsPage.Reading) }
         PageRow(
@@ -109,10 +105,6 @@ fun SettingsHub(
             title = stringResource(R.string.settings_title_words),
             summary = wordsSummary(settings, packs),
         ) { onOpen(SettingsPage.Words) }
-        PageRow(
-            title = stringResource(R.string.settings_title_saved),
-            summary = stringResource(R.string.settings_summary_saved, savedCount),
-        ) { onOpen(SettingsPage.Saved) }
         PageRow(
             title = stringResource(R.string.settings_title_about),
             summary = stringResource(R.string.settings_version_short, version),
@@ -134,8 +126,12 @@ private fun reciterName(
 
 @Composable
 private fun translationName(settings: AppSettings, packs: List<ContentPack>): String {
-    val chosen = packs.firstOrNull { it.id == settings.translationPack && it.installed }
-    return chosen?.name ?: stringResource(R.string.settings_none_yet)
+    val chosen = packs.filter { it.id in settings.translationPacks && it.installed }
+    return when {
+        chosen.isEmpty() -> stringResource(R.string.settings_none_yet)
+        chosen.size == 1 -> chosen.first().name
+        else -> stringResource(R.string.settings_chosen_count, chosen.size)
+    }
 }
 
 @Composable
@@ -163,7 +159,8 @@ private fun wordsSummary(settings: AppSettings, packs: List<ContentPack>): Strin
  * word is only useful in the language the reader is reading in.
  */
 internal fun activeWordsPack(settings: AppSettings, packs: List<ContentPack>): String? {
-    val language = packs.firstOrNull { it.id == settings.translationPack }?.language ?: "en"
+    val chosen = packs.firstOrNull { it.id in settings.translationPacks && it.installed }
+    val language = chosen?.language ?: "en"
     val preferred = "words-$language"
     if (packs.any { it.id == preferred && it.installed }) return preferred
     if (packs.any { it.id == ContentDatabase.WORDS_PACK && it.installed }) return ContentDatabase.WORDS_PACK
@@ -194,9 +191,9 @@ fun AppearancePage(settings: AppSettings, onTheme: (io.github.muntasimulhaque.qu
 fun TextPage(
     settings: AppSettings,
     preview: suspend () -> StudyRow?,
-    onSize: (TypeRole, Int) -> Unit,
+    onSize: (TypeRole, Float) -> Unit,
 ) {
-    val row by produceState<StudyRow?>(initialValue = null, settings.translationPack) { value = preview() }
+    val row by produceState<StudyRow?>(initialValue = null, settings.translationPacks) { value = preview() }
     Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
         if (row != null) {
             SizeSample(row = row!!, settings = settings)
@@ -230,9 +227,9 @@ private fun SizeSample(row: StudyRow, settings: AppSettings) {
             textAlign = TextAlign.Right,
             modifier = Modifier.fillMaxWidth(),
         )
-        row.translation?.let { translation ->
+        row.translations.firstOrNull()?.let { line ->
             TranslationBody(
-                runs = remember(translation.text) { RichText.footnotes(translation.text) },
+                runs = remember(line.text.text) { RichText.footnotes(line.text.text) },
                 modifier = Modifier.padding(top = 10.dp),
                 sizeSp = settings.translationSp,
                 lineSp = settings.translationLineSp,
@@ -260,11 +257,6 @@ fun ReadingPage(settings: AppSettings, actions: SettingsActions) {
             subtitle = stringResource(R.string.settings_follow_subtitle),
             checked = settings.followReciter,
         ) { actions.onFollowReciter(it) }
-        ToggleRow(
-            title = stringResource(R.string.settings_footnotes_title),
-            subtitle = stringResource(R.string.settings_footnotes_subtitle),
-            checked = settings.showFootnotes,
-        ) { actions.onShowFootnotes(it) }
     }
 }
 
@@ -404,7 +396,11 @@ private fun ReciterDownloads(
     Spacer(Modifier.height(6.dp))
 }
 
-/** Translations: one is read, and each language keeps its own list. */
+/**
+ * Translations: more than one may be on, and each one reads in its own column
+ * under the ayah, so the mark is a check rather than a single choice. The
+ * first one turned on is the one search and the ayah card read by default.
+ */
 @Composable
 fun TranslationsPage(
     settings: AppSettings,
@@ -421,11 +417,11 @@ fun TranslationsPage(
             modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = 6.dp),
         )
         LanguageGroups(packs, PackType.Translation) { pack ->
-            ChoiceRow(
+            MarkRow(
                 title = pack.name,
                 subtitle = translationSubtitle(pack),
-                selected = pack.installed && pack.id == settings.translationPack,
-                onClick = { if (pack.installed) actions.onTranslationPack(pack.id) },
+                selected = pack.installed && pack.id in settings.translationPacks,
+                onClick = { if (pack.installed) actions.onToggleTranslation(pack.id) },
                 trailing = { PackTrailing(pack, packSetup, actions) },
             )
         }
@@ -454,8 +450,7 @@ fun TafsirsPage(
                 title = pack.name,
                 subtitle = translationSubtitle(pack),
                 selected = pack.installed && pack.id in settings.tafsirPacks,
-                onClick = { if (pack.installed) actions.onToggleTafsir(pack.id) },
-                trailing = { PackTrailing(pack, packSetup, actions) },
+                onClick = { if (pack.installed) actions.onToggleTafsir(pack.id) },                trailing = { PackTrailing(pack, packSetup, actions) },
             )
         }
         Spacer(Modifier.height(12.dp))
@@ -554,42 +549,9 @@ private fun LanguageGroups(
         }
 }
 
-/** Where the reader's own work lives, and how to carry it to a new phone. */
-@Composable
-fun SavedPage(
-    savedCount: Int,
-    dataNotice: DataNotice?,
-    actions: SettingsActions,
-) {
-    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
-        Group(stringResource(R.string.settings_group_saved))
-        ValueRow(
-            stringResource(R.string.settings_saved_count),
-            stringResource(R.string.settings_summary_saved, savedCount),
-        )
-        TextRow(
-            title = stringResource(R.string.settings_export),
-            subtitle = stringResource(R.string.settings_export_subtitle),
-            onClick = actions.onExport,
-        )
-        TextRow(
-            title = stringResource(R.string.settings_import),
-            subtitle = stringResource(R.string.settings_import_subtitle),
-            onClick = actions.onImport,
-        )
-        dataNotice?.let { notice ->
-            Text(
-                text = notice.text(savedCount),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = 2.dp, bottom = 4.dp),
-            )
-        }
-        Spacer(Modifier.height(12.dp))
-    }
-}
-
-/** The app itself: its version, its credits, and a way to check its content. */
+/**
+ * The app itself: its version, its credits, and a way to check its content.
+ */
 @Composable
 fun AboutPage(
     version: String,
@@ -637,13 +599,4 @@ internal fun languageOrder(language: String): String = when (language) {
     "en" -> "0"
     "ar" -> "1"
     else -> "2" + languageName(language)
-}
-
-@Composable
-private fun DataNotice.text(savedCount: Int): String = when (this) {
-    DataNotice.Exported -> stringResource(R.string.settings_export_done, savedCount)
-    is DataNotice.Imported -> stringResource(R.string.settings_import_done, count)
-    DataNotice.NothingToExport -> stringResource(R.string.settings_export_empty)
-    DataNotice.NothingImported -> stringResource(R.string.settings_import_none)
-    DataNotice.ImportFailed -> stringResource(R.string.settings_import_failed)
 }

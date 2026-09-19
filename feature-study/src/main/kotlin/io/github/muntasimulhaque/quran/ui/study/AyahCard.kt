@@ -51,7 +51,7 @@ import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.TafsirPassage
-import io.github.muntasimulhaque.quran.data.TranslationText
+import io.github.muntasimulhaque.quran.data.TranslationLine
 import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.feature.study.R
 import io.github.muntasimulhaque.quran.ui.kit.languageName
@@ -89,7 +89,7 @@ fun AyahCard(
     content: ContentDatabase,
     ayah: Ayah,
     surahName: String,
-    translationPack: ContentPack?,
+    translations: List<ContentPack>,
     tafsirPacks: List<ContentPack>,
     settings: AppSettings,
     wordLanguage: String,
@@ -111,13 +111,24 @@ fun AyahCard(
     var door by remember(ayah.number) { mutableStateOf<Door?>(null) }
     var editingNote by remember(ayah.number) { mutableStateOf(false) }
 
-    // A card with no translation chosen is not a failure: it is a reader who
-    // has not chosen one yet, so the card offers the door instead of a line
-    // that sounds like a bug.
-    var translationReady by remember(ayah.number, translationPack?.id) { mutableStateOf(false) }
-    val translation by produceState<TranslationText?>(initialValue = null, ayah.number, translationPack?.id) {
+    // Every translation the reader turned on, each read once. A card with no
+    // translation chosen is not a failure: it is a reader who has not chosen
+    // one yet, so the card offers the door instead of a line that sounds like
+    // a bug.
+    var translationReady by remember(ayah.number, translations.map { it.id }) {
+        mutableStateOf(false)
+    }
+    val lines by produceState<List<TranslationLine>>(
+        initialValue = emptyList(),
+        ayah.number,
+        translations.map { it.id },
+    ) {
         value = withContext(Dispatchers.IO) {
-            translationPack?.let { content.translations(listOf(ayah.number), it.id)[ayah.number] }
+            translations.mapNotNull { pack ->
+                content.translations(listOf(ayah.number), pack.id)[ayah.number]?.let { text ->
+                    TranslationLine(pack.id, pack.name, pack.language, text)
+                }
+            }
         }
         translationReady = true
     }
@@ -146,10 +157,10 @@ fun AyahCard(
         }
     }
 
-    val shareText = remember(translation, ayah, surahName) {
+    val shareText = remember(lines, ayah, surahName) {
         buildString {
             append(ayah.text)
-            translation?.text?.takeIf { it.isNotBlank() }?.let {
+            lines.firstOrNull()?.text?.text?.takeIf { it.isNotBlank() }?.let {
                 append("\n\n")
                 append(RichText.plain(it))
             }
@@ -221,27 +232,42 @@ fun AyahCard(
                     .padding(horizontal = 22.dp, vertical = 16.dp),
             )
 
-            translation?.let { body ->
+            lines.forEach { line ->
+                if (lines.size > 1) {
+                    Text(
+                        text = line.packName,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f),
+                        modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = 16.dp),
+                    )
+                }
                 TranslationBody(
-                    runs = remember(body.text) { RichText.footnotes(body.text) },
-                    modifier = Modifier.padding(horizontal = 22.dp),
+                    runs = remember(line.text.text) { RichText.footnotes(line.text.text) },
+                    modifier = Modifier.padding(
+                        start = 22.dp,
+                        end = 22.dp,
+                        top = if (lines.size > 1) 4.dp else 0.dp,
+                    ),
                     sizeSp = settings.translationSp,
                     lineSp = settings.translationLineSp,
                     arabicSp = settings.arabicSp * 0.8f,
                 )
-            } ?: when {
-                translationPack == null -> AddTranslation(
-                    text = stringResource(R.string.card_add_translation),
-                    onClick = onAddContent,
-                    modifier = Modifier.padding(horizontal = 22.dp),
-                )
-                translationReady -> Text(
-                    text = stringResource(R.string.card_no_translation),
-                    style = LatinReading.copy(fontSize = 15.sp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 22.dp),
-                )
-                else -> Unit
+            }
+            if (lines.isEmpty()) {
+                when {
+                    translations.isEmpty() -> AddTranslation(
+                        text = stringResource(R.string.card_add_translation),
+                        onClick = onAddContent,
+                        modifier = Modifier.padding(horizontal = 22.dp),
+                    )
+                    translationReady -> Text(
+                        text = stringResource(R.string.card_no_translation),
+                        style = LatinReading.copy(fontSize = 15.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 22.dp),
+                    )
+                    else -> Unit
+                }
             }
 
             Spacer(Modifier.height(18.dp))
@@ -304,7 +330,8 @@ fun AyahCard(
                 },
             )
 
-            translation?.footnotes?.takeIf { it.isNotEmpty() }?.let { footnotes ->
+            val footnotes = lines.flatMap { it.text.footnotes }
+            if (footnotes.isNotEmpty()) {
                 Column(Modifier.padding(horizontal = 22.dp, vertical = 6.dp)) {
                     Text(
                         text = stringResource(R.string.card_translator_notes),

@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
@@ -28,15 +29,14 @@ data class AppSettings(
     val ayah: Int = 1,
     val mode: ReadingMode = ReadingMode.Mushaf,
     val theme: AppTheme = AppTheme.Paper,
-    val arabicSize: Int = TextSize.DEFAULT,
-    val translationSize: Int = TextSize.DEFAULT,
-    val tafsirSize: Int = TextSize.DEFAULT,
-    val wordsSize: Int = TextSize.DEFAULT,
+    val arabicSize: Float = TextSize.DEFAULT,
+    val translationSize: Float = TextSize.DEFAULT,
+    val tafsirSize: Float = TextSize.DEFAULT,
+    val wordsSize: Float = TextSize.DEFAULT,
     val recitation: String = "minshawi",
     val keepAwake: Boolean = true,
     val followReciter: Boolean = true,
-    val showFootnotes: Boolean = false,
-    val translationPack: String = "",
+    val translationPacks: Set<String> = emptySet(),
     val tafsirPacks: Set<String> = emptySet(),
     val wordByWord: Boolean = false,
     val longPressHintShown: Boolean = false,
@@ -49,7 +49,7 @@ data class AppSettings(
     val tafsirLineSp: Float get() = TextSize.lineSp(TypeRole.Tafsir, tafsirSize)
     val wordsSp: Float get() = TextSize.sp(TypeRole.Words, wordsSize)
 
-    fun sizeOf(role: TypeRole): Int = when (role) {
+    fun sizeOf(role: TypeRole): Float = when (role) {
         TypeRole.Arabic -> arabicSize
         TypeRole.Translation -> translationSize
         TypeRole.Tafsir -> tafsirSize
@@ -65,10 +65,12 @@ data class AppSettings(
 class SettingsStore(private val context: Context) {
 
     val settings: Flow<AppSettings> = context.settingsStore.data.map { preferences ->
+        val choices = preferences.asMap()
         val ayah = preferences[AYAH] ?: 1
         // The four sizes arrived after the one size did, so a reader who had
-        // chosen one keeps that choice for every kind of text.
-        val legacy = preferences[TEXT_SIZE]
+        // chosen one keeps that choice for every kind of text, and a step
+        // stored as an index by the build that shipped it keeps its scale.
+        val legacy = sizeOf(choices, TEXT_SIZE)
         AppSettings(
             ayah = ayah.coerceIn(1, 6236),
             mode = when (preferences[MODE]) {
@@ -81,17 +83,14 @@ class SettingsStore(private val context: Context) {
                 "black" -> AppTheme.Black
                 else -> AppTheme.Paper
             },
-            arabicSize = TextSize.step(preferences[ARABIC_SIZE] ?: legacy ?: TextSize.DEFAULT),
-            translationSize = TextSize.step(
-                preferences[TRANSLATION_SIZE] ?: legacy ?: TextSize.DEFAULT,
-            ),
-            tafsirSize = TextSize.step(preferences[TAFSIR_SIZE] ?: legacy ?: TextSize.DEFAULT),
-            wordsSize = TextSize.step(preferences[WORDS_SIZE] ?: legacy ?: TextSize.DEFAULT),
+            arabicSize = sizeOf(choices, ARABIC_SIZE, legacy),
+            translationSize = sizeOf(choices, TRANSLATION_SIZE, legacy),
+            tafsirSize = sizeOf(choices, TAFSIR_SIZE, legacy),
+            wordsSize = sizeOf(choices, WORDS_SIZE, legacy),
             recitation = preferences[RECITATION] ?: "minshawi",
             keepAwake = preferences[KEEP_AWAKE] ?: true,
             followReciter = preferences[FOLLOW_RECITER] ?: true,
-            showFootnotes = preferences[SHOW_FOOTNOTES] ?: false,
-            translationPack = preferences[TRANSLATION_PACK] ?: "",
+            translationPacks = translationPacks(preferences),
             tafsirPacks = preferences[TAFSIR_PACKS] ?: emptySet(),
             wordByWord = preferences[WORD_BY_WORD] ?: false,
             longPressHintShown = preferences[HINT_SHOWN] ?: false,
@@ -117,8 +116,7 @@ class SettingsStore(private val context: Context) {
         }
     }
 
-    suspend fun setTypeSize(role: TypeRole, step: Int) {
-        val value = TextSize.step(step)
+    suspend fun setTypeSize(role: TypeRole, value: Float) {
         context.settingsStore.edit {
             it[keyOf(role)] = value
             it.remove(TEXT_SIZE)
@@ -137,10 +135,6 @@ class SettingsStore(private val context: Context) {
         context.settingsStore.edit { it[FOLLOW_RECITER] = follow }
     }
 
-    suspend fun setShowFootnotes(show: Boolean) {
-        context.settingsStore.edit { it[SHOW_FOOTNOTES] = show }
-    }
-
     suspend fun setWordByWord(show: Boolean) {
         context.settingsStore.edit { it[WORD_BY_WORD] = show }
     }
@@ -149,15 +143,50 @@ class SettingsStore(private val context: Context) {
         context.settingsStore.edit { it[HINT_SHOWN] = true }
     }
 
-    suspend fun setTranslationPack(pack: String) {
-        context.settingsStore.edit { it[TRANSLATION_PACK] = pack }
+    suspend fun setTranslationPacks(packs: Set<String>) {
+        context.settingsStore.edit { it[TRANSLATION_PACKS] = packs }
     }
 
     suspend fun setTafsirPacks(packs: Set<String>) {
         context.settingsStore.edit { it[TAFSIR_PACKS] = packs }
     }
 
-    private fun keyOf(role: TypeRole): Preferences.Key<Int> = when (role) {
+    /**
+     * One stored size as a scale. The preference is read by name off the raw
+     * map, not through a typed key, because the build that shipped 0.2 wrote
+     * these as step indices: reading an Int through a Float key throws, and a
+     * reader who updated the app must never meet a crash for a text size.
+     *
+     * A stored scale keeps its own meaning (1.6 becomes the new 1.4, the
+     * largest step, not the third one); an index is looked up in the list the
+     * index was written against.
+     */
+    private fun sizeOf(
+        choices: Map<Preferences.Key<*>, Any?>,
+        key: Preferences.Key<Float>,
+        legacy: Float? = null,
+        fallback: Float = TextSize.DEFAULT,
+    ): Float {
+        val stored = choices.entries.firstOrNull { it.key.name == key.name }?.value ?: legacy
+        return when (stored) {
+            is Float -> TextSize.step(stored)
+            is Int -> TextSize.step(TextSize.LEGACY_STEPS[stored.coerceIn(0, 4)])
+            else -> fallback
+        }
+    }
+
+    /**
+     * The translations the reader has on. It was one pack before a reader
+     * could read two at once, so the old single value is read as a set of one
+     * and cleared once it has been carried over.
+     */
+    private fun translationPacks(preferences: Preferences): Set<String> {
+        preferences[TRANSLATION_PACKS]?.let { return it }
+        val single = preferences[TRANSLATION_PACK]
+        return if (single.isNullOrBlank()) emptySet() else setOf(single)
+    }
+
+    private fun keyOf(role: TypeRole): Preferences.Key<Float> = when (role) {
         TypeRole.Arabic -> ARABIC_SIZE
         TypeRole.Translation -> TRANSLATION_SIZE
         TypeRole.Tafsir -> TAFSIR_SIZE
@@ -168,16 +197,16 @@ class SettingsStore(private val context: Context) {
         val AYAH = intPreferencesKey("ayah")
         val MODE = stringPreferencesKey("mode")
         val THEME = stringPreferencesKey("theme")
-        val TEXT_SIZE = intPreferencesKey("text_size")
-        val ARABIC_SIZE = intPreferencesKey("arabic_size")
-        val TRANSLATION_SIZE = intPreferencesKey("translation_size")
-        val TAFSIR_SIZE = intPreferencesKey("tafsir_size")
-        val WORDS_SIZE = intPreferencesKey("words_size")
+        val TEXT_SIZE = floatPreferencesKey("text_size")
+        val ARABIC_SIZE = floatPreferencesKey("arabic_size")
+        val TRANSLATION_SIZE = floatPreferencesKey("translation_size")
+        val TAFSIR_SIZE = floatPreferencesKey("tafsir_size")
+        val WORDS_SIZE = floatPreferencesKey("words_size")
         val RECITATION = stringPreferencesKey("recitation")
         val KEEP_AWAKE = booleanPreferencesKey("keep_awake")
         val FOLLOW_RECITER = booleanPreferencesKey("follow_reciter")
-        val SHOW_FOOTNOTES = booleanPreferencesKey("show_footnotes")
         val TRANSLATION_PACK = stringPreferencesKey("translation_pack")
+        val TRANSLATION_PACKS = stringSetPreferencesKey("translation_packs")
         val TAFSIR_PACKS = stringSetPreferencesKey("tafsir_packs")
         val WORD_BY_WORD = booleanPreferencesKey("word_by_word")
         val HINT_SHOWN = booleanPreferencesKey("hint_shown")

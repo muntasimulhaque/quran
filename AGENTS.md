@@ -192,7 +192,7 @@ Where truth lives, by question (filled in as code lands):
 | Path | What is there |
 | --- | --- |
 | `core/` | pure JVM Kotlin, zero `android.*` imports: references, search normalization, rich text parsing, models |
-| `data/` | read-only content database access, the saved-ayah user database, page font store, preferences, models; instrumented tests in `data/src/androidTest` |
+| `data/` | read-only content database access, the saved-ayah user database, the last-read user database, page font store, preferences, models; instrumented tests in `data/src/androidTest` |
 | `app/` | the shell: activity, view model, the screen that composes the features, the shell's strings |
 | `feature-*/` | one reading surface each (mushaf, study, search, browse, playback, settings), each owning its own strings and icons |
 | `ui-kit/` | the shared look: theme and palettes, the hand-drawn icons, the rich text views, the small formatters |
@@ -234,6 +234,10 @@ implement it and update this list.
 - The name and the three strings are frozen (D-001).
 - Reader-first, no tab bar (D-008).
 - Both reading modes ship together (D-008).
+- The reading modes are one switch in the top bar, and the reader's other
+  doors are Browse, Search, and Settings; there is no bottom bar (D-051).
+- Last Read is a Browse tab beside Surahs, Juz, and Saved (D-051).
+- Text sizes are 0.75, 0.85, 1, 1.2, 1.4 (D-051).
 - Saheeh International is the only translation (D-004).
 - Ibn Kathir and As-Sa'di are the tafsirs (D-005).
 - Minshawi and Husary are the only reciters (D-007).
@@ -285,7 +289,9 @@ implement it and update this list.
 - The user database (`saved.db`) is hand-rolled SQLite, separate from the
   content database and never touched by a content rebuild. A schema change
   means bumping `DATABASE_VERSION` and writing the migration in the same
-  session; `SavedStoreTest` pins the behavior.
+  session; `SavedStoreTest` pins the behavior. The same is true of
+  `last-read.db` (`data/LastReadStore`, capped at twenty places, one row per
+  ayah) and `LastReadStoreTest` pins its behavior.
 - Android's `rawQuery` binds arguments positionally: a query whose IN clause
   is built from literals must be passed `null`, never the numbers. The
   instrumented search test exists to catch exactly this class of mistake.
@@ -312,6 +318,18 @@ implement it and update this list.
   which has a round trip test: reading `firstVisibleItemIndex` as an ayah number
   is what silently moved the reader's place to the start of the surah, and it is
   the kind of mistake that ships.
+- The study list draws nothing until the rows for the surah it was handed
+  arrive, and it writes the place only from a drag of the reader's own. A list
+  of the previous surah's rows under the new surah's name, or a write from a
+  programmatic scroll, is what made the reading place jump back and forth.
+- `ReaderViewModel` owns the settings after the library opens. `SettingsStore`
+  is read once, while the library opens, and never collected again: an
+  emission of an old stored place arriving during a jump is what moved the
+  reader off the page they had just chosen.
+- Text sizes are stored as scale factors (`Float`), never step indices, so a
+  choice means the same thing under a changed list of steps. 0.2 wrote them as
+  `Int`, so the preference is read off the raw map by key name, not through a
+  `Float` key (reading an `Int` through one throws).
 - The study list writes the reader's place only after the reader dragged it, and
   the Mushaf writes it only when the page is a new one. Anything else lets a
   jump, a mode switch, or the first frame record a place the reader never chose.
@@ -359,9 +377,11 @@ exports, the provenance of every pack), `content/quran.db` and
 4. **Instant launch, second step.** A pre-rendered bitmap of the *next* page
    in the direction the reader was reading, so the first swipe after a launch
    is also a texture draw.
-5. **Trust work, second step.** A merge preview before an import applies
-   ("12 saved ayahs, 3 notes"), and a way to move a single note into the
-   reader's own file rather than the whole document.
+5. **Trust work, second step.** The owner removed export and import in the
+   tenth session (D-051), so this item is gone unless they ask for a different
+   way to carry saved work. If they do, the shape to build is a merge preview
+   and a way to move one note rather than the whole document, never the same
+   JSON door again.
 6. **Robustness, second step.** A pack that fails verification at download
    time should say which check failed (size, hash, or unpack) rather than one
    line for all three, and the content self check should offer the removal it
@@ -388,46 +408,23 @@ exports, the provenance of every pack), `content/quran.db` and
   release build carries only the core pack, and that is enforced by variant,
   not by a condition.
 
-## Where the project stands (end of the ninth session)
+## Where the project stands (end of the tenth session)
 
-**Submitted to Google Play for review, 0.2 (versionCode 2).** The bundle was
-built and verified on this machine, CI was green on the push, and the store kit
-was refreshed from the workflows before the hand-off. What Play has now:
-play-store/aab/quran-0.2-vc2.aab, 147,673,026 bytes, SHA-256
-2bf54fd1e66e974ca3a28bac340b795c08c7fd02cbd2be9f0128a21220958e15, signed
-with the owner's upload key and carrying only the core pack. The hand-off copy
-was deleted after the submission; the folder keeps its own note.
+The owner read the shipped 0.2 and reported eleven things; all eleven are done
+(D-051). The reading place no longer jumps back (the DataStore echo and the
+study list's stale rows are gone), the mode switch is one icon in the top bar
+that offers the other mode, the bottom bar and its Listen and Saved doors are
+removed, Last Read is a Browse tab with twenty places kept, the audio offer
+has a "Not now" close, the hub chevrons point right, choice marks sit at the
+left, translations are checks like tafsirs (more than one may be on, each
+named under the ayah), the size scale lost its top step and gained a smaller
+one, Show footnotes is gone, and export and import are removed from the app
+entirely.
 
-The eighth session, the one behind that release, was the owner reading the app
-and reporting what they met, on their instruction to make it the best there is:
-the place that was lost, the
-settings that were one long scroll, the audio that asked twice and played a
-reciter nobody chose, the sizes that only moved one kind of text, the footnotes
-that collided at large sizes, the Copy button the share sheet already offers,
-and the two words over the reading modes.
+The suite is green: core tests, data unit tests, the data instrumented tests
+(16, including the six new `LastReadStoreTest` cases), the app instrumented
+tests (11, including the deterministic screenshot tour), lint with no issues,
+and the content gates. `versionCode` has not moved; that waits for the owner.
 
-What stands now: the reader's place is one ayah, exact, in both modes, written
-only when they move it themselves (D-045); settings is a hub of nine rows with
-the state of each on the row, a page behind each one, and per role text sizes
-(D-046); listening asks once for the timings and the audio together, names the
-size and the reciter in the offer, and lets the reciter be changed right there
-(D-047); the reading modes are two drawn pages named once and then silent
-(D-048); the screen dim is gone; About is the version, the credits, and the
-content check; and a paragraph takes the line height of the script actually in
-it, so the markers never collide (D-049). The study view loads a surah in three
-queries instead of three per ayah, so the first frame after a jump is the
-reader's own ayah and rows never grow under the finger.
-
-The store tour now prepares its own library and its own settings before it
-photographs anything, so the same frames come out of a fresh emulator every
-time, and the set shows the study view with a translation, the word by word
-aid, the tafsir door, and the new settings hub.
-
-CI is green on every push: core tests (42, including the em dash scan and the
-study list round trip), data unit and instrumented tests (13, with export and
-import), app instrumented tests (11, with the deterministic screenshot tour),
-lint with no issues, database and catalog checks, search round trips in three
-scripts, and three form factor screenshots whose PNGs are uploaded as
-artifacts.
 
 

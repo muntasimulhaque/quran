@@ -36,20 +36,18 @@ import io.github.muntasimulhaque.quran.feature.settings.R
  */
 data class SettingsActions(
     val onTheme: (AppTheme) -> Unit = {},
-    val onTypeSize: (TypeRole, Int) -> Unit = { _, _ -> },
+    val onTypeSize: (TypeRole, Float) -> Unit = { _, _ -> },
     val onKeepAwake: (Boolean) -> Unit = {},
     val onFollowReciter: (Boolean) -> Unit = {},
-    val onShowFootnotes: (Boolean) -> Unit = {},
     val onWordByWord: (Boolean) -> Unit = {},
     val onSelectRecitation: (String) -> Unit = {},
     val onTranslationPack: (String) -> Unit = {},
     val onToggleTafsir: (String) -> Unit = {},
+    val onToggleTranslation: (String) -> Unit = {},
     val onInstallPack: (String) -> Unit = {},
     val onRemovePack: (String) -> Unit = {},
     val onPackSetupCancel: () -> Unit = {},
     val onRemoveDownloads: suspend (String, Int) -> Unit = { _, _ -> },
-    val onExport: () -> Unit = {},
-    val onImport: () -> Unit = {},
     val onCheckContent: () -> Unit = {},
     val onOpenLink: (String) -> Unit = {},
 )
@@ -62,15 +60,6 @@ data class PackSetupState(
     val progress: Float?,
     val failed: Boolean,
 )
-
-/** What the last export or import did, so the row can say it once. */
-sealed interface DataNotice {
-    data object Exported : DataNotice
-    data class Imported(val count: Int) : DataNotice
-    data object NothingToExport : DataNotice
-    data object NothingImported : DataNotice
-    data object ImportFailed : DataNotice
-}
 
 /** What the content self check is doing, or what it found. */
 sealed interface ContentCheck {
@@ -93,8 +82,6 @@ fun SettingsSheet(
     packs: List<ContentPack>,
     packSetup: PackSetupState?,
     recitations: List<Recitation>,
-    savedCount: Int,
-    dataNotice: DataNotice?,
     contentCheck: ContentCheck?,
     version: String,
     preview: suspend () -> StudyRow?,
@@ -139,7 +126,6 @@ fun SettingsSheet(
                         settings = settings,
                         packs = packs,
                         recitations = recitations,
-                        savedCount = savedCount,
                         version = version,
                         onOpen = { page = it },
                     )
@@ -178,7 +164,6 @@ fun SettingsSheet(
                         packSetup = packSetup,
                         actions = actions,
                     )
-                    SettingsPage.Saved -> SavedPage(savedCount, dataNotice, actions)
                     SettingsPage.About -> AboutPage(
                         version = version,
                         contentCheck = contentCheck,

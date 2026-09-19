@@ -30,36 +30,37 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.JuzStart
+import io.github.muntasimulhaque.quran.data.ReadPlace
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
-import io.github.muntasimulhaque.quran.ui.theme.LatinReading
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 private enum class BrowseTab(val labelRes: Int) {
     Surahs(R.string.browse_tab_surahs),
     Juz(R.string.browse_tab_juz),
+    LastRead(R.string.browse_tab_last_read),
     Saved(R.string.browse_tab_saved),
 }
 
 /**
- * The browse sheet: the surahs, the thirty juz, and everything the reader
- * saved. Each list is one line per row and opens the reader exactly where it
- * says, so a reader is never more than two taps from any ayah in the Quran.
+ * The browse sheet: the surahs, the thirty juz, where the reader has been
+ * reading, and everything they saved. Each list is one line per row and opens
+ * the reader exactly where it says, so a reader is never more than two taps
+ * from any ayah in the Quran.
+ *
+ * Four tabs, one row of them, and every tab was asked for: Surahs and Juz are
+ * the Book's own divisions, Saved is the reader's own work, and Last Read is
+ * the way back to a place they left.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,19 +68,44 @@ fun BrowseSheet(
     content: ContentDatabase,
     surahs: List<Surah>,
     saved: List<SavedAyah>,
+    lastRead: List<ReadPlace>,
     translationPack: String,
-    startOnSaved: Boolean = false,
+    startOnLastRead: Boolean = false,
     onDismiss: () -> Unit,
     onAyah: (Int) -> Unit,
     onSurah: (Int) -> Unit,
     onRemove: (Int) -> Unit,
+    onForget: (Int) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var tab by remember {
-        mutableStateOf(if (startOnSaved) BrowseTab.Saved else BrowseTab.Surahs)
+        mutableStateOf(if (startOnLastRead) BrowseTab.LastRead else BrowseTab.Surahs)
     }
     val juzStarts by produceState(initialValue = emptyList<JuzStart>(), content) {
         value = withContext(Dispatchers.IO) { content.juzStarts() }
+    }
+    // Every list that needs the ayah's own text reads it in one pass: the
+    // reader never sees a row that is still looking for what it says.
+    val texts by produceState<Map<Int, AyahText>>(
+        initialValue = emptyMap(),
+        saved,
+        lastRead,
+        translationPack,
+    ) {
+        value = withContext(Dispatchers.IO) {
+            val numbers = (saved.map { it.ayahNumber } + lastRead.map { it.ayahNumber }).distinct()
+            if (numbers.isEmpty()) return@withContext emptyMap()
+            val ayahs = content.ayahsWithPages(numbers).associateBy { it.ayah.number }
+            val translations = content.translations(numbers, translationPack)
+            numbers.associateWith { number ->
+                AyahText(
+                    reference = ayahs[number]?.ayah?.verseKey ?: "Ayah $number",
+                    page = ayahs[number]?.page ?: 1,
+                    arabic = ayahs[number]?.ayah?.text.orEmpty(),
+                    translation = translations[number]?.text?.let { RichText.plain(it) },
+                )
+            }
+        }
     }
 
     ModalBottomSheet(
@@ -119,7 +145,7 @@ fun BrowseSheet(
                                 },
                             )
                             .clickable { tab = entry }
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
                     ) {
                         Text(
                             text = stringResource(entry.labelRes),
@@ -151,10 +177,15 @@ fun BrowseSheet(
                         )
                     }
                 }
+                BrowseTab.LastRead -> LastReadList(
+                    places = lastRead,
+                    texts = texts,
+                    onAyah = onAyah,
+                    onForget = onForget,
+                )
                 BrowseTab.Saved -> SavedList(
-                    content = content,
                     saved = saved,
-                    translationPack = translationPack,
+                    texts = texts,
                     onAyah = onAyah,
                     onRemove = onRemove,
                 )
@@ -240,162 +271,3 @@ private fun JuzRow(juz: Int, reference: String, surahName: String, onJuz: () -> 
         }
     }
 }
-
-@Composable
-private fun SavedList(
-    content: ContentDatabase,
-    saved: List<SavedAyah>,
-    translationPack: String,
-    onAyah: (Int) -> Unit,
-    onRemove: (Int) -> Unit,
-) {
-    if (saved.isEmpty()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 30.dp, vertical = 60.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = stringResource(R.string.saved_empty_title),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-                text = stringResource(R.string.saved_empty_body),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 8.dp),
-            )
-        }
-        return
-    }
-    val context = LocalContext.current
-    val hafs = remember {
-        FontFamily(Font(path = "fonts/UthmanicHafs_V22.ttf", assetManager = context.assets))
-    }
-    // Every saved ayah is read in two batched queries, once, so the list
-    // never opens on a row that is still looking for its text.
-    val texts by produceState<Map<Int, SavedText>>(emptyMap(), saved, translationPack) {
-        value = withContext(Dispatchers.IO) {
-            val numbers = saved.map { it.ayahNumber }
-            val ayahs = content.ayahsWithPages(numbers).associateBy { it.ayah.number }
-            val translations = content.translations(numbers, translationPack)
-            numbers.associateWith { number ->
-                SavedText(
-                    reference = ayahs[number]?.ayah?.verseKey ?: "Ayah $number",
-                    arabic = ayahs[number]?.ayah?.text.orEmpty(),
-                    translation = translations[number]?.text?.let { RichText.plain(it) },
-                )
-            }
-        }
-    }
-    LazyColumn(contentPadding = PaddingValues(bottom = 28.dp)) {
-        items(saved, key = { it.ayahNumber }) { row ->
-            SavedRow(
-                saved = row,
-                text = texts[row.ayahNumber],
-                hafs = hafs,
-                onAyah = onAyah,
-                onRemove = onRemove,
-            )
-        }
-    }
-}
-
-/** What one saved row shows, read with its neighbours. */
-private data class SavedText(
-    val reference: String,
-    val arabic: String,
-    val translation: String?,
-)
-
-@Composable
-private fun SavedRow(
-    saved: SavedAyah,
-    text: SavedText?,
-    hafs: FontFamily,
-    onAyah: (Int) -> Unit,
-    onRemove: (Int) -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onAyah(saved.ayahNumber) }
-            .padding(horizontal = 22.dp, vertical = 12.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = text?.reference ?: stringResource(R.string.saved_reference_fallback, saved.ayahNumber),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.weight(1f),
-            )
-            Text(
-                text = stringResource(R.string.action_open),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = stringResource(R.string.action_remove),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .padding(start = 14.dp)
-                    .clip(RoundedCornerShape(50))
-                    .clickable { onRemove(saved.ayahNumber) }
-                    .padding(horizontal = 6.dp, vertical = 2.dp),
-            )
-        }
-        text?.arabic?.takeIf { it.isNotEmpty() }?.let { arabic ->
-            Text(
-                text = arabic,
-                style = TextStyle(
-                    fontFamily = hafs,
-                    fontSize = 20.sp,
-                    lineHeight = 38.sp,
-                    color = MaterialTheme.colorScheme.onSurface,
-                ),
-                textAlign = TextAlign.Right,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 6.dp),
-            )
-        }
-        text?.translation?.let { translation ->
-            Text(
-                text = translation,
-                style = LatinReading.copy(fontSize = 15.sp, lineHeight = 23.sp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = 6.dp),
-            )
-        }
-        saved.note?.takeIf { it.isNotBlank() }?.let { note ->
-            Text(
-                text = note,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.06f))
-                    .padding(horizontal = 10.dp, vertical = 8.dp),
-            )
-        }
-    }
-}
-
-@Composable
-private fun placeName(place: String): String =
-    if (place.equals("makkah", true)) {
-        stringResource(R.string.place_makkah)
-    } else {
-        stringResource(R.string.place_madinah)
-    }

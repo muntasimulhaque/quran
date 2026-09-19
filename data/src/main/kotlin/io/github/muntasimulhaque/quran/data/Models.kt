@@ -52,6 +52,18 @@ data class Footnote(val number: Int, val text: String)
 
 data class TranslationText(val text: String, val footnotes: List<Footnote>)
 
+/**
+ * One translation of one ayah, with the pack it came from. More than one may
+ * be turned on, and each is drawn in its own column under the ayah, so the
+ * line carries the name it belongs to rather than staying anonymous.
+ */
+data class TranslationLine(
+    val pack: String,
+    val packName: String,
+    val language: String,
+    val text: TranslationText,
+)
+
 data class WordMeaning(val word: String, val meaning: String?)
 
 data class TafsirPassage(
@@ -209,10 +221,10 @@ data class JuzStart(
 /** One downloaded surah of one reciter, offered for removal. */
 data class DownloadedSurah(val surah: Int, val name: String, val bytes: Long)
 
-/** Everything one study row needs: the ayah, its words, and its translation. */
+/** Everything one study row needs: the ayah, its words, and its translations. */
 data class StudyRow(
     val ayah: Ayah,
     val words: List<Word>,
-    val translation: TranslationText?,
+    val translations: List<TranslationLine> = emptyList(),
     val meanings: List<WordMeaning> = emptyList(),
 )

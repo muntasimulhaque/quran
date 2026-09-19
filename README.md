@@ -4,12 +4,14 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** submitted to Google Play for review, version 0.2 (versionCode 2).
-The signed bundle was 147,673,026 bytes, verified with `jarsigner`, and carries
+**Status:** 0.2 (versionCode 2) is submitted to Google Play for review. The
+signed bundle was 147,673,026 bytes, verified with `jarsigner`, and carries
 only the core pack: the Quran text and its page layout, with everything else
 added from the project's own Releases when a reader asks for it. The listing,
 icon, feature graphic, and screenshots per form factor are in
-[`play-store/`](play-store/), refreshed from CI.
+[`play-store/`](play-store/), refreshed from CI. The tenth session read the
+app against the owner's report and changed eleven things; those are in the
+repository on `main` and not yet released.
 
 ## What it does
 
@@ -26,6 +28,10 @@ icon, feature graphic, and screenshots per form factor are in
   surah and offers the next. Arabic, then the translation, then footnotes
   behind their markers. An optional word by word aid puts each word's meaning
   beneath it, in the language of the translation above it.
+- **A reading place you can go back to.** The app opens on the ayah you left.
+  Browse keeps the last twenty places you read, newest first, each with the
+  mode you were in and when you left it, so a surah you visited last week is
+  one tap away again.
 - **The ayah card.** Save, note, share, play from this ayah, word by word, and
   every tafsir you have installed. It offers to add what it does not have yet
   rather than showing an empty panel.
@@ -35,9 +41,8 @@ icon, feature graphic, and screenshots per form factor are in
 - **Recitation.** Minshawi and Husary, one surah at a time, asked for once: one
   offer names the reciter, the surah, and the size, the reciter can be swapped
   in that offer, and the word being recited is washed as it is read. The page
-  follows the reciter if you ask it to.
-- **Your own work, yours to move.** Saved ayahs and notes export to a file and
-  import back on another phone, through the system's own file picker.
+  follows the reciter if you ask it to. An offer you do not want is one tap
+  away from gone.
 - **A library you choose.** The app ships the Quran text and its page layout
   and nothing else. Translations, tafsirs, word lists, and recitations are
   added when the reader wants them, from the project's own Releases, with the
@@ -119,7 +124,7 @@ The app collects nothing. The policy is [online](https://muntasimulhaque.github.
 and [in this repo](docs/privacy.html). The one network use is a content pack
 or a recitation package the reader asks for, from the project's own Releases.
 Android's cloud backup and device transfer are refused explicitly, so the
-reader's saved ayahs and notes stay on the device until they export them.
+reader's saved ayahs and notes stay on the device and move nowhere.
 
 ## License
 

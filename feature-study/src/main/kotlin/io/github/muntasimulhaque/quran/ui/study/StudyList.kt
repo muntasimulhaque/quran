@@ -69,7 +69,6 @@ import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.StudyRow
 import io.github.muntasimulhaque.quran.feature.study.R
-import io.github.muntasimulhaque.quran.ui.rich.FootnoteList
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
@@ -113,13 +112,17 @@ fun StudyList(
     }
     // The whole surah arrives at once, so every item has its text before the
     // list is measured: the reader's place lands exactly, and nothing grows or
-    // shifts under them while they read.
-    val rows by produceState(
-        initialValue = emptyList<StudyRow>(),
+    // shifts under them while they read. Until the rows for *this* surah are
+    // in hand the paper is shown, never the surah the reader just left: a
+    // stale list would be measured with the new surah's name on it, and a
+    // scroll through it would write a place in the wrong surah.
+    val loaded by produceState<Pair<Int, List<StudyRow>>?>(
+        initialValue = null,
         surah.number,
-        settings.translationPack,
+        settings.translationPacks,
         settings.wordByWord,
-    ) { value = loadRows() }
+    ) { value = surah.number to loadRows() }
+    val rows = loaded?.takeIf { it.first == surah.number }?.second.orEmpty()
     val ayahs = remember(rows) { rows.map { it.ayah.number } }
     var footnote by remember { mutableStateOf<OpenFootnote?>(null) }
     if (ayahs.isEmpty()) {
@@ -183,10 +186,9 @@ private fun StudyRows(
         initialFirstVisibleItemIndex = AyahList.indexOf(ayahs, settings.ayah),
     )
 
-    // The reader's place is written down when the scroll rests, and only when
-    // the reader moved the list. A jump into the surah, a mode switch, and the
-    // first frame of either are not places of their own: writing them would
-    // drag the reader's place to whatever the list happened to open on.
+    // The reader's place is written down when a drag of their own ends, and
+    // never by a scroll the app started. The flag is cleared on the write, so
+    // the jump that follows a drag cannot write a place of its own.
     var dragged by remember(surah.number) { mutableStateOf(false) }
     LaunchedEffect(listState, surah.number) {
         listState.interactionSource.interactions.collect { interaction ->
@@ -197,6 +199,7 @@ private fun StudyRows(
         snapshotFlow { listState.isScrollInProgress to listState.firstVisibleItemIndex }
             .collect { (scrolling, index) ->
                 if (scrolling || !dragged) return@collect
+                dragged = false
                 AyahList.ayahAt(ayahs, index)?.let(onPlaceChanged)
             }
     }
@@ -254,7 +257,6 @@ private fun StudyRows(
                 row = row,
                 hafs = hafs,
                 settings = settings,
-                showFootnotes = settings.showFootnotes,
                 wordByWord = settings.wordByWord,
                 isSelected = selected?.number == row.ayah.number,
                 playingAyah = playingAyah,
@@ -262,7 +264,9 @@ private fun StudyRows(
                 onAyah = onAyah,
                 onBackgroundTap = onBackgroundTap,
                 onFootnote = { number ->
-                    val note = row.translation?.footnotes?.firstOrNull { it.number == number }
+                    val note = row.translations.asSequence()
+                        .flatMap { it.text.footnotes.asSequence() }
+                        .firstOrNull { it.number == number }
                     if (note != null) {
                         onFootnote(
                             OpenFootnote(note, "${row.ayah.surah}:${row.ayah.ayah}"),
@@ -505,7 +509,6 @@ private fun AyahBlock(
     row: StudyRow,
     hafs: FontFamily,
     settings: AppSettings,
-    showFootnotes: Boolean,
     wordByWord: Boolean,
     isSelected: Boolean,
     playingAyah: Int?,
@@ -557,21 +560,26 @@ private fun AyahBlock(
             if (wordByWord && row.meanings.any { it.meaning != null }) {
                 WordByWord(row.meanings, hafs, settings)
             }
-            row.translation?.let { translation ->
+            // More than one translation may be on, and each is drawn in its
+            // own column, named, so the reader always knows whose reading
+            // they are looking at.
+            row.translations.forEach { line ->
+                if (row.translations.size > 1) {
+                    Text(
+                        text = line.packName,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f),
+                        modifier = Modifier.padding(top = 12.dp),
+                    )
+                }
                 TranslationBody(
-                    runs = remember(translation.text) { RichText.footnotes(translation.text) },
-                    modifier = Modifier.padding(top = 12.dp),
+                    runs = remember(line.text.text) { RichText.footnotes(line.text.text) },
+                    modifier = Modifier.padding(top = if (row.translations.size > 1) 4.dp else 12.dp),
                     sizeSp = settings.translationSp,
                     lineSp = settings.translationLineSp,
                     arabicSp = settings.arabicSp * 0.8f,
                     onFootnote = onFootnote,
                 )
-                if (showFootnotes) {
-                    FootnoteList(
-                        footnotes = translation.footnotes,
-                        quiet = true,
-                    )
-                }
             }
             Row(
                 modifier = Modifier
