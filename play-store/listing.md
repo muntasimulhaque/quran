@@ -70,32 +70,44 @@ QuranEnc. Full credits and licenses are in the app and in the repository.
 
 The icon and the feature graphic are made; the screenshots are captured by the
 screenshot test on a real Android system, one folder per form factor Play asks
-for. The tenth session changed the reader's chrome, the browse sheet, the
-translations page, and the text sizes page, so the set must be refreshed from
-the `Capture store screenshots` workflow before the next hand-off; the
-tour itself now photographs the four tab browse sheet.
+for.
 
 - App icon: `icon-512.png`
 - Feature graphic: `feature-graphic-1024x500.png`
-- Phone screenshots: `screenshots/phone/` (1080 x 1920), eight of them
-- 7 inch tablet screenshots: `screenshots/tablet7/` (1200 x 1920)
+- Phone screenshots: `screenshots/phone/` (1080 x 1920), sixteen of them
+- 7 inch tablet screenshots: `screenshots/tablet7/` (800 x 1280)
 - 10 inch tablet screenshots: `screenshots/tablet10/` (2560 x 1800)
 
-The `.github/workflows/screenshots.yml` workflow runs the capture test on
-three emulator profiles (phone, 7 inch, 10 inch) and uploads each set as its
-own artifact, so the store images always match the shipped build. Run it from
-the Actions tab, or let it run when the UI changes.
-  2. Study page with translation and footnotes
-  3. The ayah card with its actions
-  4. Ibn Kathir tafsir
-  5. As-Sa'di tafsir
-  6. Search results with the matched word marked
-  7. Browse sheet, Last read tab with a place
-  8. Browse sheet, Saved tab with a note
-  9. Recitation playing with the word marked
-- Tablet screenshots: required by Play if the listing targets tablets.
-  The layout is responsive Compose; captures still needed.
-- Night and Sepia theme captures are a nice extra.
+The set was refreshed in the tenth session from the `Capture store screenshots`
+workflow, for all three form factors, after the chrome, the browse sheet, the
+translations page, and the text sizes page changed. The tour now covers the
+Last read tab and the translations page.
+
+The workflow runs the capture test on three emulator profiles (phone, 7 inch,
+10 inch), caches the AVD per profile so only the first run of each pays for
+creating the emulator, waits for the emulated storage to mount before the test
+starts, and uploads each set as its own artifact, so the store images always
+match the shipped build. Run it from the Actions tab, or let it run when the UI
+changes.
+
+What each set shows, in order:
+
+1. The Mushaf page
+2. The chrome: the mode switch, Browse, Search, and Settings
+3. The study reading with its translation
+4. The surah opening
+5. Search with the matched word marked
+6. The settings hub
+7. Browse, Surahs
+8. Browse, Juz
+9. Browse, Last read
+10. An ayah's actions
+11. The ayah card
+12. Credits and licenses
+13. About
+14. Browse, Saved
+15. Translations, with more than one able to be on
+16. The word by word aid in Bengali
 
 ## Release notes (first release)
 
