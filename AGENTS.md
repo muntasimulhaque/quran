@@ -187,6 +187,11 @@ does not tell you, and each one costs a failed command to rediscover:
 
 ## Release hand-off
 
+The bundle and the screenshots are one delivery. They are collected, checked,
+and handed over together, before the owner submits anything, because a
+screenshot refreshed after the submission has nothing left to be used for:
+the store already has the old set.
+
 1. Raise `versionCode` by 1 and `versionName` by 0.1 in the app build
    file, and update the version line in `play-store/listing.md`.
 2. Release notes go to `play-store/listing.md` as plain flowing text,
@@ -194,7 +199,25 @@ does not tell you, and each one costs a failed command to rediscover:
 3. Run the full CI suite locally.
 4. Commit, push, confirm CI is green. The `signed-bundle` job in `build.yml`
    signs on every push to `main` and leaves the bundle in the run's artifacts.
-5. Pull the signed bundle from that run into `play-store/aab/`:
+5. Screenshots, **before the hand-over, whenever visible UI changed.** The
+   push in step 4 starts the `screenshots` workflow on its own when
+   `app/src/main`, `app/src/androidTest`, or the app build file changed. Wait
+   for it, then collect all three form factors and install them:
+
+   ```bash
+   gh run list --workflow=screenshots.yml --limit 1
+   gh run download <run-id> -n store-screenshots-phone   -D <dir>
+   gh run download <run-id> -n store-screenshots-tablet7 -D <dir>
+   gh run download <run-id> -n store-screenshots-tablet10 -D <dir>
+   ```
+
+   Each artifact prefixes its frames with the form factor; strip that prefix
+   into `play-store/screenshots/<form>/` and verify every frame against the
+   artifact with `cmp` rather than installing them on trust, because a leg
+   can pass while holding a frame nobody should ship. If nothing visible
+   changed, say so in the hand-over and do not run it: a new set that is
+   byte-identical is CI time spent for nothing.
+6. Pull the signed bundle from the step 4 run into `play-store/aab/`:
 
    ```bash
    gh run download <run-id> -n quran-signed-aab -D play-store/aab
@@ -202,25 +225,26 @@ does not tell you, and each one costs a failed command to rediscover:
 
    The artifact carries the bundle and its `SHA-256`, and GitHub deletes it
 after two weeks, so a signed build is never sitting in public and never
-sitting around. Hand the bundle over in chat with the size, the checksum, and
-the notes pasted verbatim, and delete the copy once the owner confirms the
-Play submission. Hand the notes over as a bare paragraph: no blockquote, no
-fence, no wrapping quotes, nothing on the same line as the text.
-6. Screenshots: **eight per form factor**, so the store set is phone,
-   7 inch, and 10 inch at eight frames each, twenty-four images in all. The
-   tour (`ScreenshotTest`) and the numbered list in `play-store/listing.md`
-   are kept in step with that count, so no frame is captured that the listing
-   does not explain, and none is listed that is not captured. Refresh the CI
-   set whenever visible UI changed, and say explicitly when nothing changed
-   and why. Never capture a listing set by hand: the frames come from the
-   `screenshots` workflow's artifacts.
+sitting around.
+7. **Hand over the bundle and the screenshots in the same message**, with the
+   size, the checksum, what changed in the set (or that nothing did), and the
+   notes pasted verbatim. Delete the hand-off copy once the owner confirms the
+   Play submission. Hand the notes over as a bare paragraph: no blockquote, no
+   fence, no wrapping quotes, nothing on the same line as the text.
 
-   The set is the reader's surface, in order: the Mushaf page, the chrome
-   over it, the study reading, the surah opening, search, the settings hub,
-   Browse, and the ayah card. Eight is the number the store shows first and
-   the number a session can keep honest; a ninth has to earn its place
-   against the reading, and the tour is trimmed rather than allowed to grow
-   back.
+**The screenshot set is eight frames per form factor**, so phone, 7 inch, and
+10 inch at eight each, twenty-four images in all. The tour (`ScreenshotTest`)
+and the numbered list in `play-store/listing.md` are kept in step with that
+count, so no frame is captured that the listing does not explain, and none is
+listed that is not captured.
+
+The eight are the reader's surface, in order: the Mushaf page, the chrome
+over it, the study reading, the surah opening, search, the settings hub,
+Browse, and the ayah card. Eight is the number the store shows first and the
+number a session can keep honest; a ninth has to earn its place against the
+reading, and the tour is trimmed rather than allowed to grow back. Never
+capture a listing set by hand: the frames come from the `screenshots`
+workflow's artifacts.
 
 **Signing, and the trap in it.** The `signed-bundle` job fails when the four
 secrets are absent rather than producing an unsigned artifact, because "it
@@ -384,7 +408,14 @@ implement it and update this list.
   back with that dialog in all sixteen frames and the workflow still green.
   The capture checks the window list before keeping a frame and fails the run
   rather than write a dialog into the store listing, and the leg requires the
-  full sixteen frames instead of one.
+  full sixteen frames instead of one. Even so, install a set only after
+  comparing every frame with the artifact: the guard catches the dialog, and
+  `cmp` is what catches everything else.
+- The bundle and the screenshots are one delivery, and the screenshots come
+  first. A set refreshed after the owner has submitted has nothing left to be
+  used for: the store already holds the old one, so the work is wasted and the
+  session has spent CI minutes and an emulator run for nobody. Collect and
+  verify both, then hand both over in the same message, before the submission.
 - An emulator workflow is not a test: it is a machine. Cache the AVD per form
   factor, wait for `/sdcard/Android` to exist before starting the test (a cold
   boot reports completion before its storage is mounted, and the test's output
@@ -551,6 +582,12 @@ fetching them again; the space is worth less than the time.
    Read, credits, About, the ayah actions, and the translations page. Decide
    each against the store listing's numbered list, update both together, and
    re-run `screenshots.yml` for all three form factors.
+
+   Do that trim at the start of a session, not at the end of one: the next
+   release needs the eight-frame set ready before its bundle is handed over,
+   and a tour of sixteen frames halfway through a release is a set nobody can
+   install without deleting half of it first. The workflow's own check
+   (`-ge 16` frames) moves with the tour, to `-ge 8`.
 
 ## Traps worth remembering
 

@@ -1707,3 +1707,15 @@ keep a frame a system dialog is sitting over, the workflow clears one before
 the tour starts, and a leg must produce all sixteen frames. The set was
 recaptured, and every frame of all three form factors was verified byte for
 byte against the artifacts before it replaced the committed set.
+
+**The bundle and the screenshots are one delivery, and the screenshots come
+first.** The owner said it plainly after 0.5: a set refreshed once they have
+submitted to Play has nothing left to be used for, because the store already
+holds the old one, so the work is wasted and the session has spent CI minutes
+and an emulator run for nobody. Both are now collected, verified, and handed
+over in the same message, and the hand-over happens before the submission,
+never after it. That is where the ordering belongs: step 5 of the hand-off is
+the screenshots and step 7 is the bundle and the set together, with step 6 in
+between only because both downloads come from the same pipeline. The rule is
+also in the traps, where a session looks when it is about to do the work, and
+in `play-store/RELEASE.md` above the upload step.

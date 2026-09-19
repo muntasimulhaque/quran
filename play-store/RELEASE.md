@@ -107,6 +107,8 @@ key, and the job's actions are pinned by commit rather than by tag.
 
 ## 4. Upload
 
+The bundle and the screenshots are handed over **together, before this step**.
+
 1. Play Console, **Internal testing**, create a release.
 2. Upload `app/build/outputs/bundle/release/app-release.aab`.
 3. Play will ask about the app's size and the pack download. Answer: content
@@ -138,6 +140,10 @@ Everything the listing needs is in this folder:
   reader asked for, from the project's own Releases. Play's data safety form
   and the privacy policy say exactly that.
 * The screenshots in `play-store/screenshots/` come from the `screenshots`
-  workflow, never from a hand run. Push to `main` refreshes them whenever the
-  UI, the capture test, or the app build file changes; download the artifact
-  and replace the folder when the images moved.
+  workflow, never from a hand run. They are collected and installed **before**
+  the bundle is handed over, not after: a set refreshed once the owner has
+  submitted has nothing left to be used for, because the store already holds
+  the old one. Push to `main` starts the workflow whenever the UI, the capture
+  test, or the app build file changes; download all three artifacts, verify
+  every frame with `cmp`, and replace the folder when the images moved. When
+  nothing visible changed, say so and skip it.
