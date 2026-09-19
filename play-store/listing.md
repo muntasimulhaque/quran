@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 0.2 (versionCode 2)
+Version: 0.3 (versionCode 3)
 
 ## Listing
 
@@ -109,6 +109,10 @@ What each set shows, in order:
 15. Translations, with more than one able to be on
 16. The word by word aid in Bengali
 
+## Release notes (0.2)
+
+Opens on the exact ayah you left, in both reading modes, and paints that page before anything else loads. Settings is a hub: its own page for text sizes, reciters, translations, and tafsirs, each sized as you like. Listening asks once, names the reciter and the size, and lets you swap reciter in the offer. The modes are two drawn icons, and footnotes no longer collide at large sizes. Saved ayahs export and import, and Settings can check every pack on the device. No ads, no trackers, no account.
+
 ## Release notes (first release)
 
 First release. Mushaf and study modes, Saheeh International with
@@ -116,9 +120,9 @@ footnotes, word by word, Ibn Kathir and As-Sa'di, search, bookmarks and
 notes, and recitations by Minshawi and Husary downloaded per surah on
 request. No ads, no trackers, no account.
 
-## Release notes (ready for the next release, 481 characters)
+## Release notes (0.3, 496 characters)
 
-The reading place no longer jumps back when you come from another surah. The mode switch is one icon in the top bar that offers the other view, and the bottom bar is gone: Saved sits in Browse beside the surahs and juz, and listening is the play action on any ayah. Browse has a Last read tab with your last twenty places. Text sizes gained a smaller step and lost the largest, and the download offer can be dismissed. No ads, no trackers, no account.
+The reading place no longer jumps back when you come from another surah. The mode switch is one icon in the top bar that offers the other view, and the bottom bar is gone: Saved sits in Browse beside the surahs and juz, and listening is the play action on any ayah. Browse has a Last read tab with your last twenty places. More than one translation may be on at once, text sizes gained a smaller step and lost the largest, and the download offer can be dismissed. No ads, no trackers, no account.
 
 ## Before each release
 
