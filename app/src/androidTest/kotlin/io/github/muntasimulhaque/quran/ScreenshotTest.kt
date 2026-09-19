@@ -56,20 +56,60 @@ class ScreenshotTest {
      * emulator draws in software, so a frame that includes a newly summoned
      * control can take seconds to appear; a fixed sleep would photograph the
      * frame before it.
+     *
+     * A system dialog over the app is not a frame: a loaded emulator can raise
+     * "Pixel Launcher isn't responding", and keeping that would put an Android
+     * dialog in the store listing and, worse, quietly steal the taps the tour
+     * makes next, so the frames after it were of the wrong screens. The dialog
+     * is dismissed and the frame retaken.
      */
     private fun capture(name: String) {
+        repeat(3) {
+            val bitmap = steadyFrame()
+            if (bitmap != null && !hasSystemDialog()) {
+                write(name, bitmap)
+                return
+            }
+            dismissDialog()
+        }
+        throw AssertionError("a system dialog stayed over the screen at $name")
+    }
+
+    /** The first frame that matches the one after it, or null if none settled. */
+    private fun steadyFrame(): Bitmap? {
         rule.waitForIdle()
         var previous: Bitmap? = null
         repeat(20) {
             Thread.sleep(400)
             val bitmap = androidx.test.runner.screenshot.Screenshot.capture().bitmap
-            if (previous != null && previous.sameAs(bitmap)) {
-                write(name, bitmap)
-                return
-            }
+            if (previous != null && previous.sameAs(bitmap)) return bitmap
             previous = bitmap
         }
-        previous?.let { write(name, it) }
+        return previous
+    }
+
+    /**
+     * True while an ANR or "isn't responding" dialog owns a window. The check
+     * reads the window list through UiAutomation, which every instrumentation
+     * run already has, so the test needs no extra dependency.
+     */
+    private fun hasSystemDialog(): Boolean = runCatching {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        instrumentation.uiAutomation.executeShellCommand("dumpsys window windows").use { command ->
+            java.io.FileInputStream(command.fileDescriptor).bufferedReader().use { reader ->
+                val text = reader.readText()
+                text.contains("isn't responding") || text.contains("Application Not Responding")
+            }
+        }
+    }.getOrDefault(false)
+
+    private fun dismissDialog() {
+        runCatching {
+            InstrumentationRegistry.getInstrumentation().uiAutomation
+                .executeShellCommand("input keyevent KEYCODE_BACK")
+                .close()
+        }
+        Thread.sleep(1_500)
     }
 
     private fun write(name: String, bitmap: Bitmap) {

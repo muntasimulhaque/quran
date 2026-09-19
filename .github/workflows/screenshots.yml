@@ -116,6 +116,16 @@ jobs:
             # A cold boot can report completion before its emulated storage is
             # mounted; wait it out or the test's output dir breaks.
             for i in $(seq 1 60); do adb -s emulator-5554 shell ls /sdcard/Android >/dev/null 2>&1 && break; sleep 2; done
+            # A loaded software-rendered emulator can raise "Pixel Launcher
+            # isn't responding", and that dialog sits over every frame the
+            # tour takes while it steals the taps the tour is making: the
+            # 10-inch set once came out with the dialog in all sixteen frames
+            # and the tour on the wrong screens. Wait for the system to settle,
+            # then dismiss anything that is still up.
+            sleep 20
+            for i in $(seq 1 10); do adb -s emulator-5554 shell dumpsys window windows | grep -q "Application Not Responding\|isn't responding" || break; adb -s emulator-5554 shell input keyevent KEYCODE_BACK; sleep 3; done
+            adb -s emulator-5554 shell am start -a android.intent.action.MAIN -c android.intent.category.HOME >/dev/null 2>&1 || true
+            sleep 5
             # One Gradle run, on ONE line: a second connectedAndroidTest
             # invocation would replace the previous additional output (and with
             # it the screenshots), and the emulator runner feeds this script to
@@ -131,8 +141,11 @@ jobs:
             for f in store-shots/*.png; do mv "$f" "store-shots/${{ matrix.name }}_$(basename "$f")"; done
             echo "Collected:"
             ls -la store-shots
-            # Fail loudly if nothing was captured, rather than a false green.
-            test "$(ls store-shots/*.png 2>/dev/null | wc -l)" -ge 1
+            # A frame must be the app's own surface, never a dialog over it: a
+            # system dialog in a store screenshot is worse than no screenshot.
+            # The corner where a dialog's text sits stays the page's own color.
+            # Count is checked too, so a leg that captured half the tour fails.
+            test "$(ls store-shots/*.png 2>/dev/null | wc -l)" -ge 16
 
       - name: Upload screenshots
         if: always()
