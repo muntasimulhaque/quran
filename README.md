@@ -4,14 +4,12 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 0.2 (versionCode 2) is submitted to Google Play for review. The
-signed bundle was 147,673,026 bytes, verified with `jarsigner`, and carries
+**Status:** 0.3 (versionCode 3) is submitted to Google Play for review. The
+signed bundle was 147,657,235 bytes, verified with `jarsigner`, and carries
 only the core pack: the Quran text and its page layout, with everything else
 added from the project's own Releases when a reader asks for it. The listing,
 icon, feature graphic, and screenshots per form factor are in
-[`play-store/`](play-store/), refreshed from CI. The tenth session read the
-app against the owner's report and changed eleven things; those are in the
-repository on `main` and not yet released.
+[`play-store/`](play-store/), refreshed from CI.
 
 ## What it does
 
@@ -32,6 +30,10 @@ repository on `main` and not yet released.
   Browse keeps the last twenty places you read, newest first, each with the
   mode you were in and when you left it, so a surah you visited last week is
   one tap away again.
+- **Two readings, one switch.** The Mushaf and the study view are one icon in
+  the top bar that always offers the other one. There is no bottom bar: the
+  index, search, saved ayahs, and settings are all one tap from the same edge,
+  and listening is the play action on any ayah.
 - **The ayah card.** Save, note, share, play from this ayah, word by word, and
   every tafsir you have installed. It offers to add what it does not have yet
   rather than showing an empty panel.
@@ -53,6 +55,8 @@ repository on `main` and not yet released.
   for the Quran text, the translation, the tafsir, and the word by word aid, a
   settings hub with the state of each choice on its row, secondary text above
   4.5:1 contrast in all four themes, and every control a real 48 dp target.
+  More than one translation may be on at once; each draws in its own place
+  under the ayah.
 
 ## The content
 

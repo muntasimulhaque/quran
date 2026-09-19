@@ -425,12 +425,17 @@ implement it and update this list.
 
 ### Housekeeping at the end of the session
 
-The hand-off bundle, every module build directory, and the content working area
-were deleted, freeing about 3.3 GB; the repository stands at 597 MB. What is
-kept is deliberate: `content/raw/` (the owner's manual QUL and QuranEnc
-exports, the provenance of every pack), `content/quran.db` and
-`content/packs/` (the shipped assets the catalog pins), and
-`play-store/screenshots/` (the store set, captured by CI).
+At the end of the ninth session the hand-off bundle, every module build
+directory, and the content working area were deleted, freeing about 3.3 GB;
+the repository stands at 597 MB. What is kept is deliberate: `content/raw/`
+(the owner's manual QUL and QuranEnc exports, the provenance of every pack),
+`content/quran.db` and `content/packs/` (the shipped assets the catalog pins),
+and `play-store/screenshots/` (the store set, captured by CI).
+
+The eleventh session kept the content working area and the build directories,
+because it ran the owner-machine gates and then built and verified the release
+bundle from them. Deleting them before the next release would only mean
+fetching them again; the space is worth less than the time.
 
 | Removed | Bring it back with |
 |---|---|
@@ -490,23 +495,37 @@ exports, the provenance of every pack), `content/quran.db` and
   release build carries only the core pack, and that is enforced by variant,
   not by a condition.
 
-## Where the project stands (end of the tenth session)
+## Where the project stands (end of the eleventh session)
 
-The owner read the shipped 0.2 and reported eleven things; all eleven are done
-(D-051). The reading place no longer jumps back (the DataStore echo and the
-study list's stale rows are gone), the mode switch is one icon in the top bar
-that offers the other mode, the bottom bar and its Listen and Saved doors are
-removed, Last Read is a Browse tab with twenty places kept, the audio offer
-has a "Not now" close, the hub chevrons point right, choice marks sit at the
-left, translations are checks like tafsirs (more than one may be on, each
-named under the ayah), the size scale lost its top step and gained a smaller
-one, Show footnotes is gone, and export and import are removed from the app
-entirely.
+**Submitted to Google Play for review, 0.3 (versionCode 3).** What Play has:
+147,657,235 bytes, SHA-256
+`4b43a694ba565f776901000f7ec87b644be82e9b9153b4d023b830db189b1b27`, signed
+with the owner's upload key, carrying only the core pack. The hand-off copy was
+deleted after the submission; `play-store/aab/` keeps its own note.
 
-The suite is green: core tests, data unit tests, the data instrumented tests
-(16, including the six new `LastReadStoreTest` cases), the app instrumented
-tests (11, including the deterministic screenshot tour), lint with no issues,
-and the content gates. `versionCode` has not moved; that waits for the owner.
+The tenth session's eleven items are in that release (D-051): the reading place
+no longer jumps back, the mode switch is one icon in the top bar that offers the
+other mode, the bottom bar and its Listen and Saved doors are gone, Last Read is
+a Browse tab with twenty places kept, the audio offer has a "Not now" close,
+the hub chevrons point right, choice marks sit at the left, translations are
+checks like tafsirs (more than one may be on, each named under the ayah), the
+size scale lost its top step and gained a smaller one, Show footnotes is gone,
+and export and import are removed from the app entirely.
+
+The pre-flight found three faults older than the session, all fixed (D-052):
+`tools fonts` had been reading a content shape that stopped existing at the pack
+split (unnoticed because CI cannot run it), its first honest run surfaced an
+undocumented decision (Bengali is drawn by Android's own Noto, now an explicit
+allow-list), and the word by word test could fail on a Compose threading race.
+The gate's numbers are current: 23,012,137 reading codepoints, 29 datasets
+verified, 0 unexplained audit differences.
+
+The suite is green locally and in CI: core tests, data unit tests, the data
+instrumented tests (16, including the six `LastReadStoreTest` cases), the app
+instrumented tests (11, with the screenshot tour and the word by word aid),
+lint with no issues, the six content gates, and three form factor screenshot
+sets captured by the `screenshots` workflow, whose AVDs are cached per form
+factor and whose boot wait waits for storage rather than sleeping.
 
 
 

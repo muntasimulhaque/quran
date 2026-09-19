@@ -1403,3 +1403,67 @@ removed completely, and it is: the two doors, the file plumbing
 strings, the Saved settings page and its hub row, and the two instrumented
 tests that pinned them. `SavedStore` keeps saving, notes, and removal, and the
 saved-ayah tests now pin exactly that.
+
+## D-052: The release hand-off, 0.3
+
+Date: the eleventh session, the release session. Version 0.3 (versionCode 3)
+went to Google Play for review.
+
+What the hand-off was: `versionCode` 3 and `versionName` 0.3, the version line
+in `play-store/listing.md`, and the release notes written there at 496
+characters, one unbroken paragraph. The notes reached the owner bare, with no
+blockquote and no quotes around them, because Play Console's text box takes
+whatever characters arrive and a wrapped paste would have carried the markers
+into the store text.
+
+The bundle: 147,657,235 bytes, SHA-256
+`4b43a694ba565f776901000f7ec87b644be82e9b9153b4d023b830db189b1b27`, signed
+with the owner's upload key (certificate SHA-256
+`537d09d20300129e973b7945316bfe24cfadcfbc77eec5229cbf30170d9de521`, the same
+key as 0.2 and the family's other apps per D-017), verified with
+`jarsigner -verify`, carrying the core pack and no debug packs. `aapt2` on the
+release APK built beside it confirmed versionCode 3 and versionName 0.3. The
+hand-off copy was deleted once the submission was confirmed.
+
+**Three things the pre-flight found, all of them older than this session.**
+They are recorded because a release is where they surfaced, and each one would
+have shipped broken:
+
+1. **`tools fonts` had been broken since the pack split.** It read
+   `content/quran.db` for a `translation` table, a `tafsir_passage` with a
+   `source` column, and a `word.translation`; the split moved all three into
+   `content/packs/*.db`. CI never ran it (it needs the raw QUL and QuranEnc
+   exports), so nothing failed and nothing was checked. It now reads the built
+   packs, and its old font paths (`app/src/main/res/font`) were corrected to
+   `content-assets`.
+2. **Its first honest run found a decision nobody had written down.** The
+   Bengali translation and the Bengali Ibn Kathir are drawn by Android's own
+   Noto, not by a bundled face, which is why they render correctly and always
+   have. The gate now allows a script *by name*, in one allow-list, and fails
+   on anything else: a new script is a decision, not an accident. All
+   23,012,137 reading codepoints pass.
+3. **The word by word test could fail with `The current thread must have a
+   looper`.** It paired `createEmptyComposeRule()` with its own
+   `ActivityScenario`, and the study list's prefetch scheduler throws when the
+   composition lands on a thread without one. The compose rule owns the
+   activity now, and library preparation is an `ExternalResource` chained
+   outside it, so the app starts after the packs are in place.
+
+**The tenth session's eleven items, as shipped.** The reader's place stopped
+jumping back (the DataStore echo and the study list's stale rows are gone);
+the mode switch is one icon in the top bar that offers the other mode, and the
+bottom bar and its Listen and Saved doors are removed; Last Read is a Browse
+tab with twenty places kept; the audio offer carries a "Not now" close; the
+hub chevrons point right; choice marks sit at the left; translations are
+checks like tafsirs, with more than one allowed and each drawn in its own named
+column; the size scale is 0.75 through 1.4, stored as scale factors so an old
+value keeps its meaning; Show footnotes is gone; and export and import are
+removed from the app entirely.
+
+**And the CI shape changed.** The screenshots workflow took the family shape:
+the AVD is cached per form factor, the script waits for `/sdcard/Android`
+before the test starts, and the app's instrumented tests run only there, on
+all three store form factors. The data tests still run in `build.yml` on one
+phone profile. The tablet legs had been failing on a 25 second wait that no
+machine with a software renderer could meet; the waits are minutes now,
+because a slow emulator is not a failing reading aid.

@@ -25,7 +25,14 @@ English and As-Sa'di in Arabic, with the Quran quotations set apart.
 
 Search reads Arabic without diacritics and English without accents, so
 typing allah finds Allah and isa finds Isa. Save any ayah, add your own
-note to it, and find everything again under Browse.
+note to it, and find everything again under Browse, beside a Last read
+list that keeps the places you have been reading so you can return to one
+you left.
+
+The two readings are one switch at the top of the page, and it always
+offers the other one: the printed page, or the study view. There is no
+bottom bar to learn. More than one translation may be on at once, and
+each one draws in its own place under the ayah.
 
 Recitation plays Minshawi or Husary, with the page following the reciter
 and the word being recited marked. Audio is not bundled and not streamed:
@@ -109,20 +116,20 @@ What each set shows, in order:
 15. Translations, with more than one able to be on
 16. The word by word aid in Bengali
 
-## Release notes (0.2)
+## Release notes (0.3, 496 characters)
+
+The reading place no longer jumps back when you come from another surah. The mode switch is one icon in the top bar that offers the other view, and the bottom bar is gone: Saved sits in Browse beside the surahs and juz, and listening is the play action on any ayah. Browse has a Last read tab with your last twenty places. More than one translation may be on at once, text sizes gained a smaller step and lost the largest, and the download offer can be dismissed. No ads, no trackers, no account.
+
+## Release notes (0.2, as shipped)
 
 Opens on the exact ayah you left, in both reading modes, and paints that page before anything else loads. Settings is a hub: its own page for text sizes, reciters, translations, and tafsirs, each sized as you like. Listening asks once, names the reciter and the size, and lets you swap reciter in the offer. The modes are two drawn icons, and footnotes no longer collide at large sizes. Saved ayahs export and import, and Settings can check every pack on the device. No ads, no trackers, no account.
 
-## Release notes (first release)
+## Release notes (first release, as shipped)
 
 First release. Mushaf and study modes, Saheeh International with
 footnotes, word by word, Ibn Kathir and As-Sa'di, search, bookmarks and
 notes, and recitations by Minshawi and Husary downloaded per surah on
 request. No ads, no trackers, no account.
-
-## Release notes (0.3, 496 characters)
-
-The reading place no longer jumps back when you come from another surah. The mode switch is one icon in the top bar that offers the other view, and the bottom bar is gone: Saved sits in Browse beside the surahs and juz, and listening is the play action on any ayah. Browse has a Last read tab with your last twenty places. More than one translation may be on at once, text sizes gained a smaller step and lost the largest, and the download offer can be dismissed. No ads, no trackers, no account.
 
 ## Before each release
 
