@@ -583,10 +583,7 @@ fun SizeRow(role: TypeRole, step: Int, onChange: (Int) -> Unit) {
                 ) {
                     Text(
                         text = if (role == TypeRole.Arabic) "\u0627" else "A",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = (11 + index * 2).sp,
-                            fontFamily = if (role == TypeRole.Arabic) null else null,
-                        ),
+                        style = MaterialTheme.typography.titleMedium.copy(fontSize = (11 + index * 2).sp),
                         color = if (active) {
                             MaterialTheme.colorScheme.primary
                         } else {

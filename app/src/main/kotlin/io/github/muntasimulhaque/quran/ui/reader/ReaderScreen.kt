@@ -73,9 +73,11 @@ import io.github.muntasimulhaque.quran.ui.study.StudyList
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.PagePalette
 import io.github.muntasimulhaque.quran.ui.theme.LocalPageThemeName
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.min
 
 /** How long the chrome stays after a touch before it steps back. */
@@ -374,7 +376,9 @@ fun ReaderScreen(
             dataNotice = viewModel.dataNotice,
             contentCheck = viewModel.contentCheck,
             version = BuildConfig.VERSION_NAME,
-            preview = { viewModel.studyRow(settings.ayah, settings.translationPack) },
+            preview = {
+                withContext(Dispatchers.IO) { viewModel.studyRow(settings.ayah, settings.translationPack) }
+            },
             downloadedSurahs = { recitation -> viewModel.downloadedSurahs(recitation) },
             actions = SettingsActions(
                 onTheme = { viewModel.setTheme(it) },
@@ -733,13 +737,15 @@ private fun BottomStack(
 @Composable
 private fun ModeHint(mode: ReadingMode, modifier: Modifier = Modifier) {
     var hint by remember { mutableStateOf<String?>(null) }
+    var shown by remember { mutableStateOf("") }
     var last by remember { mutableStateOf(mode) }
     val mushaf = stringResource(io.github.muntasimulhaque.quran.uikit.R.string.mode_mushaf)
     val study = stringResource(io.github.muntasimulhaque.quran.uikit.R.string.mode_study)
     LaunchedEffect(mode) {
         if (mode == last) return@LaunchedEffect
         last = mode
-        hint = if (mode == ReadingMode.Mushaf) mushaf else study
+        shown = if (mode == ReadingMode.Mushaf) mushaf else study
+        hint = shown
         delay(1600)
         hint = null
     }
@@ -750,7 +756,7 @@ private fun ModeHint(mode: ReadingMode, modifier: Modifier = Modifier) {
         modifier = modifier,
     ) {
         Text(
-            text = hint.orEmpty(),
+            text = shown,
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier

@@ -126,11 +126,8 @@ private fun reciterName(
     packs: List<ContentPack>,
     recitations: List<Recitation>,
 ): String {
-    val installed = recitations.any {
-        ContentDatabase.reciterPack(it.id) in packs.map { pack -> pack.id } &&
-            packs.any { pack -> pack.id == ContentDatabase.reciterPack(it.id) && pack.installed }
-    }
-    if (!installed) return stringResource(R.string.settings_none_yet)
+    val chosen = ContentDatabase.reciterPack(settings.recitation)
+    if (packs.none { it.id == chosen && it.installed }) return stringResource(R.string.settings_none_yet)
     return recitations.firstOrNull { it.id == settings.recitation }?.name
         ?: stringResource(R.string.settings_none_yet)
 }
