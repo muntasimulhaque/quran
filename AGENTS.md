@@ -395,8 +395,15 @@ implement it and update this list.
   U+FDFA is preserved), and Arabic letters Amiri Quran lacks fall back to
   the bundled Hafs font per codepoint. `tools fonts` mirrors that rule, so
   no codepoint can reach the screen as tofu.
-- The reader never sees the raw tafsir HTML: `core/RichText.kt` parses it.
-  Change the parser and the gate together.
+- The reader never sees the raw tafsir HTML: `core/RichText.kt` parses it, and
+  `RichText.plain` is the readable form for every surface that cannot draw
+  runs (sharing, a search excerpt, a surah introduction). A tafsir search
+  result printed `</p><h2>` for two sessions because the excerpt was cut from
+  the stored HTML and handed to a view with no parser; the store screenshot
+  finally showed it. `tools search` now checks every excerpt it can produce
+  and every surah introduction for markup and for a highlight that lands. A
+  tag is only what looks like one: the sources carry real angle brackets in
+  prose, so never strip a bare `<` or `>`.
 - Two modules that declare the same string name is a crash, not a merge: the
   resource table keeps one of them, and `stringResource` then throws
   `MissingFormatArgumentException` on the main thread when the arguments do
@@ -550,6 +557,12 @@ fetching them again; the space is worth less than the time.
   not by a condition.
 
 ## Where the project stands (end of the twelfth session)
+
+The session ends on 0.5 (versionCode 5), not 0.4: 0.4 was already handed to
+Play, and collecting the store screenshots then found a real bug (D-055), so
+the fix ships as the next number. Search no longer shows raw tafsir markup,
+the surah introduction reads as prose, and a content gate now checks every
+excerpt for both.
 
 **0.3 (versionCode 3) is submitted to Google Play.** What was handed over: 147,657,235
 bytes, SHA-256

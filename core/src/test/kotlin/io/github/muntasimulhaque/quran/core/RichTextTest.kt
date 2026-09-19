@@ -123,4 +123,57 @@ class RichTextTest {
         val runs = RichText.parseHtml("<p>see <a href=\"https://example.org\">this</a> note</p>").single().runs
         assertEquals("see this note", runs.joinToString("") { it.text })
     }
+
+    /**
+     * The stored tafsir is a small HTML subset for its own panels to parse.
+     * A place with no parser behind it (a share, a search excerpt, a surah's
+     * introduction) reads the text through `plain`, so a reader can never be
+     * shown `</p><h2>` where a sentence should be.
+     */
+    @Test
+    fun `plain removes the tafsir markup`() {
+        assertEquals(
+            "The Meaning of Al-Fatihah & its Various Names This Surah is called Al-Fatihah.",
+            RichText.plain(
+                "<h2>The Meaning of Al-Fatihah & its Various Names</h2>" +
+                    "<p>This Surah is called <strong>Al-Fatihah</strong>.</p>",
+            ),
+        )
+        assertEquals(
+            "Al Fatiha & its names",
+            RichText.plain("<h2>Al Fatiha & its names</h2>"),
+        )
+    }
+
+    @Test
+    fun `plain leaves no space where a tag stood beside punctuation`() {
+        assertEquals(
+            "The Entirely Merciful, the Especially Merciful.",
+            RichText.plain("The <em>Entirely</em> Merciful, the <em>Especially</em> Merciful."),
+        )
+        assertEquals("(The Cow)", RichText.plain("(The Cow)"))
+    }
+
+    @Test
+    fun `plain separates the words a removed tag stood between`() {
+        assertEquals("one two", RichText.plain("one<strong>two</strong>"))
+        assertEquals("one two three", RichText.plain("<p>one</p><p>two</p><p>three</p>"))
+        assertEquals("before after", RichText.plain("before<br>after").replace("\n", " "))
+    }
+
+    @Test
+    fun `plain keeps a real less-than and a word list's own brackets`() {
+        assertEquals("1 < 2 and 3 > 2", RichText.plain("1 < 2 and 3 > 2"))
+        assertEquals("disbelieve[d]", RichText.plain("disbelieve[d]"))
+        assertEquals("[the] Last", RichText.plain("[the] Last"))
+    }
+
+    @Test
+    fun `plain keeps a paragraph break as a break`() {
+        val plain = RichText.plain("<h2>Name</h2>\n<p>First paragraph.</p>\n<p>Second.</p>")
+        assertTrue("paragraphs must stay apart: $plain", plain.contains("\n"))
+        assertTrue(plain.startsWith("Name"))
+        assertTrue(plain.endsWith("Second."))
+        assertFalse("no run of blank lines: $plain", plain.contains("\n\n\n"))
+    }
 }

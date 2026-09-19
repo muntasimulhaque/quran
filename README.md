@@ -4,12 +4,15 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 0.3 (versionCode 3) is submitted to Google Play, and a session of
-reader corrections is in the tree. The signed bundle was 147,657,235 bytes,
-verified with `jarsigner`, and carries only the core pack: the Quran text and
-its page layout, with everything else added from the project's own Releases
-when a reader asks for it. The listing, icon, feature graphic, and screenshots
-per form factor are in [`play-store/`](play-store/), refreshed from CI.
+**Status:** 0.5 (versionCode 5) is the release in flight; 0.4 is already with
+Play. This session corrected the reader's report and fixed raw tafsir markup
+in search results, and it moved signing into CI: the `signed-bundle` job
+signs on every push to `main` and leaves the bundle in the run's own private
+artifact, so nothing signed is ever posted publicly. The bundle carries only
+the core pack, the Quran text and its page layout, with everything else added
+from the project's own Releases when a reader asks for it. The listing, icon,
+feature graphic, and screenshots per form factor are in
+[`play-store/`](play-store/), refreshed from CI.
 
 ## What it does
 

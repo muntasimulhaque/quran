@@ -1617,3 +1617,51 @@ avoids all four. The owner then set the four secrets from the vault, and the
 key was confirmed as the family's shared upload key before anything was
 written to GitHub: alias `my-key-alias`, certificate SHA-256
 `537d09d20300129e973b7945316bfe24cfadcfbc77eec5229cbf30170d9de521`.
+
+## D-055: Readable text is one rule, and a gate now checks it
+
+Date: the twelfth session, after the store screenshots were collected.
+
+Collecting the store set is what found it. The tablet search frame showed the
+reader `</p><h2>` in the middle of a tafsir result, and the frame only showed
+it because this session also fixed the tour to wait for results instead of
+photographing "Searching…". The bug predates the session and shipped in 0.3.
+
+**The shape of it.** A tafsir is stored as a small HTML subset (`p`, `h2`,
+`strong`, `q`, and so on) because its panels parse it. Search cut its excerpt
+from the stored form and printed it through a view with no parser behind it,
+so the tags reached the screen. `surah_info` had the same defect on the study
+view's "About this surah", which called `plain` while `plain` only removed
+footnote markers.
+
+**The fix is one rule in one place.** `RichText.plain` is now the readable
+form of anything: it removes tag-shaped runs, removes footnote markers,
+collapses spaces, tidies the space a removed tag leaves beside punctuation,
+and keeps a paragraph break. `Search.excerpt` takes its window from that
+readable form and matches on it too, so the highlight lands on words the
+reader can see. Every surface that cannot draw runs reads through `plain`:
+sharing, a search excerpt, a tafsir result, a surah introduction.
+
+**What `plain` deliberately does not touch.** A tag is only what looks like
+one: `<` followed by a letter or a slash. The sources carry real angle
+brackets in prose (surah 63's introduction has `Allah'&gt;` in the raw QUL
+export, decoded to a bare `>` by the build), so a rule that stripped every
+angle bracket would eat a character of the Quran's own commentary. Entities
+are decoded by the content build, not here, and a word list's own brackets
+(`disbelieve[d]`, `[the] Last`) are meaning, not markup.
+
+**A new gate catches the class.** `tools search` grew a readable-text audit:
+it takes every excerpt it can produce from every installed pack (465 of them
+on the current content), checks that no tag survives, and checks that the
+highlight still lands on a non-blank word. It also walks all 114 surah
+introductions. It runs in CI's content gates, so this cannot come back
+unnoticed. The gate is also how the Bangla highlighting question was settled:
+its first run reported missing highlights in the Bangla translation, which
+turned out to be the gate passing a raw, unfolded term where the app folds
+what the reader types. The app was right and the gate was wrong.
+
+**Version 0.5, not 0.4.** 0.4 (versionCode 4) was already submitted, so this
+is 0.5 (versionCode 5): same session, next number. The signed bundle comes
+from the `signed-bundle` job in `build.yml`, which is now the only signing
+path (D-054), and the store set is refreshed from the `screenshots` workflow
+for all three form factors.

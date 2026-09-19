@@ -39,6 +39,28 @@ object RichText {
 
     private val marker = Regex("\\[(\\d+)]")
 
+    /** A tag-shaped run: `<`, an optional slash, a letter, then to the `>`. */
+    private val tag = Regex("</?[a-zA-Z][^>]*>")
+
+    /**
+     * True when a string still carries something tag-shaped, which means it
+     * has not been through `plain` or `parseHtml` yet. A bare `<` or `>` in
+     * prose is not markup: the sources carry both, escaped and unescaped, and
+     * the content build decodes them.
+     */
+    fun hasMarkup(text: String): Boolean = tag.containsMatchIn(text)
+
+    private val horizontalSpace = Regex("[ \\t\\r\\f\\u000B]+")
+
+    /**
+     * Removing a tag leaves a space in its place, which is right between two
+     * words and wrong beside punctuation: no one writes "Al-Fatihah ."
+     */
+    private val spaceBeforePunctuation = Regex(" +([.,;:!?%)\\]])")
+    private val spaceAfterOpening = Regex("([\\[(]) +")
+    private val spaceBeforeBreak = Regex(" *\\n *")
+    private val blankLines = Regex("\\n{3,}")
+
     private val heading = Regex("h[1-4]")
 
     fun isArabic(codepoint: Int): Boolean = arabicRanges.any { codepoint in it }
@@ -181,12 +203,28 @@ object RichText {
     }
 
     /**
-     * The translation as a clean sentence for the clipboard and for sharing:
-     * the footnote markers are dropped because their footnotes are not sent
-     * along, and a dangling [7] would only confuse the reader on the other end.
+     * The text as readable prose, for a place that cannot draw runs: the
+     * tafsir's tags go, the translation's [n] footnote markers go, runs of
+     * spaces become one, and a paragraph break stays a break. Sharing, a
+     * search excerpt, and a surah's introduction all read through here, so no
+     * surface can show the raw stored form by accident.
+     *
+     * A tag is only what looks like one: a `<` that introduces a letter or a
+     * slash. A real less-than sign in prose survives, and the words on either
+     * side of a removed tag keep a space between them instead of being welded
+     * together. The brackets of a translation's footnotes are removed, but the
+     * square brackets of a word list's implied words (`disbelieve[d]`) are
+     * part of the meaning and stay.
      */
     fun plain(text: String): String =
-        marker.replace(text, "").replace(Regex(" {2,}"), " ").trim()
+        tag.replace(text, " ")
+            .let { marker.replace(it, "") }
+            .replace(horizontalSpace, " ")
+            .replace(spaceBeforePunctuation, "$1")
+            .replace(spaceAfterOpening, "$1")
+            .replace(spaceBeforeBreak, "\n")
+            .replace(blankLines, "\n\n")
+            .trim()
 
     private fun splitRuns(
         text: String,

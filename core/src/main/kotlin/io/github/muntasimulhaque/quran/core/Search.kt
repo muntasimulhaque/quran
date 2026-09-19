@@ -150,6 +150,12 @@ object Search {
      * matched ranges rebased onto the window. Used for tafsir results, where
      * the passage can be many pages long and only the sentence matters.
      *
+     * The window is taken from the readable form of the text, never the stored
+     * one: a tafsir is kept as a small HTML subset for its panels to parse, and
+     * a search result has no parser behind it, so a raw window would print
+     * `</p><h2>` at the reader. Matching runs on that same readable form, which
+     * keeps the highlight on the words the reader can see.
+     *
      * The window is widened, never narrowed, to the nearest word boundaries,
      * and it always contains the first match: a highlight that points at
      * nothing, or a sentence that starts in the middle of a word, would be
@@ -161,22 +167,23 @@ object Search {
         arabic: Boolean,
         window: Int = 180,
     ): Pair<String, List<IntRange>> {
-        val ranges = matchRanges(text, terms, arabic)
-        if (ranges.isEmpty() || text.length <= window * 2) return text to ranges
+        val readable = RichText.plain(text)
+        val ranges = matchRanges(readable, terms, arabic)
+        if (ranges.isEmpty() || readable.length <= window * 2) return readable to ranges
         val first = ranges.first().first
         val last = ranges.last().last + 1
         var start = (first - window).coerceAtLeast(0)
-        var end = (last + window).coerceAtMost(text.length)
-        while (start > 0 && !text[start - 1].isWhitespace()) start--
-        while (end < text.length && !text[end].isWhitespace()) end++
+        var end = (last + window).coerceAtMost(readable.length)
+        while (start > 0 && !readable[start - 1].isWhitespace()) start--
+        while (end < readable.length && !readable[end].isWhitespace()) end++
         start = minOf(start, first)
         end = maxOf(end, last)
-        if (start >= end) return text to ranges
+        if (start >= end) return readable to ranges
         val prefix = if (start > 0) "... " else ""
-        val suffix = if (end < text.length) " ..." else ""
+        val suffix = if (end < readable.length) " ..." else ""
         val rebased = ranges.filter { it.first >= start && it.last < end }
             .map { (it.first - start + prefix.length)..(it.last - start + prefix.length) }
-        return (prefix + text.substring(start, end) + suffix) to rebased
+        return (prefix + readable.substring(start, end) + suffix) to rebased
     }
 
     private fun isMark(codePoint: Int): Boolean =

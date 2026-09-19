@@ -17,10 +17,19 @@ import java.util.TreeMap
  * codepoint is audited to fold to plain ASCII (or to be Arabic, which the
  * Arabic path handles), and plain words a reader would actually type must
  * match something.
+ *
+ * Readable: a tafsir is stored as a small HTML subset for its own panels to
+ * parse, and a search result has no parser behind it, so every excerpt the
+ * reader can be shown is checked for markup and for a highlight that lands on
+ * words they can see. A surah's introduction is checked the same way. This is
+ * the gate that would have caught raw `</p><h2>` in a tafsir result.
  */
 class SearchCheck(private val root: File) {
 
     private val problems = mutableListOf<String>()
+
+    /** Excerpts and introductions checked for readable text. */
+    private var readableChecked = 0
 
     fun run(): Int {
         val database = File(root, "content/quran.db")
@@ -64,11 +73,13 @@ class SearchCheck(private val root: File) {
         auditNonAscii(nonAscii)
         auditScriptRoundTrip("content/quran.db", "bn")
         auditPlainWords(translations)
+        auditReadableText()
 
         if (problems.isEmpty()) {
             println("search: $arabicChecked arabic round trips passed")
             println("search: ${nonAscii.size} distinct non-ASCII translation codepoints fold cleanly")
             println("search: plain english words match")
+            println("search: ${readableChecked} readable excerpts carry no markup")
             return 0
         }
         println("SEARCH FAILURES (${problems.size})")
@@ -137,8 +148,109 @@ class SearchCheck(private val root: File) {
         }
     }
 
-    /** Codepoints whose job is to fold to a plain Latin letter. */
-    private fun isLatinFolding(codepoint: Int): Boolean = when (codepoint) {
+    /**
+     * Every excerpt the reader can be shown, and every surah introduction,
+     * comes out readable: no tag, no footnote marker where a marker belongs to
+     * a footnote, and a highlight that still lands on a word. A tafsir result
+     * used to print `</p><h2>` because the excerpt was cut from the stored
+     * HTML, which is exactly what this checks.
+     *
+     * The probe term goes through `Search.parse` and not raw, because that is
+     * what the app does with the reader's typing: a raw term would fold
+     * differently from the stored column and report a missing highlight that
+     * the reader would never meet.
+     */
+    private fun auditReadableText() {
+        val packs = File(root, "content/packs")
+        if (!packs.isDirectory) return
+        val probes = listOf(
+            "tafsir-ibn-kathir-en" to "tafsir_passage",
+            "tafsir-ibn-kathir-bn" to "tafsir_passage",
+            "translation-saheeh-en" to "translation",
+            "translation-taisirul-quran-bn" to "translation",
+        )
+        for ((id, table) in probes) {
+            val file = File(packs, "$id.db")
+            if (!file.isFile) {
+                println("search: $id is not built; readable check skipped for it")
+                continue
+            }
+            openSqlite(file).use { connection ->
+                val probe = readableProbe(connection, table) ?: run {
+                    println("search: $id has no text to check")
+                    return@use
+                }
+                // Fold the probe the way the app folds what the reader types:
+                // a raw term folds differently from the stored column and would
+                // report a missing highlight the reader would never meet.
+                val terms = listOf(Search.normalizeForIndex(probe.window))
+                connection.each(
+                    "SELECT text FROM ${probe.table} WHERE text LIKE '%${probe.window}%' LIMIT 200",
+                ) { rs ->
+                    val raw = rs.getString(1) ?: return@each
+                    val (excerpt, ranges) = Search.excerpt(raw, terms, arabic = false)
+                    readableChecked++
+                    if (RichText.hasMarkup(excerpt)) {
+                        problems += "$id leaked markup into an excerpt: " +
+                            excerpt.take(90).replace('\n', ' ')
+                    }
+                    if (ranges.isEmpty()) {
+                        problems += "$id excerpt lost its highlight for \"${probe.window}\""
+                    } else {
+                        for (range in ranges) {
+                            val matched = excerpt.substring(range.first, range.last + 1)
+                            if (matched.isBlank()) {
+                                problems += "$id highlight is empty in: ${excerpt.take(60)}"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // A surah's introduction is drawn as plain prose, so it must read as
+        // prose: no tag survives into the study view's "About this surah".
+        val infoPack = File(packs, "words-en.db")
+        if (infoPack.isFile) {
+            openSqlite(infoPack).use { connection ->
+                connection.each("SELECT surah, text FROM surah_info") { rs ->
+                    val plain = RichText.plain(rs.getString(2) ?: "")
+                    readableChecked++
+                    if (RichText.hasMarkup(plain)) {
+                        problems += "surah ${rs.getInt(1)} introduction leaked markup: " +
+                            plain.take(90)
+                    }
+                    if (plain.isBlank()) problems += "surah ${rs.getInt(1)} introduction is empty"
+                }
+            }
+        }
+    }
+
+    private data class ReadableProbe(val table: String, val window: String)
+
+    /**
+     * A word to search for that is actually in this pack, and that a reader
+     * could type: English gets a word of the app's own language, and another
+     * script gets the longest word of its own first row.
+     */
+    private fun readableProbe(connection: Connection, table: String): ReadableProbe? {
+        for (candidate in listOf("mercy", "merciful")) {
+            val found = connection.prepareStatement(
+                "SELECT text FROM $table WHERE text LIKE ? LIMIT 1",
+            ).use { statement ->
+                statement.setString(1, "%$candidate%")
+                statement.executeQuery().use { rs -> if (rs.next()) rs.getString(1) else null }
+            }
+            if (found != null) return ReadableProbe(table, candidate)
+        }
+        val first = connection.prepareStatement("SELECT text FROM $table LIMIT 1").use { statement ->
+            statement.executeQuery().use { rs -> if (rs.next()) rs.getString(1) else null }
+        } ?: return null
+        val word = longestWord(RichText.plain(first), minimum = 4) ?: return null
+        return ReadableProbe(table, word)
+    }
+
+    /** Codepoints whose job is to fold to a plain Latin letter. */    private fun isLatinFolding(codepoint: Int): Boolean = when (codepoint) {
         in 0x00A0..0x024F -> true // Latin-1 supplement and Latin extended A/B
         in 0x1E00..0x1EFF -> true // Latin extended additional
         0x2018, 0x2019, 0x201C, 0x201D -> true // typographic quotes

@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 0.4 (versionCode 4)
+Version: 0.5 (versionCode 5)
 
 ## Listing
 
@@ -117,6 +117,10 @@ What each set shows, in order:
 14. Browse, Saved
 15. Translations, with more than one able to be on
 16. The word by word aid in Bangla
+
+## Release notes (0.5, 235 characters)
+
+Search results no longer show raw markup where a tafsir was matched; every result now reads as plain prose, and a matched word stays highlighted. The surah introduction in study mode reads as prose too. No ads, no trackers, no account.
 
 ## Release notes (0.4, 423 characters)
 

@@ -134,4 +134,39 @@ class SearchTest {
         assertTrue("the window starts mid-word: $firstWord", firstWord.matches(Regex("before\\d+")))
         assertTrue("the window ends mid-word: $lastWord", lastWord.matches(Regex("after\\d+")))
     }
+
+    /**
+     * A tafsir is stored as a small HTML subset for its own panels to parse,
+     * and a search result has no parser behind it. The excerpt therefore comes
+     * from the readable form, or the reader is shown `</p><h2>` inside a
+     * sentence. The highlight is computed on that same form, so it still lands
+     * on the words the reader can see.
+     */
+    @Test
+    fun `a tafsir excerpt is readable prose and its highlight still lands`() {
+        val passage = "<h2>The Meaning of Al-Fatihah</h2>" +
+            "<p>This Surah is called Al-Fatihah because of its subject matter, and " +
+            "the <strong>mercy</strong> of Allah is mentioned in it more than once.</p>"
+        val (excerpt, ranges) = Search.excerpt(passage, listOf("mercy"), arabic = false, window = 20)
+        assertFalse("the excerpt must carry no markup: $excerpt", excerpt.contains('<'))
+        assertTrue("the excerpt must carry the match: $excerpt", excerpt.contains("mercy"))
+        assertEquals(1, ranges.size)
+        assertEquals("mercy", excerpt.substring(ranges.first().first, ranges.first().last + 1))
+        assertTrue(
+            "a removed tag must not weld two words together: $excerpt",
+            !excerpt.contains("subject matter,and"),
+        )
+    }
+
+    @Test
+    fun `a translation excerpt drops footnote markers instead of showing them`() {
+        val (excerpt, ranges) = Search.excerpt(
+            "In the name of Allah,[2] the Entirely Merciful, the Especially Merciful.[3]",
+            listOf("merciful"),
+            arabic = false,
+            window = 5,
+        )
+        assertFalse("a marker must not reach the reader: $excerpt", excerpt.contains("[2]"))
+        assertEquals("Merciful", excerpt.substring(ranges.first().first, ranges.first().last + 1))
+    }
 }
