@@ -113,9 +113,17 @@ module build files, never here):
 
 ```bash
 ./gradlew :core:test :data:testDebugUnitTest :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
-./gradlew :data:connectedDebugAndroidTest   # saved store, on a device or emulator
-./gradlew :app:connectedDebugAndroidTest    # search against the shipped database
+./gradlew :data:connectedDebugAndroidTest   # saved store, last read, recitation manifest
+./gradlew :app:connectedDebugAndroidTest    # search, word by word, and the screenshot tour
 ```
+
+CI runs the JVM suite and the content gates in `build.yml`, the data
+instrumented tests there too on one phone profile, and the app instrumented
+tests, including the screenshot tour, in `screenshots.yml` on all three store
+form factors. The emulator is cold and software rendered, so the screenshot
+workflow caches the AVD per form factor and waits for the emulated storage
+to mount before it starts the test; a fixed sleep is not the answer (the
+tablet legs were failing on waits that were tight for the slowest profile).
 
 Content pipeline, from the repository root. Keep every one of these green
 at every step:

@@ -68,12 +68,17 @@ jobs:
 # verify, audit, and fonts are owner-machine gates: they need the raw QUL and
 # QuranEnc exports, which are not in the repository. Run them locally with
 # ./gradlew :tools:run --args="verify|audit|fonts" before a release.
+#
+# The app's instrumented tests, including the screenshot tour, live in the
+# screenshots workflow: they run there on all three store form factors, and
+# running them again here would double the CI minutes for the same answer.
 
-  # The screenshots job runs the app on a real Android system and photographs
-  # every reading surface. Its artifacts are how a change is reviewed without
-  # a device in hand.
-  screenshots:
-    name: Screenshots and instrumented tests
+  # The data layer's instrumented tests: the saved store, the last-read
+  # history, and the recitation manifest. They read and write small SQLite
+  # files, so they need a device but not a fast one, and a phone profile is
+  # enough.
+  data-tests:
+    name: Data instrumented tests
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
     env:
@@ -101,9 +106,6 @@ jobs:
             content/quran.db
           key: content-work-${{ hashFiles('content/manifest.json', 'content/build-report.json') }}
 
-      # Hardware acceleration is not available on the runners, so the emulator
-      # runs on the software renderer. It is slow, and it still renders every
-      # pixel the reader would see.
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
@@ -111,21 +113,14 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Instrumented tests and screenshots
+      - name: Data instrumented tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
           arch: x86_64
-          profile: pixel_4
+          profile: pixel_2
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: |
-            ./gradlew :data:connectedDebugAndroidTest :app:connectedDebugAndroidTest --console=plain
-
-      - name: Upload screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: quran-screenshots
-          path: app/build/outputs/connected_android_test_additional_output/**/*.png
-          if-no-files-found: warn
+            for i in $(seq 1 60); do adb -s emulator-5554 shell ls /sdcard/Android >/dev/null 2>&1 && break; sleep 2; done
+            ./gradlew :data:connectedDebugAndroidTest --console=plain

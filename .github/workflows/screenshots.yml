@@ -4,6 +4,14 @@ name: Capture store screenshots
 # Android emulator, for all three form factors Play asks for: phone, 7 inch
 # tablet, and 10 inch tablet. Trigger manually, or automatically when the UI
 # or the capture test changes.
+#
+# The emulator is cold and software rendered, which is the slowest Android
+# this app will ever run on, so the AVD and its snapshot are cached per form
+# factor: only the first run of a form factor pays for creating the machine,
+# and every run after it boots from the snapshot. The boot wait before the
+# test is not a fixed sleep: a cold boot can report completion before its
+# emulated storage is mounted, and the test's output directory breaks if the
+# test starts first.
 on:
   workflow_dispatch:
   push:
@@ -70,25 +78,60 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Capture on emulator
+      # The AVD and its snapshot are expensive to cold-create; cache them per
+      # form factor so only the first leg pays for it.
+      - name: Cache AVD
+        id: avd-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ env.API_LEVEL }}-${{ matrix.profile }}
+
+      - name: Create AVD and generate a snapshot to cache
+        if: steps.avd-cache.outputs.cache-hit != 'true'
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 35
+          api-level: ${{ env.API_LEVEL }}
           target: google_apis
           arch: x86_64
           profile: ${{ matrix.profile }}
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -no-snapshot
+          disable-animations: true
+          script: echo "Generated AVD snapshot."
+
+      - name: Capture on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ env.API_LEVEL }}
+          target: google_apis
+          arch: x86_64
+          profile: ${{ matrix.profile }}
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -no-snapshot
           disable-animations: true
           script: |
+            # A cold boot can report completion before its emulated storage is
+            # mounted; wait it out or the test's output dir breaks.
+            for i in $(seq 1 60); do adb -s emulator-5554 shell ls /sdcard/Android >/dev/null 2>&1 && break; sleep 2; done
             # One Gradle run, on ONE line: a second connectedAndroidTest
             # invocation would replace the previous additional output (and with
             # it the screenshots), and the emulator runner feeds this script to
             # sh, which chokes on multi-line continuations.
             ./gradlew :app:connectedDebugAndroidTest --console=plain -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest,io.github.muntasimulhaque.quran.WordByWordTest
+            # AGP copies the test's additional output off-device (before it
+            # uninstalls the app) into the connected additional output folder.
             mkdir -p store-shots
             find app/build/outputs/connected_android_test_additional_output -type f -name '*.png' -exec cp {} store-shots/ ';'
+            # Prefix every PNG with the form factor so per-leg artifacts never
+            # collide. (Single line: the runner feeds this to sh, which chokes
+            # on multi-line compound commands.)
             for f in store-shots/*.png; do mv "$f" "store-shots/${{ matrix.name }}_$(basename "$f")"; done
+            echo "Collected:"
             ls -la store-shots
+            # Fail loudly if nothing was captured, rather than a false green.
             test "$(ls store-shots/*.png 2>/dev/null | wc -l)" -ge 1
 
       - name: Upload screenshots
