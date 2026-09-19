@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 0.1 (versionCode 1)
+Version: 0.2 (versionCode 2)
 
 ## Listing
 
