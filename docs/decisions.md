@@ -1855,3 +1855,21 @@ verified byte for byte against the artifact with `cmp` before it replaced the
 committed set. The signed bundle comes from the `signed-bundle` job in
 `build.yml` (D-054) and is pulled into `play-store/aab/` for the hand-over,
 then deleted once Play has it.
+
+**The bundle.** 147,667,170 bytes, SHA-256
+`8c620c231f219993713e5248469ae1d048e407e8bec7ccb048b5e1dc282f6bc3`, signed
+with the shared upload key (D-017; the certificate's SHA-256 is
+`537d09d20300129e973b7945316bfe24cfadcfbc77eec5229cbf30170d9de521`), carrying
+only the core pack. It was built by the `signed-bundle` job on the push that
+carried the fixes and the version bump, and pulled from that run's artifact.
+
+**The set.** Eight frames per form factor, twenty-four in all, the eight the
+listing names, every one compared with its artifact by `cmp`. The set is new
+in three ways: the search frame shows the filters wrapped under their label
+instead of scrolling off the edge, the study frame shows the word by word aid
+at its new size with each word centered over its meaning, and the ayah card
+frame no longer carries the translator's notes block or the repeated Play
+action while its doors carry a visible arrow. The first capture attempt
+failed on the phone and 7 inch legs, and the failure was real: the trimmed
+tour exposed the prewarm race above, so the fix is what made the set
+capturable.

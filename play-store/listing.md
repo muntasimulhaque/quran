@@ -172,7 +172,7 @@ something Play would reject.
 | `icon-512.png` | 512 x 512 | store icon |
 | `feature-graphic-1024x500.png` | 1024 x 500 | feature graphic |
 | `screenshots/phone/*.png` | 1080 x 1920 | phone screenshots (8) |
-| `screenshots/tablet7/*.png` | 1200 x 1920 | 7 inch tablet screenshots (8) |
+| `screenshots/tablet7/*.png` | 800 x 1280 | 7 inch tablet screenshots (8) |
 | `screenshots/tablet10/*.png` | 2560 x 1800 | 10 inch tablet screenshots (8) |
 
 Screenshots: the Mushaf page, the summoned chrome, the study reading, the
