@@ -323,7 +323,25 @@ implement it and update this list.
   permissions, and its R8 release needs extra keep rules. The page fonts
   ship in the base instead (D-018); reopen only with the owner.
 
+### Housekeeping at the end of the session
 
+The hand-off bundle, every module build directory, and the content working area
+were deleted, freeing about 3.3 GB; the repository stands at 597 MB. What is
+kept is deliberate: `content/raw/` (the owner's manual QUL and QuranEnc
+exports, the provenance of every pack), `content/quran.db` and
+`content/packs/` (the shipped assets the catalog pins), and
+`play-store/screenshots/` (the store set, captured by CI).
+
+| Removed | Bring it back with |
+|---|---|
+| `play-store/aab/*.aab` (the hand-off copy) | `./gradlew :app:bundleRelease`, or a `v0.3` tag |
+| every `build/` directory | any `./gradlew` build |
+| `content/work/verify` (extracted sources, 288 MB) | `./gradlew :tools:run --args="verify"` |
+| `content/work/fonts-v2`, `qpc-v2-font` (the font packs) | `./gradlew :tools:run --args="fetch"` |
+| `content/work/db`, `json`, `qpc-v2.db` (built component files) | `./gradlew :tools:run --args="build"` |
+| `content/work/audio-dev` (the development sample) | `./gradlew :tools:run --args="audio sample"` |
+
+## Next session: the remaining queue, in order
 
 1. **Measure on real hardware.** The numbers in D-037 come from a software
    rendered emulator, the slowest Android this app will run on. A
@@ -348,15 +366,16 @@ implement it and update this list.
    time should say which check failed (size, hash, or unpack) rather than one
    line for all three, and the content self check should offer the removal it
    recommends.
-- **A khatm plan, if the owner wants one.** A khatm is a commitment, not a
-  guess: an explicit plan (a daily portion, a finish date) is the only honest
-  way to keep a linear reading place apart from casual lookups, and it builds
-  on the portion the glossary already describes. The eighth session shipped no
-  heuristic for it (D-045).
-- **A recording of the tour's study frames.** The screenshot set covers the
-  surface; a short screen recording of a page turn, a mode switch, and the
-  ayah card would catch the motion a still cannot, and the pipeline already
-  has an emulator to do it on.
+7. **A khatm plan, if the owner wants one.** A khatm is a commitment, not a
+   guess: an explicit plan (a daily portion, a finish date) is the only honest
+   way to keep a linear reading place apart from casual lookups, and it builds
+   on the portion the glossary already describes. The eighth session shipped no
+   heuristic for it (D-045).
+8. **A recording of the tour's study frames.** The screenshot set covers the
+   surface; a short screen recording of a page turn, a mode switch, and the
+   ayah card would catch the motion a still cannot, and the pipeline already
+   has an emulator to do it on.
+
 ## Traps worth remembering
 
 * QUL downloads need an account, so their datasets are placed by hand into
@@ -369,11 +388,19 @@ implement it and update this list.
   release build carries only the core pack, and that is enforced by variant,
   not by a condition.
 
-## Where the project stands (end of the eighth session)
+## Where the project stands (end of the ninth session)
 
-**Submitted to Google Play for review, and then read as a reader.** The
-eighth session was the owner reading the app and reporting what they met, on
-the instruction to make it the best there is: the place that was lost, the
+**Submitted to Google Play for review, 0.2 (versionCode 2).** The bundle was
+built and verified on this machine, CI was green on the push, and the store kit
+was refreshed from the workflows before the hand-off. What Play has now:
+play-store/aab/quran-0.2-vc2.aab, 147,673,026 bytes, SHA-256
+2bf54fd1e66e974ca3a28bac340b795c08c7fd02cbd2be9f0128a21220958e15, signed
+with the owner's upload key and carrying only the core pack. The hand-off copy
+was deleted after the submission; the folder keeps its own note.
+
+The eighth session, the one behind that release, was the owner reading the app
+and reporting what they met, on their instruction to make it the best there is:
+the place that was lost, the
 settings that were one long scroll, the audio that asked twice and played a
 reciter nobody chose, the sizes that only moved one kind of text, the footnotes
 that collided at large sizes, the Copy button the share sheet already offers,

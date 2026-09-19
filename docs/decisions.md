@@ -1281,3 +1281,43 @@ A paragraph now takes the taller of the sizes it actually contains, aligned
 line boxes with no trimming, and markers at 0.65 of the base size. The first
 cut gave every Latin paragraph the Arabic's room, which floated a translation
 in white space; the runs decide, not the setting.
+
+## D-050: The release hand-off, 0.2
+
+Date: the ninth session, the release session. Version 0.2 (versionCode 2) went
+to Google Play for review.
+
+What the hand-off was: `versionCode` 2 and `versionName` 0.2, the version line
+in `play-store/listing.md`, and the release notes written there at 499
+characters, one unbroken paragraph. The full suite ran on this machine before
+anything was pushed: core tests, data unit and instrumented tests, app unit and
+instrumented tests, lint with no issues, the debug and release builds, and the
+content gates (`verify`, `checkdb`, `search`). Two pushes followed, `258d69f`
+and `64df043`, both green: the `build` workflow, the `pages` deployment, and
+the `screenshots` workflow for phone, 7 inch, and 10 inch.
+
+The bundle: 147,673,026 bytes, SHA-256
+`2bf54fd1e66e974ca3a28bac340b795c08c7fd02cbd2be9f0128a21220958e15`, signed
+with the owner's upload key, verified with `jarsigner -verify`, carrying the
+core pack and no debug packs. `aapt2` on the release APK built beside it
+confirmed versionCode 2 and versionName 0.2.
+
+Two placements changed on the owner's word: the hand-off bundle now lands in
+`play-store/aab/`, a folder of its own with a four line note that says what
+lives there, and `.gitignore` covers that folder so a 140 MB binary can never
+enter the repository. The runbook's step 5 names the new path. The hand-off
+copy was deleted once the submission was confirmed.
+
+The store screenshots were refreshed from the `Capture store screenshots`
+run for the release commit, never captured by hand, and committed in
+`64df043`: 14 PNGs for each of the three form factors, now showing the
+settings hub, the study view with a translation and the word by word aid, the
+ayah card with its tafsir door, and version 0.2.
+
+Housekeeping closed the session: the hand-off bundle, every module build
+directory, and the content working area (extracted sources, font packs, built
+component files, the development audio sample) were deleted, about 3.3 GB,
+leaving a 597 MB repository. The provenance (`content/raw/`), the shipped
+assets (`content/quran.db`, `content/packs/`), and the store screenshots were
+kept on purpose, and AGENTS.md carries the table that says how to bring back
+everything that was removed.
