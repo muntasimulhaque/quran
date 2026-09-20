@@ -111,7 +111,7 @@ What each set shows, in order:
 7. Browse, Surahs
 8. The ayah card, with its word by word and tafsir doors
 
-## Release notes (0.8, for this hand-off, 494 characters)
+## Release notes (0.8, submitted, 494 characters)
 
 Pages now turn the way a printed Mushaf turns: the next page lies to the left, so a swipe to the right goes forward. The ayah actions bar floats as a rounded pill. The top bar reads a little smaller, and search filters show a check when they are on. Downloaded surahs sit closer to their reciter under one label with a turning arrow. The phone back button returns from a settings page to Settings, and scrolling back up in Browse does not pull the sheet closed. No ads, no trackers, no account.
 

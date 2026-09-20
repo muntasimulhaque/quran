@@ -600,15 +600,15 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the fifteenth session)
 
-**0.8 (versionCode 8) is handed over for Google Play.** What 0.8 handed over:
-147,681,534 bytes, SHA-256
+**0.8 (versionCode 8) is submitted to Google Play for review.** What 0.8
+handed over: 147,681,534 bytes, SHA-256
 `b7cbe82f1c66ab66fed4ce8a7466f78956e3d74fc1886dec39b5bbd3a7bdce92`, signed
-with the owner's upload key, carrying only the core pack. The hand-off copy
-lives in `play-store/aab/` until the submission is confirmed, then it is
-deleted. The screenshots come from the same pipeline that built the bundle,
-all three form factors, every frame compared with its artifact by `cmp`, and
-both were handed over together, before the submission (D-061 answers the
-report, D-062 is the hand-off).
+with the owner's upload key, carrying only the core pack. The hand-off copy was
+deleted once the submission was confirmed; `play-store/aab/` keeps its own
+note. The screenshots came from the same pipeline that built the bundle, all
+three form factors, every frame compared with its artifact by `cmp`, and both
+were handed over together, before the submission (D-061 answers the report,
+D-062 is the hand-off).
 
 **The reader's fourth report (D-061).** The owner read 0.7 on a phone and
 reported seven things. The ayah actions bar is a floating pill now, the top

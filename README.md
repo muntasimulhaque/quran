@@ -4,10 +4,10 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 0.8 (versionCode 8) is handed over for Google Play. This session
-answered the reader's fourth report: Mushaf pages now turn the way a printed
-Mushaf turns, with the next page to the left and a swipe to the right going
-forward; the long-press ayah bar floats as a rounded pill; the top bar reads a
+**Status:** 0.8 (versionCode 8) is submitted to Google Play for review. This
+session answered the reader's fourth report: Mushaf pages now turn the way a
+printed Mushaf turns, with the next page to the left and a swipe to the right
+going forward; the long-press ayah bar floats as a rounded pill; the top bar reads a
 little smaller; search filters carry a check when they are on and say what an
 empty choice means; the phone back button returns from a settings page to
 Settings; the reciter list's downloaded surahs sit closer under one label with
