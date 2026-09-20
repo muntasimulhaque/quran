@@ -1973,3 +1973,33 @@ tour included) are green. `checkdb` and `search` are green; `verify`,
 `audit`, and `fonts` need `content/raw`, the owner's manual QUL and QuranEnc
 exports, which this session's machine did not carry, and must run on the
 machine that owns them before the hand-over.
+
+## D-060: The release hand-off, 0.7
+
+Date: the fourteenth session, the release session. Version 0.7 (versionCode 7)
+is handed over for Google Play, and the hand-off is the bundle and the
+screenshots in one message, before the submission, as D-056 settled.
+
+**The bundle.** 147,678,451 bytes, SHA-256
+`1f7b882981bc5319461a96dcde1d01d1f2762083c095c5a7a9e05d4116c2595b`, signed
+with the shared upload key (D-017; the certificate's SHA-256 is
+`537d09d20300129e973b7945316bfe24cfadcfbc77eec5229cbf30170d9de521`), carrying
+only the core pack. It was built by the `signed-bundle` job on the push that
+raised the version and carried the fixes, and pulled from that run's artifact
+into `play-store/aab/quran-0.7-vc7.aab`, its checksum beside it.
+
+**The set.** Eight frames per form factor, twenty-four in all, the eight the
+listing names, every one compared with its artifact by `cmp` before it
+replaced the committed set. The set changed where the reader's eye would: the
+chrome frame carries the redrawn mode icons, the Mushaf frame reads right to
+left, and the Browse frame has no title. The 7 inch leg failed its first
+capture with a system dialog over `01-mushaf`; the capture guard refused to
+keep it and failed the run rather than write the dialog into the listing, so
+the leg was rerun and passed. The phone and 10 inch legs were green on the
+first attempt.
+
+**The hand-off.** The set was installed from the artifacts, never captured by
+hand, and the bundle was flattened out of the artifact's workspace path into
+`play-store/aab/` with its checksum verified locally. Both were handed over in
+one message, and the copy is deleted once the owner confirms that Play has the
+submission.

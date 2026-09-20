@@ -85,11 +85,13 @@ for.
 - 7 inch tablet screenshots: `screenshots/tablet7/` (800 x 1280), eight of them
 - 10 inch tablet screenshots: `screenshots/tablet10/` (2560 x 1800), eight of them
 
-The set was refreshed in the thirteenth session from the `Capture store
-screenshots` workflow, for all three form factors, and trimmed to the eight
-frames the store lists. The tour now captures exactly those eight, one surface
-each, so no frame is captured that the listing does not explain and none is
-listed that is not captured.
+The set was refreshed in the fourteenth session from the `Capture store
+screenshots` workflow, for all three form factors, in the eight frames the
+store lists. The tour captures exactly those eight, one surface each, so no
+frame is captured that the listing does not explain and none is listed that is
+not captured. Three frames changed in that refresh: the chrome shows the
+redrawn mode icons, the Mushaf page reads right to left, and Browse carries no
+title.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for

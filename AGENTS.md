@@ -179,16 +179,19 @@ does not tell you, and each one costs a failed command to rediscover:
 
 - Gradle needs `JAVA_HOME`, and the shell has no JDK on `PATH`. Prefix every
   invocation with `export JAVA_HOME="/c/Program Files/Android/Android Studio/jbr"`.
-- `adb` is `C:/Users/user/android-sdk/platform-tools/adb.exe` and the
-  emulator is `C:/Users/user/android-sdk/emulator/emulator.exe` with the AVD
-  `Pixel_4`; neither is on `PATH`. Start it headless with `-no-window -gpu
-  swiftshader_indirect` and wait for `sys.boot_completed` to report `1`.
+- `adb` is `C:/Users/Dev Pro/AppData/Local/Android/Sdk/platform-tools/adb.exe`
+  and the emulator is
+  `C:/Users/Dev Pro/AppData/Local/Android/Sdk/emulator/emulator.exe` with the
+  AVDs `Pixel_4_35` (phone), `Nexus_7_35` (7 inch), `Pixel_C_35` (10 inch),
+  and `api27`; neither binary is on `PATH`. Start one headless with
+  `-no-window -gpu swiftshader_indirect` and wait for `sys.boot_completed` to
+  report `1`.
 - MSYS rewrites `/sdcard/...` style arguments into Windows paths. Prefix
-  `adb shell` and `adb pull` with `MSYS_NO_PATHCONV=1`, and the same for
-  `gh api` (and drop its leading slash).
-- There is no usable `python`/`python3` (the Store alias intercepts them).
-  `node -e` is the scriptable text tool on this machine; use it for small
-  file edits instead of writing a script file.
+  `adb shell`, `adb push`, and `adb pull` with `MSYS_NO_PATHCONV=1`, and the
+  same for `gh api` (and drop its leading slash).
+- The Store alias intercepts `python3`, but a real `python` 3.12 exists on
+  this machine; `node -e` is still the small-edit tool used here. Use it for
+  small file edits instead of writing a script file.
 
 ## Release hand-off
 
@@ -590,19 +593,37 @@ fetching them again; the space is worth less than the time.
   release build carries only the core pack, and that is enforced by variant,
   not by a condition.
 
-## Where the project stands (end of the thirteenth session)
+## Where the project stands (end of the fourteenth session)
 
-**0.6 (versionCode 6) is submitted to Google Play for review.** What 0.6
-handed over: 147,667,170 bytes, SHA-256
-`8c620c231f219993713e5248469ae1d048e407e8bec7ccb048b5e1dc282f6bc3`, signed
-with the owner's upload key, carrying only the core pack. The hand-off copy was
-deleted once the submission was confirmed; `play-store/aab/` keeps its own
-note. The session answered the reader's second report in full (D-057) and
-trimmed the store set to the eight frames the listing names. The screenshots
-come from the same pipeline that built the bundle, and both were handed over
-together, before the submission (D-058).
+**0.7 (versionCode 7) is handed over for Google Play.** What 0.7 handed over:
+147,678,451 bytes, SHA-256
+`1f7b882981bc5319461a96dcde1d01d1f2762083c095c5a7a9e05d4116c2595b`, signed
+with the owner's upload key, carrying only the core pack. The hand-off copy
+lives in `play-store/aab/` until the submission is confirmed, then it is
+deleted. The screenshots come from the same pipeline that built the bundle,
+all three form factors, every frame compared with its artifact by `cmp`, and
+both were handed over together, before the submission (D-059 answers the
+report, D-060 is the hand-off).
 
-**The reader's report (D-057).** The owner read 0.5 on a phone and reported
+**The reader's third report (D-059).** The owner read 0.6 on a phone and
+reported ten things, the first of them a defect that had shipped since the
+first release: every Mushaf line was drawn left to right, so its words read
+backwards. The renderer
+now starts at each line's right edge and walks left. The open book drawn in
+D-057 read as an inverse book, so the Mushaf icon was redrawn as pages rising
+from the fold with the spine dipping at the foot, beside the study page. A
+footnote now takes the size of the text it belongs to. About this surah
+dismisses with a tap anywhere outside it. Opening a surah from Browse lands on
+the reader's last place in it, or at its top when there is none; the Juz rows
+now open the ayah they name. Browse lost its title and Last Read rows lost
+their redundant Open action. A scroll back up in Browse can no longer pull the
+sheet closed, because a new pure policy in `core` judges the pull by where the
+gesture began; pull to close from the top is unchanged. A reciter's downloaded
+surahs are now a door with an arrow, indented under the reciter's name, with
+tighter rows, and the page says plainly that the small download is the word
+timings, not the audio.
+
+**The reader's second report (D-057).** The owner read 0.5 on a phone and reported
 thirteen things. The Mushaf icon is an open book now, so the two reading
 modes never read as lookalikes. Last Read names a place and only a place: the
 ayah's Arabic and translation are gone from those rows. The search filters
@@ -663,7 +684,10 @@ dialog into the store listing, the workflow clears a dialog before the tour
 starts, and a leg must now produce every frame the tour captures (eight,
 since the thirteenth session).
 
-The suite is green locally and in CI: core tests (51), data unit tests, the
-data instrumented tests (16), the app instrumented tests (11, the screenshot
-tour included), lint with no issues, and the owner-machine gates (`verify`,
-`audit`, `fonts`, `checkdb`, `search`).
+The suite is green locally and in CI: core tests (55), data unit tests (9),
+the data instrumented tests (16), the app instrumented tests (11, the
+screenshot tour included), lint with no issues, and the gates that run
+(`checkdb`, `search`). `verify`, `audit`, and `fonts` need `content/raw`, the
+owner's manual QUL and QuranEnc exports, which the fourteenth session's
+machine did not carry; run them on the machine that owns them before the
+hand-over is closed.
