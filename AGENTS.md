@@ -425,6 +425,15 @@ implement it and update this list.
   used for: the store already holds the old one, so the work is wasted and the
   session has spent CI minutes and an emulator run for nobody. Collect and
   verify both, then hand both over in the same message, before the submission.
+- The store set is captured from the Compose root with `captureToImage`, one
+  capture per frame, never by driving the running app with full-screen
+  captures through a settle loop: that loop took the phone emulator down five
+  times in a row while the tablet legs passed. A modal sheet is its own
+  window, which the Compose root cannot PixelCopy, so the four sheet frames
+  (search, settings, Browse, and the ayah card) take one display capture each,
+  with the window list checked first. A root frame cannot hold a system dialog,
+  so only the sheet frames need that guard, and the whole tour runs in about
+  half a minute on a phone profile.
 - An emulator workflow is not a test: it is a machine. Cache the AVD per form
   factor, wait for `/sdcard/Android` to exist before starting the test (a cold
   boot reports completion before its storage is mounted, and the test's output
@@ -598,17 +607,29 @@ fetching them again; the space is worth less than the time.
   to right on the screen; `MushafTurnTest` now pins the direction on every
   form factor.
 
-## Where the project stands (end of the sixteenth session)
+## Where the project stands (end of the seventeenth session)
 
-**0.9 (versionCode 9) is submitted to Google Play for review.** What 0.9
-handed over: 147,684,684 bytes, SHA-256
-`85ea5bcf520d800476f9b490f470cdffa0db787185635662961db95ac80153dc`, signed
-with the owner's upload key, carrying only the core pack. The hand-off copy was
-deleted once the submission was confirmed; `play-store/aab/` keeps its own
-note. The screenshots came from the same pipeline that built the bundle, all
-three form factors, every frame compared with its artifact by `cmp`, and both
-were handed over together, before the submission (D-063 answers the report,
-D-064 is the hand-off).
+**0.10 (versionCode 10) is handed over for Google Play.** What 0.10 handed
+over: 147,691,199 bytes, SHA-256
+`320f7b8de7ce0bcbff01eb97c185215df000efb1bb6dcf2ee6984b12b618b0af`, signed
+with the owner's upload key, carrying only the core pack. The hand-off copy
+lives in `play-store/aab/` until the submission is confirmed, then it is
+deleted. The screenshots come from the same pipeline that built the bundle,
+all three form factors, every frame compared with its artifact by `cmp`, and
+both were handed over together, before the submission (D-065 answers the
+report, D-066 is the hand-off).
+
+**The reader's sixth report (D-065).** The owner read 0.9 on a phone and
+reported six things. The top bar is two rows on every size now: the controls
+first, with Browse leading, the reading modes centered on the screen, and
+Search and Settings at the end, then the surah and juz centered as one unit
+under them, so no name of the 114 is shortened on any phone. The pressed
+surah paragraph answers in the same rounded shape as an ayah, and the word
+being recited in the study reading wears the Mushaf's rounded wash instead
+of a rectangle. The end of a surah offers the next one as a card with its
+name and an arrow. The word list language stayed what it was, the reader's
+translation's, with no selector and no stored choice, and Last Read keeps its
+twenty places.
 
 **The reader's fifth report (D-063).** The owner read 0.8 on a phone and
 reported seven things. The font size page previews Al-Ikhlas 112:1 instead of

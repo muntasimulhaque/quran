@@ -2275,3 +2275,45 @@ are green; the data instrumented tests (16) and the app instrumented tests
 was checked with Al-Muddaththir at 320, 360, and 411dp, and the rounded word
 mark, the About shape, and the next-surah card were checked on the running
 app.
+
+## D-066: The release hand-off, 0.10
+
+Date: the seventeenth session, the release session. Version 0.10 (versionCode
+10) is handed over for Google Play, and the hand-off is the bundle and the
+screenshots in one message, before the submission, as D-056 settled.
+
+**The capture was rebuilt on the family's pattern.** The phone leg failed
+five times with the emulator dying mid test (`device offline`, then `device
+not found`), while the tablet legs passed and the build workflow's own phone
+emulator passed beside it. The difference was the tour itself: it drove the
+running app and kept frames with `Screenshot.capture()` through a settle loop
+of up to twenty full-screen captures per frame, and that load is what took
+the phone emulator down. A frame is now kept from the Compose root with
+`captureToImage`, one capture per frame, with one retry for a stalled
+PixelCopy. A sheet lives in its own window, which the Compose root cannot
+PixelCopy, so the four sheet frames (search, settings, Browse, and the ayah
+card) take one display capture each, the window list checked first. The whole
+tour runs in about half a minute on a phone profile, and the dialog guard is
+no longer needed for the root frames: a system dialog cannot enter a frame it
+is not part of.
+
+**The set.** Eight frames per form factor, twenty-four in all, the eight the
+listing names, every one compared with its artifact by `cmp` before it
+replaced the committed set. The set changed where the reader's eye would: the
+chrome is two rows with the surah and juz centered under the controls, the
+study frame marks the recited word with the same rounded wash the Mushaf
+uses, and the About paragraph answers in that shape. All three legs were
+green on the first attempt with the rebuilt capture.
+
+**The bundle.** 147,691,199 bytes, SHA-256
+`320f7b8de7ce0bcbff01eb97c185215df000efb1bb6dcf2ee6984b12b618b0af`, signed
+with the shared upload key (D-017; the certificate's SHA-256 is
+`537d09d20300129e973b7945316bfe24cfadcfbc77eec5229cbf30170d9de521`), carrying
+only the core pack. It was built by the `signed-bundle` job on the push that
+carried the rebuilt capture and pulled from that run's artifact into
+`play-store/aab/quran-0.10-vc10.aab` with its checksum verified locally
+against the artifact's own file.
+
+**The gates.** All five content gates are green on this machine: `verify`,
+`audit`, `fonts`, `checkdb`, and `search` read the raw QUL and QuranEnc
+exports in `content/raw` and passed.
