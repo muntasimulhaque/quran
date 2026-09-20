@@ -592,14 +592,15 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the thirteenth session)
 
-**0.6 (versionCode 6) is handed over for Google Play.** What 0.6 handed
-over: 147,667,170 bytes, SHA-256
+**0.6 (versionCode 6) is submitted to Google Play for review.** What 0.6
+handed over: 147,667,170 bytes, SHA-256
 `8c620c231f219993713e5248469ae1d048e407e8bec7ccb048b5e1dc282f6bc3`, signed
-with the owner's upload key, carrying only the core pack. The session answered
-the reader's second report in full (D-057) and trimmed the store set to the
-eight frames the listing names. The screenshots come from the same pipeline
-that built the bundle, and both are handed over together, before the
-submission (D-058).
+with the owner's upload key, carrying only the core pack. The hand-off copy was
+deleted once the submission was confirmed; `play-store/aab/` keeps its own
+note. The session answered the reader's second report in full (D-057) and
+trimmed the store set to the eight frames the listing names. The screenshots
+come from the same pipeline that built the bundle, and both were handed over
+together, before the submission (D-058).
 
 **The reader's report (D-057).** The owner read 0.5 on a phone and reported
 thirteen things. The Mushaf icon is an open book now, so the two reading

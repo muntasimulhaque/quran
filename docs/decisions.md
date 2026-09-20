@@ -1873,3 +1873,9 @@ action while its doors carry a visible arrow. The first capture attempt
 failed on the phone and 7 inch legs, and the failure was real: the trimmed
 tour exposed the prewarm race above, so the fix is what made the set
 capturable.
+
+**The submission.** The owner confirmed that Play had the submission, and the
+hand-off copy was deleted from `play-store/aab/` in the same breath, so no
+signed bundle sits in the repository or on the machine waiting to be uploaded
+twice. `play-store/aab/` keeps only its own note about where a bundle comes
+from and when it goes.
