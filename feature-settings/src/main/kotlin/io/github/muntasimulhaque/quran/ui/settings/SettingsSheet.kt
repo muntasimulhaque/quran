@@ -148,7 +148,6 @@ fun SettingsSheet(
                     SettingsPage.Reciters -> RecitersPage(
                         settings = settings,
                         packs = packs,
-                        packSetup = packSetup,
                         downloadedSurahs = downloadedSurahs,
                         actions = actions,
                     )

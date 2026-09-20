@@ -64,6 +64,17 @@ object TextSize {
      */
     fun wordSp(step: Float): Float = meaningSp(step) * base(TypeRole.Arabic) / base(TypeRole.Translation)
 
+    /**
+     * The Arabic inside a Latin tafsir. Arabic set at the Latin size reads
+     * visibly smaller, so a quoted passage disappears into the prose around
+     * it; the quotation is the Quran or the Prophet's words and must read as
+     * the reading, not as a footnote. The stand is the one the study
+     * translation already gives its inline Arabic (0.8 of the 30 sp Arabic
+     * against the 17 sp translation), so the app has one answer to how much
+     * larger the Arabic is than the text beside it.
+     */
+    fun tafsirArabic(step: Float): Float = sp(TypeRole.Tafsir, step) * INLINE_ARABIC_RATIO
+
     private fun base(role: TypeRole): Float = when (role) {
         TypeRole.Arabic -> 30f
         TypeRole.Translation -> 17f
@@ -82,4 +93,7 @@ object TextSize {
 
     /** The size the meaning under a word is read at, before any scaling. */
     private const val MEANING_BASE = 14f
+
+    /** Arabic beside Latin, at the stand the reading already uses: 1.4 to 1. */
+    private const val INLINE_ARABIC_RATIO = 1.4f
 }

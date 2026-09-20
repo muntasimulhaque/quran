@@ -12,9 +12,6 @@
     <string name="study_continue_to">Continue to %1$s</string>
     <string name="study_end_of_quran">This is the end of the Quran</string>
 
-    <string name="card_cd_saved">Saved</string>
-    <string name="card_cd_save">Save this ayah</string>
-    <string name="card_cd_share">Share the ayah</string>
     <string name="card_no_translation">This ayah has no text in the chosen translation.</string>
     <string name="card_add_translation">Add a translation to read this ayah in your language</string>
     <string name="card_word_by_word">Word by word</string>

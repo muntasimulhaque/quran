@@ -39,6 +39,8 @@ import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.ListenOffer
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
+import io.github.muntasimulhaque.quran.ui.reader.Icon
+import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 
 /**
  * The playback pill. It speaks in four voices: asking to download a surah,
@@ -317,14 +319,28 @@ private fun ListenOfferBar(
                 Column(
                     modifier = Modifier
                         .clip(RoundedCornerShape(50))
-                        .clickable(enabled = progress == null) { chooser = true }
+                        .clickable(enabled = progress == null, role = Role.Button) { chooser = true }
                         .padding(horizontal = 4.dp, vertical = 2.dp),
                 ) {
-                    Text(
-                        text = offer.reciterName,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = offer.reciterName,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                        // The name is the door to the other reciters; the
+                        // mark says so, so the choice is found without a
+                        // guess, and it goes away once the download starts.
+                        if (progress == null) {
+                            IconGlyph(
+                                icon = Icon.Chevron,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .padding(start = 4.dp)
+                                    .size(14.dp),
+                            )
+                        }
+                    }
                     Text(
                         text = when {
                             offer.failed -> stringResource(R.string.playback_download_failed)

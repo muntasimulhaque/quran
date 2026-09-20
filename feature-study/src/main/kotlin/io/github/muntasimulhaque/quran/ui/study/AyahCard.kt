@@ -59,7 +59,6 @@ import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.feature.study.R
 import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.reader.Icon
-import io.github.muntasimulhaque.quran.ui.reader.IconButton
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.rich.ArabicBody
 import io.github.muntasimulhaque.quran.ui.rich.RichBlocks
@@ -97,12 +96,9 @@ fun AyahCard(
     settings: AppSettings,
     wordLanguage: String,
     hasWords: Boolean,
-    isSaved: Boolean,
     note: String?,
-    onToggleSave: () -> Unit,
     onSaveNote: (String?) -> Unit,
     onAddContent: () -> Unit,
-    onShare: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -160,22 +156,6 @@ fun AyahCard(
         }
     }
 
-    val shareText = remember(lines, ayah, surahName) {
-        buildString {
-            append(ayah.text)
-            lines.firstOrNull()?.text?.text?.takeIf { it.isNotBlank() }?.let {
-                append("\n\n")
-                append(RichText.plain(it))
-            }
-            append("\n\n")
-            append(surahName)
-            append(' ')
-            append(ayah.surah)
-            append(':')
-            append(ayah.ayah)
-        }
-    }
-
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -188,36 +168,20 @@ fun AyahCard(
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = 28.dp),
         ) {
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 22.dp, end = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                    .padding(start = 22.dp, end = 22.dp),
             ) {
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        text = surahName,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text(
-                        text = "${ayah.surah}:${ayah.ayah}",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
-                IconButton(
-                    icon = if (isSaved) Icon.BookmarkFilled else Icon.Bookmark,
-                    description = stringResource(
-                        if (isSaved) R.string.card_cd_saved else R.string.card_cd_save,
-                    ),
-                    onClick = onToggleSave,
-                    active = isSaved,
+                Text(
+                    text = surahName,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                IconButton(
-                    icon = Icon.Share,
-                    description = stringResource(R.string.card_cd_share),
-                    onClick = { onShare(shareText) },
+                Text(
+                    text = "${ayah.surah}:${ayah.ayah}",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
 
@@ -468,7 +432,7 @@ private fun TafsirPanel(view: TafsirView, arabic: Boolean, settings: AppSettings
                 blocks = remember(view.passage.text) { RichText.parseHtml(view.passage.text) },
                 sizeSp = settings.tafsirSp,
                 lineSp = settings.tafsirLineSp,
-                arabicSp = settings.tafsirSp,
+                arabicSp = settings.tafsirArabicSp,
             )
         }
         Text(

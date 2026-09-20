@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 0.8 (versionCode 8)
+Version: 0.9 (versionCode 9)
 
 ## Listing
 
@@ -110,6 +110,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its word by word and tafsir doors
+
+## Release notes (0.9, 496 characters)
+
+The two reading modes are one switch at the center of the top bar, and the Play offer lets you pick the reciter, with the size shown. The Reciters page no longer downloads or explains the word timings; they come with the first surah you play, and removing a reciter selects another. The font size page previews a short ayah, Arabic inside a tafsir reads larger than the prose, the ayah card drops its repeated Save and Share, and downloaded surah rows sit closer. No ads, no trackers, no account.
 
 ## Release notes (0.8, submitted, 494 characters)
 

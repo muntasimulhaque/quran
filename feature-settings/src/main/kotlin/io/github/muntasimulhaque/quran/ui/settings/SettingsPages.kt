@@ -13,10 +13,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -115,7 +117,7 @@ fun SettingsHub(
         ) { onOpen(SettingsPage.Reading) }
         PageRow(
             title = stringResource(R.string.settings_title_reciters),
-            summary = reciterName(settings, packs, recitations),
+            summary = reciterName(settings, recitations),
         ) { onOpen(SettingsPage.Reciters) }
         PageRow(
             title = stringResource(R.string.settings_title_translations),
@@ -137,16 +139,9 @@ fun SettingsHub(
 }
 
 @Composable
-private fun reciterName(
-    settings: AppSettings,
-    packs: List<ContentPack>,
-    recitations: List<Recitation>,
-): String {
-    val chosen = ContentDatabase.reciterPack(settings.recitation)
-    if (packs.none { it.id == chosen && it.installed }) return stringResource(R.string.settings_none_yet)
-    return recitations.firstOrNull { it.id == settings.recitation }?.name
+private fun reciterName(settings: AppSettings, recitations: List<Recitation>): String =
+    recitations.firstOrNull { it.id == settings.recitation }?.name
         ?: stringResource(R.string.settings_none_yet)
-}
 
 @Composable
 private fun translationName(settings: AppSettings, packs: List<ContentPack>): String {
@@ -311,44 +306,45 @@ fun ReadingPage(settings: AppSettings, actions: SettingsActions) {
 }
 
 /**
- * The reciters page: one row per reciter, the mark showing which one the
- * reader hears, and each row carrying its own downloaded surahs with their
- * sizes, so a reader with more than one reciter always knows what is whose.
+ * The reciters page: one choice per reciter, and under each one the surahs
+ * that are already on the device. Choosing a reciter here only says whose
+ * voice the reading uses; the word timings and the audio arrive together the
+ * first time the reader taps Play, so nothing is downloaded before it is
+ * wanted and this page has nothing to explain.
  */
 @Composable
 fun RecitersPage(
     settings: AppSettings,
     packs: List<ContentPack>,
-    packSetup: PackSetupState?,
     downloadedSurahs: suspend (String) -> List<DownloadedSurah>,
     actions: SettingsActions,
 ) {
     Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_reciters))
-        Text(
-            text = stringResource(R.string.settings_reciters_note),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
-        )
         packs.filter { it.type == PackType.Recitation }
             .sortedBy { it.name.lowercase() }
             .forEach { pack ->
                 val id = pack.id.removePrefix(ContentDatabase.RECITER_PREFIX)
                 val selected = pack.id == ContentDatabase.reciterPack(settings.recitation)
-                PackChoiceRow(
-                    pack = pack,
-                    subtitle = reciterSubtitle(pack),
+                ChoiceRow(
+                    title = pack.name,
+                    subtitle = null,
                     selected = selected,
-                    radio = true,
-                    setup = packSetup?.takeIf { it.packId == pack.id },
-                    onActivate = { actions.onSelectRecitation(id) },
-                    onInstall = { actions.onInstallPack(pack.id) },
-                    onRemove = { actions.onRemovePack(pack.id) },
-                    // The downloads door follows the reciter it belongs to, so
-                    // the reciter's own room at the foot would read as a gap
-                    // between the two.
+                    onClick = { actions.onSelectRecitation(id) },
+                    // The downloads door follows the reciter it belongs to,
+                    // so the reciter's own room at the foot would read as a
+                    // gap between the two.
                     bottomPadding = if (pack.installed) 0.dp else 12.dp,
+                    trailing = {
+                        // A reciter whose timings are on the device can give
+                        // the room back; a reciter nothing was heard from has
+                        // nothing to remove.
+                        if (pack.installed) {
+                            PackActionText(stringResource(R.string.pack_action_remove)) {
+                                actions.onRemovePack(pack.id)
+                            }
+                        }
+                    },
                 )
                 if (pack.installed) {
                     ReciterDownloads(id, downloadedSurahs, actions)
@@ -357,13 +353,6 @@ fun RecitersPage(
             }
         Spacer(Modifier.height(Space.Section))
     }
-}
-
-@Composable
-private fun reciterSubtitle(pack: ContentPack): String = when {
-    pack.shipped -> stringResource(R.string.pack_included)
-    pack.installed -> stringResource(R.string.settings_reciter_installed, formatBytes(pack.bytes))
-    else -> stringResource(R.string.settings_reciter_size, formatBytes(pack.bytes))
 }
 
 /**
@@ -401,13 +390,19 @@ private fun ReciterDownloads(
         )
         return
     }
-    rows.forEach { row ->
-        DownloadedSurahRow(row) {
-            scope.launch {
-                actions.onRemoveDownloads(recitation, row.surah)
-                // Whatever the removal did, the list is read from the device
-                // again: the row goes when its files are gone.
-                downloaded = downloadedSurahs(recitation).sortedBy { it.surah }
+    // The rows of this one block are read as one list of names, so their
+    // Remove actions keep a compact target instead of the 48 dp a standalone
+    // row carries: the whole block tightens, and the door above it still
+    // gives a finger the full target.
+    CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 40.dp) {
+        rows.forEach { row ->
+            DownloadedSurahRow(row) {
+                scope.launch {
+                    actions.onRemoveDownloads(recitation, row.surah)
+                    // Whatever the removal did, the list is read from the device
+                    // again: the row goes when its files are gone.
+                    downloaded = downloadedSurahs(recitation).sortedBy { it.surah }
+                }
             }
         }
     }

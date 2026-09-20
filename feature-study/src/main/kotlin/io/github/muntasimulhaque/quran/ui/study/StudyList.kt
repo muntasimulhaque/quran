@@ -381,8 +381,7 @@ private fun SurahOpening(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 34.dp, bottom = 14.dp)
-            .clickable(onClick = onPaperTap),
+            .padding(top = 34.dp, bottom = 14.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
@@ -434,7 +433,13 @@ private fun SurahOpening(
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.78f),
                 maxLines = if (expanded) 40 else 3,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = Space.Block),
+                // The door is the paragraph itself: the reading around it is
+                // the paper, and only the part that opens is its own target,
+                // so a press shows the boundary of the about and not of the
+                // whole opening.
+                modifier = Modifier
+                    .padding(top = Space.Block)
+                    .clickable(onClick = onPaperTap),
             )
         }
         Text(

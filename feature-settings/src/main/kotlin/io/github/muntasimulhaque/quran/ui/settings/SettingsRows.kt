@@ -193,6 +193,8 @@ fun ChoiceRow(
     selected: Boolean,
     onClick: () -> Unit,
     trailing: @Composable () -> Unit = {},
+    /** The room under the row; a row with a block beneath it keeps less. */
+    bottomPadding: Dp = 12.dp,
 ) {
     SettingRow(
         title = title,
@@ -200,6 +202,7 @@ fun ChoiceRow(
         selected = selected,
         role = Role.RadioButton,
         onClick = onClick,
+        bottomPadding = bottomPadding,
         trailing = trailing,
     ) { Mark(selected = selected, radio = true) }
 }

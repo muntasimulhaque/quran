@@ -567,11 +567,12 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     fun removePack(id: String) {
         val pack = catalog.get(id) ?: return
         if (pack.shipped) return
+        val reciter = id.removePrefix(ContentDatabase.RECITER_PREFIX)
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 store.remove(id)
                 if (pack.type == PackType.Recitation) {
-                    val folder = contentDatabase?.recitationAyah(pack.id.removePrefix("reciter-"), 1)?.audioPath
+                    val folder = contentDatabase?.recitationAyah(reciter, 1)?.audioPath
                         ?.substringBeforeLast('/')
                     if (folder != null) recitationStore.removeAll(folder)
                 }
@@ -580,8 +581,34 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
                 setTranslationPacks(settings.translationPacks - id)
             }
             if (id in settings.tafsirPacks) toggleTafsirPack(id)
+            // A removed reciter cannot stay the default: the reader hears
+            // somebody else now, and the choice is written down with the
+            // removal, before the library closes over the new packs.
+            if (pack.type == PackType.Recitation && settings.recitation == reciter) {
+                val fallback = fallbackReciter(reciter)
+                settings = settings.copy(recitation = fallback)
+                settingsStore.setRecitation(fallback)
+            }
             reopenLibrary()
         }
+    }
+
+    /**
+     * The reciter the app falls back to when the selected one is removed.
+     * The remaining reciter with the most audio on the device wins, because
+     * that is the one the reader has actually been listening to; with nothing
+     * downloaded anywhere the fallback is Husary, the quiet second voice, and
+     * only then the list's own order. A removed reciter is never chosen, even
+     * if a file of his lingers.
+     */
+    private suspend fun fallbackReciter(removed: String): String {
+        val candidates = recitations.filter { it.id != removed }
+        if (candidates.isEmpty()) return recitations.firstOrNull()?.id ?: removed
+        val totals = downloadedTotals()
+        candidates.maxByOrNull { totals[it.id]?.first ?: 0 }
+            ?.takeIf { (totals[it.id]?.first ?: 0) > 0 }
+            ?.let { return it.id }
+        return candidates.firstOrNull { it.id == FALLBACK_RECITER }?.id ?: candidates.first().id
     }
 
     /**
@@ -602,12 +629,27 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         withContext(Dispatchers.IO) { fresh.prewarmSearch(settings.tafsirPacks.toList()) }
     }
 
+    /**
+     * The reader's reciter, chosen in settings or on the offer: it becomes
+     * the default, and an ayah already playing moves to it. The move goes
+     * through the same door Play uses, so a reciter whose timings or audio
+     * are not on the device is offered, never reported as unavailable.
+     */
     fun selectRecitation(id: String) {
-        if (id == settings.recitation) return
+        if (!setRecitation(id)) return
+        playback.state.value.ayahNumber?.let { playAyah(it) }
+    }
+
+    /**
+     * Writes the default reciter down, and answers whether it changed. The
+     * offer chooses through this too, so a reader who picks a reciter on the
+     * pill is heard from that reciter from then on.
+     */
+    private fun setRecitation(id: String): Boolean {
+        if (id == settings.recitation) return false
         settings = settings.copy(recitation = id)
         viewModelScope.launch { settingsStore.setRecitation(id) }
-        val current = playback.state.value.ayahNumber ?: return
-        viewModelScope.launch { playback.play(id, current) }
+        return true
     }
 
     /**
@@ -675,6 +717,14 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         synchronized(rowCache) { rowCache[ayahNumber] = row }
         return row
     }
+
+    /**
+     * The ayah the font size page shows above its steps. It is short on
+     * purpose: the sample is there to judge a size, and a long ayah would
+     * push the steps off the screen before the reader reached them.
+     */
+    suspend fun sizePreviewRow(): StudyRow? =
+        withContext(Dispatchers.IO) { studyRow(SIZE_PREVIEW_AYAH) }
 
     private fun clearRowCache() {
         synchronized(rowCache) { rowCache.clear() }
@@ -804,7 +854,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
                 return
             }
             reopenLibrary()
-            selectRecitation(offer.reciter)
+            setRecitation(offer.reciter)
         }
         if (audioBytes > 0L) {
             val fetched = playback.fetchSurahAudio(offer.reciter, offer.surah) { fraction ->
@@ -827,7 +877,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     fun chooseListenReciter(reciter: String) {
         val offer = listenOffer ?: return
         if (reciter == offer.reciter || offer.progress != null) return
-        selectRecitation(reciter)
+        setRecitation(reciter)
         viewModelScope.launch {
             val ayah = contentDatabase?.ayah(offer.ayah) ?: return@launch
             val bytes = listenBytes(reciter, ayah)
@@ -933,6 +983,12 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
         /** The Quran's ayah count; the numbering is one ascending run. */
         const val TOTAL_AYAHS = 6236
+
+        /** Al-Ikhlas 112:1, the short ayah the size page previews. */
+        const val SIZE_PREVIEW_AYAH = 6222
+
+        /** The reciter the app falls to when nothing is downloaded anywhere. */
+        const val FALLBACK_RECITER = "husary"
 
         /** How long a settled page waits before its picture is written. */
         const val PAGE_CACHE_DELAY_MS = 350L

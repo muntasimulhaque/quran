@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -44,6 +45,8 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -74,15 +77,16 @@ import io.github.muntasimulhaque.quran.ui.study.StudyList
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.PagePalette
 import io.github.muntasimulhaque.quran.ui.theme.LocalPageThemeName
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.math.min
 
 /** How long the chrome stays after a touch before it steps back. */
 private const val CHROME_MILLIS = 7000L
+
+/** The room the centered mode switch needs, so the title never runs under it. */
+private val ModeSwitchReserve = 96.dp
 
 /** Which sheet is over the reader, if any. */
 private enum class ReaderSheet { None, Browse, Search, Settings }
@@ -362,9 +366,7 @@ fun ReaderScreen(
             recitations = viewModel.recitations,
             contentCheck = viewModel.contentCheck,
             version = BuildConfig.VERSION_NAME,
-            preview = {
-                withContext(Dispatchers.IO) { viewModel.studyRow(settings.ayah) }
-            },
+            preview = { viewModel.sizePreviewRow() },
             downloadedSurahs = { recitation -> viewModel.downloadedSurahs(recitation) },
             actions = SettingsActions(
                 onTheme = { viewModel.setTheme(it) },
@@ -401,15 +403,12 @@ fun ReaderScreen(
             settings = settings,
             wordLanguage = viewModel.wordLanguage,
             hasWords = content.meaningPack(viewModel.wordLanguage) != null,
-            isSaved = savedRow != null,
             onAddContent = {
                 cardAyah = null
                 sheet = ReaderSheet.Settings
             },
             note = savedRow?.note,
-            onToggleSave = { viewModel.toggleSaved(ayah) },
             onSaveNote = { note -> viewModel.setNote(ayah, note) },
-            onShare = { text -> shareAyah(text) },
             onDismiss = { cardAyah = null },
         )
     }
@@ -525,7 +524,7 @@ private fun ReaderTopBar(
         exit = fadeOut() + slideOutVertically { -it / 3 },
         modifier = modifier,
     ) {
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
@@ -539,39 +538,92 @@ private fun ReaderTopBar(
                 )
                 .windowInsetsPadding(WindowInsets.statusBars)
                 .padding(start = 20.dp, end = 8.dp, top = 8.dp, bottom = 22.dp),
-            verticalAlignment = Alignment.CenterVertically,
         ) {
-            ReadingTitle(surah = title, detail = detail, modifier = Modifier.weight(1f))
-            Row(horizontalArrangement = Arrangement.End) {
-                // The switch is one door, not two: it offers the other reading
-                // and never itself, so the bar says where a tap can go rather
-                // than naming where the reader already is.
-                IconButton(
-                    icon = if (mode == ReadingMode.Mushaf) {
-                        Icon.StudyPage
-                    } else {
-                        Icon.MushafPage
-                    },
-                    description = stringResource(
-                        if (mode == ReadingMode.Mushaf) {
-                            io.github.muntasimulhaque.quran.uikit.R.string.mode_study
-                        } else {
-                            io.github.muntasimulhaque.quran.uikit.R.string.mode_mushaf
-                        },
-                    ),
-                    onClick = {
-                        onMode(
-                            if (mode == ReadingMode.Mushaf) {
-                                ReadingMode.Study
-                            } else {
-                                ReadingMode.Mushaf
-                            },
-                        )
-                    },
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                // The title keeps clear of the switch in the middle, so a
+                // long surah name is cut by its own edge and never runs
+                // under the control.
+                ReadingTitle(
+                    surah = title,
+                    detail = detail,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = ModeSwitchReserve),
                 )
-                IconButton(Icon.Browse, stringResource(R.string.action_browse), onBrowse)
-                IconButton(Icon.Search, stringResource(R.string.action_search), onSearch)
-                IconButton(Icon.Settings, stringResource(R.string.action_settings), onSettings)
+                Row(horizontalArrangement = Arrangement.End) {
+                    IconButton(Icon.Browse, stringResource(R.string.action_browse), onBrowse)
+                    IconButton(Icon.Search, stringResource(R.string.action_search), onSearch)
+                    IconButton(Icon.Settings, stringResource(R.string.action_settings), onSettings)
+                }
+            }
+            // The two reading modes sit together as one switch at the center
+            // of the bar, instead of lending the mode icon to the row of
+            // doors, so the reader sees a choice rather than a door that
+            // happens to go sideways.
+            ModeSwitch(
+                mode = mode,
+                onMode = onMode,
+                modifier = Modifier.align(Alignment.Center),
+            )
+        }
+    }
+}
+
+/**
+ * The two reading modes as one switch: the mode the reader is in is marked,
+ * and the other is one tap away. It wears the same segmented shape the app
+ * uses for a small set of choices, and only the two mode icons sit in it.
+ */
+@Composable
+private fun ModeSwitch(
+    mode: ReadingMode,
+    onMode: (ReadingMode) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(50))
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            .padding(3.dp),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        ReadingMode.entries.forEach { entry ->
+            val active = entry == mode
+            val description = stringResource(
+                if (entry == ReadingMode.Mushaf) {
+                    io.github.muntasimulhaque.quran.uikit.R.string.mode_mushaf
+                } else {
+                    io.github.muntasimulhaque.quran.uikit.R.string.mode_study
+                },
+            )
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(
+                        if (active) {
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                        } else {
+                            androidx.compose.ui.graphics.Color.Transparent
+                        },
+                    )
+                    .selectable(selected = active, role = Role.RadioButton) { onMode(entry) }
+                    .semantics { contentDescription = description },
+                contentAlignment = Alignment.Center,
+            ) {
+                IconGlyph(
+                    icon = if (entry == ReadingMode.Mushaf) Icon.MushafPage else Icon.StudyPage,
+                    tint = if (active) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                    modifier = Modifier.size(22.dp),
+                )
             }
         }
     }

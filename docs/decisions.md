@@ -2118,3 +2118,67 @@ the missing export, not a content check: `audit` and `fonts` stop with "no
 database for quran-script-kfgqpc; run verify first", and `verify` lists the
 missing raw files. They must run on the machine that owns the exports before
 the hand-off is closed, as the fourteenth session noted.
+
+## D-063: The reader's report, the sixteenth session
+
+Date: the sixteenth session. The owner read 0.8 on a phone and reported seven
+things, and confirmed the fallback rule the reciter removal should use.
+
+**The size sample is a short ayah.** The font size page previewed the reader's
+own place, and a long ayah pushed the steps off the screen before the reader
+reached them. The page now previews Al-Ikhlas 112:1 through
+`ReaderViewModel.sizePreviewRow`, so the sample is there to judge a size and
+nothing else.
+
+**A removed reciter is never the default.** Removing the selected reciter left
+it selected, so the settings row named a voice with nothing behind it. The
+removal now writes a fallback in the same breath: the remaining reciter with
+the most audio on the device wins, because that is the one the reader has
+actually been listening to; with nothing downloaded anywhere the fallback is
+Husary (`FALLBACK_RECITER`), and only then the list's own order. A removed
+reciter is never chosen, even if a file of his lingers. `selectRecitation`
+also moves an ayah already playing through the same door Play uses, so a
+reciter whose timings are not on the device is offered, never reported
+unavailable.
+
+**The Reciters page downloads nothing and explains nothing.** Choosing a
+reciter only chooses; the word timings and the surah's audio arrive together
+from the Play offer, which is where the choice already was. The page keeps one
+radio row per reciter, the downloaded surahs under it, and a Remove only for a
+reciter that has content. The note about the timings is gone with the install
+action it explained. The offer's reciter name gained a chevron, because the
+dropdown had been there since 0.2 and could not be found. The downloaded surah
+rows also sit tighter: their Remove actions keep a 40 dp target instead of
+48 dp, while the door above them keeps the full target.
+
+**The modes are one switch in the center of the top bar.** The two reading
+icons sat at the head of the row of doors, reading as one more door. They are
+one segmented switch now, centered, with the active mode marked and both
+spoken as radio choices; the title keeps a reserve to its right so a long
+surah name ellipsizes instead of running under it.
+
+**Arabic inside a Latin tafsir stands at 1.4 to 1.** The tafsir's own size set
+its Arabic too, and the same nominal size reads smaller in Arabic, so a quoted
+passage vanished into the prose. `TextSize.tafsirArabic` gives the Arabic the
+stand the study translation already gives its inline Arabic (0.8 of the 30 sp
+Arabic against the 17 sp translation, 1.4 to 1), so the app has one answer to
+how much larger the Arabic is than the text beside it. A block that carries
+Arabic keeps the line height the Arabic needs, which is the behavior the
+reading already had.
+
+**The ayah card does not repeat the floating bar.** Save and Share sat at the
+card's top right, one step after the pill that already carries both. They are
+gone, and the card opens on its own reference.
+
+**About this surah is pressed where it opens.** The whole opening was one
+press target, so a press lit the area from the Arabic name down to Hide. Only
+the paragraph and its About/Hide control are targets now; a tap on the heading
+still dismisses the about or brings the chrome through the list.
+
+**Verification.** The JVM suite (core 57, data 9, app unit), lint, and
+`assembleDebug` are green; the app instrumented tests (12, the screenshot tour
+included) are green on a phone profile, and each behavior was checked by hand
+on the emulator: the centered switch, the short size sample, the chevron and
+dropdown on the offer, the Reciters page with its tightened rows, removal
+falling back to Husary, the larger tafsir Arabic, the trimmed ayah card, and
+the About area.
