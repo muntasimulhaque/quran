@@ -592,18 +592,35 @@ fetching them again; the space is worth less than the time.
 * A debug build carries every pack in `assets/packs/` for offline work; a
   release build carries only the core pack, and that is enforced by variant,
   not by a condition.
+* A still frame cannot show which way a page turned, and the order of the
+  words on a line and the order of the pages are two different bugs. The
+  lines were fixed in the fourteenth session while the pager still ran left
+  to right on the screen; `MushafTurnTest` now pins the direction on every
+  form factor.
 
-## Where the project stands (end of the fourteenth session)
+## Where the project stands (end of the fifteenth session)
 
-**0.7 (versionCode 7) is submitted to Google Play for review.** What 0.7
-handed over: 147,678,451 bytes, SHA-256
-`1f7b882981bc5319461a96dcde1d01d1f2762083c095c5a7a9e05d4116c2595b`, signed
-with the owner's upload key, carrying only the core pack. The hand-off copy was
-deleted once the submission was confirmed; `play-store/aab/` keeps its own
-note. The screenshots came from the same pipeline that built the bundle, all
-three form factors, every frame compared with its artifact by `cmp`, and both
-were handed over together, before the submission (D-059 answers the report,
-D-060 is the hand-off).
+**0.8 (versionCode 8) is handed over for Google Play.** What 0.8 handed over:
+147,681,534 bytes, SHA-256
+`b7cbe82f1c66ab66fed4ce8a7466f78956e3d74fc1886dec39b5bbd3a7bdce92`, signed
+with the owner's upload key, carrying only the core pack. The hand-off copy
+lives in `play-store/aab/` until the submission is confirmed, then it is
+deleted. The screenshots come from the same pipeline that built the bundle,
+all three form factors, every frame compared with its artifact by `cmp`, and
+both were handed over together, before the submission (D-061 answers the
+report, D-062 is the hand-off).
+
+**The reader's fourth report (D-061).** The owner read 0.7 on a phone and
+reported seven things. The ayah actions bar is a floating pill now, the top
+bar reads a little smaller, and the Mushaf pager turns right to left, with
+`MushafTurnTest` pinning it because a still frame cannot show a direction.
+The search chips kept their shape and gained the check they were missing, and
+an all-off filter row says so instead of "No matches." Back from a settings
+page returns to the hub, the downloaded surahs door sits closer under its
+reciter with the arrow beside a name that never changes, and the Browse pull
+is fixed for the case that got past the last fix: an interrupted fling never
+reports its end, so the gate now watches the finger landing and lets any
+gesture that finds the list scrolled own its leftovers.
 
 **The reader's third report (D-059).** The owner read 0.6 on a phone and
 reported ten things, the first of them a defect that had shipped since the
@@ -684,10 +701,10 @@ dialog into the store listing, the workflow clears a dialog before the tour
 starts, and a leg must now produce every frame the tour captures (eight,
 since the thirteenth session).
 
-The suite is green locally and in CI: core tests (55), data unit tests (9),
-the data instrumented tests (16), the app instrumented tests (11, the
-screenshot tour included), lint with no issues, and the gates that run
-(`checkdb`, `search`). `verify`, `audit`, and `fonts` need `content/raw`, the
-owner's manual QUL and QuranEnc exports, which the fourteenth session's
-machine did not carry; run them on the machine that owns them before the
-hand-over is closed.
+The suite is green locally and in CI: core tests (57), data unit tests (9),
+the data instrumented tests (16), the app instrumented tests (12, the
+screenshot tour and the new Mushaf turn test included), lint with no issues,
+and the gates that run (`checkdb`, `search`). `verify`, `audit`, and `fonts`
+need `content/raw`, the owner's manual QUL and QuranEnc exports, which the
+fifteenth session's machine did not carry; run them on the machine that owns
+them before the hand-over is closed.

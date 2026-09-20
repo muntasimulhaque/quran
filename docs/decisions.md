@@ -2076,3 +2076,40 @@ machine does not carry (only the font pack is in `content/raw`), so they must
 run on the machine that owns them before the hand-off is closed; `audit` and
 `fonts` fail here with "no database for quran-script-kfgqpc; run verify first",
 which is the missing export, not a content failure.
+
+## D-062: The release hand-off, 0.8
+
+Date: the fifteenth session, the release session. Version 0.8 (versionCode 8)
+is handed over for Google Play, and the hand-off is the bundle and the
+screenshots in one message, before the submission, as D-056 settled.
+
+**The bundle.** 147,681,534 bytes, SHA-256
+`b7cbe82f1c66ab66fed4ce8a7466f78956e3d74fc1886dec39b5bbd3a7bdce92`, signed
+with the shared upload key (D-017; the certificate's SHA-256 is
+`537d09d20300129e973b7945316bfe24cfadcfbc77eec5229cbf30170d9de521`), carrying
+only the core pack. It was built by the `signed-bundle` job on the push that
+raised the version and carried the fixes, and pulled from that run's artifact
+into `play-store/aab/quran-0.8-vc8.aab` with its checksum verified locally
+against the artifact's own file.
+
+**The set.** Eight frames per form factor, twenty-four in all, the eight the
+listing names, every one compared with its artifact by `cmp` before it
+replaced the committed set. Two frames changed for the reader: the chrome
+carries the smaller top bar, and the search filters show their checks. The
+screenshots workflow was given `MushafTurnTest` too, so the page direction is
+checked on all three form factors, not only on the machine that built the
+bundle. All three legs were green on the first attempt.
+
+**The hand-off.** The set was installed from the artifacts, never captured by
+hand, and the bundle was flattened out of the artifact's workspace path into
+`play-store/aab/` with its checksum verified locally. Both were handed over in
+one message, before the submission. The copy is deleted once the owner
+confirms that Play has the submission.
+
+**The gates.** `checkdb` and `search` are green on this machine; `verify`,
+`audit`, and `fonts` need the raw QUL and QuranEnc exports, which this machine
+does not carry (only the font pack is in `content/raw`). Their failure here is
+the missing export, not a content check: `audit` and `fonts` stop with "no
+database for quran-script-kfgqpc; run verify first", and `verify` lists the
+missing raw files. They must run on the machine that owns the exports before
+the hand-off is closed, as the fourteenth session noted.
