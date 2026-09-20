@@ -2211,6 +2211,12 @@ hand, and the bundle was flattened out of the artifact's workspace path into
 `play-store/aab/` with its checksum verified locally. Both were handed over in
 one message, before the submission.
 
+**The submission.** The owner confirmed that Play had the submission, and the
+hand-off copy was deleted from `play-store/aab/` in the same breath, so no
+signed bundle sits in the repository or on the machine waiting to be uploaded
+twice. `play-store/aab/` keeps only its own note about where a bundle comes
+from and when it goes.
+
 **The gates.** All five content gates are green on this machine, including the
 three the fifteenth session could not run: `verify`, `audit`, and `fonts` read
 the raw QUL and QuranEnc exports in `content/raw` and passed, so the 0.8

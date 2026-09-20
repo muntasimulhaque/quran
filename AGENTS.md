@@ -600,15 +600,15 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the sixteenth session)
 
-**0.9 (versionCode 9) is handed over for Google Play.** What 0.9 handed over:
-147,684,684 bytes, SHA-256
+**0.9 (versionCode 9) is submitted to Google Play for review.** What 0.9
+handed over: 147,684,684 bytes, SHA-256
 `85ea5bcf520d800476f9b490f470cdffa0db787185635662961db95ac80153dc`, signed
-with the owner's upload key, carrying only the core pack. The hand-off copy
-lives in `play-store/aab/` until the submission is confirmed, then it is
-deleted. The screenshots come from the same pipeline that built the bundle,
-all three form factors, every frame compared with its artifact by `cmp`, and
-both were handed over together, before the submission (D-063 answers the
-report, D-064 is the hand-off).
+with the owner's upload key, carrying only the core pack. The hand-off copy was
+deleted once the submission was confirmed; `play-store/aab/` keeps its own
+note. The screenshots came from the same pipeline that built the bundle, all
+three form factors, every frame compared with its artifact by `cmp`, and both
+were handed over together, before the submission (D-063 answers the report,
+D-064 is the hand-off).
 
 **The reader's fifth report (D-063).** The owner read 0.8 on a phone and
 reported seven things. The font size page previews Al-Ikhlas 112:1 instead of
