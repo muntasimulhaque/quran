@@ -2317,3 +2317,20 @@ against the artifact's own file.
 **The gates.** All five content gates are green on this machine: `verify`,
 `audit`, `fonts`, `checkdb`, and `search` read the raw QUL and QuranEnc
 exports in `content/raw` and passed.
+
+**The delay, and the lesson.** The phone leg failed five times and cost about
+forty minutes, every failure reading as an emulator flake (`device offline`,
+then `device not found`), every retry ending the same way. The working clue
+was already on the machine: the family's other apps in `Documents/GitHub`
+capture their store sets from the Compose root, one frame at a time, and never
+drive the running app through full-screen captures. The workflow was the same
+shape all along; the test was not. A leg that dies while a sibling leg passes
+the same code is the capture until proven otherwise. Read the failing job
+against the passing one, and read the family's repos, before spending a second
+retry.
+
+**The submission.** The owner confirmed that Play had the submission, and the
+hand-off copy was deleted from `play-store/aab/` in the same breath, so no
+signed bundle sits in the repository or on the machine waiting to be uploaded
+twice. `play-store/aab/` keeps only its own note about where a bundle comes
+from and when it goes.

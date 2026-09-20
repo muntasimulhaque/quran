@@ -434,6 +434,14 @@ implement it and update this list.
   with the window list checked first. A root frame cannot hold a system dialog,
   so only the sheet frames need that guard, and the whole tour runs in about
   half a minute on a phone profile.
+- A screenshot leg that dies with `device offline` while another leg passes
+  the same code is the capture load until proven otherwise, not the runner.
+  Five reruns of the phone leg cost about forty minutes, and the fix was one
+  commit that made the capture lighter. Read the failing job against the
+  passing one, and read the family's sibling repos in `Documents/GitHub`
+  before spending a second retry: each of them already carries the capture
+  shape that works. A lighter test is also a faster one; the same tour went
+  from a leg that sometimes killed the emulator to a green run in seconds.
 - An emulator workflow is not a test: it is a machine. Cache the AVD per form
   factor, wait for `/sdcard/Android` to exist before starting the test (a cold
   boot reports completion before its storage is mounted, and the test's output
@@ -609,15 +617,15 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the seventeenth session)
 
-**0.10 (versionCode 10) is handed over for Google Play.** What 0.10 handed
-over: 147,691,199 bytes, SHA-256
+**0.10 (versionCode 10) is submitted to Google Play for review.** What 0.10
+handed over: 147,691,199 bytes, SHA-256
 `320f7b8de7ce0bcbff01eb97c185215df000efb1bb6dcf2ee6984b12b618b0af`, signed
-with the owner's upload key, carrying only the core pack. The hand-off copy
-lives in `play-store/aab/` until the submission is confirmed, then it is
-deleted. The screenshots come from the same pipeline that built the bundle,
-all three form factors, every frame compared with its artifact by `cmp`, and
-both were handed over together, before the submission (D-065 answers the
-report, D-066 is the hand-off).
+with the owner's upload key, carrying only the core pack. The hand-off copy was
+deleted once the submission was confirmed; `play-store/aab/` keeps its own
+note. The screenshots came from the same pipeline that built the bundle, all
+three form factors, every frame compared with its artifact by `cmp`, and both
+were handed over together, before the submission (D-065 answers the report,
+D-066 is the hand-off).
 
 **The reader's sixth report (D-065).** The owner read 0.9 on a phone and
 reported six things. The top bar is two rows on every size now: the controls
