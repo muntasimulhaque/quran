@@ -2182,3 +2182,36 @@ on the emulator: the centered switch, the short size sample, the chevron and
 dropdown on the offer, the Reciters page with its tightened rows, removal
 falling back to Husary, the larger tafsir Arabic, the trimmed ayah card, and
 the About area.
+
+## D-064: The release hand-off, 0.9
+
+Date: the sixteenth session, the release session. Version 0.9 (versionCode 9)
+is handed over for Google Play, and the hand-off is the bundle and the
+screenshots in one message, before the submission, as D-056 settled.
+
+**The bundle.** 147,684,684 bytes, SHA-256
+`85ea5bcf520d800476f9b490f470cdffa0db787185635662961db95ac80153dc`, signed
+with the shared upload key (D-017; the certificate's SHA-256 is
+`537d09d20300129e973b7945316bfe24cfadcfbc77eec5229cbf30170d9de521`), carrying
+only the core pack. It was built by the `signed-bundle` job on the push that
+raised the version and carried the fixes, and pulled from that run's artifact
+into `play-store/aab/quran-0.9-vc9.aab` with its checksum verified locally
+against the artifact's own file. The job's first run failed its core tests on
+a transient plugin resolution error; the rerun was green.
+
+**The set.** Eight frames per form factor, twenty-four in all, the eight the
+listing names, every one compared with its artifact by `cmp` before it
+replaced the committed set. Two frames changed for the reader: the chrome
+carries the two reading modes as one centered switch, and the ayah card no
+longer repeats Save and Share. All three legs were green on the first
+attempt.
+
+**The hand-off.** The set was installed from the artifacts, never captured by
+hand, and the bundle was flattened out of the artifact's workspace path into
+`play-store/aab/` with its checksum verified locally. Both were handed over in
+one message, before the submission.
+
+**The gates.** All five content gates are green on this machine, including the
+three the fifteenth session could not run: `verify`, `audit`, and `fonts` read
+the raw QUL and QuranEnc exports in `content/raw` and passed, so the 0.8
+caveat is closed.
