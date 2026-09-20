@@ -41,6 +41,7 @@ enum class Icon {
     Settings,
     Bookmark,
     BookmarkFilled,
+    Check,
     Play,
     Pause,
     Next,
@@ -110,6 +111,20 @@ fun IconGlyph(
                 } else {
                     drawPath(path, tint, style = Stroke(width = w * 0.08f))
                 }
+            }
+            Icon.Check -> {
+                drawLine(
+                    tint,
+                    Offset(w * 0.16f, h * 0.52f),
+                    Offset(w * 0.42f, h * 0.78f),
+                    strokeWidth = w * 0.13f,
+                )
+                drawLine(
+                    tint,
+                    Offset(w * 0.42f, h * 0.78f),
+                    Offset(w * 0.84f, h * 0.22f),
+                    strokeWidth = w * 0.13f,
+                )
             }
             Icon.Play -> drawPath(playPath(w, h), tint)
             Icon.Pause -> {
@@ -315,7 +330,7 @@ fun ReadingTitle(surah: String, detail: String?, modifier: Modifier = Modifier) 
     Row(modifier = modifier, verticalAlignment = Alignment.Bottom) {
         Text(
             text = surah,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 1,
             overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
@@ -324,7 +339,7 @@ fun ReadingTitle(surah: String, detail: String?, modifier: Modifier = Modifier) 
         if (!detail.isNullOrBlank()) {
             Text(
                 text = detail,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 8.dp, bottom = 1.dp),
             )

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.toggleable
@@ -63,6 +64,8 @@ import io.github.muntasimulhaque.quran.data.SearchResults
 import io.github.muntasimulhaque.quran.data.SearchSources
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.search.R
+import io.github.muntasimulhaque.quran.ui.reader.Icon
+import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.rich.HighlightedText
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
@@ -115,7 +118,7 @@ fun SearchSheet(
      */
     LaunchedEffect(text, content, sources) {
         val query = Search.parse(text)
-        if (query == null) {
+        if (query == null || !sources.any) {
             results = SearchResults()
             searching = false
             return@LaunchedEffect
@@ -163,7 +166,12 @@ fun SearchSheet(
                 hasTafsirs = tafsirPacks.isNotEmpty(),
                 onChange = { sources = it },
             )
-            StatusLine(query = Search.parse(text), results = results, searching = searching)
+            StatusLine(
+                query = Search.parse(text),
+                results = results,
+                searching = searching,
+                hasSources = sources.any,
+            )
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(bottom = 28.dp),
@@ -260,17 +268,15 @@ private fun FilterRow(
     }
 }
 
-/** One source, on or off, as a chip the reader taps. */
+/**
+ * One source, on or off, as a chip the reader taps. A chosen chip carries the
+ * check the app uses for a mark, so its state is read at a glance instead of
+ * being guessed from the fill alone; the whole chip is one checkbox to
+ * TalkBack, which says whether it is on.
+ */
 @Composable
 private fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit) {
-    Text(
-        text = label,
-        style = MaterialTheme.typography.labelMedium,
-        color = if (on) {
-            MaterialTheme.colorScheme.onPrimary
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        },
+    Row(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
             .background(
@@ -282,7 +288,26 @@ private fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit) 
             )
             .toggleable(value = on, role = Role.Checkbox, onValueChange = onChange)
             .padding(horizontal = 12.dp, vertical = 9.dp),
-    )
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+    ) {
+        if (on) {
+            IconGlyph(
+                icon = Icon.Check,
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(13.dp),
+            )
+        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = if (on) {
+                MaterialTheme.colorScheme.onPrimary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
+        )
+    }
 }
 
 @Composable
@@ -346,7 +371,12 @@ private fun SearchField(
 }
 
 @Composable
-private fun StatusLine(query: SearchQuery?, results: SearchResults, searching: Boolean) {
+private fun StatusLine(
+    query: SearchQuery?,
+    results: SearchResults,
+    searching: Boolean,
+    hasSources: Boolean,
+) {
     val total = results.counts.total
     val counts = results.counts
     val partSurahs = if (counts.surahs > 0) {
@@ -376,6 +406,7 @@ private fun StatusLine(query: SearchQuery?, results: SearchResults, searching: B
     }
     val capped = if (results.capped) stringResource(R.string.search_status_capped, LIMIT) else null
     val message = when {
+        !hasSources -> stringResource(R.string.search_status_no_sources)
         query == null -> stringResource(R.string.search_status_prompt)
         searching && results.hits.isEmpty() -> stringResource(R.string.search_status_searching)
         total == 0 -> stringResource(R.string.search_status_no_matches)

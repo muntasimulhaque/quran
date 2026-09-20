@@ -166,6 +166,10 @@ data class SearchSources(
     val translations: Boolean = true,
     val tafsirs: Boolean = true,
 ) {
+    /** True while at least one source is on; a search with none has nothing to read. */
+    val any: Boolean
+        get() = text || surahs || references || words || translations || tafsirs
+
     /** The whole library, which is where every search starts. */
     companion object {
         val ALL = SearchSources()

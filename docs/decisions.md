@@ -2008,3 +2008,71 @@ hand-off copy was deleted from `play-store/aab/` in the same breath, so no
 signed bundle sits in the repository or on the machine waiting to be uploaded
 twice. `play-store/aab/` keeps only its own note about where a bundle comes
 from and when it goes.
+
+## D-061: The reader's report, the fifteenth session
+
+Date: the fifteenth session. The owner read 0.7 on a phone and reported seven
+things, one of them the part of the fourteenth session's fix that had not gone
+far enough.
+
+**The long press floats.** The ayah actions bar sat flush with the foot of the
+page as a rounded bar. It is a full radius capsule with a 6 dp shadow now, the
+shape the playback pill already wears, so a long press raises the actions over
+the reading instead of adding a bar to it. `AyahActions` in the app module is
+the one place both reading modes draw it from.
+
+**The top bar reads smaller.** `ReadingTitle` moved the surah name from
+`titleMedium` to `titleSmall` (16 to 15 sp) and the juz from `bodySmall` to
+`labelMedium` (13 to 12 sp), and both reading modes draw through it.
+
+**The Mushaf turns right to left.** The fourteenth session fixed the order of
+the words inside a line but left the pager itself running left to right. The
+`HorizontalPager` now carries `reverseLayout = true`: page 1 opens on the
+right, the next page lies to its left, and a swipe to the right turns forward.
+A still frame cannot show which way a page moved, which is exactly how the
+reversed lines survived four screenshot sets, so `MushafTurnTest` in the app's
+instrumented tests pins the direction: it swipes right to page 2 (Al-Baqarah)
+and left back to page 1, and reads the exposed ayah nodes to know which page
+is the one on screen.
+
+**A scroll that comes home cannot close Browse.** The fourteenth session's
+`SheetDragPolicy` judged a gesture by its first delta, but a fling that a new
+touch interrupts never reports its end, so a record could stay open and its
+beginning could judge the next gesture. The policy now lets a gesture that
+finds the list scrolled own its leftovers, and `Modifier.sheetDragGate` watches
+the finger landing (`PointerEventPass.Initial`, never consumed) so every touch
+opens a fresh record. Pull to close from the top is unchanged, and the
+policy's new cases have unit tests.
+
+**Search filters say what they are.** The chips stay, because a row of toggle
+chips is what a multi select scope filter is: Material's own `FilterChip`
+exists for it, and checkboxes read as form controls, take more room, and scan
+slower. What was missing was the affordance, so a chosen chip now carries the
+app's drawn check beside its label. When every source is off, the status line
+says "Turn on at least one filter to search." instead of a false "No matches.";
+`SearchSources.any` is the one place that knows whether anything is on.
+
+**Back steps out of a settings page.** The handler was registered in the
+activity's window, but `ModalBottomSheet` lives in its own dialog window with
+its own back dispatcher, which dismissed the sheet before the activity saw the
+event. The handler now lives inside the sheet's content, where it registers on
+the sheet's dispatcher after the sheet's own callback and wins. Appearance
+returns to the hub, and only a back at the hub closes Settings. The emulator
+run confirmed it: the frame after back was byte-identical to the hub frame.
+
+**The downloaded surahs belong to the reciter's row.** The door lost the gap
+above it: the reciter's `PackChoiceRow` gives up its 12 dp foot when a
+downloads door follows, so the label sits about 14 dp under the reciter where
+it used to sit about 26. The arrow sits immediately after a label that never
+changes, `Downloaded surahs (N)`, with the arrow turning, instead of at the far
+right of a row whose name flipped between two names.
+
+**Verification.** The JVM suite (core 57, data 9, app unit), lint, and
+`assembleDebug` are green; `checkdb` and `search` are green; the data
+instrumented tests (16) and the app instrumented tests (12, the screenshot tour
+and the new turn test included) are green on a phone profile. `verify`, `audit`,
+and `fonts` still need the owner's manual QUL and QuranEnc exports, which this
+machine does not carry (only the font pack is in `content/raw`), so they must
+run on the machine that owns them before the hand-off is closed; `audit` and
+`fonts` fail here with "no database for quran-script-kfgqpc; run verify first",
+which is the missing export, not a content failure.

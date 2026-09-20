@@ -29,6 +29,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.AppTheme
@@ -243,6 +244,8 @@ fun PackChoiceRow(
     onActivate: () -> Unit,
     onInstall: () -> Unit,
     onRemove: () -> Unit,
+    /** The room under the row; a row with a block beneath it keeps less. */
+    bottomPadding: Dp = 12.dp,
 ) {
     val busy = setup?.packId == pack.id && setup.failed.not()
     SettingRow(
@@ -254,6 +257,7 @@ fun PackChoiceRow(
         // door that brings it here instead, and nothing looks selectable
         // while it is on its way in.
         onClick = if (pack.installed && !busy) onActivate else onInstall,
+        bottomPadding = bottomPadding,
         trailing = { PackTrailing(pack, setup, onInstall, onRemove) },
     ) { Mark(selected = selected, radio = radio) }
 }
@@ -274,6 +278,7 @@ private fun SettingRow(
     selected: Boolean,
     role: Role,
     onClick: () -> Unit,
+    bottomPadding: Dp = 12.dp,
     trailing: @Composable () -> Unit,
     mark: @Composable () -> Unit,
 ) {
@@ -282,7 +287,7 @@ private fun SettingRow(
             .fillMaxWidth()
             .minimumInteractiveComponentSize()
             .selectable(selected = selected, role = role, onClick = onClick)
-            .padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
+            .padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = bottomPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         mark()

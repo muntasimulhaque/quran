@@ -95,15 +95,17 @@ fun SettingsSheet(
     var credits by remember { mutableStateOf(false) }
     val hubScroll = rememberScrollState()
 
-    // Back steps out of a page before it closes the sheet, the way a stack
-    // of pages is expected to behave.
-    BackHandler(enabled = page != null) { page = null }
-
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
+        // Back steps out of a page before it closes the sheet, the way a
+        // stack of pages is expected to behave. It lives inside the sheet's
+        // own window: the sheet registers its own back handling there, and a
+        // handler in the activity's window never sees the event while the
+        // sheet is up.
+        BackHandler(enabled = page != null) { page = null }
         Column(
             modifier = Modifier
                 .fillMaxWidth()

@@ -31,7 +31,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -185,7 +184,7 @@ fun BrowseSheet(
             when (tab) {
                 BrowseTab.Surahs -> LazyColumn(
                     state = surahsList,
-                    modifier = Modifier.nestedScroll(surahsGate),
+                    modifier = Modifier.sheetDragGate(surahsGate),
                     contentPadding = PaddingValues(bottom = 28.dp),
                 ) {
                     items(surahs, key = { it.number }) { surah ->
@@ -194,7 +193,7 @@ fun BrowseSheet(
                 }
                 BrowseTab.Juz -> LazyColumn(
                     state = juzList,
-                    modifier = Modifier.nestedScroll(juzGate),
+                    modifier = Modifier.sheetDragGate(juzGate),
                     contentPadding = PaddingValues(bottom = 28.dp),
                 ) {
                     itemsIndexedCompat(juzStarts) { index, start ->
@@ -213,7 +212,7 @@ fun BrowseSheet(
                     places = lastRead,
                     texts = texts,
                     listState = lastReadList,
-                    listModifier = Modifier.nestedScroll(lastReadGate),
+                    listModifier = Modifier.sheetDragGate(lastReadGate),
                     onAyah = onAyah,
                     onForget = onForget,
                 )
@@ -221,7 +220,7 @@ fun BrowseSheet(
                     saved = saved,
                     texts = texts,
                     listState = savedList,
-                    listModifier = Modifier.nestedScroll(savedGate),
+                    listModifier = Modifier.sheetDragGate(savedGate),
                     onAyah = onAyah,
                     onRemove = onRemove,
                 )

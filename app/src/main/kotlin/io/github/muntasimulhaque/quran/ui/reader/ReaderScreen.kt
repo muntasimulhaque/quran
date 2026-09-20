@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -479,6 +480,9 @@ private fun MushafReader(
             modifier = Modifier
                 .fillMaxSize()
                 .semantics(mergeDescendants = false) { },
+            // An Arabic Mushaf opens on the right: the next page lies to the
+            // left of this one, so a swipe to the right turns forward.
+            reverseLayout = true,
             beyondViewportPageCount = 1,
         ) { index ->
             MushafPage(
@@ -726,11 +730,13 @@ private fun AyahActions(
     onMore: () -> Unit,
     onShare: () -> Unit,
 ) {
+    val shape = RoundedCornerShape(50)
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(24.dp))
+            .shadow(elevation = 6.dp, shape = shape)
+            .clip(shape)
             .background(MaterialTheme.colorScheme.surface)
-            .padding(start = 16.dp, end = 6.dp, top = 5.dp, bottom = 5.dp),
+            .padding(start = 18.dp, end = 6.dp, top = 5.dp, bottom = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.padding(end = 10.dp)) {

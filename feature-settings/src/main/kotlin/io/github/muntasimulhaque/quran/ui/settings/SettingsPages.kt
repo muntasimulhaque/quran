@@ -345,6 +345,10 @@ fun RecitersPage(
                     onActivate = { actions.onSelectRecitation(id) },
                     onInstall = { actions.onInstallPack(pack.id) },
                     onRemove = { actions.onRemovePack(pack.id) },
+                    // The downloads door follows the reciter it belongs to, so
+                    // the reciter's own room at the foot would read as a gap
+                    // between the two.
+                    bottomPadding = if (pack.installed) 0.dp else 12.dp,
                 )
                 if (pack.installed) {
                     ReciterDownloads(id, downloadedSurahs, actions)
@@ -410,7 +414,11 @@ private fun ReciterDownloads(
     Spacer(Modifier.height(Space.Block))
 }
 
-/** The door to one reciter's downloaded surahs, with the arrow it opens by. */
+/**
+ * The door to one reciter's downloaded surahs. Its name never changes; the
+ * arrow beside it turns to say whether the list is open, so the door says
+ * what it opens rather than what a tap will do.
+ */
 @Composable
 private fun ReciterDownloadsDoor(open: Boolean, count: Int, onClick: () -> Unit) {
     Row(
@@ -422,21 +430,17 @@ private fun ReciterDownloadsDoor(open: Boolean, count: Int, onClick: () -> Unit)
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = if (open) {
-                stringResource(R.string.settings_downloaded_hide)
-            } else {
-                stringResource(R.string.settings_downloaded_show, count)
-            },
+            text = stringResource(R.string.settings_downloaded_label, count),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.weight(1f),
         )
-        // The arrow says the label opens something, and which way it will
-        // move: down while the list is hidden, up once it is under it.
+        // The arrow sits with the name it belongs to, and turns to say which
+        // way the list will move: down while it is hidden, up once it is open.
         IconGlyph(
             icon = Icon.Chevron,
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier
+                .padding(start = 6.dp)
                 .size(18.dp)
                 .rotate(if (open) 180f else 0f),
         )

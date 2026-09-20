@@ -31,8 +31,7 @@
 
     <string name="settings_text_size_option">%3$s size %1$d of %2$d</string>
 
-    <string name="settings_downloaded_hide">Hide downloaded surahs</string>
-    <string name="settings_downloaded_show">Downloaded surahs (%1$d)</string>
+    <string name="settings_downloaded_label">Downloaded surahs (%1$d)</string>
     <string name="settings_downloaded_empty">No surahs downloaded for this reciter yet. Tap Play on any ayah to add one.</string>
 
     <string name="pack_type_translation">Translation</string>

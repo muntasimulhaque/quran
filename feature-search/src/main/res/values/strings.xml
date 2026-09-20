@@ -5,6 +5,7 @@
     <string name="search_status_prompt">The Arabic text, translations, tafsirs, word meanings, surah names, and references like 2:255.</string>
     <string name="search_status_searching">Searching…</string>
     <string name="search_status_no_matches">No matches.</string>
+    <string name="search_status_no_sources">Turn on at least one filter to search.</string>
     <string name="search_status_capped">the first %1$d shown</string>
     <string name="search_label_go_to">Go to</string>
     <string name="search_label_surah">Surah</string>

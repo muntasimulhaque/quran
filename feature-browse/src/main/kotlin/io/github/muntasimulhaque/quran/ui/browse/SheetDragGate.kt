@@ -1,9 +1,14 @@
 package io.github.muntasimulhaque.quran.ui.browse
 
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Velocity
 import io.github.muntasimulhaque.quran.core.SheetDragPolicy
 
@@ -33,6 +38,11 @@ internal class SheetDragGate(
 
     private val policy = SheetDragPolicy()
 
+    /** A touch landed on the list: the next input is a new gesture. */
+    fun onPointerDown() {
+        policy.onPointerDown()
+    }
+
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
         if (source == NestedScrollSource.UserInput) {
             policy.onUserInput(atTop = !listState.canScrollBackward)
@@ -54,3 +64,18 @@ internal class SheetDragGate(
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity =
         Velocity(0f, policy.endGesture(available.y))
 }
+
+/**
+ * The modifier one list wears: the gate for the sheet, and the touch that
+ * tells the gate a new gesture has begun. A press is watched, never consumed,
+ * so the list scrolls exactly as it did without it.
+ */
+internal fun Modifier.sheetDragGate(gate: SheetDragGate): Modifier =
+    nestedScroll(gate).pointerInput(gate) {
+        awaitPointerEventScope {
+            while (true) {
+                val event = awaitPointerEvent(PointerEventPass.Initial)
+                if (event.type == PointerEventType.Press) gate.onPointerDown()
+            }
+        }
+    }

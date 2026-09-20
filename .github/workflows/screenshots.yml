@@ -130,7 +130,7 @@ jobs:
             # invocation would replace the previous additional output (and with
             # it the screenshots), and the emulator runner feeds this script to
             # sh, which chokes on multi-line continuations.
-            ./gradlew :app:connectedDebugAndroidTest --console=plain -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest,io.github.muntasimulhaque.quran.WordByWordTest
+            ./gradlew :app:connectedDebugAndroidTest --console=plain -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest,io.github.muntasimulhaque.quran.WordByWordTest,io.github.muntasimulhaque.quran.MushafTurnTest
             # AGP copies the test's additional output off-device (before it
             # uninstalls the app) into the connected additional output folder.
             mkdir -p store-shots
