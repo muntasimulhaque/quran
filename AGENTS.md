@@ -595,15 +595,15 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the fourteenth session)
 
-**0.7 (versionCode 7) is handed over for Google Play.** What 0.7 handed over:
-147,678,451 bytes, SHA-256
+**0.7 (versionCode 7) is submitted to Google Play for review.** What 0.7
+handed over: 147,678,451 bytes, SHA-256
 `1f7b882981bc5319461a96dcde1d01d1f2762083c095c5a7a9e05d4116c2595b`, signed
-with the owner's upload key, carrying only the core pack. The hand-off copy
-lives in `play-store/aab/` until the submission is confirmed, then it is
-deleted. The screenshots come from the same pipeline that built the bundle,
-all three form factors, every frame compared with its artifact by `cmp`, and
-both were handed over together, before the submission (D-059 answers the
-report, D-060 is the hand-off).
+with the owner's upload key, carrying only the core pack. The hand-off copy was
+deleted once the submission was confirmed; `play-store/aab/` keeps its own
+note. The screenshots came from the same pipeline that built the bundle, all
+three form factors, every frame compared with its artifact by `cmp`, and both
+were handed over together, before the submission (D-059 answers the report,
+D-060 is the hand-off).
 
 **The reader's third report (D-059).** The owner read 0.6 on a phone and
 reported ten things, the first of them a defect that had shipped since the

@@ -4,8 +4,8 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 0.7 (versionCode 7) is handed over for Google Play. This session
-answered the reader's third report: every Mushaf line now reads right to left
+**Status:** 0.7 (versionCode 7) is submitted to Google Play for review. This
+session answered the reader's third report: every Mushaf line now reads right to left
 as the printed page does, the two mode icons were redrawn as an open Book and
 a single page, footnotes follow the size of the text they belong to, About
 this surah closes with a tap anywhere, a surah opened from Browse lands on the

@@ -2001,5 +2001,10 @@ first attempt.
 **The hand-off.** The set was installed from the artifacts, never captured by
 hand, and the bundle was flattened out of the artifact's workspace path into
 `play-store/aab/` with its checksum verified locally. Both were handed over in
-one message, and the copy is deleted once the owner confirms that Play has the
-submission.
+one message, before the submission.
+
+**The submission.** The owner confirmed that Play had the submission, and the
+hand-off copy was deleted from `play-store/aab/` in the same breath, so no
+signed bundle sits in the repository or on the machine waiting to be uploaded
+twice. `play-store/aab/` keeps only its own note about where a bundle comes
+from and when it goes.

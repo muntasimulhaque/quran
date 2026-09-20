@@ -111,7 +111,7 @@ What each set shows, in order:
 7. Browse, Surahs
 8. The ayah card, with its word by word and tafsir doors
 
-## Release notes (0.7, for this hand-off, 487 characters)
+## Release notes (0.7, submitted, 487 characters)
 
 Every Mushaf page now reads right to left, as the printed page does. The Mushaf and study icons were redrawn, Browse lost its title, and a surah opened from Browse lands on your last place in it or at its top. Footnotes follow the size of the translation, About this surah closes with a tap anywhere, Last Read rows lost their Open button, reciters gained a clearer downloaded-surahs list, and a scroll back up in Browse no longer pulls the sheet closed. No ads, no trackers, no account.
 
