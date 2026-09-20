@@ -2221,3 +2221,57 @@ from and when it goes.
 three the fifteenth session could not run: `verify`, `audit`, and `fonts` read
 the raw QUL and QuranEnc exports in `content/raw` and passed, so the 0.8
 caveat is closed.
+
+## D-065: The reader's sixth report, the seventeenth session
+
+Date: the seventeenth session. The owner read 0.9 on a phone and reported six
+things, and a design discussion settled the top bar.
+
+**The top bar is two rows, centered.** The one-row bar could not hold the
+surah name whole on a phone: the title slot is `screen width - 276dp` once
+the switch and the three 48dp doors are counted, so the longest of the 114
+names (Al-Muddaththir, about 106dp) clipped below a 382dp screen. The bar is
+two rows on every size now: the controls first (Browse at the head, the two
+reading modes centered on the screen, Search and Settings at the end), then
+the surah and its juz centered as one unit beneath them. The switch keeps the
+exact position D-063 gave it, the name has the whole width, and the scrim
+stays solid through both rows and gives way only under the name.
+`ReadingTitle` centers the pair in its row and still draws the juz only when
+it fits beside the whole name. Al-Muddaththir Juz 29 is whole at 320dp,
+360dp, and 411dp. A bottom placement for the switch, in the ayah pill's slot,
+and a title-first row order were both weighed and set aside: the controls
+group in one row, the title reads as a caption over the page, and the switch
+never moves. Material's large app bar puts the actions above the title for
+the same reason.
+
+**The shapes answer in the reading's own language.** The expanded surah
+introduction was a bare `clickable`, so its ripple was a hard rectangle; it
+is clipped to the 14dp rounded shape the ayah press uses. The word being
+recited in the study reading was a `SpanStyle` background, which is always a
+rectangle and a style boundary inside an Arabic word besides; it is drawn
+now through the text layout's own bounding boxes as the same rounded wash the
+Mushaf draws, so both modes share one word mark. The Mushaf mark was brought
+to the same corner proportion.
+
+**The end of a surah names the next one.** "Continue to X" was plain text
+with no sign that it could be pressed. It is a card now: a quiet "Next surah"
+label, the name, and a chevron that points the way the reading goes.
+
+**The word list stays the translation's.** An earlier fix in this session
+added a stored word list choice; the owner asked for it to be reverted and
+the app made simpler. The meaning language is not a choice, there is no
+selector, no stored pack, and no new preference: the aid speaks the language
+of the first translation turned on, then English, exactly as it did before.
+`WordByWordTest` still pins that path.
+
+**Last Read keeps its twenty places.** The cap was measured rather than
+guessed: the database is three 4KB pages, 12,288 bytes, with 0, 10, or 20
+rows, and a row costs about 20 bytes. Capping to ten would save a quarter of
+one page and halve the history, so the list stays a list of twenty places.
+
+**Verification.** The JVM suite (core, data, app), lint, and `assembleDebug`
+are green; the data instrumented tests (16) and the app instrumented tests
+(12, the screenshot tour included) are green on the phone profile. The bar
+was checked with Al-Muddaththir at 320, 360, and 411dp, and the rounded word
+mark, the About shape, and the next-surah card were checked on the running
+app.

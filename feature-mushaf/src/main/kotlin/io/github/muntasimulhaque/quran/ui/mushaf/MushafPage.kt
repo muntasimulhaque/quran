@@ -231,12 +231,15 @@ private fun DrawScope.drawWashes(
     }
     if (playingAyah != null && playingWord != null) {
         page.wordBox(playingAyah, playingWord)?.let { word ->
-            val pad = (word.bottom - word.top) * 0.08f
+            // The same rounded wash the study reading draws under its word:
+            // one word mark in one shape, in both modes.
+            val height = word.bottom - word.top
+            val pad = height * 0.08f
             drawRoundRect(
                 color = page.palette.highlight,
                 topLeft = Offset(word.left - pad, word.top + pad * 0.5f),
-                size = Size(word.right - word.left + pad * 2, word.bottom - word.top - pad),
-                cornerRadius = CornerRadius(pad * 2.4f),
+                size = Size(word.right - word.left + pad * 2, height - pad),
+                cornerRadius = CornerRadius(height * 0.26f),
             )
         }
     }

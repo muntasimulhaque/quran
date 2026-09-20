@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,7 +33,14 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
@@ -41,14 +49,13 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,6 +67,8 @@ import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.StudyRow
 import io.github.muntasimulhaque.quran.feature.study.R
+import io.github.muntasimulhaque.quran.ui.reader.Icon
+import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
@@ -67,6 +76,8 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.withContext
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * The study reading of one surah: its opening, then a continuous scroll
@@ -436,9 +447,11 @@ private fun SurahOpening(
                 // The door is the paragraph itself: the reading around it is
                 // the paper, and only the part that opens is its own target,
                 // so a press shows the boundary of the about and not of the
-                // whole opening.
+                // whole opening. The boundary is the ayah's own rounded one,
+                // so the two presses answer in the same shape.
                 modifier = Modifier
                     .padding(top = Space.Block)
+                    .clip(RoundedCornerShape(14.dp))
                     .clickable(onClick = onPaperTap),
             )
         }
@@ -488,16 +501,41 @@ private fun SurahEnd(
             modifier = Modifier.padding(top = 16.dp),
         )
         if (next <= 114 && nextSurahName != null) {
-            Text(
-                text = stringResource(R.string.study_continue_to, nextSurahName),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
+            // The next surah is a card, not a bare line of type: the label
+            // says what the tap does, the name says where it lands, and the
+            // arrow says which way the reading goes, the way the end of a
+            // page names the page after it.
+            Row(
                 modifier = Modifier
-                    .padding(top = 10.dp)
-                    .clip(RoundedCornerShape(50))
+                    .fillMaxWidth()
+                    .padding(top = Space.Block)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.05f))
                     .clickable { onNextSurah(next) }
-                    .padding(horizontal = 18.dp, vertical = 10.dp),
-            )
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.study_next_surah),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        text = nextSurahName,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(top = 1.dp),
+                    )
+                }
+                IconGlyph(
+                    icon = Icon.Chevron,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .rotate(-90f),
+                )
+            }
         } else if (next > 114) {
             Text(
                 text = stringResource(R.string.study_end_of_quran),
@@ -553,8 +591,10 @@ private fun AyahBlock(
                 )
                 .padding(horizontal = 8.dp, vertical = 10.dp),
         ) {
+            val arabicLine = arabic(row, playing, playingWord)
+            var textLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
             Text(
-                text = arabic(row, playing, playingWord, hafs, palette.highlight),
+                text = arabicLine.text,
                 style = TextStyle(
                     fontFamily = hafs,
                     fontSize = settings.arabicSp.sp,
@@ -562,7 +602,17 @@ private fun AyahBlock(
                     color = MaterialTheme.colorScheme.onBackground,
                 ),
                 textAlign = TextAlign.Right,
-                modifier = Modifier.fillMaxWidth(),
+                onTextLayout = { textLayout = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .drawWithContent {
+                        val range = arabicLine.washRange
+                        val layout = textLayout
+                        if (layout != null && range != null) {
+                            drawPlayingWordWash(layout, range, palette.highlight)
+                        }
+                        drawContent()
+                    },
             )
             if (wordByWord && row.meanings.any { it.meaning != null }) {
                 WordByWord(
@@ -611,32 +661,74 @@ private fun AyahBlock(
     }
 }
 
-/** The ayah as whole words, the recited word washed in the accent color. */
-@Composable
-private fun arabic(
-    row: StudyRow,
-    playing: Boolean,
-    playingWord: Int?,
-    hafs: FontFamily,
-    wash: Color,
-): AnnotatedString {
+/** One Arabic line: its words, and the wash the reciter is on. */
+private data class ArabicLine(val text: AnnotatedString, val washRange: IntRange?)
+
+/**
+ * The ayah as whole words. The recited word carries its range instead of a
+ * style span, so the surface above can wash it in a rounded shape: a style
+ * boundary inside an Arabic word breaks its letter joining, and a span is
+ * always a bare rectangle behind the glyphs.
+ */
+private fun arabic(row: StudyRow, playing: Boolean, playingWord: Int?): ArabicLine {
     val words = row.words
-    if (words.isEmpty()) return AnnotatedString(row.ayah.text)
-    return buildAnnotatedString {
+    if (words.isEmpty()) return ArabicLine(AnnotatedString(row.ayah.text), null)
+    var washRange: IntRange? = null
+    val text = buildAnnotatedString {
         words.forEachIndexed { index, word ->
             if (index > 0) append(' ')
-            if (playing && word.position == playingWord) {
-                withStyle(
-                    SpanStyle(
-                        background = wash,
-                        color = MaterialTheme.colorScheme.onBackground,
-                    ),
-                ) { append(word.text) }
-            } else {
-                append(word.text)
-            }
+            val start = length
+            append(word.text)
+            if (playing && word.position == playingWord) washRange = start until length
         }
     }
+    return ArabicLine(text, washRange)
+}
+
+/**
+ * The current word under the reciter, drawn as one rounded wash per line it
+ * spans. The geometry comes from the text layout itself, so the wash sits
+ * exactly on the word the reciter is saying, in the reading direction too.
+ */
+private fun DrawScope.drawPlayingWordWash(
+    layout: TextLayoutResult,
+    range: IntRange,
+    wash: Color,
+) {
+    val start = range.first.coerceAtLeast(0)
+    val end = range.last.coerceAtMost(layout.layoutInput.text.length - 1)
+    if (end < start) return
+    var line = layout.getLineForOffset(start)
+    var box: Rect? = null
+    for (offset in start..end) {
+        val nextLine = layout.getLineForOffset(offset)
+        if (nextLine != line) {
+            box?.let { drawWordWash(it, wash) }
+            box = null
+            line = nextLine
+        }
+        val charBox = layout.getBoundingBox(offset)
+        box = box?.let { union ->
+            Rect(
+                left = min(union.left, charBox.left),
+                top = min(union.top, charBox.top),
+                right = max(union.right, charBox.right),
+                bottom = max(union.bottom, charBox.bottom),
+            )
+        } ?: charBox
+    }
+    box?.let { drawWordWash(it, wash) }
+}
+
+/** One word's wash: rounded, with the room a mark needs around the glyphs. */
+private fun DrawScope.drawWordWash(box: Rect, wash: Color) {
+    val pad = box.height * 0.08f
+    drawRoundRect(
+        color = wash,
+        topLeft = Offset(box.left - pad, box.top + pad * 0.5f),
+        size = Size(box.width + pad * 2, box.height - pad),
+        cornerRadius = CornerRadius(box.height * 0.26f),
+    )
 }
 
 private const val BASMALLAH = "\u0628\u0650\u0633\u0652\u0645\u0650 \u0671\u0644\u0644\u0651\u064e\u0647\u0650 " +

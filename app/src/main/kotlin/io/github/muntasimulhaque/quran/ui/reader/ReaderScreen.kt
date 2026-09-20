@@ -14,10 +14,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -85,8 +87,22 @@ import kotlin.math.min
 /** How long the chrome stays after a touch before it steps back. */
 private const val CHROME_MILLIS = 7000L
 
-/** The room the centered mode switch needs, so the title never runs under it. */
-private val ModeSwitchReserve = 96.dp
+/** The bar's own margins; the title aligns with the reading under it. */
+private val BarStart = 20.dp
+private val BarEnd = 8.dp
+
+/** The mode switch's full width: two 40 dp choices, 2 dp apart, 3 dp of rim. */
+private val ModeSwitchWidth = 88.dp
+
+/** The index door at the head of the bar, and the two tools at its end. */
+private val LeadingDoorWidth = 48.dp
+private val TrailingDoorsWidth = 96.dp
+
+/** The least room between two of the first row's three groups. */
+private val TopBarGap = 8.dp
+
+/** The room between the controls and the surah name beneath them. */
+private val TitleTopGap = 6.dp
 
 /** Which sheet is over the reader, if any. */
 private enum class ReaderSheet { None, Browse, Search, Settings }
@@ -524,49 +540,63 @@ private fun ReaderTopBar(
         exit = fadeOut() + slideOutVertically { -it / 3 },
         modifier = modifier,
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
+                // The scrim stays solid over both rows and gives way only
+                // below the name, so the surah and its juz never sit on the
+                // fading edge and the page runs out from under them.
                 .background(
                     Brush.verticalGradient(
-                        listOf(
-                            MaterialTheme.colorScheme.background,
-                            MaterialTheme.colorScheme.background.copy(alpha = 0.92f),
-                            MaterialTheme.colorScheme.background.copy(alpha = 0f),
-                        ),
+                        0f to MaterialTheme.colorScheme.background,
+                        0.78f to MaterialTheme.colorScheme.background,
+                        0.9f to MaterialTheme.colorScheme.background.copy(alpha = 0.92f),
+                        1f to MaterialTheme.colorScheme.background.copy(alpha = 0f),
                     ),
                 )
                 .windowInsetsPadding(WindowInsets.statusBars)
-                .padding(start = 20.dp, end = 8.dp, top = 8.dp, bottom = 22.dp),
+                .padding(start = BarStart, end = BarEnd, top = 8.dp, bottom = 22.dp),
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                // The title keeps clear of the switch in the middle, so a
-                // long surah name is cut by its own edge and never runs
-                // under the control.
-                ReadingTitle(
-                    surah = title,
-                    detail = detail,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = ModeSwitchReserve),
-                )
-                Row(horizontalArrangement = Arrangement.End) {
+            // The first row is every control: the index leads, the two tools
+            // trail, and the reading modes stay at the center of the screen
+            // between them.
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     IconButton(Icon.Browse, stringResource(R.string.action_browse), onBrowse)
-                    IconButton(Icon.Search, stringResource(R.string.action_search), onSearch)
-                    IconButton(Icon.Settings, stringResource(R.string.action_settings), onSettings)
+                    Spacer(Modifier.weight(1f))
+                    Row(horizontalArrangement = Arrangement.End) {
+                        IconButton(Icon.Search, stringResource(R.string.action_search), onSearch)
+                        IconButton(Icon.Settings, stringResource(R.string.action_settings), onSettings)
+                    }
                 }
+                // The switch is centered on the screen itself, not on the
+                // content: the bar's margins differ by the room a 48 dp
+                // touch target keeps at its edge, and that difference is
+                // taken out here. It is clamped so it never touches either
+                // group, even on the narrowest phone.
+                val centeredLeft = (maxWidth - ModeSwitchWidth) / 2 - (BarStart - BarEnd) / 2
+                val minLeft = LeadingDoorWidth + TopBarGap
+                val maxLeft = (maxWidth - TrailingDoorsWidth - TopBarGap - ModeSwitchWidth)
+                    .coerceAtLeast(minLeft)
+                ModeSwitch(
+                    mode = mode,
+                    onMode = onMode,
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .offset(x = centeredLeft.coerceIn(minLeft, maxLeft)),
+                )
             }
-            // The two reading modes sit together as one switch at the center
-            // of the bar, instead of lending the mode icon to the row of
-            // doors, so the reader sees a choice rather than a door that
-            // happens to go sideways.
-            ModeSwitch(
-                mode = mode,
-                onMode = onMode,
-                modifier = Modifier.align(Alignment.Center),
+            // The surah and its part have the whole width under the
+            // controls, so no name is ever shortened on any phone.
+            ReadingTitle(
+                surah = title,
+                detail = detail,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = TitleTopGap),
             )
         }
     }

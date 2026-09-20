@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
@@ -24,11 +23,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.ReadingMode
@@ -324,25 +326,54 @@ fun TextAction(label: String, icon: Icon, onClick: () -> Unit, active: Boolean =
     }
 }
 
-/** The surah and its part, as a quiet line of type. */
+/**
+ * The surah and its part, as one quiet line of type, centered under the
+ * controls. The juz label is drawn only when it truly fits beside the whole
+ * name: the name of the surah is what the reader looks for, and a tight bar
+ * must shorten the label, never the name.
+ */
 @Composable
 fun ReadingTitle(surah: String, detail: String?, modifier: Modifier = Modifier) {
-    Row(modifier = modifier, verticalAlignment = Alignment.Bottom) {
-        Text(
-            text = surah,
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onBackground,
-            maxLines = 1,
-            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, fill = false),
-        )
-        if (!detail.isNullOrBlank()) {
+    Layout(
+        content = {
             Text(
-                text = detail,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 8.dp, bottom = 1.dp),
+                text = surah,
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis,
             )
+            if (!detail.isNullOrBlank()) {
+                Text(
+                    text = detail,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        },
+        modifier = modifier,
+    ) { measurables, constraints ->
+        val gap = 8.dp.roundToPx()
+        val name = measurables[0].measure(constraints.copy(minWidth = 0, minHeight = 0))
+        // The label is measured at its own size and placed only if the
+        // whole name plus the label fits; the name is never cut to make
+        // room for the label beside it.
+        val label = measurables.getOrNull(1)
+            ?.measure(Constraints())
+            ?.takeIf { name.width + gap + it.width <= constraints.maxWidth }
+        // The name and its part are one unit, so they are centered as one;
+        // when the label cannot fit beside the whole name, the name alone
+        // takes the center.
+        val contentWidth = name.width + (label?.let { gap + it.width } ?: 0)
+        val start = ((constraints.maxWidth - contentWidth) / 2).coerceAtLeast(0)
+        val height = maxOf(name.height, label?.height ?: 0)
+        layout(constraints.maxWidth, height) {
+            name.place(start, height - name.height)
+            label?.place(start + name.width + gap, height - label.height)
         }
     }
 }

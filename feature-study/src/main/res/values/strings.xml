@@ -9,7 +9,7 @@
     <string name="study_about_surah">About this surah</string>
     <string name="study_hide">Hide</string>
     <string name="study_surah_complete">%1$s complete</string>
-    <string name="study_continue_to">Continue to %1$s</string>
+    <string name="study_next_surah">Next surah</string>
     <string name="study_end_of_quran">This is the end of the Quran</string>
 
     <string name="card_no_translation">This ayah has no text in the chosen translation.</string>

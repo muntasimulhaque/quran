@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 0.9 (versionCode 9)
+Version: 0.10 (versionCode 10)
 
 ## Listing
 
@@ -111,6 +111,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its word by word and tafsir doors
+
+## Release notes (0.10, 365 characters)
+
+The top bar is two rows now: the reading modes stay at the center of the screen, and the surah and Juz sit centered beneath them, whole on every phone. The word being recited in the study view is marked with the Mushaf's rounded wash, About this surah answers in the same shape, and the end of a surah offers the next one as a card. No ads, no trackers, no account.
 
 ## Release notes (0.9, submitted, 496 characters)
 
