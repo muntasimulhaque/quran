@@ -18,14 +18,29 @@ import io.github.muntasimulhaque.quran.data.Footnote
 import io.github.muntasimulhaque.quran.feature.study.R
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
-/** A footnote the reader opened, with the ayah it belongs to. */
-internal data class OpenFootnote(val note: Footnote, val reference: String)
+/**
+ * A footnote the reader opened, with the ayah it belongs to and the size of
+ * the text it annotates. The size travels with the note because a footnote is
+ * part of the sentence it explains: a translator's note is read at the
+ * translation's size, and a tafsir's note at the tafsir's size, whatever the
+ * reader chose for that kind of text.
+ */
+internal data class OpenFootnote(
+    val note: Footnote,
+    val reference: String,
+    val sizeSp: Float,
+    val lineSp: Float,
+)
 
 /**
  * The footnote of one ayah, opened from the marker the reader tapped. The
  * study reading and the ayah card both open this same sheet, so a translator's
  * note reads the same wherever it was reached from, and no surface prints its
  * footnotes at the foot of the page as a block nobody asked for.
+ *
+ * The note is set at the size of the text it belongs to, passed in by the
+ * caller, so the translation's notes follow the translation size setting and
+ * a tafsir's notes will follow the tafsir size the day a tafsir carries one.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,6 +48,8 @@ internal fun FootnoteSheet(
     footnote: Footnote,
     surahName: String,
     reference: String,
+    sizeSp: Float,
+    lineSp: Float,
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -54,7 +71,10 @@ internal fun FootnoteSheet(
             )
             Text(
                 text = footnote.text,
-                style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontSize = sizeSp.sp,
+                    lineHeight = lineSp.sp,
+                ),
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(top = Space.Block),
             )

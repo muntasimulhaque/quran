@@ -205,6 +205,8 @@ fun ReaderScreen(
                         onNextSurah = { number -> viewModel.jumpToSurah(number) },
                         onAddContent = { sheet = ReaderSheet.Settings },
                         onPlaceChanged = { ayah -> viewModel.onStudySettled(ayah) },
+                        startAtOpening = viewModel.startAtSurahOpening == surah.number,
+                        onOpeningReached = { viewModel.consumeSurahOpening(surah.number) },
                         contentPaddingTop = 64.dp,
                         contentPaddingBottom = 120.dp,
                     )
@@ -320,7 +322,9 @@ fun ReaderScreen(
             },
             onSurah = { number ->
                 sheet = ReaderSheet.None
-                viewModel.jumpToSurah(number)
+                // From Browse, a surah opens where the reader left it, or at
+                // its top when they have never been there.
+                viewModel.openSurah(number)
             },
             onRemove = { viewModel.removeSaved(it) },
             onForget = { viewModel.forgetPlace(it) },

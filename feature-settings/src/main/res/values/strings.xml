@@ -117,7 +117,7 @@
     <string name="settings_group_reciters">Reciters</string>
     <string name="settings_reciter_installed">Word timings installed · %1$s</string>
     <string name="settings_reciter_size">%1$s of word timings</string>
-    <string name="settings_reciters_note">Word timings are what let the app mark the word being recited. The recitations themselves are added one surah at a time, when you tap Play while reading.</string>
+    <string name="settings_reciters_note">This small download is not the recitation. It is the timing data that lets the app mark the word being recited. The audio itself is added one surah at a time, when you tap Play while reading.</string>
     <string name="settings_group_translations">Translations</string>
     <string name="settings_translations_note">More than one may be on. Each one you turn on reads in its own place under the ayah, and the first is the one search reads.</string>
     <string name="settings_group_tafsirs">Tafsirs</string>

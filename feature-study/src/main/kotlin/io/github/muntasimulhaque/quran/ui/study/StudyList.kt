@@ -95,6 +95,9 @@ fun StudyList(
     onNextSurah: (Int) -> Unit,
     onAddContent: () -> Unit,
     onPlaceChanged: (Int) -> Unit,
+    /** True when the reader opened this surah at its top; answered once. */
+    startAtOpening: Boolean,
+    onOpeningReached: () -> Unit,
     contentPaddingTop: Dp,
     contentPaddingBottom: Dp,
     modifier: Modifier = Modifier,
@@ -143,6 +146,8 @@ fun StudyList(
         onNextSurah = onNextSurah,
         onAddContent = onAddContent,
         onPlaceChanged = onPlaceChanged,
+        startAtOpening = startAtOpening,
+        onOpeningReached = onOpeningReached,
         contentPaddingTop = contentPaddingTop,
         contentPaddingBottom = contentPaddingBottom,
         footnote = footnote,
@@ -172,6 +177,8 @@ private fun StudyRows(
     onNextSurah: (Int) -> Unit,
     onAddContent: () -> Unit,
     onPlaceChanged: (Int) -> Unit,
+    startAtOpening: Boolean,
+    onOpeningReached: () -> Unit,
     contentPaddingTop: Dp,
     contentPaddingBottom: Dp,
     footnote: OpenFootnote?,
@@ -181,6 +188,16 @@ private fun StudyRows(
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = AyahList.indexOf(ayahs, settings.ayah),
     )
+
+    // The surah's introduction opens from its quiet door; once it is open, a
+    // tap anywhere on the paper, the ayahs, or the closing line puts it away
+    // again, exactly as the Hide action does, so the reader is never left
+    // looking for the way out. The state lives here rather than inside the
+    // opening item because the taps that dismiss it land outside that item.
+    var aboutOpen by rememberSaveable(surah.number) { mutableStateOf(false) }
+    val dismissAbout: () -> Unit = {
+        if (aboutOpen) aboutOpen = false else onBackgroundTap()
+    }
 
     // Moving the page means reading, and reading wants the page: the chrome
     // is told to step aside as soon as the list is moving under a finger.
@@ -216,6 +233,17 @@ private fun StudyRows(
         if (target != listState.firstVisibleItemIndex) listState.scrollToItem(target)
     }
 
+    // Opening a surah from Browse lands on its top: the opening item, which
+    // is not an ayah and so has no place of its own. The request is its own
+    // effect rather than a branch of the place above, because the place must
+    // not re-run when the request is cleared: that is what would pull the
+    // reader back down to the first ayah the moment the opening appeared.
+    LaunchedEffect(listState, ayahs, startAtOpening) {
+        if (!startAtOpening || ayahs.isEmpty()) return@LaunchedEffect
+        listState.scrollToItem(0)
+        onOpeningReached()
+    }
+
     // The playing ayah comes back into view when the reciter moves on.
     LaunchedEffect(playingAyah, ayahs) {
         val ayahNumber = playingAyah ?: return@LaunchedEffect
@@ -233,7 +261,7 @@ private fun StudyRows(
             .pointerInput(Unit) {
                 // The paper around the text brings the chrome; the text itself
                 // belongs to its ayah, and every ayah consumes its own taps.
-                detectTapGestures(onTap = { onBackgroundTap() })
+                detectTapGestures(onTap = { dismissAbout() })
             },
         contentPadding = PaddingValues(
             start = 20.dp,
@@ -246,7 +274,9 @@ private fun StudyRows(
             SurahOpening(
                 surah = surah,
                 content = content,
-                onBackgroundTap = onBackgroundTap,
+                expanded = aboutOpen,
+                onExpandedChange = { aboutOpen = it },
+                onPaperTap = { if (!aboutOpen) onBackgroundTap() },
             )
             if (!hasTranslation) {
                 AddContent(
@@ -266,14 +296,19 @@ private fun StudyRows(
                 playingAyah = playingAyah,
                 playingWord = playingWord,
                 onAyah = onAyah,
-                onBackgroundTap = onBackgroundTap,
+                onBackgroundTap = dismissAbout,
                 onFootnote = { number ->
                     val note = row.translations.asSequence()
                         .flatMap { it.text.footnotes.asSequence() }
                         .firstOrNull { it.number == number }
                     if (note != null) {
                         onFootnote(
-                            OpenFootnote(note, "${row.ayah.surah}:${row.ayah.ayah}"),
+                            OpenFootnote(
+                                note = note,
+                                reference = "${row.ayah.surah}:${row.ayah.ayah}",
+                                sizeSp = settings.translationSp,
+                                lineSp = settings.translationLineSp,
+                            ),
                         )
                     }
                 },
@@ -284,7 +319,7 @@ private fun StudyRows(
                 surah = surah,
                 nextSurahName = nextSurahName,
                 onNextSurah = onNextSurah,
-                onBackgroundTap = onBackgroundTap,
+                onBackgroundTap = dismissAbout,
             )
         }
     }
@@ -294,6 +329,8 @@ private fun StudyRows(
             footnote = open.note,
             surahName = surah.nameSimple,
             reference = open.reference,
+            sizeSp = open.sizeSp,
+            lineSp = open.lineSp,
             onDismiss = { onFootnote(null) },
         )
     }
@@ -330,9 +367,10 @@ private fun AddContent(text: String, onClick: () -> Unit) {
 private fun SurahOpening(
     surah: Surah,
     content: ContentDatabase?,
-    onBackgroundTap: () -> Unit,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    onPaperTap: () -> Unit,
 ) {
-    var expanded by rememberSaveable(surah.number) { mutableStateOf(false) }
     val info by produceState<String?>(initialValue = null, surah.number, expanded) {
         value = if (expanded) {
             withContext(Dispatchers.IO) { content?.surahInfo(surah.number) }
@@ -344,7 +382,7 @@ private fun SurahOpening(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 34.dp, bottom = 14.dp)
-            .clickable(onClick = onBackgroundTap),
+            .clickable(onClick = onPaperTap),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
@@ -410,9 +448,7 @@ private fun SurahOpening(
             modifier = Modifier
                 .padding(top = 10.dp)
                 .clip(RoundedCornerShape(50))
-                .clickable {
-                    if (info == null) expanded = true else expanded = !expanded
-                }
+                .clickable { onExpandedChange(!expanded) }
                 .padding(horizontal = 10.dp, vertical = 6.dp),
         )
     }

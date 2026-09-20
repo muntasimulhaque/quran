@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 0.6 (versionCode 6)
+Version: 0.7 (versionCode 7)
 
 ## Listing
 
@@ -109,7 +109,11 @@ What each set shows, in order:
 7. Browse, Surahs
 8. The ayah card, with its word by word and tafsir doors
 
-## Release notes (0.6, for this hand-off, 377 characters)
+## Release notes (0.7, for this hand-off, 487 characters)
+
+Every Mushaf page now reads right to left, as the printed page does. The Mushaf and study icons were redrawn, Browse lost its title, and a surah opened from Browse lands on your last place in it or at its top. Footnotes follow the size of the translation, About this surah closes with a tap anywhere, Last Read rows lost their Open button, reciters gained a clearer downloaded-surahs list, and a scroll back up in Browse no longer pulls the sheet closed. No ads, no trackers, no account.
+
+## Release notes (0.6, submitted, 377 characters)
 
 Footnotes in the ayah card open from their marker now, like the study reading. The word by word aid is larger, its Arabic centered over each meaning. Search filters wrap so none are hidden, settings have more room, and reciter rows say what the download is. A download request leaves with its surah, and a finished surah no longer stays marked. No ads, no trackers, no account.
 

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -42,6 +44,7 @@ import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
+import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -81,6 +84,17 @@ fun BrowseSheet(
     var tab by remember {
         mutableStateOf(if (startOnLastRead) BrowseTab.LastRead else BrowseTab.Surahs)
     }
+    // Each tab keeps its own list state so its place is remembered while the
+    // reader moves between tabs, and each list carries a gate so a scroll
+    // back to the top never turns into a pull that closes the sheet.
+    val surahsList = rememberLazyListState()
+    val juzList = rememberLazyListState()
+    val lastReadList = rememberLazyListState()
+    val savedList = rememberLazyListState()
+    val surahsGate = remember(surahsList) { SheetDragGate(surahsList) }
+    val juzGate = remember(juzList) { SheetDragGate(juzList) }
+    val lastReadGate = remember(lastReadList) { SheetDragGate(lastReadList) }
+    val savedGate = remember(savedList) { SheetDragGate(savedList) }
     val juzStarts by produceState(initialValue = emptyList<JuzStart>(), content) {
         value = withContext(Dispatchers.IO) { content.juzStarts() }
     }
@@ -123,19 +137,13 @@ fun BrowseSheet(
                 .fillMaxSize()
                 .imePadding(),
         ) {
-            Text(
-                text = stringResource(R.string.browse_title),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = 8.dp),
-            )
-            // The tabs are centered on the sheet: a bar of four choices
-            // reads as one control, and a control that hugs the left edge
-            // reads as the start of a list.
+            // The sheet needs no title: the four tabs name everything it
+            // holds, and a heading over a control that already says where the
+            // reader is spends the first line of the sheet on nothing.
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 22.dp),
+                    .padding(start = 22.dp, end = 22.dp, top = Space.Block),
                 horizontalArrangement = Arrangement.Center,
             ) {
                 Row(
@@ -175,31 +183,45 @@ fun BrowseSheet(
             }
             Spacer(Modifier.height(8.dp))
             when (tab) {
-                BrowseTab.Surahs -> LazyColumn(contentPadding = PaddingValues(bottom = 28.dp)) {
+                BrowseTab.Surahs -> LazyColumn(
+                    state = surahsList,
+                    modifier = Modifier.nestedScroll(surahsGate),
+                    contentPadding = PaddingValues(bottom = 28.dp),
+                ) {
                     items(surahs, key = { it.number }) { surah ->
                         SurahRow(surah) { onSurah(surah.number) }
                     }
                 }
-                BrowseTab.Juz -> LazyColumn(contentPadding = PaddingValues(bottom = 28.dp)) {
+                BrowseTab.Juz -> LazyColumn(
+                    state = juzList,
+                    modifier = Modifier.nestedScroll(juzGate),
+                    contentPadding = PaddingValues(bottom = 28.dp),
+                ) {
                     itemsIndexedCompat(juzStarts) { index, start ->
                         val surah = surahs.firstOrNull { it.number == start.surah }
                         JuzRow(
                             juz = start.juz,
                             reference = start.verseKey,
                             surahName = surah?.nameSimple ?: "",
-                            onJuz = { onSurah(start.surah) },
+                            // A juz begins at one ayah; a tap opens exactly
+                            // that ayah, which is what the row's own line says.
+                            onJuz = { onAyah(start.ayah) },
                         )
                     }
                 }
                 BrowseTab.LastRead -> LastReadList(
                     places = lastRead,
                     texts = texts,
+                    listState = lastReadList,
+                    listModifier = Modifier.nestedScroll(lastReadGate),
                     onAyah = onAyah,
                     onForget = onForget,
                 )
                 BrowseTab.Saved -> SavedList(
                     saved = saved,
                     texts = texts,
+                    listState = savedList,
+                    listModifier = Modifier.nestedScroll(savedGate),
                     onAyah = onAyah,
                     onRemove = onRemove,
                 )

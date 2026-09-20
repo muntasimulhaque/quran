@@ -279,12 +279,17 @@ class PageRenderer(private val context: Context) {
                         val word = wordsById[id] ?: continue
                         total += glyphPaint.measureText(word.glyph)
                     }
-                    var x = if (line.centered) (widthPx - total) / 2f else widthPx - (widthPx - textWidth) / 2f - total
+                    // The Quran is read right to left: the line's first word
+                    // sits at its right edge and every word after it lays out
+                    // to the left. Drawing them left to right is what showed
+                    // the reader each line in reverse.
+                    var x = if (line.centered) (widthPx + total) / 2f else (widthPx + textWidth) / 2f
                     val metrics = glyphPaint.fontMetrics
                     val baseline = slotTop + (lineHeight - (metrics.descent - metrics.ascent)) / 2f - metrics.ascent
                     for (id in line.firstWordId..line.lastWordId) {
                         val word = wordsById[id] ?: continue
                         val advance = glyphPaint.measureText(word.glyph)
+                        x -= advance
                         canvas.drawText(word.glyph, x, baseline, glyphPaint)
                         val box = RectF(
                             x,
@@ -305,7 +310,6 @@ class PageRenderer(private val context: Context) {
                         if (!word.marker) {
                             ayahBoxes.getOrPut(word.ayah) { mutableListOf() }.add(box)
                         }
-                        x += advance
                     }
                 }
             }

@@ -129,45 +129,52 @@ fun IconGlyph(
                 drawLine(tint, Offset(w * 0.74f, h * 0.26f), Offset(w * 0.26f, h * 0.74f), w * 0.09f)
             }
             // The two reading modes are one pair, so they are drawn as one
-            // pair and never as two lookalikes: the Mushaf is the printed
-            // Book itself, open at the spine with a leaf to each side, and
-            // the study page is a single page with an ayah and its reading
-            // set in under it, so every second rule is short. Both use the
+            // pair and never as two lookalikes. The Mushaf is the Book
+            // itself, open: the two pages rise from the fold and the spine
+            // dips below them at the foot, so the shape reads as a book and
+            // not as its inverse. The study reading is a single flat page
+            // with an ayah and its reading set in under it. Both use the
             // stroke weight the other glyphs use, and neither leans on a
             // lighter tone that nothing else in the set carries.
             Icon.MushafPage -> {
-                val spine = w * 0.5f
-                val top = h * 0.24f
-                val bottom = h * 0.78f
-                val shoulder = h * 0.32f
-                val outer = w * 0.17f
                 val stroke = w * 0.075f
-                // The two leaves: each runs from the spine's top corner out
-                // to the cover edge and back to the spine's foot.
+                val spine = w * 0.5f
+                val outer = w * 0.14f
+                val inner = w * 0.354f
+                val curveOuter = w * 0.457f
+                val top = h * 0.24f
+                val foldTop = h * 0.377f
+                val bottom = h * 0.713f
+                val foldBottom = h * 0.82f
+                // The left page: a flat head and foot, with the paper
+                // curving down into the fold on the spine side.
                 drawPath(
                     Path().apply {
-                        moveTo(spine, top)
-                        lineTo(outer, shoulder)
-                        lineTo(outer, bottom - h * 0.06f)
-                        lineTo(spine, bottom)
+                        moveTo(outer, top)
+                        lineTo(inner, top)
+                        cubicTo(curveOuter, top, spine, h * 0.316f, spine, foldTop)
+                        lineTo(spine, foldBottom)
+                        cubicTo(spine, h * 0.751f, curveOuter, bottom, inner, bottom)
+                        lineTo(outer, bottom)
+                        close()
                     },
                     tint,
                     style = Stroke(width = stroke),
                 )
+                // The right page, the left one's mirror.
                 drawPath(
                     Path().apply {
-                        moveTo(spine, top)
-                        lineTo(w - outer, shoulder)
-                        lineTo(w - outer, bottom - h * 0.06f)
-                        lineTo(spine, bottom)
+                        moveTo(w - outer, top)
+                        lineTo(w - inner, top)
+                        cubicTo(w - curveOuter, top, spine, h * 0.316f, spine, foldTop)
+                        lineTo(spine, foldBottom)
+                        cubicTo(spine, h * 0.751f, w - curveOuter, bottom, w - inner, bottom)
+                        lineTo(w - outer, bottom)
+                        close()
                     },
                     tint,
                     style = Stroke(width = stroke),
                 )
-                // The spine, and one line of reading on each leaf.
-                drawLine(tint, Offset(spine, top), Offset(spine, bottom), stroke)
-                drawLine(tint, Offset(w * 0.28f, h * 0.48f), Offset(w * 0.4f, h * 0.48f), stroke)
-                drawLine(tint, Offset(w * 0.6f, h * 0.48f), Offset(w * 0.72f, h * 0.48f), stroke)
             }
             Icon.StudyPage -> {
                 pageOutline(tint)
@@ -218,7 +225,7 @@ private fun DrawScope.pageOutline(tint: Color) {
         topLeft = Offset(w * 0.18f, h * 0.12f),
         size = Size(w * 0.64f, h * 0.76f),
         cornerRadius = CornerRadius(w * 0.08f),
-        style = Stroke(width = w * 0.085f),
+        style = Stroke(width = w * 0.075f),
     )
 }
 

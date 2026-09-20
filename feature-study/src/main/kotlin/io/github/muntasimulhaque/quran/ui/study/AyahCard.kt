@@ -260,7 +260,12 @@ fun AyahCard(
                         // reading, instead of the card printing every note as
                         // a block at the foot of the page.
                         line.text.footnotes.firstOrNull { it.number == number }?.let { note ->
-                            footnote = OpenFootnote(note, "${ayah.surah}:${ayah.ayah}")
+                            footnote = OpenFootnote(
+                                note = note,
+                                reference = "${ayah.surah}:${ayah.ayah}",
+                                sizeSp = settings.translationSp,
+                                lineSp = settings.translationLineSp,
+                            )
                         }
                     },
                 )
@@ -354,6 +359,8 @@ fun AyahCard(
             footnote = open.note,
             surahName = surahName,
             reference = open.reference,
+            sizeSp = open.sizeSp,
+            lineSp = open.lineSp,
             onDismiss = { footnote = null },
         )
     }

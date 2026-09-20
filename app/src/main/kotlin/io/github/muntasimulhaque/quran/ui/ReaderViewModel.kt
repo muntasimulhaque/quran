@@ -392,6 +392,38 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         jumpToAyah(contentDatabase?.firstAyahOfSurah(surah) ?: return)
     }
 
+    /**
+     * The surah whose opening item the study reading should land on, once.
+     * Browse asks for the top of a surah and the list answers by scrolling to
+     * the surah's opening; the request is then cleared, so neither a later
+     * place change nor a recomposition is pulled up with it.
+     */
+    var startAtSurahOpening by mutableStateOf<Int?>(null)
+        private set
+
+    /**
+     * Opens a surah from Browse. A reader who has a place in that surah lands
+     * on the place; a reader who does not lands on the top of the surah, its
+     * opening item in study mode and the page of its first ayah in the
+     * Mushaf. The first ayah is still the place written down, so the next
+     * launch returns there.
+     */
+    fun openSurah(surah: Int) {
+        val database = contentDatabase ?: return
+        val place = lastRead.value.firstOrNull { surahOf(it.ayahNumber)?.number == surah }
+        if (place != null) {
+            jumpToAyah(place.ayahNumber)
+            return
+        }
+        startAtSurahOpening = surah
+        jumpToAyah(database.firstAyahOfSurah(surah))
+    }
+
+    /** The study list has landed on the surah's opening; the request is done. */
+    fun consumeSurahOpening(surah: Int) {
+        if (startAtSurahOpening == surah) startAtSurahOpening = null
+    }
+
     fun switchMode(newMode: ReadingMode) {
         if (newMode == settings.mode) return
         settings = settings.copy(mode = newMode)

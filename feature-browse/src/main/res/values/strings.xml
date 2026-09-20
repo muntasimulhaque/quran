@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="browse_title">Browse</string>
     <string name="browse_tab_surahs">Surahs</string>
     <string name="browse_tab_juz">Juz</string>
     <string name="browse_tab_last_read">Last Read</string>

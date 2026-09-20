@@ -4,19 +4,19 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 0.6 (versionCode 6) is submitted to Google Play for review. This
-session answered the reader's second report: the ayah card's footnotes now
-open from their marker like the study reading, the word by word aid is larger
-with its Arabic centered over each meaning, the search filters wrap under a
-label so none are hidden, settings gained room and clearer names, reciter rows
-say that their download is the word timings while the audio comes per surah, a
-download request leaves with the surah it belongs to, and a finished surah no
-longer leaves its last ayah marked. The store screenshot set is now the eight
-frames the listing names, captured by the tour itself. The bundle carries only
-the core pack, the Quran text and its page layout, with everything else added
-from the project's own Releases when a reader asks for it. The listing, icon,
-feature graphic, and screenshots per form factor are in
-[`play-store/`](play-store/), refreshed from CI.
+**Status:** 0.7 (versionCode 7) is handed over for Google Play. This session
+answered the reader's third report: every Mushaf line now reads right to left
+as the printed page does, the two mode icons were redrawn as an open Book and
+a single page, footnotes follow the size of the text they belong to, About
+this surah closes with a tap anywhere, a surah opened from Browse lands on the
+reader's last place in it or at its top, Browse lost its title, Last Read rows
+lost the redundant Open action, the reciter list's downloaded surahs read as
+one indented block with a disclosure arrow, and a scroll back up in Browse can
+no longer pull the sheet closed. The bundle carries only the core pack, the
+Quran text and its page layout, with everything else added from the project's
+own Releases when a reader asks for it. The listing, icon, feature graphic,
+and screenshots per form factor are in [`play-store/`](play-store/), refreshed
+from CI.
 
 ## What it does
 

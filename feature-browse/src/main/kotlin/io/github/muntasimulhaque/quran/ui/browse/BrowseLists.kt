@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -47,6 +48,8 @@ import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 internal fun LastReadList(
     places: List<ReadPlace>,
     texts: Map<Int, AyahText>,
+    listState: LazyListState,
+    listModifier: Modifier = Modifier,
     onAyah: (Int) -> Unit,
     onForget: (Int) -> Unit,
 ) {
@@ -57,7 +60,11 @@ internal fun LastReadList(
         )
         return
     }
-    LazyColumn(contentPadding = PaddingValues(bottom = 28.dp)) {
+    LazyColumn(
+        state = listState,
+        modifier = listModifier,
+        contentPadding = PaddingValues(bottom = 28.dp),
+    ) {
         items(places, key = { it.ayahNumber }) { place ->
             val text = texts[place.ayahNumber]
             AyahRow(
@@ -73,6 +80,9 @@ internal fun LastReadList(
                 ),
                 onClick = { onAyah(place.ayahNumber) },
                 action = stringResource(R.string.action_forget) to { onForget(place.ayahNumber) },
+                // The row is the door: tapping the place opens it, so an
+                // Open label beside it is a second door to the same room.
+                showOpen = false,
             )
         }
     }
@@ -100,6 +110,8 @@ internal data class AyahText(
 internal fun SavedList(
     saved: List<SavedAyah>,
     texts: Map<Int, AyahText>,
+    listState: LazyListState,
+    listModifier: Modifier = Modifier,
     onAyah: (Int) -> Unit,
     onRemove: (Int) -> Unit,
 ) {
@@ -110,7 +122,11 @@ internal fun SavedList(
         )
         return
     }
-    LazyColumn(contentPadding = PaddingValues(bottom = 28.dp)) {
+    LazyColumn(
+        state = listState,
+        modifier = listModifier,
+        contentPadding = PaddingValues(bottom = 28.dp),
+    ) {
         items(saved, key = { it.ayahNumber }) { row ->
             val text = texts[row.ayahNumber]
             AyahRow(
@@ -137,6 +153,7 @@ private fun AyahRow(
     detail: String? = null,
     onClick: () -> Unit,
     action: Pair<String, () -> Unit>? = null,
+    showOpen: Boolean = true,
 ) {
     Column(
         modifier = Modifier
@@ -162,11 +179,13 @@ private fun AyahRow(
                     )
                 }
             }
-            Text(
-                text = stringResource(R.string.action_open),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            if (showOpen) {
+                Text(
+                    text = stringResource(R.string.action_open),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             action?.let { RowAction(it.first, it.second) }
         }
         if (!detail.isNullOrBlank()) {

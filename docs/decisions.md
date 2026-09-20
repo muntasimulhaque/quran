@@ -1879,3 +1879,97 @@ hand-off copy was deleted from `play-store/aab/` in the same breath, so no
 signed bundle sits in the repository or on the machine waiting to be uploaded
 twice. `play-store/aab/` keeps only its own note about where a bundle comes
 from and when it goes.
+
+## D-059: The reader's report, the fourteenth session
+
+Date: the fourteenth session. The owner read 0.6 on a phone and reported ten
+things, the first of them a defect the screenshots had carried since the first
+release.
+
+**The Mushaf's lines were reversed.** `PageRenderer` measured each line's
+words and then drew them from its left edge in word order, so every line of
+the printed page read backwards: the reader saw the line's last word first.
+Study mode was correct because Android shapes and orders a whole Arabic
+string; the Mushaf draws one word glyph at a time, and the direction was left
+to the caller. The renderer now starts each line at its right edge (a
+centered line at the right edge of its own span) and walks left as it draws,
+and the touch boxes are built from the same x, so a tap still lands on the
+word it names. A reversed line still looks like Arabic, which is why four
+sessions of screenshots had shown it; the owner's eye found it.
+
+**The two mode icons are one pair again.** The open book drawn in D-057 read
+as an inverse book: its pages met in a tall center instead of sagging into
+the fold. The Mushaf is now the Book itself, open, with flat page heads and
+feet and the spine dipping below the pages at the fold; the study reading
+stays the single flat ruled page; both use the same 0.075 stroke as the rest
+of the set (`pageOutline` had kept 0.085).
+
+**A footnote is part of the text it annotates.** The footnote sheet was fixed
+at `bodyLarge` with a 26 sp line, whatever the reader had chosen for the text
+the note belonged to. `OpenFootnote` now carries the size and line height of
+the text the marker came from, so the translation's notes follow the
+translation size setting, and a tafsir's notes will follow the tafsir size
+the day a tafsir carries any (`RichText.footnotes` only recognizes the
+translation's `[n]` markers today). The sheet takes the two values as its
+own parameters, so the caller names the text the note belongs to.
+
+**About this surah is dismissed like a transient.** The expanded state lived
+inside the opening item, so only the Hide link could put it away. It moved up
+to `StudyRows`: a tap on the paper, on any ayah, or on the closing line
+collapses the about and does nothing else that tap would have done, the
+opening item is inert while the about is open, and Hide still toggles. The
+state is saveable and keyed by surah, as it was.
+
+**Opening a surah from Browse lands at its top, or where the reader left.**
+`ReaderViewModel.openSurah` reads the newest place in that surah from Last
+Read and jumps there when one exists. Otherwise it jumps to the first ayah
+and raises a one-shot `startAtSurahOpening` request; the study list answers
+it once by scrolling to its opening item and clears it. The request is a
+separate `LaunchedEffect` and the place effect is not keyed on it, because a
+place effect that re-ran when the request cleared would pull the reader back
+down to the first ayah the moment the opening appeared. `AyahList` is
+untouched. The Juz rows were found to open the start of the surah rather than
+the ayah the row itself names; they now open `start.ayah` (2:142 for Juz 2).
+The next-surah link and search keep `jumpToSurah`, which goes to the first
+ayah.
+
+**Browse has no title.** The four tabs name everything the sheet holds, so
+"Browse" over them spent the first line of the sheet on a word the reader had
+already chosen. The tabs keep their own room under the drag handle, and the
+string is gone from the module.
+
+**A Last Read row has one action.** The row is the door: tapping a place
+opens it. The Open label beside Forget was a second door to the same room,
+so Last Read rows keep only Forget. Saved rows keep their Open and Remove,
+because the owner's report was about the last-read list and the two lists
+are not the same list.
+
+**A scroll back up in Browse cannot pull the sheet closed.** A pull down and
+a scroll back to the top are the same finger movement: the list reports only
+what it could not scroll, and by then it is already at its top, so the
+leftover delta cannot tell the two apart and the sheet's own nested scroll
+handling dragged the sheet with it. `core/SheetDragPolicy` decides by the
+gesture's beginning: a drag that starts with the list scrolled keeps its
+leftovers for the whole gesture, drag and fling alike, so the sheet never
+sees them; a drag that starts with the list at its top passes through, so
+pull to close is unchanged. The policy is pure and has unit tests;
+`feature-browse/SheetDragGate` is the Compose connection that feeds it the
+list's state and keeps its answers. One gate belongs to one tab's list.
+
+**The reciter downloads are a door, and they belong to their reciter.** The
+label gained the disclosure arrow the rest of the app uses for a door (down
+closed, up open), the whole row is tappable, the block is indented to sit
+under the reciter's name, the surah rows sit close together (each row is
+already 48 dp tall because Remove carries its own touch target), and the gap
+above the block is smaller than the gap to the next reciter. The page note
+now says plainly that the small download is the word timings and not the
+audio, which was the owner's question: the timings are one map for the whole
+Quran for that reciter, while the audio is one surah at a time and can be a
+hundred megabytes each.
+
+**Verification.** The JVM suite (core 55, data 9, app unit), lint, the data
+instrumented tests (16), and the app instrumented tests (11, the screenshot
+tour included) are green. `checkdb` and `search` are green; `verify`,
+`audit`, and `fonts` need `content/raw`, the owner's manual QUL and QuranEnc
+exports, which this session's machine did not carry, and must run on the
+machine that owns them before the hand-over.

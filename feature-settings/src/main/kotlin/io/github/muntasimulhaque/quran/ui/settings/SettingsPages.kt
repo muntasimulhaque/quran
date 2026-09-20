@@ -9,11 +9,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -23,6 +25,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -39,6 +42,8 @@ import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.languageSortKey
+import io.github.muntasimulhaque.quran.ui.reader.Icon
+import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.rich.ArabicFonts
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -344,6 +349,7 @@ fun RecitersPage(
                 if (pack.installed) {
                     ReciterDownloads(id, downloadedSurahs, actions)
                 }
+                Spacer(Modifier.height(Space.Line))
             }
         Spacer(Modifier.height(Space.Section))
     }
@@ -361,6 +367,11 @@ private fun reciterSubtitle(pack: ContentPack): String = when {
  * removed disappears from the list in the same frame, because the list the
  * reader sees is the list the removal changed: a row that stayed after its
  * Remove was tapped would read as a button that did nothing.
+ *
+ * The block is indented under the reciter's own name and its label carries a
+ * disclosure arrow, so the surahs read as belonging to the reciter above them
+ * rather than to the list at large. The label is a door: it opens and closes,
+ * and it says so with the arrow the rest of the app uses for a door.
  */
 @Composable
 private fun ReciterDownloads(
@@ -375,58 +386,88 @@ private fun ReciterDownloads(
         downloaded = downloadedSurahs(recitation).sortedBy { it.surah }
     }
     val rows = downloaded ?: return
-    Text(
-        text = if (open) {
-            stringResource(R.string.settings_downloaded_hide)
-        } else {
-            stringResource(R.string.settings_downloaded_show, rows.size)
-        },
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier
-            .padding(start = 22.dp, top = Space.Tight)
-            .clickable { open = !open }
-            .padding(vertical = Space.Line),
-    )
+    ReciterDownloadsDoor(open = open, count = rows.size) { open = !open }
     if (!open) return
     if (rows.isEmpty()) {
         Text(
             text = stringResource(R.string.settings_downloaded_empty),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Block),
+            modifier = Modifier.padding(start = 50.dp, end = 22.dp, bottom = Space.Block),
         )
         return
     }
     rows.forEach { row ->
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 22.dp, end = 12.dp, top = Space.Line, bottom = Space.Line),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = row.name,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f),
-            )
-            Text(
-                text = formatBytes(row.bytes),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            PackActionText(stringResource(R.string.pack_action_remove)) {
-                scope.launch {
-                    actions.onRemoveDownloads(recitation, row.surah)
-                    // Whatever the removal did, the list is read from the
-                    // device again: the row goes when its files are gone.
-                    downloaded = downloadedSurahs(recitation).sortedBy { it.surah }
-                }
+        DownloadedSurahRow(row) {
+            scope.launch {
+                actions.onRemoveDownloads(recitation, row.surah)
+                // Whatever the removal did, the list is read from the device
+                // again: the row goes when its files are gone.
+                downloaded = downloadedSurahs(recitation).sortedBy { it.surah }
             }
         }
     }
-    Spacer(Modifier.height(Space.Tight))
+    Spacer(Modifier.height(Space.Block))
+}
+
+/** The door to one reciter's downloaded surahs, with the arrow it opens by. */
+@Composable
+private fun ReciterDownloadsDoor(open: Boolean, count: Int, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .minimumInteractiveComponentSize()
+            .clickable(onClick = onClick)
+            .padding(start = 50.dp, end = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = if (open) {
+                stringResource(R.string.settings_downloaded_hide)
+            } else {
+                stringResource(R.string.settings_downloaded_show, count)
+            },
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.weight(1f),
+        )
+        // The arrow says the label opens something, and which way it will
+        // move: down while the list is hidden, up once it is under it.
+        IconGlyph(
+            icon = Icon.Chevron,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .size(18.dp)
+                .rotate(if (open) 180f else 0f),
+        )
+    }
+}
+
+/** One downloaded surah: its name, its size, and the one action it needs. */
+@Composable
+private fun DownloadedSurahRow(row: DownloadedSurah, onRemove: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            // The row is already as tall as a finger needs, because the
+            // Remove action brings its own touch target; the surah names sit
+            // close together so the list reads as one block.
+            .padding(start = 50.dp, end = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = row.name,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = formatBytes(row.bytes),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        PackActionText(stringResource(R.string.pack_action_remove), onRemove)
+    }
 }
 
 /**
