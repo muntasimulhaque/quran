@@ -87,13 +87,14 @@ for.
 - 7 inch tablet screenshots: `screenshots/tablet7/` (800 x 1280), eight of them
 - 10 inch tablet screenshots: `screenshots/tablet10/` (2560 x 1800), eight of them
 
-The set was refreshed in the sixteenth session from the `Capture store
+The set was refreshed in the eighteenth session from the `Capture store
 screenshots` workflow, for all three form factors, in the eight frames the
 store lists. The tour captures exactly those eight, one surface each, so no
 frame is captured that the listing does not explain and none is listed that is
-not captured. Two frames changed for the reader: the chrome carries the two
-reading modes as one centered switch, and the ayah card no longer repeats Save
-and Share. Every frame was compared with its artifact by `cmp` before it
+not captured. Six frames changed for the reader: the chrome carries the two
+reading modes as one door, so every frame with the chrome behind a sheet
+changed with it, and the settings hub gained the Language row and the word by
+word switch. Every frame was compared with its artifact by `cmp` before it
 replaced the committed set.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,

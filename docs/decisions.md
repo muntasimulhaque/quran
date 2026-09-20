@@ -2416,3 +2416,41 @@ tour included) are green on the phone profile. The welcome screen, the
 Bangla reading, the settings hub, the search sheet, Browse, the word toggle,
 and the reciter chooser were walked on the running app. All five content
 gates are green on this machine.
+
+## D-068: The release hand-off, 1.0
+
+Date: the eighteenth session, the release session. Version 1.0 (versionCode
+11) is handed over for Google Play, and the hand-off is the bundle and the
+screenshots in one message, before the submission, as D-056 settled.
+
+**The version name follows the runbook now.** 0.1 through 0.9, then 1.0; the
+0.10 of the seventeenth session was the mistake the owner named, and it is
+kept in the history rather than rewritten. The runbook carries the rule.
+
+**The bundle.** 147,705,241 bytes, SHA-256
+`2b13117d1bfe1358e8590bcecb72749ad28284bdb2d1e28cbad64f1f7bd20c3c`, signed
+with the shared upload key (D-017; the certificate's SHA-256 is
+`537d09d20300129e973b7945316bfe24cfadcfbc77eec5229cbf30170d9de521`), carrying
+only the core pack and both interface languages (language splitting is
+disabled, so a phone set to English still carries the Bangla strings the
+in-app switch needs). It was built by the `signed-bundle` job on the push of
+`8a484b6`, pulled from run 35535699655's `quran-signed-aab` artifact into
+`play-store/aab/quran-1.0-vc11.aab`, and its checksum was verified locally
+against the artifact's own file.
+
+**The set.** Eight frames per form factor, twenty-four in all, from run
+35535699669, all three legs green on the first attempt. Six frames changed
+for the reader: the chrome is one row with the mode door, so every frame
+with the chrome behind a sheet changed with it, and the settings hub gained
+the Language row and the word by word switch. Every frame was compared with
+its artifact by `cmp` before it replaced the committed set, and the frames
+were looked at before they were installed.
+
+**Verification.** The JVM suite (72), lint with no issues, and
+`assembleDebug` and `bundleRelease` are green locally; the data instrumented
+tests (16) and the app instrumented tests (12, the screenshot tour included)
+are green on the phone profile; and all five content gates (`verify`,
+`audit`, `fonts`, `checkdb`, `search`) are green on this machine. The
+welcome screen, the Bangla reading, the settings hub, the search sheet,
+Browse, the word toggle, and the reciter chooser were walked on the running
+app before the push.

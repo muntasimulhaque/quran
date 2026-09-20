@@ -637,7 +637,32 @@ fetching them again; the space is worth less than the time.
   to right on the screen; `MushafTurnTest` now pins the direction on every
   form factor.
 
-## Where the project stands (end of the seventeenth session)
+## Where the project stands (end of the eighteenth session)
+
+**1.0 (versionCode 11) is handed over for Google Play.** What 1.0 hands
+over: 147,705,241 bytes, SHA-256
+`2b13117d1bfe1358e8590bcecb72749ad28284bdb2d1e28cbad64f1f7bd20c3c`, signed
+with the owner's upload key, carrying only the core pack. The screenshots
+came from the same pipeline that built the bundle, all three form factors,
+every frame compared with its artifact by `cmp`, and both were handed over
+together, before the submission (D-067 answers the report, D-068 is the
+hand-off).
+
+**The reader's seventh report (D-067).** The owner read 0.10 on a phone and
+asked for five things. The top bar is one row again, with a single door that
+shows the reading the reader is not in and takes them there, replacing the
+two-choice switch that made the bar two rows. The reciter chooser in the play
+offer wears the pill's own surface and a rounded shape, with the chosen
+reciter checked. Word by word is one switch in the settings hub, and turning
+it on fetches the word list that speaks the translation's language, with the
+size on the row before the tap. A first-launch screen offers English or
+Bangla, each named in its own script, and the choice sets the interface, the
+translation, the tafsir, and the word meanings together; a Language row at
+the top of Settings changes it later. The locale is applied in
+`MainActivity.attachBaseContext` from a synchronous mirror, so every sheet,
+dialog, and popup speaks the chosen language, and the release bundle
+disables language splitting. The version convention is now written in the
+runbook: 0.1 through 0.9, then 1.0, never 0.10.
 
 **0.10 (versionCode 10) is submitted to Google Play for review.** What 0.10
 handed over: 147,691,199 bytes, SHA-256
