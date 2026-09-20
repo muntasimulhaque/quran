@@ -2,9 +2,12 @@ package io.github.muntasimulhaque.quran
 
 import android.graphics.Bitmap
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
@@ -13,6 +16,7 @@ import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
@@ -53,40 +57,46 @@ class ScreenshotTest {
     val rule = createEmptyComposeRule()
 
     /**
-     * Waits until the screen has stopped changing, then keeps the frame. The
-     * emulator draws in software, so a frame that includes a newly summoned
-     * control can take seconds to appear; a fixed sleep would photograph the
-     * frame before it.
-     *
-     * A system dialog over the app is not a frame: a loaded emulator can raise
-     * "Pixel Launcher isn't responding", and keeping that would put an Android
-     * dialog in the store listing and, worse, quietly steal the taps the tour
-     * makes next, so the frames after it were of the wrong screens. The dialog
-     * is dismissed and the frame retaken.
+     * Keeps the settled frame of the app's own surface. The capture is the
+     * Compose root, not the whole screen, so a system dialog can never enter
+     * a frame and a loaded emulator cannot steal the tour's next tap through
+     * a screenshot. The slow software emulator can still stall the PixelCopy
+     * behind the first try; the frame is static, so a fresh idle wait and a
+     * retry is always safe.
      */
     private fun capture(name: String) {
-        repeat(3) {
-            val bitmap = steadyFrame()
-            if (bitmap != null && !hasSystemDialog()) {
+        repeat(3) { attempt ->
+            rule.waitForIdle()
+            try {
+                val root = rule.onAllNodes(isRoot(), useUnmergedTree = true).onLast()
+                write(name, root.captureToImage().asAndroidBitmap())
+                return
+            } catch (error: AssertionError) {
+                if (attempt == 2) throw error
+                Thread.sleep(2_000)
+            }
+        }
+    }
+
+    /**
+     * Keeps the whole display for the frames a sheet owns. A modal sheet
+     * lives in its own window, and the compose root cannot PixelCopy that
+     * window's surface, so the search, the settings, the Browse list, and the
+     * ayah card each need one screen capture. It is one capture per frame,
+     * never a settle loop, and the window list is checked
+     * first: a frame of Android is worse than no frame at all.
+     */
+    private fun captureScreen(name: String) {
+        repeat(3) { attempt ->
+            rule.waitForIdle()
+            val bitmap = androidx.test.runner.screenshot.Screenshot.capture().bitmap
+            if (!hasSystemDialog()) {
                 write(name, bitmap)
                 return
             }
             dismissDialog()
+            if (attempt == 2) throw AssertionError("a system dialog stayed over $name")
         }
-        throw AssertionError("a system dialog stayed over the screen at $name")
-    }
-
-    /** The first frame that matches the one after it, or null if none settled. */
-    private fun steadyFrame(): Bitmap? {
-        rule.waitForIdle()
-        var previous: Bitmap? = null
-        repeat(20) {
-            Thread.sleep(400)
-            val bitmap = androidx.test.runner.screenshot.Screenshot.capture().bitmap
-            if (previous != null && previous.sameAs(bitmap)) return bitmap
-            previous = bitmap
-        }
-        return previous
     }
 
     /**
@@ -276,21 +286,21 @@ class ScreenshotTest {
                 rule.onAllNodesWithText("match", substring = true).fetchSemanticsNodes().isNotEmpty()
         }
         Thread.sleep(600)
-        capture("05-search")
+        captureScreen("05-search")
         back()
 
         // 6. The settings hub.
         revealChrome()
         rule.onNodeWithContentDescription("Settings").performClick()
         waitFor("Appearance")
-        capture("06-settings")
+        captureScreen("06-settings")
         back()
 
         // 7. Browse, the surah list.
         revealChrome()
         rule.onNodeWithContentDescription("Browse the Quran").performClick()
         waitFor("Al-Fatihah")
-        capture("07-browse")
+        captureScreen("07-browse")
         back()
 
         // 8. An ayah's actions, and the card they open. The Arabic line sits
@@ -305,7 +315,7 @@ class ScreenshotTest {
         Thread.sleep(1_500)
         rule.onNodeWithContentDescription("More").performClick()
         Thread.sleep(1_200)
-        capture("08-ayah-card")
+        captureScreen("08-ayah-card")
         back()
 
         // Leave the app on the Mushaf page for the next run.
