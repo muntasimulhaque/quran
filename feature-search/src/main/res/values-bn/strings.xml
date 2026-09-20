@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_hint">কুরআনে অনুসন্ধান করুন</string>
+    <string name="search_close">বন্ধ</string>
+    <string name="search_status_prompt">আরবি লেখা, অনুবাদ, তাফসীর, শব্দের অর্থ, সূরার নাম এবং 2:255-এর মতো রেফারেন্স।</string>
+    <string name="search_status_searching">খোঁজা হচ্ছে…</string>
+    <string name="search_status_no_matches">কিছু পাওয়া যায়নি।</string>
+    <string name="search_status_no_sources">অনুসন্ধান করতে অন্তত একটি ফিল্টার চালু করুন।</string>
+    <string name="search_status_capped">প্রথম %1$dটি দেখানো হচ্ছে</string>
+    <string name="search_label_go_to">যান</string>
+    <string name="search_label_surah">সূরা</string>
+    <string name="search_action_open">খুলুন</string>
+    <string name="search_surah_meta">%1$d আয়াত  ·  %2$s</string>
+    <string name="search_word_meaning">শব্দের অর্থ: %1$s</string>
+    <string name="search_tafsir_range">%1$s  ·  %2$s %3$s</string>
+    <string name="search_place_makkah">মক্কা</string>
+    <string name="search_place_madinah">মদিনা</string>
+
+    <string name="search_filter">যেখানে খুঁজবেন</string>
+    <string name="search_filter_text">কুরআনের লেখা</string>
+    <string name="search_filter_surahs">সূরার নাম</string>
+    <string name="search_filter_references">রেফারেন্স</string>
+    <string name="search_filter_translations">অনুবাদ</string>
+    <string name="search_filter_words">শব্দের অর্থ</string>
+    <string name="search_filter_tafsirs">তাফসীর</string>
+
+    <plurals name="search_matches">
+        <item quantity="other">%1$dটি মিল</item>
+    </plurals>
+    <plurals name="search_part_surah_names">
+        <item quantity="other">%1$dটি সূরার নাম</item>
+    </plurals>
+    <plurals name="search_part_text">
+        <item quantity="other">লেখায় %1$dটি</item>
+    </plurals>
+    <plurals name="search_part_translation">
+        <item quantity="other">অনুবাদে %1$dটি</item>
+    </plurals>
+    <plurals name="search_part_words">
+        <item quantity="other">শব্দের অর্থে %1$dটি</item>
+    </plurals>
+    <plurals name="search_part_tafsir">
+        <item quantity="other">তাফসীরে %1$dটি</item>
+    </plurals>
+</resources>

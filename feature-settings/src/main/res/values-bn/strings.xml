@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">সেটিংস</string>
+
+    <string name="settings_title_language">ভাষা</string>
+    <string name="settings_group_language">অ্যাপের ভাষা</string>
+    <string name="settings_language_note">অ্যাপ, অনুবাদ, তাফসীর ও শব্দের অর্থ সবকিছু এই ভাষায় পড়া যাবে।</string>
+    <string name="settings_language_subtitle">ইন্টারফেস, অনুবাদ, তাফসীর ও শব্দের অর্থ</string>
+
+    <string name="settings_theme_paper">কাগজ</string>
+    <string name="settings_theme_sepia">সিপিয়া</string>
+    <string name="settings_theme_night">রাত</string>
+    <string name="settings_theme_black">কালো</string>
+    <string name="settings_auto_night_title">সিস্টেমের ডার্ক মোড অনুসরণ করুন</string>
+    <string name="settings_auto_night_subtitle">ফোন ডার্ক মোডে থাকলে রাতের থিম, নাহলে আপনার পাতা</string>
+    <string name="settings_summary_theme_auto">%1$s · স্বয়ংক্রিয়</string>
+
+    <string name="settings_keep_awake_title">স্ক্রিন জাগিয়ে রাখুন</string>
+    <string name="settings_keep_awake_subtitle">পড়ার সময় পাতা জ্বলজ্বল করে থাকবে</string>
+    <string name="settings_follow_title">তিলাওয়াতের সাথে চলুন</string>
+    <string name="settings_follow_subtitle">তিলাওয়াতের সাথে পাতা এগিয়ে যাবে</string>
+    <string name="settings_words_title">শব্দের অর্থ দেখান</string>
+    <string name="settings_words_subtitle">আয়াতের নিচে প্রতিটি শব্দ ও তার অর্থ</string>
+    <string name="settings_words_add">%1$s শব্দতালিকা যোগ করে · %2$s</string>
+    <string name="settings_words_failed">ডাউনলোড করা যায়নি। আবার চেষ্টা করতে ট্যাপ করুন।</string>
+
+    <string name="settings_text_size_option">%3$s · আকার %1$d/%2$d</string>
+
+    <string name="settings_downloaded_label">ডাউনলোড করা সূরা (%1$d)</string>
+    <string name="settings_downloaded_empty">এই তিলাওয়াতকারীর জন্য এখনও কোনো সূরা ডাউনলোড হয়নি। যেকোনো আয়াতে প্লে ট্যাপ করে একটি যোগ করুন।</string>
+
+    <string name="pack_type_translation">অনুবাদ</string>
+    <string name="pack_type_tafsir">তাফসীর</string>
+    <string name="pack_type_words">শব্দে শব্দে</string>
+    <string name="pack_type_recitation">তিলাওয়াত</string>
+    <string name="pack_type_script">লিপি</string>
+    <string name="pack_included_suffix">অন্তর্ভুক্ত</string>
+    <string name="pack_action_add">যোগ করুন</string>
+    <string name="pack_action_remove">মুছুন</string>
+    <string name="pack_action_retry">আবার চেষ্টা করুন</string>
+    <string name="pack_included">অন্তর্ভুক্ত</string>
+    <string name="settings_pack_preparing">প্রস্তুত হচ্ছে…</string>
+    <string name="settings_pack_downloading">ডাউনলোড হচ্ছে %1$d%%</string>
+    <string name="pack_installed">%1$s · %2$s</string>
+
+    <string name="settings_check_content">ইনস্টল করা কনটেন্ট পরীক্ষা করুন</string>
+    <string name="settings_check_content_subtitle">প্রতিটি ইনস্টল করা প্যাক পড়ে তার রেকর্ডকৃত ফিঙ্গারপ্রিন্টের সাথে মিলিয়ে দেখে</string>
+    <string name="settings_check_running">ইনস্টল করা কনটেন্ট পরীক্ষা করা হচ্ছে…</string>
+    <string name="settings_check_ok">ইনস্টল করা সবকিছু অক্ষত আছে।</string>
+    <string name="settings_check_damaged">ক্ষতিগ্রস্ত, মুছে ফেলা ভালো: %1$s</string>
+
+    <string name="settings_version">সংস্করণ</string>
+    <string name="settings_license_label">লাইসেন্স</string>
+
+    <string name="settings_rights">সংশোধন ও অধিকার</string>
+    <string name="settings_credits">স্বীকৃতি ও লাইসেন্স</string>
+
+    <string name="about_subtitle">সংস্করণ %1$s</string>
+    <string name="about_group_content">কনটেন্ট</string>
+    <string name="about_group_fonts">ফন্ট</string>
+    <string name="about_group_recitations">তিলাওয়াত</string>
+    <string name="about_group_app">অ্যাপটি</string>
+    <string name="about_license">MIT</string>
+    <string name="about_pack_title">%1$s · %2$s</string>
+
+    <string name="credit_page_fonts">QPC V2 পেজ ফন্ট</string>
+    <string name="credit_page_fonts_by">বাদশাহ ফাহদ গ্লোরিয়াস কুরআন প্রিন্টিং কমপ্লেক্স, অপরিবর্তিত</string>
+    <string name="credit_page_fonts_use">অধ্যয়ন ও মুসহাফের লেখা</string>
+    <string name="credit_amiri">আমিরি কুরআন</string>
+    <string name="credit_amiri_by">খালেদ হোসনী, SIL ওপেন ফন্ট লাইসেন্স 1.1</string>
+    <string name="credit_amiri_use">মুসহাফের বাইরের অলংকরণ ও আরবি</string>
+    <string name="credit_literata">লিটারাটা</string>
+    <string name="credit_literata_by">টাইপটুগেদার, SIL ওপেন ফন্ট লাইসেন্স 1.1</string>
+    <string name="credit_literata_use">অনুবাদ ও তাফসীর</string>
+    <string name="credit_inter">ইন্টার</string>
+    <string name="credit_inter_by">রাসমুস অ্যান্ডারসন, SIL ওপেন ফন্ট লাইসেন্স 1.1</string>
+    <string name="credit_inter_use">ইন্টারফেস</string>
+    <string name="credit_minshawi">মিনশাবী</string>
+    <string name="credit_minshawi_by">মুহাম্মদ সিদ্দিক আল-মিনশাবী, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে</string>
+    <string name="credit_minshawi_use">মুরাত্তাল</string>
+    <string name="credit_husary">হুসারী</string>
+    <string name="credit_husary_by">মাহমুদ খলিল আল-হুসারী, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে</string>
+    <string name="credit_husary_use">মুরাত্তাল</string>
+
+    <string name="settings_title_appearance">রূপ</string>
+    <string name="settings_title_text">লেখার আকার</string>
+    <string name="settings_title_reading">পাঠ</string>
+    <string name="settings_title_reciters">তিলাওয়াতকারী</string>
+    <string name="settings_title_translations">অনুবাদ</string>
+    <string name="settings_title_tafsirs">তাফসীর</string>
+    <string name="settings_title_about">অ্যাপ সম্পর্কে</string>
+    <string name="settings_summary_text">আরবি %1$d · অনুবাদ %2$d</string>
+    <string name="settings_summary_reading">২টির মধ্যে %1$dটি চালু</string>
+    <string name="settings_version_short">সংস্করণ %1$s</string>
+    <string name="settings_none_yet">এখনও যোগ করা হয়নি</string>
+    <string name="settings_chosen_count">%1$dটি বেছে নেওয়া</string>
+    <string name="settings_group_theme">থিম</string>
+    <string name="settings_theme_note">পুরো অ্যাপ এটি অনুসরণ করে: পাতা, শিট ও বার।</string>
+    <string name="settings_theme_note_auto">পুরো অ্যাপ এখন আপনার ফোন অনুসরণ করছে: পাতা, শিট ও বার। উপরের পাতাটি দিনে আপনার পড়ার পাতা।</string>
+    <string name="settings_group_sizes">লেখার আকার</string>
+    <string name="settings_size_arabic">কুরআনের লেখা</string>
+    <string name="settings_size_translation">অনুবাদ</string>
+    <string name="settings_size_tafsir">তাফসীর</string>
+    <string name="settings_size_words">শব্দে শব্দে</string>
+    <string name="settings_group_reciters">তিলাওয়াতকারী</string>
+    <string name="settings_group_translations">অনুবাদ</string>
+    <string name="settings_translations_note">একাধিক অনুবাদ চালু রাখা যায়। প্রতিটি আয়াতের নিচে নিজের জায়গায় পড়া যায়, আর অনুসন্ধান পড়ে প্রথমটি।</string>
+    <string name="settings_group_tafsirs">তাফসীর</string>
+    <string name="settings_tafsirs_note">যে তাফসীরই চালু করবেন, তা আয়াতের নিচে নিজের দরজা থেকে খোলে।</string>
+    <string name="settings_rights_note">কোনো ভুল অক্ষরের কথা জানান, অথবা কোনো ডেটাসেট বদলানো বা সরানোর অনুরোধ করুন।</string>
+    <string name="settings_group_reading">আচরণ</string>
+    <string name="settings_group_about">অ্যাপটি</string>
+    <string name="settings_group_content">এই ডিভাইসের কনটেন্ট</string>
+    <string name="settings_back">ফিরে যান</string>
+</resources>

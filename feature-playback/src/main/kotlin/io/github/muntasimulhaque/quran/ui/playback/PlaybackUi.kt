@@ -2,6 +2,7 @@ package io.github.muntasimulhaque.quran.ui.playback
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -12,9 +13,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -37,6 +38,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.ListenOffer
+import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.reader.Icon
@@ -291,6 +293,58 @@ private fun TransportButton(kind: Transport, description: String, onClick: () ->
 
 
 /**
+ * One reciter in the offer's chooser: the name, what still needs fetching,
+ * and a check on the one already chosen. It is rounded and it is the pill's
+ * own surface, so the choice reads as part of the pill it opened from.
+ */
+@Composable
+private fun ReciterChoiceRow(
+    option: ListenOption,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 6.dp, vertical = 2.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 9.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = option.name,
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (selected) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                },
+            )
+            Text(
+                text = if (option.bytes > 0L) {
+                    formatBytes(option.bytes)
+                } else {
+                    stringResource(R.string.playback_reciter_ready)
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        if (selected) {
+            IconGlyph(
+                icon = Icon.Check,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .padding(start = 10.dp)
+                    .size(18.dp),
+            )
+        }
+    }
+}
+
+/**
  * One request, named in full: which reciter, which surah, how much, and the
  * reciter is changeable without leaving the offer. One tap downloads the word
  * timings and the audio together, under one progress bar, and then it plays.
@@ -354,27 +408,27 @@ private fun ListenOfferBar(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                DropdownMenu(expanded = chooser, onDismissRequest = { chooser = false }) {
+                // The chooser wears the pill's own cloth: the same surface
+                // color and a rounded shape of its own, so it reads as the
+                // pill opening rather than a foreign sheet laid over it. The
+                // reciter in use carries the check.
+                DropdownMenu(
+                    expanded = chooser,
+                    onDismissRequest = { chooser = false },
+                    shape = RoundedCornerShape(20.dp),
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 0.dp,
+                    shadowElevation = 10.dp,
+                    border = BorderStroke(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
+                    ),
+                    modifier = Modifier.widthIn(min = 216.dp, max = 288.dp),
+                ) {
                     offer.options.forEach { option ->
-                        DropdownMenuItem(
-                            text = {
-                                Column {
-                                    Text(
-                                        text = option.name,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                    )
-                                    Text(
-                                        text = if (option.bytes > 0L) {
-                                            formatBytes(option.bytes)
-                                        } else {
-                                            stringResource(R.string.playback_reciter_ready)
-                                        },
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                            },
+                        ReciterChoiceRow(
+                            option = option,
+                            selected = option.reciter == offer.reciter,
                             onClick = {
                                 chooser = false
                                 onReciter(option.reciter)
@@ -419,3 +473,4 @@ private fun ListenOfferBar(
         }
     }
 }
+

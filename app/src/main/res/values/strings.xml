@@ -1,12 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Quran</string>
+    <!-- The three frozen names (D-001): the app is named Quran in every
+         language, and the Arabic title and its English are the same on every
+         screen. translatable="false" is the freeze written where lint can
+         see it. -->
+    <string name="app_name" translatable="false">Quran</string>
 
-    <string name="first_paint_title">القرآن</string>
-    <string name="first_paint_subtitle">The Noble Book</string>
+    <string name="first_paint_title" translatable="false">القرآن</string>
+    <string name="first_paint_subtitle" translatable="false">The Noble Book</string>
     <string name="reader_fallback_title">Quran</string>
     <string name="surah_fallback_name">Surah %1$d</string>
     <string name="juz_label">Juz %1$d</string>
+
+    <!-- The one screen before the reading, shown once. Each language is named
+         in its own script there, so these lines only carry the question. -->
+    <string name="welcome_title">Choose your language</string>
+    <string name="welcome_body">The app, the translation, the tafsir, and the word meanings all read in the language you choose.</string>
+    <string name="welcome_later">You can change this any time in Settings.</string>
+    <string name="welcome_suggested">Suggested</string>
 
     <string name="hint_long_press_ayah">Press and hold any ayah for its actions</string>
 

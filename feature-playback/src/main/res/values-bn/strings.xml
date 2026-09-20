@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="playback_download_failed">ডাউনলোড ব্যর্থ হয়েছে</string>
+    <string name="playback_downloading">ডাউনলোড হচ্ছে %1$d%%</string>
+    <string name="playback_unavailable">এখনও পাওয়া যাচ্ছে না</string>
+    <string name="playback_retry">আবার চেষ্টা করুন</string>
+    <string name="playback_continue">চালিয়ে যান</string>
+    <string name="playback_download">ডাউনলোড</string>
+    <string name="playback_cancel_download">ডাউনলোড বাতিল</string>
+    <string name="playback_close_offer">এখন নয়</string>
+    <string name="playback_close">বন্ধ</string>
+    <string name="playback_stop">থামান</string>
+    <string name="playback_previous_ayah">আগের আয়াত</string>
+    <string name="playback_play_pause">চালান বা থামান</string>
+    <string name="playback_next_ayah">পরের আয়াত</string>
+    <string name="playback_reciter_ready">শোনার জন্য প্রস্তুত</string>
+</resources>

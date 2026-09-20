@@ -124,8 +124,8 @@ android {
         applicationId = "io.github.muntasimulhaque.quran"
         minSdk = 24
         targetSdk = 37
-        versionCode = 10
-        versionName = "0.10"
+        versionCode = 11
+        versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -154,6 +154,15 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+    // Both interface languages ship inside every install. The reader can
+    // change the app's language from Settings, and a bundle split by locale
+    // would hand a phone only the language it asked for at install time, so
+    // the Bangla strings would be missing exactly when they are chosen.
+    bundle {
+        language {
+            enableSplit = false
+        }
     }
     sourceSets.getByName("main").assets.directories.add(contentAssets.get().asFile.absolutePath)
     // The packs that exist only for development, on the debug variant alone.

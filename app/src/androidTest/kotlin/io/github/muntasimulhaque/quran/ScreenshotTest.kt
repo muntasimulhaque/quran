@@ -228,6 +228,7 @@ class ScreenshotTest {
         store.install("tafsir-ibn-kathir-en")
         val settings = SettingsStore(context)
         runBlocking {
+            settings.setUiLanguage("en")
             settings.setAyah(1)
             settings.setMode(ReadingMode.Mushaf)
             settings.setTheme(AppTheme.Paper)
@@ -245,19 +246,19 @@ class ScreenshotTest {
         // 1. The Mushaf, with nothing over it.
         if (!inMushaf()) {
             revealChrome()
-            rule.onNodeWithContentDescription("Mushaf").performClick()
+            rule.onNodeWithContentDescription("Switch to the Mushaf page").performClick()
             Thread.sleep(1_000)
         }
         hideChrome()
         capture("01-mushaf")
 
-        // 2. The chrome over the page: the mode switch, Browse, Search, and
+        // 2. The chrome over the page: the mode door, Browse, Search, and
         // Settings, which is every door the reader has.
         revealChrome()
         capture("02-chrome")
 
         // 3. The study reading of the same place, with its translation.
-        rule.onNodeWithContentDescription("Study").performClick()
+        rule.onNodeWithContentDescription("Switch to the study reading").performClick()
         rule.waitUntil(timeoutMillis = 15_000) {
             rule.onAllNodesWithContentDescription("Study page").fetchSemanticsNodes().isNotEmpty()
         }
@@ -320,7 +321,7 @@ class ScreenshotTest {
 
         // Leave the app on the Mushaf page for the next run.
         revealChrome()
-        rule.onNodeWithContentDescription("Mushaf").performClick()
+        rule.onNodeWithContentDescription("Switch to the Mushaf page").performClick()
         Thread.sleep(800)
     }
 }

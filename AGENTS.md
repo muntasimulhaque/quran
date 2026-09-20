@@ -70,8 +70,14 @@ dead letter.
 7. **Accessibility is a rule, not a feature.** TalkBack works end to end.
    Study mode honors the system font scale; Mushaf mode zooms. Contrast
    targets live in the theme and are tested.
-8. **English UI, Arabic content.** Arabic is data, not a locale; RTL
-   support stays on. No localization infrastructure until the owner asks.
+8. **Two UI languages, one content language each.** English and Bangla
+   ship together: the interface strings live in each module's
+   `values-bn`, and the reader's choice sets the translation, the tafsir,
+   and the word meanings too (D-067). Arabic is data, not a locale; RTL
+   support stays on. A new interface language needs a real translation
+   pass and a `values-xx` folder, and its packs need the same review the
+   Arabic content gets. The frozen names (`app_name`, `first_paint_title`,
+   `first_paint_subtitle`, the store title) are never translated.
 9. **Reader first.** The app opens where the reader left off. There is no
    home screen, no dashboard, and no permanent tab bar; index, search,
    library, and settings are sheets raised from a slim bar.
@@ -85,9 +91,9 @@ dead letter.
     Nothing blocks the main thread, ever.
 12. **Daily reading, not engagement.** A daily portion, a quiet reminder,
     and a widget. No streaks, no badges, no social, no guilt.
-11. **No AI attribution anywhere.** No `Co-Authored-By` trailers, no
+13. **No AI attribution anywhere.** No `Co-Authored-By` trailers, no
     "generated with" footers, no name in contributors, commits, or code.
-12. **Owner's law.** The build waits for the owner's word; one build
+14. **Owner's law.** The build waits for the owner's word; one build
     carries the whole session.
 
 ## Style
@@ -200,8 +206,11 @@ and handed over together, before the owner submits anything, because a
 screenshot refreshed after the submission has nothing left to be used for:
 the store already has the old set.
 
-1. Raise `versionCode` by 1 and `versionName` by 0.1 in the app build
-   file, and update the version line in `play-store/listing.md`.
+1. Raise `versionCode` by 1 and raise `versionName` by one tenth within
+   the major line: 0.1 through 0.9, then 1.0, then 1.1 through 1.9, then
+   2.0. There is no 0.10: the tenth release of a major line is its `x.0`,
+   and a version name is never written with a two-digit minor. Update the
+   version line in `play-store/listing.md`.
 2. Release notes go to `play-store/listing.md` as plain flowing text,
    one unbroken line per bullet, under 500 characters.
 3. Run the full CI suite locally.
@@ -537,6 +546,19 @@ implement it and update this list.
 - Play Core's asset delivery drags WorkManager, Room, and five merged
   permissions, and its R8 release needs extra keep rules. The page fonts
   ship in the base instead (D-018); reopen only with the owner.
+- A modal sheet, a dialog, and a popup are their own windows and take the
+  Activity's own resources, so a locale provided through a composition local
+  reaches the reading and misses every sheet: the settings sheet came up
+  English over a Bangla reader. The interface language is applied in
+  `MainActivity.attachBaseContext`, read from a synchronous mirror
+  (`LanguagePreference`) that the choice writes before it recreates the
+  Activity, and the release bundle disables language splitting so both
+  languages are inside every install.
+- The state a screen switches on is read in the screen's own scope. With a
+  wrapper around the screen, a `when` one lambda down missed the switch from
+  the first paint to the welcome deterministically on this machine until a
+  configuration change forced a recomposition. `QuranApp` reads `ready` and
+  `failure` at its top level, where it decides the screen.
 
 ### Housekeeping at the end of the session
 

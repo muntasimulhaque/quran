@@ -1,0 +1,270 @@
+package io.github.muntasimulhaque.quran.ui.settings
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.data.AppSettings
+import io.github.muntasimulhaque.quran.data.ContentDatabase
+import io.github.muntasimulhaque.quran.data.ContentPack
+import io.github.muntasimulhaque.quran.data.PackType
+import io.github.muntasimulhaque.quran.data.Recitation
+import io.github.muntasimulhaque.quran.data.UiLanguage
+import io.github.muntasimulhaque.quran.feature.settings.R
+import io.github.muntasimulhaque.quran.ui.kit.formatBytes
+import io.github.muntasimulhaque.quran.ui.kit.languageName
+import io.github.muntasimulhaque.quran.ui.kit.nativeLanguageName
+import io.github.muntasimulhaque.quran.ui.theme.Space
+/** The pages the settings hub opens, one at a time. */
+enum class SettingsPage { Language, Appearance, FontSize, Reading, Reciters, Translations, Tafsirs, About }
+
+@Composable
+fun SettingsPage.title(): String = stringResource(
+    when (this) {
+        SettingsPage.Language -> R.string.settings_title_language
+        SettingsPage.Appearance -> R.string.settings_title_appearance
+        SettingsPage.FontSize -> R.string.settings_title_text
+        SettingsPage.Reading -> R.string.settings_title_reading
+        SettingsPage.Reciters -> R.string.settings_title_reciters
+        SettingsPage.Translations -> R.string.settings_title_translations
+        SettingsPage.Tafsirs -> R.string.settings_title_tafsirs
+        SettingsPage.About -> R.string.settings_title_about
+    },
+)
+
+/**
+ * The page a choice reads as, with the automatic switch said in the same
+ * breath, so the hub row never claims a page the reader is not on.
+ */
+@Composable
+private fun themeSummary(settings: AppSettings): String {
+    val name = settings.theme.name()
+    return if (settings.autoNight) {
+        stringResource(R.string.settings_summary_theme_auto, name)
+    } else {
+        name
+    }
+}
+
+/**
+ * The hub: one row per category, each carrying where it stands, so a reader
+ * can see their own setup at a glance and open only what they came to change.
+ */
+@Composable
+fun SettingsHub(
+    settings: AppSettings,
+    packs: List<ContentPack>,
+    recitations: List<Recitation>,
+    version: String,
+    packSetup: PackSetupState?,
+    onWordByWord: (Boolean) -> Unit,
+    onOpen: (SettingsPage) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier.fillMaxWidth()) {
+        PageRow(
+            title = stringResource(R.string.settings_title_language),
+            summary = nativeLanguageName(settings.uiLanguage ?: UiLanguage.English.tag),
+        ) { onOpen(SettingsPage.Language) }
+        PageRow(
+            title = stringResource(R.string.settings_title_appearance),
+            summary = themeSummary(settings),
+        ) { onOpen(SettingsPage.Appearance) }
+        PageRow(
+            title = stringResource(R.string.settings_title_text),
+            summary = stringResource(
+                R.string.settings_summary_text,
+                settings.arabicSp.toInt(),
+                settings.translationSp.toInt(),
+            ),
+        ) { onOpen(SettingsPage.FontSize) }
+        PageRow(
+            title = stringResource(R.string.settings_title_reading),
+            summary = stringResource(
+                R.string.settings_summary_reading,
+                listOf(settings.keepAwake, settings.followReciter).count { it },
+            ),
+        ) { onOpen(SettingsPage.Reading) }
+        PageRow(
+            title = stringResource(R.string.settings_title_reciters),
+            summary = reciterName(settings, recitations),
+        ) { onOpen(SettingsPage.Reciters) }
+        PageRow(
+            title = stringResource(R.string.settings_title_translations),
+            summary = translationName(settings, packs),
+        ) { onOpen(SettingsPage.Translations) }
+        PageRow(
+            title = stringResource(R.string.settings_title_tafsirs),
+            summary = tafsirSummary(settings, packs),
+        ) { onOpen(SettingsPage.Tafsirs) }
+        // Word meanings are one switch, not a page: the list they need is the
+        // one that speaks the translation's language, so there is nothing to
+        // choose, only something to show. Turning the switch on fetches that
+        // list when it is not yet on the device, with its size on the row.
+        WordByWordRow(settings, packs, packSetup, onWordByWord)
+        PageRow(
+            title = stringResource(R.string.settings_title_about),
+            summary = stringResource(R.string.settings_version_short, version),
+        ) { onOpen(SettingsPage.About) }
+    }
+}
+
+@Composable
+private fun reciterName(settings: AppSettings, recitations: List<Recitation>): String =
+    recitations.firstOrNull { it.id == settings.recitation }?.name
+        ?: stringResource(R.string.settings_none_yet)
+
+@Composable
+private fun translationName(settings: AppSettings, packs: List<ContentPack>): String {
+    val chosen = packs.filter { it.id in settings.translationPacks && it.installed }
+    return when {
+        chosen.isEmpty() -> stringResource(R.string.settings_none_yet)
+        chosen.size == 1 -> chosen.first().name
+        else -> stringResource(R.string.settings_chosen_count, chosen.size)
+    }
+}
+
+@Composable
+private fun tafsirSummary(settings: AppSettings, packs: List<ContentPack>): String {
+    val chosen = packs.filter { it.type == PackType.Tafsir && it.installed && it.id in settings.tafsirPacks }
+    return when {
+        chosen.isEmpty() -> stringResource(R.string.settings_none_yet)
+        chosen.size == 1 -> chosen.first().name
+        else -> stringResource(R.string.settings_chosen_count, chosen.size)
+    }
+}
+
+/**
+ * The word by word switch, and the state of the list behind it. The row is
+ * checked only when the aid is on and the list it needs is on the device, so
+ * a switch that reads on always means meanings are being drawn; when the
+ * list is missing the row says so, with its size, and the same tap that would
+ * turn the aid on fetches it.
+ */
+@Composable
+private fun WordByWordRow(
+    settings: AppSettings,
+    packs: List<ContentPack>,
+    packSetup: PackSetupState?,
+    onWordByWord: (Boolean) -> Unit,
+) {
+    val wanted = wantedWordsPack(settings, packs)
+    val installed = wanted?.installed == true
+    val setup = packSetup?.takeIf { it.packId == wanted?.id }
+    val subtitle = when {
+        setup != null && setup.failed -> stringResource(R.string.settings_words_failed)
+        setup != null && setup.progress != null -> stringResource(
+            R.string.settings_pack_downloading,
+            (setup.progress * 100).toInt(),
+        )
+        setup != null -> stringResource(R.string.settings_pack_preparing)
+        !installed && wanted != null -> stringResource(
+            R.string.settings_words_add,
+            languageName(wanted.language),
+            formatBytes(wanted.bytes),
+        )
+        else -> stringResource(R.string.settings_words_subtitle)
+    }
+    ToggleRow(
+        title = stringResource(R.string.settings_words_title),
+        subtitle = subtitle,
+        checked = settings.wordByWord && installed,
+        onChange = onWordByWord,
+    )
+}
+
+/**
+ * The language page: the interface's language, and with it the language of
+ * the translation, the tafsir, and the word meanings. Each choice is named
+ * in its own script, because a reader who cannot read the current interface
+ * must still be able to find their own language on this page.
+ */
+@Composable
+fun LanguagePage(
+    settings: AppSettings,
+    onLanguage: (String) -> Unit,
+) {
+    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+        Group(stringResource(R.string.settings_group_language))
+        Text(
+            text = stringResource(R.string.settings_language_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
+        )
+        UiLanguage.entries.forEach { language ->
+            ChoiceRow(
+                title = nativeLanguageName(language.tag),
+                subtitle = stringResource(R.string.settings_language_subtitle),
+                selected = settings.uiLanguage == language.tag,
+                onClick = { onLanguage(language.tag) },
+            )
+        }
+        Spacer(Modifier.height(Space.Section))
+    }
+}
+
+/**
+ * The word list the reading speaks: the one that matches the first chosen
+ * translation, and English when that language has no list. The translation
+ * counts as chosen even before it is installed, so a Bangla reader is never
+ * offered the English word list because the Bangla translation is still on
+ * its way. The pack is the one the switch adds when it is missing.
+ */
+internal fun wantedWordsPack(settings: AppSettings, packs: List<ContentPack>): ContentPack? {
+    val language = packs.firstOrNull { it.id in settings.translationPacks }?.language
+        ?: UiLanguage.English.tag
+    val preferred = ContentDatabase.wordsPackId(language)
+    return packs.firstOrNull { it.id == preferred }
+        ?: packs.firstOrNull { it.id == ContentDatabase.WORDS_PACK }
+}
+
+@Composable
+internal fun translationSubtitle(pack: ContentPack): String {
+    val detail = if (pack.shipped) {
+        stringResource(R.string.pack_included_suffix)
+    } else {
+        formatBytes(pack.bytes)
+    }
+    return stringResource(R.string.pack_installed, languageName(pack.language), detail)
+}
+
+/**
+ * The packs of one kind, grouped by the language they speak and alphabetical
+ * inside each group. A list of choices is read, not searched: the reader
+ * looks for a name, so names are in one order everywhere in the app. The
+ * reader's own language leads, so the pack the app was set up for is the
+ * first one under the finger.
+ */
+@Composable
+internal fun LanguageGroups(
+    packs: List<ContentPack>,
+    type: PackType,
+    preferred: String,
+    row: @Composable (ContentPack) -> Unit,
+) {
+    val groups = packs.filter { it.type == type }.groupBy { it.language }
+    val names = HashMap<String, String>()
+    for (language in groups.keys) names[language] = languageName(language)
+    groups.entries
+        .sortedWith(compareBy({ it.key != preferred }, { names[it.key] ?: it.key }))
+        .forEach { (language, group) ->
+            Text(
+                text = names[language] ?: language,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Block, bottom = Space.Tight),
+            )
+            group.sortedBy { it.name.lowercase() }.forEach { pack -> row(pack) }
+        }
+}
+

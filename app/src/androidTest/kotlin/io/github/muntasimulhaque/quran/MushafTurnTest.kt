@@ -39,6 +39,7 @@ class MushafTurnTest {
             val context = InstrumentationRegistry.getInstrumentation().targetContext
             val settings = SettingsStore(context)
             runBlocking {
+                settings.setUiLanguage("en")
                 settings.setAyah(1)
                 settings.setMode(ReadingMode.Mushaf)
             }

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="browse_tab_surahs">সূরাসমূহ</string>
+    <string name="browse_tab_juz">পারা</string>
+    <string name="browse_tab_last_read">শেষ পাঠ</string>
+    <string name="browse_tab_saved">সংরক্ষিত</string>
+
+    <string name="place_makkah">মক্কা</string>
+    <string name="place_madinah">মদিনা</string>
+    <string name="surah_meta_place_ayahs">%1$s  ·  %2$d আয়াত</string>
+    <string name="juz_title">পারা %1$d</string>
+    <string name="juz_starts_at">%1$s  ·  শুরু %2$s থেকে</string>
+
+    <string name="last_read_empty_title">এখনও কোনো পাঠস্থান নেই</string>
+    <string name="last_read_empty_body">আপনি যেসব আয়াত পড়েছেন সেগুলো এখানে রাখা হয়, নতুনটি আগে, যাতে ছেড়ে আসা স্থানে ফিরে যেতে পারেন।</string>
+    <string name="last_read_detail">%1$s পড়া · %2$s</string>
+    <string name="last_read_ayah_label">আয়াত %1$d</string>
+    <string name="last_read_mode_mushaf">মুসহাফে</string>
+    <string name="last_read_mode_study">অধ্যয়নে</string>
+    <string name="last_read_just_now">এইমাত্র</string>
+    <plurals name="last_read_minutes">
+        <item quantity="other">%1$d মিনিট আগে</item>
+    </plurals>
+    <plurals name="last_read_hours">
+        <item quantity="other">%1$d ঘণ্টা আগে</item>
+    </plurals>
+    <plurals name="last_read_days">
+        <item quantity="other">%1$d দিন আগে</item>
+    </plurals>
+    <plurals name="last_read_weeks">
+        <item quantity="other">%1$d সপ্তাহ আগে</item>
+    </plurals>
+
+    <string name="saved_empty_title">এখনও কিছু সংরক্ষিত হয়নি</string>
+    <string name="saved_empty_body">পড়ার সময় যেকোনো আয়াতে চাপ দিয়ে ধরে রাখুন, তারপর সংরক্ষণ করুন। আপনার সংরক্ষিত আয়াত ও নোট এখানে দেখা যাবে, নতুনটি আগে।</string>
+    <string name="saved_reference_fallback">আয়াত %1$d</string>
+    <string name="action_open">খুলুন</string>
+    <string name="action_remove">মুছুন</string>
+    <string name="action_forget">সরিয়ে ফেলুন</string>
+</resources>

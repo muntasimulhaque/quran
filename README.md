@@ -4,20 +4,18 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 0.10 (versionCode 10) is submitted to Google Play for review. This
-session answered the reader's sixth report: the top bar is two rows on every
-size, the reading modes centered on the screen with the surah and Juz centered
-beneath them, so no name of the 114 is shortened on any phone; the pressed
-surah paragraph, the recited word in the study reading, and the ayah card
-answer in the same rounded shape; and the end of a surah offers the next one
-as a card. The word list language still follows the reader's translation, and
-Last Read keeps its twenty places. The store capture was rebuilt on the
-family's pattern, from the Compose root one frame at a time, after the old
-full-screen tour kept killing the phone emulator. The bundle carries only the
-core pack, the Quran text and its page layout, with everything else added from
-the project's own Releases when a reader asks for it. The listing, icon,
-feature graphic, and screenshots per form factor are in
-[`play-store/`](play-store/), refreshed from CI.
+**Status:** 1.0 (versionCode 11) is handed over for Google Play. This session
+answered the reader's seventh report: the top bar is one row again, with a
+single door that takes the reader between the Mushaf and the study view; the
+reciter chooser wears the pill's own rounded shape; word meanings are one
+switch in Settings, which fetches the word list the reader's translation
+speaks; and a first-launch screen offers English or Bangla, with the
+interface, the translation, the tafsir, and the word meanings all following
+the choice. The version name now follows the runbook's tenth-step rule: 0.9,
+then 1.0. The bundle carries only the core pack, the Quran text and its page
+layout, with everything else added from the project's own Releases when a
+reader asks for it. The listing, icon, feature graphic, and screenshots per
+form factor are in [`play-store/`](play-store/), refreshed from CI.
 
 ## What it does
 
@@ -38,11 +36,15 @@ feature graphic, and screenshots per form factor are in
   Browse keeps the last twenty places you read, newest first, each with the
   mode you were in and when you left it, so a surah you visited last week is
   one tap away again.
-- **Two readings, one switch.** The Mushaf and the study view are one switch
-  centered on the screen, with the surah and its juz centered under it, both
-  choices visible with the current one marked. There is no bottom bar: the
-  index, search, saved ayahs, and settings are all one tap from the same edge,
-  and listening is the play action on any ayah.
+- **Two readings, one door.** The Mushaf and the study view are one door in
+  the top bar: the icon shows the reading the reader is not in, and a tap
+  takes them there. There is no bottom bar: the index, search, saved ayahs,
+  and settings are all one tap from the same edge, and listening is the play
+  action on any ayah.
+- **A language chosen once.** A first-launch screen offers English or Bangla,
+  each named in its own script, and the choice sets the interface, the
+  translation, the tafsir, and the word meanings together. It can be changed
+  at any time from Settings, and the whole app follows without a restart.
 - **The ayah card.** Save, note, share, play from this ayah, word by word, and
   every tafsir you have installed. It offers to add what it does not have yet
   rather than showing an empty panel.

@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 0.10 (versionCode 10)
+Version: 1.0 (versionCode 11)
 
 ## Listing
 
@@ -21,7 +21,9 @@ matches the printed copy line for line.
 
 Study mode gives each ayah its Saheeh International translation with the
 original footnotes, word by word meanings, and two tafsirs: Ibn Kathir in
-English and As-Sa'di in Arabic, with the Quran quotations set apart.
+English and As-Sa'di in Arabic, with the Quran quotations set apart. Bangla
+readers get the Taisirul Quran translation, Ibn Kathir in Bangla, and Bangla
+word meanings, and the whole interface can be read in English or Bangla.
 
 Search reads Arabic without diacritics and English without accents, so
 typing allah finds Allah and isa finds Isa. Save any ayah, add your own
@@ -29,7 +31,7 @@ note to it, and find everything again under Browse, beside a Last read
 list that keeps the places you have been reading so you can return to one
 you left.
 
-The two readings are one switch at the top of the page, and it always
+The two readings are one door at the top of the page, and it always
 offers the other one: the printed page, or the study view. There is no
 bottom bar to learn. More than one translation may be on at once, and
 each one draws in its own place under the ayah.
@@ -104,13 +106,17 @@ changes.
 What each set shows, in order:
 
 1. The Mushaf page
-2. The chrome: the mode switch, Browse, Search, and Settings
+2. The chrome: the mode door, Browse, Search, and Settings
 3. The study reading with its translation
 4. The surah opening
 5. Search with the matched word marked, and the filters under the field
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its word by word and tafsir doors
+
+## Release notes (1.0, submitted, 439 characters)
+
+Choose your language on the first screen: English or Bangla, and the app, the translation, the tafsir, and the word meanings all follow it. The top bar is one row again, with a single icon that takes you between the Mushaf and the study view. Word meanings are one switch in Settings, which fetches the word list your translation speaks. The reciter chooser now matches the pill in color and rounded shape. No ads, no trackers, no account.
 
 ## Release notes (0.10, submitted, 365 characters)
 

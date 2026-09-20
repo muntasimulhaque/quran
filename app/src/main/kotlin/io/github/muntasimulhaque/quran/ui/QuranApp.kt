@@ -75,9 +75,30 @@ fun QuranApp(
         }
 
         val content = viewModel.content
+        // These are read here, in the screen's own scope, and not only inside
+        // a nested lambda: the first paint gives way to the reading the
+        // moment the library opens, and that switch must never wait for a
+        // later recomposition to notice.
+        val ready = viewModel.ready
+        val failed = viewModel.failure
         when {
-            viewModel.failure -> ContentProblem(onRetry = { viewModel.retryOpen() })
-            !viewModel.ready || content == null -> FirstPaint(viewModel.startupPage)
+            failed -> ContentProblem(onRetry = { viewModel.retryOpen() })
+            !ready || content == null -> FirstPaint(viewModel.startupPage)
+            settings.uiLanguage == null -> {
+                // The first screen is on screen; the system can stop counting.
+                LaunchedEffect(Unit) {
+                    (view.context as? Activity)?.reportFullyDrawn()
+                }
+                LanguageWelcome(
+                    suggested = systemLanguage(),
+                    onChoose = { language ->
+                        viewModel.chooseLanguage(language)
+                        // The locale belongs to the Activity's own resources;
+                        // the recreation brings every window up speaking it.
+                        (view.context as? Activity)?.recreate()
+                    },
+                )
+            }
             else -> {
                 // The first page is on screen; the system can stop counting.
                 LaunchedEffect(Unit) {
@@ -179,3 +200,4 @@ private fun FirstPaint(startup: StartupPage?) {
         }
     }
 }
+

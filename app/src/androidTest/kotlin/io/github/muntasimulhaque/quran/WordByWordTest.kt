@@ -43,6 +43,7 @@ class WordByWordTest {
             store.install("words-bn")
             val settings = SettingsStore(context)
             runBlocking {
+                settings.setUiLanguage("en")
                 settings.setTranslationPacks(setOf("translation-taisirul-quran-bn"))
                 settings.setWordByWord(true)
                 settings.setMode(ReadingMode.Study)

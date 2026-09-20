@@ -2334,3 +2334,85 @@ hand-off copy was deleted from `play-store/aab/` in the same breath, so no
 signed bundle sits in the repository or on the machine waiting to be uploaded
 twice. `play-store/aab/` keeps only its own note about where a bundle comes
 from and when it goes.
+
+## D-067: The reader's seventh report, the eighteenth session
+
+Date: the eighteenth session. The owner read 0.10 on a phone and asked for
+five things, one of them a defect in the version discipline itself.
+
+**The top bar is one row again, with one mode door.** The two-row bar of
+D-065 is gone. The reader's list is the single-row lineup with the two-choice
+switch replaced by one icon: Browse and the mode door lead, the surah and its
+juz sit centered between the two pairs, and Search and Settings close the row.
+The mode door shows the mode the reader is not in (the study page while in
+the Mushaf, the open Book while studying) and a tap takes them there; it wears
+the accent because it is the reading itself, not another tool. Two doors on
+each side is what keeps the title on the screen's own center, and the single
+icon gives the name the room the old switch took. The trade is named and
+accepted: on a 320dp phone the longest names still clip, which D-065 measured;
+the owner chose the one row knowing that.
+
+**The reciter chooser wears the pill's cloth.** The offer's dropdown was
+Material's own menu, a different surface and a square shape, and it read as a
+foreign sheet laid over the pill. It is now a rounded 20dp menu of the pill's
+own surface color with a hairline, and the chosen reciter carries a check.
+The rows inside it are the app's own rounded press targets, not stock menu
+items.
+
+**Word by word is one switch in the hub.** The Words page and its list of
+language packs are gone. The hub carries the switch directly, and turning it
+on fetches the word list that speaks the first chosen translation's language,
+with the size on the row before the tap and the progress on the row during
+it. The switch reads on only when the aid is on and its list is on the
+device, so an on switch always means meanings are being drawn; a missing list
+is named with its size, and the same tap adds it. The word list still follows
+the translation's language (D-065), and the language counts as chosen even
+before its pack is installed, so a Bangla reader is never offered the English
+list while the Bangla translation is on its way.
+
+**The interface speaks Bangla, and the choice is one.** A first-launch screen
+asks for the language, each choice named in its own script, with the phone's
+own language marked Suggested. The choice sets the interface, the translation,
+the tafsir, and the word meanings together, through one `UiLanguage` model in
+`data`, and it can be changed from a Language row at the top of the settings
+hub. The content
+packs are selected, never fetched: the sizes stay on the rows that install
+them, and nothing is downloaded before the reader asks. `values-bn` carries
+every string in all eight modules; the frozen names (`app_name`,
+`first_paint_title`, `first_paint_subtitle`, `about_title`) are marked
+`translatable="false"` and never move (D-001). The bundle disables language
+splitting, because a split would hand a phone only the language it asked for
+at install time and the in-app switch would find the Bangla strings missing.
+
+**The locale lives on the Activity, not in a composition local.** The first
+attempt wrapped the composition in a localized context. It worked for the
+reading and failed for every modal surface: a sheet, a dialog, and a popup
+are their own windows and take the Activity's resources, so the settings
+sheet came up English over a Bangla reader. The locale is now applied in
+`MainActivity.attachBaseContext`, from a synchronous mirror
+(`LanguagePreference`) that the choice writes before it recreates the
+Activity, so every window speaks the chosen language from its first frame.
+The mirror is a SharedPreferences file only because `attachBaseContext` runs
+before any coroutine can read the DataStore; the DataStore stays the source
+of truth.
+
+**A screen-level state read belongs in the screen's own scope.** With the
+composition-local wrapper, the `when` that chose between the first paint, the
+welcome, and the reader sat inside a nested lambda, and the switch from the
+first paint to the welcome was missed deterministically on this machine until
+a configuration change forced a recomposition. Reading `ready` and `failure`
+in `QuranApp`'s own scope fixed it. The wrapper is gone now, but the lesson
+stays: the state a screen switches on is read where the screen is, not one
+lambda down.
+
+**The version convention is written down.** The first version was 0.1 and
+0.10 was a mistake: the tenth release of a major line is its `x.0`. The
+release runbook now says 0.1 through 0.9, then 1.0, then 1.1 through 1.9,
+then 2.0, and this session's release is 1.0 (versionCode 11).
+
+**Verification.** The JVM suite (72), lint with no issues, the data
+instrumented tests (16), and the app instrumented tests (12, the screenshot
+tour included) are green on the phone profile. The welcome screen, the
+Bangla reading, the settings hub, the search sheet, Browse, the word toggle,
+and the reciter chooser were walked on the running app. All five content
+gates are green on this machine.

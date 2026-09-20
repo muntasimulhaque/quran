@@ -14,18 +14,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -47,8 +44,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -57,7 +52,6 @@ import io.github.muntasimulhaque.quran.BuildConfig
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
-import io.github.muntasimulhaque.quran.data.ReadPlace
 import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
@@ -90,19 +84,6 @@ private const val CHROME_MILLIS = 7000L
 /** The bar's own margins; the title aligns with the reading under it. */
 private val BarStart = 20.dp
 private val BarEnd = 8.dp
-
-/** The mode switch's full width: two 40 dp choices, 2 dp apart, 3 dp of rim. */
-private val ModeSwitchWidth = 88.dp
-
-/** The index door at the head of the bar, and the two tools at its end. */
-private val LeadingDoorWidth = 48.dp
-private val TrailingDoorsWidth = 96.dp
-
-/** The least room between two of the first row's three groups. */
-private val TopBarGap = 8.dp
-
-/** The room between the controls and the surah name beneath them. */
-private val TitleTopGap = 6.dp
 
 /** Which sheet is over the reader, if any. */
 private enum class ReaderSheet { None, Browse, Search, Settings }
@@ -385,6 +366,14 @@ fun ReaderScreen(
             preview = { viewModel.sizePreviewRow() },
             downloadedSurahs = { recitation -> viewModel.downloadedSurahs(recitation) },
             actions = SettingsActions(
+                onLanguage = { tag ->
+                    io.github.muntasimulhaque.quran.data.UiLanguage.of(tag)?.let { language ->
+                        viewModel.chooseLanguage(language)
+                        // The locale belongs to the Activity's own resources;
+                        // the recreation brings every window up speaking it.
+                        (context as? android.app.Activity)?.recreate()
+                    }
+                },
                 onTheme = { viewModel.setTheme(it) },
                 onAutoNight = { viewModel.setAutoNight(it) },
                 onTypeSize = { role, step -> viewModel.setTypeSize(role, step) },
@@ -540,123 +529,66 @@ private fun ReaderTopBar(
         exit = fadeOut() + slideOutVertically { -it / 3 },
         modifier = modifier,
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                // The scrim stays solid over both rows and gives way only
-                // below the name, so the surah and its juz never sit on the
-                // fading edge and the page runs out from under them.
+                // The scrim stays solid behind the controls and gives way
+                // only below the name, so the surah never sits on the fading
+                // edge and the page runs out from under the bar.
                 .background(
                     Brush.verticalGradient(
                         0f to MaterialTheme.colorScheme.background,
-                        0.78f to MaterialTheme.colorScheme.background,
+                        0.72f to MaterialTheme.colorScheme.background,
                         0.9f to MaterialTheme.colorScheme.background.copy(alpha = 0.92f),
                         1f to MaterialTheme.colorScheme.background.copy(alpha = 0f),
                     ),
                 )
                 .windowInsetsPadding(WindowInsets.statusBars)
                 .padding(start = BarStart, end = BarEnd, top = 8.dp, bottom = 22.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            // The first row is every control: the index leads, the two tools
-            // trail, and the reading modes stay at the center of the screen
-            // between them.
-            BoxWithConstraints(Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    IconButton(Icon.Browse, stringResource(R.string.action_browse), onBrowse)
-                    Spacer(Modifier.weight(1f))
-                    Row(horizontalArrangement = Arrangement.End) {
-                        IconButton(Icon.Search, stringResource(R.string.action_search), onSearch)
-                        IconButton(Icon.Settings, stringResource(R.string.action_settings), onSettings)
-                    }
-                }
-                // The switch is centered on the screen itself, not on the
-                // content: the bar's margins differ by the room a 48 dp
-                // touch target keeps at its edge, and that difference is
-                // taken out here. It is clamped so it never touches either
-                // group, even on the narrowest phone.
-                val centeredLeft = (maxWidth - ModeSwitchWidth) / 2 - (BarStart - BarEnd) / 2
-                val minLeft = LeadingDoorWidth + TopBarGap
-                val maxLeft = (maxWidth - TrailingDoorsWidth - TopBarGap - ModeSwitchWidth)
-                    .coerceAtLeast(minLeft)
-                ModeSwitch(
-                    mode = mode,
-                    onMode = onMode,
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .offset(x = centeredLeft.coerceIn(minLeft, maxLeft)),
-                )
-            }
-            // The surah and its part have the whole width under the
-            // controls, so no name is ever shortened on any phone.
+            // The bar is one row: Browse and the mode door lead, the surah
+            // and its juz sit centered between the two pairs, and Search and
+            // Settings close it. Two doors on each side is what keeps the
+            // title on the screen's own center, and the single mode icon
+            // leaves the name the room the old two-choice switch took.
+            IconButton(Icon.Browse, stringResource(R.string.action_browse), onBrowse)
+            ModeDoor(mode, onMode)
             ReadingTitle(
                 surah = title,
                 detail = detail,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = TitleTopGap),
+                    .weight(1f)
+                    .padding(horizontal = 4.dp),
             )
+            IconButton(Icon.Search, stringResource(R.string.action_search), onSearch)
+            IconButton(Icon.Settings, stringResource(R.string.action_settings), onSettings)
         }
     }
 }
 
 /**
- * The two reading modes as one switch: the mode the reader is in is marked,
- * and the other is one tap away. It wears the same segmented shape the app
- * uses for a small set of choices, and only the two mode icons sit in it.
+ * The two reading modes as one door: the glyph shows the mode the reader is
+ * not in, and a tap takes them there. One icon instead of a two-choice
+ * switch, so the bar keeps a single row and the surah name keeps its room;
+ * the accent says this door is the reading itself, not another tool.
  */
 @Composable
-private fun ModeSwitch(
-    mode: ReadingMode,
-    onMode: (ReadingMode) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier
-            .clip(RoundedCornerShape(50))
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-            .padding(3.dp),
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        ReadingMode.entries.forEach { entry ->
-            val active = entry == mode
-            val description = stringResource(
-                if (entry == ReadingMode.Mushaf) {
-                    io.github.muntasimulhaque.quran.uikit.R.string.mode_mushaf
-                } else {
-                    io.github.muntasimulhaque.quran.uikit.R.string.mode_study
-                },
-            )
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(50))
-                    .background(
-                        if (active) {
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
-                        } else {
-                            androidx.compose.ui.graphics.Color.Transparent
-                        },
-                    )
-                    .selectable(selected = active, role = Role.RadioButton) { onMode(entry) }
-                    .semantics { contentDescription = description },
-                contentAlignment = Alignment.Center,
-            ) {
-                IconGlyph(
-                    icon = if (entry == ReadingMode.Mushaf) Icon.MushafPage else Icon.StudyPage,
-                    tint = if (active) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-                    modifier = Modifier.size(22.dp),
-                )
-            }
-        }
-    }
+private fun ModeDoor(mode: ReadingMode, onMode: (ReadingMode) -> Unit) {
+    val other = if (mode == ReadingMode.Mushaf) ReadingMode.Study else ReadingMode.Mushaf
+    val description = stringResource(
+        if (other == ReadingMode.Mushaf) {
+            io.github.muntasimulhaque.quran.uikit.R.string.mode_switch_to_mushaf
+        } else {
+            io.github.muntasimulhaque.quran.uikit.R.string.mode_switch_to_study
+        },
+    )
+    IconButton(
+        icon = if (other == ReadingMode.Mushaf) Icon.MushafPage else Icon.StudyPage,
+        description = description,
+        onClick = { onMode(other) },
+        active = true,
+    )
 }
 
 /** Everything that can sit at the foot of the page, stacked in one place. */
@@ -844,3 +776,4 @@ private fun AyahActions(
         TextAction(stringResource(R.string.action_more), Icon.More, onMore)
     }
 }
+

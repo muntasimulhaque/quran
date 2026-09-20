@@ -20,6 +20,7 @@ import io.github.muntasimulhaque.quran.data.PackVerifier
 import io.github.muntasimulhaque.quran.data.PageFontStore
 import io.github.muntasimulhaque.quran.data.PagePosition
 import io.github.muntasimulhaque.quran.data.LastReadStore
+import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.ReadPlace
 import io.github.muntasimulhaque.quran.data.ReadingMode
@@ -34,6 +35,8 @@ import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TranslationLine
 import io.github.muntasimulhaque.quran.data.TypeRole
+import io.github.muntasimulhaque.quran.data.UiLanguage
+import io.github.muntasimulhaque.quran.data.withLanguage
 import io.github.muntasimulhaque.quran.playback.PlaybackController
 import io.github.muntasimulhaque.quran.playback.ListenOffer
 import io.github.muntasimulhaque.quran.playback.ListenOption
@@ -64,6 +67,7 @@ import java.util.LinkedHashMap
 class ReaderViewModel(application: Application) : AndroidViewModel(application) {
 
     private val settingsStore = SettingsStore(application)
+    private val languagePreference = LanguagePreference(application)
     private val pageFonts = PageFontStore(application)
     private val savedStore = SavedStore(application)
     private val lastReadStore = LastReadStore(application)
@@ -121,15 +125,12 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     val tafsirPacks: List<ContentPack> get() = packs.filter { it.type == PackType.Tafsir }
 
     /**
-     * The translations the reader turned on, in catalog order. More than one
-     * may be on, and each is drawn in its own column under the ayah; the
-     * first is the one search, share, and the word by word aid read.
+     * The translations the reader turned on and has on the device, in catalog
+     * order. More than one may be on, and each is drawn in its own column
+     * under the ayah; the first is the one search and share read.
      */
     val enabledTranslationPacks: List<ContentPack>
         get() = translationPacks.filter { it.installed && it.id in settings.translationPacks }
-
-    /** The first translation turned on, or null when the reader has none. */
-    val selectedTranslation: ContentPack? get() = enabledTranslationPacks.firstOrNull()
 
     val enabledTafsirPacks: List<ContentPack>
         get() = tafsirPacks.filter { it.id in settings.tafsirPacks && it.installed }
@@ -138,9 +139,12 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * The word by word aid should speak the language of the reading the reader
      * chose, so the meanings under an ayah and the words in a card match the
      * translation beside them. With more than one translation on, the first
-     * one decides.
+     * one decides. The choice counts even before its pack is on the device:
+     * a reader who chose Bangla wants Bangla meanings, and the word list is
+     * what the settings toggle adds for them.
      */
-    val wordLanguage: String get() = selectedTranslation?.language ?: "en"
+    val wordLanguage: String
+        get() = translationPacks.firstOrNull { it.id in settings.translationPacks }?.language ?: "en"
 
     /** A pack the reader asked for, while it downloads. */
     data class PackSetup(
@@ -468,8 +472,57 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun setWordByWord(show: Boolean) {
-        settings = settings.copy(wordByWord = show)
-        viewModelScope.launch { settingsStore.setWordByWord(show) }
+        if (!show) {
+            settings = settings.copy(wordByWord = false)
+            viewModelScope.launch { settingsStore.setWordByWord(false) }
+            return
+        }
+        // The meanings speak the language of the first translation on. When
+        // that language's word list is not on the device, turning the aid on
+        // is asking for it: the list is fetched through the same sized offer
+        // every other pack uses, and the aid turns on when it has landed.
+        val wanted = wantedWordsPack()
+        val pack = catalog.get(wanted)
+        if (pack == null || pack.installed) {
+            settings = settings.copy(wordByWord = true)
+            viewModelScope.launch { settingsStore.setWordByWord(true) }
+            return
+        }
+        installPack(pack.id)
+    }
+
+    /** The word list the reading speaks: the translation's language, or English. */
+    fun wantedWordsPack(): String =
+        ContentDatabase.wordsPackId(wordLanguage)
+            .takeIf { catalog.get(it) != null }
+            ?: ContentDatabase.WORDS_PACK
+
+    /**
+     * The reader's language: the interface switches at once, and the content
+     * follows it. The language's own translation and tafsir replace the other
+     * offered language's defaults, so a reader who moves from Bangla to
+     * English never keeps two defaults fighting; a pack the reader added by
+     * hand, like As-Sa'di, is left exactly where it was.
+     */
+    fun chooseLanguage(language: UiLanguage) {
+        val next = settings.withLanguage(language)
+        settings = next
+        // The boot-time mirror lands before anything else, so the Activity
+        // that recreates for the new locale comes up speaking it.
+        languagePreference.set(language.tag)
+        viewModelScope.launch {
+            settingsStore.setLanguage(language, next.translationPacks, next.tafsirPacks)
+        }
+        // A reader who already reads with word meanings is given the word
+        // list of the new language, through the same door the toggle uses.
+        if (next.wordByWord) ensureWordsPack()
+    }
+
+    /** The active language's word list, fetched when it is not yet here. */
+    private fun ensureWordsPack() {
+        val pack = catalog.get(wantedWordsPack()) ?: return
+        if (pack.installed) return
+        installPack(pack.id)
     }
 
     fun markLongPressHintShown() {
@@ -517,6 +570,9 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             selectPack(pack)
             return
         }
+        // A pack already on its way is not asked for twice; a failed one is,
+        // because the second tap is the reader's retry.
+        if (packSetup?.let { it.pack.id == id && !it.failed } == true) return
         viewModelScope.launch {
             packSetup = PackSetup(pack, progress = 0f)
             if (store.install(id)) {
@@ -539,14 +595,17 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
     private suspend fun finishInstall(pack: ContentPack) {
         packSetup = null
-        reopenLibrary()
+        // The pack becomes the reader's choice before the library reopens,
+        // so the search index that warms behind the reopen knows about it.
         selectPack(catalog.get(pack.id)?.copy(installed = true) ?: pack.copy(installed = true))
+        reopenLibrary()
     }
 
     /**
      * Adding a pack is also choosing it: a reader who added a reciter wants
-     * to hear them, and a reader who added a translation wants to read it.
-     * Anything else leaves the app playing a reciter they never picked.
+     * to hear them, a reader who added a translation wants to read it, and a
+     * reader who added a word list wants to see the meanings. Anything else
+     * leaves the app showing a pack the reader never asked to use.
      */
     private fun selectPack(pack: ContentPack) {
         when (pack.type) {
@@ -556,6 +615,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             PackType.Tafsir -> if (pack.id !in settings.tafsirPacks) toggleTafsirPack(pack.id)
             PackType.Recitation ->
                 selectRecitation(pack.id.removePrefix(ContentDatabase.RECITER_PREFIX))
+            PackType.Words -> if (!settings.wordByWord) {
+                settings = settings.copy(wordByWord = true)
+                viewModelScope.launch { settingsStore.setWordByWord(true) }
+            }
             else -> Unit
         }
     }
@@ -1001,3 +1064,4 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         const val PLACE_SETTLE_MS = 1_200L
     }
 }
+

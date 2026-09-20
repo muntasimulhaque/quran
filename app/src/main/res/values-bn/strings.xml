@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The three frozen names (app_name, first_paint_title, first_paint_subtitle)
+         are deliberately absent: the app is named Quran in every language. -->
+
+    <string name="reader_fallback_title">কুরআন</string>
+    <string name="surah_fallback_name">সূরা %1$d</string>
+    <string name="juz_label">পারা %1$d</string>
+
+    <string name="welcome_title">আপনার ভাষা বেছে নিন</string>
+    <string name="welcome_body">অ্যাপ, অনুবাদ, তাফসীর ও শব্দের অর্থ সবকিছু আপনার বেছে নেওয়া ভাষায় পড়া যাবে।</string>
+    <string name="welcome_later">সেটিংস থেকে যেকোনো সময় এটি বদলাতে পারবেন।</string>
+    <string name="welcome_suggested">প্রস্তাবিত</string>
+
+    <string name="hint_long_press_ayah">যেকোনো আয়াতে চাপ দিয়ে ধরে রাখলে তার কাজগুলো দেখা যাবে</string>
+
+    <string name="action_browse">কুরআন ব্রাউজ করুন</string>
+    <string name="action_search">অনুসন্ধান</string>
+    <string name="action_settings">সেটিংস</string>
+    <string name="action_save">সংরক্ষণ</string>
+    <string name="action_play">প্লে</string>
+    <string name="action_share">শেয়ার</string>
+    <string name="action_more">আরও</string>
+    <string name="action_retry">আবার চেষ্টা করুন</string>
+    <string name="action_close">বন্ধ</string>
+    <string name="action_cancel">বাতিল</string>
+
+    <string name="reader_pack_preparing">প্রস্তুত হচ্ছে…</string>
+    <string name="reader_pack_downloading">ডাউনলোড হচ্ছে %1$d%% · %2$s</string>
+    <string name="pack_download_failed">ডাউনলোড করা যায়নি। সংযোগ পরীক্ষা করুন।</string>
+
+    <string name="playback_continue_to">%1$s-এ চালিয়ে যান · %2$s</string>
+    <string name="playback_offer">%1$s · %2$s</string>
+
+    <string name="content_problem_title">কুরআনের লেখা খোলা যায়নি</string>
+    <string name="content_problem_body">এই ডিভাইসে এমন কিছু আছে যা অ্যাপকে তার নিজের কনটেন্ট পড়তে বাধা দিচ্ছে। কিছুই হারায়নি: আপনার সংরক্ষিত আয়াত ও সেটিংস অক্ষত আছে।</string>
+    <string name="content_problem_retry">আবার চেষ্টা করুন</string>
+</resources>

@@ -35,6 +35,7 @@ import io.github.muntasimulhaque.quran.feature.settings.R
  * read, tested, and previewed without a view model.
  */
 data class SettingsActions(
+    val onLanguage: (String) -> Unit = {},
     val onTheme: (AppTheme) -> Unit = {},
     val onAutoNight: (Boolean) -> Unit = {},
     val onTypeSize: (TypeRole, Float) -> Unit = { _, _ -> },
@@ -130,12 +131,18 @@ fun SettingsSheet(
                         packs = packs,
                         recitations = recitations,
                         version = version,
+                        packSetup = packSetup,
+                        onWordByWord = actions.onWordByWord,
                         onOpen = { page = it },
                     )
                 }
             } else {
                 PageHeader(title = open.title(), onBack = { page = null })
                 when (open) {
+                    SettingsPage.Language -> LanguagePage(
+                        settings = settings,
+                        onLanguage = actions.onLanguage,
+                    )
                     SettingsPage.Appearance -> AppearancePage(
                         settings = settings,
                         onTheme = actions.onTheme,
@@ -163,12 +170,6 @@ fun SettingsSheet(
                         packSetup = packSetup,
                         actions = actions,
                     )
-                    SettingsPage.Words -> WordsPage(
-                        settings = settings,
-                        packs = packs,
-                        packSetup = packSetup,
-                        actions = actions,
-                    )
                     SettingsPage.About -> AboutPage(
                         version = version,
                         contentCheck = contentCheck,
@@ -189,3 +190,4 @@ fun SettingsSheet(
         )
     }
 }
+

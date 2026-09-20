@@ -50,6 +50,12 @@ data class AppSettings(
     val theme: AppTheme = AppTheme.Paper,
     /** When on, the page turns over with the system's own day and night. */
     val autoNight: Boolean = false,
+    /**
+     * The language the interface is written in, and the content it reads.
+     * Null until the reader has chosen, which is what shows the welcome
+     * screen once, on the first launch and on the update that added it.
+     */
+    val uiLanguage: String? = null,
     val arabicSize: Float = TextSize.DEFAULT,
     val translationSize: Float = TextSize.DEFAULT,
     val tafsirSize: Float = TextSize.DEFAULT,
@@ -107,6 +113,7 @@ class SettingsStore(private val context: Context) {
                 else -> AppTheme.Paper
             },
             autoNight = preferences[AUTO_NIGHT] ?: false,
+            uiLanguage = preferences[UI_LANGUAGE],
             arabicSize = sizeOf(choices, ARABIC_SIZE, legacy),
             translationSize = sizeOf(choices, TRANSLATION_SIZE, legacy),
             tafsirSize = sizeOf(choices, TAFSIR_SIZE, legacy),
@@ -142,6 +149,27 @@ class SettingsStore(private val context: Context) {
 
     suspend fun setAutoNight(follow: Boolean) {
         context.settingsStore.edit { it[AUTO_NIGHT] = follow }
+    }
+
+    suspend fun setUiLanguage(tag: String) {
+        LanguagePreference(context).set(tag)
+        context.settingsStore.edit { it[UI_LANGUAGE] = tag }
+    }
+
+    /**
+     * The language and the content it reads, in one write, so a process that
+     * dies mid-choice can never keep a Bangla interface over English
+     * defaults: the language and the packs it brings land together or not at
+     * all. The boot-time mirror is written first, because the Activity that
+     * recreates for the new locale reads it synchronously.
+     */
+    suspend fun setLanguage(language: UiLanguage, translationPacks: Set<String>, tafsirPacks: Set<String>) {
+        LanguagePreference(context).set(language.tag)
+        context.settingsStore.edit {
+            it[UI_LANGUAGE] = language.tag
+            it[TRANSLATION_PACKS] = translationPacks
+            it[TAFSIR_PACKS] = tafsirPacks
+        }
     }
 
     suspend fun setTypeSize(role: TypeRole, value: Float) {
@@ -226,6 +254,7 @@ class SettingsStore(private val context: Context) {
         val MODE = stringPreferencesKey("mode")
         val THEME = stringPreferencesKey("theme")
         val AUTO_NIGHT = booleanPreferencesKey("auto_night")
+        val UI_LANGUAGE = stringPreferencesKey("ui_language")
         val TEXT_SIZE = floatPreferencesKey("text_size")
         val ARABIC_SIZE = floatPreferencesKey("arabic_size")
         val TRANSLATION_SIZE = floatPreferencesKey("translation_size")
@@ -241,3 +270,4 @@ class SettingsStore(private val context: Context) {
         val HINT_SHOWN = booleanPreferencesKey("hint_shown")
     }
 }
+
