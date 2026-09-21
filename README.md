@@ -4,18 +4,19 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 1.0 (versionCode 11) is handed over for Google Play. This session
-answered the reader's seventh report: the top bar is one row again, with a
-single door that takes the reader between the Mushaf and the study view; the
-reciter chooser wears the pill's own rounded shape; word meanings are one
-switch in Settings, which fetches the word list the reader's translation
-speaks; and a first-launch screen offers English or Bangla, with the
-interface, the translation, the tafsir, and the word meanings all following
-the choice. The version name now follows the runbook's tenth-step rule: 0.9,
-then 1.0. The bundle carries only the core pack, the Quran text and its page
-layout, with everything else added from the project's own Releases when a
-reader asks for it. The listing, icon, feature graphic, and screenshots per
-form factor are in [`play-store/`](play-store/), refreshed from CI.
+**Status:** 1.0 (versionCode 11) is submitted to Google Play for review. This
+session answered the reader's seventh report: the top bar is one row again,
+with a single door that takes the reader between the Mushaf and the study
+view; the reciter chooser wears the pill's own rounded shape; word meanings
+are one switch in Settings, which fetches the word list the reader's
+translation speaks; and a first-launch screen offers English or Bangla, with
+the interface, the translation, the tafsir, and the word meanings all
+following the choice. The version name now follows the runbook's tenth-step
+rule: 0.9, then 1.0. The bundle carries only the core pack, the Quran text
+and its page layout, with everything else added from the project's own
+Releases when a reader asks for it. The listing, icon, feature graphic, and
+screenshots per form factor are in [`play-store/`](play-store/), refreshed
+from CI.
 
 ## What it does
 

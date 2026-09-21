@@ -2454,3 +2454,9 @@ are green on the phone profile; and all five content gates (`verify`,
 welcome screen, the Bangla reading, the settings hub, the search sheet,
 Browse, the word toggle, and the reciter chooser were walked on the running
 app before the push.
+
+**The submission.** The owner confirmed that Play had the 1.0 submission, and
+the hand-off copy was deleted from `play-store/aab/` in the same breath, so no
+signed bundle sits in the repository or on the machine waiting to be uploaded
+twice. `play-store/aab/` keeps only its own note about where a bundle comes
+from and when it goes.

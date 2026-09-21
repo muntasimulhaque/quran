@@ -115,7 +115,7 @@ What each set shows, in order:
 7. Browse, Surahs
 8. The ayah card, with its word by word and tafsir doors
 
-## Release notes (1.0, handed over, 439 characters)
+## Release notes (1.0, submitted, 439 characters)
 
 Choose your language on the first screen: English or Bangla, and the app, the translation, the tafsir, and the word meanings all follow it. The top bar is one row again, with a single icon that takes you between the Mushaf and the study view. Word meanings are one switch in Settings, which fetches the word list your translation speaks. The reciter chooser now matches the pill in color and rounded shape. No ads, no trackers, no account.
 
