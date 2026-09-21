@@ -319,12 +319,17 @@ class ScreenshotTest {
         captureScreen("07-browse")
         back()
 
-        // 8. An ayah's actions, and the card they open. The Arabic line sits
-        // at the top of the block; the markers, which are links, sit lower,
-        // and a link would take the press instead.
-        rule.onNodeWithText("1:1").performTouchInput {
-            longClick(Offset(centerX, top + height * 0.15f))
-        }
+        // 8. An ayah's actions, and the card they open, captured from the
+        // Mushaf: there the card carries the translation, word by word, and
+        // the tafsir, which is the richer surface and the one a reader coming
+        // off the page meets. The Arabic line sits at the top of the block;
+        // the markers, which are links, sit lower, and a link would take the
+        // press instead.
+        revealChrome()
+        rule.onNodeWithContentDescription("Switch to the Mushaf page").performClick()
+        Thread.sleep(1_200)
+        rule.onAllNodes(hasContentDescription("1:1.", substring = true)).onFirst()
+            .performTouchInput { longClick() }
         // The actions bar slides in over the ayah; the tap on More waits for
         // it to settle, so the press lands on the control and not on an
         // animation.
