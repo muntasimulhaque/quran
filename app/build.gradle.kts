@@ -62,6 +62,24 @@ val canSignRelease = keystoreStoreFile != null &&
 val contentAssets = layout.buildDirectory.dir("generated/contentAssets")
 val devPackAssets = layout.buildDirectory.dir("generated/devPackAssets")
 
+/**
+ * Which development packs a build carries.
+ *
+ * A normal debug build carries every pack, so the whole app works with no
+ * network while it is being developed. The screenshot CI build carries only
+ * the packs its tests install: the app is 197 MB with every pack, and dexing
+ * and installing that is most of the capture's runtime, while the tour opens
+ * none of the rest. Set it with `-Pquran.devPacks=screenshot`.
+ */
+val leanDevPacks = (project.findProperty("quran.devPacks") as String?) == "screenshot"
+val screenshotPacks = setOf(
+    "translation-saheeh-en.db",
+    "words-en.db",
+    "tafsir-ibn-kathir-en.db",
+    "translation-taisirul-quran-bn.db",
+    "words-bn.db",
+)
+
 val prepareContentAssets = tasks.register("prepareContentAssets") {
     group = "content"
     description = "Copies the core pack, the pack catalog, the fonts, and the recitation manifest."
@@ -72,6 +90,7 @@ val prepareContentAssets = tasks.register("prepareContentAssets") {
     inputs.dir(rootProject.file("content/packs"))
     inputs.dir(rootProject.file("content/work/fonts-hafs"))
     inputs.dir(rootProject.file("content/work/fonts-v2"))
+    inputs.property("leanDevPacks", leanDevPacks)
     outputs.dir(contentAssets)
     outputs.dir(devPackAssets)
     doLast {
@@ -89,9 +108,11 @@ val prepareContentAssets = tasks.register("prepareContentAssets") {
         val devPacks = devPackAssets.get().asFile
         devPacks.deleteRecursively()
         File(devPacks, "packs").mkdirs()
-        packs.listFiles { file -> file.name.endsWith(".db") }?.forEach { pack ->
-            pack.copyTo(File(File(devPacks, "packs"), pack.name), overwrite = true)
-        }
+        packs.listFiles { file -> file.name.endsWith(".db") }
+            ?.filter { !leanDevPacks || it.name in screenshotPacks }
+            ?.forEach { pack ->
+                pack.copyTo(File(File(devPacks, "packs"), pack.name), overwrite = true)
+            }
         val studyFont = rootProject.file("content/work/fonts-hafs").walkTopDown()
             .firstOrNull { it.isFile && it.name.endsWith(".ttf") }
             ?: throw GradleException("the study font is missing; run ./gradlew :tools:run --args=fetch")

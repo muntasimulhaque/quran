@@ -9,11 +9,13 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.longClick
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
@@ -180,6 +182,19 @@ class ScreenshotTest {
         }
     }
 
+    /**
+     * A surface identified by a test tag rather than by its copy. The tour
+     * must never anchor on a user-visible string: a label can be renamed
+     * ("Appearance" became "Theme") and the tour that waited on the old word
+     * then fails in CI over a change that is otherwise correct. Tags are
+     * stable; copy is not. See AGENTS.md, "Store screenshots".
+     */
+    private fun waitForTag(tag: String, timeout: Long = 15_000) {
+        rule.waitUntil(timeoutMillis = timeout) {
+            rule.onAllNodesWithTag(tag, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
     private fun chromeIsUp(): Boolean =
         rule.onAllNodesWithContentDescription("Settings").fetchSemanticsNodes().isNotEmpty()
 
@@ -293,7 +308,7 @@ class ScreenshotTest {
         // 6. The settings hub.
         revealChrome()
         rule.onNodeWithContentDescription("Settings").performClick()
-        waitFor("Appearance")
+        waitForTag("settings-hub")
         captureScreen("06-settings")
         back()
 

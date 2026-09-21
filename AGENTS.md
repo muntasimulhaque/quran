@@ -292,6 +292,43 @@ run all of them, because a broken one will not fail in CI and will not be
 noticed until it is needed. If one fails, fix it and note the failure here
 before moving on.
 
+## Store screenshots
+
+The capture is a machine that must not fail and must not be slow. It follows
+the house pattern the family's other apps use, so this section is short on
+purpose: the lessons live in the workflows.
+
+- `screenshots.yml` runs on the three store form factors and uploads
+  `store-screenshots-<form>`. Its `paths` filter must name **every module that
+  can put a pixel on the screen** (`app/`, `ui-kit/`, `feature-*/`,
+  `content-assets/`), because a UI label lives in its feature's `strings.xml`: a
+  filter that watched only `app/` once let a settings rename ship a stale set.
+- The capture build passes `-Pquran.devPacks=screenshot`, so the debug APK
+  carries only the packs the capture tests install. Every pack is 197 MB of
+  install on every leg; the tour opens none of the rest.
+- The workflow restores the Gradle build cache (`gradle/actions/setup-gradle`),
+  not only the dependency cache, and caches the AVD per form factor, so a warm
+  run is minutes rather than most of an hour.
+- The tour anchors on test tags and content descriptions, never on
+  user-visible copy. A tour that waited on the word `Appearance` broke when
+  the label became `Theme`, which is a copy change, not a UI defect. Tags are
+  stable; copy is not. `waitForTag` is the anchor; `waitForText` is for text
+  the tour itself types.
+- A leg must produce every frame the tour captures (`test ... -ge 8`), and a
+  frame is checked against a system dialog before it is kept. Install a set
+  only after comparing every frame with its artifact by `cmp`.
+
+```bash
+gh run list --workflow=screenshots.yml --limit 1
+gh run download <run-id> -n store-screenshots-phone   -D <dir>
+gh run download <run-id> -n store-screenshots-tablet7 -D <dir>
+gh run download <run-id> -n store-screenshots-tablet10 -D <dir>
+```
+
+If a leg fails, read the failing job against a passing one before rerunning:
+the answer is usually a path that did not trigger a recapture, a copy rename
+the tour waited on, or a build that carried packs it did not need.
+
 ## Content rules
 
 - Every dataset in `content/manifest.json` records: source name, URL,
@@ -660,10 +697,10 @@ fetching them again; the space is worth less than the time.
 ## Where the project stands (end of the nineteenth session)
 
 **1.1 (versionCode 12) is handed over for Google Play, awaiting the owner's
-submission.** This session
-answered the reader's eighth report, and the release bundle and screenshots
-are handed over together, before the submission, per the runbook (D-069
-answers the report).
+submission.** This session answered the reader's eighth report, and the
+release bundle and screenshots are handed over together, before the
+submission, per the runbook (D-069 answers the report, D-070 rebuilds the
+screenshot workflow).
 
 **The reader's eighth report (D-069).** The owner read 1.0 on a phone and
 reported sixteen things. One was fatal: turning Mushaf pages quickly killed

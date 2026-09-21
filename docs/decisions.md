@@ -2553,3 +2553,46 @@ installing a translation, and Remove were walked on the running phone profile.
 The owner-machine gates `verify`, `audit`, and `fonts` need `content/raw`,
 which this machine does not carry, and are left for the machine that owns the
 raw sources.
+
+## D-070: The screenshot workflow, made to not fail and not be slow
+
+Date: the nineteenth session, after the reader's eighth report. The push
+that raised 1.1 failed `screenshots.yml` on all three legs. The cause was
+mine and it was avoidable: the tour waited on the visible string
+`Appearance`, and the session renamed that row to `Theme`, so the wait timed
+out over a correct copy change. The same push also exposed three older
+weaknesses in the workflow, all closed here.
+
+**The tour anchors on tags and content descriptions, never on copy.**
+`ScreenshotTest.waitForTag("settings-hub")` waits for a stable
+`Modifier.testTag` on the settings hub; the settings label can be renamed
+forever without touching the tour. A tour that waits on user-visible copy is
+a tour that fails on a wording change, which is not a defect. The one
+remaining `waitFor` is a data string (a surah name), which does not move.
+
+**The capture build carries only the packs its tests install.** A full debug
+build bundles every pack (197 MB of assets, the APK over 380 MB uncompressed),
+and dexing and installing that is most of a capture's wall time. The build
+grew `-Pquran.devPacks=screenshot`, which keeps the five packs the two capture
+tests install (Saheeh, English words, Ibn Kathir English, Taisirul Quran, Bangla
+words) and drops the rest. The release bundle is untouched: this is a
+property on the debug asset task alone.
+
+**The workflow uses the house pattern.** `gradle/actions/setup-gradle`
+restores the Gradle build cache, not only the dependency cache, so a fresh
+runner does not recompile every module; the AVD is cached per form factor as
+before; and the fixed `sleep 20` before the test became a bounded loop that
+waits for the system to settle and dismisses a dialog if it must. Count and
+dialog checks stay.
+
+**The trigger watches every module that draws.** The old `paths` filter
+named only `app/`, so a change to a `feature-*/strings.xml` label would not
+recapture; that is exactly how a stale set could ship. It now names `app/`,
+`ui-kit/`, `feature-*/`, and `content-assets/`.
+
+**Verified.** `:app:assembleDebug -Pquran.devPacks=screenshot` builds the
+five-pack APK (305 MB uncompressed, down from 383 MB); the three capture
+tests (ScreenshotTest, WordByWordTest, MushafTurnTest) pass on the phone
+profile and produce all eight frames, each the app's own surface. The settings
+frame was looked at and shows the new hub. The next push runs the workflow on
+all three legs.

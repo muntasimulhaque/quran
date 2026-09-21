@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.AppSettings
@@ -69,7 +70,7 @@ fun SettingsHub(
     onOpen: (SettingsPage) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier.fillMaxWidth()) {
+    Column(modifier.fillMaxWidth().testTag("settings-hub")) {
         PageRow(
             title = stringResource(R.string.settings_title_language),
             summary = nativeLanguageName(settings.uiLanguage ?: UiLanguage.English.tag),
