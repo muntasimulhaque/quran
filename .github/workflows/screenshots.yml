@@ -132,21 +132,32 @@ jobs:
             # A cold boot can report completion before its emulated storage is
             # mounted; wait it out or the test's output dir breaks.
             for i in $(seq 1 60); do adb -s emulator-5554 shell ls /sdcard/Android >/dev/null 2>&1 && break; sleep 2; done
-            # A loaded software-rendered emulator can raise "Pixel Launcher
-            # isn't responding", and that dialog sits over every frame the
-            # tour takes while it steals the taps the tour is making. Wait for
-            # the system to settle (bounded, not a fixed sleep), then dismiss
-            # anything still up; the capture also checks the window list
-            # before it keeps a frame.
-            for i in $(seq 1 20); do adb -s emulator-5554 shell dumpsys window windows | grep -q "Application Not Responding\|isn't responding" || break; adb -s emulator-5554 shell input keyevent KEYCODE_BACK; sleep 3; done
+            # ANR and crash dialogs are suppressed at the device level. A
+            # loaded software-rendered emulator raises "Pixel Launcher isn't
+            # responding" mid-tour on the heaviest leg, and that dialog sits
+            # over a frame and steals the taps after it. Dismissing dialogs
+            # that are already up cannot win that race; this is the
+            # deterministic fix, and it is what makes a red leg a real
+            # failure instead of an environment flake. The capture test still
+            # checks the window list before keeping a frame, as a second net.
+            adb -s emulator-5554 shell settings put global hide_error_dialogs 1
+            adb -s emulator-5554 shell settings put secure anr_show_background 0
+            # Dismiss anything already up from before that setting landed
+            # (bounded, not a fixed sleep).
+            for i in $(seq 1 10); do adb -s emulator-5554 shell dumpsys window windows | grep -q "Application Not Responding\|isn't responding" || break; adb -s emulator-5554 shell input keyevent KEYCODE_BACK; sleep 2; done
             adb -s emulator-5554 shell am start -a android.intent.action.MAIN -c android.intent.category.HOME >/dev/null 2>&1 || true
-            # One Gradle run, on ONE line: a second connectedAndroidTest
-            # invocation would replace the previous additional output (and with
-            # it the screenshots), and the emulator runner feeds this script to
-            # sh, which chokes on multi-line continuations. The lean dev packs
-            # carry only what the capture tests install, which keeps the APK
-            # small and the install quick.
+            # One Gradle run: a second connectedAndroidTest invocation would
+            # replace the previous additional output, and with it the
+            # screenshots, so the three capture classes are named in one call.
+            # The lean dev packs carry only what the capture tests install,
+            # which keeps the APK small and the install quick. The exit code is
+            # kept, and returned at the very end after the frames are
+            # collected, so a red leg still leaves its capture in the artifact
+            # to be read.
+            set +e
             ./gradlew :app:connectedDebugAndroidTest --console=plain -Pquran.devPacks=screenshot -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest,io.github.muntasimulhaque.quran.WordByWordTest,io.github.muntasimulhaque.quran.MushafTurnTest
+            gradle_status=$?
+            set -e
             # AGP copies the test's additional output off-device (before it
             # uninstalls the app) into the connected additional output folder.
             mkdir -p store-shots
@@ -160,7 +171,8 @@ jobs:
             # A frame must be the app's own surface, never a dialog over it: a
             # system dialog in a store screenshot is worse than no screenshot.
             # Count is checked too, so a leg that captured half the tour fails.
-            test "$(ls store-shots/*.png 2>/dev/null | wc -l)" -ge 8
+            if [ "$(ls store-shots/*.png 2>/dev/null | wc -l)" -lt 8 ]; then echo "the capture is short of the eight frames"; exit 1; fi
+            exit $gradle_status
 
       - name: Upload screenshots
         if: always()

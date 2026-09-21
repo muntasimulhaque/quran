@@ -2811,3 +2811,35 @@ the card's labels.
 compared with its artifact by `cmp`. Frame 08 is the ayah card from the Mushaf
 with its new Translation and Tafsir labels, frame 07 shows Browse's five
 chips, so the frame D-073 left open is closed as well.
+
+## D-075: The screenshot workflow is deterministic
+
+Date: the twenty-first session, during the 1.3 hand-off. The 1.3 push failed
+the 10 inch screenshot leg with `a system dialog stayed over 05-search`. Phone
+and tablet7 passed the same code. This is the old trap in a new shape: the
+workflow dismissed dialogs that were already up before the tour started, but a
+loaded software rendered emulator can raise "Pixel Launcher isn't responding"
+in the middle of the tour, and clearing a dialog after it appears loses that
+race.
+
+**The fix is at the device level.** The capture script now sets
+`hide_error_dialogs 1` and `anr_show_background 0` before the test, so ANR and
+crash dialogs are never drawn. The capture test still checks the window list
+before keeping a frame as a second net. With the race gone, a red leg is a
+real failure instead of an environment flake.
+
+**The procedure lives in AGENTS.md and in the workflow, not in a sibling
+repository.** AGENTS.md now carries the whole capture procedure: what a leg
+must do, why each guard is in the script, how to collect and verify a set, and
+what each failure line means (dialog over a frame, a tour anchor that moved,
+`device offline`, a missing artifact). The instruction to read the family's
+sibling repos is gone: the answer to a capture failure is written here once,
+and a session that meets a new failure writes it here before rerunning.
+
+**A red leg keeps its frames.** The Gradle exit code is captured and returned
+after the frames are copied, so a leg that fails its test still uploads the
+frames it took, and the failing frame can be read instead of guessed at.
+
+**Verification.** The fix was pushed and both workflows ran green: the capture
+in about six minutes on all three legs and the build. The 1.3 bundle was
+handed over with the set.

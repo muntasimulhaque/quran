@@ -294,29 +294,57 @@ before moving on.
 
 ## Store screenshots
 
-The capture is a machine that must not fail and must not be slow. It follows
-the house pattern the family's other apps use, so this section is short on
-purpose: the lessons live in the workflows.
+The capture runs on GitHub's runners, so it is the same machine every time and
+this section is the whole procedure. Nothing here depends on a local computer,
+and nothing here is rediscovered by reading another repository: if a leg ever
+fails, the fix belongs in this section and in `screenshots.yml` before the next
+attempt.
 
-- `screenshots.yml` runs on the three store form factors and uploads
-  `store-screenshots-<form>`. Its `paths` filter must name **every module that
-  can put a pixel on the screen** (`app/`, `ui-kit/`, `feature-*/`,
-  `content-assets/`), because a UI label lives in its feature's `strings.xml`: a
-  filter that watched only `app/` once let a settings rename ship a stale set.
-- The capture build passes `-Pquran.devPacks=screenshot`, so the debug APK
-  carries only the packs the capture tests install. Every pack is 197 MB of
-  install on every leg; the tour opens none of the rest.
-- The workflow restores the Gradle build cache (`gradle/actions/setup-gradle`),
-  not only the dependency cache, and caches the AVD per form factor, so a warm
-  run is minutes rather than most of an hour.
-- The tour anchors on test tags and content descriptions, never on
-  user-visible copy. A tour that waited on the word `Appearance` broke when
-  the label became `Theme`, which is a copy change, not a UI defect. Tags are
-  stable; copy is not. `waitForTag` is the anchor; `waitForText` is for text
-  the tour itself types.
-- A leg must produce every frame the tour captures (`test ... -ge 8`), and a
-  frame is checked against a system dialog before it is kept. Install a set
-  only after comparing every frame with its artifact by `cmp`.
+**The one command that captures.** Push any commit that touches a module which
+can draw (the `paths` filter in `screenshots.yml` names them all) or run the
+workflow by hand; a warm run is about four minutes on all three legs. The
+paths filter must name **every module that can put a pixel on the screen**
+(`app/`, `ui-kit/`, `feature-*/`, `content-assets/`), because a UI label lives
+in its feature's `strings.xml`: a filter that watched only `app/` once let a
+settings rename ship a stale set. When a session has not changed a pixel, it
+says so in the hand-off and does not run the capture.
+
+**What makes a leg pass, in the workflow itself (do not remove these):**
+
+1. `settings put global hide_error_dialogs 1` and
+   `settings put secure anr_show_background 0` run before the test. This is
+   the deterministic fix for the trap below: the dialogs are suppressed at the
+   device level, so a red leg is a real failure rather than an environment
+   flake. Dismissing dialogs after they appear loses the race on the 10 inch
+   leg.
+2. The script waits for `/sdcard/Android` before starting the test. A cold
+   boot reports completion before its emulated storage is mounted, and the
+   test's output directory breaks if it starts first.
+3. The capture build passes `-Pquran.devPacks=screenshot`, so the debug APK
+   carries only the packs the capture tests install. Every pack is 197 MB of
+   install on every leg; the tour opens none of the rest.
+4. The run is one `connectedDebugAndroidTest` invocation, on one line, with
+   the test classes named. A second invocation would replace the first's
+   additional output, and the emulator runner feeds the script to `sh`, which
+   chokes on multi-line continuations. The exit code is kept and returned at
+   the end, after the frames are collected, so a red leg still leaves its
+   capture in the artifact to be read.
+5. The `paths` filter and the capture build are why a run is minutes, not an
+   hour: the Gradle build cache is restored (`gradle/actions/setup-gradle`),
+   not only the dependency cache, and the AVD is cached per form factor.
+6. A leg must produce every frame the tour captures (eight), and the capture
+   test checks the window list before keeping any frame. A frame of Android is
+   worse than no frame at all.
+
+**The tour itself.** It anchors on test tags and content descriptions, never on
+user-visible copy: a tour that waited on the word `Appearance` broke when the
+label became `Theme`, which is a copy change, not a UI defect. Tags are stable;
+copy is not. `waitForTag` is the anchor; `waitForText` is for text the tour
+itself types. It waits for two identical frames on this software rendered
+emulator, never a fixed sleep.
+
+**Collecting a set.** The workflow uploads `store-screenshots-<form>`, phone,
+tablet7, and tablet10, every leg even when its test fails (`if: always()`):
 
 ```bash
 gh run list --workflow=screenshots.yml --limit 1
@@ -325,9 +353,27 @@ gh run download <run-id> -n store-screenshots-tablet7 -D <dir>
 gh run download <run-id> -n store-screenshots-tablet10 -D <dir>
 ```
 
-If a leg fails, read the failing job against a passing one before rerunning:
-the answer is usually a path that did not trigger a recapture, a copy rename
-the tour waited on, or a build that carried packs it did not need.
+Each artifact prefixes its frames with the form factor; strip that prefix into
+`play-store/screenshots/<form>/` and verify every frame against the artifact
+with `cmp` rather than installing them on trust, because a leg can pass while
+holding a frame nobody should ship. If nothing visible changed, the capture is
+not run and the hand-off says so.
+
+**If a leg fails, the order of operations.** Read the failing job's log
+(`gh run view --log-failed --job <id>`):
+
+- `a system dialog stayed over <frame>` means the dialog suppression at the
+  top of the script is missing or was removed; restore it.
+- `Test <name> FAILED` with a node assertion means the tour anchored on
+  something the UI moved or renamed; fix the anchor to a tag.
+- `device offline` or `device not found` on one leg while another passes the
+  same code is the capture's load, not the runner; make the capture lighter,
+  do not rerun.
+- A missing artifact means the script exited before `mkdir store-shots`;
+  that is why the Gradle exit code is now kept and returned last.
+
+Rerun only after the failing step above is named and, if it is a script
+problem, fixed in `screenshots.yml` in the same session.
 
 ## Content rules
 
@@ -467,17 +513,20 @@ implement it and update this list.
 - Emulator screenshots and local captures prove nothing about Arabic
   shaping. Shaping and glyph fidelity are verified from CI artifacts and
   golden renders.
-- A screenshot leg can pass while holding a photograph of Android. A loaded
-  software-rendered emulator raises "Pixel Launcher isn't responding", the
-  dialog sits over every frame after it, and it swallows the taps the tour is
-  making, so the tour ends up on the wrong screens: the 10-inch set once came
-  back with that dialog in all sixteen frames and the workflow still green.
-  The capture checks the window list before keeping a frame and fails the run
-  rather than write a dialog into the store listing, and the leg requires
-  every frame the tour captures (eight, since the thirteenth session) instead
-  of one. Even so, install a set only after comparing every frame with the
-  artifact: the guard catches the dialog, and `cmp` is what catches everything
-  else.
+- A screenshot leg can pass while holding a photograph of Android, and it can
+  also fail over one. A loaded software-rendered emulator raises "Pixel
+  Launcher isn't responding", the dialog sits over every frame after it, and
+  it swallows the taps the tour is making, so the tour ends up on the wrong
+  screens: the 0.5 set once came back with that dialog in all sixteen 10-inch
+  frames and the workflow still green, and the 1.3 push failed the 10-inch leg
+  because the dialog appeared mid-tour. Clearing a dialog that is already up
+  loses that race. The workflow now suppresses the dialogs at the device level
+  (`settings put global hide_error_dialogs 1`, `settings put secure
+  anr_show_background 0`) before it starts the test, which makes a red leg a
+  real failure; the capture still checks the window list before keeping a
+  frame and the leg requires every frame the tour captures (eight). Even so,
+  install a set only after comparing every frame with the artifact: the guard
+  catches the dialog, and `cmp` is what catches everything else.
 - The bundle and the screenshots are one delivery, and the screenshots come
   first. A set refreshed after the owner has submitted has nothing left to be
   used for: the store already holds the old one, so the work is wasted and the
