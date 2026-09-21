@@ -759,16 +759,17 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the twenty-first session)
 
-**1.3 (versionCode 14) is handed over to the owner for submission.** It
-answers the reader's tenth report (D-074), and the screenshot workflow was
-made deterministic (D-075). 147,700,916 bytes, SHA-256
+**1.3 (versionCode 14) is submitted to Google Play for review.** It answers
+the reader's tenth report (D-074), and the screenshot workflow was made
+deterministic (D-075). What was handed over: 147,700,916 bytes, SHA-256
 `66dbc990261f41bdc31d42715a4a9d09ca3bb3acfcc2f60503a44777feffb1b1`, signed
 with the shared upload certificate, carrying only the core pack. The bundle
 was built from `93efe44`, which is byte-for-byte the app source in the tree:
 the commits after it touch docs, the screenshots, and the workflow only. The
 screenshots came from run 35630768597, all three form factors, every frame
 compared with its artifact by `cmp`, and both were handed over together,
-before the submission (D-076).
+before the submission. The hand-off copy was deleted once the submission was
+confirmed; `play-store/aab/` keeps only its own note (D-076).
 
 **The reader's tenth report (D-074).** Seven fixes, each on a surface the
 ninth report had just reshaped. The Language page now survives the Activity

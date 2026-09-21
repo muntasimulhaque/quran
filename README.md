@@ -4,8 +4,8 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 1.3 (versionCode 14) is handed over for Google Play, answering the
-reader's tenth report. Changing the language leaves the reader on the Language
+**Status:** 1.3 (versionCode 14) is submitted to Google Play for review,
+answering the reader's tenth report. Changing the language leaves the reader on the Language
 page, speaking the language they chose; the ayah card's horizontal rules are
 replaced by Translation and Tafsir labels; About this surah no longer truncates
 when opened; every text-only action wears the app's one button shape, so Save

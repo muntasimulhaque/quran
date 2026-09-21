@@ -2876,3 +2876,8 @@ from run 35630768597 (the deterministic capture, D-075), all three form
 factors, all 24 frames compared with their artifact by `cmp` before being
 installed. Both are handed over together, before the submission. The hand-off
 copy is deleted once the owner confirms the submission.
+
+**The hand-off is closed.** The owner submitted 1.3 to Play for review, so the
+hand-off copy of the bundle was deleted the same session, as the runbook
+requires: the artifact stays in the build run and in Play, never sitting in the
+repository. Nothing else moved after the submission.
