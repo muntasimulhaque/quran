@@ -4,17 +4,18 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 1.2 (versionCode 13) is submitted to Google Play for review; the
-working tree carries the reader's tenth report (D-074). Changing the language
-now leaves the reader on the Language page, speaking the language they chose;
-the ayah card's horizontal rules are replaced by Translation and Tafsir labels;
-About this surah no longer truncates when opened; every text-only action wears
-the app's one button shape, so Save and Note can no longer be mistaken for each
-other; Browse has a Notes tab that lists the ayahs a note was written on; and
-the font sizes run 0.65 through 1.2. The version name follows the runbook: 1.0,
-then 1.1, then 1.2. The bundle carries only the core pack, with everything else
-added from the project's own Releases when a reader asks for it. The listing,
-icon, feature graphic, and screenshots per form factor are in
+**Status:** 1.3 (versionCode 14) is handed over for Google Play, answering the
+reader's tenth report. Changing the language leaves the reader on the Language
+page, speaking the language they chose; the ayah card's horizontal rules are
+replaced by Translation and Tafsir labels; About this surah no longer truncates
+when opened; every text-only action wears the app's one button shape, so Save
+and Note can no longer be mistaken for each other; Browse has a Notes tab that
+lists the ayahs a note was written on; and the font sizes run 0.65 through 1.2.
+The screenshot capture is deterministic now, and its whole procedure is in
+AGENTS.md (D-075). The version name follows the runbook: 1.0, then 1.1, 1.2,
+then 1.3. The bundle carries only the core pack, with everything else added
+from the project's own Releases when a reader asks for it. The listing, icon,
+feature graphic, and screenshots per form factor are in
 [`play-store/`](play-store/), refreshed from CI.
 
 ## What it does

@@ -759,6 +759,17 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the twenty-first session)
 
+**1.3 (versionCode 14) is handed over to the owner for submission.** It
+answers the reader's tenth report (D-074), and the screenshot workflow was
+made deterministic (D-075). 147,700,916 bytes, SHA-256
+`66dbc990261f41bdc31d42715a4a9d09ca3bb3acfcc2f60503a44777feffb1b1`, signed
+with the shared upload certificate, carrying only the core pack. The bundle
+was built from `93efe44`, which is byte-for-byte the app source in the tree:
+the commits after it touch docs, the screenshots, and the workflow only. The
+screenshots came from run 35630768597, all three form factors, every frame
+compared with its artifact by `cmp`, and both were handed over together,
+before the submission (D-076).
+
 **The reader's tenth report (D-074).** Seven fixes, each on a surface the
 ninth report had just reshaped. The Language page now survives the Activity
 recreation a language choice causes, so the reader stays where they chose.
@@ -773,10 +784,13 @@ row opens the note over its ayah; `saved.db` went to version 2 with a
 `note_at` column.
 
 **Verification.** JVM suite, lint, and assembleDebug green; data instrumented
-tests 22/22; app instrumented tests 12/12 on the phone profile. Every changed
-surface walked on the emulator. The store set was captured from CI (run
-35625457689), all three form factors, every frame compared with its artifact
-by `cmp` before it was installed, and the frame D-073 left open is closed.
+tests 22/22; app instrumented tests 12/12 on the phone profile. All five
+owner-machine content gates ran (`verify`, `audit`, `fonts`, `checkdb`,
+`search`), and every changed surface was walked on the emulator. The store set
+was captured from CI (run 35630768597, the deterministic capture), all three
+form factors, every frame compared with its artifact by `cmp` before it was
+installed. The frame D-073 left open is closed, and the capture now completes
+in under five minutes on all three legs.
 
 ## Where the project stands (end of the twentieth session)
 

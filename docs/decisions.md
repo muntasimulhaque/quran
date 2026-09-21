@@ -2843,3 +2843,36 @@ frames it took, and the failing frame can be read instead of guessed at.
 **Verification.** The fix was pushed and both workflows ran green: the capture
 in about six minutes on all three legs and the build. The 1.3 bundle was
 handed over with the set.
+
+## D-076: The 1.3 hand-off
+
+Date: the twenty-first session, after D-074 and D-075. The owner asked for the
+Play release, so the version was raised to 1.3 (versionCode 14) and the whole
+runbook was walked.
+
+**The release.** `versionCode` 13 to 14, `versionName` 1.2 to 1.3, and the
+version line in `play-store/listing.md` updated. The notes are 410 characters,
+one paragraph of plain prose, kept under their own heading as
+`## Release notes (1.3, 410 characters)`. Every earlier release's notes stay
+where they were.
+
+**The gates.** The JVM suite, lint, and `assembleDebug` are green. Both
+instrumented suites pass (data 22/22, app 12/12 on the phone profile). All five
+owner-machine content gates were run on the owner's own raw exports:
+`verify` (29 datasets, checksums and structure), `audit` (6236 ayahs against
+Tanzil, 0 unexplained differences), `fonts` (628,169 study codepoints, 604
+pages, 22,985,677 reading codepoints, all covered), `checkdb` (the committed
+database at 128,966,656 bytes and 10 pack files), and `search` (round trips,
+folding, 465 excerpts).
+
+**The hand-off.** The bundle is `quran-1.3-vc14.aab`, 147,700,916 bytes,
+SHA-256 `66dbc990261f41bdc31d42715a4a9d09ca3bb3acfcc2f60503a44777feffb1b1`,
+signed with the shared upload certificate
+(`53:7D:09:D2:...:0D:9D:E5:21`, verified with `keytool -printcert`). It was
+built by the `signed-bundle` job of the green build run for `93efe44`, and the
+app source in the tree is byte-identical to that commit: the commits after it
+touch docs, the screenshots, and the workflow only. The screenshot set came
+from run 35630768597 (the deterministic capture, D-075), all three form
+factors, all 24 frames compared with their artifact by `cmp` before being
+installed. Both are handed over together, before the submission. The hand-off
+copy is deleted once the owner confirms the submission.
