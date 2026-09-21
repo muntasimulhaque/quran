@@ -112,7 +112,7 @@ What each set shows, in order:
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
 
-## Release notes (1.2, 448 characters)
+## Release notes (1.2, 397 characters)
 
 Long-press an ayah and the pill now has a Note action, and the phone's back button closes it instead of the app. More shows only what the reading behind it does not: from the Mushaf the translation and word by word, from study the tafsir. Settings lists read alphabetically, and word meanings sits at the top of Translations. Fixed a crash when switching language. No ads, no trackers, no account.
 
