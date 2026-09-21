@@ -629,18 +629,10 @@ fetching them again; the space is worth less than the time.
 
 ## Next session: the remaining queue, in order
 
-0. **Harden the language-change path.** The reader reported the app closing
-   once on the first-launch language choice, and once on opening Browse after
-   switching to Bangla; neither reproduced here (D-069). `chooseLanguage` sets
-   the in-memory settings, which name the new translation and tafsir packs,
-   before `SettingsStore.setLanguage` writes and before `reopenLibrary`
-   attaches them, and `Activity.recreate` fires on the same tap. A screen that
-   reads a pack the freshly opened database has not attached, or a query on a
-   `ContentDatabase` that `reopenLibrary` or `removePack` closed under a worker
-   (`reopenLibrary` does `close()` then swaps), is the shape to look for. The
-   fix is to apply the language and reopen before any frame or query can see
-   the half-applied state, and to make the database swap safe for in-flight
-   readers, not to guess.
+0. **The screenshot tour is unchanged since 1.2** except for one thing:
+the ayah card frame. It was changed to capture the card from the Mushaf, its
+fuller face, after the 1.2 set was collected. The next session that touches
+the UI captures the set again and closes it (D-073).
 
 1. **Measure on real hardware.** The numbers in D-037 come from a software
    rendered emulator, the slowest Android this app will run on. A
@@ -693,6 +685,35 @@ fetching them again; the space is worth less than the time.
   lines were fixed in the fourteenth session while the pager still ran left
   to right on the screen; `MushafTurnTest` now pins the direction on every
   form factor.
+
+
+## Where the project stands (end of the twentieth session)
+
+**1.2 (versionCode 13) is submitted to Google Play for review.** This session
+answered the reader's ninth report (D-072) and closed the hand-off (D-073).
+
+**The reader's ninth report (D-072).** The language-change crash was found at
+last, and it was two defects hiding each other. `openLibrary` loaded the pack
+catalog unmarked and marked only a throwaway copy, so the view model believed
+every pack missing; with word by word on, a language switch re-fetched a word
+list already on the device and reopened the library, which closed the old
+database under any in-flight query and threw on a worker. The catalog is now
+marked once, in `openLibrary` and `reopenLibrary`. `ContentDatabase` hands each
+query a read ticket from its start to its cursor's close, and close waits for
+the last ticket, with the fresh library published before the old is retired on
+a worker. The note moved off the ayah card into the long-press pill, which
+gained a Note action and lost the surah reference; More now shows only what
+the reading behind it does not (Mushaf: translation, word by word, tafsir;
+study: tafsir only). The phone's back button closes the pill before the app.
+Settings lists read alphabetically, and word meanings sits above the
+translations. Bangla surah names stay content backlog with their two candidate
+sources named in D-072.
+
+**Verification.** JVM suite, lint, assembleDebug green; data instrumented tests
+19/19 with a new `PackCatalogTest`; search and the Mushaf turn pass. The app
+tour's leg died with the emulator (device not found), an environment failure.
+The screenshot set is from run 35595201651; the tour's ayah-card frame was
+adjusted after it and is named open in D-073.
 
 ## Where the project stands (end of the nineteenth session)
 
