@@ -698,11 +698,11 @@ fetching them again; the space is worth less than the time.
 
 ## Next session: the remaining queue, in order
 
-0. **The store set is current again.** The tenth report's session (D-074)
-   captured and installed the eight frames per form factor from run
-   35625457689, so frame 08 shows the card's labels and frame 07 the five
-   tabs, both closing the frame D-073 left open. The next session that
-   changes a pixel captures again.
+0. **The store set is current, and the capture can be trusted.** D-073's open
+   frame is closed, and the workflow suppresses ANR dialogs at the device
+   level, so a red leg is a real failure (D-075). The next session that
+   changes a pixel captures again with the procedure in "Store screenshots",
+   and does not read a sibling repository to do it.
 
 1. **Measure on real hardware.** The numbers in D-037 come from a software
    rendered emulator, the slowest Android this app will run on. A
