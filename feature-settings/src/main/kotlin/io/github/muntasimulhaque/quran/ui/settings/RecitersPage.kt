@@ -35,6 +35,7 @@ import io.github.muntasimulhaque.quran.data.DownloadedSurah
 import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.Recitation
 import io.github.muntasimulhaque.quran.feature.settings.R
+import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
@@ -83,9 +84,11 @@ fun RecitersPage(
                         // the room back; a reciter nothing was heard from has
                         // nothing to remove.
                         if (pack.installed) {
-                            PackActionText(stringResource(R.string.pack_action_remove)) {
-                                actions.onRemovePack(pack.id)
-                            }
+                            TextButton(
+                                label = stringResource(R.string.pack_action_remove),
+                                onClick = { actions.onRemovePack(pack.id) },
+                                quiet = true,
+                            )
                         }
                     },
                 )
@@ -208,7 +211,11 @@ private fun DownloadedSurahRow(row: DownloadedSurah, onRemove: () -> Unit) {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        PackActionText(stringResource(R.string.pack_action_remove), onRemove)
+        TextButton(
+            label = stringResource(R.string.pack_action_remove),
+            onClick = onRemove,
+            quiet = true,
+        )
     }
 }
 

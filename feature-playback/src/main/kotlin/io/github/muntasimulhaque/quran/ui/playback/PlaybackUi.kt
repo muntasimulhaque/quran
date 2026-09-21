@@ -39,6 +39,7 @@ import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.ListenOffer
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
+import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
@@ -117,18 +118,21 @@ fun PlaybackBar(
             }
             Spacer(Modifier.padding(horizontal = 6.dp))
             when {
-                state.downloadFailed -> PillText(stringResource(R.string.playback_retry), onDownload)
+                state.downloadFailed -> TextButton(
+                    label = stringResource(R.string.playback_retry),
+                    onClick = onDownload,
+                )
                 downloading -> TransportButton(
                     Transport.Close,
                     stringResource(R.string.playback_cancel_download),
                     onClose,
                 )
                 needsDownload -> {
-                    PillText(
-                        stringResource(
+                    TextButton(
+                        label = stringResource(
                             if (state.pendingIsContinuation) R.string.playback_continue else R.string.playback_download,
                         ),
-                        onDownload,
+                        onClick = onDownload,
                     )
                     // A request the reader has not answered is not a trap:
                     // the same close that ends playback takes the offer away,
@@ -181,24 +185,6 @@ fun PlaybackBar(
                 trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
             )
         }
-    }
-}
-
-@Composable
-private fun PillText(label: String, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .minimumInteractiveComponentSize()
-            .clip(RoundedCornerShape(50))
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 8.dp),
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-        )
     }
 }
 
@@ -441,9 +427,15 @@ private fun ListenOfferBar(
                     stringResource(R.string.playback_cancel_download),
                     onCancel,
                 )
-                offer.failed -> PillText(stringResource(R.string.playback_retry), onConfirm)
+                offer.failed -> TextButton(
+                    label = stringResource(R.string.playback_retry),
+                    onClick = onConfirm,
+                )
                 else -> {
-                    PillText(stringResource(R.string.playback_download), onConfirm)
+                    TextButton(
+                        label = stringResource(R.string.playback_download),
+                        onClick = onConfirm,
+                    )
                     // An offer the reader does not want is not a trap: the
                     // same close that cancels a download takes the offer
                     // away, so nothing sits over the reading unasked.

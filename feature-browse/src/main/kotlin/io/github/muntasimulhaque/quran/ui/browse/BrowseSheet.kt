@@ -7,6 +7,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,19 +57,23 @@ private enum class BrowseTab(val labelRes: Int) {
     Juz(R.string.browse_tab_juz),
     LastRead(R.string.browse_tab_last_read),
     Saved(R.string.browse_tab_saved),
+    Notes(R.string.browse_tab_notes),
 }
 
 /**
  * The browse sheet: the surahs, the thirty juz, where the reader has been
- * reading, and everything they saved. Each list is one line per row and opens
- * the reader exactly where it says, so a reader is never more than two taps
- * from any ayah in the Quran.
+ * reading, everything they saved, and every ayah they wrote a note on. Each
+ * list is one line per row and opens the reader exactly where it says, so a
+ * reader is never more than two taps from any ayah in the Quran.
  *
- * Four tabs, one row of them, and every tab was asked for: Surahs and Juz are
- * the Book's own divisions, Saved is the reader's own work, and Last Read is
- * the way back to a place they left.
+ * Five tabs, and every tab was asked for: Surahs and Juz are the Book's own
+ * divisions, Saved and Notes are the reader's own work, and Last Read is the
+ * way back to a place they left. Saved is what the reader marked to keep;
+ * Notes is only the ayahs they wrote something on, so the two lists answer
+ * two different questions and a note can be found without reading every
+ * saved row.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun BrowseSheet(
     content: ContentDatabase,
@@ -80,6 +87,7 @@ fun BrowseSheet(
     onSurah: (Int) -> Unit,
     onRemove: (Int) -> Unit,
     onForget: (Int) -> Unit,
+    onNote: (Int) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var tab by remember {
@@ -92,10 +100,12 @@ fun BrowseSheet(
     val juzList = rememberLazyListState()
     val lastReadList = rememberLazyListState()
     val savedList = rememberLazyListState()
+    val notesList = rememberLazyListState()
     val surahsGate = remember(surahsList) { SheetDragGate(surahsList) }
     val juzGate = remember(juzList) { SheetDragGate(juzList) }
     val lastReadGate = remember(lastReadList) { SheetDragGate(lastReadList) }
     val savedGate = remember(savedList) { SheetDragGate(savedList) }
+    val notesGate = remember(notesList) { SheetDragGate(notesList) }
     val juzStarts by produceState(initialValue = emptyList<JuzStart>(), content) {
         value = withContext(Dispatchers.IO) { content.juzStarts() }
     }
@@ -138,48 +148,30 @@ fun BrowseSheet(
                 .fillMaxSize()
                 .imePadding(),
         ) {
-            // The sheet needs no title: the four tabs name everything it
-            // holds, and a heading over a control that already says where the
-            // reader is spends the first line of the sheet on nothing.
-            Row(
+            // The sheet needs no title: the tabs name everything it holds,
+            // and a heading over a control that already says where the reader
+            // is spends the first line of the sheet on nothing.
+            //
+            // The tabs wrap rather than scroll, the way the search filters do:
+            // the labels are read in two languages and follow the system font
+            // scale, and a tab that runs off the edge is a list the reader
+            // cannot open. Wrapped, every tab stays visible and whole. Each
+            // tab is its own rounded chip, the shape search already taught the
+            // reader, rather than one strip that would have to break its own
+            // outline to wrap.
+            FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 22.dp, end = 22.dp, top = Space.Block),
-                horizontalArrangement = Arrangement.Center,
+                    .padding(start = 16.dp, end = 16.dp, top = Space.Block),
+                horizontalArrangement = Arrangement.spacedBy(Space.Line, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(Space.Line),
             ) {
-                Row(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(50))
-                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-                        .padding(3.dp),
-                    horizontalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                    BrowseTab.entries.forEach { entry ->
-                        val active = entry == tab
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(50))
-                                .background(
-                                    if (active) {
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
-                                    } else {
-                                        androidx.compose.ui.graphics.Color.Transparent
-                                    },
-                                )
-                                .clickable { tab = entry }
-                                .padding(horizontal = 12.dp, vertical = 8.dp),
-                        ) {
-                            Text(
-                                text = stringResource(entry.labelRes),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = if (active) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                },
-                            )
-                        }
-                    }
+                BrowseTab.entries.forEach { entry ->
+                    BrowseTabChip(
+                        label = stringResource(entry.labelRes),
+                        active = entry == tab,
+                        onClick = { tab = entry },
+                    )
                 }
             }
             Spacer(Modifier.height(8.dp))
@@ -226,8 +218,47 @@ fun BrowseSheet(
                     onAyah = onAyah,
                     onRemove = onRemove,
                 )
+                BrowseTab.Notes -> NotesList(
+                    saved = saved,
+                    texts = texts,
+                    listState = notesList,
+                    listModifier = Modifier.sheetDragGate(notesGate),
+                    onNote = onNote,
+                )
             }
         }
+    }
+}
+
+/**
+ * One tab as a chip: the reader taps a chip, so the tab row is the same kind
+ * of control as the search filters, and one choice among five is read the same
+ * way wherever the app asks for it.
+ */
+@Composable
+private fun BrowseTabChip(label: String, active: Boolean, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(
+                if (active) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f)
+                },
+            )
+            .clickable(role = Role.RadioButton, onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 8.dp),
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = if (active) {
+                MaterialTheme.colorScheme.onPrimary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
+        )
     }
 }
 

@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -55,6 +54,7 @@ import io.github.muntasimulhaque.quran.data.TafsirPassage
 import io.github.muntasimulhaque.quran.data.TranslationLine
 import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.feature.study.R
+import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
@@ -182,13 +182,28 @@ fun AyahCard(
             // its translation, and its meanings are already open on the page,
             // and only the tafsir doors remain.
             if (fromMushaf) {
+                // What each block is is said in words, not with a rule: a
+                // horizontal line between the translation and the tafsir is
+                // furniture the app draws nowhere else, and a name over the
+                // text tells the reader more than a line ever could. The
+                // translation is named once because it is one block even
+                // when more than one translation is on; the pack's own name
+                // stays on the lines, where it says whose reading it is.
+                if (lines.isNotEmpty()) {
+                    Text(
+                        text = stringResource(R.string.card_translation_label),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Block),
+                    )
+                }
                 lines.forEach { line ->
                     if (lines.size > 1) {
                         Text(
                             text = line.packName,
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f),
-                            modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = 16.dp),
+                            modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = 14.dp),
                         )
                     }
                     TranslationBody(
@@ -196,7 +211,7 @@ fun AyahCard(
                         modifier = Modifier.padding(
                             start = 22.dp,
                             end = 22.dp,
-                            top = if (lines.size > 1) Space.Tight else Space.Block,
+                            top = if (lines.size > 1) Space.Tight else Space.Line,
                         ),
                         sizeSp = settings.translationSp,
                         lineSp = settings.translationLineSp,
@@ -234,7 +249,7 @@ fun AyahCard(
                     }
                 }
 
-                Spacer(Modifier.height(Space.Section))
+                Spacer(Modifier.height(Space.Block))
 
                 if (hasWords) {
                     DoorRow(
@@ -268,6 +283,18 @@ fun AyahCard(
                     text = stringResource(R.string.card_add_tafsir),
                     onClick = onAddContent,
                     modifier = Modifier.padding(horizontal = 22.dp),
+                )
+            }
+            // The label stands over the tafsir doors in both readings: the
+            // doors themselves name the pack, never the kind of text, so
+            // without a name over them "Ibn Kathir" could be read as the word
+            // by word list.
+            if (tafsirPacks.isNotEmpty()) {
+                Text(
+                    text = stringResource(R.string.card_tafsir_label),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Block),
                 )
             }
             tafsirPacks.sortedBy { it.language }.forEach { pack ->
@@ -348,10 +375,6 @@ private fun DoorRow(
     val state = open?.let {
         stringResource(if (it) R.string.card_door_shown else R.string.card_door_hidden)
     }
-    HorizontalDivider(
-        modifier = Modifier.padding(horizontal = 22.dp),
-        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-    )
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -468,31 +491,27 @@ private fun NoteEditor(initial: String?, onSave: (String?) -> Unit, onClear: () 
             .padding(horizontal = 22.dp, vertical = 10.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
+            // The word at the left names the sheet; the two at the right
+            // touch. The name is bare type and the actions wear the app's
+            // button shape, so "Note" and "Save" are never mistaken for
+            // the same kind of word.
             Text(
                 text = stringResource(R.string.card_note_label),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),
             )
             if (!initial.isNullOrBlank()) {
-                Text(
-                    text = stringResource(R.string.action_clear),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(50))
-                        .clickable(onClick = onClear)
-                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                TextButton(
+                    label = stringResource(R.string.action_clear),
+                    onClick = onClear,
+                    quiet = true,
                 )
             }
-            Text(
-                text = stringResource(R.string.study_note_save),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(50))
-                    .clickable { onSave(draft.trim().takeIf { it.isNotEmpty() }) }
-                    .padding(horizontal = 10.dp, vertical = 6.dp),
+            TextButton(
+                label = stringResource(R.string.study_note_save),
+                onClick = { onSave(draft.trim().takeIf { it.isNotEmpty() }) },
+                modifier = Modifier.padding(start = Space.Line),
             )
         }
         BasicTextField(

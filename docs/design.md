@@ -150,7 +150,9 @@ closes the sheet, and the hub keeps its place while a page is open (D-046).
 * **Text**: the Quran text, the translation, the tafsir, and the word by word
   aid, each with its own five steps, above a sample drawn from the reader's
   own ayah so a change is judged on the page it is about to change. The five
-  steps are 0.75, 0.85, 1, 1.2, and 1.4 of each face's base.
+  steps are 0.65, 0.75, 0.85, 1, and 1.2 of each face's base. A stored value
+  lands on the nearest step, so a scale the reader chose before the list
+  changed keeps its meaning.
 * **Reading**: keep the screen awake, and follow the reciter.
 * **Reciters**: one reciter is the reader's, a radio mark at the left says
   which, each reciter carries its own downloaded surahs with their sizes, and

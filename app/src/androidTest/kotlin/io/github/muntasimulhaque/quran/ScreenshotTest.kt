@@ -339,9 +339,14 @@ class ScreenshotTest {
         captureScreen("08-ayah-card")
         back()
 
-        // Leave the app on the Mushaf page for the next run.
-        revealChrome()
-        rule.onNodeWithContentDescription("Switch to the Mushaf page").performClick()
-        Thread.sleep(800)
+        // Leave the app on the Mushaf page for the next run. The card was
+        // captured from the Mushaf, so the door already offers the study
+        // reading when the tour is here; asking for the Mushaf again would
+        // look for a door that is not on the bar.
+        if (!inMushaf()) {
+            revealChrome()
+            rule.onNodeWithContentDescription("Switch to the Mushaf page").performClick()
+            Thread.sleep(800)
+        }
     }
 }

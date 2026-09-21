@@ -17,6 +17,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -92,8 +93,14 @@ fun SettingsSheet(
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var page by remember { mutableStateOf<SettingsPage?>(null) }
-    var credits by remember { mutableStateOf(false) }
+    // The page survives the window, not only the composition. A change of
+    // language recreates the Activity, and a page kept in plain `remember`
+    // went with the old window: the reader chose a language on the Language
+    // page and came back to the reading. The open page and the open credits
+    // are written into the saved state, so the sheet comes back up where the
+    // choice was made, in the language just chosen.
+    var page by rememberSaveable { mutableStateOf<SettingsPage?>(null) }
+    var credits by rememberSaveable { mutableStateOf(false) }
     val hubScroll = rememberScrollState()
 
     ModalBottomSheet(

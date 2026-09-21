@@ -28,6 +28,7 @@ import io.github.muntasimulhaque.quran.data.ReadPlace
 import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.feature.browse.R
+import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.theme.LatinReading
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
@@ -82,6 +83,59 @@ internal fun LastReadList(
                 action = stringResource(R.string.action_forget) to { onForget(place.ayahNumber) },
                 // The row is the door: tapping the place opens it, so an
                 // Open label beside it is a second door to the same room.
+                showOpen = false,
+            )
+        }
+    }
+}
+
+/**
+ * The ayahs the reader wrote a note on, newest note first. The note itself is
+ * not drawn here: a note is the reader's own writing, and the row's work is
+ * to name the place that holds it. A tap opens the note where it was written,
+ * on its ayah: the reader tapped a row in the Notes list because they want to
+ * read or change what they wrote, and sending them to the ayah to hunt for it
+ * would be a second errand.
+ */
+@Composable
+internal fun NotesList(
+    saved: List<SavedAyah>,
+    texts: Map<Int, AyahText>,
+    listState: LazyListState,
+    listModifier: Modifier = Modifier,
+    onNote: (Int) -> Unit,
+) {
+    // The order is the note's own, not the ayah's: a note written today on an
+    // ayah saved last year is today's note, and the reader looking for what
+    // they last wrote must find it at the top. A note from before this
+    // column existed falls back to the moment the ayah was saved.
+    val notes = saved
+        .filter { !it.note.isNullOrBlank() }
+        .sortedByDescending { it.noteAt ?: it.createdAt }
+    if (notes.isEmpty()) {
+        EmptyNote(
+            title = stringResource(R.string.notes_empty_title),
+            body = stringResource(R.string.notes_empty_body),
+        )
+        return
+    }
+    LazyColumn(
+        state = listState,
+        modifier = listModifier,
+        contentPadding = PaddingValues(bottom = 28.dp),
+    ) {
+        items(notes, key = { it.ayahNumber }) { row ->
+            val text = texts[row.ayahNumber]
+            AyahRow(
+                surah = text?.surahName
+                    ?: stringResource(R.string.saved_reference_fallback, row.ayahNumber),
+                ayah = text?.ayahLabel,
+                arabic = "",
+                translation = null,
+                detail = stringResource(R.string.notes_detail, moment(row.noteAt ?: row.createdAt)),
+                onClick = { onNote(row.ayahNumber) },
+                // The row opens the note itself, so an Open label beside it
+                // would be a second name for the same tap.
                 showOpen = false,
             )
         }
@@ -186,7 +240,17 @@ private fun AyahRow(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            action?.let { RowAction(it.first, it.second) }
+            // Remove and Forget are actions, so they wear the app's button
+            // shape: the Open label beside them is a sign, not a control,
+            // and the two never read alike.
+            action?.let {
+                TextButton(
+                    label = it.first,
+                    onClick = it.second,
+                    modifier = Modifier.padding(start = 10.dp),
+                    quiet = true,
+                )
+            }
         }
         if (!detail.isNullOrBlank()) {
             Text(
@@ -239,20 +303,6 @@ private fun AyahRow(
             )
         }
     }
-}
-
-@Composable
-private fun RowAction(label: String, onClick: () -> Unit) {
-    Text(
-        text = label,
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier
-            .padding(start = 14.dp)
-            .clip(RoundedCornerShape(50))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 6.dp, vertical = 2.dp),
-    )
 }
 
 @Composable

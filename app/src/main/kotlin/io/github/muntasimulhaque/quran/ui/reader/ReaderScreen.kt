@@ -32,6 +32,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +61,7 @@ import io.github.muntasimulhaque.quran.ui.browse.BrowseSheet
 import io.github.muntasimulhaque.quran.ui.mushaf.MushafPage
 import io.github.muntasimulhaque.quran.ui.mushaf.PAGE_ASPECT
 import io.github.muntasimulhaque.quran.ui.playback.PlaybackBar
+import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.shortReciterName
 import io.github.muntasimulhaque.quran.ui.reader.Icon
@@ -110,8 +112,17 @@ fun ReaderScreen(
     var chrome by remember { mutableStateOf(false) }
     var selected by remember { mutableStateOf<Ayah?>(null) }
     var cardAyah by remember { mutableStateOf<Ayah?>(null) }
-    var cardNote by remember { mutableStateOf<Ayah?>(null) }
-    var sheet by remember { mutableStateOf(ReaderSheet.None) }
+    // The note sheet is keyed by the ayah's number, not by the ayah itself:
+    // the same sheet opens from the reading's pill and from a Notes row in
+    // Browse, and Browse only knows the number until the reader is there.
+    var cardNote by remember { mutableStateOf<Int?>(null) }
+    // The open sheet survives the window, not only the composition: a change
+    // of language recreates the Activity, and a sheet kept in plain `remember`
+    // closed with the old window while the reader was still in it. The reader
+    // chose a language from the Language page and was returned to the reading;
+    // the sheet is written into the saved state, so the choice is answered
+    // where it was made (owner decision, 21).
+    var sheet by rememberSaveable { mutableStateOf(ReaderSheet.None) }
     var touch by remember { mutableIntStateOf(0) }
     val context = androidx.compose.ui.platform.LocalContext.current
 
@@ -311,7 +322,7 @@ fun ReaderScreen(
                     cardAyah = ayah
                     selected = null
                 },
-                onNote = { ayah -> cardNote = ayah },
+                onNote = { ayah -> cardNote = ayah.number },
                 onShareText = { text -> shareAyah(text) },
                 onTouch = { touch++ },
                 onReciter = { sheet = ReaderSheet.Settings },
@@ -344,6 +355,14 @@ fun ReaderScreen(
             },
             onRemove = { viewModel.removeSaved(it) },
             onForget = { viewModel.forgetPlace(it) },
+            onNote = { ayahNumber ->
+                // The row the reader tapped says "a note on this ayah": the
+                // reading goes to the ayah and the note opens over it, so the
+                // words the note was written about are under the sheet.
+                sheet = ReaderSheet.None
+                viewModel.jumpToAyah(ayahNumber)
+                cardNote = ayahNumber
+            },
         )
         ReaderSheet.Search -> SearchSheet(
             content = content,
@@ -382,6 +401,10 @@ fun ReaderScreen(
             actions = SettingsActions(
                 onLanguage = { tag ->
                     io.github.muntasimulhaque.quran.data.UiLanguage.of(tag)?.let { language ->
+                        // The language already chosen is not chosen again: a
+                        // second recreation for the same answer would close
+                        // the page for nothing.
+                        if (language.tag == settings.uiLanguage) return@let
                         viewModel.chooseLanguage(language)
                         // The locale belongs to the Activity's own resources;
                         // the recreation brings every window up speaking it.
@@ -430,12 +453,12 @@ fun ReaderScreen(
         )
     }
 
-    cardNote?.let { ayah ->
-        val savedRow = saved.firstOrNull { it.ayahNumber == ayah.number }
+    cardNote?.let { ayahNumber ->
+        val savedRow = saved.firstOrNull { it.ayahNumber == ayahNumber }
         AyahNoteSheet(
             note = savedRow?.note,
             onSave = { note ->
-                viewModel.setNote(ayah, note)
+                viewModel.setNote(ayahNumber, note)
                 cardNote = null
             },
             onDismiss = { cardNote = null },
@@ -669,24 +692,18 @@ private fun BottomStack(
                     )
                 }
                 if (setup.failed) {
-                    Text(
-                        text = stringResource(R.string.action_retry),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .clickable { viewModel.installPack(setup.pack.id) }
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                    TextButton(
+                        label = stringResource(R.string.action_retry),
+                        onClick = { viewModel.installPack(setup.pack.id) },
                     )
                 }
-                Text(
-                    text = stringResource(if (setup.failed) R.string.action_close else R.string.action_cancel),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(50))
-                        .clickable { viewModel.cancelPackSetup() }
-                        .padding(horizontal = 10.dp, vertical = 8.dp),
+                TextButton(
+                    label = stringResource(
+                        if (setup.failed) R.string.action_close else R.string.action_cancel,
+                    ),
+                    onClick = { viewModel.cancelPackSetup() },
+                    modifier = Modifier.padding(start = 6.dp),
+                    quiet = true,
                 )
             }
         }

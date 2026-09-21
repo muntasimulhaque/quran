@@ -66,6 +66,7 @@ import io.github.muntasimulhaque.quran.data.SearchSources
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.search.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
+import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
@@ -367,15 +368,11 @@ private fun SearchField(
                 },
             )
         }
-        Text(
-            text = stringResource(R.string.search_close),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .padding(start = 8.dp)
-                .clip(RoundedCornerShape(50))
-                .clickable(onClick = onClose)
-                .padding(horizontal = 10.dp, vertical = 8.dp),
+        TextButton(
+            label = stringResource(R.string.search_close),
+            onClick = onClose,
+            modifier = Modifier.padding(start = 8.dp),
+            quiet = true,
         )
     }
 }
@@ -466,11 +463,9 @@ private fun ReferenceRow(ayah: Ayah, onAyah: (Ayah, Int) -> Unit) {
                 modifier = Modifier.padding(top = 2.dp),
             )
         }
-        Text(
-            text = stringResource(R.string.search_action_open),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
-        )
+        // The row is the door too, but a reader looking for a control
+        // finds it here: the shape says the word opens something.
+        TextButton(label = stringResource(R.string.search_action_open), onClick = { onAyah(ayah, 0) })
     }
 }
 

@@ -2729,3 +2729,79 @@ before the tour was adjusted.
 **Open at the head of the next session.** The reader's Bangla surah names
 (researched in D-072, two meanings-based sources named, left as content
 backlog), and the tour's ayah-card frame above.
+
+## D-074: The reader's tenth report, the twenty-first session
+
+Date: the twenty-first session. The owner read 1.2 on a phone and reported
+seven things, each about a surface the ninth report had just reshaped.
+
+**The Language page survives a change of language.** Tapping a language
+recreated the Activity for the new locale, and the page the reader was
+standing on was kept in plain `remember`, so it went with the old window and
+the reader was returned to the reading. The open page and the open credits are
+`rememberSaveable` now, and the choice itself is guarded: re-tapping the
+language already chosen does nothing. The reader stays on the Language page,
+now speaking the language just chosen.
+
+**A switch keeps its distance from its own words.** The automatic night-mode
+row and every other `ToggleRow` set its subtitle flush against the switch:
+under a long Bangla subtitle the words ran into the control, and the two read
+as one crowded shape. The text column now keeps the same 12 dp gap the choice
+rows already keep on the other side of their trailing control, so one
+measurement answers across the sheet.
+
+**The font sizes run 0.65 to 1.2.** The largest step, 1.4, was more than the
+reading needed and the list had no room below 0.75, so the top step was let
+go and a smaller one arrived: 0.65, 0.75, 0.85, 1, 1.2. Sizes are stored as
+scales, so a reader who chose 1.4 lands on 1.2, the top of today's list
+(`data/TextSize`, pinned by `TextSizeTest`).
+
+**About this surah loses its truncation and gains the ayah's own wash.** The
+opened introduction was capped at 40 lines, so a long surah's about ended in
+an ellipsis in the middle of a sentence; opened, the whole paragraph is the
+reader's now, and only the closed preview ellipsizes. The press mark around
+the paragraph is the ayah's own shape with the ayah's own room inside it, so
+the reader never meets text touching the edge of a highlight.
+
+**The ayah card loses its rules and gains its names.** From the Mushaf, the
+translation, the word by word, and the tafsir were divided by horizontal
+lines, furniture the app draws nowhere else. They are named now: a
+"Translation" label over the translation lines (whose pack names stay on the
+lines when more than one is on), "Word by word" already names itself, and a
+"Tafsir" label opens the tafsir doors. `DoorRow` keeps no divider, so no rule
+is left in the card.
+
+**A word that acts wears a shape.** Save, Note, Add, Remove, Clear, Retry,
+Close, Cancel, Download, and Open looked exactly like a heading, so nothing
+told the reader which word answered a touch. `ui-kit/TextButton` is the one
+text button now: a rounded shape of the theme's own quiet fill, a primary
+tone for what the reader came to do and a quiet tone for what ends or
+removes. Applied to the note editor (whose "Note" heading is named in
+title type, so the name and the buttons are clearly different kinds of
+word), the pack rows, the reciter page, the reader's pack progress pill, the
+playback offer, Browse's Remove and Forget, Search's Close and Open, the
+content problem's Retry, and the "About this surah" door itself.
+
+**The Notes list, a fifth Browse tab, is where notes are found.** A note was
+written and then had nowhere to be seen: the Saved list showed the note's
+text under the ayah but could not say which ayahs had one. Browse now has a
+Notes tab beside Saved, listing only the ayahs the reader wrote a note on,
+newest note first. The store carries the note's own moment
+(`saved.db` version 2, `note_at`, migrated from `created_at` for notes
+written before the column; `SavedStoreTest` pins the migration). The list
+shows the place and when the note was written, not the note's text: a note is
+the reader's own writing, and the row's work is to name where it lives.
+Tapping a row takes the reading to the ayah and opens the note over it, so
+the words the note was written about are under the sheet. The five tabs wrap
+as chips instead of one strip, the shape search already taught, so no label
+is ever cut off at a large font scale or in Bangla.
+
+**Verification.** The JVM suite, lint with no issues, and `assembleDebug` are
+green. The data instrumented tests pass (22, including four new
+`SavedStoreTest` cases for the note's moment and its migration). The app
+instrumented tests pass on the phone profile (12), and the tour's ayah-card
+frame now shows the card's new face. Every changed surface was also walked on
+the running emulator: the language choice staying put and speaking Bangla,
+the theme toggle's gap in both languages, the note editor's heading and
+buttons, the Notes list and its tap, About this surah opened and closed, and
+the card's labels.

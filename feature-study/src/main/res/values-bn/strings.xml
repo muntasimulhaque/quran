@@ -12,6 +12,8 @@
     <string name="study_next_surah">পরের সূরা</string>
     <string name="study_end_of_quran">এটি কুরআনের শেষ</string>
 
+    <string name="card_translation_label">অনুবাদ</string>
+    <string name="card_tafsir_label">তাফসীর</string>
     <string name="card_no_translation">বেছে নেওয়া অনুবাদে এই আয়াতের লেখা নেই।</string>
     <string name="card_add_translation">আপনার ভাষায় এই আয়াত পড়তে একটি অনুবাদ যোগ করুন</string>
     <string name="card_word_by_word">শব্দে শব্দে অনুবাদ</string>

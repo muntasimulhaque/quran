@@ -835,8 +835,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun setNote(ayah: Ayah, note: String?) {
-        viewModelScope.launch { savedStore.setNote(ayah.number, note) }
+    /** Writes the reader's note on one ayah. It is keyed by number because
+     * the note sheet opens both from the reading and from a Notes row. */
+    fun setNote(ayahNumber: Int, note: String?) {
+        viewModelScope.launch { savedStore.setNote(ayahNumber, note) }
     }
 
     fun removeSaved(ayahNumber: Int) {

@@ -67,6 +67,7 @@ import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.StudyRow
 import io.github.muntasimulhaque.quran.feature.study.R
+import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
@@ -442,32 +443,35 @@ private fun SurahOpening(
                 text = RichText.plain(info.orEmpty()),
                 style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.78f),
-                maxLines = if (expanded) 40 else 3,
+                // Opened, the whole introduction is the reader's; it was
+                // asked for with a press, and a cap on it would cut the one
+                // paragraph the app only shows on request. Closed, the first
+                // lines are a preview, and the ellipsis says so.
+                maxLines = if (expanded) Int.MAX_VALUE else 3,
                 overflow = TextOverflow.Ellipsis,
                 // The door is the paragraph itself: the reading around it is
                 // the paper, and only the part that opens is its own target,
                 // so a press shows the boundary of the about and not of the
                 // whole opening. The boundary is the ayah's own rounded one,
-                // so the two presses answer in the same shape.
+                // and the ayah's own room sits inside it: the shape wraps the
+                // padding, not the letters, so a press on the about answers in
+                // the same shape as a press on an ayah and no line of text is
+                // left touching the edge it is standing on.
                 modifier = Modifier
                     .padding(top = Space.Block)
                     .clip(RoundedCornerShape(14.dp))
-                    .clickable(onClick = onPaperTap),
+                    .clickable(onClick = onPaperTap)
+                    .padding(horizontal = 8.dp, vertical = 10.dp),
             )
         }
-        Text(
-            text = if (expanded) {
-                stringResource(R.string.study_hide)
-            } else {
-                stringResource(R.string.study_about_surah)
-            },
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .padding(top = 10.dp)
-                .clip(RoundedCornerShape(50))
-                .clickable { onExpandedChange(!expanded) }
-                .padding(horizontal = 10.dp, vertical = 6.dp),
+        // The door itself is a button like every other action in the app,
+        // so a word that answers a tap never reads as plain type.
+        TextButton(
+            label = stringResource(
+                if (expanded) R.string.study_hide else R.string.study_about_surah,
+            ),
+            onClick = { onExpandedChange(!expanded) },
+            modifier = Modifier.padding(top = 10.dp),
         )
     }
 }

@@ -213,8 +213,8 @@ class SettingsStore(private val context: Context) {
      * these as step indices: reading an Int through a Float key throws, and a
      * reader who updated the app must never meet a crash for a text size.
      *
-     * A stored scale keeps its own meaning (1.6 becomes the new 1.4, the
-     * largest step, not the third one); an index is looked up in the list the
+     * A stored scale keeps its own meaning (1.6 becomes the largest step of
+     * today's list, not the third one); an index is looked up in the list the
      * index was written against.
      */
     private fun sizeOf(

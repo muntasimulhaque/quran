@@ -18,27 +18,31 @@ enum class TypeRole { Arabic, Translation, Tafsir, Words }
  * small next to the space the diacritics need, so at the same nominal size it
  * reads visibly smaller than Latin text.
  *
- * The largest step stops at 1.4. Past that the study reading turns into a
+ * The largest step stops at 1.2. Past that the study reading turns into a
  * page of headings, and the Mushaf page, which does not scale, is left
- * behind. The smallest, 0.75, is there for a reader who wants more of an
- * ayah on one screen than 0.85 gives.
+ * behind. The smallest, 0.65, is there for a reader who wants more of an
+ * ayah on one screen than 0.75 gives: a reader who once chose 1.4 keeps the
+ * largest step, which is now 1.2, so no choice ever loses its meaning.
  */
 object TextSize {
 
-    val STEPS = listOf(0.75f, 0.85f, 1f, 1.2f, 1.4f)
+    val STEPS = listOf(0.65f, 0.75f, 0.85f, 1f, 1.2f)
 
     /** The middle step: comfortable for most readers, on most screens. */
     const val DEFAULT = 1f
 
     /**
-     * The scales as they were before the smallest arrived and the largest
-     * was let go, by the index that was stored for them then.
+     * The scales the scales have been, by the index that was stored for them
+     * when a step was stored as an index. The first list is the five the
+     * setting was born with; a reader who chose the top of it lands on the
+     * top of today's list, and so on down.
      */
     val LEGACY_STEPS = listOf(0.85f, 1f, 1.2f, 1.4f, 1.6f)
 
     /**
      * The step nearest a stored value. A choice made under an older list of
-     * scales keeps its meaning: 1.6 becomes 1.4, not whatever index it was.
+     * scales keeps its meaning: 1.6 becomes 1.2, the largest step now, not
+     * whatever index it was.
      */
     fun step(value: Float): Float = STEPS.minByOrNull { abs(it - value) } ?: DEFAULT
 

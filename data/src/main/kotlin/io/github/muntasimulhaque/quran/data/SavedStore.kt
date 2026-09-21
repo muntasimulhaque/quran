@@ -14,6 +14,12 @@ data class SavedAyah(
     val ayahNumber: Int,
     val note: String?,
     val createdAt: Long,
+    /**
+     * When the note was last written, or null when there is no note. The notes
+     * list reads newest first by this and not by the ayah's own moment: a note
+     * written today on an ayah saved last year is today's note.
+     */
+    val noteAt: Long? = null,
 )
 
 /**
@@ -43,8 +49,15 @@ class SavedStore(context: Context) {
     /** Writes a note, saving the ayah first if needed; a blank note clears it. */
     suspend fun setNote(ayahNumber: Int, note: String?) = withContext(Dispatchers.IO) {
         val clean = note?.trim()?.takeIf { it.isNotEmpty() }
+        val now = System.currentTimeMillis()
         val values = ContentValues().apply {
-            if (clean == null) putNull(COLUMN_NOTE) else put(COLUMN_NOTE, clean)
+            if (clean == null) {
+                putNull(COLUMN_NOTE)
+                putNull(COLUMN_NOTE_AT)
+            } else {
+                put(COLUMN_NOTE, clean)
+                put(COLUMN_NOTE_AT, now)
+            }
         }
         val updated = database().update(
             TABLE,
@@ -53,7 +66,7 @@ class SavedStore(context: Context) {
             arrayOf(ayahNumber.toString()),
         )
         if (updated == 0) {
-            write(ayahNumber, clean, System.currentTimeMillis())
+            write(ayahNumber, clean, now, clean?.let { now })
         }
         refresh()
     }
@@ -65,11 +78,12 @@ class SavedStore(context: Context) {
 
     fun close() = helper.close()
 
-    private fun write(ayahNumber: Int, note: String?, createdAt: Long) {
+    private fun write(ayahNumber: Int, note: String?, createdAt: Long, noteAt: Long? = null) {
         val values = ContentValues().apply {
             put(COLUMN_AYAH, ayahNumber)
             if (note == null) putNull(COLUMN_NOTE) else put(COLUMN_NOTE, note)
             put(COLUMN_CREATED, createdAt)
+            if (noteAt == null) putNull(COLUMN_NOTE_AT) else put(COLUMN_NOTE_AT, noteAt)
         }
         database().insert(TABLE, null, values)
     }
@@ -86,7 +100,7 @@ class SavedStore(context: Context) {
 
     private fun refresh() {
         _saved.value = database().rawQuery(
-            "SELECT $COLUMN_AYAH, $COLUMN_NOTE, $COLUMN_CREATED FROM $TABLE " +
+            "SELECT $COLUMN_AYAH, $COLUMN_NOTE, $COLUMN_CREATED, $COLUMN_NOTE_AT FROM $TABLE " +
                 "ORDER BY $COLUMN_CREATED DESC, $COLUMN_AYAH DESC",
             null,
         ).use { cursor ->
@@ -97,6 +111,7 @@ class SavedStore(context: Context) {
                             ayahNumber = cursor.getInt(0),
                             note = if (cursor.isNull(1)) null else cursor.getString(1),
                             createdAt = cursor.getLong(2),
+                            noteAt = if (cursor.isNull(3)) null else cursor.getLong(3),
                         ),
                     )
                 }
@@ -114,21 +129,32 @@ class SavedStore(context: Context) {
                 "CREATE TABLE $TABLE (" +
                     "$COLUMN_AYAH INTEGER PRIMARY KEY, " +
                     "$COLUMN_NOTE TEXT, " +
-                    "$COLUMN_CREATED INTEGER NOT NULL)",
+                    "$COLUMN_CREATED INTEGER NOT NULL, " +
+                    "$COLUMN_NOTE_AT INTEGER)",
             )
         }
 
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            // Version 1 is the first schema; later versions write their steps here.
+            // Version 2 added the note's own moment, so the notes list can read
+            // newest first. A note written before it keeps its ayah's own
+            // moment, which is the closest true answer left on the device.
+            if (oldVersion < 2) {
+                db.execSQL("ALTER TABLE $TABLE ADD COLUMN $COLUMN_NOTE_AT INTEGER")
+                db.execSQL(
+                    "UPDATE $TABLE SET $COLUMN_NOTE_AT = $COLUMN_CREATED " +
+                        "WHERE $COLUMN_NOTE IS NOT NULL",
+                )
+            }
         }
     }
 
     private companion object {
         const val DATABASE_NAME = "saved.db"
-        const val DATABASE_VERSION = 1
+        const val DATABASE_VERSION = 2
         const val TABLE = "saved"
         const val COLUMN_AYAH = "ayah_number"
         const val COLUMN_NOTE = "note"
         const val COLUMN_CREATED = "created_at"
+        const val COLUMN_NOTE_AT = "note_at"
     }
 }

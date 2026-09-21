@@ -38,6 +38,7 @@ import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.feature.settings.R
+import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
@@ -165,7 +166,17 @@ fun ToggleRow(
             .padding(start = 22.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(Modifier.weight(1f)) {
+        // The name and its note keep a clear gap from the switch, the way the
+        // marks in the rows above keep theirs from the names they select: a
+        // subtitle set flush against the control reads as part of it, and on
+        // a long line the two merge into one crowded shape. The gap is the
+        // same one a choice row puts on the other side of its trailing
+        // control, so the whole sheet answers with one measurement.
+        Column(
+            Modifier
+                .weight(1f)
+                .padding(end = 12.dp),
+        ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyLarge,
@@ -427,7 +438,10 @@ private fun PackTrailing(
 ) {
     when {
         setup?.packId == pack.id && setup.failed ->
-            PackActionText(stringResource(R.string.pack_action_retry), onInstall)
+            TextButton(
+                label = stringResource(R.string.pack_action_retry),
+                onClick = onInstall,
+            )
 
         setup?.packId == pack.id -> Text(
             text = if (setup.progress == null) {
@@ -439,7 +453,10 @@ private fun PackTrailing(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        !pack.installed -> PackActionText(stringResource(R.string.pack_action_add), onInstall)
+        !pack.installed -> TextButton(
+            label = stringResource(R.string.pack_action_add),
+            onClick = onInstall,
+        )
 
         pack.shipped -> Text(
             text = stringResource(R.string.pack_included),
@@ -447,37 +464,10 @@ private fun PackTrailing(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
-        else -> Text(
-            text = stringResource(R.string.pack_action_remove),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-                .minimumInteractiveComponentSize()
-                .clip(RoundedCornerShape(50))
-                .clickable(onClick = onRemove)
-                .padding(horizontal = 10.dp),
-        )
-    }
-}
-
-/**
- * One quiet action on a pack row. The touch target is the smallest a finger
- * needs, so a tap that lands near the word lands on it.
- */
-@Composable
-internal fun PackActionText(label: String, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .minimumInteractiveComponentSize()
-            .clip(RoundedCornerShape(50))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 10.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
+        else -> TextButton(
+            label = stringResource(R.string.pack_action_remove),
+            onClick = onRemove,
+            quiet = true,
         )
     }
 }

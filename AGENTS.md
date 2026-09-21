@@ -379,6 +379,10 @@ Terms this project uses as private vocabulary.
 - **the study card**: the bottom sheet one ayah opens: its text, the
   translation with footnotes, and the Words, Ibn Kathir, and As-Sa'di
   panels.
+- **the text button**: `ui-kit/TextButton`, the one shape a word that acts
+  wears. A heading, a name, or a label is bare type; anything that answers a
+  touch is a rounded shape (primary for what the reader came to do, quiet for
+  what ends or removes).
 - **the search sheet**: one field over the Arabic text, the translation,
   and the surah names; results stay in Mushaf order.
 - **the pack**: a Play asset pack, one per reciter; the app reads it, the
@@ -394,8 +398,9 @@ implement it and update this list.
 - Both reading modes ship together (D-008).
 - The reading modes are one switch in the top bar, and the reader's other
   doors are Browse, Search, and Settings; there is no bottom bar (D-051).
-- Last Read is a Browse tab beside Surahs, Juz, and Saved (D-051).
-- Text sizes are 0.75, 0.85, 1, 1.2, 1.4 (D-051).
+- Last Read and Notes are Browse tabs beside Surahs, Juz, and Saved
+  (D-051, D-074).
+- Text sizes are 0.65, 0.75, 0.85, 1, 1.2 (D-051, D-074).
 - Saheeh International is the only translation (D-004).
 - Ibn Kathir and As-Sa'di are the tafsirs (D-005).
 - Minshawi and Husary are the only reciters (D-007).
@@ -603,6 +608,21 @@ implement it and update this list.
   the first paint to the welcome deterministically on this machine until a
   configuration change forced a recomposition. `QuranApp` reads `ready` and
   `failure` at its top level, where it decides the screen.
+- A language choice recreates the Activity, so anything the reader was
+  standing in that lives in plain `remember` goes with the old window: the
+  whole Settings sheet closed and the reader landed back in the reading. The
+  open page is `rememberSaveable` now. A modal sheet is its own window, and
+  Material3 gives it a saveable id of its own (`Dialog:$dialogId`), so state
+  inside a sheet survives the recreation too.
+- A text-only action and a heading look the same on a page that draws no
+  buttons. `ui-kit/TextButton` is the one shape a word that acts wears, and
+  the note sheet's "Note" is named in `titleMedium` so the name and the
+  actions are different kinds of thing. Apply it to every new action; a bare
+  clickable `Text` is what made Save and Note the same word.
+- The notes list reads newest first by the note's own moment, not the ayah's
+  save moment, so `saved.db` has a `note_at` column and `DATABASE_VERSION` is
+  2. A schema change means the migration and its test in the same session, the
+  way the saved-ayah database has always worked.
 
 ### Housekeeping at the end of the session
 
@@ -629,10 +649,11 @@ fetching them again; the space is worth less than the time.
 
 ## Next session: the remaining queue, in order
 
-0. **The screenshot tour is unchanged since 1.2** except for one thing:
-the ayah card frame. It was changed to capture the card from the Mushaf, its
-fuller face, after the 1.2 set was collected. The next session that touches
-the UI captures the set again and closes it (D-073).
+0. **The store set predates this session's UI.** The tour is current and
+   the eight frames are unchanged in number, but the committed set is from
+   run 35595201651, before the tenth report's changes: the card's labels, the
+   tabs' chips, the buttons' shapes, and the About paragraph all ship in it.
+   The next release captures the set again from CI and installs it (D-074).
 
 1. **Measure on real hardware.** The numbers in D-037 come from a software
    rendered emulator, the slowest Android this app will run on. A
@@ -686,6 +707,25 @@ the UI captures the set again and closes it (D-073).
   to right on the screen; `MushafTurnTest` now pins the direction on every
   form factor.
 
+
+## Where the project stands (end of the twenty-first session)
+
+**The reader's tenth report (D-074).** Seven fixes, each on a surface the
+ninth report had just reshaped. The Language page now survives the Activity
+recreation a language choice causes, so the reader stays where they chose.
+Every toggle row keeps 12 dp between its words and its switch. Font sizes run
+0.65 through 1.2. About this surah no longer truncates when open, and its
+press mark is the ayah's own wash with the ayah's own inset. The ayah card's
+horizontal rules are gone, replaced by "Translation" and "Tafsir" labels.
+`ui-kit/TextButton` gives every text-only action the app's button shape, so
+Save and Note are never mistaken for each other. Browse gained a Notes tab
+that lists the ayahs a note was written on, newest note first, and tapping a
+row opens the note over its ayah; `saved.db` went to version 2 with a
+`note_at` column.
+
+**Verification.** JVM suite, lint, and assembleDebug green; data instrumented
+tests 22/22; app instrumented tests 12/12 on the phone profile. Every changed
+surface walked on the emulator.
 
 ## Where the project stands (end of the twentieth session)
 
