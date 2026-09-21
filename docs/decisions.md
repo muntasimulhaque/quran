@@ -2805,3 +2805,9 @@ the running emulator: the language choice staying put and speaking Bangla,
 the theme toggle's gap in both languages, the note editor's heading and
 buttons, the Notes list and its tap, About this surah opened and closed, and
 the card's labels.
+
+**The store set is current.** The set captured at the end of this session
+(run 35625457689) was installed for all three form factors, every frame
+compared with its artifact by `cmp`. Frame 08 is the ayah card from the Mushaf
+with its new Translation and Tafsir labels, frame 07 shows Browse's five
+chips, so the frame D-073 left open is closed as well.

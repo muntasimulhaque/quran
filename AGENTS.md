@@ -649,11 +649,11 @@ fetching them again; the space is worth less than the time.
 
 ## Next session: the remaining queue, in order
 
-0. **The store set predates this session's UI.** The tour is current and
-   the eight frames are unchanged in number, but the committed set is from
-   run 35595201651, before the tenth report's changes: the card's labels, the
-   tabs' chips, the buttons' shapes, and the About paragraph all ship in it.
-   The next release captures the set again from CI and installs it (D-074).
+0. **The store set is current again.** The tenth report's session (D-074)
+   captured and installed the eight frames per form factor from run
+   35625457689, so frame 08 shows the card's labels and frame 07 the five
+   tabs, both closing the frame D-073 left open. The next session that
+   changes a pixel captures again.
 
 1. **Measure on real hardware.** The numbers in D-037 come from a software
    rendered emulator, the slowest Android this app will run on. A
@@ -725,7 +725,9 @@ row opens the note over its ayah; `saved.db` went to version 2 with a
 
 **Verification.** JVM suite, lint, and assembleDebug green; data instrumented
 tests 22/22; app instrumented tests 12/12 on the phone profile. Every changed
-surface walked on the emulator.
+surface walked on the emulator. The store set was captured from CI (run
+35625457689), all three form factors, every frame compared with its artifact
+by `cmp` before it was installed, and the frame D-073 left open is closed.
 
 ## Where the project stands (end of the twentieth session)
 
