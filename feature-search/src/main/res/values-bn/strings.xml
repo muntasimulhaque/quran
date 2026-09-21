@@ -21,7 +21,7 @@
     <string name="search_filter_surahs">সূরার নাম</string>
     <string name="search_filter_references">রেফারেন্স</string>
     <string name="search_filter_translations">অনুবাদ</string>
-    <string name="search_filter_words">শব্দের অর্থ</string>
+    <string name="search_filter_words">শব্দে শব্দে অনুবাদ</string>
     <string name="search_filter_tafsirs">তাফসীর</string>
 
     <plurals name="search_matches">

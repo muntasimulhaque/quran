@@ -36,23 +36,38 @@ class PageCache(context: Context) {
         return StartupPage(page = page, widthPx = width, theme = theme, bitmap = bitmap)
     }
 
-    /** Replaces the page picture. Written whole, so a half-written one is never read. */
+    /**
+     * Replaces the page picture. One write runs at a time, and every step
+     * that can fail is inside one guard.
+     *
+     * Two settles can race here (a swipe and the flick after it), and the
+     * losing writer used to reach `copyTo` on a temporary file the winning
+     * one had already renamed away, which threw on a worker and killed the
+     * process. The lock serializes the writers, the temporary's name is the
+     * same for both because the lock is, and the whole write is guarded so
+     * no filesystem surprise can escape.
+     */
+    @Synchronized
     fun save(page: Int, widthPx: Int, theme: String, bitmap: Bitmap) {
-        val temporary = File(directory, "page.webp.part")
-        val written = runCatching {
-            temporary.outputStream().buffered().use { output ->
+        runCatching {
+            val temporary = File(directory, "page.webp.part")
+            val written = temporary.outputStream().buffered().use { output ->
                 bitmap.compress(Bitmap.CompressFormat.WEBP, QUALITY, output)
             }
-        }.getOrDefault(false)
-        if (!written) {
-            temporary.delete()
-            return
+            if (!written) {
+                temporary.delete()
+                return
+            }
+            if (!temporary.renameTo(image)) {
+                temporary.copyTo(image, overwrite = true)
+                temporary.delete()
+            }
+            marker.writeText("$page $widthPx $theme")
+        }.onFailure {
+            // A picture that could not be written is not worth a crash: the
+            // next launch simply renders the page instead of painting it.
+            android.util.Log.w(TAG, "the launch picture could not be written", it)
         }
-        if (!temporary.renameTo(image)) {
-            temporary.copyTo(image, overwrite = true)
-            temporary.delete()
-        }
-        runCatching { marker.writeText("$page $widthPx $theme") }
     }
 
     /** Forgets the picture, for when a page can no longer be trusted. */
@@ -62,6 +77,8 @@ class PageCache(context: Context) {
     }
 
     private companion object {
+        const val TAG = "PageCache"
+
         /** Text tolerates no blur; a page is a few hundred kilobytes at this quality. */
         const val QUALITY = 92
     }

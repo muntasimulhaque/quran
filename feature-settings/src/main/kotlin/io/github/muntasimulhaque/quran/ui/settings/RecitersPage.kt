@@ -56,6 +56,14 @@ fun RecitersPage(
 ) {
     Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_reciters))
+        // Following the recitation is a choice about the reciter, not about
+        // the page: it sits here, above the list of voices, and turns the
+        // reading into one that moves with the one being heard.
+        ToggleRow(
+            title = stringResource(R.string.settings_follow_title),
+            subtitle = stringResource(R.string.settings_follow_subtitle),
+            checked = settings.followReciter,
+        ) { actions.onFollowReciter(it) }
         packs.filter { it.type == PackType.Recitation }
             .sortedBy { it.name.lowercase() }
             .forEach { pack ->

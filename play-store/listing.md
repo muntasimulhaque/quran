@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 1.0 (versionCode 11)
+Version: 1.1 (versionCode 12)
 
 ## Listing
 
@@ -114,6 +114,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its word by word and tafsir doors
+
+## Release notes (1.1, handed over, 387 characters)
+
+Fixed a crash when turning Mushaf pages quickly. The reciter chooser now matches the pill it opens from, and scrolling back to the top of search results no longer closes the sheet. Settings are tidier: word by word sits under Translations, following the reciter sits with the Reciters, and keeping the screen awake is in the hub. Bangla wording improved. No ads, no trackers, no account.
 
 ## Release notes (1.0, submitted, 439 characters)
 

@@ -25,15 +25,14 @@ import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.nativeLanguageName
 import io.github.muntasimulhaque.quran.ui.theme.Space
 /** The pages the settings hub opens, one at a time. */
-enum class SettingsPage { Language, Appearance, FontSize, Reading, Reciters, Translations, Tafsirs, About }
+enum class SettingsPage { Language, Theme, FontSize, Reciters, Translations, Tafsirs, About }
 
 @Composable
 fun SettingsPage.title(): String = stringResource(
     when (this) {
         SettingsPage.Language -> R.string.settings_title_language
-        SettingsPage.Appearance -> R.string.settings_title_appearance
+        SettingsPage.Theme -> R.string.settings_title_appearance
         SettingsPage.FontSize -> R.string.settings_title_text
-        SettingsPage.Reading -> R.string.settings_title_reading
         SettingsPage.Reciters -> R.string.settings_title_reciters
         SettingsPage.Translations -> R.string.settings_title_translations
         SettingsPage.Tafsirs -> R.string.settings_title_tafsirs
@@ -66,7 +65,7 @@ fun SettingsHub(
     recitations: List<Recitation>,
     version: String,
     packSetup: PackSetupState?,
-    onWordByWord: (Boolean) -> Unit,
+    onKeepAwake: (Boolean) -> Unit,
     onOpen: (SettingsPage) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -78,7 +77,7 @@ fun SettingsHub(
         PageRow(
             title = stringResource(R.string.settings_title_appearance),
             summary = themeSummary(settings),
-        ) { onOpen(SettingsPage.Appearance) }
+        ) { onOpen(SettingsPage.Theme) }
         PageRow(
             title = stringResource(R.string.settings_title_text),
             summary = stringResource(
@@ -87,13 +86,6 @@ fun SettingsHub(
                 settings.translationSp.toInt(),
             ),
         ) { onOpen(SettingsPage.FontSize) }
-        PageRow(
-            title = stringResource(R.string.settings_title_reading),
-            summary = stringResource(
-                R.string.settings_summary_reading,
-                listOf(settings.keepAwake, settings.followReciter).count { it },
-            ),
-        ) { onOpen(SettingsPage.Reading) }
         PageRow(
             title = stringResource(R.string.settings_title_reciters),
             summary = reciterName(settings, recitations),
@@ -106,11 +98,14 @@ fun SettingsHub(
             title = stringResource(R.string.settings_title_tafsirs),
             summary = tafsirSummary(settings, packs),
         ) { onOpen(SettingsPage.Tafsirs) }
-        // Word meanings are one switch, not a page: the list they need is the
-        // one that speaks the translation's language, so there is nothing to
-        // choose, only something to show. Turning the switch on fetches that
-        // list when it is not yet on the device, with its size on the row.
-        WordByWordRow(settings, packs, packSetup, onWordByWord)
+        // Reading with the screen awake sits in the hub itself, beside the
+        // other whole-app choices: it is one switch with no page behind it,
+        // and a page that held only this one row was a door to a single tap.
+        ToggleRow(
+            title = stringResource(R.string.settings_keep_awake_title),
+            subtitle = stringResource(R.string.settings_keep_awake_subtitle),
+            checked = settings.keepAwake,
+        ) { onKeepAwake(it) }
         PageRow(
             title = stringResource(R.string.settings_title_about),
             summary = stringResource(R.string.settings_version_short, version),
@@ -151,7 +146,7 @@ private fun tafsirSummary(settings: AppSettings, packs: List<ContentPack>): Stri
  * turn the aid on fetches it.
  */
 @Composable
-private fun WordByWordRow(
+internal fun WordByWordRow(
     settings: AppSettings,
     packs: List<ContentPack>,
     packSetup: PackSetupState?,

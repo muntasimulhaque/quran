@@ -2460,3 +2460,96 @@ the hand-off copy was deleted from `play-store/aab/` in the same breath, so no
 signed bundle sits in the repository or on the machine waiting to be uploaded
 twice. `play-store/aab/` keeps only its own note about where a bundle comes
 from and when it goes.
+
+## D-069: The reader's eighth report, the nineteenth session
+
+Date: the nineteenth session. The owner read 1.0 on a phone and reported
+sixteen things, one of them fatal. This session fixed the fatal defect, the
+one visible defect behind it, and the wording and layout the owner asked
+for, and raised the release to 1.1 (versionCode 12).
+
+**Turning Mushaf pages quickly killed the app.** The launch picture is
+written on a worker after each settle, and two settles could race: one writer
+was still compressing into `page.webp.part` while another had already renamed
+it to `page.webp`, so the loser reached `copyTo` on a file that no longer
+existed. `runCatching` covered `compress` but not the copy, so the
+`NoSuchFileException` escaped the coroutine and took the process down on the
+main thread. It is the stop-the-line class: the reader turned a page, turned
+back, and the app closed. `PageCache.save` is now `@Synchronized` and guarded
+whole, so no filesystem surprise can escape. Validating that fix on the
+emulator surfaced a second race the first had hidden: the page LRU recycles a
+bitmap while the writer compresses it, so `Can't compress a recycled bitmap`
+threw where the file race used to. `PageRenderer.rememberStartupPage` now
+copies the bitmap while the cache lock is held, writes the copy, and recycles
+only the copy. Verified on the phone profile with the reported pattern (right,
+right, left) and with hundreds of flicks: no crash, and the launch picture
+now lands reliably where it silently failed before.
+
+**The reciter chooser is the pill, exactly.** D-067 gave the chooser the
+pill's surface and a 10 dp shadow and a hairline, and the reader still read
+it as a foreign sheet because the pill carries neither. The shadow and the
+border are gone; the menu is the pill's surface color, its rounded shape, and
+nothing the pill does not have. The reference is the pill, not a Material
+menu.
+
+**Search wears the same drag gate Browse has.** A scroll back to the top of
+the results pulled the sheet closed, the same defect Browse had and D-063
+fixed there. `SheetDragGate` and its pure `SheetDragPolicy` moved from
+`feature-browse` into `ui-kit`, beside the shared reader chrome, so both
+sheets share one policy: a gesture that started with the list scrolled
+belongs to the list, and only a gesture that started at the top can pull the
+sheet down.
+
+**The search order is Mushaf order, and it is now written down.** A reference
+row (a query like `2:255`) leads, then surah-name rows, then ayah and tafsir
+rows together sorted by ayah number, tafsir after an ayah at the same number.
+There is no relevance ranking, by design: results stay in the order of the
+Book.
+
+**Settings are tidier.** The word by word switch moved under the Translations
+list it is bound to; Follow the reciter moved to the top of the Reciters
+page; Keep the screen awake moved into the hub beside the other whole-app
+choices. The Reading page held only those two switches and is deleted, with
+its page enum member and its strings.
+
+**Bangla wording, corrected from the reader's list.** Last Read is now
+সর্বশেষ পঠিত (the tab), Theme is থিম (was রূপ), Font size is ফন্ট সাইজ (was
+লেখার আকার), the Arabic size row is কুরআনের আয়াত (was কুরআনের লেখা), the four
+theme names are পেপার, সেপিয়া, নাইট, ব্ল্যাক, word by word is শব্দে শব্দে অনুবাদ
+everywhere, and Remove is মুছুন in the settings packs too (the browse `action_remove`
+was already correct; only `pack_action_remove` lagged). Sepia is সেপিয়া, not
+সিপিয়া: Bengali Wikipedia and standard dictionaries use সেপিয়া for the
+cuttlefish ink and the color, and সিপিয়া is a homeopathy-writing variant.
+
+**Bangla surah and pack names: searched, not implemented.** QUL's
+`metadata-surah-names` (resource 70) is English and transliterated only, and
+QUL has no separate Bangla surah-name dataset. quran.com's chapter metadata
+with `language=bn` carries a ready Bangla name for all 114 (Al-Fatihah is
+সূচনা, Al-Baqarah is বকনা-বাছুর, Al-Ikhlas is আন্তরিকতা), but it is the name's
+meaning, not a transliteration, and it is a new dataset with new terms. Bangla
+transliterations (সূরা আল-ফাতিহা) are widely published but not as one pinnable
+source. For packs, authentic renderings exist and are already in the app's own
+About credits: Minshawi is মিনশাবী and Husary is হুসারী, with ইবনে কাসীর and
+তাইসীরুল কুরআন for the two Bangla packs; the English and Arabic packs have no
+authentic Bangla name and stay Latin. Localizing pack names is a content-side
+change (a name field per pack or a name map), so it is content backlog and
+not in this release. The owner asked to be told first, and was.
+
+**Two reports were not reproduced, and that is said plainly.** The owner
+reported (1) the first-launch language choice crashing once and (5) opening
+Browse after switching to Bangla crashing once, both working on the second
+open. Neither reproduced on this machine across repeated first-launch choices
+and settings language switches, before or after the crash fix. The language
+path does open a window where the in-memory settings name the new pack before
+`reopenLibrary` has attached it, and a later session with the reader's report
+in hand should harden that path rather than assume it clean. Nothing was
+changed there blind.
+
+**Verification.** The JVM suite, lint with no issues, and `assembleDebug` are
+green locally; `checkdb` (10 pack files, the committed database) and `search`
+(65 Bangla round trips, 63 Arabic, 465 excerpts) are green. The settings hub,
+Theme, Translations with the word toggle, Reciters with the Follow switch,
+installing a translation, and Remove were walked on the running phone profile.
+The owner-machine gates `verify`, `audit`, and `fonts` need `content/raw`,
+which this machine does not carry, and are left for the machine that owns the
+raw sources.

@@ -155,10 +155,30 @@ class PageRenderer(private val context: Context) {
      * Writes the page the reader has settled on, so the next launch can paint
      * it before anything else is ready. A newer settle cancels the write
      * before it starts, so swiping through the Quran never touches the disk.
+     *
+     * The bitmap is copied while the cache lock is held, because swiping on
+     * can evict and recycle the page's own bitmap out from under the write.
+     * Compressing a recycled bitmap throws, and a launch picture that only
+     * sometimes lands is worse than one that always does.
      */
     suspend fun rememberStartupPage(key: PageKey) {
-        val rendered = peek(key) ?: return
-        withContext(Dispatchers.IO) { lastPage.save(key.page, key.widthPx, key.theme, rendered.bitmap) }
+        val copy = withContext(Dispatchers.Default) {
+            synchronized(cache) {
+                val source = cache.get(key)?.bitmap ?: return@withContext null
+                if (source.isRecycled) {
+                    null
+                } else {
+                    runCatching { source.copy(Bitmap.Config.ARGB_8888, false) }.getOrNull()
+                }
+            }
+        } ?: return
+        withContext(Dispatchers.IO) {
+            try {
+                lastPage.save(key.page, key.widthPx, key.theme, copy)
+            } finally {
+                copy.recycle()
+            }
+        }
     }
 
     /**

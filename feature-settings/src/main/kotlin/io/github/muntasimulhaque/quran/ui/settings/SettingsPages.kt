@@ -134,24 +134,6 @@ private fun SizeSample(row: StudyRow, settings: AppSettings) {
     }
 }
 
-@Composable
-fun ReadingPage(settings: AppSettings, actions: SettingsActions) {
-    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
-        Group(stringResource(R.string.settings_group_reading))
-        ToggleRow(
-            title = stringResource(R.string.settings_keep_awake_title),
-            subtitle = stringResource(R.string.settings_keep_awake_subtitle),
-            checked = settings.keepAwake,
-        ) { actions.onKeepAwake(it) }
-        ToggleRow(
-            title = stringResource(R.string.settings_follow_title),
-            subtitle = stringResource(R.string.settings_follow_subtitle),
-            checked = settings.followReciter,
-        ) { actions.onFollowReciter(it) }
-    }
-}
-
-
 /**
  * Translations: more than one may be on, and each one reads in its own column
  * under the ayah, so the mark is a check rather than a single choice. The
@@ -188,6 +170,11 @@ fun TranslationsPage(
                 onRemove = { actions.onRemovePack(pack.id) },
             )
         }
+        // The word by word aid belongs to the reading these translations are:
+        // the meanings under an ayah speak the language of the first one on,
+        // and the list they need is fetched through this switch, with its
+        // size on the row. It sits under the list it is bound to.
+        WordByWordRow(settings, packs, packSetup, actions.onWordByWord)
         Spacer(Modifier.height(Space.Section))
     }
 }

@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -64,6 +65,8 @@ import io.github.muntasimulhaque.quran.data.SearchResults
 import io.github.muntasimulhaque.quran.data.SearchSources
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.search.R
+import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
+import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.rich.HighlightedText
@@ -106,6 +109,10 @@ fun SearchSheet(
     var results by remember { mutableStateOf(SearchResults()) }
     var searching by remember { mutableStateOf(false) }
     var sources by remember { mutableStateOf(SearchSources.ALL) }
+    // The result list wears the same drag gate Browse does, so a scroll back
+    // to the top can never turn into a pull that closes the sheet.
+    val resultsList = rememberLazyListState()
+    val resultsGate = remember(resultsList) { SheetDragGate(resultsList) }
     val queryTerms = remember(text) { Search.parse(text)?.terms.orEmpty() }
     LaunchedEffect(sheetState.currentValue) {
         if (sheetState.currentValue == SheetValue.Expanded) focus.requestFocus()
@@ -173,7 +180,10 @@ fun SearchSheet(
                 hasSources = sources.any,
             )
             LazyColumn(
-                modifier = Modifier.weight(1f),
+                state = resultsList,
+                modifier = Modifier
+                    .weight(1f)
+                    .sheetDragGate(resultsGate),
                 contentPadding = PaddingValues(bottom = 28.dp),
             ) {
                 items(results.hits, key = { key(it) }) { hit ->

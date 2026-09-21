@@ -393,7 +393,14 @@ implement it and update this list.
 - The launch picture (`feature-mushaf/PageCache`, `cacheDir/last-page`) is
   keyed by page, pixel width, and theme name. A launch at another width or in
   another theme must miss it, not stretch it. Nothing depends on it: a miss is
-  the old first paint.
+  the old first paint. Two writes can race here (a settle and the flick after
+  it), so `PageCache.save` is `@Synchronized` and guarded whole: the losing
+  writer used to reach `copyTo` on a temporary the winner had renamed away,
+  and the `NoSuchFileException` escaped a worker and killed the app. The other
+  half of the same bug is the page LRU recycling a bitmap while the writer
+  compresses it, so `PageRenderer.rememberStartupPage` copies the bitmap under
+  the cache lock before writing. A crash the reader meets by turning a page is
+  this class until proven otherwise.
 - A screen capture on a software rendered emulator can lag the composition by
   seconds. The screenshot tour waits for two identical frames before it keeps
   one; never replace that with a fixed sleep. A test that waits for text does
@@ -585,6 +592,19 @@ fetching them again; the space is worth less than the time.
 
 ## Next session: the remaining queue, in order
 
+0. **Harden the language-change path.** The reader reported the app closing
+   once on the first-launch language choice, and once on opening Browse after
+   switching to Bangla; neither reproduced here (D-069). `chooseLanguage` sets
+   the in-memory settings, which name the new translation and tafsir packs,
+   before `SettingsStore.setLanguage` writes and before `reopenLibrary`
+   attaches them, and `Activity.recreate` fires on the same tap. A screen that
+   reads a pack the freshly opened database has not attached, or a query on a
+   `ContentDatabase` that `reopenLibrary` or `removePack` closed under a worker
+   (`reopenLibrary` does `close()` then swaps), is the shape to look for. The
+   fix is to apply the language and reopen before any frame or query can see
+   the half-applied state, and to make the database swap safe for in-flight
+   readers, not to guess.
+
 1. **Measure on real hardware.** The numbers in D-037 come from a software
    rendered emulator, the slowest Android this app will run on. A
    Macrobenchmark module for startup and page turns, run on a phone, is the
@@ -637,17 +657,33 @@ fetching them again; the space is worth less than the time.
   to right on the screen; `MushafTurnTest` now pins the direction on every
   form factor.
 
-## Where the project stands (end of the eighteenth session)
+## Where the project stands (end of the nineteenth session)
 
-**1.0 (versionCode 11) is submitted to Google Play for review.** What 1.0
-hands over: 147,705,241 bytes, SHA-256
-`2b13117d1bfe1358e8590bcecb72749ad28284bdb2d1e28cbad64f1f7bd20c3c`, signed
-with the owner's upload key, carrying only the core pack. The screenshots
-came from the same pipeline that built the bundle, all three form factors,
-every frame compared with its artifact by `cmp`, and both were handed over
-together, before the submission. The hand-off copy was deleted once the
-submission was confirmed; `play-store/aab/` keeps its own note (D-067
-answers the report, D-068 is the hand-off).
+**1.1 (versionCode 12) is handed over for Google Play, awaiting the owner's
+submission.** This session
+answered the reader's eighth report, and the release bundle and screenshots
+are handed over together, before the submission, per the runbook (D-069
+answers the report).
+
+**The reader's eighth report (D-069).** The owner read 1.0 on a phone and
+reported sixteen things. One was fatal: turning Mushaf pages quickly killed
+the app, because the launch picture's writer raced its own cache and threw
+`NoSuchFileException` on a worker. `PageCache.save` is now serialized and
+guarded whole, and `PageRenderer.rememberStartupPage` copies the bitmap before
+the cache can recycle it, so the second race the first had hidden (`Can't
+compress a recycled bitmap`) is closed too. The reciter chooser is now the
+pill exactly, with no shadow and no border, because the pill has neither. The
+search results list wears the same drag gate Browse has, so a scroll back to
+the top no longer closes the sheet. Settings are tidier: word by word under
+Translations, Follow the reciter with the Reciters, Keep the screen awake in
+the hub, and the Reading page deleted. Bangla wording was corrected: Last Read
+is সর্বশেষ পঠিত, Theme is থিম, Font size is ফন্ট সাইজ, the Arabic size row is
+কুরআনের আয়াত, the theme names are পেপার/সেপিয়া/নাইট/ব্ল্যাক, word by word is
+শব্দে শব্দে অনুবাদ, Remove is মুছুন, and Sepia is সেপিয়া. Bangla surah names and
+Bangla pack names were researched and left as content backlog (D-069 records
+what exists). Two reports (a first-launch language crash and a Browse crash
+after switching to Bangla) did not reproduce on this machine and are named as
+open, not assumed clean.
 
 **The reader's seventh report (D-067).** The owner read 0.10 on a phone and
 asked for five things. The top bar is one row again, with a single door that

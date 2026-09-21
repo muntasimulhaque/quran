@@ -2,7 +2,7 @@
 <resources>
     <string name="browse_tab_surahs">সূরাসমূহ</string>
     <string name="browse_tab_juz">পারা</string>
-    <string name="browse_tab_last_read">শেষ পাঠ</string>
+    <string name="browse_tab_last_read">সর্বশেষ পঠিত</string>
     <string name="browse_tab_saved">সংরক্ষিত</string>
 
     <string name="place_makkah">মক্কা</string>

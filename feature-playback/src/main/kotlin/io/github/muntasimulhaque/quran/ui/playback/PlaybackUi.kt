@@ -2,7 +2,6 @@ package io.github.muntasimulhaque.quran.ui.playback
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -409,20 +408,18 @@ private fun ListenOfferBar(
                     )
                 }
                 // The chooser wears the pill's own cloth: the same surface
-                // color and a rounded shape of its own, so it reads as the
-                // pill opening rather than a foreign sheet laid over it. The
-                // reciter in use carries the check.
+                // color, the same rounded shape of its own, and no depth the
+                // pill does not have. The pill carries no border and casts no
+                // shadow, so a menu that did read as a foreign sheet laid over
+                // it; matching both exactly is what makes it read as the pill
+                // opening. The reciter in use carries the check.
                 DropdownMenu(
                     expanded = chooser,
                     onDismissRequest = { chooser = false },
                     shape = RoundedCornerShape(20.dp),
                     containerColor = MaterialTheme.colorScheme.surface,
                     tonalElevation = 0.dp,
-                    shadowElevation = 10.dp,
-                    border = BorderStroke(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
-                    ),
+                    shadowElevation = 0.dp,
                     modifier = Modifier.widthIn(min = 216.dp, max = 288.dp),
                 ) {
                     offer.options.forEach { option ->

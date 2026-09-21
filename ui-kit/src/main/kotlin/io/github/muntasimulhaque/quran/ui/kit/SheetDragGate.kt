@@ -1,4 +1,4 @@
-package io.github.muntasimulhaque.quran.ui.browse
+package io.github.muntasimulhaque.quran.ui.kit
 
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.ui.Modifier
@@ -17,7 +17,7 @@ import io.github.muntasimulhaque.quran.core.SheetDragPolicy
  *
  * The sheet closes on a downward pull. When its content is a list, the pull
  * and a scroll back to the top are the same gesture, and the list's leftovers
- * can reach the sheet: a reader who scrolled down ten surahs and then dragged
+ * can reach the sheet: a reader who scrolled down ten results and then dragged
  * back up would pull the sheet along as the list reached its top. The sheet's
  * own nested scroll handling cannot tell the two apart, because by the time a
  * delta is left over the list is already at its top.
@@ -31,8 +31,12 @@ import io.github.muntasimulhaque.quran.core.SheetDragPolicy
  * One instance belongs to one [LazyListState]; a list that can never scroll
  * (Saved with nothing in it, for example) is always at its top, so its pull
  * passes through untouched.
+ *
+ * Browse and Search both keep their results in a sheet, so this lives in the
+ * shared look rather than in either feature: the same policy, worn the same
+ * way, is what makes a scroll back to the top behave the same in both.
  */
-internal class SheetDragGate(
+class SheetDragGate(
     private val listState: LazyListState,
 ) : NestedScrollConnection {
 
@@ -70,7 +74,7 @@ internal class SheetDragGate(
  * tells the gate a new gesture has begun. A press is watched, never consumed,
  * so the list scrolls exactly as it did without it.
  */
-internal fun Modifier.sheetDragGate(gate: SheetDragGate): Modifier =
+fun Modifier.sheetDragGate(gate: SheetDragGate): Modifier =
     nestedScroll(gate).pointerInput(gate) {
         awaitPointerEventScope {
             while (true) {

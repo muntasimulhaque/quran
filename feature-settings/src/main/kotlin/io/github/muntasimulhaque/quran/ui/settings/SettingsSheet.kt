@@ -132,7 +132,7 @@ fun SettingsSheet(
                         recitations = recitations,
                         version = version,
                         packSetup = packSetup,
-                        onWordByWord = actions.onWordByWord,
+                        onKeepAwake = actions.onKeepAwake,
                         onOpen = { page = it },
                     )
                 }
@@ -143,7 +143,7 @@ fun SettingsSheet(
                         settings = settings,
                         onLanguage = actions.onLanguage,
                     )
-                    SettingsPage.Appearance -> AppearancePage(
+                    SettingsPage.Theme -> AppearancePage(
                         settings = settings,
                         onTheme = actions.onTheme,
                         onAutoNight = actions.onAutoNight,
@@ -151,7 +151,6 @@ fun SettingsSheet(
                     SettingsPage.FontSize -> TextPage(settings, preview) { role, step ->
                         actions.onTypeSize(role, step)
                     }
-                    SettingsPage.Reading -> ReadingPage(settings, actions)
                     SettingsPage.Reciters -> RecitersPage(
                         settings = settings,
                         packs = packs,
