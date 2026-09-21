@@ -1,13 +1,6 @@
 # Store kit
 
-Version: 1.2 (versionCode 13)
-
-The working tree carries unreleased changes (the reader's tenth report,
-D-074): the language page stays open across a language change, the ayah
-card reads under Translation and Tafsir labels instead of rules, notes are
-reachable from Browse's Notes tab, text-only actions wear one button shape,
-and the font size range is 0.65 through 1.2. They need a version bump and
-a screenshot recapture before submission.
+Version: 1.3 (versionCode 14)
 
 ## Listing
 
@@ -119,9 +112,9 @@ What each set shows, in order:
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
 
-## Release notes (next, unreleased)
+## Release notes (1.3, 410 characters)
 
-Changing the language now keeps you on the Language page, in the language you just chose. The ayah card reads under Translation and Tafsir names instead of lines. About this surah no longer cuts off when opened. Words that act, like Save and Remove, now look like buttons. Browse has a Notes tab listing every ayah you wrote a note on. Font sizes now run 0.65 through 1.2. No ads, no trackers, no account.
+Changing the language now keeps you on the Language page, in the language you just chose. The ayah card reads under Translation and Tafsir names instead of lines. About this surah no longer cuts off when opened. Words that act, like Save and Remove, now look like buttons. Browse has a Notes tab listing every ayah you wrote a note on, and font sizes now run 0.65 through 1.2. No ads, no trackers, no account.
 
 ## Release notes (1.2, 397 characters)
 
