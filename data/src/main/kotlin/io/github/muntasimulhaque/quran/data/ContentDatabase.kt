@@ -1,6 +1,9 @@
 package io.github.muntasimulhaque.quran.data
 
 import android.content.Context
+import android.database.Cursor
+import android.database.CursorWrapper
+import android.database.MatrixCursor
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import io.github.muntasimulhaque.quran.core.Search
@@ -8,6 +11,7 @@ import io.github.muntasimulhaque.quran.core.SearchQuery
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
+import java.util.concurrent.locks.ReentrantLock
 
 /**
  * The read-only content database.
@@ -32,6 +36,84 @@ class ContentDatabase private constructor(
 
     private fun has(id: String): Boolean = id in installedPacks && id != PackCatalog.CORE_ID
 
+    // ------------------------------------------------------- swapping safely
+
+    /**
+     * The gate that lets the library be replaced under a running query.
+     *
+     * The reader's library is reopened when a pack arrives, leaves, or the
+     * interface language changes the packs it reads. The old database used to
+     * be closed the moment the new one was ready, which closed it under any
+     * query still running on a worker (the study list loading, a tafsir index
+     * warming, a Browse column) and took the process down. Every query now
+     * holds a read ticket from the moment it starts until its cursor is
+     * closed, and [close] waits for every ticket to be returned before it
+     * touches the connection. A swap can no longer close a database a reader
+     * is still reading.
+     */
+    private val swapLock = ReentrantLock()
+    private val swapIdle = swapLock.newCondition()
+    private var activeReads = 0
+    private var retired = false
+    private var connectionClosed = false
+
+    /** Runs one raw query, holding a ticket until the returned cursor closes. */
+    private fun query(sql: String, args: Array<String>?): Cursor {
+        swapLock.lock()
+        try {
+            // A database whose turn has passed yields nothing rather than
+            // touching a closed connection. This can only happen in the one
+            // frame between a swap and the recomposition that hands the new
+            // library down; the recomposition replaces the empty result.
+            if (retired) return MatrixCursor(emptyArray())
+            activeReads++
+        } finally {
+            swapLock.unlock()
+        }
+        val cursor = try {
+            database.rawQuery(sql, args)
+        } catch (failure: Throwable) {
+            returnTicket()
+            throw failure
+        }
+        return GuardedCursor(cursor)
+    }
+
+    private fun returnTicket() {
+        var closeNow = false
+        swapLock.lock()
+        try {
+            activeReads--
+            if (activeReads <= 0) {
+                swapIdle.signalAll()
+                if (retired) closeNow = true
+            }
+        } finally {
+            swapLock.unlock()
+        }
+        if (closeNow) closeConnection()
+    }
+
+    /**
+     * A query's cursor that hands its ticket back when it is closed. A caller
+     * that forgets to close its cursor would hold the swap open, so every call
+     * site reads through `use`, which always closes.
+     */
+    private inner class GuardedCursor(cursor: Cursor) : CursorWrapper(cursor) {
+        private var returned = false
+
+        override fun close() {
+            try {
+                super.close()
+            } finally {
+                if (!returned) {
+                    returned = true
+                    returnTicket()
+                }
+            }
+        }
+    }
+
     fun installedPack(id: String): Boolean = id == PackCatalog.CORE_ID || has(id)
 
     fun catalog(): PackCatalog = catalog
@@ -43,7 +125,7 @@ class ContentDatabase private constructor(
     // --------------------------------------------------------------- reading
 
     fun surahs(): List<Surah> =
-        database.rawQuery(
+        query(
             "SELECT number, name_arabic, name_simple, name_latin, revelation_place, verses_count, " +
                 "bismillah_pre FROM surah ORDER BY number",
             null,
@@ -56,7 +138,7 @@ class ContentDatabase private constructor(
         }
 
     fun surah(number: Int): Surah? =
-        database.rawQuery(
+        query(
             "SELECT number, name_arabic, name_simple, name_latin, revelation_place, verses_count, " +
                 "bismillah_pre FROM surah WHERE number = ?",
             arrayOf(number.toString()),
@@ -78,14 +160,14 @@ class ContentDatabase private constructor(
     /** The English introduction to a surah, when the content carries one. */
     fun surahInfo(surah: Int): String? {
         if (!installedPack(SURAH_INFO)) return null
-        return database.rawQuery(
+        return query(
             "SELECT text FROM ${schema(SURAH_INFO)}.surah_info WHERE surah = ?",
             arrayOf(surah.toString()),
         ).use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
     }
 
     fun pageLines(page: Int): List<PageLine> =
-        database.rawQuery(
+        query(
             "SELECT line, type, centered, first_word_id, last_word_id, surah FROM page_line " +
                 "WHERE page = ? ORDER BY line",
             arrayOf(page.toString()),
@@ -108,7 +190,7 @@ class ContentDatabase private constructor(
 
     /** Every glyph on one page, in reading order, markers included. */
     fun pageWords(page: Int): List<PageWord> =
-        database.rawQuery(
+        query(
             "SELECT id, ayah_number, position, marker, glyph FROM word " +
                 "WHERE page = ? ORDER BY line, line_position",
             arrayOf(page.toString()),
@@ -129,11 +211,11 @@ class ContentDatabase private constructor(
         }
 
     fun firstAyahOfPage(page: Int): Int =
-        database.rawQuery("SELECT MIN(number) FROM ayah WHERE page = ?", arrayOf(page.toString()))
+        query("SELECT MIN(number) FROM ayah WHERE page = ?", arrayOf(page.toString()))
             .use { cursor -> if (cursor.moveToFirst()) cursor.getInt(0) else 1 }
 
     fun pageOfAyah(number: Int): Int =
-        database.rawQuery("SELECT page FROM ayah WHERE number = ?", arrayOf(number.toString()))
+        query("SELECT page FROM ayah WHERE number = ?", arrayOf(number.toString()))
             .use { cursor -> if (cursor.moveToFirst()) cursor.getInt(0) else 1 }
 
     private fun wordOf(cursor: android.database.Cursor, offset: Int) = Word(
@@ -150,7 +232,7 @@ class ContentDatabase private constructor(
      * every surah, so they are drawn with the same page font.
      */
     fun basmallahGlyphs(): String =
-        database.rawQuery(
+        query(
             "SELECT glyph FROM word WHERE ayah_number = 1 AND marker = 0 ORDER BY position",
             null,
         ).use { cursor ->
@@ -160,7 +242,7 @@ class ContentDatabase private constructor(
         }
 
     fun ayahsForPage(page: Int): List<Ayah> =
-        database.rawQuery(
+        query(
             "SELECT number, surah, ayah, verse_key, text FROM ayah WHERE page = ? ORDER BY number",
             arrayOf(page.toString()),
         ).use { cursor ->
@@ -170,7 +252,7 @@ class ContentDatabase private constructor(
         }
 
     fun ayah(number: Int): Ayah? =
-        database.rawQuery(
+        query(
             "SELECT number, surah, ayah, verse_key, text FROM ayah WHERE number = ?",
             arrayOf(number.toString()),
         ).use { cursor -> if (cursor.moveToFirst()) ayahOf(cursor) else null }
@@ -186,7 +268,7 @@ class ContentDatabase private constructor(
     fun translations(ayahNumbers: List<Int>, pack: String): Map<Int, TranslationText> {
         if (ayahNumbers.isEmpty() || !installedPack(pack)) return emptyMap()
         val placeholders = ayahNumbers.joinToString(",") { "?" }
-        return database.rawQuery(
+        return query(
             "SELECT ayah_number, text, footnotes FROM ${schema(pack)}.translation " +
                 "WHERE ayah_number IN ($placeholders)",
             ayahNumbers.map { it.toString() }.toTypedArray(),
@@ -228,7 +310,7 @@ class ContentDatabase private constructor(
         val chosen = meaningPack(language)
         val inClause = ayahNumbers.joinToString(",")
         val meanings = if (chosen != null) {
-            database.rawQuery(
+            query(
                 "SELECT ayah_number, position, meaning FROM ${schema(chosen)}.word_meaning " +
                     "WHERE ayah_number IN ($inClause)",
                 null,
@@ -243,7 +325,7 @@ class ContentDatabase private constructor(
         } else {
             emptyMap()
         }
-        return database.rawQuery(
+        return query(
             "SELECT ayah_number, text, position FROM word " +
                 "WHERE ayah_number IN ($inClause) AND marker = 0 ORDER BY ayah_number, position",
             null,
@@ -263,7 +345,7 @@ class ContentDatabase private constructor(
     fun wordMeanings(ayahNumber: Int, language: String = "en"): List<WordMeaning> {
         val chosen = meaningPack(language)
         val meanings = if (chosen != null) {
-            database.rawQuery(
+            query(
                 "SELECT position, meaning FROM ${schema(chosen)}.word_meaning " +
                     "WHERE ayah_number = ? ORDER BY position",
                 arrayOf(ayahNumber.toString()),
@@ -275,7 +357,7 @@ class ContentDatabase private constructor(
         } else {
             emptyMap()
         }
-        return database.rawQuery(
+        return query(
             "SELECT text, position FROM word WHERE ayah_number = ? AND marker = 0 ORDER BY position",
             arrayOf(ayahNumber.toString()),
         ).use { cursor ->
@@ -304,7 +386,7 @@ class ContentDatabase private constructor(
     fun wordsForAyahs(numbers: List<Int>): Map<Int, List<Word>> {
         if (numbers.isEmpty()) return emptyMap()
         val inClause = numbers.joinToString(",")
-        return database.rawQuery(
+        return query(
             "SELECT ayah_number, id, position, text, glyph FROM word " +
                 "WHERE ayah_number IN ($inClause) AND marker = 0 ORDER BY ayah_number, position",
             null,
@@ -320,7 +402,7 @@ class ContentDatabase private constructor(
     fun tafsir(ayahNumber: Int, pack: String): TafsirPassage? {
         if (!installedPack(pack)) return null
         val schema = schema(pack)
-        return database.rawQuery(
+        return query(
             "SELECT p.surah, p.from_ayah, p.to_ayah, p.text FROM $schema.tafsir_ayah a " +
                 "JOIN $schema.tafsir_passage p ON p.source_id = a.passage_id " +
                 "WHERE a.ayah_number = ?",
@@ -359,7 +441,7 @@ class ContentDatabase private constructor(
     }
 
     fun pagePosition(page: Int): PagePosition? =
-        database.rawQuery(
+        query(
             "SELECT surah, juz, hizb FROM ayah WHERE page = ? ORDER BY number LIMIT 1",
             arrayOf(page.toString()),
         ).use { cursor ->
@@ -368,7 +450,7 @@ class ContentDatabase private constructor(
         }
 
     fun firstAyahOfSurah(surah: Int): Int =
-        database.rawQuery("SELECT MIN(number) FROM ayah WHERE surah = ?", arrayOf(surah.toString()))
+        query("SELECT MIN(number) FROM ayah WHERE surah = ?", arrayOf(surah.toString()))
             .use { cursor -> if (cursor.moveToFirst()) cursor.getInt(0) else 1 }
 
     /**
@@ -377,7 +459,7 @@ class ContentDatabase private constructor(
      * the whole list is one query.
      */
     fun juzStarts(): List<JuzStart> =
-        database.rawQuery(
+        query(
             "SELECT juz, MIN(number), surah, ayah, verse_key FROM ayah GROUP BY juz ORDER BY juz",
             null,
         ).use { cursor ->
@@ -398,7 +480,7 @@ class ContentDatabase private constructor(
     fun ayahsWithPages(numbers: List<Int>): List<AyahLocation> {
         if (numbers.isEmpty()) return emptyList()
         val inClause = numbers.joinToString(",")
-        return database.rawQuery(
+        return query(
             "SELECT number, surah, ayah, verse_key, text, page FROM ayah " +
                 "WHERE number IN ($inClause) ORDER BY number",
             null,
@@ -417,7 +499,7 @@ class ContentDatabase private constructor(
     }
 
     fun ayahsOfSurah(surah: Int): List<Ayah> =
-        database.rawQuery(
+        query(
             "SELECT number, surah, ayah, verse_key, text FROM ayah WHERE surah = ? ORDER BY ayah",
             arrayOf(surah.toString()),
         ).use { cursor ->
@@ -440,7 +522,7 @@ class ContentDatabase private constructor(
     fun recitationAyah(recitation: String, ayahNumber: Int): RecitationAyah? {
         val pack = reciterPack(recitation)
         if (!installedPack(pack)) return null
-        return database.rawQuery(
+        return query(
             "SELECT audio_path, segments FROM ${schema(pack)}.recitation_ayah WHERE ayah_number = ?",
             arrayOf(ayahNumber.toString()),
         ).use { cursor ->
@@ -662,7 +744,7 @@ class ContentDatabase private constructor(
     }
 
     private fun ayahWithPage(number: Int): Pair<Ayah, Int>? =
-        database.rawQuery(
+        query(
             "SELECT number, surah, ayah, verse_key, text, page FROM ayah WHERE number = ?",
             arrayOf(number.toString()),
         ).use { cursor ->
@@ -671,7 +753,7 @@ class ContentDatabase private constructor(
 
     private fun arabicMatches(query: SearchQuery, limit: Int): List<Int> {
         val condition = query.terms.joinToString(" AND ") { "text_search LIKE ? ESCAPE '\\'" }
-        return database.rawQuery(
+        return query(
             "SELECT number FROM ayah WHERE $condition ORDER BY number LIMIT ?",
             (query.terms.map { Search.pattern(it) } + limit.toString()).toTypedArray(),
         ).use { cursor ->
@@ -685,7 +767,7 @@ class ContentDatabase private constructor(
         if (numbers.isEmpty()) return emptyMap()
         val inClause = numbers.joinToString(",")
         val condition = terms.joinToString(" OR ") { "text_search LIKE ? ESCAPE '\\'" }
-        return database.rawQuery(
+        return query(
             "SELECT ayah_number, position FROM word WHERE ayah_number IN ($inClause) AND ($condition)",
             terms.map { Search.pattern(it) }.toTypedArray(),
         ).use { cursor ->
@@ -700,7 +782,7 @@ class ContentDatabase private constructor(
     private fun wordMeaningMatches(query: SearchQuery, limit: Int, wordsPack: String): Map<Int, String> {
         if (query.arabic || !installedPack(wordsPack)) return emptyMap()
         val condition = query.terms.joinToString(" AND ") { "meaning_search LIKE ? ESCAPE '\\'" }
-        return database.rawQuery(
+        return query(
             "SELECT ayah_number, meaning FROM ${schema(wordsPack)}.word_meaning WHERE $condition " +
                 "ORDER BY ayah_number LIMIT ?",
             (query.terms.map { Search.pattern(it) } + (limit * 4).toString()).toTypedArray(),
@@ -719,7 +801,7 @@ class ContentDatabase private constructor(
     private fun packMatches(schemaId: String, terms: List<String>, limit: Int): List<Int> {
         if (!installedPack(schemaId)) return emptyList()
         val condition = terms.joinToString(" AND ") { "text_search LIKE ? ESCAPE '\\'" }
-        return database.rawQuery(
+        return query(
             "SELECT ayah_number FROM ${schema(schemaId)}.translation WHERE $condition " +
                 "ORDER BY ayah_number LIMIT ?",
             (terms.map { Search.pattern(it) } + limit.toString()).toTypedArray(),
@@ -735,7 +817,7 @@ class ContentDatabase private constructor(
         val out = LinkedHashMap<Int, Row>(numbers.size)
         for (chunk in numbers.toList().chunked(400)) {
             val placeholders = chunk.joinToString(",") { "?" }
-            database.rawQuery(
+            query(
                 "SELECT number, surah, ayah, verse_key, text, page FROM ayah " +
                     "WHERE number IN ($placeholders) ORDER BY number",
                 chunk.map { it.toString() }.toTypedArray(),
@@ -791,7 +873,7 @@ class ContentDatabase private constructor(
             val loaded = ArrayList<TafsirEntry>()
             for (id in wanted) {
                 if (!installedPack(id)) continue
-                database.rawQuery(
+                query(
                     "SELECT source_id, surah, from_ayah, to_ayah, text_search " +
                         "FROM ${schema(id)}.tafsir_passage",
                     null,
@@ -866,7 +948,7 @@ class ContentDatabase private constructor(
         val out = HashMap<Int, String>(sourceIds.size)
         for (chunk in sourceIds.chunked(400)) {
             val placeholders = chunk.joinToString(",") { "?" }
-            database.rawQuery(
+            query(
                 "SELECT source_id, text FROM ${schema(pack)}.tafsir_passage WHERE source_id IN ($placeholders)",
                 chunk.map { it.toString() }.toTypedArray(),
             ).use { cursor ->
@@ -891,8 +973,54 @@ class ContentDatabase private constructor(
             .map { SearchHit.SurahHit(it) }
             .toList()
 
+    /**
+     * Lets the database go without waiting: the last query still reading it
+     * closes the connection when it finishes, and one with no readers closes
+     * it here. Used when the view model is cleared, where blocking the main
+     * thread on a slow search would be worse than the delayed close.
+     */
+    fun retire() {
+        closed = true
+        swapLock.lock()
+        try {
+            retired = true
+            if (activeReads <= 0) closeConnectionLocked()
+        } finally {
+            swapLock.unlock()
+        }
+    }
+
+    /**
+     * Retires the database and waits for every reader to finish before closing
+     * the connection. Call it off the main thread: a swap is rare, and the wait
+     * is exactly the in-flight query it must not kill.
+     */
     fun close() {
         closed = true
+        swapLock.lock()
+        try {
+            retired = true
+            while (activeReads > 0) swapIdle.await()
+            closeConnectionLocked()
+        } catch (interrupted: InterruptedException) {
+            Thread.currentThread().interrupt()
+        } finally {
+            swapLock.unlock()
+        }
+    }
+
+    private fun closeConnection() {
+        swapLock.lock()
+        try {
+            closeConnectionLocked()
+        } finally {
+            swapLock.unlock()
+        }
+    }
+
+    private fun closeConnectionLocked() {
+        if (connectionClosed) return
+        connectionClosed = true
         database.close()
     }
 

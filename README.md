@@ -4,22 +4,17 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 1.1 (versionCode 12) is submitted to Google Play for review. This
-session answered the reader's eighth report. The one fatal defect was turning
-Mushaf pages quickly: the launch picture's writer raced its own cache and
-threw on a worker, so the fix serializes the write, copies the bitmap before
-it can be recycled, and guards every step. The reciter chooser now wears the
-pill's own surface with no border and no shadow; the search results list wears
-the same drag gate Browse has, so scrolling back to the top no longer closes
-the sheet; settings are tidier, with word by word under Translations, follow
-the reciter with the Reciters, and keep the screen awake in the hub; and the
-Bangla wording was corrected (Last Read is সর্বশেষ পঠিত, Theme is থিম, the
-Sepia spelling is সেপিয়া, word by word is শব্দে শব্দে অনুবাদ, and Remove is
-মুছুন). The version name follows the runbook: 1.0, then 1.1. The bundle
-carries only the core pack, with everything else added from the project's own
-Releases when a reader asks for it. The listing, icon, feature graphic, and
-screenshots per form factor are in [`play-store/`](play-store/), refreshed
-from CI.
+**Status:** 1.2 (versionCode 13) is ready for Google Play, handed over with its screenshots. This session answered the
+reader's ninth report. The note moved off the More card into the pill that a
+long press raises, where the phone's back button now closes it instead of the
+app; More shows only what the reading behind it does not, so from the Mushaf it
+carries the translation and word by word and from the study reading only the
+tafsir; the settings lists read alphabetically; and the language-change crash
+was found and fixed. The version name follows the runbook: 1.0, then 1.1, then
+1.2. The bundle carries only the core pack, with everything else added from the
+project's own Releases when a reader asks for it. The listing, icon, feature
+graphic, and screenshots per form factor are in [`play-store/`](play-store/),
+refreshed from CI.
 
 ## What it does
 

@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 1.1 (versionCode 12)
+Version: 1.2 (versionCode 13)
 
 ## Listing
 
@@ -115,6 +115,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its word by word and tafsir doors
+
+## Release notes (1.2, 448 characters)
+
+Long-press an ayah and the pill now has a Note action, and the phone's back button closes it instead of the app. More shows only what the reading behind it does not: from the Mushaf the translation and word by word, from study the tafsir. Settings lists read alphabetically, and word meanings sits at the top of Translations. Fixed a crash when switching language. No ads, no trackers, no account.
 
 ## Release notes (1.1, submitted, 387 characters)
 

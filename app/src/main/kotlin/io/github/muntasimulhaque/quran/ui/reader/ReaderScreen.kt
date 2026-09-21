@@ -69,6 +69,7 @@ import io.github.muntasimulhaque.quran.ui.settings.PackSetupState
 import io.github.muntasimulhaque.quran.ui.settings.SettingsActions
 import io.github.muntasimulhaque.quran.ui.settings.SettingsSheet
 import io.github.muntasimulhaque.quran.ui.study.AyahCard
+import io.github.muntasimulhaque.quran.ui.study.AyahNoteSheet
 import io.github.muntasimulhaque.quran.ui.study.StudyList
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.PagePalette
@@ -109,9 +110,21 @@ fun ReaderScreen(
     var chrome by remember { mutableStateOf(false) }
     var selected by remember { mutableStateOf<Ayah?>(null) }
     var cardAyah by remember { mutableStateOf<Ayah?>(null) }
+    var cardNote by remember { mutableStateOf<Ayah?>(null) }
     var sheet by remember { mutableStateOf(ReaderSheet.None) }
     var touch by remember { mutableIntStateOf(0) }
     val context = androidx.compose.ui.platform.LocalContext.current
+
+    // The phone's back button dismisses the ayah pill first, and only closes
+    // the app when nothing is raised. A reader who long-pressed an ayah means
+    // the pill, and back is the gesture they already use to put a thing away.
+    // The sheets (the ayah card, the note, Browse, Search, Settings) are their
+    // own windows and take back through their own handlers; this one is for
+    // the pill, which is not a window.
+    androidx.activity.compose.BackHandler(enabled = selected != null) {
+        selected = null
+        touch++
+    }
 
     // Reading with the screen awake is part of reading.
     val view = LocalView.current
@@ -298,6 +311,7 @@ fun ReaderScreen(
                     cardAyah = ayah
                     selected = null
                 },
+                onNote = { ayah -> cardNote = ayah },
                 onShareText = { text -> shareAyah(text) },
                 onTouch = { touch++ },
                 onReciter = { sheet = ReaderSheet.Settings },
@@ -397,7 +411,6 @@ fun ReaderScreen(
     }
 
     cardAyah?.let { ayah ->
-        val savedRow = saved.firstOrNull { it.ayahNumber == ayah.number }
         AyahCard(
             content = content,
             ayah = ayah,
@@ -408,13 +421,24 @@ fun ReaderScreen(
             settings = settings,
             wordLanguage = viewModel.wordLanguage,
             hasWords = content.meaningPack(viewModel.wordLanguage) != null,
+            fromMushaf = settings.mode == ReadingMode.Mushaf,
             onAddContent = {
                 cardAyah = null
                 sheet = ReaderSheet.Settings
             },
-            note = savedRow?.note,
-            onSaveNote = { note -> viewModel.setNote(ayah, note) },
             onDismiss = { cardAyah = null },
+        )
+    }
+
+    cardNote?.let { ayah ->
+        val savedRow = saved.firstOrNull { it.ayahNumber == ayah.number }
+        AyahNoteSheet(
+            note = savedRow?.note,
+            onSave = { note ->
+                viewModel.setNote(ayah, note)
+                cardNote = null
+            },
+            onDismiss = { cardNote = null },
         )
     }
 }
@@ -600,6 +624,7 @@ private fun BottomStack(
     selected: Ayah?,
     onPlay: (Ayah) -> Unit,
     onDeselect: () -> Unit,
+    onNote: (Ayah) -> Unit,
     onMore: (Ayah) -> Unit,
     onShareText: (String) -> Unit,
     onTouch: () -> Unit,
@@ -667,10 +692,8 @@ private fun BottomStack(
         }
         selected?.let { ayah ->
             AyahActions(
-                ayah = ayah,
-                surahName = viewModel.surahs.firstOrNull { it.number == ayah.surah }?.nameSimple
-                    ?: stringResource(R.string.surah_fallback_name, ayah.surah),
                 isSaved = saved.any { it.ayahNumber == ayah.number },
+                hasNote = saved.any { it.ayahNumber == ayah.number && !it.note.isNullOrBlank() },
                 onSave = {
                     viewModel.toggleSaved(ayah)
                     onTouch()
@@ -679,6 +702,7 @@ private fun BottomStack(
                     onPlay(ayah)
                     onDeselect()
                 },
+                onNote = { onNote(ayah) },
                 onMore = { onMore(ayah) },
                 onShare = {
                     scope.launch { onShareText(viewModel.ayahShareText(ayah)) }
@@ -736,11 +760,11 @@ private fun surahName(viewModel: ReaderViewModel, ayah: Int): String =
 
 @Composable
 private fun AyahActions(
-    ayah: Ayah,
-    surahName: String,
     isSaved: Boolean,
+    hasNote: Boolean,
     onSave: () -> Unit,
     onPlay: () -> Unit,
+    onNote: () -> Unit,
     onMore: () -> Unit,
     onShare: () -> Unit,
 ) {
@@ -750,21 +774,9 @@ private fun AyahActions(
             .shadow(elevation = 6.dp, shape = shape)
             .clip(shape)
             .background(MaterialTheme.colorScheme.surface)
-            .padding(start = 18.dp, end = 6.dp, top = 5.dp, bottom = 5.dp),
+            .padding(horizontal = 6.dp, vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(Modifier.padding(end = 10.dp)) {
-            Text(
-                text = surahName,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = "${ayah.surah}:${ayah.ayah}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
         TextAction(
             label = stringResource(R.string.action_save),
             icon = if (isSaved) Icon.BookmarkFilled else Icon.Bookmark,
@@ -772,6 +784,12 @@ private fun AyahActions(
             active = isSaved,
         )
         TextAction(stringResource(R.string.action_play), Icon.Play, onPlay)
+        TextAction(
+            label = stringResource(R.string.action_note),
+            icon = Icon.Note,
+            onClick = onNote,
+            active = hasNote,
+        )
         TextAction(stringResource(R.string.action_share), Icon.Share, onShare)
         TextAction(stringResource(R.string.action_more), Icon.More, onMore)
     }

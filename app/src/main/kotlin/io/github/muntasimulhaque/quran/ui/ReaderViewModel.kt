@@ -76,7 +76,15 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     private val recitationStore = RecitationStore(application)
     private val store = PackStore(application)
     private val downloader = PackDownloader(application)
-    private var contentDatabase: ContentDatabase? = null
+
+    /**
+     * The reader's library. It is Compose state, not a plain field, because a
+     * pack arriving, leaving, or the interface language changing the packs it
+     * reads replaces it: every screen that holds the open database must be
+     * recomposed with the new one, or it keeps reading a connection the swap
+     * has retired.
+     */
+    private var contentDatabase by mutableStateOf<ContentDatabase?>(null)
     private var catalog: PackCatalog = PackCatalog.parse("{}")
     private var installed: Set<String> = emptySet()
 
@@ -203,8 +211,11 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch {
             failure = false
             val application = getApplication<Application>()
-            catalog = PackCatalog.load(application)
             installed = store.installed()
+            // The catalog is marked with what this device has, so a pack that
+            // is present is never offered as missing and a language switch
+            // never re-fetches what is already here.
+            catalog = PackCatalog.load(application).withInstalled(installed)
             val opened = runCatching { ContentDatabase.open(application, catalog, installed) }
             val database = opened.getOrElse {
                 android.util.Log.e(TAG, "the content library could not be opened", it)
@@ -682,12 +693,21 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     private suspend fun reopenLibrary() {
         val application = getApplication<Application>()
         installed = withContext(Dispatchers.IO) { store.installed() }
+        catalog = catalog.withInstalled(installed)
         val fresh = withContext(Dispatchers.IO) { ContentDatabase.open(application, catalog, installed) }
-        contentDatabase?.close()
+        // The new library is published before the old one is retired, so no
+        // screen can pick up a database whose turn has passed. The retire is
+        // not a close: it waits for the last query still reading the old
+        // connection to finish, then closes it, so an in-flight Browse or
+        // study load is never killed under the reader.
+        val old = contentDatabase
         contentDatabase = fresh
         playback.attach(fresh)
         packs = fresh.packs()
         clearRowCache()
+        // The old library is retired on a worker, because retiring it waits
+        // for the last in-flight reader, and the main thread must never wait.
+        if (old != null) withContext(Dispatchers.IO) { old.close() }
         // The tafsir search index changes with the packs, so it is rebuilt.
         withContext(Dispatchers.IO) { fresh.prewarmSearch(settings.tafsirPacks.toList()) }
     }
@@ -1037,7 +1057,9 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     override fun onCleared() {
         savedStore.close()
         lastReadStore.close()
-        contentDatabase?.close()
+        // The process is going away; the connection is let go without waiting
+        // on the main thread for whatever speculative work is still reading it.
+        contentDatabase?.retire()
         contentDatabase = null
     }
 

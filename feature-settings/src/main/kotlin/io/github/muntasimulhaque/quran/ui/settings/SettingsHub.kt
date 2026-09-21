@@ -197,7 +197,13 @@ fun LanguagePage(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
         )
-        UiLanguage.entries.forEach { language ->
+        // A list of choices is read, not searched: the languages are sorted by
+        // the name the interface itself shows them under, so Bangla sits above
+        // English in an English interface and each language's own alphabet is
+        // respected in its own interface. The name on the row stays the
+        // language's native script, which the reader must recognise first.
+        val entries = UiLanguage.entries.map { it to languageName(it.tag) }
+        entries.sortedBy { it.second.lowercase() }.forEach { (language, _) ->
             ChoiceRow(
                 title = nativeLanguageName(language.tag),
                 subtitle = stringResource(R.string.settings_language_subtitle),
@@ -235,24 +241,22 @@ internal fun translationSubtitle(pack: ContentPack): String {
 }
 
 /**
- * The packs of one kind, grouped by the language they speak and alphabetical
- * inside each group. A list of choices is read, not searched: the reader
- * looks for a name, so names are in one order everywhere in the app. The
- * reader's own language leads, so the pack the app was set up for is the
- * first one under the finger.
+ * The packs of one kind, grouped by the language they speak, in the
+ * alphabetical order of those languages, and alphabetical inside each group.
+ * A list of choices is read, not searched: the reader looks for a name, so
+ * names are in one order everywhere in the app.
  */
 @Composable
 internal fun LanguageGroups(
     packs: List<ContentPack>,
     type: PackType,
-    preferred: String,
     row: @Composable (ContentPack) -> Unit,
 ) {
     val groups = packs.filter { it.type == type }.groupBy { it.language }
     val names = HashMap<String, String>()
     for (language in groups.keys) names[language] = languageName(language)
     groups.entries
-        .sortedWith(compareBy({ it.key != preferred }, { names[it.key] ?: it.key }))
+        .sortedBy { (names[it.key] ?: it.key).lowercase() }
         .forEach { (language, group) ->
             Text(
                 text = names[language] ?: language,

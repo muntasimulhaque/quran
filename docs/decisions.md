@@ -2633,3 +2633,73 @@ at the head of the queue, not claimed clean. The owner-machine content gates
 (`verify`, `audit`, `fonts`) were not run: this machine carries only the two
 font zips under `content/raw`, not the owner's manual QUL and QuranEnc
 exports, so they remain for the machine that owns the sources.
+## D-072: The reader's ninth report, the twentieth session
+
+Date: the twentieth session. The owner read 1.1 on a phone and reported six
+things. The session fixed them, found the crash behind two of them, and raised
+the release to 1.2 (versionCode 13).
+
+**The language-change crash, found at last.** The reader reported that tapping
+a language in Settings closed the app instantly, both ways, and that opening
+Browse after a language switch closed it too. The cause was two defects that
+had hidden each other. `openLibrary` loaded the pack catalog unmarked and
+marked only a copy it threw away, so `ReaderViewModel.catalog` believed every
+pack was missing; with word by word on, `ensureWordsPack` then re-fetched a
+word list that was already on the device and called `reopenLibrary`, which
+`close()`d the old `ContentDatabase` under any reader still querying it (a
+study load, the tafsir index warming, a Browse column), and the exception
+escaped a worker. The catalog is now marked with the installed set once, in
+`openLibrary` and in `reopenLibrary`, so a present pack is never treated as
+missing. For the swap itself, `ContentDatabase` now hands each query a read
+ticket from its start to its cursor's close, and `close()` waits for the last
+ticket before touching the connection; the view model publishes the fresh
+library before retiring the old one, and retires it on a worker, so the main
+thread never waits and no query is closed under it. `contentDatabase` is
+Compose state, so every screen recomposes with the new library instead of
+holding a retired one.
+
+**The note belongs to the pill.** The note left the ayah card's More sheet. It
+is now a Note action in the pill a long press raises, opening a small sheet
+with just the editor, and the reader can reach it without scrolling a card.
+The pill also lost the surah name and ayah reference it carried: the top bar
+already names the surah, so the pill is now Save, Play, Note, Share, More.
+
+**More shows only what the reading behind it does not.** From the Mushaf,
+where the page carries neither translation nor meanings, the card holds the
+translation with footnotes, word by word, and each tafsir. From the study
+reading, where the ayah, its translation, and its meanings are already open,
+the card holds only the tafsir doors (and, with none chosen, the door to add
+one). The Arabic ayah and the reference are gone from the card in both modes
+over the pill.
+
+**The phone's back button puts the pill away first.** A `BackHandler` with the
+pill raised clears the selection; only with nothing raised does back close the
+app. Sheets keep their own back handling, which they already had.
+
+**Settings lists read alphabetically.** The language page is sorted by the
+name the current interface shows each language under, so Bangla sits above
+English in an English interface. The translation and tafsir lists are grouped
+by language in the alphabetical order of those language names, and the reciter
+list stays alphabetical by name. Word meanings moved to the top of the
+Translations page, above the list, so more translations under it can never
+bury the switch.
+
+**Bangla surah names: the source is named, the change is content backlog.**
+QUL has no Bangla surah-name dataset (its `metadata-surah-names`, resource 70,
+is English and transliterated only, and its surah-info set has no Bangla
+entry). Two pinnable meanings-based sources exist: quran.com's chapter metadata
+with `language=bn` (`সূচনা`, `বকনা-বাছুর`) and the `risan/quran-json` Bengali
+translation (Muhiuddin Khan's translation, also meanings). Both are the name's
+meaning, not a transliteration, and both are a new dataset with new terms, so
+this stays content backlog with the sources written down here, as D-069 left
+it. Authentic Bangla transliterations (সূরা আল-ফাতিহা) are widely published but
+not as one pinnable source.
+
+**Verification.** The JVM suite, lint with no issues, and `assembleDebug` are
+green. The data instrumented tests pass (19, including a new
+`PackCatalogTest`). The app instrumented run had search and the Mushaf turn
+pass; the screenshot tour's leg died with the emulator (`device not found`)
+mid-run, an environment failure, not an assertion. The whole report was walked
+on the running phone profile: the pill with its Note action, back closing the
+note then the pill then the app, More from both modes, the word-by-word switch
+above the translations, and the language order.

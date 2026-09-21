@@ -21,6 +21,7 @@
     <string name="action_play">প্লে</string>
     <string name="action_share">শেয়ার</string>
     <string name="action_more">আরও</string>
+    <string name="action_note">নোট</string>
     <string name="action_retry">আবার চেষ্টা করুন</string>
     <string name="action_close">বন্ধ</string>
     <string name="action_cancel">বাতিল</string>

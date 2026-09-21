@@ -16,11 +16,10 @@
     <string name="card_add_translation">আপনার ভাষায় এই আয়াত পড়তে একটি অনুবাদ যোগ করুন</string>
     <string name="card_word_by_word">শব্দে শব্দে অনুবাদ</string>
     <string name="card_add_word_by_word">শব্দে শব্দে অনুবাদ যোগ করুন</string>
+    <string name="card_add_tafsir">গভীরভাবে পড়তে একটি তাফসীর যোগ করুন</string>
     <string name="card_opening_pack">%1$s খোলা হচ্ছে…</string>
     <string name="card_door_shown">দেখানো</string>
     <string name="card_door_hidden">লুকানো</string>
-    <string name="card_add_note">একটি নোট যোগ করুন</string>
-    <string name="card_your_note">আপনার নোট</string>
     <string name="card_note_label">নোট</string>
     <string name="card_note_hint">এই আয়াতের জন্য একটি নোট লিখুন</string>
     <string name="action_clear">মুছুন</string>

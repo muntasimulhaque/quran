@@ -54,6 +54,7 @@ enum class Icon {
     Share,
     More,
     Chevron,
+    Note,
 }
 
 @Composable
@@ -229,6 +230,31 @@ fun IconGlyph(
             Icon.Chevron -> {
                 drawLine(tint, Offset(w * 0.28f, h * 0.4f), Offset(w * 0.5f, h * 0.62f), w * 0.085f)
                 drawLine(tint, Offset(w * 0.5f, h * 0.62f), Offset(w * 0.72f, h * 0.4f), w * 0.085f)
+            }
+            // A note: a sheet with its turned corner and a line of writing,
+            // drawn to the same weight as the glyphs beside it, so the pill's
+            // note action reads as part of the set rather than a stock mark.
+            Icon.Note -> {
+                val stroke = w * 0.075f
+                val corner = w * 0.62f
+                drawPath(
+                    Path().apply {
+                        moveTo(w * 0.22f, h * 0.14f)
+                        lineTo(corner, h * 0.14f)
+                        lineTo(w * 0.78f, h * 0.32f)
+                        lineTo(w * 0.78f, h * 0.86f)
+                        lineTo(w * 0.22f, h * 0.86f)
+                        close()
+                    },
+                    tint,
+                    style = Stroke(width = stroke),
+                )
+                // The turned corner, so the sheet reads as a note rather than
+                // a plain page.
+                drawLine(tint, Offset(corner, h * 0.14f), Offset(corner, h * 0.32f), stroke)
+                drawLine(tint, Offset(corner, h * 0.32f), Offset(w * 0.78f, h * 0.32f), stroke)
+                // One line of writing.
+                drawLine(tint, Offset(w * 0.33f, h * 0.58f), Offset(w * 0.67f, h * 0.58f), stroke)
             }
         }
     }

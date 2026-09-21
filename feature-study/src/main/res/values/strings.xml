@@ -16,11 +16,10 @@
     <string name="card_add_translation">Add a translation to read this ayah in your language</string>
     <string name="card_word_by_word">Word by word</string>
     <string name="card_add_word_by_word">Add word by word</string>
+    <string name="card_add_tafsir">Add a tafsir to read this ayah deeper</string>
     <string name="card_opening_pack">Opening %1$s…</string>
     <string name="card_door_shown">Shown</string>
     <string name="card_door_hidden">Hidden</string>
-    <string name="card_add_note">Add a note</string>
-    <string name="card_your_note">Your note</string>
     <string name="card_note_label">Note</string>
     <string name="card_note_hint">Write a note for this ayah</string>
     <string name="action_clear">Clear</string>

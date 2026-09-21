@@ -28,6 +28,7 @@
     <string name="action_play">Play</string>
     <string name="action_share">Share</string>
     <string name="action_more">More</string>
+    <string name="action_note">Note</string>
     <string name="action_retry">Retry</string>
     <string name="action_close">Close</string>
     <string name="action_cancel">Cancel</string>
