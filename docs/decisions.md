@@ -2703,3 +2703,29 @@ mid-run, an environment failure, not an assertion. The whole report was walked
 on the running phone profile: the pill with its Note action, back closing the
 note then the pill then the app, More from both modes, the word-by-word switch
 above the translations, and the language order.
+
+## D-073: The 1.2 submission, and the hand-off closed
+
+Date: the twentieth session, after D-072. The owner submitted 1.2 (versionCode
+13) to Google Play for review, so this session is closed.
+
+The bundle was handed over from the `signed-bundle` job of the green `build`
+run for the push that raised 1.2: `quran-1.2-vc13.aab`, 147,700,590 bytes,
+SHA-256 `d598a37e25a6613192de12a523e13f376e5bb3ae05f9889df72a4efbc1214762`,
+signed with the shared upload certificate
+(`53:7D:09:D2:...:0D:9D:E5:21`). The notes were pasted bare, 397 characters.
+The hand-off copy was deleted once the submission was confirmed, so
+`play-store/aab/` keeps only its own note.
+
+The screenshot set was installed from run 35595201651 and every frame was
+compared with its artifact by `cmp`. One thing is left named rather than
+claimed clean: the tour was then changed to capture the ayah card from the
+Mushaf (its fuller face), and that push was not re-collected before the
+submission. The committed set is therefore from run 35595201651, where frame
+08 is the study-mode card. The next session that touches the UI captures the
+set again and closes this; it is not a defect in the app, only a frame chosen
+before the tour was adjusted.
+
+**Open at the head of the next session.** The reader's Bangla surah names
+(researched in D-072, two meanings-based sources named, left as content
+backlog), and the tour's ayah-card frame above.
