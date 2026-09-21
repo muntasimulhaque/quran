@@ -4,8 +4,7 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 1.1 (versionCode 12) is handed over for Google Play, awaiting the
-owner's submission. This
+**Status:** 1.1 (versionCode 12) is submitted to Google Play for review. This
 session answered the reader's eighth report. The one fatal defect was turning
 Mushaf pages quickly: the launch picture's writer raced its own cache and
 threw on a worker, so the fix serializes the write, copies the bitmap before

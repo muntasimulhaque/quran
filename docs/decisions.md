@@ -2596,3 +2596,40 @@ tests (ScreenshotTest, WordByWordTest, MushafTurnTest) pass on the phone
 profile and produce all eight frames, each the app's own surface. The settings
 frame was looked at and shows the new hub. The next push runs the workflow on
 all three legs.
+
+## D-071: The 1.1 submission, and the hand-off closed
+
+Date: the nineteenth session. The owner confirmed that Play has the 1.1
+submission, so the hand-off copy of the bundle was deleted from
+`play-store/aab/` in the same breath: no signed build sits in the repository
+or on the machine waiting to be uploaded a second time, and the bundle was
+already deleted by GitHub from the run's artifacts after its own two weeks.
+`play-store/aab/` keeps only its own note about where a bundle comes from and
+when it goes.
+
+**What was submitted.** 1.1 (versionCode 12), 147704100 bytes, SHA-256
+`b876e0f6011452b45202ff0731a9d9ee280153cb1a18722e3dc6d6fb88bde8d2`, signed
+with the shared upload key (`537d09d2...de521`), carrying only the core pack.
+The committed source at `b5c50ef` is byte-for-byte what that bundle was built
+from: the only commit after the bundle's build (`89e803c`) touched
+`play-store/screenshots/`, `play-store/listing.md`, and the docs, none of
+which enters the app. The screenshots came from the same pipeline that built
+the bundle, all three form factors, eight frames each, every frame compared
+with its artifact by `cmp`, and both were handed over together, before the
+submission.
+
+**The screenshot workflow was rebuilt in this session (D-070).** The 1.1 push
+failed every screenshot leg because the tour waited on the visible word
+`Appearance` and the session renamed that row to `Theme`. The tour now waits
+on a test tag, the capture build carries only the packs its tests install, the
+workflow restores the Gradle build cache, and the trigger names every module
+that draws. A warm run is 4m33s on all three legs, under the owner's
+five-minute bar, and the workflow is written down in AGENTS.md so no machine
+rediscovers it.
+
+**What is left open.** The reader's two unreproduced reports (the first-launch
+language choice, and Browse after switching to Bangla) stay open in D-069 and
+at the head of the queue, not claimed clean. The owner-machine content gates
+(`verify`, `audit`, `fonts`) were not run: this machine carries only the two
+font zips under `content/raw`, not the owner's manual QUL and QuranEnc
+exports, so they remain for the machine that owns the sources.

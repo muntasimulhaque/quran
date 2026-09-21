@@ -696,11 +696,11 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the nineteenth session)
 
-**1.1 (versionCode 12) is handed over for Google Play, awaiting the owner's
-submission.** This session answered the reader's eighth report, and the
-release bundle and screenshots are handed over together, before the
-submission, per the runbook (D-069 answers the report, D-070 rebuilds the
-screenshot workflow).
+**1.1 (versionCode 12) is submitted to Google Play for review.** This
+session answered the reader's eighth report, and the release bundle and
+screenshots were handed over together, before the submission, per the
+runbook (D-069 answers the report, D-070 rebuilds the screenshot workflow,
+D-071 closes the hand-off).
 
 **The reader's eighth report (D-069).** The owner read 1.0 on a phone and
 reported sixteen things. One was fatal: turning Mushaf pages quickly killed
