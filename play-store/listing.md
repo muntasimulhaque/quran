@@ -87,16 +87,12 @@ for.
 - 7 inch tablet screenshots: `screenshots/tablet7/` (800 x 1280), eight of them
 - 10 inch tablet screenshots: `screenshots/tablet10/` (2560 x 1800), eight of them
 
-The set was refreshed in the nineteenth session from the `Capture store
-screenshots` workflow (run 35573190605), for all three form factors, in the
-eight frames the store lists. The tour captures exactly those eight, one
-surface each, so no frame is captured that the listing does not explain and
-none is listed that is not captured. The settings frame changed: the hub says
-Theme now, keep the screen awake sits in it, and word by word moved under
-Translations. The surah-opening, Browse, search, and ayah-card frames were
-recaptured with the same surfaces; the search frame still shows the keyboard
-over the results, as it has since the set was first captured. Every frame was
-compared with its artifact by `cmp` before it replaced the committed set.
+The set was refreshed in the twentieth session from the `Capture store
+screenshots` workflow (run 35595201651), for all three form factors, in the
+eight frames the store lists. Every frame was compared with its artifact by
+`cmp` before it replaced the committed set. The ayah-card frame now shows the
+card from the study reading, which opens the tafsir doors without repeating the
+ayah, its translation, or its meanings.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
@@ -114,7 +110,7 @@ What each set shows, in order:
 5. Search with the matched word marked, and the filters under the field
 6. The settings hub
 7. Browse, Surahs
-8. The ayah card, with its word by word and tafsir doors
+8. The ayah card, with its tafsir doors
 
 ## Release notes (1.2, 448 characters)
 
