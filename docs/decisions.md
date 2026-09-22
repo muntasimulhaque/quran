@@ -3032,3 +3032,8 @@ same push: run 35702564098, all three form factors, all twenty-four frames
 compared with their artifacts by `cmp` and every sheet frame checked for its
 content before it was installed. Both are handed over together, before the
 submission.
+
+**The hand-off is closed.** The owner submitted 1.4 to Play for review, so
+the hand-off copy of the bundle and its checksum were deleted the same
+session, as the runbook requires: the artifact stays in the build run and in
+Play, never sitting in the repository.

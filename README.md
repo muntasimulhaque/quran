@@ -4,7 +4,7 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 1.4 (versionCode 15) is handed over for Google Play submission,
+**Status:** 1.4 (versionCode 15) is submitted to Google Play for review,
 carrying the reader's eleventh report; 1.3 remains in review. What 1.4
 brings: Share sends a picture of the ayah with its translation, its
 reference, and the app's mark, with the plain text as the caption; Browse's

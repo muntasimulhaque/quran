@@ -29,7 +29,9 @@ dead letter.
 
 1. Read this file.
 2. `git fetch` and pull `main` before any other command: the owner works
-   from more than one machine, and no session builds on a stale head.
+   from more than one machine, and no session builds on a stale head. Do
+   them in order: reading AGENTS.md in the same block as the pull races it,
+   and you end up reading the file you were about to update.
 3. Do the work, then ask one question: anything else? The build waits for
    the owner's word. No `versionCode` moves until the session is done and
    the owner says so.
@@ -198,6 +200,52 @@ does not tell you, and each one costs a failed command to rediscover:
 - The Store alias intercepts `python3`, but a real `python` 3.12 exists on
   this machine; `node -e` is still the small-edit tool used here. Use it for
   small file edits instead of writing a script file.
+- `git pull` alone fails here (`main` is not a remote): it is
+  `git pull origin main`.
+- The working tree mixes LF and CRLF files. A `node -e` replacement anchored
+  on `\n` silently no-ops in a CRLF file (replace returns the text
+  unchanged and exits 0), which is how import edits went missing this
+  session: match `\r?\n`, or use the edit tool (it normalizes), and grep
+  afterwards to confirm the change actually landed.
+- adb is a Windows binary: with `MSYS_NO_PATHCONV=1` a `/tmp/x` destination
+  lands at `C:\tmp\x`, and adb cannot create `/c/tmp/...` at all. The read
+  tool resolves `/tmp/...` Windows-style, so `/tmp/x` written by adb is read
+  back as `C:\tmp\x`. Plan paths around that instead of debugging a
+  missing file.
+- Two tool calls in one block run in parallel: never edit a file and read it
+  (or run two reads whose results must stay in order) in the same block.
+
+**Verifying UI on this machine.**
+
+- **Do not hand-drive the app to verify UI.** After one emulator crash this
+  session, injected input in the top band of the screen (the whole top bar,
+  through both `input tap` and the compose test's own injection) went dead
+  while everything below it kept working, display captures returned older
+  frames, and the device clock jumped. Chasing the cause cost hours and
+  found nothing app-side. One reboot is allowed; if the symptoms persist,
+  stop. The verification loop is: JVM suite and lint locally, push, then
+  read the tour's frames from the screenshots run. The CI runners are
+  healthy and are the authority; every UI claim in a hand-over should be
+  backed by a CI frame or by a compose-test run, not by hand-taps.
+- Before any local connected run, put the same device settings on the
+  emulator that `screenshots.yml` sets (`settings put global
+  hide_error_dialogs 1`, `settings put secure anr_show_background 0`) and
+  check `dumpsys window windows | grep "Application Not Responding"`. A
+  stuck ANR window fails the tour on every attempt and a reboot clears it;
+  setting the flags alone does not remove a dialog already up. A freshly
+  wiped or freshly booted emulator fails `searchIsFastWhenWarm` and can
+  raise dialogs on its first run: let one run warm it before trusting any
+  result.
+- After a gradle `connectedDebugAndroidTest`, the app is uninstalled and
+  its on-device frames are gone with it. Pull frames in the same breath, or
+  drive the tests with `am instrument` against APKs you installed
+  yourself.
+- A screenshot decides nothing through the read tool unless its caption's
+  `original WxH` matches the artifact's real size: the tool has served a
+  same-named file from a different folder and has shuffled two reads in one
+  block. Read one frame per turn from a uniquely named copy, and check a
+  whole set with pixel signatures in python (the sheet's top edge, the
+  lapis chips, the keyboard) instead of by eye.
 
 ## Release hand-off
 
@@ -206,6 +254,13 @@ and handed over together, before the owner submits anything, because a
 screenshot refreshed after the submission has nothing left to be used for:
 the store already has the old set.
 
+0. **Confirm the owner gates can run, first.** `ls content/raw` must show
+   the manual QUL and QuranEnc datasets, not only the two font zips, and
+   `content/work/verify` must hold the extractions. `verify`, `audit`, and
+   `fonts` are part of a release and read only those files; if they are
+   gone, say so before the release starts rather than at gate time (the
+   twenty-second session lost an hour that way and shipped with the three
+   named as owed, D-078).
 1. Raise `versionCode` by 1 and raise `versionName` by one tenth within
    the major line: 0.1 through 0.9, then 1.0, then 1.1 through 1.9, then
    2.0. There is no 0.10: the tenth release of a major line is its `x.0`,
@@ -227,6 +282,12 @@ the store already has the old set.
    gh run download <run-id> -n store-screenshots-tablet7 -D <dir>
    gh run download <run-id> -n store-screenshots-tablet10 -D <dir>
    ```
+
+   A red leg keeps its frames (D-075): read the failure first, then
+   `gh run rerun <run-id> --failed`; one boot-time ANR on the 10 inch leg
+   cost exactly one rerun (D-078). `gh run download` nests the artifact's
+   own path structure, so locate the file with `find` instead of assuming
+   the destination's layout.
 
    Each artifact prefixes its frames with the form factor; strip that prefix
    into `play-store/screenshots/<form>/` and verify every frame against the
@@ -334,7 +395,10 @@ says so in the hand-off and does not run the capture.
    not only the dependency cache, and the AVD is cached per form factor.
 6. A leg must produce every frame the tour captures (eight), and the capture
    test checks the window list before keeping any frame. A frame of Android is
-   worse than no frame at all.
+   worse than no frame at all. Install a set only after comparing every frame
+   with its artifact by `cmp`, and read every changed frame for its content
+   before it ships: a green leg and a matching byte count say nothing about
+   which sheet is in the picture.
 
 **The tour itself.** It anchors on test tags and content descriptions, never on
 user-visible copy: a tour that waited on the word `Appearance` broke when the
@@ -777,14 +841,15 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the twenty-second session)
 
-**1.4 (versionCode 15) is handed to the owner for Play submission, carrying
+**1.4 (versionCode 15) is submitted to Google Play for review, carrying
 the reader's eleventh report (D-077); 1.3 remains in review.** The bundle
 is `quran-1.4-vc15.aab`, 147,738,638 bytes, SHA-256
 `5dce62ed7086efac2cfee6857c1073991d13f81bbb069b5730cb2cd09f711f4b`, verified
-as signed by the shared upload certificate, sitting in `play-store/aab/`
-until Play has it. The screenshots came from the same push (run
+as signed by the shared upload certificate; the hand-off copy was deleted
+once the owner confirmed the submission, and `play-store/aab/` keeps only its
+own note. The screenshots came from the same push (run
 35702564098), all three form factors, every frame `cmp`'d against its
-artifact and every sheet frame checked for its content, and both are handed
+artifact and every sheet frame checked for its content, and both were handed
 over together before the submission (D-078).
 
 **What the eleventh report answered:** Browse's numbers align on one right edge so every name starts at one place;
