@@ -35,6 +35,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -175,7 +176,8 @@ fun AyahCard(
                 // and then scrolled back up is the reader reading, never a
                 // pull that closes the card under them.
                 .sheetVerticalScroll(rememberScrollState())
-                .padding(bottom = 28.dp),
+                .padding(bottom = 28.dp)
+                .testTag("ayah-card"),
         ) {
             // From the Mushaf the card is the study surface, so the
             // translation, the word by word meanings, and the tafsirs are

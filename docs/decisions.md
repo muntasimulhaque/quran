@@ -2964,3 +2964,16 @@ workflow runs on CI are the ones to read for those, and the crash
 (`performMeasureAndLayout called during measure layout`, once, on a cold
 boot) plus one earlier `SnapshotStateObserver` threading failure are named
 here as environment findings to watch for in CI rather than assumed clean.
+
+**The tour anchors on its own sheets, and a sheet frame settles before it is
+kept.** CI collected this session's set green, but frame 07 was the reader
+instead of Browse on all three form factors and frame 08 missed the card: the
+tour's Browse wait matched the reader's title sitting behind the sheet, so it
+passed before the sheet existed, and a display capture taken right after a
+click photographs the sheet's window before its first draw and its opening
+animation have settled. Browse and the ayah card gained test tags
+(`browse-sheet`, `ayah-card`) the way the settings hub already had one, the
+tour waits on those tags, and a sheet frame is now kept only when two display
+captures in a row are identical. The loop only photographs the screen, never
+drives the app between captures, and the window list is still checked before
+every frame.

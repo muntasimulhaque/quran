@@ -537,8 +537,14 @@ implement it and update this list.
   captures through a settle loop: that loop took the phone emulator down five
   times in a row while the tablet legs passed. A modal sheet is its own
   window, which the Compose root cannot PixelCopy, so the four sheet frames
-  (search, settings, Browse, and the ayah card) take one display capture each,
-  with the window list checked first. A root frame cannot hold a system dialog,
+  (search, settings, Browse, and the ayah card) keep a display capture only
+  when two captures in a row are identical, with the window list checked
+  first: a sheet's semantics exist before its window has drawn and its
+  opening animation has settled, and a frame kept before that photographs
+  the reader under the sheet (the Browse frame lost that race on all three
+  legs once, and its wait matched the reader's own title behind the sheet,
+  so the tour now waits on each sheet's test tag and never on text a sheet
+  covers). A root frame cannot hold a system dialog,
   so only the sheet frames need that guard, and the whole tour runs in about
   half a minute on a phone profile.
 - A screenshot leg that dies with `device offline` while another leg passes

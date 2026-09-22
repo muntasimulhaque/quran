@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
@@ -146,7 +147,10 @@ fun BrowseSheet(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .imePadding(),
+                .imePadding()
+                // The tag is the tour's anchor: the reader's own title sits
+                // behind this sheet and would answer a text wait at once.
+                .testTag("browse-sheet"),
         ) {
             // The sheet needs no title: the tabs name everything it holds,
             // and a heading over a control that already says where the reader

@@ -84,21 +84,36 @@ class ScreenshotTest {
      * Keeps the whole display for the frames a sheet owns. A modal sheet
      * lives in its own window, and the compose root cannot PixelCopy that
      * window's surface, so the search, the settings, the Browse list, and the
-     * ayah card each need one screen capture. It is one capture per frame,
-     * never a settle loop, and the window list is checked
-     * first: a frame of Android is worse than no frame at all.
+     * ayah card each need one screen capture. A sheet's semantics exist
+     * before its window has drawn and its opening animation has settled, so
+     * the frame is kept only when two captures in a row are identical:
+     * whatever is still arriving photographs differently from the capture
+     * before it, and a settled screen photographs the same twice. This loop
+     * only looks at the screen, unlike the old settle loop that drove the app
+     * between full-screen captures and took the phone emulator down, and the
+     * window list is checked before every frame: a frame of Android is worse
+     * than no frame at all.
      */
     private fun captureScreen(name: String) {
-        repeat(3) { attempt ->
+        var prior: android.graphics.Bitmap? = null
+        repeat(8) { attempt ->
             rule.waitForIdle()
-            val bitmap = androidx.test.runner.screenshot.Screenshot.capture().bitmap
-            if (!hasSystemDialog()) {
-                write(name, bitmap)
-                return
+            Thread.sleep(600)
+            if (hasSystemDialog()) {
+                dismissDialog()
+                if (attempt == 7) throw AssertionError("a system dialog stayed over $name")
+            } else {
+                val bitmap = androidx.test.runner.screenshot.Screenshot.capture().bitmap
+                val settled = prior != null && prior!!.sameAs(bitmap)
+                prior?.recycle()
+                prior = bitmap
+                if (settled) {
+                    write(name, bitmap)
+                    return
+                }
             }
-            dismissDialog()
-            if (attempt == 2) throw AssertionError("a system dialog stayed over $name")
         }
+        throw AssertionError("the screen over $name never settled")
     }
 
     /**
@@ -174,12 +189,6 @@ class ScreenshotTest {
         InstrumentationRegistry.getInstrumentation()
             .sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK)
         Thread.sleep(700)
-    }
-
-    private fun waitFor(text: String, timeout: Long = 15_000) {
-        rule.waitUntil(timeoutMillis = timeout) {
-            rule.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
-        }
     }
 
     /**
@@ -315,7 +324,10 @@ class ScreenshotTest {
         // 7. Browse, the surah list.
         revealChrome()
         rule.onNodeWithContentDescription("Browse the Quran").performClick()
-        waitFor("Al-Fatihah")
+        // The anchor is the sheet itself, by tag: the reader's own title sits
+        // behind the sheet and matches a text wait at once, which let the
+        // capture run before the sheet existed and photographed the reader.
+        waitForTag("browse-sheet")
         captureScreen("07-browse")
         back()
 
@@ -335,7 +347,9 @@ class ScreenshotTest {
         // animation.
         Thread.sleep(1_500)
         rule.onNodeWithContentDescription("More").performClick()
-        Thread.sleep(1_200)
+        // The card composes after the tap, and its capture raced ahead of it
+        // the same way Browse's did; the tag waits for the card itself.
+        waitForTag("ayah-card")
         captureScreen("08-ayah-card")
         back()
 
