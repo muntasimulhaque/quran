@@ -778,13 +778,11 @@ fetching them again; the space is worth less than the time.
 
 ## Next session: the remaining queue, in order
 
-0. **The store set is installed and verified.** The twenty-second session
-   changed pixels, and the set from run 35696938701 (the capture with the
-   sheet tags and the settling frames) is in `play-store/screenshots/` for
-   all three form factors: every frame compared with its artifact by `cmp`,
-   every sheet frame read for its content before it was kept. The frame
-   count and the numbered list in `play-store/listing.md` are unchanged at
-   eight each.
+0. **The store set is current, and the capture can be trusted.** 1.5
+   installed the set from run 35771681366: every frame compared with its
+   artifact by `cmp`, the ayah card frame carrying the word by word order.
+   The next session that changes a pixel captures again with the procedure
+   in "Store screenshots".
 
 1. **Measure on real hardware.** The numbers in D-037 come from a software
    rendered emulator, the slowest Android this app will run on. A
@@ -838,6 +836,32 @@ fetching them again; the space is worth less than the time.
   to right on the screen; `MushafTurnTest` now pins the direction on every
   form factor.
 
+
+## Where the project stands (end of the twenty-third session)
+
+**1.5 (versionCode 16) is submitted to Google Play for review.** It carries
+two fixes: About this surah keeps its headings on their own lines
+(`RichText.paragraphs`, drawn by the study view and audited by
+`tools search`), and opened from the Mushaf, the ayah card reads word by
+word first, then the translation, then the tafsir (D-079). What was handed
+over: 147,736,943 bytes, SHA-256
+`afa01b1d7953f51fb9c4c0fe4d6a99b80b742ba899592d904ca3b942d9571d5e`, signed
+with the shared upload certificate, carrying only the core pack. The
+screenshots came from run 35771681366, all three form factors, every frame
+compared with its artifact by `cmp`, and both were handed over together.
+The hand-off copy was deleted once the submission was confirmed.
+
+**The Bangla names.** The session researched a full Bangla surah-name list
+(Wikipedia base, adapted per the Arabic and English columns) and the owner
+decided the release ships without it; a future release can pick it up, and
+D-079 records where the work stopped.
+
+**Verification.** JVM suite, lint, and `assembleDebug` green. All five
+owner-machine content gates ran green locally this time (`verify`, `audit`,
+`search`, `fonts`, `checkdb`), closing the three D-078 left owed. The
+instrumented tests and the screenshot tour ran in CI (build run 35771681314,
+screenshots run 35771681366, both green); the emulator was left out of this
+session at the owner's word.
 
 ## Where the project stands (end of the twenty-second session)
 
