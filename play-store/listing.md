@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 1.4 (versionCode 15)
+Version: 1.5 (versionCode 16)
 
 ## Listing
 
@@ -112,6 +112,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (1.5, 338 characters)
+
+About this surah keeps its headings now: Name, Period of Revelation, and Theme each stand on their own line instead of running into the paragraph they head. Opened from the Mushaf, the ayah card now reads word by word first, then the translation, then the tafsir, in the order the study view already uses. No ads, no trackers, no account.
 
 ## Release notes (1.4, 432 characters)
 
