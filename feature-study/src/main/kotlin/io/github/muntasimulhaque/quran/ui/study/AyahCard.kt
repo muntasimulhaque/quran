@@ -85,7 +85,7 @@ private data class TafsirView(
  *
  * What it shows follows the reading the reader came from. From the Mushaf,
  * where the page carries neither translation nor meanings, the card is the
- * whole study surface: the translation, word by word, and each tafsir. From
+ * whole study surface: word by word, the translation, and each tafsir. From
  * the study reading, where the ayah and its translation and meanings are
  * already on the page, the card does not repeat them: it opens only the
  * tafsirs. The note is not here at all: it belongs to the pill that the long
@@ -179,21 +179,59 @@ fun AyahCard(
                 .padding(bottom = 28.dp)
                 .testTag("ayah-card"),
         ) {
-            // From the Mushaf the card is the study surface, so the
-            // translation, the word by word meanings, and the tafsirs are
-            // here. The ayah itself is not drawn: the reader came from it and
-            // it is on the page behind the card, so repeating the Arabic here
-            // would only push the study down. From the study reading the ayah,
-            // its translation, and its meanings are already open on the page,
+            // From the Mushaf the card is the study surface, so the word by
+            // word meanings, the translation, and the tafsirs are here, in
+            // that order: it is the order the study reading draws them in,
+            // the words under the ayah and the translation under the words.
+            // The ayah itself is not drawn: the reader came from it and it is
+            // on the page behind the card, so repeating the Arabic here would
+            // only push the study down. From the study reading the ayah, its
+            // translation, and its meanings are already open on the page,
             // and only the tafsir doors remain.
             if (fromMushaf) {
+                if (hasWords) {
+                    // Every block of the card is named above itself: the
+                    // words, the translation, the tafsir. The door below
+                    // this label does not repeat it; it names what is inside,
+                    // the list in the language the reading speaks, the way a
+                    // tafsir door names its pack.
+                    Text(
+                        text = stringResource(R.string.card_word_by_word),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Block),
+                    )
+                    DoorRow(
+                        title = stringResource(R.string.card_words_meanings),
+                        subtitle = languageName(wordLanguage),
+                        open = door == Door.Words,
+                        onClick = { door = if (door == Door.Words) null else Door.Words },
+                    )
+                    if (door == Door.Words) {
+                        WordByWord(
+                            meanings = words,
+                            hafs = hafs,
+                            settings = settings,
+                            modifier = Modifier.padding(horizontal = 22.dp, vertical = Space.Block),
+                        )
+                    }
+                } else {
+                    Spacer(Modifier.height(Space.Block))
+                    DoorRow(
+                        title = stringResource(R.string.card_add_word_by_word),
+                        subtitle = "",
+                        open = null,
+                        onClick = onAddContent,
+                    )
+                }
+
                 // What each block is is said in words, not with a rule: a
-                // horizontal line between the translation and the tafsir is
-                // furniture the app draws nowhere else, and a name over the
-                // text tells the reader more than a line ever could. The
-                // translation is named once because it is one block even
-                // when more than one translation is on; the pack's own name
-                // stays on the lines, where it says whose reading it is.
+                // name over the text tells the reader more than a horizontal
+                // line ever could, and the app draws no such rule anywhere
+                // else. The translation is named once because it is one
+                // block even when more than one translation is on; the
+                // pack's own name stays on the lines, where it says whose
+                // reading it is.
                 if (lines.isNotEmpty()) {
                     Text(
                         text = stringResource(R.string.card_translation_label),
@@ -242,52 +280,16 @@ fun AyahCard(
                         translations.isEmpty() -> AddTranslation(
                             text = stringResource(R.string.card_add_translation),
                             onClick = onAddContent,
-                            modifier = Modifier.padding(horizontal = 22.dp),
+                            modifier = Modifier.padding(top = Space.Block, start = 22.dp, end = 22.dp),
                         )
                         translationReady -> Text(
                             text = stringResource(R.string.card_no_translation),
                             style = LatinReading.copy(fontSize = 15.sp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(horizontal = 22.dp),
+                            modifier = Modifier.padding(top = Space.Block, start = 22.dp, end = 22.dp),
                         )
                         else -> Unit
                     }
-                }
-
-                if (hasWords) {
-                    // Every block of the card is named above itself: the
-                    // translation, the words, the tafsir. The door below
-                    // this label does not repeat it; it names what is inside,
-                    // the list in the language the reading speaks, the way a
-                    // tafsir door names its pack.
-                    Text(
-                        text = stringResource(R.string.card_word_by_word),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Block),
-                    )
-                    DoorRow(
-                        title = stringResource(R.string.card_words_meanings),
-                        subtitle = languageName(wordLanguage),
-                        open = door == Door.Words,
-                        onClick = { door = if (door == Door.Words) null else Door.Words },
-                    )
-                    if (door == Door.Words) {
-                        WordByWord(
-                            meanings = words,
-                            hafs = hafs,
-                            settings = settings,
-                            modifier = Modifier.padding(horizontal = 22.dp, vertical = Space.Block),
-                        )
-                    }
-                } else {
-                    Spacer(Modifier.height(Space.Block))
-                    DoorRow(
-                        title = stringResource(R.string.card_add_word_by_word),
-                        subtitle = "",
-                        open = null,
-                        onClick = onAddContent,
-                    )
                 }
             }
             if (!fromMushaf && tafsirPacks.isEmpty()) {
