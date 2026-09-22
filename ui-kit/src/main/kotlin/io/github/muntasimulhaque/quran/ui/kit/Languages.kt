@@ -18,13 +18,18 @@ fun languageName(code: String): String {
 }
 
 /**
- * A language's name as the language itself writes it, whatever the interface
- * says. The page that asks a reader to choose a language cannot assume the
- * reader understands its own question, so each choice on it is named in the
- * script it belongs to: English, বাংলা.
+ * How the app names a language wherever the reader chooses one: the
+ * language's own script first, so a reader who cannot read the current
+ * interface still finds their own, and the English name beside it in
+ * parentheses, so a reader who knows only one of the two names still knows
+ * which row is which. English carries no second name: English is its own
+ * answer, and "English (English)" would say nothing twice. The platform's
+ * locale data writes both names, so no list of languages lives in this file.
  */
-fun nativeLanguageName(code: String): String {
+fun languageChoiceName(code: String): String {
     val locale = Locale.forLanguageTag(code)
-    return locale.getDisplayName(locale)
+    val own = locale.getDisplayName(locale)
+    if (locale.language == Locale.ENGLISH.language) return own
+    return "$own (${locale.getDisplayName(Locale.ENGLISH)})"
 }
 

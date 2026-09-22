@@ -2881,3 +2881,86 @@ copy is deleted once the owner confirms the submission.
 hand-off copy of the bundle was deleted the same session, as the runbook
 requires: the artifact stays in the build run and in Play, never sitting in the
 repository. Nothing else moved after the submission.
+
+## D-077: The reader's eleventh report, the twenty-second session
+
+Date: the twenty-second session. The owner read 1.3 on a phone and reported
+seven things, all of them about the app's small mechanics rather than its
+shape. Nothing here is released yet; the tree carries the answers and the
+build waits for the owner's word.
+
+**Numbers in a numbered list end at one edge.** In Browse, the surah and juz
+numbers set their digits left to right from the row's own padding, so "10"
+began where "3" began and the name after it started deeper than the name of
+row 3. Every number now measures into the width of the widest number its list
+holds and sits flush to that width's right edge (`feature-browse/NumberedRows.kt`):
+the digits end at one line, the names start at one place, and the width is
+measured with the reader's own font scale so a large system text grows the
+column instead of clipping it.
+
+**A language is named in its own script with the English beside it.** The
+welcome cards, the settings hub's Language row, and the Language page all read
+`বাংলা (Bangla)` now (`ui-kit/Languages.kt`, `languageChoiceName`), while
+English keeps its one name, because "English (English)" says nothing twice.
+The platform writes both names; no list of languages lives in the code.
+
+**Nothing a reader reads sits against a button.** The downloaded surah's size
+touched its Remove, the search reference sat on Open, and the note's heading
+ran into Clear. Each keeps the 12 dp the choice rows and the toggles already
+keep between their words and their trailing control, so one measurement
+answers across the app.
+
+**The ayah card names every block it holds.** From the Mushaf, the words
+section gained the label over it that the translation and the tafsir already
+had, and the door under it no longer repeats the label: it says what is
+inside, "Meanings" with the list's language beside it, the way a tafsir door
+names its pack.
+
+**A scroll back to the top never closes a sheet.** The pull gate was a list
+affair until now, and a long tafsir scrolled down and then scrolled back up
+pulled the card closed under the reader. `SheetDragGate` now answers over any
+scroll position, and every scrolling sheet wears it: the ayah card, the
+settings hub, all seven settings pages, and the credits. The same policy
+Browse and Search already wore, so one gesture behaves the same everywhere;
+verified on the emulator by scrolling the card down and up three times with
+the sheet staying put.
+
+**The pill reads Play, Note, Save, Share, More.** The order the owner asked
+for, actions before the door.
+
+**The note sheet says what the reader is about to do.** A fresh sheet is
+"Take a note"; a sheet with a note already written is "Edit note". The bare
+"Note" heading against a Save button left the reader to read both twice.
+
+**Share carries a picture of the ayah.** The card is the app's own face: the
+ayah in the Hafs face, the first enabled translation under it (the same pack
+search and the plain text read, with footnote markers dropped because a
+superscript with no door behind it is a number nobody can open), the
+reference, and the launcher's mark beside "Quran" at the foot, with the
+translation's name quiet at the other end. It is drawn on the manuscript
+paper whatever theme the reader uses, at one fixed text scale, because a
+picture is one artifact that leaves the app and lands in a chat. The capture
+composes invisibly (`app/.../reader/AyahShare.kt`): the child is measured
+taller than the screen so a long ayah is never cut, its drawing is recorded
+into a graphics layer that is never drawn back, the node clears its
+semantics, and two frames later the pixels are read back. The PNG is written
+to one cache folder the app's own FileProvider exposes (`share_paths.xml`,
+read-granted to the app the reader picks), with the plain share text riding
+along as the caption. Anything that fails along the way falls back to the
+plain text share, so Share is never a tap that did nothing.
+
+**Verification, and what this machine could not prove.** The JVM suite, lint,
+and assembleDebug are green; the data instrumented tests pass (22) and the
+app instrumented tests pass (12) in two full runs on this code. On the
+running emulator the walk confirmed the pill's new order, the welcome's
+`বাংলা (Bangla)`, the settings hub, the study card's Tafsir block, the note
+sheet's "Take a note", the share end to end (the PNG's contents and the
+system chooser showing "Sharing image" with the card), and the scroll gate
+keeping the card open through three scroll-up gestures. After the emulator
+crashed once this session its input injection went unreliable in the top band
+of the screen, so the Browse numbers, the Language page, and the Mushaf card's
+Word by word label were not photographed locally; the frames the screenshots
+workflow runs on CI are the ones to read for those, and the crash
+(`performMeasureAndLayout called during measure layout`, once, on a cold
+boot) plus one earlier `SnapshotStateObserver` threading failure are named
+here as environment findings to watch for in CI rather than assumed clean.

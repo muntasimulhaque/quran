@@ -30,10 +30,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.data.UiLanguage
+import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
-import java.util.Locale
 
 /**
  * The one screen before the reading, shown once: which language the app
@@ -42,8 +42,9 @@ import java.util.Locale
  * never handed an English column and asked to change it later.
  *
  * The screen itself speaks the system's language when the system speaks one
- * of the offered two, and each language is named in its own script, so the
- * page is understood before it is answered. It is shown until the choice is
+ * of the offered two, and each language is named in its own script first,
+ * with the English name beside it, so the page is understood before it is
+ * answered by a reader who knows either name. It is shown until the choice is
  * made, and the choice is remembered; the language can be changed at any
  * time from Settings.
  */
@@ -116,14 +117,14 @@ fun LanguageWelcome(
     }
 }
 
-/** One language, named in its own script, with a quiet mark when the phone speaks it. */
+/** One language, named in its own script with the English name beside it, and a quiet mark when the phone speaks it. */
 @Composable
 private fun LanguageCard(
     language: UiLanguage,
     suggested: Boolean,
     onClick: () -> Unit,
 ) {
-    val name = remember(language) { nativeName(language) }
+    val name = remember(language) { languageChoiceName(language.tag) }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -156,16 +157,6 @@ private fun LanguageCard(
                 .rotate(-90f),
         )
     }
-}
-
-/**
- * A language's name as the language itself writes it: English is English and
- * Bangla is বাংলা whatever the rest of the interface says, because the page
- * that asks the question cannot assume its own answer.
- */
-private fun nativeName(language: UiLanguage): String {
-    val locale = Locale.forLanguageTag(language.tag)
-    return locale.getDisplayName(locale)
 }
 
 /** The language the phone itself asks for, resolved to one of the offered two. */

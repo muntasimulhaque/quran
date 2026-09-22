@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,9 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.JuzStart
@@ -47,7 +44,6 @@ import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
-import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -106,6 +102,10 @@ fun BrowseSheet(
     val lastReadGate = remember(lastReadList) { SheetDragGate(lastReadList) }
     val savedGate = remember(savedList) { SheetDragGate(savedList) }
     val notesGate = remember(notesList) { SheetDragGate(notesList) }
+    // Both number columns are measured once here and handed to their rows: every
+    // number of a list ends at one edge, and every name starts at one place.
+    val surahNumberWidth = rememberNumberWidth("114")
+    val juzNumberWidth = rememberNumberWidth("30")
     val juzStarts by produceState(initialValue = emptyList<JuzStart>(), content) {
         value = withContext(Dispatchers.IO) { content.juzStarts() }
     }
@@ -182,7 +182,7 @@ fun BrowseSheet(
                     contentPadding = PaddingValues(bottom = 28.dp),
                 ) {
                     items(surahs, key = { it.number }) { surah ->
-                        SurahRow(surah) { onSurah(surah.number) }
+                        SurahRow(surah, surahNumberWidth) { onSurah(surah.number) }
                     }
                 }
                 BrowseTab.Juz -> LazyColumn(
@@ -194,6 +194,7 @@ fun BrowseSheet(
                         val surah = surahs.firstOrNull { it.number == start.surah }
                         JuzRow(
                             juz = start.juz,
+                            numberWidth = juzNumberWidth,
                             reference = start.verseKey,
                             surahName = surah?.nameSimple ?: "",
                             // A juz begins at one ayah; a tap opens exactly
@@ -268,74 +269,4 @@ private fun <T> androidx.compose.foundation.lazy.LazyListScope.itemsIndexedCompa
     row: @Composable (Int, T) -> Unit,
 ) {
     items(items.size) { index -> row(index, items[index]) }
-}
-
-@Composable
-private fun SurahRow(surah: Surah, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 22.dp, vertical = 11.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = surah.number.toString(),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-            modifier = Modifier.padding(end = 16.dp),
-        )
-        Column(Modifier.weight(1f)) {
-            Text(
-                text = surah.nameSimple,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-                text = stringResource(
-                    R.string.surah_meta_place_ayahs,
-                    placeName(surah.revelationPlace),
-                    surah.versesCount,
-                ),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 2.dp),
-            )
-        }
-        Text(
-            text = surah.nameArabic,
-            style = TextStyle(fontFamily = Amiri, fontSize = 23.sp, color = MaterialTheme.colorScheme.onSurfaceVariant),
-        )
-    }
-}
-
-@Composable
-private fun JuzRow(juz: Int, reference: String, surahName: String, onJuz: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onJuz)
-            .padding(horizontal = 22.dp, vertical = 13.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = juz.toString(),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(end = 16.dp),
-        )
-        Column(Modifier.weight(1f)) {
-            Text(
-                text = stringResource(R.string.juz_title, juz),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-                text = if (reference.isEmpty()) "" else stringResource(R.string.juz_starts_at, surahName, reference),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 2.dp),
-            )
-        }
-    }
 }

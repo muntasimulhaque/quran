@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -29,6 +28,7 @@ import io.github.muntasimulhaque.quran.data.StudyRow
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.feature.settings.R
+import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 
 /**
  * What the settings sheet can ask the app to do. The sheet itself owns no
@@ -125,7 +125,7 @@ fun SettingsSheet(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .verticalScroll(hubScroll),
+                        .sheetVerticalScroll(hubScroll),
                 ) {
                     Text(
                         text = stringResource(R.string.settings_title),

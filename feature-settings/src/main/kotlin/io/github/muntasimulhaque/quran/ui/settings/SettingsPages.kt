@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,6 +25,7 @@ import io.github.muntasimulhaque.quran.data.StudyRow
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.feature.settings.R
+import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.rich.ArabicFonts
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -42,7 +42,7 @@ fun AppearancePage(
     onTheme: (io.github.muntasimulhaque.quran.data.AppTheme) -> Unit,
     onAutoNight: (Boolean) -> Unit,
 ) {
-    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+    Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_theme))
         ThemeRow(settings.theme, onTheme)
         // The swatches and the switch are two separate decisions, and the
@@ -85,7 +85,7 @@ fun TextPage(
     onSize: (TypeRole, Float) -> Unit,
 ) {
     val row by produceState<StudyRow?>(initialValue = null, settings.translationPacks) { value = preview() }
-    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+    Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         if (row != null) {
             SizeSample(row = row!!, settings = settings)
         }
@@ -146,7 +146,7 @@ fun TranslationsPage(
     packSetup: PackSetupState?,
     actions: SettingsActions,
 ) {
-    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+    Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_translations))
         Text(
             text = stringResource(R.string.settings_translations_note),
@@ -188,7 +188,7 @@ fun TafsirsPage(
     packSetup: PackSetupState?,
     actions: SettingsActions,
 ) {
-    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+    Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_tafsirs))
         Text(
             text = stringResource(R.string.settings_tafsirs_note),
@@ -224,7 +224,7 @@ fun AboutPage(
     onCredits: () -> Unit,
     onCheckContent: () -> Unit,
 ) {
-    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+    Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_about))
         ValueRow(stringResource(R.string.settings_version), version)
         TextRow(title = stringResource(R.string.settings_credits), onClick = onCredits)

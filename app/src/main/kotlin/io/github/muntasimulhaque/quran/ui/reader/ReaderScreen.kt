@@ -40,6 +40,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -76,9 +77,11 @@ import io.github.muntasimulhaque.quran.ui.study.StudyList
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.PagePalette
 import io.github.muntasimulhaque.quran.ui.theme.LocalPageThemeName
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.min
 
 /** How long the chrome stays after a touch before it steps back. */
@@ -125,6 +128,12 @@ fun ReaderScreen(
     var sheet by rememberSaveable { mutableStateOf(ReaderSheet.None) }
     var touch by remember { mutableIntStateOf(0) }
     val context = androidx.compose.ui.platform.LocalContext.current
+    val scope = rememberCoroutineScope()
+    // A share is a card: the parts are read off the main thread, then the
+    // card composes invisibly, is recorded into a layer, and leaves as a
+    // PNG through the chooser. While this holds a card the capture is
+    // composing for the frame alone; it is never drawn to the screen.
+    var sharing by remember { mutableStateOf<ShareCard?>(null) }
 
     // The phone's back button dismisses the ayah pill first, and only closes
     // the app when nothing is raised. A reader who long-pressed an ayah means
@@ -148,13 +157,28 @@ fun ReaderScreen(
         chrome = false
     }
 
-    fun shareAyah(text: String) {
+    fun sharePlainText(text: String) {
         val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(android.content.Intent.EXTRA_TEXT, text)
         }
         runCatching {
             context.startActivity(android.content.Intent.createChooser(intent, null))
+        }
+    }
+
+    /**
+     * The card as an image beside the plain text: the PNG goes out through
+     * the app's own content provider and the text rides along as the caption
+     * every receiving app can use. Anything that fails along the way (a full
+     * cache, a provider that will not resolve) falls back to the plain text,
+     * so a Share is never a tap that did nothing.
+     */
+    fun shareCard(image: ImageBitmap, text: String) {
+        scope.launch {
+            val file = withContext(Dispatchers.IO) { writeShareCard(context, image) }
+            val opened = file != null && startShareCard(context, file, text)
+            if (!opened) sharePlainText(text)
         }
     }
 
@@ -323,13 +347,33 @@ fun ReaderScreen(
                     selected = null
                 },
                 onNote = { ayah -> cardNote = ayah.number },
-                onShareText = { text -> shareAyah(text) },
+                onShare = { ayah ->
+                    scope.launch { sharing = loadShareCard(context, viewModel, ayah) }
+                },
                 onTouch = { touch++ },
                 onReciter = { sheet = ReaderSheet.Settings },
                 reciterName = shortReciterName(
                     settings.recitation,
                     viewModel.recitations.firstOrNull { it.id == settings.recitation }?.name.orEmpty(),
                 ),
+            )
+        }
+
+        // The share card, composed for its capture alone. It never reaches
+        // the screen: the layer it records into is read back and then the
+        // whole node leaves the composition.
+        sharing?.let { card ->
+            ShareCardCapture(
+                card = card,
+                onImage = { image ->
+                    sharing = null
+                    shareCard(image, card.text)
+                },
+                onFailed = {
+                    sharing = null
+                    sharePlainText(card.text)
+                },
+                modifier = Modifier.align(Alignment.BottomStart),
             )
         }
     }
@@ -649,7 +693,7 @@ private fun BottomStack(
     onDeselect: () -> Unit,
     onNote: (Ayah) -> Unit,
     onMore: (Ayah) -> Unit,
-    onShareText: (String) -> Unit,
+    onShare: (Ayah) -> Unit,
     onTouch: () -> Unit,
     onReciter: () -> Unit,
     reciterName: String,
@@ -662,7 +706,6 @@ private fun BottomStack(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        val scope = rememberCoroutineScope()
         viewModel.packSetup?.let { setup ->
             Row(
                 modifier = Modifier
@@ -721,9 +764,7 @@ private fun BottomStack(
                 },
                 onNote = { onNote(ayah) },
                 onMore = { onMore(ayah) },
-                onShare = {
-                    scope.launch { onShareText(viewModel.ayahShareText(ayah)) }
-                },
+                onShare = { onShare(ayah) },
             )
         }
 
@@ -794,18 +835,18 @@ private fun AyahActions(
             .padding(horizontal = 6.dp, vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        TextAction(
-            label = stringResource(R.string.action_save),
-            icon = if (isSaved) Icon.BookmarkFilled else Icon.Bookmark,
-            onClick = onSave,
-            active = isSaved,
-        )
         TextAction(stringResource(R.string.action_play), Icon.Play, onPlay)
         TextAction(
             label = stringResource(R.string.action_note),
             icon = Icon.Note,
             onClick = onNote,
             active = hasNote,
+        )
+        TextAction(
+            label = stringResource(R.string.action_save),
+            icon = if (isSaved) Icon.BookmarkFilled else Icon.Bookmark,
+            onClick = onSave,
+            active = isSaved,
         )
         TextAction(stringResource(R.string.action_share), Icon.Share, onShare)
         TextAction(stringResource(R.string.action_more), Icon.More, onMore)

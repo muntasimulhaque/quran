@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -17,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.feature.settings.R
+import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.languageName
 
 /** How the catalog joins the licenses of one pack's datasets. */
@@ -53,7 +53,7 @@ fun CreditsSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .imePadding()
-                .verticalScroll(rememberScrollState())
+                .sheetVerticalScroll(rememberScrollState())
                 .padding(bottom = 34.dp),
         ) {
             Text(

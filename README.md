@@ -5,7 +5,13 @@ turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
 **Status:** 1.3 (versionCode 14) is submitted to Google Play for review,
-answering the reader's tenth report. Changing the language leaves the reader on the Language
+answering the reader's tenth report. The eleventh report is answered in the
+tree and not yet released: Browse's numbers align on one edge, every language
+but English is named with the English beside it, the ayah card labels its word
+by word block, a scroll back to the top never closes a scrolling sheet, the
+pill reads Play, Note, Save, Share, More, the note sheet says Take a note or
+Edit note, and Share sends a picture of the ayah with its translation and the
+app's mark (D-077). Changing the language leaves the reader on the Language
 page, speaking the language they chose; the ayah card's horizontal rules are
 replaced by Translation and Tafsir labels; About this surah no longer truncates
 when opened; every text-only action wears the app's one button shape, so Save

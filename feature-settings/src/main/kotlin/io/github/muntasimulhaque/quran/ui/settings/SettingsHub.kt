@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,9 +20,10 @@ import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.Recitation
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.feature.settings.R
+import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.languageName
-import io.github.muntasimulhaque.quran.ui.kit.nativeLanguageName
+import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
 import io.github.muntasimulhaque.quran.ui.theme.Space
 /** The pages the settings hub opens, one at a time. */
 enum class SettingsPage { Language, Theme, FontSize, Reciters, Translations, Tafsirs, About }
@@ -73,7 +73,7 @@ fun SettingsHub(
     Column(modifier.fillMaxWidth().testTag("settings-hub")) {
         PageRow(
             title = stringResource(R.string.settings_title_language),
-            summary = nativeLanguageName(settings.uiLanguage ?: UiLanguage.English.tag),
+            summary = languageChoiceName(settings.uiLanguage ?: UiLanguage.English.tag),
         ) { onOpen(SettingsPage.Language) }
         PageRow(
             title = stringResource(R.string.settings_title_appearance),
@@ -189,7 +189,7 @@ fun LanguagePage(
     settings: AppSettings,
     onLanguage: (String) -> Unit,
 ) {
-    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+    Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_language))
         Text(
             text = stringResource(R.string.settings_language_note),
@@ -200,12 +200,14 @@ fun LanguagePage(
         // A list of choices is read, not searched: the languages are sorted by
         // the name the interface itself shows them under, so Bangla sits above
         // English in an English interface and each language's own alphabet is
-        // respected in its own interface. The name on the row stays the
-        // language's native script, which the reader must recognise first.
+        // respected in its own interface. Each row is named in the language's
+        // own script first, which the reader must recognise before they can
+        // read anything else here, with the English name beside it so the two
+        // names are never a guess.
         val entries = UiLanguage.entries.map { it to languageName(it.tag) }
         entries.sortedBy { it.second.lowercase() }.forEach { (language, _) ->
             ChoiceRow(
-                title = nativeLanguageName(language.tag),
+                title = languageChoiceName(language.tag),
                 subtitle = stringResource(R.string.settings_language_subtitle),
                 selected = settings.uiLanguage == language.tag,
                 onClick = { onLanguage(language.tag) },

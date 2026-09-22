@@ -464,8 +464,14 @@ private fun ReferenceRow(ayah: Ayah, onAyah: (Ayah, Int) -> Unit) {
             )
         }
         // The row is the door too, but a reader looking for a control
-        // finds it here: the shape says the word opens something.
-        TextButton(label = stringResource(R.string.search_action_open), onClick = { onAyah(ayah, 0) })
+        // finds it here: the shape says the word opens something. It keeps
+        // the same 12 dp from the reference beside it that every trailing
+        // control keeps, so the two never read as one crowded shape.
+        TextButton(
+            label = stringResource(R.string.search_action_open),
+            onClick = { onAyah(ayah, 0) },
+            modifier = Modifier.padding(start = 12.dp),
+        )
     }
 }
 

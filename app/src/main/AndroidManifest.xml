@@ -29,5 +29,19 @@
             </intent-filter>
         </activity>
 
+        <!-- The ayah card leaves as a PNG through this provider: one folder
+             of the cache, read-granted to the app the reader picks in the
+             chooser, exported to nobody. It adds no permission and no new
+             dependency; androidx.core has always been here. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/share_paths" />
+        </provider>
+
     </application>
 </manifest>

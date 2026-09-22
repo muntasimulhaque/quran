@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,6 +34,7 @@ import io.github.muntasimulhaque.quran.data.DownloadedSurah
 import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.Recitation
 import io.github.muntasimulhaque.quran.feature.settings.R
+import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.reader.Icon
@@ -55,7 +55,7 @@ fun RecitersPage(
     downloadedSurahs: suspend (String) -> List<DownloadedSurah>,
     actions: SettingsActions,
 ) {
-    Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+    Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_reciters))
         // Following the recitation is a choice about the reciter, not about
         // the page: it sits here, above the list of voices, and turns the
@@ -210,10 +210,16 @@ private fun DownloadedSurahRow(row: DownloadedSurah, onRemove: () -> Unit) {
             text = formatBytes(row.bytes),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 12.dp),
         )
+        // The size and the button are two readings of the same row, so they
+        // keep the 12 dp the choice rows keep between their words and their
+        // trailing control: a size set flush against Remove reads as part of
+        // the button instead of as what it weighs.
         TextButton(
             label = stringResource(R.string.pack_action_remove),
             onClick = onRemove,
+            modifier = Modifier.padding(start = 12.dp),
             quiet = true,
         )
     }

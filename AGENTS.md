@@ -657,6 +657,16 @@ implement it and update this list.
   the first paint to the welcome deterministically on this machine until a
   configuration change forced a recomposition. `QuranApp` reads `ready` and
   `failure` at its top level, where it decides the screen.
+* When this machine's emulator crashes mid-session, injected input can go
+  dead in a band of the screen (the top bar, through both `input tap` and the
+  compose test's own injection) while the rest keeps working, display
+  captures can return older frames, and the device clock jumps. A tour
+  anchor that matches text *behind* a sheet (the reader's own title under
+  Browse) passes without the sheet ever opening, so a green tour on this
+  machine proves less than it looks like: read every collected frame, never
+  trust a capture by its byte size or its status-bar clock, and treat one
+  cold crash or one snapshot-observer failure as environment until CI says
+  otherwise.
 - A language choice recreates the Activity, so anything the reader was
   standing in that lives in plain `remember` goes with the old window: the
   whole Settings sheet closed and the reader landed back in the reading. The
@@ -698,11 +708,12 @@ fetching them again; the space is worth less than the time.
 
 ## Next session: the remaining queue, in order
 
-0. **The store set is current, and the capture can be trusted.** D-073's open
-   frame is closed, and the workflow suppresses ANR dialogs at the device
-   level, so a red leg is a real failure (D-075). The next session that
-   changes a pixel captures again with the procedure in "Store screenshots",
-   and does not read a sibling repository to do it.
+0. **The store set is being recaptured for the twenty-second session.**
+   That session changed pixels (the Browse numbers, the card's Word by word
+   label, the pill's order), so the screenshots workflow runs for its push;
+   collect the three form factors, verify every frame against its artifact
+   with `cmp`, and install them into `play-store/screenshots/` per "Store
+   screenshots". Open until that set is installed.
 
 1. **Measure on real hardware.** The numbers in D-037 come from a software
    rendered emulator, the slowest Android this app will run on. A
@@ -756,6 +767,34 @@ fetching them again; the space is worth less than the time.
   to right on the screen; `MushafTurnTest` now pins the direction on every
   form factor.
 
+
+## Where the project stands (end of the twenty-second session)
+
+**1.3 (versionCode 14) remains in Google Play review; the reader's eleventh
+report is answered in the tree and unreleased (D-077).** Seven answers:
+Browse's numbers align on one right edge so every name starts at one place;
+every language but English is named in its own script with the English name
+beside it (`বাংলা (Bangla)`); text keeps 12 dp from every trailing button
+app-wide; the ayah card labels its Word by word block and the door under the
+label says "Meanings" with the list's language; the pull gate now wears every
+scrolling sheet, so a scroll back to the top never closes the card or the
+settings pages; the pill reads Play, Note, Save, Share, More; the note sheet
+says Take a note or Edit note; and Share sends a picture of the ayah (the
+Hafs ayah, the first enabled translation, the reference, the app's mark and
+name at the foot, the plain text riding as the caption, and the text share as
+the fallback when anything fails).
+
+**Verification.** JVM suite, lint, assembleDebug green; data instrumented
+22/22; app instrumented 12/12 in two full runs. Walked on the emulator: the
+pill's order, the welcome's language naming, the settings hub, the study
+card, the note sheet's "Take a note", the share end to end (the PNG and the
+system chooser's "Sharing image"), and the scroll gate keeping the card open
+through repeated scroll-up gestures. After the emulator crashed this
+session its input injection went unreliable in the screen's top band, so the
+Browse numbers, the Language page, and the Mushaf card's label were left for
+the CI screenshots run to show; the one cold-boot crash and one
+snapshot-observer failure are named in D-077 as environment findings for CI
+to confirm, not assumed clean.
 
 ## Where the project stands (end of the twenty-first session)
 

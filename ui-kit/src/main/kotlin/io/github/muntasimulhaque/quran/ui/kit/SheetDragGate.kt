@@ -1,6 +1,10 @@
 package io.github.muntasimulhaque.quran.ui.kit
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -28,17 +32,26 @@ import io.github.muntasimulhaque.quran.core.SheetDragPolicy
  * the reader only has to start the gesture at the top, which is where a pull
  * to close begins anyway.
  *
- * One instance belongs to one [LazyListState]; a list that can never scroll
- * (Saved with nothing in it, for example) is always at its top, so its pull
- * passes through untouched.
+ * One instance belongs to one scrolling thing: a [LazyListState] or a
+ * [ScrollState]. A list that can never scroll (Saved with nothing in it, for
+ * example) is always at its top, so its pull passes through untouched.
  *
- * Browse and Search both keep their results in a sheet, so this lives in the
- * shared look rather than in either feature: the same policy, worn the same
- * way, is what makes a scroll back to the top behave the same in both.
+ * Browse and Search both keep their results in a sheet, and every sheet whose
+ * content scrolls needs the same gate: the ayah card and the settings pages
+ * scroll in a column rather than a list, and a scroll back to the top of a
+ * long tafsir closed the card the same way it once closed Browse. The gate is
+ * worn the same way everywhere, so one gesture behaves the same in all of
+ * them.
  */
 class SheetDragGate(
-    private val listState: LazyListState,
+    private val atTop: () -> Boolean,
 ) : NestedScrollConnection {
+
+    /** A lazy list: at its top when it can scroll back no further. */
+    constructor(listState: LazyListState) : this({ !listState.canScrollBackward })
+
+    /** A scrollable column: the same rule over its scroll position. */
+    constructor(scrollState: ScrollState) : this({ !scrollState.canScrollBackward })
 
     private val policy = SheetDragPolicy()
 
@@ -49,7 +62,7 @@ class SheetDragGate(
 
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
         if (source == NestedScrollSource.UserInput) {
-            policy.onUserInput(atTop = !listState.canScrollBackward)
+            policy.onUserInput(atTop = atTop())
         }
         return Offset.Zero
     }
@@ -83,3 +96,13 @@ fun Modifier.sheetDragGate(gate: SheetDragGate): Modifier =
             }
         }
     }
+
+/**
+ * A column that scrolls inside a sheet, gate and scroll as one modifier. The
+ * gate is listed before the scroll, which places it outside: what the scroll
+ * leaves over reaches the gate first, and the sheet behind the gate only ever
+ * sees a pull the reader meant for it.
+ */
+@Composable
+fun Modifier.sheetVerticalScroll(state: ScrollState): Modifier =
+    sheetDragGate(remember(state) { SheetDragGate(state) }).verticalScroll(state)

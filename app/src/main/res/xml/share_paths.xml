@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     The ayah card on its way out of the app: one PNG in the app's own
+     cache, handed to the chooser as a content URI. The provider exposes
+     this folder and nothing else, and the file is overwritten in place, so
+     a shared card never accumulates and never points outside the cache.
+-->
+<paths>
+    <cache-path name="share" path="share/" />
+</paths>

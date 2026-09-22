@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -56,6 +55,7 @@ import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.feature.study.R
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.languageName
+import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.rich.ArabicBody
@@ -171,7 +171,10 @@ fun AyahCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .imePadding()
-                .verticalScroll(rememberScrollState())
+                // The gate rides with the scroll: a long tafsir scrolled down
+                // and then scrolled back up is the reader reading, never a
+                // pull that closes the card under them.
+                .sheetVerticalScroll(rememberScrollState())
                 .padding(bottom = 28.dp),
         ) {
             // From the Mushaf the card is the study surface, so the
@@ -249,12 +252,21 @@ fun AyahCard(
                     }
                 }
 
-                Spacer(Modifier.height(Space.Block))
-
                 if (hasWords) {
+                    // Every block of the card is named above itself: the
+                    // translation, the words, the tafsir. The door below
+                    // this label does not repeat it; it names what is inside,
+                    // the list in the language the reading speaks, the way a
+                    // tafsir door names its pack.
+                    Text(
+                        text = stringResource(R.string.card_word_by_word),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Block),
+                    )
                     DoorRow(
-                        title = stringResource(R.string.card_word_by_word),
-                        subtitle = "",
+                        title = stringResource(R.string.card_words_meanings),
+                        subtitle = languageName(wordLanguage),
                         open = door == Door.Words,
                         onClick = { door = if (door == Door.Words) null else Door.Words },
                     )
@@ -267,6 +279,7 @@ fun AyahCard(
                         )
                     }
                 } else {
+                    Spacer(Modifier.height(Space.Block))
                     DoorRow(
                         title = stringResource(R.string.card_add_word_by_word),
                         subtitle = "",
@@ -491,12 +504,15 @@ private fun NoteEditor(initial: String?, onSave: (String?) -> Unit, onClear: () 
             .padding(horizontal = 22.dp, vertical = 10.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // The word at the left names the sheet; the two at the right
-            // touch. The name is bare type and the actions wear the app's
-            // button shape, so "Note" and "Save" are never mistaken for
-            // the same kind of word.
+            // The words at the left name the sheet by what the reader is
+            // about to do: a fresh sheet invites the note, an existing one
+            // edits what is already written. The two at the right wear the
+            // app's button shape, so the name and the buttons are never
+            // mistaken for the same kind of word.
             Text(
-                text = stringResource(R.string.card_note_label),
+                text = stringResource(
+                    if (initial.isNullOrBlank()) R.string.card_note_take else R.string.card_note_edit,
+                ),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),
@@ -505,6 +521,7 @@ private fun NoteEditor(initial: String?, onSave: (String?) -> Unit, onClear: () 
                 TextButton(
                     label = stringResource(R.string.action_clear),
                     onClick = onClear,
+                    modifier = Modifier.padding(start = 12.dp),
                     quiet = true,
                 )
             }
