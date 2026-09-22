@@ -3082,3 +3082,8 @@ says `jar verified`. The screenshots came from the same push: all
 twenty-four frames compared with their artifacts by `cmp` and installed
 into `play-store/screenshots/`, the ayah card frame carrying the new order.
 Both are handed over together, before the submission.
+
+**The hand-off is closed.** The owner submitted 1.5 to Play for review, so
+the hand-off copy of the bundle and its checksum were deleted the same
+session, as the runbook requires: the artifact stays in the build run and in
+Play, never sitting in the repository.
