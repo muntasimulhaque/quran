@@ -714,12 +714,13 @@ fetching them again; the space is worth less than the time.
 
 ## Next session: the remaining queue, in order
 
-0. **The store set is being recaptured for the twenty-second session.**
-   That session changed pixels (the Browse numbers, the card's Word by word
-   label, the pill's order), so the screenshots workflow runs for its push;
-   collect the three form factors, verify every frame against its artifact
-   with `cmp`, and install them into `play-store/screenshots/` per "Store
-   screenshots". Open until that set is installed.
+0. **The store set is installed and verified.** The twenty-second session
+   changed pixels, and the set from run 35696938701 (the capture with the
+   sheet tags and the settling frames) is in `play-store/screenshots/` for
+   all three form factors: every frame compared with its artifact by `cmp`,
+   every sheet frame read for its content before it was kept. The frame
+   count and the numbered list in `play-store/listing.md` are unchanged at
+   eight each.
 
 1. **Measure on real hardware.** The numbers in D-037 come from a software
    rendered emulator, the slowest Android this app will run on. A
@@ -791,16 +792,19 @@ name at the foot, the plain text riding as the caption, and the text share as
 the fallback when anything fails).
 
 **Verification.** JVM suite, lint, assembleDebug green; data instrumented
-22/22; app instrumented 12/12 in two full runs. Walked on the emulator: the
+22/22; app instrumented 12/12 in two full runs, and CI green twice more
+(build and all three screenshot legs). Walked on the emulator: the
 pill's order, the welcome's language naming, the settings hub, the study
 card, the note sheet's "Take a note", the share end to end (the PNG and the
 system chooser's "Sharing image"), and the scroll gate keeping the card open
 through repeated scroll-up gestures. After the emulator crashed this
 session its input injection went unreliable in the screen's top band, so the
-Browse numbers, the Language page, and the Mushaf card's label were left for
-the CI screenshots run to show; the one cold-boot crash and one
-snapshot-observer failure are named in D-077 as environment findings for CI
-to confirm, not assumed clean.
+Browse numbers, the Language page, and the Mushaf card's label were read
+from the CI set instead (run 35696938701, all three form factors, every
+frame `cmp`'d against its artifact and every sheet frame checked for its
+content); the one cold-boot crash and one snapshot-observer failure are
+named in D-077 as environment findings, confirmed clean by two green CI
+runs.
 
 ## Where the project stands (end of the twenty-first session)
 

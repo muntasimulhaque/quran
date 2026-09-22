@@ -2977,3 +2977,11 @@ tour waits on those tags, and a sheet frame is now kept only when two display
 captures in a row are identical. The loop only photographs the screen, never
 drives the app between captures, and the window list is still checked before
 every frame.
+
+**The set.** The recapture ran green on all three form factors (run
+35696938701); all twenty-four frames were pulled, compared with their
+artifacts by `cmp`, installed into `play-store/screenshots/`, and read for
+their content before they were kept: search, settings, the Browse sheet with
+its aligned number column, and the Mushaf card with its three labels, each
+present in each leg. The eight-frame count and the numbered list in
+`play-store/listing.md` stand unchanged.
