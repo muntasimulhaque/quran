@@ -208,19 +208,20 @@ class SearchCheck(private val root: File) {
             }
         }
 
-        // A surah's introduction is drawn as plain prose, so it must read as
-        // prose: no tag survives into the study view's "About this surah".
+        // A surah's introduction is drawn block by block, heading over its
+        // own paragraph, so it must read as prose: no tag survives into the
+        // study view's "About this surah".
         val infoPack = File(packs, "words-en.db")
         if (infoPack.isFile) {
             openSqlite(infoPack).use { connection ->
                 connection.each("SELECT surah, text FROM surah_info") { rs ->
-                    val plain = RichText.plain(rs.getString(2) ?: "")
+                    val drawn = RichText.paragraphs(rs.getString(2) ?: "")
                     readableChecked++
-                    if (RichText.hasMarkup(plain)) {
+                    if (RichText.hasMarkup(drawn)) {
                         problems += "surah ${rs.getInt(1)} introduction leaked markup: " +
-                            plain.take(90)
+                            drawn.take(90)
                     }
-                    if (plain.isBlank()) problems += "surah ${rs.getInt(1)} introduction is empty"
+                    if (drawn.isBlank()) problems += "surah ${rs.getInt(1)} introduction is empty"
                 }
             }
         }

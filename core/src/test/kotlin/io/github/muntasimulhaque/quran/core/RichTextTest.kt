@@ -176,4 +176,32 @@ class RichTextTest {
         assertTrue(plain.endsWith("Second."))
         assertFalse("no run of blank lines: $plain", plain.contains("\n\n\n"))
     }
+
+    @Test
+    fun `paragraphs keeps every heading over its own paragraph`() {
+        val text = RichText.paragraphs(
+            "<h2>Name</h2><p>This Surah is named Al-Fatihah because of its subject matter.</p>" +
+                "<h2>Period of Revelation</h2><p>Surah Al-Fatihah is one of the earliest.</p>" +
+                "<h3>Topics</h3><p>Guidance.</p>",
+        )
+        assertEquals(
+            "Name\n\n" +
+                "This Surah is named Al-Fatihah because of its subject matter.\n\n" +
+                "Period of Revelation\n\n" +
+                "Surah Al-Fatihah is one of the earliest.\n\n" +
+                "Topics\n\n" +
+                "Guidance.",
+            text,
+        )
+    }
+
+    @Test
+    fun `paragraphs drops every tag and keeps a bare angle bracket out of them`() {
+        val text = RichText.paragraphs(
+            "<h2>Name</h2><p>Why the name <strong>Al-Baqarah</strong>? " +
+                "The story is in <a href=\"/2/67-73\">67-73</a>.</p>",
+        )
+        assertFalse("no markup reaches the reader: $text", RichText.hasMarkup(text))
+        assertEquals("Name\n\nWhy the name Al-Baqarah? The story is in 67-73.", text)
+    }
 }

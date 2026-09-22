@@ -440,12 +440,12 @@ private fun SurahOpening(
         }
         if (info != null) {
             Text(
-                text = RichText.plain(info.orEmpty()),
+                text = RichText.paragraphs(info.orEmpty()),
                 style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.78f),
                 // Opened, the whole introduction is the reader's; it was
-                // asked for with a press, and a cap on it would cut the one
-                // paragraph the app only shows on request. Closed, the first
+                // asked for with a press, and a cap on it would cut the
+                // paragraphs the app only shows on request. Closed, the first
                 // lines are a preview, and the ellipsis says so.
                 maxLines = if (expanded) Int.MAX_VALUE else 3,
                 overflow = TextOverflow.Ellipsis,

@@ -203,11 +203,30 @@ object RichText {
     }
 
     /**
+     * The readable form of a marked-up document read from its first word to
+     * its last: every heading and every paragraph of the source becomes its
+     * own paragraph here, one blank line between them, so a heading stands
+     * where the source put it instead of running into the sentence it heads.
+     * [plain] welds the blocks into one run of prose, which is right for an
+     * excerpt cut from the middle of a text and wrong for the surah's
+     * introduction, whose headings (Name, Period of Revelation, Theme) are
+     * half of what it says.
+     */
+    fun paragraphs(html: String): String =
+        marker.replace(
+            parseHtml(html).joinToString("\n\n") { block ->
+                block.runs.joinToString("") { run -> run.text }
+            },
+            "",
+        )
+
+    /**
      * The text as readable prose, for a place that cannot draw runs: the
      * tafsir's tags go, the translation's [n] footnote markers go, runs of
-     * spaces become one, and a paragraph break stays a break. Sharing, a
-     * search excerpt, and a surah's introduction all read through here, so no
-     * surface can show the raw stored form by accident.
+     * spaces become one, and a paragraph break stays a break. Sharing and a
+     * search excerpt read through here, so no surface can show the raw
+     * stored form by accident. A whole document whose headings matter reads
+     * through [paragraphs] instead, which keeps the blocks apart.
      *
      * A tag is only what looks like one: a `<` that introduces a letter or a
      * slash. A real less-than sign in prose survives, and the words on either
