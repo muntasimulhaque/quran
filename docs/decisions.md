@@ -3037,3 +3037,48 @@ submission.
 the hand-off copy of the bundle and its checksum were deleted the same
 session, as the runbook requires: the artifact stays in the build run and in
 Play, never sitting in the repository.
+
+## D-079: The 1.5 hand-off
+
+Date: the twenty-third session. The owner said "go for release with the
+other changes you made", after calling off the Bangla surah-name work, so
+the runbook was walked with two fixes and nothing else.
+
+**What ships.** About this surah keeps its headings, Name, Period of
+Revelation, and Theme, on their own lines: `core/RichText.paragraphs` keeps
+every source block its own paragraph, and the study view draws the
+introduction through it, with `tools search` auditing the drawn form. Opened
+from the Mushaf, the ayah card reads word by word first, then the
+translation, then the tafsir, the order the study reading already uses.
+`versionCode` 15 to 16, `versionName` 1.4 to 1.5, and the version line in
+`play-store/listing.md` updated. The notes are 338 characters under
+`## Release notes (1.5, 338 characters)`.
+
+**The Bangla names, decided and dropped.** The session researched a full
+Bangla surah-name list (Bengali Wikipedia base, adapted per the Arabic and
+English columns, the five name divergences and the article and hyphen rules
+worked out and checked against Bangla usage), and the owner decided the
+release ships without it. Nothing of that work entered the code; the list
+lives only in this record's session, and a future release can pick it up.
+
+**The gates.** The JVM suite, lint, and `assembleDebug` are green. All five
+owner-machine content gates ran green on this machine this time: `verify`
+(29 datasets), `audit` (no unexplained differences), `search` (465 excerpts
+clean), `fonts` (604 pages, 88,186 glyph codepoints, 22,985,677 reading
+codepoints), and `checkdb` (the committed database verifies at 128,966,656
+bytes, SHA-256 `5c5988fa2916eb1cc905d01ddb9b4ef9319d0ca19c945bf0140eaff32296cea9`).
+That closes the three D-078 left owed.
+
+**CI.** The build run (35771681314) is green: instrumented data tests, the
+gates, the debug build, and the signed bundle. The screenshots run
+(35771681366) is green on all three legs, in about six minutes each. The
+instrumented app tests and the tour ran there, not on this machine; the
+owner asked to leave the emulator out.
+
+**The hand-off.** The bundle is `quran-1.5-vc16.aab`, 147,736,943 bytes,
+SHA-256 `afa01b1d7953f51fb9c4c0fe4d6a99b80b742ba899592d904ca3b942d9571d5e`,
+matching the checksum file the artifact carries, and `jarsigner -verify`
+says `jar verified`. The screenshots came from the same push: all
+twenty-four frames compared with their artifacts by `cmp` and installed
+into `play-store/screenshots/`, the ayah card frame carrying the new order.
+Both are handed over together, before the submission.

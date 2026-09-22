@@ -87,13 +87,13 @@ for.
 - 7 inch tablet screenshots: `screenshots/tablet7/` (800 x 1280), eight of them
 - 10 inch tablet screenshots: `screenshots/tablet10/` (2560 x 1800), eight of them
 
-The set was refreshed for the 1.4 release from the `Capture store
-testscreenshots` workflow (run 35702564098), for all three form factors, in the
-eight frames the store lists. Every frame was compared with its artifact by
-`cmp` before it replaced the committed set, and every sheet frame was checked
-for its content on every leg. It carries the eleventh report's changes:
-Browse's aligned number column, the ayah card's Word by word label and
-Meanings door, and the settings hub at version 1.4.
+The set was refreshed for the 1.5 release from the `Capture store
+testscreenshots` workflow (run 35771681366), for all three form factors, in
+the eight frames the store lists. Every frame was compared with its artifact
+by `cmp` before it replaced the committed set. It carries the two fixes:
+the ayah card's word by word section now stands above the translation, and
+surah introductions keep their headings on their own lines. The remaining
+frame differences between runs are the status bar's own clock.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
