@@ -777,9 +777,17 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the twenty-second session)
 
-**1.3 (versionCode 14) remains in Google Play review; the reader's eleventh
-report is answered in the tree and unreleased (D-077).** Seven answers:
-Browse's numbers align on one right edge so every name starts at one place;
+**1.4 (versionCode 15) is handed to the owner for Play submission, carrying
+the reader's eleventh report (D-077); 1.3 remains in review.** The bundle
+is `quran-1.4-vc15.aab`, 147,738,638 bytes, SHA-256
+`5dce62ed7086efac2cfee6857c1073991d13f81bbb069b5730cb2cd09f711f4b`, verified
+as signed by the shared upload certificate, sitting in `play-store/aab/`
+until Play has it. The screenshots came from the same push (run
+35702564098), all three form factors, every frame `cmp`'d against its
+artifact and every sheet frame checked for its content, and both are handed
+over together before the submission (D-078).
+
+**What the eleventh report answered:** Browse's numbers align on one right edge so every name starts at one place;
 every language but English is named in its own script with the English name
 beside it (`বাংলা (Bangla)`); text keeps 12 dp from every trailing button
 app-wide; the ayah card labels its Word by word block and the door under the
@@ -805,6 +813,13 @@ frame `cmp`'d against its artifact and every sheet frame checked for its
 content); the one cold-boot crash and one snapshot-observer failure are
 named in D-077 as environment findings, confirmed clean by two green CI
 runs.
+
+**The release's gates, plainly.** JVM, lint, both assembles, both
+instrumented suites, `fetch`, `checkdb`, and `search` are green here and in
+CI; `verify`, `audit`, and `fonts` did not run on this machine because the
+manual QUL and QuranEnc exports in `content/raw` are gone from it (content
+is byte-identical to the release that ran all five green), and D-078 names
+that as owed, not passed.
 
 ## Where the project stands (end of the twenty-first session)
 

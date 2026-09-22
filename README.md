@@ -4,14 +4,19 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 1.3 (versionCode 14) is submitted to Google Play for review,
-answering the reader's tenth report. The eleventh report is answered in the
-tree and not yet released: Browse's numbers align on one edge, every language
-but English is named with the English beside it, the ayah card labels its word
-by word block, a scroll back to the top never closes a scrolling sheet, the
-pill reads Play, Note, Save, Share, More, the note sheet says Take a note or
-Edit note, and Share sends a picture of the ayah with its translation and the
-app's mark (D-077). Changing the language leaves the reader on the Language
+**Status:** 1.4 (versionCode 15) is handed over for Google Play submission,
+carrying the reader's eleventh report; 1.3 remains in review. What 1.4
+brings: Share sends a picture of the ayah with its translation, its
+reference, and the app's mark, with the plain text as the caption; Browse's
+surah and juz numbers line up so every name starts in the same place; the
+ayah card names its word by word section and its door says Meanings;
+scrolling back up never closes the card or the settings; the pill reads
+Play, Note, Save, Share, More; the note sheet opens as Take a note or Edit
+note; text keeps a clear gap from every button; and every language but
+English is named in its own script with the English name beside it
+(`বাংলা (Bangla)`) (D-077, D-078). The bundle and the screenshots were
+collected from the same push and handed over together. Changing the language
+leaves the reader on the Language
 page, speaking the language they chose; the ayah card's horizontal rules are
 replaced by Translation and Tafsir labels; About this surah no longer truncates
 when opened; every text-only action wears the app's one button shape, so Save
@@ -19,7 +24,7 @@ and Note can no longer be mistaken for each other; Browse has a Notes tab that
 lists the ayahs a note was written on; and the font sizes run 0.65 through 1.2.
 The screenshot capture is deterministic now, and its whole procedure is in
 AGENTS.md (D-075). The version name follows the runbook: 1.0, then 1.1, 1.2,
-then 1.3. The bundle carries only the core pack, with everything else added
+then 1.3, then 1.4. The bundle carries only the core pack, with everything else added
 from the project's own Releases when a reader asks for it. The listing, icon,
 feature graphic, and screenshots per form factor are in
 [`play-store/`](play-store/), refreshed from CI.

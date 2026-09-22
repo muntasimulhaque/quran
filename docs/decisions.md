@@ -2985,3 +2985,50 @@ their content before they were kept: search, settings, the Browse sheet with
 its aligned number column, and the Mushaf card with its three labels, each
 present in each leg. The eight-frame count and the numbered list in
 `play-store/listing.md` stand unchanged.
+
+## D-078: The 1.4 hand-off
+
+Date: the twenty-second session, after D-077. The owner said "go for play
+release", so the runbook was walked.
+
+**The release.** `versionCode` 14 to 15, `versionName` 1.3 to 1.4, and the
+version line in `play-store/listing.md` updated. The notes are 432
+characters, one paragraph of plain prose, kept under their own heading as
+`## Release notes (1.4, 432 characters)`; every earlier release's notes stay
+where they were.
+
+**The gates.** The JVM suite, lint, `assembleDebug`, and `assembleRelease`
+are green. Both instrumented suites pass (data 22/22, app 12/12 on the phone
+profile). `fetch`, `checkdb`, and `search` are green, and `checkdb` proves
+the content is untouched: the committed database verifies at 128,966,656
+bytes with the same SHA-256 the 1.3 release carried. `verify`, `audit`, and
+`fonts` could not run on this machine: `content/raw` now holds only the two
+font packs, and the manual QUL and QuranEnc exports those three gates read
+are absent (with `content/work/verify` holding only the font extractions).
+They ran green at the last release against content that is byte-identical to
+today's, and CI's own gates ran green on this push, but the three are named
+here as not run rather than as passed: restoring the exports from the copy
+that has them and running the three is owed to the next content change, and
+the owner may want it before submitting.
+
+**The suite on this machine fought back.** A wiped emulator needed one
+reboot and the workflow's own `hide_error_dialogs` setting after a systemui
+ANR window stuck over the screen; with those, the tour and all twelve app
+tests pass locally.
+
+**CI.** The build run (35702564152) is green: data instrumented, gates and
+debug build, and the signed bundle. The screenshots run (35702564098) went
+red once on the 10 inch leg with `a system dialog stayed over 05-search`, a
+boot-time ANR window the suppression had not yet met; the rerun is green on
+all three legs, and a red leg keeps its frames, so nothing was guessed at.
+
+**The hand-off.** The bundle is `quran-1.4-vc15.aab`, 147,738,638 bytes,
+SHA-256 `5dce62ed7086efac2cfee6857c1073991d13f81bbb069b5730cb2cd09f711f4b`,
+matching the checksum file the artifact carries. `jarsigner -verify` says
+`jar verified`, and the certificate is the shared upload key
+(`53:7D:09:D2:...:0D:9D:E5:21`). It sits in `play-store/aab/`, which is
+gitignored, and is deleted once Play has it. The screenshots came from the
+same push: run 35702564098, all three form factors, all twenty-four frames
+compared with their artifacts by `cmp` and every sheet frame checked for its
+content before it was installed. Both are handed over together, before the
+submission.
