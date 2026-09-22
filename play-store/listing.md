@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 1.3 (versionCode 14)
+Version: 1.4 (versionCode 15)
 
 ## Listing
 
@@ -111,6 +111,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (1.4, 432 characters)
+
+Share now sends a picture of the ayah with its translation, its reference, and the app's mark, with the plain text along as the caption. Browse's surah and juz numbers line up so every name starts in the same place. The ayah card names its word by word section, scrolling back up no longer closes a sheet, the ayah actions read Play, Note, Save, Share, More, and the note sheet opens as Take a note. No ads, no trackers, no account.
 
 ## Release notes (1.3, 410 characters)
 
