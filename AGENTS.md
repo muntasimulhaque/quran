@@ -786,11 +786,12 @@ fetching them again; the space is worth less than the time.
 
 ## Next session: the remaining queue, in order
 
-0. **The store set needs one more capture.** 1.5 installed the set from run
-   35771681366, and the twenty-fourth session then changed Browse's number
-   column and the three reader lists, so the committed set is older than
-   the tree. The next hand-off captures again with the procedure in "Store
-   screenshots" before anything is submitted.
+0. **The store set is current, and the capture can be trusted.** 1.6
+   installed the set from run 35823592289: every frame compared with its
+   artifact by `cmp`, and every changed frame read before it shipped (the
+   version text, the wider number column, the cursor's blink, subpixel
+   antialiasing). The next session that changes a pixel captures again with
+   the procedure in "Store screenshots".
 
 1. **Measure on real hardware.** The numbers in D-037 come from a software
    rendered emulator, the slowest Android this app will run on. A
@@ -847,9 +848,10 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the twenty-fourth session)
 
-**No release; the reader's twelfth report is answered in the tree.** Eight
-things from the owner (D-080): About this surah wears the same lapis wash a
-chosen ayah wears; QUL was checked and carries no Bangla surah
+**1.6 (versionCode 17) is signed and handed over for the Play submission.**
+It answers the reader's twelfth report (D-080), eight things from the
+owner: About this surah wears the same lapis wash a chosen ayah wears;
+QUL was checked and carries no Bangla surah
 introduction, so that item stays content backlog; Browse's surah numbers
 keep their last digit and follow the interface's digits; Save and Note are
 separate marks in `saved.db` version 3; the Saved, Notes, and Last Read
@@ -857,9 +859,14 @@ lists are place lists, with Remove on the first two and Forget in Last Read
 speaking মুছুন like every other removal; a note opened from Browse washes
 its ayah. The JVM suite, lint, and `assembleDebug` are green; the
 data instrumented tests pass (28) and the app instrumented tests pass (13)
-on the phone emulator, the new `BrowseNumbersTest` among them. `versionCode`
-and `versionName` did not move, and the store set will be captured again at
-the next hand-off.
+on the phone emulator, the new `BrowseNumbersTest` among them. What was
+handed over: 147,736,755 bytes, SHA-256
+`5de7f297eca1cc2f7ef3598137b88e0c25fb7debb79e47a19858f280c8c32ced`, signed
+with the shared upload certificate, and the screenshots from run 35823592289
+with every frame compared by `cmp`. The three owner gates (`verify`,
+`audit`, `fonts`) are owed this release: the manual exports and the verify
+extractions are gone from the machine, and the owner chose to ship with them
+named, the way 1.4 did (D-081).
 
 ## Where the project stands (end of the twenty-third session)
 

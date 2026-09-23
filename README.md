@@ -4,24 +4,16 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 1.5 (versionCode 16) is submitted to Google Play for review. It
-carries two fixes: About this surah keeps its headings, Name, Period of
-Revelation, and Theme, on their own lines instead of running them into the
-text, and opened from the Mushaf, the ayah card reads word by word first,
-then the translation, then the tafsir, in the order the study view already
-uses. The bundle and the screenshots were collected from the same push and
-handed over together. A Bangla surah-name list was researched this session
-and the owner called it off, so 1.5 ships no name changes. The version name
-follows the runbook: 1.0, then 1.1, 1.2, 1.3, 1.4, then 1.5. The bundle
-carries only the core pack, with everything else added from the project's
-own Releases when a reader asks for it. The listing, icon, feature graphic,
-and screenshots per form factor are in [`play-store/`](play-store/),
-refreshed from CI.
-
-The reader's twelfth report is answered in the tree and waits for a release:
-About this surah wears the wash a chosen ayah wears, Save and Note are
-separate marks, the reader's lists name a place without repeating its text,
-and Browse's surah numbers are whole and speak the interface's own digits.
+**Status:** 1.6 (versionCode 17) is signed and handed over for the Google
+Play submission. It answers the reader's twelfth report: About this surah
+wears the same wash as a long-pressed ayah, Save and Note are separate
+marks, the Saved list names a place without repeating its text, Browse's
+surah numbers are whole and speak the interface's own digits, and Forget
+reads মুছুন in Bangla. The version name follows the runbook: 1.0, then 1.1,
+1.2, 1.3, 1.4, 1.5, then 1.6. The bundle carries only the core pack, with
+everything else added from the project's own Releases when a reader asks
+for it. The listing, icon, feature graphic, and screenshots per form factor
+are in [`play-store/`](play-store/), refreshed from CI.
 
 ## What it does
 

@@ -3151,8 +3151,61 @@ than by the pill's selection. When the note closes, the wash goes.
 `assembleDebug` are green. The data instrumented tests pass (28, including
 the new store cases and both migrations) and the app instrumented tests
 pass (13, the new `BrowseNumbersTest` among them), on the phone emulator
-with the workflow's own dialog settings. The new look is not in the eight
+with the workflow's own dialog settings. The new look was not in the 1.5
 store frames: the tour never opens About, and its Browse frame starts at
-surah 1, so the next hand-off captures the set again. No release was cut:
-`versionCode` and `versionName` did not move, and the notes were not
-written.
+surah 1. The release followed in the same session (D-081), and its capture
+installed the new set.
+
+## D-081: The 1.6 hand-off
+
+Date: the twenty-fourth session, after D-080. The owner read the eight
+fixes, answered "ok" to each, and said "go for play release".
+
+**What ships.** `versionCode` 16 to 17, `versionName` 1.5 to 1.6, and the
+version line in `play-store/listing.md` updated. The notes are 438
+characters under `## Release notes (1.6, 438 characters)`: Save and Note
+are separate, Browse's surah numbers are whole and in the reader's digits,
+the Saved list names a place without repeating its text, a note highlights
+its ayah, About this surah wears the long-pressed ayah's wash, and Forget
+reads মুছুন in Bangla.
+
+**The three owner gates are owed, and the owner chose to ship anyway.**
+Step 0 found `content/raw` holding only the two font zips and
+`content/work/verify` holding only the font extractions, so `verify`,
+`audit`, and `fonts` cannot run on this machine; the manual QUL and
+QuranEnc exports are gone and no copy was found under `Documents/GitHub`,
+`Downloads`, or `Desktop`. The two gates that can run were run: `checkdb`
+reports `content/quran.db` at 128,966,656 bytes, SHA-256
+`5c5988fa2916eb1cc905d01ddb9b4ef9319d0ca19c945bf0140eaff32296cea9`, the
+same bytes D-079 recorded when all five ran green, and `search` passes with
+the same counts (465 excerpts, 63 Arabic round trips, 65 Bangla). The
+session touched no content, only code. The owner was asked before the
+version moved and chose (a): proceed and name the three owed, exactly as
+1.4 shipped (D-078).
+
+**The suite.** JVM suite, lint, and `assembleDebug` are green. Data
+instrumented 28/28. The first app instrumented run lost its emulator
+mid-suite (`device 'emulator-5554' not found` in the run's own XML, not an
+assertion); one reboot later the same run is 13/13, so the environment was
+named and the symptom did not persist, as the runbook allows.
+
+**CI.** The build run (35823592271) is green: data instrumented, the gates,
+the debug build, and the signed bundle. The screenshots run (35823592289)
+is green on all three legs.
+
+**The set.** All twenty-four frames were installed into
+`play-store/screenshots/<form>/` and every one was compared with its
+artifact by `cmp`. Every changed frame was read before it shipped: the
+settings frames carry "Version 1.6", the Browse frames carry the wider
+number column, the search frames differ only in the text cursor's blink,
+the phone Mushaf frame differs by subpixel antialiasing only (mean 0.02
+levels per channel, the tablets byte-identical), and the ayah card frames
+differ only in the few pixels of the reading behind the sheet.
+
+**The hand-off.** The bundle is `quran-1.6-vc17.aab`, 147,736,755 bytes,
+SHA-256
+`5de7f297eca1cc2f7ef3598137b88e0c25fb7debb79e47a19858f280c8c32ced`,
+matching the checksum file the artifact carries. `jarsigner -verify` says
+`jar verified.`, and the certificate is the shared upload key
+(`53:7D:09:D2:...:0D:9D:E5:21`). The bundle and the screenshots are handed
+over together, before the submission.
