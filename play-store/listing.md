@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 1.5 (versionCode 16)
+Version: 1.6 (versionCode 17)
 
 ## Listing
 
@@ -112,6 +112,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (1.6, 438 characters)
+
+Saving and noting are now separate: a note no longer appears under Saved, and Remove sits beside every note in Browse. Surah numbers in Browse are whole again (100 was showing as 10) and read in the digits of your language. The Saved list shows just the surah and ayah, tapping a note highlights its ayah, About this surah wears the same highlight as a long-pressed ayah, and Forget reads মুছুন in Bangla. No ads, no trackers, no account.
 
 ## Release notes (1.5, 338 characters)
 
