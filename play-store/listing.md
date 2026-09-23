@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 1.6 (versionCode 17)
+Version: 1.7 (versionCode 18)
 
 ## Listing
 
@@ -114,6 +114,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (1.7, 320 characters)
+
+Search now reads references by name too, like baqara 255 beside 2:255. Browse gained Go to ayah: pick a surah, tap a number, with your own place already chosen. Saved rows show when they were saved. The word meanings are named the same everywhere, and their door names only its language. No ads, no trackers, no account.
 
 ## Release notes (1.6, 438 characters)
 
