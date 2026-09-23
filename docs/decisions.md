@@ -3309,3 +3309,34 @@ rerun is green. The store set is stale after this session: the Browse
 frame gains the "Go to ayah" row and the ayah-card frame reads "Word
 meanings" over the language door, so the next capture refreshes 07 and 08,
 by the workflow's artifacts and never by hand.
+
+## D-083: The 1.7 hand-off
+
+Date: the twenty-fifth session, after D-082 and the owner's word to ship.
+The raw sources were restored to `content/raw` by hand (24 QUL downloads,
+`english_saheeh.zip` and `arabic_saadi.json` from QuranEnc, and the Tanzil
+XML with `marks`, `sajdah`, `alef`, and `tatweel` set), and all five owner
+gates ran green this time: `verify` (29 datasets, checksums and structure),
+`audit` (6236 ayahs, 0 unexplained differences, one accepted orthographic
+variant), `fonts` (coverage passed), `checkdb` (the committed database
+unchanged), and `search`. The three gates 1.6 left owed are closed.
+
+The JVM suite, lint, and `assembleDebug` are green; the data instrumented
+suite is 31/31; the four affected app classes pass. The full local app run
+lost its emulator twice (`device 'emulator-5554' not found` in the run's
+own XML, empty failure bodies, not assertions), so the local tour is not
+evidence and CI's capture is the authority.
+
+The store set is from run 35841954697: all three form factors, every frame
+compared with its artifact by `cmp`, and every changed frame read. The
+Browse frame carries the Go to ayah row, the ayah-card frame reads Word
+meanings over the language door, and the settings frame reads Version 1.7;
+the Mushaf frames differ by subpixel antialiasing (max delta 4 levels) and
+the search frames by the cursor's blink only. The 10 inch leg failed once
+on the boot-time dialog over 05-search and passed on the one rerun the
+runbook allows (D-078).
+
+The bundle is `quran-1.7-vc18.aab`, 147,801,933 bytes, SHA-256
+`be0174e036add42fbf84c62f1914da228a600da801ea18287e2092a7458cd195`,
+`jar verified`, the certificate the shared upload key. The bundle and the
+screenshots are handed over together, before the submission.

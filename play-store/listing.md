@@ -87,15 +87,15 @@ for.
 - 7 inch tablet screenshots: `screenshots/tablet7/` (800 x 1280), eight of them
 - 10 inch tablet screenshots: `screenshots/tablet10/` (2560 x 1800), eight of them
 
-The set was refreshed for the 1.6 release from the `Capture store
-testscreenshots` workflow (run 35823592289), for all three form factors, in
+The set was refreshed for the 1.7 release from the `Capture store
+screenshots` workflow (run 35841954697), for all three form factors, in
 the eight frames the store lists. Every frame was compared with its artifact
 by `cmp` before it replaced the committed set. It carries the release's own
-changes: the settings frame reads Version 1.6, and the Browse frame shows
-the wider number column where a whole 100 no longer loses its last digit.
-The remaining frame differences between runs are the status bar's own clock,
-the text cursor's blink in the search frame, and a few pixels of subpixel
-antialiasing.
+changes: the settings frame reads Version 1.7, the Browse frame shows the
+new Go to ayah action over the surah list, and the ayah card reads Word
+meanings over the door that names its language. The remaining frame
+differences between runs are the status bar's own clock, the text cursor's
+blink in the search frame, and a few pixels of subpixel antialiasing.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for

@@ -848,6 +848,41 @@ fetching them again; the space is worth less than the time.
   form factor.
 
 
+## Where the project stands (end of the twenty-fifth session)
+
+**1.7 (versionCode 18) is signed and handed over for the Google Play
+submission.** It carries four changes from the owner's session: Browse
+gained a Go to ayah picker over the surah list, with the reader's own surah
+already chosen and their ayah marked; Search reads references by surah name
+("baqara 255") beside "2:255", and the empty-search prompt names both;
+Saved rows say when they were saved, from a `saved_at` column in `saved.db`
+version 4; and the word-meaning aid is "Word meanings" everywhere, with
+the ayah card's door naming only the list's language.
+
+**The owner gates all ran green this time.** The raw QUL and QuranEnc
+sources were restored to `content/raw` (24 QUL downloads, two QuranEnc
+files, and the Tanzil XML with `marks`, `sajdah`, `alef`, and `tatweel`
+set), closing the three gates 1.6 left owed: `verify` 29 datasets,
+`audit` 0 unexplained differences, `fonts` coverage passed, plus `checkdb`
+and `search`.
+
+**The suite.** JVM, lint, and `assembleDebug` green. Data instrumented
+31/31. The four affected app classes pass on the phone emulator; the full
+local app run died twice with the emulator (`device 'emulator-5554' not
+found`, empty failure bodies), so the tour's authority is the CI capture,
+which is green on all three legs after one rerun of the 10 inch leg (the
+boot-time dialog over 05-search, D-078's known case).
+
+**The hand-off.** The bundle is `quran-1.7-vc18.aab`, 147,801,933 bytes,
+SHA-256 `be0174e036add42fbf84c62f1914da228a600da801ea18287e2092a7458cd195`,
+`jar verified`, signed with the shared upload key
+(`53:7D:09:D2:...:0D:9D:E5:21`). The screenshots come from run 35841954697,
+all three form factors, every frame compared with its artifact by `cmp` and
+every changed frame read before it shipped (the Go to ayah row, the Word
+meanings door, Version 1.7; the Mushaf and search differences are the
+subpixel antialiasing and the cursor's blink). The bundle and the
+screenshots are handed over together, before the submission.
+
 ## Where the project stands (end of the twenty-fourth session)
 
 **1.6 (versionCode 17) is submitted to Google Play for review.** It answers
