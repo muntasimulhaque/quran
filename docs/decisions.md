@@ -3214,3 +3214,14 @@ over together, before the submission.
 the hand-off copy of the bundle and its checksum were deleted the same
 session, as the runbook requires: the artifact stays in the build run and in
 Play, never sitting in the repository.
+
+**One correction after the hand-off.** The owner asked why the session
+setup said `git pull` fails on this machine. It does not: the clone on
+September 20 wrote `branch.main.remote = origin` and
+`branch.main.merge = refs/heads/main` into `.git/config` (the file's
+timestamp is three seconds after the clone), `git branch -vv` shows
+`[origin/main]`, and plain `git pull` answers "Already up to date." The
+September 22 note that it fails was a misdiagnosis of some other pull
+trouble, and AGENTS.md now records what is true, with the one-time
+`git branch --set-upstream-to=origin/main main` as the repair for a machine
+that ever lacks the tracking.
