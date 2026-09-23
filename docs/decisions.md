@@ -3436,3 +3436,57 @@ Mushaf, where the action still reads More. The store set is stale again:
 frame 07 gains the chip in its tab row, and 03-study changes with the aid's
 tone and spacing, so the next capture refreshes both, from the workflow's
 artifacts and never by hand.
+
+## D-085: The 1.8 hand-off, and what a screenshot leg's failure classes are
+
+Date: the twenty-sixth session, after D-084 and the owner's word to ship.
+
+**All five owner gates ran green on the restored sources**: `verify` 29
+datasets (checksums and structure), `audit` 6236 ayahs with 0 unexplained
+differences and one accepted orthographic variant, `fonts` coverage passed
+(628169 study codepoints, 604 pages, 22985677 reading codepoints), `checkdb`
+(the committed database unchanged, 128966656 bytes), and `search`. The JVM
+suite, lint, and `assembleDebug` are green; the data instrumented suite is
+31/31 and the app instrumented suite 16/16 on the phone emulator, the new
+`AyahActionsTest` and the screenshot tour among them.
+
+**The store set is from run 35883297322 attempt 2** (the tablet7 leg on its
+second attempt), all three form factors, every frame compared with its
+artifact by `cmp` (24 matches, 0 mismatches) and every changed frame read
+before it shipped: the settings frame reads Version 1.8, the Browse frame
+shows the Go to ayah chip in the tab row, the study frames show the aid
+reading as a gloss with a legible reference, and the tablet10 search frame
+differs from its predecessor by the study reading visible behind the sheet
+(the aid and reference changes) plus the status bar clock. The ayah card
+keeps its Word meanings and Tafsir doors from the Mushaf.
+
+**Why the tablet7 leg failed, and why the answer is written down.** The leg
+died in the `Capture on emulator` step, inside the emulator action's own
+`Install Android SDK`, with `Error on ZipFile unknown archive` while
+preparing `system-images;android-35;google_apis;x86_64`: a truncated
+download on that runner. The action then terminated a machine that had
+never started and reported `could not connect to TCP port 5554: Connection
+refused`. The phone and tablet10 legs passed the same commit in the same
+run, which is what makes it infrastructure and not the app. One rerun of
+the failed leg is the whole fix, and the rerun's frames are the set.
+
+The owner asked why this keeps happening and why the lesson was not already
+in AGENTS.md. The history says it does not keep happening in one shape:
+of the last 24 screenshot runs, 19 are green and 5 red, and the reds split
+into three real classes. A leg can die **before our script** (this run: a
+truncated download in the action's setup), **in the tour** (a node the UI
+moved, a wait whose anchor never came: runs 35596449680 and 35569779756),
+or **under capture load** (`device offline` while a sister leg passes:
+35524134742, 35526311219). The runbook had entries for the fourth case only
+(a dialog in a frame) plus load and missing-artifact notes. It now names
+all of them, says which are rerun-once and which are fixed in the session
+in the tour, and records the log-reading trap found here: after a rerun,
+`gh run view --log --job <id>` serves the latest attempt's log under the
+original failed job id, so the jobs API's `run_attempt` is the record and
+the artifacts endpoint takes an `attempt` parameter.
+
+**The bundle** is `quran-1.8-vc19.aab`, 147803132 bytes, SHA-256
+`7a2fe75a33790fe17b90d90767908940c5e59af769b6cf3f19deae91d5f29205`,
+`jar verified`, signed with the shared upload key
+(`53:7D:09:D2:...:0D:9D:E5:21`). The bundle and the screenshots are handed
+over together, before the submission.

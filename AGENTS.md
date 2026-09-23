@@ -434,20 +434,51 @@ holding a frame nobody should ship. If nothing visible changed, the capture is
 not run and the hand-off says so.
 
 **If a leg fails, the order of operations.** Read the failing job's log
-(`gh run view --log-failed --job <id>`):
+(`gh run view --log --job <id>`), and read it in two passes: first the
+step list, then the error. The step list says which of the four classes the
+failure is in, and they need different actions:
 
+- **The leg died before our script ran (infrastructure, rerun it).** The
+  failing step is `Capture on emulator` or `Create AVD and generate a
+  snapshot to cache`, and the log shows the emulator action's own `Install
+  Android SDK` failing, or `Error on ZipFile unknown archive`, or
+  `adb -s emulator-5554 emu kill` answered by `could not connect to TCP port
+  5554: Connection refused`. The runner truncated a download of the system
+  image or the emulator; the app, the tour, and the capture's load are all
+  innocent. Rerun the failed leg once. If the same leg fails in the same
+  pre-script step again, stop and report a runner outage: no change in this
+  repository can fix it, and twenty minutes of log reading has never found
+  one. This is the class the 1.8 push met (run 35883297322, tablet7, `Error
+  on ZipFile unknown archive`).
 - `a system dialog stayed over <frame>` means the dialog suppression at the
   top of the script is missing or was removed; restore it.
 - `Test <name> FAILED` with a node assertion means the tour anchored on
-  something the UI moved or renamed; fix the anchor to a tag.
+  something the UI moved or renamed; fix the anchor to a tag. Two signatures
+  this has worn: `Failed to inject touch input ... could not find any node`
+  for a `Switch to the Mushaf page` that the real app did not have up
+  (the tour's first press), and `ComposeTimeoutException` for a wait whose
+  anchor never appeared. Both are real findings about the tour, never a
+  reason to rerun.
 - `device offline` or `device not found` on one leg while another passes the
   same code is the capture's load, not the runner; make the capture lighter,
   do not rerun.
 - A missing artifact means the script exited before `mkdir store-shots`;
   that is why the Gradle exit code is now kept and returned last.
 
-Rerun only after the failing step above is named and, if it is a script
-problem, fixed in `screenshots.yml` in the same session.
+Rerun only after the failing step above is named, and only for the
+infrastructure class or "the capture's load": a node assertion or a dialog
+in a frame is fixed in the same session, in `screenshots.yml` or the tour,
+never rerun away.
+
+**Reading a rerun's logs and artifacts.** `gh run view --log --job <id>`
+serves the **latest attempt's** log even when the id is the original failed
+job's, so a green log under a red job id is the rerun, not a contradiction.
+The API is the record: `gh api repos/muntasimulhaque/quran/actions/jobs/<id>
+--jq '{run_attempt, conclusion}'` says which attempt an id belongs to, and
+`gh api "repos/muntasimulhaque/quran/actions/runs/<id>/artifacts?attempt=N"`
+lists each attempt's artifacts. A rerun's artifact is a valid source for the
+store set once every frame is `cmp`'d and every changed frame is read, the
+same as any other: attempt 2 of run 35883297322 is the 1.8 capture.
 
 ## Content rules
 
@@ -629,6 +660,21 @@ implement it and update this list.
   before spending a second retry: each of them already carries the capture
   shape that works. A lighter test is also a faster one; the same tour went
   from a leg that sometimes killed the emulator to a green run in seconds.
+- A leg can also die before our script, inside the emulator action's own
+  setup: `Install Android SDK` failing with `Error on ZipFile unknown
+  archive` is a truncated system-image download on that runner, and the
+  `Connection refused` on the action's own terminate is the same outage
+  finishing its sentence. The phone and tablet10 legs passing the same
+  commit in the same run is the proof. That class is a rerun, once; a second
+  failure in the same pre-script step is a runner outage to report, not a
+  thing to debug. Do not read a tour defect into a leg whose test never
+  started: the step list says whether the capture test ran at all.
+- After a rerun, `gh run view --log --job <failed-id>` serves the latest
+  attempt's log, so a green log can appear under the original red job id.
+  `run_attempt` from the jobs API says which attempt is which, and the
+  artifacts endpoint takes an `attempt` parameter. That matters twice: to
+  avoid recording a rerun's log as the failure's evidence, and to know which
+  artifact holds the frames that were actually installed.
 - An emulator workflow is not a test: it is a machine. Cache the AVD per form
   factor, wait for `/sdcard/Android` to exist before starting the test (a cold
   boot reports completion before its storage is mounted, and the test's output
@@ -893,9 +939,19 @@ ran green on the restored sources this time: `verify` 29 datasets, `audit`
 0 unexplained differences, `fonts` coverage passed, `checkdb` and `search`.
 The phone emulator ran the full app instrumented suite 16/16 (the new
 `AyahActionsTest` and the screenshot tour among them) and the data suite
-31/31. The store set is stale and the capture is owed in this push's
-screenshots workflow: 07 gains the Go to ayah chip, 03-study changes with
-the aid's tone and spacing, 06-settings reads Version 1.8.
+31/31. The store set is from run 35883297322 attempt 2 (the tablet7 leg on
+its second attempt after a truncated system-image download on the runner,
+the class now written into "If a leg fails"): all three form factors,
+every frame `cmp`'d (24 matches, 0 mismatches), every changed frame read.
+The settings frame reads Version 1.8, Browse shows the Go to ayah chip in
+its tab row, and the study frames show the aid as a gloss with a legible
+reference.
+
+**The hand-off.** The bundle is `quran-1.8-vc19.aab`, 147803132 bytes,
+SHA-256 `7a2fe75a33790fe17b90d90767908940c5e59af769b6cf3f19deae91d5f29205`,
+`jar verified`, signed with the shared upload key
+(`53:7D:09:D2:...:0D:9D:E5:21`), carrying only the core pack. The bundle
+and the screenshots are handed over together, before the submission.
 
 ## Where the project stands (end of the twenty-fifth session)
 
