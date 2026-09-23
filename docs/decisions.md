@@ -3490,3 +3490,8 @@ the artifacts endpoint takes an `attempt` parameter.
 `jar verified`, signed with the shared upload key
 (`53:7D:09:D2:...:0D:9D:E5:21`). The bundle and the screenshots are handed
 over together, before the submission.
+
+**The hand-off is closed.** The owner submitted 1.8 to Play for review, so
+the hand-off copy of the bundle was deleted the same session, as the
+runbook requires: the artifact stays in the build run and in Play, never
+sitting in the repository. `play-store/aab/` keeps only its own note.

@@ -4,7 +4,8 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 1.8 (versionCode 19) is in this push. It comes from the owner's
+**Status:** 1.8 (versionCode 19) is submitted to Google Play for review. It
+comes from the owner's
 read of 1.7: Go to ayah moved into Browse's tab row, one tap from any tab;
 the word by word aid reads as a gloss of the ayah above it; the study
 reading's deep door is named Tafsir with its own mark (More from the

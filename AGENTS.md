@@ -916,7 +916,8 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the twenty-sixth session)
 
-**1.8 (versionCode 19) is in the release push.** The owner answered five UI
+**1.8 (versionCode 19) is submitted to Google Play for review.** The owner
+answered five UI
 questions about the 1.7 surfaces, and the answers are in the tree (D-084).
 Go to ayah moved from a row over
 the surah list into a chip in Browse's tab row, one tap from any tab, a
@@ -951,7 +952,8 @@ reference.
 SHA-256 `7a2fe75a33790fe17b90d90767908940c5e59af769b6cf3f19deae91d5f29205`,
 `jar verified`, signed with the shared upload key
 (`53:7D:09:D2:...:0D:9D:E5:21`), carrying only the core pack. The bundle
-and the screenshots are handed over together, before the submission.
+and the screenshots were handed over together, before the submission, and
+the hand-off copy was deleted once the submission was confirmed.
 
 ## Where the project stands (end of the twenty-fifth session)
 
