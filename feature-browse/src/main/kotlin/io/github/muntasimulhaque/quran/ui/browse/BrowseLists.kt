@@ -1,37 +1,30 @@
 package io.github.muntasimulhaque.quran.ui.browse
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.ReadPlace
 import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
-import io.github.muntasimulhaque.quran.ui.theme.LatinReading
 import io.github.muntasimulhaque.quran.ui.theme.Space
-import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 
 /**
  * Where the reader has been reading, newest first. Each row names the place
@@ -68,12 +61,10 @@ internal fun LastReadList(
     ) {
         items(places, key = { it.ayahNumber }) { place ->
             val text = texts[place.ayahNumber]
-            AyahRow(
+            PlaceRow(
                 surah = text?.surahName
                     ?: stringResource(R.string.saved_reference_fallback, place.ayahNumber),
                 ayah = text?.ayahLabel,
-                arabic = "",
-                translation = null,
                 detail = stringResource(
                     R.string.last_read_detail,
                     readingModeName(place.mode),
@@ -81,9 +72,6 @@ internal fun LastReadList(
                 ),
                 onClick = { onAyah(place.ayahNumber) },
                 action = stringResource(R.string.action_forget) to { onForget(place.ayahNumber) },
-                // The row is the door: tapping the place opens it, so an
-                // Open label beside it is a second door to the same room.
-                showOpen = false,
             )
         }
     }
@@ -95,7 +83,8 @@ internal fun LastReadList(
  * to name the place that holds it. A tap opens the note where it was written,
  * on its ayah: the reader tapped a row in the Notes list because they want to
  * read or change what they wrote, and sending them to the ayah to hunt for it
- * would be a second errand.
+ * would be a second errand. The Remove beside the row is the other end of the
+ * same work: the note is the reader's own, so they can take it back here.
  */
 @Composable
 internal fun NotesList(
@@ -104,6 +93,7 @@ internal fun NotesList(
     listState: LazyListState,
     listModifier: Modifier = Modifier,
     onNote: (Int) -> Unit,
+    onRemove: (Int) -> Unit,
 ) {
     // The order is the note's own, not the ayah's: a note written today on an
     // ayah saved last year is today's note, and the reader looking for what
@@ -126,17 +116,13 @@ internal fun NotesList(
     ) {
         items(notes, key = { it.ayahNumber }) { row ->
             val text = texts[row.ayahNumber]
-            AyahRow(
+            PlaceRow(
                 surah = text?.surahName
                     ?: stringResource(R.string.saved_reference_fallback, row.ayahNumber),
                 ayah = text?.ayahLabel,
-                arabic = "",
-                translation = null,
                 detail = stringResource(R.string.notes_detail, moment(row.noteAt ?: row.createdAt)),
                 onClick = { onNote(row.ayahNumber) },
-                // The row opens the note itself, so an Open label beside it
-                // would be a second name for the same tap.
-                showOpen = false,
+                action = stringResource(R.string.action_remove) to { onRemove(row.ayahNumber) },
             )
         }
     }
@@ -150,16 +136,23 @@ private fun readingModeName(mode: ReadingMode): String = stringResource(
     },
 )
 
-/** What one saved row shows, read with its neighbours. */
+/**
+ * The names one row draws: the surah as a reader says it, and the ayah's own
+ * number under it. The ayah's text is not carried at all: every list that
+ * draws these rows is a list of places, and the reading is one tap away.
+ */
 internal data class AyahText(
-    val arabic: String,
-    val translation: String?,
-    /** The surah as a reader says it, the way a place is named out loud. */
     val surahName: String? = null,
-    /** "Ayah 31": the other half of the same name. */
     val ayahLabel: String? = null,
 )
 
+/**
+ * The ayahs the reader saved. A row is the place and the way to unsave it:
+ * the ayah's own text and its note are not repeated here. Saved means saved,
+ * so this list holds the Save action's work and nothing else; a note written
+ * on an ayah never puts it here, and a saved ayah that also has a note is
+ * named again in Notes where the note itself lives.
+ */
 @Composable
 internal fun SavedList(
     saved: List<SavedAyah>,
@@ -169,7 +162,8 @@ internal fun SavedList(
     onAyah: (Int) -> Unit,
     onRemove: (Int) -> Unit,
 ) {
-    if (saved.isEmpty()) {
+    val rows = remember(saved) { saved.filter { it.saved } }
+    if (rows.isEmpty()) {
         EmptyNote(
             title = stringResource(R.string.saved_empty_title),
             body = stringResource(R.string.saved_empty_body),
@@ -181,14 +175,11 @@ internal fun SavedList(
         modifier = listModifier,
         contentPadding = PaddingValues(bottom = 28.dp),
     ) {
-        items(saved, key = { it.ayahNumber }) { row ->
+        items(rows, key = { it.ayahNumber }) { row ->
             val text = texts[row.ayahNumber]
-            AyahRow(
+            PlaceRow(
                 surah = text?.surahName ?: stringResource(R.string.saved_reference_fallback, row.ayahNumber),
                 ayah = text?.ayahLabel,
-                arabic = text?.arabic.orEmpty(),
-                translation = text?.translation,
-                note = row.note,
                 onClick = { onAyah(row.ayahNumber) },
                 action = stringResource(R.string.action_remove) to { onRemove(row.ayahNumber) },
             )
@@ -196,18 +187,21 @@ internal fun SavedList(
     }
 }
 
-/** A saved ayah or a place left behind: the same row, in two lists. */
+/**
+ * One row in the reader's own lists: a place, named the way a reader says it,
+ * and at most one action the list's work allows. The ayah's text is
+ * deliberately not part of the row. The reader is looking for where they
+ * were, or what they wrote, and a list of Arabic lines and translations
+ * makes them read every row to find it; the text itself is one tap away, and
+ * so is the row itself, which is the door.
+ */
 @Composable
-private fun AyahRow(
+private fun PlaceRow(
     surah: String,
     ayah: String?,
-    arabic: String,
-    translation: String?,
-    note: String? = null,
     detail: String? = null,
     onClick: () -> Unit,
     action: Pair<String, () -> Unit>? = null,
-    showOpen: Boolean = true,
 ) {
     Column(
         modifier = Modifier
@@ -233,16 +227,8 @@ private fun AyahRow(
                     )
                 }
             }
-            if (showOpen) {
-                Text(
-                    text = stringResource(R.string.action_open),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
             // Remove and Forget are actions, so they wear the app's button
-            // shape: the Open label beside them is a sign, not a control,
-            // and the two never read alike.
+            // shape: the two never read as the place's own name.
             action?.let {
                 TextButton(
                     label = it.first,
@@ -258,48 +244,6 @@ private fun AyahRow(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = Space.Line),
-            )
-        }
-        if (arabic.isNotEmpty()) {
-            Text(
-                text = arabic,
-                style = TextStyle(
-                    fontFamily = rememberHafs(),
-                    fontSize = 20.sp,
-                    lineHeight = 38.sp,
-                    color = MaterialTheme.colorScheme.onSurface,
-                ),
-                textAlign = TextAlign.Right,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = Space.Line),
-            )
-        }
-        translation?.let { body ->
-            Text(
-                text = body,
-                style = LatinReading.copy(fontSize = 15.sp, lineHeight = 23.sp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = Space.Line),
-            )
-        }
-        note?.takeIf { it.isNotBlank() }?.let {
-            Text(
-                text = it,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .padding(top = Space.Block)
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.06f))
-                    .padding(horizontal = 10.dp, vertical = 8.dp),
             )
         }
     }

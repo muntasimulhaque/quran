@@ -5,6 +5,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.DragInteraction
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,6 +24,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -98,7 +100,7 @@ fun StudyList(
     settings: AppSettings,
     hasTranslation: Boolean,
     nextSurahName: String?,
-    selected: Ayah?,
+    selectedAyah: Int?,
     playingAyah: Int?,
     playingWord: Int?,
     onAyah: (Ayah) -> Unit,
@@ -147,7 +149,7 @@ fun StudyList(
         settings = settings,
         hasTranslation = hasTranslation,
         nextSurahName = nextSurahName,
-        selected = selected,
+        selectedAyah = selectedAyah,
         playingAyah = playingAyah,
         playingWord = playingWord,
         hafs = hafs,
@@ -178,7 +180,7 @@ private fun StudyRows(
     settings: AppSettings,
     hasTranslation: Boolean,
     nextSurahName: String?,
-    selected: Ayah?,
+    selectedAyah: Int?,
     playingAyah: Int?,
     playingWord: Int?,
     hafs: FontFamily,
@@ -304,7 +306,7 @@ private fun StudyRows(
                 hafs = hafs,
                 settings = settings,
                 wordByWord = settings.wordByWord,
-                isSelected = selected?.number == row.ayah.number,
+                isSelected = selectedAyah == row.ayah.number,
                 playingAyah = playingAyah,
                 playingWord = playingWord,
                 onAyah = onAyah,
@@ -439,6 +441,17 @@ private fun SurahOpening(
             )
         }
         if (info != null) {
+            // Opened, the introduction wears the wash a chosen ayah wears:
+            // the reader asked for it, and while it is up it reads as the
+            // chosen thing on the page, in the same lapis at the same weight
+            // the long press leaves behind. A press on it answers in the same
+            // lapis rather than the gray an unstyled ripple would flash.
+            val wash = if (expanded) {
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.07f)
+            } else {
+                Color.Transparent
+            }
+            val press = remember { MutableInteractionSource() }
             Text(
                 text = RichText.paragraphs(info.orEmpty()),
                 style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
@@ -454,13 +467,18 @@ private fun SurahOpening(
                 // so a press shows the boundary of the about and not of the
                 // whole opening. The boundary is the ayah's own rounded one,
                 // and the ayah's own room sits inside it: the shape wraps the
-                // padding, not the letters, so a press on the about answers in
-                // the same shape as a press on an ayah and no line of text is
-                // left touching the edge it is standing on.
+                // padding, not the letters, so the about answers in the same
+                // shape and color as an ayah and no line of text is left
+                // touching the edge it is standing on.
                 modifier = Modifier
                     .padding(top = Space.Block)
                     .clip(RoundedCornerShape(14.dp))
-                    .clickable(onClick = onPaperTap)
+                    .background(wash)
+                    .clickable(
+                        interactionSource = press,
+                        indication = ripple(color = MaterialTheme.colorScheme.primary),
+                        onClick = onPaperTap,
+                    )
                     .padding(horizontal = 8.dp, vertical = 10.dp),
             )
         }

@@ -32,11 +32,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.JuzStart
 import io.github.muntasimulhaque.quran.data.ReadPlace
@@ -77,14 +77,14 @@ fun BrowseSheet(
     surahs: List<Surah>,
     saved: List<SavedAyah>,
     lastRead: List<ReadPlace>,
-    translationPack: String,
     startOnLastRead: Boolean = false,
     onDismiss: () -> Unit,
     onAyah: (Int) -> Unit,
     onSurah: (Int) -> Unit,
-    onRemove: (Int) -> Unit,
+    onRemoveSaved: (Int) -> Unit,
     onForget: (Int) -> Unit,
     onNote: (Int) -> Unit,
+    onRemoveNote: (Int) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var tab by remember {
@@ -105,35 +105,36 @@ fun BrowseSheet(
     val notesGate = remember(notesList) { SheetDragGate(notesList) }
     // Both number columns are measured once here and handed to their rows: every
     // number of a list ends at one edge, and every name starts at one place.
-    val surahNumberWidth = rememberNumberWidth("114")
-    val juzNumberWidth = rememberNumberWidth("30")
+    // The widest number each list can draw is found by measuring the list
+    // itself, so no three-digit surah loses its last digit to a column sized
+    // on a narrower stand-in.
     val juzStarts by produceState(initialValue = emptyList<JuzStart>(), content) {
         value = withContext(Dispatchers.IO) { content.juzStarts() }
     }
-    // Every list that needs the ayah's own text reads it in one pass: the
-    // reader never sees a row that is still looking for what it says.
+    val surahNumberWidth = rememberNumberWidth(surahs.map { it.number })
+    val juzNumberWidth = rememberNumberWidth(juzStarts.map { it.juz })
+    // Every list that needs the ayah's own name reads it in one pass: the
+    // reader never sees a row that is still looking for what it says. The
+    // ayah's own number inside the label follows the interface's digits.
+    val locale = LocalConfiguration.current.locales[0]
     val ayahLabel = stringResource(R.string.last_read_ayah_label)
     val texts by produceState<Map<Int, AyahText>>(
         initialValue = emptyMap(),
         saved,
         lastRead,
-        translationPack,
     ) {
         value = withContext(Dispatchers.IO) {
             val numbers = (saved.map { it.ayahNumber } + lastRead.map { it.ayahNumber }).distinct()
             if (numbers.isEmpty()) return@withContext emptyMap()
             val ayahs = content.ayahsWithPages(numbers).associateBy { it.ayah.number }
-            val translations = content.translations(numbers, translationPack)
             val surahs = content.surahs().associateBy { it.number }
             numbers.associateWith { number ->
                 val ayah = ayahs[number]?.ayah
                 AyahText(
-                    arabic = ayah?.text.orEmpty(),
-                    translation = translations[number]?.text?.let { RichText.plain(it) },
                     // The reader's own way of naming the place: the surah as
                     // they know it, and the ayah's own number under it.
                     surahName = ayah?.let { surahs[it.surah]?.nameSimple },
-                    ayahLabel = ayah?.let { ayahLabel.format(it.ayah) },
+                    ayahLabel = ayah?.let { String.format(locale, ayahLabel, it.ayah) },
                 )
             }
         }
@@ -182,7 +183,7 @@ fun BrowseSheet(
             when (tab) {
                 BrowseTab.Surahs -> LazyColumn(
                     state = surahsList,
-                    modifier = Modifier.sheetDragGate(surahsGate),
+                    modifier = Modifier.sheetDragGate(surahsGate).testTag("browse-surahs"),
                     contentPadding = PaddingValues(bottom = 28.dp),
                 ) {
                     items(surahs, key = { it.number }) { surah ->
@@ -221,7 +222,7 @@ fun BrowseSheet(
                     listState = savedList,
                     listModifier = Modifier.sheetDragGate(savedGate),
                     onAyah = onAyah,
-                    onRemove = onRemove,
+                    onRemove = onRemoveSaved,
                 )
                 BrowseTab.Notes -> NotesList(
                     saved = saved,
@@ -229,6 +230,7 @@ fun BrowseSheet(
                     listState = notesList,
                     listModifier = Modifier.sheetDragGate(notesGate),
                     onNote = onNote,
+                    onRemove = onRemoveNote,
                 )
             }
         }

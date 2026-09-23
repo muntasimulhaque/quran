@@ -135,6 +135,12 @@ fun ReaderScreen(
     // composing for the frame alone; it is never drawn to the screen.
     var sharing by remember { mutableStateOf<ShareCard?>(null) }
 
+    // The wash under an ayah: the one the long press chose, or the one whose
+    // note is open over it. A note opened from Browse has no pill behind it,
+    // but the reader is still looking at the ayah the note belongs to, so it
+    // wears the same mark while the sheet is up.
+    val washedAyah = selected?.number ?: cardNote
+
     // The phone's back button dismisses the ayah pill first, and only closes
     // the app when nothing is raised. A reader who long-pressed an ayah means
     // the pill, and back is the gesture they already use to put a thing away.
@@ -201,7 +207,7 @@ fun ReaderScreen(
                 content = content,
                 palette = palette,
                 themeKey = themeKey,
-                selected = selected,
+                selectedAyah = washedAyah,
                 playback = playback,
                 onAyah = { ayah ->
                     selected = if (selected?.number == ayah.number) null else ayah
@@ -230,7 +236,7 @@ fun ReaderScreen(
                         hasTranslation = viewModel.enabledTranslationPacks.isNotEmpty(),
                         nextSurahName = viewModel.surahs
                             .firstOrNull { it.number == surah.number + 1 }?.nameSimple,
-                        selected = selected,
+                        selectedAyah = washedAyah,
                         playingAyah = playback.ayahNumber,
                         playingWord = playback.wordPosition,
                         onAyah = { ayah ->
@@ -385,7 +391,6 @@ fun ReaderScreen(
             surahs = viewModel.surahs,
             saved = saved,
             lastRead = lastRead,
-            translationPack = viewModel.enabledTranslationPacks.firstOrNull()?.id.orEmpty(),
             onDismiss = { sheet = ReaderSheet.None },
             onAyah = { ayahNumber ->
                 sheet = ReaderSheet.None
@@ -397,7 +402,7 @@ fun ReaderScreen(
                 // its top when they have never been there.
                 viewModel.openSurah(number)
             },
-            onRemove = { viewModel.removeSaved(it) },
+            onRemoveSaved = { viewModel.removeSaved(it) },
             onForget = { viewModel.forgetPlace(it) },
             onNote = { ayahNumber ->
                 // The row the reader tapped says "a note on this ayah": the
@@ -407,6 +412,7 @@ fun ReaderScreen(
                 viewModel.jumpToAyah(ayahNumber)
                 cardNote = ayahNumber
             },
+            onRemoveNote = { viewModel.removeNote(it) },
         )
         ReaderSheet.Search -> SearchSheet(
             content = content,
@@ -516,7 +522,7 @@ private fun MushafReader(
     content: ContentDatabase,
     palette: PagePalette,
     themeKey: String,
-    selected: Ayah?,
+    selectedAyah: Int?,
     playback: PlaybackUiState,
     onAyah: (Ayah) -> Unit,
     onBackgroundTap: () -> Unit,
@@ -588,7 +594,7 @@ private fun MushafReader(
                 pageWidth = pageWidth,
                 palette = palette,
                 themeKey = themeKey,
-                selectedAyah = selected?.number,
+                selectedAyah = selectedAyah,
                 playingAyah = playback.ayahNumber,
                 playingWord = playback.wordPosition,
                 onLongPressAyah = onAyah,
@@ -752,7 +758,7 @@ private fun BottomStack(
         }
         selected?.let { ayah ->
             AyahActions(
-                isSaved = saved.any { it.ayahNumber == ayah.number },
+                isSaved = saved.any { it.ayahNumber == ayah.number && it.saved },
                 hasNote = saved.any { it.ayahNumber == ayah.number && !it.note.isNullOrBlank() },
                 onSave = {
                     viewModel.toggleSaved(ayah)

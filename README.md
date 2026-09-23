@@ -18,6 +18,11 @@ own Releases when a reader asks for it. The listing, icon, feature graphic,
 and screenshots per form factor are in [`play-store/`](play-store/),
 refreshed from CI.
 
+The reader's twelfth report is answered in the tree and waits for a release:
+About this surah wears the wash a chosen ayah wears, Save and Note are
+separate marks, the reader's lists name a place without repeating its text,
+and Browse's surah numbers are whole and speak the interface's own digits.
+
 ## What it does
 
 - **Mushaf mode.** The page of the Madinah Mushaf, drawn glyph by glyph from

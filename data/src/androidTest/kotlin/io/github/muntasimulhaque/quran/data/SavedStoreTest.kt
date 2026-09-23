@@ -1,11 +1,13 @@
 package io.github.muntasimulhaque.quran.data
 
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -15,9 +17,9 @@ import org.junit.runner.RunWith
 
 /**
  * The saved-ayah database is the reader's own work, so its behavior is pinned:
- * a toggle saves and unsaves, a note stays with its ayah, a blank note clears
- * without dropping the ayah, newest comes first, and everything survives the
- * app being closed.
+ * Save and Note are two separate marks on one ayah, a toggle saves and
+ * unsaves, a note stays with its ayah and never enters Saved by itself,
+ * newest comes first, and everything survives the app being closed.
  */
 @RunWith(AndroidJUnit4::class)
 class SavedStoreTest {
@@ -43,23 +45,77 @@ class SavedStoreTest {
         store.load()
         store.toggle(262)
         assertEquals(listOf(262), store.saved.value.map { it.ayahNumber })
+        assertTrue(store.saved.value.single().saved)
         store.toggle(262)
         assertTrue(store.saved.value.isEmpty())
     }
 
     @Test
-    fun noteIsKeptWithItsAyah() = runBlocking {
+    fun aNoteDoesNotSaveTheAyah() = runBlocking {
         store.setNote(262, "The Throne verse")
         val row = store.saved.value.single()
         assertEquals(262, row.ayahNumber)
         assertEquals("The Throne verse", row.note)
+        assertFalse("a note never enters Saved by itself", row.saved)
     }
 
     @Test
-    fun blankNoteClearsButKeepsTheAyah() = runBlocking {
+    fun savingAnAyahKeepsItsNote() = runBlocking {
+        store.setNote(262, "The Throne verse")
+        store.toggle(262)
+        val row = store.saved.value.single()
+        assertTrue(row.saved)
+        assertEquals("The Throne verse", row.note)
+    }
+
+    @Test
+    fun unsavingAnAyahKeepsItsNote() = runBlocking {
+        store.toggle(262)
+        store.setNote(262, "The Throne verse")
+        store.unsave(262)
+        val row = store.saved.value.single()
+        assertFalse(row.saved)
+        assertEquals("The Throne verse", row.note)
+    }
+
+    @Test
+    fun clearingANoteKeepsTheSave() = runBlocking {
+        store.toggle(262)
+        store.setNote(262, "The Throne verse")
+        store.clearNote(262)
+        val row = store.saved.value.single()
+        assertTrue(row.saved)
+        assertNull(row.note)
+    }
+
+    @Test
+    fun unsavingAnAyahWithNoNoteDropsTheRow() = runBlocking {
+        store.toggle(1)
+        store.unsave(1)
+        assertTrue(store.saved.value.isEmpty())
+    }
+
+    @Test
+    fun clearingANoteWithNoSaveDropsTheRow() = runBlocking {
+        store.setNote(1, "a passing thought")
+        store.clearNote(1)
+        assertTrue(store.saved.value.isEmpty())
+    }
+
+    @Test
+    fun blankNoteClearsTheRowItAloneCreated() = runBlocking {
+        store.setNote(262, "a note")
+        store.setNote(262, "   ")
+        assertTrue(store.saved.value.isEmpty())
+    }
+
+    @Test
+    fun blankNoteOnASavedAyahKeepsTheSave() = runBlocking {
+        store.toggle(262)
         store.setNote(262, "a note")
         store.setNote(262, "   ")
         val row = store.saved.value.single()
+        assertTrue(row.saved)
         assertNull(row.note)
     }
 
@@ -81,13 +137,6 @@ class SavedStoreTest {
     }
 
     @Test
-    fun removeDropsTheRow() = runBlocking {
-        store.toggle(1)
-        store.remove(1)
-        assertTrue(store.saved.value.isEmpty())
-    }
-
-    @Test
     fun aNoteKeepsTheMomentItWasWritten() = runBlocking {
         store.setNote(262, "written now")
         val row = store.saved.value.single()
@@ -96,9 +145,11 @@ class SavedStoreTest {
 
     @Test
     fun aClearedNoteLosesItsMoment() = runBlocking {
+        store.toggle(262)
         store.setNote(262, "a note")
         store.setNote(262, null)
-        assertNull(store.saved.value.single().noteAt)
+        val row = store.saved.value.single()
+        assertNull(row.noteAt)
     }
 
     /**
@@ -109,24 +160,57 @@ class SavedStoreTest {
      */
     @Test
     fun aNoteFromBeforeTheNotesListKeepsItsAyahsMoment() = runBlocking {
-        store.close()
-        context.deleteDatabase("saved.db")
-        val path = context.getDatabasePath("saved.db")
-        path.parentFile?.mkdirs()
-        val legacy = android.database.sqlite.SQLiteDatabase.openOrCreateDatabase(path, null)
-        legacy.execSQL(
-            "CREATE TABLE saved (" +
+        writeLegacyDatabase(
+            version = 1,
+            create = "CREATE TABLE saved (" +
                 "ayah_number INTEGER PRIMARY KEY, note TEXT, created_at INTEGER NOT NULL)",
+            insert = "INSERT INTO saved VALUES (262, 'an old note', 1234)",
         )
-        legacy.execSQL("INSERT INTO saved VALUES (262, 'an old note', 1234)")
-        legacy.version = 1
-        legacy.close()
 
         val reopened = SavedStore(context)
         reopened.load()
         val row = reopened.saved.value.single()
         assertEquals("an old note", row.note)
         assertEquals(1234L, row.noteAt)
+        assertFalse("a note written alone never enters Saved", row.saved)
         reopened.close()
+    }
+
+    /**
+     * The version 3 migration has one question it can answer: a row whose note
+     * was written in the same insert as the row itself (the two moments are
+     * one) was written by the note alone; a note written later than the row
+     * cannot be told from a note the reader edited, and that row stays saved,
+     * so nothing the reader saved is lost.
+     */
+    @Test
+    fun theSaveNoteMigrationLeavesNoteOnlyRowsOutOfSaved() = runBlocking {
+        writeLegacyDatabase(
+            version = 2,
+            create = "CREATE TABLE saved (" +
+                "ayah_number INTEGER PRIMARY KEY, note TEXT, created_at INTEGER NOT NULL, " +
+                "note_at INTEGER)",
+            insert = "INSERT INTO saved VALUES (262, 'a note alone', 1000, 1000), " +
+                "(263, 'after a save', 500, 900)",
+        )
+
+        val reopened = SavedStore(context)
+        reopened.load()
+        val byAyah = reopened.saved.value.associateBy { it.ayahNumber }
+        assertFalse(byAyah.getValue(262).saved)
+        assertTrue(byAyah.getValue(263).saved)
+        reopened.close()
+    }
+
+    private fun writeLegacyDatabase(version: Int, create: String, insert: String) {
+        store.close()
+        context.deleteDatabase("saved.db")
+        val path = context.getDatabasePath("saved.db")
+        path.parentFile?.mkdirs()
+        val legacy = SQLiteDatabase.openOrCreateDatabase(path, null)
+        legacy.execSQL(create)
+        legacy.execSQL(insert)
+        legacy.version = version
+        legacy.close()
     }
 }

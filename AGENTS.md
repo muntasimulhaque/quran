@@ -1,5 +1,10 @@
 # Quran: working rules
 
+**The first task of every session, before reading this file and before any
+other command: `git fetch`, then `git pull origin main`. It is the most
+important task in this file; a session that has not pulled has not
+started.**
+
 A free, offline Android Quran reader. Two reading modes on one text: the
 Mushaf page and a study view with Saheeh International, word-by-word,
 Tafsir Ibn Kathir, and Tafsir As-Sa'di, with recitation by Al-Minshawi and
@@ -27,11 +32,14 @@ dead letter.
 
 ## Every session
 
-1. Read this file.
-2. `git fetch` and pull `main` before any other command: the owner works
-   from more than one machine, and no session builds on a stale head. Do
-   them in order: reading AGENTS.md in the same block as the pull races it,
-   and you end up reading the file you were about to update.
+1. **Pull first. This is the most important task in this file, and it comes
+   before everything else, including reading this file.** The first
+   commands of the session are `git fetch`, then `git pull origin main`, in
+   that order. The owner works from more than one machine, and no session
+   reads a stale file or builds on a stale head.
+2. Read this file after the pull, never before and never in the same block
+   as it: reading AGENTS.md in the same block as the pull races it, and you
+   end up reading the file you were about to update.
 3. Do the work, then ask one question: anything else? The build waits for
    the owner's word. No `versionCode` moves until the session is done and
    the owner says so.
@@ -778,11 +786,11 @@ fetching them again; the space is worth less than the time.
 
 ## Next session: the remaining queue, in order
 
-0. **The store set is current, and the capture can be trusted.** 1.5
-   installed the set from run 35771681366: every frame compared with its
-   artifact by `cmp`, the ayah card frame carrying the word by word order.
-   The next session that changes a pixel captures again with the procedure
-   in "Store screenshots".
+0. **The store set needs one more capture.** 1.5 installed the set from run
+   35771681366, and the twenty-fourth session then changed Browse's number
+   column and the three reader lists, so the committed set is older than
+   the tree. The next hand-off captures again with the procedure in "Store
+   screenshots" before anything is submitted.
 
 1. **Measure on real hardware.** The numbers in D-037 come from a software
    rendered emulator, the slowest Android this app will run on. A
@@ -836,6 +844,22 @@ fetching them again; the space is worth less than the time.
   to right on the screen; `MushafTurnTest` now pins the direction on every
   form factor.
 
+
+## Where the project stands (end of the twenty-fourth session)
+
+**No release; the reader's twelfth report is answered in the tree.** Eight
+things from the owner (D-080): About this surah wears the same lapis wash a
+chosen ayah wears; QUL was checked and carries no Bangla surah
+introduction, so that item stays content backlog; Browse's surah numbers
+keep their last digit and follow the interface's digits; Save and Note are
+separate marks in `saved.db` version 3; the Saved, Notes, and Last Read
+lists are place lists, with Remove on the first two and Forget in Last Read
+speaking মুছুন like every other removal; a note opened from Browse washes
+its ayah. The JVM suite, lint, and `assembleDebug` are green; the
+data instrumented tests pass (28) and the app instrumented tests pass (13)
+on the phone emulator, the new `BrowseNumbersTest` among them. `versionCode`
+and `versionName` did not move, and the store set will be captured again at
+the next hand-off.
 
 ## Where the project stands (end of the twenty-third session)
 

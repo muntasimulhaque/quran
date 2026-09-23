@@ -3087,3 +3087,72 @@ Both are handed over together, before the submission.
 the hand-off copy of the bundle and its checksum were deleted the same
 session, as the runbook requires: the artifact stays in the build run and in
 Play, never sitting in the repository.
+
+## D-080: The reader's twelfth report, the twenty-fourth session
+
+Date: the twenty-fourth session. The owner read 1.5 on a phone and reported
+eight things, each on a surface the earlier reports had left.
+
+**About this surah wears the ayah's wash.** Opened, the introduction now
+sits on the same lapis a long-pressed ayah wears, `primary` at 7% alpha,
+the exact value `AyahBlock` gives its selected wash, and its press answers
+in the same lapis through `material3.ripple` instead of the gray an
+unstyled `clickable` flashed. The rounded shape and the inset were already
+the ayah's; the color was the part that was not.
+
+**Bangla About this surah cannot ship from QUL.** The owner asked whether
+the same source carries the surah introductions in Bangla. It does not:
+QUL's surah-info section holds six resources, English (3), Urdu (4), Tamil
+(5), Italian (6), Malayalam (7), and Indonesian (454), with no other page,
+which is what D-072 already recorded for the surah-name dataset. No content
+was changed and no hand-written translation entered the repository; the
+item stays content backlog until a source is named and reviewed the way the
+Arabic content is.
+
+**Browse's surah numbers keep their last digit.** The number column was
+sized by measuring "114" and drawing every number into that width, and the
+digits of the interface face are not one width: "114" is narrower than
+"100", so every 100 to 109 row was clipped to "10" (and 110 to 114 to
+"11"). The column now measures every number the list actually draws and
+takes the widest. The numbers also follow the interface's own digits:
+`numberLabel` formats through the composition's locale, so a Bangla reading
+gets ১০০ where an English one gets 100, and the ayah labels of the three
+reader lists format through the same locale. `BrowseNumbersTest` pins both:
+the width "100" gets must be greater than the width "114" gets (equal
+widths is the old bug), and after the language choice recreates the
+Activity, ১০০ exists in the Bangla sheet.
+
+**Save and Note are two marks, not one.** A note used to be written by
+saving the ayah behind it, so every note turned up in Saved; and Save on a
+noted ayah deleted the note with the row. `saved.db` is version 3: a
+`saved` column, set by Save alone, with Note writing its own row. A note
+never enters Saved, a save keeps its note, unsaving keeps the note, and
+clearing the note keeps the save. The migration marks a note row whose note
+moment is the row's own moment as note-only (the old single insert wrote
+both), and leaves a later note saved, because a save that predates its note
+cannot be told from an edited note and nothing the reader saved may leave
+the list. `SavedStoreTest` grows both migration cases and the new
+behaviors.
+
+**The reader's three lists are place lists.** Saved now shows the surah
+name and the ayah number and nothing else: the ayah's text, its
+translation, and its note are gone from the row, as Last Read and Notes
+already were. The redundant Open label is gone from all three, because the
+row is the door. Notes gains the Remove the owner asked for, so a note can
+be taken back where it is listed, and Forget in Last Read is মুছুন in
+Bangla like every other removal.
+
+**A note opened from Browse wears the wash under it.** The note sheet opens
+over the reading the row jumped to, and the ayah it belongs to now carries
+the same wash a long press leaves, driven by the open note itself rather
+than by the pill's selection. When the note closes, the wash goes.
+
+**Verification.** The JVM suite (core, data, app), lint, and
+`assembleDebug` are green. The data instrumented tests pass (28, including
+the new store cases and both migrations) and the app instrumented tests
+pass (13, the new `BrowseNumbersTest` among them), on the phone emulator
+with the workflow's own dialog settings. The new look is not in the eight
+store frames: the tour never opens About, and its Browse frame starts at
+surah 1, so the next hand-off captures the set again. No release was cut:
+`versionCode` and `versionName` did not move, and the notes were not
+written.

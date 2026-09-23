@@ -37,12 +37,11 @@
     </plurals>
 
     <string name="saved_empty_title">Nothing saved yet</string>
-    <string name="saved_empty_body">Press and hold any ayah while reading, then Save. Your saved ayahs and notes appear here, newest first.</string>
+    <string name="saved_empty_body">Press and hold any ayah while reading, then Save. Your saved ayahs appear here, newest first.</string>
     <string name="notes_empty_title">No notes yet</string>
     <string name="notes_empty_body">Press and hold any ayah while reading, then Note. Every ayah you wrote a note on is kept here, newest first.</string>
     <string name="notes_detail">Note written %1$s</string>
     <string name="saved_reference_fallback">Ayah %1$d</string>
-    <string name="action_open">Open</string>
     <string name="action_remove">Remove</string>
     <string name="action_forget">Forget</string>
 </resources>

@@ -841,8 +841,14 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch { savedStore.setNote(ayahNumber, note) }
     }
 
+    /** Removes the reader's save; a note on the ayah stays in Notes. */
     fun removeSaved(ayahNumber: Int) {
-        viewModelScope.launch { savedStore.remove(ayahNumber) }
+        viewModelScope.launch { savedStore.unsave(ayahNumber) }
+    }
+
+    /** Removes the reader's note; a save on the ayah stays in Saved. */
+    fun removeNote(ayahNumber: Int) {
+        viewModelScope.launch { savedStore.clearNote(ayahNumber) }
     }
 
     fun playAyah(ayahNumber: Int) {
