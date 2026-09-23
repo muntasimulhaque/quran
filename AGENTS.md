@@ -844,11 +844,13 @@ fetching them again; the space is worth less than the time.
 
 ## Next session: the remaining queue, in order
 
-0. **The store set is stale after D-084, and the next capture refreshes
-   it.** Frame 07 (Browse) gains the Go to ayah chip in its tab row, and
-   03-study changes with the aid's tone and spacing; 08 keeps its Word
-   meanings door. Capture with the procedure in "Store screenshots" before
-   the next hand-off, never by hand.
+0. **The store set is current, and the capture can be trusted.** 1.8
+   installed the set from run 35883297322 attempt 2: every frame compared
+   with its artifact by `cmp` (24 matches) and every changed frame read
+   (the Version 1.8 text, the Go to ayah chip in the tab row, the study
+   aid's tighter gloss, the legible references). The next session that
+   changes a pixel captures again with the procedure in "Store
+   screenshots".
 
 1. **The quiet alphas on the card.** D-084 measured two more tones under
    the design document's own 4.5:1 rule on the sepia ground: the tafsir
