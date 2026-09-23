@@ -423,7 +423,7 @@ private fun SurahOpening(
                 surah.versesCount,
             ),
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 4.dp),
         )
         if (surah.number != 1 && surah.bismillahPre) {
@@ -519,7 +519,7 @@ private fun SurahEnd(
         Text(
             text = stringResource(R.string.study_surah_complete, surah.nameSimple),
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 16.dp),
         )
         if (next <= 114 && nextSurahName != null) {
@@ -641,7 +641,12 @@ private fun AyahBlock(
                     meanings = row.meanings,
                     hafs = hafs,
                     settings = settings,
-                    modifier = Modifier.padding(top = Space.Block),
+                    // The aid is an annotation of the ayah above it, not a
+                    // second verse: a tighter break than the one before the
+                    // translation groups the word list with its line, so the
+                    // reader reads the verse first and the meanings as its
+                    // gloss.
+                    modifier = Modifier.padding(top = Space.Line),
                 )
             }
             // More than one translation may be on, and each is drawn in its
@@ -667,6 +672,11 @@ private fun AyahBlock(
                     onFootnote = onFootnote,
                 )
             }
+            // The reference closes the block the way a printed study Quran
+            // numbers its verses: after the reader has read the ayah, not as
+            // a heading before it. It takes the theme's secondary tone
+            // rather than a quiet alpha, because an alpha that whispers on
+            // paper sinks under 4.5:1 on the sepia ground.
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -676,7 +686,7 @@ private fun AyahBlock(
                 Text(
                     text = "${row.ayah.surah}:${row.ayah.ayah}",
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.45f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }

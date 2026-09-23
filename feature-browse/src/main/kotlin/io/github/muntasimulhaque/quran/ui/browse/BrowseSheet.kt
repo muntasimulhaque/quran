@@ -58,7 +58,6 @@ import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
-import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
@@ -78,8 +77,8 @@ private enum class BrowseTab(val labelRes: Int) {
  * The browse sheet: the surahs, the thirty juz, where the reader has been
  * reading, everything they saved, and every ayah they wrote a note on. Each
  * list is one line per row and opens the reader exactly where it says, and
- * the surah list carries a Go to ayah picker for a place inside a surah
- * that would otherwise be a scroll away.
+ * the tab row carries a Go to ayah door for a place inside a surah that
+ * would otherwise be a scroll away.
  *
  * Five tabs, and every tab was asked for: Surahs and Juz are the Book's own
  * divisions, Saved and Notes are the reader's own work, and Last Read is the
@@ -122,11 +121,13 @@ fun BrowseSheet(
     val lastReadGate = remember(lastReadList) { SheetDragGate(lastReadList) }
     val savedGate = remember(savedList) { SheetDragGate(savedList) }
     val notesGate = remember(notesList) { SheetDragGate(notesList) }
-    // The picker the surah list raises: two steps, the surah and its ayah
-    // numbers, with the reader's own surah already chosen so a jump within
-    // it is one tap on a number. The numbering is the Quran's own, one past
-    // every ayah before, which is where a surah starts and how a grid number
-    // becomes a reference.
+    // The picker the Go to ayah chip raises: two steps, the surah and its
+    // ayah numbers, with the reader's own surah already chosen so a jump
+    // within it is one tap on a number. The door never takes the chips'
+    // chosen fill, so closing the picker leaves the reader on the tab they
+    // came from. The numbering is the Quran's own, one past every ayah
+    // before, which is where a surah starts and how a grid number becomes a
+    // reference.
     var picking by remember { mutableStateOf(false) }
     var choosingSurah by remember { mutableStateOf(false) }
     var pickSurah by remember { mutableIntStateOf(1) }
@@ -230,26 +231,23 @@ fun BrowseSheet(
                             onClick = { tab = entry },
                         )
                     }
+                    GoToAyahChip {
+                        pickSurah = currentSurah
+                        choosingSurah = false
+                        picking = true
+                    }
                 }
                 Spacer(Modifier.height(8.dp))
                 when (tab) {
-                    BrowseTab.Surahs -> Column(Modifier.fillMaxSize()) {
-                        GoToAyahRow {
-                            pickSurah = currentSurah
-                            choosingSurah = false
-                            picking = true
-                        }
-                        LazyColumn(
-                            state = surahsList,
-                            modifier = Modifier
-                                .weight(1f)
-                                .sheetDragGate(surahsGate)
-                                .testTag("browse-surahs"),
-                            contentPadding = PaddingValues(bottom = 28.dp),
-                        ) {
-                            items(surahs, key = { it.number }) { surah ->
-                                SurahRow(surah, surahNumberWidth) { onSurah(surah.number) }
-                            }
+                    BrowseTab.Surahs -> LazyColumn(
+                        state = surahsList,
+                        modifier = Modifier
+                            .sheetDragGate(surahsGate)
+                            .testTag("browse-surahs"),
+                        contentPadding = PaddingValues(bottom = 28.dp),
+                    ) {
+                        items(surahs, key = { it.number }) { surah ->
+                            SurahRow(surah, surahNumberWidth) { onSurah(surah.number) }
                         }
                     }
                     BrowseTab.Juz -> LazyColumn(
@@ -341,21 +339,26 @@ private fun <T> androidx.compose.foundation.lazy.LazyListScope.itemsIndexedCompa
 }
 
 /**
- * The action over the surah list: the way to any ayah without scrolling to
- * it. It wears the app's text button, because it is a word that acts, and it
- * belongs to the surah list it sits on rather than to the sheet's tabs.
+ * The door in the tab row: the way to any ayah without scrolling to it. It
+ * wears the chip shape the tabs wear, because it stands among them, but it
+ * is an action rather than a list, so it never takes the chosen fill and it
+ * answers as a button. The picker swaps in over the lists and the reader's
+ * own tab is waiting when it closes.
  */
 @Composable
-private fun GoToAyahRow(onClick: () -> Unit) {
-    Row(
+private fun GoToAyahChip(onClick: () -> Unit) {
+    Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 22.dp, end = 22.dp, top = 2.dp, bottom = 6.dp),
+            .clip(RoundedCornerShape(50))
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f))
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 8.dp)
+            .testTag("go-to-ayah"),
     ) {
-        TextButton(
-            label = stringResource(R.string.browse_go_to_ayah),
-            onClick = onClick,
-            modifier = Modifier.testTag("go-to-ayah"),
+        Text(
+            text = stringResource(R.string.browse_go_to_ayah),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -395,10 +398,11 @@ private fun GoToAyahPicker(
     }
 
     Column(Modifier.fillMaxSize()) {
+        // One name for the whole picker: the surah list that opens from the
+        // selector is obviously a list of surahs, and a heading that renamed
+        // the step would be a second name for the same door.
         PickerHeader(
-            title = stringResource(
-                if (choosingSurah) R.string.browse_choose_surah else R.string.browse_go_to_ayah,
-            ),
+            title = stringResource(R.string.browse_go_to_ayah),
             onBack = onBack,
         )
         if (choosingSurah) {

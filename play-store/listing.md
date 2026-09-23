@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 1.7 (versionCode 18)
+Version: 1.8 (versionCode 19)
 
 ## Listing
 
@@ -114,6 +114,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (1.8, 425 characters)
+
+Browse now puts Go to ayah beside the lists, one tap from any tab, opening on the surah and ayah you are in. Word by word reads as a gloss of the ayah above it, quieter and tighter, instead of looking like a second verse. In the study reading the actions bar ends with Tafsir and its own mark; from the Mushaf it stays More. Ayah references and quiet labels are easier to read in every theme. No ads, no trackers, no account.
 
 ## Release notes (1.7, 320 characters)
 

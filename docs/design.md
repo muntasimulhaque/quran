@@ -47,7 +47,11 @@ words. Everything else is a guest.
 * A **tap** anywhere belongs to the reading: it brings the chrome, or puts
   it away. No tap ever opens a panel by surprise.
 * A **long press** on an ayah asks about that ayah: it washes the ayah, hums
-  once, and shows one row of actions (save, play, copy, share, more).
+  once, and shows one row of actions (play, note, save, share, and the
+  deeper door). The deeper door names what is actually behind it: the card,
+  which from the Mushaf holds the word meanings, the translation, and the
+  tafsirs, so it reads **More** with its dots; from the study reading the
+  card holds only the tafsirs, so it reads **Tafsir** with the scroll mark.
 * While a recitation plays, the current word carries a soft lapis wash and
   the current ayah a fainter one. Nothing else moves.
 
@@ -79,8 +83,17 @@ gives, and readers read it as one.
   translation (Literata). Footnote markers are quiet superscripts, and a tap
   on a marker opens that note in its own sheet, so the reading is never
   interrupted by a wall of notes it did not ask for.
+* The word by word aid sits under the ayah as its gloss, not as a second
+  verse: the ayah keeps the ink of the reading, the aid's Arabic steps one
+  tone down, and the whole aid takes the theme's secondary tone for its
+  meanings. The aid never replaces the ayah, because a verse is read as a
+  line and recited as one, and the playing word's wash needs the line's own
+  layout to sit on. The surface that shows meanings without the verse is
+  the ayah card, which carries no Arabic from the Mushaf.
 * The ayah's reference sits under its translation in small muted type, the
-  way a printed study Quran numbers verses.
+  way a printed study Quran numbers verses. The theme's own secondary tone,
+  never a quiet alpha: a text tone that floats on paper sinks under 4.5:1 on
+  the sepia ground.
 * Tapping any ayah opens its card. The card is the only place features live.
 * While a recitation plays, the playing ayah takes a soft lapis wash, and
   the view follows it only when the reader is not scrolling.
@@ -141,11 +154,13 @@ Searched, in one pass:
   the place and the moment it was saved.
 * **Notes**: the ayahs a note was written on, newest note first, each row
   opening the note over its ayah.
-* **Go to ayah**: over the surah list, a two-step picker for any ayah in the
-  Quran: the surah first (the reader's own already chosen), then its ayah
-  numbers in a grid, with the ayah they are on marked and the grid landed on
-  it. Tapping a number opens that ayah and closes the sheet, so a long surah
-  never has to be scrolled to reach a place in it.
+* **Go to ayah**: a door in the tab row beside the lists, opening a two-step
+  picker for any ayah in the Quran: the surah first (the reader's own
+  already chosen), then its ayah numbers in a grid, with the ayah they are
+  on marked and the grid landed on it. Tapping a number opens that ayah and
+  closes the sheet, so a long surah never has to be scrolled to reach a
+  place in it. The door never takes the chips' chosen fill: the picker swaps
+  in over the lists and the reader's own tab is waiting when it closes.
 
 ## 7. Settings
 

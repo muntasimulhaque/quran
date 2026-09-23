@@ -28,7 +28,7 @@ import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 
 /**
- * The picker over the surah list: Browse, Go to ayah, then a number. The
+ * The Go to ayah picker: Browse, the chip in the tab row, then a number. The
  * reader's own surah is already chosen so a jump within it is one tap, and
  * another surah is one more tap through the same list Browse draws. The test
  * follows the whole path and lands on 2:12, which is a place in a long surah
@@ -62,6 +62,8 @@ class GoToAyahTest {
     @Test
     fun thePickerJumpsToAnyAyahOfAnySurah() {
         openBrowse()
+        // The chip stands in the tab row: one tap from anywhere in Browse, not
+        // a row over the surah list the reader has to be on first.
         compose.onNodeWithTag("go-to-ayah").performClick()
         waitForTag("go-to-ayahs")
 

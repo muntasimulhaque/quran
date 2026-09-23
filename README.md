@@ -4,16 +4,19 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 1.7 (versionCode 18) is submitted to Google Play for review. It
-adds Go to ayah, a picker over the surah list that
-opens any ayah without scrolling; reference searches by name (baqara 255
-beside 2:255); the moment a save was made under every Saved row; and one
-name, Word meanings, for the word-meaning aid everywhere. All five owner
-content gates are green on the restored sources. The version name follows
-the runbook: 1.0, then 1.1 through 1.7. The bundle carries only the core
-pack, with everything else added from the project's own Releases when a
-reader asks for it. The listing, icon, feature graphic, and screenshots
-per form factor are in [`play-store/`](play-store/), refreshed from CI.
+**Status:** 1.8 (versionCode 19) is in this push. It comes from the owner's
+read of 1.7: Go to ayah moved into Browse's tab row, one tap from any tab;
+the word by word aid reads as a gloss of the ayah above it; the study
+reading's deep door is named Tafsir with its own mark (More from the
+Mushaf, where the card holds more); and the quiet labels and references
+take each theme's own secondary tone. 1.7, submitted for review before it,
+added Go to ayah, references by surah name, the moment under every Saved
+row, and one name for the word meanings. All five owner content gates are
+green on the restored sources. The version name follows the runbook: 1.0,
+then 1.1 through 1.8. The bundle carries only the core pack, with
+everything else added from the project's own Releases when a reader asks
+for it. The listing, icon, feature graphic, and screenshots per form factor
+are in [`play-store/`](play-store/), refreshed from CI.
 
 ## What it does
 
@@ -37,8 +40,8 @@ per form factor are in [`play-store/`](play-store/), refreshed from CI.
 - **Notes you can find again.** Write a note on any ayah from the pill a long
   press raises. Browse's Notes tab lists every ayah you wrote one on, newest
   first, and a tap opens the note over its ayah.
-- **Any ayah, without scrolling.** Browse's surah list carries a Go to ayah
-  picker: your own surah is already chosen, another is one tap through the
+- **Any ayah, without scrolling.** Browse carries a Go to ayah door in its
+  tab row: your own surah is already chosen, another is one tap through the
   same list, and a tap on a number opens that ayah.
 - **Two readings, one door.** The Mushaf and the study view are one door in
   the top bar: the icon shows the reading the reader is not in, and a tap

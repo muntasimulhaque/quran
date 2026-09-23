@@ -762,6 +762,16 @@ implement it and update this list.
   save moment, so `saved.db` has a `note_at` column and `DATABASE_VERSION` is
   2. A schema change means the migration and its test in the same session, the
   way the saved-ayah database has always worked.
+- A quiet alpha is not a legibility strategy. `onBackground.copy(alpha = 0.45f)`
+  measured 2.44:1 on the sepia ground and 2.82:1 on paper: the alpha looked
+  muted on the screen the author was looking at and failed the design
+  document's own 4.5:1 rule for muted text on two of the four themes. A tone
+  with meaning takes the theme's own secondary token (`onSurfaceVariant`),
+  which is defined per theme and measures 6.1:1 and up on all four grounds.
+  D-084 moved the study reading's three quiet tones and left two named:
+  the card's tafsir range (0.7 alpha, 3.3:1) and its note hint (0.5, 2.2:1).
+  Measure before choosing a tone, and say "alpha" only when the alpha is
+  against a ground that was actually checked.
 
 ### Housekeeping at the end of the session
 
@@ -788,47 +798,57 @@ fetching them again; the space is worth less than the time.
 
 ## Next session: the remaining queue, in order
 
-0. **The store set is current, and the capture can be trusted.** 1.6
-   installed the set from run 35823592289: every frame compared with its
-   artifact by `cmp`, and every changed frame read before it shipped (the
-   version text, the wider number column, the cursor's blink, subpixel
-   antialiasing). The next session that changes a pixel captures again with
-   the procedure in "Store screenshots".
+0. **The store set is stale after D-084, and the next capture refreshes
+   it.** Frame 07 (Browse) gains the Go to ayah chip in its tab row, and
+   03-study changes with the aid's tone and spacing; 08 keeps its Word
+   meanings door. Capture with the procedure in "Store screenshots" before
+   the next hand-off, never by hand.
 
-1. **Measure on real hardware.** The numbers in D-037 come from a software
+1. **The quiet alphas on the card.** D-084 measured two more tones under
+   the design document's own 4.5:1 rule on the sepia ground: the tafsir
+   range at 0.7 alpha (3.3:1) and the note hint at 0.5 (2.2:1), both on
+   `surface`. The study reading's own quiet tones were moved to
+   `onSurfaceVariant` in that pass; the card's are named as the next one's
+   work.
+2. **Accessibility for the study pill.** The Mushaf gives every ayah a
+   semantics node whose action raises the pill; the study block answers a
+   real long press only. Expose the same custom action on the study row,
+   the way the Mushaf does, so a TalkBack reader can act on an ayah in both
+   readings.
+3. **Measure on real hardware.** The numbers in D-037 come from a software
    rendered emulator, the slowest Android this app will run on. A
    Macrobenchmark module for startup and page turns, run on a phone, is the
    only way to hold the budget the design document sets (under 300 ms to the
    first painted page on a warm start) and to prove the baseline profile is
    pulling its weight.
-2. **The second language.** The strings are ready for one; the reader is not.
+4. **The second language.** The strings are ready for one; the reader is not.
    A translation pass needs a translator for the interface, a `values-xx`
    folder, and the same care the Arabic content gets: a real review, not a
    machine.
-3. **Content backlog.** More translations and tafsirs as packs (each one is a
+5. **Content backlog.** More translations and tafsirs as packs (each one is a
    dataset entry in `PackSources`, a pack definition, and a Release), and a
    second mushaf script if a font and layout are chosen.
-4. **Instant launch, second step.** A pre-rendered bitmap of the *next* page
+6. **Instant launch, second step.** A pre-rendered bitmap of the *next* page
    in the direction the reader was reading, so the first swipe after a launch
    is also a texture draw.
-5. **Trust work, second step.** The owner removed export and import in the
+7. **Trust work, second step.** The owner removed export and import in the
    tenth session (D-051), so this item is gone unless they ask for a different
    way to carry saved work. If they do, the shape to build is a merge preview
    and a way to move one note rather than the whole document, never the same
    JSON door again.
-6. **Robustness, second step.** A pack that fails verification at download
+8. **Robustness, second step.** A pack that fails verification at download
    time should say which check failed (size, hash, or unpack) rather than one
    line for all three, and the content self check should offer the removal it
    recommends.
-7. **A khatm plan, if the owner wants one.** A khatm is a commitment, not a
+9. **A khatm plan, if the owner wants one.** A khatm is a commitment, not a
    guess: an explicit plan (a daily portion, a finish date) is the only honest
    way to keep a linear reading place apart from casual lookups, and it builds
    on the portion the glossary already describes. The eighth session shipped no
    heuristic for it (D-045).
-8. **A recording of the tour's study frames.** The screenshot set covers the
-   surface; a short screen recording of a page turn, a mode switch, and the
-   ayah card would catch the motion a still cannot, and the pipeline already
-   has an emulator to do it on.
+10. **A recording of the tour's study frames.** The screenshot set covers the
+    surface; a short screen recording of a page turn, a mode switch, and the
+    ayah card would catch the motion a still cannot, and the pipeline already
+    has an emulator to do it on.
 
 ## Traps worth remembering
 
@@ -847,6 +867,35 @@ fetching them again; the space is worth less than the time.
   to right on the screen; `MushafTurnTest` now pins the direction on every
   form factor.
 
+
+## Where the project stands (end of the twenty-sixth session)
+
+**1.8 (versionCode 19) is in the release push.** The owner answered five UI
+questions about the 1.7 surfaces, and the answers are in the tree (D-084).
+Go to ayah moved from a row over
+the surah list into a chip in Browse's tab row, one tap from any tab, a
+door and not a state: the picker swaps in and the reader's own tab waits
+when it closes. The word by word aid stays under the ayah as its gloss (a
+verse is read and recited as one line, and the playing word's wash needs
+the line's layout), with its Arabic stepped one tone down, its meanings on
+the theme's secondary tone, and `Space.Line` above it instead of
+`Space.Block`. The ayah reference stays at the foot of its block, where it
+closes what the reader just read, and it now takes `onSurfaceVariant`
+(instead of 0.45 alpha, which measured 2.44:1 on sepia). The study pill's
+deep door reads **Tafsir** with a new scroll glyph, because in the study
+reading the card holds only tafsirs; from the Mushaf it stays **More**,
+where the card holds the meanings, the translation, and the tafsirs. The
+long-press pill itself stays, with its reasoning written in D-084. A new
+`AyahActionsTest` pins the two names.
+
+**The suite.** JVM, lint, and `assembleDebug` green. All five owner gates
+ran green on the restored sources this time: `verify` 29 datasets, `audit`
+0 unexplained differences, `fonts` coverage passed, `checkdb` and `search`.
+The phone emulator ran the full app instrumented suite 16/16 (the new
+`AyahActionsTest` and the screenshot tour among them) and the data suite
+31/31. The store set is stale and the capture is owed in this push's
+screenshots workflow: 07 gains the Go to ayah chip, 03-study changes with
+the aid's tone and spacing, 06-settings reads Version 1.8.
 
 ## Where the project stands (end of the twenty-fifth session)
 

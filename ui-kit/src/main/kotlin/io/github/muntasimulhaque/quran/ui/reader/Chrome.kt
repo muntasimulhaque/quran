@@ -53,6 +53,7 @@ enum class Icon {
     StudyPage,
     Share,
     More,
+    Tafsir,
     Chevron,
     Note,
 }
@@ -226,6 +227,37 @@ fun IconGlyph(
                 for (x in listOf(0.28f, 0.5f, 0.72f)) {
                     drawCircle(tint, radius = w * 0.07f, center = Offset(w * x, h * 0.5f))
                 }
+            }
+            // A tafsir: a scroll, the commentary a reader unrolls beside the
+            // page. It is deliberately not a book: the Mushaf and the study
+            // reading are already two book-like marks, and a third would
+            // read as another mode. A scroll is one sheet between two rolls,
+            // with two lines of explanation on it, drawn to the weight of
+            // the rest of the set.
+            Icon.Tafsir -> {
+                val stroke = w * 0.07f
+                val rollRadius = CornerRadius(h * 0.07f)
+                // The two rolled ends, above and below the sheet.
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(w * 0.2f, h * 0.15f),
+                    size = Size(w * 0.6f, h * 0.14f),
+                    cornerRadius = rollRadius,
+                    style = Stroke(width = stroke),
+                )
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(w * 0.2f, h * 0.71f),
+                    size = Size(w * 0.6f, h * 0.14f),
+                    cornerRadius = rollRadius,
+                    style = Stroke(width = stroke),
+                )
+                // The sheet the rolls hold, its edges inside them.
+                drawLine(tint, Offset(w * 0.29f, h * 0.29f), Offset(w * 0.29f, h * 0.71f), stroke)
+                drawLine(tint, Offset(w * 0.71f, h * 0.29f), Offset(w * 0.71f, h * 0.71f), stroke)
+                // Two lines of commentary on the sheet.
+                drawLine(tint, Offset(w * 0.4f, h * 0.43f), Offset(w * 0.6f, h * 0.43f), stroke)
+                drawLine(tint, Offset(w * 0.4f, h * 0.57f), Offset(w * 0.6f, h * 0.57f), stroke)
             }
             Icon.Chevron -> {
                 drawLine(tint, Offset(w * 0.28f, h * 0.4f), Offset(w * 0.5f, h * 0.62f), w * 0.085f)

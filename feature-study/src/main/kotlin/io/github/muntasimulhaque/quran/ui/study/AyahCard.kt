@@ -213,6 +213,10 @@ fun AyahCard(
                             hafs = hafs,
                             settings = settings,
                             modifier = Modifier.padding(horizontal = 22.dp, vertical = Space.Block),
+                            // The card opened from the Mushaf carries no
+                            // ayah of its own, so the aid is the only
+                            // Arabic here and keeps the reading ink.
+                            gloss = false,
                         )
                     }
                 } else {

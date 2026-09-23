@@ -340,6 +340,7 @@ fun ReaderScreen(
                 playback = playback,
                 saved = saved,
                 selected = selected,
+                fromMushaf = settings.mode == ReadingMode.Mushaf,
                 onPlay = { ayah ->
                     onPlaybackPermission()
                     viewModel.playAyah(ayah.number)
@@ -696,6 +697,7 @@ private fun BottomStack(
     playback: PlaybackUiState,
     saved: List<SavedAyah>,
     selected: Ayah?,
+    fromMushaf: Boolean,
     onPlay: (Ayah) -> Unit,
     onDeselect: () -> Unit,
     onNote: (Ayah) -> Unit,
@@ -761,6 +763,12 @@ private fun BottomStack(
             AyahActions(
                 isSaved = saved.any { it.ayahNumber == ayah.number && it.saved },
                 hasNote = saved.any { it.ayahNumber == ayah.number && !it.note.isNullOrBlank() },
+                // The deeper door names what is actually behind it: from the
+                // study reading the card is only the tafsir doors, so the
+                // action says Tafsir; from the Mushaf the card is the whole
+                // study surface (the meanings, the translation, the tafsirs),
+                // so the name stays More and the glyph promises everything.
+                fromMushaf = fromMushaf,
                 onSave = {
                     viewModel.toggleSaved(ayah)
                     onTouch()
@@ -827,6 +835,7 @@ private fun surahName(viewModel: ReaderViewModel, ayah: Int): String =
 private fun AyahActions(
     isSaved: Boolean,
     hasNote: Boolean,
+    fromMushaf: Boolean,
     onSave: () -> Unit,
     onPlay: () -> Unit,
     onNote: () -> Unit,
@@ -856,7 +865,13 @@ private fun AyahActions(
             active = isSaved,
         )
         TextAction(stringResource(R.string.action_share), Icon.Share, onShare)
-        TextAction(stringResource(R.string.action_more), Icon.More, onMore)
+        TextAction(
+            label = stringResource(
+                if (fromMushaf) R.string.action_more else R.string.action_tafsir,
+            ),
+            icon = if (fromMushaf) Icon.More else Icon.Tafsir,
+            onClick = onMore,
+        )
     }
 }
 

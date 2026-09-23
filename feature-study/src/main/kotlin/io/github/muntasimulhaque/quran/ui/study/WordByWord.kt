@@ -32,6 +32,17 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * the aid is a small copy of the reading rather than a footnote under it, and
  * both sizes scale with the one choice the reader made for word meanings.
  *
+ * The meaning takes the theme's secondary tone rather than an alpha that
+ * just looks quiet: that tone is what each theme defines for secondary
+ * text, so the meaning stays readable on paper and on sepia alike.
+ *
+ * [gloss] says what the aid is standing on. Under the study reading's ayah
+ * the tiles repeat words the verse above already shows, so the Arabic steps
+ * one tone down and the line stays the verse. In the ayah card, opened from
+ * the Mushaf, there is no line above: the aid is the only Arabic there, so
+ * it keeps the reading's own ink. The step is small either way, so the word
+ * always reads as the Quran's own.
+ *
  * Arabic reads right to left, so the words wrap that way too.
  */
 @Composable
@@ -40,6 +51,7 @@ internal fun WordByWord(
     hafs: FontFamily,
     settings: AppSettings,
     modifier: Modifier = Modifier,
+    gloss: Boolean = true,
 ) {
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         FlowRow(
@@ -55,7 +67,17 @@ internal fun WordByWord(
                             fontFamily = hafs,
                             fontSize = settings.wordsSp.sp,
                             lineHeight = (settings.wordsSp * 1.8f).sp,
-                            color = MaterialTheme.colorScheme.onBackground,
+                            // The tiles are the same words the ayah above
+                            // already shows, so a gloss steps the Arabic one
+                            // tone down from the verse's own ink: the line
+                            // stays the verse, the tiles read as its gloss.
+                            // Still well above the reading contrast on every
+                            // theme. Standalone, the aid is the reading.
+                            color = if (gloss) {
+                                MaterialTheme.colorScheme.onBackground.copy(alpha = 0.78f)
+                            } else {
+                                MaterialTheme.colorScheme.onBackground
+                            },
                         ),
                         textAlign = TextAlign.Center,
                     )
@@ -65,7 +87,7 @@ internal fun WordByWord(
                             fontSize = settings.wordsMeaningSp.sp,
                             lineHeight = (settings.wordsMeaningSp * 1.45f).sp,
                         ),
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.62f),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(top = Space.Tight),
                     )

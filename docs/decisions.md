@@ -3345,3 +3345,94 @@ screenshots are handed over together, before the submission.
 the hand-off copy of the bundle was deleted the same session, as the
 runbook requires: the artifact stays in the build run and in Play, never
 sitting in the repository.
+
+## D-084: Go to ayah is a tab-row door, and every door names what is behind it
+
+Date: the twenty-sixth session. The owner read the 1.7 surfaces and asked
+five questions about them: the Go to ayah picker's depth, whether the word
+by word aid should replace the ayah it glosses, whether an ayah's reference
+belongs at the top or the foot of its block, whether the study pill's More
+button is an extra step with one destination, and whether per-ayah icons or
+a kebab would beat the long press pill. The answers, and what the tree
+carries now.
+
+**Go to ayah moved into the tab row.** It was a quiet text button over the
+surah list, so getting to the picker meant Browse, then the row, then the
+surah selector only if the reader was not already where they wanted to be.
+The door is now a chip beside the five list chips, one tap from any tab.
+It is a door, not a state: it never takes the chosen fill, and closing the
+picker returns the reader to the tab they came from, the way an action
+stands among tabs without becoming one. The picker itself is unchanged:
+the reader's own surah already chosen, the grid opening on their ayah and
+marking it, and one tap on a number to land. The picker's header reads one
+name for the whole picker (`browse_go_to_ayah`); `browse_choose_surah` is
+gone, because the 114-row list that opens from the selector is obviously a
+list of surahs and a second name for the step was a second name for the
+same door.
+
+**The word by word aid stays under the ayah, as its gloss.** The owner's
+report was real: with the switch on, the ayah appears twice, once as the
+line and once as the tiles. But the two are not the same text. The line is
+the verse read as one: shaped words, joined cursives, the unit the reader
+memorizes and recites. The tiles are the word list: each word centered over
+its meaning, which is a study view of the words and not a recitable verse.
+Removing the line would also take the playing word's wash with it, because
+that wash is drawn from the line's own `TextLayoutResult`; the tiles have
+their own layout and are columns, which is the shape the wash was drawn not
+to be. So the aid stays, and reads as the annotation it is: the tiles'
+Arabic steps one tone down from the verse's ink, the meanings take the
+theme's own secondary tone instead of a quiet alpha, and the break above
+the aid is `Space.Line` rather than `Space.Block`, so the word list groups
+with the line it glosses rather than floating as a second verse. The one
+surface where the aid has no line above it is the ayah card opened from the
+Mushaf, and there the component now keeps the reading ink (`gloss = false`),
+because there the aid *is* the Arabic. If the owner wants a meanings-only
+reading, the honest place for it is the card, which already shows no ayah
+from the Mushaf.
+
+**The reference stays at the foot of the block.** It is a footnote to the
+verse, not a heading: the reader reads the Arabic, then the translation,
+then finds the number to know where they are. At the top it would be the
+first thing after the Arabic and would push the translation down; at the
+foot it closes the block and always sits where the reader is, however many
+lines the ayah took. This is also what print does, and what the card does
+the other way around on purpose: the card names the ayah first because the
+card is a mode switch, not a reading. The same pass found the reference at
+0.45 alpha at 2.44:1 on the sepia ground, under the design document's own
+4.5:1 rule for muted text, so the reference, the surah metadata line, and
+the surah-complete line now take `onSurfaceVariant`, the theme's own
+secondary tone, and I recomputed their contrast on every ground before
+choosing it: 6.2:1 on paper, 6.1:1 on sepia, 8.3:1 on night, each well past
+the 4.5:1 rule. The card's own quiet labels (the tafsir range at 0.7 alpha
+and the note hint at 0.5) came out below the same rule when measured and
+are left named here, not quietly blessed: they are the next pass's work,
+because this session's scope was the study reading.
+
+**The deeper door names what is actually behind it.** In the study reading
+the ayah card holds only the tafsir doors, so the pill's last action reads
+**Tafsir** with a new `Icon.Tafsir`, a scroll drawn in the same hand as the
+rest of the set and deliberately not book-like, because the Mushaf and the
+study reading are already two book marks. In the Mushaf the card holds the
+word meanings, the translation, and the tafsirs together, so the action
+stays **More** with its dots: a tafsir glyph there would promise a tafsir
+and land on four blocks. Same slot, two honest names, chosen by the reading
+the pill was raised over.
+
+**The pill stays.** Per-ayah icons would draw 6236 toolbars and would be
+impossible in the Mushaf, where the page is a picture of text; a kebab
+would promise secondary actions and teach a second way to raise one thing.
+The long press stays the one gesture, with its shown-once hint. The one
+weakness, discoverability, is answered where the app already answers it:
+the hint on the first read, and in the Mushaf by a semantics layer that
+gives every ayah a node whose action raises the same row. The study block
+is one node that answers a real long press only; giving it the same
+accessibility action is a known gap, named here rather than implied fixed.
+
+**Verification.** The JVM suite, lint, and `assembleDebug` are green after
+the change. No emulator was available this session, so the instrumented
+claims wait for CI: `GoToAyahTest` now taps the chip in the tab row (its
+tag moved with the door), and the tour still reaches the card from the
+Mushaf, where the action still reads More. The store set is stale again:
+frame 07 gains the chip in its tab row, and 03-study changes with the aid's
+tone and spacing, so the next capture refreshes both, from the workflow's
+artifacts and never by hand.
