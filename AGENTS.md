@@ -850,8 +850,8 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the twenty-fifth session)
 
-**1.7 (versionCode 18) is signed and handed over for the Google Play
-submission.** It carries four changes from the owner's session: Browse
+**1.7 (versionCode 18) is submitted to Google Play for review.** It
+carries four changes from the owner's session: Browse
 gained a Go to ayah picker over the surah list, with the reader's own surah
 already chosen and their ayah marked; Search reads references by surah name
 ("baqara 255") beside "2:255", and the empty-search prompt names both;
@@ -881,7 +881,8 @@ all three form factors, every frame compared with its artifact by `cmp` and
 every changed frame read before it shipped (the Go to ayah row, the Word
 meanings door, Version 1.7; the Mushaf and search differences are the
 subpixel antialiasing and the cursor's blink). The bundle and the
-screenshots are handed over together, before the submission.
+screenshots were handed over together, before the submission. The hand-off
+copy of the bundle was deleted once the submission was confirmed.
 
 ## Where the project stands (end of the twenty-fourth session)
 

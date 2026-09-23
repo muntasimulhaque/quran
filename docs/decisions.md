@@ -3340,3 +3340,8 @@ The bundle is `quran-1.7-vc18.aab`, 147,801,933 bytes, SHA-256
 `be0174e036add42fbf84c62f1914da228a600da801ea18287e2092a7458cd195`,
 `jar verified`, the certificate the shared upload key. The bundle and the
 screenshots are handed over together, before the submission.
+
+**The hand-off is closed.** The owner submitted 1.7 to Play for review, so
+the hand-off copy of the bundle was deleted the same session, as the
+runbook requires: the artifact stays in the build run and in Play, never
+sitting in the repository.

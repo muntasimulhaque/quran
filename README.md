@@ -4,8 +4,8 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 1.7 (versionCode 18) is signed and handed over for the Google
-Play submission. It adds Go to ayah, a picker over the surah list that
+**Status:** 1.7 (versionCode 18) is submitted to Google Play for review. It
+adds Go to ayah, a picker over the surah list that
 opens any ayah without scrolling; reference searches by name (baqara 255
 beside 2:255); the moment a save was made under every Saved row; and one
 name, Word meanings, for the word-meaning aid everywhere. All five owner
