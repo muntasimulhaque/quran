@@ -4,8 +4,8 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 1.6 (versionCode 17) is signed and handed over for the Google
-Play submission. It answers the reader's twelfth report: About this surah
+**Status:** 1.6 (versionCode 17) is submitted to Google Play for review. It
+answers the reader's twelfth report: About this surah
 wears the same wash as a long-pressed ayah, Save and Note are separate
 marks, the Saved list names a place without repeating its text, Browse's
 surah numbers are whole and speak the interface's own digits, and Forget

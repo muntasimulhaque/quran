@@ -848,9 +848,8 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the twenty-fourth session)
 
-**1.6 (versionCode 17) is signed and handed over for the Play submission.**
-It answers the reader's twelfth report (D-080), eight things from the
-owner: About this surah wears the same lapis wash a chosen ayah wears;
+**1.6 (versionCode 17) is submitted to Google Play for review.** It answers
+the reader's twelfth report (D-080), eight things from the owner: About this surah wears the same lapis wash a chosen ayah wears;
 QUL was checked and carries no Bangla surah
 introduction, so that item stays content backlog; Browse's surah numbers
 keep their last digit and follow the interface's digits; Save and Note are
@@ -866,7 +865,8 @@ with the shared upload certificate, and the screenshots from run 35823592289
 with every frame compared by `cmp`. The three owner gates (`verify`,
 `audit`, `fonts`) are owed this release: the manual exports and the verify
 extractions are gone from the machine, and the owner chose to ship with them
-named, the way 1.4 did (D-081).
+named, the way 1.4 did (D-081). The hand-off copy of the bundle was deleted
+once the submission was confirmed.
 
 ## Where the project stands (end of the twenty-third session)
 
