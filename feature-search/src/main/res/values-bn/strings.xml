@@ -2,7 +2,7 @@
 <resources>
     <string name="search_hint">কুরআনে অনুসন্ধান করুন</string>
     <string name="search_close">বন্ধ</string>
-    <string name="search_status_prompt">আরবি লেখা, অনুবাদ, তাফসীর, শব্দের অর্থ, সূরার নাম এবং 2:255-এর মতো রেফারেন্স।</string>
+    <string name="search_status_prompt">আরবি লেখা, অনুবাদ, তাফসীর, শব্দের অর্থ, সূরার নাম এবং 2:255 বা baqara 255-এর মতো রেফারেন্স।</string>
     <string name="search_status_searching">খোঁজা হচ্ছে…</string>
     <string name="search_status_no_matches">কিছু পাওয়া যায়নি।</string>
     <string name="search_status_no_sources">অনুসন্ধান করতে অন্তত একটি ফিল্টার চালু করুন।</string>
@@ -21,7 +21,7 @@
     <string name="search_filter_surahs">সূরার নাম</string>
     <string name="search_filter_references">রেফারেন্স</string>
     <string name="search_filter_translations">অনুবাদ</string>
-    <string name="search_filter_words">শব্দে শব্দে অনুবাদ</string>
+    <string name="search_filter_words">শব্দের অর্থ</string>
     <string name="search_filter_tafsirs">তাফসীর</string>
 
     <plurals name="search_matches">

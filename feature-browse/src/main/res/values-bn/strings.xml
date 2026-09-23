@@ -5,6 +5,10 @@
     <string name="browse_tab_last_read">সর্বশেষ পঠিত</string>
     <string name="browse_tab_saved">সংরক্ষিত</string>
     <string name="browse_tab_notes">নোট</string>
+    <string name="browse_go_to_ayah">আয়াতে যান</string>
+    <string name="browse_choose_surah">সূরা বেছে নিন</string>
+    <string name="browse_back">ফিরে যান</string>
+    <string name="browse_ayah_current">বর্তমান</string>
 
     <string name="place_makkah">মক্কা</string>
     <string name="place_madinah">মদিনা</string>
@@ -37,6 +41,7 @@
     <string name="notes_empty_title">এখনও কোনো নোট নেই</string>
     <string name="notes_empty_body">পড়ার সময় যেকোনো আয়াতে চাপ দিয়ে ধরে রাখুন, তারপর নোটে ট্যাপ করুন। যে আয়াতগুলোতে নোট লিখেছেন সেগুলো এখানে রাখা হয়, নতুনটি আগে।</string>
     <string name="notes_detail">নোট লেখা %1$s</string>
+    <string name="saved_detail">সংরক্ষণ করা %1$s</string>
     <string name="saved_reference_fallback">আয়াত %1$d</string>
     <string name="action_remove">মুছুন</string>
     <string name="action_forget">মুছুন</string>

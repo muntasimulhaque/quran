@@ -558,10 +558,10 @@ class ContentDatabase private constructor(
     /**
      * One pass over everything the reader enabled: the Arabic text, the
      * translation packs, the tafsir packs, the word meanings, the surah
-     * names, and references typed as numbers. Every source is a prepared
-     * statement against an index column shaped by the same normalizer the
-     * query went through, so results are exact and no index has to be built
-     * at search time.
+     * names, and references typed as numbers or as a name and an ayah
+     * ("2:255", "baqara 255"). Every source is a prepared statement against
+     * an index column shaped by the same normalizer the query went through,
+     * so results are exact and no index has to be built at search time.
      */
     fun search(request: SearchRequest): SearchResults {
         val query = request.query
@@ -570,12 +570,9 @@ class ContentDatabase private constructor(
         val leading = ArrayList<SearchHit>(9)
         val counts = intArrayOf(0, 0, 0, 0, 0) // arabic, translation, tafsir, words, surahs
 
-        val reference = if (sources.references) Search.reference(query.input) else null
-        if (reference != null) {
-            val number = referenceAyahNumber(reference)
-            if (number != null) {
-                ayahWithPage(number)?.let { leading += SearchHit.ReferenceHit(it.first, it.second) }
-            }
+        val referenceNumber = if (sources.references) referencedAyahNumber(query.input) else null
+        if (referenceNumber != null) {
+            ayahWithPage(referenceNumber)?.let { leading += SearchHit.ReferenceHit(it.first, it.second) }
         }
 
         if (sources.surahs) {
@@ -734,6 +731,52 @@ class ContentDatabase private constructor(
         val surah = surahCache[reference.surah] ?: return null
         if (ayah > surah.versesCount) return null
         return first + ayah - 1
+    }
+
+    /**
+     * The ayah a typed reference points at, whether the surah was given as a
+     * number or as a name: "2:255", "2 255", "baqara 255", "al kahf 10".
+     * A named surah that matches nothing, or an ayah past the surah's end,
+     * is not a reference: the query stays whatever else it was searched as.
+     */
+    private fun referencedAyahNumber(input: String): Int? {
+        Search.reference(input)?.let { return referenceAyahNumber(it) }
+        val named = Search.nameReference(input) ?: return null
+        val surah = surahByName(named.name) ?: return null
+        return referenceAyahNumber(Search.Reference(surah, named.ayah))
+    }
+
+    /**
+     * The surah a reader named, for a reference typed in words. The match
+     * prefers a name over a longer name that merely begins with it ("nas"
+     * is An-Nas, not An-Nasr), and the shortest of those when several
+     * remain; ties fall to the earlier surah. The names and their articles
+     * are the ones the reader sees, in all three scripts the content
+     * carries.
+     */
+    private fun surahByName(name: String): Int? {
+        val key = Search.nameKey(name)
+        if (key.isEmpty()) return null
+        var bestScore = Int.MAX_VALUE
+        var bestSurah: Int? = null
+        for (number in surahCache.keys.sorted()) {
+            val forms = surahNameKeys[number] ?: continue
+            val score = when {
+                key in forms -> 0
+                else -> {
+                    val shortest = forms.asSequence()
+                        .filter { it.startsWith(key) }
+                        .minOfOrNull { it.length - key.length }
+                        ?: continue
+                    shortest + 1
+                }
+            }
+            if (score < bestScore) {
+                bestScore = score
+                bestSurah = number
+            }
+        }
+        return bestSurah
     }
 
     private fun firstAyahOfPassage(surah: Int, ayah: Int): Int? {
@@ -918,6 +961,17 @@ class ContentDatabase private constructor(
 
     /** The 114 surahs, read once: search resolves passages against them. */
     private val surahCache: Map<Int, Surah> by lazy { surahs().associateBy { it.number } }
+
+    /** Every key each surah's name may be typed by, built once with the names. */
+    private val surahNameKeys: Map<Int, Set<String>> by lazy {
+        surahCache.values.associate { surah ->
+            surah.number to buildSet {
+                addAll(Search.surahNameForms(surah.nameSimple))
+                addAll(Search.surahNameForms(surah.nameLatin))
+                addAll(Search.surahNameForms(surah.nameArabic))
+            }
+        }
+    }
 
     private val firstAyahCache: Map<Int, Int> by lazy {
         surahCache.keys.associateWith { firstAyahOfSurah(it) }

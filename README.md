@@ -28,7 +28,7 @@ are in [`play-store/`](play-store/), refreshed from CI.
   already showing the Book instead of a splash.
 - **Study mode.** One surah at a time, scrolls continuously to the end of the
   surah and offers the next. Arabic, then the translation, then footnotes
-  behind their markers. An optional word by word aid puts each word's meaning
+  behind their markers. An optional switch shows each word with its meaning
   beneath it, in the language of the translation above it.
 - **A reading place you can go back to.** The app opens on the ayah you left.
   Browse keeps the last twenty places you read, newest first, each with the
@@ -37,6 +37,9 @@ are in [`play-store/`](play-store/), refreshed from CI.
 - **Notes you can find again.** Write a note on any ayah from the pill a long
   press raises. Browse's Notes tab lists every ayah you wrote one on, newest
   first, and a tap opens the note over its ayah.
+- **Any ayah, without scrolling.** Browse's surah list carries a Go to ayah
+  picker: your own surah is already chosen, another is one tap through the
+  same list, and a tap on a number opens that ayah.
 - **Two readings, one door.** The Mushaf and the study view are one door in
   the top bar: the icon shows the reading the reader is not in, and a tap
   takes them there. There is no bottom bar: the index, search, saved ayahs,
@@ -46,13 +49,13 @@ are in [`play-store/`](play-store/), refreshed from CI.
   each named in its own script, and the choice sets the interface, the
   translation, the tafsir, and the word meanings together. It can be changed
   at any time from Settings, and the whole app follows without a restart.
-- **The ayah card.** Save, note, share, play from this ayah, word by word, and
-  every tafsir you have installed. It offers to add what it does not have yet
-  rather than showing an empty panel.
+- **The ayah card.** Save, note, share, play from this ayah, the word
+  meanings, and every tafsir you have installed. It offers to add what it
+  does not have yet rather than showing an empty panel.
 - **Search.** Arabic text, every enabled translation and tafsir, word
-  meanings, surah names, and references like `2:255`, with a filter row under
-  the field for narrowing the sources when a query returns too much. Results
-  are exact and instant, even over a forty megabyte tafsir.
+  meanings, surah names, and references like `2:255` or `baqara 255`, with a
+  filter row under the field for narrowing the sources when a query returns
+  too much. Results are exact and instant, even over a forty megabyte tafsir.
 - **Recitation.** Minshawi and Husary, one surah at a time, asked for once: one
   offer names the reciter, the surah, and the size, the reciter can be swapped
   in that offer, and the word being recited is washed as it is read. The page
@@ -67,7 +70,7 @@ are in [`play-store/`](play-store/), refreshed from CI.
 - **Readable in every room, on every setting.** Four themes, an automatic night
   mode that follows the system when the reader asks it to, a size of your own
   (0.65 through 1.2) for the Quran text, the translation, the tafsir, and the
-  word by word aid, a
+  word meanings, a
   settings hub with the state of each choice on its row, secondary text above
   4.5:1 contrast in all four themes, and every control a real touch target.
   More than one translation may be on at once; each draws in its own place
@@ -85,7 +88,7 @@ every license is honored: see [`docs/content-sources.md`](docs/content-sources.m
 
 The library today, language by language:
 
-| Language | Translation | Tafsir | Word by word |
+| Language | Translation | Tafsir | Word meanings |
 |---|---|---|---|
 | English | Saheeh International | Ibn Kathir | yes |
 | Arabic | the Quran itself | As-Sa'di | |

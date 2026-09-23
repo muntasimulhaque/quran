@@ -2,6 +2,7 @@ package io.github.muntasimulhaque.quran.ui.kit
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -49,6 +50,9 @@ class SheetDragGate(
 
     /** A lazy list: at its top when it can scroll back no further. */
     constructor(listState: LazyListState) : this({ !listState.canScrollBackward })
+
+    /** A lazy grid: the same rule over the grid's own scroll position. */
+    constructor(gridState: LazyGridState) : this({ !gridState.canScrollBackward })
 
     /** A scrollable column: the same rule over its scroll position. */
     constructor(scrollState: ScrollState) : this({ !scrollState.canScrollBackward })

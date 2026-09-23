@@ -5,6 +5,10 @@
     <string name="browse_tab_last_read">Last Read</string>
     <string name="browse_tab_saved">Saved</string>
     <string name="browse_tab_notes">Notes</string>
+    <string name="browse_go_to_ayah">Go to ayah</string>
+    <string name="browse_choose_surah">Choose a surah</string>
+    <string name="browse_back">Back</string>
+    <string name="browse_ayah_current">Current</string>
 
     <string name="place_makkah">Makkah</string>
     <string name="place_madinah">Madinah</string>
@@ -41,6 +45,7 @@
     <string name="notes_empty_title">No notes yet</string>
     <string name="notes_empty_body">Press and hold any ayah while reading, then Note. Every ayah you wrote a note on is kept here, newest first.</string>
     <string name="notes_detail">Note written %1$s</string>
+    <string name="saved_detail">Saved %1$s</string>
     <string name="saved_reference_fallback">Ayah %1$d</string>
     <string name="action_remove">Remove</string>
     <string name="action_forget">Forget</string>

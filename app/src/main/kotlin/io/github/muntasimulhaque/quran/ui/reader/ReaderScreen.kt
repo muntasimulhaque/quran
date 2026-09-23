@@ -391,6 +391,7 @@ fun ReaderScreen(
             surahs = viewModel.surahs,
             saved = saved,
             lastRead = lastRead,
+            currentAyah = settings.ayah,
             onDismiss = { sheet = ReaderSheet.None },
             onAyah = { ayahNumber ->
                 sheet = ReaderSheet.None

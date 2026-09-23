@@ -22,6 +22,14 @@ data class SavedAyah(
      */
     val noteAt: Long? = null,
     /**
+     * When the current Save mark was made, or null when the ayah is not
+     * saved. Each mark carries its own moment: the row's own `createdAt` is
+     * only the first of the two to arrive, so a note written first would
+     * otherwise date the save. The Saved list reads newest first by this,
+     * and a re-save after an unsave writes a new moment.
+     */
+    val savedAt: Long? = null,
+    /**
      * True when the reader saved the ayah itself. Writing a note does not
      * save it: Save and Note are the reader's two separate actions, so the
      * Saved list holds what was saved and the Notes list holds what was
@@ -32,9 +40,9 @@ data class SavedAyah(
 
 /**
  * The reader's own database: one row per ayah they marked, with the two marks
- * an ayah can carry. Save keeps the ayah; Note keeps the reader's own words
- * about it; neither action performs the other, so a note alone never turns
- * up in Saved. Newest first.
+ * an ayah can carry, each with its own moment. Save keeps the ayah; Note
+ * keeps the reader's own words about it; neither action performs the other,
+ * so a note alone never turns up in Saved. Newest first.
  */
 class SavedStore(context: Context) {
 
@@ -48,16 +56,14 @@ class SavedStore(context: Context) {
     suspend fun toggle(ayahNumber: Int) = withContext(Dispatchers.IO) {
         val row = row(ayahNumber)
         when {
-            row == null -> write(
-                ayahNumber,
-                note = null,
-                createdAt = System.currentTimeMillis(),
-                saved = true,
-            )
-            !row.saved -> setSaved(ayahNumber, true)
+            row == null -> {
+                val now = System.currentTimeMillis()
+                write(ayahNumber, note = null, createdAt = now, savedAt = now, saved = true)
+            }
+            !row.saved -> setSaved(ayahNumber, saved = true, at = System.currentTimeMillis())
             // Unsaving an ayah with a note keeps the note: it belongs to
             // Notes until the reader clears it there.
-            row.note != null -> setSaved(ayahNumber, false)
+            row.note != null -> setSaved(ayahNumber, saved = false)
             else -> delete(ayahNumber)
         }
         refresh()
@@ -120,13 +126,16 @@ class SavedStore(context: Context) {
 
     private fun row(ayahNumber: Int): SavedAyah? =
         database().rawQuery(
-            "SELECT $COLUMN_AYAH, $COLUMN_NOTE, $COLUMN_CREATED, $COLUMN_NOTE_AT, $COLUMN_SAVED " +
+            "SELECT $COLUMN_AYAH, $COLUMN_NOTE, $COLUMN_CREATED, $COLUMN_NOTE_AT, $COLUMN_SAVED, $COLUMN_SAVED_AT " +
                 "FROM $TABLE WHERE $COLUMN_AYAH = ?",
             arrayOf(ayahNumber.toString()),
         ).use { cursor -> if (cursor.moveToFirst()) rowOf(cursor) else null }
 
-    private fun setSaved(ayahNumber: Int, saved: Boolean) {
-        val values = ContentValues().apply { put(COLUMN_SAVED, if (saved) 1 else 0) }
+    private fun setSaved(ayahNumber: Int, saved: Boolean, at: Long? = null) {
+        val values = ContentValues().apply {
+            put(COLUMN_SAVED, if (saved) 1 else 0)
+            if (saved && at != null) put(COLUMN_SAVED_AT, at) else putNull(COLUMN_SAVED_AT)
+        }
         database().update(TABLE, values, "$COLUMN_AYAH = ?", arrayOf(ayahNumber.toString()))
     }
 
@@ -136,6 +145,7 @@ class SavedStore(context: Context) {
         createdAt: Long,
         noteAt: Long? = null,
         saved: Boolean,
+        savedAt: Long? = null,
     ) {
         val values = ContentValues().apply {
             put(COLUMN_AYAH, ayahNumber)
@@ -143,6 +153,7 @@ class SavedStore(context: Context) {
             put(COLUMN_CREATED, createdAt)
             if (noteAt == null) putNull(COLUMN_NOTE_AT) else put(COLUMN_NOTE_AT, noteAt)
             put(COLUMN_SAVED, if (saved) 1 else 0)
+            if (savedAt == null) putNull(COLUMN_SAVED_AT) else put(COLUMN_SAVED_AT, savedAt)
         }
         database().insert(TABLE, null, values)
     }
@@ -153,7 +164,7 @@ class SavedStore(context: Context) {
 
     private fun refresh() {
         _saved.value = database().rawQuery(
-            "SELECT $COLUMN_AYAH, $COLUMN_NOTE, $COLUMN_CREATED, $COLUMN_NOTE_AT, $COLUMN_SAVED " +
+            "SELECT $COLUMN_AYAH, $COLUMN_NOTE, $COLUMN_CREATED, $COLUMN_NOTE_AT, $COLUMN_SAVED, $COLUMN_SAVED_AT " +
                 "FROM $TABLE ORDER BY $COLUMN_CREATED DESC, $COLUMN_AYAH DESC",
             null,
         ).use { cursor ->
@@ -169,6 +180,7 @@ class SavedStore(context: Context) {
         createdAt = cursor.getLong(2),
         noteAt = if (cursor.isNull(3)) null else cursor.getLong(3),
         saved = cursor.getInt(4) == 1,
+        savedAt = if (cursor.isNull(5)) null else cursor.getLong(5),
     )
 
     private fun database(): SQLiteDatabase = helper.writableDatabase
@@ -183,7 +195,8 @@ class SavedStore(context: Context) {
                     "$COLUMN_NOTE TEXT, " +
                     "$COLUMN_CREATED INTEGER NOT NULL, " +
                     "$COLUMN_NOTE_AT INTEGER, " +
-                    "$COLUMN_SAVED INTEGER NOT NULL DEFAULT 0)",
+                    "$COLUMN_SAVED INTEGER NOT NULL DEFAULT 0, " +
+                    "$COLUMN_SAVED_AT INTEGER)",
             )
         }
 
@@ -213,17 +226,29 @@ class SavedStore(context: Context) {
                         "AND $COLUMN_NOTE_AT IS NOT NULL AND $COLUMN_NOTE_AT = $COLUMN_CREATED",
                 )
             }
+            // Version 4 gave the Save mark its own moment. Until now the row
+            // carried one moment, whichever mark made it; a saved row starts
+            // with that moment, the closest true answer left on the device,
+            // and a note-only row keeps none.
+            if (oldVersion < 4) {
+                db.execSQL("ALTER TABLE $TABLE ADD COLUMN $COLUMN_SAVED_AT INTEGER")
+                db.execSQL(
+                    "UPDATE $TABLE SET $COLUMN_SAVED_AT = $COLUMN_CREATED " +
+                        "WHERE $COLUMN_SAVED = 1",
+                )
+            }
         }
     }
 
     private companion object {
         const val DATABASE_NAME = "saved.db"
-        const val DATABASE_VERSION = 3
+        const val DATABASE_VERSION = 4
         const val TABLE = "saved"
         const val COLUMN_AYAH = "ayah_number"
         const val COLUMN_NOTE = "note"
         const val COLUMN_CREATED = "created_at"
         const val COLUMN_NOTE_AT = "note_at"
         const val COLUMN_SAVED = "saved"
+        const val COLUMN_SAVED_AT = "saved_at"
     }
 }

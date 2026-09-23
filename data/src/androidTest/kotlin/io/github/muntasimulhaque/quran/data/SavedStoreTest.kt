@@ -152,6 +152,26 @@ class SavedStoreTest {
         assertNull(row.noteAt)
     }
 
+    @Test
+    fun aSaveKeepsItsOwnMoment() = runBlocking {
+        store.toggle(262)
+        assertNotNull("a save carries its own moment", store.saved.value.single().savedAt)
+    }
+
+    @Test
+    fun theSaveMomentBelongsToTheCurrentSave() = runBlocking {
+        store.toggle(262)
+        val first = store.saved.value.single().savedAt
+        assertNotNull(first)
+        store.setNote(262, "kept")
+        store.unsave(262)
+        assertNull("an unsaved row carries no save moment", store.saved.value.single().savedAt)
+        store.toggle(262)
+        val second = store.saved.value.single().savedAt
+        assertNotNull(second)
+        assertTrue("a re-save writes its own, later moment", second!! >= first!!)
+    }
+
     /**
      * A reader who updates the app keeps the notes they wrote before the
      * notes list existed. The moment of the note was not recorded then, so
@@ -199,6 +219,31 @@ class SavedStoreTest {
         val byAyah = reopened.saved.value.associateBy { it.ayahNumber }
         assertFalse(byAyah.getValue(262).saved)
         assertTrue(byAyah.getValue(263).saved)
+        reopened.close()
+    }
+
+    /**
+     * A version 3 database kept one moment for the row and one for the note,
+     * so a row saved before the save's own column existed starts with its
+     * row's moment, the closest true answer left on the device, and a
+     * note-only row keeps none.
+     */
+    @Test
+    fun theSaveMomentMigrationBackfillsOnlySavedRows() = runBlocking {
+        writeLegacyDatabase(
+            version = 3,
+            create = "CREATE TABLE saved (" +
+                "ayah_number INTEGER PRIMARY KEY, note TEXT, created_at INTEGER NOT NULL, " +
+                "note_at INTEGER, saved INTEGER NOT NULL DEFAULT 1)",
+            insert = "INSERT INTO saved VALUES (262, NULL, 1000, NULL, 1), " +
+                "(263, 'a note alone', 900, 900, 0)",
+        )
+
+        val reopened = SavedStore(context)
+        reopened.load()
+        val byAyah = reopened.saved.value.associateBy { it.ayahNumber }
+        assertEquals(1000L, byAyah.getValue(262).savedAt)
+        assertNull(byAyah.getValue(263).savedAt)
         reopened.close()
     }
 

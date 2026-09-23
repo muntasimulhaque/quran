@@ -16,9 +16,8 @@
     <string name="card_tafsir_label">তাফসীর</string>
     <string name="card_no_translation">বেছে নেওয়া অনুবাদে এই আয়াতের লেখা নেই।</string>
     <string name="card_add_translation">আপনার ভাষায় এই আয়াত পড়তে একটি অনুবাদ যোগ করুন</string>
-    <string name="card_word_by_word">শব্দে শব্দে অনুবাদ</string>
-    <string name="card_words_meanings">শব্দের অর্থ</string>
-    <string name="card_add_word_by_word">শব্দে শব্দে অনুবাদ যোগ করুন</string>
+    <string name="card_word_by_word">শব্দের অর্থ</string>
+    <string name="card_add_word_by_word">শব্দের অর্থ যোগ করুন</string>
     <string name="card_add_tafsir">গভীরভাবে পড়তে একটি তাফসীর যোগ করুন</string>
     <string name="card_opening_pack">%1$s খোলা হচ্ছে…</string>
     <string name="card_door_shown">দেখানো</string>

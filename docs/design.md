@@ -95,7 +95,7 @@ One sheet, three depths, no tabs to learn:
    each named when more than one is on, then footnotes. A footnote marker
    opens that note in its own sheet; there is no setting that spills every
    note under every ayah.
-3. **Deeper.** Three quiet rows, each a door: *Word by word*, *Ibn Kathir*,
+3. **Deeper.** Three quiet rows, each a door: *Word meanings*, *Ibn Kathir*,
    *As-Sa'di*. Tapping one unfolds it in place; tapping again closes it.
 4. **Note.** "Add a note" row; when a note exists it shows as its own
    paragraph in the reader's voice, with an edit affordance.
@@ -137,7 +137,15 @@ Searched, in one pass:
   row carrying the ayah, the mode it was read in, and when it was left. One
   row per ayah, so a place returned to moves up instead of piling up, and the
   list is capped at twenty (D-051).
-* **Saved**: saved ayahs and notes, newest first, each opening at its ayah.
+* **Saved**: the ayahs the reader saved, newest save first, each row naming
+  the place and the moment it was saved.
+* **Notes**: the ayahs a note was written on, newest note first, each row
+  opening the note over its ayah.
+* **Go to ayah**: over the surah list, a two-step picker for any ayah in the
+  Quran: the surah first (the reader's own already chosen), then its ayah
+  numbers in a grid, with the ayah they are on marked and the grid landed on
+  it. Tapping a number opens that ayah and closes the sheet, so a long surah
+  never has to be scrolled to reach a place in it.
 
 ## 7. Settings
 
@@ -147,12 +155,12 @@ closes the sheet, and the hub keeps its place while a page is open (D-046).
 
 * **Appearance**: Paper, Sepia, Night, Black, as swatches that are the page
   each one paints. The theme is the whole app: the page, the sheets, the bars.
-* **Text**: the Quran text, the translation, the tafsir, and the word by word
-  aid, each with its own five steps, above a sample drawn from the reader's
-  own ayah so a change is judged on the page it is about to change. The five
-  steps are 0.65, 0.75, 0.85, 1, and 1.2 of each face's base. A stored value
-  lands on the nearest step, so a scale the reader chose before the list
-  changed keeps its meaning.
+* **Text**: the Quran text, the translation, the tafsir, and the word
+  meanings aid, each with its own five steps, above a sample drawn from the
+  reader's own ayah so a change is judged on the page it is about to change.
+  The five steps are 0.65, 0.75, 0.85, 1, and 1.2 of each face's base. A
+  stored value lands on the nearest step, so a scale the reader chose before
+  the list changed keeps its meaning.
 * **Reading**: keep the screen awake, and follow the reciter.
 * **Reciters**: one reciter is the reader's, a radio mark at the left says
   which, each reciter carries its own downloaded surahs with their sizes, and
@@ -163,7 +171,7 @@ closes the sheet, and the hub keeps its place while a page is open (D-046).
   one search and share read.
 * **Tafsirs**: as many as the reader wants, grouped by language, each opening
   from its own door under the ayah.
-* **Word by word**: the switch, and the lists by language. The meaning under
+* **Word meanings**: the switch, and the lists by language. The meaning under
   an Arabic word is only useful in the language the reader is reading in, so
   the list follows the chosen translation rather than asking (D-046).
 * **About**: the version, the credits and licenses, the corrections and

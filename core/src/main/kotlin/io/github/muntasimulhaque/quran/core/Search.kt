@@ -90,6 +90,71 @@ object Search {
     }
 
     /**
+     * A surah named in words, with the ayah the reader gave: "baqara 255",
+     * "al kahf 10", "النور 24". The last word must be the ayah number, so a
+     * name of several words keeps them, and the leading "surah" the numbered
+     * form accepts is dropped the same way. The name itself is resolved by
+     * the content, which owns the surah names.
+     */
+    data class NameReference(val name: String, val ayah: Int)
+
+    /**
+     * Reads a reference whose surah is named rather than numbered. The last
+     * word must be an ayah number and what precedes it must carry a letter:
+     * "2 255" belongs to the numbered form, and "mercy 2" stays text.
+     */
+    fun nameReference(input: String): NameReference? {
+        var rest = input.trim()
+        val lowered = rest.lowercase(Locale.ROOT)
+        for (prefix in referencePrefixes) {
+            if (lowered.startsWith(prefix)) {
+                rest = rest.substring(prefix.length).trim()
+                break
+            }
+        }
+        val words = rest.split(whitespace)
+        if (words.size < 2) return null
+        val number = Arabic.normalizeForSearch(words.last())
+        if (number.isEmpty() || number.any { !it.isDigit() }) return null
+        val ayah = number.toIntOrNull() ?: return null
+        if (ayah < 1) return null
+        val name = words.dropLast(1).joinToString(" ")
+        if (name.none { it.isLetter() }) return null
+        return NameReference(name, ayah)
+    }
+
+    /** Articles a reader drops from a surah's name: "kahf" finds Al-Kahf. */
+    private val nameArticles =
+        listOf("ash", "ath", "adh", "al", "an", "as", "at", "ar", "az", "ad")
+
+    /**
+     * The one shape a typed surah name and a stored one meet in: letters and
+     * digits only, so case, hyphens, apostrophes, and the space between two
+     * words never block a match ("an nas" and "An-Nas" are one key).
+     */
+    fun nameKey(input: String): String =
+        normalizeForIndex(input).filter { it.isLetterOrDigit() }
+
+    /**
+     * Every key a surah's name may be typed by: the whole key, and the same
+     * with a leading article removed, because readers say "baqara" for
+     * "Al-Baqarah" and "rahman" for "Ar-Rahman".
+     */
+    fun surahNameForms(name: String): Set<String> {
+        val key = nameKey(name)
+        if (key.isEmpty()) return emptySet()
+        val forms = LinkedHashSet<String>()
+        forms += key
+        for (article in nameArticles) {
+            if (key.startsWith(article) && key.length > article.length) {
+                forms += key.removePrefix(article)
+                break
+            }
+        }
+        return forms
+    }
+
+    /**
      * Where each term appears in [text], as offsets into the original text.
      * The text is folded once with an offsets map, so a match survives
      * diacritics, letter form differences, and transliteration marks while

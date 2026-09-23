@@ -117,6 +117,37 @@ class ContentSearchTest {
     }
 
     @Test
+    fun namedReferencesJumpToTheAyahToo() = runBlocking {
+        // The form the design promises and the reader actually types: the
+        // surah by name, the ayah by number.
+        val named = content.search(request("baqara 255"))
+        val hit = named.hits.filterIsInstance<SearchHit.ReferenceHit>().firstOrNull()
+        assertEquals(2, hit?.ayah?.surah)
+        assertEquals(255, hit?.ayah?.ayah)
+
+        // A name whose article the reader dropped, and an Arabic name.
+        val kahf = content.search(request("al kahf 10"))
+        assertEquals(18, kahf.hits.filterIsInstance<SearchHit.ReferenceHit>().firstOrNull()?.ayah?.surah)
+        val nur = content.search(request("\u0627\u0644\u0646\u0648\u0631 24"))
+        val nurHit = nur.hits.filterIsInstance<SearchHit.ReferenceHit>().firstOrNull()
+        assertEquals(24, nurHit?.ayah?.surah)
+        assertEquals(24, nurHit?.ayah?.ayah)
+
+        // A shorter name that begins another name is the nearer surah.
+        val nas = content.search(request("nas 1"))
+        assertEquals(114, nas.hits.filterIsInstance<SearchHit.ReferenceHit>().firstOrNull()?.ayah?.surah)
+
+        // Words that name no surah, and ayahs past a surah's end, are not
+        // references; the query stays whatever else it was searched as.
+        assertTrue(
+            content.search(request("mercy 2")).hits.filterIsInstance<SearchHit.ReferenceHit>().isEmpty(),
+        )
+        assertTrue(
+            content.search(request("baqara 300")).hits.filterIsInstance<SearchHit.ReferenceHit>().isEmpty(),
+        )
+    }
+
+    @Test
     fun wordMeaningsAreSearchable() = runBlocking {
         val results = content.search(request("mercy", translations = false, tafsir = false))
         assertTrue("a word meaning must match", results.counts.words > 0)

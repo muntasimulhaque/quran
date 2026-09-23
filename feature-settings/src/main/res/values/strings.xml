@@ -31,7 +31,7 @@
 
     <string name="pack_type_translation">Translation</string>
     <string name="pack_type_tafsir">Tafsir</string>
-    <string name="pack_type_words">Word by word</string>
+    <string name="pack_type_words">Word meanings</string>
     <string name="pack_type_recitation">Recitation</string>
     <string name="pack_type_script">Script</string>
     <string name="pack_included_suffix">included</string>
@@ -100,7 +100,7 @@
     <string name="settings_size_arabic">Quran text</string>
     <string name="settings_size_translation">Translation</string>
     <string name="settings_size_tafsir">Tafsir</string>
-    <string name="settings_size_words">Word by word</string>
+    <string name="settings_size_words">Word meanings</string>
     <string name="settings_group_reciters">Reciters</string>
     <string name="settings_group_translations">Translations</string>
     <string name="settings_translations_note">More than one may be on. Each one you turn on reads in its own place under the ayah, and the first is the one search reads.</string>

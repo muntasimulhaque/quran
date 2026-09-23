@@ -19,7 +19,7 @@
     <string name="settings_keep_awake_subtitle">পড়ার সময় পাতা জ্বলজ্বল করে থাকবে</string>
     <string name="settings_follow_title">তিলাওয়াতের সাথে চলুন</string>
     <string name="settings_follow_subtitle">তিলাওয়াতের সাথে পাতা এগিয়ে যাবে</string>
-    <string name="settings_words_title">শব্দে শব্দে অনুবাদ দেখান</string>
+    <string name="settings_words_title">শব্দের অর্থ দেখান</string>
     <string name="settings_words_subtitle">আয়াতের নিচে প্রতিটি শব্দ ও তার অর্থ</string>
     <string name="settings_words_add">%1$s শব্দতালিকা যোগ করে · %2$s</string>
     <string name="settings_words_failed">ডাউনলোড করা যায়নি। আবার চেষ্টা করতে ট্যাপ করুন।</string>
@@ -31,7 +31,7 @@
 
     <string name="pack_type_translation">অনুবাদ</string>
     <string name="pack_type_tafsir">তাফসীর</string>
-    <string name="pack_type_words">শব্দে শব্দে অনুবাদ</string>
+    <string name="pack_type_words">শব্দের অর্থ</string>
     <string name="pack_type_recitation">তিলাওয়াত</string>
     <string name="pack_type_script">লিপি</string>
     <string name="pack_included_suffix">অন্তর্ভুক্ত</string>
@@ -99,7 +99,7 @@
     <string name="settings_size_arabic">কুরআনের আয়াত</string>
     <string name="settings_size_translation">অনুবাদ</string>
     <string name="settings_size_tafsir">তাফসীর</string>
-    <string name="settings_size_words">শব্দে শব্দে অনুবাদ</string>
+    <string name="settings_size_words">শব্দের অর্থ</string>
     <string name="settings_group_reciters">তিলাওয়াতকারী</string>
     <string name="settings_group_translations">অনুবাদ</string>
     <string name="settings_translations_note">একাধিক অনুবাদ চালু রাখা যায়। প্রতিটি আয়াতের নিচে নিজের জায়গায় পড়া যায়, আর অনুসন্ধান পড়ে প্রথমটি।</string>

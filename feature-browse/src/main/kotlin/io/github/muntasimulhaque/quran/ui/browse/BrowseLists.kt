@@ -147,11 +147,12 @@ internal data class AyahText(
 )
 
 /**
- * The ayahs the reader saved. A row is the place and the way to unsave it:
- * the ayah's own text and its note are not repeated here. Saved means saved,
- * so this list holds the Save action's work and nothing else; a note written
- * on an ayah never puts it here, and a saved ayah that also has a note is
- * named again in Notes where the note itself lives.
+ * The ayahs the reader saved. A row is the place, the moment it was saved,
+ * and the way to unsave it: the ayah's own text and its note are not
+ * repeated here. Saved means saved, so this list holds the Save action's
+ * work and nothing else; a note written on an ayah never puts it here, and
+ * a saved ayah that also has a note is named again in Notes where the note
+ * itself lives.
  */
 @Composable
 internal fun SavedList(
@@ -162,7 +163,13 @@ internal fun SavedList(
     onAyah: (Int) -> Unit,
     onRemove: (Int) -> Unit,
 ) {
-    val rows = remember(saved) { saved.filter { it.saved } }
+    // The order is the save's own moment, not the row's: an ayah first noted
+    // a year ago and saved today is today's save (D-082). A row saved before
+    // the column existed keeps its row's own moment, the closest truth the
+    // migration could write.
+    val rows = remember(saved) {
+        saved.filter { it.saved }.sortedByDescending { it.savedAt ?: it.createdAt }
+    }
     if (rows.isEmpty()) {
         EmptyNote(
             title = stringResource(R.string.saved_empty_title),
@@ -180,6 +187,7 @@ internal fun SavedList(
             PlaceRow(
                 surah = text?.surahName ?: stringResource(R.string.saved_reference_fallback, row.ayahNumber),
                 ayah = text?.ayahLabel,
+                detail = stringResource(R.string.saved_detail, moment(row.savedAt ?: row.createdAt)),
                 onClick = { onAyah(row.ayahNumber) },
                 action = stringResource(R.string.action_remove) to { onRemove(row.ayahNumber) },
             )

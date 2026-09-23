@@ -3225,3 +3225,87 @@ September 22 note that it fails was a misdiagnosis of some other pull
 trouble, and AGENTS.md now records what is true, with the one-time
 `git branch --set-upstream-to=origin/main main` as the repair for a machine
 that ever lacks the tracking.
+
+## D-082: One name for the word meanings, references that name their surah, and a picker for any ayah
+
+Date: the twenty-fifth session. The owner asked for three things: an
+explanation of what a moment under each Saved row would take, a full
+coherent rename of the word-meaning aid, and a way to any ayah that needs
+neither scrolling to it nor knowing its reference. After the explanation
+the owner named the fix exactly, a moment per mark, and said to build it
+for this reader rather than guard other installs; all three are in the
+tree.
+
+**The word-meaning aid is called one thing now: "Word meanings".** The
+Mushaf ayah card's block label read "Word by word" over a door that read
+"Meanings", the settings page said "Show word meanings", the size page
+said "Word by word", and the search filter said both across the two
+languages. The card's label is "Word meanings" and the door under it now
+names only the list's language ("English"), the way a tafsir door names
+its pack, so the two lines say what the block is and what is inside it
+without repeating each other. The size row, the pack type, and the search
+filter follow in both languages (settings_size_words, pack_type_words,
+search_filter_words, and the card's add row), and the old
+`card_words_meanings` string is gone. D-077's reasoning for the door still
+holds: the door names what is inside, never repeats the label above it.
+
+**A reference may name its surah.** Search already read "2:255", "2.255",
+"2 255", "surah 2", and their Arabic digit forms, and docs/design.md
+promised "baqara 255" while the parser only took digits. `Search.nameReference`
+now reads a last word that is an ayah number and a name in front of it
+("baqara 255", "al kahf 10", "النور 24", with the same "surah" prefix
+the numbered form accepts), `Search.nameKey` and `Search.surahNameForms`
+fold a name to letters and digits and also try it without its article
+("baqara" for "Al-Baqarah"), and `ContentDatabase.surahByName` resolves the
+name against the same three name columns the surah list matches, preferring
+a name over a longer name that merely begins with it ("nas" is An-Nas, not
+An-Nasr) and the shortest such match next. The resolved reference draws the
+same "Go to" row the numbered form does, so the reader who knows "Al-Kahf,
+ayah 10" but not "18" is one field and one tap away. The empty search
+prompt now names both forms ("references like 2:255 or baqara 255") so the
+form is visible where it is typed. A name that matches no surah, or an ayah
+past its end, is not a reference and the query stays whatever else it was
+searched as.
+
+**Browse can raise a picker for any ayah.** The surah list now leads with a
+quiet "Go to ayah" action (`feature-browse/BrowseSheet.kt`). It swaps the
+sheet's tabs for a two-step picker in the same window: the surah already
+chosen is the reader's own, the selector row above the grid changes it
+through the same 114-row list Browse draws, and the grid is the surah's
+ayah numbers, the reader's own ayah filled and spoken as current. The grid
+is laid out adaptively so a phone gets six columns and a tablet more, and
+it opens on the reader's ayah, so a jump within a long surah is one tap on
+a number and never a scroll. The back arrow steps from the surah list to
+the grid and from the grid to the tabs; a number calls the same `onAyah`
+path every Browse row uses, so the sheet closes and the reading jumps.
+`SheetDragGate` gained a `LazyGridState` constructor so a scroll back to
+the top of the grid still cannot pull the sheet closed. No new screen, no
+sixth tab, and the top bar keeps its one row.
+
+**Each mark keeps its own moment.** The row's `created_at` is only the
+first of the two marks to arrive, so a note written first dated the save,
+and an unsave followed by a save did not move it. `saved.db` is version 4
+now: `saved_at` is written when the Save mark goes on and cleared when it
+is removed, so a re-save carries the moment of the current save, while
+`note_at` keeps doing the same for a note. The migration fills saved rows
+with their row's own moment, the best true answer left on the device, and
+leaves note-only rows empty. The Saved list draws "Saved <moment>" the way
+Last Read and Notes draw theirs and reads newest first by the save's own
+moment, so an ayah first noted a year ago and saved today is today's save.
+`SavedStoreTest` pins the column, the re-save, and the migration, and the
+schema version moved with the migration in the same session.
+
+**Verification.** The JVM suite, lint, and `assembleDebug` are green. The
+data instrumented suite is 31/31, the three new cases among them (a save's
+own moment, a re-save's new moment, and the version 3 to 4 backfill). The
+four affected app instrumented classes ran on the phone emulator:
+ContentSearchTest 10/10 (the new named-reference test among them),
+WordByWordTest, BrowseNumbersTest, and GoToAyahTest, which lands on 2:12.
+The first run failed GoToAyahTest on the test's own assertion, not the
+app: it looked for the text "Al-Fatihah", which also names the surah in
+the reading behind the sheet, and the third match was the picker's own
+selector; the assertion now anchors on the selector's test tag, and the
+rerun is green. The store set is stale after this session: the Browse
+frame gains the "Go to ayah" row and the ayah-card frame reads "Word
+meanings" over the language door, so the next capture refreshes 07 and 08,
+by the workflow's artifacts and never by hand.

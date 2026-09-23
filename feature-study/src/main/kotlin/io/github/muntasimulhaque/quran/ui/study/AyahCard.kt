@@ -202,8 +202,8 @@ fun AyahCard(
                         modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Block),
                     )
                     DoorRow(
-                        title = stringResource(R.string.card_words_meanings),
-                        subtitle = languageName(wordLanguage),
+                        title = languageName(wordLanguage),
+                        subtitle = "",
                         open = door == Door.Words,
                         onClick = { door = if (door == Door.Words) null else Door.Words },
                     )

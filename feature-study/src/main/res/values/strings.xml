@@ -16,9 +16,8 @@
     <string name="card_tafsir_label">Tafsir</string>
     <string name="card_no_translation">This ayah has no text in the chosen translation.</string>
     <string name="card_add_translation">Add a translation to read this ayah in your language</string>
-    <string name="card_word_by_word">Word by word</string>
-    <string name="card_words_meanings">Meanings</string>
-    <string name="card_add_word_by_word">Add word by word</string>
+    <string name="card_word_by_word">Word meanings</string>
+    <string name="card_add_word_by_word">Add word meanings</string>
     <string name="card_add_tafsir">Add a tafsir to read this ayah deeper</string>
     <string name="card_opening_pack">Opening %1$s…</string>
     <string name="card_door_shown">Shown</string>

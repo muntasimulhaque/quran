@@ -2,7 +2,7 @@
 <resources>
     <string name="search_hint">Search the Quran</string>
     <string name="search_close">Close</string>
-    <string name="search_status_prompt">The Arabic text, translations, tafsirs, word meanings, surah names, and references like 2:255.</string>
+    <string name="search_status_prompt">The Arabic text, translations, tafsirs, word meanings, surah names, and references like 2:255 or baqara 255.</string>
     <string name="search_status_searching">Searching…</string>
     <string name="search_status_no_matches">No matches.</string>
     <string name="search_status_no_sources">Turn on at least one filter to search.</string>

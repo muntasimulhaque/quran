@@ -79,6 +79,35 @@ class SearchTest {
     }
 
     @Test
+    fun `a surah named in words is read with its ayah`() {
+        assertEquals(Search.NameReference("baqara", 255), Search.nameReference("baqara 255"))
+        assertEquals(Search.NameReference("al kahf", 10), Search.nameReference("al kahf 10"))
+        assertEquals(Search.NameReference("yasin", 5), Search.nameReference("surah yasin 5"))
+        assertEquals(
+            Search.NameReference("\u0627\u0644\u0646\u0648\u0631", 24),
+            Search.nameReference("\u0627\u0644\u0646\u0648\u0631 \u0662\u0664"),
+        )
+        assertNull(Search.nameReference("2 255"))
+        assertNull(Search.nameReference("255"))
+        assertNull(Search.nameReference("kahf"))
+        assertNull(Search.nameReference("kahf 0"))
+        // The words before the number are only text here; the content decides
+        // whether they name a surah.
+        assertEquals(Search.NameReference("mercy", 2), Search.nameReference("mercy 2"))
+    }
+
+    @Test
+    fun `a surah name matches through its articles and punctuation`() {
+        assertEquals("albaqarah", Search.nameKey("Al-Baqarah"))
+        assertEquals("annas", Search.nameKey("An Nas"))
+        assertTrue(Search.surahNameForms("Al-Baqarah").containsAll(listOf("albaqarah", "baqarah")))
+        assertTrue(Search.surahNameForms("An-Nas").contains("nas"))
+        assertTrue(Search.surahNameForms("Ar-Rahman").contains("rahman"))
+        assertTrue(Search.surahNameForms("Ya-Sin").contains("yasin"))
+        assertTrue(Search.surahNameForms("Al-'Alaq").contains("alaq"))
+    }
+
+    @Test
     fun `arabic matches ignore diacritics and letter forms`() {
         val text = "\u0671\u0644\u0631\u0651\u064e\u062d\u0652\u0645\u064e\u0670\u0646\u0650 \u0671\u0644\u0631\u0651\u064e\u062d\u0650\u064a\u0645\u0650"
         val ranges = Search.matchRanges(text, listOf("\u0627\u0644\u0631\u062d\u0645\u0646"), arabic = true)
