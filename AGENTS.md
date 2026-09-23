@@ -208,8 +208,10 @@ does not tell you, and each one costs a failed command to rediscover:
 - The Store alias intercepts `python3`, but a real `python` 3.12 exists on
   this machine; `node -e` is still the small-edit tool used here. Use it for
   small file edits instead of writing a script file.
-- `git pull` alone fails here (`main` is not a remote): it is
-  `git pull origin main`.
+- `git pull` works here: the clone set `main` to track `origin/main`. If a
+  machine ever says there is no tracking information, use
+  `git pull origin main`, or set the tracking once with
+  `git branch --set-upstream-to=origin/main main`.
 - The working tree mixes LF and CRLF files. A `node -e` replacement anchored
   on `\n` silently no-ops in a CRLF file (replace returns the text
   unchanged and exits 0), which is how import edits went missing this
