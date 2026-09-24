@@ -228,6 +228,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             // uses that same value: the store is not read twice for one launch.
             val stored = settingsStore.settings.first()
             settings = stored
+            // The reader's pace and repeat choice are theirs from the last
+            // session, and the player must be told before the first ayah.
+            playback.setSpeed(stored.playbackSpeed)
+            playback.setRepeatAyah(stored.repeatAyah)
             surahs = database.surahs()
             indexSurahs()
             packs = database.packs()
@@ -480,6 +484,20 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     fun setFollowReciter(follow: Boolean) {
         settings = settings.copy(followReciter = follow)
         viewModelScope.launch { settingsStore.setFollowReciter(follow) }
+    }
+
+    /** The reader's pace for the recitation; it is remembered and applied. */
+    fun setPlaybackSpeed(speed: Float) {
+        settings = settings.copy(playbackSpeed = speed)
+        playback.setSpeed(speed)
+        viewModelScope.launch { settingsStore.setPlaybackSpeed(speed) }
+    }
+
+    /** One ayah, repeated until the reader stops it. */
+    fun setRepeatAyah(repeat: Boolean) {
+        settings = settings.copy(repeatAyah = repeat)
+        playback.setRepeatAyah(repeat)
+        viewModelScope.launch { settingsStore.setRepeatAyah(repeat) }
     }
 
     fun setWordByWord(show: Boolean) {

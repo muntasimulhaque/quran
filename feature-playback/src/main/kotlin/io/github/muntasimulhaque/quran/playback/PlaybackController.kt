@@ -53,6 +53,10 @@ class PlaybackController(
     private var downloadJob: Job? = null
     private var requestedAyah: Int? = null
 
+    /** The reader's pace and repeat choice, applied to every player on connect. */
+    private var speed = 1f
+    private var repeatAyah = false
+
     private val _state = MutableStateFlow(PlaybackUiState())
     val state: StateFlow<PlaybackUiState> = _state.asStateFlow()
 
@@ -210,6 +214,29 @@ class PlaybackController(
         if (player.isPlaying) player.pause() else player.play()
     }
 
+    /**
+     * The reader's pace. It is their own choice and it is remembered, so it
+     * is applied to the player the moment it is set and to every player the
+     * app connects afterwards. ExoPlayer keeps the pitch, so a slower
+     * recitation is slower, not deeper.
+     */
+    fun setSpeed(value: Float) {
+        speed = value.coerceIn(MIN_SPEED, MAX_SPEED)
+        controller?.setPlaybackSpeed(speed)
+    }
+
+    /**
+     * One ayah, again and again, until the reader stops it: memorization is
+     * repetition, and asking a reader to tap Play at the end of every pass is
+     * asking them to stop reading to keep reading. With repeat on, the item
+     * itself loops, so the surah-end offer never appears until repeat is off.
+     */
+    fun setRepeatAyah(value: Boolean) {
+        repeatAyah = value
+        controller?.repeatMode =
+            if (value) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
+    }
+
     fun next() {
         controller?.seekToNextMediaItem()
     }
@@ -233,7 +260,15 @@ class PlaybackController(
             future.addListener(
                 {
                     try {
-                        val player = future.get().also { it.addListener(listener) }
+                        val player = future.get().also {
+                            it.addListener(listener)
+                            // The reader's own pace and repeat choice arrive
+                            // with the connection, so the first ayah plays the
+                            // way the last session was being heard.
+                            it.setPlaybackSpeed(speed)
+                            it.repeatMode =
+                                if (repeatAyah) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
+                        }
                         controller = player
                         _state.value = _state.value.copy(connected = true)
                         continuation.resume(player)
@@ -363,4 +398,10 @@ class PlaybackController(
     }
 
     private fun mediaId(ayahNumber: Int, surah: Int) = "$ayahNumber:$surah"
+
+    private companion object {
+        /** The pace the reader may choose, and its bounds. */
+        const val MIN_SPEED = 0.5f
+        const val MAX_SPEED = 1.5f
+    }
 }

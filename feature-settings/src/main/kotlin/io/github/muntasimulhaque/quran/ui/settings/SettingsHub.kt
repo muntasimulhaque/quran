@@ -24,9 +24,10 @@ import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
+import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.theme.Space
 /** The pages the settings hub opens, one at a time. */
-enum class SettingsPage { Language, Theme, FontSize, Reciters, Translations, Tafsirs, About }
+enum class SettingsPage { Language, Theme, FontSize, Reciters, Listening, Translations, Tafsirs, About }
 
 @Composable
 fun SettingsPage.title(): String = stringResource(
@@ -35,6 +36,7 @@ fun SettingsPage.title(): String = stringResource(
         SettingsPage.Theme -> R.string.settings_title_appearance
         SettingsPage.FontSize -> R.string.settings_title_text
         SettingsPage.Reciters -> R.string.settings_title_reciters
+        SettingsPage.Listening -> R.string.settings_title_listening
         SettingsPage.Translations -> R.string.settings_title_translations
         SettingsPage.Tafsirs -> R.string.settings_title_tafsirs
         SettingsPage.About -> R.string.settings_title_about
@@ -92,6 +94,10 @@ fun SettingsHub(
             summary = reciterName(settings, recitations),
         ) { onOpen(SettingsPage.Reciters) }
         PageRow(
+            title = stringResource(R.string.settings_title_listening),
+            summary = listeningSummary(settings),
+        ) { onOpen(SettingsPage.Listening) }
+        PageRow(
             title = stringResource(R.string.settings_title_translations),
             summary = translationName(settings, packs),
         ) { onOpen(SettingsPage.Translations) }
@@ -118,6 +124,54 @@ fun SettingsHub(
 private fun reciterName(settings: AppSettings, recitations: List<Recitation>): String =
     recitations.firstOrNull { it.id == settings.recitation }?.name
         ?: stringResource(R.string.settings_none_yet)
+
+/**
+ * Where the listening choices stand, in one line: the pace, and whether an
+ * ayah is repeating. A reader who set a pace and forgot it must be able to
+ * see it from the hub, or the reading sounds slow for a reason they cannot
+ * find.
+ */
+@Composable
+private fun listeningSummary(settings: AppSettings): String {
+    val speed = stringResource(R.string.settings_listening_speed_value, speedText(settings.playbackSpeed))
+    return if (settings.repeatAyah) {
+        stringResource(R.string.settings_listening_summary_repeat, speed)
+    } else {
+        speed
+    }
+}
+
+/**
+ * The listening page: how fast the recitation plays, and whether one ayah
+ * repeats. Both are about hearing, not about the page, so they sit together
+ * under the reciter whose voice they shape.
+ */
+@Composable
+fun ListeningPage(
+    settings: AppSettings,
+    onSpeed: (Float) -> Unit,
+    onRepeat: (Boolean) -> Unit,
+) {
+    Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
+        Group(stringResource(R.string.settings_group_speed))
+        Text(
+            text = stringResource(R.string.settings_speed_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
+        )
+        SpeedRow(value = settings.playbackSpeed, onChange = onSpeed)
+        Spacer(Modifier.height(Space.Section))
+        Group(stringResource(R.string.settings_group_repeat))
+        ToggleRow(
+            title = stringResource(R.string.settings_repeat_title),
+            subtitle = stringResource(R.string.settings_repeat_subtitle),
+            checked = settings.repeatAyah,
+            onChange = onRepeat,
+        )
+        Spacer(Modifier.height(Space.Section))
+    }
+}
 
 @Composable
 private fun translationName(settings: AppSettings, packs: List<ContentPack>): String {

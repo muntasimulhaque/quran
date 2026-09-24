@@ -86,6 +86,16 @@
     <string name="settings_title_appearance">Theme</string>
     <string name="settings_title_text">Font size</string>
     <string name="settings_title_reciters">Reciters</string>
+    <string name="settings_title_listening">Listening</string>
+    <string name="settings_listening_speed_value">%1$s speed</string>
+    <string name="settings_listening_summary_repeat">%1$s · one ayah repeats</string>
+    <string name="settings_group_speed">Speed</string>
+    <string name="settings_speed_label">Playback speed</string>
+    <string name="settings_speed_option">%1$s, %2$s</string>
+    <string name="settings_speed_note">The pace of the recitation. The voice keeps its pitch, so a slower ayah is slower, not deeper.</string>
+    <string name="settings_group_repeat">Repeat</string>
+    <string name="settings_repeat_title">Repeat the ayah</string>
+    <string name="settings_repeat_subtitle">The playing ayah begins again when it ends, until you stop it</string>
     <string name="settings_title_translations">Translations</string>
     <string name="settings_title_tafsirs">Tafsirs</string>
     <string name="settings_title_about">About</string>

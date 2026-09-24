@@ -45,6 +45,8 @@ data class SettingsActions(
     val onTypeSize: (TypeRole, Float) -> Unit = { _, _ -> },
     val onKeepAwake: (Boolean) -> Unit = {},
     val onFollowReciter: (Boolean) -> Unit = {},
+    val onPlaybackSpeed: (Float) -> Unit = {},
+    val onRepeatAyah: (Boolean) -> Unit = {},
     val onWordByWord: (Boolean) -> Unit = {},
     val onSelectRecitation: (String) -> Unit = {},
     val onTranslationPack: (String) -> Unit = {},
@@ -172,6 +174,11 @@ fun SettingsSheet(
                         packs = packs,
                         downloadedSurahs = downloadedSurahs,
                         actions = actions,
+                    )
+                    SettingsPage.Listening -> ListeningPage(
+                        settings = settings,
+                        onSpeed = actions.onPlaybackSpeed,
+                        onRepeat = actions.onRepeatAyah,
                     )
                     SettingsPage.Translations -> TranslationsPage(
                         settings = settings,

@@ -3,6 +3,7 @@
     <string name="playback_download_failed">Download failed</string>
     <string name="playback_downloading">Downloading %1$d%%</string>
     <string name="playback_unavailable">Not available yet</string>
+    <string name="playback_repeating">repeating</string>
     <string name="playback_retry">Retry</string>
     <string name="playback_continue">Continue</string>
     <string name="playback_download">Download</string>

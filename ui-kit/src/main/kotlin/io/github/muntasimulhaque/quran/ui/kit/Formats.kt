@@ -23,3 +23,13 @@ fun shortReciterName(id: String, fallback: String): String = when (id) {
     "husary-mujawwad" -> "Husary Mujawwad"
     else -> fallback
 }
+
+/**
+ * A playback pace as the reader reads it: "1x", "0.75x", never a trailing
+ * run of digits. It lives here because the settings page that chooses the
+ * pace and the pill that reports it must name it the same way; a reader who
+ * chose 0.75x in settings and sees 0.7500001x on the pill has been told two
+ * different things about one choice.
+ */
+fun speedText(speed: Float): String =
+    if (speed == speed.toInt().toFloat()) "${speed.toInt()}x" else "${speed}x"

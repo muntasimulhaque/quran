@@ -42,6 +42,7 @@ import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
+import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 
@@ -58,6 +59,10 @@ fun PlaybackBar(
     reciterName: String,
     reference: String?,
     pendingLabel: String?,
+    /** The reader's pace, shown only when it is not the ordinary one. */
+    speed: Float = 1f,
+    /** True while the playing ayah repeats; the pill says so. */
+    repeating: Boolean = false,
     onToggle: () -> Unit,
     onNext: () -> Unit,
     onPrevious: () -> Unit,
@@ -115,7 +120,7 @@ fun PlaybackBar(
                         )
                         needsDownload -> pendingLabel.orEmpty()
                         state.unavailable -> stringResource(R.string.playback_unavailable)
-                        else -> reference.orEmpty()
+                        else -> playbackStatus(reference.orEmpty(), speed, repeating)
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -194,6 +199,26 @@ fun PlaybackBar(
 }
 
 private enum class Transport { Play, Pause, Next, Previous, Close }
+
+/**
+ * What the pill says under the reciter's name while an ayah plays: where the
+ * reader is, and, only when they are not the ordinary ones, the pace and the
+ * repeat. A reader who set 1.5x a week ago and forgot, or who turned repeat
+ * on and then wondered why the reading would not move on, reads the answer
+ * here instead of hunting through settings for it.
+ */
+@Composable
+private fun playbackStatus(reference: String, speed: Float, repeating: Boolean): String {
+    val extras = buildList {
+        if (kotlin.math.abs(speed - 1f) > 0.01f) {
+            add(speedText(speed))
+        }
+        if (repeating) {
+            add(stringResource(R.string.playback_repeating))
+        }
+    }
+    return (listOf(reference) + extras).filter { it.isNotBlank() }.joinToString(" · ")
+}
 
 /** Hand-drawn transport controls: two shapes each, the app's own weight. */
 @Composable

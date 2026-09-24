@@ -63,6 +63,10 @@ data class AppSettings(
     val recitation: String = "minshawi",
     val keepAwake: Boolean = true,
     val followReciter: Boolean = true,
+    /** How fast the recitation plays: the reader's own pace, remembered. */
+    val playbackSpeed: Float = 1f,
+    /** True when one ayah repeats until the reader stops it. */
+    val repeatAyah: Boolean = false,
     val translationPacks: Set<String> = emptySet(),
     val tafsirPacks: Set<String> = emptySet(),
     val wordByWord: Boolean = false,
@@ -121,6 +125,8 @@ class SettingsStore(private val context: Context) {
             recitation = preferences[RECITATION] ?: "minshawi",
             keepAwake = preferences[KEEP_AWAKE] ?: true,
             followReciter = preferences[FOLLOW_RECITER] ?: true,
+            playbackSpeed = (preferences[PLAYBACK_SPEED] ?: 1f).coerceIn(MIN_SPEED, MAX_SPEED),
+            repeatAyah = preferences[REPEAT_AYAH] ?: false,
             translationPacks = translationPacks(preferences),
             tafsirPacks = preferences[TAFSIR_PACKS] ?: emptySet(),
             wordByWord = preferences[WORD_BY_WORD] ?: false,
@@ -191,6 +197,14 @@ class SettingsStore(private val context: Context) {
         context.settingsStore.edit { it[FOLLOW_RECITER] = follow }
     }
 
+    suspend fun setPlaybackSpeed(speed: Float) {
+        context.settingsStore.edit { it[PLAYBACK_SPEED] = speed.coerceIn(MIN_SPEED, MAX_SPEED) }
+    }
+
+    suspend fun setRepeatAyah(repeat: Boolean) {
+        context.settingsStore.edit { it[REPEAT_AYAH] = repeat }
+    }
+
     suspend fun setWordByWord(show: Boolean) {
         context.settingsStore.edit { it[WORD_BY_WORD] = show }
     }
@@ -250,6 +264,10 @@ class SettingsStore(private val context: Context) {
     }
 
     private companion object {
+        /** The recitation pace the reader may choose, and its bounds. */
+        const val MIN_SPEED = 0.5f
+        const val MAX_SPEED = 1.5f
+
         val AYAH = intPreferencesKey("ayah")
         val MODE = stringPreferencesKey("mode")
         val THEME = stringPreferencesKey("theme")
@@ -263,6 +281,8 @@ class SettingsStore(private val context: Context) {
         val RECITATION = stringPreferencesKey("recitation")
         val KEEP_AWAKE = booleanPreferencesKey("keep_awake")
         val FOLLOW_RECITER = booleanPreferencesKey("follow_reciter")
+        val PLAYBACK_SPEED = floatPreferencesKey("playback_speed")
+        val REPEAT_AYAH = booleanPreferencesKey("repeat_ayah")
         val TRANSLATION_PACK = stringPreferencesKey("translation_pack")
         val TRANSLATION_PACKS = stringSetPreferencesKey("translation_packs")
         val TAFSIR_PACKS = stringSetPreferencesKey("tafsir_packs")

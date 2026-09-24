@@ -64,6 +64,7 @@ import io.github.muntasimulhaque.quran.ui.mushaf.PAGE_ASPECT
 import io.github.muntasimulhaque.quran.ui.playback.PlaybackBar
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
+import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.kit.shortReciterName
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
@@ -473,6 +474,8 @@ fun ReaderScreen(
                 onTypeSize = { role, step -> viewModel.setTypeSize(role, step) },
                 onKeepAwake = { viewModel.setKeepAwake(it) },
                 onFollowReciter = { viewModel.setFollowReciter(it) },
+                onPlaybackSpeed = { viewModel.setPlaybackSpeed(it) },
+                onRepeatAyah = { viewModel.setRepeatAyah(it) },
                 onWordByWord = { viewModel.setWordByWord(it) },
                 onSelectRecitation = { viewModel.selectRecitation(it) },
                 onToggleTranslation = { viewModel.toggleTranslationPack(it) },
@@ -541,6 +544,7 @@ private fun MushafReader(
         // The page's height follows from its width; every page is rendered at
         // the width it will actually be drawn at, and never larger.
         val pageWidth = min(availableWidth, availableHeight / PAGE_ASPECT).toInt().coerceAtLeast(1)
+        val reducedMotion by rememberReducedMotion()
         val pagerState = rememberPagerState(
             initialPage = (viewModel.page - 1).coerceIn(0, 603),
             pageCount = { 604 },
@@ -563,12 +567,14 @@ private fun MushafReader(
         }
         // A jump from the cards or the sheets moves the pager; a swipe never
         // moves the pager from here. A far jump lands at once: animating
-        // across three hundred pages would render all of them on the way.
-        LaunchedEffect(viewModel.page) {
+        // across three hundred pages would render all of them on the way. A
+        // reader who asked the system to reduce motion lands at once for a
+        // near jump too, the jump the design document names.
+        LaunchedEffect(viewModel.page, reducedMotion) {
             val target = (viewModel.page - 1).coerceIn(0, 603)
             val current = pagerState.currentPage
             if (current == target) return@LaunchedEffect
-            if (kotlin.math.abs(target - current) > 2) {
+            if (reducedMotion || kotlin.math.abs(target - current) > 2) {
                 pagerState.scrollToPage(target)
             } else {
                 pagerState.animateScrollToPage(target)
@@ -824,6 +830,8 @@ private fun BottomStack(
                         viewModel.stopPlayback()
                     }
                 },
+                speed = viewModel.settings.playbackSpeed,
+                repeating = viewModel.settings.repeatAyah,
             )
         }
     }

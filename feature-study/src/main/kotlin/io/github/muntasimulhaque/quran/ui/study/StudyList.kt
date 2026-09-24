@@ -73,6 +73,7 @@ import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.StudyRow
 import io.github.muntasimulhaque.quran.feature.study.R
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
@@ -262,13 +263,18 @@ private fun StudyRows(
         onOpeningReached()
     }
 
-    // The playing ayah comes back into view when the reciter moves on.
-    LaunchedEffect(playingAyah, ayahs) {
+    // The playing ayah comes back into view when the reciter moves on. A
+    // reader who asked the system to reduce motion is taken there at once.
+    val reducedMotion by rememberReducedMotion()
+    LaunchedEffect(playingAyah, ayahs, reducedMotion) {
         val ayahNumber = playingAyah ?: return@LaunchedEffect
         if (!settings.followReciter) return@LaunchedEffect
         val target = AyahList.indexOf(ayahs, ayahNumber)
         val current = listState.firstVisibleItemIndex
-        if (target < current || target > current + 3) listState.animateScrollToItem(target)
+        if (target < current || target > current + 3) {
+            if (reducedMotion) listState.scrollToItem(target)
+            else listState.animateScrollToItem(target)
+        }
     }
 
     // The reading sits in a column of a readable width, centered when the

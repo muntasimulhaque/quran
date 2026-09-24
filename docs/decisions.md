@@ -3588,3 +3588,64 @@ not break `MushafTurnTest`. A rushed zoom on the crash-sensitive page is
 worse than a named gap. This is the next session's first work. (2)
 Surah-arrival motion, recitation speed and repeat, and similar reading aids
 are backlog, not this pass.
+
+## D-087: The listening page, and what a Mushaf font size really is
+
+Date: the twenty-seventh session, after D-086.
+
+**The owner asked how other apps give the Mushaf a font size, and the
+answer is three different things.** (1) Most apps scale the page bitmap:
+the glyphs grow and soften, the whole-page view is lost, and it is a zoom
+under another name. That is the thing this app does not want. (2) The
+honest approach re-renders the glyphs at a larger em. The QPC V2 page fonts
+are vector outlines, so a bigger size draws bigger, equally crisp glyphs;
+but the page is pre-justified (each line sums to 15.6 em, D-011), so a
+larger em means the line no longer fills the page and the 15 lines must be
+re-justified and the page allowed to grow taller than the printed one. This
+is a layout engine, and it is the feature to build if the owner wants a
+larger Mushaf. (3) Some apps switch to a flowing Unicode face (QPC Hafs,
+IndoPak) in which case "Mushaf mode" becomes continuous text and is no
+longer the printed page. The owner said no to zoom. The re-layout in (2) is
+the named next feature, to be built as a pure tested `PageLayout` in `core`
+before any of it touches the page.
+
+**The listening page.** The recitation had no pace and no repeat, so a
+reader memorizing an ayah had to tap Play at the end of every pass, and a
+reader who wanted a slower voice could not have one. Both are now real,
+remembered choices:
+
+- `AppSettings.playbackSpeed` (0.5 through 1.5, in the five steps the text
+  sizes use) and `AppSettings.repeatAyah`, both in DataStore. ExoPlayer's
+  `setPlaybackSpeed` keeps the pitch, so a slower recitation is slower, not
+  deeper, and `REPEAT_MODE_ONE` loops the one item so the surah-end offer
+  does not appear while the reader is repeating.
+- The controller applies both when it connects, so the first ayah of a
+  session plays the way the last one was being heard, and the settings read
+  once at launch is what tells it.
+- Settings gained a **Listening** page (speed, repeat) under Reciters, and
+  the hub's own row summarizes both. `SpeedRow` is the same segmented control
+  the text sizes use, so one control is learned once. `speedText` moved to
+  `ui-kit/Formats`, because the page that chooses the pace and the pill that
+  reports it must name it the same way.
+- The playback pill says "1.5x" and "repeating" beside the reference, and
+  only when they are not the ordinary ones: a reader who set a pace a week
+  ago and forgot, or who turned repeat on and wondered why the reading would
+  not move on, reads the answer in the moment instead of hunting settings.
+
+**Two related reading-polish changes in the same pass.**
+
+- **Reduced motion is now honored.** The design document promised it (page
+  turns and scroll animations become jumps) and nothing read the system
+  setting. `ui-kit/rememberReducedMotion` reads the animator duration scale
+  on a worker, once, and the Mushaf's programmatic page jump and the study
+  list's follow-the-reciter scroll use `scrollToItem` rather than
+  `animateScrollToItem` when it is on. A swipe is the reader's own finger and
+  is never changed.
+- **The first screen keeps the reading's measure.** The language welcome was
+  full width on a tablet; it now holds `Reading.MaxMeasure`, the same cap the
+  study reading and the settings sheet use.
+
+**Verification.** The JVM suite, lint, and `assembleDebug` are green. No
+emulator this session; the instrumented claims wait for CI. The store set is
+stale (the study frames, settings, Browse numbers, the ayah pill, and the new
+Listening page all changed visibly), so the next capture refreshes it.

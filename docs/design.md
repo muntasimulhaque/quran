@@ -164,7 +164,8 @@ Searched, in one pass:
 
 ## 7. Settings
 
-A hub, not a scroll: eight rows, each carrying where it stands right now,
+A hub, not a scroll: one row per category, each carrying where it stands
+right now,
 and each opening a page of its own. Back steps out of a page before it
 closes the sheet, and the hub keeps its place while a page is open (D-046).
 
@@ -180,6 +181,12 @@ closes the sheet, and the hub keeps its place while a page is open (D-046).
 * **Reciters**: one reciter is the reader's, a radio mark at the left says
   which, each reciter carries its own downloaded surahs with their sizes, and
   adding a reciter selects it.
+* **Listening**: how fast the recitation plays, at the same five steps the
+  text sizes use, and whether one ayah repeats. The pace is the reader's and
+  is remembered; the voice keeps its pitch, so a slower ayah is slower and
+  not deeper. A pace or a repeat that is not the ordinary one is said on the
+  playback pill too, so a reader is never left wondering why the reading
+  sounds slow or will not move on.
 * **Translations**: more than one may be on, grouped by the language each one
   speaks, with the size before a byte moves. The mark is a check, like every
   other list where more than one may be on; the first one turned on is the

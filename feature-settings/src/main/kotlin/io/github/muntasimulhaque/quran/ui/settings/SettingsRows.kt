@@ -40,6 +40,7 @@ import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
+import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.BlackBackground
@@ -625,3 +626,72 @@ fun SizeRow(role: TypeRole, step: Float, onChange: (Float) -> Unit) {
         }
     }
 }
+
+/**
+ * The pace of the recitation, in the same segmented shape the text sizes use:
+ * one row, the choices growing left to right, the chosen one filled. The pace
+ * belongs to hearing the way the size belongs to reading, so the two are the
+ * same control, and a reader who learned one has learned the other. The value
+ * is in numbers, because "slow" and "fast" are not the same for every reader.
+ */
+@Composable
+fun SpeedRow(value: Float, onChange: (Float) -> Unit) {
+    val label = stringResource(R.string.settings_speed_label)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 22.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f),
+        )
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(50))
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+                .padding(3.dp),
+            horizontalArrangement = Arrangement.spacedBy(1.dp),
+        ) {
+            SPEEDS.forEach { speed ->
+                val active = kotlin.math.abs(speed - value) < 0.01f
+                val description = stringResource(
+                    R.string.settings_speed_option,
+                    speedText(speed),
+                    label,
+                )
+                Box(
+                    modifier = Modifier
+                        .size(46.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(
+                            if (active) {
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                            } else {
+                                Color.Transparent
+                            },
+                        )
+                        .selectable(selected = active, role = Role.RadioButton) { onChange(speed) }
+                        .semantics { contentDescription = description },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = speedText(speed),
+                        style = MaterialTheme.typography.labelLarge.copy(fontSize = 12.sp),
+                        color = if (active) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** The paces the reader may choose, from the slowest to the quickest. */
+val SPEEDS = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f)
