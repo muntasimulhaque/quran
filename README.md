@@ -4,7 +4,7 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 1.9 (versionCode 20) is built, signed, and ready to hand over. It
+**Status:** 1.9 (versionCode 20) is submitted to Google Play for review. It
 carries the twenty-seventh session's craftsmanship pass (D-086 through
 D-088): every quiet text tone was measured against the design document's own
 4.5:1 rule and raised, the ornament gold now meets it too, the color scheme

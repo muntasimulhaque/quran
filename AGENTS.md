@@ -928,7 +928,7 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the twenty-seventh session)
 
-**1.9 (versionCode 20) is built, signed, and waiting for the hand-over.** It
+**1.9 (versionCode 20) is submitted to Google Play for review.** It
 carries the craftsmanship pass. Every quiet text tone was measured against
 the design document's own 4.5:1 rule and raised, including the five the log
 had never named (Browse numbers, the search hint and source, the footnotes,
