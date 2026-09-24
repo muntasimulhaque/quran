@@ -4,29 +4,26 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 1.8 (versionCode 19) is submitted to Google Play for review. It
-comes from the owner's
-read of 1.7: Go to ayah moved into Browse's tab row, one tap from any tab;
-the word by word aid reads as a gloss of the ayah above it; the study
-reading's deep door is named Tafsir with its own mark (More from the
-Mushaf, where the card holds more); and the quiet labels and references
-take each theme's own secondary tone. 1.7, submitted for review before it,
-added Go to ayah, references by surah name, the moment under every Saved
-row, and one name for the word meanings. All five owner content gates are
-green on the restored sources. The version name follows the runbook: 1.0,
-then 1.1 through 1.8. The bundle carries only the core pack, with
-everything else added from the project's own Releases when a reader asks
-for it. The listing, icon, feature graphic, and screenshots per form factor
-are in [`play-store/`](play-store/), refreshed from CI.
-
-The tree also carries the twenty-seventh session's craftsmanship pass
-(D-086), in for the next release: every quiet text tone was measured and
-raised to the design document's own 4.5:1 rule, the ornament gold now meets
-it too, the color scheme names every role Material draws from, the study
-reading and the settings sheet hold a readable measure on a wide screen,
-a floating control wears a floating tone, the study surah opening is built
-to the printed page's model, and the study block answers TalkBack's action
-the way the Mushaf does.
+**Status:** 1.9 (versionCode 20) is built, signed, and ready to hand over. It
+carries the twenty-seventh session's craftsmanship pass (D-086 through
+D-088): every quiet text tone was measured against the design document's own
+4.5:1 rule and raised, the ornament gold now meets it too, the color scheme
+names every role Material draws from so nothing falls through to a default,
+the study reading and the settings sheet hold a readable measure on a wide
+screen instead of running the width of the glass, a floating control wears a
+floating tone, the study surah opening is drawn to the printed page's model,
+the study block answers TalkBack's action the way the Mushaf does, and
+Settings gained a Listening page with a remembered recitation pace and ayah
+repeat. The screenshot workflow's own bug, which had silently destroyed every
+red leg's frames, is fixed and its failure modes are catalogued in
+[`docs/screenshot-failures.md`](docs/screenshot-failures.md). 1.8, submitted
+for review before it, moved Go to ayah into Browse's tab row and named the
+deep door by what is behind it. All five owner content gates are green on the
+restored sources. The version name follows the runbook: 1.0, 1.1 through
+1.9. The bundle carries only the core pack, with everything else added from
+the project's own Releases when a reader asks for it. The listing, icon,
+feature graphic, and screenshots per form factor are in
+[`play-store/`](play-store/), refreshed from CI.
 
 ## What it does
 

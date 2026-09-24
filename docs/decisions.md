@@ -3707,3 +3707,50 @@ workflow YAML parses with the fixed script. The capture is re-run after this
 push; the fixed shape is proven by a red leg now printing `Collected:` and
 `frames: N` and keeping its artifact, and by the intruder message naming a
 real package if one ever appears.
+
+## D-089: The 1.9 hand-off run
+
+Date: the twenty-seventh session, on the owner's word to go for a Play
+release.
+
+Step 0 of the runbook passed first: `content/raw` holds all 29 datasets (the
+24 QUL exports, the two QuranEnc files, and the Tanzil XML) and
+`content/work/verify` holds all 29 extractions, so `verify`, `audit`, and
+`fonts` could run on this machine rather than being owed the way 1.4 and 1.6
+left them.
+
+**All five owner gates ran green.** `verify` 29 datasets (checksums and
+structure), `audit` 6236 ayahs with 0 unexplained differences and one
+accepted orthographic variant, `fonts` coverage passed (628169 study
+codepoints, 604 pages, 22985677 reading codepoints), `checkdb` (the
+committed database unchanged, 128966656 bytes, `5c5988fa...`), and `search`
+(63 Arabic round trips, 82 non-ASCII codepoints folding cleanly, 465
+excerpts free of markup). The JVM suite, lint, and `assembleDebug` are also
+green.
+
+**The version.** `versionCode` 20, `versionName` 1.9, per the runbook's
+counting (1.8 then 1.9, no 1.10). The bundle's own manifest was read back to
+confirm: versionCode 20, versionName 1.9.
+
+**The release notes** are 363 characters, no apostrophes, quotes, or dashes,
+and they lead with the one thing a reader will notice first: the Listening
+page. They are kept under their own heading in `play-store/listing.md`, with
+1.8's notes intact below.
+
+**CI.** Build run 35980906492: the data instrumented suite, the gates and
+debug build, and the `signed-bundle` job, all green. Screenshot run
+35980906679: all three legs green first try on the repaired workflow.
+
+**The store set** is from run 35980906679, all three form factors, every
+frame `cmp`'d against its artifact (24 matches) and every changed frame read
+before it shipped. Only the settings frames changed in substance (Version
+1.9 and the Listening row); the rest of the differences are the status bar
+clock, the cursor's blink, and subpixel antialiasing.
+
+**The bundle.** `quran-1.9-vc20.aab`, 147817691 bytes, SHA-256
+`3b9feb8591e57f5c06f84dacb1031890a0d14916cdaa7d25ef778641d4031dc2` (which is
+the artifact's own recorded hash), `jar verified`, signed with the shared
+upload key (`53:7D:09:D2:...:0D:9D:E5:21`). Read back from the bundle: it
+carries `base/assets/content/core.db` and the 608 font files (the Hafs face
+and the 604 page fonts), and no other pack. The bundle and the screenshots
+are handed over together, before the submission, per the runbook.

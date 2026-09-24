@@ -853,60 +853,56 @@ fetching them again; the space is worth less than the time.
 
 ## Next session: the remaining queue, in order
 
-0. **The store set is current, and the capture can be trusted.** 1.8
-   installed the set from run 35883297322 attempt 2: every frame compared
-   with its artifact by `cmp` (24 matches) and every changed frame read
-   (the Version 1.8 text, the Go to ayah chip in the tab row, the study
-   aid's tighter gloss, the legible references). The next session that
-   changes a pixel captures again with the procedure in "Store
-   screenshots".
+0. **The store set is current, and the capture can be trusted.** 1.9
+   installed the set from run 35980906679, all three legs green first try on
+   the repaired workflow: every frame compared with its artifact by `cmp`
+   (24 matches) and every changed frame read (the Version 1.9 settings
+   frames with the Listening row, plus the clock and the cursor). The next
+   session that changes a pixel captures again with the procedure in "Store
+   screenshots", and reads `docs/screenshot-failures.md` first if a leg goes
+   red.
 
-1. **Mushaf zoom, and the window it needs.** The design document promises
-   pinch zoom and the hard constraints require it, and the app has none. It
-   is the first work of the next session, and it is a real feature, not a
-   gesture: the page is one printed sheet, so zoom is a window over the same
-   bitmap and not a reflow. The shape: `core/PageWindow` (a scale and a
-   clamped center, pure and tested), the renderer drawing only the visible
-   window at the device scale, and a pan/pinch handler that stays out of the
-   pager's way so `MushafTurnTest` still passes. The sign-off to change the
-   Mushaf interaction model is the owner's; bring the plan before building.
-2. **The quiet alphas on the card are closed.** D-084's two named tones, the
-   tafsir range and the note hint, now take `onSurfaceVariant`, and the
-   sweep in D-086 found and closed five more of the same defect across
-   Browse, Search, the shared card, and the footnotes. The rule stands: a
-   tone with meaning takes the theme's token, and the token is measured.
-3. **Accessibility for the study pill is closed.** The study block now
-   exposes the same custom action the Mushaf does (D-086).
-4. **Measure on real hardware.** The numbers in D-037 come from a software
+1. **The segmented controls' touch targets.** The text size steps and the
+   playback pace draw 38 dp and 46 dp cells, under the design document's own
+   48 dp rule. They are read as one row, so the fix is structural (an outer
+   48 dp touch box with the visual cell inside it) and touches a captured,
+   tested control. Named in D-087, not yet done.
+2. **Mushaf text size, if the owner wants it.** The owner declined zoom and
+   asked what other apps do; the answer is in D-087. The honest larger-text
+   path is a re-layout of the pre-justified page at a bigger em, built as a
+   pure tested `PageLayout` in `core` first, and only then on the page. The
+   flowing Unicode alternative is also described there. No work is queued
+   unless the owner asks.
+3. **Measure on real hardware.** The numbers in D-037 come from a software
    rendered emulator, the slowest Android this app will run on. A
    Macrobenchmark module for startup and page turns, run on a phone, is the
    only way to hold the budget the design document sets (under 300 ms to the
    first painted page on a warm start) and to prove the baseline profile is
    pulling its weight.
-5. **The second language.** The strings are ready for one; the reader is not.
+4. **The second language.** The strings are ready for one; the reader is not.
    A translation pass needs a translator for the interface, a `values-xx`
    folder, and the same care the Arabic content gets: a real review, not a
    machine.
-6. **Content backlog.** More translations and tafsirs as packs (each one is a
+5. **Content backlog.** More translations and tafsirs as packs (each one is a
    dataset entry in `PackSources`, a pack definition, and a Release), and a
    second mushaf script if a font and layout are chosen.
-7. **A recording of the tour's study frames.** The screenshot set covers the
+6. **A recording of the tour's study frames.** The screenshot set covers the
    surface; a short screen recording of a page turn, a mode switch, and the
    ayah card would catch the motion a still cannot, and the pipeline already
    has an emulator to do it on.
-8. **A reading plan, if the owner wants one.** A khatm is a commitment, not a
+7. **A reading plan, if the owner wants one.** A khatm is a commitment, not a
    guess: an explicit plan (a daily portion, a finish date) is the only
    honest way to keep a linear reading place apart from casual lookups, and
    it builds on the portion the glossary already describes. The eighth
    session shipped no heuristic for it (D-045).
-9. **Instant launch, second step.** A pre-rendered bitmap of the *next* page
+8. **Instant launch, second step.** A pre-rendered bitmap of the *next* page
    in the direction the reader was reading, so the first swipe after a launch
    is also a texture draw.
-10. **Robustness, second step.** A pack that fails verification at download
+9. **Robustness, second step.** A pack that fails verification at download
     time should say which check failed (size, hash, or unpack) rather than one
     line for all three, and the content self check should offer the removal it
     recommends.
-11. **Trust work, second step.** The owner removed export and import in the
+10. **Trust work, second step.** The owner removed export and import in the
     tenth session (D-051), so this item is gone unless they ask for a different
     way to carry saved work. If they do, the shape to build is a merge preview
     and a way to move one note rather than the whole document, never the same
@@ -929,6 +925,53 @@ fetching them again; the space is worth less than the time.
   to right on the screen; `MushafTurnTest` now pins the direction on every
   form factor.
 
+
+## Where the project stands (end of the twenty-seventh session)
+
+**1.9 (versionCode 20) is built, signed, and waiting for the hand-over.** It
+carries the craftsmanship pass. Every quiet text tone was measured against
+the design document's own 4.5:1 rule and raised, including the five the log
+had never named (Browse numbers, the search hint and source, the footnotes,
+the shared card's reference), and the ornament gold, which draws the page
+number and the surah names, went from 3.2:1 to 4.6:1 on paper. The color
+scheme now names every role Material draws from, so no sheet picks up a
+default tone or a blue tint. The study reading and the settings sheet hold a
+readable measure on a wide screen; on the ten inch tablet a translation had
+been running the full 2560 px, over two hundred characters a line. A control
+that floats over the reading wears a floating tone and a soft lift. The
+study surah opening is built to the printed page's model, and the study
+block answers the same TalkBack action the Mushaf does. Settings gained a
+**Listening** page: the recitation pace (0.5x to 1.5x, pitch kept) and an
+ayah repeat, both remembered and both said on the playback pill when they
+are not the ordinary ones. The app now honors the system's reduce-motion
+setting.
+
+**The screenshot workflow was repaired, and its failures catalogued.** The
+emulator runner executes each `script:` line in its own shell, so the old
+`set +e` / `gradle_status=$?` shape never shared a shell: the runner stopped
+the script at the failed Gradle line and **no red leg ever kept its frames**,
+which is why `store-screenshots-tablet10` was missing from the failed 1.9
+capture. The exit status is now saved on the Gradle line itself, every
+collection line is guarded, and the window guard reads the focused window's
+owner instead of searching the dump for a phrase a stale record can carry.
+`docs/screenshot-failures.md` catalogues all five failure classes with their
+evidence and fixes; a red leg is now a lookup, and all three legs went green
+first try on the fixed workflow (run 35980906679).
+
+**The suite.** All five owner gates ran green on the machine this session:
+`verify` 29 datasets, `audit` 0 unexplained differences, `fonts` coverage
+passed (628169 study codepoints, 604 pages, 22985677 reading codepoints),
+`checkdb` (the committed database unchanged, 128966656 bytes), and `search`.
+The JVM suite, lint, and `assembleDebug` are green. CI is green on the push:
+build 35980906492 with the data instrumented suite and the `signed-bundle`
+job, and the screenshot run 35980906679 on all three legs.
+
+**The store set is current.** Run 35980906679, all three form factors, every
+frame compared with its artifact by `cmp` (24 matches) and every changed
+frame read before it shipped. The changed frames are the settings frames,
+which now read Version 1.9 and carry the Listening row, plus the status bar
+clock and the cursor's blink; nothing else moved, because the pass was
+verified in the previous capture.
 
 ## Where the project stands (end of the twenty-sixth session)
 
