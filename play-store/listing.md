@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 1.8 (versionCode 19)
+Version: 1.9 (versionCode 20)
 
 ## Listing
 
@@ -119,6 +119,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (1.9, 363 characters)
+
+Listening now has its own page: choose the pace of the recitation from 0.5x to 1.5x, or repeat one ayah until you stop it, and both are remembered. On a wide screen the study reading keeps a comfortable line length instead of stretching across the glass. Quiet labels and the gold page ornaments are easier to read in every theme. No ads, no trackers, no account.
 
 ## Release notes (1.8, 425 characters)
 
