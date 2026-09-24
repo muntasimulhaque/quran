@@ -150,29 +150,37 @@ jobs:
             # replace the previous additional output, and with it the
             # screenshots, so the three capture classes are named in one call.
             # The lean dev packs carry only what the capture tests install,
-            # which keeps the APK small and the install quick. The exit code is
-            # kept, and returned at the very end after the frames are
-            # collected, so a red leg still leaves its capture in the artifact
-            # to be read.
-            set +e
-            ./gradlew :app:connectedDebugAndroidTest --console=plain -Pquran.devPacks=screenshot -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest,io.github.muntasimulhaque.quran.WordByWordTest,io.github.muntasimulhaque.quran.MushafTurnTest
-            gradle_status=$?
-            set -e
+            # which keeps the APK small and the install quick.
+            #
+            # The exit code is saved to a file so the frames are collected even
+            # when the tour fails: a red leg keeps its capture to be read
+            # (D-075). The save must be on the SAME line as the Gradle call,
+            # because the emulator runner executes each script line in its own
+            # shell: `set +e` on one line and `gradle_status=$?` on the next
+            # never shared a shell, so the old shape silently lost every red
+            # leg's frames, and the runner stopped the script at the failed
+            # Gradle line before anything was collected (runs 35463781932 and
+            # 35974207613, tablet10).
+            ./gradlew :app:connectedDebugAndroidTest --console=plain -Pquran.devPacks=screenshot -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest,io.github.muntasimulhaque.quran.WordByWordTest,io.github.muntasimulhaque.quran.MushafTurnTest ; echo $? > /tmp/gradle_status
             # AGP copies the test's additional output off-device (before it
             # uninstalls the app) into the connected additional output folder.
+            # Every collection line is guarded, because the runner aborts the
+            # whole script on the first non-zero line: a find over a directory
+            # the tour never created must not cost the leg its frames.
             mkdir -p store-shots
-            find app/build/outputs/connected_android_test_additional_output -type f -name '*.png' -exec cp {} store-shots/ ';'
+            find app/build/outputs/connected_android_test_additional_output -type f -name '*.png' -exec cp {} store-shots/ ';' 2>/dev/null || true
             # Prefix every PNG with the form factor so per-leg artifacts never
             # collide. (Single line: the runner feeds this to sh, which chokes
             # on multi-line compound commands.)
-            for f in store-shots/*.png; do mv "$f" "store-shots/${{ matrix.name }}_$(basename "$f")"; done
+            for f in store-shots/*.png; do [ -e "$f" ] && mv "$f" "store-shots/${{ matrix.name }}_$(basename "$f")"; done ; true
             echo "Collected:"
             ls -la store-shots
             # A frame must be the app's own surface, never a dialog over it: a
             # system dialog in a store screenshot is worse than no screenshot.
             # Count is checked too, so a leg that captured half the tour fails.
-            if [ "$(ls store-shots/*.png 2>/dev/null | wc -l)" -lt 8 ]; then echo "the capture is short of the eight frames"; exit 1; fi
-            exit $gradle_status
+            # The last line reports the Gradle result, so a red tour is still
+            # red while its frames are safe in the artifact.
+            frames=$(ls store-shots/*.png 2>/dev/null | wc -l) ; echo "frames: $frames" ; if [ "$frames" -lt 8 ]; then echo "the capture is short of the eight frames" ; exit 1 ; fi ; exit $(cat /tmp/gradle_status 2>/dev/null || echo 1)
 
       - name: Upload screenshots
         if: always()

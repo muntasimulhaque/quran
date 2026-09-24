@@ -99,9 +99,12 @@ class ScreenshotTest {
         repeat(8) { attempt ->
             rule.waitForIdle()
             Thread.sleep(600)
-            if (hasSystemDialog()) {
+            val intruder = intruderWindow()
+            if (intruder != null) {
                 dismissDialog()
-                if (attempt == 7) throw AssertionError("a system dialog stayed over $name")
+                if (attempt == 7) {
+                    throw AssertionError("a system window ($intruder) stayed over $name")
+                }
             } else {
                 val bitmap = androidx.test.runner.screenshot.Screenshot.capture().bitmap
                 val settled = prior != null && prior!!.sameAs(bitmap)
@@ -116,20 +119,26 @@ class ScreenshotTest {
         throw AssertionError("the screen over $name never settled")
     }
 
+    private fun hasSystemDialog(): Boolean = intruderWindow() != null
+
     /**
-     * True while an ANR or "isn't responding" dialog owns a window. The check
-     * reads the window list through UiAutomation, which every instrumentation
-     * run already has, so the test needs no extra dependency.
+     * The package that owns the focused window when it is not ours, or null
+     * when the app itself holds focus and the frame is safe to keep. The
+     * owner is returned so a failure names the window that stole the screen
+     * instead of only saying that something did.
      */
-    private fun hasSystemDialog(): Boolean = runCatching {
+    private fun intruderWindow(): String? = runCatching {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val ours = instrumentation.targetContext.packageName
         instrumentation.uiAutomation.executeShellCommand("dumpsys window windows").use { command ->
-            java.io.FileInputStream(command.fileDescriptor).bufferedReader().use { reader ->
-                val text = reader.readText()
-                text.contains("isn't responding") || text.contains("Application Not Responding")
-            }
+            val text = java.io.FileInputStream(command.fileDescriptor).bufferedReader().use { it.readText() }
+            val focus = text.lineSequence().firstOrNull { line ->
+                line.contains("mCurrentFocus=") || line.contains("mFocusedWindow=")
+            } ?: return@runCatching null
+            val owner = Regex("""Window\{[^}]*?\s([^\s/}]+)/""").find(focus)?.groupValues?.get(1)
+            if (owner == null || owner == ours) null else owner
         }
-    }.getOrDefault(false)
+    }.getOrNull()
 
     private fun dismissDialog() {
         runCatching {

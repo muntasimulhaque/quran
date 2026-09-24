@@ -435,8 +435,10 @@ not run and the hand-off says so.
 
 **If a leg fails, the order of operations.** Read the failing job's log
 (`gh run view --log --job <id>`), and read it in two passes: first the
-step list, then the error. The step list says which of the four classes the
-failure is in, and they need different actions:
+step list, then the error. **Every failure mode this workflow has shown is
+catalogued in `docs/screenshot-failures.md`, with its class, its evidence,
+and its fix; read it before diagnosing anything.** The step list says which
+of the four classes the failure is in, and they need different actions:
 
 - **The leg died before our script ran (infrastructure, rerun it).** The
   failing step is `Capture on emulator` or `Create AVD and generate a
@@ -451,7 +453,10 @@ failure is in, and they need different actions:
   one. This is the class the 1.8 push met (run 35883297322, tablet7, `Error
   on ZipFile unknown archive`).
 - `a system dialog stayed over <frame>` means the dialog suppression at the
-  top of the script is missing or was removed; restore it.
+  top of the script is missing or was removed; restore it. (The guard now
+  names the window, as `a system window (<pkg>) stayed over <frame>`, and
+  reads the focused window's owner rather than a stale record in the dump;
+  see `docs/screenshot-failures.md`.)
 - `Test <name> FAILED` with a node assertion means the tour anchored on
   something the UI moved or renamed; fix the anchor to a tag. Two signatures
   this has worn: `Failed to inject touch input ... could not find any node`
@@ -462,8 +467,12 @@ failure is in, and they need different actions:
 - `device offline` or `device not found` on one leg while another passes the
   same code is the capture's load, not the runner; make the capture lighter,
   do not rerun.
-- A missing artifact means the script exited before `mkdir store-shots`;
-  that is why the Gradle exit code is now kept and returned last.
+- A missing artifact means the script exited before `mkdir store-shots`.
+  The emulator runner runs **each script line in its own shell**, so the
+  Gradle exit status must be saved on the Gradle line itself
+  (`... ; echo $? > /tmp/gradle_status`) and every collection line must be
+  guarded, or the runner stops the script at the failed Gradle line and the
+  frames are lost. `docs/screenshot-failures.md` has the whole history.
 
 Rerun only after the failing step above is named, and only for the
 infrastructure class or "the capture's load": a node assertion or a dialog

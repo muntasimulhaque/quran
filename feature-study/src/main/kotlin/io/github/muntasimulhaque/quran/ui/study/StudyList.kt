@@ -475,15 +475,6 @@ private fun SurahOpening(
                     .padding(top = Space.Section),
             )
         }
-        // The door itself is a button like every other action in the app,
-        // so a word that answers a tap never reads as plain type.
-        TextButton(
-            label = stringResource(
-                if (expanded) R.string.study_hide else R.string.study_about_surah,
-            ),
-            onClick = { onExpandedChange(!expanded) },
-            modifier = Modifier.padding(top = Space.Section),
-        )
         if (info != null) {
             // Opened, the introduction wears the wash a chosen ayah wears:
             // the reader asked for it, and while it is up it reads as the
@@ -527,13 +518,15 @@ private fun SurahOpening(
             )
         }
         // The door itself is a button like every other action in the app,
-        // so a word that answers a tap never reads as plain type.
+        // so a word that answers a tap never reads as plain type. It sits
+        // under the introduction: closed, it is the whole of what is shown;
+        // opened, it is the Hide that puts the introduction away again.
         TextButton(
             label = stringResource(
                 if (expanded) R.string.study_hide else R.string.study_about_surah,
             ),
             onClick = { onExpandedChange(!expanded) },
-            modifier = Modifier.padding(top = 10.dp),
+            modifier = Modifier.padding(top = if (info == null) Space.Section else 10.dp),
         )
     }
 }

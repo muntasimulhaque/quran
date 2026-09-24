@@ -3656,3 +3656,54 @@ document's 48 dp target. They are read as one row, and the fix is structural
 (an outer 48 dp touch box with the visual cell inside it), so it is a change
 to a captured, tested control that cannot be verified without a screen. It is
 the next pass's work, named rather than quietly left.
+
+## D-088: The screenshot workflow's failure modes, and the script bug under them
+
+Date: the twenty-seventh session, after the second 1.9 capture went red.
+
+The owner asked a fair and pointed question: why does the screenshot
+workflow keep failing, and why is nothing learned between failures. The
+answer, from the logs of every red run this workflow has had, is that it
+fails in five classes and that the class which kept costing the most was our
+own bug and had destroyed the evidence for the rest. All five are now
+catalogued in `docs/screenshot-failures.md`, which is the file to read
+before diagnosing a red leg; a new mode is added there in the same session
+that fixes it.
+
+**The script bug, which is the real finding.** The emulator runner feeds
+**each line of `script:` to its own `/usr/bin/sh -c`**. The workflow was
+written as `set +e` / `./gradlew ...` / `gradle_status=$?` / `set -e`, which
+only works if the lines share one shell. They never did: `set +e` did not
+protect the Gradle line and `gradle_status=$?` read the status of nothing.
+When the tour failed, the runner stopped the block at the Gradle line, the
+`mkdir store-shots`, the `find ... -exec cp`, and the `exit` never ran, and
+the upload step had nothing to upload. The runbook's promise, that a red leg
+keeps its frames to be read (D-075), had been false since the day it was
+written, and the missing `store-screenshots-tablet10` artifact is the proof
+(runs 35463781932 and 35377607496 lost theirs the same way). The fix: the
+Gradle status is written to a file on the Gradle line itself
+(`... ; echo $? > /tmp/gradle_status`), every collection line is guarded so
+it cannot abort the script, and the last line still returns the saved status
+so a red tour is still red with its frames safe in the artifact.
+
+**The window guard was asking the wrong question.** `captureScreen` searched
+the whole `dumpsys window windows` dump for `isn't responding`, which is true
+whenever a stale or suppressed window record carries the phrase, not when a
+dialog is in front. The 10 inch leg failed `a system dialog stayed over
+05-search` twice for a dialog that was not there. It now reads
+`mCurrentFocus`/`mFocusedWindow`, takes the package that owns focus, and
+fails only when that package is not ours, naming it in the message: the next
+red leg says which window stole the screen.
+
+**The five classes**, in full in the new document: runner infrastructure
+(rerun once, then report an outage), device drop under load (make the
+capture lighter, never rerun), the tour's anchors (a real finding, fixed in
+the session), a window that is not ours (the guard above), and our own
+script (the bug above). Rerun is allowed only for the first class and, with
+a lighter capture, the second.
+
+**Verification.** `:app:compileDebugAndroidTestKotlin` is green and the
+workflow YAML parses with the fixed script. The capture is re-run after this
+push; the fixed shape is proven by a red leg now printing `Collected:` and
+`frames: N` and keeping its artifact, and by the intruder message naming a
+real package if one ever appears.
