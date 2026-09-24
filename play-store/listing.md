@@ -87,15 +87,18 @@ for.
 - 7 inch tablet screenshots: `screenshots/tablet7/` (800 x 1280), eight of them
 - 10 inch tablet screenshots: `screenshots/tablet10/` (2560 x 1800), eight of them
 
-The set was refreshed for the 1.8 release from the `Capture store
-screenshots` workflow (run 35883297322, the tablet7 leg on its second
-attempt after a runner-side truncated system-image download), for all three
-form factors, in the eight frames the store lists. Every frame was compared
-with its artifact by `cmp` before it replaced the committed set. It carries
-the release's own changes: the settings frame reads Version 1.8, the Browse
-frame shows the Go to ayah chip in the tab row, the study frames show the
-word by word aid reading as a gloss with a legible ayah reference, and the
-ayah card keeps its Word meanings door. The remaining frame differences
+The set was refreshed after the craftsmanship pass (D-086/D-087) from the
+`Capture store screenshots` workflow (run 35978639462, all three legs green
+first try once the workflow's own script bug was fixed, D-088), for all
+three form factors, in the eight frames the store lists. Every frame was
+compared with its artifact by `cmp` (24 matches) and read for its content
+before it replaced the committed set. It carries the pass's changes: the
+study reading holds a readable measure on the wide screens, the surah
+opening is built to the printed page's model with one About button, the
+Browse numbers and the search hint are legible at full strength, a floating
+control wears a floating tone, and settings shows the new Listening row.
+It reads Version 1.8 because no release has been cut since the pass; the
+version line moves with the next release. The remaining frame differences
 between runs are the status bar's own clock, the text cursor's blink in the
 search frame, and a few pixels of subpixel antialiasing.
 
