@@ -3754,3 +3754,9 @@ upload key (`53:7D:09:D2:...:0D:9D:E5:21`). Read back from the bundle: it
 carries `base/assets/content/core.db` and the 608 font files (the Hafs face
 and the 604 page fonts), and no other pack. The bundle and the screenshots
 are handed over together, before the submission, per the runbook.
+
+**The submission is confirmed, so the hand-off is closed (D-089).** The owner
+submitted 1.9 to Google Play for review, and the hand-off copy of the bundle
+was deleted the same session, as the runbook requires: the artifact stays in
+the build run and in Play, and `play-store/aab/` keeps only its own note. The
+tree is clean.
