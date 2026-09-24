@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -17,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -29,6 +31,7 @@ import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
+import io.github.muntasimulhaque.quran.ui.theme.Reading
 
 /**
  * What the settings sheet can ask the app to do. The sheet itself owns no
@@ -116,6 +119,12 @@ fun SettingsSheet(
         BackHandler(enabled = page != null) { page = null }
         Column(
             modifier = Modifier
+                // A settings row is a name and the place it stands, and on a
+                // wide screen those two ends drift a foot apart. The sheet
+                // keeps a column a person can read across, centered on the
+                // ground, the way every other sheet and the study reading do.
+                .align(Alignment.CenterHorizontally)
+                .widthIn(max = Reading.MaxMeasure + 44.dp)
                 .fillMaxWidth()
                 .imePadding()
                 .padding(bottom = 30.dp),

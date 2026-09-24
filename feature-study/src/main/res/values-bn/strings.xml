@@ -11,6 +11,7 @@
     <string name="study_surah_complete">%1$s সম্পূর্ণ</string>
     <string name="study_next_surah">পরের সূরা</string>
     <string name="study_end_of_quran">এটি কুরআনের শেষ</string>
+    <string name="study_ayah_actions">আয়াতের কাজ</string>
 
     <string name="card_translation_label">অনুবাদ</string>
     <string name="card_tafsir_label">তাফসীর</string>

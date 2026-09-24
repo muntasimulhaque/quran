@@ -19,6 +19,15 @@ everything else added from the project's own Releases when a reader asks
 for it. The listing, icon, feature graphic, and screenshots per form factor
 are in [`play-store/`](play-store/), refreshed from CI.
 
+The tree also carries the twenty-seventh session's craftsmanship pass
+(D-086), in for the next release: every quiet text tone was measured and
+raised to the design document's own 4.5:1 rule, the ornament gold now meets
+it too, the color scheme names every role Material draws from, the study
+reading and the settings sheet hold a readable measure on a wide screen,
+a floating control wears a floating tone, the study surah opening is built
+to the printed page's model, and the study block answers TalkBack's action
+the way the Mushaf does.
+
 ## What it does
 
 - **Mushaf mode.** The page of the Madinah Mushaf, drawn glyph by glyph from

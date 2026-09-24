@@ -341,7 +341,11 @@ private fun Mark(selected: Boolean, radio: Boolean) {
             val h = size.height
             if (radio) {
                 drawCircle(
-                    color = if (selected) accent else accent.copy(alpha = 0.35f),
+                    // An unselected mark is a control boundary, so it holds the
+                    // 3:1 a control owes; 0.6 of the accent was measured at
+                    // 3.0:1 and up on all four grounds, where the 0.35 it wore
+                    // measured 1.8:1 and read as nothing (D-084).
+                    color = if (selected) accent else accent.copy(alpha = 0.6f),
                     radius = w * 0.42f,
                     style = androidx.compose.ui.graphics.drawscope.Stroke(width = w * 0.09f),
                 )
@@ -363,7 +367,8 @@ private fun Mark(selected: Boolean, radio: Boolean) {
                 )
             } else {
                 drawCircle(
-                    color = accent.copy(alpha = 0.35f),
+                    // The same control-boundary rule as the radio mark above.
+                    color = accent.copy(alpha = 0.6f),
                     radius = w * 0.42f,
                     style = androidx.compose.ui.graphics.drawscope.Stroke(width = w * 0.09f),
                 )

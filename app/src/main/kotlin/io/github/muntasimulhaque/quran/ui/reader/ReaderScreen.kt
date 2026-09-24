@@ -304,8 +304,13 @@ fun ReaderScreen(
                 Row(
                     modifier = Modifier
                         .padding(horizontal = 24.dp)
+                        .shadow(elevation = 6.dp, shape = RoundedCornerShape(18.dp))
                         .clip(RoundedCornerShape(18.dp))
-                        .background(MaterialTheme.colorScheme.surface)
+                        // A control that floats over the reading wears the
+                        // floating tone and a soft lift, not the sheet's own
+                        // surface: the page runs around it, and it has to read
+                        // as above the page rather than printed into it.
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                         .clickable {
                             hintVisible = false
                             viewModel.markLongPressHintShown()
@@ -718,8 +723,9 @@ private fun BottomStack(
         viewModel.packSetup?.let { setup ->
             Row(
                 modifier = Modifier
+                    .shadow(elevation = 6.dp, shape = RoundedCornerShape(50))
                     .clip(RoundedCornerShape(50))
-                    .background(MaterialTheme.colorScheme.surface)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                     .padding(start = 18.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -847,7 +853,7 @@ private fun AyahActions(
         modifier = Modifier
             .shadow(elevation = 6.dp, shape = shape)
             .clip(shape)
-            .background(MaterialTheme.colorScheme.surface)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .padding(horizontal = 6.dp, vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

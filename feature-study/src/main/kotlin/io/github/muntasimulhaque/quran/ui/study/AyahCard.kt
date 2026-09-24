@@ -462,7 +462,13 @@ private fun TafsirPanel(view: TafsirView, arabic: Boolean, settings: AppSettings
         Text(
             text = view.range,
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            // The range is read, not decoration: it is where this tafsir
+            // passage begins and ends. It takes the theme's own secondary
+            // tone, which is measured at 6.1:1 and up on every ground, rather
+            // than a quiet alpha. The 0.7 alpha it wore measured 3.3:1 on the
+            // sepia surface, under the design document's own 4.5:1 rule for
+            // muted text, and this is the pass that closes it (D-084).
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 12.dp),
         )
     }
@@ -559,7 +565,12 @@ private fun NoteEditor(initial: String?, onSave: (String?) -> Unit, onClear: () 
                         Text(
                             text = stringResource(R.string.card_note_hint),
                             style = LatinReading.copy(fontSize = 16.sp),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            // The hint is the one thing in an empty field, so it
+                            // has to be read to be a hint at all. The theme's
+                            // secondary tone measures 6.1:1 and up on every
+                            // ground; the 0.5 alpha it wore measured 2.2:1 on
+                            // sepia and is closed here (D-084).
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                     inner()

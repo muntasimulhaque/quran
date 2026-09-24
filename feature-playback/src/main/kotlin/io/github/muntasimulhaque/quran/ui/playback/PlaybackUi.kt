@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -83,8 +84,12 @@ fun PlaybackBar(
     val needsDownload = state.pendingDownloadSurah != null && !downloading
     Column(
         modifier = modifier
+            .shadow(elevation = 6.dp, shape = RoundedCornerShape(50))
             .clip(RoundedCornerShape(50))
-            .background(MaterialTheme.colorScheme.surface),
+            // The playback bar floats over the reading, so it wears the
+            // floating tone and a soft lift: the page is visible around it
+            // and under it, and it has to read as above the page.
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
     ) {
         Row(
             modifier = Modifier.padding(start = 16.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
@@ -347,8 +352,9 @@ private fun ListenOfferBar(
     val progress = offer.progress
     Column(
         modifier = modifier
+            .shadow(elevation = 6.dp, shape = RoundedCornerShape(50))
             .clip(RoundedCornerShape(50))
-            .background(MaterialTheme.colorScheme.surface),
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
     ) {
         Row(
             modifier = Modifier.padding(start = 16.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
@@ -403,7 +409,11 @@ private fun ListenOfferBar(
                     expanded = chooser,
                     onDismissRequest = { chooser = false },
                     shape = RoundedCornerShape(20.dp),
-                    containerColor = MaterialTheme.colorScheme.surface,
+                    // The chooser wears the pill's own cloth: the same floating
+                    // tone, the same rounded shape, and no depth the pill does
+                    // not have, so it reads as the pill opening rather than a
+                    // foreign sheet laid over it.
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                     tonalElevation = 0.dp,
                     shadowElevation = 0.dp,
                     modifier = Modifier.widthIn(min = 216.dp, max = 288.dp),

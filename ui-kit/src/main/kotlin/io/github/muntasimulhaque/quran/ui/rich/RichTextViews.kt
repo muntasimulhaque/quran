@@ -158,7 +158,7 @@ fun FootnoteList(
             Text(
                 text = buildAnnotatedString {
                     withStyle(
-                        SpanStyle(color = primary.copy(alpha = 0.8f), fontWeight = FontWeight.Medium, fontSize = (sizeSp - 2).sp),
+                        SpanStyle(color = primary, fontWeight = FontWeight.Medium, fontSize = (sizeSp - 2).sp),
                     ) { append(footnote.number.toString()) }
                     append("  ")
                     append(footnote.text)
@@ -171,7 +171,10 @@ fun FootnoteList(
                             textIndent = TextIndent(firstLine = 0.sp, restLine = 14.sp),
                         ),
                     ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                // A footnote is read. It keeps the theme's own secondary tone,
+                // measured at 6.1:1 and up on every ground; the 0.8 alpha it
+                // wore measured 3.7:1 and is closed here (D-084).
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
@@ -274,7 +277,10 @@ private fun annotated(
             val marker = run.marker
             if (marker != null) {
                 val style = SpanStyle(
-                    color = markerColor.copy(alpha = 0.75f),
+                    // The marker is a door to the note; it is read, so it keeps
+                    // the theme's secondary tone rather than the 0.75 alpha that
+                    // measured 3.7:1 on paper and sepia (D-084).
+                    color = markerColor,
                     fontWeight = FontWeight.Medium,
                     fontSize = markerSize,
                     baselineShift = BaselineShift.Superscript,

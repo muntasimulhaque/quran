@@ -103,7 +103,10 @@ internal fun SurahRow(surah: Surah, numberWidth: Dp, onClick: () -> Unit) {
         NumberCell(
             text = numberLabel(surah.number),
             width = numberWidth,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            // The number is read, so it takes the theme's own secondary tone
+            // and not a quiet alpha: onSurfaceVariant measures 6.1:1 and up on
+            // every ground, where the 0.7 alpha it wore measured 3.3:1 (D-084).
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(end = 16.dp),
         )
         Column(Modifier.weight(1f)) {

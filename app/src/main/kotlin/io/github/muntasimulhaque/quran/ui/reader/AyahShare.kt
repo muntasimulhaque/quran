@@ -172,7 +172,7 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
             Text(
                 text = card.reference,
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
                     .padding(top = if (card.translation.isEmpty()) Space.Block else Space.Line)
                     .align(Alignment.End),
@@ -187,7 +187,7 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
                 Text(
                     text = stringResource(R.string.app_name),
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(start = Space.Line),
                 )
                 Spacer(Modifier.weight(1f))
@@ -195,7 +195,7 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
                     Text(
                         text = name,
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }

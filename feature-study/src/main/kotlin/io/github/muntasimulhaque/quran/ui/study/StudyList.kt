@@ -46,9 +46,12 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
@@ -75,6 +78,7 @@ import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
+import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -267,6 +271,14 @@ private fun StudyRows(
         if (target < current || target > current + 3) listState.animateScrollToItem(target)
     }
 
+    // The reading sits in a column of a readable width, centered when the
+    // screen is wider than the measure. A translation laid across the whole
+    // of a ten inch tablet is over two hundred characters a line, and the eye
+    // stops returning to the margin on its own; a book never does that. The
+    // list itself stays full width, so the paper around the column still
+    // answers a tap with the chrome and a drag with the scroll.
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val side = maxOf(20.dp, (screenWidth - Reading.MaxMeasure) / 2)
     LazyColumn(
         state = listState,
         modifier = modifier
@@ -278,8 +290,8 @@ private fun StudyRows(
                 detectTapGestures(onTap = { dismissAbout() })
             },
         contentPadding = PaddingValues(
-            start = 20.dp,
-            end = 20.dp,
+            start = side,
+            end = side,
             top = contentPaddingTop,
             bottom = contentPaddingBottom,
         ),
@@ -392,25 +404,42 @@ private fun SurahOpening(
             null
         }
     }
+    val ornament = LocalPagePalette.current.ornament
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 34.dp, bottom = 14.dp),
+            .padding(top = 40.dp, bottom = 14.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        // The opening of a surah is the one arrival in the reading, so it is
+        // built to the same model as the printed page: the Arabic name in the
+        // ornament gold, a short gold rule under it, and the name and place in
+        // quiet type. The Mushaf page draws exactly this on its surah line, so
+        // the two readings open a surah the same way.
         Text(
             text = surah.nameArabic,
             style = TextStyle(
                 fontFamily = Amiri,
-                fontSize = 34.sp,
-                color = LocalPagePalette.current.ornament,
+                fontSize = 40.sp,
+                color = ornament,
             ),
+        )
+        // The rule is ornament, never a separator: it sits under the Arabic
+        // name the way the printed page rules its surah line, and it carries
+        // no meaning a reader would lose without it. It is a hairline of the
+        // same gold, held well inside the measure.
+        Box(
+            Modifier
+                .padding(top = 14.dp)
+                .fillMaxWidth(0.3f)
+                .height(1.dp)
+                .background(ornament.copy(alpha = 0.55f)),
         )
         Text(
             text = surah.nameSimple,
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(top = Space.Line),
+            modifier = Modifier.padding(top = Space.Section),
         )
         Text(
             text = stringResource(
@@ -431,7 +460,7 @@ private fun SurahOpening(
                 text = BASMALLAH,
                 style = TextStyle(
                     fontFamily = Amiri,
-                    fontSize = 24.sp,
+                    fontSize = 26.sp,
                     color = MaterialTheme.colorScheme.onBackground,
                 ),
                 textAlign = TextAlign.Center,
@@ -440,6 +469,15 @@ private fun SurahOpening(
                     .padding(top = Space.Section),
             )
         }
+        // The door itself is a button like every other action in the app,
+        // so a word that answers a tap never reads as plain type.
+        TextButton(
+            label = stringResource(
+                if (expanded) R.string.study_hide else R.string.study_about_surah,
+            ),
+            onClick = { onExpandedChange(!expanded) },
+            modifier = Modifier.padding(top = Space.Section),
+        )
         if (info != null) {
             // Opened, the introduction wears the wash a chosen ayah wears:
             // the reader asked for it, and while it is up it reads as the
@@ -586,6 +624,7 @@ private fun AyahBlock(
     val haptics = LocalHapticFeedback.current
     val palette = LocalPagePalette.current
     val playing = row.ayah.number == playingAyah
+    val ayahActions = stringResource(R.string.study_ayah_actions)
     val wash = when {
         isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.07f)
         playing -> palette.highlight.copy(alpha = palette.highlight.alpha * 0.55f)
@@ -611,6 +650,20 @@ private fun AyahBlock(
                         onAyah(row.ayah)
                     },
                 )
+                // The Mushaf gives every ayah a node whose action raises the
+                // pill; the study block answered a real long press only, so a
+                // screen reader could read an ayah here but not act on it. The
+                // same action is now exposed the same way in both readings,
+                // which is the one gesture the reading is built around
+                // (D-084 named this gap; this closes it).
+                .semantics {
+                    customActions = listOf(
+                        CustomAccessibilityAction(ayahActions) {
+                            onAyah(row.ayah)
+                            true
+                        },
+                    )
+                }
                 .padding(horizontal = 8.dp, vertical = 10.dp),
         ) {
             val arabicLine = arabic(row, playing, playingWord)

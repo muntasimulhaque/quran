@@ -3495,3 +3495,96 @@ over together, before the submission.
 the hand-off copy of the bundle was deleted the same session, as the
 runbook requires: the artifact stays in the build run and in Play, never
 sitting in the repository. `play-store/aab/` keeps only its own note.
+
+## D-086: The craftsmanship pass, grounded in measurement
+
+Date: the twenty-seventh session. The owner asked for the most beautiful
+reading experience the app can give: Apple-level polish, coherence, the
+best legibility and accessibility the medium allows, the work questioned
+from the ground up. The session audited every surface against the design
+document and against measured contrast, and made the changes below. The
+guiding rule of the pass is the project's own: a tone with meaning takes
+the theme's own token, and the token is measured before it is chosen.
+
+**The quiet alphas D-084 named are closed, and the class was swept.** D-084
+measured the card's tafsir range (0.7 alpha, 3.3:1 on sepia) and its note
+hint (0.5, 2.2:1) and left them as the next pass's work. Both now take
+`onSurfaceVariant`, the theme's secondary tone, 6.1:1 or better on every
+ground. A sweep of every `color.copy(alpha = ...)` used on text found five
+more of the same defect that nobody had named: the Browse surah and juz
+numbers (0.7, 3.3:1), the search result's source name (0.7), the search
+field's hint (0.55, 2.5:1), the shared card's reference and translation
+name (0.75, 3.7:1, and its app name at 0.85, 4.6:1), and the footnote
+markers in the translation body (0.75). All of them now take
+`onSurfaceVariant` or `onSurface` at full strength. The values were
+computed, not eyeballed: 0.85 of `onSurfaceVariant` measures 4.63:1 on
+paper, 0.8 measures 4.13:1, 0.75 measures 3.69:1, 0.7 measures 3.31:1, and
+0.55 measures 2.45:1, so nothing under full strength survives the 4.5:1
+rule on the day grounds. The unselected radio and check marks in settings
+rose from 0.35 of the accent (1.8:1, invisible) to 0.6 (3.0:1 and up on
+all four grounds), which is what a control boundary owes.
+
+**The ornament gold is now read, so it is measurable.** Gold draws the
+Mushaf's page number, its juz, the surah names on the page, and the
+ornamental name at the head of the study reading, so it is text and not
+decoration. The paper gold sat at 3.22:1 and the sepia at 4.11:1, under
+the design document's own 4.5:1 rule. Both were darkened without changing
+the hue: `#856411` on paper (now 4.64:1 on paper, 5.04:1 on the paper
+surface) and `#7E5C1C` on sepia (5.08:1). Night and black already met the
+rule at 5.84:1 and 5.35:1 and are untouched. The Mushaf's own pixels are
+unaffected: those are the page font's glyphs, not the ornament tone, which
+the app draws only for the foot band, the surah name, and the ornament.
+
+**The color scheme is now fully spoken for.** Every role Material draws
+from was left to its default before, and a default is a color nobody
+chose. All four schemes now name their containers, `outline`/
+`outlineVariant`, `inverse*`, and `scrim`, and `surfaceTint` is transparent
+in all four so no sheet picks up a blue wash from Material's tonal lift.
+The new `surfaceContainerHigh` is the *floating* tone: the ayah pill, the
+playback bar, and the reciter chooser now wear it with a soft shadow, so a
+control that floats over the page reads as floating instead of as printed
+into the page with a hard rectangle. That is the one place the design
+document's "quiet is beautiful" had been met with a box, and it is gone.
+
+**The study reading now has a measure.** The ten inch study frame laid a
+translation across the full 2560 px of the glass, well over two hundred
+characters a line, where the eye stops returning to the margin on its own.
+`Reading.MaxMeasure` (620 dp) and `ReadingFrame` cap every reading column
+at a readable measure and center it when the screen is wider than the
+measure; the study list, which keeps its paper full width so a drag still
+scrolls and a tap on the margin still brings the chrome, draws its rows
+into the centered column. Settings' sheet adopts the same cap, so a settings
+row's two ends no longer sit a foot apart on a tablet. This is the single
+largest legibility win of the pass, and it is invisible on a phone.
+
+**The study surah opening is an arrival.** The head of a surah was three
+lines of centered type. It is now built to the printed page's own model,
+the model the Mushaf already draws on its surah line: the Arabic name in
+the ornament gold at 40 sp, a short gold rule under it, then the simple
+name and the place in quiet type, the basmalla below, and the About button
+under that. The rule is ornament and carries no meaning, which is why it is
+gold and not a separator.
+
+**The study block is now actionable for TalkBack.** D-084 named the gap:
+the Mushaf gives every ayah a semantics node whose action raises the pill,
+but the study block answered a real long press only, so a screen reader
+could read an ayah there but not act on it. The block now exposes the same
+custom accessibility action (`study_ayah_actions`), so the one gesture the
+reading is built around works in both readings.
+
+**Verification.** The JVM suite, lint, and `assembleDebug` are green after
+every change. No emulator was used this session; the instrumented claims
+wait for CI. The store set is stale: the study frames, the settings sheet,
+the Browse numbers, and the ayah pill all changed visibly, so the next
+capture refreshes them from the workflow's artifacts.
+
+**Named and not done, so nothing is implied fixed.** (1) Mushaf zoom. The
+design document promises pinch zoom and the hard constraints require it,
+and the app has none. It is deliberately not in this pass: the page is a
+pre-rendered bitmap and the pager owns horizontal drags, so a correct zoom
+needs a `PageWindow` in `core` (scale and a clamped center, tested), rendering
+only the visible window, and a way to tell a pan from a page turn that does
+not break `MushafTurnTest`. A rushed zoom on the crash-sensitive page is
+worse than a named gap. This is the next session's first work. (2)
+Surah-arrival motion, recitation speed and repeat, and similar reading aids
+are backlog, not this pass.

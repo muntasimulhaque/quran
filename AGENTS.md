@@ -852,51 +852,56 @@ fetching them again; the space is worth less than the time.
    changes a pixel captures again with the procedure in "Store
    screenshots".
 
-1. **The quiet alphas on the card.** D-084 measured two more tones under
-   the design document's own 4.5:1 rule on the sepia ground: the tafsir
-   range at 0.7 alpha (3.3:1) and the note hint at 0.5 (2.2:1), both on
-   `surface`. The study reading's own quiet tones were moved to
-   `onSurfaceVariant` in that pass; the card's are named as the next one's
-   work.
-2. **Accessibility for the study pill.** The Mushaf gives every ayah a
-   semantics node whose action raises the pill; the study block answers a
-   real long press only. Expose the same custom action on the study row,
-   the way the Mushaf does, so a TalkBack reader can act on an ayah in both
-   readings.
-3. **Measure on real hardware.** The numbers in D-037 come from a software
+1. **Mushaf zoom, and the window it needs.** The design document promises
+   pinch zoom and the hard constraints require it, and the app has none. It
+   is the first work of the next session, and it is a real feature, not a
+   gesture: the page is one printed sheet, so zoom is a window over the same
+   bitmap and not a reflow. The shape: `core/PageWindow` (a scale and a
+   clamped center, pure and tested), the renderer drawing only the visible
+   window at the device scale, and a pan/pinch handler that stays out of the
+   pager's way so `MushafTurnTest` still passes. The sign-off to change the
+   Mushaf interaction model is the owner's; bring the plan before building.
+2. **The quiet alphas on the card are closed.** D-084's two named tones, the
+   tafsir range and the note hint, now take `onSurfaceVariant`, and the
+   sweep in D-086 found and closed five more of the same defect across
+   Browse, Search, the shared card, and the footnotes. The rule stands: a
+   tone with meaning takes the theme's token, and the token is measured.
+3. **Accessibility for the study pill is closed.** The study block now
+   exposes the same custom action the Mushaf does (D-086).
+4. **Measure on real hardware.** The numbers in D-037 come from a software
    rendered emulator, the slowest Android this app will run on. A
    Macrobenchmark module for startup and page turns, run on a phone, is the
    only way to hold the budget the design document sets (under 300 ms to the
    first painted page on a warm start) and to prove the baseline profile is
    pulling its weight.
-4. **The second language.** The strings are ready for one; the reader is not.
+5. **The second language.** The strings are ready for one; the reader is not.
    A translation pass needs a translator for the interface, a `values-xx`
    folder, and the same care the Arabic content gets: a real review, not a
    machine.
-5. **Content backlog.** More translations and tafsirs as packs (each one is a
+6. **Content backlog.** More translations and tafsirs as packs (each one is a
    dataset entry in `PackSources`, a pack definition, and a Release), and a
    second mushaf script if a font and layout are chosen.
-6. **Instant launch, second step.** A pre-rendered bitmap of the *next* page
+7. **A recording of the tour's study frames.** The screenshot set covers the
+   surface; a short screen recording of a page turn, a mode switch, and the
+   ayah card would catch the motion a still cannot, and the pipeline already
+   has an emulator to do it on.
+8. **A reading plan, if the owner wants one.** A khatm is a commitment, not a
+   guess: an explicit plan (a daily portion, a finish date) is the only
+   honest way to keep a linear reading place apart from casual lookups, and
+   it builds on the portion the glossary already describes. The eighth
+   session shipped no heuristic for it (D-045).
+9. **Instant launch, second step.** A pre-rendered bitmap of the *next* page
    in the direction the reader was reading, so the first swipe after a launch
    is also a texture draw.
-7. **Trust work, second step.** The owner removed export and import in the
-   tenth session (D-051), so this item is gone unless they ask for a different
-   way to carry saved work. If they do, the shape to build is a merge preview
-   and a way to move one note rather than the whole document, never the same
-   JSON door again.
-8. **Robustness, second step.** A pack that fails verification at download
-   time should say which check failed (size, hash, or unpack) rather than one
-   line for all three, and the content self check should offer the removal it
-   recommends.
-9. **A khatm plan, if the owner wants one.** A khatm is a commitment, not a
-   guess: an explicit plan (a daily portion, a finish date) is the only honest
-   way to keep a linear reading place apart from casual lookups, and it builds
-   on the portion the glossary already describes. The eighth session shipped no
-   heuristic for it (D-045).
-10. **A recording of the tour's study frames.** The screenshot set covers the
-    surface; a short screen recording of a page turn, a mode switch, and the
-    ayah card would catch the motion a still cannot, and the pipeline already
-    has an emulator to do it on.
+10. **Robustness, second step.** A pack that fails verification at download
+    time should say which check failed (size, hash, or unpack) rather than one
+    line for all three, and the content self check should offer the removal it
+    recommends.
+11. **Trust work, second step.** The owner removed export and import in the
+    tenth session (D-051), so this item is gone unless they ask for a different
+    way to carry saved work. If they do, the shape to build is a merge preview
+    and a way to move one note rather than the whole document, never the same
+    JSON door again.
 
 ## Traps worth remembering
 

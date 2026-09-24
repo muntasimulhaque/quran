@@ -360,7 +360,11 @@ private fun SearchField(
                             Text(
                                 text = stringResource(R.string.search_hint),
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
+                                // The hint is the only text in an empty field,
+                                // so it has to be read to be a hint at all. The
+                                // 0.55 alpha it wore measured 2.5:1, under the
+                                // design document's 4.5:1 rule (D-084).
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                         inner()
@@ -557,7 +561,10 @@ private fun AyahRow(
                 Text(
                     text = translation.packName,
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    // A pack's name is read, so it keeps the theme's own
+                    // secondary tone; the 0.7 alpha it wore measured 3.3:1,
+                    // under the design document's 4.5:1 rule (D-084).
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 4.dp),
                 )
             }
