@@ -4005,3 +4005,10 @@ installed in `play-store/screenshots/`, every frame compared with its
 artifact by `cmp` (24 of 24 match) and every changed frame read. The
 hand-off copy of the bundle is deleted once the owner confirms the Play
 submission, as every release before it has done.
+
+**The submission is confirmed, so the hand-off is closed.** The owner
+submitted 2.0 to Google Play for review, and the hand-off copy of the bundle
+was deleted the same session, as the runbook requires: the artifact stays in
+the build run and in Play, and `play-store/aab/` keeps only its own note. The
+tree is clean. The signed bundle's record is above and in build run
+36008294664; nothing in the repository depends on the binary.

@@ -934,8 +934,10 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the twenty-eighth session)
 
-**2.0 (versionCode 21) is submitted to Google Play for review.** It carries
-the reader's seventh report (D-090, D-092, D-093):
+**2.0 (versionCode 21) is submitted to Google Play for review**, and the
+hand-off is closed: the bundle was deleted once the submission was confirmed,
+and `play-store/aab/` keeps only its own note. It carries the reader's
+seventh report (D-090, D-092, D-093):
 
 - **The playback pill never touches the glass.** Both states keep a 16 dp
 gutter outside the shadow, and the label gives before the size or the doors
