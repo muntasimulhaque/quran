@@ -4,18 +4,18 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 2.0 (versionCode 21) is prepared for Google Play, carrying the
-reader's seventh report (D-090): the playback pill keeps a gutter from the
-glass and lets its label be the thing that gives; Share raises a sheet with
-the card shown as it will be sent and two doors (image alone, which is the
-default, and the words alone); the tafsir's mixed paragraphs no longer
-breathe as whole Arabic paragraphs, with the line room measured out of the
-sources' own glyphs; search results run from the verse outward (reference,
-surah name, Arabic text, translation, word meanings, tafsir), each kind in
-Mushaf order; Go to Ayah is capitalized and its picker is a designed page;
-and the pill carries the pace and repeat, the same two values the Listening
-page owns. Arabic as a third interface language is deferred on the owner's
-word; its design is recorded in D-090.
+**Status:** 2.0 (versionCode 21) is submitted to Google Play for review,
+carrying the reader's seventh report (D-090): the playback pill keeps a
+gutter from the glass and lets its label be the thing that gives; Share
+raises a sheet with the card shown as it will be sent and two doors (image
+alone, which is the default, and the words alone); the tafsir's mixed
+paragraphs no longer breathe as whole Arabic paragraphs, with the line room
+measured out of the sources' own glyphs; search results run from the verse
+outward (reference, surah name, Arabic text, translation, word meanings,
+tafsir), each kind in Mushaf order; Go to Ayah is capitalized and its picker
+is a designed page; and the pill carries the pace and repeat, the same two
+values the Listening page owns. Arabic as a third interface language is
+deferred on the owner's word; its design is recorded in D-090.
 
 **1.9**, submitted before it, carries the twenty-seventh session's
 craftsmanship pass (D-086 through
