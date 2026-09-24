@@ -42,8 +42,10 @@ words. Everything else is a guest.
   reads as a book.
 * One page per screen, turned by a horizontal swipe. Adjacent pages are
   pre-rendered, so a turn is a texture draw, never a render.
-* While the reader swipes, the moving page casts a soft shadow on the page
-  under it, and a light haptic marks the settle.
+* While the reader swipes, the page simply slides: nothing is lifted, nothing
+  casts a shadow, and a light haptic marks the settle. The page is the Book,
+  not a sheet being picked up, and an edge lifted off the paper draws the eye
+  away from the text it carries.
 * A **tap** anywhere belongs to the reading: it brings the chrome, or puts
   it away. No tap ever opens a panel by surprise.
 * A **long press** on an ayah asks about that ayah: it washes the ayah, hums
@@ -59,9 +61,10 @@ words. Everything else is a guest.
 
 Revealed by a tap on the paper, faded out after seven seconds of no touch.
 
-* Top edge: the surah name and juz at the left, then four icon buttons at
-  the right: the **mode switch**, **Browse** (surah, juz, Last Read, and
-  saved lists), **Search**, **Settings**.
+* Top edge: Browse, the mode door, the surah name and juz centered as one
+  unit, then Search and Settings. The mode door shows the reading the reader
+  is not in, one icon instead of a two-choice switch, so the name keeps its
+  room on the screen's own center.
 * There is no bottom edge. The bar that held the mode switch, Listen, and
   Saved is gone: the switch is one door at the top that offers the *other*
   mode (the icon shown is the mode a tap will reach, never the one the reader
@@ -100,20 +103,30 @@ gives, and readers read it as one.
 
 ## 4. The ayah card
 
-One sheet, three depths, no tabs to learn:
+One sheet, no tabs to learn, and what it holds follows the reading the
+reader came from. The card never repeats what is already on the page behind
+it, so it is the deeper material and nothing else:
 
-1. **Reference and actions.** The reference in small type, then three icon
-   buttons at the right: save, share, and the deeper doors.
-2. **The ayah.** Arabic in Hafs, then every translation the reader turned on,
-   each named when more than one is on, then footnotes. A footnote marker
-   opens that note in its own sheet; there is no setting that spills every
-   note under every ayah.
-3. **Deeper.** Three quiet rows, each a door: *Word meanings*, *Ibn Kathir*,
-   *As-Sa'di*. Tapping one unfolds it in place; tapping again closes it.
-4. **Note.** "Add a note" row; when a note exists it shows as its own
-   paragraph in the reader's voice, with an edit affordance.
-5. **Listen.** One outlined button at the foot of the card: play from this
-   ayah.
+* **From the Mushaf**, where the page carries no translation and no
+  meanings, the card is the study surface: **word meanings** over their list
+  door, then the **translation**, then the **tafsirs**, in the order the
+  study reading itself draws them. The ayah's own Arabic is not repeated: the
+  reader came from it, it is on the page behind the card, and a second copy
+  would only push the study down.
+* **From the study reading**, where the ayah, its translation, and its
+  meanings are already open on the page, the card is the **tafsirs** and
+  nothing else. A reader with no tafsir open gets the door to add one rather
+  than a sheet with nothing in it.
+* **Deeper.** Each tafsir is a quiet row, a door: tapping it unfolds the
+  passage in place, and tapping again closes it. The row says what is behind
+  it and whether it is shown.
+* **Footnotes.** A translation's footnote marker opens that note in its own
+  sheet, from the card exactly as from the study reading. There is no
+  setting that spills every note under every ayah.
+* **The note is not here.** Writing a note belongs to the long-press pill,
+  one tap from the reading rather than a scroll to the foot of a card.
+* **Listen** is the play action on the pill and in the pill's row, not a
+  repeated button at the foot of the card.
 
 ## 5. Search
 

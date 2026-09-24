@@ -32,7 +32,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.uikit.R
 
@@ -373,7 +372,11 @@ fun TextAction(label: String, icon: Icon, onClick: () -> Unit, active: Boolean =
         )
         Text(
             text = label,
-            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+            // The label sits at the theme's own small label size rather than a
+            // point smaller. 10 sp was under Material's floor and under the
+            // size the rest of the app's smallest type uses, so the one word
+            // naming each action was the hardest word on the page to read.
+            style = MaterialTheme.typography.labelSmall,
             color = if (active) {
                 MaterialTheme.colorScheme.primary
             } else {
