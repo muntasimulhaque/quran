@@ -684,28 +684,12 @@ class ContentDatabase private constructor(
                 wordMeaning = row.meaning,
             )
         }
-        val merged = ArrayList<SearchHit>(leading.size + ayahHits.size + tafsirHits.size)
-        merged += leading
-        merged += (ayahHits + tafsirHits).sortedWith(
-            compareBy({ hitAyahNumber(it) }, { if (it is SearchHit.TafsirHitResult) 1 else 0 }),
-        )
-        // A reader wants one row per passage, not one per ayah it covers.
-        val deduped = ArrayList<SearchHit>(merged.size)
-        var lastTafsir: SearchHit.TafsirHitResult? = null
-        for (hit in merged) {
-            if (hit is SearchHit.TafsirHitResult) {
-                if (lastTafsir != null && lastTafsir.pack == hit.pack &&
-                    lastTafsir.fromAyah == hit.fromAyah && lastTafsir.surah == hit.surah
-                ) {
-                    continue
-                }
-                lastTafsir = hit
-            }
-            deduped += hit
-        }
-        val capped = deduped.size > limit
+        // The kinds run from the verse outward, each still in Mushaf order
+        // inside itself; the pure function carries the reasoning and the
+        // test, so this call site only has to hand it what it found.
+        val (hits, capped) = orderSearchHits(leading, ayahHits, tafsirHits, limit)
         return SearchResults(
-            hits = deduped.take(limit),
+            hits = hits,
             counts = SearchCounts(counts[0], counts[1], counts[2], counts[3], counts[4]),
             capped = capped,
         )
@@ -715,13 +699,6 @@ class ContentDatabase private constructor(
         var matchedWords: Set<Int> = emptySet()
         var translation: TranslationHit? = null
         var meaning: String? = null
-    }
-
-    private fun hitAyahNumber(hit: SearchHit): Int = when (hit) {
-        is SearchHit.ReferenceHit -> hit.ayah.number
-        is SearchHit.AyahHit -> hit.ayah.number
-        is SearchHit.SurahHit -> 0
-        is SearchHit.TafsirHitResult -> hit.ayah.number
     }
 
     private fun referenceAyahNumber(reference: Search.Reference): Int? {

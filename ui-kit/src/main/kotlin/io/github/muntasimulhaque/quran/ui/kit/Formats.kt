@@ -33,3 +33,11 @@ fun shortReciterName(id: String, fallback: String): String = when (id) {
  */
 fun speedText(speed: Float): String =
     if (speed == speed.toInt().toFloat()) "${speed.toInt()}x" else "${speed}x"
+
+/**
+ * The paces a reader may choose, from the slowest to the quickest. One list,
+ * because the Listening page and the playing pill offer the same five and set
+ * the same value: a pace that appeared in one and not the other would be two
+ * answers to one question.
+ */
+val SpeedSteps = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f)

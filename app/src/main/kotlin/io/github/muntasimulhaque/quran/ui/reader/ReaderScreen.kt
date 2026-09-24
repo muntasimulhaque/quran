@@ -130,11 +130,11 @@ fun ReaderScreen(
     var touch by remember { mutableIntStateOf(0) }
     val context = androidx.compose.ui.platform.LocalContext.current
     val scope = rememberCoroutineScope()
-    // A share is a card: the parts are read off the main thread, then the
-    // card composes invisibly, is recorded into a layer, and leaves as a
-    // PNG through the chooser. While this holds a card the capture is
-    // composing for the frame alone; it is never drawn to the screen.
-    var sharing by remember { mutableStateOf<ShareCard?>(null) }
+    // What a Share is doing: null when nothing, a card waiting for the
+    // reader's choice in the share sheet, and the same card with `capture`
+    // set once they asked for the picture. One holder rather than two, so a
+    // second tap can never leave a stray sheet behind the capture.
+    var sharing by remember { mutableStateOf<ShareRequest?>(null) }
 
     // The wash under an ayah: the one the long press chose, or the one whose
     // note is open over it. A note opened from Browse has no pill behind it,
@@ -164,27 +164,38 @@ fun ReaderScreen(
         chrome = false
     }
 
+    // The localized fallback line for a device with no receiving app, read
+    // here where stringResource is valid; the share itself runs in a plain
+    // lambda where a composable call would not be.
+    val shareUnavailable = stringResource(R.string.share_unavailable)
+
+    /**
+     * The words alone, wherever a door sends them. The card and the words
+     * are two separate intents now: putting the text on the picture's own
+     * intent is what made every receiver post the ayah twice (D-090).
+     */
     fun sharePlainText(text: String) {
-        val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(android.content.Intent.EXTRA_TEXT, text)
-        }
-        runCatching {
-            context.startActivity(android.content.Intent.createChooser(intent, null))
+        if (!shareAyahText(context, text)) {
+            // Nothing can be shared on a device with no receiving app; the
+            // reader is told rather than left with a tap that did nothing.
+            android.widget.Toast.makeText(
+                context,
+                shareUnavailable,
+                android.widget.Toast.LENGTH_SHORT,
+            ).show()
         }
     }
 
     /**
-     * The card as an image beside the plain text: the PNG goes out through
-     * the app's own content provider and the text rides along as the caption
-     * every receiving app can use. Anything that fails along the way (a full
-     * cache, a provider that will not resolve) falls back to the plain text,
-     * so a Share is never a tap that did nothing.
+     * The card as a picture, alone. The PNG goes out through the app's own
+     * content provider; a full cache or a provider that will not resolve
+     * falls back to the plain text, so a Share is never a tap that did
+     * nothing.
      */
     fun shareCard(image: ImageBitmap, text: String) {
         scope.launch {
             val file = withContext(Dispatchers.IO) { writeShareCard(context, image) }
-            val opened = file != null && startShareCard(context, file, text)
+            val opened = file != null && startShareCard(context, file)
             if (!opened) sharePlainText(text)
         }
     }
@@ -374,21 +385,36 @@ fun ReaderScreen(
 
         // The share card, composed for its capture alone. It never reaches
         // the screen: the layer it records into is read back and then the
-        // whole node leaves the composition.
-        sharing?.let { card ->
+        // whole node leaves the composition. This capture runs only after
+        // the reader has chosen Share image, so the words-only door never
+        // pays for a bitmap.
+        sharing?.takeIf { it.capture }?.let { card ->
             ShareCardCapture(
-                card = card,
+                card = card.card,
                 onImage = { image ->
                     sharing = null
-                    shareCard(image, card.text)
+                    shareCard(image, card.card.text)
                 },
                 onFailed = {
                     sharing = null
-                    sharePlainText(card.text)
+                    sharePlainText(card.card.text)
                 },
                 modifier = Modifier.align(Alignment.BottomStart),
             )
         }
+    }
+
+    // The share sheet: the real card as a preview, and the two doors.
+    sharing?.takeIf { !it.capture }?.let { ready ->
+        AyahShareSheet(
+            card = ready.card,
+            onShareImage = { sharing = ready.copy(capture = true) },
+            onShareText = {
+                sharing = null
+                sharePlainText(ready.card.text)
+            },
+            onDismiss = { sharing = null },
+        )
     }
 
     when (sheet) {
@@ -832,6 +858,8 @@ private fun BottomStack(
                 },
                 speed = viewModel.settings.playbackSpeed,
                 repeating = viewModel.settings.repeatAyah,
+                onSpeed = { viewModel.setPlaybackSpeed(it) },
+                onRepeat = { viewModel.setRepeatAyah(it) },
             )
         }
     }

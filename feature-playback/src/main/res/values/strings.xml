@@ -15,4 +15,7 @@
     <string name="playback_play_pause">Play or pause</string>
     <string name="playback_next_ayah">Next ayah</string>
     <string name="playback_reciter_ready">Ready to play</string>
+    <string name="playback_speed_label">Playback speed</string>
+    <string name="playback_speed_option">%1$s, %2$s</string>
+    <string name="playback_repeat_ayah">Repeat the ayah</string>
 </resources>

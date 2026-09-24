@@ -168,6 +168,39 @@ class ContentSearchTest {
         assertTrue("the excerpt must carry a range label", hit.fromAyah >= 1)
     }
 
+    /**
+     * The kinds run from the verse outward, each still in Mushaf order
+     * inside itself (owner decision, 28, D-090). The exact ordering is
+     * pinned by `SearchOrderTest` in the JVM suite, which does not depend on
+     * how many of one kind a query happens to return; what this checks is
+     * that a real query against the shipped database comes back in that
+     * order.
+     */
+    @Test
+    fun resultsRunFromTheVerseOutward() = runBlocking {
+        val results = content.search(request("mercy", limit = 200))
+        val kinds = results.hits.map { hit ->
+            when (hit) {
+                is SearchHit.AyahHit -> when {
+                    hit.arabicMatchedWords.isNotEmpty() -> 0
+                    hit.translation != null -> 1
+                    else -> 2
+                }
+                is SearchHit.TafsirHitResult -> 3
+                else -> -1
+            }
+        }
+        val ranked = kinds.filter { it >= 0 }
+        assertTrue("a common word must match something", ranked.isNotEmpty())
+        assertEquals("the kinds must never run backwards, got: " + kinds, ranked.sorted(), ranked)
+        // Within one kind the Book's own order is kept.
+        val numbers = results.hits
+            .filterIsInstance<SearchHit.AyahHit>()
+            .filter { it.translation != null }
+            .map { it.ayah.number }
+        assertEquals(numbers.sorted(), numbers)
+    }
+
     @Test
     fun searchIsFastWhenWarm() = runBlocking {
         content.search(request("mercy", tafsir = false))

@@ -39,6 +39,7 @@ import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.kit.SpeedSteps
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.reader.Icon
@@ -656,7 +657,7 @@ fun SpeedRow(value: Float, onChange: (Float) -> Unit) {
                 .padding(3.dp),
             horizontalArrangement = Arrangement.spacedBy(1.dp),
         ) {
-            SPEEDS.forEach { speed ->
+            SpeedSteps.forEach { speed ->
                 val active = kotlin.math.abs(speed - value) < 0.01f
                 val description = stringResource(
                     R.string.settings_speed_option,
@@ -693,5 +694,3 @@ fun SpeedRow(value: Float, onChange: (Float) -> Unit) {
     }
 }
 
-/** The paces the reader may choose, from the slowest to the quickest. */
-val SPEEDS = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f)

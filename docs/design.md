@@ -127,6 +127,11 @@ it, so it is the deeper material and nothing else:
   one tap from the reading rather than a scroll to the foot of a card.
 * **Listen** is the play action on the pill and in the pill's row, not a
   repeated button at the foot of the card.
+* **Share** is two doors in one sheet: the reader sees the ayah card as it
+  will be sent, then sends the picture alone (the default) or the words
+  alone. The picture never carries the text as a caption, because a receiver
+  then posts the ayah twice; the card itself is one centered column, from
+  the reference at its head to the app's own foot (D-090).
 
 ## 5. Search
 
@@ -167,13 +172,16 @@ Searched, in one pass:
   the place and the moment it was saved.
 * **Notes**: the ayahs a note was written on, newest note first, each row
   opening the note over its ayah.
-* **Go to ayah**: a door in the tab row beside the lists, opening a two-step
+* **Go to Ayah**: a door in the tab row beside the lists, opening a two-step
   picker for any ayah in the Quran: the surah first (the reader's own
   already chosen), then its ayah numbers in a grid, with the ayah they are
-  on marked and the grid landed on it. Tapping a number opens that ayah and
-  closes the sheet, so a long surah never has to be scrolled to reach a
-  place in it. The door never takes the chips' chosen fill: the picker swaps
-  in over the lists and the reader's own tab is waiting when it closes.
+  on marked and the grid landed on it. The surah is a card of its own quiet
+  fill, the grid opens a block under it rather than a finger's width, and
+  the header, the card, and the grid share one gutter, so the picker reads
+  as one page (D-090). Tapping a number opens that ayah and closes the
+  sheet, so a long surah never has to be scrolled to reach a place in it.
+  The door never takes the chips' chosen fill: the picker swaps in over the
+  lists and the reader's own tab is waiting when it closes.
 
 ## 7. Settings
 
@@ -198,8 +206,11 @@ closes the sheet, and the hub keeps its place while a page is open (D-046).
   text sizes use, and whether one ayah repeats. The pace is the reader's and
   is remembered; the voice keeps its pitch, so a slower ayah is slower and
   not deeper. A pace or a repeat that is not the ordinary one is said on the
-  playback pill too, so a reader is never left wondering why the reading
-  sounds slow or will not move on.
+  playback pill too, and the pill's own line is the door to both while an
+  ayah plays: the same two values, the same five steps, set where the reader
+  feels the need for them (D-090). The Settings page keeps them as the
+  default the next ayah starts from; there is one value with two doors, not
+  a remembered setting and a hidden session value.
 * **Translations**: more than one may be on, grouped by the language each one
   speaks, with the size before a byte moves. The mark is a check, like every
   other list where more than one may be on; the first one turned on is the
@@ -229,9 +240,12 @@ Rules:
 * The study text sizes follow the reader's own four settings; the Mushaf page
   never scales, because its lines are justified to the page and the page is
   the printed page, not a reflowed screen.
-* A paragraph takes the line height of the script actually in it: 1.9x for a
-  line that carries Arabic, 1.6x for Latin alone, never the Arabic's room
-  where there is no Arabic (D-049).
+* A paragraph takes the line height of the script actually in it: the
+  Arabic line for a block that is only Arabic, a shorter one for a Latin
+  paragraph that carries a quotation, and the Latin line for a block with no
+  Arabic at all, never the Arabic's room where there is no Arabic (D-049,
+  D-090). The ratios are measured against the sources' own glyph ink, not
+  chosen by eye.
 * No more than three sizes of type on one surface: a label, a reading size,
   and a display size.
 * Numbers in references are Latin (2:255) so they can be searched and read

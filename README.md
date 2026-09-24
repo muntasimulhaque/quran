@@ -4,8 +4,21 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 1.9 (versionCode 20) is submitted to Google Play for review. It
-carries the twenty-seventh session's craftsmanship pass (D-086 through
+**Status:** 2.0 (versionCode 21) is prepared for Google Play, carrying the
+reader's seventh report (D-090): the playback pill keeps a gutter from the
+glass and lets its label be the thing that gives; Share raises a sheet with
+the card shown as it will be sent and two doors (image alone, which is the
+default, and the words alone); the tafsir's mixed paragraphs no longer
+breathe as whole Arabic paragraphs, with the line room measured out of the
+sources' own glyphs; search results run from the verse outward (reference,
+surah name, Arabic text, translation, word meanings, tafsir), each kind in
+Mushaf order; Go to Ayah is capitalized and its picker is a designed page;
+and the pill carries the pace and repeat, the same two values the Listening
+page owns. Arabic as a third interface language is deferred on the owner's
+word; its design is recorded in D-090.
+
+**1.9**, submitted before it, carries the twenty-seventh session's
+craftsmanship pass (D-086 through
 D-088): every quiet text tone was measured against the design document's own
 4.5:1 rule and raised, the ornament gold now meets it too, the color scheme
 names every role Material draws from so nothing falls through to a default,
@@ -47,7 +60,7 @@ feature graphic, and screenshots per form factor are in
 - **Notes you can find again.** Write a note on any ayah from the pill a long
   press raises. Browse's Notes tab lists every ayah you wrote one on, newest
   first, and a tap opens the note over its ayah.
-- **Any ayah, without scrolling.** Browse carries a Go to ayah door in its
+- **Any ayah, without scrolling.** Browse carries a Go to Ayah door in its
   tab row: your own surah is already chosen, another is one tap through the
   same list, and a tap on a number opens that ayah.
 - **Two readings, one door.** The Mushaf and the study view are one door in
@@ -61,16 +74,22 @@ feature graphic, and screenshots per form factor are in
   at any time from Settings, and the whole app follows without a restart.
 - **The ayah card.** Save, note, share, play from this ayah, the word
   meanings, and every tafsir you have installed. It offers to add what it
-  does not have yet rather than showing an empty panel.
+  does not have yet rather than showing an empty panel. Share shows the card
+  as it will be sent, then sends the picture or the words, never both at
+  once.
 - **Search.** Arabic text, every enabled translation and tafsir, word
   meanings, surah names, and references like `2:255` or `baqara 255`, with a
   filter row under the field for narrowing the sources when a query returns
-  too much. Results are exact and instant, even over a forty megabyte tafsir.
+  too much. Results are exact and instant, even over a forty megabyte tafsir,
+  and they run from the verse outward: the reference you typed, the surah you
+  named, the ayahs whose Arabic matched, then the translation, the word
+  meanings, and the tafsir, each kind in the Book's own order.
 - **Recitation.** Minshawi and Husary, one surah at a time, asked for once: one
   offer names the reciter, the surah, and the size, the reciter can be swapped
   in that offer, and the word being recited is washed as it is read. The page
   follows the reciter if you ask it to. An offer you do not want is one tap
-  away from gone.
+  away from gone. The pace and the ayah repeat sit on the playing pill itself
+  while an ayah plays, and in Settings as the default for the next one.
 - **A library you choose.** The app ships the Quran text and its page layout
   and nothing else. Translations, tafsirs, word lists, and recitations are
   added when the reader wants them, from the project's own Releases, with the

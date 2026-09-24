@@ -20,6 +20,9 @@
     <string name="action_save">সংরক্ষণ</string>
     <string name="action_play">প্লে</string>
     <string name="action_share">শেয়ার</string>
+    <string name="share_image">ছবি শেয়ার করুন</string>
+    <string name="share_text">লেখা শেয়ার করুন</string>
+    <string name="share_unavailable">এই ডিভাইসে শেয়ার নেওয়ার মতো কোনো অ্যাপ নেই</string>
     <string name="action_more">আরও</string>
     <string name="action_tafsir">তাফসীর</string>
     <string name="action_note">নোট</string>

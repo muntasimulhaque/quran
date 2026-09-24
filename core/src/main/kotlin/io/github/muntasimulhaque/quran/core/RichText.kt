@@ -26,6 +26,54 @@ enum class TextBlockKind { PARAGRAPH, HEADING }
 
 data class TextBlock(val kind: TextBlockKind, val runs: List<TextRun>)
 
+/**
+ * Which scripts a block of tafsir or translation actually carries. The line
+ * room a block is given follows this, because the two scripts need very
+ * different air: Arabic draws diacritics above and descenders below its
+ * letters, Latin does not.
+ *
+ * The distinction between [ARABIC] and [MIXED] is the one the owner asked
+ * for: a paragraph that is all Arabic is an Arabic paragraph and takes the
+ * Arabic line; a paragraph that carries Latin prose with a quotation in it
+ * is an English paragraph with a quotation, and giving every line of it the
+ * Arabic paragraph's air is what made the tafsir's gaps uneven. The names
+ * are the block's, not the line's, because Compose sets line height per
+ * paragraph and a line cannot be given its own (see D-090).
+ */
+enum class ScriptMix { LATIN, MIXED, ARABIC }
+
+/**
+ * The scripts in one run list. A block with no Arabic letter at all is
+ * [LATIN], one with Arabic and Latin letters both is [MIXED], and one with
+ * only Arabic letters is [ARABIC].
+ *
+ * Only letters decide. A space between two Arabic words is its own run in
+ * the parser (the split follows script, and a space is neither), and a
+ * footnote marker is a digit: counting either as Latin would class every
+ * Arabic paragraph as mixed, which is exactly the mistake this rule exists
+ * to avoid.
+ */
+fun scriptMix(runs: List<TextRun>): ScriptMix {
+    var arabic = false
+    var latin = false
+    for (run in runs) {
+        if (run.marker != null) continue
+        var index = 0
+        while (index < run.text.length) {
+            val codepoint = run.text.codePointAt(index)
+            if (Character.isLetter(codepoint)) {
+                if (RichText.isArabic(codepoint)) arabic = true else latin = true
+                if (arabic && latin) return ScriptMix.MIXED
+            }
+            index += Character.charCount(codepoint)
+        }
+    }
+    return when {
+        arabic -> ScriptMix.ARABIC
+        else -> ScriptMix.LATIN
+    }
+}
+
 object RichText {
 
     /** Arabic script ranges, including the presentation forms used by ﷺ. */

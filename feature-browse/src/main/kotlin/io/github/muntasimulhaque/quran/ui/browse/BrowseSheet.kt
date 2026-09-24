@@ -49,6 +49,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.ContentDatabase
@@ -429,7 +430,10 @@ private fun GoToAyahPicker(
                     .weight(1f)
                     .sheetDragGate(gridGate)
                     .testTag("go-to-ayahs"),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 28.dp),
+                // The grid opens a block under its selector: the surah card
+                // is what the numbers belong to, and a grid that began a
+                // finger's width under it read as two separate lists (D-090).
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = Space.Block, bottom = 28.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
@@ -446,14 +450,18 @@ private fun GoToAyahPicker(
     }
 }
 
-/** The head of the picker: one way back, one name for the step. */
+/**
+ * The head of the picker: one way back, one name for the step. The title and
+ * the surah card below it share one gutter with the grid, so the picker reads
+ * as one page instead of a heading with a list under it (D-090).
+ */
 @Composable
 private fun PickerHeader(title: String, onBack: () -> Unit) {
     val back = stringResource(R.string.browse_back)
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 6.dp, end = 22.dp, top = 2.dp, bottom = 6.dp),
+            .padding(start = 6.dp, end = 16.dp, top = 2.dp, bottom = Space.Line),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
@@ -487,15 +495,24 @@ private fun PickerHeader(title: String, onBack: () -> Unit) {
     }
 }
 
-/** The surah the grid belongs to, and the door that changes it. */
+/**
+ * The surah the grid belongs to, and the door that changes it. It is a card
+ * of its own quiet fill rather than a bare row: the name a reader is about to
+ * leave has to read as a thing they hold, not as a label over a list, and the
+ * card's own air is what keeps the name and the first number from touching
+ * (owner report, D-090).
+ */
 @Composable
 private fun SurahSelector(name: String, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
             .clickable(onClick = onClick)
             .semantics { role = Role.Button }
-            .padding(horizontal = 22.dp, vertical = 10.dp)
+            .padding(horizontal = 14.dp, vertical = 14.dp)
             .testTag("go-to-surah"),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -503,12 +520,15 @@ private fun SurahSelector(name: String, onClick: () -> Unit) {
             text = name,
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
         IconGlyph(
             icon = Icon.Chevron,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
+                .padding(start = 12.dp)
                 .size(20.dp)
                 // A tap opens the surah list in place, so the mark points the
                 // way the page turns.

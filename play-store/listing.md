@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 1.9 (versionCode 20)
+Version: 2.0 (versionCode 21)
 
 ## Listing
 
@@ -87,20 +87,26 @@ for.
 - 7 inch tablet screenshots: `screenshots/tablet7/` (800 x 1280), eight of them
 - 10 inch tablet screenshots: `screenshots/tablet10/` (2560 x 1800), eight of them
 
-The set was refreshed after the craftsmanship pass (D-086/D-087) from the
-`Capture store screenshots` workflow (run 35978639462, all three legs green
-first try once the workflow's own script bug was fixed, D-088), for all
-three form factors, in the eight frames the store lists. Every frame was
+The set was refreshed after the craftsmanship pass (D-086/D-087) and again
+for 1.9 (D-089), all three legs green first try once the workflow's own
+script bug was fixed (D-088), for all three form factors, in the eight
+frames the store lists. Every frame was
 compared with its artifact by `cmp` (24 matches) and read for its content
 before it replaced the committed set. It carries the pass's changes: the
 study reading holds a readable measure on the wide screens, the surah
 opening is built to the printed page's model with one About button, the
 Browse numbers and the search hint are legible at full strength, a floating
-control wears a floating tone, and settings shows the new Listening row.
-It reads Version 1.8 because no release has been cut since the pass; the
-version line moves with the next release. The remaining frame differences
+control wears a floating tone, and settings shows the Listening row.
+The remaining frame differences
 between runs are the status bar's own clock, the text cursor's blink in the
 search frame, and a few pixels of subpixel antialiasing.
+
+The set is refreshed again for 2.0 from the release push: the playback pill,
+the share sheet, the Go to Ayah picker, the tafsir's paragraphs, and the
+search results all moved, so the capture reruns and the frames are read
+before they are installed. The set stays at eight frames per form factor:
+every changed surface is one the set already shows, and the share sheet is a
+door inside the ayah actions the eighth frame captures.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
@@ -119,6 +125,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (2.0, 482 characters)
+
+Share now shows the ayah card before you send it, with one button for the picture and one for the words, so the text never rides along with the image. The playback pill keeps its distance from the screen edge, and the pace and repeat are one tap away while an ayah plays. Tafsir paragraphs with a quoted Arabic line no longer stretch every line of the paragraph apart, search results run from the verse outward, and Go to Ayah opens as its own page. No ads, no trackers, no account.
 
 ## Release notes (1.9, 363 characters)
 

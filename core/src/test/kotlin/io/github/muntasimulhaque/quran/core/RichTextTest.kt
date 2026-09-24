@@ -204,4 +204,29 @@ class RichTextTest {
         assertFalse("no markup reaches the reader: $text", RichText.hasMarkup(text))
         assertEquals("Name\n\nWhy the name Al-Baqarah? The story is in 67-73.", text)
     }
+
+    @Test
+    fun `a paragraph is classed by the scripts it carries`() {
+        val latin = RichText.parseHtml("<p>In the Name of Allah, the Most Merciful.</p>").single().runs
+        assertEquals(ScriptMix.LATIN, scriptMix(latin))
+        val arabic = RichText.parseHtml("<p>وَالْعَادِيَاتِ ضَبْحًا</p>").single().runs
+        assertEquals(ScriptMix.ARABIC, scriptMix(arabic))
+        val mixed = RichText.parseHtml("<p>Allah said <q>إِنَّ اللَّهَ</q> indeed.</p>").single().runs
+        assertEquals(ScriptMix.MIXED, scriptMix(mixed))
+    }
+
+    @Test
+    fun `the prophet ligature alone makes a paragraph mixed`() {
+        // The ligature is Arabic inside English prose, and it is the case the
+        // mixed rule exists for: at the inline size its marks reach past a
+        // Latin line box (measured in D-090).
+        val runs = RichText.runs("the Prophet ﷺ said")
+        assertEquals(ScriptMix.MIXED, scriptMix(runs))
+    }
+
+    @Test
+    fun `a footnote marker never decides the scripts`() {
+        val runs = RichText.footnotes("In the name of Allah,[2] the Merciful.[3]")
+        assertEquals(ScriptMix.LATIN, scriptMix(runs))
+    }
 }

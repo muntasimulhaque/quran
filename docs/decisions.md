@@ -3760,3 +3760,192 @@ submitted 1.9 to Google Play for review, and the hand-off copy of the bundle
 was deleted the same session, as the runbook requires: the artifact stays in
 the build run and in Play, and `play-store/aab/` keeps only its own note. The
 tree is clean.
+
+## D-090: The owner's seventh reading report, and the measurements behind it
+
+Date: the twenty-eighth session. The owner read 1.9 on a phone, sent two
+screenshots, and asked seven questions. Six are answered in the tree this
+session; the seventh (an Arabic interface) is deferred on the owner's word.
+The owner approved the search order, the share sheet, the line-height
+direction, and the per-moment Listening control before any code was written.
+
+**1. The playback pill touched the glass.** The screenshot showed the
+continue-offer pill's rounded ends at the very left and right edges of the
+phone. The pill is centered in a full-width `Column` and had no horizontal
+margin of its own, so a long line ("Continue to Al-Baqarah - 177 MB") pushed
+it to the window's edges. A floating control keeps a gutter, and past the
+gutter the content gives, not the margin. Both states of the bar (playing
+and offer) now take 16 dp of horizontal padding **outside** the shadow, and
+both text columns are the flexible thing (`weight(1f, fill = false)`, the
+reciter name on one line, the status at most two, ellipsized), so the size
+and the buttons never truncate.
+
+**2. Share sent text with the picture, and the card was a mess of
+alignments.** `ACTION_SEND` carried `EXTRA_STREAM` **and** `EXTRA_TEXT`, so
+receivers posted the image with the text welded on as a caption, and some
+posted both. Tap Share now raises a small sheet with a live preview of the
+real card, and two doors: **Share image** (the default, the PNG alone, no
+text attached) and **Share text**. The card is rebuilt as one centered
+column: the reference, the Arabic, the translation, a hairline, then the
+mark with **Quran: The Noble Book** (the store title, its own string; the
+frozen `app_name` is untouched) and the translation's name. One alignment
+system replaced the four the card had (Arabic right, translation left,
+reference right, app name left). The store set is not captured by this
+session.
+
+**3. A paragraph with any Arabic breathed as a whole Arabic paragraph.**
+Measured, not guessed. The app gave the whole paragraph `arabicSp * 1.9`,
+which at the default tafsir size is 42.6 px of line for a 16 sp Latin
+paragraph. The Arabic's own ink was then measured out of the sources' own
+glyphs, the way the font gate measures coverage: the Arabic-only paragraphs
+need 1.67 em at the median and 1.84 em at the 90th percentile, while the
+Arabic inside the mixed paragraphs needs 0.97 em at the median and 1.32 em
+at the very worst. The owner's report was about the mixed paragraphs, and
+the two distributions are not the same size at all, which is the whole
+defect. The fix lands where the owner asked, at the block level the tafsir
+source already gives: a paragraph that is **only** Arabic keeps its full 1.9
+line, unchanged, and a paragraph that **mixes** scripts now takes
+`max(latinLine, arabicSp * 1.35)`: at the default size, 30.2 px of line
+instead of 42.6, and still past the 1.32 em the corpus reaches at its worst.
+Compose applies line height per paragraph and has no public per-line
+override (read in the pinned Compose 1.12.0 source: `LineHeightStyleSpan`
+bounds the whole paragraph, and `SpanStyle` has no line-height field), so
+the unit of the decision is the block, exactly as the source writes it, and
+the limit is named rather than hidden. A pure `core` function (`scriptMix`)
+classes a block as LATIN, MIXED, or ARABIC, and its test found a real bug
+while it was being written: a space between two Arabic words is its own run
+in the parser, and counting it as Latin classed an Arabic paragraph as
+mixed. Only letters decide the class.
+
+**4. Search order.** It was: a typed reference first, then a matched surah
+name, then everything else in one Mushaf-order list with a tafsir row sorted
+after its ayah. The owner approved the kinds running from the verse
+outward: reference, surah name, then the ayahs that matched in the **Arabic
+text**, then **translation**, then **word meaning**, then **tafsir**, each
+group still in Mushaf order. Within one grouped kind, an ayah whose
+translation also matched still opens its translation below the Arabic line,
+so a row never loses material it used to show. This is a `compareBy` in
+`ContentDatabase.search` plus its own test.
+
+**5. `Go to ayah` became `Go to Ayah`,** and the picker became a page: the
+surah selector is a card with its own quiet fill, rounded shape, and 14 dp
+of inner air; the header, selector, and grid share one gutter; the grid
+opens `Space.Block` under the selector instead of nearly touching it. The
+owner's "no gap between the surah name and the ayah" is closed.
+
+**6. Listening on the pill, and why it is the same two values.** The owner
+asked for the pace and repeat while an ayah plays. The honest model is one
+value with two doors, not two values: the pill's control calls the same
+`setPlaybackSpeed`/`setRepeatAyah` the Settings page calls, so the choice
+applies at once, persists, and the Settings page reads it back. A separate
+"this session only" value would be a second truth to explain and to keep in
+step, and a reader who slows one ayah almost always means the next one too.
+The pill's status line became the door: a quiet chip with a chevron opening
+a menu in the pill's own cloth, holding the same five-speed segmented
+control and the repeat switch as the Listening page. The offer bar has no
+pace control: the reader there is deciding whether to download, not how to
+hear. Two owners of the two setters on the pill (the toggle and the menu)
+share one callback set, so no new state was added.
+
+**7. Arabic as an interface language: deferred.** The design is sound and
+nearly ready (the enum, the locale plumbing, and `supportsRtl` are in
+place), but rule 8 needs a real translation pass over about 240 strings and
+a mirrored-layout QA pass. The owner deferred it; nothing changed this
+session, and this note is where it stands if a later session picks it up.
+
+**Verification.** The JVM suite (core and data), the app's unit tests, lint,
+and `assembleDebug` are green. New tests: `RichTextTest.scriptMix` in core
+and a search-order test in data. The emulator was not driven by hand; the
+instrumented claims wait for CI, and the store set will be refreshed by the
+next capture because every surface above moved.
+
+## D-091: The 2.0 notes, drafted and held
+
+Date: the twenty-eighth session, after D-090.
+
+The runbook's version rule gives the release after 1.9 the name **2.0**
+(no 1.10 exists: the tenth release of a major line is its `x.0`), so this
+entry exists so the session that cuts the release does not have to
+rediscover the arithmetic: **the next version is 2.0, versionCode 21.**
+
+The notes, 482 characters, written under `## Release notes (2.0)` when the
+release is cut, and kept at that length because the Play field holds 500:
+
+Share now shows the ayah card before you send it, with one button for the
+picture and one for the words, so the text never rides along with the image.
+The playback pill keeps its distance from the screen edge, and the pace and
+repeat are one tap away while an ayah plays. Tafsir paragraphs with a quoted
+Arabic line no longer stretch every line of the paragraph apart, search
+results run from the verse outward, and Go to Ayah opens as its own page. No
+ads, no trackers, no account.
+
+**The store set.** Every surface in this report moved: the pill, the share
+sheet, the picker, the tafsir's paragraphs, and the search results. The next
+capture refreshes all three form factors, and the eight-frame set keeps its
+count: no new frame is needed, because every changed surface is one the set
+already shows, except the share sheet, which is a door inside the ayah
+actions the eighth frame already captures. If the owner wants the share
+sheet in the set, a ninth frame has to earn its place against the reading,
+which is the runbook's own rule; it is not added here.
+
+## D-092: The 2.0 release, prepared
+
+Date: the twenty-eighth session, on the owner's word to go for a Play release.
+
+Step 0 passed before anything moved: `content/raw` holds the manual exports
+(27 QUL files, the two QuranEnc files, and the Tanzil XML) and
+`content/work/verify` holds all 29 extractions, so the owner gates ran here
+rather than being owed.
+
+**All five owner gates green.** `verify` 29 datasets (checksums and
+structure), `audit` 6236 ayahs with 0 unexplained differences and the one
+accepted orthographic variant, `fonts` coverage passed (628169 study
+codepoints, 604 pages, 22985677 reading codepoints), `checkdb` (the committed
+database unchanged, 128966656 bytes,
+`5c5988fa2916eb1cc905d01ddb9b4ef9319d0ca19c945bf0140eaff32296cea9`, and the
+catalog matching 10 pack files), and `search` (63 Arabic and 65 Bangla round
+trips, 82 non-ASCII codepoints folding, 465 excerpts free of markup).
+
+**The version.** `versionCode` 21, `versionName` 2.0, read back from the
+built release APK rather than assumed. The version line in
+`play-store/listing.md` moved with it, and the notes sit under their own
+`## Release notes (2.0)` heading, 482 characters, no dashes or smart quotes,
+with 1.9's notes kept below.
+
+**The suite.** The JVM suite, lint, `assembleDebug`, `assembleRelease`, and
+`bundleRelease` are green. On the phone emulator: the data instrumented
+suite 31/31 and the app instrumented suite 19/19, the new `PlaybackPillTest`
+and the tour among them.
+
+**A test of mine was wrong, and the finding is worth keeping.** The new
+search-order assertion was written against one live query, and that query
+returns so many translation matches that the 200-row cap hid every other
+kind, so the assertion failed on its own assumption rather than on the
+order. The order is a pure function now (`data/SearchOrder.kt`), pinned by
+five JVM tests that build their own hits and cannot be fooled by what the
+corpus returns; the instrumented test keeps only what a device can prove
+(the kinds never run backwards and one kind keeps the Book's order). A
+contract should be tested where it lives, not through whatever one query
+happens to answer.
+
+**One list, two doors, one declaration.** `SpeedSteps` moved from
+`feature-settings` to `ui-kit/Formats`, because the pill's menu and the
+Listening page now draw the same five paces: two copies of the list would be
+two answers to one question, and the copy would only be found the day one of
+them changed.
+
+**The bundle.** Built locally from the vault keystore,
+`app/build/outputs/bundle/release/app-release.aab`, 147824330 bytes,
+`jar verified` (the PKIX warning is the self-signed upload key's own chain,
+which is expected and is why CI prints the certificate's SHA-256 from the
+authoritative artifact). Read back: versionCode 21, versionName 2.0,
+`base/assets/content/core.db`, the Hafs face, 604 page fonts, and no other
+pack. The hand-off artifact is CI's `signed-bundle` from the release push,
+per the runbook.
+
+**Still owed at hand-over.** The screenshots. Every surface this release
+touches moved visibly (the pill, the share sheet, the Go to Ayah picker, the
+tafsir's paragraphs, the search results), so the capture runs on the release
+push and all three form factors are collected, `cmp`'d, and read before the
+hand-over, which happens only once the CI run is green and the signed bundle
+has been downloaded from it.

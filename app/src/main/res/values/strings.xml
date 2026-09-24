@@ -6,6 +6,17 @@
          see it. -->
     <string name="app_name" translatable="false">Quran</string>
 
+    <!-- The name the shared card carries: the store title, because the
+         picture leaves the app. Like the three frozen names, it is never
+         translated (D-001, D-090). -->
+    <string name="share_card_name" translatable="false">Quran: The Noble Book</string>
+
+    <!-- The two doors of the share sheet. The image is the default; the
+         words are the second choice, never welded to the picture. -->
+    <string name="share_image">Share image</string>
+    <string name="share_text">Share text</string>
+    <string name="share_unavailable">No app on this device can receive a share</string>
+
     <string name="first_paint_title" translatable="false">القرآن</string>
     <string name="first_paint_subtitle" translatable="false">The Noble Book</string>
     <string name="reader_fallback_title">Quran</string>

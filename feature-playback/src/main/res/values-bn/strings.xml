@@ -15,4 +15,7 @@
     <string name="playback_play_pause">চালান বা থামান</string>
     <string name="playback_next_ayah">পরের আয়াত</string>
     <string name="playback_reciter_ready">শোনার জন্য প্রস্তুত</string>
+    <string name="playback_speed_label">তিলাওয়াতের গতি</string>
+    <string name="playback_speed_option">%1$s, %2$s</string>
+    <string name="playback_repeat_ayah">আয়াত পুনরাবৃত্তি করুন</string>
 </resources>

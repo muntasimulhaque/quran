@@ -35,6 +35,8 @@ import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.TextBlock
 import io.github.muntasimulhaque.quran.core.TextBlockKind
 import io.github.muntasimulhaque.quran.core.TextRun
+import io.github.muntasimulhaque.quran.core.ScriptMix
+import io.github.muntasimulhaque.quran.core.scriptMix
 import io.github.muntasimulhaque.quran.data.Footnote
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.Inter
@@ -49,7 +51,8 @@ import io.github.muntasimulhaque.quran.ui.theme.LatinReading
  * a superscript marker that sits above the line. The line height is therefore
  * taken from the tallest thing on the line, never from the Latin size alone:
  * otherwise the Arabic and the markers collide with the lines around them as
- * soon as the reader turns the text up.
+ * soon as the reader turns the text up. A block with no Arabic keeps the
+ * Latin line exactly; see [lineHeightFor] for the two that carry it.
  */
 @Composable
 fun TranslationBody(
@@ -59,16 +62,15 @@ fun TranslationBody(
     lineSp: Float? = null,
     arabicSp: Float = sizeSp ?: 18f,
     onFootnote: ((Int) -> Unit)? = null,
+    /** True on a surface that centers its lines, such as the share card. */
+    centered: Boolean = false,
 ) {
     val latin = sizeSp ?: LatinReading.fontSize.value
-    // Only a paragraph that actually carries Arabic needs the taller line;
-    // giving every Latin paragraph the Arabic's room leaves a translation
-    // floating in white space.
-    val line = if (runs.any { it.arabic }) {
-        maxOf(lineSp ?: latin * 1.6f, arabicSp * 1.9f)
-    } else {
-        lineSp ?: latin * 1.6f
-    }
+    val line = lineHeightFor(
+        mix = scriptMix(runs),
+        latinLine = lineSp ?: latin * 1.6f,
+        arabicSp = arabicSp,
+    )
     val base = LatinReading.copy(
         fontSize = latin.sp,
         lineHeight = line.sp,
@@ -87,10 +89,47 @@ fun TranslationBody(
         ),
         style = base,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = if (centered) TextAlign.Center else TextAlign.Unspecified,
         modifier = modifier.fillMaxWidth(),
     )
 }
 
+/**
+ * The line room one block gets, from the scripts it actually carries.
+ *
+ * Arabic draws its diacritics above and its descenders below letters, so an
+ * Arabic paragraph needs more air than a Latin one. The mistake this fixes
+ * (owner report, D-090) was giving a whole Latin paragraph the Arabic
+ * paragraph's air because one quotation appeared in it: every line of an
+ * English tafsir paragraph breathed at 42.6 px for one inline word.
+ *
+ * The two ratios are grounded in the sources' own glyphs, not in taste. The
+ * Amiri ink of the tafsir's Arabic-only paragraphs needs 1.67 em at the
+ * median and 1.84 em at the 90th percentile, so [ArabicAir] stays where it
+ * has been at 1.9, just past that tail: the owner's report was about the
+ * mixed paragraphs, and the all-Arabic block's own rhythm was not part of
+ * it, so its line does not move. The Arabic inside the 4,836 mixed
+ * paragraphs needs 0.97 em at the median and 1.32 em at the very worst (the
+ * Prophet's ligature under a stack of marks, and one Urdu blessing), so
+ * [MixedAir] at 1.35 covers the whole distribution while bringing the mixed
+ * line down from the old 1.9: at the default tafsir size that is 30.2 px of
+ * line instead of 42.6 for a 16 sp body, which is the change that made the
+ * tafsir's gaps even (owner report, D-090). A block whose inline Arabic is
+ * taller than any the sources carry today would need this constant raised
+ * with it; the measurement is written here so the next session can redo it
+ * rather than guess.
+ */
+private fun lineHeightFor(mix: ScriptMix, latinLine: Float, arabicSp: Float): Float = when (mix) {
+    ScriptMix.LATIN -> latinLine
+    ScriptMix.MIXED -> maxOf(latinLine, arabicSp * MixedAir)
+    ScriptMix.ARABIC -> maxOf(latinLine, arabicSp * ArabicAir)
+}
+
+/** The air a Latin paragraph with an Arabic quotation gives the quotation. */
+private const val MixedAir = 1.35f
+
+/** The air an all-Arabic paragraph gives its diacritics; unchanged at 1.9. */
+private const val ArabicAir = 1.9f
 /**
  * A plain sentence with the matched words washed in the accent color. Used by
  * search results, where the text is a snippet rather than rich runs.
@@ -199,11 +238,11 @@ fun RichBlocks(
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         blocks.forEach { block ->
-            val line = if (block.runs.any { it.arabic }) {
-                maxOf(lineSp, arabicSp * 1.9f)
-            } else {
-                lineSp
-            }
+            val line = lineHeightFor(
+                mix = scriptMix(block.runs),
+                latinLine = lineSp,
+                arabicSp = arabicSp,
+            )
             when (block.kind) {
                 TextBlockKind.HEADING -> Text(
                     text = annotated(
