@@ -3649,3 +3649,10 @@ remembered choices:
 emulator this session; the instrumented claims wait for CI. The store set is
 stale (the study frames, settings, Browse numbers, the ayah pill, and the new
 Listening page all changed visibly), so the next capture refreshes it.
+
+**Named and not done (D-087).** The segmented controls that choose text
+sizes and the playback pace draw 38 dp and 46 dp cells, under the design
+document's 48 dp target. They are read as one row, and the fix is structural
+(an outer 48 dp touch box with the visual cell inside it), so it is a change
+to a captured, tested control that cannot be verified without a screen. It is
+the next pass's work, named rather than quietly left.
