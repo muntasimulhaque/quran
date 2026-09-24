@@ -177,7 +177,13 @@ fun AyahCard(
                 // pull that closes the card under them.
                 .sheetVerticalScroll(rememberScrollState())
                 .padding(bottom = 28.dp)
-                .testTag("ayah-card"),
+                // The sheet's window appears before its content has been read
+                // off the database, so a capture that keeps the first settled
+                // frame photographs a card missing its translation. The tag
+                // says when the card is whole, and the tour waits on it: the
+                // reader never sees the gap (the sheet is animating open), but
+                // a still frame does (owner report, D-090).
+                .testTag(if (translationReady) "ayah-card" else "ayah-card-loading"),
         ) {
             // From the Mushaf the card is the study surface, so the word by
             // word meanings, the translation, and the tafsirs are here, in

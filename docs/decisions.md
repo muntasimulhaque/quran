@@ -3949,3 +3949,38 @@ tafsir's paragraphs, the search results), so the capture runs on the release
 push and all three form factors are collected, `cmp`'d, and read before the
 hand-over, which happens only once the CI run is green and the signed bundle
 has been downloaded from it.
+
+## D-093: The 2.0 store set, and the race it found
+
+Date: the twenty-eighth session, on the release push.
+
+The push ran build 36006955183 (gates and debug build, data instrumented
+tests, and the signed bundle: all green) and screenshot run 36006955051
+(phone, 7 inch, and 10 inch: all three legs green first try). All 24 frames
+were collected and compared with their artifacts.
+
+**A real finding the comparison caught.** The phone's ayah-card frame differed
+from its predecessor by 15% of its pixels, far more than a clock or a cursor:
+rows 928 to 1210, the card's Translation block, were missing. The tablet7 and
+tablet10 cards differed from their predecessors by 0.03% and 0.02%. The cause
+is the race the runbook already names for sheets, in a place it had not been
+seen: the card's window exists and settles before its translations have been
+read off the database on a worker, so a capture that keeps the first two
+identical frames can photograph a card that is not yet whole. The reader
+never sees it (the sheet is still animating open at that moment), but a still
+frame does. The card now carries `ayah-card` only once its content is ready
+and `ayah-card-loading` before it, and the tour waits, within a bound, for
+the ready tag before it keeps the frame. A genuinely empty card still
+photographs, because a device with nothing installed is a true state rather
+than a race.
+
+**The set is installed from run 36006955051**, all three form factors, every
+frame `cmp`'d (24 checks): 24 of 24 match the artifact. Every changed frame
+was read before it shipped. The changes are the release's own: the search
+frames lead with a translation match instead of a tafsir row, which is the
+new order working; the settings frames read Version 2.0; the Browse frames
+carry the capitalized Go to Ayah chip; the pill, the picker, and the tafsir's
+paragraphs moved as designed; and the phone and tablet search frames
+otherwise differ only by the status bar's clock, the cursor's blink, and
+subpixel antialiasing (frame 01's whole-image difference is a maximum channel
+delta of 4, antialiasing and nothing else).

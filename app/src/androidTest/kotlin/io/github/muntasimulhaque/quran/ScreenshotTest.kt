@@ -357,8 +357,20 @@ class ScreenshotTest {
         Thread.sleep(1_500)
         rule.onNodeWithContentDescription("More").performClick()
         // The card composes after the tap, and its capture raced ahead of it
-        // the same way Browse's did; the tag waits for the card itself.
-        waitForTag("ayah-card")
+        // the same way Browse's did; the tag waits for the card itself. The
+        // card's content is read off the database on a worker, so the first
+        // ready tag can arrive before its translation does; the tour waits a
+        // bounded moment for the whole card and keeps the frame either way,
+        // because a card that is genuinely empty on a device where nothing
+        // is installed is a true frame, not a race.
+        waitForTag("ayah-card", timeout = 30_000)
+        runCatching {
+            rule.waitUntil(timeoutMillis = 10_000) {
+                rule.onAllNodesWithTag("ayah-card-loading", useUnmergedTree = true)
+                    .fetchSemanticsNodes().isEmpty()
+            }
+        }
+        Thread.sleep(600)
         captureScreen("08-ayah-card")
         back()
 
