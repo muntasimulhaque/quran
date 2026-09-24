@@ -117,6 +117,21 @@ artifact, `No files were found` (classes 2 and 5). The script bug.
 **Run 35377607496, all three legs.** `adb: device offline`, no artifact
 (classes 2 and 5).
 
+**Run 36006955051, phone, frame 08 (`08-ayah-card`), 2.0.** The leg was green
+and the frame settled twice, and the card in it was missing its Translation
+block. This is not a new class: it is the sheet race this file already
+names, wearing a new face. A modal sheet's **window** settles as soon as the
+sheet has drawn; its **content** may still be on a worker. The Browse and
+search frames dodge this because their content is computed before the sheet
+is raised, and the card's translation is read after it. The card now exposes
+`ayah-card` only once its content is ready and `ayah-card-loading` before
+that, and the tour waits on the ready tag. The tell in the numbers: the
+phone frame differed from its predecessor by 15% of its pixels with the
+differing rows exactly the translation block, while the two larger form
+factors differed by 0.03% and 0.02%. A still frame is where this race is
+visible; a reader never sees it, because the sheet is still animating open
+while the content lands.
+
 **The 0.5-era failure that started the workflow hardening.** "Pixel Launcher
 isn't responding" sat over every 10 inch frame while the leg was green. The
 workflow now suppresses ANR dialogs at the device level (`hide_error_dialogs

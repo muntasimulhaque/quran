@@ -3985,19 +3985,22 @@ otherwise differ only by the status bar's clock, the cursor's blink, and
 subpixel antialiasing (frame 01's whole-image difference is a maximum channel
 delta of 4, antialiasing and nothing else).
 
-**The bundle.** Downloaded from build run 36006955183's own artifact
-(`quran-signed-aab`) per the runbook, not from the local build:
-`quran-2.0-vc21.aab`, 147837053 bytes, `jar verified`, signed with the shared
-upload key whose SHA-256 is
+**The bundle, from the run that carries every commit.** The first download
+came from build run 36006955183, the release commit; the card fix (D-093)
+landed after it, so the bundle was replaced with the artifact of build run
+36008294664, which contains the whole source. This is the trap in miniature:
+the hand-off bundle must come from the newest green build on `main`, not the
+first one after the version bump. `quran-2.0-vc21.aab`, 147837180 bytes,
+`jar verified`, signed with the shared upload key whose SHA-256 is
 `537d09d20300129e973b7945316bfe24cfadcfbc77eec5229cbf30170d9de521` (checked
 with `keytool -printcert -jarfile`), and its delivered SHA-256 is exactly the
 one the artifact recorded,
-`2761134b6cd9a7dd9d55b207f364bf4dc888ace22415cf8115e17eb575708d57`. Read
-back from the bundle: `base/assets/content/core.db`, the catalog, the Hafs
-face, the 604 page fonts, and no other pack.
+`523d22e233a5db9c7d40a74ce5f3804968712b9e665b9f17f78218e6baa9a66d`. Read
+back: `base/assets/content/core.db`, the catalog, the Hafs face, the 604 page
+fonts, and no other pack.
 
-**Handed over together, before the submission.** The bundle and the 24
-screenshots from run 36008295034 are the delivery. The screenshots are
+**Handed over together, before the submission.** The bundle (run 36008294664)
+and the 24 screenshots (run 36008295034) are the delivery. The screenshots are
 installed in `play-store/screenshots/`, every frame compared with its
 artifact by `cmp` (24 of 24 match) and every changed frame read. The
 hand-off copy of the bundle is deleted once the owner confirms the Play

@@ -313,7 +313,11 @@ the store already has the old set.
 
    The artifact carries the bundle and its `SHA-256`, and GitHub deletes it
 after two weeks, so a signed build is never sitting in public and never
-sitting around.
+sitting around. **Take it from the newest green `build` run on `main`, not
+the first one after the version bump:** everything committed after the bump
+is in the later run and in nothing else, and 2.0's first download was the
+release commit's bundle while the card fix that followed it was already in
+the tree (D-093).
 7. **Hand over the bundle and the screenshots in the same message**, with the
    size, the checksum, what changed in the set (or that nothing did), and the
    notes pasted verbatim. Delete the hand-off copy once the owner confirms the
@@ -853,14 +857,16 @@ fetching them again; the space is worth less than the time.
 
 ## Next session: the remaining queue, in order
 
-0. **The store set is current, and the capture can be trusted.** 1.9
-   installed the set from run 35980906679, all three legs green first try on
-   the repaired workflow: every frame compared with its artifact by `cmp`
-   (24 matches) and every changed frame read (the Version 1.9 settings
-   frames with the Listening row, plus the clock and the cursor). The next
-   session that changes a pixel captures again with the procedure in "Store
-   screenshots", and reads `docs/screenshot-failures.md` first if a leg goes
-   red.
+0. **The store set is current, and the capture can be trusted.** 2.0
+   installed the set from run 36008295034, all three legs green first try:
+   every frame compared with its artifact by `cmp` (24 matches) and every
+   changed frame read. The next session that changes a pixel captures again
+   with the procedure in "Store screenshots", and reads
+   `docs/screenshot-failures.md` first if a leg goes red. One race is now
+   named for sheets whose content loads after their window settles: the
+   card says when it is whole and the tour waits on the tag, so a new sheet
+   with asynchronous content needs the same tag or it can photograph empty
+   (D-093).
 
 1. **The segmented controls' touch targets.** The text size steps and the
    playback pace draw 38 dp and 46 dp cells, under the design document's own
@@ -925,6 +931,58 @@ fetching them again; the space is worth less than the time.
   to right on the screen; `MushafTurnTest` now pins the direction on every
   form factor.
 
+
+## Where the project stands (end of the twenty-eighth session)
+
+**2.0 (versionCode 21) is submitted to Google Play for review.** It carries
+the reader's seventh report (D-090, D-092, D-093):
+
+- **The playback pill never touches the glass.** Both states keep a 16 dp
+gutter outside the shadow, and the label gives before the size or the doors
+do. `PlaybackPillTest` measures the real bounds.
+- **Share shows the card before you send it,** then sends the picture alone
+(the default) or the words alone. The caption is gone, which had made every
+receiver post the ayah twice, and the card is one centered column ending in
+**Quran: The Noble Book**.
+- **The tafsir's mixed paragraphs no longer breathe as Arabic paragraphs:**
+1.9 down to 1.35, past the 1.32 em the corpus reaches at its worst, with the
+line room measured out of the sources' own glyph ink and the three cases
+classed by a pure `core` function.
+- **Search results run from the verse outward,** each kind in Mushaf order.
+The order is a pure function with its own JVM tests.
+- **Go to Ayah** is capitalized and its picker is a designed page.
+- **The pill carries the pace and repeat,** the same two values the Listening
+page owns: one value, two doors.
+- **Arabic as a third interface language is deferred** on the owner's word,
+with its design recorded in D-090.
+
+**The suite.** All five owner gates ran green on this machine (`verify` 29
+datasets, `audit` 0 unexplained differences, `fonts` coverage passed,
+`checkdb`, `search`), plus the JVM suite, lint, both assembles, the data
+instrumented suite 31/31, and the app instrumented suite 19/19 on the phone
+emulator. CI: build 36008294664 (gates, data tests, signed bundle) and
+screenshot run 36008295034, all three legs green.
+
+**A race the capture found, and the rule it wrote into the runbook.** The
+phone's ayah-card frame came back missing its Translation block: the card's
+window settles before its translations are read off the database. The card
+now says when it is whole (`ayah-card` after `ayah-card-loading`) and the
+tour waits on that. The second finding is the bundle's own: the hand-off must
+come from the **newest** green build, because the card fix landed after the
+version bump and the first download predated it (D-093, and the runbook step
+now says so).
+
+**The store set is current.** Run 36008295034, all three form factors, every
+frame `cmp`'d (24 of 24) and every changed frame read. The changes are the
+release's own: search leads with a translation match instead of a tafsir row,
+settings reads Version 2.0, and Browse carries the capitalized Go to Ayah
+chip.
+
+**The bundle.** `quran-2.0-vc21.aab`, 147837180 bytes, SHA-256
+`523d22e233a5db9c7d40a74ce5f3804968712b9e665b9f17f78218e6baa9a66d`,
+`jar verified`, signed with the shared upload key
+(`53:7D:09:D2:...:0D:9D:E5:21`), carrying only the core pack. Handed over
+with the screenshots in one message, before the submission.
 
 ## Where the project stands (end of the twenty-seventh session)
 
