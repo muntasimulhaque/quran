@@ -100,6 +100,24 @@ is gone is never an intruder.
 The list below is the full history of this workflow's reds, newest first,
 and of the green legs that shipped a wrong frame.
 
+**Run 36164556475 (2.2 work), phone, attempt 1.** The leg went red on
+`a system window (com.google.android.apps.nexuslauncher) stayed over
+05-search` and kept only four frames. This is class 4 answering its own
+question: the suppression flags were set (`hide_error_dialogs 1` and
+`anr_show_background 0` are both in the log, and were re-applied before the
+test), a launcher ANR still came up over the keyboard-heavy search frame on
+the slowest of the three legs, and the **guard refused to ship it**. Both
+tablet legs passed the same code first try, which is the signature of the
+environment rather than the app. One rerun, per D-078 and the rule below;
+attempt 2 is green on all three legs and its artifact is the store set.
+The tell in the kept frames: 01 to 04 are healthy and complete, and frame
+01 is byte-identical to the previous release's, so nothing in the app had
+moved when the launcher arrived. In the rerun's set, frame 01 differs from
+the previous release's by subpixel antialiasing alone, measured at a
+maximum delta of 4 of 255 across the page.
+
+The list below is the older history.
+
 **Run 36121494370, phone, frames 07 and 08, 2.1.** The leg was green and
 the frames were wrong: "Pixel Launcher isn't responding" sat over both, the
 back key that closes Browse was swallowed, and frame 08 photographed the

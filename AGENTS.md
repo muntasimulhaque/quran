@@ -917,15 +917,16 @@ fetching them again; the space is worth less than the time.
 
 ## Next session: the remaining queue, in order
 
-0. **The store set is one capture behind.** 2.1's set is installed and
-   verified (run 36125481691), and the next release must capture because
-   this session changed pixels: the settings hub (merged switches with
-   their doors, the daily reminder row), the search results (no repeated
-   word meaning), the Go to Ayah picker (the reader's ayah centered), and
-   the share sheet (a long card scrolls). Use the procedure in "Store
-   screenshots" and start with the fast path in "Release hand-off": keep a
-   booted snapshot in the per-form-factor AVD cache so a leg comes under
-   three minutes.
+0. **The store set is current, and the capture can be trusted.** 2.2
+   installed the set from run 36164556475 attempt 2, all three legs green:
+   every frame compared with its artifact by `cmp` (24 matches) and every
+   changed frame read. The phone leg's first attempt met a launcher ANR over
+   `05-search`; the window guard refused the frame and the leg kept only four,
+   which is the guard working, and one rerun is the runbook's answer for that
+   class (D-078, D-098). The next session that changes a pixel captures again
+   with the procedure in "Store screenshots", and starts with the fast path
+   in "Release hand-off": keep a booted snapshot in the per-form-factor AVD
+   cache so a leg comes under three minutes.
 
 1. **The segmented controls' touch targets.** The text size steps and the
    playback pace draw 38 dp and 46 dp cells, under the design document's own
@@ -993,12 +994,12 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the thirtieth session)
 
-**2.1 remains the submitted release; the working tree carries the owner's
-ninth report and the daily reminder, unversioned until the owner's word
-(D-097).**
+**2.2 (versionCode 23) is prepared and handed over, awaiting the owner's
+submission to Google Play (D-097, D-098).** The owner asked for eight things
+against 2.1 and then said "go for play release"; the listening page reads
+অডিও, the owner's own word, after the first read of a garbled request.
 
-The owner read 2.1 on a phone and asked for eight things, and all eight are
-answered in the tree:
+What the release carries:
 
 - **Go to Ayah lands the reader's ayah mid-grid.** The picker scrolled the
   place to the viewport's top edge, where it read as any other row; it now
@@ -1010,9 +1011,9 @@ answered in the tree:
   in `data`, pure and tested in the JVM suite and against the shipped
   database.
 - **The reading switches and the packs are one row each.** Show translation
-  and Show tafsir carry the chevron that opens their own list, with their
-  own spoken names; the separate hub rows are gone. Word meanings is
-  untouched.
+  and Show tafsir carry the chevron that opens their own list, with the
+  chosen pack's name under them and their own spoken names; the separate hub
+  rows are gone. Word meanings is untouched.
 - **The share card is captured whole on every device.** `toImageBitmap`
   makes a hardware bitmap, capped by the GPU's texture size and refused by a
   software canvas; the capture now stitches 2,048 px software windows, and
@@ -1021,7 +1022,7 @@ answered in the tree:
 - **The theme swatch says what is drawing.** With auto-night on and the
   phone dark, Night is filled and the day page is named beside it.
 - **One Bangla spelling, and the listening word.** তাফসীর everywhere (the
-  QUL corpus's own), and the Listening page reads অডিও, the owner's own word.
+  QUL corpus's own), and the Listening page reads অডিও.
 - **The daily reminder.** One ayah a day at the reader's own hour, the
   translation when they read with one, and a tap that opens the ayah in the
   study reading. Offline, no new permission, no new dependency, off until
@@ -1031,10 +1032,18 @@ answered in the tree:
 **The suite.** `core:test`, `data:testDebugUnitTest`,
 `app:testDebugUnitTest`, `:app:lintDebug`, and `:app:assembleDebug` are
 green; the data instrumented suite is 31/31 and the app instrumented suite
-is 36/36 on the phone emulator, including the eight new test classes. The
-design document's Browse, Search, and Settings sections and D-097 carry the
-rules. The store set is one capture behind because this session changed
-pixels.
+is 39/39 on the phone emulator. All five owner gates ran green (D-098). CI:
+build 36164556479 green with the signed bundle, screenshot run 36164556475
+all three legs green on attempt 2 (the phone leg's first attempt met a
+launcher ANR over 05-search; the guard refused the frame, which is the
+environment class D-078 names).
+
+**The store set is current** (run 36164556475 attempt 2, 24 frames cmp'd,
+all changed frames read). **The bundle is handed over**:
+`quran-2.2-vc23.aab`, 147,867,353 bytes, SHA-256
+`ba4b9c1e4060a8fa16ef5424319ea2f8b17c9f7121fb83aff3961b4b5ec67c7d`, `jar
+verified`, signed with the shared upload key, core pack only. The hand-off
+copy is deleted once the owner confirms the Play submission.
 
 ## Where the project stands (end of the twenty-ninth session)
 

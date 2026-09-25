@@ -4334,3 +4334,59 @@ is 36/36 on the phone emulator, the five new classes included:
 Browse, Search, and Settings sections carry the new rules. The store set
 changes visibly (settings, search, and the share sheet), so the next capture
 refreshes all three form factors.
+
+## D-098: The 2.2 release, prepared
+
+Date: the thirtieth session, on the owner's word "go for play release".
+
+**The listening word is corrected first.** The owner's request had arrived
+garbled by the terminal as `অও`; the word they had meant is `অডিও`, the
+transliteration of "audio", and the Listening page reads it now. D-097's
+paragraph 6 is corrected in place and the runbook's Bangla trap with it.
+
+**Version and notes.** `versionCode` 22 to 23 and `versionName` 2.1 to 2.2,
+in `app/build.gradle.kts` and on the listing's version line. The 2.2 notes
+are 462 characters, one paragraph under their own heading, and the 2.1 notes
+stay under theirs.
+
+**All five owner gates green.** `verify` 29 datasets; `audit` 0 unexplained
+differences; `fonts` coverage passed; `checkdb` the committed database
+unchanged, 128,966,656 bytes, SHA-256
+`5c5988fa2916eb1cc905d01ddb9b4ef9319d0ca19c945bf0140eaff32296cea9`; `search`
+clean.
+
+**The local suite.** The JVM suite (core, data, app), lint, and
+`assembleDebug` green; the data instrumented suite 31 of 31 and the app
+instrumented suite 39 of 39 on the phone emulator, the eight new classes
+included.
+
+**The push.** `build.yml` ran build 36164556479, green (gates, data
+instrumented tests, and the signed bundle). The screenshot run 36164556475
+went red on the phone leg alone: the tour met a launcher ANR over
+`05-search`, the guard refused the frame, and the leg kept its four good
+frames; both tablet legs passed the same code first try. That is the
+class D-078 names, and one rerun is what the runbook allows for it: attempt
+2 is green on all three legs.
+
+**The store set**, from attempt 2 of run 36164556475, all three form
+factors, every frame compared with its artifact by `cmp` (24 matches) and
+every changed frame read. The changed set is the release's own: the settings
+frame carries the merged switches with their chevron doors, the chosen
+pack's name under each, and the new Daily ayah switch (off); the tablet
+search frames show the translation highlight standing alone with no repeated
+word meaning block; the phone Mushaf, Browse, and ayah-card frames differ
+only in the status bar clock and subpixel antialiasing, with the Mushaf
+page's whole-page difference measured at a maximum delta of 4 of 255.
+
+**The bundle**, from the newest green build on main, run 36164556479:
+`quran-2.2-vc23.aab`, 147,867,353 bytes, SHA-256
+`ba4b9c1e4060a8fa16ef5424319ea2f8b17c9f7121fb83aff3961b4b5ec67c7d` (matching
+the artifact's own recorded checksum), `jar verified`, signed with the
+shared upload key
+(`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`).
+Read back from the bundle: `base/assets/content/core.db` and its catalog,
+the 604 page fonts and the Hafs face, and no `assets/packs` entry at all.
+
+**Handed over together, before the submission.** The bundle and the 24
+screenshots are the delivery, with the 2.2 notes pasted bare. The hand-off
+copy of the bundle is deleted once the owner confirms the Play submission.
