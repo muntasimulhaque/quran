@@ -4196,3 +4196,10 @@ the 604 page fonts and the Hafs face, and no `assets/packs` entry at all.
 36125481634) and the 24 screenshots (run 36125481691) are the delivery, with
 the 2.1 notes pasted bare. The hand-off copy of the bundle is deleted once
 the owner confirms the Play submission, as every release before it has done.
+
+**The submission is confirmed, so the hand-off is closed.** The owner
+submitted 2.1 to Google Play for review, and the hand-off copy of the bundle
+was deleted the same session, as the runbook requires: the artifact stays in
+build run 36125481634 and in Play, and `play-store/aab/` keeps only its own
+note. The tree is clean. The signed bundle's record is above; nothing in the
+repository depends on the binary.

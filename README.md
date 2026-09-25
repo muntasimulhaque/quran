@@ -4,18 +4,19 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 2.0 (versionCode 21) is submitted to Google Play for review,
-carrying the reader's seventh report (D-090): the playback pill keeps a
-gutter from the glass and lets its label be the thing that gives; Share
-raises a sheet with the card shown as it will be sent and two doors (image
-alone, which is the default, and the words alone); the tafsir's mixed
-paragraphs no longer breathe as whole Arabic paragraphs, with the line room
-measured out of the sources' own glyphs; search results run from the verse
-outward (reference, surah name, Arabic text, translation, word meanings,
-tafsir), each kind in Mushaf order; Go to Ayah is capitalized and its picker
-is a designed page; and the pill carries the pace and repeat, the same two
-values the Listening page owns. Arabic as a third interface language is
-deferred on the owner's word; its design is recorded in D-090.
+**Status:** 2.1 (versionCode 22) is submitted to Google Play for review,
+carrying the reader's eighth report (D-094): Arabic passages in tafsir wrap
+from the right, so a quoted verse reads in order on every line (the cause
+was Compose's own default direction, named in D-094); Notes in Browse
+preview what you wrote, two lines at most, so a note is found without
+opening them all; Settings gains Show translation and Show tafsir switches
+beside Show word meanings, and the word by word switch moved out of the
+Translations page into that group; Go to Ayah is a normal Browse tab, with
+the surah choice as the one step that keeps a head and a back; search
+results name their word meanings; and the shared ayah card no longer prints
+the translation's name. The capture's window guard was widened the same
+session after a green phone leg shipped a dialog that never took focus
+(D-096), and the release runbook now carries the measured fast path.
 
 **1.9**, submitted before it, carries the twenty-seventh session's
 craftsmanship pass (D-086 through

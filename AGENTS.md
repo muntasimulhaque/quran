@@ -884,16 +884,17 @@ fetching them again; the space is worth less than the time.
 
 ## Next session: the remaining queue, in order
 
-0. **The store set is current, and the capture can be trusted.** 2.0
-   installed the set from run 36008295034, all three legs green first try:
-   every frame compared with its artifact by `cmp` (24 matches) and every
-   changed frame read. The next session that changes a pixel captures again
-   with the procedure in "Store screenshots", and reads
-   `docs/screenshot-failures.md` first if a leg goes red. One race is now
-   named for sheets whose content loads after their window settles: the
-   card says when it is whole and the tour waits on the tag, so a new sheet
-   with asynchronous content needs the same tag or it can photograph empty
-   (D-093).
+0. **The store set is current, and the capture can be trusted.** 2.1
+   installed the set from run 36125481691, all three legs green: every frame
+   compared with its artifact by `cmp` (24 matches) and every changed frame
+   read. The capture's first run was green and wrong (a dialog that never
+   took focus), and the guard now reads visible error dialogs out of their
+   own window blocks while the tour waits for Browse to close after the
+   back key (D-096, `docs/screenshot-failures.md`). The next session that
+   changes a pixel captures again with the procedure in "Store screenshots",
+   and starts with the fast path in "Release hand-off": keep a booted
+   snapshot in the per-form-factor AVD cache so a leg comes under three
+   minutes.
 
 1. **The segmented controls' touch targets.** The text size steps and the
    playback pace draw 38 dp and 46 dp cells, under the design document's own
@@ -958,6 +959,54 @@ fetching them again; the space is worth less than the time.
   to right on the screen; `MushafTurnTest` now pins the direction on every
   form factor.
 
+
+## Where the project stands (end of the twenty-ninth session)
+
+**2.1 (versionCode 22) is submitted to Google Play for review**, and the
+hand-off is closed: the bundle was deleted once the submission was confirmed,
+and `play-store/aab/` keeps only its own note. It carries the reader's
+eighth report (D-094, D-095, D-096):
+
+- **Tafsir Arabic wraps from the right.** The cause was Compose's own
+default: `TextDirection.Unspecified` resolves against the interface's layout
+direction, not the text's first strong character. `RichBlocks` states
+`TextDirection.Content` and `ArabicBody` states `Rtl`; `TafsirDirectionTest`
+draws the real block and reads the last line's pixels.
+- **Notes preview what you wrote.** Two lines at most, in the reading face,
+clamped on every row; Saved is untouched, so the two lists differ at a
+glance. `NotesPreviewTest` covers it.
+- **Settings draws what the reading shows.** Show translation, Show tafsir,
+and Show word meanings sit in the hub under Font size, translation and tafsir
+on by default; the word by word switch moved there from the Translations
+page. Word by word stays off by default because turning it on is the door
+that fetches the list. `SettingsVisibilityTest` covers the reading response.
+- **Go to Ayah is the sixth Browse tab,** with the chips always visible and
+the surah choice as the one step with a head and a back.
+- **Search names its word meanings,** and the shared ayah card no longer
+prints the translation's name.
+
+**The capture's window guard was widened.** The first 2.1 capture was green
+with a focus-less "Pixel Launcher isn't responding" dialog over two phone
+frames; the guard now reads visible error dialogs out of their own window
+blocks (only `mHasSurface=true` counts) and the tour waits for Browse to
+close after the back key. `docs/screenshot-failures.md` catalogues the mode.
+The store set is from run 36125481691 (24 of 24 `cmp`'d), and the bundle
+`quran-2.1-vc22.aab` came from the newest green build, run 36125481634:
+147,841,916 bytes, SHA-256
+`a81cad7ef254409cdd24c5681f3541d9b2453709b88a17453f1bef8a51a1d6dd`, `jar
+verified`, core pack only.
+
+**The suite.** All five owner gates ran green on this machine (`verify` 29
+datasets, `audit` 0 unexplained differences, `fonts` coverage passed,
+`checkdb`, `search`), plus the JVM suite, lint, `assembleDebug`, the data
+instrumented suite 31/31, and the app instrumented suite 23/23 on the phone
+emulator. CI: build 36125481634 and screenshot run 36125481691, all green.
+
+**The fast path.** The release runbook now records the measured budget
+(local suite about six minutes, build and capture in parallel, numeric frame
+verification) and names the next speedup: a booted emulator snapshot in the
+per-form-factor AVD cache, with the target of a capture leg under three
+minutes.
 
 ## Where the project stands (end of the twenty-eighth session)
 
