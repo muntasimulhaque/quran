@@ -111,6 +111,20 @@ Version 2.1, the tablet search frames show the new word meaning block, and
 the Browse and ayah-card frames differ from 2.0 only in the status bar
 clock, which the numeric compare confirms.
 
+The set is refreshed for 2.2 from run 36164556475 (all three legs green after
+one rerun of the phone leg, whose first attempt met a launcher ANR over the
+search frame and kept only four frames; the guard refused to ship the
+dialog). Every frame was compared with its artifact by `cmp` (24 matches)
+and every changed frame was read before it shipped. The settings frame is
+the release's: Show translation and Show tafsir now carry the chevron that
+opens their own list with the chosen pack's name under them, the separate
+Translation and Tafsir rows are gone, and the Daily ayah switch is new,
+off by default. The tablet search frames show the translation highlight
+standing alone, with no repeated word meaning block under it. The phone
+Mushaf, Browse, and ayah-card frames differ only in the status bar clock
+and subpixel antialiasing, which the numeric compare confirms (a maximum
+delta of 4 of 255 on the Mushaf page).
+
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
 creating the emulator, waits for the emulated storage to mount before the test
