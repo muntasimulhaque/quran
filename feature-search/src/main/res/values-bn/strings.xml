@@ -11,7 +11,7 @@
     <string name="search_label_surah">সূরা</string>
     <string name="search_action_open">খুলুন</string>
     <string name="search_surah_meta">%1$d আয়াত  ·  %2$s</string>
-    <string name="search_word_meaning">শব্দের অর্থ: %1$s</string>
+    <string name="search_word_meaning_label">শব্দের অর্থ</string>
     <string name="search_tafsir_range">%1$s  ·  %2$s %3$s</string>
     <string name="search_place_makkah">মক্কা</string>
     <string name="search_place_madinah">মদিনা</string>

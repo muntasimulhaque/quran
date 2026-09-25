@@ -310,7 +310,10 @@ private fun StudyRows(
                 onExpandedChange = { aboutOpen = it },
                 onPaperTap = { if (!aboutOpen) onBackgroundTap() },
             )
-            if (!hasTranslation) {
+            // The door asks for a translation only while translations are
+            // something the reading draws at all: a reader who hid them in
+            // Settings is not looking for one here.
+            if (settings.showTranslation && !hasTranslation) {
                 AddContent(
                     text = stringResource(R.string.study_add_translation),
                     onClick = onAddContent,
@@ -703,26 +706,30 @@ private fun AyahBlock(
             }
             // More than one translation may be on, and each is drawn in its
             // own column, named, so the reader always knows whose reading
-            // they are looking at.
-            row.translations.forEach { line ->
-                if (row.translations.size > 1) {
-                    Text(
-                        text = line.packName,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f),
-                        modifier = Modifier.padding(top = Space.Block),
+            // they are looking at. The library still reads the translation
+            // for the font size sample; the reading draws it only when the
+            // reader asked to see it.
+            if (settings.showTranslation) {
+                row.translations.forEach { line ->
+                    if (row.translations.size > 1) {
+                        Text(
+                            text = line.packName,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f),
+                            modifier = Modifier.padding(top = Space.Block),
+                        )
+                    }
+                    TranslationBody(
+                        runs = remember(line.text.text) { RichText.footnotes(line.text.text) },
+                        modifier = Modifier.padding(
+                            top = if (row.translations.size > 1) Space.Tight else Space.Block,
+                        ),
+                        sizeSp = settings.translationSp,
+                        lineSp = settings.translationLineSp,
+                        arabicSp = settings.arabicSp * 0.8f,
+                        onFootnote = onFootnote,
                     )
                 }
-                TranslationBody(
-                    runs = remember(line.text.text) { RichText.footnotes(line.text.text) },
-                    modifier = Modifier.padding(
-                        top = if (row.translations.size > 1) Space.Tight else Space.Block,
-                    ),
-                    sizeSp = settings.translationSp,
-                    lineSp = settings.translationLineSp,
-                    arabicSp = settings.arabicSp * 0.8f,
-                    onFootnote = onFootnote,
-                )
             }
             // The reference closes the block the way a printed study Quran
             // numbers its verses: after the reader has read the ayah, not as

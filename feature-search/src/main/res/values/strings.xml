@@ -11,7 +11,7 @@
     <string name="search_label_surah">Surah</string>
     <string name="search_action_open">Open</string>
     <string name="search_surah_meta">%1$d ayahs  ·  %2$s</string>
-    <string name="search_word_meaning">Word meaning: %1$s</string>
+    <string name="search_word_meaning_label">Word meaning</string>
     <string name="search_tafsir_range">%1$s  ·  %2$s %3$s</string>
     <string name="search_place_makkah">Makkah</string>
     <string name="search_place_madinah">Madinah</string>

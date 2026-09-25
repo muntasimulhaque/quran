@@ -19,6 +19,10 @@
     <string name="settings_keep_awake_subtitle">পড়ার সময় পাতা জ্বলজ্বল করে থাকবে</string>
     <string name="settings_follow_title">তিলাওয়াতের সাথে চলুন</string>
     <string name="settings_follow_subtitle">তিলাওয়াতের সাথে পাতা এগিয়ে যাবে</string>
+    <string name="settings_show_translation_title">অনুবাদ দেখান</string>
+    <string name="settings_show_translation_subtitle">প্রতিটি আয়াতের নিচে অনুবাদ দেখা যায়</string>
+    <string name="settings_show_tafsir_title">তাফসির দেখান</string>
+    <string name="settings_show_tafsir_subtitle">যোগ করা তাফসির আয়াতের কার্ড থেকে খোলে</string>
     <string name="settings_words_title">শব্দের অর্থ দেখান</string>
     <string name="settings_words_subtitle">আয়াতের নিচে প্রতিটি শব্দ ও তার অর্থ</string>
     <string name="settings_words_add">%1$s শব্দতালিকা যোগ করে · %2$s</string>

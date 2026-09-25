@@ -32,6 +32,7 @@ kotlin {
 dependencies {
     api(project(":ui-kit"))
     implementation(project(":content-assets"))
+    implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.ui)

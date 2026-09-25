@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 2.0 (versionCode 21)
+Version: 2.1 (versionCode 22)
 
 ## Listing
 
@@ -125,6 +125,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (2.1, 425 characters)
+
+Arabic passages in tafsir now wrap from the right, so a quoted verse reads in order on every line. Notes in Browse preview what you wrote, so you can find one without opening them all. Settings gains Show translation and Show tafsir switches, and the shared ayah card no longer prints the translation's name. Go to Ayah is a normal Browse tab now, and search results name their word meanings. No ads, no trackers, no account.
 
 ## Release notes (2.0, 482 characters)
 

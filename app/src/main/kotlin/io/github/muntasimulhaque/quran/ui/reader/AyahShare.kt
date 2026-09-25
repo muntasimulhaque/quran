@@ -98,7 +98,6 @@ internal data class ShareRequest(val card: ShareCard, val capture: Boolean = fal
 internal data class ShareCard(
     val arabic: String,
     val translation: List<TextRun>,
-    val translationName: String?,
     val reference: String,
     val text: String,
 )
@@ -124,7 +123,6 @@ internal suspend fun loadShareCard(
         ShareCard(
             arabic = ayah.text,
             translation = runs.orEmpty(),
-            translationName = line?.packName?.takeIf { runs != null },
             reference = "$name ${ayah.surah}:${ayah.ayah}",
             text = viewModel.ayahShareText(ayah),
         ),
@@ -225,17 +223,6 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(start = Space.Line),
-                )
-            }
-            card.translationName?.let { name ->
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = Space.Tight),
                 )
             }
         }

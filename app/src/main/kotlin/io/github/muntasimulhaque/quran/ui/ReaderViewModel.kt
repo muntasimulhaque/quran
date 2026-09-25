@@ -500,6 +500,18 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch { settingsStore.setRepeatAyah(repeat) }
     }
 
+    /** The reading keeps the reader's chosen translation; this only shows or hides it. */
+    fun setShowTranslation(show: Boolean) {
+        settings = settings.copy(showTranslation = show)
+        viewModelScope.launch { settingsStore.setShowTranslation(show) }
+    }
+
+    /** The reading keeps the reader's chosen tafsirs; this only shows or hides them. */
+    fun setShowTafsir(show: Boolean) {
+        settings = settings.copy(showTafsir = show)
+        viewModelScope.launch { settingsStore.setShowTafsir(show) }
+    }
+
     fun setWordByWord(show: Boolean) {
         if (!show) {
             settings = settings.copy(wordByWord = false)

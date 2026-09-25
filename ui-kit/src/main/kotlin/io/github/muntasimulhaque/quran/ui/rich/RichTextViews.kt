@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
@@ -256,6 +257,7 @@ fun RichBlocks(
                         fontWeight = FontWeight.SemiBold,
                         fontSize = (sizeSp + 1).sp,
                         lineHeight = line.sp,
+                        textDirection = TextDirection.Content,
                     ),
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -269,6 +271,15 @@ fun RichBlocks(
                     style = LatinReading.copy(
                         fontSize = sizeSp.sp,
                         lineHeight = line.sp,
+                        // A block resolves its own direction from its first
+                        // strong character, never from the interface around
+                        // it: an Arabic paragraph in an English tafsir must
+                        // lay its wrapped lines from the right, and Compose's
+                        // default (TextDirection.Unspecified) takes the
+                        // composition's LTR instead, which started every line
+                        // after the first at the left edge (owner report,
+                        // twenty-ninth session).
+                        textDirection = TextDirection.Content,
                         lineHeightStyle = LineHeightStyle(
                             alignment = LineHeightStyle.Alignment.Center,
                             trim = LineHeightStyle.Trim.None,
@@ -292,7 +303,15 @@ fun ArabicBody(runs: List<TextRun>, modifier: Modifier = Modifier, sizeSp: Float
             markerSize = (sizeSp * 0.6f).sp,
             quoteColor = MaterialTheme.colorScheme.onBackground,
         ),
-        style = TextStyle(fontFamily = Amiri, fontSize = sizeSp.sp, lineHeight = (sizeSp * 1.9f).sp),
+        style = TextStyle(
+            fontFamily = Amiri,
+            fontSize = sizeSp.sp,
+            lineHeight = (sizeSp * 1.9f).sp,
+            // As-Sa'di is Arabic prose from its first letter; the paragraph's
+            // own direction is stated beside the right alignment so the two
+            // can never disagree about which edge a wrapped line starts from.
+            textDirection = TextDirection.Rtl,
+        ),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Right,
         modifier = modifier.fillMaxWidth(),

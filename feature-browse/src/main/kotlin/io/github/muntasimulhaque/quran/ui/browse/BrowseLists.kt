@@ -19,11 +19,13 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.ReadPlace
 import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.theme.Literata
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -79,11 +81,12 @@ internal fun LastReadList(
 
 /**
  * The ayahs the reader wrote a note on, newest note first. The note itself is
- * not drawn here: a note is the reader's own writing, and the row's work is
- * to name the place that holds it. A tap opens the note where it was written,
- * on its ayah: the reader tapped a row in the Notes list because they want to
- * read or change what they wrote, and sending them to the ayah to hunt for it
- * would be a second errand. The Remove beside the row is the other end of the
+ * drawn under the place, two lines of it: without it every row is only a
+ * surah and a number, and the reader cannot tell the note they are looking
+ * for from the rest without opening them one by one. The preview is clamped
+ * rather than free, so every row is the same height and a long note cannot
+ * push the next place off the screen; a tap opens the note where it was
+ * written, on its ayah. The Remove beside the row is the other end of the
  * same work: the note is the reader's own, so they can take it back here.
  */
 @Composable
@@ -120,6 +123,7 @@ internal fun NotesList(
                 surah = text?.surahName
                     ?: stringResource(R.string.saved_reference_fallback, row.ayahNumber),
                 ayah = text?.ayahLabel,
+                note = row.note?.trim(),
                 detail = stringResource(R.string.notes_detail, moment(row.noteAt ?: row.createdAt)),
                 onClick = { onNote(row.ayahNumber) },
                 action = stringResource(R.string.action_remove) to { onRemove(row.ayahNumber) },
@@ -208,6 +212,7 @@ private fun PlaceRow(
     surah: String,
     ayah: String?,
     detail: String? = null,
+    note: String? = null,
     onClick: () -> Unit,
     action: Pair<String, () -> Unit>? = null,
 ) {
@@ -245,6 +250,24 @@ private fun PlaceRow(
                     quiet = true,
                 )
             }
+        }
+        if (!note.isNullOrBlank()) {
+            // The reader's own words are the one part of the row drawn in the
+            // reading ink and the reading face, and the only part allowed two
+            // lines: a note is how the place is recognised, while the place
+            // and the moment are its labels. The clamp is the same two lines
+            // on every row, so one long note cannot change the list's rhythm.
+            Text(
+                text = note,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontFamily = Literata,
+                    lineHeight = 20.sp,
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(top = Space.Line),
+            )
         }
         if (!detail.isNullOrBlank()) {
             Text(

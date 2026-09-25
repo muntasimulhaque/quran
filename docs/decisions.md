@@ -4012,3 +4012,137 @@ was deleted the same session, as the runbook requires: the artifact stays in
 the build run and in Play, and `play-store/aab/` keeps only its own note. The
 tree is clean. The signed bundle's record is above and in build run
 36008294664; nothing in the repository depends on the binary.
+
+## D-094: The owner's eighth reading report
+
+Date: the twenty-ninth session. The owner read 2.0 on a phone, sent two
+screenshots (the Go to Ayah picker and a search result for "mercy"), and
+asked eight things. All eight are answered in the tree this session; no
+version moved, because the release waits for the owner's word.
+
+**1. The share card dropped the translation's name.** The card ended with
+the app's mark, **Quran: The Noble Book**, and the translation's name under
+it. The receiver of a picture needs neither; the line was small type with no
+door behind it. `ShareCard` no longer carries `translationName`, and the
+card's foot is the mark and the store's name alone. The share sheet's preview
+draws the same composable, so the preview lost the line with the picture.
+
+**2. Arabic paragraphs now wrap from the right, and the cause is named.**
+The owner reported that an Arabic passage in a tafsir started at the left
+once it wrapped. First the claim was checked, on the emulator, with a probe
+that laid out an Arabic-only paragraph and read the line geometry back: the
+paragraph resolved to `dir=Ltr` and every line after the first began at x=0.
+The cause is Compose's own default, read in the pinned 1.12.0 sources:
+`TextDirection.Unspecified` resolves against the *composition's* layout
+direction (`resolveTextDirection`), so an English interface gives every
+paragraph an LTR base no matter what it says. `TextDirection.Content` takes
+the block's own first strong character instead. `RichBlocks` now states
+`Content` on its headings and paragraphs, and `ArabicBody` states `Rtl` beside
+its right alignment. Only all-Arabic blocks are affected in today's tafsirs;
+a mixed paragraph is Latin-first by design, and the corpus was scanned (every
+pack, 4,836 mixed blocks) and holds no Arabic-dominant mixed block that would
+need a different rule. `TafsirDirectionTest` draws the real `RichBlocks` and
+reads the last line's pixels; it fails on the old code and passes now, and it
+runs in the capture workflow on all three form factors.
+
+**3. The Go to Ayah gap survives the scroll.** The grid's `Space.Block` top
+padding was *inside* the scrollable content, so scrolling to the reader's
+own ayah carried it away and the clipped number pill touched the surah card.
+The 16 dp now sits between the card and the grid, outside the scroll, and the
+grid's content padding keeps only its horizontal and bottom room.
+
+**4. Notes previews the reader's own words.** Saved and Notes drew the same
+row, so the owner could not tell the note on Ayat Al-Kursi from any other
+without opening them one by one. The Notes row now draws the note under the
+place: two lines at most, in the reading face (Literata) at 14 sp and the
+reading ink, while the place and the moment stay interface type. Two lines
+are the reserved room, so a long note is ellipsized and every row keeps the
+same height. Saved is untouched, and the two lists now differ at a glance.
+`NotesPreviewTest` writes a note on 2:255 before the activity starts and
+reads it back in the list.
+
+**5. Go to Ayah is a tab, not a page over the tabs.** The owner asked why it
+alone showed a back arrow and its own name while Surahs, Juz, and the rest
+showed neither. It is now the sixth chip: the chips stay on screen, the chip
+takes the chosen fill like the tab it is, and the grid hangs under the row
+with no title repeating the chip's own name. Choosing another surah is the
+one step with a head (Choose a surah) and a back, because it is the one step
+with somewhere to go back to; the phone's back returns to the numbers before
+it leaves the sheet. This supersedes D-084's rule that the door never takes
+the chips' chosen fill, on the owner's coherence report. `GoToAyahTest`
+follows the whole new path unchanged.
+
+**6. A search row names its word meaning.** The line rode under the
+translation in nearly the translation's own type, so it read as the
+sentence's last words. It is now a block of its own under the row: the label
+**Word meaning** in the speaking tone, `Space.Block` of air above it, and the
+meaning under it in the reading size with the matched term washed, exactly
+the shape the tafsir result's own header already had.
+
+**7. No footer size, and the reason is the reading.** The footer is not
+reading text, so it does not get a reading size. In the study reading the
+reference at the foot of an ayah (and the tafsir range) is the interface's
+own `labelMedium`, independent of the four reading steps and scaled by the
+system font setting; in the Mushaf the page number and juz are drawn into the
+page bitmap from the page's own glyph em (`PAGE_NUMBER_RATIO` 0.4 and
+`HEADER_RATIO` 0.34), so they follow the printed page and nothing else; the
+translate-on-tap footnotes already take the translation's size
+(`FootnoteSheet`). A fifth size step would be a choice that does not earn its
+place against the reading, per rule 10.
+
+**8. What the reading draws is a switch, beside its size.** The word by word
+switch moved out of the Translations page into the settings hub, and it is
+joined by **Show translation** and **Show tafsir**, all three under Font size
+where the reader already looks for how the reading draws. The pack pages keep
+choosing content; the switches say what the page shows. Translation and
+tafsir are on by default, so a reader who added one sees it. Word by word
+stays off by default even though it is the same kind of switch: turning it on
+is the door that fetches the word list, with the size on the row, and a
+default-on switch would fetch a pack at first launch, which rule 1 forbids.
+With tafsir hidden the study reading's pill drops its Tafsir action rather
+than opening an empty card. Search is deliberately untouched: its own filter
+chips already say what it reads, and the display switches are about the
+reading surface. `SettingsVisibilityTest` hides the translation, proves the
+reading has no translation, flips the switch in the hub, and waits for the
+text to return; `ScreenshotTest.prepareTheLibrary` now pins both switches so
+the tour cannot inherit a hidden state from another test.
+
+**Verification.** The JVM suite (core, data, app unit tests), lint, and
+`assembleDebug` are green. The app instrumented suite ran complete on the
+phone profile: 22 of 22, including the new `TafsirDirectionTest`,
+`NotesPreviewTest`, and `SettingsVisibilityTest`, the tour, and every older
+test. Two surfaces in the store set changed visibly (Settings gains the three
+switches; Search names its word meanings), so the next capture refreshes all
+three form factors; no frame is added or removed. On the owner's word the release
+followed in the same session: 2.1 (versionCode 22), with these notes drafted
+as the release notes and every gate run before the push (D-095).
+
+## D-095: The 2.1 release, prepared
+
+Date: the twenty-ninth session, on the owner's word to go for a Play release.
+
+Step 0 passed before anything moved: `content/raw` holds the manual QUL and
+QuranEnc exports and the Tanzil XML, and `content/work/verify` holds all 29
+extractions, so the owner gates ran here rather than being owed.
+
+**Version and notes.** `versionCode` 21 to 22 and `versionName` 2.0 to 2.1,
+in `app/build.gradle.kts` and on the listing's version line. The notes for
+2.1 are 425 characters, one paragraph under their own heading, and the 2.0
+notes stay under theirs.
+
+**All five owner gates green.** `verify` 29 datasets; `audit` 6,236 ayahs
+compared, 77,432 KFGQPC words against 77,433 Tanzil words, one accepted
+orthographic variant, zero unexplained differences; `fonts` coverage passed;
+`checkdb` the committed database unchanged, 128,966,656 bytes, SHA-256
+`5c5988fa2916eb1cc905d01ddb9b4ef9319d0ca19c945bf0140eaff32296cea9`; `search`
+465 readable excerpts with no markup.
+
+**The local suite.** The JVM suite (core, data, app), lint, and
+`assembleDebug` green; the data instrumented suite 31 of 31 and the app
+instrumented suite 22 of 22 on the phone emulator, the three new tests
+included.
+
+**The push starts the rest.** `build.yml` runs the content gates and the
+signed bundle, and the screenshot workflow runs because surfaces that draw
+changed. The run IDs, the store set, and the bundle record follow in D-096
+when they are in hand.

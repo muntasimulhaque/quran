@@ -570,11 +570,25 @@ private fun AyahRow(
             }
         }
         hit.wordMeaning?.let { meaning ->
+            // The word meaning is its own block, named like the tafsir hit's
+            // own line and separated by a block's own air, instead of one
+            // small line riding under the translation where it read as the
+            // sentence's last words (owner report, twenty-ninth session).
+            // The matched term keeps the wash the translation has, so what
+            // matched is visible here too.
             Text(
-                text = stringResource(R.string.search_word_meaning, meaning),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 6.dp),
+                text = stringResource(R.string.search_word_meaning_label),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(top = Space.Block),
+            )
+            HighlightedText(
+                text = meaning,
+                ranges = remember(meaning, terms) {
+                    Search.matchRanges(meaning, terms, arabic = false)
+                },
+                style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 23.sp),
+                modifier = Modifier.padding(top = 4.dp),
             )
         }
     }

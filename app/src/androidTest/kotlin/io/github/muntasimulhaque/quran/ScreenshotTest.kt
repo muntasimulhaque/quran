@@ -267,6 +267,8 @@ class ScreenshotTest {
             settings.setTheme(AppTheme.Paper)
             settings.setTranslationPacks(setOf("translation-saheeh-en"))
             settings.setTafsirPacks(setOf("tafsir-ibn-kathir-en"))
+            settings.setShowTranslation(true)
+            settings.setShowTafsir(true)
             settings.setWordByWord(true)
             for (role in TypeRole.entries) settings.setTypeSize(role, TextSize.DEFAULT)
         }

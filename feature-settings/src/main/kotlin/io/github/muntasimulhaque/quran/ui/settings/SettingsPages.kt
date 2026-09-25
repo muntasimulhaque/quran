@@ -154,13 +154,6 @@ fun TranslationsPage(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
         )
-        // The word by word aid sits above the list, not under it: it belongs
-        // to the reading these translations are, and with more translations
-        // arriving over time a switch buried under all of them would be a
-        // switch nobody finds. It reads the language of the first translation
-        // on, and the list it needs is fetched through the switch, with its
-        // size on the row.
-        WordByWordRow(settings, packs, packSetup, actions.onWordByWord)
         LanguageGroups(
             packs = packs,
             type = PackType.Translation,

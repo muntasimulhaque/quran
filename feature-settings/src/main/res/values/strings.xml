@@ -19,6 +19,10 @@
     <string name="settings_keep_awake_subtitle">The page stays lit while you read</string>
     <string name="settings_follow_title">Follow the reciter</string>
     <string name="settings_follow_subtitle">The page moves with the recitation</string>
+    <string name="settings_show_translation_title">Show translation</string>
+    <string name="settings_show_translation_subtitle">The translation reads under each ayah</string>
+    <string name="settings_show_tafsir_title">Show tafsir</string>
+    <string name="settings_show_tafsir_subtitle">The tafsirs you add open from the ayah card</string>
     <string name="settings_words_title">Show word meanings</string>
     <string name="settings_words_subtitle">Each word with its meaning, under the ayah</string>
     <string name="settings_words_add">Adds the %1$s word list · %2$s</string>

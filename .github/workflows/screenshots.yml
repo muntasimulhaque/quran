@@ -161,7 +161,7 @@ jobs:
             # leg's frames, and the runner stopped the script at the failed
             # Gradle line before anything was collected (runs 35463781932 and
             # 35974207613, tablet10).
-            ./gradlew :app:connectedDebugAndroidTest --console=plain -Pquran.devPacks=screenshot -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest,io.github.muntasimulhaque.quran.WordByWordTest,io.github.muntasimulhaque.quran.MushafTurnTest ; echo $? > /tmp/gradle_status
+            ./gradlew :app:connectedDebugAndroidTest --console=plain -Pquran.devPacks=screenshot -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest,io.github.muntasimulhaque.quran.WordByWordTest,io.github.muntasimulhaque.quran.MushafTurnTest,io.github.muntasimulhaque.quran.TafsirDirectionTest,io.github.muntasimulhaque.quran.NotesPreviewTest,io.github.muntasimulhaque.quran.SettingsVisibilityTest ; echo $? > /tmp/gradle_status
             # AGP copies the test's additional output off-device (before it
             # uninstalls the app) into the connected additional output folder.
             # Every collection line is guarded, because the runner aborts the

@@ -69,6 +69,9 @@ fun SettingsHub(
     version: String,
     packSetup: PackSetupState?,
     onKeepAwake: (Boolean) -> Unit,
+    onShowTranslation: (Boolean) -> Unit,
+    onShowTafsir: (Boolean) -> Unit,
+    onWordByWord: (Boolean) -> Unit,
     onOpen: (SettingsPage) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -89,6 +92,24 @@ fun SettingsHub(
                 settings.translationSp.toInt(),
             ),
         ) { onOpen(SettingsPage.FontSize) }
+        // What the reading draws, beside the sizes that decide how it draws
+        // it. The packs say what the reader has; these three say what the
+        // page shows, and each is on by default, so a reader who chose a
+        // translation or a tafsir sees it until they ask it away. The word
+        // by word switch sits here with them rather than at the top of the
+        // Translations page, where a reader looking for a display choice
+        // would not think to look.
+        ToggleRow(
+            title = stringResource(R.string.settings_show_translation_title),
+            subtitle = stringResource(R.string.settings_show_translation_subtitle),
+            checked = settings.showTranslation,
+        ) { onShowTranslation(it) }
+        ToggleRow(
+            title = stringResource(R.string.settings_show_tafsir_title),
+            subtitle = stringResource(R.string.settings_show_tafsir_subtitle),
+            checked = settings.showTafsir,
+        ) { onShowTafsir(it) }
+        WordByWordRow(settings, packs, packSetup, onWordByWord)
         PageRow(
             title = stringResource(R.string.settings_title_reciters),
             summary = reciterName(settings, recitations),

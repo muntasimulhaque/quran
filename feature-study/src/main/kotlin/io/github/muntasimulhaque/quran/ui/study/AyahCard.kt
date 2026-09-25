@@ -241,8 +241,10 @@ fun AyahCard(
                 // else. The translation is named once because it is one
                 // block even when more than one translation is on; the
                 // pack's own name stays on the lines, where it says whose
-                // reading it is.
-                if (lines.isNotEmpty()) {
+                // reading it is. A reader who hid translations in Settings
+                // draws no lines and no doors for them.
+                val drawnLines = if (settings.showTranslation) lines else emptyList()
+                if (drawnLines.isNotEmpty()) {
                     Text(
                         text = stringResource(R.string.card_translation_label),
                         style = MaterialTheme.typography.labelMedium,
@@ -250,8 +252,8 @@ fun AyahCard(
                         modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Block),
                     )
                 }
-                lines.forEach { line ->
-                    if (lines.size > 1) {
+                drawnLines.forEach { line ->
+                    if (drawnLines.size > 1) {
                         Text(
                             text = line.packName,
                             style = MaterialTheme.typography.labelMedium,
@@ -264,7 +266,7 @@ fun AyahCard(
                         modifier = Modifier.padding(
                             start = 22.dp,
                             end = 22.dp,
-                            top = if (lines.size > 1) Space.Tight else Space.Line,
+                            top = if (drawnLines.size > 1) Space.Tight else Space.Line,
                         ),
                         sizeSp = settings.translationSp,
                         lineSp = settings.translationLineSp,
@@ -285,7 +287,7 @@ fun AyahCard(
                         },
                     )
                 }
-                if (lines.isEmpty()) {
+                if (settings.showTranslation && drawnLines.isEmpty()) {
                     when {
                         translations.isEmpty() -> AddTranslation(
                             text = stringResource(R.string.card_add_translation),
@@ -302,47 +304,51 @@ fun AyahCard(
                     }
                 }
             }
-            if (!fromMushaf && tafsirPacks.isEmpty()) {
-                // From the study reading the card is only the tafsir doors, so
-                // a reader with none open gets the door to add one rather than
-                // a sheet with nothing in it.
-                AddTranslation(
-                    text = stringResource(R.string.card_add_tafsir),
-                    onClick = onAddContent,
-                    modifier = Modifier.padding(horizontal = 22.dp),
-                )
-            }
-            // The label stands over the tafsir doors in both readings: the
-            // doors themselves name the pack, never the kind of text, so
-            // without a name over them "Ibn Kathir" could be read as the word
-            // by word list.
-            if (tafsirPacks.isNotEmpty()) {
-                Text(
-                    text = stringResource(R.string.card_tafsir_label),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Block),
-                )
-            }
-            tafsirPacks.sortedBy { it.language }.forEach { pack ->
-                val open = (door as? Door.Tafsir)?.pack?.id == pack.id
-                DoorRow(
-                    title = pack.name,
-                    subtitle = languageName(pack.language),
-                    open = open,
-                    onClick = { door = if (open) null else Door.Tafsir(pack) },
-                )
-                if (open) {
-                    Box(Modifier.padding(horizontal = 22.dp, vertical = Space.Line)) {
-                        val view = tafsir
-                        if (view == null) {
-                            Text(
-                                text = stringResource(R.string.card_opening_pack, pack.name),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        } else {
-                            TafsirPanel(view, arabic = pack.language == "ar", settings = settings)
+            // The tafsir is drawn only while the reader shows it. The packs
+            // still stand in for search; this is what the ayah card draws.
+            if (settings.showTafsir) {
+                if (!fromMushaf && tafsirPacks.isEmpty()) {
+                    // From the study reading the card is only the tafsir doors, so
+                    // a reader with none open gets the door to add one rather than
+                    // a sheet with nothing in it.
+                    AddTranslation(
+                        text = stringResource(R.string.card_add_tafsir),
+                        onClick = onAddContent,
+                        modifier = Modifier.padding(horizontal = 22.dp),
+                    )
+                }
+                // The label stands over the tafsir doors in both readings: the
+                // doors themselves name the pack, never the kind of text, so
+                // without a name over them "Ibn Kathir" could be read as the word
+                // by word list.
+                if (tafsirPacks.isNotEmpty()) {
+                    Text(
+                        text = stringResource(R.string.card_tafsir_label),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Block),
+                    )
+                }
+                tafsirPacks.sortedBy { it.language }.forEach { pack ->
+                    val open = (door as? Door.Tafsir)?.pack?.id == pack.id
+                    DoorRow(
+                        title = pack.name,
+                        subtitle = languageName(pack.language),
+                        open = open,
+                        onClick = { door = if (open) null else Door.Tafsir(pack) },
+                    )
+                    if (open) {
+                        Box(Modifier.padding(horizontal = 22.dp, vertical = Space.Line)) {
+                            val view = tafsir
+                            if (view == null) {
+                                Text(
+                                    text = stringResource(R.string.card_opening_pack, pack.name),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            } else {
+                                TafsirPanel(view, arabic = pack.language == "ar", settings = settings)
+                            }
                         }
                     }
                 }

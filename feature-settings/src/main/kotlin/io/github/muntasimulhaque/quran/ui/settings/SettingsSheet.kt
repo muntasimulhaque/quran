@@ -47,6 +47,8 @@ data class SettingsActions(
     val onFollowReciter: (Boolean) -> Unit = {},
     val onPlaybackSpeed: (Float) -> Unit = {},
     val onRepeatAyah: (Boolean) -> Unit = {},
+    val onShowTranslation: (Boolean) -> Unit = {},
+    val onShowTafsir: (Boolean) -> Unit = {},
     val onWordByWord: (Boolean) -> Unit = {},
     val onSelectRecitation: (String) -> Unit = {},
     val onTranslationPack: (String) -> Unit = {},
@@ -151,6 +153,9 @@ fun SettingsSheet(
                         version = version,
                         packSetup = packSetup,
                         onKeepAwake = actions.onKeepAwake,
+                        onShowTranslation = actions.onShowTranslation,
+                        onShowTafsir = actions.onShowTafsir,
+                        onWordByWord = actions.onWordByWord,
                         onOpen = { page = it },
                     )
                 }

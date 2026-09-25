@@ -69,6 +69,14 @@ data class AppSettings(
     val repeatAyah: Boolean = false,
     val translationPacks: Set<String> = emptySet(),
     val tafsirPacks: Set<String> = emptySet(),
+    /**
+     * Whether the reading draws what the reader has chosen. The packs say
+     * what they have; these say what the page shows. Both are on by default:
+     * a reader who added a translation or a tafsir means to see it until
+     * they say otherwise.
+     */
+    val showTranslation: Boolean = true,
+    val showTafsir: Boolean = true,
     val wordByWord: Boolean = false,
     val longPressHintShown: Boolean = false,
 ) {
@@ -129,6 +137,8 @@ class SettingsStore(private val context: Context) {
             repeatAyah = preferences[REPEAT_AYAH] ?: false,
             translationPacks = translationPacks(preferences),
             tafsirPacks = preferences[TAFSIR_PACKS] ?: emptySet(),
+            showTranslation = preferences[SHOW_TRANSLATION] ?: true,
+            showTafsir = preferences[SHOW_TAFSIR] ?: true,
             wordByWord = preferences[WORD_BY_WORD] ?: false,
             longPressHintShown = preferences[HINT_SHOWN] ?: false,
         )
@@ -203,6 +213,14 @@ class SettingsStore(private val context: Context) {
 
     suspend fun setRepeatAyah(repeat: Boolean) {
         context.settingsStore.edit { it[REPEAT_AYAH] = repeat }
+    }
+
+    suspend fun setShowTranslation(show: Boolean) {
+        context.settingsStore.edit { it[SHOW_TRANSLATION] = show }
+    }
+
+    suspend fun setShowTafsir(show: Boolean) {
+        context.settingsStore.edit { it[SHOW_TAFSIR] = show }
     }
 
     suspend fun setWordByWord(show: Boolean) {
@@ -286,6 +304,8 @@ class SettingsStore(private val context: Context) {
         val TRANSLATION_PACK = stringPreferencesKey("translation_pack")
         val TRANSLATION_PACKS = stringSetPreferencesKey("translation_packs")
         val TAFSIR_PACKS = stringSetPreferencesKey("tafsir_packs")
+        val SHOW_TRANSLATION = booleanPreferencesKey("show_translation")
+        val SHOW_TAFSIR = booleanPreferencesKey("show_tafsir")
         val WORD_BY_WORD = booleanPreferencesKey("word_by_word")
         val HINT_SHOWN = booleanPreferencesKey("hint_shown")
     }
