@@ -85,9 +85,31 @@ its name goes into the failure message, so the next red leg says
 `a system window (com.google.android.apps.nexuslauncher) stayed over
 05-search` instead of hunting.
 
+The guard was widened after the 2.1 capture. The focused window is still
+asked first, but the dump is now also read for a **visible** window whose
+title is an error dialog (`Application Not Responding`, `isn't responding`,
+`Application Error`) even when our app still holds focus. A dialog can sit
+over the whole screen without ever taking focus; that is what happened on
+run 36121494370, phone, where the leg was green and frames 07 and 08 held
+"Pixel Launcher isn't responding" while the tour's back key was swallowed.
+Only a block whose own `mHasSurface=true` counts, so a dialog whose surface
+is gone is never an intruder.
+
 ## Every mode, with its evidence
 
-The list below is the full history of this workflow's reds, newest first.
+The list below is the full history of this workflow's reds, newest first,
+and of the green legs that shipped a wrong frame.
+
+**Run 36121494370, phone, frames 07 and 08, 2.1.** The leg was green and
+the frames were wrong: "Pixel Launcher isn't responding" sat over both, the
+back key that closes Browse was swallowed, and frame 08 photographed the
+card opening over the still-open sheet, a screen two steps behind the tour.
+The dialog never held focus, so the focus-only guard saw nothing. Fixed in
+the session: the guard now also reads visible error dialogs out of their own
+window blocks, and the tour waits for the Browse sheet's tag to be gone
+after the back key, so a swallowed key is a red leg and not a quiet wrong
+frame. `cmp` is what caught it, which is the rule this file already keeps:
+a green leg is not proof of a good frame.
 
 **Run 35974207613 (1.9 work), tablet10, attempt 1 and attempt 2.**
 `a system dialog stayed over 05-search` (class 4, the stale-record bug), and

@@ -24,6 +24,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -122,23 +124,36 @@ class ScreenshotTest {
     private fun hasSystemDialog(): Boolean = intruderWindow() != null
 
     /**
-     * The package that owns the focused window when it is not ours, or null
-     * when the app itself holds focus and the frame is safe to keep. The
-     * owner is returned so a failure names the window that stole the screen
-     * instead of only saying that something did.
+     * The package that owns the window in front of the app, or null when only
+     * ours is. Two questions are asked. Which window holds focus: that is the
+     * ordinary case, and the owner's name goes into the failure message. And
+     * which visible window is an error dialog: an ANR dialog can sit over the
+     * screen without ever taking focus, which is how the 2.1 capture kept two
+     * phone frames of "Pixel Launcher isn't responding" while the leg was
+     * green (twenty-ninth session). The focused window was still the app, the
+     * old guard saw nothing, the dialog swallowed the tour's back key, and
+     * the last two frames photographed a screen two steps behind the tour.
+     *
+     * The visible check reads the window blocks themselves, so a dialog whose
+     * surface is gone (the stale record the old phrase search tripped on)
+     * is never called an intruder: only `mHasSurface=true` counts.
      */
     private fun intruderWindow(): String? = runCatching {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val ours = instrumentation.targetContext.packageName
         instrumentation.uiAutomation.executeShellCommand("dumpsys window windows").use { command ->
             val text = java.io.FileInputStream(command.fileDescriptor).bufferedReader().use { it.readText() }
-            val focus = text.lineSequence().firstOrNull { line ->
-                line.contains("mCurrentFocus=") || line.contains("mFocusedWindow=")
-            } ?: return@runCatching null
-            val owner = Regex("""Window\{[^}]*?\s([^\s/}]+)/""").find(focus)?.groupValues?.get(1)
-            if (owner == null || owner == ours) null else owner
+            focusedIntruder(text, ours) ?: visibleErrorDialog(text, ours)
         }
     }.getOrNull()
+
+    private fun focusedIntruder(text: String, ours: String): String? {
+        val focus = text.lineSequence().firstOrNull { line ->
+            line.contains("mCurrentFocus=") || line.contains("mFocusedWindow=")
+        } ?: return null
+        val owner = Regex("""Window\{[^}]*?\s([^\s/}]+)/""").find(focus)?.groupValues?.get(1)
+        return if (owner == null || owner == ours) null else owner
+    }
 
     private fun dismissDialog() {
         runCatching {
@@ -249,6 +264,38 @@ class ScreenshotTest {
     }
 
     /**
+     * The visible-dialog half of the window guard: a live ANR or crash dialog
+     * is an intruder even when our app still holds focus, and a dialog whose
+     * surface is gone is not. Both shapes are fed in directly, because the
+     * guard cannot be waiting for a real ANR to test whether it would see
+     * one.
+     */
+    @Test
+    fun theWindowGuardReadsVisibleDialogs() {
+        val ours = "io.github.muntasimulhaque.quran"
+        val live = """
+            Window #12 Window{6fdf0b8 u0 Application Not Responding: com.google.android.apps.nexuslauncher}:
+              mHasSurface=true isReadyForDisplay()=true mWindowRemovalAllowed=false
+        """.trimIndent()
+        assertEquals(
+            "com.google.android.apps.nexuslauncher",
+            visibleErrorDialog(live, ours),
+        )
+
+        val gone = """
+            Window #12 Window{6fdf0b8 u0 Application Not Responding: com.google.android.apps.nexuslauncher}:
+              mHasSurface=false isReadyForDisplay()=false mWindowRemovalAllowed=false
+        """.trimIndent()
+        assertNull(visibleErrorDialog(gone, ours))
+
+        val aNormalWindow = """
+            Window #12 Window{6fdf0b8 u0 com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity}:
+              mHasSurface=true isReadyForDisplay()=true mWindowRemovalAllowed=false
+        """.trimIndent()
+        assertNull(visibleErrorDialog(aNormalWindow, ours))
+    }
+
+    /**
      * The state the tour photographs: the reader's own translation, the word
      * list that speaks its language, the first tafsir, and the defaults a
      * fresh install starts from.
@@ -341,6 +388,16 @@ class ScreenshotTest {
         waitForTag("browse-sheet")
         captureScreen("07-browse")
         back()
+        // The back key must actually close Browse before the next screen is
+        // asked for. When a system dialog swallowed it, the card used to
+        // open over the still-open sheet and the last two frames
+        // photographed a screen two steps behind the tour while the leg was
+        // green (twenty-ninth session). If the sheet is still there, the
+        // wait fails and the leg is red, which is the honest answer.
+        rule.waitUntil(timeoutMillis = 10_000) {
+            rule.onAllNodesWithTag("browse-sheet", useUnmergedTree = true)
+                .fetchSemanticsNodes().isEmpty()
+        }
 
         // 8. An ayah's actions, and the card they open, captured from the
         // Mushaf: there the card carries the translation, word by word, and
@@ -386,4 +443,37 @@ class ScreenshotTest {
             Thread.sleep(800)
         }
     }
+}
+
+/**
+ * A live ANR or crash dialog in a `dumpsys window windows` dump, whatever
+ * window holds focus, or null when there is none. Each window is read as its
+ * own block: only one whose surface is up can be an intruder, and only one
+ * whose title is an error is returned, so a stale record of a dialog that is
+ * gone is never mistaken for one that is in front. The title names the
+ * package that stopped responding; the window itself belongs to the system,
+ * so the package in the title is what a failure should say.
+ */
+internal fun visibleErrorDialog(text: String, ours: String): String? {
+    val error = listOf("Application Not Responding", "isn't responding", "Application Error")
+    var block = StringBuilder()
+    var inBlock = false
+    fun inspect(): String? {
+        val body = block.toString()
+        if (!body.contains("mHasSurface=true")) return null
+        val title = Regex("""Window\{([^}]*)\}""").find(body)?.groupValues?.get(1) ?: return null
+        if (title.contains(ours)) return null
+        if (error.none { title.contains(it) }) return null
+        return title.substringAfter(": ", "a system dialog").trim().substringBefore(' ')
+    }
+    for (line in text.lineSequence()) {
+        if (line.contains("Window #") && line.contains("Window{")) {
+            if (inBlock) inspect()?.let { return it }
+            block = StringBuilder()
+            inBlock = true
+        }
+        if (inBlock) block.append(line).append('\n')
+    }
+    if (inBlock) inspect()?.let { return it }
+    return null
 }
