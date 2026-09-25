@@ -994,10 +994,12 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the thirtieth session)
 
-**2.2 (versionCode 23) is prepared and handed over, awaiting the owner's
-submission to Google Play (D-097, D-098).** The owner asked for eight things
-against 2.1 and then said "go for play release"; the listening page reads
-অডিও, the owner's own word, after the first read of a garbled request.
+**2.2 (versionCode 23) is submitted to Google Play for review** (D-097,
+D-098). The owner asked for eight things against 2.1 and then said "go for
+play release"; the listening page reads অডিও, the owner's own word, after
+the first read of a garbled request. The hand-off is closed: the bundle was
+deleted once the submission was confirmed, and `play-store/aab/` keeps only
+its own note.
 
 What the release carries:
 
@@ -1039,11 +1041,11 @@ launcher ANR over 05-search; the guard refused the frame, which is the
 environment class D-078 names).
 
 **The store set is current** (run 36164556475 attempt 2, 24 frames cmp'd,
-all changed frames read). **The bundle is handed over**:
+all changed frames read). **The bundle was handed over and is in Play**:
 `quran-2.2-vc23.aab`, 147,867,353 bytes, SHA-256
 `ba4b9c1e4060a8fa16ef5424319ea2f8b17c9f7121fb83aff3961b4b5ec67c7d`, `jar
 verified`, signed with the shared upload key, core pack only. The hand-off
-copy is deleted once the owner confirms the Play submission.
+copy is deleted; the artifact stays in build run 36164556479.
 
 ## Where the project stands (end of the twenty-ninth session)
 

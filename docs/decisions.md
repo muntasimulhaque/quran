@@ -4388,5 +4388,11 @@ Read back from the bundle: `base/assets/content/core.db` and its catalog,
 the 604 page fonts and the Hafs face, and no `assets/packs` entry at all.
 
 **Handed over together, before the submission.** The bundle and the 24
-screenshots are the delivery, with the 2.2 notes pasted bare. The hand-off
-copy of the bundle is deleted once the owner confirms the Play submission.
+screenshots were the delivery, with the 2.2 notes pasted bare.
+
+**The submission is confirmed, so the hand-off is closed.** The owner
+submitted 2.2 to Google Play for review, and the hand-off copy of the bundle
+was deleted the same session, as the runbook requires: the artifact stays in
+build run 36164556479 and in Play, and `play-store/aab/` keeps only its own
+note. The tree is clean. The signed bundle's record is above; nothing in the
+repository depends on the binary.
