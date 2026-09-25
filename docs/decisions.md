@@ -4146,3 +4146,53 @@ included.
 signed bundle, and the screenshot workflow runs because surfaces that draw
 changed. The run IDs, the store set, and the bundle record follow in D-096
 when they are in hand.
+
+## D-096: The 2.1 store set and the 2.1 bundle
+
+Date: the twenty-ninth session, on the release push.
+
+The push ran build 36125481634 (gates and debug build, data instrumented
+tests, and the signed bundle, all green) and screenshot run 36125481691
+(phone, 7 inch, and 10 inch, all three legs green first try).
+
+**The first capture was green and wrong.** Run 36121494370, the release
+commit's own capture, passed on all three legs, and `cmp` then found the
+phone's 07-browse and 08-ayah-card frames differed from 2.0 by nearly every
+pixel. Reading them showed "Pixel Launcher isn't responding" over both: the
+dialog never took focus, so the guard that reads `mCurrentFocus` saw nothing,
+and it swallowed the back key that closes Browse, so frame 08 photographed
+the ayah card opening over the still-open sheet, a screen two steps behind
+the tour. This is class 4 in `docs/screenshot-failures.md` wearing a new
+face, and both halves are fixed there and in the test: the guard now also
+reads visible error dialogs out of their own window blocks (only
+`mHasSurface=true` counts, so a stale record is never an intruder), and the
+tour waits for the Browse sheet's tag to disappear after the back key, so a
+swallowed key is a red leg and not a quiet wrong frame. A new
+`theWindowGuardReadsVisibleDialogs` test feeds the guard a live dialog, a
+dismissed one, and an ordinary window, because the guard cannot wait for a
+real ANR to be tested. The fix ran build 36125481634 and capture 36125481691;
+both green.
+
+**The set is installed from run 36125481691**, all three form factors, every
+frame compared with its artifact by `cmp` (24 of 24 match). Every changed
+frame was read before it shipped, and the changed set is small: the settings
+frames carry the three switches and Version 2.1, the tablet search frames
+show the named word meaning block (the phone's search frame shows only the
+Arabic above the keyboard, unchanged), and the Browse and ayah-card frames
+differ from 2.0 only in the status bar clock, which the numeric compare
+confirms (the differing bounding box is the clock on every form factor).
+
+**The bundle, from the newest green build on main.** Run 36125481634
+carries every commit, including the guard fix. `quran-2.1-vc22.aab`,
+147,841,916 bytes, SHA-256
+`a81cad7ef254409cdd24c5681f3541d9b2453709b88a17453f1bef8a51a1d6dd` (the
+artifact's own recorded hash, recomputed from the file), `jar verified`,
+signed with the shared upload key
+(`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`).
+Read back from the bundle: `base/assets/content/core.db` and its catalog,
+the 604 page fonts and the Hafs face, and no `assets/packs` entry at all.
+
+**Handed over together, before the submission.** The bundle (run
+36125481634) and the 24 screenshots (run 36125481691) are the delivery, with
+the 2.1 notes pasted bare. The hand-off copy of the bundle is deleted once
+the owner confirms the Play submission, as every release before it has done.

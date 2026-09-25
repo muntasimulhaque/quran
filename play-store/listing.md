@@ -101,12 +101,15 @@ The remaining frame differences
 between runs are the status bar's own clock, the text cursor's blink in the
 search frame, and a few pixels of subpixel antialiasing.
 
-The set is refreshed again for 2.0 from the release push: the playback pill,
-the share sheet, the Go to Ayah picker, the tafsir's paragraphs, and the
-search results all moved, so the capture reruns and the frames are read
-before they are installed. The set stays at eight frames per form factor:
-every changed surface is one the set already shows, and the share sheet is a
-door inside the ayah actions the eighth frame captures.
+The set is refreshed for 2.1 from the release push: Settings gained the Show
+translation, Show tafsir, and Show word meanings switches, and the search
+results name each word meaning under the translation. The set stays at eight
+frames per form factor, and no frame was added or removed. Every frame was
+compared with its artifact by `cmp` (24 matches) and every changed frame was
+read before it shipped: the settings frames carry the three switches and
+Version 2.1, the tablet search frames show the new word meaning block, and
+the Browse and ayah-card frames differ from 2.0 only in the status bar
+clock, which the numeric compare confirms.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for

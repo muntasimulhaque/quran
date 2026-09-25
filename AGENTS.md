@@ -324,6 +324,33 @@ the tree (D-093).
    Play submission. Hand the notes over as a bare paragraph: no blockquote, no
    fence, no wrapping quotes, nothing on the same line as the text.
 
+**The fast path, measured in the twenty-ninth session.** A release is about
+fifteen minutes of wall clock, and the order below is what keeps it there.
+
+- The local suite is about six minutes: the JVM suite and lint, the two
+  instrumented suites on one emulator, and the five owner gates. Run it
+  once, then push once.
+- The push starts `build` (about five minutes) and `screenshots` (about
+  four and a half) together on their own runners, so the wait is the longer
+  of the two and never the sum. While they run, write the decisions entry
+  and the listing's set paragraph; do not poll from the first minute.
+- Never push twice for one release. A docs-only or `play-store`-only push
+  triggers nothing; a test-only push triggers a second full capture for
+  frames the first set already holds, so capture-test fixes ride the
+  release commit or wait for the next one.
+- Verify the set numerically before reading anything: the differing
+  bounding boxes say which frames carry content and which carry only the
+  status bar clock. Read the content frames, one per turn from uniquely
+  named copies, then `cmp` all twenty-four against the artifacts. Reading
+  the whole set by eye is the slowest step in the hand-off and the one that
+  adds nothing.
+- The capture leg itself is the next place to cut. Each leg spends one to
+  two minutes on a cold boot because the workflow passes `-no-snapshot`;
+  the AVD cache per form factor already exists. The first release task of
+  the next session is to keep a booted snapshot in that cache and measure
+  the leg with it, reading `docs/screenshot-failures.md` first if a leg
+  goes red. The target is a leg under three minutes.
+
 **The screenshot set is eight frames per form factor**, so phone, 7 inch, and
 10 inch at eight each, twenty-four images in all. The tour (`ScreenshotTest`)
 and the numbered list in `play-store/listing.md` are kept in step with that
