@@ -43,5 +43,14 @@
                 android:resource="@xml/share_paths" />
         </provider>
 
+        <!-- The daily reminder, fired by the alarm the app itself set. The
+             alarm's pending intent names this receiver directly, so the
+             receiver is not exported and carries no intent filter: nothing
+             outside the app can reach it, and it needs no permission of its
+             own. -->
+        <receiver
+            android:name=".daily.DailyAyahScheduler$Receiver"
+            android:exported="false" />
+
     </application>
 </manifest>

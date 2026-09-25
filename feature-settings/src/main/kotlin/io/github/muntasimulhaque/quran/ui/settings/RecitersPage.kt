@@ -64,7 +64,8 @@ fun RecitersPage(
             title = stringResource(R.string.settings_follow_title),
             subtitle = stringResource(R.string.settings_follow_subtitle),
             checked = settings.followReciter,
-        ) { actions.onFollowReciter(it) }
+            onChange = actions.onFollowReciter,
+        )
         packs.filter { it.type == PackType.Recitation }
             .sortedBy { it.name.lowercase() }
             .forEach { pack ->

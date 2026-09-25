@@ -1,6 +1,5 @@
 package io.github.muntasimulhaque.quran
 
-import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -87,7 +86,7 @@ class NotesPreviewTest {
         // The chrome comes up on a tap on the paper; the reading below it
         // keeps its own gestures, so the tap is the same one a reader makes.
         compose.onAllNodesWithContentDescription(studyPage).onFirst()
-            .performTouchInput { click(center) }
+            .tapThePaper()
         val browse = compose.activity.getString(R.string.action_browse)
         compose.waitUntil(timeoutMillis = 15_000) {
             compose.onAllNodesWithContentDescription(browse).fetchSemanticsNodes().isNotEmpty()

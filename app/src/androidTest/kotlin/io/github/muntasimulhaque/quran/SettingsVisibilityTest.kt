@@ -1,6 +1,5 @@
 package io.github.muntasimulhaque.quran
 
-import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
@@ -108,7 +107,7 @@ class SettingsVisibilityTest {
     private fun revealChrome() {
         val studyPage = compose.activity.getString(StudyR.string.study_page_description)
         compose.onAllNodesWithContentDescription(studyPage).onFirst()
-            .performTouchInput { click(center) }
+            .tapThePaper()
         compose.waitUntil(timeoutMillis = 15_000) {
             compose.onAllNodesWithContentDescription(
                 compose.activity.getString(R.string.action_settings),

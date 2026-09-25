@@ -154,12 +154,28 @@ fun PageHeader(title: String, onBack: () -> Unit) {
     }
 }
 
+/**
+ * A switch, and, when [onOpen] is given, a chevron that opens the page the
+ * switch's content is chosen on.
+ *
+ * The three reading switches and the packs behind them used to live in two
+ * places: a switch here and a separate row for the packs, so a reader who
+ * turned the translation off still had a "Translations" row below that read
+ * as a second, unexplained control (owner report, D-097). One row now carries
+ * both: the switch says what the reading draws, and the chevron says the
+ * packs are one tap away. The chevron is its own touch target with its own
+ * spoken name, so TalkBack reads a switch and a door rather than one crowded
+ * control.
+ */
 @Composable
 fun ToggleRow(
     title: String,
     subtitle: String?,
     checked: Boolean,
     onChange: (Boolean) -> Unit,
+    /** The page this switch's content is chosen on, when there is one. */
+    onOpen: (() -> Unit)? = null,
+    openLabel: String? = null,
 ) {
     Row(
         modifier = Modifier
@@ -189,6 +205,29 @@ fun ToggleRow(
                     text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        if (onOpen != null) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(50))
+                    .clickable(onClick = onOpen)
+                    .semantics {
+                        if (!openLabel.isNullOrBlank()) contentDescription = openLabel
+                        role = Role.Button
+                    },
+                contentAlignment = Alignment.Center,
+            ) {
+                IconGlyph(
+                    icon = Icon.Chevron,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .size(18.dp)
+                        // The mark says where a tap goes: the chevron points
+                        // the way the page slides in, to the right.
+                        .graphicsLayer(rotationZ = -90f),
                 )
             }
         }
@@ -479,9 +518,21 @@ private fun PackTrailing(
     }
 }
 
-/** The four grounds, as swatches: each one is the page it will paint. */
+/**
+ * The four grounds, as swatches: each one is the page it will paint. The
+ * swatch that is filled is the page the reader is actually reading on, not
+ * the stored day choice: with automatic night mode on and the phone in dark
+ * mode, Night draws the app, so Night is what the row says (owner report,
+ * D-097). The day choice is named in the note under the switch, and a tap
+ * still sets the day page.
+ */
 @Composable
-fun ThemeRow(selected: AppTheme, onSelect: (AppTheme) -> Unit) {
+fun ThemeRow(
+    selected: AppTheme,
+    onSelect: (AppTheme) -> Unit,
+    /** The page drawn right now, when the system has a say. */
+    shown: AppTheme = selected,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -493,7 +544,7 @@ fun ThemeRow(selected: AppTheme, onSelect: (AppTheme) -> Unit) {
                 modifier = Modifier
                     .minimumInteractiveComponentSize()
                     .clip(RoundedCornerShape(14.dp))
-                    .selectable(selected = theme == selected, role = Role.RadioButton) {
+                    .selectable(selected = theme == shown, role = Role.RadioButton) {
                         onSelect(theme)
                     }
                     .padding(horizontal = 6.dp, vertical = 8.dp),
@@ -505,8 +556,8 @@ fun ThemeRow(selected: AppTheme, onSelect: (AppTheme) -> Unit) {
                         .clip(CircleShape)
                         .background(ground)
                         .border(
-                            width = if (theme == selected) 2.dp else 1.dp,
-                            color = if (theme == selected) {
+                            width = if (theme == shown) 2.dp else 1.dp,
+                            color = if (theme == shown) {
                                 MaterialTheme.colorScheme.primary
                             } else {
                                 MaterialTheme.colorScheme.outline
@@ -524,7 +575,7 @@ fun ThemeRow(selected: AppTheme, onSelect: (AppTheme) -> Unit) {
                 Text(
                     text = theme.name(),
                     style = MaterialTheme.typography.labelSmall,
-                    color = if (theme == selected) {
+                    color = if (theme == shown) {
                         MaterialTheme.colorScheme.primary
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant

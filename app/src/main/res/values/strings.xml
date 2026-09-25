@@ -60,4 +60,9 @@
     <string name="content_problem_title">The Quran text could not be opened</string>
     <string name="content_problem_body">Something on this device stopped the app from reading its own content. Nothing has been lost: your saved ayahs and settings are untouched.</string>
     <string name="content_problem_retry">Try again</string>
+
+    <!-- The daily reminder: a quiet invitation to read, one ayah each day. -->
+    <string name="daily_channel_name">Daily ayah</string>
+    <string name="daily_channel_description">One ayah each day, at the hour you choose.</string>
+    <string name="daily_notification_title">%1$s %2$d:%3$d</string>
 </resources>

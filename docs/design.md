@@ -153,7 +153,10 @@ Searched, in one pass:
   where the matches are: "18 in the text, 4 in the translation, 3 in Ibn
   Kathir".
 * Matched Arabic words and matched English words are marked in the accent
-  color, exactly, without disturbing the rest of the sentence.
+  color, exactly, without disturbing the rest of the sentence. A row never
+  says the same match twice: the word meaning is drawn only when it is the
+  row's only evidence of the match, so a translation highlight is never
+  repeated as a meaning block under it (D-097).
 * Tapping a result opens the ayah in the reader and, in the study card, its
   context.
 * The indexes are built in the background after the first page appears, so
@@ -178,10 +181,28 @@ Searched, in one pass:
   on marked and the grid landed on it. The surah is a card of its own quiet
   fill, the grid opens a block under it rather than a finger's width, and
   the header, the card, and the grid share one gutter, so the picker reads
-  as one page (D-090). Tapping a number opens that ayah and closes the
-  sheet, so a long surah never has to be scrolled to reach a place in it.
-  The door never takes the chips' chosen fill: the picker swaps in over the
-  lists and the reader's own tab is waiting when it closes.
+  as one page (D-090). The reader's own ayah is centered in the grid's view,
+  not pinned to its top edge: a number flush against the viewport's edge
+  reads as any other row, and the place has to be unmistakable (D-097).
+  Tapping a number opens that ayah and closes the sheet, so a long surah
+  never has to be scrolled to reach a place in it. The door never takes the
+  chips' chosen fill: the picker swaps in over the lists and the reader's
+  own tab is waiting when it closes.
+
+## 6a. The daily reminder
+
+One ayah a day, in the reader's own notifications: the quiet nudge of rule
+12, built so it can be counted. The switch is off until the reader asks for
+it, nothing is scheduled while it is off, and nothing is fetched at any
+time: the ayah and its translation are read from the content already on the
+device. The ayah is the local day's own, walking the Book in order so a
+reader who keeps the reminder meets the whole Quran rather than the same
+short list of favorites (D-097). The notification carries the Arabic and,
+when the reader reads with a translation, the first enabled one, in plain
+words with no footnote markers, because the shade has no door for a note. A
+tap opens that ayah in the study reading, whatever mode the reader was last
+in. The hour is the reader's, and the alarm is the system's own inexact one:
+minutes of drift under Doze are nothing to an invitation to read.
 
 ## 7. Settings
 
@@ -192,6 +213,9 @@ closes the sheet, and the hub keeps its place while a page is open (D-046).
 
 * **Appearance**: Paper, Sepia, Night, Black, as swatches that are the page
   each one paints. The theme is the whole app: the page, the sheets, the bars.
+  The filled swatch is the page drawing right now: with automatic night mode
+  on and the phone in dark mode, Night is filled, and the day page the reader
+  chose is named under the switch (D-097).
 * **Text**: the Quran text, the translation, the tafsir, and the word
   meanings aid, each with its own five steps, above a sample drawn from the
   reader's own ayah so a change is judged on the page it is about to change.
@@ -211,15 +235,18 @@ closes the sheet, and the hub keeps its place while a page is open (D-046).
   feels the need for them (D-090). The Settings page keeps them as the
   default the next ayah starts from; there is one value with two doors, not
   a remembered setting and a hidden session value.
-* **Translations**: more than one may be on, grouped by the language each one
-  speaks, with the size before a byte moves. The mark is a check, like every
-  other list where more than one may be on; the first one turned on is the
-  one search and share read.
-* **Tafsirs**: as many as the reader wants, grouped by language, each opening
-  from its own door under the ayah.
+* **Show translation and Show tafsir**: each switch says whether the reading
+  draws what it names, and the chevron on the same row opens the list it is
+  chosen from. The packs say what the reader has; the switch says what the
+  page shows. One row, one decision, and no second door for the same thing
+  (D-097). Both are on by default, so a reader who added one sees it.
 * **Word meanings**: the switch, and the lists by language. The meaning under
   an Arabic word is only useful in the language the reader is reading in, so
   the list follows the chosen translation rather than asking (D-046).
+* **Daily ayah**: one switch and one hour. The reminder is off until the
+  reader asks for it, nothing is scheduled while it is off, and nothing is
+  fetched at any time: the ayah is read from the content already on the
+  device (D-097).
 * **About**: the version, the credits and licenses, the corrections and
   rights contact, and a self check that reads every installed pack back and
   names anything damaged.

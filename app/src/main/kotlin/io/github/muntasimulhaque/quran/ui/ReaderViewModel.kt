@@ -37,6 +37,7 @@ import io.github.muntasimulhaque.quran.data.TranslationLine
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.data.withLanguage
+import io.github.muntasimulhaque.quran.daily.DailyAyahScheduler
 import io.github.muntasimulhaque.quran.playback.PlaybackController
 import io.github.muntasimulhaque.quran.playback.ListenOffer
 import io.github.muntasimulhaque.quran.playback.ListenOption
@@ -393,6 +394,22 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
+     * Opens one ayah in the study reading. A tap on the daily reminder asks
+     * for a verse to read, not for the mode the reader last happened to be
+     * in, so the reading moves to study whatever it was, and the place is
+     * written down the same way any other jump writes it (owner decision,
+     * 30).
+     */
+    fun jumpToAyahInStudy(ayah: Int) {
+        val clamped = ayah.coerceIn(1, 6236)
+        if (settings.mode != ReadingMode.Study) {
+            settings = settings.copy(mode = ReadingMode.Study)
+            viewModelScope.launch { settingsStore.setMode(ReadingMode.Study) }
+        }
+        jumpToAyah(clamped)
+    }
+
+    /**
      * A download offer belongs to the surah it was asked for. Moving to
      * another surah takes it away: a request for one surah's audio must never
      * sit over a different surah, waiting for a tap that no longer means what
@@ -510,6 +527,40 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     fun setShowTafsir(show: Boolean) {
         settings = settings.copy(showTafsir = show)
         viewModelScope.launch { settingsStore.setShowTafsir(show) }
+    }
+
+    /**
+     * The daily reminder, armed or cleared where it is chosen. Turning it on
+     * also asks for the notification permission, because a switch that
+     * cannot speak is not a working switch; the alarm itself is set on the
+     * worker, so the main thread never touches the system alarm manager.
+     */
+    fun setDailyAyah(enabled: Boolean, onPermission: () -> Unit) {
+        if (enabled) onPermission()
+        settings = settings.copy(dailyAyah = enabled)
+        viewModelScope.launch {
+            settingsStore.setDailyAyah(enabled)
+            withContext(Dispatchers.IO) {
+                DailyAyahScheduler.apply(
+                    getApplication(),
+                    enabled = enabled,
+                    hour = settings.dailyAyahHour,
+                )
+            }
+        }
+    }
+
+    /** The hour the daily reminder arrives, in the reader's local time. */
+    fun setDailyAyahHour(hour: Int) {
+        val safe = hour.coerceIn(0, 23)
+        settings = settings.copy(dailyAyahHour = safe)
+        viewModelScope.launch {
+            settingsStore.setDailyAyahHour(safe)
+            if (!settings.dailyAyah) return@launch
+            withContext(Dispatchers.IO) {
+                DailyAyahScheduler.apply(getApplication(), enabled = true, hour = safe)
+            }
+        }
     }
 
     fun setWordByWord(show: Boolean) {

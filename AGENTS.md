@@ -858,6 +858,38 @@ implement it and update this list.
   the card's tafsir range (0.7 alpha, 3.3:1) and its note hint (0.5, 2.2:1).
   Measure before choosing a tone, and say "alpha" only when the alpha is
   against a ground that was actually checked.
+- A hardware bitmap is a texture, and a texture has a size limit. The share
+  card is read off a Compose graphics layer with `toImageBitmap`, which
+  makes a **hardware** bitmap on API 28 and up; a tall card passes the
+  driver's limit (4,096 px on much of the mid range hardware this app runs
+  on) and loses its tail, and a software canvas refuses the bitmap outright
+  (`Software rendering doesn't support hardware bitmaps`). The capture takes
+  the card in 2,048 px windows and stitches software copies into one
+  software bitmap, so the picture is the card's real size on every device.
+  Reopen only with a measurement; the emulator here has a large limit and
+  would not show the truncation (D-097).
+- Testing the study reading by tapping the page's exact center is a trap: a
+  translation footnote marker sits in the flow of the text, so at the center
+  of Al-Fatihah 1:1 one of them is under the finger, and the tap opens the
+  footnote sheet instead of the chrome. Every test that wants the chrome
+  taps the page's own left margin through `tapThePaper()`, which is where a
+  reader taps too. Eight tests failed together from this before it was
+  found; the clean 2.1 tree shows the same flakiness, so it is a trap and
+  not a regression (D-097).
+- A reminder scheduled outside the app must not need a boot permission. The
+  daily ayah arms through `AlarmManager` and an unexported receiver, and
+  re-arms on the app's own launch: a reboot or a clock change costs at most
+  one morning before the app is opened again, which is the price of not
+  adding `RECEIVE_BOOT_COMPLETED` to a manifest whose permission set is
+  audited (D-097).
+- `getIntExtra(EXTRA, 0)` is not an absent extra. The daily reminder's first
+  cut defaulted a missing ayah to 0, which coerced to ayah 1, so every plain
+  launch jumped to the first ayah; the default is a sentinel that cannot be
+  a place (D-097).
+- The Bangla interface follows the QUL Bangla corpus for spelling: তাফসীর,
+  not তাফসির, and শোনা for listening, not the formal শ্রবণ. Sweep the whole
+  Bangla surface whenever a word is settled, because the double spellings
+  drift one string at a time (D-097).
 
 ### Housekeeping at the end of the session
 
@@ -884,17 +916,15 @@ fetching them again; the space is worth less than the time.
 
 ## Next session: the remaining queue, in order
 
-0. **The store set is current, and the capture can be trusted.** 2.1
-   installed the set from run 36125481691, all three legs green: every frame
-   compared with its artifact by `cmp` (24 matches) and every changed frame
-   read. The capture's first run was green and wrong (a dialog that never
-   took focus), and the guard now reads visible error dialogs out of their
-   own window blocks while the tour waits for Browse to close after the
-   back key (D-096, `docs/screenshot-failures.md`). The next session that
-   changes a pixel captures again with the procedure in "Store screenshots",
-   and starts with the fast path in "Release hand-off": keep a booted
-   snapshot in the per-form-factor AVD cache so a leg comes under three
-   minutes.
+0. **The store set is one capture behind.** 2.1's set is installed and
+   verified (run 36125481691), and the next release must capture because
+   this session changed pixels: the settings hub (merged switches with
+   their doors, the daily reminder row), the search results (no repeated
+   word meaning), the Go to Ayah picker (the reader's ayah centered), and
+   the share sheet (a long card scrolls). Use the procedure in "Store
+   screenshots" and start with the fast path in "Release hand-off": keep a
+   booted snapshot in the per-form-factor AVD cache so a leg comes under
+   three minutes.
 
 1. **The segmented controls' touch targets.** The text size steps and the
    playback pace draw 38 dp and 46 dp cells, under the design document's own
@@ -959,6 +989,52 @@ fetching them again; the space is worth less than the time.
   to right on the screen; `MushafTurnTest` now pins the direction on every
   form factor.
 
+
+## Where the project stands (end of the thirtieth session)
+
+**2.1 remains the submitted release; the working tree carries the owner's
+ninth report and the daily reminder, unversioned until the owner's word
+(D-097).**
+
+The owner read 2.1 on a phone and asked for eight things, and all eight are
+answered in the tree:
+
+- **Go to Ayah lands the reader's ayah mid-grid.** The picker scrolled the
+  place to the viewport's top edge, where it read as any other row; it now
+  centers it, and the scroll is keyed on the place as well as the surah.
+  `GoToAyahScrollTest` fails on the old scroll with the measured numbers.
+- **Search never says the same match twice.** The word meaning block is
+  drawn only when it is the row's only evidence of the match; a translation
+  highlight is never repeated under it. The rule is `shouldShowWordMeaning`
+  in `data`, pure and tested in the JVM suite and against the shipped
+  database.
+- **The reading switches and the packs are one row each.** Show translation
+  and Show tafsir carry the chevron that opens their own list, with their
+  own spoken names; the separate hub rows are gone. Word meanings is
+  untouched.
+- **The share card is captured whole on every device.** `toImageBitmap`
+  makes a hardware bitmap, capped by the GPU's texture size and refused by a
+  software canvas; the capture now stitches 2,048 px software windows, and
+  the sheet's preview has its height cap on the viewport rather than on the
+  card. Two tests pin both halves.
+- **The theme swatch says what is drawing.** With auto-night on and the
+  phone dark, Night is filled and the day page is named beside it.
+- **One Bangla spelling.** তাফসীর everywhere (the QUL corpus's own), and
+  শোনা for listening; the owner's `অও` is not a Bangla word and was not
+  used.
+- **The daily reminder.** One ayah a day at the reader's own hour, the
+  translation when they read with one, and a tap that opens the ayah in the
+  study reading. Offline, no new permission, no new dependency, off until
+  asked for. `core/DailyAyah` is the pure rotation and `DailyAyahTest`
+  pins it.
+
+**The suite.** `core:test`, `data:testDebugUnitTest`,
+`app:testDebugUnitTest`, `:app:lintDebug`, and `:app:assembleDebug` are
+green; the data instrumented suite is 31/31 and the app instrumented suite
+is 36/36 on the phone emulator, including the eight new test classes. The
+design document's Browse, Search, and Settings sections and D-097 carry the
+rules. The store set is one capture behind because this session changed
+pixels.
 
 ## Where the project stands (end of the twenty-ninth session)
 

@@ -78,6 +78,14 @@ data class AppSettings(
     val showTranslation: Boolean = true,
     val showTafsir: Boolean = true,
     val wordByWord: Boolean = false,
+    /**
+     * The daily reminder: one ayah, once a day, at the reader's own time.
+     * Off until the reader asks for it, because nothing in this app schedules
+     * itself or fetches anything without their word.
+     */
+    val dailyAyah: Boolean = false,
+    /** The hour the daily reminder arrives, in the reader's local time. */
+    val dailyAyahHour: Int = 8,
     val longPressHintShown: Boolean = false,
 ) {
     val arabicSp: Float get() = TextSize.sp(TypeRole.Arabic, arabicSize)
@@ -140,6 +148,9 @@ class SettingsStore(private val context: Context) {
             showTranslation = preferences[SHOW_TRANSLATION] ?: true,
             showTafsir = preferences[SHOW_TAFSIR] ?: true,
             wordByWord = preferences[WORD_BY_WORD] ?: false,
+            dailyAyah = preferences[DAILY_AYAH] ?: false,
+            dailyAyahHour = (preferences[DAILY_AYAH_HOUR] ?: DEFAULT_DAILY_HOUR)
+                .coerceIn(0, 23),
             longPressHintShown = preferences[HINT_SHOWN] ?: false,
         )
     }
@@ -227,6 +238,14 @@ class SettingsStore(private val context: Context) {
         context.settingsStore.edit { it[WORD_BY_WORD] = show }
     }
 
+    suspend fun setDailyAyah(enabled: Boolean) {
+        context.settingsStore.edit { it[DAILY_AYAH] = enabled }
+    }
+
+    suspend fun setDailyAyahHour(hour: Int) {
+        context.settingsStore.edit { it[DAILY_AYAH_HOUR] = hour.coerceIn(0, 23) }
+    }
+
     suspend fun setLongPressHintShown() {
         context.settingsStore.edit { it[HINT_SHOWN] = true }
     }
@@ -286,6 +305,9 @@ class SettingsStore(private val context: Context) {
         const val MIN_SPEED = 0.5f
         const val MAX_SPEED = 1.5f
 
+        /** Morning, before the day's work starts, until the reader says otherwise. */
+        const val DEFAULT_DAILY_HOUR = 8
+
         val AYAH = intPreferencesKey("ayah")
         val MODE = stringPreferencesKey("mode")
         val THEME = stringPreferencesKey("theme")
@@ -307,6 +329,8 @@ class SettingsStore(private val context: Context) {
         val SHOW_TRANSLATION = booleanPreferencesKey("show_translation")
         val SHOW_TAFSIR = booleanPreferencesKey("show_tafsir")
         val WORD_BY_WORD = booleanPreferencesKey("word_by_word")
+        val DAILY_AYAH = booleanPreferencesKey("daily_ayah")
+        val DAILY_AYAH_HOUR = intPreferencesKey("daily_ayah_hour")
         val HINT_SHOWN = booleanPreferencesKey("hint_shown")
     }
 }

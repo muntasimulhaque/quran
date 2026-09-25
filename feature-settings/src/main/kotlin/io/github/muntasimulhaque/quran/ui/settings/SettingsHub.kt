@@ -1,17 +1,27 @@
 package io.github.muntasimulhaque.quran.ui.settings
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.ContentDatabase
@@ -19,6 +29,7 @@ import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.Recitation
 import io.github.muntasimulhaque.quran.data.UiLanguage
+import io.github.muntasimulhaque.quran.data.resolved
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
@@ -45,13 +56,19 @@ fun SettingsPage.title(): String = stringResource(
 
 /**
  * The page a choice reads as, with the automatic switch said in the same
- * breath, so the hub row never claims a page the reader is not on.
+ * breath, so the hub row never claims a page the reader is not on: in dark
+ * mode with auto-night on, the row says Night, the page drawing, and names
+ * the day choice after it (owner report, D-097).
  */
 @Composable
 private fun themeSummary(settings: AppSettings): String {
-    val name = settings.theme.name()
+    val dark = (LocalContext.current.resources.configuration.uiMode and
+        android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+        android.content.res.Configuration.UI_MODE_NIGHT_YES
+    val shown = settings.theme.resolved(autoNight = settings.autoNight, systemDark = dark)
+    val name = shown.name()
     return if (settings.autoNight) {
-        stringResource(R.string.settings_summary_theme_auto, name)
+        stringResource(R.string.settings_summary_theme_auto, name, settings.theme.name())
     } else {
         name
     }
@@ -72,6 +89,8 @@ fun SettingsHub(
     onShowTranslation: (Boolean) -> Unit,
     onShowTafsir: (Boolean) -> Unit,
     onWordByWord: (Boolean) -> Unit,
+    onDailyAyah: (Boolean) -> Unit,
+    onDailyAyahHour: (Int) -> Unit,
     onOpen: (SettingsPage) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -93,22 +112,28 @@ fun SettingsHub(
             ),
         ) { onOpen(SettingsPage.FontSize) }
         // What the reading draws, beside the sizes that decide how it draws
-        // it. The packs say what the reader has; these three say what the
-        // page shows, and each is on by default, so a reader who chose a
-        // translation or a tafsir sees it until they ask it away. The word
-        // by word switch sits here with them rather than at the top of the
-        // Translations page, where a reader looking for a display choice
-        // would not think to look.
+        // it, and the packs to draw it from one tap away. Each switch says
+        // whether the reading shows what it names, and the chevron beside it
+        // opens the list it is chosen from: the same row carries both halves
+        // of one decision, so a reader who turned the translation off still
+        // has one place to go for the translations, not two rows that read
+        // as two separate controls (owner report, D-097).
         ToggleRow(
             title = stringResource(R.string.settings_show_translation_title),
-            subtitle = stringResource(R.string.settings_show_translation_subtitle),
+            subtitle = translationName(settings, packs),
             checked = settings.showTranslation,
-        ) { onShowTranslation(it) }
+            onChange = onShowTranslation,
+            onOpen = { onOpen(SettingsPage.Translations) },
+            openLabel = stringResource(R.string.settings_open_translations),
+        )
         ToggleRow(
             title = stringResource(R.string.settings_show_tafsir_title),
-            subtitle = stringResource(R.string.settings_show_tafsir_subtitle),
+            subtitle = tafsirSummary(settings, packs),
             checked = settings.showTafsir,
-        ) { onShowTafsir(it) }
+            onChange = onShowTafsir,
+            onOpen = { onOpen(SettingsPage.Tafsirs) },
+            openLabel = stringResource(R.string.settings_open_tafsirs),
+        )
         WordByWordRow(settings, packs, packSetup, onWordByWord)
         PageRow(
             title = stringResource(R.string.settings_title_reciters),
@@ -118,14 +143,6 @@ fun SettingsHub(
             title = stringResource(R.string.settings_title_listening),
             summary = listeningSummary(settings),
         ) { onOpen(SettingsPage.Listening) }
-        PageRow(
-            title = stringResource(R.string.settings_title_translations),
-            summary = translationName(settings, packs),
-        ) { onOpen(SettingsPage.Translations) }
-        PageRow(
-            title = stringResource(R.string.settings_title_tafsirs),
-            summary = tafsirSummary(settings, packs),
-        ) { onOpen(SettingsPage.Tafsirs) }
         // Reading with the screen awake sits in the hub itself, beside the
         // other whole-app choices: it is one switch with no page behind it,
         // and a page that held only this one row was a door to a single tap.
@@ -133,7 +150,20 @@ fun SettingsHub(
             title = stringResource(R.string.settings_keep_awake_title),
             subtitle = stringResource(R.string.settings_keep_awake_subtitle),
             checked = settings.keepAwake,
-        ) { onKeepAwake(it) }
+            onChange = onKeepAwake,
+        )
+        // The daily reminder: one ayah a day, off until the reader asks for
+        // it. Nothing in this app schedules itself, and nothing fetches
+        // anything without their word, so the switch is the whole door.
+        ToggleRow(
+            title = stringResource(R.string.settings_daily_title),
+            subtitle = dailySubtitle(settings),
+            checked = settings.dailyAyah,
+            onChange = onDailyAyah,
+        )
+        if (settings.dailyAyah) {
+            DailyHourRow(hour = settings.dailyAyahHour, onChange = onDailyAyahHour)
+        }
         PageRow(
             title = stringResource(R.string.settings_title_about),
             summary = stringResource(R.string.settings_version_short, version),
@@ -152,6 +182,73 @@ private fun reciterName(settings: AppSettings, recitations: List<Recitation>): S
  * see it from the hub, or the reading sounds slow for a reason they cannot
  * find.
  */
+/**
+ * Where the reminder stands, in one line: whether it will come, and when.
+ * The hour is read from the same value the alarm is armed with, so the row
+ * never promises a time the reminder does not keep.
+ */
+@Composable
+private fun dailySubtitle(settings: AppSettings): String =
+    if (settings.dailyAyah) {
+        stringResource(
+            R.string.settings_daily_subtitle_on,
+            stringResource(R.string.settings_daily_hour_value, settings.dailyAyahHour),
+        )
+    } else {
+        stringResource(R.string.settings_daily_subtitle_off)
+    }
+
+/**
+ * The hour the reminder arrives: one row of hours, the morning ones first,
+ * so the choice is a tap rather than a time picker. The reader's own hour is
+ * always among them, so opening the row never hides the value it shows.
+ */
+@Composable
+private fun DailyHourRow(hour: Int, onChange: (Int) -> Unit) {
+    val hours = remember(hour) {
+        ((6..9).toList() + 12 + (0..23)).distinct().sortedWith(
+            compareBy({ if (it in 6..9 || it == 12) 0 else 1 }, { it }),
+        )
+    }
+    Text(
+        text = stringResource(R.string.settings_daily_hour_title),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Line),
+    )
+    FlowRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 22.dp, vertical = Space.Tight),
+        horizontalArrangement = Arrangement.spacedBy(Space.Line),
+        verticalArrangement = Arrangement.spacedBy(Space.Line),
+    ) {
+        hours.forEach { value ->
+            val active = value == hour
+            Text(
+                text = stringResource(R.string.settings_daily_hour_value, value),
+                style = MaterialTheme.typography.labelMedium,
+                color = if (active) {
+                    MaterialTheme.colorScheme.onPrimary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50))
+                    .background(
+                        if (active) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f)
+                        },
+                    )
+                    .selectable(selected = active, role = Role.RadioButton) { onChange(value) }
+                    .padding(horizontal = 12.dp, vertical = 9.dp),
+            )
+        }
+    }
+}
+
 @Composable
 private fun listeningSummary(settings: AppSettings): String {
     val speed = stringResource(R.string.settings_listening_speed_value, speedText(settings.playbackSpeed))

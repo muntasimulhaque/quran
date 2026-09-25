@@ -505,6 +505,10 @@ fun ReaderScreen(
                 onShowTranslation = { viewModel.setShowTranslation(it) },
                 onShowTafsir = { viewModel.setShowTafsir(it) },
                 onWordByWord = { viewModel.setWordByWord(it) },
+                onDailyAyah = { enabled ->
+                    viewModel.setDailyAyah(enabled, onPlaybackPermission)
+                },
+                onDailyAyahHour = { viewModel.setDailyAyahHour(it) },
                 onSelectRecitation = { viewModel.selectRecitation(it) },
                 onToggleTranslation = { viewModel.toggleTranslationPack(it) },
                 onToggleTafsir = { viewModel.toggleTafsirPack(it) },

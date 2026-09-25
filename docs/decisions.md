@@ -4203,3 +4203,132 @@ was deleted the same session, as the runbook requires: the artifact stays in
 build run 36125481634 and in Play, and `play-store/aab/` keeps only its own
 note. The tree is clean. The signed bundle's record is above; nothing in the
 repository depends on the binary.
+
+## D-097: The owner's ninth reading report, and the daily reminder
+
+Date: the thirtieth session. The owner read 2.1 on a phone and asked for
+eight things: three defects, three wording and structure changes, one
+new feature, and one content question. All eight are answered in the tree.
+No version moved, because the release waits for the owner's word.
+
+**1. Go to Ayah lands the reader's ayah mid-grid.** The picker's grid
+scrolled to the reader's place with `scrollToItem(index)`, which puts the
+target at the viewport's **top** edge. On a 286 ayah surah the reader's row
+sat in the same corner as every row above it, so the place they came for was
+readable only if they knew the number; the owner saw the top of the surah
+instead. The grid now scrolls to the place and then centers it: the target's
+cell height is measured from the grid's own layout info and the second
+scroll moves it down by half the leftover viewport. The scroll is also keyed
+on the place as well as the surah, so a jump that changes the reader's ayah
+while the picker is composed can never leave the grid on a place that is no
+longer theirs. `GoToAyahScrollTest` measures the cell against the grid's
+center and fails on the old scroll with `grid center 1231.0, cell center
+663.0`.
+
+**2. A search row never says the same match twice.** The word meaning was
+drawn as its own labelled block under every row that had one, so a reader
+who searched "mercy" saw the translation's highlight and, under it, the same
+match as a meaning (owner report). The block is now drawn only when it is
+the row's **only** evidence of the match: `shouldShowWordMeaning` in `data`,
+pure and pinned by `SearchMeaningTest` in both the JVM suite and against the
+shipped database. A row that matched only a meaning keeps it, named, because
+an unlabelled line under the ayah would be read as a translation.
+
+**3. The reading switches and the packs are one row each.** The hub carried
+a switch and, four rows below, a separate page row for the same thing, which
+read as two controls for one decision. Each switch now carries the chevron
+that opens its own list, with its own spoken name, so the translation's row
+is the translation's door and the tafsir's row the tafsir's. Word meanings
+is untouched: there is no list to choose from, and the aid's language
+follows the reader's translation (D-046). The separate hub rows are gone.
+`SettingsMergeTest` opens the list from the switch's own row and proves the
+hub no longer repeats it.
+
+**4. The share card is captured whole on every device.** The card is read
+off a graphics layer with `toImageBitmap`, which produces a **hardware**
+bitmap: a texture, capped by the device's own size limit and refused
+outright by a software canvas ("Software rendering doesn't support hardware
+bitmaps"). A long ayah at a large text scale passes 4,096 px, which is the
+limit on much of the mid range hardware this app runs on, and the tail was
+lost. The capture now takes the card in 2,048 px windows, copies each
+window to a software bitmap, and stitches them into one bitmap the PNG
+writer can encode. A single window covers every ordinary card, so the
+common case pays nothing. The sheet's preview had a second defect of the
+same symptom: its height cap sat *inside* the scroll, so a long card was
+clamped at 340 dp with nothing left to scroll. The cap is on the viewport
+now. `ShareCardCaptureTest` captures Al-Baqarah 2:282, three windows tall,
+and checks the last row's pixels are painted; `SharePreviewScrollTest`
+scrolls the translation's last words into view and fails on the old order.
+
+**5. The theme swatch says what is drawing.** With automatic night mode on
+and the phone in dark mode, Night draws the app while the stored day choice
+is still Paper; the swatch row filled Paper, which read as the app ignoring
+the switch (owner report). The filled swatch is the **resolved** theme now,
+in the Appearance page and in the hub's summary, and the day page the reader
+chose is named beside it so the choice is never lost. A tap still sets the
+day page.
+
+**6. One spelling of Tafsir in Bangla, and one of listening.** The strings
+carried both তাফসীর and তাফসির; the QUL Bangla tafsir corpus holds 2,519 of
+the first and none of the second, so তাফসীর is the spelling everywhere.
+`শ্রবণ` (formal "hearing") became `শোনা` (the everyday "listening" the same
+corpus uses). The owner asked for `অও`; that is not a Bangla word (two
+independent vowels with no meaning), so the word used is the corpus's own.
+The whole Bangla surface was swept for the same class of drift; no other
+double spelling survives.
+
+**7. The daily reminder.** The owner asked for an ayah of the day: one
+notification, carrying the ayah and, when the reader reads with a
+translation, the first enabled one, with a tap opening that ayah in the
+study reading, and a switch to turn it on. It is built to the house rules:
+
+* **Offline, always.** The ayah is read from the content database that
+  already ships on the device; the translation from a pack the reader
+  installed. `DailyAyahContent` opens the same library the reading does,
+  reads exactly one ayah and at most one translation, and closes it.
+  Nothing is fetched and nothing is kept.
+* **No new permission and no new dependency.** The reminder fires from an
+  `AlarmManager` alarm through an unexported `BroadcastReceiver`, so its
+  pending intent is the only thing that can wake it, and the manifest's
+  permission set is byte-identical to 2.1's. WorkManager was the other
+  candidate and was not taken: it is not in the allowed dependency list, and
+  an inexact daily alarm is the smallest thing that does the job. The alarm
+  is re-armed on the app's own launch, which corrects a reboot, a timezone
+  change, and a Doze deferral without asking for a boot permission this app
+  has never needed.
+* **Deterministic and in order.** `core/DailyAyah` walks the Book by the
+  local epoch day, `floorDiv` and `floorMod` so a pre-epoch instant or a
+  negative day still lands inside 1..6236, with the reader's own timezone
+  offset. `DailyAyahTest` in `core` proves the same day always gives the
+  same ayah, the walk runs forward and wraps once, a full rotation reaches
+  every ayah exactly once, and midnight is where the day turns.
+* **One ayah, one translation, plain words.** A notification cannot open a
+  footnote, so `RichText.plain` drops the markers and their notes; the
+  reminder carries the readable form.
+* **A tap is a reading.** The pending intent carries the ayah; the activity
+  reads it once on cold start and jumps in study mode, and the same ayah is
+  written down as the reader's place. Writing this found a real bug in the
+  first cut: an absent extra defaulted to 0, which coerced to ayah 1, so
+  every launch jumped to the first ayah. The default is a sentinel that
+  cannot be a place.
+
+**8. A test-suite trap the work uncovered.** Eight tests in the app suite
+began failing together, and the cause was not the app: several of them
+tapped the study page's exact `center` to bring the chrome, and at the
+center of Al-Fatihah 1:1 sits a translation footnote marker, which is a
+door. The tap opened the footnote sheet and every wait after it failed.
+Every such test now taps the page's own left margin through one shared
+`tapThePaper()` helper, which is where a reader taps too. The same flakiness
+was proven present in the clean 2.1 tree before the change, so it is
+recorded here as a trap rather than a regression.
+
+**Verification.** `core:test`, `data:testDebugUnitTest`,
+`app:testDebugUnitTest`, `:app:lintDebug`, and `:app:assembleDebug` are
+green. The data instrumented suite is 31/31 and the app instrumented suite
+is 36/36 on the phone emulator, the five new classes included:
+`GoToAyahScrollTest`, `SearchMeaningTest`, `SettingsMergeTest`,
+`DailyAyahTest`, `DailyAyahJumpTest`, `DailyAyahToggleTest`,
+`ShareCardCaptureTest`, and `SharePreviewScrollTest`. The design document's
+Browse, Search, and Settings sections carry the new rules. The store set
+changes visibly (settings, search, and the share sheet), so the next capture
+refreshes all three form factors.

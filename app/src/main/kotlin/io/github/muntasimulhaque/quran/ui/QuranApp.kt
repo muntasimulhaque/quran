@@ -52,8 +52,18 @@ import io.github.muntasimulhaque.quran.ui.theme.QuranTheme
 @Composable
 fun QuranApp(
     viewModel: ReaderViewModel = viewModel(),
+    /** The ayah a reminder's tap asked for, before the reading is on screen. */
+    initialAyah: Int? = null,
     onPlaybackPermission: () -> Unit = {},
 ) {
+    // A tap on the reminder opens that ayah in the study reading, which is
+    // what a reminder is for: the reader meets the words, not the app. The
+    // jump runs once, after the library has opened, and the same ayah is
+    // written down as the place, so closing the app leaves it there.
+    LaunchedEffect(initialAyah, viewModel.ready) {
+        if (initialAyah == null || !viewModel.ready) return@LaunchedEffect
+        viewModel.jumpToAyahInStudy(initialAyah)
+    }
     val settings = viewModel.settings
     val theme = settings.theme.resolved(
         autoNight = settings.autoNight,

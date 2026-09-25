@@ -50,6 +50,8 @@ data class SettingsActions(
     val onShowTranslation: (Boolean) -> Unit = {},
     val onShowTafsir: (Boolean) -> Unit = {},
     val onWordByWord: (Boolean) -> Unit = {},
+    val onDailyAyah: (Boolean) -> Unit = {},
+    val onDailyAyahHour: (Int) -> Unit = {},
     val onSelectRecitation: (String) -> Unit = {},
     val onTranslationPack: (String) -> Unit = {},
     val onToggleTafsir: (String) -> Unit = {},
@@ -156,6 +158,8 @@ fun SettingsSheet(
                         onShowTranslation = actions.onShowTranslation,
                         onShowTafsir = actions.onShowTafsir,
                         onWordByWord = actions.onWordByWord,
+                        onDailyAyah = actions.onDailyAyah,
+                        onDailyAyahHour = actions.onDailyAyahHour,
                         onOpen = { page = it },
                     )
                 }

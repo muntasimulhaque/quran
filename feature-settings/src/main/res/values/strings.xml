@@ -13,16 +13,23 @@
     <string name="settings_theme_black">Black</string>
     <string name="settings_auto_night_title">Follow the system dark mode</string>
     <string name="settings_auto_night_subtitle">Night when your phone is in dark mode, your page otherwise</string>
-    <string name="settings_summary_theme_auto">%1$s · auto</string>
+    <string name="settings_summary_theme_auto">%1$s · auto, day page %2$s</string>
 
     <string name="settings_keep_awake_title">Keep the screen awake</string>
     <string name="settings_keep_awake_subtitle">The page stays lit while you read</string>
+    <string name="settings_daily_title">Daily ayah</string>
+    <string name="settings_daily_subtitle_off">One ayah a day, in your notifications</string>
+    <string name="settings_daily_subtitle_on">One ayah a day, at %1$s</string>
+    <string name="settings_daily_hour_title">When it arrives</string>
+    <string name="settings_daily_hour_value">%1$d:00</string>
     <string name="settings_follow_title">Follow the reciter</string>
     <string name="settings_follow_subtitle">The page moves with the recitation</string>
     <string name="settings_show_translation_title">Show translation</string>
     <string name="settings_show_translation_subtitle">The translation reads under each ayah</string>
     <string name="settings_show_tafsir_title">Show tafsir</string>
     <string name="settings_show_tafsir_subtitle">The tafsirs you add open from the ayah card</string>
+    <string name="settings_open_translations">Choose translations</string>
+    <string name="settings_open_tafsirs">Choose tafsirs</string>
     <string name="settings_words_title">Show word meanings</string>
     <string name="settings_words_subtitle">Each word with its meaning, under the ayah</string>
     <string name="settings_words_add">Adds the %1$s word list · %2$s</string>
@@ -109,7 +116,7 @@
     <string name="settings_chosen_count">%1$d chosen</string>
     <string name="settings_group_theme">Theme</string>
     <string name="settings_theme_note">The whole app follows this: the page, the sheets, and the bars.</string>
-    <string name="settings_theme_note_auto">The whole app follows your phone right now: the page, the sheets, and the bars. The page above is what you read by day.</string>
+    <string name="settings_theme_note_auto">The whole app follows your phone right now: the page, the sheets, and the bars. By day it reads the page you chose, %1$s.</string>
     <string name="settings_group_sizes">Font size</string>
     <string name="settings_size_arabic">Quran text</string>
     <string name="settings_size_translation">Translation</string>

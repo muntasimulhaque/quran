@@ -40,4 +40,9 @@
     <string name="content_problem_title">কুরআনের লেখা খোলা যায়নি</string>
     <string name="content_problem_body">এই ডিভাইসে এমন কিছু আছে যা অ্যাপকে তার নিজের কনটেন্ট পড়তে বাধা দিচ্ছে। কিছুই হারায়নি: আপনার সংরক্ষিত আয়াত ও সেটিংস অক্ষত আছে।</string>
     <string name="content_problem_retry">আবার চেষ্টা করুন</string>
+
+    <!-- The daily reminder: a quiet invitation to read, one ayah each day. -->
+    <string name="daily_channel_name">দৈনিক আয়াত</string>
+    <string name="daily_channel_description">প্রতিদিন একটি আয়াত, আপনি যে সময় বেছে নেবেন।</string>
+    <string name="daily_notification_title">%1$s %2$d:%3$d</string>
 </resources>

@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.os.Build
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -29,7 +30,11 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,10 +43,12 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
@@ -250,17 +257,35 @@ private fun AppMark(mark: Painter, ground: Color, modifier: Modifier = Modifier)
 private class CardHeight(var px: Int = 0)
 
 /**
+ * The tallest slice the capture asks the GPU to hold at once.
+ *
+ * `GraphicsLayer.toImageBitmap` produces a *hardware* bitmap on API 28 and
+ * up, and a hardware bitmap is a texture: the driver refuses or clips
+ * anything taller than its own texture limit, which is 4,096 px on much of
+ * the mid range hardware this app runs on and 8,192 or 16,384 px on the rest.
+ * A long ayah at a large text scale passes 4,096 px easily, so the capture
+ * takes the card in slices this tall and stitches them into one software
+ * bitmap. The limit is deliberately under the smallest known texture size,
+ * and one slice covers every ordinary card, so the common case pays nothing
+ * for the guarantee (owner report, D-097).
+ */
+private const val CaptureSlicePx = 2048
+
+/**
  * The card's one appearance: it composes at the foot of the reader's own
  * screen, is recorded into a graphics layer that is never drawn back, and
- * [onImage] receives the pixels two frames later. Nothing of it reaches the
- * eye: the layer has no draw call, the node clears its semantics so TalkBack
- * never meets a card the reader cannot see, and the whole thing leaves the
+ * [onImage] receives the whole card. Nothing of it reaches the eye: the
+ * layer has no draw call, the node clears its semantics so TalkBack never
+ * meets a card the reader cannot see, and the whole thing leaves the
  * composition the moment it has been read.
  *
  * The child is measured taller than the screen allows, because a long ayah
  * makes a tall card and a picture must never be cut: the node reports the
  * screen's own height, the child stands outside those bounds (nothing here
- * clips), and the layer records the child's full height.
+ * clips), and the layer records the card slice by slice. Each slice moves
+ * the card up by its own height and records one window of it, and the
+ * windows are stitched into a single software bitmap, so the output is the
+ * card's real size on every device, whatever the GPU's texture limit is.
  *
  * If any of it fails, [onFailed] is called and the share falls back to the
  * plain text, so the reader never meets a Share that did nothing.
@@ -273,20 +298,34 @@ internal fun ShareCardCapture(
     modifier: Modifier = Modifier,
 ) {
     val layer = rememberGraphicsLayer()
-    val height = remember { CardHeight() }
     val density = LocalDensity.current
+    val widthPx = with(density) { CardWidth.roundToPx() }
+    // The card's full height, reported by the measuring child, and the slice
+    // the capture is photographing right now. Both are Compose state: the
+    // effect below must re-run when the card has been measured, and must
+    // walk a new slice on every pass.
+    var cardHeight by remember { mutableIntStateOf(0) }
+    var slice by remember { mutableStateOf(Slice(top = 0, height = 0)) }
     Layout(
         content = {
             CompositionLocalProvider(LocalDensity provides Density(density.density, fontScale = 1f)) {
-                AyahShareCardContent(card, Modifier.fillMaxWidth())
+                AyahShareCardContent(
+                    card,
+                    Modifier
+                        .fillMaxWidth()
+                        .onSizeChanged { size -> cardHeight = size.height },
+                )
             }
         },
         modifier = modifier
             .width(CardWidth)
             .clearAndSetSemantics { }
             .drawWithContent {
-                layer.record(size = IntSize(size.width.toInt(), height.px)) {
-                    this@drawWithContent.drawContent()
+                val tall = slice.height.takeIf { it > 0 } ?: cardHeight
+                if (tall > 0) {
+                    layer.record(size = IntSize(size.width.toInt(), tall)) {
+                        this@drawWithContent.drawContent()
+                    }
                 }
             },
     ) { measurables, constraints ->
@@ -298,24 +337,69 @@ internal fun ShareCardCapture(
                 maxHeight = Constraints.Infinity,
             ),
         )
-        height.px = child.height
-        layout(constraints.maxWidth, child.height.coerceAtMost(constraints.maxHeight)) {
-            child.place(0, 0)
+        val tall = slice.height.takeIf { it > 0 } ?: child.height
+        layout(constraints.maxWidth, tall.coerceAtMost(constraints.maxHeight)) {
+            child.place(0, -slice.top)
         }
     }
-    LaunchedEffect(layer, card) {
-        // Two frames: one for the composition to be measured and recorded,
-        // one to be sure the record has finished before it is read back.
-        withFrameNanos { }
-        withFrameNanos { }
-        val image = runCatching { layer.toImageBitmap() }.getOrNull()
-        if (image == null || image.width < 2 || image.height < 2) {
+    LaunchedEffect(layer, card, widthPx, cardHeight) {
+        val total = cardHeight
+        if (total <= 0 || widthPx <= 0) return@LaunchedEffect
+        // A software bitmap has no texture limit, so the stitched card is the
+        // card, whatever the driver would have held.
+        val stitched = runCatching {
+            Bitmap.createBitmap(widthPx, total, Bitmap.Config.ARGB_8888)
+        }.getOrNull()
+        if (stitched == null) {
             onFailed()
-        } else {
-            onImage(image)
+            return@LaunchedEffect
         }
+        val canvas = android.graphics.Canvas(stitched)
+        var top = 0
+        while (top < total) {
+            val tall = minOf(CaptureSlicePx, total - top)
+            slice = Slice(top = top, height = tall)
+            // Two frames: one for the slice to be placed and recorded, one to
+            // be sure the record has finished before it is read back.
+            withFrameNanos { }
+            withFrameNanos { }
+            val image = runCatching { layer.toImageBitmap() }.getOrNull()
+            if (image == null || image.width < 1 || image.height < 1) {
+                stitched.recycle()
+                onFailed()
+                return@LaunchedEffect
+            }
+            // The read-back is a hardware bitmap on API 28 and up, and a
+            // software canvas refuses one ("Software rendering doesn't
+            // support hardware bitmaps"). The slice is copied to a software
+            // bitmap first: the slice is under the texture limit by
+            // construction, so the copy is the whole window, and the
+            // stitched result is software, which the PNG writer can encode
+            // directly (owner report, D-097). Below API 26 there is no
+            // hardware config at all, so the copy is skipped.
+            val source = image.asAndroidBitmap()
+            val piece = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+                source.config == Bitmap.Config.HARDWARE
+            ) {
+                source.copy(Bitmap.Config.ARGB_8888, false)
+            } else {
+                source
+            }
+            if (piece == null) {
+                stitched.recycle()
+                onFailed()
+                return@LaunchedEffect
+            }
+            canvas.drawBitmap(piece, 0f, top.toFloat(), null)
+            if (piece !== source) piece.recycle()
+            top += tall
+        }
+        onImage(stitched.asImageBitmap())
     }
 }
+
+/** One window of the card: where it starts, and how tall it is. */
+private data class Slice(val top: Int, val height: Int)
 
 /**
  * Writes the card where the content provider can hand it out: one PNG in the
@@ -412,15 +496,7 @@ internal fun AyahShareSheet(
             // The preview keeps the card's own measure and corners, so the
             // reader looks at the artifact rather than at a description of
             // it. It scrolls with the sheet if an ayah makes it tall.
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = 22.dp)
-                    .clip(RoundedCornerShape(18.dp))
-                    .verticalScroll(rememberScrollState())
-                    .heightIn(max = 340.dp),
-            ) {
-                ShareCardPreview(card)
-            }
+            ShareCardPreviewBox(card)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -446,12 +522,36 @@ internal fun AyahShareSheet(
 
 /** The card, drawn as it will be sent: the preview's own measure, no capture. */
 @Composable
-private fun ShareCardPreview(card: ShareCard) {
+internal fun ShareCardPreview(card: ShareCard) {
     Box(
         modifier = Modifier
             .width(CardWidth)
             .clip(RoundedCornerShape(18.dp)),
     ) {
         AyahShareCardContent(card)
+    }
+}
+
+/**
+ * The preview as the share sheet shows it: the card's own measure behind a
+ * height cap, with the cap on the viewport rather than on the card.
+ *
+ * Modifier order is the whole of it. `heightIn` before `verticalScroll`
+ * caps the viewport, so a taller card still measures at its real height and
+ * the reader scrolls to the foot of it; the other order caps the card
+ * itself, and the clip cut a long ayah off at the cap with no scroll to
+ * reach the rest (owner report, D-097). The corner clip stays outside the
+ * cap so the sheet's own shape is cut once.
+ */
+@Composable
+internal fun ShareCardPreviewBox(card: ShareCard) {
+    Box(
+        modifier = Modifier
+            .padding(horizontal = 22.dp)
+            .clip(RoundedCornerShape(18.dp))
+            .heightIn(max = 340.dp)
+            .verticalScroll(rememberScrollState()),
+    ) {
+        ShareCardPreview(card)
     }
 }

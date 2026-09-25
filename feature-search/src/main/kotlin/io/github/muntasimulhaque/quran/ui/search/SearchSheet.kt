@@ -64,6 +64,7 @@ import io.github.muntasimulhaque.quran.data.SearchRequest
 import io.github.muntasimulhaque.quran.data.SearchResults
 import io.github.muntasimulhaque.quran.data.SearchSources
 import io.github.muntasimulhaque.quran.data.Surah
+import io.github.muntasimulhaque.quran.data.shouldShowWordMeaning
 import io.github.muntasimulhaque.quran.feature.search.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
@@ -569,13 +570,14 @@ private fun AyahRow(
                 )
             }
         }
-        hit.wordMeaning?.let { meaning ->
-            // The word meaning is its own block, named like the tafsir hit's
-            // own line and separated by a block's own air, instead of one
-            // small line riding under the translation where it read as the
-            // sentence's last words (owner report, twenty-ninth session).
-            // The matched term keeps the wash the translation has, so what
-            // matched is visible here too.
+        // The word meaning is drawn only when it is the row's only evidence
+        // of the match; the rule is pure and tested in `data` beside the
+        // result ordering. When the translation above already carries the
+        // wash, the meaning is a second copy of the same fact and the owner
+        // read it as noise (owner report, D-097). A row that matched only a
+        // meaning keeps it, named: an unlabelled line under the ayah would be
+        // read as a translation, and it is not one.
+        hit.wordMeaning?.takeIf { shouldShowWordMeaning(hit) }?.let { meaning ->
             Text(
                 text = stringResource(R.string.search_word_meaning_label),
                 style = MaterialTheme.typography.labelMedium,

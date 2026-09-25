@@ -13,16 +13,23 @@
     <string name="settings_theme_black">ব্ল্যাক</string>
     <string name="settings_auto_night_title">সিস্টেমের ডার্ক মোড অনুসরণ করুন</string>
     <string name="settings_auto_night_subtitle">ফোন ডার্ক মোডে থাকলে রাতের থিম, নাহলে আপনার পাতা</string>
-    <string name="settings_summary_theme_auto">%1$s · স্বয়ংক্রিয়</string>
+    <string name="settings_summary_theme_auto">%1$s · স্বয়ংক্রিয়, দিনের পাতা %2$s</string>
 
     <string name="settings_keep_awake_title">স্ক্রিন জাগিয়ে রাখুন</string>
     <string name="settings_keep_awake_subtitle">পড়ার সময় পাতা জ্বলজ্বল করে থাকবে</string>
+    <string name="settings_daily_title">দৈনিক আয়াত</string>
+    <string name="settings_daily_subtitle_off">প্রতিদিন একটি আয়াত, নোটিফিকেশনে</string>
+    <string name="settings_daily_subtitle_on">প্রতিদিন একটি আয়াত, %1$s-এ</string>
+    <string name="settings_daily_hour_title">কখন আসবে</string>
+    <string name="settings_daily_hour_value">%1$d:00</string>
     <string name="settings_follow_title">তিলাওয়াতের সাথে চলুন</string>
     <string name="settings_follow_subtitle">তিলাওয়াতের সাথে পাতা এগিয়ে যাবে</string>
     <string name="settings_show_translation_title">অনুবাদ দেখান</string>
     <string name="settings_show_translation_subtitle">প্রতিটি আয়াতের নিচে অনুবাদ দেখা যায়</string>
-    <string name="settings_show_tafsir_title">তাফসির দেখান</string>
-    <string name="settings_show_tafsir_subtitle">যোগ করা তাফসির আয়াতের কার্ড থেকে খোলে</string>
+    <string name="settings_show_tafsir_title">তাফসীর দেখান</string>
+    <string name="settings_show_tafsir_subtitle">যোগ করা তাফসীর আয়াতের কার্ড থেকে খোলে</string>
+    <string name="settings_open_translations">অনুবাদ বাছাই করুন</string>
+    <string name="settings_open_tafsirs">তাফসীর বাছাই করুন</string>
     <string name="settings_words_title">শব্দের অর্থ দেখান</string>
     <string name="settings_words_subtitle">আয়াতের নিচে প্রতিটি শব্দ ও তার অর্থ</string>
     <string name="settings_words_add">%1$s শব্দতালিকা যোগ করে · %2$s</string>
@@ -89,7 +96,7 @@
     <string name="settings_title_appearance">থিম</string>
     <string name="settings_title_text">ফন্ট সাইজ</string>
     <string name="settings_title_reciters">তিলাওয়াতকারী</string>
-    <string name="settings_title_listening">শ্রবণ</string>
+    <string name="settings_title_listening">শোনা</string>
     <string name="settings_listening_speed_value">%1$s গতি</string>
     <string name="settings_listening_summary_repeat">%1$s · একই আয়াত পুনরাবৃত্তি হচ্ছে</string>
     <string name="settings_group_speed">গতি</string>
@@ -108,7 +115,7 @@
     <string name="settings_chosen_count">%1$dটি বেছে নেওয়া</string>
     <string name="settings_group_theme">থিম</string>
     <string name="settings_theme_note">পুরো অ্যাপ এটি অনুসরণ করে: পাতা, শিট ও বার।</string>
-    <string name="settings_theme_note_auto">পুরো অ্যাপ এখন আপনার ফোন অনুসরণ করছে: পাতা, শিট ও বার। উপরের পাতাটি দিনে আপনার পড়ার পাতা।</string>
+    <string name="settings_theme_note_auto">পুরো অ্যাপ এখন আপনার ফোন অনুসরণ করছে: পাতা, শিট ও বার। দিনে এটি আপনার বেছে নেওয়া পাতা, %1$s।</string>
     <string name="settings_group_sizes">ফন্ট সাইজ</string>
     <string name="settings_size_arabic">কুরআনের আয়াত</string>
     <string name="settings_size_translation">অনুবাদ</string>

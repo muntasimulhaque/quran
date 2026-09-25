@@ -13,7 +13,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import android.content.res.Configuration
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -24,6 +26,7 @@ import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.StudyRow
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.UiLanguage
+import io.github.muntasimulhaque.quran.data.resolved
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.rich.ArabicFonts
@@ -35,6 +38,13 @@ import io.github.muntasimulhaque.quran.core.RichText
 /**
  * The appearance page: the four grounds, and the switch that lets the system
  * choose between the day and the night halves of them.
+ *
+ * The filled swatch is the page drawing right now. With automatic night mode
+ * on and the phone in dark mode, that is Night, even though the stored choice
+ * is the day page under it; the note names the day page so the choice is
+ * never lost (owner report, D-097). The system's own state is read from the
+ * resources here rather than from a composition local, because a sheet is its
+ * own window and never sees the activity's composition.
  */
 @Composable
 fun AppearancePage(
@@ -42,9 +52,15 @@ fun AppearancePage(
     onTheme: (io.github.muntasimulhaque.quran.data.AppTheme) -> Unit,
     onAutoNight: (Boolean) -> Unit,
 ) {
+    val systemDark = (LocalContext.current.resources.configuration.uiMode and
+        Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+    val shown = settings.theme.resolved(
+        autoNight = settings.autoNight,
+        systemDark = systemDark,
+    )
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_theme))
-        ThemeRow(settings.theme, onTheme)
+        ThemeRow(selected = settings.theme, shown = shown, onSelect = onTheme)
         // The swatches and the switch are two separate decisions, and the
         // switch is not a fifth swatch: the break between them says so.
         Spacer(Modifier.height(Space.Section))
@@ -52,15 +68,14 @@ fun AppearancePage(
             title = stringResource(R.string.settings_auto_night_title),
             subtitle = stringResource(R.string.settings_auto_night_subtitle),
             checked = settings.autoNight,
-        ) { onAutoNight(it) }
+            onChange = onAutoNight,
+        )
         Text(
-            text = stringResource(
-                if (settings.autoNight) {
-                    R.string.settings_theme_note_auto
-                } else {
-                    R.string.settings_theme_note
-                },
-            ),
+            text = if (settings.autoNight) {
+                stringResource(R.string.settings_theme_note_auto, settings.theme.name())
+            } else {
+                stringResource(R.string.settings_theme_note)
+            },
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(

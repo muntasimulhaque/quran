@@ -386,10 +386,25 @@ private fun GoToAyahPicker(
     val firstAyah = starts[chosen.number] ?: 1
     val currentInChosen = currentAyah - firstAyah + 1
     val currentHere = currentInChosen in 1..chosen.versesCount
-    // A grid that opens on the reader's ayah starts there; one for another
-    // surah starts at its first ayah.
-    LaunchedEffect(chosen.number) {
-        gridState.scrollToItem(if (currentHere) currentInChosen - 1 else 0)
+    // The grid opens on the reader's own ayah, and the ayah is centered in
+    // the viewport rather than pinned to its top: a number that answers "go
+    // to" has to be unmistakably the one the reader is standing on, and on a
+    // tall grid a top-aligned row reads as any other row (owner report,
+    // D-097). The place is a second key beside the surah, so a jump that
+    // changes the reader's ayah while this picker is composed can never
+    // leave the grid on a place that is no longer theirs. A grid for a
+    // surah the reader is not in has no place to show and starts at its
+    // first ayah, which is what choosing another surah means.
+    LaunchedEffect(chosen.number, currentInChosen) {
+        val index = if (currentHere) currentInChosen - 1 else 0
+        gridState.scrollToItem(index)
+        if (!currentHere) return@LaunchedEffect
+        val viewport = gridState.layoutInfo.viewportSize.height
+        val cell = gridState.layoutInfo.visibleItemsInfo
+            .firstOrNull { it.index == index }?.size?.height ?: 0
+        if (viewport > cell && cell > 0) {
+            gridState.scrollToItem(index, scrollOffset = -((viewport - cell) / 2))
+        }
     }
 
     Column(modifier.fillMaxWidth()) {

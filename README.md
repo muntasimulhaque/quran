@@ -4,19 +4,29 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 2.1 (versionCode 22) is submitted to Google Play for review,
-carrying the reader's eighth report (D-094): Arabic passages in tafsir wrap
-from the right, so a quoted verse reads in order on every line (the cause
-was Compose's own default direction, named in D-094); Notes in Browse
-preview what you wrote, two lines at most, so a note is found without
-opening them all; Settings gains Show translation and Show tafsir switches
-beside Show word meanings, and the word by word switch moved out of the
-Translations page into that group; Go to Ayah is a normal Browse tab, with
-the surah choice as the one step that keeps a head and a back; search
-results name their word meanings; and the shared ayah card no longer prints
-the translation's name. The capture's window guard was widened the same
-session after a green phone leg shipped a dialog that never took focus
-(D-096), and the release runbook now carries the measured fast path.
+**Status:** 2.1 (versionCode 22) is the latest submission and remains in
+review; the tree carries the reader's ninth report and the daily reminder,
+unversioned until the owner's word to release (D-097). It answers eight
+things from the owner:
+
+- The Go to Ayah picker centers the reader's own ayah, so it is unmistakable
+  instead of sitting at the viewport's top edge.
+- Search results no longer repeat a translation match as a separate word
+  meaning block; the meaning is drawn only when it is the row's only
+  evidence of the match.
+- Show translation and Show tafsir each carry the chevron that opens their
+  own list, so one decision is one row.
+- A long ayah's share card is captured whole on every device by stitching
+  software slices, and the share sheet's preview scrolls it instead of
+  clamping it.
+- The theme swatch shows the page actually drawing when automatic night mode
+  is on, with the day choice named beside it.
+- The Bangla interface keeps one spelling of Tafsir (তাফসীর, the QUL
+  corpus's own) and says শোনা for listening.
+- A new daily reminder sends one ayah a day at the reader's own hour, with
+  the translation when they read with one and a tap that opens that ayah in
+  the study reading. The reminder is offline, adds no permission and no
+  dependency, and is off until the reader asks for it.
 
 **1.9**, submitted before it, carries the twenty-seventh session's
 craftsmanship pass (D-086 through

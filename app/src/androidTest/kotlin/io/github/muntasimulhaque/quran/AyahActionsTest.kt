@@ -1,6 +1,5 @@
 package io.github.muntasimulhaque.quran
 
-import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.longClick
@@ -71,7 +70,7 @@ class AyahActionsTest {
         // real press on the Mushaf ayah.
         val studyPage = compose.activity.getString(StudyR.string.study_page_description)
         compose.onAllNodesWithContentDescription(studyPage).onFirst()
-            .performTouchInput { click(center) }
+            .tapThePaper()
         compose.onNodeWithContentDescription("Switch to the Mushaf page").performClick()
         compose.waitUntil(timeoutMillis = 30_000) {
             compose.onAllNodes(hasContentDescription("Mushaf page", substring = true))
@@ -95,7 +94,7 @@ class AyahActionsTest {
     private fun longPressStudyAyah() {
         val studyPage = compose.activity.getString(StudyR.string.study_page_description)
         compose.onAllNodesWithContentDescription(studyPage).onFirst()
-            .performTouchInput { click(center) }
+            .tapThePaper()
         compose.waitUntil(timeoutMillis = 15_000) {
             compose.onAllNodesWithText("1:1", substring = true).fetchSemanticsNodes().isNotEmpty()
         }
