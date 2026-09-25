@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 2.1 (versionCode 22)
+Version: 2.2 (versionCode 23)
 
 ## Listing
 
@@ -128,6 +128,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (2.2, 462 characters)
+
+A new daily reminder brings one ayah to your notifications at the hour you choose, with its translation when you read with one, and a tap opens it in the study reading. Go to Ayah now centres your own ayah so it is easy to find, a search row no longer repeats a translation match as a separate word meaning, Show translation and Show tafsir each open their own list from the same row, and a long ayah share card is no longer cut. No ads, no trackers, no account.
 
 ## Release notes (2.1, 425 characters)
 

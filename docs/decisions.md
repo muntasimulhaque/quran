@@ -4268,14 +4268,16 @@ in the Appearance page and in the hub's summary, and the day page the reader
 chose is named beside it so the choice is never lost. A tap still sets the
 day page.
 
-**6. One spelling of Tafsir in Bangla, and one of listening.** The strings
+**6. One spelling of Tafsir in Bangla, and the listening word.** The strings
 carried both তাফসীর and তাফসির; the QUL Bangla tafsir corpus holds 2,519 of
-the first and none of the second, so তাফসীর is the spelling everywhere.
-`শ্রবণ` (formal "hearing") became `শোনা` (the everyday "listening" the same
-corpus uses). The owner asked for `অও`; that is not a Bangla word (two
-independent vowels with no meaning), so the word used is the corpus's own.
-The whole Bangla surface was swept for the same class of drift; no other
-double spelling survives.
+the first and none of the second, so তাফসীর is the spelling everywhere. For
+the Listening page the formal `শ্রবণ` was first read as a word problem and
+replaced with the everyday `শোনা`, and the owner then named the word they
+had meant: `অডিও`, the transliteration of "audio", which is what the page
+truly is (the reader's word had arrived garbled by the terminal). The page
+reads `অডিও` now. The whole Bangla surface was swept for the same class of
+drift; no other double spelling survives (D-097, corrected on the owner's
+word).
 
 **7. The daily reminder.** The owner asked for an ayah of the day: one
 notification, carrying the ayah and, when the reader reads with a

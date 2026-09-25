@@ -887,9 +887,10 @@ implement it and update this list.
   launch jumped to the first ayah; the default is a sentinel that cannot be
   a place (D-097).
 - The Bangla interface follows the QUL Bangla corpus for spelling: তাফসীর,
-  not তাফসির, and শোনা for listening, not the formal শ্রবণ. Sweep the whole
-  Bangla surface whenever a word is settled, because the double spellings
-  drift one string at a time (D-097).
+  not তাফসির. The Listening page reads অডিও ("audio"), the owner's own word
+  after an earlier session read a garbled `শ্রবণ` as a spelling question.
+  Sweep the whole Bangla surface whenever a word is settled, because the
+  double spellings drift one string at a time (D-097).
 
 ### Housekeeping at the end of the session
 
@@ -1019,9 +1020,8 @@ answered in the tree:
   card. Two tests pin both halves.
 - **The theme swatch says what is drawing.** With auto-night on and the
   phone dark, Night is filled and the day page is named beside it.
-- **One Bangla spelling.** তাফসীর everywhere (the QUL corpus's own), and
-  শোনা for listening; the owner's `অও` is not a Bangla word and was not
-  used.
+- **One Bangla spelling, and the listening word.** তাফসীর everywhere (the
+  QUL corpus's own), and the Listening page reads অডিও, the owner's own word.
 - **The daily reminder.** One ayah a day at the reader's own hour, the
   translation when they read with one, and a tap that opens the ayah in the
   study reading. Offline, no new permission, no new dependency, off until

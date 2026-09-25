@@ -4,9 +4,8 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 2.1 (versionCode 22) is the latest submission and remains in
-review; the tree carries the reader's ninth report and the daily reminder,
-unversioned until the owner's word to release (D-097). It answers eight
+**Status:** 2.2 (versionCode 23) is prepared for release; it carries the
+reader's ninth report and the daily reminder (D-097). It answers eight
 things from the owner:
 
 - The Go to Ayah picker centers the reader's own ayah, so it is unmistakable
@@ -22,7 +21,7 @@ things from the owner:
 - The theme swatch shows the page actually drawing when automatic night mode
   is on, with the day choice named beside it.
 - The Bangla interface keeps one spelling of Tafsir (তাফসীর, the QUL
-  corpus's own) and says শোনা for listening.
+  corpus's own) and reads অডিও on the Listening page.
 - A new daily reminder sends one ayah a day at the reader's own hour, with
   the translation when they read with one and a tap that opens that ayah in
   the study reading. The reminder is offline, adds no permission and no

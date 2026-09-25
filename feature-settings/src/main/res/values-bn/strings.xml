@@ -96,7 +96,7 @@
     <string name="settings_title_appearance">থিম</string>
     <string name="settings_title_text">ফন্ট সাইজ</string>
     <string name="settings_title_reciters">তিলাওয়াতকারী</string>
-    <string name="settings_title_listening">শোনা</string>
+    <string name="settings_title_listening">অডিও</string>
     <string name="settings_listening_speed_value">%1$s গতি</string>
     <string name="settings_listening_summary_repeat">%1$s · একই আয়াত পুনরাবৃত্তি হচ্ছে</string>
     <string name="settings_group_speed">গতি</string>
