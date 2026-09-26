@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 2.2 (versionCode 23)
+Version: 2.3 (versionCode 24)
 
 ## Listing
 
@@ -142,6 +142,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (2.3, 444 characters)
+
+A switch now does what it says: the daily reminder, Show translation, and Show tafsir each toggle from their own switch, and the rest of the row opens the list it belongs to. The daily reminder comes on with the app at a time you pick on the clock, word meanings sit above the translation, Go to Ayah shows the surah name in Arabic with its length, and search no longer prints a Quran line that matched nothing. No ads, no trackers, no account.
 
 ## Release notes (2.2, 462 characters)
 
