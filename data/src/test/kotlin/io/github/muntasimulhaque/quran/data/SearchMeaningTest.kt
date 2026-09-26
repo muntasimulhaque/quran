@@ -90,6 +90,17 @@ class SearchMeaningTest {
             SearchArabicLine.None,
             arabicLineFor(hit(translationRanges = listOf(4..8), meaning = "and His Mercy")),
         )
+        assertEquals(
+            "and the words that carried the meaning are not a second copy of the wash",
+            SearchArabicLine.None,
+            arabicLineFor(
+                hit(
+                    translationRanges = listOf(4..8),
+                    meaning = "and His Mercy",
+                    words = listOf("\u0631\u062d\u0645\u0629"),
+                ),
+            ),
+        )
     }
 
     @Test

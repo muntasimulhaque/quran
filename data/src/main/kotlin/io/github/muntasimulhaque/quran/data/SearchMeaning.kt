@@ -31,21 +31,26 @@ fun shouldShowWordMeaning(hit: SearchHit.AyahHit): Boolean =
  *
  * - the Arabic **is** the match, and the ayah is drawn whole with the matched
  *   words washed;
- * - a word meaning is the only evidence, and the **matched words** are drawn
- *   in the ayah's own order, washed, so the row answers "why is this ayah
- *   here" with the word that earned it rather than with a page of text;
+ * - a word meaning is the **only** evidence, and the matched **words** are
+ *   drawn in the ayah's own order, washed, so the row answers "why is this
+ *   ayah here" with the word that earned it rather than with a page of text;
  * - the row has no other evidence, which is a reference the reader typed, and
  *   the ayah is drawn plain: then it is all the row has to say.
  *
- * Anything else draws no Arabic at all. Dropping it is a legibility decision,
- * not a simplification: four lines of Arabic that never matched is the tallest
- * thing on the row and the least informative.
+ * Anything else draws no Arabic at all, and a row the translation already
+ * washed is in that group on purpose: the word line would be the same match
+ * said twice, which is the very thing this rule's neighbour exists to stop
+ * (D-097). Dropping the rest is a legibility decision, not a simplification:
+ * four lines of Arabic that never matched is the tallest thing on the row and
+ * the least informative.
  */
 fun arabicLineFor(hit: SearchHit.AyahHit): SearchArabicLine =
     when {
         hit.arabicMatchedWords.isNotEmpty() -> SearchArabicLine.Ayah
-        hit.matchedWordText.isNotEmpty() -> SearchArabicLine.Words(hit.matchedWordText)
-        hit.translation == null && hit.wordMeaning == null -> SearchArabicLine.Ayah
+        !hit.translation?.ranges.isNullOrEmpty() -> SearchArabicLine.None
+        shouldShowWordMeaning(hit) && hit.matchedWordText.isNotEmpty() ->
+            SearchArabicLine.Words(hit.matchedWordText)
+        hit.wordMeaning == null -> SearchArabicLine.Ayah
         else -> SearchArabicLine.None
     }
 
