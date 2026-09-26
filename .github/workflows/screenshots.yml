@@ -28,6 +28,14 @@ on:
       - "ui-kit/src/main/**"
       - "feature-*/src/main/**"
       - "content-assets/src/main/**"
+      # `data` and `core` put no pixels on the screen themselves, but they
+      # decide what the pixels say: a search rule (`arabicLineFor`), a display
+      # model, or a formatter changes a frame without touching a UI module. A
+      # capture that skipped them shipped a store set of the old frames once
+      # (the D-099 refinement), which is the runbook's own definition of wasted
+      # work.
+      - "data/src/main/**"
+      - "core/src/main/**"
       - ".github/workflows/screenshots.yml"
 
 permissions:
