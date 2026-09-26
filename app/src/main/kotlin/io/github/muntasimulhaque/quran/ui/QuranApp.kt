@@ -55,6 +55,10 @@ fun QuranApp(
     /** The ayah a reminder's tap asked for, before the reading is on screen. */
     initialAyah: Int? = null,
     onPlaybackPermission: () -> Unit = {},
+    /** Whether the phone will show this app's notifications, read from the phone. */
+    notificationsBlocked: () -> Boolean = { false },
+    /** Opens the phone's own page for this app's notifications. */
+    onOpenNotificationSettings: () -> Unit = {},
 ) {
     // A tap on the reminder opens that ayah in the study reading, which is
     // what a reminder is for: the reader meets the words, not the app. The
@@ -113,7 +117,13 @@ fun QuranApp(
                 LaunchedEffect(Unit) {
                     (view.context as? Activity)?.reportFullyDrawn()
                 }
-                ReaderScreen(viewModel, content, onPlaybackPermission)
+                ReaderScreen(
+                    viewModel,
+                    content,
+                    onPlaybackPermission,
+                    notificationsBlocked,
+                    onOpenNotificationSettings,
+                )
             }
         }
     }

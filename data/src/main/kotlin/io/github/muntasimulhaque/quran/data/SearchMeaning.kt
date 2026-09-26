@@ -17,3 +17,46 @@ fun shouldShowWordMeaning(hit: SearchHit.AyahHit): Boolean =
     hit.wordMeaning != null &&
         hit.arabicMatchedWords.isEmpty() &&
         hit.translation?.ranges.isNullOrEmpty()
+
+/**
+ * Which Arabic a search row draws, if any.
+ *
+ * Every ayah row used to open with the Arabic, up to four lines of it, whether
+ * or not the Arabic had anything to do with the search. Measured on the
+ * shipped content database: a Latin query never matches the Arabic at all, so
+ * for the English word "mercy" the 144 ayahs the translation matched each
+ * carried an Arabic block that matched nothing, and the 9 ayahs only a word
+ * meaning reached carried the same block beside a gloss that named one word
+ * (owner report, 2.3). So a row draws its Arabic in one of three ways:
+ *
+ * - the Arabic **is** the match, and the ayah is drawn whole with the matched
+ *   words washed;
+ * - a word meaning is the only evidence, and the **matched words** are drawn
+ *   in the ayah's own order, washed, so the row answers "why is this ayah
+ *   here" with the word that earned it rather than with a page of text;
+ * - the row has no other evidence, which is a reference the reader typed, and
+ *   the ayah is drawn plain: then it is all the row has to say.
+ *
+ * Anything else draws no Arabic at all. Dropping it is a legibility decision,
+ * not a simplification: four lines of Arabic that never matched is the tallest
+ * thing on the row and the least informative.
+ */
+fun arabicLineFor(hit: SearchHit.AyahHit): SearchArabicLine =
+    when {
+        hit.arabicMatchedWords.isNotEmpty() -> SearchArabicLine.Ayah
+        hit.matchedWordText.isNotEmpty() -> SearchArabicLine.Words(hit.matchedWordText)
+        hit.translation == null && hit.wordMeaning == null -> SearchArabicLine.Ayah
+        else -> SearchArabicLine.None
+    }
+
+/** What a row draws of the Arabic, and how much of it. */
+sealed interface SearchArabicLine {
+    /** The whole ayah, with [SearchHit.AyahHit.arabicMatchedWords] washed. */
+    data object Ayah : SearchArabicLine
+
+    /** Only the words that matched, in the ayah's own order. */
+    data class Words(val words: List<String>) : SearchArabicLine
+
+    /** Nothing: the row's evidence is elsewhere. */
+    data object None : SearchArabicLine
+}

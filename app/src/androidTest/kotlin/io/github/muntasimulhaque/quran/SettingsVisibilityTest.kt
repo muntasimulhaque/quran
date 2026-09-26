@@ -5,6 +5,7 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
@@ -86,9 +87,7 @@ class SettingsVisibilityTest {
                 io.github.muntasimulhaque.quran.feature.settings.R.string.settings_show_translation_title,
             )).fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithText(compose.activity.getString(
-            io.github.muntasimulhaque.quran.feature.settings.R.string.settings_show_translation_title,
-        )).performClick()
+        compose.onNodeWithTag("switch-translation").performClick()
         back()
 
         compose.waitUntil(timeoutMillis = 30_000) {

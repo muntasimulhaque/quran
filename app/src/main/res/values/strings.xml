@@ -63,6 +63,7 @@
 
     <!-- The daily reminder: a quiet invitation to read, one ayah each day. -->
     <string name="daily_channel_name">Daily ayah</string>
-    <string name="daily_channel_description">One ayah each day, at the hour you choose.</string>
+    <string name="daily_channel_description">One ayah each day, at the time you choose.</string>
     <string name="daily_notification_title">%1$s %2$d:%3$d</string>
+    <string name="notification_settings_unavailable">This phone has no notification settings to open.</string>
 </resources>

@@ -105,6 +105,8 @@ fun ReaderScreen(
     viewModel: ReaderViewModel,
     content: ContentDatabase,
     onPlaybackPermission: () -> Unit,
+    notificationsBlocked: () -> Boolean,
+    onOpenNotificationSettings: () -> Unit,
 ) {
     val settings = viewModel.settings
     val palette = LocalPagePalette.current
@@ -482,6 +484,10 @@ fun ReaderScreen(
             version = BuildConfig.VERSION_NAME,
             preview = { viewModel.sizePreviewRow() },
             downloadedSurahs = { recitation -> viewModel.downloadedSurahs(recitation) },
+            // Read where it is drawn, so the Daily page tells the truth about
+            // the phone's own switch even when the reader comes back from the
+            // system settings without the app restarting.
+            notificationsBlocked = notificationsBlocked,
             actions = SettingsActions(
                 onLanguage = { tag ->
                     io.github.muntasimulhaque.quran.data.UiLanguage.of(tag)?.let { language ->
@@ -508,7 +514,12 @@ fun ReaderScreen(
                 onDailyAyah = { enabled ->
                     viewModel.setDailyAyah(enabled, onPlaybackPermission)
                 },
-                onDailyAyahHour = { viewModel.setDailyAyahHour(it) },
+                onDailyAyahTime = { minute ->
+                    // Moving the moment is as clear a yes as turning the
+                    // switch, so it asks for the same permission.
+                    viewModel.setDailyAyahTime(minute, onPlaybackPermission)
+                },
+                onOpenNotificationSettings = onOpenNotificationSettings,
                 onSelectRecitation = { viewModel.selectRecitation(it) },
                 onToggleTranslation = { viewModel.toggleTranslationPack(it) },
                 onToggleTafsir = { viewModel.toggleTafsirPack(it) },

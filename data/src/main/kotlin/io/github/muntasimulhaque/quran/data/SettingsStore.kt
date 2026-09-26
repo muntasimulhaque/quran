@@ -19,6 +19,15 @@ enum class ReadingMode { Mushaf, Study }
 
 enum class AppTheme { Paper, Sepia, Night, Black }
 
+/**
+ * The minute the daily reminder arrives when the reader has never chosen one:
+ * eight in the morning, before the day's work starts.
+ */
+const val DEFAULT_DAILY_MINUTE = 8 * 60
+
+/** The last minute a day has, 23:59. */
+const val LAST_MINUTE_OF_DAY = 24 * 60 - 1
+
 /** True for the two themes that turn the page over into the dark. */
 fun AppTheme.isDark(): Boolean = this == AppTheme.Night || this == AppTheme.Black
 
@@ -80,12 +89,19 @@ data class AppSettings(
     val wordByWord: Boolean = false,
     /**
      * The daily reminder: one ayah, once a day, at the reader's own time.
-     * Off until the reader asks for it, because nothing in this app schedules
-     * itself or fetches anything without their word.
+     * On from the first launch (owner decision, 2.3): the reminder is the
+     * quietest thing the app can do, a silent line in the shade with no sound
+     * and no counting, and rule twelve names it as one of the three things
+     * this app is for. A reader who does not want it turns it off in one tap
+     * on the Daily ayah page, and the alarm is cleared in the same tap.
      */
-    val dailyAyah: Boolean = false,
-    /** The hour the daily reminder arrives, in the reader's local time. */
-    val dailyAyahHour: Int = 8,
+    val dailyAyah: Boolean = true,
+    /**
+     * The minute of the day the reminder arrives, in the reader's own local
+     * time: minutes from midnight, so one whole number carries the hour and
+     * the minute and the picker has nothing to reconcile.
+     */
+    val dailyAyahMinute: Int = DEFAULT_DAILY_MINUTE,
     val longPressHintShown: Boolean = false,
 ) {
     val arabicSp: Float get() = TextSize.sp(TypeRole.Arabic, arabicSize)
@@ -148,9 +164,8 @@ class SettingsStore(private val context: Context) {
             showTranslation = preferences[SHOW_TRANSLATION] ?: true,
             showTafsir = preferences[SHOW_TAFSIR] ?: true,
             wordByWord = preferences[WORD_BY_WORD] ?: false,
-            dailyAyah = preferences[DAILY_AYAH] ?: false,
-            dailyAyahHour = (preferences[DAILY_AYAH_HOUR] ?: DEFAULT_DAILY_HOUR)
-                .coerceIn(0, 23),
+            dailyAyah = preferences[DAILY_AYAH] ?: true,
+            dailyAyahMinute = storedDailyMinute(preferences),
             longPressHintShown = preferences[HINT_SHOWN] ?: false,
         )
     }
@@ -242,8 +257,9 @@ class SettingsStore(private val context: Context) {
         context.settingsStore.edit { it[DAILY_AYAH] = enabled }
     }
 
-    suspend fun setDailyAyahHour(hour: Int) {
-        context.settingsStore.edit { it[DAILY_AYAH_HOUR] = hour.coerceIn(0, 23) }
+    /** The moment the daily reminder arrives: minutes from midnight. */
+    suspend fun setDailyAyahTime(minuteOfDay: Int) {
+        context.settingsStore.edit { it[DAILY_AYAH_MINUTE] = minuteOfDay.coerceIn(0, LAST_MINUTE_OF_DAY) }
     }
 
     suspend fun setLongPressHintShown() {
@@ -293,6 +309,17 @@ class SettingsStore(private val context: Context) {
         return if (single.isNullOrBlank()) emptySet() else setOf(single)
     }
 
+    /**
+     * The moment the reminder arrives, read from whichever key this install
+     * has: the minute of the day the picker writes, or the hour a build
+     * before 2.3 wrote (a reader who chose 5 in that build keeps 5:00).
+     */
+    private fun storedDailyMinute(preferences: Preferences): Int {
+        preferences[DAILY_AYAH_MINUTE]?.let { return it.coerceIn(0, LAST_MINUTE_OF_DAY) }
+        preferences[DAILY_AYAH_HOUR]?.let { return (it.coerceIn(0, 23)) * 60 }
+        return DEFAULT_DAILY_MINUTE
+    }
+
     private fun keyOf(role: TypeRole): Preferences.Key<Float> = when (role) {
         TypeRole.Arabic -> ARABIC_SIZE
         TypeRole.Translation -> TRANSLATION_SIZE
@@ -304,9 +331,6 @@ class SettingsStore(private val context: Context) {
         /** The recitation pace the reader may choose, and its bounds. */
         const val MIN_SPEED = 0.5f
         const val MAX_SPEED = 1.5f
-
-        /** Morning, before the day's work starts, until the reader says otherwise. */
-        const val DEFAULT_DAILY_HOUR = 8
 
         val AYAH = intPreferencesKey("ayah")
         val MODE = stringPreferencesKey("mode")
@@ -330,7 +354,10 @@ class SettingsStore(private val context: Context) {
         val SHOW_TAFSIR = booleanPreferencesKey("show_tafsir")
         val WORD_BY_WORD = booleanPreferencesKey("word_by_word")
         val DAILY_AYAH = booleanPreferencesKey("daily_ayah")
+
+        /** Written by builds before the picker took minutes; read, never written. */
         val DAILY_AYAH_HOUR = intPreferencesKey("daily_ayah_hour")
+        val DAILY_AYAH_MINUTE = intPreferencesKey("daily_ayah_minute")
         val HINT_SHOWN = booleanPreferencesKey("hint_shown")
     }
 }

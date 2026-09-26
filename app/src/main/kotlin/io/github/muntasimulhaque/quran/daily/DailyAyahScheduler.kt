@@ -15,6 +15,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import io.github.muntasimulhaque.quran.MainActivity
 import io.github.muntasimulhaque.quran.R
+import io.github.muntasimulhaque.quran.data.LAST_MINUTE_OF_DAY
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +39,7 @@ import java.util.Calendar
  *
  * An alarm is a one-shot, so the next one is armed in the same breath the
  * current one fires: that is what makes the reminder daily without a
- * repeating alarm, and it re-anchors the hour every day instead of letting
+ * repeating alarm, and it re-anchors the moment every day instead of letting
  * the platform's deferrals walk it later and later. The alarm is armed only
  * while the reader has the switch on, and is re-armed from the app's own
  * launch too, so a reboot or a clock change costs at most the one morning
@@ -63,39 +64,50 @@ object DailyAyahScheduler {
     private val workers = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     /**
-     * Creates the channel once, at app start, so the reminder is visible in
-     * the system's own settings before it ever speaks. Silent on purpose: a
-     * reminder waits in the shade without making a sound, and a reader who
-     * wants to hear it can raise the channel themselves.
+     * Creates the reminder's channel at app start, so it is visible in the
+     * system's own settings before it ever speaks, and refreshes its words when
+     * the app's own wording has changed since the install was made.
+     *
+     * Silent on purpose: a reminder waits in the shade without making a sound,
+     * and a reader who wants to hear it can raise the channel themselves.
      */
     fun createChannel(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val manager = context.getSystemService(NotificationManager::class.java) ?: return
+        val name = context.getString(R.string.daily_channel_name)
+        val words = context.getString(R.string.daily_channel_description)
+        val existing = manager.notificationChannels?.firstOrNull { it.id == CHANNEL_ID }
+        if (existing != null && existing.name.toString() == name && existing.description == words) {
+            return
+        }
+        // Re-creating a channel that is already there is the platform's own
+        // way to change its words: the system keeps whatever the reader chose
+        // in its settings and takes only the name and the description from
+        // what the app passes. That is what carries a renamed or reworded
+        // channel to an install that has had it since before the words
+        // changed (owner decision, 2.3), and it is why the call is made here
+        // rather than once, ever.
         manager.createNotificationChannel(
-            NotificationChannel(
-                CHANNEL_ID,
-                context.getString(R.string.daily_channel_name),
-                NotificationManager.IMPORTANCE_LOW,
-            ).apply {
-                description = context.getString(R.string.daily_channel_description)
+            NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_LOW).apply {
+                description = words
             },
         )
     }
 
     /**
-     * Arms the reminder for the next occurrence of [hour], or clears it when
-     * the reader has turned it off. Re-arming the same pending intent moves
-     * the alarm rather than adding a second one, so this is safe to call on
-     * every launch and after every fire.
+     * Arms the reminder for the next occurrence of [minuteOfDay], or clears it
+     * when the reader has turned it off. Re-arming the same pending intent
+     * moves the alarm rather than adding a second one, so this is safe to call
+     * on every launch and after every fire.
      */
-    fun apply(context: Context, enabled: Boolean, hour: Int) {
+    fun apply(context: Context, enabled: Boolean, minuteOfDay: Int) {
         val alarm = context.getSystemService(AlarmManager::class.java) ?: return
         val pending = pendingIntent(context)
         if (!enabled) {
             alarm.cancel(pending)
             return
         }
-        val at = nextOccurrence(hour)
+        val at = nextOccurrence(minuteOfDay)
         // Inexact on purpose: the system may move this by minutes to keep the
         // whole phone's radios and wake ups quieter, and a reminder that is
         // ten minutes late is a reminder.
@@ -110,19 +122,20 @@ object DailyAyahScheduler {
     private suspend fun armNext(context: Context) {
         val settings = runCatching { SettingsStore(context).settings.first() }.getOrNull()
             ?: return
-        apply(context, enabled = settings.dailyAyah, hour = settings.dailyAyahHour)
+        apply(context, enabled = settings.dailyAyah, minuteOfDay = settings.dailyAyahMinute)
     }
 
     /**
      * The next moment the reminder should come, in the reader's own local
-     * time. The hour is theirs; the minute is the top of the hour, which is
-     * all a daily invitation needs and one less choice to make.
+     * time. The hour and the minute are theirs, read off the one number the
+     * picker writes.
      */
-    internal fun nextOccurrence(hour: Int, now: Long = System.currentTimeMillis()): Long {
+    internal fun nextOccurrence(minuteOfDay: Int, now: Long = System.currentTimeMillis()): Long {
+        val minute = minuteOfDay.coerceIn(0, LAST_MINUTE_OF_DAY)
         val calendar = Calendar.getInstance().apply {
             timeInMillis = now
-            set(Calendar.HOUR_OF_DAY, hour.coerceIn(0, 23))
-            set(Calendar.MINUTE, 0)
+            set(Calendar.HOUR_OF_DAY, minute / 60)
+            set(Calendar.MINUTE, minute % 60)
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
             if (timeInMillis <= now) add(Calendar.DAY_OF_YEAR, 1)

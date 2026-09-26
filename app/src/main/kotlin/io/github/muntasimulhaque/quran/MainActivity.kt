@@ -1,17 +1,22 @@
 package io.github.muntasimulhaque.quran
 
 import android.Manifest
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import io.github.muntasimulhaque.quran.daily.DailyAyahScheduler
+import io.github.muntasimulhaque.quran.daily.rememberNotificationsBlocked
 import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.ui.QuranApp
@@ -65,10 +70,16 @@ class MainActivity : ComponentActivity() {
             DailyAyahScheduler.apply(
                 this@MainActivity,
                 enabled = settings.dailyAyah,
-                hour = settings.dailyAyahHour,
+                minuteOfDay = settings.dailyAyahMinute,
             )
         }
         setContent {
+            // Whether the phone will show this app's notifications is the one
+            // thing about the daily reminder the app does not own, so it is
+            // read from the phone and refreshed every time the app comes back
+            // to the foreground: the reader can change it in the system
+            // settings and return without a restart.
+            val notificationsBlocked = rememberNotificationsBlocked()
             QuranApp(
                 initialAyah = intent?.let { incoming ->
                     // No extra, no jump. 0 is the sentinel, and it must never
@@ -77,7 +88,32 @@ class MainActivity : ComponentActivity() {
                     incoming.getIntExtra(EXTRA_AYAH, 0).takeIf { it > 0 }
                 },
                 onPlaybackPermission = ::ensureNotificationPermission,
+                notificationsBlocked = { notificationsBlocked.value },
+                onOpenNotificationSettings = ::openNotificationSettings,
             )
+        }
+    }
+
+    /**
+     * The phone's own page for this app's notifications, opened for the reader
+     * who was told the reminder cannot arrive. The channel API arrived with
+     * Android 8, and the releases before it have no notification settings to
+     * name, so those get the app's page in the system settings, which holds
+     * the same switch. A phone with no settings app at all is told so in one
+     * sentence rather than left tapping a word that did nothing.
+     */
+    private fun openNotificationSettings() {
+        val page = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+        } else {
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                .setData(android.net.Uri.parse("package:" + packageName))
+        }
+        try {
+            startActivity(page.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        } catch (notFound: ActivityNotFoundException) {
+            Toast.makeText(this, R.string.notification_settings_unavailable, Toast.LENGTH_LONG).show()
         }
     }
 

@@ -1,5 +1,6 @@
 package io.github.muntasimulhaque.quran.data
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -15,6 +16,7 @@ class SearchMeaningTest {
         arabic: Int = 0,
         translationRanges: List<IntRange> = emptyList(),
         meaning: String? = null,
+        words: List<String> = emptyList(),
     ) = SearchHit.AyahHit(
         ayah = Ayah(1, 1, 1, "1:1", "text"),
         page = 1,
@@ -25,6 +27,7 @@ class SearchMeaningTest {
             TranslationHit("p", "Pack", "text", translationRanges, emptyList())
         },
         wordMeaning = meaning,
+        matchedWordText = words,
     )
 
     @Test
@@ -58,5 +61,43 @@ class SearchMeaningTest {
     @Test
     fun noMeaningIsEverInvented() {
         assertFalse("a row with nothing on it draws nothing", shouldShowWordMeaning(hit()))
+    }
+
+    /**
+     * The Arabic a row draws, decided by the same reasoning in the other
+     * direction: four lines of text that never matched must not stand above a
+     * one-line highlight, and a word-meaning row must point at its word.
+     */
+    @Test
+    fun theAyahIsDrawnWholeWhenTheArabicIsTheMatch() {
+        assertEquals(SearchArabicLine.Ayah, arabicLineFor(hit(arabic = 2)))
+    }
+
+    @Test
+    fun aWordOnlyRowDrawsTheWordAndNotTheAyah() {
+        val line = arabicLineFor(hit(meaning = "and His Mercy", words = listOf("\u0631\u062d\u0645\u0629")))
+        assertEquals(
+            "the row must answer why it is here with the word, not with a page",
+            SearchArabicLine.Words(listOf("\u0631\u062d\u0645\u0629")),
+            line,
+        )
+    }
+
+    @Test
+    fun aTranslationRowDrawsNoArabicAtAll() {
+        assertEquals(
+            "the Arabic matched nothing here, so it is decoration",
+            SearchArabicLine.None,
+            arabicLineFor(hit(translationRanges = listOf(4..8), meaning = "and His Mercy")),
+        )
+    }
+
+    @Test
+    fun aReferenceRowStillShowsTheAyahItNames() {
+        assertEquals(
+            "with no other evidence the Arabic is all the row has to say",
+            SearchArabicLine.Ayah,
+            arabicLineFor(hit()),
+        )
     }
 }

@@ -21,6 +21,7 @@ import io.github.muntasimulhaque.quran.data.PageFontStore
 import io.github.muntasimulhaque.quran.data.PagePosition
 import io.github.muntasimulhaque.quran.data.LastReadStore
 import io.github.muntasimulhaque.quran.data.LanguagePreference
+import io.github.muntasimulhaque.quran.data.LAST_MINUTE_OF_DAY
 import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.ReadPlace
 import io.github.muntasimulhaque.quran.data.ReadingMode
@@ -544,21 +545,30 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
                 DailyAyahScheduler.apply(
                     getApplication(),
                     enabled = enabled,
-                    hour = settings.dailyAyahHour,
+                    minuteOfDay = settings.dailyAyahMinute,
                 )
             }
         }
     }
 
-    /** The hour the daily reminder arrives, in the reader's local time. */
-    fun setDailyAyahHour(hour: Int) {
-        val safe = hour.coerceIn(0, 23)
-        settings = settings.copy(dailyAyahHour = safe)
+    /**
+     * The moment the daily reminder arrives, in the reader's own local time.
+     *
+     * Moving the moment asks for the notification permission too, on the same
+     * terms as the switch: a reader who came to set five in the morning wants
+     * five in the morning to arrive, and the phone's answer is worth having
+     * before the reminder silently does not. It is not asked when the page is
+     * merely opened, only at these two acts of setting (owner decision, 2.3).
+     */
+    fun setDailyAyahTime(minuteOfDay: Int, onPermission: () -> Unit = {}) {
+        val safe = minuteOfDay.coerceIn(0, LAST_MINUTE_OF_DAY)
+        settings = settings.copy(dailyAyahMinute = safe)
+        if (settings.dailyAyah) onPermission()
         viewModelScope.launch {
-            settingsStore.setDailyAyahHour(safe)
+            settingsStore.setDailyAyahTime(safe)
             if (!settings.dailyAyah) return@launch
             withContext(Dispatchers.IO) {
-                DailyAyahScheduler.apply(getApplication(), enabled = true, hour = safe)
+                DailyAyahScheduler.apply(getApplication(), enabled = true, minuteOfDay = safe)
             }
         }
     }

@@ -1,27 +1,18 @@
 package io.github.muntasimulhaque.quran.ui.settings
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.ContentDatabase
@@ -32,13 +23,14 @@ import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.data.resolved
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
+import io.github.muntasimulhaque.quran.ui.kit.clockText
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
 import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.theme.Space
 /** The pages the settings hub opens, one at a time. */
-enum class SettingsPage { Language, Theme, FontSize, Reciters, Listening, Translations, Tafsirs, About }
+enum class SettingsPage { Language, Theme, FontSize, Reciters, Listening, Daily, Translations, Tafsirs, About }
 
 @Composable
 fun SettingsPage.title(): String = stringResource(
@@ -48,6 +40,7 @@ fun SettingsPage.title(): String = stringResource(
         SettingsPage.FontSize -> R.string.settings_title_text
         SettingsPage.Reciters -> R.string.settings_title_reciters
         SettingsPage.Listening -> R.string.settings_title_listening
+        SettingsPage.Daily -> R.string.settings_daily_title
         SettingsPage.Translations -> R.string.settings_title_translations
         SettingsPage.Tafsirs -> R.string.settings_title_tafsirs
         SettingsPage.About -> R.string.settings_title_about
@@ -90,7 +83,6 @@ fun SettingsHub(
     onShowTafsir: (Boolean) -> Unit,
     onWordByWord: (Boolean) -> Unit,
     onDailyAyah: (Boolean) -> Unit,
-    onDailyAyahHour: (Int) -> Unit,
     onOpen: (SettingsPage) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -111,13 +103,14 @@ fun SettingsHub(
                 settings.translationSp.toInt(),
             ),
         ) { onOpen(SettingsPage.FontSize) }
-        // What the reading draws, beside the sizes that decide how it draws
-        // it, and the packs to draw it from one tap away. Each switch says
-        // whether the reading shows what it names, and the chevron beside it
-        // opens the list it is chosen from: the same row carries both halves
-        // of one decision, so a reader who turned the translation off still
-        // has one place to go for the translations, not two rows that read
-        // as two separate controls (owner report, D-097).
+        // What the reading draws, in the order the reader puts it together: the
+        // word meanings, which sit closest to the Arabic, then the translation,
+        // then the tafsir (owner report, 2.3). Each switch says whether the
+        // reading shows what it names, and the rest of the row opens the list
+        // it is chosen from. The switch is the only thing that switches, so a
+        // reader who came to look at the translations never changes the reading
+        // by looking (owner report, 2.3).
+        WordByWordRow(settings, packs, packSetup, onWordByWord)
         ToggleRow(
             title = stringResource(R.string.settings_show_translation_title),
             subtitle = translationName(settings, packs),
@@ -125,6 +118,7 @@ fun SettingsHub(
             onChange = onShowTranslation,
             onOpen = { onOpen(SettingsPage.Translations) },
             openLabel = stringResource(R.string.settings_open_translations),
+            switchTag = "switch-translation",
         )
         ToggleRow(
             title = stringResource(R.string.settings_show_tafsir_title),
@@ -133,8 +127,8 @@ fun SettingsHub(
             onChange = onShowTafsir,
             onOpen = { onOpen(SettingsPage.Tafsirs) },
             openLabel = stringResource(R.string.settings_open_tafsirs),
+            switchTag = "switch-tafsir",
         )
-        WordByWordRow(settings, packs, packSetup, onWordByWord)
         PageRow(
             title = stringResource(R.string.settings_title_reciters),
             summary = reciterName(settings, recitations),
@@ -152,18 +146,20 @@ fun SettingsHub(
             checked = settings.keepAwake,
             onChange = onKeepAwake,
         )
-        // The daily reminder: one ayah a day, off until the reader asks for
-        // it. Nothing in this app schedules itself, and nothing fetches
-        // anything without their word, so the switch is the whole door.
+        // The daily reminder: one ayah a day, at the reader's own moment. It
+        // comes on from the first launch, and this row is the door to the page
+        // that turns it off or moves its time, so the switch and the clock are
+        // read together in one place rather than as a strip of hours under a
+        // switch in the hub (owner report, 2.3).
         ToggleRow(
             title = stringResource(R.string.settings_daily_title),
             subtitle = dailySubtitle(settings),
             checked = settings.dailyAyah,
             onChange = onDailyAyah,
+            onOpen = { onOpen(SettingsPage.Daily) },
+            openLabel = stringResource(R.string.settings_open_daily),
+            switchTag = "switch-daily",
         )
-        if (settings.dailyAyah) {
-            DailyHourRow(hour = settings.dailyAyahHour, onChange = onDailyAyahHour)
-        }
         PageRow(
             title = stringResource(R.string.settings_title_about),
             summary = stringResource(R.string.settings_version_short, version),
@@ -177,14 +173,8 @@ private fun reciterName(settings: AppSettings, recitations: List<Recitation>): S
         ?: stringResource(R.string.settings_none_yet)
 
 /**
- * Where the listening choices stand, in one line: the pace, and whether an
- * ayah is repeating. A reader who set a pace and forgot it must be able to
- * see it from the hub, or the reading sounds slow for a reason they cannot
- * find.
- */
-/**
  * Where the reminder stands, in one line: whether it will come, and when.
- * The hour is read from the same value the alarm is armed with, so the row
+ * The moment is read from the same value the alarm is armed with, so the row
  * never promises a time the reminder does not keep.
  */
 @Composable
@@ -192,63 +182,18 @@ private fun dailySubtitle(settings: AppSettings): String =
     if (settings.dailyAyah) {
         stringResource(
             R.string.settings_daily_subtitle_on,
-            stringResource(R.string.settings_daily_hour_value, settings.dailyAyahHour),
+            clockText(settings.dailyAyahMinute),
         )
     } else {
         stringResource(R.string.settings_daily_subtitle_off)
     }
 
 /**
- * The hour the reminder arrives: one row of hours, the morning ones first,
- * so the choice is a tap rather than a time picker. The reader's own hour is
- * always among them, so opening the row never hides the value it shows.
+ * Where the listening choices stand, in one line: the pace, and whether an
+ * ayah is repeating. A reader who set a pace and forgot it must be able to
+ * see it from the hub, or the reading sounds slow for a reason they cannot
+ * find.
  */
-@Composable
-private fun DailyHourRow(hour: Int, onChange: (Int) -> Unit) {
-    val hours = remember(hour) {
-        ((6..9).toList() + 12 + (0..23)).distinct().sortedWith(
-            compareBy({ if (it in 6..9 || it == 12) 0 else 1 }, { it }),
-        )
-    }
-    Text(
-        text = stringResource(R.string.settings_daily_hour_title),
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Line),
-    )
-    FlowRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 22.dp, vertical = Space.Tight),
-        horizontalArrangement = Arrangement.spacedBy(Space.Line),
-        verticalArrangement = Arrangement.spacedBy(Space.Line),
-    ) {
-        hours.forEach { value ->
-            val active = value == hour
-            Text(
-                text = stringResource(R.string.settings_daily_hour_value, value),
-                style = MaterialTheme.typography.labelMedium,
-                color = if (active) {
-                    MaterialTheme.colorScheme.onPrimary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
-                modifier = Modifier
-                    .clip(RoundedCornerShape(50))
-                    .background(
-                        if (active) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f)
-                        },
-                    )
-                    .selectable(selected = active, role = Role.RadioButton) { onChange(value) }
-                    .padding(horizontal = 12.dp, vertical = 9.dp),
-            )
-        }
-    }
-}
-
 @Composable
 private fun listeningSummary(settings: AppSettings): String {
     val speed = stringResource(R.string.settings_listening_speed_value, speedText(settings.playbackSpeed))

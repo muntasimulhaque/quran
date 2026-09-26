@@ -617,8 +617,10 @@ class ContentDatabase private constructor(
         for ((number, matched) in arabicWords) {
             rows[number]?.matchedWords = matched
         }
-        for ((number, meaning) in wordMatches) {
-            rows[number]?.meaning = meaning
+        for ((number, match) in wordMatches) {
+            val row = rows[number] ?: continue
+            row.meaning = match.meaning
+            row.matchedWordText = match.words
         }
         for ((number, pack) in translationByNumber) {
             val row = rows[number] ?: continue
@@ -682,6 +684,7 @@ class ContentDatabase private constructor(
                 arabicMatchedWords = row.matchedWords,
                 translation = row.translation,
                 wordMeaning = row.meaning,
+                matchedWordText = row.matchedWordText,
             )
         }
         // The kinds run from the verse outward, each still in Mushaf order
@@ -699,6 +702,7 @@ class ContentDatabase private constructor(
         var matchedWords: Set<Int> = emptySet()
         var translation: TranslationHit? = null
         var meaning: String? = null
+        var matchedWordText: List<String> = emptyList()
     }
 
     private fun referenceAyahNumber(reference: Search.Reference): Int? {
@@ -799,23 +803,60 @@ class ContentDatabase private constructor(
         }
     }
 
-    private fun wordMeaningMatches(query: SearchQuery, limit: Int, wordsPack: String): Map<Int, String> {
+    /**
+     * The ayahs whose word *meanings* matched, each with the meaning and the
+     * Arabic of the words that carried it.
+     *
+     * The words come from the core `word` table rather than the pack, because
+     * a pack holds the meanings and the words are the Quran's own. One query
+     * for every matched ayah and position at once, filtered back to the exact
+     * pairs in memory: row values in an `IN` clause are not on every SQLite
+     * this app runs on, and a cross product that the reader would see as
+     * words that never matched is worse than no words at all.
+     */
+    private fun wordMeaningMatches(query: SearchQuery, limit: Int, wordsPack: String): Map<Int, WordMatch> {
         if (query.arabic || !installedPack(wordsPack)) return emptyMap()
         val condition = query.terms.joinToString(" AND ") { "meaning_search LIKE ? ESCAPE '\\'" }
-        return query(
-            "SELECT ayah_number, meaning FROM ${schema(wordsPack)}.word_meaning WHERE $condition " +
+        val meanings = LinkedHashMap<Int, String>()
+        val positions = LinkedHashMap<Int, MutableSet<Int>>()
+        val rows = query(
+            "SELECT ayah_number, position, meaning FROM ${schema(wordsPack)}.word_meaning WHERE $condition " +
                 "ORDER BY ayah_number LIMIT ?",
             (query.terms.map { Search.pattern(it) } + (limit * 4).toString()).toTypedArray(),
-        ).use { cursor ->
-            val out = LinkedHashMap<Int, String>()
+        )
+        rows.use { cursor ->
             while (cursor.moveToNext()) {
                 val number = cursor.getInt(0)
-                val meaning = cursor.getString(1)?.trim().orEmpty()
-                if (meaning.isNotEmpty() && out.size < limit) out.putIfAbsent(number, meaning)
+                val meaning = cursor.getString(2)?.trim().orEmpty()
+                if (meaning.isEmpty()) continue
+                if (meanings.size >= limit && number !in meanings) continue
+                meanings.putIfAbsent(number, meaning)
+                positions.getOrPut(number) { LinkedHashSet() }.add(cursor.getInt(1))
             }
-            out
+        }
+        return meanings.mapValues { (number, meaning) ->
+            WordMatch(meaning, matchedWords(number, positions[number].orEmpty()))
         }
     }
+
+    /** The Arabic of the given word positions in one ayah, in the ayah's order. */
+    private fun matchedWords(ayahNumber: Int, positions: Set<Int>): List<String> {
+        if (positions.isEmpty()) return emptyList()
+        val list = positions.sorted().joinToString(",")
+        return query(
+            "SELECT position, text FROM word WHERE ayah_number = ? AND marker = 0 AND position IN ($list)",
+            arrayOf(ayahNumber.toString()),
+        ).use { cursor ->
+            buildList(cursor.count) {
+                while (cursor.moveToNext()) {
+                    if (cursor.getInt(0) in positions) add(cursor.getString(1).orEmpty().trim())
+                }
+            }.filter { it.isNotEmpty() }
+        }
+    }
+
+    /** One ayah's matched meaning and the words that carried it. */
+    private class WordMatch(val meaning: String, val words: List<String>)
 
     /** Matches inside one installed pack's own schema. */
     private fun packMatches(schemaId: String, terms: List<String>, limit: Int): List<Int> {

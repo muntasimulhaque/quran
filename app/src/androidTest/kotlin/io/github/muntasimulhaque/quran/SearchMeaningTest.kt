@@ -112,5 +112,15 @@ class SearchMeaningTest {
             "but a row whose meaning is absent never grows one",
             rows.any { it.wordMeaning == null && shouldShowWordMeaning(it) },
         )
+        assertTrue(
+            "a meaning row names the word that carried it, so the row can be read",
+            rows.filter { it.wordMeaning != null }.all { it.matchedWordText.isNotEmpty() },
+        )
+        assertTrue(
+            "and the words are the ayah's own, not the meaning's spelling",
+            rows.filter { it.wordMeaning != null }.all { hit ->
+                hit.matchedWordText.all { word -> hit.ayah.text.contains(word) }
+            },
+        )
     }
 }

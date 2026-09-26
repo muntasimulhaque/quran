@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -155,17 +156,28 @@ fun PageHeader(title: String, onBack: () -> Unit) {
 }
 
 /**
- * A switch, and, when [onOpen] is given, a chevron that opens the page the
- * switch's content is chosen on.
+ * A switch, and, when [onOpen] is given, the door to the page its content is
+ * chosen on.
  *
  * The three reading switches and the packs behind them used to live in two
  * places: a switch here and a separate row for the packs, so a reader who
  * turned the translation off still had a "Translations" row below that read
  * as a second, unexplained control (owner report, D-097). One row now carries
- * both: the switch says what the reading draws, and the chevron says the
- * packs are one tap away. The chevron is its own touch target with its own
- * spoken name, so TalkBack reads a switch and a door rather than one crowded
- * control.
+ * both halves, and the two halves answer to different taps (owner report,
+ * 2.3): the switch alone turns the reading on or off, while a tap anywhere
+ * else on the row opens the page. A row that toggled wherever a finger landed
+ * made the door impossible to reach without changing the reading, and a reader
+ * who came to look at the translations left them switched off by accident.
+ *
+ * The tap that opens does not switch. A reader looking at a list has asked to
+ * see it, not to change a setting, and a setting changed by a look is a
+ * setting they did not choose: the page says plainly whether the reading is
+ * showing what it lists, and its own switch turns it on from there.
+ *
+ * Without [onOpen] the whole row stays the switch, which is what a row with
+ * nowhere to go owes a finger. The chevron keeps its own touch target and its
+ * own spoken name beside the door, so TalkBack reads a switch and a door
+ * rather than one crowded control.
  */
 @Composable
 fun ToggleRow(
@@ -176,11 +188,20 @@ fun ToggleRow(
     /** The page this switch's content is chosen on, when there is one. */
     onOpen: (() -> Unit)? = null,
     openLabel: String? = null,
+    /** The anchor a test taps when it means the switch rather than the door. */
+    switchTag: String? = null,
 ) {
+    val opens = onOpen != null
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .toggleable(value = checked, role = Role.Switch, onValueChange = onChange)
+            .then(
+                if (onOpen != null) {
+                    Modifier.clickable(role = Role.Button, onClick = onOpen)
+                } else {
+                    Modifier.toggleable(value = checked, role = Role.Switch, onValueChange = onChange)
+                },
+            )
             .padding(start = 22.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -231,9 +252,19 @@ fun ToggleRow(
                 )
             }
         }
-        // The whole row is the control, so the switch is only a picture of
-        // its state and TalkBack reads one labelled node.
-        Switch(checked = checked, onCheckedChange = null)
+        // Where the row opens a page, the switch is the only thing that
+        // switches, so it takes its own clicks and carries the row's name: a
+        // control that reads "on" with nothing to say who is on tells TalkBack
+        // nothing. Where there is no page, the whole row is the control and the
+        // switch is only a picture of its state.
+        val switchModifier = Modifier
+            .then(if (opens) Modifier.semantics { contentDescription = title } else Modifier)
+            .then(if (switchTag != null) Modifier.testTag(switchTag) else Modifier)
+        Switch(
+            checked = checked,
+            onCheckedChange = if (opens) onChange else null,
+            modifier = switchModifier,
+        )
     }
 }
 

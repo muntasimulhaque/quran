@@ -917,22 +917,23 @@ fetching them again; the space is worth less than the time.
 
 ## Next session: the remaining queue, in order
 
-0. **The store set is current, and the capture can be trusted.** 2.2
-   installed the set from run 36164556475 attempt 2, all three legs green:
-   every frame compared with its artifact by `cmp` (24 matches) and every
-   changed frame read. The phone leg's first attempt met a launcher ANR over
-   `05-search`; the window guard refused the frame and the leg kept only four,
-   which is the guard working, and one rerun is the runbook's answer for that
-   class (D-078, D-098). The next session that changes a pixel captures again
-   with the procedure in "Store screenshots", and starts with the fast path
-   in "Release hand-off": keep a booted snapshot in the per-form-factor AVD
-   cache so a leg comes under three minutes.
+0. **The instrumented suites and the store set, in that order.** The
+   thirty-first session's tree compiles and its JVM suite and lint are green,
+   but its instrumented suites have not been run on a device, and the settings
+   hub's frame and the picker are changed pixels. Run
+   `:data:connectedDebugAndroidTest` and `:app:connectedDebugAndroidTest` with
+   the emulator settings the workflow uses, then capture with the procedure in
+   "Store screenshots" (the settings frame and the Browse-tab frame are the
+   visible changes), then the release, at the owner's word, on the fast path
+   in "Release hand-off".
 
 1. **The segmented controls' touch targets.** The text size steps and the
    playback pace draw 38 dp and 46 dp cells, under the design document's own
    48 dp rule. They are read as one row, so the fix is structural (an outer
    48 dp touch box with the visual cell inside it) and touches a captured,
-   tested control. Named in D-087, not yet done.
+   tested control. Named in D-087, not yet done; the Go to Ayah grid's cells
+   were brought to 48 dp in the thirty-first session, so this is the last of
+   that class.
 2. **Mushaf text size, if the owner wants it.** The owner declined zoom and
    asked what other apps do; the answer is in D-087. The honest larger-text
    path is a re-layout of the pre-justified page at a bigger em, built as a
@@ -991,6 +992,50 @@ fetching them again; the space is worth less than the time.
   to right on the screen; `MushafTurnTest` now pins the direction on every
   form factor.
 
+
+## Where the project stands (end of the thirty-first session)
+
+**The tree answers the reader's tenth report; no version has shipped it,
+because the release waits for the owner's word** (D-099).
+
+- **A switch is a switch and the row is a door.** `ToggleRow` splits them:
+only the switch toggles, the rest of the row opens its page, and the two list
+pages carry their own switch at the head so a page behind a switch is not a
+dead end.
+- **The reading builds from the Arabic outward:** word meanings above Show
+translation, translation above Show tafsir.
+- **The daily reminder is on with the app** and its moment lives on a Daily
+page behind its hub row, chosen on the platform's clock with typed input
+beside it, so every minute of the day is reachable. The stored value is a
+minute of the day (`dailyAyahMinute`), the old hour key is still read, the
+phone's permission is asked at the two acts of setting and nowhere else, and
+the page names the phone's own notification settings when the phone has
+turned the reminder off. The channel's words are refreshed on installs that
+already have it.
+- **Go to Ayah says what it is standing for:** the card carries the surah's
+Arabic name and its length, the ayah cells are 48 dp, the surah step opens on
+the reader's own surah, and both steps wear one filled mark for "the place
+you are standing". The picker has its own file, and `BrowseSheet.kt` is back
+under 400 lines.
+- **Search keeps its word meanings and stops printing Arabic that matched
+nothing:** the Arabic is drawn when it is the match, when the row has no
+other evidence, and otherwise the row points at the matched word itself. The
+rule is `arabicLineFor` in `data`, pure, tested in the JVM suite and against
+the shipped database, with its measured reasoning in the KDoc.
+- **Bangla:** প ্ৰত িদ িন ের আয ় everywhere, channel included, and every new
+line was composed from words the app already ships rather than typed fresh.
+
+**The suite.** `:core:test`, `:data:testDebugUnitTest`, `:app:testDebugUnitTest`,
+`:app:lintDebug` (no errors, two informational KTX suggestions) and
+`:app:assembleDebug` are green, and `:app:compileDebugAndroidTestKotlin`
+compiles. The instrumented suites carry the new shapes: `DailyAyahToggleTest`
+pins the switch-versus-door split and the picker, `DailyAyahTest` pins minutes
+and both ends of the day, `SettingsVisibilityTest` taps the switch tag, and
+the search instrumented test proves a meaning row names the word that carried
+it from the ayah's own text.
+
+**Owed:** the instrumented suites on a device, the store set (the settings
+hub's frame and the picker are changed pixels), and the release itself.
 
 ## Where the project stands (end of the thirtieth session)
 

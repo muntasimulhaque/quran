@@ -116,40 +116,53 @@ class DailyAyahTest {
 
     /**
      * The alarm itself: the next moment the reminder should come is the
-     * reader's own hour today, or tomorrow when that hour has passed.
+     * reader's own minute today, or tomorrow when that minute has passed.
      */
     @Test
-    fun theAlarmLandsAtTheReadersHour() {
-        val hour = 8
-        val at = DailyAyahScheduler.nextOccurrence(hour)
+    fun theAlarmLandsAtTheReadersMoment() {
+        val minute = 8 * 60 + 37
+        val at = DailyAyahScheduler.nextOccurrence(minute)
         val calendar = Calendar.getInstance().apply { timeInMillis = at }
-        assertEquals("the alarm lands on the chosen hour", hour, calendar.get(Calendar.HOUR_OF_DAY))
-        assertEquals("and at the top of it", 0, calendar.get(Calendar.MINUTE))
+        assertEquals("the alarm lands on the chosen hour", 8, calendar.get(Calendar.HOUR_OF_DAY))
+        assertEquals("and on the chosen minute, not the top of the hour", 37, calendar.get(Calendar.MINUTE))
+        assertEquals("and at the second", 0, calendar.get(Calendar.SECOND))
         assertTrue("and in the future", at > System.currentTimeMillis())
 
-        // An hour that has already passed today comes tomorrow.
+        // A moment that has already passed today comes tomorrow.
         val now = System.currentTimeMillis()
         val tomorrow = Calendar.getInstance().apply {
             timeInMillis = now
             add(Calendar.DAY_OF_YEAR, 1)
         }
-        val past = tomorrow.get(Calendar.HOUR_OF_DAY)
+        val past = tomorrow.get(Calendar.HOUR_OF_DAY) * 60
         val landing = DailyAyahScheduler.nextOccurrence(past, now)
         val landingCalendar = Calendar.getInstance().apply { timeInMillis = landing }
-        assertTrue("a passed hour lands tomorrow", landing > now)
-        assertEquals(past, landingCalendar.get(Calendar.HOUR_OF_DAY))
+        assertTrue("a passed moment lands tomorrow", landing > now)
+        assertEquals(past / 60, landingCalendar.get(Calendar.HOUR_OF_DAY))
+        assertEquals(0, landingCalendar.get(Calendar.MINUTE))
+
+        // The two ends of the day are reachable, which a list of hours could
+        // not promise and a wrong reading of the number must not break.
+        assertTrue(DailyAyahScheduler.nextOccurrence(0, now) > now)
+        assertTrue(DailyAyahScheduler.nextOccurrence(1439, now) > now)
+        assertTrue(
+            "a number past the end of the day is pulled back into it, not wrapped",
+            Calendar.getInstance().apply {
+                timeInMillis = DailyAyahScheduler.nextOccurrence(9_999, now)
+            }.get(Calendar.HOUR_OF_DAY) in 0..23,
+        )
     }
 
     /**
      * The alarm that fires is spent, and the next one is armed from the same
-     * hour: asked at the moment of a fire, the answer is tomorrow, not the
+     * moment: asked at the moment of a fire, the answer is tomorrow, not the
      * same second. That is what makes a one-shot alarm a daily reminder.
      */
     @Test
     fun theNextDayIsArmedWhenOneFires() {
-        val hour = 8
-        val firedAt = DailyAyahScheduler.nextOccurrence(hour)
-        val next = DailyAyahScheduler.nextOccurrence(hour, firedAt)
+        val minute = 8 * 60 + 37
+        val firedAt = DailyAyahScheduler.nextOccurrence(minute)
+        val next = DailyAyahScheduler.nextOccurrence(minute, firedAt)
         val day = 86_400_000L
         assertTrue("the next fire is in the future", next > firedAt)
         assertEquals(

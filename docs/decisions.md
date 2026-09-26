@@ -4396,3 +4396,95 @@ was deleted the same session, as the runbook requires: the artifact stays in
 build run 36164556479 and in Play, and `play-store/aab/` keeps only its own
 note. The tree is clean. The signed bundle's record is above; nothing in the
 repository depends on the binary.
+
+## D-099: The owner's tenth reading report
+
+Date: the thirty-first session. The owner read 2.2 on a phone and reported
+five things: three defects of behaviour, one structure change, one question
+about search, and one wording change that arrived mid-session. All five are
+answered in the tree, and the search question is answered with measurements
+rather than an opinion. No version moved, because the release waits for the
+owner's word.
+
+**1. A switch is a switch; the row around it is a door.** Show
+translation, Show tafsir, and the daily reminder all carried a switch, and
+the reader reported that tapping the row did something they did not ask for.
+`ToggleRow` now splits the two: only the `Switch` toggles, and the rest of
+the row, chevron included, opens the page the switch belongs to. The
+reasoning is that a look is not a choice, and a control that answers a tap
+with a different effect than its own label promises is two controls wearing
+one shape. The two list pages carry their own switch at the head, so
+choosing a pack from a page behind a switch is not a dead end: one value,
+two doors, the same shape the audio page and the playback pill already use
+(owner decision, 2.3). The switch also carries the row's title as its own
+content description and a test tag, so TalkBack reads it as a switch and the
+tests aim at it.
+
+**2. The reading builds in the order the reader puts it together.** Word
+meanings sit closest to the Arabic, so its row now sits above Show
+translation, and the translation above Show tafsir (owner report, 2.3).
+
+**3. The daily reminder is on from the first launch, and its moment is a
+page.** Three reports in one: the reminder was off until asked, the hour was
+a strip of twenty-four chips that filled the hub and held only the top of
+each hour, and the time belonged beside the switch. The reminder now comes on
+with the app (`SettingsStore.dailyAyah = true`, owner decision, 2.3) as a
+silent low-importance channel, the hub carries one row whose subtitle is the
+moment itself, and the moment is chosen on the `Daily` page behind that row:
+the platform's Material clock in the app's own colors, with the time
+available to be typed as well, which reaches every minute of the day. The
+stored value is a minute of the day, not an hour (`dailyAyahMinute`,
+`setDailyAyahTime`), and the old hour key is still read, so an install that
+had chosen a time keeps it. The clock dialog sits inside the sheet as its own
+window, the way a language choice already does.
+
+**4. The phone's permission is asked for at two moments, and never for
+nothing.** A default-on reminder cannot ask at launch (a dialog before
+reading is cut by the law), so the permission is asked when the reader turns
+the reminder on and when they move its moment, and at no other time. What
+the app does not own is surfaced rather than hidden: `NotificationStatus`
+reads the phone's own answer and refreshes it on every resume, and the page
+says so in one sentence and names the way out as the phone's own
+notification settings, with the pre-Android-8 page as the fallback.
+
+**5. Go to Ayah says what it is standing for.** The card above the grid
+carried the surah's Latin name alone, so a reader had to scroll the grid to
+learn how long the surah was, and the surah step always opened at Al-Fatihah,
+which hid the one row that answers "where am I". The card now carries the
+surah's own Arabic name and its `place - n ayahs` line, the ayah cells are
+48 dp (the design document's own floor for a thing a finger aims at, and the
+picker's cells are the surface where the reader aims at a two-digit shape),
+and the surah list opens on the reader's own surah and wears the same filled
+mark the grid wears for their own ayah, so one shape means "the place you
+are standing" on both steps. The picker moved to its own file
+(`GoToAyahPicker.kt`), which also brings `BrowseSheet.kt` back under the
+400-line rule (owner report, 2.3).
+
+**6. Search: the word meanings stay, the decoration goes.** The question was
+whether a Quran-text row that also carried a word meaning is redundant. It
+is not, and the measurement says so. Against the shipped content database,
+the English word "mercy" matches 144 ayahs through the translation and 148
+through the word meanings, 139 of them the same ayahs, so only 9 are
+reachable by the meanings alone, and a Latin query matches the Arabic text
+zero times: on the other 139 rows the Arabic line was four lines of text
+that had nothing to do with the search. In Bangla the balance is the other
+way, because the Bangla translation and the Bangla gloss spell things
+differently: "অহংকার" reaches 40 ayahs through the meanings alone and
+"নামাজ" 4. So the decision is (owner decision, 2.3): keep the word
+meanings, and stop printing Arabic that matched nothing. The Arabic is
+drawn when it is the match (washed, as before), when the row has no other
+evidence, which is a reference the reader typed, and otherwise not at all;
+and a row whose only evidence is a word meaning now draws the **matched
+word itself**, washed, in the ayah's own order, read from the core `word`
+table in one batched pass beside the meanings (never one query per row). The
+rule is pure and lives beside `shouldShowWordMeaning` in `data`, as
+`arabicLineFor`, with its own tests in the JVM suite and against the shipped
+database.
+
+**7. প্রতিদিনের, everywhere the word is spoken.** The owner read
+দৈনিক আয ় and asked for প ্ৰত িদ িন ের, which is the word the channel
+description and the hub row already used. The settings title and the
+notification channel's name now both read it, and a channel that already
+exists on a reader's phone has its words refreshed: the platform has no
+`updateNotificationChannel`, so re-creating the channel is the way, and the
+system keeps whatever the reader chose in its own settings.

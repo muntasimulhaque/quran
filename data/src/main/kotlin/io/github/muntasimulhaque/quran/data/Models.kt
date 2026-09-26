@@ -109,6 +109,15 @@ sealed interface SearchHit {
         val arabicMatchedWords: Set<Int>,
         val translation: TranslationHit?,
         val wordMeaning: String?,
+        /**
+         * The Arabic of the words whose *meaning* matched, in the ayah's own
+         * order. A Latin query never matches the Arabic itself, so before this
+         * a word-meaning row carried the gloss with nothing to point at: the
+         * reader was told a word meant mercy and could not see which word it
+         * was. The words are read from the same batched pass as the meanings,
+         * never one query per row.
+         */
+        val matchedWordText: List<String> = emptyList(),
     ) : SearchHit
 
     /** A tafsir passage, which usually spans several ayahs. */

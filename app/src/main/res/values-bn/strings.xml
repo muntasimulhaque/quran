@@ -42,7 +42,8 @@
     <string name="content_problem_retry">আবার চেষ্টা করুন</string>
 
     <!-- The daily reminder: a quiet invitation to read, one ayah each day. -->
-    <string name="daily_channel_name">দৈনিক আয়াত</string>
+    <string name="daily_channel_name">প্রতিদিনের আয়াত</string>
     <string name="daily_channel_description">প্রতিদিন একটি আয়াত, আপনি যে সময় বেছে নেবেন।</string>
     <string name="daily_notification_title">%1$s %2$d:%3$d</string>
+    <string name="notification_settings_unavailable">এই ফোনে নোটিফিকেশন সেটিংস নেই।</string>
 </resources>

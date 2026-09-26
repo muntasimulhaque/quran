@@ -5,9 +5,30 @@ turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
 **Status:** 2.2 (versionCode 23) is submitted to Google Play for review; it
-carries the reader's ninth report and the daily reminder (D-097, D-098). It
-answers eight things from the owner:
+carries the reader's ninth report and the daily reminder (D-097, D-098). The
+tree then answers the reader's tenth report (D-099), which no version has
+shipped yet:
 
+- A switch is a switch and the row around it is a door: only the switch
+toggles, and the rest of the row opens the page, on Show translation, Show
+tafsir, and the daily reminder alike. The list pages carry their own switch
+at the head, so a page behind a switch is never a dead end.
+- The reading builds in the order the reader puts it together: word meanings,
+  then translation, then tafsir.
+- The daily reminder now comes on with the app, its moment is chosen on its
+own page on the platform's clock (typed input included, so every minute of
+the day is reachable), and the page says so plainly when the phone has
+turned notifications off, with the way out named.
+- Go to Ayah's card carries the surah's Arabic name and its length, its ayah
+  cells are 48 dp, and its surah step opens on the reader's own surah, marked
+  with the same shape the grid uses for their own ayah.
+- Search keeps its word meanings and stops printing Arabic that matched
+  nothing: the Arabic is drawn when it is the match, when the row has no
+  other evidence, and otherwise the row points at the word that earned it.
+- The Bangla interface reads প ্ৰত িদ িন ের আয ় for the daily reminder,
+  including on the notification channel already on a reader's phone.
+
+**2.2** answers eight things from the owner:
 - The Go to Ayah picker centers the reader's own ayah, so it is unmistakable
   instead of sitting at the viewport's top edge.
 - Search results no longer repeat a translation match as a separate word

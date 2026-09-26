@@ -17,11 +17,20 @@
 
     <string name="settings_keep_awake_title">স্ক্রিন জাগিয়ে রাখুন</string>
     <string name="settings_keep_awake_subtitle">পড়ার সময় পাতা জ্বলজ্বল করে থাকবে</string>
-    <string name="settings_daily_title">দৈনিক আয়াত</string>
+    <string name="settings_daily_title">প্রতিদিনের আয়াত</string>
     <string name="settings_daily_subtitle_off">প্রতিদিন একটি আয়াত, নোটিফিকেশনে</string>
     <string name="settings_daily_subtitle_on">প্রতিদিন একটি আয়াত, %1$s-এ</string>
-    <string name="settings_daily_hour_title">কখন আসবে</string>
-    <string name="settings_daily_hour_value">%1$d:00</string>
+        <string name="settings_open_daily">প্রতিদিনের আয়াতের সেটিংস</string>
+    <string name="settings_daily_page_subtitle">প্রতিদিন একটি আয়াত, আপনি যে সময় বেছে নেবেন</string>
+    <string name="settings_daily_time_title">সময়</string>
+    <string name="settings_daily_note">প্রতিদিন একটি আয়াত, কোনো শব্দ না। এটি নোটিফিকেশনে রাখা যাবে; ট্যাপ করলে আয়াতের পাতায় খোলে।</string>
+    <string name="settings_daily_blocked">আপনার ফোনে অ্যাপের নোটিফিকেশন বন্ধ, তাই প্রতিদিনে আয়াত আসবে না।</string>
+    <string name="settings_daily_blocked_action">নোটিফিকেশন সেটিংস</string>
+    <string name="settings_daily_picker_title">কখন আসবে</string>
+    <string name="settings_daily_picker_keyboard">সময় লিখুন</string>
+    <string name="settings_daily_picker_clock">সময় বাছাই করুন</string>
+    <string name="settings_cancel">বাতিল</string>
+    <string name="settings_set">সেট করুন</string>
     <string name="settings_follow_title">তিলাওয়াতের সাথে চলুন</string>
     <string name="settings_follow_subtitle">তিলাওয়াতের সাথে পাতা এগিয়ে যাবে</string>
     <string name="settings_show_translation_title">অনুবাদ দেখান</string>

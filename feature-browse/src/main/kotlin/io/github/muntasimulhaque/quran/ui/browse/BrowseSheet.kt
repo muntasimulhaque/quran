@@ -11,19 +11,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,7 +28,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -41,17 +35,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.JuzStart
@@ -61,8 +49,6 @@ import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
-import io.github.muntasimulhaque.quran.ui.reader.Icon
-import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -355,246 +341,4 @@ private fun <T> androidx.compose.foundation.lazy.LazyListScope.itemsIndexedCompa
     row: @Composable (Int, T) -> Unit,
 ) {
     items(items.size) { index -> row(index, items[index]) }
-}
-
-/**
- * The picker: a surah's ayah numbers, with the surah itself as the first
- * choice. The reader's own surah is already chosen, so moving within a long
- * surah is one tap on a number; another surah is one more tap through the
- * same list Browse draws. The grid starts on the reader's own ayah, marked,
- * so the place they are leaving is visible before they leave it.
- */
-@Composable
-private fun GoToAyahPicker(
-    surahs: List<Surah>,
-    surahNumberWidth: Dp,
-    starts: Map<Int, Int>,
-    chosenSurah: Int,
-    currentAyah: Int,
-    choosingSurah: Boolean,
-    onChoose: () -> Unit,
-    onSurah: (Int) -> Unit,
-    onBack: () -> Unit,
-    onAyah: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val chosen = surahs.firstOrNull { it.number == chosenSurah } ?: surahs.firstOrNull() ?: return
-    val gridState = rememberLazyGridState()
-    val gridGate = remember(gridState) { SheetDragGate(gridState) }
-    val surahList = rememberLazyListState()
-    val surahGate = remember(surahList) { SheetDragGate(surahList) }
-    val firstAyah = starts[chosen.number] ?: 1
-    val currentInChosen = currentAyah - firstAyah + 1
-    val currentHere = currentInChosen in 1..chosen.versesCount
-    // The grid opens on the reader's own ayah, and the ayah is centered in
-    // the viewport rather than pinned to its top: a number that answers "go
-    // to" has to be unmistakably the one the reader is standing on, and on a
-    // tall grid a top-aligned row reads as any other row (owner report,
-    // D-097). The place is a second key beside the surah, so a jump that
-    // changes the reader's ayah while this picker is composed can never
-    // leave the grid on a place that is no longer theirs. A grid for a
-    // surah the reader is not in has no place to show and starts at its
-    // first ayah, which is what choosing another surah means.
-    LaunchedEffect(chosen.number, currentInChosen) {
-        val index = if (currentHere) currentInChosen - 1 else 0
-        gridState.scrollToItem(index)
-        if (!currentHere) return@LaunchedEffect
-        val viewport = gridState.layoutInfo.viewportSize.height
-        val cell = gridState.layoutInfo.visibleItemsInfo
-            .firstOrNull { it.index == index }?.size?.height ?: 0
-        if (viewport > cell && cell > 0) {
-            gridState.scrollToItem(index, scrollOffset = -((viewport - cell) / 2))
-        }
-    }
-
-    Column(modifier.fillMaxWidth()) {
-        if (choosingSurah) {
-            // The one step with a head: the step with a way back. Its title
-            // is the choice it asks for, never the tab's own name again.
-            PickerHeader(
-                title = stringResource(R.string.browse_choose_surah),
-                onBack = onBack,
-            )
-            LazyColumn(
-                state = surahList,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .sheetDragGate(surahGate)
-                    .testTag("go-to-surahs"),
-                contentPadding = PaddingValues(bottom = 28.dp),
-            ) {
-                items(surahs, key = { it.number }) { surah ->
-                    SurahRow(surah, surahNumberWidth) { onSurah(surah.number) }
-                }
-            }
-        } else {
-            SurahSelector(name = chosen.nameSimple, onClick = onChoose)
-            // The gap between the card and the numbers lives outside the
-            // grid, not in its content padding: padding scrolls away with
-            // the first row, and the reader met the card and a clipped pill
-            // touching once the grid moved under them (owner report, D-090
-            // closed the resting frame; this closes the scrolled one).
-            Spacer(Modifier.height(Space.Block))
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 52.dp),
-                state = gridState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .sheetDragGate(gridGate)
-                    .testTag("go-to-ayahs"),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 28.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                items(count = chosen.versesCount, key = { it + 1 }) { index ->
-                    val number = index + 1
-                    AyahNumberCell(
-                        number = number,
-                        current = currentHere && number == currentInChosen,
-                        onClick = { onAyah(firstAyah + index) },
-                    )
-                }
-            }
-        }
-    }
-}
-
-/**
- * The head of the picker: one way back, one name for the step. The title and
- * the surah card below it share one gutter with the grid, so the picker reads
- * as one page instead of a heading with a list under it (D-090).
- */
-@Composable
-private fun PickerHeader(title: String, onBack: () -> Unit) {
-    val back = stringResource(R.string.browse_back)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 6.dp, end = 16.dp, top = 2.dp, bottom = Space.Line),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(RoundedCornerShape(50))
-                .clickable(onClick = onBack)
-                .semantics {
-                    contentDescription = back
-                    role = Role.Button
-                }
-                .testTag("go-to-back"),
-            contentAlignment = Alignment.Center,
-        ) {
-            IconGlyph(
-                icon = Icon.Chevron,
-                tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier
-                    .size(22.dp)
-                    // The chevron opens downward, so going back is the same
-                    // mark turned to point the way it came.
-                    .rotate(90f),
-            )
-        }
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(start = 4.dp),
-        )
-    }
-}
-
-/**
- * The surah the grid belongs to, and the door that changes it. It is a card
- * of its own quiet fill rather than a bare row: the name a reader is about to
- * leave has to read as a thing they hold, not as a label over a list, and the
- * card's own air is what keeps the name and the first number from touching
- * (owner report, D-090).
- */
-@Composable
-private fun SurahSelector(name: String, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-            .clickable(onClick = onClick)
-            .semantics { role = Role.Button }
-            .padding(horizontal = 14.dp, vertical = 14.dp)
-            .testTag("go-to-surah"),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = name,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f),
-        )
-        IconGlyph(
-            icon = Icon.Chevron,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-                .padding(start = 12.dp)
-                .size(20.dp)
-                // A tap opens the surah list in place, so the mark points the
-                // way the page turns.
-                .rotate(-90f),
-        )
-    }
-}
-
-/**
- * One ayah's number in the picker's grid: a shape the finger can see, the
- * reader's own ayah filled, and both states spoken so the grid means the same
- * thing to TalkBack.
- */
-@Composable
-private fun AyahNumberCell(number: Int, current: Boolean, onClick: () -> Unit) {
-    val label = stringResource(R.string.last_read_ayah_label, number)
-    val currentState = stringResource(R.string.browse_ayah_current)
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 44.dp)
-            .clip(RoundedCornerShape(50))
-            .background(
-                if (current) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f)
-                },
-            )
-            .clickable(onClick = onClick)
-            .semantics {
-                contentDescription = label
-                if (current) stateDescription = currentState
-            },
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = numberLabel(number),
-            style = MaterialTheme.typography.labelLarge,
-            color = if (current) {
-                MaterialTheme.colorScheme.onPrimary
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            },
-        )
-    }
-}
-
-/** The first ayah of every surah, from the Quran's sequential numbering. */
-private fun surahStartMap(surahs: List<Surah>): Map<Int, Int> {
-    var next = 1
-    val starts = HashMap<Int, Int>(surahs.size)
-    for (surah in surahs.sortedBy { it.number }) {
-        starts[surah.number] = next
-        next += surah.versesCount
-    }
-    return starts
 }

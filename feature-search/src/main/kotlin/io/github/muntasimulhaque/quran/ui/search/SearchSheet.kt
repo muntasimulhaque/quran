@@ -64,6 +64,8 @@ import io.github.muntasimulhaque.quran.data.SearchRequest
 import io.github.muntasimulhaque.quran.data.SearchResults
 import io.github.muntasimulhaque.quran.data.SearchSources
 import io.github.muntasimulhaque.quran.data.Surah
+import io.github.muntasimulhaque.quran.data.SearchArabicLine
+import io.github.muntasimulhaque.quran.data.arabicLineFor
 import io.github.muntasimulhaque.quran.data.shouldShowWordMeaning
 import io.github.muntasimulhaque.quran.feature.search.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
@@ -538,19 +540,45 @@ private fun AyahRow(
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary,
         )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = arabic(hit, hafs, terms),
-            style = TextStyle(
-                fontFamily = hafs,
-                fontSize = 22.sp,
-                lineHeight = 42.sp,
-                color = MaterialTheme.colorScheme.onSurface,
-            ),
-            textAlign = TextAlign.Right,
-            maxLines = 4,
-            modifier = Modifier.fillMaxWidth(),
-        )
+        // The Arabic is drawn when it is the match, or when the row has
+        // nothing else to say; otherwise the row opens with the evidence
+        // instead of with a page of text that never matched (owner report,
+        // 2.3, and the rule is pure, in `data`, with its own tests).
+        when (val line = arabicLineFor(hit)) {
+            SearchArabicLine.Ayah -> {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = arabic(hit, hafs, terms),
+                    style = TextStyle(
+                        fontFamily = hafs,
+                        fontSize = 22.sp,
+                        lineHeight = 42.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    ),
+                    textAlign = TextAlign.Right,
+                    maxLines = 4,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            is SearchArabicLine.Words -> {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = washed(line.words.joinToString("  ")),
+                    style = TextStyle(
+                        fontFamily = hafs,
+                        fontSize = 24.sp,
+                        lineHeight = 40.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    ),
+                    textAlign = TextAlign.Right,
+                    maxLines = 3,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            SearchArabicLine.None -> Unit
+        }
         hit.translation?.let { translation ->
             Spacer(Modifier.height(8.dp))
             HighlightedText(
@@ -626,6 +654,14 @@ private fun TafsirRow(hit: SearchHit.TafsirHitResult, onAyah: (Ayah, Int) -> Uni
             maxLines = 5,
         )
     }
+}
+
+/** Words in a wash, which is how the ayah's own match is drawn above. */
+@Composable
+private fun washed(text: String): AnnotatedString {
+    val base = LocalPagePalette.current.highlight
+    val wash = base.copy(alpha = base.alpha.coerceAtLeast(0.25f))
+    return buildAnnotatedString { withStyle(SpanStyle(background = wash)) { append(text) } }
 }
 
 /** The ayah with the matched words washed; the ranges are exact. */

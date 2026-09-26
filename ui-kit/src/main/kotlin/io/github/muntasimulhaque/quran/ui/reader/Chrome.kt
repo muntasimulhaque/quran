@@ -55,6 +55,10 @@ enum class Icon {
     Tafsir,
     Chevron,
     Note,
+
+    /** The two halves of the time choice: the clock, and typing on a keyboard. */
+    Clock,
+    Keyboard,
 }
 
 @Composable
@@ -261,6 +265,38 @@ fun IconGlyph(
             Icon.Chevron -> {
                 drawLine(tint, Offset(w * 0.28f, h * 0.4f), Offset(w * 0.5f, h * 0.62f), w * 0.085f)
                 drawLine(tint, Offset(w * 0.5f, h * 0.62f), Offset(w * 0.72f, h * 0.4f), w * 0.085f)
+            }
+            // A clock with the hour hand at ten and the minute hand at two,
+            // the reading position a clock face is drawn in everywhere, so the
+            // mark is a clock even at 18 dp. It is the door to the time of the
+            // daily reminder, which is the only clock this app asks for.
+            Icon.Clock -> {
+                drawCircle(
+                    color = tint,
+                    radius = w * 0.33f,
+                    center = Offset(w * 0.5f, h * 0.5f),
+                    style = Stroke(width = w * 0.075f),
+                )
+                drawLine(tint, Offset(w * 0.5f, h * 0.5f), Offset(w * 0.5f, h * 0.27f), w * 0.075f)
+                drawLine(tint, Offset(w * 0.5f, h * 0.5f), Offset(w * 0.66f, h * 0.57f), w * 0.075f)
+            }
+            // A keyboard: the frame, two rows of keys, and the space bar under
+            // them. It is the same message as the clock's opposite half: the
+            // time can be typed instead of turned.
+            Icon.Keyboard -> {
+                drawRoundRect(
+                    color = tint,
+                    topLeft = Offset(w * 0.11f, h * 0.3f),
+                    size = Size(w * 0.78f, h * 0.4f),
+                    cornerRadius = CornerRadius(w * 0.09f),
+                    style = Stroke(width = w * 0.07f),
+                )
+                for (y in listOf(0.42f, 0.55f)) {
+                    for (x in listOf(0.26f, 0.4f, 0.54f, 0.68f, 0.79f)) {
+                        drawCircle(tint, radius = w * 0.028f, center = Offset(w * x, h * y))
+                    }
+                }
+                drawLine(tint, Offset(w * 0.36f, h * 0.63f), Offset(w * 0.64f, h * 0.63f), w * 0.055f)
             }
             // A note: a sheet with its turned corner and a line of writing,
             // drawn to the same weight as the glyphs beside it, so the pill's
