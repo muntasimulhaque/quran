@@ -995,8 +995,10 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the thirty-first session)
 
-**The tree answers the reader's tenth report; no version has shipped it,
-because the release waits for the owner's word** (D-099).
+**The tree answers the reader's tenth report, and 2.3 (versionCode 24) is
+prepared for submission at the owner's word** (D-099). No `versionCode` has
+moved in this list beyond the release commit below; the release itself is
+recorded under "The 2.3 release".
 
 - **A switch is a switch and the row is a door.** `ToggleRow` splits them:
 only the switch toggles, the rest of the row opens its page, and the two list
@@ -1034,8 +1036,39 @@ and both ends of the day, `SettingsVisibilityTest` taps the switch tag, and
 the search instrumented test proves a meaning row names the word that carried
 it from the ayah's own text.
 
-**Owed:** the instrumented suites on a device, the store set (the settings
-hub's frame and the picker are changed pixels), and the release itself.
+**Owed:** the hand-over to Play, and the instrumented suites are CI's
+authority this release: two local emulator runs met the documented
+environment classes (a cold first test timing out before the study reading
+drew on the first run after install, and the study list's prefetch scheduler
+on a loaded emulator, `The current thread must have a looper`), and both
+classes pass in isolation on the same build. CI ran the app suite on all
+three capture legs and the data suite on `build`, all green (runs 36263904415
+and 36263904407).
+
+## The 2.3 release
+
+**Version:** 2.3, versionCode 24, bumped from 2.2 in the release commit, with
+the version line in `play-store/listing.md` and the notes beside it (444
+characters, counted).
+
+**The bundle:** from the newest green build on `main`, run 36263904415:
+`quran-2.3-vc24.aab`, 148,097,627 bytes, SHA-256
+`59d82244bf3858b0668cb643e56afee59cf34d4ddca6dfed73cbc2fc768af026` (matching
+the artifact's own `_temp` checksum), `jar verified`, signed with the shared
+upload key.
+
+**The store set:** from run 36263904407, all three legs green first try, 24
+frames compared with their artifacts by `cmp` and the changed frames read.
+The changed frames are the same four on every form factor, all subpixel: a
+tablet band comparison flagged them and the pixel measurement classed them
+(worst average delta 0.04 of 255, worst single pixel 139), which is the
+antialiasing class the runbook names. The settings frame's foot reads
+`Version 2.3`, read back from the installed frame itself.
+
+**The five owner gates ran green on this machine** before the release:
+`verify` 29 datasets, `audit` 0 unexplained differences, `fonts` coverage
+passed, `checkdb` (the committed database and 10 pack files verified), and
+`search` (63 Arabic round trips, 82 non-ASCII codepoints, 465 excerpts).
 
 ## Where the project stands (end of the thirtieth session)
 

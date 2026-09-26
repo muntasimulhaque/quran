@@ -4488,3 +4488,56 @@ notification channel's name now both read it, and a channel that already
 exists on a reader's phone has its words refreshed: the platform has no
 `updateNotificationChannel`, so re-creating the channel is the way, and the
 system keeps whatever the reader chose in its own settings.
+
+## D-100: The 2.3 release, prepared
+
+Date: the thirty-first session, at the owner's word. 2.3 (versionCode 24)
+answers the reader's tenth report (D-099) and is prepared for submission.
+
+**The five gates ran on this machine before the release**, all green:
+`verify` 29 datasets, `audit` 0 unexplained differences of the canonical
+text, `fonts` coverage passed (22,985,677 reading codepoints, 604 pages),
+`checkdb` (the committed database unchanged at 128,966,656 bytes, its ten
+pack files verified), and `search` (63 Arabic round trips, 82 distinct
+non-ASCII translation codepoints folding cleanly, 465 readable excerpts
+carrying no markup). The manual QUL and QuranEnc exports were present in
+`content/raw`, so nothing was owed on this release.
+
+**The workflows.** `build` run 36263904415: the gates, the data instrumented
+suite, the debug build, and the signed bundle, all green. `Capture store
+screenshots` run 36263904407: all three legs green first try, which is also
+where the app instrumented suite ran for this release, the tour included.
+
+**The local instrumented runs and what they met.** Two full local runs of the
+app suite each failed one class, a different one each time, and neither was a
+defect: the first run's first test after install timed out waiting for the
+study reading to draw (`BrowseNumbersTest`, `ComposeTimeoutException` after
+90 s, no crash in its logcat), which is the cold-emulator class the runbook
+names; the second run met the study list's prefetch scheduler on a loaded
+emulator (`AyahActionsTest`, `The current thread must have a looper`), the
+trap the runbook already carries. Both classes pass in isolation on the same
+build, and CI's three legs ran the whole suite green, which is the authority
+the runbook names. Neither finding is written off: they are the environment
+classes, and the emulator here is left warm for the next session.
+
+**The store set.** Run 36263904407, eight frames per form factor, every frame
+compared with its artifact by `cmp`. A band-wise check flagged the same four
+frames on all three form factors (search, settings, Browse, ayah card), and
+the pixel measurement classed every one of them as antialiasing and clock
+differences: worst average delta 0.04 of 255, worst single pixel 139, and no
+frame differs in shape, copy, or layout. The settings frame's foot was read
+back from the installed image and says `Version 2.3`.
+
+**The bundle.** `quran-2.3-vc24.aab` from the newest green build on `main`
+(run 36263904415, not the first run after the bump): 148,097,627 bytes,
+SHA-256 `59d82244bf3858b0668cb643e56afee59cf34d4ddca6dfed73cbc2fc768af026`,
+matching the artifact's own recorded checksum, `jar verified`, signed with
+the shared upload key.
+
+**A gap the release found, and its fix.** The capture workflow's `paths`
+filter named only the modules that draw pixels, so the D-099 search
+refinement, which changes what the search draws while living in `data`, did
+not trigger a capture at all: the first push after it kept the old frames.
+The filter now names `data/src/main/**` and `core/src/main/**` with the
+reasoning written beside them, because a frame can change without a UI
+module being touched.
