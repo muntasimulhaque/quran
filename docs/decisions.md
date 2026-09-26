@@ -4541,3 +4541,10 @@ not trigger a capture at all: the first push after it kept the old frames.
 The filter now names `data/src/main/**` and `core/src/main/**` with the
 reasoning written beside them, because a frame can change without a UI
 module being touched.
+
+**The submission is confirmed, so the hand-off is closed.** The owner
+submitted 2.3 to Google Play for review, and the hand-off copy of the bundle
+was deleted the same session, as the runbook requires: the artifact stays in
+build run 36263904415 and in Play, and `play-store/aab/` keeps only its own
+note. The tree is clean. The signed bundle's record is in this entry;
+nothing in the repository depends on the binary.
