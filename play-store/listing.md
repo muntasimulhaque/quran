@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 2.4 (versionCode 25)
+Version: 2.5 (versionCode 26)
 
 ## Listing
 
@@ -156,6 +156,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (2.5, 388 characters)
+
+When you share an ayah as text, the words now read left to right, with the English translation on the left and its period where it belongs, while the Arabic keeps its own right-to-left reading inside its line. The ayah grid that opens from a surah names it in the same type as the Browse list, and every Settings switch and chevron now sits in one column. No ads, no trackers, no account.
 
 ## Release notes (2.4, 398 characters)
 
