@@ -4955,3 +4955,9 @@ in three pixels; the surah opening is byte-identical on all three.
 matching the artifact's own checksum, `jar verified`, signed with the
 shared upload key. The hand-off copy sits in `play-store/aab/` until the
 owner confirms the submission.
+
+**The submission is confirmed, so the hand-off is closed.** The owner
+submitted 2.6 to Google Play for review, and the hand-off copy of
+`quran-2.6-vc27.aab` was deleted the same session, as the runbook requires:
+the artifact stays in build run 36341047053 and in Play, and
+`play-store/aab/` keeps only its own note. The tree is clean.

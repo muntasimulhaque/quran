@@ -210,7 +210,9 @@ does not tell you, and each one costs a failed command to rediscover:
   `export JAVA_HOME="/c/Users/zn/jdks/jdk-17"`; the SDK is at
   `C:\Users\zn\AppData\Local\Android\Sdk`, so `local.properties` reads
   `sdk.dir=C:/Users/zn/AppData/Local/Android/Sdk`; and there are no AVDs, so
-  the instrumented suites run in CI only.
+  the instrumented suites run in CI only; `gh` is installed at
+  `C:\Users\zn\gh\bin` and on the user PATH, authenticated, so the content
+  Releases can be published from here.
 - MSYS rewrites `/sdcard/...` style arguments into Windows paths. Prefix
   `adb shell`, `adb push`, and `adb pull` with `MSYS_NO_PATHCONV=1`, and the
   same for `gh api` (and drop its leading slash).
@@ -1038,8 +1040,9 @@ data instrumented suite, and the signed bundle (`quran-2.6-vc27.aab`,
 36341047052 attempt 1, all three legs green first try: 24 frames compared
 with their artifacts by `cmp` and every changed frame read. The settings
 frames are the release's: compact rows, one switch and chevron column, and
-the About row reads Version 2.6. The hand-off copy sits in
-`play-store/aab/` until the owner confirms the submission.
+the About row reads Version 2.6. The owner submitted 2.6 to Google Play for
+review and confirmed it, so the hand-off copy was deleted the same session;
+the artifact stays in build run 36341047053.
 
 ## Where the project stands (end of the thirty-third session)
 
