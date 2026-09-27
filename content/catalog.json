@@ -13,9 +13,9 @@
             "shipped": true,
             "ayahs": 6236,
             "bytes": 10010624,
-            "sha256": "47e10d5ace089ca835a424957099cb3d3cd219b1a2dd7326eab3618298def662",
-            "tag": "pack-core-47e10d5a",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-47e10d5a/core.db"
+            "sha256": "ed1ef01f731f1e06156a32d47371099960243c67be42ec7715d11b59029a728d",
+            "tag": "pack-core-ed1ef01f",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-ed1ef01f/core.db"
         },
         {
             "id": "translation-saheeh-en",
@@ -43,9 +43,9 @@
             "shipped": false,
             "ayahs": 6236,
             "bytes": 23945216,
-            "sha256": "b54c27063236ee19616e719f7e3020f527854fc80885e623e495e015391274d3",
-            "tag": "pack-tafsir-ibn-kathir-en-b54c2706",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-tafsir-ibn-kathir-en-b54c2706/tafsir-ibn-kathir-en.db"
+            "sha256": "cd36142c0263235446ac8d679a26260b0c610231fdc37ceb4362e4488dc7c8c4",
+            "tag": "pack-tafsir-ibn-kathir-en-cd36142c",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-tafsir-ibn-kathir-en-cd36142c/tafsir-ibn-kathir-en.db"
         },
         {
             "id": "tafsir-as-sadi-ar",

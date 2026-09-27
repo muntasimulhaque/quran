@@ -43,7 +43,9 @@ verifies structure and records checksums; it never needs your login.
 
 Also useful, for cross-checking only: Saheeh International on QUL
 (translation/193, `translation-with-inline-footnote.sqlite`) as an
-independent copy of the translation we ship.
+independent copy of the translation we ship. Tafsir Ibn Kathir (English)
+was re-downloaded on 2026-09-24 for QUL's 2:238 typo fix; the manifest
+pins the fixed export (D-106).
 
 ## Downloads that need no account
 
@@ -96,12 +98,13 @@ independent copy of the translation we ship.
 - Fonts: KFGQPC (used unmodified, with notice) and the OFL fonts with
   their license files.
 
-## Pending: the Bangla library
+## The Bangla library
 
-Three datasets are listed in `content/manifest.json` with `pending: true`,
-which means the pipeline knows they exist and prints where to get them, and
-the gates stay green until a human places the files. Each is downloaded by
-hand from QUL, because QUL downloads need an account.
+Three more datasets are part of the manifest and ship as packs: the
+Taisirul Quran translation, Ibn Kathir in Bangla, and the Bangla word list.
+They are downloaded by hand from QUL, because QUL downloads need an account,
+like every other QUL source. The manifest carries no `pending` flag: the
+gates check all 29 datasets.
 
 | Dataset | QUL page | Save as |
 |---|---|---|

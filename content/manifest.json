@@ -1,5 +1,5 @@
 {
-  "contentVersion": "1.0.0",
+  "contentVersion": "1.0.1",
   "note": "Machine-readable source of truth for bundled content. Human-readable notes in docs/content-sources.md.",
   "datasets": [
     {
@@ -133,8 +133,8 @@
       "credit": "Tafsir Ibn Kathir, via QUL",
       "usedFor": "English tafsir",
       "path": "content/raw/qul/tafsir-ibn-kathir-english.sqlite.zip",
-      "bytes": 3855680,
-      "sha256": "5a1627854be5da065aecafd91a68834f931e7113977af5cbc4a2c6c9e7a326ce",
+      "bytes": 3860369,
+      "sha256": "5a3f38ec88e80fa1b9fd26546b2bf6782297699efb00225acc701db3f8569a2f",
       "assetUrl": null
     },
     {
