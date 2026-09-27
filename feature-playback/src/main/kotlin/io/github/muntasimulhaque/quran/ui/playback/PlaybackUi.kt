@@ -73,10 +73,19 @@ fun PlaybackBar(
     reciterName: String,
     reference: String?,
     pendingLabel: String?,
+    /**
+     * The pending surah's name and size, said while its package downloads
+     * on its own: the auto-continue path had no offer, so this is where the
+     * reader sees what is arriving (owner decision, D-105). The offer states
+     * do not need it; they carried the name and the size before the tap.
+     */
+    pendingAudio: String? = null,
     /** The reader's pace, shown only when it is not the ordinary one. */
     speed: Float = 1f,
     /** True while the playing ayah repeats; the pill says so. */
     repeating: Boolean = false,
+    /** True when the end of a surah carries on to the next one. */
+    continuing: Boolean = false,
     onToggle: () -> Unit,
     onNext: () -> Unit,
     onPrevious: () -> Unit,
@@ -86,9 +95,11 @@ fun PlaybackBar(
     onOfferConfirm: () -> Unit = {},
     onOfferCancel: () -> Unit = {},
     onOfferReciter: (String) -> Unit = {},
-    /** The pace and the repeat, set from the pill exactly as from settings. */
+    /** The pace, the repeat, and the continuation, set from the pill
+     * exactly as from settings. */
     onSpeed: (Float) -> Unit = {},
     onRepeat: (Boolean) -> Unit = {},
+    onContinue: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     if (offer != null) {
@@ -143,10 +154,14 @@ fun PlaybackBar(
                 PlaybackStatusLine(
                     text = when {
                         state.downloadFailed -> stringResource(R.string.playback_download_failed)
-                        downloading -> stringResource(
-                            R.string.playback_downloading,
-                            ((state.downloadProgress ?: 0f) * 100).toInt(),
-                        )
+                        downloading -> {
+                            val percent = ((state.downloadProgress ?: 0f) * 100).toInt()
+                            if (state.pendingIsContinuation && !pendingAudio.isNullOrBlank()) {
+                                stringResource(R.string.playback_downloading_named, pendingAudio, percent)
+                            } else {
+                                stringResource(R.string.playback_downloading, percent)
+                            }
+                        }
                         needsDownload -> pendingLabel.orEmpty()
                         state.unavailable -> stringResource(R.string.playback_unavailable)
                         else -> playbackStatus(reference.orEmpty(), speed, repeating)
@@ -159,6 +174,8 @@ fun PlaybackBar(
                     onListening = if (playing) onSpeed to onRepeat else null,
                     speed = speed,
                     repeating = repeating,
+                    continuing = continuing,
+                    onContinue = onContinue,
                 )
             }
             Spacer(Modifier.padding(horizontal = 6.dp))
@@ -245,6 +262,8 @@ private fun PlaybackStatusLine(
     onListening: Pair<(Float) -> Unit, (Boolean) -> Unit>?,
     speed: Float,
     repeating: Boolean,
+    continuing: Boolean,
+    onContinue: (Boolean) -> Unit,
 ) {
     // Read here, in the composable's own scope: a semantics lambda is not a
     // composable, and a stringResource inside one is a compile error.
@@ -298,16 +317,18 @@ private fun PlaybackStatusLine(
             onDismiss = { open = false },
             speed = speed,
             repeating = repeating,
+            continuing = continuing,
             onSpeed = onListening.first,
             onRepeat = onListening.second,
+            onContinue = onContinue,
         )
     }
 }
 
 /**
- * The pace and the repeat, in the pill's own cloth: the same floating tone
- * and rounded shape the reciter chooser wears, so it reads as the pill
- * opening rather than a foreign sheet laid over it.
+ * The pace, the repeat, and the continuation, in the pill's own cloth: the
+ * same floating tone and rounded shape the reciter chooser wears, so it reads
+ * as the pill opening rather than a foreign sheet laid over it.
  */
 @Composable
 private fun ListeningMenu(
@@ -315,8 +336,10 @@ private fun ListeningMenu(
     onDismiss: () -> Unit,
     speed: Float,
     repeating: Boolean,
+    continuing: Boolean,
     onSpeed: (Float) -> Unit,
     onRepeat: (Boolean) -> Unit,
+    onContinue: (Boolean) -> Unit,
 ) {
     DropdownMenu(
         expanded = open,
@@ -393,6 +416,26 @@ private fun ListeningMenu(
                 modifier = Modifier.weight(1f),
             )
             SwitchMark(checked = repeating)
+        }
+        // The end of the surah, where the repeat above is the end of the
+        // ayah. On, the next surah is fetched with the reciter being heard
+        // and plays on; off, the pill offers it with its size (D-105).
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 6.dp, vertical = 6.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .toggleable(value = continuing, role = Role.Switch, onValueChange = onContinue)
+                .padding(horizontal = 10.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(R.string.playback_continue_next),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f),
+            )
+            SwitchMark(checked = continuing)
         }
     }
 }

@@ -50,13 +50,14 @@ dead letter.
 ## Hard constraints (non-negotiable)
 
 1. **Offline except one thing.** The app holds `INTERNET` for exactly one
-   use, approved by the owner and recorded in D-023: downloading a
+   use, approved by the owner in D-023 and amended in D-105: downloading a
    recitation package for one surah, from the project's own GitHub
    Releases, only after the reader taps Play and then approves the shown
-   size. Nothing is fetched at launch, nothing is fetched automatically,
-   no other host is ever contacted, and there is no analytics or telemetry
-   of any kind. Everything else in the app works with no connection at
-   all. No WebView.
+   size, or after the reader has turned on Continue to the next surah,
+   which is their word, given once, for the packages that follow the one
+   being heard. Nothing is fetched at launch, no other host is ever
+   contacted, and there is no analytics or telemetry of any kind.
+   Everything else in the app works with no connection at all. No WebView.
 2. **Permissions: media, notifications, and that one network use.** The
    self-declared permissions are exactly `INTERNET` (the download above),
    `POST_NOTIFICATIONS`, `FOREGROUND_SERVICE`, and
@@ -202,6 +203,14 @@ does not tell you, and each one costs a failed command to rediscover:
   and `api27`; neither binary is on `PATH`. Start one headless with
   `-no-window -gpu swiftshader_indirect` and wait for `sys.boot_completed` to
   report `1`.
+- On the `zn` machine the same facts differ: Android Studio's JBR is Java
+  25, and the modules' `jvmToolchain(17)` then finds no matching JDK, so a
+  real JDK 17 lives at `C:\Users\zn\jdks\jdk-17` (Temurin, downloaded once
+  from Adoptium) and every Gradle call begins with
+  `export JAVA_HOME="/c/Users/zn/jdks/jdk-17"`; the SDK is at
+  `C:\Users\zn\AppData\Local\Android\Sdk`, so `local.properties` reads
+  `sdk.dir=C:/Users/zn/AppData/Local/Android/Sdk`; and there are no AVDs, so
+  the instrumented suites run in CI only.
 - MSYS rewrites `/sdcard/...` style arguments into Windows paths. Prefix
   `adb shell`, `adb push`, and `adb pull` with `MSYS_NO_PATHCONV=1`, and the
   same for `gh api` (and drop its leading slash).
@@ -601,6 +610,8 @@ implement it and update this list.
 - The design direction is the manuscript language described in D-010.
 - Content is sourced from QUL and QuranEnc under the owner decision in
   D-003, with all existing licenses honored and a takedown path in About.
+- Continue to the next surah is off by default and is the reader's one-time
+  word for the packages that follow the surah being heard (D-105).
 
 ## Traps with no code home
 
@@ -989,6 +1000,40 @@ fetching them again; the space is worth less than the time.
   to right on the screen; `MushafTurnTest` now pins the direction on every
   form factor.
 
+
+## Where the project stands (end of the thirty-fourth session)
+
+**The tree answers the owner's report on 2.5 (D-105), and 2.6
+(versionCode 27) is prepared for submission at the owner's word.**
+
+- **The settings rows are compact again.** D-103's 48 dp `ChevronSlot`
+  square was taller than the line beside it, so the plain hub rows grew
+  from 51 dp to 76 dp in 2.5 and the hub read as one uniform ladder. The
+  slot is a width now wherever the chevron is not a control of its own;
+  the horizontal column of switches and chevrons is untouched, and
+  `SettingsRowAlignmentTest` pins the compact page row.
+- **The switch lives in one place.** The hub row owns it; the Translations,
+  Tafsirs, and Daily pages drop the second copy, with a quiet line when the
+  reading is hiding what the page lists.
+- **Continue to the next surah.** Off by default, under Repeat the ayah on
+  the Listening page and in the pill's listening menu. On, the end of a
+  surah fetches the next package with the reciter being heard and plays on,
+  with the size, the progress, and a cancel on the pill; off, the Continue
+  offer stands as before, where it is the only in-player way to the next
+  surah and the only size disclosure. D-023 is amended and
+  `docs/privacy.md` says so.
+
+**The suite and the gates.** The JVM suite, `:app:lintDebug`,
+`:app:assembleDebug`, and `:app:compileDebugAndroidTestKotlin` are green on
+the zn machine, which now carries a real JDK 17 (`C:\Users\zn\jdks\jdk-17`)
+and a `local.properties` with its SDK path; both facts are recorded under
+"Session setup". All five owner gates ran green: `verify` 29 datasets,
+`audit` 0 unexplained differences, `fonts` coverage passed, `search`, and
+`checkdb` on the new database (`380e0442...`). The content took QUL's
+2:238 typo fix for the English Ibn Kathir tafsir (D-106). There are no
+AVDs on this machine, so the data and app instrumented suites and the
+screenshot tour run in CI on the owner's word; the store set does not show
+any of this yet.
 
 ## Where the project stands (end of the thirty-third session)
 

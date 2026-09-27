@@ -205,15 +205,17 @@ private fun listeningSummary(settings: AppSettings): String {
 }
 
 /**
- * The listening page: how fast the recitation plays, and whether one ayah
- * repeats. Both are about hearing, not about the page, so they sit together
- * under the reciter whose voice they shape.
+ * The listening page: how fast the recitation plays, whether one ayah
+ * repeats, and whether the next surah continues on its own. All three are
+ * about hearing, not about the page, so they sit together under the reciter
+ * whose voice they shape.
  */
 @Composable
 fun ListeningPage(
     settings: AppSettings,
     onSpeed: (Float) -> Unit,
     onRepeat: (Boolean) -> Unit,
+    onContinue: (Boolean) -> Unit,
 ) {
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_speed))
@@ -231,6 +233,18 @@ fun ListeningPage(
             subtitle = stringResource(R.string.settings_repeat_subtitle),
             checked = settings.repeatAyah,
             onChange = onRepeat,
+        )
+        // Continue: what happens at the end of the surah, where repeat is
+        // what happens at the end of the ayah. Turning it on is the reader's
+        // word for the packages that follow, so the next surah needs no
+        // second approval; it still announces itself on the pill with its
+        // size and a cancel while it downloads (owner decision, D-105).
+        ToggleRow(
+            title = stringResource(R.string.settings_continue_title),
+            subtitle = stringResource(R.string.settings_continue_subtitle),
+            checked = settings.continueSurah,
+            onChange = onContinue,
+            switchTag = "switch-continue",
         )
         Spacer(Modifier.height(Space.Section))
     }

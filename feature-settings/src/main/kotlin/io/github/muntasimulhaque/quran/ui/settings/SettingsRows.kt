@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
@@ -81,9 +82,14 @@ fun Group(title: String) {
  * other row's chevron keeps (owner report, D-103).
  */
 @Composable
-fun PageRow(title: String, summary: String?, onClick: () -> Unit) {
+fun PageRow(
+    title: String,
+    summary: String?,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .minimumInteractiveComponentSize()
             .clickable(onClick = onClick)
@@ -109,16 +115,18 @@ fun PageRow(title: String, summary: String?, onClick: () -> Unit) {
 }
 
 /**
- * The chevron that ends a settings row, in the one slot every row keeps: a
- * 48 dp touch target, drawn when the row has a page behind it and held empty
- * when it does not.
+ * The chevron that ends a settings row, in the one slot every row keeps:
+ * 48 dp wide, drawn when the row has a page behind it and held empty when it
+ * does not, so every switch ends at one line and every chevron sits at one
+ * place whatever the row carries (owner report, D-103).
  *
- * The slot is there whether the row carries a door, a switch, or both,
- * because the controls are read down one column. Before it, a row with only
- * a switch put the switch where the next row put its door, so the same kind
- * of control met the eye at two different edges (owner report, D-103). The
- * mark keeps its own touch target and its own spoken name beside the door,
- * so TalkBack reads a switch and a door rather than one crowded control.
+ * The slot owns a 48 dp square only when the chevron is a control of its
+ * own. On every other row it is a width, not a height: a square tail is
+ * taller than the line of text beside it, and a Row takes the height of its
+ * tallest child, so an empty square stretched every plain row from 51 dp to
+ * 76 dp and turned the hub into a ladder (owner report, D-105). Where the
+ * chevron does carry its own tap it keeps the square, which costs the row
+ * nothing, because the switch beside it already holds 48 dp.
  */
 @Composable
 private fun ChevronSlot(
@@ -126,9 +134,9 @@ private fun ChevronSlot(
     onOpen: (() -> Unit)? = null,
     label: String? = null,
 ) {
+    val tail = if (onOpen != null) Modifier.size(48.dp) else Modifier.width(48.dp)
     Box(
-        modifier = Modifier
-            .size(48.dp)
+        modifier = tail
             .then(
                 if (onOpen != null) {
                     Modifier

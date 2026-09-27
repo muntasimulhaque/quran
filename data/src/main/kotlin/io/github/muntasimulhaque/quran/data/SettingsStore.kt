@@ -76,6 +76,13 @@ data class AppSettings(
     val playbackSpeed: Float = 1f,
     /** True when one ayah repeats until the reader stops it. */
     val repeatAyah: Boolean = false,
+    /**
+     * True when the end of a surah is allowed to fetch the next one with
+     * the same reciter and play on. Off by default: downloads still wait
+     * for the reader's word, and this switch is that word, given once for
+     * every surah that follows (owner decision, D-105).
+     */
+    val continueSurah: Boolean = false,
     val translationPacks: Set<String> = emptySet(),
     val tafsirPacks: Set<String> = emptySet(),
     /**
@@ -159,6 +166,7 @@ class SettingsStore(private val context: Context) {
             followReciter = preferences[FOLLOW_RECITER] ?: true,
             playbackSpeed = (preferences[PLAYBACK_SPEED] ?: 1f).coerceIn(MIN_SPEED, MAX_SPEED),
             repeatAyah = preferences[REPEAT_AYAH] ?: false,
+            continueSurah = preferences[CONTINUE_SURAH] ?: false,
             translationPacks = translationPacks(preferences),
             tafsirPacks = preferences[TAFSIR_PACKS] ?: emptySet(),
             showTranslation = preferences[SHOW_TRANSLATION] ?: true,
@@ -239,6 +247,10 @@ class SettingsStore(private val context: Context) {
 
     suspend fun setRepeatAyah(repeat: Boolean) {
         context.settingsStore.edit { it[REPEAT_AYAH] = repeat }
+    }
+
+    suspend fun setContinueSurah(continueSurah: Boolean) {
+        context.settingsStore.edit { it[CONTINUE_SURAH] = continueSurah }
     }
 
     suspend fun setShowTranslation(show: Boolean) {
@@ -347,6 +359,7 @@ class SettingsStore(private val context: Context) {
         val FOLLOW_RECITER = booleanPreferencesKey("follow_reciter")
         val PLAYBACK_SPEED = floatPreferencesKey("playback_speed")
         val REPEAT_AYAH = booleanPreferencesKey("repeat_ayah")
+        val CONTINUE_SURAH = booleanPreferencesKey("continue_surah")
         val TRANSLATION_PACK = stringPreferencesKey("translation_pack")
         val TRANSLATION_PACKS = stringSetPreferencesKey("translation_packs")
         val TAFSIR_PACKS = stringSetPreferencesKey("tafsir_packs")

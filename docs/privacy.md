@@ -13,10 +13,14 @@ identifier, and no usage data. GitHub, like every web server, sees the
 connecting IP address; the app sends nothing else, and the project stores
 nothing.
 
-Nothing is downloaded at launch. Nothing is downloaded automatically. A
-download starts only after the reader taps Play on a surah, sees the surah's
-name and size, and taps Download. Each package is verified against a SHA-256
-recorded at build time, and a package that fails the check is discarded.
+Nothing is downloaded at launch. A download starts only after the reader
+taps Play on a surah, sees the surah's name and size, and taps Download, or
+after the reader has turned on Continue to the next surah in Settings or on
+the player itself: that switch is their word, given once, for the packages
+that follow the surah being heard, and the player still shows each package's
+name and size while it downloads, with a cancel. Each package is verified
+against a SHA-256 recorded at build time, and a package that fails the check
+is discarded.
 
 ## What stays on the device
 

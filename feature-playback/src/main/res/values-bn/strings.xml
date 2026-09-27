@@ -2,6 +2,7 @@
 <resources>
     <string name="playback_download_failed">ডাউনলোড ব্যর্থ হয়েছে</string>
     <string name="playback_downloading">ডাউনলোড হচ্ছে %1$d%%</string>
+    <string name="playback_downloading_named">%1$s · %2$d%%</string>
     <string name="playback_unavailable">এখনও পাওয়া যাচ্ছে না</string>
     <string name="playback_repeating">পুনরাবৃত্তি</string>
     <string name="playback_retry">আবার চেষ্টা করুন</string>
@@ -18,4 +19,5 @@
     <string name="playback_speed_label">তিলাওয়াতের গতি</string>
     <string name="playback_speed_option">%1$s, %2$s</string>
     <string name="playback_repeat_ayah">আয়াত পুনরাবৃত্তি করুন</string>
+    <string name="playback_continue_next">পরের সূরায় চালিয়ে যান</string>
 </resources>

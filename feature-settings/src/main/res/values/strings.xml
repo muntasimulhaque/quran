@@ -21,9 +21,9 @@
     <string name="settings_daily_subtitle_off">One ayah a day, in your notifications</string>
     <string name="settings_daily_subtitle_on">One ayah a day, at %1$s</string>
     <string name="settings_open_daily">Daily ayah settings</string>
-    <string name="settings_daily_page_subtitle">One ayah a day, at the time you choose</string>
     <string name="settings_daily_time_title">Time</string>
     <string name="settings_daily_note">The reminder makes no sound. It waits in your notifications with the day\'s ayah and its translation, and a tap opens it where you read. The ayahs come in the Book\'s own order, so each day brings the next one.</string>
+    <string name="settings_daily_off">The reminder is off</string>
     <string name="settings_daily_blocked">Your phone is not showing the app\'s notifications, so the reminder cannot arrive.</string>
     <string name="settings_daily_blocked_action">Notification settings</string>
     <string name="settings_daily_picker_title">When the daily ayah arrives</string>
@@ -34,9 +34,7 @@
     <string name="settings_follow_title">Follow the reciter</string>
     <string name="settings_follow_subtitle">The page moves with the recitation</string>
     <string name="settings_show_translation_title">Show translation</string>
-    <string name="settings_show_translation_subtitle">The translation reads under each ayah</string>
     <string name="settings_show_tafsir_title">Show tafsir</string>
-    <string name="settings_show_tafsir_subtitle">The tafsirs you add open from the ayah card</string>
     <string name="settings_open_translations">Choose translations</string>
     <string name="settings_open_tafsirs">Choose tafsirs</string>
     <string name="settings_words_title">Show word meanings</string>
@@ -116,6 +114,8 @@
     <string name="settings_group_repeat">Repeat</string>
     <string name="settings_repeat_title">Repeat the ayah</string>
     <string name="settings_repeat_subtitle">The playing ayah begins again when it ends, until you stop it</string>
+    <string name="settings_continue_title">Continue to the next surah</string>
+    <string name="settings_continue_subtitle">When a surah ends, the next one plays on its own, downloaded with the reciter you are hearing</string>
     <string name="settings_title_translations">Translations</string>
     <string name="settings_title_tafsirs">Tafsirs</string>
     <string name="settings_title_about">About</string>
@@ -134,8 +134,10 @@
     <string name="settings_group_reciters">Reciters</string>
     <string name="settings_group_translations">Translations</string>
     <string name="settings_translations_note">More than one may be on. Each one you turn on reads in its own place under the ayah, and the first is the one search reads.</string>
+    <string name="settings_translation_hidden">Translation is hidden in the reading</string>
     <string name="settings_group_tafsirs">Tafsirs</string>
     <string name="settings_tafsirs_note">Every tafsir you turn on opens from its own door under the ayah.</string>
+    <string name="settings_tafsir_hidden">Tafsir is hidden in the reading</string>
     <string name="settings_rights_note">Tell us about a wrong letter, or ask for a dataset to be changed or removed.</string>
     <string name="settings_group_about">The app</string>
     <string name="settings_group_content">Content on this device</string>

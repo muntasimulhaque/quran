@@ -47,6 +47,7 @@ data class SettingsActions(
     val onFollowReciter: (Boolean) -> Unit = {},
     val onPlaybackSpeed: (Float) -> Unit = {},
     val onRepeatAyah: (Boolean) -> Unit = {},
+    val onContinueSurah: (Boolean) -> Unit = {},
     val onShowTranslation: (Boolean) -> Unit = {},
     val onShowTafsir: (Boolean) -> Unit = {},
     val onWordByWord: (Boolean) -> Unit = {},
@@ -189,11 +190,11 @@ fun SettingsSheet(
                         settings = settings,
                         onSpeed = actions.onPlaybackSpeed,
                         onRepeat = actions.onRepeatAyah,
+                        onContinue = actions.onContinueSurah,
                     )
                     SettingsPage.Daily -> DailyPage(
                         settings = settings,
                         notificationsBlocked = notificationsBlocked(),
-                        onDailyAyah = actions.onDailyAyah,
                         onDailyAyahTime = actions.onDailyAyahTime,
                         onOpenNotificationSettings = actions.onOpenNotificationSettings,
                     )

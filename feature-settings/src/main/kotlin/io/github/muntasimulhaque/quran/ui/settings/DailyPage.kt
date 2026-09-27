@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -41,8 +42,10 @@ import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
- * The daily reminder's own page: the switch, the moment it arrives, and the
- * one thing that can stop it arriving.
+ * The daily reminder's own page: the moment it arrives, and the one thing
+ * that can stop it arriving. The switch is not here: it lives on the hub row,
+ * which is the one place a setting is set, and this page carries the moment
+ * (owner report, D-105).
  *
  * The hour used to be a strip of hour chips that unfolded under the switch in
  * the hub, and a reader reported two things about it: it filled the hub with
@@ -68,23 +71,29 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 fun DailyPage(
     settings: AppSettings,
     notificationsBlocked: Boolean,
-    onDailyAyah: (Boolean) -> Unit,
     onDailyAyahTime: (Int) -> Unit,
     onOpenNotificationSettings: () -> Unit,
 ) {
     var choosing by remember { mutableStateOf(false) }
-    Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
-        // The switch, then the moment. The row stays live when the reminder is
-        // off: a reader who came to move the time is not asked to turn the
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .sheetVerticalScroll(rememberScrollState())
+            .testTag("daily-page"),
+    ) {
+        // The switch lives on the hub row and nowhere else; this page is the
+        // moment (owner report, D-105). The row stays live when the reminder
+        // is off: a reader who came to move the time is not asked to turn the
         // reminder on first, and a time that is set is a time that is shown,
         // whether or not it will arrive.
-        ToggleRow(
-            title = stringResource(R.string.settings_daily_title),
-            subtitle = stringResource(R.string.settings_daily_page_subtitle),
-            checked = settings.dailyAyah,
-            onChange = onDailyAyah,
-            switchTag = "daily-switch",
-        )
+        if (!settings.dailyAyah) {
+            Text(
+                text = stringResource(R.string.settings_daily_off),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
+            )
+        }
         PageRow(
             title = stringResource(R.string.settings_daily_time_title),
             summary = clockText(settings.dailyAyahMinute),

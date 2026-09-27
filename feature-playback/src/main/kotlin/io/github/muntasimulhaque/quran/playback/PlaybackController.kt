@@ -53,9 +53,10 @@ class PlaybackController(
     private var downloadJob: Job? = null
     private var requestedAyah: Int? = null
 
-    /** The reader's pace and repeat choice, applied to every player on connect. */
+    /** The reader's pace, repeat, and continuation, applied on connect. */
     private var speed = 1f
     private var repeatAyah = false
+    private var continueSurah = false
 
     private val _state = MutableStateFlow(PlaybackUiState())
     val state: StateFlow<PlaybackUiState> = _state.asStateFlow()
@@ -182,9 +183,12 @@ class PlaybackController(
     }
 
     /**
-     * The surah ended and the next one is not on the device. Offer it, with its
-     * size, instead of leaving the reader at a silent stop or fetching it
-     * behind their back.
+     * The surah ended and the next one is not on the device. The reader's
+     * Continue choice decides: off, the offer waits with the next surah's
+     * name and size, so nothing is fetched behind the reader's back; on, the
+     * package is fetched with the reciter being heard and plays on, and the
+     * pill carries the size, the progress, and the cancel while it does
+     * (owner decision, D-105).
      */
     private fun offerNextSurah() {
         val surah = _state.value.surah ?: return
@@ -201,6 +205,7 @@ class PlaybackController(
             downloadProgress = null,
             downloadFailed = false,
         )
+        if (continueSurah) confirmDownload()
     }
 
     private fun folderFor(recitation: String, surah: Int): String? {
@@ -235,6 +240,15 @@ class PlaybackController(
         repeatAyah = value
         controller?.repeatMode =
             if (value) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
+    }
+
+    /**
+     * Continue to the next surah: on, the end of a surah fetches the next
+     * package with the reciter being heard instead of asking again. The
+     * reader's word is the switch, given once (owner decision, D-105).
+     */
+    fun setContinueSurah(value: Boolean) {
+        continueSurah = value
     }
 
     fun next() {

@@ -236,6 +236,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             // session, and the player must be told before the first ayah.
             playback.setSpeed(stored.playbackSpeed)
             playback.setRepeatAyah(stored.repeatAyah)
+            playback.setContinueSurah(stored.continueSurah)
             surahs = database.surahs()
             indexSurahs()
             packs = database.packs()
@@ -516,6 +517,18 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         settings = settings.copy(repeatAyah = repeat)
         playback.setRepeatAyah(repeat)
         viewModelScope.launch { settingsStore.setRepeatAyah(repeat) }
+    }
+
+    /**
+     * Continue to the next surah: when one ends, the next is fetched with
+     * the reciter being heard and plays on. The reader's word turns it on
+     * once, and the download still announces itself on the pill with its
+     * size and a cancel (owner decision, D-105).
+     */
+    fun setContinueSurah(continueSurah: Boolean) {
+        settings = settings.copy(continueSurah = continueSurah)
+        playback.setContinueSurah(continueSurah)
+        viewModelScope.launch { settingsStore.setContinueSurah(continueSurah) }
     }
 
     /** The reading keeps the reader's chosen translation; this only shows or hides it. */

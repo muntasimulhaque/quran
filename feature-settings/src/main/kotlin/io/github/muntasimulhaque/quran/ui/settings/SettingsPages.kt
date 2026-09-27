@@ -169,19 +169,19 @@ fun TranslationsPage(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
         )
-        // The switch, at the head of its own list. The hub carries it too, the
-        // way the playing pill carries the pace the audio page owns: one
-        // value, two doors. It matters most here, because the door to this
-        // page is now the row rather than the switch, so a reader who opened
-        // the list while the reading was hiding the translation is standing in
-        // the one place that can explain why nothing changed (owner report,
-        // 2.3).
-        ToggleRow(
-            title = stringResource(R.string.settings_show_translation_title),
-            subtitle = stringResource(R.string.settings_show_translation_subtitle),
-            checked = settings.showTranslation,
-            onChange = actions.onShowTranslation,
-        )
+        // The master switch lives on the hub row and nowhere else: this page
+        // is the list of translations, and a switch at its head re-asked a
+        // decision the hub already owns (owner report, D-105). The line below
+        // only says what the reading is doing while the switch is off, so a
+        // reader standing here is never left to wonder why nothing changed.
+        if (!settings.showTranslation) {
+            Text(
+                text = stringResource(R.string.settings_translation_hidden),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
+            )
+        }
         LanguageGroups(
             packs = packs,
             type = PackType.Translation,
@@ -217,15 +217,17 @@ fun TafsirsPage(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
         )
-        // The same door the hub's row carries, so the page that lists the
-        // tafsirs is never a page where a reader can choose one and have it
-        // stay hidden.
-        ToggleRow(
-            title = stringResource(R.string.settings_show_tafsir_title),
-            subtitle = stringResource(R.string.settings_show_tafsir_subtitle),
-            checked = settings.showTafsir,
-            onChange = actions.onShowTafsir,
-        )
+        // The same rule as the translations list: the hub row owns the
+        // switch, and this page owns the list (owner report, D-105). The line
+        // says what the reading is doing while the switch is off.
+        if (!settings.showTafsir) {
+            Text(
+                text = stringResource(R.string.settings_tafsir_hidden),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
+            )
+        }
         LanguageGroups(
             packs = packs,
             type = PackType.Tafsir,

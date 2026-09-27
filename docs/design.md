@@ -227,26 +227,34 @@ closes the sheet, and the hub keeps its place while a page is open (D-046).
   which, each reciter carries its own downloaded surahs with their sizes, and
   adding a reciter selects it.
 * **Listening**: how fast the recitation plays, at the same five steps the
-  text sizes use, and whether one ayah repeats. The pace is the reader's and
-  is remembered; the voice keeps its pitch, so a slower ayah is slower and
-  not deeper. A pace or a repeat that is not the ordinary one is said on the
-  playback pill too, and the pill's own line is the door to both while an
-  ayah plays: the same two values, the same five steps, set where the reader
-  feels the need for them (D-090). The Settings page keeps them as the
-  default the next ayah starts from; there is one value with two doors, not
-  a remembered setting and a hidden session value.
+  text sizes use, whether one ayah repeats, and whether the next surah
+  continues on its own. The pace is the reader's and is remembered; the
+  voice keeps its pitch, so a slower ayah is slower and not deeper.
+  Continue to the next surah is off by default; on, the end of a surah
+  fetches the next package with the reciter being heard and plays on, and
+  the player still shows the size, the progress, and the cancel while it
+  does (D-105). A pace or a repeat that is not the ordinary one is said on
+  the playback pill too, and the pill's own line is the door to all three
+  while an ayah plays: the same values, the same five steps, set where the
+  reader feels the need for them (D-090). The Settings page keeps them as
+  the default the next ayah starts from; there is one value with two doors,
+  not a remembered setting and a hidden session value.
 * **Show translation and Show tafsir**: each switch says whether the reading
   draws what it names, and the chevron on the same row opens the list it is
   chosen from. The packs say what the reader has; the switch says what the
   page shows. One row, one decision, and no second door for the same thing
-  (D-097). Both are on by default, so a reader who added one sees it.
+  (D-097). The list page carries the list alone, with a quiet line when the
+  reading is hiding it; the switch lives on the hub row and nowhere else
+  (D-105). Both are on by default, so a reader who added one sees it.
 * **Word meanings**: the switch, and the lists by language. The meaning under
   an Arabic word is only useful in the language the reader is reading in, so
   the list follows the chosen translation rather than asking (D-046).
-* **Daily ayah**: one switch and one hour. The reminder is off until the
-  reader asks for it, nothing is scheduled while it is off, and nothing is
-  fetched at any time: the ayah is read from the content already on the
-  device (D-097).
+* **Daily ayah**: one switch on the hub row and one hour on its own page.
+  The switch is the hub's, the page carries the moment, and the page stays
+  live while the reminder is off, so a reader who came to move the time is
+  not asked to turn the reminder on first (D-105). The reminder is on with
+  the app, nothing is fetched at any time, and the ayah is read from the
+  content already on the device (D-097).
 * **About**: the version, the credits and licenses, the corrections and
   rights contact, and a self check that reads every installed pack back and
   names anything damaged.

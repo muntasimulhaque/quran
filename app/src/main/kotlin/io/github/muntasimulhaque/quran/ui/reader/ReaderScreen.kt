@@ -515,6 +515,7 @@ fun ReaderScreen(
                 onFollowReciter = { viewModel.setFollowReciter(it) },
                 onPlaybackSpeed = { viewModel.setPlaybackSpeed(it) },
                 onRepeatAyah = { viewModel.setRepeatAyah(it) },
+                onContinueSurah = { viewModel.setContinueSurah(it) },
                 onShowTranslation = { viewModel.setShowTranslation(it) },
                 onShowTafsir = { viewModel.setShowTafsir(it) },
                 onWordByWord = { viewModel.setWordByWord(it) },
@@ -870,6 +871,10 @@ private fun BottomStack(
 
         val offer = viewModel.listenOffer
         if (playback.isAnything() || offer != null) {
+            val pendingSurahName = playback.pendingDownloadSurah?.let { surah ->
+                viewModel.surahs.firstOrNull { it.number == surah }?.nameSimple
+                    ?: stringResource(R.string.surah_fallback_name, surah)
+            }
             PlaybackBar(
                 state = playback,
                 offer = offer,
@@ -881,15 +886,16 @@ private fun BottomStack(
                 onOfferReciter = { viewModel.chooseListenReciter(it) },
                 reciterName = reciterName,
                 reference = playback.reference,
-                pendingLabel = playback.pendingDownloadSurah?.let { surah ->
-                    val name = viewModel.surahs.firstOrNull { it.number == surah }?.nameSimple
-                        ?: stringResource(R.string.surah_fallback_name, surah)
+                pendingLabel = pendingSurahName?.let { name ->
                     val size = formatBytes(playback.pendingDownloadBytes)
                     if (playback.pendingIsContinuation) {
                         stringResource(R.string.playback_continue_to, name, size)
                     } else {
                         stringResource(R.string.playback_offer, name, size)
                     }
+                },
+                pendingAudio = pendingSurahName?.let { name ->
+                    stringResource(R.string.playback_offer, name, formatBytes(playback.pendingDownloadBytes))
                 },
                 onToggle = { viewModel.togglePlayback() },
                 onNext = { viewModel.nextAyah() },
@@ -905,8 +911,10 @@ private fun BottomStack(
                 },
                 speed = viewModel.settings.playbackSpeed,
                 repeating = viewModel.settings.repeatAyah,
+                continuing = viewModel.settings.continueSurah,
                 onSpeed = { viewModel.setPlaybackSpeed(it) },
                 onRepeat = { viewModel.setRepeatAyah(it) },
+                onContinue = { viewModel.setContinueSurah(it) },
             )
         }
     }

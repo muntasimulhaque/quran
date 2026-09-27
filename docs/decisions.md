@@ -4827,3 +4827,99 @@ the artifact stays in build run 36306853778 and in Play, and
 `play-store/aab/` keeps only its own note. The tree is clean. The signed
 bundle's record is in this entry; nothing in the repository depends on the
 binary.
+
+## D-105: The settings row height, the second switch, and Continue to the next surah
+
+Date: the thirty-fourth session, on the owner's report. The owner read 2.5
+and asked three things; the tree answers all three.
+
+**1. The settings rows had grown apart.** The gap was not a spacing choice.
+D-103's `ChevronSlot` made a 48 dp square the tail of every settings row so
+that the controls run down one column. On a `PageRow` the whole row is the
+control, so the chevron needs no target of its own, and the square was
+taller than the line of text beside it: a Row takes the height of its
+tallest child, so the plain rows (Language, Theme, Font size, Reciters,
+Listening, About) went from 51 dp to 76 dp, about 49% taller. The switch
+rows did not change, because a Material `Switch` already holds 48 dp, which
+is why the hub read as one uniform ladder after 2.5. Measured on the
+committed store frames, same pixel_2 profile: the plain rows' text centers
+sit 118 and 126 px apart in the 2.4 frame and 192 and 200 px apart in the
+2.5 frame, while the switch rows are 189 px apart in both. The slot is now
+a width, not a height, wherever the chevron is not a control of its own;
+the 48 dp square stays on a row whose chevron has its own tap, where the
+switch already holds the row at 72 dp. `SettingsRowAlignmentTest` keeps the
+horizontal column and now pins the compact page row too.
+
+**2. The switch inside the page was the same decision twice.** Show
+translation, Show tafsir, and the daily reminder carried their switch on the
+hub row and again at the head of the page the row opens. That head switch
+was written when any tap on the hub row opened the page, so the page had to
+carry the setting for a reader who arrived at it (D-097). D-101 then split
+the row: the switch toggles, the rest opens the page. After the split the
+page's copy re-asked a decision the hub already owns, so it is gone. The
+pages carry their lists, and a quiet line says what the reading is doing
+when the switch is off; the switch lives on the hub row and nowhere else.
+The pill's listening menu keeps its pace and repeat beside the Listening
+page's own, because those are two different surfaces and the recorded "one
+value, two doors" shape (D-090).
+
+**3. Continue to the next surah.** When a surah ends and its successor's
+audio is on the device, the player has always appended it and played on.
+Only the missing case stopped for the reader's word, and that word was
+asked at the end of every surah. A new switch, off by default, sits under
+Repeat the ayah on the Listening page and on the pill's listening menu,
+stored as `continue_surah` beside the pace and the repeat, and
+`PlaybackController` reads it when a surah ends: on, the next package is
+fetched with the reciter being heard and plays from its first ayah, while
+the pill shows the surah and its size, the progress, and a cancel; off, the
+offer stands as before, with the size and the reader's own tap. The
+Continue button therefore stops appearing for the reader who asked for
+continuation, and stays for the reader who did not, where it is the only
+in-player way to hear the next surah and the only size disclosure. A failed
+download shows the existing Download failed state with Retry. The switch is
+the reader's approval for the packages that follow the one being heard,
+which amends D-023's "nothing is downloaded automatically": the word is
+given once, and `docs/privacy.md` now says the same. During that download
+the pill says the surah and its size where the offer would have, because
+the auto path had no offer in front of it. The updated `PlaybackPillTest`
+pins the menu row and that download line, and the new
+`ListeningSettingsTest` pins the page's switch.
+
+**Verification.** The zn machine builds after a Java 17 toolchain was
+installed (Android Studio's JBR is Java 25) and `local.properties` was
+recreated with the SDK path; those environment facts are in AGENTS.md. The
+JVM suite (`:core:test`, `:data:testDebugUnitTest`,
+`:app:testDebugUnitTest`), `:app:lintDebug`, `:app:assembleDebug`, and
+`:app:compileDebugAndroidTestKotlin` are green. No AVDs exist on this
+machine, so the instrumented suites did not run here: the app suite and the
+screenshot tour are CI's authority, and the store set does not show any of
+this until the next capture. The owner's five content gates belong to a
+release and were not run.
+
+No `versionCode` moved: the release waits for the owner's word.
+
+## D-106: The English Ibn Kathir tafsir takes QUL's 2:238 typo fix
+
+Date: the thirty-fourth session, at the owner's word, during the 2.6
+release. QUL emailed the owner that Tafsir Ibn Kathir had an update, one
+entry in the changelog: "Fixed typo in 2:238 'the 'Ar prayer' should be
+'the 'Asr prayer,'". The pinned export was no longer served by QUL: the
+resource page offers a single SQLite download and it is the fixed one, so
+the old checksum could only be reproduced from a machine that already had
+the file.
+
+The manifest pin for `tafsir-ibn-kathir-en` now records the fixed file
+(3,860,369 bytes, sha256 `5a3f38ec...`), and `contentVersion` is 1.0.1.
+All five gates ran green against it: `verify` 29 datasets, `audit` 0
+unexplained differences, `fonts` all coverage checks, `search`, and
+`checkdb`. The rebuild produced a new database
+(`380e0442fca812d8533bad80670d709acac0880fd95215a946519a38b5ef2b56`,
+128,966,656 bytes) and a new catalog: the core pack changed only in its
+recorded content version (tag `pack-core-ed1ef01f`) and the tafsir pack is
+`pack-tafsir-ibn-kathir-en-cd36142c`; both were published, and the database
+went to the `content-db-380e0442` Release that `fetch` and CI read.
+
+The reader cost is named: an install that already downloaded the old Ibn
+Kathir pack carries a file whose hash no longer matches the catalog, so the
+content self check flags it and re-adding the pack brings the fixed text;
+the reading itself is unaffected either way.

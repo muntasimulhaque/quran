@@ -36,7 +36,7 @@ import org.junit.runner.RunWith
  *
  * The test follows the shape a reader meets, in the order a reader meets it.
  * The hub row's switch turns the reminder on and nothing else does; the rest
- * of the row opens the page; the page carries its own switch; and the time row
+ * of the row opens the page; the page carries the moment; and the time row
  * opens the picker, whose Set writes the moment where the alarm reads it. A
  * tap on the row body that flipped the switch would be the bug this pins, and
  * so would a picker that could only reach the top of the hour.
@@ -99,9 +99,11 @@ class DailyAyahToggleTest {
         // The row is a door: it opens the page and it does not toggle. If it
         // toggled as well, the switch would read off again and the page would
         // come up with the reminder it was meant to be setting turned off.
+        // The page carries the moment and no second switch (owner report,
+        // D-105), so its own mark is what the wait holds on to.
         compose.onNodeWithText(title).performClick()
         compose.waitUntil(timeoutMillis = 15_000) {
-            compose.onAllNodesWithTag("daily-switch", useUnmergedTree = true)
+            compose.onAllNodesWithTag("daily-page", useUnmergedTree = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
         assertTrue(
