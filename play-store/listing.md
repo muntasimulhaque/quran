@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 2.5 (versionCode 26)
+Version: 2.6 (versionCode 27)
 
 ## Listing
 
@@ -171,6 +171,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (2.6, 487 characters)
+
+Settings reads tighter: the list rows keep their compact height, and the switch for translation, tafsir, or the daily reminder lives on its hub row alone, so the page that lists them no longer repeats it. Under Repeat the ayah, Continue to the next surah plays the surah after the one you are hearing on its own, downloading it when it is not on the device. It is off by default. The English Ibn Kathir tafsir carries QUL's correction of a typo at 2:238. No ads, no trackers, no account.
 
 ## Release notes (2.5, 388 characters)
 
