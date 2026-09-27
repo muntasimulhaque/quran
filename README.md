@@ -4,8 +4,20 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 2.5 (versionCode 26) is submitted to Google Play for review
-(D-103, D-104):
+**Status:** 2.6 (versionCode 27) is prepared for Google Play submission
+(D-105, D-106):
+
+- Settings reads tighter: the list rows keep their compact height again,
+and the switch for a translation, a tafsir, or the daily reminder lives
+on its hub row alone, so a page that lists them no longer repeats it.
+- Continue to the next surah, off by default, plays the surah after the
+one being heard on its own, downloading it with the reciter in use when
+it is not on the device. The Continue offer stays for readers who leave
+it off.
+- The English Ibn Kathir tafsir carries QUL's correction of a typo at
+2:238, and the content version is 1.0.1.
+
+**2.5** carries (D-103, D-104):
 
 - The shared text of an ayah reads left to right. A message carries one
 direction, and it was the Arabic ayah that set it, so the English

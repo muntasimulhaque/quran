@@ -4923,3 +4923,35 @@ The reader cost is named: an install that already downloaded the old Ibn
 Kathir pack carries a file whose hash no longer matches the catalog, so the
 content self check flags it and re-adding the pack brings the fixed text;
 the reading itself is unaffected either way.
+
+## D-107: The 2.6 release, prepared
+
+Date: the thirty-fourth session, at the owner's word. 2.6 (versionCode 27)
+carries D-105's settings work, D-106's tafsir correction, and the version
+line and notes in `play-store/listing.md` (487 characters, counted).
+
+**The gates ran on this machine before the release**, all green: `verify`
+29 datasets, `audit` 0 unexplained differences, `fonts` all coverage
+checks, `search`, and `checkdb` on the new database (`380e0442...`,
+128,966,656 bytes).
+
+**The workflows.** Build run 36341047053 attempt 1, green: the gates, the
+data instrumented suite, and the signed bundle. Capture run 36341047052
+attempt 1, all three legs green first try, no reruns.
+
+**The store set.** Eight frames per form factor. Every frame was compared
+with its artifact by `cmp` (24 matches) and every changed frame was read
+before it shipped. The settings frames are the release's: the plain rows
+are compact again, with the switches and chevrons still in one column, and
+the About row reads Version 2.6. The phone and tablet7 search, Browse, and
+ayah-card frames differ only in the status bar clock and the search
+cursor's blink; on tablet10 the Mushaf differs only in subpixel
+antialiasing (a maximum delta of 2 of 255) and the chrome and study frames
+in three pixels; the surah opening is byte-identical on all three.
+
+**The bundle.** `quran-2.6-vc27.aab` from build run 36341047053:
+148,097,166 bytes, SHA-256
+`316557d12962d04bd7a1a49e09b6dbf2d5d8b46f35161a725bee0a03e89a98ef`,
+matching the artifact's own checksum, `jar verified`, signed with the
+shared upload key. The hand-off copy sits in `play-store/aab/` until the
+owner confirms the submission.

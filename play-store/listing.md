@@ -154,6 +154,17 @@ Browse, and ayah-card frames differ only in the status bar clock, the search
 cursor's blink, and subpixel antialiasing (the largest content delta is 4 of
 255 on the phone Mushaf page).
 
+The set is refreshed for 2.6 from run 36341047052 attempt 1, all three legs
+green first try, no reruns. Every frame was compared with its artifact by
+`cmp` (24 matches) and every changed frame was read before it shipped. The
+settings frames are the release's: the plain rows are compact again, the
+switches and chevrons still run down one column, and the About row reads
+Version 2.6. The phone and tablet7 search, Browse, and ayah-card frames
+differ only in the status bar clock and the search cursor's blink; on
+tablet10 the Mushaf differs only in subpixel antialiasing (a maximum delta
+of 2 of 255) and the chrome and study frames in three pixels. The surah
+opening frame is byte-identical on all three.
+
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
 creating the emulator, waits for the emulated storage to mount before the test

@@ -1030,10 +1030,16 @@ and a `local.properties` with its SDK path; both facts are recorded under
 "Session setup". All five owner gates ran green: `verify` 29 datasets,
 `audit` 0 unexplained differences, `fonts` coverage passed, `search`, and
 `checkdb` on the new database (`380e0442...`). The content took QUL's
-2:238 typo fix for the English Ibn Kathir tafsir (D-106). There are no
-AVDs on this machine, so the data and app instrumented suites and the
-screenshot tour run in CI on the owner's word; the store set does not show
-any of this yet.
+2:238 typo fix for the English Ibn Kathir tafsir (D-106).
+
+**The 2.6 push.** Build run 36341047053 attempt 1 green: the gates, the
+data instrumented suite, and the signed bundle (`quran-2.6-vc27.aab`,
+148,097,166 bytes, SHA-256 `316557d1...98ef`, `jar verified`). Capture run
+36341047052 attempt 1, all three legs green first try: 24 frames compared
+with their artifacts by `cmp` and every changed frame read. The settings
+frames are the release's: compact rows, one switch and chevron column, and
+the About row reads Version 2.6. The hand-off copy sits in
+`play-store/aab/` until the owner confirms the submission.
 
 ## Where the project stands (end of the thirty-third session)
 
