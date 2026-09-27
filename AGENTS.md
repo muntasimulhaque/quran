@@ -1000,10 +1000,11 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the thirty-second session)
 
-**The tree answers the owner's simplification report (D-101). No
-`versionCode` has moved.** The session folded Go to Ayah into the surah
-list, folded Notes into Saved, kept the search word meanings (with D-099's
-numbers restated), and moved the settings chevron after the switch.
+**The tree answers the owner's simplification report (D-101), and 2.4
+(versionCode 25) is prepared for submission at the owner's word.** The
+session folded Go to Ayah into the surah list, folded Notes into Saved,
+kept the search word meanings (with D-099's numbers restated), and moved
+the settings chevron after the switch.
 
 - **A surah row is the door to its own ayahs.** Browse has four tabs now
   (Surahs, Juz, Last Read, Saved). Tapping a surah opens its 48 dp number
@@ -1031,9 +1032,32 @@ with 37 passing; the two failures are the documented emulator classes
 (`searchIsFastWhenWarm` on the loaded emulator, and an empty failure body as
 the device vanished during `SurahAyahsScrollTest`), and the five tests after
 that one never ran. The tour and `SavedNotesTest` passed. One reboot was
-spent and the device died again, so local connected runs stopped; the
-instrumented authority is CI, and the store set is owed a recapture at the
-next release because the Browse and settings frames changed.
+spent and the device died again, so local connected runs stopped. CI is the
+instrumented authority, and it ran green for the release: build 36299617649,
+and the capture on run 36299617648 attempt 2 after one rerun of the phone
+leg, whose first attempt met the loaded-emulator class in `SavedNotesTest`.
+The store set is refreshed for 2.4, with the Browse and settings changes
+read.
+
+## The 2.4 release
+
+**Version:** 2.4, versionCode 25, with the version line in
+`play-store/listing.md` and the notes beside it (398 characters, counted).
+
+**The bundle:** `quran-2.4-vc25.aab` from the green build run 36299617649:
+148,092,639 bytes, SHA-256
+`7bc5da4ba7f69cc94ad0626e4f5e937b9fd82aae12c64bde8bf824065e539970`,
+`jar verified`, signed with the shared upload key. The hand-off copy is in
+`play-store/aab/` until the submission is confirmed.
+
+**The store set:** run 36299617648 attempt 2 (the phone leg's first attempt
+met the loaded-emulator class in `SavedNotesTest` and the rerun passed;
+tablet7 and tablet10 were green first try), 24 frames compared with their
+artifacts by `cmp` and every changed frame read. Browse shows four chips,
+and settings shows the chevron after the switch with Version 2.4 in the
+foot.
+
+**The five owner gates ran green** before the release (D-102).
 
 ## Where the project stands (end of the thirty-first session)
 

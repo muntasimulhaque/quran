@@ -4652,3 +4652,60 @@ three chevrons.
 beside Surahs, Juz, and Saved (D-051, D-074)"; it now reads that Last Read
 is the fourth tab and notes live inside Saved, on the owner's approval this
 session.
+
+## D-102: The 2.4 release, prepared
+
+Date: the thirty-second session, at the owner's word. 2.4 (versionCode 25)
+carries D-101's four simplifications.
+
+**The five owner gates ran on this machine before the release**, all green:
+`verify` (29 datasets, checksums and structure), `audit` (exit 0, no
+unexplained differences), `fonts` (all coverage checks passed, 22,985,677
+reading codepoints), `checkdb` (the catalog matched, ten pack files and
+`content/quran.db` verified, 128,966,656 bytes, SHA-256
+`5c5988fa2916eb1cc905d01ddb9b4ef9319d0ca19c945bf0140eaff32296cea9`), and
+`search` (Arabic round trips, English folding, 465 readable excerpts). The
+manual QUL and QuranEnc exports and the verify extractions were present, so
+nothing was owed.
+
+**The local suite.** The JVM suite, lint, and `assembleDebug` are green. The
+data instrumented suite is 29/29. The app instrumented suite met the
+emulator's documented device-loss class twice: one run got 37 of 39 tests
+with the two failures being the loaded-emulator `searchIsFastWhenWarm` and
+an empty failure body as the device vanished, and the release run got 22
+tests with the device lost during `DailyAyahToggleTest` (the test passed on
+the same code in the earlier run). One reboot was spent and the device died
+again, so local connected runs stopped; CI is the instrumented authority.
+
+**The workflows.** `build` run 36299617649: the gates, the data instrumented
+suite, the debug build, and the signed bundle, all green in 6m21s.
+`Capture store screenshots` run 36299617648: tablet7 and tablet10 green
+first try; the phone leg's first attempt failed in `SavedNotesTest
+.aNoteIsReadableInTheSavedList` with a `ComposeTimeoutException` after 90 s
+in the study-page wait, the loaded-emulator class, while the tour and the
+other seven tests on that leg passed. The failed leg was rerun once and
+passed, and the run is green on attempt 2.
+
+**The store set.** Run 36299617648 attempt 2, eight frames per form factor.
+Every frame was compared with its artifact by `cmp` (24 matches) and every
+changed frame was read before it was installed. The changed frames are
+Browse and settings on all three forms: Browse shows four chips (Surahs,
+Juz, Last Read, Saved) instead of six, and settings shows the chevron after
+the switch on Show translation, Show tafsir, and Daily ayah, with the About
+row reading Version 2.4. The Mushaf, chrome, study, and surah opening frames
+are byte-identical to 2.3; search and the ayah card differ only in the
+status bar clock and subpixel antialiasing (the numeric compare: average
+delta 0.04 and 0.03 of 255).
+
+**The bundle.** `quran-2.4-vc25.aab` from the green build run 36299617649:
+148,092,639 bytes, SHA-256
+`7bc5da4ba7f69cc94ad0626e4f5e937b9fd82aae12c64bde8bf824065e539970`,
+matching the artifact's own checksum, `jar verified` in the job's own proof
+step, signed with the shared upload key
+(`53:7D:09:D2:...:0D:9D:E5:21`), carrying only the core pack. The hand-off
+copy sits in `play-store/aab/` until the owner confirms the submission, then
+it is deleted as the runbook requires.
+
+**The listing.** The version line reads 2.4 (versionCode 25), the release
+notes are 398 characters, and the full description's Browse sentence now
+names one list with the notes under the ayahs they were written on.

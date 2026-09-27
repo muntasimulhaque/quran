@@ -126,6 +126,19 @@ Mushaf, Browse, and ayah-card frames differ only in the status bar clock
 and subpixel antialiasing, which the numeric compare confirms (a maximum
 delta of 4 of 255 on the Mushaf page).
 
+The set is refreshed for 2.4 from run 36299617648 attempt 2: the phone
+leg's first attempt timed out waiting for the study reading to draw in
+`SavedNotesTest` (the loaded-emulator class the runbook names; the tour and
+the other seven tests on that leg were green), the two tablet legs were
+green first try, and the phone leg passed on the rerun. Every frame was
+compared with its artifact by `cmp` (24 matches) and every changed frame was
+read before it shipped. The Browse frames lose the Notes and Go to Ayah
+chips and show four tabs; the settings frames carry the chevron after the
+switch on Show translation, Show tafsir, and Daily ayah, and the About row
+reads Version 2.4. The Mushaf, chrome, study, and surah opening frames are
+byte-identical to 2.3, and the search and ayah-card frames differ only in
+the status bar clock and subpixel antialiasing.
+
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
 creating the emulator, waits for the emulated storage to mount before the test
