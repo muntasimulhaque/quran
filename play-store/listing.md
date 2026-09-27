@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 2.3 (versionCode 24)
+Version: 2.4 (versionCode 25)
 
 ## Listing
 
@@ -27,9 +27,10 @@ word meanings, and the whole interface can be read in English or Bangla.
 
 Search reads Arabic without diacritics and English without accents, so
 typing allah finds Allah and isa finds Isa. Save any ayah, add your own
-note to it, and find everything again under Browse: one list for your saved
-ayahs, one for the ayahs you wrote notes on, and a Last read list that keeps
-the places you have been reading so you can return to one you left.
+note to it, and find everything again under Browse: one list of the ayahs
+you kept, with your note under the ayah it was written on, and a Last read
+list that keeps the places you have been reading so you can return to one
+you left.
 
 The two readings are one door at the top of the page, and it always
 offers the other one: the printed page, or the study view. There is no
@@ -142,6 +143,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (2.4, 398 characters)
+
+Browse is simpler: tapping a surah now opens its ayah numbers, with the place you left in that surah already marked and in view, so there is no separate Go to Ayah. Saved and Notes are one list: every ayah you keep, with the note you wrote on it under it, and removing a saved ayah that carries a note asks first. In Settings, the chevron now sits after the switch. No ads, no trackers, no account.
 
 ## Release notes (2.3, 444 characters)
 
