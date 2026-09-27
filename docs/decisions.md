@@ -4820,6 +4820,10 @@ is deleted as the runbook requires; the artifact stays in build run
 notes are 388 characters, and the set paragraph names the reruns' classes
 and the frames that changed.
 
-The submission is not yet confirmed at the time of this entry: the bundle
-and the screenshots were handed over together, before anything was sent to
-Play, and the hand-off is closed the moment the owner confirms.
+**The submission is confirmed, so the hand-off is closed.** The owner
+submitted 2.5 to Google Play for review, and the hand-off copy of
+`quran-2.5-vc26.aab` was deleted the same session, as the runbook requires:
+the artifact stays in build run 36306853778 and in Play, and
+`play-store/aab/` keeps only its own note. The tree is clean. The signed
+bundle's record is in this entry; nothing in the repository depends on the
+binary.

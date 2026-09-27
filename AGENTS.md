@@ -919,11 +919,10 @@ fetching them again; the space is worth less than the time.
 
 ## Next session: the remaining queue, in order
 
-0. **The instrumented suites and the store set: done in the thirty-third
-   session.** The data suite is 29/29, the app suite is 45/45, all five
-   owner gates are green, and 2.5's bundle and store set were handed over;
-   what remains of the release is the hand-off deletion once the owner
-   confirms the submission. The queue starts at item 1.
+0. **The instrumented suites, the store set, and the 2.5 release: done in
+   the thirty-third session.** The data suite is 29/29, the app suite is
+   45/45, all five owner gates are green, and 2.5 was submitted with its
+   hand-off closed. The queue starts at item 1.
 
 1. **The segmented controls' touch targets.** The text size steps and the
    playback pace draw 38 dp and 46 dp cells, under the design document's own
@@ -994,7 +993,7 @@ fetching them again; the space is worth less than the time.
 ## Where the project stands (end of the thirty-third session)
 
 **The tree answers the reader's report on 2.4 (D-103), and 2.5
-(versionCode 26) is prepared for submission (D-104).**
+(versionCode 26) is submitted to Google Play for review (D-104).**
 
 - **The shared text of an ayah reads left to right.** `core/ShareText` is
 the one builder of the words, and its first character is U+200E, so a
@@ -1020,8 +1019,9 @@ over 05-search, the phone's loaded-emulator timeout in
 `SettingsVisibilityTest`), all three green. The store set is refreshed
 from attempt 2, 24 frames `cmp`'d, and the settings frames read. The
 bundle is `quran-2.5-vc26.aab`, 148,091,370 bytes, SHA-256
-`140423ca...c9b5`, `jar verified` with the shared upload key, sitting in
-`play-store/aab/` until the owner confirms the submission.
+`140423ca...c9b5`, `jar verified` with the shared upload key; the owner
+confirmed the submission, the hand-off copy is deleted, and the artifact
+stays in build run 36306853778.
 
 ## Where the project stands (end of the thirty-second session)
 
