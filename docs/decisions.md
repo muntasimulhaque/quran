@@ -4766,5 +4766,60 @@ thirty-second session recorded, so local runs stopped there and CI is the
 instrumented authority. `core/ShareTextTest` pins the four properties of
 the share text, the base-direction flip by `java.text.Bidi` among them.
 
-The version this report ships under is not set in this session: no
-`versionCode` moved, and the release waits for the owner's word.
+The version this report ships under was not set when the report landed: no
+`versionCode` moved until the owner gave the word, and then the session
+closed with 2.5 (see D-104).
+
+## D-104: The 2.5 release, prepared
+
+Date: the thirty-third session, at the owner's word. 2.5 (versionCode 26)
+carries D-103's three fixes.
+
+**The five owner gates ran on this machine before the release**, all green:
+`verify` (29 datasets, checksums and structure), `audit` (0 unexplained
+differences), `fonts` (all coverage checks passed, 22,985,677 reading
+codepoints), `checkdb` (the catalog matched, ten pack files and
+`content/quran.db` verified, 128,966,656 bytes, SHA-256
+`5c5988fa2916eb1cc905d01ddb9b4ef9319d0ca19c945bf0140eaff32296cea9`), and
+`search` (Arabic round trips, English folding, 465 readable excerpts). The
+manual QUL and QuranEnc exports and the verify extractions were present, so
+nothing was owed.
+
+**The local suite.** The JVM suite, lint, and `assembleDebug` are green.
+The data instrumented suite is 29/29 and the app instrumented suite is 45/45
+on the phone emulator, without the device-loss class this time.
+
+**The workflows.** `build` run 36306853778: green in 6m33s, the gates, the
+data instrumented suite, the debug build, and the signed bundle. Capture run
+36306854024: tablet7 green first try; tablet10's first attempt met a
+launcher ANR over 05-search, which the window guard refused (the class-4
+environment case), and the phone's first attempt timed out in
+`SettingsVisibilityTest` waiting for the study reading (the loaded-emulator
+class; all eight frames were kept). Both failed legs passed on the single
+rerun, attempt 2.
+
+**The store set.** Attempt 2, eight frames per form factor. Every frame was
+compared with its artifact by `cmp` (24 matches) and every changed frame was
+read before it shipped. The settings frames are the release's: every switch
+ends at one line and every chevron at one place, whatever a row carries, and
+the About row reads Version 2.5. The Mushaf frame and the ayah-card frames
+differ only in subpixel antialiasing (max deltas 4 and 3 of 255), and the
+search and Browse frames only in the status bar clock and the search
+cursor's blink.
+
+**The bundle.** `quran-2.5-vc26.aab` from the green build run 36306853778:
+148,091,370 bytes, SHA-256
+`140423ca3f8b072fd27552d630de887c7573100cbe60f38acbf6c8692233c9b5`,
+matching the artifact's own `_temp` checksum, `jar verified`, signed with
+the shared upload key (`53:7D:09:D2:...:0D:9D:E5:21`). The hand-off copy
+sits in `play-store/aab/` until the owner confirms the submission, then it
+is deleted as the runbook requires; the artifact stays in build run
+36306853778 and GitHub deletes it after two weeks.
+
+**The listing.** The version line reads 2.5 (versionCode 26), the release
+notes are 388 characters, and the set paragraph names the reruns' classes
+and the frames that changed.
+
+The submission is not yet confirmed at the time of this entry: the bundle
+and the screenshots were handed over together, before anything was sent to
+Play, and the hand-off is closed the moment the owner confirms.

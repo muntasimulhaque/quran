@@ -4,8 +4,8 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 2.4 (versionCode 25) is submitted to Google Play for review,
-and the tree after it answers the reader's report on 2.4 (D-103):
+**Status:** 2.5 (versionCode 26) is prepared for Google Play submission
+(D-103, D-104):
 
 - The shared text of an ayah reads left to right. A message carries one
 direction, and it was the Arabic ayah that set it, so the English

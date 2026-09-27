@@ -919,18 +919,11 @@ fetching them again; the space is worth less than the time.
 
 ## Next session: the remaining queue, in order
 
-0. **The instrumented suites and the store set, in that order.** The
-   thirty-second session's tree is green in the JVM suite, lint, and
-   `assembleDebug`, and the data instrumented suite ran 29/29 twice, but the
-   app suite met the emulator's documented classes: the tour and the new
-   `SavedNotesTest` passed, `searchIsFastWhenWarm` failed on the loaded
-   emulator, and the device died during `SurahAyahsScrollTest`, leaving five
-   tests unrun. Run `:data:connectedDebugAndroidTest` and
-   `:app:connectedDebugAndroidTest` with the emulator settings the workflow
-   uses, then capture with the procedure in "Store screenshots" (the Browse
-   frame loses the Notes and Go to Ayah chips, and the settings frame moves
-   three chevrons), then the release, at the owner's word, on the fast path
-   in "Release hand-off".
+0. **The instrumented suites and the store set: done in the thirty-third
+   session.** The data suite is 29/29, the app suite is 45/45, all five
+   owner gates are green, and 2.5's bundle and store set were handed over;
+   what remains of the release is the hand-off deletion once the owner
+   confirms the submission. The queue starts at item 1.
 
 1. **The segmented controls' touch targets.** The text size steps and the
    playback pace draw 38 dp and 46 dp cells, under the design document's own
@@ -1000,8 +993,8 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the thirty-third session)
 
-**The tree answers the reader's report on 2.4 (D-103); no versionCode has
-moved and the release waits for the owner's word.**
+**The tree answers the reader's report on 2.4 (D-103), and 2.5
+(versionCode 26) is prepared for submission (D-104).**
 
 - **The shared text of an ayah reads left to right.** `core/ShareText` is
 the one builder of the words, and its first character is U+200E, so a
@@ -1015,15 +1008,20 @@ The name, the place, and the Arabic name are one pair of composables in
 chevron aligns across rows, and a row that carries only a switch keeps the
 chevron's room empty, which lines every switch up.
 
-The JVM suite, lint, and `assembleDebug` are green, and the androidTest
-sources compile. A filtered phone-emulator run passed the new
-`SettingsRowAlignmentTest`, the new `SurahAyahsTest` header check, both
-`DailyAyahToggleTest` tests, and `SettingsVisibilityTest`; the existing
-`SurahAyahsTest.theBackMarkReturnsToTheSurahList` met the documented
-loaded-emulator looper class, and the emulator died during the isolated
-rerun with an empty failure body, so local connected runs stopped and CI is
-the instrumented authority. No store set was captured and no bundle was
-built.
+**The suite and the gates.** The JVM suite, lint, and `assembleDebug` are
+green; the data instrumented suite is 29/29 and the app instrumented suite
+is 45/45 on the phone emulator. All five owner gates ran green: `verify`
+29 datasets, `audit` 0 unexplained differences, `fonts` coverage passed on
+22,985,677 reading codepoints, `checkdb` (128,966,656 bytes, SHA-256
+`5c5988fa...`), and `search` 465 readable excerpts. CI: build run
+36306853778 green with the signed bundle; capture run 36306854024 attempt
+2, after one rerun of two environment-class legs (tablet10's launcher ANR
+over 05-search, the phone's loaded-emulator timeout in
+`SettingsVisibilityTest`), all three green. The store set is refreshed
+from attempt 2, 24 frames `cmp`'d, and the settings frames read. The
+bundle is `quran-2.5-vc26.aab`, 148,091,370 bytes, SHA-256
+`140423ca...c9b5`, `jar verified` with the shared upload key, sitting in
+`play-store/aab/` until the owner confirms the submission.
 
 ## Where the project stands (end of the thirty-second session)
 

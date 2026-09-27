@@ -139,6 +139,21 @@ reads Version 2.4. The Mushaf, chrome, study, and surah opening frames are
 byte-identical to 2.3, and the search and ayah-card frames differ only in
 the status bar clock and subpixel antialiasing.
 
+The set is refreshed for 2.5 from run 36306854024 attempt 2: the tablet10
+leg's first attempt met a launcher ANR over the search frame, which the
+window guard refused to ship, and the phone leg's first attempt timed out
+in `SettingsVisibilityTest` waiting for the study reading to draw (the
+loaded-emulator class; all eight frames were kept), while the tablet7 leg
+was green first try; both failed legs passed on the one rerun. Every frame
+was compared with its artifact by `cmp` (24 matches) and every changed frame
+was read before it shipped. The settings frames are the release's: every
+switch now ends at one line and every chevron sits at one place, whatever a
+row carries, and the About row reads Version 2.5. The Mushaf, chrome,
+study, and surah opening frames are byte-identical to 2.4, and the search,
+Browse, and ayah-card frames differ only in the status bar clock, the search
+cursor's blink, and subpixel antialiasing (the largest content delta is 4 of
+255 on the phone Mushaf page).
+
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
 creating the emulator, waits for the emulated storage to mount before the test
