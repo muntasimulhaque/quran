@@ -33,17 +33,13 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
-import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -159,38 +155,14 @@ private fun SurahGridHeader(surah: Surah, onBack: () -> Unit) {
                     .rotate(90f),
             )
         }
-        Column(
-            Modifier
+        SurahNameBlock(
+            surah = surah,
+            modifier = Modifier
                 .weight(1f)
                 .padding(start = 4.dp),
-        ) {
-            Text(
-                text = surah.nameSimple,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                text = stringResource(
-                    R.string.surah_meta_place_ayahs,
-                    placeName(surah.revelationPlace),
-                    surah.versesCount,
-                ),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 2.dp),
-            )
-        }
-        Text(
-            text = surah.nameArabic,
-            style = TextStyle(
-                fontFamily = Amiri,
-                fontSize = 23.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            ),
-            modifier = Modifier.padding(start = 12.dp),
+            nameMaxLines = 1,
         )
+        SurahArabicName(surah, Modifier.padding(start = 12.dp))
     }
 }
 

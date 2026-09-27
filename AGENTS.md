@@ -998,6 +998,33 @@ fetching them again; the space is worth less than the time.
   form factor.
 
 
+## Where the project stands (end of the thirty-third session)
+
+**The tree answers the reader's report on 2.4 (D-103); no versionCode has
+moved and the release waits for the owner's word.**
+
+- **The shared text of an ayah reads left to right.** `core/ShareText` is
+the one builder of the words, and its first character is U+200E, so a
+message that opens with Arabic no longer turns the translation and its
+closing period around; the image card is untouched, and
+`core/ShareTextTest` pins the shape and the `java.text.Bidi` flip.
+- **The ayah grid's header draws the surah in the Browse row's own type.**
+The name, the place, and the Arabic name are one pair of composables in
+`feature-browse/NumberedRows`, used by both surfaces.
+- **The settings tail is one 48 dp `ChevronSlot` on every row.** The
+chevron aligns across rows, and a row that carries only a switch keeps the
+chevron's room empty, which lines every switch up.
+
+The JVM suite, lint, and `assembleDebug` are green, and the androidTest
+sources compile. A filtered phone-emulator run passed the new
+`SettingsRowAlignmentTest`, the new `SurahAyahsTest` header check, both
+`DailyAyahToggleTest` tests, and `SettingsVisibilityTest`; the existing
+`SurahAyahsTest.theBackMarkReturnsToTheSurahList` met the documented
+loaded-emulator looper class, and the emulator died during the isolated
+rerun with an empty failure body, so local connected runs stopped and CI is
+the instrumented authority. No store set was captured and no bundle was
+built.
+
 ## Where the project stands (end of the thirty-second session)
 
 **The tree answers the owner's simplification report (D-101), and 2.4

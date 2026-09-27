@@ -1,5 +1,6 @@
 package io.github.muntasimulhaque.quran
 
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -7,9 +8,11 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.unit.height
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.LanguagePreference
@@ -17,6 +20,7 @@ import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.feature.study.R as StudyR
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExternalResource
@@ -80,6 +84,28 @@ class SurahAyahsTest {
         compose.onNodeWithTag("surah-ayah-back").performClick()
         waitForTag("browse-surahs")
         compose.onNodeWithTag("surah-row-2").assertExists()
+    }
+
+    @Test
+    fun theGridHeaderNamesTheSurahInTheListsOwnType() {
+        openBrowse()
+        val fromList = compose
+            .onNodeWithText("Al-Baqarah", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
+        compose.onNodeWithTag("surah-row-2").performClick()
+        waitForTag("surah-ayahs")
+        val fromHeader = compose
+            .onNodeWithText("Al-Baqarah", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
+        // The name's line height is its type: titleMedium in both places,
+        // where the header used to draw it a size larger than the row the
+        // reader tapped (owner report, D-103).
+        assertEquals(
+            "the grid header must name the surah at the list row's own size",
+            fromList.height.value,
+            fromHeader.height.value,
+            0.5f,
+        )
     }
 
     private fun openBrowse() {

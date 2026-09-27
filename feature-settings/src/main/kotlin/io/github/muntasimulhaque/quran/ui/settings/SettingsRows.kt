@@ -77,7 +77,8 @@ fun Group(title: String) {
 
 /**
  * One category in the settings hub: what it is called, where it stands right
- * now, and the chevron that says it opens something.
+ * now, and the chevron that says it opens something, in the same slot every
+ * other row's chevron keeps (owner report, D-103).
  */
 @Composable
 fun PageRow(title: String, summary: String?, onClick: () -> Unit) {
@@ -86,7 +87,7 @@ fun PageRow(title: String, summary: String?, onClick: () -> Unit) {
             .fillMaxWidth()
             .minimumInteractiveComponentSize()
             .clickable(onClick = onClick)
-            .padding(start = 22.dp, end = 16.dp, top = 14.dp, bottom = 14.dp),
+            .padding(start = 22.dp, end = 12.dp, top = 14.dp, bottom = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -103,15 +104,58 @@ fun PageRow(title: String, summary: String?, onClick: () -> Unit) {
                 modifier = Modifier.padding(end = 10.dp),
             )
         }
-        IconGlyph(
-            icon = Icon.Chevron,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-                .size(18.dp)
-                // The mark says where a tap goes: a row opens a page, so the
-                // chevron points the way the page slides in, to the right.
-                .graphicsLayer(rotationZ = -90f),
-        )
+        ChevronSlot(visible = true)
+    }
+}
+
+/**
+ * The chevron that ends a settings row, in the one slot every row keeps: a
+ * 48 dp touch target, drawn when the row has a page behind it and held empty
+ * when it does not.
+ *
+ * The slot is there whether the row carries a door, a switch, or both,
+ * because the controls are read down one column. Before it, a row with only
+ * a switch put the switch where the next row put its door, so the same kind
+ * of control met the eye at two different edges (owner report, D-103). The
+ * mark keeps its own touch target and its own spoken name beside the door,
+ * so TalkBack reads a switch and a door rather than one crowded control.
+ */
+@Composable
+private fun ChevronSlot(
+    visible: Boolean,
+    onOpen: (() -> Unit)? = null,
+    label: String? = null,
+) {
+    Box(
+        modifier = Modifier
+            .size(48.dp)
+            .then(
+                if (onOpen != null) {
+                    Modifier
+                        .clip(RoundedCornerShape(50))
+                        .clickable(onClick = onOpen)
+                        .semantics {
+                            if (!label.isNullOrBlank()) contentDescription = label
+                            role = Role.Button
+                        }
+                } else {
+                    Modifier
+                },
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (visible) {
+            IconGlyph(
+                icon = Icon.Chevron,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .size(18.dp)
+                    // The mark says where a tap goes: the chevron points the
+                    // way the page slides in, to the right.
+                    .graphicsLayer(rotationZ = -90f)
+                    .testTag("row-chevron"),
+            )
+        }
     }
 }
 
@@ -179,7 +223,10 @@ fun PageHeader(title: String, onBack: () -> Unit) {
  * own spoken name beside the door, so TalkBack reads a switch and a door
  * rather than one crowded control, and it sits after the switch, as the row's
  * last mark: the door is where the row ends, while the switch stays beside the
- * name it controls (owner decision, D-101).
+ * name it controls (owner decision, D-101). Its slot is kept even when the
+ * row has no door, so every switch in the sheet ends at the same line and
+ * every chevron sits at the same place, whatever a row carries (owner report,
+ * D-103).
  */
 @Composable
 fun ToggleRow(
@@ -244,34 +291,7 @@ fun ToggleRow(
             onCheckedChange = if (opens) onChange else null,
             modifier = switchModifier,
         )
-        // The door is the row's last mark. A chevron between the name and its
-        // switch reads as a third thing in the middle of the row; at the end
-        // it is what every other chevron in the app is, the mark that says a
-        // page is behind this row, and TalkBack hears the setting's state
-        // before it hears the door (owner decision, D-101).
-        if (onOpen != null) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(50))
-                    .clickable(onClick = onOpen)
-                    .semantics {
-                        if (!openLabel.isNullOrBlank()) contentDescription = openLabel
-                        role = Role.Button
-                    },
-                contentAlignment = Alignment.Center,
-            ) {
-                IconGlyph(
-                    icon = Icon.Chevron,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .size(18.dp)
-                        // The mark says where a tap goes: the chevron points
-                        // the way the page slides in, to the right.
-                        .graphicsLayer(rotationZ = -90f),
-                )
-            }
-        }
+        ChevronSlot(visible = onOpen != null, onOpen = onOpen, label = openLabel)
     }
 }
 

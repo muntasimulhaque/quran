@@ -7,6 +7,8 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import io.github.muntasimulhaque.quran.core.RichText
+import io.github.muntasimulhaque.quran.core.ShareText
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.AppTheme
@@ -361,25 +363,23 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
     private var placeJob: Job? = null
 
-    /** The ayah, its translation, and its reference, for copy and share. */
+    /**
+     * The ayah, its translation, and its reference, for copy and share. The
+     * shape and the direction mark are `core/ShareText`, where the reason for
+     * the mark lives and its test pins it.
+     */
     suspend fun ayahShareText(ayah: Ayah): String {
         val translation = withContext(Dispatchers.IO) {
             studyRow(ayah.number)?.translations?.firstOrNull()?.text?.text
         }
         val surahName = surahs.firstOrNull { it.number == ayah.surah }?.nameSimple ?: "Surah ${ayah.surah}"
-        return buildString {
-            append(ayah.text)
-            translation?.takeIf { it.isNotBlank() }?.let {
-                append("\n\n")
-                append(io.github.muntasimulhaque.quran.core.RichText.plain(it))
-            }
-            append("\n\n")
-            append(surahName)
-            append(' ')
-            append(ayah.surah)
-            append(':')
-            append(ayah.ayah)
-        }
+        return ShareText.ayah(
+            arabic = ayah.text,
+            translation = translation
+                ?.takeIf { it.isNotBlank() }
+                ?.let { RichText.plain(it) },
+            reference = "$surahName ${ayah.surah}:${ayah.ayah}",
+        )
     }
 
     fun jumpToAyah(ayah: Int) {

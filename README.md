@@ -4,8 +4,24 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 2.4 (versionCode 25) is submitted to Google Play for review;
-it carries the simplification report (D-101, D-102):
+**Status:** 2.4 (versionCode 25) is submitted to Google Play for review,
+and the tree after it answers the reader's report on 2.4 (D-103):
+
+- The shared text of an ayah reads left to right. A message carries one
+direction, and it was the Arabic ayah that set it, so the English
+translation ended at the right edge and its closing period was swept to
+the front of the sentence. The text now opens with one invisible
+left-to-right mark: the block sits on the left, punctuation stays where it
+was written, and the Arabic still shapes right to left inside its line.
+- The ayah grid's header names the surah in the Browse list's own type. The
+name, the place, and the Arabic name are one pair of composables drawn by
+both surfaces, so the same surah no longer changes size one tap after its
+row.
+- Every settings switch ends at one line and every chevron sits at one
+place. A row that carries only a switch keeps the chevron's slot empty, so
+the controls read down one column whatever a row carries.
+
+**2.4** carries the simplification report (D-101, D-102):
 
 - A surah row is the door to its own ayahs. Browse has four tabs now
   (Surahs, Juz, Last Read, Saved), and a tap on a surah opens its 48 dp

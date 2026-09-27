@@ -21,6 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -92,6 +93,58 @@ internal fun NumberCell(
 }
 
 /**
+ * One surah's names, in the one type both surfaces draw them in: the Browse
+ * row and the ayah grid's header ask the reader to know which surah they are
+ * about to open, so the name, the place, and the Arabic name read at one
+ * size wherever the surah is named. The grid header used a larger name than
+ * the row that opened it, which made the same surah look like two different
+ * things one tap apart (owner report, D-103).
+ *
+ * [nameMaxLines] is one where the header shares its row with the back mark
+ * and the name may have to give; the list row lets its name run whole.
+ */
+@Composable
+internal fun SurahNameBlock(
+    surah: Surah,
+    modifier: Modifier = Modifier,
+    nameMaxLines: Int = Int.MAX_VALUE,
+) {
+    Column(modifier) {
+        Text(
+            text = surah.nameSimple,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = nameMaxLines,
+            overflow = if (nameMaxLines == 1) TextOverflow.Ellipsis else TextOverflow.Clip,
+        )
+        Text(
+            text = stringResource(
+                R.string.surah_meta_place_ayahs,
+                placeName(surah.revelationPlace),
+                surah.versesCount,
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 2.dp),
+        )
+    }
+}
+
+/** The surah's Arabic name, in the face and size both surfaces draw it. */
+@Composable
+internal fun SurahArabicName(surah: Surah, modifier: Modifier = Modifier) {
+    Text(
+        text = surah.nameArabic,
+        style = TextStyle(
+            fontFamily = Amiri,
+            fontSize = 23.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        ),
+        modifier = modifier,
+    )
+}
+
+/**
  * One surah: its number in the shared column, its name, and its own Arabic
  * name. The row opens the surah's own ayahs, so it carries a test tag as
  * well: the copy above it changes with the interface language, and a door a
@@ -121,31 +174,8 @@ internal fun SurahRow(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(end = 16.dp),
         )
-        Column(Modifier.weight(1f)) {
-            Text(
-                text = surah.nameSimple,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-                text = stringResource(
-                    R.string.surah_meta_place_ayahs,
-                    placeName(surah.revelationPlace),
-                    surah.versesCount,
-                ),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 2.dp),
-            )
-        }
-        Text(
-            text = surah.nameArabic,
-            style = TextStyle(
-                fontFamily = Amiri,
-                fontSize = 23.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            ),
-        )
+        SurahNameBlock(surah, Modifier.weight(1f))
+        SurahArabicName(surah)
     }
 }
 

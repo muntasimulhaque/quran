@@ -4717,3 +4717,54 @@ the artifact stays in build run 36299617649 and in Play, and
 `play-store/aab/` keeps only its own note. The tree is clean. The signed
 bundle's record is in this entry; nothing in the repository depends on the
 binary.
+
+## D-103: The reader's report on 2.4: share text direction, one surah type, one settings column
+
+Date: the thirty-third session. The owner read 2.4 and reported three
+things; the tree answers all three.
+
+**1. The shared text ran right to left as a whole.** Sharing an ayah as
+text put the English translation at the right edge, with its closing period
+swept to the left of the sentence: plain text has one direction, and a
+bidi-aware receiver reads it off the message's first strong character, which
+was the Arabic ayah. `core/ShareText` is now the one builder of that text,
+and it opens with U+200E, the left-to-right mark: the block reads left to
+right, the period stays where it was written, and the Arabic still shapes
+right to left inside its own line. One mark, at the very start, the same
+shape the family's Ninety Nine app carries; a second copy would say nothing
+the first does. The translation and the reference keep their places, one
+blank line apart, and a missing translation leaves no empty paragraph. The
+image card is untouched: it gives each run its own paragraph, which is why
+the owner saw the defect only in the words.
+
+**2. The ayah grid's header named the surah in a larger type than the row
+that opened it.** `titleLarge` against the list's `titleMedium` on the same
+surah one tap apart. The name block and the Arabic name are now one pair of
+composables in `feature-browse/NumberedRows`, drawn by the Browse row and
+the grid header both, so the name, the place, and the Arabic name read at
+one size wherever a surah is named.
+
+**3. The settings controls stood at three different edges.** A row with a
+switch pinned its switch to the sheet's edge, a row with a switch and a
+door pushed the switch a chevron's width inward, and a chevron-only row sat
+closer to the edge than either. `ChevronSlot` is now the one 48 dp tail
+every row keeps: the chevron is drawn in it when the row has a page behind
+it and held empty when it does not, so every switch ends at one line and
+every chevron sits at one place. The door and the switch keep their D-101
+split, and the tap behavior is unchanged.
+
+**Verification.** The JVM suite, lint, and `assembleDebug` are green, and
+the androidTest sources compile. On the phone emulator, 6 of 7 filtered
+compose tests passed: `SettingsRowAlignmentTest` (the new one),
+`SurahAyahsTest.theGridHeaderNamesTheSurahInTheListsOwnType` (the new one),
+both `DailyAyahToggleTest` tests, and `SettingsVisibilityTest`; the seventh,
+`SurahAyahsTest.theBackMarkReturnsToTheSurahList`, met the documented
+loaded-emulator class (`The current thread must have a looper`, the study
+list's prefetch scheduler) on the shared run. The emulator then died during
+the isolated rerun with an empty failure body, the device-loss class the
+thirty-second session recorded, so local runs stopped there and CI is the
+instrumented authority. `core/ShareTextTest` pins the four properties of
+the share text, the base-direction flip by `java.text.Bidi` among them.
+
+The version this report ships under is not set in this session: no
+`versionCode` moved, and the release waits for the owner's word.
