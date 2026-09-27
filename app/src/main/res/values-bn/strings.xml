@@ -30,6 +30,14 @@
     <string name="action_close">বন্ধ</string>
     <string name="action_cancel">বাতিল</string>
 
+    <!-- The question before a save that carries a note is removed: the note
+         is the reader's own writing, so it is asked about, never taken by
+         one tap (D-101). -->
+    <string name="remove_saved_title">সংরক্ষিত আয়াতটি মুছবেন?</string>
+    <string name="remove_saved_body">এতে লেখা নোটটিও মুছে যাবে।</string>
+    <string name="remove_saved_action">মুছুন</string>
+    <string name="remove_saved_keep">রাখুন</string>
+
     <string name="reader_pack_preparing">প্রস্তুত হচ্ছে…</string>
     <string name="reader_pack_downloading">ডাউনলোড হচ্ছে %1$d%% · %2$s</string>
     <string name="pack_download_failed">ডাউনলোড করা যায়নি। সংযোগ পরীক্ষা করুন।</string>

@@ -119,9 +119,13 @@ fun ReaderScreen(
     var selected by remember { mutableStateOf<Ayah?>(null) }
     var cardAyah by remember { mutableStateOf<Ayah?>(null) }
     // The note sheet is keyed by the ayah's number, not by the ayah itself:
-    // the same sheet opens from the reading's pill and from a Notes row in
-    // Browse, and Browse only knows the number until the reader is there.
+    // the pill opens it, and the number is all it needs to write the note and
+    // keep the ayah with it.
     var cardNote by remember { mutableStateOf<Int?>(null) }
+    // The saved ayah the reader asked to remove while a note is still on it:
+    // the confirmation is up until they answer, and the ayah stays saved
+    // until they do. Null when nothing is being asked about.
+    var pendingRemove by remember { mutableStateOf<Int?>(null) }
     // The open sheet survives the window, not only the composition: a change
     // of language recreates the Activity, and a sheet kept in plain `remember`
     // closed with the old window while the reader was still in it. The reader
@@ -373,6 +377,7 @@ fun ReaderScreen(
                     selected = null
                 },
                 onNote = { ayah -> cardNote = ayah.number },
+                onRemoveSaved = { ayah -> pendingRemove = ayah.number },
                 onShare = { ayah ->
                     scope.launch { sharing = loadShareCard(context, viewModel, ayah) }
                 },
@@ -438,17 +443,19 @@ fun ReaderScreen(
                 // its top when they have never been there.
                 viewModel.openSurah(number)
             },
-            onRemoveSaved = { viewModel.removeSaved(it) },
-            onForget = { viewModel.forgetPlace(it) },
-            onNote = { ayahNumber ->
-                // The row the reader tapped says "a note on this ayah": the
-                // reading goes to the ayah and the note opens over it, so the
-                // words the note was written about are under the sheet.
-                sheet = ReaderSheet.None
-                viewModel.jumpToAyah(ayahNumber)
-                cardNote = ayahNumber
+            onRemoveSaved = { ayahNumber ->
+                // A save that carries a note asks before it goes, so the
+                // reader's own words are never removed by one tap. The
+                // question opens over the sheet the reader is still standing
+                // in.
+                val note = saved.firstOrNull { it.ayahNumber == ayahNumber }?.note
+                if (note.isNullOrBlank()) {
+                    viewModel.removeSaved(ayahNumber)
+                } else {
+                    pendingRemove = ayahNumber
+                }
             },
-            onRemoveNote = { viewModel.removeNote(it) },
+            onForget = { viewModel.forgetPlace(it) },
         )
         ReaderSheet.Search -> SearchSheet(
             content = content,
@@ -565,6 +572,17 @@ fun ReaderScreen(
                 cardNote = null
             },
             onDismiss = { cardNote = null },
+        )
+    }
+
+    pendingRemove?.let { ayahNumber ->
+        RemoveSavedSheet(
+            note = saved.firstOrNull { it.ayahNumber == ayahNumber }?.note,
+            onConfirm = {
+                viewModel.removeSaved(ayahNumber)
+                pendingRemove = null
+            },
+            onDismiss = { pendingRemove = null },
         )
     }
 }
@@ -755,6 +773,7 @@ private fun BottomStack(
     onPlay: (Ayah) -> Unit,
     onDeselect: () -> Unit,
     onNote: (Ayah) -> Unit,
+    onRemoveSaved: (Ayah) -> Unit,
     onMore: (Ayah) -> Unit,
     onShare: (Ayah) -> Unit,
     onTouch: () -> Unit,
@@ -829,7 +848,14 @@ private fun BottomStack(
                 // the action goes with the door.
                 showTafsir = viewModel.settings.showTafsir,
                 onSave = {
-                    viewModel.toggleSaved(ayah)
+                    // A save that carries a note asks before it goes, so the
+                    // reader's own words are never removed by one tap.
+                    val row = saved.firstOrNull { it.ayahNumber == ayah.number }
+                    if (row?.saved == true && !row.note.isNullOrBlank()) {
+                        onRemoveSaved(ayah)
+                    } else {
+                        viewModel.toggleSaved(ayah)
+                    }
                     onTouch()
                 },
                 onPlay = {

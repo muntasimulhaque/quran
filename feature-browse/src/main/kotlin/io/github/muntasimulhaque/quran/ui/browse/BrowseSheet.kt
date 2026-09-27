@@ -1,8 +1,6 @@
 package io.github.muntasimulhaque.quran.ui.browse
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -28,10 +25,11 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,23 +56,22 @@ private enum class BrowseTab(val labelRes: Int) {
     Juz(R.string.browse_tab_juz),
     LastRead(R.string.browse_tab_last_read),
     Saved(R.string.browse_tab_saved),
-    Notes(R.string.browse_tab_notes),
-    GoToAyah(R.string.browse_go_to_ayah),
 }
 
 /**
  * The browse sheet: the surahs, the thirty juz, where the reader has been
- * reading, everything they saved, and every ayah they wrote a note on. Each
- * list is one line per row and opens the reader exactly where it says, and
- * the tab row carries a Go to ayah door for a place inside a surah that
- * would otherwise be a scroll away.
+ * reading, and everything they kept. Each list is one line per row and opens
+ * the reader exactly where it says. A surah is a door to its own ayahs: the
+ * list stays one line per surah, and a tap opens the surah's numbers with the
+ * reader's own place marked and in view, so a jump inside a long surah is a
+ * tap on a number instead of a scroll, and the surah list is the only list of
+ * surahs the sheet needs (owner decision, D-101).
  *
- * Five tabs, and every tab was asked for: Surahs and Juz are the Book's own
- * divisions, Saved and Notes are the reader's own work, and Last Read is the
- * way back to a place they left. Saved is what the reader marked to keep;
- * Notes is only the ayahs they wrote something on, so the two lists answer
- * two different questions and a note can be found without reading every
- * saved row.
+ * Four tabs, and every tab was asked for: Surahs and Juz are the Book's own
+ * divisions, Saved is the reader's own work, and Last Read is the way back to
+ * a place they left. A note is written on a kept ayah, so it lives in Saved
+ * with the note previewed under its place, and there is no second list for
+ * the same work (owner decision, D-101).
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -90,13 +87,16 @@ fun BrowseSheet(
     onSurah: (Int) -> Unit,
     onRemoveSaved: (Int) -> Unit,
     onForget: (Int) -> Unit,
-    onNote: (Int) -> Unit,
-    onRemoveNote: (Int) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var tab by remember {
         mutableStateOf(if (startOnLastRead) BrowseTab.LastRead else BrowseTab.Surahs)
     }
+    // The surah whose ayahs are on screen, or null while the tabs are. The
+    // grid is a page inside the sheet, not a second sheet over it: one
+    // window, one scrim, and the phone's back returns to the list it came
+    // from before it leaves the sheet (owner decision, D-101).
+    var gridSurah by remember { mutableStateOf<Int?>(null) }
     // Each tab keeps its own list state so its place is remembered while the
     // reader moves between tabs, and each list carries a gate so a scroll
     // back to the top never turns into a pull that closes the sheet.
@@ -104,29 +104,26 @@ fun BrowseSheet(
     val juzList = rememberLazyListState()
     val lastReadList = rememberLazyListState()
     val savedList = rememberLazyListState()
-    val notesList = rememberLazyListState()
     val surahsGate = remember(surahsList) { SheetDragGate(surahsList) }
     val juzGate = remember(juzList) { SheetDragGate(juzList) }
     val lastReadGate = remember(lastReadList) { SheetDragGate(lastReadList) }
     val savedGate = remember(savedList) { SheetDragGate(savedList) }
-    val notesGate = remember(notesList) { SheetDragGate(notesList) }
-    // The picker is a tab like the rest, not a page over them: the chips stay
-    // on screen, the chosen chip is filled, and the reader leaves by tapping
-    // another list exactly as they leave Surahs. Inside it are two steps, the
-    // surah and its ayah numbers, with the reader's own surah already chosen
-    // so a jump within it is one tap on a number. Choosing a surah is the one
-    // step with a head, because it is the one step with somewhere to go back
-    // to. The numbering is the Quran's own, one past every ayah before, which
-    // is where a surah starts and how a grid number becomes a reference.
-    var choosingSurah by remember { mutableStateOf(false) }
-    var pickSurah by remember { mutableIntStateOf(1) }
+    // The numbering is the Quran's own, one past every ayah before, which is
+    // where a surah starts and how a grid number becomes a reference.
     val surahStarts = remember(surahs) { surahStartMap(surahs) }
     val currentSurah = remember(surahs, surahStarts, currentAyah) {
-        surahs.sortedBy { it.number }
-            .lastOrNull { (surahStarts[it.number] ?: Int.MAX_VALUE) <= currentAyah }
-            ?.number
-            ?: surahs.firstOrNull()?.number
-            ?: 1
+        surahOfAyah(surahs, surahStarts, currentAyah) ?: surahs.firstOrNull()?.number ?: 1
+    }
+    // The place the grid marks when it opens: the reader's own ayah when the
+    // surah they opened is the one they are in, and otherwise the newest
+    // place they left in that surah. The current ayah is one place and the
+    // history is around it, so a surah the reader is not in still has a
+    // place of its own (owner report, D-101).
+    fun placeIn(surahNumber: Int): Int? {
+        if (currentSurah == surahNumber) return currentAyah
+        return lastRead.firstOrNull {
+            surahOfAyah(surahs, surahStarts, it.ayahNumber) == surahNumber
+        }?.ayahNumber
     }
     // Both number columns are measured once here and handed to their rows: every
     // number of a list ends at one edge, and every name starts at one place.
@@ -170,12 +167,10 @@ fun BrowseSheet(
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
-        // Choosing a surah is a step inside the Go to Ayah tab, so the phone's
-        // back returns to the numbers before it leaves the sheet: the same
-        // two-level behavior a settings page has, one level down.
-        BackHandler(enabled = tab == BrowseTab.GoToAyah && choosingSurah) {
-            choosingSurah = false
-        }
+        // The grid is one level inside the sheet, so the phone's back returns
+        // to the surah list before it leaves the sheet: the same two-level
+        // behavior a settings page has, one level down.
+        BackHandler(enabled = gridSurah != null) { gridSurah = null }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -184,115 +179,102 @@ fun BrowseSheet(
                 // behind this sheet and would answer a text wait at once.
                 .testTag("browse-sheet"),
         ) {
-            // The sheet needs no title: the tabs name everything it holds,
-            // and a heading over a control that already says where the reader
-            // is spends the first line of the sheet on nothing. The tabs wrap
-            // rather than scroll, the way the search filters do: the labels
-            // are read in two languages and follow the system font scale, and
-            // a tab that runs off the edge is a list the reader cannot open.
-            // Wrapped, every tab stays visible and whole. Each tab is its own
-            // rounded chip, the shape search already taught the reader, rather
-            // than one strip that would have to break its own outline to
-            // wrap. Go to Ayah is one of the chips, not a door beside them:
-            // its content is a list of ayahs, and the chip that opened it is
-            // filled like the tab it is.
-            FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, top = Space.Block),
-                horizontalArrangement = Arrangement.spacedBy(Space.Line, Alignment.CenterHorizontally),
-                verticalArrangement = Arrangement.spacedBy(Space.Line),
-            ) {
-                BrowseTab.entries.forEach { entry ->
-                    BrowseTabChip(
-                        label = stringResource(entry.labelRes),
-                        active = entry == tab,
-                        modifier = if (entry == BrowseTab.GoToAyah) {
-                            Modifier.testTag("go-to-ayah")
-                        } else {
-                            Modifier
-                        },
-                        onClick = {
-                            tab = entry
-                            if (entry == BrowseTab.GoToAyah) {
-                                pickSurah = currentSurah
-                                choosingSurah = false
-                            }
-                        },
-                    )
-                }
+            val openSurah = gridSurah?.let { number ->
+                surahs.firstOrNull { it.number == number }
             }
-            Spacer(Modifier.height(8.dp))
-            when (tab) {
-                BrowseTab.Surahs -> LazyColumn(
-                    state = surahsList,
+            if (openSurah != null) {
+                SurahAyahGrid(
+                    surah = openSurah,
+                    starts = surahStarts,
+                    markedAyah = placeIn(openSurah.number),
+                    onBack = { gridSurah = null },
+                    onAyah = { number ->
+                        // The first ayah of a surah the reader never read
+                        // opens the surah itself, so study mode still lands
+                        // on its opening rather than mid-list at ayah 1; any
+                        // other number is the jump the reader asked for.
+                        val first = surahStarts[openSurah.number] ?: 1
+                        if (number == first && placeIn(openSurah.number) == null) {
+                            onSurah(openSurah.number)
+                        } else {
+                            onAyah(number)
+                        }
+                    },
+                )
+            } else {
+                // The sheet needs no title: the tabs name everything it holds,
+                // and a heading over a control that already says where the
+                // reader is spends the first line of the sheet on nothing.
+                // The tabs wrap rather than scroll, the way the search filters
+                // do: the labels are read in two languages and follow the
+                // system font scale, and a tab that runs off the edge is a
+                // list the reader cannot open. Wrapped, every tab stays
+                // visible and whole. Each tab is its own rounded chip, the
+                // shape search already taught the reader, rather than one
+                // strip that would have to break its own outline to wrap.
+                FlowRow(
                     modifier = Modifier
-                        .sheetDragGate(surahsGate)
-                        .testTag("browse-surahs"),
-                    contentPadding = PaddingValues(bottom = 28.dp),
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = Space.Block),
+                    horizontalArrangement = Arrangement.spacedBy(Space.Line, Alignment.CenterHorizontally),
+                    verticalArrangement = Arrangement.spacedBy(Space.Line),
                 ) {
-                    items(surahs, key = { it.number }) { surah ->
-                        SurahRow(surah, surahNumberWidth) { onSurah(surah.number) }
-                    }
-                }
-                BrowseTab.Juz -> LazyColumn(
-                    state = juzList,
-                    modifier = Modifier.sheetDragGate(juzGate),
-                    contentPadding = PaddingValues(bottom = 28.dp),
-                ) {
-                    itemsIndexedCompat(juzStarts) { index, start ->
-                        val surah = surahs.firstOrNull { it.number == start.surah }
-                        JuzRow(
-                            juz = start.juz,
-                            numberWidth = juzNumberWidth,
-                            reference = start.verseKey,
-                            surahName = surah?.nameSimple ?: "",
-                            // A juz begins at one ayah; a tap opens exactly
-                            // that ayah, which is what the row's own line says.
-                            onJuz = { onAyah(start.ayah) },
+                    BrowseTab.entries.forEach { entry ->
+                        BrowseTabChip(
+                            label = stringResource(entry.labelRes),
+                            active = entry == tab,
+                            onClick = { tab = entry },
                         )
                     }
                 }
-                BrowseTab.LastRead -> LastReadList(
-                    places = lastRead,
-                    texts = texts,
-                    listState = lastReadList,
-                    listModifier = Modifier.sheetDragGate(lastReadGate),
-                    onAyah = onAyah,
-                    onForget = onForget,
-                )
-                BrowseTab.Saved -> SavedList(
-                    saved = saved,
-                    texts = texts,
-                    listState = savedList,
-                    listModifier = Modifier.sheetDragGate(savedGate),
-                    onAyah = onAyah,
-                    onRemove = onRemoveSaved,
-                )
-                BrowseTab.Notes -> NotesList(
-                    saved = saved,
-                    texts = texts,
-                    listState = notesList,
-                    listModifier = Modifier.sheetDragGate(notesGate),
-                    onNote = onNote,
-                    onRemove = onRemoveNote,
-                )
-                BrowseTab.GoToAyah -> GoToAyahPicker(
-                    surahs = surahs,
-                    surahNumberWidth = surahNumberWidth,
-                    starts = surahStarts,
-                    chosenSurah = pickSurah,
-                    currentAyah = currentAyah,
-                    choosingSurah = choosingSurah,
-                    onChoose = { choosingSurah = true },
-                    onSurah = { number ->
-                        pickSurah = number
-                        choosingSurah = false
-                    },
-                    onBack = { choosingSurah = false },
-                    onAyah = onAyah,
-                    modifier = Modifier.weight(1f),
-                )
+                Spacer(Modifier.height(8.dp))
+                when (tab) {
+                    BrowseTab.Surahs -> LazyColumn(
+                        state = surahsList,
+                        modifier = Modifier
+                            .sheetDragGate(surahsGate)
+                            .testTag("browse-surahs"),
+                        contentPadding = PaddingValues(bottom = 28.dp),
+                    ) {
+                        items(surahs, key = { it.number }) { surah ->
+                            SurahRow(surah, surahNumberWidth) { gridSurah = surah.number }
+                        }
+                    }
+                    BrowseTab.Juz -> LazyColumn(
+                        state = juzList,
+                        modifier = Modifier.sheetDragGate(juzGate),
+                        contentPadding = PaddingValues(bottom = 28.dp),
+                    ) {
+                        itemsIndexedCompat(juzStarts) { index, start ->
+                            val surah = surahs.firstOrNull { it.number == start.surah }
+                            JuzRow(
+                                juz = start.juz,
+                                numberWidth = juzNumberWidth,
+                                reference = start.verseKey,
+                                surahName = surah?.nameSimple ?: "",
+                                // A juz begins at one ayah; a tap opens exactly
+                                // that ayah, which is what the row's own line says.
+                                onJuz = { onAyah(start.ayah) },
+                            )
+                        }
+                    }
+                    BrowseTab.LastRead -> LastReadList(
+                        places = lastRead,
+                        texts = texts,
+                        listState = lastReadList,
+                        listModifier = Modifier.sheetDragGate(lastReadGate),
+                        onAyah = onAyah,
+                        onForget = onForget,
+                    )
+                    BrowseTab.Saved -> SavedList(
+                        saved = saved,
+                        texts = texts,
+                        listState = savedList,
+                        listModifier = Modifier.sheetDragGate(savedGate),
+                        onAyah = onAyah,
+                        onRemove = onRemoveSaved,
+                    )
+                }
             }
         }
     }
@@ -300,7 +282,7 @@ fun BrowseSheet(
 
 /**
  * One tab as a chip: the reader taps a chip, so the tab row is the same kind
- * of control as the search filters, and one choice among five is read the same
+ * of control as the search filters, and one choice among four is read the same
  * way wherever the app asks for it.
  */
 @Composable
@@ -334,6 +316,12 @@ private fun BrowseTabChip(
         )
     }
 }
+
+/** The surah one ayah falls in, from the Quran's sequential numbering. */
+private fun surahOfAyah(surahs: List<Surah>, starts: Map<Int, Int>, ayah: Int): Int? =
+    surahs.sortedBy { it.number }
+        .lastOrNull { (starts[it.number] ?: Int.MAX_VALUE) <= ayah }
+        ?.number
 
 // A tiny helper so the juz list can use its index as the juz number.
 private fun <T> androidx.compose.foundation.lazy.LazyListScope.itemsIndexedCompat(

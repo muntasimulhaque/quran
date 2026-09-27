@@ -1,7 +1,9 @@
 package io.github.muntasimulhaque.quran
 
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -13,6 +15,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.LanguagePreference
+import io.github.muntasimulhaque.quran.data.LastReadStore
 import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.feature.study.R as StudyR
@@ -27,24 +30,29 @@ import org.junit.runner.RunWith
 import kotlin.math.abs
 
 /**
- * The Go to Ayah picker opens on the reader's own ayah, in the middle of the
- * grid, not at the top of the surah.
+ * The grid opens on the place the reader is being shown, in the middle of the
+ * viewport, not at the top of the surah. Landing it at the top edge answers
+ * "go to" with a screenful of the surah's first ayahs: the one number the
+ * reader came for sits in the same corner as every row above it, so the place
+ * has to be centered to be read as the place (owner report, D-097).
  *
- * The grid scrolls to the reader's place when the picker opens. Landing it at
- * the top edge is a scroll that answers "go to" with a screenful of the
- * surah's first ayahs: the one number the reader came for sits in the same
- * corner as every row above it, so the place has to be centered to be read as
- * the place (owner report, D-097). The reader's ayah here is Al-Baqarah 2:84,
- * a place in a 286 ayah surah that is a long scroll away.
+ * The place itself comes from two sources, and both are pinned here: the
+ * reader's own ayah when the surah they open is the one they are in, and the
+ * newest place they left in that surah when it is not (owner report, D-101).
+ * The reader is standing at Al-Baqarah 2:84 and has a history place at
+ * Al-Fatihah 1:5.
  */
 @RunWith(AndroidJUnit4::class)
-class GoToAyahScrollTest {
+class SurahAyahsScrollTest {
 
     private val compose = createAndroidComposeRule<MainActivity>()
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
 
     /** Al-Fatihah is 7 ayahs, so 2:84 is the Quran's own number 91. */
     private val place = 7 + 84
+
+    /** Al-Fatihah 1:5 is the Quran's own number 5. */
+    private val historyPlace = 5
 
     private val library = object : ExternalResource() {
         override fun before() {
@@ -54,6 +62,10 @@ class GoToAyahScrollTest {
                     setUiLanguage("en")
                     setAyah(place)
                     setMode(ReadingMode.Study)
+                }
+                LastReadStore(context).apply {
+                    record(historyPlace, ReadingMode.Study)
+                    close()
                 }
             }
         }
@@ -65,9 +77,8 @@ class GoToAyahScrollTest {
     @Test
     fun theReadersAyahOpensInTheMiddleOfTheGrid() {
         openBrowse()
-        compose.onNodeWithTag("go-to-ayah").performClick()
-        waitForTag("go-to-ayahs")
-        compose.onNodeWithTag("go-to-surah").assertTextContains("Al-Baqarah")
+        compose.onNodeWithTag("surah-row-2").performClick()
+        waitForTag("surah-ayahs")
 
         // The place is on screen, and the surah's first ayah is not: the
         // reader's row and the top of the surah are different places.
@@ -76,14 +87,14 @@ class GoToAyahScrollTest {
         val firstAyah = compose.onAllNodesWithContentDescription("Ayah 1", useUnmergedTree = true)
             .fetchSemanticsNodes()
         assertTrue(
-            "the picker must not open at the top of a 286 ayah surah",
+            "the grid must not open at the top of a 286 ayah surah",
             firstAyah.isEmpty(),
         )
 
         // And it is centered, not pinned to the viewport's top edge: a place
         // flush against the edge is the one thing the fix is about, so the
         // test measures the row against the grid it sits in.
-        val grid = compose.onNodeWithTag("go-to-ayahs", useUnmergedTree = true)
+        val grid = compose.onNodeWithTag("surah-ayahs", useUnmergedTree = true)
             .fetchSemanticsNode()
         val cell = ayahCell(84)
         val gridCenter = (grid.boundsInRoot.top + grid.boundsInRoot.bottom) / 2f
@@ -93,6 +104,24 @@ class GoToAyahScrollTest {
                 "grid center $gridCenter, cell center $cellCenter",
             abs(gridCenter - cellCenter) < cell.boundsInRoot.height,
         )
+    }
+
+    @Test
+    fun aSurahTheReaderIsNotInMarksThePlaceTheyLeft() {
+        openBrowse()
+        compose.onNodeWithTag("surah-row-1").performClick()
+        waitForTag("surah-ayahs")
+        // Al-Fatihah's own place is the history entry, not the current ayah:
+        // the reader is standing in Al-Baqarah, so the mark has to come from
+        // the history and not from where they are (owner report, D-101).
+        waitForAyah(5)
+        compose.onNodeWithContentDescription("Ayah 5", useUnmergedTree = true)
+            .assert(
+                SemanticsMatcher.expectValue(
+                    SemanticsProperties.StateDescription,
+                    "Current",
+                ),
+            )
     }
 
     private fun ayahCell(number: Int): androidx.compose.ui.semantics.SemanticsNode {

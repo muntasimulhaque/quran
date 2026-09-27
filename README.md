@@ -4,11 +4,29 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 2.2 (versionCode 23) is submitted to Google Play for review; it
-carries the reader's ninth report and the daily reminder (D-097, D-098). The
-tree then answers the reader's tenth report (D-099), which no version has
-shipped yet:
+**Status:** 2.3 (versionCode 24) is submitted to Google Play for review; it
+carries the reader's tenth report (D-099, D-100). The tree then answers the
+owner's simplification report (D-101), which no version has shipped yet:
 
+- A surah row is the door to its own ayahs. Browse has four tabs now
+  (Surahs, Juz, Last Read, Saved), and a tap on a surah opens its 48 dp
+  number grid with the reader's own place marked and in view. The separate
+  Go to Ayah tab is gone, and the grid marks the place the reader left in
+  that surah even when they are standing in another one.
+- A note is written on a kept ayah. Saved is the one list, with the note
+  previewed under the places that have one, ordered by the most recent of
+  the two moments. The pill keeps its Note action; writing a note saves the
+  ayah with it, and removing a save that carries a note asks first in a
+  small sheet that shows the note. saved.db is version 5, and note-only
+  rows are brought into Saved by the migration so nothing is lost.
+- The search word meanings stay, with the matched-word refinement from 2.3,
+  because they reach ayahs the translation alone does not (D-099's numbers,
+  restated in D-101).
+- The settings chevron sits after the switch on the three combined rows, so
+  the name and its control stay together and the door is the row's last
+  mark.
+
+**2.3** answers the reader's tenth report (D-099):
 - A switch is a switch and the row around it is a door: only the switch
 toggles, and the rest of the row opens the page, on Show translation, Show
 tafsir, and the daily reminder alike. The list pages carry their own switch

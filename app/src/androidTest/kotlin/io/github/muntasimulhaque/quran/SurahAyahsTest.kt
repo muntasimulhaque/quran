@@ -1,6 +1,5 @@
 package io.github.muntasimulhaque.quran
 
-import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -8,7 +7,6 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTouchInput
@@ -27,17 +25,17 @@ import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 
 /**
- * The Go to ayah picker: Browse, the chip in the tab row, then a number. The
- * reader's own surah is already chosen so a jump within it is one tap, and
- * another surah is one more tap through the same list Browse draws. The test
- * follows the whole path and lands on 2:12, which is a place in a long surah
- * the reader could not have reached without scrolling to it.
+ * A surah row is the door to its own ayahs. Browse holds one list of surahs,
+ * and a tap on one opens its numbers with the reader's own place marked and
+ * in view, so a jump inside a long surah is a tap on a number instead of a
+ * scroll (owner decision, D-101). The test opens Al-Baqarah, jumps to 2:12,
+ * and comes back to the list through the grid's own back mark.
  *
  * The library is prepared before the activity starts, the order a reader
  * creates it in, and the jump is the only thing the test touches.
  */
 @RunWith(AndroidJUnit4::class)
-class GoToAyahTest {
+class SurahAyahsTest {
 
     private val compose = createAndroidComposeRule<MainActivity>()
 
@@ -59,31 +57,29 @@ class GoToAyahTest {
     val rule: TestRule = RuleChain.outerRule(library).around(compose)
 
     @Test
-    fun thePickerJumpsToAnyAyahOfAnySurah() {
+    fun theSurahRowOpensItsAyahsAndAJumpLands() {
         openBrowse()
-        // The chip stands in the tab row: one tap from anywhere in Browse, not
-        // a row over the surah list the reader has to be on first.
-        compose.onNodeWithTag("go-to-ayah").performClick()
-        waitForTag("go-to-ayahs")
-
-        // The picker opens on the surah the reader is in; the ayah grid is
-        // its second step, not a first choice they have to make. The selector
-        // is the one node with that name: the reading behind the sheet names
-        // the surah too.
-        compose.onNodeWithTag("go-to-surah").assertTextContains("Al-Fatihah")
-
-        // Another surah is one tap through the same list Browse draws.
-        compose.onNodeWithTag("go-to-surah").performClick()
-        waitForTag("go-to-surahs")
-        compose.onNodeWithText("Al-Baqarah").performClick()
-        waitForTag("go-to-ayahs")
+        // The Surahs list is the only list of surahs: a tap on one opens its
+        // own numbers.
+        compose.onNodeWithTag("surah-row-2").performClick()
+        waitForTag("surah-ayahs")
 
         // Ayah 12 of Al-Baqarah, and the reading lands on 2:12.
-        compose.onNodeWithTag("go-to-ayahs").performScrollToIndex(11)
+        compose.onNodeWithTag("surah-ayahs").performScrollToIndex(11)
         compose.onNodeWithContentDescription("Ayah 12").performClick()
         compose.waitUntil(timeoutMillis = 30_000) {
             compose.onAllNodesWithText("2:12", substring = true).fetchSemanticsNodes().isNotEmpty()
         }
+    }
+
+    @Test
+    fun theBackMarkReturnsToTheSurahList() {
+        openBrowse()
+        compose.onNodeWithTag("surah-row-2").performClick()
+        waitForTag("surah-ayahs")
+        compose.onNodeWithTag("surah-ayah-back").performClick()
+        waitForTag("browse-surahs")
+        compose.onNodeWithTag("surah-row-2").assertExists()
     }
 
     private fun openBrowse() {

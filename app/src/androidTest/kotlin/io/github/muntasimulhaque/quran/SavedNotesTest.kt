@@ -26,16 +26,15 @@ import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 
 /**
- * Notes are recognised by what the reader wrote, not by the place alone.
- *
- * Saved and Notes drew the same row (a surah, an ayah, when), so a reader
- * looking for the note they took on Ayat Al-Kursi had to open the notes one
- * by one. Notes now previews the reader's own words under the place, two
- * lines at most; this test writes a note on 2:255 before the activity starts
- * and reads it back in the list.
+ * A note is written on a kept ayah, so it lives in Saved, previewed under its
+ * place: one list for the reader's own work, and the note is recognised by
+ * what the reader wrote rather than by the place alone (owner decision,
+ * D-101). Removing a save that carries a note asks first, because the note
+ * goes with it. This test writes a note on 2:255 before the activity starts,
+ * reads it back in the list, and walks the removal through its question.
  */
 @RunWith(AndroidJUnit4::class)
-class NotesPreviewTest {
+class SavedNotesTest {
 
     private val compose = createAndroidComposeRule<MainActivity>()
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
@@ -59,7 +58,7 @@ class NotesPreviewTest {
         override fun after() {
             runBlocking {
                 SavedStore(context).apply {
-                    clearNote(AYAT_AL_KURSI)
+                    unsave(AYAT_AL_KURSI)
                     close()
                 }
             }
@@ -70,12 +69,36 @@ class NotesPreviewTest {
     val rule: TestRule = RuleChain.outerRule(library).around(compose)
 
     @Test
-    fun aNoteIsReadableInTheList() {
-        openBrowse()
-        compose.onNodeWithText("Notes").performClick()
+    fun aNoteIsReadableInTheSavedList() {
+        openSaved()
         compose.waitUntil(timeoutMillis = 30_000) {
             compose.onAllNodesWithText(NOTE).fetchSemanticsNodes().isNotEmpty()
         }
+    }
+
+    @Test
+    fun removingASaveWithANoteAsksFirst() {
+        openSaved()
+        compose.waitUntil(timeoutMillis = 30_000) {
+            compose.onAllNodesWithText(NOTE).fetchSemanticsNodes().isNotEmpty()
+        }
+        // The row's Remove opens the question, and the question's own Remove
+        // takes the save and the note with it.
+        compose.onNodeWithText("Remove").performClick()
+        compose.waitUntil(timeoutMillis = 15_000) {
+            compose.onAllNodesWithTag("remove-saved-confirm", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("remove-saved-confirm").performClick()
+        compose.waitUntil(timeoutMillis = 15_000) {
+            compose.onAllNodesWithText(NOTE).fetchSemanticsNodes().isEmpty()
+        }
+    }
+
+    private fun openSaved() {
+        openBrowse()
+        compose.onNodeWithText("Saved").performClick()
+        compose.waitForIdle()
     }
 
     private fun openBrowse() {

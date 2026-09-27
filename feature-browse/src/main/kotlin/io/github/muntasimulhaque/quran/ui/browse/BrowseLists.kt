@@ -79,59 +79,6 @@ internal fun LastReadList(
     }
 }
 
-/**
- * The ayahs the reader wrote a note on, newest note first. The note itself is
- * drawn under the place, two lines of it: without it every row is only a
- * surah and a number, and the reader cannot tell the note they are looking
- * for from the rest without opening them one by one. The preview is clamped
- * rather than free, so every row is the same height and a long note cannot
- * push the next place off the screen; a tap opens the note where it was
- * written, on its ayah. The Remove beside the row is the other end of the
- * same work: the note is the reader's own, so they can take it back here.
- */
-@Composable
-internal fun NotesList(
-    saved: List<SavedAyah>,
-    texts: Map<Int, AyahText>,
-    listState: LazyListState,
-    listModifier: Modifier = Modifier,
-    onNote: (Int) -> Unit,
-    onRemove: (Int) -> Unit,
-) {
-    // The order is the note's own, not the ayah's: a note written today on an
-    // ayah saved last year is today's note, and the reader looking for what
-    // they last wrote must find it at the top. A note from before this
-    // column existed falls back to the moment the ayah was saved.
-    val notes = saved
-        .filter { !it.note.isNullOrBlank() }
-        .sortedByDescending { it.noteAt ?: it.createdAt }
-    if (notes.isEmpty()) {
-        EmptyNote(
-            title = stringResource(R.string.notes_empty_title),
-            body = stringResource(R.string.notes_empty_body),
-        )
-        return
-    }
-    LazyColumn(
-        state = listState,
-        modifier = listModifier,
-        contentPadding = PaddingValues(bottom = 28.dp),
-    ) {
-        items(notes, key = { it.ayahNumber }) { row ->
-            val text = texts[row.ayahNumber]
-            PlaceRow(
-                surah = text?.surahName
-                    ?: stringResource(R.string.saved_reference_fallback, row.ayahNumber),
-                ayah = text?.ayahLabel,
-                note = row.note?.trim(),
-                detail = stringResource(R.string.notes_detail, moment(row.noteAt ?: row.createdAt)),
-                onClick = { onNote(row.ayahNumber) },
-                action = stringResource(R.string.action_remove) to { onRemove(row.ayahNumber) },
-            )
-        }
-    }
-}
-
 @Composable
 private fun readingModeName(mode: ReadingMode): String = stringResource(
     when (mode) {
@@ -151,12 +98,18 @@ internal data class AyahText(
 )
 
 /**
- * The ayahs the reader saved. A row is the place, the moment it was saved,
- * and the way to unsave it: the ayah's own text and its note are not
- * repeated here. Saved means saved, so this list holds the Save action's
- * work and nothing else; a note written on an ayah never puts it here, and
- * a saved ayah that also has a note is named again in Notes where the note
- * itself lives.
+ * Everything the reader kept: every saved ayah, with the note written on it
+ * under the place when there is one, and nothing under the rows without.
+ * Save and Note are two actions but one list, because a note is written on a
+ * kept ayah and a reader looking for either is looking for the same thing
+ * (owner decision, D-101).
+ *
+ * The order is the most recent of the row's own moments, not the save's
+ * alone: an ayah saved last year and noted today is today's row, and the
+ * reader looking for what they last wrote must find it at the top. The
+ * detail line names which moment it is, so a note is never dated as a save.
+ * A row saved before the moments existed keeps its row's own moment, the
+ * closest truth the migrations could write.
  */
 @Composable
 internal fun SavedList(
@@ -167,12 +120,9 @@ internal fun SavedList(
     onAyah: (Int) -> Unit,
     onRemove: (Int) -> Unit,
 ) {
-    // The order is the save's own moment, not the row's: an ayah first noted
-    // a year ago and saved today is today's save (D-082). A row saved before
-    // the column existed keeps its row's own moment, the closest truth the
-    // migration could write.
     val rows = remember(saved) {
-        saved.filter { it.saved }.sortedByDescending { it.savedAt ?: it.createdAt }
+        saved.filter { it.saved || !it.note.isNullOrBlank() }
+            .sortedByDescending { maxOf(it.savedAt ?: it.createdAt, it.noteAt ?: 0L) }
     }
     if (rows.isEmpty()) {
         EmptyNote(
@@ -188,10 +138,16 @@ internal fun SavedList(
     ) {
         items(rows, key = { it.ayahNumber }) { row ->
             val text = texts[row.ayahNumber]
+            val note = row.note?.trim()
             PlaceRow(
                 surah = text?.surahName ?: stringResource(R.string.saved_reference_fallback, row.ayahNumber),
                 ayah = text?.ayahLabel,
-                detail = stringResource(R.string.saved_detail, moment(row.savedAt ?: row.createdAt)),
+                note = note,
+                detail = if (!note.isNullOrBlank()) {
+                    stringResource(R.string.notes_detail, moment(row.noteAt ?: row.createdAt))
+                } else {
+                    stringResource(R.string.saved_detail, moment(row.savedAt ?: row.createdAt))
+                },
                 onClick = { onAyah(row.ayahNumber) },
                 action = stringResource(R.string.action_remove) to { onRemove(row.ayahNumber) },
             )

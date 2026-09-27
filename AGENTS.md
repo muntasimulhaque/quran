@@ -589,8 +589,10 @@ implement it and update this list.
 - Both reading modes ship together (D-008).
 - The reading modes are one switch in the top bar, and the reader's other
   doors are Browse, Search, and Settings; there is no bottom bar (D-051).
-- Last Read and Notes are Browse tabs beside Surahs, Juz, and Saved
-  (D-051, D-074).
+- Last Read is the fourth Browse tab beside Surahs, Juz, and Saved; a note
+  lives inside Saved with the ayah it was written on (D-051, D-074, D-101).
+- A surah row in Browse opens its own ayah grid; there is no separate Go to
+  Ayah tab (D-101).
 - Text sizes are 0.65, 0.75, 0.85, 1, 1.2 (D-051, D-074).
 - Saheeh International is the only translation (D-004).
 - Ibn Kathir and As-Sa'di are the tafsirs (D-005).
@@ -918,13 +920,16 @@ fetching them again; the space is worth less than the time.
 ## Next session: the remaining queue, in order
 
 0. **The instrumented suites and the store set, in that order.** The
-   thirty-first session's tree compiles and its JVM suite and lint are green,
-   but its instrumented suites have not been run on a device, and the settings
-   hub's frame and the picker are changed pixels. Run
-   `:data:connectedDebugAndroidTest` and `:app:connectedDebugAndroidTest` with
-   the emulator settings the workflow uses, then capture with the procedure in
-   "Store screenshots" (the settings frame and the Browse-tab frame are the
-   visible changes), then the release, at the owner's word, on the fast path
+   thirty-second session's tree is green in the JVM suite, lint, and
+   `assembleDebug`, and the data instrumented suite ran 29/29 twice, but the
+   app suite met the emulator's documented classes: the tour and the new
+   `SavedNotesTest` passed, `searchIsFastWhenWarm` failed on the loaded
+   emulator, and the device died during `SurahAyahsScrollTest`, leaving five
+   tests unrun. Run `:data:connectedDebugAndroidTest` and
+   `:app:connectedDebugAndroidTest` with the emulator settings the workflow
+   uses, then capture with the procedure in "Store screenshots" (the Browse
+   frame loses the Notes and Go to Ayah chips, and the settings frame moves
+   three chevrons), then the release, at the owner's word, on the fast path
    in "Release hand-off".
 
 1. **The segmented controls' touch targets.** The text size steps and the
@@ -992,6 +997,43 @@ fetching them again; the space is worth less than the time.
   to right on the screen; `MushafTurnTest` now pins the direction on every
   form factor.
 
+
+## Where the project stands (end of the thirty-second session)
+
+**The tree answers the owner's simplification report (D-101). No
+`versionCode` has moved.** The session folded Go to Ayah into the surah
+list, folded Notes into Saved, kept the search word meanings (with D-099's
+numbers restated), and moved the settings chevron after the switch.
+
+- **A surah row is the door to its own ayahs.** Browse has four tabs now
+  (Surahs, Juz, Last Read, Saved). Tapping a surah opens its 48 dp number
+  grid as a page inside the sheet, with a back header carrying the surah's
+  name, place, length, and Arabic name. The grid marks the current ayah when
+  that surah is the one the reader is in, and otherwise the newest history
+  place in that surah; the first ayah of an unread surah still opens the
+  surah's opening in study mode.
+- **A note is written on a kept ayah.** Saved is the one list: every kept
+  ayah, note previews under the places that have them, ordered by the most
+  recent of the two moments. The pill keeps its Note action; writing a note
+  saves the ayah with it. Removing a save that carries a note asks first in
+  a small sheet that shows the note. `saved.db` is version 5, and the
+  migration brings note-only rows into Saved so nothing is lost.
+- **The word meanings stay in search.** The "Words" chip already lets a
+  reader turn the source off; the matched-word refinement from 2.3 is
+  unchanged.
+- **The chevron is the row's last mark** on the three combined rows (Show
+  translation, Show tafsir, the daily reminder), after the switch.
+
+**The suite.** `:core:test`, `:data:testDebugUnitTest`, `:app:testDebugUnitTest`,
+`:app:lintDebug`, and `:app:assembleDebug` are green. The data instrumented
+suite is 29/29, run twice on the phone emulator. The app suite ran 39 tests
+with 37 passing; the two failures are the documented emulator classes
+(`searchIsFastWhenWarm` on the loaded emulator, and an empty failure body as
+the device vanished during `SurahAyahsScrollTest`), and the five tests after
+that one never ran. The tour and `SavedNotesTest` passed. One reboot was
+spent and the device died again, so local connected runs stopped; the
+instrumented authority is CI, and the store set is owed a recapture at the
+next release because the Browse and settings frames changed.
 
 ## Where the project stands (end of the thirty-first session)
 

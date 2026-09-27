@@ -30,19 +30,21 @@ data class SavedAyah(
      */
     val savedAt: Long? = null,
     /**
-     * True when the reader saved the ayah itself. Writing a note does not
-     * save it: Save and Note are the reader's two separate actions, so the
-     * Saved list holds what was saved and the Notes list holds what was
-     * written on, and an ayah the reader did both to appears in both.
+     * True when the reader kept the ayah. A note is written on a kept ayah,
+     * so writing one saves it: the reader's own words and the ayah they are
+     * about belong together, and the Saved list is the one list that holds
+     * both. Removing the save removes the note with it, which the screen
+     * asks about first when a note exists.
      */
     val saved: Boolean = true,
 )
 
 /**
- * The reader's own database: one row per ayah they marked, with the two marks
- * an ayah can carry, each with its own moment. Save keeps the ayah; Note
- * keeps the reader's own words about it; neither action performs the other,
- * so a note alone never turns up in Saved. Newest first.
+ * The reader's own database: one row per ayah they kept, with the note they
+ * wrote on it when there is one, each mark carrying its own moment. A note
+ * is written on a kept ayah, so a note alone keeps the ayah too; removing
+ * the save removes the note, and the screen asks before that when a note is
+ * there. Newest first.
  */
 class SavedStore(context: Context) {
 
@@ -52,7 +54,7 @@ class SavedStore(context: Context) {
 
     suspend fun load() = withContext(Dispatchers.IO) { refresh() }
 
-    /** Saves the ayah if it was not saved, unsaves it if it was. */
+    /** Saves the ayah if it was not saved, removes it if it was. */
     suspend fun toggle(ayahNumber: Int) = withContext(Dispatchers.IO) {
         val row = row(ayahNumber)
         when {
@@ -61,18 +63,19 @@ class SavedStore(context: Context) {
                 write(ayahNumber, note = null, createdAt = now, savedAt = now, saved = true)
             }
             !row.saved -> setSaved(ayahNumber, saved = true, at = System.currentTimeMillis())
-            // Unsaving an ayah with a note keeps the note: it belongs to
-            // Notes until the reader clears it there.
-            row.note != null -> setSaved(ayahNumber, saved = false)
+            // Removing the save removes the row, and the note written on it
+            // with it. The screen asks before this when a note exists, so
+            // the reader's own words are never lost to one tap.
             else -> delete(ayahNumber)
         }
         refresh()
     }
 
     /**
-     * Writes a note, leaving the ayah's saved state exactly as it was; a
-     * blank note clears it. A note on an ayah the reader never saved keeps
-     * the ayah in Notes alone.
+     * Writes a note, and keeps the ayah with it: a note is written on a kept
+     * ayah, so writing one saves the ayah. A blank note clears the note and
+     * leaves the save; on a row that was never saved it leaves nothing
+     * behind.
      */
     suspend fun setNote(ayahNumber: Int, note: String?) = withContext(Dispatchers.IO) {
         val clean = note?.trim()?.takeIf { it.isNotEmpty() }
@@ -80,16 +83,24 @@ class SavedStore(context: Context) {
         if (row == null) {
             if (clean != null) {
                 val now = System.currentTimeMillis()
-                write(ayahNumber, clean, createdAt = now, noteAt = now, saved = false)
+                write(ayahNumber, clean, createdAt = now, noteAt = now, saved = true, savedAt = now)
             }
         } else {
+            val now = System.currentTimeMillis()
             val values = ContentValues().apply {
                 if (clean == null) {
                     putNull(COLUMN_NOTE)
                     putNull(COLUMN_NOTE_AT)
                 } else {
                     put(COLUMN_NOTE, clean)
-                    put(COLUMN_NOTE_AT, System.currentTimeMillis())
+                    put(COLUMN_NOTE_AT, now)
+                    // A note keeps the ayah. A row from before this rule was
+                    // only a note; it becomes a save with this note's moment,
+                    // the closest true answer for when it was kept.
+                    if (!row.saved) {
+                        put(COLUMN_SAVED, 1)
+                        put(COLUMN_SAVED_AT, now)
+                    }
                 }
             }
             database().update(TABLE, values, "$COLUMN_AYAH = ?", arrayOf(ayahNumber.toString()))
@@ -100,25 +111,12 @@ class SavedStore(context: Context) {
         refresh()
     }
 
-    /** Removes the Save mark. The ayah's note, if any, stays in Notes. */
+    /**
+     * Removes the ayah from Saved, and the note written on it with it. The
+     * screen asks before this when a note exists.
+     */
     suspend fun unsave(ayahNumber: Int) = withContext(Dispatchers.IO) {
-        val row = row(ayahNumber) ?: return@withContext
-        if (row.note == null) delete(ayahNumber) else setSaved(ayahNumber, false)
-        refresh()
-    }
-
-    /** Removes the note. The ayah's save, if any, stays in Saved. */
-    suspend fun clearNote(ayahNumber: Int) = withContext(Dispatchers.IO) {
-        val row = row(ayahNumber) ?: return@withContext
-        if (row.saved) {
-            val values = ContentValues().apply {
-                putNull(COLUMN_NOTE)
-                putNull(COLUMN_NOTE_AT)
-            }
-            database().update(TABLE, values, "$COLUMN_AYAH = ?", arrayOf(ayahNumber.toString()))
-        } else {
-            delete(ayahNumber)
-        }
+        delete(ayahNumber)
         refresh()
     }
 
@@ -237,12 +235,23 @@ class SavedStore(context: Context) {
                         "WHERE $COLUMN_SAVED = 1",
                 )
             }
+            // Version 5 makes a note a thing written on a kept ayah. A row
+            // that was only a note enters Saved, carrying the note's own
+            // moment as when it was kept, so no reader loses a note to the
+            // merge.
+            if (oldVersion < 5) {
+                db.execSQL(
+                    "UPDATE $TABLE SET $COLUMN_SAVED = 1, " +
+                        "$COLUMN_SAVED_AT = COALESCE($COLUMN_NOTE_AT, $COLUMN_CREATED) " +
+                        "WHERE $COLUMN_NOTE IS NOT NULL AND $COLUMN_SAVED = 0",
+                )
+            }
         }
     }
 
     private companion object {
         const val DATABASE_NAME = "saved.db"
-        const val DATABASE_VERSION = 4
+        const val DATABASE_VERSION = 5
         const val TABLE = "saved"
         const val COLUMN_AYAH = "ayah_number"
         const val COLUMN_NOTE = "note"

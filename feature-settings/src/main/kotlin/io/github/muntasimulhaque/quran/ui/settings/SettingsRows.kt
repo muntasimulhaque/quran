@@ -177,7 +177,9 @@ fun PageHeader(title: String, onBack: () -> Unit) {
  * Without [onOpen] the whole row stays the switch, which is what a row with
  * nowhere to go owes a finger. The chevron keeps its own touch target and its
  * own spoken name beside the door, so TalkBack reads a switch and a door
- * rather than one crowded control.
+ * rather than one crowded control, and it sits after the switch, as the row's
+ * last mark: the door is where the row ends, while the switch stays beside the
+ * name it controls (owner decision, D-101).
  */
 @Composable
 fun ToggleRow(
@@ -229,6 +231,24 @@ fun ToggleRow(
                 )
             }
         }
+        // Where the row opens a page, the switch is the only thing that
+        // switches, so it takes its own clicks and carries the row's name: a
+        // control that reads "on" with nothing to say who is on tells TalkBack
+        // nothing. Where there is no page, the whole row is the control and the
+        // switch is only a picture of its state.
+        val switchModifier = Modifier
+            .then(if (opens) Modifier.semantics { contentDescription = title } else Modifier)
+            .then(if (switchTag != null) Modifier.testTag(switchTag) else Modifier)
+        Switch(
+            checked = checked,
+            onCheckedChange = if (opens) onChange else null,
+            modifier = switchModifier,
+        )
+        // The door is the row's last mark. A chevron between the name and its
+        // switch reads as a third thing in the middle of the row; at the end
+        // it is what every other chevron in the app is, the mark that says a
+        // page is behind this row, and TalkBack hears the setting's state
+        // before it hears the door (owner decision, D-101).
         if (onOpen != null) {
             Box(
                 modifier = Modifier
@@ -252,19 +272,6 @@ fun ToggleRow(
                 )
             }
         }
-        // Where the row opens a page, the switch is the only thing that
-        // switches, so it takes its own clicks and carries the row's name: a
-        // control that reads "on" with nothing to say who is on tells TalkBack
-        // nothing. Where there is no page, the whole row is the control and the
-        // switch is only a picture of its state.
-        val switchModifier = Modifier
-            .then(if (opens) Modifier.semantics { contentDescription = title } else Modifier)
-            .then(if (switchTag != null) Modifier.testTag(switchTag) else Modifier)
-        Switch(
-            checked = checked,
-            onCheckedChange = if (opens) onChange else null,
-            modifier = switchModifier,
-        )
     }
 }
 

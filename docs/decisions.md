@@ -4548,3 +4548,107 @@ was deleted the same session, as the runbook requires: the artifact stays in
 build run 36263904415 and in Play, and `play-store/aab/` keeps only its own
 note. The tree is clean. The signed bundle's record is in this entry;
 nothing in the repository depends on the binary.
+
+## D-101: Four simplifications, on the owner's report
+
+Date: the thirty-second session. The owner read the tree and asked for four
+changes in the shape of the app: fold Go to Ayah into the surah list, fold
+Notes into Save, drop the word meanings from search, and move the settings
+chevron after the switch. Three were agreed as proposed; the second was
+reshaped after the owner pushed back on the first counter-proposal, and the
+reasoning is recorded here with the result.
+
+**1. A surah row is the door to its own ayahs.** Browse's Go to Ayah tab and
+the Surahs tab each held a list of the 114, and the picker's first step was
+the same `SurahRow` the Surahs tab draws. The tab is gone, and a tap on a
+surah opens its numbers as a page inside the sheet: a header with a back
+mark and the surah's name, place, length, and Arabic name, then the 48 dp
+ayah grid. One window and one back stack, not a second bottom sheet over the
+first, and the phone's back returns to the surah list before it leaves the
+sheet. The picker's "choose another surah" step is gone with the tab, since
+back plus another row does that.
+
+The place the grid marks is the current ayah when the opened surah is the
+one the reader is in, and otherwise the newest history entry in that surah.
+The owner asked whether the last-read ayah is not simply the current ayah:
+it is only when the tapped surah is the current one. The current place is
+one value in the settings, and `last-read.db` is the history around it, up
+to twenty places. Tapping Al-Baqarah while standing in Al-Fatihah must mark
+2:84, the place the reader left there, which is what `openSurah` already
+looked up before this change. Marking only the current ayah would have
+shown no mark and opened at ayah 1, a regression against the behavior the
+tap had. Tapping the first ayah of a surah with no place still opens the
+surah itself, so study mode lands on its opening rather than mid-list.
+
+**2. A note is written on a kept ayah, and the pill keeps its Note.** Saved
+and Notes were two tabs answering nearly the same question, so they are one
+list now: Saved draws every kept ayah, with the note previewed under the
+place when there is one and nothing when there is not, ordered by the most
+recent of the two moments, with the detail line naming which moment it is.
+The owner's first proposal was to remove Note from the pill and ask "add a
+note?" on every Save. The first counter-proposal, a Note action that appears
+only after an ayah is saved, was wrong and the owner said why: a reader taps
+a saved ayah to unsave it, so a door that only exists behind the saved state
+is a door nobody finds. The result keeps Note visible in the pill and fixes
+the model instead: writing a note saves the ayah with it (a note implies a
+save), Save stays one tap and silent, and removing a save that carries a
+note asks first, in a small sheet that shows the note, because the note goes
+with the save and the reader's own words are never taken by one tap. The
+`SavedStore` schema did not change shape; `DATABASE_VERSION` went to 5 with
+one migration that marks existing note-only rows as saved, carrying the
+note's own moment as when they were kept, so no reader loses a note to the
+merge. `clearNote` is gone; `setNote(null)` is the one way a note is
+cleared, and it keeps the save.
+
+**3. The word meanings stay in search.** This was measured in D-099 and the
+measurement was restated to the owner: "mercy" reaches 144 ayahs through the
+translation and 148 through the meanings, 139 shared, so 9 are reachable by
+the meanings alone, and in Bangla "অহংকার" reaches 40 ayahs through the
+meanings alone. The meanings source stays, the "Words" chip already lets a
+reader turn it off, and the 2.3 refinement that draws the matched word only
+when it is the row's only evidence is unchanged. No code moved.
+
+**4. The chevron is the row's last mark.** `ToggleRow` drew the chevron
+between the name and its switch, where it read as a third thing in the
+middle of the row. It now sits after the switch, so the name and its control
+stay together, the door is the row's final mark the way every other chevron
+in the app is, TalkBack hears the setting's state before the door, and an
+accidental tap at the trailing edge navigates (visible, back returns)
+instead of silently flipping a reading setting. The platform convention that
+puts a switch at the trailing edge is acknowledged and overridden for the
+combined row, a shape Material does not define, on the app's own
+consistency and on D-099's own accidental-toggle report.
+
+**Tests.** `GoToAyahTest` and `GoToAyahScrollTest` became `SurahAyahsTest`
+and `SurahAyahsScrollTest`, the second now pinning both place sources (the
+current ayah, and the history place of a surah the reader is not in).
+`NotesPreviewTest` became `SavedNotesTest`, which reads a note back from the
+merged Saved list and walks the removal through its confirmation; the
+screenshots workflow's class list was updated with the new name.
+`SavedStoreTest` was rewritten for the new model, including the version 5
+migration from versions 1, 2, and 3. `StringNameTest` and the browse strings
+lost `browse_tab_notes`, `browse_go_to_ayah`, `browse_choose_surah`, and the
+two `notes_empty` strings; the app gained the four `remove_saved_*` strings
+in English and Bangla.
+
+**Verification, and what the emulator met.** The JVM suite, lint, and
+`assembleDebug` are green. The data instrumented suite is 29/29, twice, on
+the phone emulator. The app suite ran 39 tests with 37 passing: the two
+failures are the documented environment classes. `ContentSearchTest
+.searchIsFastWhenWarm` failed its three-second budget on a loaded emulator
+(the runbook names the freshly booted class), and `SurahAyahsScrollTest
+.theReadersAyahOpensInTheMiddleOfTheGrid` recorded an empty failure body
+while `system-err` showed `device 'emulator-5554' not found`, the class the
+1.7 session met twice; the emulator died during that class and the five
+tests after it never ran, `SurahAyahsTest` among them. The tour,
+`SavedNotesTest` (both tests, including the confirmation), `BrowseNumbersTest`,
+and the settings tests passed. One reboot was spent and the device died
+again, so local connected runs were stopped, per the runbook. The
+instrumented authority is CI, and the store set must be recaptured for the
+next release: the Browse frame loses two chips and the settings frame moves
+three chevrons.
+
+**AGENTS.md.** The decisions list said "Last Read and Notes are Browse tabs
+beside Surahs, Juz, and Saved (D-051, D-074)"; it now reads that Last Read
+is the fourth tab and notes live inside Saved, on the owner's approval this
+session.

@@ -7,7 +7,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -16,9 +15,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * The saved-ayah database is the reader's own work, so its behavior is pinned:
- * Save and Note are two separate marks on one ayah, a toggle saves and
- * unsaves, a note stays with its ayah and never enters Saved by itself,
+ * The saved-ayah database is the reader's own work, so its behavior is
+ * pinned: a note is written on a kept ayah, so writing one keeps the ayah,
+ * a toggle saves and removes, removing the save removes the note with it,
  * newest comes first, and everything survives the app being closed.
  */
 @RunWith(AndroidJUnit4::class)
@@ -41,7 +40,7 @@ class SavedStoreTest {
     }
 
     @Test
-    fun toggleSavesAndUnsaves() = runBlocking {
+    fun toggleSavesAndRemoves() = runBlocking {
         store.load()
         store.toggle(262)
         assertEquals(listOf(262), store.saved.value.map { it.ayahNumber })
@@ -51,38 +50,37 @@ class SavedStoreTest {
     }
 
     @Test
-    fun aNoteDoesNotSaveTheAyah() = runBlocking {
+    fun aNoteSavesTheAyah() = runBlocking {
         store.setNote(262, "The Throne verse")
         val row = store.saved.value.single()
         assertEquals(262, row.ayahNumber)
         assertEquals("The Throne verse", row.note)
-        assertFalse("a note never enters Saved by itself", row.saved)
+        assertTrue("a note is written on a kept ayah, so it keeps the ayah", row.saved)
+        assertNotNull("the keep carries its own moment", row.savedAt)
     }
 
     @Test
-    fun savingAnAyahKeepsItsNote() = runBlocking {
-        store.setNote(262, "The Throne verse")
+    fun savingAnAyahThenWritingANoteKeepsBoth() = runBlocking {
         store.toggle(262)
+        store.setNote(262, "The Throne verse")
         val row = store.saved.value.single()
         assertTrue(row.saved)
         assertEquals("The Throne verse", row.note)
     }
 
     @Test
-    fun unsavingAnAyahKeepsItsNote() = runBlocking {
+    fun removingASaveRemovesItsNote() = runBlocking {
         store.toggle(262)
         store.setNote(262, "The Throne verse")
         store.unsave(262)
-        val row = store.saved.value.single()
-        assertFalse(row.saved)
-        assertEquals("The Throne verse", row.note)
+        assertTrue(store.saved.value.isEmpty())
     }
 
     @Test
     fun clearingANoteKeepsTheSave() = runBlocking {
         store.toggle(262)
         store.setNote(262, "The Throne verse")
-        store.clearNote(262)
+        store.setNote(262, null)
         val row = store.saved.value.single()
         assertTrue(row.saved)
         assertNull(row.note)
@@ -96,22 +94,7 @@ class SavedStoreTest {
     }
 
     @Test
-    fun clearingANoteWithNoSaveDropsTheRow() = runBlocking {
-        store.setNote(1, "a passing thought")
-        store.clearNote(1)
-        assertTrue(store.saved.value.isEmpty())
-    }
-
-    @Test
-    fun blankNoteClearsTheRowItAloneCreated() = runBlocking {
-        store.setNote(262, "a note")
-        store.setNote(262, "   ")
-        assertTrue(store.saved.value.isEmpty())
-    }
-
-    @Test
-    fun blankNoteOnASavedAyahKeepsTheSave() = runBlocking {
-        store.toggle(262)
+    fun blankNoteClearsTheNoteAndKeepsTheSave() = runBlocking {
         store.setNote(262, "a note")
         store.setNote(262, "   ")
         val row = store.saved.value.single()
@@ -159,13 +142,13 @@ class SavedStoreTest {
     }
 
     @Test
-    fun theSaveMomentBelongsToTheCurrentSave() = runBlocking {
+    fun aRemovedSaveReturnsWithItsOwnLaterMoment() = runBlocking {
         store.toggle(262)
         val first = store.saved.value.single().savedAt
         assertNotNull(first)
         store.setNote(262, "kept")
         store.unsave(262)
-        assertNull("an unsaved row carries no save moment", store.saved.value.single().savedAt)
+        assertTrue(store.saved.value.isEmpty())
         store.toggle(262)
         val second = store.saved.value.single().savedAt
         assertNotNull(second)
@@ -176,7 +159,7 @@ class SavedStoreTest {
      * A reader who updates the app keeps the notes they wrote before the
      * notes list existed. The moment of the note was not recorded then, so
      * the ayah's own moment is the closest true answer left on the device,
-     * and that is what the migration writes.
+     * and that is what the migrations write.
      */
     @Test
     fun aNoteFromBeforeTheNotesListKeepsItsAyahsMoment() = runBlocking {
@@ -192,19 +175,19 @@ class SavedStoreTest {
         val row = reopened.saved.value.single()
         assertEquals("an old note", row.note)
         assertEquals(1234L, row.noteAt)
-        assertFalse("a note written alone never enters Saved", row.saved)
+        assertTrue("a note written alone enters Saved", row.saved)
+        assertEquals("its keep carries the note's own moment", 1234L, row.savedAt)
         reopened.close()
     }
 
     /**
-     * The version 3 migration has one question it can answer: a row whose note
-     * was written in the same insert as the row itself (the two moments are
-     * one) was written by the note alone; a note written later than the row
-     * cannot be told from a note the reader edited, and that row stays saved,
-     * so nothing the reader saved is lost.
+     * Version 5 brings note-only rows into Saved: a note is written on a kept
+     * ayah, so a reader who only wrote notes keeps them all, each dated by
+     * the note's own moment, the closest true answer for when it was kept.
+     * A row that was already saved keeps the moment it already had.
      */
     @Test
-    fun theSaveNoteMigrationLeavesNoteOnlyRowsOutOfSaved() = runBlocking {
+    fun theNoteMergeBringsNoteOnlyRowsIntoSaved() = runBlocking {
         writeLegacyDatabase(
             version = 2,
             create = "CREATE TABLE saved (" +
@@ -217,8 +200,10 @@ class SavedStoreTest {
         val reopened = SavedStore(context)
         reopened.load()
         val byAyah = reopened.saved.value.associateBy { it.ayahNumber }
-        assertFalse(byAyah.getValue(262).saved)
+        assertTrue(byAyah.getValue(262).saved)
+        assertEquals(1000L, byAyah.getValue(262).savedAt)
         assertTrue(byAyah.getValue(263).saved)
+        assertEquals(500L, byAyah.getValue(263).savedAt)
         reopened.close()
     }
 
@@ -226,10 +211,10 @@ class SavedStoreTest {
      * A version 3 database kept one moment for the row and one for the note,
      * so a row saved before the save's own column existed starts with its
      * row's moment, the closest true answer left on the device, and a
-     * note-only row keeps none.
+     * note-only row is brought into Saved with the note's own moment.
      */
     @Test
-    fun theSaveMomentMigrationBackfillsOnlySavedRows() = runBlocking {
+    fun theSaveMomentMigrationBackfillsSavedAndNoteRows() = runBlocking {
         writeLegacyDatabase(
             version = 3,
             create = "CREATE TABLE saved (" +
@@ -243,7 +228,8 @@ class SavedStoreTest {
         reopened.load()
         val byAyah = reopened.saved.value.associateBy { it.ayahNumber }
         assertEquals(1000L, byAyah.getValue(262).savedAt)
-        assertNull(byAyah.getValue(263).savedAt)
+        assertTrue(byAyah.getValue(263).saved)
+        assertEquals(900L, byAyah.getValue(263).savedAt)
         reopened.close()
     }
 

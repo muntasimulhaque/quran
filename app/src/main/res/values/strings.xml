@@ -45,6 +45,14 @@
     <string name="action_close">Close</string>
     <string name="action_cancel">Cancel</string>
 
+    <!-- The question before a save that carries a note is removed: the note
+         is the reader's own writing, so it is asked about, never taken by
+         one tap (D-101). -->
+    <string name="remove_saved_title">Remove this saved ayah?</string>
+    <string name="remove_saved_body">The note you wrote on it will be removed too.</string>
+    <string name="remove_saved_action">Remove</string>
+    <string name="remove_saved_keep">Keep</string>
+
 
     <!-- The reader's own pack progress. The name carries the module that
          draws it, so two modules can never both own a `pack_downloading`
