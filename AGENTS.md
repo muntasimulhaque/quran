@@ -1001,7 +1001,7 @@ fetching them again; the space is worth less than the time.
 ## Where the project stands (end of the thirty-second session)
 
 **The tree answers the owner's simplification report (D-101), and 2.4
-(versionCode 25) is prepared for submission at the owner's word.** The
+(versionCode 25) is submitted to Google Play for review.** The
 session folded Go to Ayah into the surah list, folded Notes into Saved,
 kept the search word meanings (with D-099's numbers restated), and moved
 the settings chevron after the switch.
@@ -1047,8 +1047,9 @@ read.
 **The bundle:** `quran-2.4-vc25.aab` from the green build run 36299617649:
 148,092,639 bytes, SHA-256
 `7bc5da4ba7f69cc94ad0626e4f5e937b9fd82aae12c64bde8bf824065e539970`,
-`jar verified`, signed with the shared upload key. The hand-off copy is in
-`play-store/aab/` until the submission is confirmed.
+`jar verified`, signed with the shared upload key. The submission is
+confirmed and the hand-off copy was deleted; the artifact stays in build run
+36299617649 and in Play, and `play-store/aab/` keeps only its own note.
 
 **The store set:** run 36299617648 attempt 2 (the phone leg's first attempt
 met the loaded-emulator class in `SavedNotesTest` and the rerun passed;

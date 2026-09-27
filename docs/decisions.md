@@ -4709,3 +4709,11 @@ it is deleted as the runbook requires.
 **The listing.** The version line reads 2.4 (versionCode 25), the release
 notes are 398 characters, and the full description's Browse sentence now
 names one list with the notes under the ayahs they were written on.
+
+**The submission is confirmed, so the hand-off is closed.** The owner
+submitted 2.4 to Google Play for review, and the hand-off copy of
+`quran-2.4-vc25.aab` was deleted the same session, as the runbook requires:
+the artifact stays in build run 36299617649 and in Play, and
+`play-store/aab/` keeps only its own note. The tree is clean. The signed
+bundle's record is in this entry; nothing in the repository depends on the
+binary.
