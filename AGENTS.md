@@ -1015,9 +1015,9 @@ fetching them again; the space is worth less than the time.
 ## Where the project stands (end of the thirty-sixth session)
 
 **The tree carries the owner's two reports: the settings tail puts every
-switch last, and the icon and the feature graphic are redrawn as the center of a
-mushaf cover (D-111, D-112).** No `versionCode` moved; 2.7 stays the
-submitted release, and the assets ride the next one.
+switch last, and the icon and the feature graphic are redrawn as the center
+of a mushaf cover (D-111, D-112). 2.8 (versionCode 29) is prepared for
+submission (D-113), its hand-over closed.**
 
 - **The settings tail is two columns, switch last.** On a row that carries
 both a switch and a chevron, the chevron stands one column before the
@@ -1027,13 +1027,24 @@ sheet's edge and all chevrons at one place before them.
 compact height.
 - **The icon and the feature graphic are the center of a mushaf cover.** The mark is a twelve petal shamsa in flat champagne gold on an ink navy field, a finial in every notch, a ray and bead ring, and the word القرآن in the app's Amiri at the center, with two pendants on the vertical axis (D-112). The store icon wears the pendants; the adaptive foreground is the medallion alone inside the safe zone; the shared card carries a miniature of the same medallion. The feature graphic is the medallion centered inside two thin rules at 1024x500, 24-bit with no alpha. The palette is the owner's correction: ink navy and champagne gold, flat, no metallic ramps.
 
-**The suite.** `:core:test`, `:data:testDebugUnitTest`,
-`:app:testDebugUnitTest`, `:app:lintDebug`, and `:app:assembleDebug` are
-green on the zn machine, and `:app:compileDebugAndroidTestKotlin` compiles.
-There are no AVDs on this machine, so the instrumented suites did not run
-locally; CI is their authority. The committed store set differs from the
-tree in the settings frames alone (D-111); the next release's capture
-refreshes it, never by hand.
+**The suite and the gates.** The JVM suite, `:app:lintDebug`,
+`:app:assembleDebug`, and `:app:compileDebugAndroidTestKotlin` are green on
+the zn machine. All five owner gates ran green: `verify` 29 datasets,
+`audit` 0 unexplained differences, `fonts` all coverage checks, `search`,
+and `checkdb`. There are no AVDs on this machine, so the instrumented
+suites are CI's: the build run's data leg and the capture run's three legs
+passed.
+
+**The 2.8 push.** Build run 36448152402 attempt 1 green: the gates, the data
+instrumented suite, and the signed bundle (`quran-2.8-vc29.aab`,
+148,728,995 bytes, SHA-256 `e13f1eca...b03d2f`, `jar verified`). Capture run
+36448152056 attempt 1 went red on the tablet10 leg alone (the launcher ANR
+over the keyboard-heavy search frame, class 4 of
+`docs/screenshot-failures.md`, and the guard refused the frame); one rerun,
+attempt 2 green on all three legs. The store set is refreshed: 24 frames
+`cmp`'d against their artifacts, the settings frames carry the new tail and
+Version 2.8, and the rest is the status bar clock, the tablet10 keyboard
+chrome, and subpixel antialiasing.
 
 ## Where the project stands (end of the thirty-fifth session)
 

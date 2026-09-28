@@ -5170,3 +5170,41 @@ simulated circle and squircle masks, and against the owner's references
 before it was installed. No `versionCode` moved for this: the assets ride
 the next release, and the next capture refreshes the settings frames D-111
 changed.
+
+## D-113: The 2.8 release
+
+Date: the thirty-sixth session, at the owner's word "go for play release".
+2.8 (versionCode 29) carries D-111's settings tail and D-112's shamsa icon
+and feature graphic.
+
+**The gates.** All five owner gates ran green on this machine before the
+push: `verify` 29 datasets, `audit` 0 unexplained differences, `fonts` all
+coverage checks (628,169 study codepoints, 604 pages, 22,985,678 reading
+codepoints), `search` (63 Arabic round trips, 65 Bangla round trips, 82
+non-ASCII codepoints, 465 excerpts), and `checkdb` (the committed database,
+128,966,656 bytes, SHA-256 380e0442..., 10 pack files).
+
+**The suite.** `:core:test`, `:data:testDebugUnitTest`,
+`:app:testDebugUnitTest`, `:app:lintDebug`, `:app:assembleDebug`, and
+`:app:compileDebugAndroidTestKotlin` are green on this machine. There are no
+AVDs here, so the instrumented suites are CI's: the build run's data leg
+passed, and the capture run's three legs ran the app suite.
+
+**The push.** Build run 36448152402 attempt 1 green: the gates, the data
+instrumented suite, and the signed bundle. Capture run 36448152056 attempt 1
+went red on the tablet10 leg alone: the launcher ANR over the keyboard-heavy
+search frame, class 4 of `docs/screenshot-failures.md`, with the guard
+refusing the frame; one rerun, and attempt 2 is green on all three legs.
+
+**The store set.** Eight frames per form factor, 24 in all, from attempt 2
+of run 36448152056 for tablet10 and attempt 1 for the other two. Every frame
+was compared with its artifact by `cmp` (24 matches) and every changed frame
+was read: the settings frames carry the new tail (switch last, two columns)
+and Version 2.8; the other changes are the status bar clock, the tablet10
+search frame's soft keyboard chrome, and subpixel antialiasing, a maximum
+delta of 2 of 255 on the tablet10 Mushaf frame.
+
+**The bundle.** `quran-2.8-vc29.aab`, 148,728,995 bytes, SHA-256
+`e13f1ecad0de92b45675cdea623413b8fb39af53d8dc218886fad89db3b03d2f`, matching
+the artifact's own checksum file, `jar verified`, signed with the shared
+upload key (`53:7D:09:D2:...:0D:9D:E5:21`).
