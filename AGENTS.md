@@ -1008,6 +1008,55 @@ fetching them again; the space is worth less than the time.
   form factor.
 
 
+## Where the project stands (end of the thirty-fifth session)
+
+**The tree answers the owner's work on 2.6 and carries 2.7 (versionCode 28),
+prepared for submission at the owner's word (D-108, D-109).**
+
+- **Search leads with a surah name, then a reference.** The only query that
+yields both is a bare number, and the surah card is the better landing there
+than 2:1; a full reference still has no surah hit to displace it.
+- **Bangla wording pass.** `settings_keep_awake_subtitle`, the fuller
+  `settings_daily_note`, `settings_daily_blocked`, `settings_translations_note`,
+  `settings_speed_note`, `last_read_empty_title`, and `share_unavailable`
+  were corrected; the owner kept `action_clear`, `action_play`,
+  `playback_reciter_ready`, and `action_browse`.
+- **The daily reminder's text is centered.** The collapsed and big texts
+  carry an `AlignmentSpan`; if the system ignores paragraph spans the
+  reminder is exactly what it was.
+- **Content stays current quietly.** `PackUpdater` replaces a pack the
+  reader already has when the app carries a newer version, only on an
+  unmetered connection, only after the first page is readable. The manual
+  Check installed content shows Updating and repairs what it finds, ending
+  in "Everything installed is intact." or a positive "Update available".
+  D-109 amends the offline rule; D-023 is amended for the second time.
+
+**The suite and the gates.** `:core:test`, `:data:testDebugUnitTest`,
+`:app:lintDebug`, and `:app:assembleDebug` are green. The data instrumented
+suite is 33/33 (29 plus the new `PackVerifierTest`, whose stale/current/
+absent/shipped detection is pinned). The app instrumented suite was attempted
+twice on the phone emulator and the device vanished mid-run both times
+(23 of 48, then 38 of 48, with `ComposeTimeoutException`, a missing node as a
+sheet never drew, and an empty failure body), the documented loaded-emulator
+class on this machine; the capture workflow ran its six named classes green
+on all three legs, and CI is the instrumented authority. All five owner gates
+ran green on this machine: `verify` 29 datasets, `audit` 0 unexplained
+differences, `fonts` all coverage checks, `search`, and `checkdb`.
+
+**The 2.7 push.** Build run 36395366975 attempt 1 green: the gates, the data
+instrumented suite, and the signed bundle. Capture run 36395366904 attempt 1,
+all three legs green first try. The store set was refreshed, 24 frames
+compared with their artifacts by `cmp` and every changed frame read; the
+settings frames carry Version 2.7, the tablet10 search difference is the
+keyboard's chrome alone, and the rest is the status bar clock and subpixel
+antialiasing.
+
+**The bundle.** `quran-2.7-vc28.aab`, 148,102,394 bytes, SHA-256
+`bc3e382ce703fa166183e4033da3c52a71cbf2f853f3b58a55f12c19d3c51381`,
+`jar verified`, signed with the shared upload key
+(`53:7D:09:D2:...:0D:9D:E5:21`). The hand-off copy sits in `play-store/aab/`
+until the owner confirms the submission.
+
 ## Where the project stands (end of the thirty-fourth session)
 
 **The tree answers the owner's report on 2.5 (D-105), and 2.6

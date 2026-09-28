@@ -169,6 +169,18 @@ tablet10 the Mushaf differs only in subpixel antialiasing (a maximum delta
 of 2 of 255) and the chrome and study frames in three pixels. The surah
 opening frame is byte-identical on all three.
 
+The set is refreshed for 2.7 from run 36395366904 attempt 1, all three legs
+green first try, no reruns. Every frame was compared with its artifact by
+`cmp` (24 matches) and every changed frame was read before it shipped. The
+settings frames are the release's: the About row reads Version 2.7 on both
+tablet form factors (the phone's About row sits below the sheet's visible
+area, so its frame differs only in the status bar clock). The tablet10
+search frame differs only in the soft keyboard's chrome below the results,
+which are unchanged; the Mushaf frames differ only in subpixel antialiasing
+(a maximum delta of 4 of 255 on the phone), and the rest only in the status
+bar clock and the search cursor's blink. No frame was added or removed; the
+set stays at eight per form factor.
+
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
 creating the emulator, waits for the emulated storage to mount before the test
