@@ -4,8 +4,25 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 2.6 (versionCode 27) is submitted to Google Play for review
-(D-105, D-106):
+**Status:** 2.7 (versionCode 28) is submitted to Google Play for review
+(D-108, D-109, D-110):
+
+- Search leads with a surah name when a bare number can read as one, then a
+  reference, so "2:255" still opens the verse and a surah name lands on the
+  surah.
+- The Bangla surface had a wording pass, and the daily reminder's text is
+  centered.
+- A pack the reader already has is refreshed quietly when the app carries a
+  newer version, on an unmetered connection only and only after the first
+  page is readable; the manual Check installed content repairs what it finds
+  (D-109 amends the offline rule).
+
+The tree also carries the thirty-sixth session's work, which will ride the
+next release: the settings rows put every switch last, with all switches on
+one line and all chevrons on another (D-111), and the icon and the feature
+graphic are redrawn from the physical mushaf (D-112).
+
+**2.6** carries (D-105, D-106):
 
 - Settings reads tighter: the list rows keep their compact height again,
 and the switch for a translation, a tafsir, or the daily reminder lives

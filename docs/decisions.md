@@ -5103,3 +5103,76 @@ status bar clock and subpixel antialiasing.
 `jar verified`, signed with the shared upload key. The owner submitted 2.7 to
 Google Play for review and confirmed it, so the hand-off copy was deleted the
 same session; the artifact stays in build run 36395366975.
+
+## D-111: The settings tail: the switch is the row's last mark
+
+Date: the thirty-sixth session, from the owner's report.
+
+The owner read the settings sheet and asked for two things: on a row that
+carries both a switch and a chevron, the switch is to be the last item, and
+the two kinds of control are each to stand on one line of their own, so all
+switches share one vertical line and all chevrons another.
+
+The tail is now two fixed columns: the chevron's, 48 dp, then the switch's,
+52 dp (Material 3's own track). A row draws the marks it carries and leaves
+the other column's room empty, and the switch is always the row's last mark.
+A chevron-only row therefore ends with empty switch room, which is the price
+of every chevron standing at one place; the switch always ends at the sheet's
+edge.
+
+`SettingsRowAlignmentTest` pins both columns and the order: a switch-only row
+and a row with a door end their switches at one line, the page row's chevron
+and the door row's chevron share both edges, the door's chevron ends before
+the door's switch begins, and the page row keeps its compact height. The
+52 dp slot is a number kept beside the code, and the test measures the real
+control against it, so a Material release that widens the track fails there
+instead of moving every chevron off the line.
+
+## D-112: The icon and the feature graphic are drawn from the mushaf
+
+Date: the thirty-sixth session, from the owner's report that the mark was
+basic and the brief to make the most beautiful icon.
+
+The old mark was a line-drawn eight-point star and a ring on navy: clean,
+but it belonged to no particular object. The new art is drawn from the
+physical mushaf, studied from museum photographs: the Mamluk frontispiece
+(TIEM 450), the Sultan Barquq Qur'an's decagram medallion and its juz'
+opening, the Uljaytu Mosul Qur'an's carpet page, and the Ashmolean's
+thirty-volume unwan. Their vocabulary is the mark's: a carpet page facing
+the first text page, an octagram medallion in gold, a surah headpiece in
+white on burnished gold, verse-marker roundels, a ruled cover border, and a
+crimson ribbon.
+
+What is in the icon: an open mushaf on a lapis field with a faint
+octagon-and-cross girih. The left page is a carpet page, its lapis field
+carrying a gold octagram medallion with pendant drops and corner leaves.
+The right page carries the unwan, the surah name in white, and Al-Fatihah
+itself, right aligned in Amiri, every verse closed by a gold roundel. The
+text is read from `content/quran.db`, so not one byte is retyped. A crimson
+ribbon falls from between the leaves. The store icon adds the cover's ruled
+border with corner lozenges.
+
+The feature graphic (1024x500, 24-bit, no alpha, the Play requirement the
+old file broke) is a mushaf page of the banner's shape: a rule, a lapis
+scroll band, and a gold band frame the canvas; the same opening stands left
+of center; القرآن is set in the app's own Amiri at the right, under a gold
+rule with "The Noble Book". The left side stays quiet, because Play lays
+the app's icon and name over the banner's lower left.
+
+The layers: `mipmap-*/ic_launcher.png` (legacy), `ic_launcher_fg.png` (the
+book alone, inside the 108 dp safe zone), `ic_launcher_bg.png` (the lapis
+field and its girih), and `ic_launcher_mono.png` (the themed icon: the book
+opening with the medallion, the headpiece, and the reading lines as one
+mark). The shared ayah card no longer uses the launcher's foreground: the
+whole opening at 20 dp would be mud, so the card carries the medallion star
+the icon is built around, drawn as `drawable-*/ic_share_mark.png` on the
+card's lapis square.
+
+The art was drawn at a high master resolution with Pillow and downsampled,
+with the app's own faces (Amiri for the Arabic, Literata and Inter for the
+Latin) and the palette of `ui-kit/theme/Color.kt` deepened for the cover:
+lapis #1E588A and #0A2038, gold #F6DE9A through #68480E, parchment #FAF3E4,
+crimson #AA3734. The design was read back at real sizes (48 dp through
+192 dp) and under simulated circle and squircle masks before it was
+installed. No `versionCode` moved for this: the assets ride the next
+release, and the next capture refreshes the settings frames D-111 changed.

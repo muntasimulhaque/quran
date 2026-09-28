@@ -1,9 +1,6 @@
 package io.github.muntasimulhaque.quran.ui.settings
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,9 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -24,36 +19,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import io.github.muntasimulhaque.quran.data.AppTheme
-import io.github.muntasimulhaque.quran.data.ContentPack
-import io.github.muntasimulhaque.quran.data.PackType
-import io.github.muntasimulhaque.quran.data.TextSize
-import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.feature.settings.R
-import io.github.muntasimulhaque.quran.ui.kit.TextButton
-import io.github.muntasimulhaque.quran.ui.kit.SpeedSteps
-import io.github.muntasimulhaque.quran.ui.kit.formatBytes
-import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
-import io.github.muntasimulhaque.quran.ui.theme.BlackBackground
-import io.github.muntasimulhaque.quran.ui.theme.BlackText
-import io.github.muntasimulhaque.quran.ui.theme.NightBackground
-import io.github.muntasimulhaque.quran.ui.theme.NightText
-import io.github.muntasimulhaque.quran.ui.theme.PaperBackground
-import io.github.muntasimulhaque.quran.ui.theme.PaperInk
-import io.github.muntasimulhaque.quran.ui.theme.SepiaBackground
-import io.github.muntasimulhaque.quran.ui.theme.SepiaInk
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -78,8 +53,8 @@ fun Group(title: String) {
 
 /**
  * One category in the settings hub: what it is called, where it stands right
- * now, and the chevron that says it opens something, in the same slot every
- * other row's chevron keeps (owner report, D-103).
+ * now, and the chevron that says it opens something, in the chevron's own
+ * column of the row's tail, before the switch's column (D-111).
  */
 @Composable
 fun PageRow(
@@ -110,15 +85,16 @@ fun PageRow(
                 modifier = Modifier.padding(end = 10.dp),
             )
         }
-        ChevronSlot(visible = true)
+        RowTail(chevron = true)
     }
 }
 
 /**
- * The chevron that ends a settings row, in the one slot every row keeps:
- * 48 dp wide, drawn when the row has a page behind it and held empty when it
- * does not, so every switch ends at one line and every chevron sits at one
- * place whatever the row carries (owner report, D-103).
+ * The chevron that stands one column in from a settings row's end, where
+ * every row keeps it: 48 dp wide, drawn when the row has a page behind it
+ * and held empty when it does not, so every chevron in the sheet stands at
+ * one place and every switch at another, whatever the row carries (owner
+ * report, D-111).
  *
  * The slot owns a 48 dp square only when the chevron is a control of its
  * own. On every other row it is a width, not a height: a square tail is
@@ -208,6 +184,40 @@ fun PageHeader(title: String, onBack: () -> Unit) {
 }
 
 /**
+ * Material 3's switch is one track wide, 52 dp, and the tail reserves that
+ * exact width so the chevron column lands at one place whether the row
+ * carries a switch or not. [SettingsRowAlignmentTest] measures the real
+ * control against this number, so a Material release that widens the track
+ * fails there instead of silently moving every chevron off the line.
+ */
+private val SwitchSlot = 52.dp
+
+/**
+ * The two columns every settings row ends with: the chevron's, then the
+ * switch's. A row draws the marks it carries and leaves the other column's
+ * room empty, so every chevron in the sheet stands at one place and every
+ * switch at another, whatever a row carries, and the switch is always the
+ * line's last mark (owner report, D-111).
+ */
+@Composable
+private fun RowTail(
+    chevron: Boolean,
+    onOpen: (() -> Unit)? = null,
+    chevronLabel: String? = null,
+    switch: @Composable () -> Unit = {},
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        ChevronSlot(visible = chevron, onOpen = onOpen, label = chevronLabel)
+        Box(
+            modifier = Modifier.width(SwitchSlot),
+            contentAlignment = Alignment.CenterEnd,
+        ) {
+            switch()
+        }
+    }
+}
+
+/**
  * A switch, and, when [onOpen] is given, the door to the page its content is
  * chosen on.
  *
@@ -227,14 +237,12 @@ fun PageHeader(title: String, onBack: () -> Unit) {
  * showing what it lists, and its own switch turns it on from there.
  *
  * Without [onOpen] the whole row stays the switch, which is what a row with
- * nowhere to go owes a finger. The chevron keeps its own touch target and its
- * own spoken name beside the door, so TalkBack reads a switch and a door
- * rather than one crowded control, and it sits after the switch, as the row's
- * last mark: the door is where the row ends, while the switch stays beside the
- * name it controls (owner decision, D-101). Its slot is kept even when the
- * row has no door, so every switch in the sheet ends at the same line and
- * every chevron sits at the same place, whatever a row carries (owner report,
- * D-103).
+ * nowhere to go owes a finger. The switch is the row's last mark, at the
+ * sheet's edge, and the chevron sits one column before it whether the row has
+ * a door or not, so every switch in the sheet ends at one line and every
+ * chevron stands at one place (owner report, D-111). The chevron keeps its
+ * own touch target and its own spoken name beside the door, so TalkBack reads
+ * a switch and a door rather than one crowded control.
  */
 @Composable
 fun ToggleRow(
@@ -294,192 +302,16 @@ fun ToggleRow(
         val switchModifier = Modifier
             .then(if (opens) Modifier.semantics { contentDescription = title } else Modifier)
             .then(if (switchTag != null) Modifier.testTag(switchTag) else Modifier)
-        Switch(
-            checked = checked,
-            onCheckedChange = if (opens) onChange else null,
-            modifier = switchModifier,
-        )
-        ChevronSlot(visible = onOpen != null, onOpen = onOpen, label = openLabel)
-    }
-}
-
-/** One choice among several: the reader takes one, and the mark says which. */
-@Composable
-fun ChoiceRow(
-    title: String,
-    subtitle: String?,
-    selected: Boolean,
-    onClick: () -> Unit,
-    trailing: @Composable () -> Unit = {},
-    /** The room under the row; a row with a block beneath it keeps less. */
-    bottomPadding: Dp = 12.dp,
-) {
-    SettingRow(
-        title = title,
-        subtitle = subtitle,
-        selected = selected,
-        role = Role.RadioButton,
-        onClick = onClick,
-        bottomPadding = bottomPadding,
-        trailing = trailing,
-    ) { Mark(selected = selected, radio = true) }
-}
-
-/** A row that can be on or off among many, with a check for its state. */
-@Composable
-fun MarkRow(
-    title: String,
-    subtitle: String?,
-    selected: Boolean,
-    onClick: () -> Unit,
-    trailing: @Composable () -> Unit = {},
-) {
-    SettingRow(
-        title = title,
-        subtitle = subtitle,
-        selected = selected,
-        role = Role.Checkbox,
-        onClick = onClick,
-        trailing = trailing,
-    ) { Mark(selected = selected, radio = false) }
-}
-
-/**
- * One pack in a list of choices: a mark for its state, its name, and the one
- * action it needs. The mark and the name are one control, so a reader who
- * taps the name of a pack they do not have yet is asking for it, with the
- * size already on the row in front of them; a reader who taps a name they do
- * have turns it on or off. The action at the right is the same door for a
- * reader who looks for a button instead of a row.
- *
- * Radios for a reciter, checks for translations, tafsirs, and word lists:
- * one reciter is heard at a time, while more than one reading may be on.
- */
-@Composable
-fun PackChoiceRow(
-    pack: ContentPack,
-    subtitle: String,
-    selected: Boolean,
-    radio: Boolean,
-    setup: PackSetupState?,
-    onActivate: () -> Unit,
-    onInstall: () -> Unit,
-    onRemove: () -> Unit,
-    /** The room under the row; a row with a block beneath it keeps less. */
-    bottomPadding: Dp = 12.dp,
-) {
-    val busy = setup?.packId == pack.id && setup.failed.not()
-    SettingRow(
-        title = pack.name,
-        subtitle = subtitle,
-        selected = selected,
-        role = if (radio) Role.RadioButton else Role.Checkbox,
-        // A pack that is not here yet cannot be turned on: its row is the
-        // door that brings it here instead, and nothing looks selectable
-        // while it is on its way in.
-        onClick = if (pack.installed && !busy) onActivate else onInstall,
-        bottomPadding = bottomPadding,
-        trailing = { PackTrailing(pack, setup, onInstall, onRemove) },
-    ) { Mark(selected = selected, radio = radio) }
-}
-
-/**
- * A row with a mark at its left, the way a list of choices is read: the mark
- * comes before the name, so the eye lands on the state first and the name
- * reads as the thing it belongs to. The whole row is one tappable control.
- *
- * The mark and the name keep a clear gap between them: a radio set against
- * the word it selects reads as one crowded glyph, and the reader has to look
- * twice to see which mark belongs to which name.
- */
-@Composable
-private fun SettingRow(
-    title: String,
-    subtitle: String?,
-    selected: Boolean,
-    role: Role,
-    onClick: () -> Unit,
-    bottomPadding: Dp = 12.dp,
-    trailing: @Composable () -> Unit,
-    mark: @Composable () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .minimumInteractiveComponentSize()
-            .selectable(selected = selected, role = role, onClick = onClick)
-            .padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = bottomPadding),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        mark()
-        Column(
-            Modifier
-                .weight(1f)
-                .padding(start = 16.dp),
+        RowTail(
+            chevron = onOpen != null,
+            onOpen = onOpen,
+            chevronLabel = openLabel,
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
+            Switch(
+                checked = checked,
+                onCheckedChange = if (opens) onChange else null,
+                modifier = switchModifier,
             )
-            if (!subtitle.isNullOrBlank()) {
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 1.dp),
-                )
-            }
-        }
-        Box(Modifier.padding(start = 12.dp)) { trailing() }
-    }
-}
-
-/** The app's own mark: a drawn ring and dot, or a check, never a stock icon. */
-@Composable
-private fun Mark(selected: Boolean, radio: Boolean) {
-    val accent = MaterialTheme.colorScheme.primary
-    Box(
-        modifier = Modifier.size(22.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        androidx.compose.foundation.Canvas(Modifier.size(22.dp)) {
-            val w = size.width
-            val h = size.height
-            if (radio) {
-                drawCircle(
-                    // An unselected mark is a control boundary, so it holds the
-                    // 3:1 a control owes; 0.6 of the accent was measured at
-                    // 3.0:1 and up on all four grounds, where the 0.35 it wore
-                    // measured 1.8:1 and read as nothing (D-084).
-                    color = if (selected) accent else accent.copy(alpha = 0.6f),
-                    radius = w * 0.42f,
-                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = w * 0.09f),
-                )
-                if (selected) {
-                    drawCircle(color = accent, radius = w * 0.2f)
-                }
-            } else if (selected) {
-                drawLine(
-                    color = accent,
-                    start = androidx.compose.ui.geometry.Offset(w * 0.16f, h * 0.52f),
-                    end = androidx.compose.ui.geometry.Offset(w * 0.42f, h * 0.78f),
-                    strokeWidth = w * 0.13f,
-                )
-                drawLine(
-                    color = accent,
-                    start = androidx.compose.ui.geometry.Offset(w * 0.42f, h * 0.78f),
-                    end = androidx.compose.ui.geometry.Offset(w * 0.84f, h * 0.22f),
-                    strokeWidth = w * 0.13f,
-                )
-            } else {
-                drawCircle(
-                    // The same control-boundary rule as the radio mark above.
-                    color = accent.copy(alpha = 0.6f),
-                    radius = w * 0.42f,
-                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = w * 0.09f),
-                )
-            }
         }
     }
 }
@@ -532,282 +364,6 @@ fun ValueRow(title: String, value: String) {
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(0.6f),
         )
-    }
-}
-
-/**
- * The action one pack row carries: Add when it is not here, Retry when a
- * download failed, its progress while it is on its way, Remove once it is. A
- * row already in use shows nothing else, because the mark at the left already
- * says what state it is in.
- */
-@Composable
-private fun PackTrailing(
-    pack: ContentPack,
-    setup: PackSetupState?,
-    onInstall: () -> Unit,
-    onRemove: () -> Unit,
-) {
-    when {
-        setup?.packId == pack.id && setup.failed ->
-            TextButton(
-                label = stringResource(R.string.pack_action_retry),
-                onClick = onInstall,
-            )
-
-        setup?.packId == pack.id -> Text(
-            text = if (setup.progress == null) {
-                stringResource(R.string.settings_pack_preparing)
-            } else {
-                stringResource(R.string.settings_pack_downloading, (setup.progress * 100).toInt())
-            },
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
-        !pack.installed -> TextButton(
-            label = stringResource(R.string.pack_action_add),
-            onClick = onInstall,
-        )
-
-        pack.shipped -> Text(
-            text = stringResource(R.string.pack_included),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
-        else -> TextButton(
-            label = stringResource(R.string.pack_action_remove),
-            onClick = onRemove,
-            quiet = true,
-        )
-    }
-}
-
-/**
- * The four grounds, as swatches: each one is the page it will paint. The
- * swatch that is filled is the page the reader is actually reading on, not
- * the stored day choice: with automatic night mode on and the phone in dark
- * mode, Night draws the app, so Night is what the row says (owner report,
- * D-097). The day choice is named in the note under the switch, and a tap
- * still sets the day page.
- */
-@Composable
-fun ThemeRow(
-    selected: AppTheme,
-    onSelect: (AppTheme) -> Unit,
-    /** The page drawn right now, when the system has a say. */
-    shown: AppTheme = selected,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = Space.Tight),
-    ) {
-        AppTheme.entries.forEach { theme ->
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .minimumInteractiveComponentSize()
-                    .clip(RoundedCornerShape(14.dp))
-                    .selectable(selected = theme == shown, role = Role.RadioButton) {
-                        onSelect(theme)
-                    }
-                    .padding(horizontal = 6.dp, vertical = 8.dp),
-            ) {
-                val (ground, ink) = theme.swatch()
-                Box(
-                    modifier = Modifier
-                        .size(46.dp)
-                        .clip(CircleShape)
-                        .background(ground)
-                        .border(
-                            width = if (theme == shown) 2.dp else 1.dp,
-                            color = if (theme == shown) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.outline
-                            },
-                            shape = CircleShape,
-                        ),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = "\u0627",
-                        style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp),
-                        color = ink,
-                    )
-                }
-                Text(
-                    text = theme.name(),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (theme == shown) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-                    modifier = Modifier.padding(top = Space.Line),
-                )
-            }
-        }
-    }
-}
-
-fun AppTheme.swatch(): Pair<Color, Color> = when (this) {
-    AppTheme.Paper -> PaperBackground to PaperInk
-    AppTheme.Sepia -> SepiaBackground to SepiaInk
-    AppTheme.Night -> NightBackground to NightText
-    AppTheme.Black -> BlackBackground to BlackText
-}
-
-@Composable
-fun AppTheme.name(): String = stringResource(
-    when (this) {
-        AppTheme.Paper -> R.string.settings_theme_paper
-        AppTheme.Sepia -> R.string.settings_theme_sepia
-        AppTheme.Night -> R.string.settings_theme_night
-        AppTheme.Black -> R.string.settings_theme_black
-    },
-)
-
-/**
- * The size of one kind of text: the row names what it sizes, the steps grow,
- * and the value on the right says exactly what it comes to. The sample is
- * drawn in the script of the text it sizes, so Arabic is judged as Arabic.
- */@Composable
-fun SizeRow(role: TypeRole, step: Float, onChange: (Float) -> Unit) {
-    val label = stringResource(
-        when (role) {
-            TypeRole.Arabic -> R.string.settings_size_arabic
-            TypeRole.Translation -> R.string.settings_size_translation
-            TypeRole.Tafsir -> R.string.settings_size_tafsir
-            TypeRole.Words -> R.string.settings_size_words
-        },
-    )
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 22.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(1f),
-        )
-        Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(50))
-                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-                .padding(3.dp),
-            horizontalArrangement = Arrangement.spacedBy(1.dp),
-        ) {
-            TextSize.STEPS.forEachIndexed { index, value ->
-                val active = value == step
-                val description = stringResource(
-                    R.string.settings_text_size_option,
-                    index + 1,
-                    TextSize.STEPS.size,
-                    label,
-                )
-                Box(
-                    modifier = Modifier
-                        .size(38.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(
-                            if (active) {
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
-                            } else {
-                                Color.Transparent
-                            },
-                        )
-                        .selectable(selected = active, role = Role.RadioButton) { onChange(value) }
-                        .semantics { contentDescription = description },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        // The letters run from the smallest step to the
-                        // largest, so the row reads as one scale.
-                        text = if (role == TypeRole.Arabic) "\u0627" else "A",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = (11 + index * 2).sp,
-                        ),
-                        color = if (active) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                    )
-                }
-            }
-        }
-    }
-}
-
-/**
- * The pace of the recitation, in the same segmented shape the text sizes use:
- * one row, the choices growing left to right, the chosen one filled. The pace
- * belongs to hearing the way the size belongs to reading, so the two are the
- * same control, and a reader who learned one has learned the other. The value
- * is in numbers, because "slow" and "fast" are not the same for every reader.
- */
-@Composable
-fun SpeedRow(value: Float, onChange: (Float) -> Unit) {
-    val label = stringResource(R.string.settings_speed_label)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 22.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(1f),
-        )
-        Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(50))
-                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-                .padding(3.dp),
-            horizontalArrangement = Arrangement.spacedBy(1.dp),
-        ) {
-            SpeedSteps.forEach { speed ->
-                val active = kotlin.math.abs(speed - value) < 0.01f
-                val description = stringResource(
-                    R.string.settings_speed_option,
-                    speedText(speed),
-                    label,
-                )
-                Box(
-                    modifier = Modifier
-                        .size(46.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(
-                            if (active) {
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
-                            } else {
-                                Color.Transparent
-                            },
-                        )
-                        .selectable(selected = active, role = Role.RadioButton) { onChange(speed) }
-                        .semantics { contentDescription = description },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = speedText(speed),
-                        style = MaterialTheme.typography.labelLarge.copy(fontSize = 12.sp),
-                        color = if (active) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                    )
-                }
-            }
-        }
     }
 }
 

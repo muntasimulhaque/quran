@@ -152,10 +152,11 @@ internal suspend fun loadShareCard(
 @Composable
 internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier) {
     val hafs = rememberHafs()
-    // The launcher's star, drawn from the same resource the home screen
-    // draws, so the mark on the card is the mark of the app and not a
-    // second icon drawn from memory.
-    val mark = painterResource(R.mipmap.ic_launcher_fg)
+    // The medallion the launcher icon is built around, sized for a foot:
+    // the launcher's illustration is a whole illuminated opening, and a
+    // whole opening at 20 dp would be mud, so the card carries the star the
+    // icon's carpet page is built on (owner decision, D-112).
+    val mark = painterResource(R.drawable.ic_share_mark)
     val lapis = colorResource(R.color.icon_background)
     val paper = lightColorScheme(
         primary = Lapis,
@@ -236,7 +237,7 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
     }
 }
 
-/** The app's mark at a foot's size: the drawn star on its lapis square. */
+/** The app's mark at a foot's size: the medallion star on its lapis square. */
 @Composable
 private fun AppMark(mark: Painter, ground: Color, modifier: Modifier = Modifier) {
     Box(

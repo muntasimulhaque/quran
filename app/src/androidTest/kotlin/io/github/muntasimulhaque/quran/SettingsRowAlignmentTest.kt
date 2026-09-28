@@ -17,15 +17,15 @@ import org.junit.Rule
 import org.junit.Test
 
 /**
- * The settings sheet's controls run down one column.
+ * The settings sheet's controls run down two columns, the chevrons' and the
+ * switches', with the switch always last.
  *
- * A row can carry a switch, a chevron, or both, and before this the two
- * kinds of row put their controls at different edges: a switch-only row put
- * its switch at the sheet's edge, while a row with a door pushed its switch
- * a chevron's width inward, and a chevron-only row sat closer to the edge
- * than either. The three shapes are composed here side by side, and the test
- * reads the real bounds of the switches and the chevrons: every switch ends
- * at one line and every chevron sits at one place (owner report, D-103).
+ * A row can carry a switch, a chevron, or both. The owner asked for the
+ * switch to be the row's last mark and for the two kinds of control to stand
+ * at one place each, so the three shapes are composed here side by side and
+ * the test reads the real bounds: every switch ends at one line at the
+ * sheet's edge, every chevron sits one column before it, and the switch of a
+ * row with a door comes after that row's chevron (owner report, D-111).
  *
  * The column is a width, not a height: the tail's 48 dp square stretched
  * every plain row where the chevron was not a control of its own, so the
@@ -37,7 +37,7 @@ class SettingsRowAlignmentTest {
     val compose = createComposeRule()
 
     @Test
-    fun switchesAndChevronsShareOneColumn() {
+    fun switchesEndTheLineAndChevronsShareOneColumn() {
         compose.setContent {
             MaterialTheme {
                 Column {
@@ -69,22 +69,26 @@ class SettingsRowAlignmentTest {
 
         val alone = compose.onNodeWithTag("switch-alone", useUnmergedTree = true)
             .getUnclippedBoundsInRoot()
-        val door = compose.onNodeWithTag("switch-door", useUnmergedTree = true)
+        val doorSwitch = compose.onNodeWithTag("switch-door", useUnmergedTree = true)
             .getUnclippedBoundsInRoot()
         assertEquals(
             "every switch must end at one line",
             alone.right.value,
-            door.right.value,
+            doorSwitch.right.value,
             0.5f,
         )
 
         val chevrons = compose.onAllNodesWithTag("row-chevron", useUnmergedTree = true)
             .fetchSemanticsNodes()
         assertEquals("the page row and the door row draw one each", 2, chevrons.size)
-        val first = chevrons.first().boundsInRoot
-        val second = chevrons.last().boundsInRoot
-        assertEquals("every chevron must sit at one left edge", first.left, second.left, 0.5f)
-        assertEquals("every chevron must sit at one right edge", first.right, second.right, 0.5f)
+        val pageChevron = chevrons.first().boundsInRoot
+        val doorChevron = chevrons.last().boundsInRoot
+        assertEquals("every chevron must sit at one left edge", pageChevron.left, doorChevron.left, 0.5f)
+        assertEquals("every chevron must sit at one right edge", pageChevron.right, doorChevron.right, 0.5f)
+        assertTrue(
+            "the switch must be the row's last mark, after its chevron",
+            doorChevron.right <= doorSwitch.left.value + 0.5f,
+        )
 
         val page = compose.onNodeWithTag("page-row").getUnclippedBoundsInRoot()
         assertTrue(

@@ -221,9 +221,13 @@ does not tell you, and each one costs a failed command to rediscover:
 - MSYS rewrites `/sdcard/...` style arguments into Windows paths. Prefix
   `adb shell`, `adb push`, and `adb pull` with `MSYS_NO_PATHCONV=1`, and the
   same for `gh api` (and drop its leading slash).
-- The Store alias intercepts `python3`, but a real `python` 3.12 exists on
-  this machine; `node -e` is still the small-edit tool used here. Use it for
-  small file edits instead of writing a script file.
+- The Store alias intercepts `python3`, and the working interpreter on this
+  machine is the harness's own at
+  `C:\Users\zn\AppData\Local\hermes\tools\python-3.14.7+20260901-win32-x64\python.exe`,
+  with Pillow, fontTools, arabic-reshaper, and python-bidi installed into it
+  by hand for the store-asset work (D-112). Nothing in the build depends on
+  it; `node -e` is still the small-edit tool used here, for small file edits
+  instead of writing a script file.
 - `git pull` works here: the clone set `main` to track `origin/main`. If a
   machine ever says there is no tracking information, use
   `git pull origin main`, or set the tracking once with
@@ -1007,6 +1011,37 @@ fetching them again; the space is worth less than the time.
   to right on the screen; `MushafTurnTest` now pins the direction on every
   form factor.
 
+
+## Where the project stands (end of the thirty-sixth session)
+
+**The tree carries the owner's two reports: the settings tail puts every
+switch last, and the icon and the feature graphic are redrawn from the
+physical mushaf (D-111, D-112).** No `versionCode` moved; 2.7 stays the
+submitted release, and the assets ride the next one.
+
+- **The settings tail is two columns, switch last.** On a row that carries
+both a switch and a chevron, the chevron stands one column before the
+switch, and every row keeps both columns, so all switches end at the
+sheet's edge and all chevrons at one place before them.
+`SettingsRowAlignmentTest` pins the columns, the order, and the page row's
+compact height.
+- **The icon and the feature graphic are drawn from the mushaf.** An open
+mushaf on lapis: a carpet page with a gold octagram medallion facing the
+first page of Al-Fatihah, read byte-exact from `content/quran.db`, its
+unwan in white Amiri and its verses closed by gold roundels, with a
+crimson ribbon. The store icon wears the cover's ruled border; the adaptive
+layers carry the book alone (fg), the lapis girih (bg), and a themed
+monochrome mark; the shared ayah card carries the icon's medallion star.
+The feature graphic is a mushaf page of the banner's shape at 1024x500,
+24-bit with no alpha.
+
+**The suite.** `:core:test`, `:data:testDebugUnitTest`,
+`:app:testDebugUnitTest`, `:app:lintDebug`, and `:app:assembleDebug` are
+green on the zn machine, and `:app:compileDebugAndroidTestKotlin` compiles.
+There are no AVDs on this machine, so the instrumented suites did not run
+locally; CI is their authority. The committed store set differs from the
+tree in the settings frames alone (D-111); the next release's capture
+refreshes it, never by hand.
 
 ## Where the project stands (end of the thirty-fifth session)
 

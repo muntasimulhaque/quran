@@ -92,6 +92,17 @@ for.
 - 7 inch tablet screenshots: `screenshots/tablet7/` (800 x 1280), eight of them
 - 10 inch tablet screenshots: `screenshots/tablet10/` (2560 x 1800), eight of them
 
+The icon and the feature graphic are drawn from the physical mushaf
+(D-112). The store icon is an illuminated opening on a lapis field: a
+carpet page with a gold octagram medallion facing the first page of
+Al-Fatihah, its unwan in white Amiri and its verses closed by gold
+roundels, with a crimson ribbon, all inside the cover's ruled border. The
+feature graphic is a mushaf page of the banner's shape, 1024 x 500, 24-bit
+with no alpha, carrying the same opening and القرآن in the app's Amiri with
+The Noble Book beside it. The screenshot set committed here still shows the
+2.7 settings frames; D-111's settings tail changes them, and the next
+release's capture refreshes the set.
+
 The set was refreshed after the craftsmanship pass (D-086/D-087) and again
 for 1.9 (D-089), all three legs green first try once the workflow's own
 script bug was fixed (D-088), for all three form factors, in the eight

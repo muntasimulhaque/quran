@@ -249,7 +249,8 @@ fun TafsirsPage(
 
 /**
  * The app itself: its version, its credits, and a way to check its content.
- */@Composable
+ */
+@Composable
 fun AboutPage(
     version: String,
     contentCheck: ContentCheck?,
