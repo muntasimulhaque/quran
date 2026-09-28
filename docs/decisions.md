@@ -5207,4 +5207,6 @@ delta of 2 of 255 on the tablet10 Mushaf frame.
 **The bundle.** `quran-2.8-vc29.aab`, 148,728,995 bytes, SHA-256
 `e13f1ecad0de92b45675cdea623413b8fb39af53d8dc218886fad89db3b03d2f`, matching
 the artifact's own checksum file, `jar verified`, signed with the shared
-upload key (`53:7D:09:D2:...:0D:9D:E5:21`).
+upload key (`53:7D:09:D2:...:0D:9D:E5:21`). The owner submitted 2.8
+to Google Play for review and confirmed it, so the hand-off copy was deleted
+the same session; the artifact stays in build run 36448152402.

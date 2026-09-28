@@ -1016,8 +1016,8 @@ fetching them again; the space is worth less than the time.
 
 **The tree carries the owner's two reports: the settings tail puts every
 switch last, and the icon and the feature graphic are redrawn as the center
-of a mushaf cover (D-111, D-112). 2.8 (versionCode 29) is prepared for
-submission (D-113), its hand-over closed.**
+of a mushaf cover (D-111, D-112). 2.8 (versionCode 29) is submitted to Google Play
+for review (D-113), its hand-off closed.**
 
 - **The settings tail is two columns, switch last.** On a row that carries
 both a switch and a chevron, the chevron stands one column before the
