@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 2.7 (versionCode 28)
+Version: 2.8 (versionCode 29)
 
 ## Listing
 
@@ -202,6 +202,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (2.8, 328 characters)
+
+Settings is tidier: on every row that carries a switch and a door, the switch is now the last mark, so all switches run down one line and all chevrons another. The app has a new face too: the icon and the store art are redrawn as the shamsa at the center of a mushaf cover, in gold on deep navy. No ads, no trackers, no account.
 
 ## Release notes (2.7, 354 characters)
 
