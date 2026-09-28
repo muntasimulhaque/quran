@@ -50,14 +50,19 @@ dead letter.
 ## Hard constraints (non-negotiable)
 
 1. **Offline except one thing.** The app holds `INTERNET` for exactly one
-   use, approved by the owner in D-023 and amended in D-105: downloading a
-   recitation package for one surah, from the project's own GitHub
-   Releases, only after the reader taps Play and then approves the shown
-   size, or after the reader has turned on Continue to the next surah,
-   which is their word, given once, for the packages that follow the one
-   being heard. Nothing is fetched at launch, no other host is ever
-   contacted, and there is no analytics or telemetry of any kind.
-   Everything else in the app works with no connection at all. No WebView.
+   purpose, content from the project's own GitHub Releases, approved by the
+   owner in D-023, amended in D-105, and amended again in D-109. The reads
+   are: a content pack the reader asks for (a translation, tafsir, or word
+   list) after they have seen its size and tapped Add; a recitation package
+   for one surah after the reader taps Play and then approves the shown
+   size, or after the reader has turned on Continue to the next surah, which
+   is their word, given once, for the packages that follow the one being
+   heard; and a quiet refresh of a pack the reader already has, only when the
+   app carries a newer version of it, only on an unmetered connection, and
+   only after the first page is readable. Nothing else is fetched at launch,
+   no other host is ever contacted, and there is no analytics or telemetry of
+   any kind. Everything else in the app works with no connection at all. No
+   WebView.
 2. **Permissions: media, notifications, and that one network use.** The
    self-declared permissions are exactly `INTERNET` (the download above),
    `POST_NOTIFICATIONS`, `FOREGROUND_SERVICE`, and

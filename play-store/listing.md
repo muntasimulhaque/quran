@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 2.6 (versionCode 27)
+Version: 2.7 (versionCode 28)
 
 ## Listing
 
@@ -45,8 +45,10 @@ asked for are never downloaded. Everything you do download works offline
 forever after.
 
 There are no ads, no trackers, no analytics, and no account. The app is
-free and its source code is public. The only connection it ever makes is
-the recitation download you ask for.
+free and its source code is public. It reaches the project's own release
+page only for content: a pack or a surah's recitation you ask for, or a
+quiet refresh of a pack you already have when a newer version ships, on
+Wi-Fi only.
 
 Credits: Quran text by the King Fahd Complex for the Printing of the Holy
 Quran, audited against the Tanzil Uthmani reference. Translation by
@@ -69,10 +71,12 @@ QuranEnc. Full credits and licenses are in the app and in the repository.
 - Data shared: none.
 - Data security: no account, no identifiers, nothing stored off the
   device.
-- The app declares `INTERNET` for one purpose: downloading a recitation
-  package for one surah, from the project's own GitHub Releases, only
-  after the reader taps Play and approves the shown size. Nothing is sent
-  beyond that request. No analytics, no crash reporting, no advertising.
+- The app declares `INTERNET` for content from the project's own GitHub
+  Releases: a translation, tafsir, word list, or recitation pack the
+  reader asks for after seeing its size, and a quiet refresh of an
+  installed pack when the app carries a newer version, on an unmetered
+  connection only. Nothing is sent beyond the request. No analytics, no
+  crash reporting, no advertising.
 - Privacy policy URL:
   https://muntasimulhaque.github.io/quran/privacy.html
 
@@ -182,6 +186,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (2.7, 354 characters)
+
+Search now offers a matched surah name before a typed reference. The daily reminder centers its Arabic, and a translation or tafsir you already have updates quietly on Wi-Fi when the app carries a newer version, so Check installed content can repair what it finds rather than only reporting it. Bangla wording is cleaner. No ads, no trackers, no account.
 
 ## Release notes (2.6, 487 characters)
 
@@ -353,13 +361,17 @@ size shown before a byte moves and a SHA-256 check before it is used:
 Recitations: Minshawi and Husary, one surah at a time (0.2 to 122 MB each),
 plus 1.7 MB of timing data per reciter.
 
+Content updates arrive on their own: when a pack you already have is
+superseded, the app replaces it quietly on Wi-Fi, so the tafsir and
+translation stay current without a tap.
+
 ## Store answers to have ready
 
 * **Is the app free?** Yes, and open source (MIT).
 * **Does it show ads?** No, and it has no analytics and no accounts.
 * **Why does it need the internet permission?** To download a content pack
-  or a surah's recitation that the reader asks for, from the project's own
-  releases. Nothing is fetched at launch, nothing automatically, and there is
-  no other host.
+  or a surah's recitation the reader asks for, from the project's own
+  releases, and to quietly refresh an installed content pack when the app
+  carries a newer version, on Wi-Fi only. No other host is ever contacted.
 * **Data safety**: no data collected, no data shared, nothing stored off the
   device. Notes and bookmarks stay in the app's private storage.

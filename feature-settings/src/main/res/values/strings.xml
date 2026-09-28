@@ -64,8 +64,9 @@
     <string name="settings_check_content">Check installed content</string>
     <string name="settings_check_content_subtitle">Reads every installed pack and compares it with its recorded fingerprint</string>
     <string name="settings_check_running">Checking installed content…</string>
+    <string name="settings_check_updating">Updating…</string>
     <string name="settings_check_ok">Everything installed is intact.</string>
-    <string name="settings_check_damaged">Damaged and best removed: %1$s</string>
+    <string name="settings_check_available">Update available: %1$s</string>
 
     <string name="settings_version">Version</string>
     <string name="settings_license_label">License</string>

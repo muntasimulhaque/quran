@@ -570,13 +570,13 @@ class ContentDatabase private constructor(
         val leading = ArrayList<SearchHit>(9)
         val counts = intArrayOf(0, 0, 0, 0, 0) // arabic, translation, tafsir, words, surahs
 
+        if (sources.surahs) {
+            leading += surahHits(query).also { counts[4] = it.size }
+        }
+
         val referenceNumber = if (sources.references) referencedAyahNumber(query.input) else null
         if (referenceNumber != null) {
             ayahWithPage(referenceNumber)?.let { leading += SearchHit.ReferenceHit(it.first, it.second) }
-        }
-
-        if (sources.surahs) {
-            leading += surahHits(query).also { counts[4] = it.size }
         }
 
         // The Arabic text, matched on the normalized column.

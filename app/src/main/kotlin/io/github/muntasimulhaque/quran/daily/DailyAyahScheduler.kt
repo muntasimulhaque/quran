@@ -10,6 +10,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.text.Layout
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.AlignmentSpan
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -191,16 +195,18 @@ object DailyAyahScheduler {
                                     content.ayah,
                                 ),
                             )
-                            .setContentText(content.arabic)
+                            .setContentText(centered(content.arabic))
                             .setStyle(
                                 NotificationCompat.BigTextStyle().bigText(
-                                    buildString {
-                                        append(content.arabic)
-                                        content.translation?.takeIf { it.isNotBlank() }?.let {
-                                            append("\n\n")
-                                            append(it)
-                                        }
-                                    },
+                                    centered(
+                                        buildString {
+                                            append(content.arabic)
+                                            content.translation?.takeIf { it.isNotBlank() }?.let {
+                                                append("\n\n")
+                                                append(it)
+                                            }
+                                        },
+                                    ),
                                 ),
                             )
                             .setContentIntent(content.pendingIntent(application))
@@ -237,6 +243,26 @@ object DailyAyahScheduler {
             REQUEST_CODE,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+    }
+}
+
+/**
+ * The reminder's text, centered. The reading draws Arabic centered on the
+ * manuscript page, and a notification that left-aligned it read as English
+ * wearing Arabic letters. Center is direction-neutral, so it needs no bidi
+ * mark and cannot turn the translation's closing punctuation around. If the
+ * system ignores paragraph spans, the text is exactly what it was before
+ * this (owner decision, D-108).
+ */
+private fun centered(text: CharSequence): CharSequence {
+    if (text.isEmpty()) return text
+    return SpannableString(text).apply {
+        setSpan(
+            AlignmentSpan.Standard(Layout.Alignment.ALIGN_CENTER),
+            0,
+            length,
+            Spannable.SPAN_INCLUSIVE_INCLUSIVE,
         )
     }
 }

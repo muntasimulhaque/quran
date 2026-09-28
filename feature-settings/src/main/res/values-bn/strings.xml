@@ -16,15 +16,15 @@
     <string name="settings_summary_theme_auto">%1$s · স্বয়ংক্রিয়, দিনের পাতা %2$s</string>
 
     <string name="settings_keep_awake_title">স্ক্রিন জাগিয়ে রাখুন</string>
-    <string name="settings_keep_awake_subtitle">পড়ার সময় পাতা জ্বলজ্বল করে থাকবে</string>
+    <string name="settings_keep_awake_subtitle">পড়ার সময় স্ক্রিন চালু থাকবে</string>
     <string name="settings_daily_title">প্রতিদিনের আয়াত</string>
     <string name="settings_daily_subtitle_off">প্রতিদিন একটি আয়াত, নোটিফিকেশনে</string>
     <string name="settings_daily_subtitle_on">প্রতিদিন একটি আয়াত, %1$s-এ</string>
         <string name="settings_open_daily">প্রতিদিনের আয়াতের সেটিংস</string>
     <string name="settings_daily_time_title">সময়</string>
-    <string name="settings_daily_note">প্রতিদিন একটি আয়াত, কোনো শব্দ না। এটি নোটিফিকেশনে রাখা যাবে; ট্যাপ করলে আয়াতের পাতায় খোলে।</string>
+    <string name="settings_daily_note">প্রতিদিন একটি আয়াত, কোনো শব্দ না। এটি নোটিফিকেশনে দিনের আয়াত ও তার অনুবাদ নিয়ে অপেক্ষা করে; ট্যাপ করলে আপনি যেখানে পড়ছেন সেখানে খোলে। আয়াতগুলো কুরআনের নিজের ক্রমে আসে, তাই প্রতিদিন পরের আয়াতটি আসে।</string>
     <string name="settings_daily_off">প্রতিদিনের আয়াত বন্ধ আছে</string>
-    <string name="settings_daily_blocked">আপনার ফোনে অ্যাপের নোটিফিকেশন বন্ধ, তাই প্রতিদিনে আয়াত আসবে না।</string>
+    <string name="settings_daily_blocked">আপনার ফোনে অ্যাপের নোটিফিকেশন বন্ধ, তাই প্রতিদিনের আয়াত আসবে না।</string>
     <string name="settings_daily_blocked_action">নোটিফিকেশন সেটিংস</string>
     <string name="settings_daily_picker_title">কখন আসবে</string>
     <string name="settings_daily_picker_keyboard">সময় লিখুন</string>
@@ -64,8 +64,9 @@
     <string name="settings_check_content">ইনস্টল করা কনটেন্ট পরীক্ষা করুন</string>
     <string name="settings_check_content_subtitle">প্রতিটি ইনস্টল করা প্যাক পড়ে তার রেকর্ডকৃত ফিঙ্গারপ্রিন্টের সাথে মিলিয়ে দেখে</string>
     <string name="settings_check_running">ইনস্টল করা কনটেন্ট পরীক্ষা করা হচ্ছে…</string>
+    <string name="settings_check_updating">আপডেট করা হচ্ছে…</string>
     <string name="settings_check_ok">ইনস্টল করা সবকিছু অক্ষত আছে।</string>
-    <string name="settings_check_damaged">ক্ষতিগ্রস্ত, মুছে ফেলা ভালো: %1$s</string>
+    <string name="settings_check_available">আপডেট পাওয়া গেছে: %1$s</string>
 
     <string name="settings_version">সংস্করণ</string>
     <string name="settings_license_label">লাইসেন্স</string>
@@ -109,7 +110,7 @@
     <string name="settings_group_speed">গতি</string>
     <string name="settings_speed_label">তিলাওয়াতের গতি</string>
     <string name="settings_speed_option">%1$s, %2$s</string>
-    <string name="settings_speed_note">তিলাওয়াতের গতি। কণ্ঠ তার সুর ধরে রাখে, তাই ধীর আয়াত ধীর হয়, গম্ভীর নয়।</string>
+    <string name="settings_speed_note">তিলাওয়াতের গতি। কণ্ঠ তার স্বর ধরে রাখে, তাই ধীর আয়াত ধীর হয়, গম্ভীর নয়।</string>
     <string name="settings_group_repeat">পুনরাবৃত্তি</string>
     <string name="settings_repeat_title">আয়াত পুনরাবৃত্তি করুন</string>
     <string name="settings_repeat_subtitle">চলমান আয়াত শেষ হলে আবার শুরু হয়, আপনি থামানো পর্যন্ত</string>
@@ -132,7 +133,7 @@
     <string name="settings_size_words">শব্দের অর্থ</string>
     <string name="settings_group_reciters">তিলাওয়াতকারী</string>
     <string name="settings_group_translations">অনুবাদ</string>
-    <string name="settings_translations_note">একাধিক অনুবাদ চালু রাখা যায়। প্রতিটি আয়াতের নিচে নিজের জায়গায় পড়া যায়, আর অনুসন্ধান পড়ে প্রথমটি।</string>
+    <string name="settings_translations_note">একাধিক অনুবাদ চালু রাখা যায়। প্রতিটি আয়াতের নিচে নিজের জায়গায় পড়া যায়, আর অনুসন্ধান প্রথমটি পড়ে।</string>
     <string name="settings_translation_hidden">পাঠে অনুবাদ দেখানো হচ্ছে না</string>
     <string name="settings_group_tafsirs">তাফসীর</string>
     <string name="settings_tafsirs_note">যে তাফসীরই চালু করবেন, তা আয়াতের নিচে নিজের দরজা থেকে খোলে।</string>

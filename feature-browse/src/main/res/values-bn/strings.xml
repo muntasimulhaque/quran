@@ -13,7 +13,7 @@
     <string name="juz_title">পারা %1$d</string>
     <string name="juz_starts_at">%1$s  ·  শুরু %2$s থেকে</string>
 
-    <string name="last_read_empty_title">এখনও কোনো পাঠস্থান নেই</string>
+    <string name="last_read_empty_title">এখনও কোনো পড়ার স্থান নেই</string>
     <string name="last_read_empty_body">আপনি যেসব আয়াত পড়েছেন সেগুলো এখানে রাখা হয়, নতুনটি আগে, যাতে ছেড়ে আসা স্থানে ফিরে যেতে পারেন।</string>
     <string name="last_read_detail">%1$s পড়া · %2$s</string>
     <string name="last_read_ayah_label">আয়াত %1$d</string>

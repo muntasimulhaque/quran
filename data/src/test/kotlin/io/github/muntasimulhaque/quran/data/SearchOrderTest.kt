@@ -65,17 +65,17 @@ class SearchOrderTest {
     }
 
     @Test
-    fun aReferenceAndASurahComeBeforeEveryAyah() {
+    fun aSurahAndAReferenceComeBeforeEveryAyah() {
         val reference = SearchHit.ReferenceHit(Ayah(255, 2, 255, "2:255", "text"), 42)
         val surah = SearchHit.SurahHit(Surah(2, "البقرة", "Al-Baqarah", "Al-Baqarah", "madinah", 286))
         val (hits, _) = orderSearchHits(
-            leading = listOf(reference, surah),
+            leading = listOf(surah, reference),
             ayahHits = listOf(ayah(1, arabic = 1)),
             tafsirHits = emptyList(),
             limit = 50,
         )
-        assertEquals(reference, hits[0])
-        assertEquals(surah, hits[1])
+        assertEquals(surah, hits[0])
+        assertEquals(reference, hits[1])
         assertEquals(1, (hits[2] as SearchHit.AyahHit).ayah.number)
     }
 

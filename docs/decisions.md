@@ -4961,3 +4961,102 @@ submitted 2.6 to Google Play for review, and the hand-off copy of
 `quran-2.6-vc27.aab` was deleted the same session, as the runbook requires:
 the artifact stays in build run 36341047053 and in Play, and
 `play-store/aab/` keeps only its own note. The tree is clean.
+
+## D-108: A surah name leads a reference, a Bangla wording pass, and a centered reminder
+
+Date: the thirty-fifth session, on the owner's report. Three settled
+changes; no `versionCode` moved.
+
+**1. Search leads with a surah name, then a reference.**
+`ContentDatabase.search` built its `leading` list reference-first. The only
+query that yields both kinds is a bare number ("2" is both a reference to
+2:1 and a surah-number match in `surahHits`), and it showed the arbitrary
+first ayah above the surah card. The owner chose a surah name first and a
+reference second; the kinds after them are unchanged (Arabic text,
+translation, word meanings, tafsir, each in the Book's own order).
+`SearchOrder`'s KDoc, `SearchOrderTest`, and `docs/design.md` carry the new
+order. The exact-ayah jump is still one row away for a reader who typed a
+full reference, because a full reference never produces a surah hit.
+
+**2. The Bangla wording pass.** The owner read the whole Bangla surface and
+settled these lines; the rest of the surface is untouched.
+
+| String | Before | After |
+| --- | --- | --- |
+| `settings_keep_awake_subtitle` | পড়ার সময় পাতা জ্বলজ্বল করে থাকবে | পড়ার সময় স্ক্রিন চালু থাকবে |
+| `settings_daily_note` | (silent and tap only) | the full thought: silent, the ayah and its translation wait in notifications, the tap opens the reader's place, the ayahs come in the Book's own order |
+| `settings_daily_blocked` | তাই প্রতিদিনে আয়াত আসবে না | তাই প্রতিদিনের আয়াত আসবে না |
+| `settings_translations_note` | আর অনুসন্ধান পড়ে প্রথমটি | আর অনুসন্ধান প্রথমটি পড়ে |
+| `settings_speed_note` | কণ্ঠ তার সুর ধরে রাখে | কণ্ঠ তার স্বর ধরে রাখে |
+| `last_read_empty_title` | এখনও কোনো পাঠস্থান নেই | এখনও কোনো পড়ার স্থান নেই |
+| `share_unavailable` | শেয়ার নেওয়ার মতো | শেয়ার করার মতো |
+
+The owner kept `action_clear` (মুছুন), `action_play` (প্লে),
+`playback_reciter_ready` (শোনার জন্য প্রস্তুত), and `action_browse`
+(ব্রাউজ করুন) as they are. The JVM suite (`:core:test`,
+`:data:testDebugUnitTest`) is green after the change.
+
+**3. The daily reminder's text is centered.** The reading draws Arabic
+centered on the manuscript page, and the reminder's Arabic sat left-aligned
+like English. The owner chose center, the direction-neutral alignment, so no
+bidi mark is needed and the translation's closing punctuation cannot turn
+around. `DailyAyahScheduler` wraps the collapsed text and the big text in an
+`AlignmentSpan.Standard(ALIGN_CENTER)`; if the system ignores paragraph spans
+the reminder looks exactly as it did, so the change cannot break anything. The
+image card already centers everything, and a plain text share cannot: plain
+text carries no alignment (owner decision, D-108).
+
+## D-109: A quiet refresh keeps the reader's packs current
+
+Date: the thirty-fifth session, at the owner's word. The owner's report on
+2.5 finished with the English Ibn Kathir tafsir: the 2.6 catalog (D-106)
+carries the corrected hash, but an install that already downloaded the old
+pack keeps the old file, and "Check installed content" called it "Damaged and
+best removed" with no update path. The owner asked for the most seamless
+experience the reader could have, and approved a quiet refresh of the packs
+the reader already has. This is the second amendment of D-023's offline rule
+(D-105 was the first).
+
+**What the reader sees: nothing.** When an app update carries a newer catalog
+than the files on the device, the app replaces a stale pack with the catalog's
+current one on its own, on an unmetered connection, after the first page is
+readable. The reading never waits and never blocks; a stale pack keeps working
+until the replacement lands, and the library is reopened over the new file. A
+failed or interrupted refresh leaves the old pack in place and is retried on a
+later launch on an unmetered connection.
+
+**Why it is safe to do silently.** The reader already chose the pack and
+already trusts the host. It is the same project-owned GitHub Releases page, the
+same whole-file SHA-256 check, and the same private folder as a
+reader-initiated download. It never touches a pack the reader does not have,
+never runs on cellular data, and never contacts any other host. The check is
+remembered by catalog fingerprint, so it does not re-read every pack on every
+launch.
+
+**What it costs.** `ACCESS_NETWORK_STATE`, already merged into the manifest by
+Media3, is now read for the metered flag; no permission is declared. The
+refresh adds one download per changed pack per content update, on unmetered
+connections only.
+
+**What changed.** `PackUpdater` (new) detects and replaces stale packs;
+`PackVerifier` gained `needsRefresh`, the one look behind both the quiet pass
+and the manual check; `ReaderViewModel.openLibrary` starts the quiet pass
+after the first page is ready and reopens the library when anything changed.
+The self-check copy is now "Update available", a positive note rather than a
+command to remove, because the app refreshes it on its own when the
+connection allows.
+
+**The manual check repairs what it finds.** The reader's own tap on Check
+installed content does not stop at a list. `ReaderViewModel.checkContent`
+reports what is behind, and when the connection is unmetered it shows
+"Updating…", refreshes the packs through the same `PackUpdater`, reopens the
+library, and re-reads them. The line then ends in "Everything installed is
+intact." when it can, and in "Update available" only when the connection does
+not allow the repair. A `Mutex` in `PackUpdater` keeps the quiet launch pass
+and this manual pass from downloading the same pack at once.
+
+`docs/privacy.md` and `AGENTS.md`'s offline
+constraint now name the quiet refresh. `PackVerifierTest` pins the detection
+(a stale pack is flagged, a current pack is not, an absent pack is not).
+
+No `versionCode` moved: the release waits for the owner's word.

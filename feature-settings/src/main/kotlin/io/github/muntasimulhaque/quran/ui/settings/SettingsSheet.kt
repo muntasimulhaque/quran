@@ -78,7 +78,12 @@ data class PackSetupState(
 /** What the content self check is doing, or what it found. */
 sealed interface ContentCheck {
     data object Running : ContentCheck
-    data class Done(val damaged: List<String>) : ContentCheck
+
+    /** The check found work and is repairing it, on a connection that allows. */
+    data object Updating : ContentCheck
+
+    /** What the check could not repair, usually because the connection did not allow it. */
+    data class Done(val remaining: List<String>) : ContentCheck
 }
 
 /**

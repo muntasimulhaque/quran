@@ -5,22 +5,33 @@ trackers, no analytics, and no crash reporting.
 
 ## What leaves the device
 
-Almost nothing. The app has one network use, and it happens only when the
-reader asks for it: downloading a recitation package for one surah from the
-project's own GitHub Releases page (`github.com/muntasimulhaque/quran`).
-That request carries nothing but the request itself. There is no account, no
-identifier, and no usage data. GitHub, like every web server, sees the
+Almost nothing, and only to the project's own GitHub Releases page
+(`github.com/muntasimulhaque/quran`). No other host is ever contacted.
+Every request carries nothing but the request itself: there is no account,
+no identifier, and no usage data. GitHub, like every web server, sees the
 connecting IP address; the app sends nothing else, and the project stores
 nothing.
 
-Nothing is downloaded at launch. A download starts only after the reader
-taps Play on a surah, sees the surah's name and size, and taps Download, or
-after the reader has turned on Continue to the next surah in Settings or on
-the player itself: that switch is their word, given once, for the packages
-that follow the surah being heard, and the player still shows each package's
-name and size while it downloads, with a cancel. Each package is verified
-against a SHA-256 recorded at build time, and a package that fails the check
-is discarded.
+Three reads touch the network, all verified against a SHA-256 recorded at
+build time:
+
+- A content pack the reader asks for (a translation, a tafsir, or a word
+  list), after they have seen its size and tapped Add.
+- A recitation package for one surah, after the reader taps Play, sees the
+  surah's name and size, and taps Download; or after they have turned on
+  Continue to the next surah in Settings or on the player itself. That
+  switch is their word, given once, for the packages that follow the surah
+  being heard, and the player still shows each package's name and size while
+  it downloads, with a cancel.
+- A quiet refresh of a pack the reader already has, when the app itself has
+  carried a newer version of it (a corrected tafsir, say). The refresh runs
+  only on an unmetered connection and only for installed packs, so a reader
+  on cellular data never pays for it; it waits until the first page is
+  readable and never blocks the reading. A pack that fails its checksum is
+  discarded and retried later.
+
+Nothing else is fetched at launch, and the app works fully offline with no
+connection at all.
 
 ## What stays on the device
 
@@ -39,4 +50,7 @@ is discarded.
 - `FOREGROUND_SERVICE` and `FOREGROUND_SERVICE_MEDIA_PLAYBACK`: keeping
   recitation playing with the screen off.
 
-Nothing else is declared.
+Nothing else is declared. The player's library also merges in
+`ACCESS_NETWORK_STATE` and `WAKE_LOCK`, which the app does not declare.
+`ACCESS_NETWORK_STATE` is what the quiet refresh reads to stay off metered
+connections; it collects nothing.

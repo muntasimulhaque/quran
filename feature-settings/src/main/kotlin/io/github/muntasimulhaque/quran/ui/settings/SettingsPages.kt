@@ -270,12 +270,13 @@ fun AboutPage(
             Text(
                 text = when (check) {
                     ContentCheck.Running -> stringResource(R.string.settings_check_running)
-                    is ContentCheck.Done -> if (check.damaged.isEmpty()) {
+                    ContentCheck.Updating -> stringResource(R.string.settings_check_updating)
+                    is ContentCheck.Done -> if (check.remaining.isEmpty()) {
                         stringResource(R.string.settings_check_ok)
                     } else {
                         stringResource(
-                            R.string.settings_check_damaged,
-                            check.damaged.joinToString(", "),
+                            R.string.settings_check_available,
+                            check.remaining.joinToString(", "),
                         )
                     }
                 },

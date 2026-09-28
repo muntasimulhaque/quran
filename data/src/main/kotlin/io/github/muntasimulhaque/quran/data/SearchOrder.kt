@@ -4,8 +4,8 @@ package io.github.muntasimulhaque.quran.data
  * The order a search result list is read in: the kinds run from the verse
  * outward, and each kind keeps the Book's own order inside itself.
  *
- * 1. A typed reference (the reader named an exact place).
- * 2. A matched surah name (they named a surah).
+ * 1. A matched surah name (they named a surah).
+ * 2. A typed reference (the reader named an exact place).
  * 3. Ayahs whose **Arabic text** matched.
  * 4. Ayahs whose **translation** matched.
  * 5. Ayahs whose **word meaning** matched.
@@ -15,7 +15,9 @@ package io.github.muntasimulhaque.quran.data
  * Before this, one Mushaf-order list mixed the kinds: a translation match for
  * 2:2 sat above an Arabic match for 2:255. The Book's own order is still kept,
  * it just no longer mixes what kind of thing a reader found (owner decision,
- * 28, D-090).
+ * 28, D-090). A surah name leads a typed reference (owner decision, D-108):
+ * a bare number is the only query that yields both, and the surah card is
+ * the better landing there than an arbitrary first ayah.
  *
  * An ayah that matched in more than one source ranks by its strongest one and
  * still draws every source it matched, so a row never loses material. The

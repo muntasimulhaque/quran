@@ -19,12 +19,11 @@ import java.security.MessageDigest
  */
 class PackVerifier(private val context: Context) {
 
-    /** The names of the installed packs whose bytes no longer match the catalog. */
-    suspend fun damaged(packs: List<ContentPack>): List<String> = withContext(Dispatchers.IO) {
-        packs.filter { it.installed && !it.shipped }
-            .filter { !intact(it) }
-            .map { it.name }
-    }
+    /** The installed packs whose bytes no longer match the catalog. */
+    suspend fun needsRefresh(packs: List<ContentPack>): List<ContentPack> =
+        withContext(Dispatchers.IO) {
+            packs.filter { it.installed && !it.shipped }.filter { !intact(it) }
+        }
 
     private fun intact(pack: ContentPack): Boolean {
         val file = PackStore(context).fileFor(pack.id)

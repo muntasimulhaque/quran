@@ -18,6 +18,7 @@ import io.github.muntasimulhaque.quran.data.DownloadedSurah
 import io.github.muntasimulhaque.quran.data.PackCatalog
 import io.github.muntasimulhaque.quran.data.PackDownloader
 import io.github.muntasimulhaque.quran.data.PackStore
+import io.github.muntasimulhaque.quran.data.PackUpdater
 import io.github.muntasimulhaque.quran.data.PackVerifier
 import io.github.muntasimulhaque.quran.data.PageFontStore
 import io.github.muntasimulhaque.quran.data.PagePosition
@@ -80,6 +81,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     private val recitationStore = RecitationStore(application)
     private val store = PackStore(application)
     private val downloader = PackDownloader(application)
+    private val packUpdater = PackUpdater(application)
 
     /**
      * The reader's library. It is Compose state, not a plain field, because a
@@ -247,6 +249,13 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             // The tafsir index is the one thing a first search would wait for,
             // so it is built now, on a worker, while the reader is reading.
             withContext(Dispatchers.IO) { database.prewarmSearch(stored.tafsirPacks.toList()) }
+            // A pack the app has updated since this install is replaced
+            // quietly, on an unmetered connection, and the library is
+            // reopened over it. The reading never waits: this runs after the
+            // first page is ready.
+            viewModelScope.launch {
+                if (packUpdater.refresh(catalog).isNotEmpty()) reopenLibrary()
+            }
         }
     }
 
@@ -928,14 +937,28 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
     /**
      * Reads every installed pack back and compares it with the fingerprint
-     * the catalog recorded. This is the reader's own second look at the
-     * library, not something that runs on its own.
+     * the catalog recorded. When something is behind and the connection
+     * allows, the check repairs it in the same breath rather than only
+     * naming it, so the reader's own second look ends in a clean library
+     * instead of a list of work (D-109).
      */
     fun checkContent() {
         viewModelScope.launch {
             contentCheck = ContentCheck.Running
-            val damaged = PackVerifier(getApplication()).damaged(packs)
-            contentCheck = ContentCheck.Done(damaged)
+            val verifier = PackVerifier(getApplication())
+            val behind = runCatching { verifier.needsRefresh(packs) }.getOrNull().orEmpty()
+            if (behind.isEmpty()) {
+                contentCheck = ContentCheck.Done(emptyList())
+                return@launch
+            }
+            if (packUpdater.canRefresh()) {
+                contentCheck = ContentCheck.Updating
+                if (packUpdater.refresh(catalog, force = true).isNotEmpty()) {
+                    reopenLibrary()
+                }
+            }
+            val left = runCatching { verifier.needsRefresh(behind) }.getOrNull().orEmpty()
+            contentCheck = ContentCheck.Done(left.map { it.name })
         }
     }
 

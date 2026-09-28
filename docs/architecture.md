@@ -60,7 +60,9 @@ other.
    (`PackDownloader`, `RecitationDownloader`) and happen only when the app
    asks on the reader's behalf, with the size shown, or after the reader has
    turned on Continue to the next surah, which is their word for the
-   packages that follow (D-105).
+   packages that follow (D-105). The one download the reader does not start
+   is `PackUpdater`, the quiet refresh of an already-installed pack on an
+   unmetered connection (D-109).
 5. **Resources stay where they are read.** The fonts live in
    `content-assets`, and every sentence the reader can see lives in a
    `strings.xml` in the module that draws it: `app` for the shell, each

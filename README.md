@@ -248,10 +248,12 @@ live:
 ## Privacy
 
 The app collects nothing. The policy is [online](https://muntasimulhaque.github.io/quran/privacy.html)
-and [in this repo](docs/privacy.html). The one network use is a content pack
-or a recitation package the reader asks for, from the project's own Releases.
-Android's cloud backup and device transfer are refused explicitly, so the
-reader's saved ayahs and notes stay on the device and move nowhere.
+and [in this repo](docs/privacy.html). The network is used only for content
+from the project's own Releases: a pack or a recitation package the reader
+asks for, and a quiet refresh of an installed pack when a newer version
+ships, on Wi-Fi only. Android's cloud backup and device transfer are refused
+explicitly, so the reader's saved ayahs and notes stay on the device and move
+nowhere.
 
 ## License
 

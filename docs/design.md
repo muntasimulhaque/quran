@@ -149,9 +149,11 @@ Searched, in one pass:
 | Surah names | simple and Latin spellings |
 | References | "2:255", "2 255", "surah 2" and "baqara 255" |
 
-* Results stay in Mushaf order, capped at 200, with a one line summary of
-  where the matches are: "18 in the text, 4 in the translation, 3 in Ibn
-  Kathir".
+* Results run from the verse outward, capped at 200: a matched surah name,
+  then a typed reference, then the Arabic text, the translation, the word
+  meanings, and the tafsir, each kind in the Book's own order. A one line
+  summary says where the matches are: "18 in the text, 4 in the translation,
+  3 in Ibn Kathir".
 * Matched Arabic words and matched English words are marked in the accent
   color, exactly, without disturbing the rest of the sentence. A row never
   says the same match twice: the word meaning is drawn only when it is the
