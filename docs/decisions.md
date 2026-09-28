@@ -5059,4 +5059,47 @@ and this manual pass from downloading the same pack at once.
 constraint now name the quiet refresh. `PackVerifierTest` pins the detection
 (a stale pack is flagged, a current pack is not, an absent pack is not).
 
-No `versionCode` moved: the release waits for the owner's word.
+The release followed in D-110.
+
+## D-110: The 2.7 release
+
+Date: the thirty-fifth session, at the owner's word "go for play release".
+2.7 (versionCode 28) carries D-108's search order, Bangla pass, and centered
+reminder, and D-109's quiet refresh.
+
+**The gates caught a stale raw, not a content defect.** All five owner gates
+ran green on this machine: `verify` 29 datasets, `audit` 0 unexplained
+differences, `fonts` all coverage checks, `search`, and `checkdb`. `verify`
+first failed on the English Ibn Kathir raw export: the machine carried the
+pre-fix file (3,855,680 / `5a162785`) while the manifest pins the fixed one
+(3,860,369 / `5a3f38ec`). The shipped content was never in question (the
+committed pack matches the catalog, `cd36142c`). The owner re-downloaded the
+fixed export from QUL, and `verify` then passed 29 datasets. This is exactly
+the runbook's step 0: a release is the moment a gate is run, and this one
+had been silently pointing at a stale input on this machine.
+
+**The suite.** `:core:test`, `:data:testDebugUnitTest`, `:app:lintDebug`,
+`:app:assembleDebug`, and `:app:compileDebugAndroidTestKotlin` are green. The
+data instrumented suite is 33/33 (29 plus `PackVerifierTest`). The full app
+suite was attempted twice on the phone emulator and the device vanished
+mid-run both times (23 of 48, then 38 of 48; `ComposeTimeoutException`, a
+missing node as a sheet never drew, and an empty failure body), the documented
+loaded-emulator class on this machine. Per the runbook the local connected
+runs stopped and CI is the instrumented authority; the capture workflow's six
+named classes ran green on all three legs.
+
+**The push.** Build run 36395366975 attempt 1 green: the gates, the data
+instrumented suite, and the signed bundle. Capture run 36395366904 attempt 1,
+all three legs green first try, no reruns.
+
+**The store set.** Eight frames per form factor, 24 in all. Every frame was
+compared with its artifact by `cmp` and every changed frame was read: the
+settings frames carry Version 2.7, the tablet10 search frame differs only in
+the soft keyboard's chrome below unchanged results, and the rest is the
+status bar clock and subpixel antialiasing.
+
+**The bundle.** `quran-2.7-vc28.aab`, 148,102,394 bytes, SHA-256
+`bc3e382ce703fa166183e4033da3c52a71cbf2f853f3b58a55f12c19d3c51381`,
+`jar verified`, signed with the shared upload key. The owner submitted 2.7 to
+Google Play for review and confirmed it, so the hand-off copy was deleted the
+same session; the artifact stays in build run 36395366975.

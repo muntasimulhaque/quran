@@ -1010,8 +1010,8 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the thirty-fifth session)
 
-**The tree answers the owner's work on 2.6 and carries 2.7 (versionCode 28),
-prepared for submission at the owner's word (D-108, D-109).**
+**The tree answers the owner's work on 2.6, and 2.7 (versionCode 28) is
+submitted to Google Play for review (D-108, D-109, D-110).**
 
 - **Search leads with a surah name, then a reference.** The only query that
 yields both is a bare number, and the surah card is the better landing there
@@ -1054,8 +1054,10 @@ antialiasing.
 **The bundle.** `quran-2.7-vc28.aab`, 148,102,394 bytes, SHA-256
 `bc3e382ce703fa166183e4033da3c52a71cbf2f853f3b58a55f12c19d3c51381`,
 `jar verified`, signed with the shared upload key
-(`53:7D:09:D2:...:0D:9D:E5:21`). The hand-off copy sits in `play-store/aab/`
-until the owner confirms the submission.
+(`53:7D:09:D2:...:0D:9D:E5:21`). The owner submitted 2.7 to Google Play for
+review and confirmed it, so the hand-off copy was deleted the same session:
+the artifact stays in build run 36395366975 and in Play, and `play-store/aab/`
+keeps only its own note. The tree is clean.
 
 ## Where the project stands (end of the thirty-fourth session)
 
