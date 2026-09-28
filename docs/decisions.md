@@ -5128,51 +5128,45 @@ the door's switch begins, and the page row keeps its compact height. The
 control against it, so a Material release that widens the track fails there
 instead of moving every chevron off the line.
 
-## D-112: The icon and the feature graphic are drawn from the mushaf
+## D-112: The icon and the feature graphic are the center of a mushaf cover
 
-Date: the thirty-sixth session, from the owner's report that the mark was
-basic and the brief to make the most beautiful icon.
+Date: the thirty-sixth session. Redrawn twice at the owner's word: the first
+set was read as basic, the second as dated, and the third as badly colored;
+the owner then pointed at a folder of mushaf covers and asked for the middle
+portion of the cover as the icon.
 
-The old mark was a line-drawn eight-point star and a ring on navy: clean,
-but it belonged to no particular object. The new art is drawn from the
-physical mushaf, studied from museum photographs: the Mamluk frontispiece
-(TIEM 450), the Sultan Barquq Qur'an's decagram medallion and its juz'
-opening, the Uljaytu Mosul Qur'an's carpet page, and the Ashmolean's
-thirty-volume unwan. Their vocabulary is the mark's: a carpet page facing
-the first text page, an octagram medallion in gold, a surah headpiece in
-white on burnished gold, verse-marker roundels, a ruled cover border, and a
-crimson ribbon.
+The mark is the shamsa at the heart of a cover, not the cover: a collar of
+twelve petals drawn as circular arcs meeting in cusps, a finial in every
+notch, a ring of ray drops over a chain of beads, a fine sixteen scallop
+lace ring, and a roundel carrying the word القرآن in the app's own Amiri at
+its bold weight. Two small pendants hang on the vertical axis the way a
+cover's medallion carries its finials. The word is Arabic data like all the
+app's Arabic, read from `content/quran.db`, so not one byte is retyped.
 
-What is in the icon: an open mushaf on a lapis field with a faint
-octagon-and-cross girih. The left page is a carpet page, its lapis field
-carrying a gold octagram medallion with pendant drops and corner leaves.
-The right page carries the unwan, the surah name in white, and Al-Fatihah
-itself, right aligned in Amiri, every verse closed by a gold roundel. The
-text is read from `content/quran.db`, so not one byte is retyped. A crimson
-ribbon falls from between the leaves. The store icon adds the cover's ruled
-border with corner lozenges.
+The palette is the owner's correction on the first sets, which wore yellow
+to brown metallic ramps that read as the 1980s. It is now flat and
+restrained: an ink navy field (#0B131F through #17263A), champagne and bone
+gold (#E2D0A8, #CFB888, #B0986C), bronze outlines (#866E4A), and a bone
+white (#F3EDE0) for the sparks. The field carries one subtle tonal shift and
+the gold carries none: depth comes from a soft shadow and crisp outlines,
+never from a gradient.
 
-The feature graphic (1024x500, 24-bit, no alpha, the Play requirement the
-old file broke) is a mushaf page of the banner's shape: a rule, a lapis
-scroll band, and a gold band frame the canvas; the same opening stands left
-of center; القرآن is set in the app's own Amiri at the right, under a gold
-rule with "The Noble Book". The left side stays quiet, because Play lays
-the app's icon and name over the banner's lower left.
+The layers: `mipmap-*/ic_launcher.png` (legacy, the medallion with its
+pendants), `ic_launcher_fg.png` (the medallion alone, its rim landed inside
+the 108 dp safe zone), `ic_launcher_bg.png` (the ink navy field, its glow,
+and a faint octagon lattice), and `ic_launcher_mono.png` (the themed icon:
+the petal collar, the ring, and the word in one tone). The shared ayah card
+carries a miniature of the same medallion as `drawable-*/ic_share_mark.png`,
+because the full mark at 20 dp would be mud.
 
-The layers: `mipmap-*/ic_launcher.png` (legacy), `ic_launcher_fg.png` (the
-book alone, inside the 108 dp safe zone), `ic_launcher_bg.png` (the lapis
-field and its girih), and `ic_launcher_mono.png` (the themed icon: the book
-opening with the medallion, the headpiece, and the reading lines as one
-mark). The shared ayah card no longer uses the launcher's foreground: the
-whole opening at 20 dp would be mud, so the card carries the medallion star
-the icon is built around, drawn as `drawable-*/ic_share_mark.png` on the
-card's lapis square.
+The feature graphic (1024x500, 24-bit, no alpha) is the medallion centered on
+the same field inside two thin rules with a diamond at each corner, the
+cover's frame reduced to its quietest form. Nothing else is drawn on it:
+Play lays the app's icon and name over the banner itself.
 
-The art was drawn at a high master resolution with Pillow and downsampled,
-with the app's own faces (Amiri for the Arabic, Literata and Inter for the
-Latin) and the palette of `ui-kit/theme/Color.kt` deepened for the cover:
-lapis #1E588A and #0A2038, gold #F6DE9A through #68480E, parchment #FAF3E4,
-crimson #AA3734. The design was read back at real sizes (48 dp through
-192 dp) and under simulated circle and squircle masks before it was
-installed. No `versionCode` moved for this: the assets ride the next
-release, and the next capture refreshes the settings frames D-111 changed.
+The art was drawn at a high master resolution with Pillow and downsampled.
+The design was read back at real sizes (48 dp through 192 dp), under
+simulated circle and squircle masks, and against the owner's references
+before it was installed. No `versionCode` moved for this: the assets ride
+the next release, and the next capture refreshes the settings frames D-111
+changed.

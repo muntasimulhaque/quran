@@ -20,7 +20,7 @@ trackers, no accounts, nothing collected, ever.
 The tree also carries the thirty-sixth session's work, which will ride the
 next release: the settings rows put every switch last, with all switches on
 one line and all chevrons on another (D-111), and the icon and the feature
-graphic are redrawn from the physical mushaf (D-112).
+graphic are redrawn as the center of a mushaf cover (D-112).
 
 **2.6** carries (D-105, D-106):
 

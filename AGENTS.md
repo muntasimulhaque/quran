@@ -1015,8 +1015,8 @@ fetching them again; the space is worth less than the time.
 ## Where the project stands (end of the thirty-sixth session)
 
 **The tree carries the owner's two reports: the settings tail puts every
-switch last, and the icon and the feature graphic are redrawn from the
-physical mushaf (D-111, D-112).** No `versionCode` moved; 2.7 stays the
+switch last, and the icon and the feature graphic are redrawn as the center of a
+mushaf cover (D-111, D-112).** No `versionCode` moved; 2.7 stays the
 submitted release, and the assets ride the next one.
 
 - **The settings tail is two columns, switch last.** On a row that carries
@@ -1025,15 +1025,7 @@ switch, and every row keeps both columns, so all switches end at the
 sheet's edge and all chevrons at one place before them.
 `SettingsRowAlignmentTest` pins the columns, the order, and the page row's
 compact height.
-- **The icon and the feature graphic are drawn from the mushaf.** An open
-mushaf on lapis: a carpet page with a gold octagram medallion facing the
-first page of Al-Fatihah, read byte-exact from `content/quran.db`, its
-unwan in white Amiri and its verses closed by gold roundels, with a
-crimson ribbon. The store icon wears the cover's ruled border; the adaptive
-layers carry the book alone (fg), the lapis girih (bg), and a themed
-monochrome mark; the shared ayah card carries the icon's medallion star.
-The feature graphic is a mushaf page of the banner's shape at 1024x500,
-24-bit with no alpha.
+- **The icon and the feature graphic are the center of a mushaf cover.** The mark is a twelve petal shamsa in flat champagne gold on an ink navy field, a finial in every notch, a ray and bead ring, and the word القرآن in the app's Amiri at the center, with two pendants on the vertical axis (D-112). The store icon wears the pendants; the adaptive foreground is the medallion alone inside the safe zone; the shared card carries a miniature of the same medallion. The feature graphic is the medallion centered inside two thin rules at 1024x500, 24-bit with no alpha. The palette is the owner's correction: ink navy and champagne gold, flat, no metallic ramps.
 
 **The suite.** `:core:test`, `:data:testDebugUnitTest`,
 `:app:testDebugUnitTest`, `:app:lintDebug`, and `:app:assembleDebug` are

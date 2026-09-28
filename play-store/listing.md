@@ -92,14 +92,7 @@ for.
 - 7 inch tablet screenshots: `screenshots/tablet7/` (800 x 1280), eight of them
 - 10 inch tablet screenshots: `screenshots/tablet10/` (2560 x 1800), eight of them
 
-The icon and the feature graphic are drawn from the physical mushaf
-(D-112). The store icon is an illuminated opening on a lapis field: a
-carpet page with a gold octagram medallion facing the first page of
-Al-Fatihah, its unwan in white Amiri and its verses closed by gold
-roundels, with a crimson ribbon, all inside the cover's ruled border. The
-feature graphic is a mushaf page of the banner's shape, 1024 x 500, 24-bit
-with no alpha, carrying the same opening and القرآن in the app's Amiri with
-The Noble Book beside it. The screenshot set committed here still shows the
+The icon and the feature graphic are the center of a mushaf cover (D-112): a twelve petal shamsa in flat champagne gold on an ink navy field, with the word القرآن in the app's Amiri at its heart. The store icon wears the medallion's pendants; the feature graphic is the same medallion centered inside two thin rules, 1024 x 500, 24-bit with no alpha. The screenshot set committed here still shows the
 2.7 settings frames; D-111's settings tail changes them, and the next
 release's capture refreshes the set.
 
@@ -232,7 +225,7 @@ A switch now does what it says: the daily reminder, Show translation, and Show t
 
 ## Release notes (2.2, 462 characters)
 
-A new daily reminder brings one ayah to your notifications at the hour you choose, with its translation when you read with one, and a tap opens it in the study reading. Go to Ayah now centres your own ayah so it is easy to find, a search row no longer repeats a translation match as a separate word meaning, Show translation and Show tafsir each open their own list from the same row, and a long ayah share card is no longer cut. No ads, no trackers, no account.
+A new daily reminder brings one ayah to your notifications at the hour you choose, with its translation when you read with one, and a tap opens it in the study reading. Go to Ayah now centers your own ayah so it is easy to find, a search row no longer repeats a translation match as a separate word meaning, Show translation and Show tafsir each open their own list from the same row, and a long ayah share card is no longer cut. No ads, no trackers, no account.
 
 ## Release notes (2.1, 425 characters)
 
