@@ -5834,3 +5834,30 @@ and `:app:assembleRelease` are green on this machine, and the `fonts` gate
 passes. There are no AVDs here, so the sheets, the grid, the card, the ruled
 page and the scrim are owed to the next CI capture and to a session with an
 emulator; none of them is claimed as seen.
+
+## D-123: The 3.1 release
+
+Date: the thirty-ninth session, at the owner's word: "go for play release.
+don't wait for me, so that I can just upload to the play console."
+3.1 (versionCode 32) carries D-122 and nothing else: the reading answers the
+reader, the reading surfaces are fixed, the app is faster to start and speaks
+Bangla in a face it chose.
+
+**The owner gates all ran green before the push, which is the check that has to
+pass before a release starts rather than at gate time (D-078).** The manual
+QUL and QuranEnc exports were in `content/raw` and the extractions in
+`content/work/verify`, so the gates could run at all: `verify` 29 datasets
+(checksums and structure), `audit` 6236 ayahs compared, 6235 letter
+identical, 1 accepted orthographic variant, 0 unexplained differences, 1
+segmentation note; `fonts` every coverage check (628,169 study codepoints,
+604 pages, 22,985,678 reading codepoints, Anek Bangla added and still
+covering all of them); `search` 65 Bangla and 63 Arabic round trips, 82
+non-ASCII codepoints folding cleanly, 465 readable excerpts with no markup;
+and `checkdb` the committed database unchanged at 128,966,656 bytes, SHA-256
+`380e0442fca812d8533bad80670d709acac0880fd95215a946519a38b5ef2b56`, 10 pack
+files verified. The content is byte-identical to 3.0, which is the point: a
+release that changes the reading changes no content.
+
+**The notes.** 471 characters, under Play's five hundred, one unbroken line
+per thought, no dashes and no markdown, and the "no ads, no trackers, no
+account" line every release has carried.

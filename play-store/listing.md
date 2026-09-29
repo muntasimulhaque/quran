@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 3.0 (versionCode 31)
+Version: 3.1 (versionCode 32)
 
 ## Listing
 
@@ -200,6 +200,16 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (3.1)
+
+Word by word reads as a grid now: the words stand in columns, each over its
+own meaning. The ayah card opens with its ayah, the mushaf page carries a rule
+so a page has an edge, and the bar no longer dims the surah's name on it. Tap
+any word in the study reading to hear it on repeat. Bangla is set in a chosen
+face. Settings and the reader's own surah are headings a screen reader can
+jump by, and a sheet is a page, not a floating card. No ads, no trackers, no
+account.
 
 ## Release notes (next, unreleased)
 
