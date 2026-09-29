@@ -5224,25 +5224,31 @@ reading codepoints), `search` (63 Arabic and 65 Bangla round trips, 82
 non-ASCII translation codepoints, 465 readable excerpts), and `checkdb` (the
 committed database, 128,966,656 bytes, SHA-256 380e0442..., 10 pack files).
 
-**The capture, and the class it found.** The first capture run (36538355301)
-was green on all three legs and its Browse frames carry a fifth chip,
-"Notes", that the tree has not had since the thirty-second session (D-101) and
-that no string in the app can even produce: the frame is the Browse sheet of
-the build at commit 27f7ec1, the twenty-ninth session. The AVD cache key was
-`avd-<api>-<profile>`, so a cache hit restored a userdata image with an app
-from an earlier run still installed, and every guard passed the frame because
-an old build of the same package owns the same window name. The commit is in
-the key now, and the app and its test package are uninstalled before the tour
-runs. The set was not installed, which is the runbook's own rule and the only
-reason this was caught: `cmp` said twelve frames were identical, and reading
-the thirteen that were not is what found it (class 0 in
-`docs/screenshot-failures.md`).
+**The capture, and a false alarm it caused.** The first capture run
+(36538355301) was green on all three legs. Its phone Browse frame measured as
+carrying a fifth chip, "Notes", that the tree has not drawn since the
+thirty-second session (D-101), and a workflow change was pushed on the
+strength of that: the commit SHA into the AVD cache key, on the theory that a
+cached AVD had carried an older build into the frame. **The measurement was of
+the wrong file.** The python on this machine is a Windows build, so `/tmp/...`
+in a script is the temp folder on the C: drive while the same path at the
+bash prompt is the MSYS temp, and `gh run download` wrote the real artifact
+to the second. Every comparison and every crop was therefore made against a directory
+an earlier session had left behind, and the read tool resolved the names the
+Windows way and served those. The real artifacts, copied into the repository
+and measured there, carry the same four chips as the 2.8 set.
 
-That is a second push for one release, which the runbook warns against, and
-the exception is deliberate: the first set is not shippable, and a workflow
-fix that waits for the next release would leave the store frame of 2.9
-carrying a tab the app does not have. The bundle is taken from the newest
-green build on `main` either way (D-093).
+Two things came out of it, and one of them is a mistake on the record rather
+than a change. The AVD cache key is back on the API level and the profile,
+because a key that includes the commit makes every capture cold, which is the
+cost the cache exists to avoid. The app and its test package are now
+uninstalled before the tour runs, which is hardening and is kept: a cached
+AVD's userdata image can carry an install from an earlier run, and the
+capture's window guard cannot see that, because another build of the same
+package owns the same window name. And `docs/screenshot-failures.md` carries
+the real lesson, which is the one the runbook already had: a frame is only
+evidence when the file measured is the file downloaded, so the frames are
+copied into the repository before anything looks at them.
 
 
 ## D-114: The daily reminder keeps the minute it was given

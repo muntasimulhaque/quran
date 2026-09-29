@@ -111,14 +111,12 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          # The commit is in the key on purpose. An AVD is a whole userdata
-          # image, so a cache hit brings back the app that was installed in an
-          # earlier run *as well as* the emulator, and the capture cannot tell
-          # two builds of one package apart: every guard it has asks whether
-          # the focused window belongs to this package, and a stale build of
-          # the same package passes it. That is how a green leg handed back a
-          # store frame from a build three weeks old (37th session, D-117).
-          key: avd-${{ env.API_LEVEL }}-${{ matrix.profile }}-${{ github.sha }}
+          # The key stays on the API level and the profile alone, which is the
+          # whole point of it: an AVD is a whole userdata image, and the
+          # capture's own windows do not need a fresh machine for a code
+          # change. What the image can carry between runs is handled where it
+          # matters, by the uninstall below.
+          key: avd-${{ env.API_LEVEL }}-${{ matrix.profile }}
 
       - name: Create AVD and generate a snapshot to cache
         if: steps.avd-cache.outputs.cache-hit != 'true'
@@ -162,13 +160,14 @@ jobs:
             for i in $(seq 1 10); do adb -s emulator-5554 shell dumpsys window windows | grep -q "Application Not Responding\|isn't responding" || break; adb -s emulator-5554 shell input keyevent KEYCODE_BACK; sleep 2; done
             adb -s emulator-5554 shell am start -a android.intent.action.MAIN -c android.intent.category.HOME >/dev/null 2>&1 || true
             # Nothing that was already on the phone may be the app the tour
-            # photographs. The install below replaces the app, but a restored
-            # task or a window of the old build can outlive it, and the
-            # capture's own window guard only asks about the package, which an
-            # old build of the same package shares (37th session, D-117).
-            # Uninstalling first makes the question impossible to get wrong,
-            # and both lines are guarded because a package that is not there is
-            # the normal case on a cold AVD.
+            # photographs. The install below replaces the app, and a cache hit
+            # on the AVD means the image can carry an install from an earlier
+            # run, so a restored task can outlive the install. The capture's
+            # own window guard cannot catch that: it asks whether the focused
+            # window belongs to this package, and another build of the same
+            # package owns the same window name. This is hardening, not a fix
+            # for something seen; two guarded lines, and a package that is not
+            # there is the normal case on a cold AVD.
             adb -s emulator-5554 shell pm uninstall io.github.muntasimulhaque.quran >/dev/null 2>&1 || true
             adb -s emulator-5554 shell pm uninstall io.github.muntasimulhaque.quran.test >/dev/null 2>&1 || true
             adb -s emulator-5554 shell am start -a android.intent.action.MAIN -c android.intent.category.HOME >/dev/null 2>&1 || true

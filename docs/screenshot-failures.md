@@ -12,11 +12,10 @@ with `gh run view --log --job <id>` for the log. **A red run is one of the
 classes below, always.** If it is not, the class is missing from this file
 and the file is the thing to fix.
 
-## The six classes
+## The five classes
 
 | # | Class | Where it dies | What the log says | The fix |
 |---|---|---|---|---|
-| 0 | **A frame that is not this build** | nowhere: the leg is green and the frame is another build's screen | nothing: this is the class with no log at all, and it is found by reading the frame | The AVD cache carried an installed build from an earlier run, and the window guard cannot see it because an old build shares the package. The commit is in the AVD cache key now, and the app is uninstalled before the tour. See "A green leg that photographed an old build" below. |
 | 1 | **Runner infrastructure** | before the capture script, in the emulator action's own setup | `Install Android SDK` fails, `Error on ZipFile unknown archive`, or the action's own `emu kill` answers `Connection refused` | Rerun the failed leg once. A second failure in the same pre-script step is a runner outage to report, not to debug. |
 | 2 | **Device drop under load** | mid-run | `adb: device offline`, `device 'emulator-5554' not found` | The capture is too heavy for that profile. Make it lighter; never just rerun. |
 | 3 | **The tour's anchors** | in the test | `ComposeTimeoutException: Condition still not satisfied`, `could not find any node that satisfies: (ContentDescription = ...)` | Real finding: the UI moved or a label changed under the tour. Fix the anchor to a tag, in the session. |
@@ -179,38 +178,36 @@ workflow now suppresses ANR dialogs at the device level (`hide_error_dialogs
 1`, `anr_show_background 0`) and the tour checks the window list, so a
 dialog is never silently shipped.
 
-## A green leg that photographed an old build
+## A frame read from the wrong folder
 
-The 2.9 capture (run 36538355301) came back green on all three legs, and its
-phone and tablet Browse frames carry **five** chips: Surahs, Juz, Last Read,
-Saved and **Notes**. The tree has four tabs; the fifth was folded into Saved
-in the thirty-second session (D-101, commit 6f8b8a8), and no string in the
-app says "Notes" at all. The frame is the Browse sheet of the build at commit
-27f7ec1, the twenty-ninth session, which had exactly those five tabs.
+Thirty-seventh session, 2.9. The phone and tablet Browse frames were measured
+as carrying a fifth chip, "Notes", that the tree has not drawn since the
+thirty-second session, and a workflow change was pushed on the strength of it.
+**Every one of those measurements was of a file from somewhere else.** The
+python on this machine is a Windows build, so a path written `/tmp/shots/...`
+in a script resolves to the temp folder on the C: drive, while the same path
+typed at the bash prompt resolves to the MSYS temp, and `gh run download`
+wrote the real artifact to the second one. The comparisons and the crops were
+therefore made against a directory left behind by an earlier session, and the
+read tool, which resolves `/tmp` the Windows way, served those images for the
+names I asked for. The real artifacts, copied into the repository and measured
+there, match the code: the same four chips, the same signature as the 2.8 set.
 
-**How it got there.** The AVD cache key is `avd-<api>-<profile>`, so a cache
-hit restores a whole userdata image with whatever was installed in an earlier
-run. The capture installs today's build over it, and every other frame in the
-same artifact is today's build (the settings frame carries the new hub, and
-twelve of the twenty-four frames are byte-identical to the 2.8 set). The
-Browse frame is the one the stale install was on screen for, and every guard
-passed it: the window guard asks whether the focused window belongs to *this
-package*, and an old build of the same package shares it, and the eight-frame
-count is satisfied because the tour wrote its other seven.
+**What is worth keeping.** The rule the runbook already had, stated in the
+place where it is needed: a frame is only evidence when the file you measured
+is the file you downloaded. `cmp` against the artifact is what caught this,
+because it disagreed with the eye and with python at the same time, and the
+disagreement is the only reason it was caught at all. So: copy the frames into
+the repository (or anywhere the shell and the interpreter agree on) before
+measuring or reading them, and when a number and a picture disagree with each
+other, believe the third measurement before either.
 
-**What it cost and what it would have shipped.** Nothing, this time: the
-frame was caught by reading it, which is the one thing the runbook insists on
-and the only thing that could have caught it. Had it been installed, the store
-listing would have shown a tab the app does not have, for 2.9, from a build
-three weeks old.
-
-**The two fixes.** The commit SHA is part of the AVD cache key, so a code
-change never reuses an emulator that may hold another build, and the app and
-its test package are uninstalled before the tour runs, so a restored task or a
-leftover window cannot be photographed. The lesson for the catalogue is the
-one rule 3 already says, sharpened: a green leg is not proof of a good frame,
-and a frame whose *content* cannot be produced by the source is a finding
-about the workflow, not a rerun away.
+The capture workflow did gain one thing from the false alarm, and it is
+hardening rather than a fix: the app and its test package are now uninstalled
+before the tour runs, so a cached AVD's image cannot carry an install from an
+earlier run into a frame. The AVD cache key deliberately stays on the API level
+and the profile, because putting the commit in it would make every run cold,
+which is the cost the cache exists to avoid.
 
 ## The rules this file implies
 
@@ -221,8 +218,8 @@ about the workflow, not a rerun away.
    window are findings about the app or the tour. They are fixed in the
    session. Rerun only class 1 (once) and, with a lighter capture, class 2.
 3. **A green leg is not proof of a good frame.** Every frame still gets
-   `cmp`'d against its artifact and read for its content before it ships,
-   and a frame that shows something the source cannot draw is class 0: the
-   AVD carried another build, and it is fixed in the workflow, not rerun.
+   `cmp`'d against its artifact and read for its content before it ships, and
+   the frame is measured from the artifact, copied somewhere the shell and the
+   interpreter agree on (see "A frame read from the wrong folder" above).
 4. **A new failure mode is added here before the next capture**, not
    remembered in a session note.
