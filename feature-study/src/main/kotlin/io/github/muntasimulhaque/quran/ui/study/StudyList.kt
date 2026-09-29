@@ -45,6 +45,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -54,11 +55,9 @@ import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
@@ -675,8 +674,9 @@ private fun AyahBlock(
                 }
                 .padding(horizontal = 8.dp, vertical = 10.dp),
         ) {
-            val arabicLine = arabic(row, playing, playingWord) { w -> onWord?.invoke(row.ayah.number, w) }
+            val arabicLine = arabic(row, playing, playingWord)
             var textLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
+            val tapWord = onWord
             Text(
                 text = arabicLine.text,
                 style = TextStyle(
@@ -689,6 +689,22 @@ private fun AyahBlock(
                 onTextLayout = { textLayout = it },
                 modifier = Modifier
                     .fillMaxWidth()
+                    // A tap on a word hears that word on repeat. The line is
+                    // drawn exactly as it always was, and the word under the
+                    // finger is found from the layout, so the reading never
+                    // becomes a page of links.
+                    .pointerInput(tapWord, textLayout) {
+                        if (tapWord == null) return@pointerInput
+                        detectTapGestures { position ->
+                            val layout = textLayout ?: return@detectTapGestures
+                            val word = layout.wordAt(
+                                position.x,
+                                position.y,
+                                row.words.size,
+                            )
+                            if (word != null) tapWord(row.ayah.number, word)
+                        }
+                    }
                     .drawWithContent {
                         val range = arabicLine.washRange
                         val layout = textLayout
@@ -772,7 +788,6 @@ private fun arabic(
     row: StudyRow,
     playing: Boolean,
     playingWord: Int?,
-    onWord: ((Int) -> Unit)? = null,
 ): ArabicLine {
     val words = row.words
     if (words.isEmpty()) return ArabicLine(AnnotatedString(row.ayah.text), null)
@@ -781,25 +796,44 @@ private fun arabic(
         words.forEachIndexed { index, word ->
             if (index > 0) append(' ')
             val start = length
-            if (onWord == null) {
-                append(word.text)
-            } else {
-                // Every word in the line is its own tap target, the way the
-                // footnote markers already are: a reader who taps a word hears
-                // that word, and hears it again, without leaving the verse.
-                // The link carries the word's own number so the reading, and
-                // not a string, decides what was tapped.
-                withLink(
-                    LinkAnnotation.Clickable(
-                        tag = "word-${word.position}",
-                        linkInteractionListener = { onWord(word.position) },
-                    ),
-                ) { append(word.text) }
-            }
+            append(word.text)
             if (playing && word.position == playingWord) washRange = start until length
         }
     }
     return ArabicLine(text, washRange)
+}
+
+/**
+ * The word under a touch on the Arabic line, from the line's own layout.
+ *
+ * Tapping a word hears it again, and a link span is the wrong way to make a
+ * word tappable: Compose draws a link in the link colour with an underline, so
+ * the whole verse came to look like a web page, and a screen reader read a
+ * line of links. The tap is resolved here from the text layout instead, so the
+ * line is drawn exactly as it always was and the word under the finger is
+ * found by where it actually sits.
+ *
+ * The trade is deliberate and it is the point of the feature: a tap on the
+ * Arabic line now hears a word rather than raising and lowering the chrome.
+ * The chrome is still one tap away on the paper around the text, which is
+ * where a reader's hand already goes, so nothing is lost but the accidental
+ * tap on a word.
+ */
+private fun TextLayoutResult.wordAt(x: Float, y: Float, count: Int): Int? {
+    if (count == 0) return null
+    val offset = getOffsetForPosition(Offset(x, y))
+    // walk back over the space that separates two words, so a tap in the gap
+    // belongs to the word it is nearer
+    var index = offset.coerceIn(0, layoutInput.text.length - 1)
+    while (index > 0 && layoutInput.text[index] == ' ') index--
+    if (index >= layoutInput.text.length) index = layoutInput.text.lastIndex
+    // the words are separated by single spaces and the line holds no other
+    // characters, so the word's number is the count of spaces before it
+    var word = 1
+    for (i in 0 until index) {
+        if (layoutInput.text[i] == ' ') word++
+    }
+    return word.takeIf { it in 1..count }
 }
 
 /**

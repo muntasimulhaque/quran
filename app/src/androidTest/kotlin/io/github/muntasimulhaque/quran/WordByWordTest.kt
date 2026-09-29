@@ -2,6 +2,7 @@ package io.github.muntasimulhaque.quran
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import org.junit.Assert.assertTrue
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.PackStore
@@ -64,5 +65,38 @@ class WordByWordTest {
         compose.waitUntil(timeoutMillis = 90_000) {
             compose.onAllNodesWithText("নামে", substring = true).fetchSemanticsNodes().isNotEmpty()
         }
+    }
+
+    /**
+     * The aid is a grid, not a heap: a word stands in the same column as its
+     * own meaning, and the row beneath it is the next word's, so the reader
+     * reads down a column and never hunts for the pair.
+     *
+     * This is the geometry the change was about, and a string the aid happens
+     * to contain does not prove it: two Bangla meanings of 1:1 are long enough
+     * that a naive tile would put the whole verse down the page as one
+     * column. So the test reads the first word and the first meaning and asks
+     * whether they share a column.
+     */
+    @Test
+    fun aWordStandsOverItsOwnMeaning() {
+        compose.waitUntil(timeoutMillis = 90_000) {
+            compose.onAllNodesWithText("নামে", substring = true).fetchSemanticsNodes().isNotEmpty()
+        }
+        // the first word of 1:1 exactly as the database spells it, in the reading's Arabic
+        val word = compose.onAllNodesWithText("بِسۡمِ", substring = true)
+            .fetchSemanticsNodes().first()
+        val meaning = compose.onAllNodesWithText("নামে", substring = true)
+            .fetchSemanticsNodes().first()
+        val wordBox = word.boundsInRoot
+        val meaningBox = meaning.boundsInRoot
+        // a word and its meaning are one tile: their columns are the same, so
+        // the horizontal centres are within a tile's own width
+        val wordCentre = wordBox.center.x
+        val meaningCentre = meaningBox.center.x
+        assertTrue(
+            "the word and its meaning stand in one column (word $wordCentre, meaning $meaningCentre)",
+            kotlin.math.abs(wordCentre - meaningCentre) < wordBox.width,
+        )
     }
 }
