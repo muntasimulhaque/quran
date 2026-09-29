@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 2.9 (versionCode 30)
+Version: 3.0 (versionCode 31)
 
 ## Listing
 
@@ -200,6 +200,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (3.0, 464 characters)
+
+Repeat the surah: the whole surah begins again when it ends, from the pill while a recitation plays and from Settings under Repeat the ayah. What happens at the end of the audio is one choice, so repeat the ayah, repeat the surah, and continue never fight each other. The pill's words keep a full line on a phone, so the surah, its ayah, the pace, and the repeat are no longer cut short. Settings rows end with the mark they carry. No ads, no trackers, no account.
 
 ## Release notes (2.9, 458 characters)
 
