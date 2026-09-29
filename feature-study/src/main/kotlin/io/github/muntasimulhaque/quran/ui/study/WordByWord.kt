@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -119,7 +120,14 @@ internal fun WordByWord(
         constraints = Constraints(),
     ).size.width
 
-    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+    BoxWithConstraints(
+        // the aid is one surface with one name, so a test can wait for the
+        // aid itself rather than for a word that may be scrolled out of a
+        // wide screen's tree
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag("word-by-word"),
+    ) {
         val available = with(density) { maxWidth.roundToPx() }
         // the grid's width rule is pure and lives in core, where the suite
         // holds it: a tile is as wide as the widest thing in it, never

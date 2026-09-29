@@ -434,7 +434,15 @@ class ScreenshotTest {
         // press instead.
         revealChrome()
         rule.onNodeWithContentDescription("Switch to the Mushaf page").performClick()
-        Thread.sleep(1_200)
+        // The Mushaf has to be the reading on the screen before the ayah's
+        // node is pressed. A fixed sleep let the press land while a sheet from
+        // the step before was still leaving, and the press went to the
+        // scrim; the wait is on the page itself, which is the thing the press
+        // is aimed at.
+        rule.waitUntil(timeoutMillis = 15_000) {
+            rule.onAllNodes(hasContentDescription("Mushaf page", substring = true))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
         // the ayah's own node on the page, by the reference the tour set up
         rule.onAllNodes(hasContentDescription("2:255.", substring = true)).onFirst()
             .performTouchInput { longClick() }

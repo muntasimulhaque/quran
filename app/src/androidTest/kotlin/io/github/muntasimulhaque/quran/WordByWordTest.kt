@@ -1,6 +1,7 @@
 package io.github.muntasimulhaque.quran
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import org.junit.Assert.assertTrue
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -71,6 +72,9 @@ class WordByWordTest {
         // time opening the content library, and a slow machine is not a
         // failing reading aid.
         compose.waitUntil(timeoutMillis = 90_000) {
+            compose.onAllNodesWithTag("word-by-word").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.waitUntil(timeoutMillis = 90_000) {
             compose.onAllNodesWithText("নামে", substring = true).fetchSemanticsNodes().isNotEmpty()
         }
     }
@@ -88,6 +92,9 @@ class WordByWordTest {
      */
     @Test
     fun aWordStandsOverItsOwnMeaning() {
+        compose.waitUntil(timeoutMillis = 90_000) {
+            compose.onAllNodesWithTag("word-by-word").fetchSemanticsNodes().isNotEmpty()
+        }
         compose.waitUntil(timeoutMillis = 90_000) {
             compose.onAllNodesWithText("নামে", substring = true).fetchSemanticsNodes().isNotEmpty()
         }
