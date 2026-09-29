@@ -1061,10 +1061,11 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the thirty-eighth session)
 
-**3.0 (versionCode 31) is prepared for submission at the owner's word
-(D-118, D-119, D-120, D-121).** The hand-over is the bundle and the store
-set in one message, before the submission; the hand-off copy of the bundle is
-deleted once the owner confirms Play has it.
+**3.0 (versionCode 31) is submitted to Google Play for review (D-118, D-119,
+D-120, D-121).** The hand-off is closed: the bundle went with the screenshots
+and the notes in one message, and the hand-over copy was deleted the same
+session, so the artifact stays in build run 36563923564 and in Play and
+`play-store/aab/` keeps only its own note.
 
 **The tree answers the owner's three reports of this session, and 2.9
 (versionCode 30) is still the release in Google Play.**
