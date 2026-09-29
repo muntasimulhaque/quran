@@ -8,6 +8,8 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import io.github.muntasimulhaque.quran.core.EndOfAudio
+import io.github.muntasimulhaque.quran.core.RecitationPlaylist
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.RecitationAyah
 import io.github.muntasimulhaque.quran.data.RecitationDownloader
@@ -33,7 +35,13 @@ import kotlinx.coroutines.suspendCancellableCoroutine
  * The playlist is built one surah at a time, from the ayah files that are
  * actually on the device, and the next surah is appended as the reader
  * reaches the end of the current one. A media id is "ayah:surah", so the
- * player always knows where it is without another query.
+ * player always knows where it is without another query, and the shape that
+ * id gives the playlist lives in [RecitationPlaylist] where it can be
+ * tested.
+ *
+ * What happens at the end of the audio is [EndOfAudio], one value, and the
+ * surah repeat is the one answer the player cannot give by itself
+ * (owner decision, D-118).
  */
 class PlaybackController(
     private val context: Context,
@@ -55,8 +63,7 @@ class PlaybackController(
 
     /** The reader's pace, repeat, and continuation, applied on connect. */
     private var speed = 1f
-    private var repeatAyah = false
-    private var continueSurah = false
+    private var end = EndOfAudio.OFF
 
     private val _state = MutableStateFlow(PlaybackUiState())
     val state: StateFlow<PlaybackUiState> = _state.asStateFlow()
@@ -94,7 +101,9 @@ class PlaybackController(
             )
             return
         }
-        val index = items.indexOfFirst { it.mediaId == mediaId(location.ayah.number, location.ayah.surah) }
+        val index = items.indexOfFirst {
+            it.mediaId == RecitationPlaylist.mediaId(location.ayah.number, location.ayah.surah)
+        }
         if (index < 0) {
             // The surah is not fully on the device; ask before fetching it.
             val packageToFetch = manifest.packageFor(recitation, location.ayah.surah)
@@ -191,6 +200,10 @@ class PlaybackController(
      * (owner decision, D-105).
      */
     private fun offerNextSurah() {
+        // A surah that is repeating has not ended; it has begun again, so
+        // there is nothing to offer and no package to fetch. This is the
+        // same word the reader gave by turning the repeat on (D-105, D-118).
+        if (end == EndOfAudio.REPEAT_SURAH) return
         val surah = _state.value.surah ?: return
         val recitation = recitationId ?: return
         val next = surah + 1
@@ -205,7 +218,30 @@ class PlaybackController(
             downloadProgress = null,
             downloadFailed = false,
         )
-        if (continueSurah) confirmDownload()
+        if (end == EndOfAudio.CONTINUE) confirmDownload()
+    }
+
+    /**
+     * The surah begins again, from the first ayah that is on the device.
+     *
+     * A surah's end arrives through one of two events, and both have to be
+     * here or the repeat works only half the time: the playlist running out,
+     * which is what happens when the next surah is not on the device, and an
+     * automatic transition into the next surah, which is what happens when it
+     * is. A deliberate step is a seek and never an automatic transition, so
+     * Next and Previous still carry the reader out of the surah, and the
+     * repeat then follows the surah they moved to.
+     *
+     * False when that surah is not in the playlist, which is the one case
+     * the caller has to answer for itself.
+     */
+    private fun restartSurah(player: Player, surah: Int): Boolean {
+        val ids = (0 until player.mediaItemCount).map { player.getMediaItemAt(it).mediaId }
+        val first = RecitationPlaylist.startOf(ids, surah)
+        if (first < 0) return false
+        player.seekTo(first, 0L)
+        player.play()
+        return true
     }
 
     private fun folderFor(recitation: String, surah: Int): String? {
@@ -231,24 +267,23 @@ class PlaybackController(
     }
 
     /**
-     * One ayah, again and again, until the reader stops it: memorization is
-     * repetition, and asking a reader to tap Play at the end of every pass is
-     * asking them to stop reading to keep reading. With repeat on, the item
-     * itself loops, so the surah-end offer never appears until repeat is off.
+     * What happens at the end of the audio: the ayah again, the surah again,
+     * or the surah after this one. One value, and the three switches that
+     * show it in the pill and on the Listening page are three views of it
+     * (owner decision, D-118).
+     *
+     * The ayah repeat is the player's own, so the item itself loops and the
+     * surah-end offer never appears while the reader is repeating. The surah
+     * repeat cannot be: the playlist grows (the next surah's ayahs are
+     * appended while the reader is in this one), so `REPEAT_MODE_ALL` would
+     * loop everything that is loaded rather than one surah. It is therefore
+     * ours, and [restartSurah] does it from the two events a surah's end
+     * arrives through.
      */
-    fun setRepeatAyah(value: Boolean) {
-        repeatAyah = value
+    fun setEndOfAudio(value: EndOfAudio) {
+        end = value
         controller?.repeatMode =
-            if (value) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
-    }
-
-    /**
-     * Continue to the next surah: on, the end of a surah fetches the next
-     * package with the reciter being heard instead of asking again. The
-     * reader's word is the switch, given once (owner decision, D-105).
-     */
-    fun setContinueSurah(value: Boolean) {
-        continueSurah = value
+            if (value == EndOfAudio.REPEAT_AYAH) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
     }
 
     fun next() {
@@ -281,7 +316,11 @@ class PlaybackController(
                             // way the last session was being heard.
                             it.setPlaybackSpeed(speed)
                             it.repeatMode =
-                                if (repeatAyah) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
+                                if (end == EndOfAudio.REPEAT_AYAH) {
+                                    Player.REPEAT_MODE_ONE
+                                } else {
+                                    Player.REPEAT_MODE_OFF
+                                }
                         }
                         controller = player
                         _state.value = _state.value.copy(connected = true)
@@ -303,7 +342,7 @@ class PlaybackController(
             val audio = database.recitationAyah(recitation, ayah.number) ?: return@mapNotNull null
             val uri = store.uri(audio.audioPath) ?: return@mapNotNull null
             MediaItem.Builder()
-                .setMediaId(mediaId(ayah.number, ayah.surah))
+                .setMediaId(RecitationPlaylist.mediaId(ayah.number, ayah.surah))
                 .setUri(uri)
                 .setMediaMetadata(
                     MediaMetadata.Builder()
@@ -321,12 +360,32 @@ class PlaybackController(
         }
 
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            // The surah that was being heard, read before the state moves on:
+            // the surah that has just ended is the one the state last
+            // published, and it is the one the repeat belongs to.
+            val ended = _state.value.surah
+            val player = controller
+            if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO &&
+                end == EndOfAudio.REPEAT_SURAH &&
+                player != null && ended != null && restartSurah(player, ended)
+            ) {
+                publish(player)
+                return
+            }
             publish(controller)
             maybeAppendNextSurah()
         }
 
         override fun onPlaybackStateChanged(playbackState: Int) {
             if (playbackState != Player.STATE_ENDED) return
+            val player = controller
+            val surah = _state.value.surah
+            if (end == EndOfAudio.REPEAT_SURAH &&
+                player != null && surah != null && restartSurah(player, surah)
+            ) {
+                publish(player)
+                return
+            }
             // The surah ended, so nothing is playing and nothing may stay
             // marked. The player keeps the last ayah as its current item, and
             // the next publish would keep drawing it as the reciting ayah
@@ -359,8 +418,8 @@ class PlaybackController(
         // surah is over the state says so itself, with no ayah marked.
         if (player.playbackState == Player.STATE_ENDED) return
         val id = player.currentMediaItem?.mediaId ?: return
-        val ayahNumber = id.substringBefore(':').toIntOrNull() ?: return
-        val surah = id.substringAfter(':').toIntOrNull()
+        val ayahNumber = RecitationPlaylist.ayahOf(id) ?: return
+        val surah = RecitationPlaylist.surahOf(id)
         val position = player.currentPosition.coerceAtLeast(0)
         if (segmentedAyah != ayahNumber) loadSegments(ayahNumber)
         _state.value = _state.value.copy(
@@ -398,7 +457,7 @@ class PlaybackController(
     private fun maybeAppendNextSurah() {
         val player = controller ?: return
         val id = player.currentMediaItem?.mediaId ?: return
-        val surah = id.substringAfter(':').toIntOrNull() ?: return
+        val surah = RecitationPlaylist.surahOf(id) ?: return
         if (surah >= 114 || loadedThroughSurah != surah) return
         val next = surah + 1
         loadedThroughSurah = next
@@ -410,8 +469,6 @@ class PlaybackController(
             }
         }
     }
-
-    private fun mediaId(ayahNumber: Int, surah: Int) = "$ayahNumber:$surah"
 
     private companion object {
         /** The pace the reader may choose, and its bounds. */

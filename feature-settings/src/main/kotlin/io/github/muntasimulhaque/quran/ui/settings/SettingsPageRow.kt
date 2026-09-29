@@ -16,8 +16,9 @@ import androidx.compose.ui.unit.dp
 
 /**
  * One category in the settings hub: what it is called, where it stands right
- * now, and the chevron that says it opens something, in the chevron's own
- * column of the row's tail, before the switch's column (D-111).
+ * now, and the chevron that says it opens something. The chevron is the
+ * row's own last mark, at the same line where a switch's right edge stands
+ * on a row that has one (owner report, D-120).
  *
  * The name and the value are two halves of one line, and the name is the half
  * that is read first, so the name holds its room: the value is measured
@@ -33,10 +34,12 @@ import androidx.compose.ui.unit.dp
  * stranded at the end of a line reads as a mistake, a comma reads as
  * punctuation.
  *
- * Both halves fill their share, so the chevron and the switch columns that
- * follow stand at the same place on every row in the sheet whatever the value
- * measures (D-111): a value that took only the width it needed would push the
- * marks after it along with itself.
+ * Both halves fill their share, so the row's end stands at the same place on
+ * every row whatever the value measures (D-111 for the switch column, D-120
+ * for the chevron that ends a row without one): a value that took only the
+ * width it needed would push the mark after it along with itself. A row with
+ * no switch keeps no empty room for one, so the value ends 52 dp further
+ * right than it used to, which is the room a long value was short of.
  *
  * The value keeps the same type as a switch row's status line, so the sheet
  * has one size for "where this stands" and one for the name of the thing.

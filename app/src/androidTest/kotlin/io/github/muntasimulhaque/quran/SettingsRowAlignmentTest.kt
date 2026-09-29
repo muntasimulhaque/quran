@@ -27,15 +27,20 @@ import org.junit.Rule
 import org.junit.Test
 
 /**
- * The settings sheet's controls run down two columns, the chevrons' and the
- * switches', with the switch always last.
+ * The settings sheet's controls run down one line: the last mark a row has is
+ * the last thing in it.
  *
  * A row can carry a switch, a chevron, or both. The owner asked for the
  * switch to be the row's last mark and for the two kinds of control to stand
  * at one place each, so the three shapes are composed here side by side and
  * the test reads the real bounds: every switch ends at one line at the
- * sheet's edge, every chevron sits one column before it, and the switch of a
- * row with a door comes after that row's chevron (owner report, D-111).
+ * sheet's edge, a row with no switch ends with its chevron on that same
+ * line, and the switch of a row with a door comes after that row's chevron
+ * (owner report, D-111, and D-120 for the row with no switch).
+ *
+ * The chevron's slot is measured, not the mark: a mark is centred in its
+ * slot, so the slot's edges are what a row's alignment is about, and the
+ * slot's tag is on the rows that draw a chevron at all.
  *
  * The column is a width, not a height: the tail's 48 dp square stretched
  * every plain row where the chevron was not a control of its own, so the
@@ -60,7 +65,7 @@ class SettingsRowAlignmentTest {
     val compose = createComposeRule()
 
     @Test
-    fun switchesEndTheLineAndChevronsShareOneColumn() {
+    fun aRowsOwnMarkEndsItAtOneLine() {
         compose.setContent {
             MaterialTheme {
                 Column {
@@ -113,25 +118,25 @@ class SettingsRowAlignmentTest {
         // right edge in pixels, which fails on every device whose density is
         // not one and passes on none of them. Nothing about the rows was
         // wrong; the measurement was (thirty-seventh session).
-        val chevrons = compose.onAllNodesWithTag("row-chevron", useUnmergedTree = true)
-        assertEquals("the page row and the door row draw one each", 2, chevrons.fetchSemanticsNodes().size)
-        val pageChevron = chevrons[0].getUnclippedBoundsInRoot()
-        val doorChevron = chevrons[1].getUnclippedBoundsInRoot()
+        val slots = compose.onAllNodesWithTag("chevron-slot", useUnmergedTree = true)
+        assertEquals("the page row and the door row draw one each", 2, slots.fetchSemanticsNodes().size)
+        val pageSlot = slots[0].getUnclippedBoundsInRoot()
+        val doorSlot = slots[1].getUnclippedBoundsInRoot()
         assertEquals(
-            "every chevron must sit at one left edge",
-            pageChevron.left.value,
-            doorChevron.left.value,
+            "a row with no switch ends with its chevron on the line every switch ends on",
+            doorSwitch.right.value,
+            pageSlot.right.value,
             0.5f,
         )
         assertEquals(
-            "every chevron must sit at one right edge",
-            pageChevron.right.value,
-            doorChevron.right.value,
+            "the switch is the last mark of the row that has one, after its chevron column",
+            doorSwitch.left.value,
+            doorSlot.right.value,
             0.5f,
         )
         assertTrue(
-            "the switch must be the row's last mark, after its chevron",
-            doorChevron.right.value <= doorSwitch.left.value + 0.5f,
+            "a page row's chevron has moved to the end, so it stands right of the door row's",
+            pageSlot.left.value > doorSlot.left.value,
         )
 
         val page = compose.onNodeWithTag("page-row").getUnclippedBoundsInRoot()
@@ -149,8 +154,8 @@ class SettingsRowAlignmentTest {
      * and the row became four lines tall, and "Font size" two. The value is
      * measured inside its own share of the row now, and the name's share is
      * the larger one, so a long value costs the value a second line at most.
-     * The two halves both fill their share, which is what keeps the chevron
-     * standing at the same place on every row (D-111).
+     * The two halves both fill their share, which is what keeps the row's end
+     * standing at the same place (D-111, D-120).
      */
     @Test
     fun aLongValueNeverSqueezesTheName() {
@@ -185,7 +190,7 @@ class SettingsRowAlignmentTest {
         )
 
         // Both halves fill their share, so the marks after them do not move.
-        val marks = compose.onAllNodesWithTag("row-chevron", useUnmergedTree = true)
+        val marks = compose.onAllNodesWithTag("chevron-slot", useUnmergedTree = true)
             .fetchSemanticsNodes()
             .map { it.boundsInRoot }
         assertEquals("one chevron a row", 2, marks.size)

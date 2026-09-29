@@ -5,7 +5,22 @@ turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
 **Status:** 2.9 (versionCode 30) is submitted to Google Play for review
-(D-114, D-115, D-116), carrying the thirty-seventh session's three reports:
+(D-114, D-115, D-116). The tree now carries the thirty-eighth session's
+three reports, which are not in a release yet:
+
+- The end of the recitation is one answer, not three switches: repeat the
+  ayah, repeat the surah, or carry on to the next surah. Turning one on turns
+  the other two off, and a surah that repeats begins again at its first ayah
+  (D-118).
+- The playing pill's words keep a measure or they take a line of their own, so
+  a surah name, its ayah, the pace, and the repeat are never cut with an
+  ellipsis on a phone (D-119).
+- A settings row ends with the mark it actually has: a row with a switch ends
+  with the switch, a row without ends with its arrow, and the 64 dp of empty
+  margin at the end of six rows is gone (D-120).
+
+**2.9** carries the thirty-seventh session's three reports (D-114, D-115,
+D-116):
 
 - The daily ayah arrives at the minute the reader chose, where the phone gives
   the app the exact time it needs to say so even on a locked, sleeping phone,
@@ -195,8 +210,10 @@ feature graphic, and screenshots per form factor are in
   offer names the reciter, the surah, and the size, the reciter can be swapped
   in that offer, and the word being recited is washed as it is read. The page
   follows the reciter if you ask it to. An offer you do not want is one tap
-  away from gone. The pace and the ayah repeat sit on the playing pill itself
-  while an ayah plays, and in Settings as the default for the next one.
+  away from gone. The pace and what happens at the end of the audio sit on the
+  playing pill itself while a recitation plays, and in Settings as the
+  default for the next one: the ayah again, the surah again, or the next
+  surah on its own.
 - **A library you choose.** The app ships the Quran text and its page layout
   and nothing else. Translations, tafsirs, word lists, and recitations are
   added when the reader wants them, from the project's own Releases, with the

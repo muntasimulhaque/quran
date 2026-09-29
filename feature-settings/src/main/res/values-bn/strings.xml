@@ -111,6 +111,7 @@
     <string name="settings_title_listening">অডিও</string>
     <string name="settings_listening_speed_value">%1$s গতি</string>
     <string name="settings_listening_summary_repeat">%1$s · একই আয়াত পুনরাবৃত্তি হচ্ছে</string>
+    <string name="settings_listening_summary_repeat_surah">%1$s · সূরা পুনরাবৃত্তি হচ্ছে</string>
     <string name="settings_group_speed">গতি</string>
     <string name="settings_speed_label">তিলাওয়াতের গতি</string>
     <string name="settings_speed_option">%1$s, %2$s</string>
@@ -118,6 +119,8 @@
     <string name="settings_group_repeat">পুনরাবৃত্তি</string>
     <string name="settings_repeat_title">আয়াত পুনরাবৃত্তি করুন</string>
     <string name="settings_repeat_subtitle">চলমান আয়াত শেষ হলে আবার শুরু হয়, আপনি থামানো পর্যন্ত</string>
+    <string name="settings_repeat_surah_title">সূরা পুনরাবৃত্তি করুন</string>
+    <string name="settings_repeat_surah_subtitle">চলমান সূরা শেষ হলে আবার শুরু হয়, আপনি থামানো পর্যন্ত</string>
     <string name="settings_continue_title">পরের সূরায় চালিয়ে যান</string>
     <string name="settings_continue_subtitle">সূরা শেষ হলে পরেরটি নিজে থেকেই বাজবে, যে তিলাওয়াতকারীকে শুনছেন তার থেকে ডাউনলোড হবে</string>
     <string name="settings_title_translations">অনুবাদ</string>

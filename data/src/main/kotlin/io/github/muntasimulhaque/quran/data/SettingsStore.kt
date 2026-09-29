@@ -10,6 +10,8 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import io.github.muntasimulhaque.quran.core.EndOfAudio
+import io.github.muntasimulhaque.quran.core.RepeatPlan
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -74,15 +76,18 @@ data class AppSettings(
     val followReciter: Boolean = true,
     /** How fast the recitation plays: the reader's own pace, remembered. */
     val playbackSpeed: Float = 1f,
-    /** True when one ayah repeats until the reader stops it. */
-    val repeatAyah: Boolean = false,
     /**
-     * True when the end of a surah is allowed to fetch the next one with
-     * the same reciter and play on. Off by default: downloads still wait
-     * for the reader's word, and this switch is that word, given once for
-     * every surah that follows (owner decision, D-105).
+     * What happens when the recitation being heard ends: the ayah again, the
+     * surah again, or the surah after this one.
+     *
+     * One value and not three switches, because two of them on at once is a
+     * promise the player cannot keep: a surah that repeats never ends, so
+     * the continuation would never come (owner decision, D-118). The
+     * continuation is off by default, and a download still waits for the
+     * reader's word: this is that word, given once for every surah that
+     * follows (owner decision, D-105).
      */
-    val continueSurah: Boolean = false,
+    val endOfAudio: EndOfAudio = EndOfAudio.OFF,
     val translationPacks: Set<String> = emptySet(),
     val tafsirPacks: Set<String> = emptySet(),
     /**
@@ -165,8 +170,7 @@ class SettingsStore(private val context: Context) {
             keepAwake = preferences[KEEP_AWAKE] ?: true,
             followReciter = preferences[FOLLOW_RECITER] ?: true,
             playbackSpeed = (preferences[PLAYBACK_SPEED] ?: 1f).coerceIn(MIN_SPEED, MAX_SPEED),
-            repeatAyah = preferences[REPEAT_AYAH] ?: false,
-            continueSurah = preferences[CONTINUE_SURAH] ?: false,
+            endOfAudio = storedEnd(preferences),
             translationPacks = translationPacks(preferences),
             tafsirPacks = preferences[TAFSIR_PACKS] ?: emptySet(),
             showTranslation = preferences[SHOW_TRANSLATION] ?: true,
@@ -245,12 +249,22 @@ class SettingsStore(private val context: Context) {
         context.settingsStore.edit { it[PLAYBACK_SPEED] = speed.coerceIn(MIN_SPEED, MAX_SPEED) }
     }
 
-    suspend fun setRepeatAyah(repeat: Boolean) {
-        context.settingsStore.edit { it[REPEAT_AYAH] = repeat }
-    }
-
-    suspend fun setContinueSurah(continueSurah: Boolean) {
-        context.settingsStore.edit { it[CONTINUE_SURAH] = continueSurah }
+    /**
+     * What happens at the end of the audio, written as the three keys it has
+     * always been written as, in one edit.
+     *
+     * The keys move together or not at all: a process that died between two
+     * writes would leave a reader with the ayah repeating and the next surah
+     * being fetched behind it, which is the impossible pair the value above
+     * exists to prevent (owner decision, D-118).
+     */
+    suspend fun setEndOfAudio(end: EndOfAudio) {
+        val plan = RepeatPlan.OFF.with(end)
+        context.settingsStore.edit {
+            it[REPEAT_AYAH] = plan.ayah
+            it[REPEAT_SURAH] = plan.surah
+            it[CONTINUE_SURAH] = plan.next
+        }
     }
 
     suspend fun setShowTranslation(show: Boolean) {
@@ -311,6 +325,20 @@ class SettingsStore(private val context: Context) {
     }
 
     /**
+     * The end of the audio, as the three stored keys stand.
+     *
+     * A build before the exclusivity (D-118) let a reader turn two of them
+     * on, so the read settles that case the way [RepeatPlan.end] does: the
+     * narrower promise is the one kept, because it is the one the reader can
+     * still hear working.
+     */
+    private fun storedEnd(preferences: Preferences): EndOfAudio = RepeatPlan(
+        ayah = preferences[REPEAT_AYAH] ?: false,
+        surah = preferences[REPEAT_SURAH] ?: false,
+        next = preferences[CONTINUE_SURAH] ?: false,
+    ).end
+
+    /**
      * The translations the reader has on. It was one pack before a reader
      * could read two at once, so the old single value is read as a set of one
      * and cleared once it has been carried over.
@@ -358,7 +386,15 @@ class SettingsStore(private val context: Context) {
         val KEEP_AWAKE = booleanPreferencesKey("keep_awake")
         val FOLLOW_RECITER = booleanPreferencesKey("follow_reciter")
         val PLAYBACK_SPEED = floatPreferencesKey("playback_speed")
+        /**
+         * The three keys one answer is stored as. `repeat_ayah` and
+         * `continue_surah` were written before the answer was one value;
+         * `repeat_surah` is the third key that made, added in D-118 and
+         * absent from every install before it, which costs a reader
+         * nothing: an unwritten key reads as off.
+         */
         val REPEAT_AYAH = booleanPreferencesKey("repeat_ayah")
+        val REPEAT_SURAH = booleanPreferencesKey("repeat_surah")
         val CONTINUE_SURAH = booleanPreferencesKey("continue_surah")
         val TRANSLATION_PACK = stringPreferencesKey("translation_pack")
         val TRANSLATION_PACKS = stringSetPreferencesKey("translation_packs")

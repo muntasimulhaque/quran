@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.DownloadedSurah
@@ -46,8 +47,8 @@ data class SettingsActions(
     val onKeepAwake: (Boolean) -> Unit = {},
     val onFollowReciter: (Boolean) -> Unit = {},
     val onPlaybackSpeed: (Float) -> Unit = {},
-    val onRepeatAyah: (Boolean) -> Unit = {},
-    val onContinueSurah: (Boolean) -> Unit = {},
+    /** What happens at the end of the audio: one answer, three switches. */
+    val onEndOfAudio: (EndOfAudio) -> Unit = {},
     val onShowTranslation: (Boolean) -> Unit = {},
     val onShowTafsir: (Boolean) -> Unit = {},
     val onWordByWord: (Boolean) -> Unit = {},
@@ -197,8 +198,7 @@ fun SettingsSheet(
                     SettingsPage.Listening -> ListeningPage(
                         settings = settings,
                         onSpeed = actions.onPlaybackSpeed,
-                        onRepeat = actions.onRepeatAyah,
-                        onContinue = actions.onContinueSurah,
+                        onEndOfAudio = actions.onEndOfAudio,
                     )
                     SettingsPage.Daily -> DailyPage(
                         settings = settings,

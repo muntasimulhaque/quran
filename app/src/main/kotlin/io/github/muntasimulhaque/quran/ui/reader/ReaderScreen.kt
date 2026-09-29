@@ -517,8 +517,7 @@ fun ReaderScreen(
                 onKeepAwake = { viewModel.setKeepAwake(it) },
                 onFollowReciter = { viewModel.setFollowReciter(it) },
                 onPlaybackSpeed = { viewModel.setPlaybackSpeed(it) },
-                onRepeatAyah = { viewModel.setRepeatAyah(it) },
-                onContinueSurah = { viewModel.setContinueSurah(it) },
+                onEndOfAudio = { viewModel.setEndOfAudio(it) },
                 onShowTranslation = { viewModel.setShowTranslation(it) },
                 onShowTafsir = { viewModel.setShowTafsir(it) },
                 onWordByWord = { viewModel.setWordByWord(it) },
@@ -914,11 +913,9 @@ private fun BottomStack(
                     }
                 },
                 speed = viewModel.settings.playbackSpeed,
-                repeating = viewModel.settings.repeatAyah,
-                continuing = viewModel.settings.continueSurah,
+                end = viewModel.settings.endOfAudio,
                 onSpeed = { viewModel.setPlaybackSpeed(it) },
-                onRepeat = { viewModel.setRepeatAyah(it) },
-                onContinue = { viewModel.setContinueSurah(it) },
+                onEndOfAudio = { viewModel.setEndOfAudio(it) },
             )
         }
     }

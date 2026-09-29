@@ -634,6 +634,9 @@ implement it and update this list.
   D-003, with all existing licenses honored and a takedown path in About.
 - Continue to the next surah is off by default and is the reader's one-time
   word for the packages that follow the surah being heard (D-105).
+- What happens at the end of the audio is one answer, not three switches:
+  repeat the ayah, repeat the surah, or continue. Turning one on turns the
+  other two off (D-118).
 
 ## Traps with no code home
 
@@ -804,6 +807,32 @@ implement it and update this list.
   the current word comes from the segment that spans the position, and its
   word-table position is `wordFrom + 1`. The player skips ayahs whose files
   are absent, which is why a partial pack plays only what is on the device.
+  The id is read by `core/RecitationPlaylist`, never by string surgery at the
+  call site, because a surah repeat is a seek to the index it returns and a
+  partial pack is a surah that starts at its first ayah on the device, never
+  at a later one.
+- A surah's end arrives through two events, and a repeat that watches only one
+  of them works half the time: `STATE_ENDED`, which is the playlist running
+  out, and an automatic transition into the next surah, which is what happens
+  when it is already on the device. `REPEAT_MODE_ALL` cannot stand in for
+  either, because the playlist grows while the reader listens. And a
+  deliberate Next or Previous is a seek, never an automatic transition, so it
+  is never intercepted: the reader is never trapped in a surah (D-118).
+- A floating control that floats over the page has one measure, and a name cut
+  with an ellipsis is a defect, not a wrap. The playback pill spent 192 dp of
+  a 369 dp phone on four 48 dp targets and left about 91 dp of text, which is
+  fourteen characters: enough for a reciter's name and never enough for a
+  surah. So the words keep a measure or they take a line of their own
+  (`oneRowFloor` in `feature-playback/PlaybackBar.kt`), and the floor is
+  computed from the row's own numbers so a control that changes width is one
+  number changed in one place. The offer states carry two controls and keep
+  their own row; a measure belongs to the state that needs it (D-119).
+- A settings row's tail reserves a column only for a mark the row actually
+  has. Holding the switch column empty on a row with no switch ended six hub
+  rows with 64 dp of nothing at their right edge, and a reader reads that gap
+  as the row not knowing where it stops. A row's own mark is now the last
+  thing in it, and the test measures the chevron's *slot* rather than the
+  centred mark inside it (D-120, which reverses the other half of D-111).
 - The development audio sample lives in `content/work/audio-dev` and is
   bundled into debug builds only; release builds carry no audio until the
   owner decides how the recitations are delivered (D-022).
@@ -1029,6 +1058,48 @@ fetching them again; the space is worth less than the time.
   to right on the screen; `MushafTurnTest` now pins the direction on every
   form factor.
 
+
+## Where the project stands (end of the thirty-eighth session)
+
+**The tree answers the owner's three reports of this session, and 2.9
+(versionCode 30) is still the release in Google Play (D-118, D-119, D-120).
+No `versionCode` has moved.**
+
+- **Repeat the surah, and one answer for the end of the audio.** The end of
+  the recitation is one value, `core.EndOfAudio`, not three switches: repeat
+  the ayah, repeat the surah, or carry on to the next surah. Turning one on
+  turns the other two off, because a surah that repeats never ends and the
+  continuation would then never come. The surah repeat is the app's own,
+  because the playlist grows and `REPEAT_MODE_ALL` would loop everything
+  loaded; it seeks to the surah's first ayah on the device from the two
+  events a surah's end arrives through, and a deliberate Next or Previous is
+  never intercepted. The store keeps its three keys and settles an older
+  install's impossible pair by keeping the narrower promise.
+- **The pill's words keep a measure, or they take a line of their own.** Four
+  48 dp targets left about 91 dp of text on a 369 dp phone, which is fourteen
+  characters: a surah name and its ayah always broke, and the pace and repeat
+  were ellipsized. The pill is now two rows wherever the words cannot keep
+  300 dp, and the one row it has always been on a tablet or a landscape
+  phone. The phone pill grows from about 55 dp to about 98 dp, which is the
+  price the owner chose over a one-line pill where the tap between the reciter
+  and the place is a guess. `PlaybackUi.kt` (768 lines) is four files now.
+- **A settings row's own mark is the last thing in it.** A row with a switch
+  ends with the switch, a row without ends with its chevron on the same line,
+  and a row with both is untouched. Six hub rows lost 64 dp of empty right
+  margin and their values gained the room, which is what the wrapped "Arabic
+  30, translation 17" needed. This reverses the other half of D-111.
+
+**The suite.** `:core:test` (91, ten new), `:data:testDebugUnitTest`,
+`:app:testDebugUnitTest`, `:app:lintDebug` and `:app:assembleDebug` are green
+on this machine, and `:app:compileDebugAndroidTestKotlin` compiles. There are
+no AVDs here, so `PlaybackPillTest`, `ListeningSettingsTest` and
+`SettingsRowAlignmentTest` are unrun: none of the three is among the six
+classes CI names, and the next session with an emulator, or the next release's
+full app run, is where they answer.
+
+**Stale on purpose.** `play-store/screenshots/` is the 2.9 set. The settings
+frames now differ in the tail, and no store frame carries the pill, so the
+next capture refreshes the three settings frames and nothing else.
 
 ## Where the project stands (end of the thirty-seventh session)
 

@@ -54,11 +54,10 @@ fun Group(title: String) {
 }
 
 /**
- * The chevron that stands one column in from a settings row's end, where
- * every row keeps it: 48 dp wide, drawn when the row has a page behind it
- * and held empty when it does not, so every chevron in the sheet stands at
- * one place and every switch at another, whatever the row carries (owner
- * report, D-111).
+ * The chevron at the end of a settings row: 48 dp wide, drawn when the row
+ * has a page behind it and held empty when it does not, so every switch in
+ * the sheet stands at one place whatever the row carries (owner report,
+ * D-111).
  *
  * The slot owns a 48 dp square only when the chevron is a control of its
  * own. On every other row it is a width, not a height: a square tail is
@@ -89,7 +88,12 @@ private fun ChevronSlot(
                 } else {
                     Modifier
                 },
-            ),
+            )
+            // The slot, not the mark: a mark is centred in its slot, so the
+            // slot's edges are what a row's alignment is about. The tag is
+            // on a row that draws a chevron only, so a count of them is a
+            // count of the rows that have a door (owner report, D-120).
+            .then(if (visible) Modifier.testTag("chevron-slot") else Modifier),
         contentAlignment = Alignment.Center,
     ) {
         if (visible) {
@@ -148,9 +152,9 @@ fun PageHeader(title: String, onBack: () -> Unit) {
 }
 
 /**
- * Material 3's switch is one track wide, and the tail reserves that exact
- * width so the chevron column lands at one place whether the row carries a
- * switch or not.
+ * Material 3's switch is one track wide, and a row that draws a switch
+ * reserves that exact width for it, so every switch in the sheet ends at one
+ * line at the row's own margin.
  *
  * The number is kept here, beside the code that reserves it, and
  * [SettingsRowAlignmentTest] measures the real control against it. A Material
@@ -162,27 +166,36 @@ fun PageHeader(title: String, onBack: () -> Unit) {
 val SwitchSlot = 52.dp
 
 /**
- * The two columns every settings row ends with: the chevron's, then the
- * switch's. Shared with the page row, which is one file of its own, so the
- * tail is internal here rather than private. A row draws the marks it carries and leaves the other column's
- * room empty, so every chevron in the sheet stands at one place and every
- * switch at another, whatever a row carries, and the switch is always the
- * line's last mark (owner report, D-111).
+ * The marks a settings row ends with, in the order a row's own hands read
+ * them: the chevron's column, then the switch's.
+ *
+ * The switch's column exists on a row that has a switch and on no other row.
+ * A row with nowhere to switch to keeps no empty room for one, so the
+ * chevron in it is the row's last mark at the same line where a switch's own
+ * right edge stands, and a row with both keeps the two columns exactly as
+ * they were (owner report, D-120, which reverses the other half of D-111:
+ * six rows in the hub ended with 64 dp of nothing at their right edge, and
+ * a reader reads the gap as the row not knowing where it stops).
+ *
+ * A row draws the marks it carries and leaves the chevron's column empty when
+ * it has no door, so every switch ends at one line whatever a row carries.
  */
 @Composable
 internal fun RowTail(
     chevron: Boolean,
     onOpen: (() -> Unit)? = null,
     chevronLabel: String? = null,
-    switch: @Composable () -> Unit = {},
+    switch: (@Composable () -> Unit)? = null,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         ChevronSlot(visible = chevron, onOpen = onOpen, label = chevronLabel)
-        Box(
-            modifier = Modifier.width(SwitchSlot),
-            contentAlignment = Alignment.CenterEnd,
-        ) {
-            switch()
+        if (switch != null) {
+            Box(
+                modifier = Modifier.width(SwitchSlot),
+                contentAlignment = Alignment.CenterEnd,
+            ) {
+                switch()
+            }
         }
     }
 }
@@ -208,11 +221,11 @@ internal fun RowTail(
  *
  * Without [onOpen] the whole row stays the switch, which is what a row with
  * nowhere to go owes a finger. The switch is the row's last mark, at the
- * sheet's edge, and the chevron sits one column before it whether the row has
- * a door or not, so every switch in the sheet ends at one line and every
- * chevron stands at one place (owner report, D-111). The chevron keeps its
- * own touch target and its own spoken name beside the door, so TalkBack reads
- * a switch and a door rather than one crowded control.
+ * row's own margin, and the chevron sits one column before it whether the
+ * row has a door or not, so every switch in the sheet ends at one line
+ * (owner report, D-111). The chevron keeps its own touch target and its own
+ * spoken name beside the door, so TalkBack reads a switch and a door rather
+ * than one crowded control.
  */
 @Composable
 fun ToggleRow(

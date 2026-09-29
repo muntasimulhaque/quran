@@ -5492,3 +5492,183 @@ the settings geometry ones included, runs on a session's own emulator or not
 at all, and two of them had been red for nobody to see. A release session
 should run the full app suite on the emulator, not only the six, which is
 what `AGENTS.md`'s release steps say and what this session did.
+
+## D-118: The end of the audio is one answer, and the surah can be it
+
+Date: the thirty-eighth session, from the owner's report. They asked for a
+third end beside "Repeat the ayah", under it, in the pill's own menu and on
+the Listening page, and for it to mean what it says: the surah begins again.
+
+**Three answers to one question, so one value.** The pill and the Listening
+page had two switches about what happens when the audio ends: repeat the
+ayah, and carry on into the next surah. A surah repeat is a third. Two of
+them on at once is a promise the player cannot keep, because a surah that
+repeats never ends, so the continuation would never come, and a reader who
+had turned both on would sit waiting for a surah that never arrives. So the
+three are one value, `core.EndOfAudio`, in `core/Repeat.kt`, and
+`AppSettings.endOfAudio` is that value and not three booleans. The switches
+are three views of it: each reports the answer it names through
+`chosenBy(turnedOn, choice)`, and the plan the app keeps is that answer
+alone.
+
+**The store did not move shape, only meaning.** The keys are still
+`repeat_ayah`, `continue_surah`, and now `repeat_surah`, so a reader who
+updates keeps what they chose, and an install that has never heard of the
+third key reads it as off. They are read through `RepeatPlan.end`, which
+settles the one impossible set an older build could leave behind (ayah repeat
+and continuation both on) by keeping the narrower promise, because that is
+the one the reader can still hear working. They are written in one edit, so a
+process that died between two writes cannot leave half an answer on the disk.
+One read, one write, one place: the data layer is the only code that knows
+there are three keys at all.
+
+**The player's own loop cannot do the surah.** The ayah repeat is
+`REPEAT_MODE_ONE`, which loops the item and is right. The surah repeat cannot
+be `REPEAT_MODE_ALL`, because the playlist grows: `maybeAppendNextSurah`
+appends the next surah's ayahs while the reader is in this one, so ALL would
+loop everything that is loaded rather than one surah. It is therefore ours,
+in two places, because a surah's end arrives through two events and a repeat
+that only watches one of them works half the time:
+
+* `STATE_ENDED`, which is the playlist running out, and is what happens when
+  the next surah is not on the device;
+* an automatic `onMediaItemTransition` (`REASON_AUTO`) into the next surah's
+  first ayah, which is what happens when it is.
+
+Both seek to the first item of the surah that just finished and play. A
+deliberate step is a seek and never an automatic transition, so Next and
+Previous still carry the reader out, and the repeat then follows the surah
+they moved to. `offerNextSurah` returns at once when the surah is repeating:
+nothing ended, so there is nothing to offer and no package to fetch, which is
+the same standing word the continuation switch is (D-023, D-105).
+
+The arithmetic is pure and lives in `core/RecitationPlaylist` with its own
+JVM test, because the surah repeat is the one answer the player cannot give
+by itself and the index it needs is the whole of what could be wrong with it.
+
+**The words.** English: "Repeat the surah", a subtitle mirroring the ayah
+one, "repeating the surah" beside the reference on the pill, and "the surah
+repeats" in the hub's Listening value. Bangla from words the app already
+ships: সূরা পুনরাবৃত্তি করুন, সূরা পুনরাবৃত্তি হচ্ছে. The pill's own word
+for the ayah case became "repeating the ayah", since "repeating" alone could
+not say which end was repeating.
+
+**Tests.** `RepeatTest` pins the rule over every stored combination rather
+than one example of each: one answer on at most, the narrower promise kept
+when a legacy set holds two, and a switch reporting its answer or none.
+`RecitationPlaylistTest` pins the media id and the index a surah starts at,
+including a partial package, where the first ayah on the device is the start
+and never a later one. `ListeningSettingsTest` and `PlaybackPillTest` carry
+the two doors, and the page test asserts that exactly one of the three rows
+can read on. The restart inside the listener is the one thing with no test
+seam, because `PlaybackController` needs a real `MediaController` from the
+service; that is stated in its KDoc rather than papered over, and the two
+compose tests that drive the menu are what CI runs.
+
+## D-119: The pill's words keep a measure, or they take a line of their own
+
+Date: the thirty-eighth session, from the owner's report and their own
+photograph of the pill: the reciter's name, the surah name and the ayah were
+being cut.
+
+**The measurement, from the owner's own screen.** The photograph is 738 px
+wide at a density of 2.0 (the 16 dp `BarGutter` lands on 31.5 px and the four
+48 dp transport targets measure 98 px apart), so a 369 dp phone. The pill
+spends, before the words get a pixel: 32 dp of gutter, 22 dp of the row's
+own padding, 12 dp of gap, and 192 dp of four 48 dp controls. What is left is
+117 dp, and the status line's own chevron takes 18 of it: **about 91 dp of
+text, which is fourteen characters** at the size the line is set. So
+"Al-Kawthar 108:3" always broke across two lines, which is the photograph,
+and "Al-Baqarah 2:255 · 1.5x" was past the two lines the text allows and was
+ellipsized. The reciter's name was never the problem: `shortReciterName`
+already gives "Husary" and "Minshawi".
+
+**The rule, and only the rule.** The words keep a measure or they take a line
+of their own. The measure is 300 dp, the whole line the pill can print at its
+longest: the longest surah name and its ayah, the slowest pace, and the surah
+repeat (D-118). Below that the pill is two rows, the words on the full width
+above the four controls; at or above it, the pill is the one row it has
+always been. The floor is computed in one function from the row's own
+numbers, so a control that changes width is a number changed in one place:
+`oneRowFloor(controls) = 22 + 12 + controls × 48 + 18 + 300`, which is 544 dp
+of pill for the playing state. A tablet, a landscape phone, and nothing else
+keeps the single row; **a phone in portrait always takes the two rows.**
+
+**The cost, stated.** The pill grows from about 55 dp to about 98 dp on a
+phone, which is the price of never cutting a word: the owner chose it over
+the 80 dp one-line variant, where the reciter and the place share one line
+and the tap that lands between them is a guess. The study list keeps 120 dp
+below its last line, so it still clears; the Mushaf page is a fixed
+fifteen-line composition, so a taller pill covers a little more of its
+bottom margin. The words' inset is 20 dp in the two-row shape and 16 dp in
+the one, because the corner of a 98 dp capsule reaches further in than the
+corner of a 55 dp one.
+
+**The offer keeps its own row**, and that is not an oversight: it carries two
+controls, never four, and the one line it prints is a name and a size, which
+is about 180 dp. The measure belongs to the playing pill.
+
+**The file is four now.** `PlaybackUi.kt` was 768 lines, over the project's
+own limit, and this change added to it. It is `PlaybackBar.kt` (the pill and
+its words), `ListeningMenu.kt` (the pace and the three ends), `PillControls.kt`
+(the controls, one list, which is where the count the measure reads comes
+from), and `ListenOfferBar.kt` (the offer and the reciter chooser). The
+controls are a list because the layout is a function of how many there are,
+and a count read from a second `when` beside that one is a number that drifts
+from the row it measures.
+
+**Tests.** `PlaybackPillTest` pins both shapes by measuring them: at 393 dp
+the transport sits under the words, at 840 dp it shares their row. The
+existing promises (the gutter, the door on the status line, the automatic
+download naming what it fetches) are unchanged and still run, and the two new
+menu tests cover the surah repeat and the continuation reporting one answer
+each.
+
+## D-120: A row's own mark is the last thing in it
+
+Date: the thirty-eighth session, from the owner's report and their
+photograph of the settings hub: the rows with an arrow and no switch had a gap
+at the right margin, and it looked bad.
+
+**What the gap was.** `RowTail` reserved both columns on every row, so a
+chevron-only row ended with the switch column's 52 dp held empty, plus the
+row's own 12 dp of padding: 64 dp of nothing at the end of six of the eleven
+hub rows (Language, Theme, Font size, Reciters, Listening, About). D-111 named
+that as the price of every chevron standing on one line, and the owner is
+reversing that half of it.
+
+**The rule now.** A row's own mark is the last thing in it. A row that carries
+a switch ends with the switch, at the row's own margin. A row that does not
+ends with its chevron, on the same line where a switch's right edge stands. A
+row with both keeps the two columns and the order it has had since D-111. The
+switch's column now exists on a row that has a switch and on no other row,
+which is the whole of the change: `RowTail` draws the slot only when the row
+gives it a switch, and `PageRow` gives it none.
+
+**What moves.** Six page rows' chevrons move right by 52 dp, to the sheet's
+edge, and their values gain that 52 dp, which is what D-116's "the name holds
+its room" wanted and what a value like "Arabic 30, translation 17" was
+wrapping for. Nothing else in the sheet moves: a switch-only row keeps its
+empty chevron column so every switch still ends at one line, and a door row
+keeps both.
+
+**The test changed, because the rule changed.** `SettingsRowAlignmentTest`
+now measures the chevron's *slot* rather than the mark (a mark is centred in
+its slot, so the slot's edges are what an alignment is about), and the slot's
+tag is on the rows that draw a chevron at all. It pins: every switch ends at
+one line; a page row's chevron ends on that same line; the door row's switch
+begins where its chevron column ends; and a page row's chevron stands right of
+the door row's, which is the new shape and the reason the test was rewritten
+rather than adjusted. The compact-height and long-value measurements are
+unchanged and still pass.
+
+**The gates for the three changes.** `:core:test` (91, ten of them new),
+`:data:testDebugUnitTest`, `:app:testDebugUnitTest`, `:app:lintDebug` and
+`:app:assembleDebug` are green on this machine, and
+`:app:compileDebugAndroidTestKotlin` compiles. There are no AVDs on this
+machine, so the three instrumented classes that carry these changes
+(`PlaybackPillTest`, `ListeningSettingsTest`, `SettingsRowAlignmentTest`,
+which are not among the six CI names) are for a session with an emulator or
+for the next release's full app run. The settings frames in
+`play-store/screenshots/` are the 2.9 set and are now stale in the tail; the
+next capture refreshes them.

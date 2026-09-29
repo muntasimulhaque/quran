@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.core.ShareText
 import io.github.muntasimulhaque.quran.data.Ayah
@@ -234,11 +235,11 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             // uses that same value: the store is not read twice for one launch.
             val stored = settingsStore.settings.first()
             settings = stored
-            // The reader's pace and repeat choice are theirs from the last
-            // session, and the player must be told before the first ayah.
+            // The reader's pace and their answer to what happens at the end
+            // of the audio are theirs from the last session, and the player
+            // must be told before the first ayah.
             playback.setSpeed(stored.playbackSpeed)
-            playback.setRepeatAyah(stored.repeatAyah)
-            playback.setContinueSurah(stored.continueSurah)
+            playback.setEndOfAudio(stored.endOfAudio)
             surahs = database.surahs()
             indexSurahs()
             packs = database.packs()
@@ -521,23 +522,21 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch { settingsStore.setPlaybackSpeed(speed) }
     }
 
-    /** One ayah, repeated until the reader stops it. */
-    fun setRepeatAyah(repeat: Boolean) {
-        settings = settings.copy(repeatAyah = repeat)
-        playback.setRepeatAyah(repeat)
-        viewModelScope.launch { settingsStore.setRepeatAyah(repeat) }
-    }
-
     /**
-     * Continue to the next surah: when one ends, the next is fetched with
-     * the reciter being heard and plays on. The reader's word turns it on
-     * once, and the download still announces itself on the pill with its
-     * size and a cancel (owner decision, D-105).
+     * What happens at the end of the audio: the ayah again, the surah again,
+     * or the next surah.
+     *
+     * One setter for all three, because they are one answer and the plan
+     * behind them keeps at most one on (owner decision, D-118). Turning one
+     * on leaves the other two off, so a reader can never be waiting for a
+     * surah that a repeating one will never end. The continuation is the
+     * reader's word for the packages that follow, and it still announces
+     * itself on the pill with its size and a cancel (owner decision, D-105).
      */
-    fun setContinueSurah(continueSurah: Boolean) {
-        settings = settings.copy(continueSurah = continueSurah)
-        playback.setContinueSurah(continueSurah)
-        viewModelScope.launch { settingsStore.setContinueSurah(continueSurah) }
+    fun setEndOfAudio(choice: EndOfAudio) {
+        settings = settings.copy(endOfAudio = choice)
+        playback.setEndOfAudio(choice)
+        viewModelScope.launch { settingsStore.setEndOfAudio(choice) }
     }
 
     /** The reading keeps the reader's chosen translation; this only shows or hides it. */

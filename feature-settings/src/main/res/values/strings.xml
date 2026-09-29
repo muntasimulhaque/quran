@@ -112,6 +112,7 @@
     <string name="settings_title_listening">Listening</string>
     <string name="settings_listening_speed_value">%1$s speed</string>
     <string name="settings_listening_summary_repeat">%1$s · one ayah repeats</string>
+    <string name="settings_listening_summary_repeat_surah">%1$s · the surah repeats</string>
     <string name="settings_group_speed">Speed</string>
     <string name="settings_speed_label">Playback speed</string>
     <string name="settings_speed_option">%1$s, %2$s</string>
@@ -119,6 +120,8 @@
     <string name="settings_group_repeat">Repeat</string>
     <string name="settings_repeat_title">Repeat the ayah</string>
     <string name="settings_repeat_subtitle">The playing ayah begins again when it ends, until you stop it</string>
+    <string name="settings_repeat_surah_title">Repeat the surah</string>
+    <string name="settings_repeat_surah_subtitle">The playing surah begins again when it ends, until you stop it</string>
     <string name="settings_continue_title">Continue to the next surah</string>
     <string name="settings_continue_subtitle">When a surah ends, the next one plays on its own, downloaded with the reciter you are hearing</string>
     <string name="settings_title_translations">Translations</string>
