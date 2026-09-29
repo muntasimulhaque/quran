@@ -20,6 +20,13 @@ import org.junit.runner.RunWith
  * so the row must be there and must report the choice it was given: turning
  * it on from this page and from the pill are the same value, the same as the
  * pace and the repeat before it (owner decision, D-105).
+ *
+ * The switch is looked for in the unmerged tree, and it has to be: the row
+ * itself is the door and the switch is its own control inside it, so the
+ * merged tree reads one control for the pair and the switch's own tag is not
+ * in it. Every test that names a switch in a row that opens a page asks for
+ * the unmerged tree, and this one did not, so it was reading a node that is
+ * not there (thirty-seventh session).
  */
 @RunWith(AndroidJUnit4::class)
 class ListeningSettingsTest {
@@ -40,7 +47,7 @@ class ListeningSettingsTest {
                 )
             }
         }
-        compose.onNodeWithTag("switch-continue").performClick()
+        compose.onNodeWithTag("switch-continue", useUnmergedTree = true).performClick()
         assertTrue("the continue switch must report the choice", continuation)
     }
 }

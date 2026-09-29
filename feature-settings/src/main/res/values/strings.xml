@@ -13,19 +13,24 @@
     <string name="settings_theme_black">Black</string>
     <string name="settings_auto_night_title">Follow the system dark mode</string>
     <string name="settings_auto_night_subtitle">Night when your phone is in dark mode, your page otherwise</string>
-    <string name="settings_summary_theme_auto">%1$s · auto, day page %2$s</string>
+    <string name="settings_summary_theme_auto">%1$s · day page %2$s</string>
+
+    <string name="settings_group_reading">Reading</string>
+    <string name="settings_group_recitation">Recitation</string>
+    <string name="settings_group_reminder">The reminder</string>
 
     <string name="settings_keep_awake_title">Keep the screen awake</string>
-    <string name="settings_keep_awake_subtitle">The page stays lit while you read</string>
     <string name="settings_daily_title">Daily ayah</string>
-    <string name="settings_daily_subtitle_off">One ayah a day, in your notifications</string>
+    <string name="settings_daily_subtitle_off">Off, set for %1$s</string>
     <string name="settings_daily_subtitle_on">One ayah a day, at %1$s</string>
     <string name="settings_open_daily">Daily ayah settings</string>
     <string name="settings_daily_time_title">Time</string>
     <string name="settings_daily_note">The reminder makes no sound. It waits in your notifications with the day\'s ayah and its translation, and a tap opens it where you read. The ayahs come in the Book\'s own order, so each day brings the next one.</string>
     <string name="settings_daily_off">The reminder is off</string>
-    <string name="settings_daily_blocked">Your phone is not showing the app\'s notifications, so the reminder cannot arrive.</string>
+    <string name="settings_daily_blocked">Your phone is not showing this reminder, so it cannot arrive.</string>
     <string name="settings_daily_blocked_action">Notification settings</string>
+    <string name="settings_daily_exact_note">Your phone is not keeping an exact time for this reminder, so on a locked or sleeping phone it can arrive a little after the minute you chose. Allowing exact times keeps it to that minute.</string>
+    <string name="settings_daily_exact_action">Allow exact times</string>
     <string name="settings_daily_picker_title">When the daily ayah arrives</string>
     <string name="settings_daily_picker_keyboard">Type the time instead</string>
     <string name="settings_daily_picker_clock">Turn the clock instead</string>
@@ -38,7 +43,6 @@
     <string name="settings_open_translations">Choose translations</string>
     <string name="settings_open_tafsirs">Choose tafsirs</string>
     <string name="settings_words_title">Show word meanings</string>
-    <string name="settings_words_subtitle">Each word with its meaning, under the ayah</string>
     <string name="settings_words_add">Adds the %1$s word list · %2$s</string>
     <string name="settings_words_failed">Could not download. Tap to try again.</string>
 

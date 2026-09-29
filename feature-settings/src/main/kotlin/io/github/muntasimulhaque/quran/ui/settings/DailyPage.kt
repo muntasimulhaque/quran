@@ -66,13 +66,21 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * on, and moving its moment. Never when the page is merely opened, because a
  * reader who came to look is not the reader who came to set, and a system
  * dialog is not a thing to spend on curiosity (owner decision, 2.3).
+ *
+ * The phone's own exact alarm switch is a different kind of permission: it is
+ * not given at install, it lives in the phone's settings rather than in a
+ * dialog, and the app never interrupts anything to ask for it. The reminder
+ * works without it, inside the minute, so this page only names what is
+ * missing and opens the phone's own page for it (D-114).
  */
 @Composable
 fun DailyPage(
     settings: AppSettings,
     notificationsBlocked: Boolean,
+    exactAlarmsAllowed: Boolean,
     onDailyAyahTime: (Int) -> Unit,
     onOpenNotificationSettings: () -> Unit,
+    onOpenExactAlarmSettings: () -> Unit,
 ) {
     var choosing by remember { mutableStateOf(false) }
     Column(
@@ -121,6 +129,26 @@ fun DailyPage(
                 TextButton(
                     label = stringResource(R.string.settings_daily_blocked_action),
                     onClick = onOpenNotificationSettings,
+                )
+            }
+        }
+        // The phone may refuse to keep an exact time for this app, and then a
+        // reminder due while the phone is locked and idle waits for the phone
+        // to wake on its own. The reminder still comes, inside the minute, so
+        // this line says what is missing and what the reader's one tap buys,
+        // and it is only there when the phone really is refusing: a reader who
+        // has granted it, or a phone that never asked, sees nothing (D-114).
+        if (settings.dailyAyah && !exactAlarmsAllowed) {
+            Text(
+                text = stringResource(R.string.settings_daily_exact_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Line),
+            )
+            Box(Modifier.padding(start = 16.dp, top = Space.Line)) {
+                TextButton(
+                    label = stringResource(R.string.settings_daily_exact_action),
+                    onClick = onOpenExactAlarmSettings,
                 )
             }
         }

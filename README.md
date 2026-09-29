@@ -5,7 +5,19 @@ turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
 **Status:** 2.8 (versionCode 29) is submitted to Google Play for review
-(D-111, D-112, D-113):
+(D-111, D-112, D-113). The tree now carries the thirty-seventh session's
+three reports, which are not in a release yet:
+
+- The daily ayah arrives at the minute the reader chose, where the phone gives
+  the app the exact time it needs to say so even on a locked, sleeping phone,
+  and the reminder keeps working where the reader does not (D-114).
+- The app follows the phone's own day and night, at the moment it changes,
+  with the switch on (D-115).
+- The settings sheet reads as a list: no squeezed names, no rows that explain
+  what their own switch already shows, three quiet groups, and every step of
+  a text size or a pace a proper target to tap (D-116).
+
+**2.8** carries (D-111, D-112, D-113):
 
 - Settings is tidier: on every row that carries a switch and a door, the
   switch is now the last mark, so all switches run down one line and all

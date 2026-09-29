@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 2.8 (versionCode 29)
+Version: 2.9 (versionCode 30)
 
 ## Listing
 
@@ -200,6 +200,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (2.9, 458 characters)
+
+The daily ayah now arrives at the minute you chose, even on a locked or sleeping phone, if you let the app keep that exact time on the Daily ayah page. The app now follows your phone's own light and dark mode the moment it changes, with the follow system switch on. Settings reads as a list: names no longer squeeze, rows say what stands rather than explain themselves, and every text size and playback step is easier to tap. No ads, no trackers, no account.
 
 ## Release notes (2.8, 328 characters)
 

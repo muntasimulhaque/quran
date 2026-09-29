@@ -46,9 +46,19 @@ connection at all.
 ## Permissions
 
 - `INTERNET`: the one use described above.
-- `POST_NOTIFICATIONS`: the media notification while recitation plays.
+- `POST_NOTIFICATIONS`: the media notification while recitation plays, and
+  the daily ayah reminder.
 - `FOREGROUND_SERVICE` and `FOREGROUND_SERVICE_MEDIA_PLAYBACK`: keeping
   recitation playing with the screen off.
+- `SCHEDULE_EXACT_ALARM`: the daily ayah reminder, and nothing else. On
+  Android 12 and later the phone does not give this at install: it is the
+  reader's own switch in the phone's settings, and the app asks for it in one
+  place, on the reminder's own page, where it also says what the reminder does
+  without it (it still comes, inside the minute you chose). Before Android 12
+  exact alarms were never gated, so on those releases the app uses them and
+  there is nothing for the reader to grant. Nothing about this permission
+  leaves the phone: it is a switch for when this app's own reminder is due, and
+  no other app's alarms are touched.
 
 Nothing else is declared. The player's library also merges in
 `ACCESS_NETWORK_STATE` and `WAKE_LOCK`, which the app does not declare.

@@ -129,9 +129,10 @@ fun AppTheme.name(): String = stringResource(
 )
 
 /**
- * The size of one kind of text: the row names what it sizes, the steps grow,
- * and the value on the right says exactly what it comes to. The sample is
- * drawn in the script of the text it sizes, so Arabic is judged as Arabic.
+ * The size of one kind of text: the row names what it sizes, the steps grow
+ * from the smallest to the largest, and the chosen one is filled. The sample
+ * above the rows is drawn in the script of the text that is being sized, so
+ * Arabic is judged as Arabic.
  */
 @Composable
 fun SizeRow(role: TypeRole, step: Float, onChange: (Float) -> Unit) {
@@ -143,106 +144,118 @@ fun SizeRow(role: TypeRole, step: Float, onChange: (Float) -> Unit) {
             TypeRole.Words -> R.string.settings_size_words
         },
     )
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 22.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(1f),
+    SegmentedRow(
+        label = label,
+        value = step,
+        steps = TextSize.STEPS,
+        onSelect = onChange,
+        // The letters run from the smallest step to the largest, so the row
+        // reads as one scale.
+        cell = { index, active ->
+            Text(
+                text = if (role == TypeRole.Arabic) "\u0627" else "A",
+                style = MaterialTheme.typography.titleMedium
+                    .copy(fontSize = (11 + index * 2).sp),
+                color = if (active) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+            )
+        },
+    ) { chosen ->
+        val index = TextSize.STEPS.indexOf(chosen)
+        stringResource(
+            R.string.settings_text_size_option,
+            index + 1,
+            TextSize.STEPS.size,
+            label,
         )
-        Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(50))
-                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-                .padding(3.dp),
-            horizontalArrangement = Arrangement.spacedBy(1.dp),
-        ) {
-            TextSize.STEPS.forEachIndexed { index, value ->
-                val active = value == step
-                val description = stringResource(
-                    R.string.settings_text_size_option,
-                    index + 1,
-                    TextSize.STEPS.size,
-                    label,
-                )
-                Box(
-                    modifier = Modifier
-                        .size(38.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(
-                            if (active) {
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
-                            } else {
-                                Color.Transparent
-                            },
-                        )
-                        .selectable(selected = active, role = Role.RadioButton) { onChange(value) }
-                        .semantics { contentDescription = description },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        // The letters run from the smallest step to the
-                        // largest, so the row reads as one scale.
-                        text = if (role == TypeRole.Arabic) "\u0627" else "A",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = (11 + index * 2).sp,
-                        ),
-                        color = if (active) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                    )
-                }
-            }
-        }
     }
 }
 
 /**
- * The pace of the recitation, in the same segmented shape the text sizes use:
- * one row, the choices growing left to right, the chosen one filled. The pace
- * belongs to hearing the way the size belongs to reading, so the two are the
- * same control, and a reader who learned one has learned the other. The value
- * is in numbers, because "slow" and "fast" are not the same for every reader.
+ * The pace of the recitation, in the same segmented shape the text sizes
+ * use: one control, learned once. The pace belongs to hearing the way the
+ * size belongs to reading, so a reader who learned one has learned the other.
+ * The value is in numbers, because "slow" and "fast" are not the same for
+ * every reader.
  */
 @Composable
 fun SpeedRow(value: Float, onChange: (Float) -> Unit) {
     val label = stringResource(R.string.settings_speed_label)
-    Row(
+    SegmentedRow(
+        label = label,
+        value = value,
+        steps = SpeedSteps,
+        onSelect = onChange,
+        cell = { index, active ->
+            Text(
+                text = speedText(SpeedSteps[index]),
+                style = MaterialTheme.typography.labelLarge.copy(fontSize = 12.sp),
+                color = if (active) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+            )
+        },
+    ) { chosen ->
+        stringResource(R.string.settings_speed_option, speedText(chosen), label)
+    }
+}
+
+/**
+ * One choice out of a few, drawn the same way everywhere it appears: the name
+ * of the thing above, the choices in one pill under it, the chosen one filled.
+ *
+ * The name is above rather than beside because of the 48 dp rule. Every step
+ * carries its own touch box, so a row of five is 250 dp wide, and beside a
+ * name that would leave the name 60-odd dp on a small phone: "Playback speed"
+ * would break in the middle and the Bengali names would break anywhere. Above,
+ * the name has the row to itself and the choices have the row's middle, and
+ * the pair reads as one block (D-087: these cells were 38 and 46 dp, named
+ * there and not done until now).
+ */
+@Composable
+private fun SegmentedRow(
+    label: String,
+    value: Float,
+    steps: List<Float>,
+    onSelect: (Float) -> Unit,
+    /** What one step draws, given its place in the scale and whether it is chosen. */
+    cell: @Composable (index: Int, active: Boolean) -> Unit,
+    /** What a screen reader says for one step, place and meaning together. */
+    description: @Composable (Float) -> String,
+) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 22.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
+            .padding(start = 22.dp, end = 22.dp, top = Space.Tight, bottom = Space.Tight),
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(1f),
         )
         Row(
             modifier = Modifier
+                .padding(top = Space.Line)
+                .align(Alignment.CenterHorizontally)
                 .clip(RoundedCornerShape(50))
                 .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
                 .padding(3.dp),
             horizontalArrangement = Arrangement.spacedBy(1.dp),
         ) {
-            SpeedSteps.forEach { speed ->
-                val active = kotlin.math.abs(speed - value) < 0.01f
-                val description = stringResource(
-                    R.string.settings_speed_option,
-                    speedText(speed),
-                    label,
-                )
+            steps.forEachIndexed { index, step ->
+                val active = kotlin.math.abs(step - value) < 0.01f
+                val said = description(step)
                 Box(
                     modifier = Modifier
-                        .size(46.dp)
+                        // The 48 dp is the whole reason this control has a
+                        // shape of its own: the mark inside is smaller, and the
+                        // target a finger gets is not (D-087).
+                        .size(48.dp)
                         .clip(RoundedCornerShape(50))
                         .background(
                             if (active) {
@@ -251,19 +264,11 @@ fun SpeedRow(value: Float, onChange: (Float) -> Unit) {
                                 Color.Transparent
                             },
                         )
-                        .selectable(selected = active, role = Role.RadioButton) { onChange(speed) }
-                        .semantics { contentDescription = description },
+                        .selectable(selected = active, role = Role.RadioButton) { onSelect(step) }
+                        .semantics { contentDescription = said },
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(
-                        text = speedText(speed),
-                        style = MaterialTheme.typography.labelLarge.copy(fontSize = 12.sp),
-                        color = if (active) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                    )
+                    cell(index, active)
                 }
             }
         }

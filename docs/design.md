@@ -203,8 +203,12 @@ short list of favorites (D-097). The notification carries the Arabic and,
 when the reader reads with a translation, the first enabled one, in plain
 words with no footnote markers, because the shade has no door for a note. A
 tap opens that ayah in the study reading, whatever mode the reader was last
-in. The hour is the reader's, and the alarm is the system's own inexact one:
-minutes of drift under Doze are nothing to an invitation to read.
+in. The hour is the reader's. Where the reader has given the app the phone's
+own exact alarm access, the reminder is an exact alarm and arrives at that
+minute even on a phone that is locked and asleep then; where they have not,
+it is the platform's own batched alarm, which can still reach a sleeping
+phone and can be minutes late, and the page says so in one line rather than
+promising the minute (D-114).
 
 ## 7. Settings
 
@@ -212,12 +216,23 @@ A hub, not a scroll: one row per category, each carrying where it stands
 right now,
 and each opening a page of its own. Back steps out of a page before it
 closes the sheet, and the hub keeps its place while a page is open (D-046).
+The rows sit in three quiet groups, so a list of eleven is read at a glance
+rather than one row at a time, and a row says a state and not an
+explanation: a switch that already shows its own state carries no line under
+it restating it (D-116). The name of a row keeps its room whatever the
+value beside it says, and the two tail columns stand at one place on every
+row (D-111, D-116). A row of choices draws its name above the choices, so
+every step of a segmented control is a full 48 dp target (D-087, D-116).
 
 * **Appearance**: Paper, Sepia, Night, Black, as swatches that are the page
   each one paints. The theme is the whole app: the page, the sheets, the bars.
   The filled swatch is the page drawing right now: with automatic night mode
   on and the phone in dark mode, Night is filled, and the day page the reader
-  chose is named under the switch (D-097).
+  chose is named under the switch (D-097). With that switch on, the app
+  follows the phone's own day and night as it changes, without waiting to be
+  restarted: the window is rebuilt by the platform, which is the one way the
+  whole app, the sheets and the bars included, sees the new colours at once
+  (D-115).
 * **Text**: the Quran text, the translation, the tafsir, and the word
   meanings aid, each with its own five steps, above a sample drawn from the
   reader's own ayah so a change is judged on the page it is about to change.

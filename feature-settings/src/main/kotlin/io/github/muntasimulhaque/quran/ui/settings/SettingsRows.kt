@@ -25,6 +25,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.reader.Icon
@@ -49,44 +51,6 @@ fun Group(title: String) {
             bottom = Space.Line,
         ),
     )
-}
-
-/**
- * One category in the settings hub: what it is called, where it stands right
- * now, and the chevron that says it opens something, in the chevron's own
- * column of the row's tail, before the switch's column (D-111).
- */
-@Composable
-fun PageRow(
-    title: String,
-    summary: String?,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .minimumInteractiveComponentSize()
-            .clickable(onClick = onClick)
-            .padding(start = 22.dp, end = 12.dp, top = 14.dp, bottom = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f),
-        )
-        if (!summary.isNullOrBlank()) {
-            Text(
-                text = summary,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(end = 10.dp),
-            )
-        }
-        RowTail(chevron = true)
-    }
 }
 
 /**
@@ -184,23 +148,29 @@ fun PageHeader(title: String, onBack: () -> Unit) {
 }
 
 /**
- * Material 3's switch is one track wide, 52 dp, and the tail reserves that
- * exact width so the chevron column lands at one place whether the row
- * carries a switch or not. [SettingsRowAlignmentTest] measures the real
- * control against this number, so a Material release that widens the track
- * fails there instead of silently moving every chevron off the line.
+ * Material 3's switch is one track wide, and the tail reserves that exact
+ * width so the chevron column lands at one place whether the row carries a
+ * switch or not.
+ *
+ * The number is kept here, beside the code that reserves it, and
+ * [SettingsRowAlignmentTest] measures the real control against it. A Material
+ * release that widens the track therefore fails there, where the fix is one
+ * number, instead of quietly pushing every switch out of its own column and
+ * leaving it overlapping the chevron in front of it, which is what a track
+ * wider than its slot does (found by that test, thirty-seventh session).
  */
-private val SwitchSlot = 52.dp
+val SwitchSlot = 52.dp
 
 /**
  * The two columns every settings row ends with: the chevron's, then the
- * switch's. A row draws the marks it carries and leaves the other column's
+ * switch's. Shared with the page row, which is one file of its own, so the
+ * tail is internal here rather than private. A row draws the marks it carries and leaves the other column's
  * room empty, so every chevron in the sheet stands at one place and every
  * switch at another, whatever a row carries, and the switch is always the
  * line's last mark (owner report, D-111).
  */
 @Composable
-private fun RowTail(
+internal fun RowTail(
     chevron: Boolean,
     onOpen: (() -> Unit)? = null,
     chevronLabel: String? = null,

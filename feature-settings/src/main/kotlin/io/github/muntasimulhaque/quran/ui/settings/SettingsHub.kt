@@ -15,9 +15,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.AppSettings
-import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ContentPack
-import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.Recitation
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.data.resolved
@@ -52,6 +50,14 @@ fun SettingsPage.title(): String = stringResource(
  * breath, so the hub row never claims a page the reader is not on: in dark
  * mode with auto-night on, the row says Night, the page drawing, and names
  * the day choice after it (owner report, D-097).
+ *
+ * The row carries the page that is drawing and nothing more. With the switch
+ * on and the phone in the light, that is the reader's own day page, so the
+ * row reads "Paper" and stops: the old summary said "Paper · auto, day page
+ * Paper", which repeated the same word twice, and its length is what pushed
+ * the row's name into four lines (owner report, 37th session). The second
+ * half is kept for the only case it says anything, when the phone is in dark
+ * mode and the day page the reader chose is the one being named (D-097).
  */
 @Composable
 private fun themeSummary(settings: AppSettings): String {
@@ -60,7 +66,7 @@ private fun themeSummary(settings: AppSettings): String {
         android.content.res.Configuration.UI_MODE_NIGHT_YES
     val shown = settings.theme.resolved(autoNight = settings.autoNight, systemDark = dark)
     val name = shown.name()
-    return if (settings.autoNight) {
+    return if (settings.autoNight && shown != settings.theme) {
         stringResource(R.string.settings_summary_theme_auto, name, settings.theme.name())
     } else {
         name
@@ -70,6 +76,14 @@ private fun themeSummary(settings: AppSettings): String {
 /**
  * The hub: one row per category, each carrying where it stands, so a reader
  * can see their own setup at a glance and open only what they came to change.
+ *
+ * The rows are in three quiet groups, because a flat list of eleven rows is
+ * read one at a time and a list with a name over each part of it is read at a
+ * glance: what the page looks like and what it draws, then what the reader
+ * hears, then the one reminder. The language stays above the groups on its
+ * own, since it changes the words of every row below it, and About stands at
+ * the foot on its own, which is where an app names itself (owner report,
+ * 37th session).
  */
 @Composable
 fun SettingsHub(
@@ -91,6 +105,7 @@ fun SettingsHub(
             title = stringResource(R.string.settings_title_language),
             summary = languageChoiceName(settings.uiLanguage ?: UiLanguage.English.tag),
         ) { onOpen(SettingsPage.Language) }
+        Group(stringResource(R.string.settings_group_reading))
         PageRow(
             title = stringResource(R.string.settings_title_appearance),
             summary = themeSummary(settings),
@@ -129,6 +144,19 @@ fun SettingsHub(
             openLabel = stringResource(R.string.settings_open_tafsirs),
             switchTag = "switch-tafsir",
         )
+        // Reading with the screen awake sits in the reading itself, beside
+        // the other whole-app choices: it is one switch with no page behind it,
+        // and a page that held only this one row was a door to a single tap.
+        // It says nothing under its name: the switch is the whole of what it
+        // is, and a line of explanation under a control that already shows its
+        // own state is the sheet talking to itself.
+        ToggleRow(
+            title = stringResource(R.string.settings_keep_awake_title),
+            subtitle = null,
+            checked = settings.keepAwake,
+            onChange = onKeepAwake,
+        )
+        Group(stringResource(R.string.settings_group_recitation))
         PageRow(
             title = stringResource(R.string.settings_title_reciters),
             summary = reciterName(settings, recitations),
@@ -137,20 +165,12 @@ fun SettingsHub(
             title = stringResource(R.string.settings_title_listening),
             summary = listeningSummary(settings),
         ) { onOpen(SettingsPage.Listening) }
-        // Reading with the screen awake sits in the hub itself, beside the
-        // other whole-app choices: it is one switch with no page behind it,
-        // and a page that held only this one row was a door to a single tap.
-        ToggleRow(
-            title = stringResource(R.string.settings_keep_awake_title),
-            subtitle = stringResource(R.string.settings_keep_awake_subtitle),
-            checked = settings.keepAwake,
-            onChange = onKeepAwake,
-        )
         // The daily reminder: one ayah a day, at the reader's own moment. It
-        // comes on from the first launch, and this row is the door to the page
-        // that turns it off or moves its time, so the switch and the clock are
-        // read together in one place rather than as a strip of hours under a
+        // comes on with the app, and this row is the door to the page that
+        // turns it off or moves its time, so the switch and the clock are read
+        // together in one place rather than as a strip of hours under a
         // switch in the hub (owner report, 2.3).
+        Group(stringResource(R.string.settings_group_reminder))
         ToggleRow(
             title = stringResource(R.string.settings_daily_title),
             subtitle = dailySubtitle(settings),
@@ -160,6 +180,7 @@ fun SettingsHub(
             openLabel = stringResource(R.string.settings_open_daily),
             switchTag = "switch-daily",
         )
+        Spacer(Modifier.height(Space.Section))
         PageRow(
             title = stringResource(R.string.settings_title_about),
             summary = stringResource(R.string.settings_version_short, version),
@@ -173,20 +194,21 @@ private fun reciterName(settings: AppSettings, recitations: List<Recitation>): S
         ?: stringResource(R.string.settings_none_yet)
 
 /**
- * Where the reminder stands, in one line: whether it will come, and when.
- * The moment is read from the same value the alarm is armed with, so the row
- * never promises a time the reminder does not keep.
+ * Where the reminder stands, in one line: whether it will come, and when. The
+ * moment is read from the same value the alarm is armed with, so the row never
+ * promises a time the reminder does not keep, and it says the moment whether
+ * the reminder is on or off, because the page stays live while it is off and a
+ * reader who has set a time is owed to see it (D-105).
  */
 @Composable
-private fun dailySubtitle(settings: AppSettings): String =
+private fun dailySubtitle(settings: AppSettings): String = stringResource(
     if (settings.dailyAyah) {
-        stringResource(
-            R.string.settings_daily_subtitle_on,
-            clockText(settings.dailyAyahMinute),
-        )
+        R.string.settings_daily_subtitle_on
     } else {
-        stringResource(R.string.settings_daily_subtitle_off)
-    }
+        R.string.settings_daily_subtitle_off
+    },
+    clockText(settings.dailyAyahMinute),
+)
 
 /**
  * Where the listening choices stand, in one line: the pace, and whether an
@@ -250,32 +272,18 @@ fun ListeningPage(
     }
 }
 
-@Composable
-private fun translationName(settings: AppSettings, packs: List<ContentPack>): String {
-    val chosen = packs.filter { it.id in settings.translationPacks && it.installed }
-    return when {
-        chosen.isEmpty() -> stringResource(R.string.settings_none_yet)
-        chosen.size == 1 -> chosen.first().name
-        else -> stringResource(R.string.settings_chosen_count, chosen.size)
-    }
-}
-
-@Composable
-private fun tafsirSummary(settings: AppSettings, packs: List<ContentPack>): String {
-    val chosen = packs.filter { it.type == PackType.Tafsir && it.installed && it.id in settings.tafsirPacks }
-    return when {
-        chosen.isEmpty() -> stringResource(R.string.settings_none_yet)
-        chosen.size == 1 -> chosen.first().name
-        else -> stringResource(R.string.settings_chosen_count, chosen.size)
-    }
-}
-
 /**
  * The word by word switch, and the state of the list behind it. The row is
  * checked only when the aid is on and the list it needs is on the device, so
  * a switch that reads on always means meanings are being drawn; when the
  * list is missing the row says so, with its size, and the same tap that would
  * turn the aid on fetches it.
+ *
+ * The row says nothing else. The aid is a switch, the switch says whether the
+ * reading draws the meanings, and a line under it restating that, or
+ * explaining what a word meaning is to a reader who has just turned the aid
+ * on, is the one kind of line a status list does not carry (owner report,
+ * 37th session).
  */
 @Composable
 internal fun WordByWordRow(
@@ -299,7 +307,7 @@ internal fun WordByWordRow(
             languageName(wanted.language),
             formatBytes(wanted.bytes),
         )
-        else -> stringResource(R.string.settings_words_subtitle)
+        else -> null
     }
     ToggleRow(
         title = stringResource(R.string.settings_words_title),
@@ -346,58 +354,5 @@ fun LanguagePage(
         }
         Spacer(Modifier.height(Space.Section))
     }
-}
-
-/**
- * The word list the reading speaks: the one that matches the first chosen
- * translation, and English when that language has no list. The translation
- * counts as chosen even before it is installed, so a Bangla reader is never
- * offered the English word list because the Bangla translation is still on
- * its way. The pack is the one the switch adds when it is missing.
- */
-internal fun wantedWordsPack(settings: AppSettings, packs: List<ContentPack>): ContentPack? {
-    val language = packs.firstOrNull { it.id in settings.translationPacks }?.language
-        ?: UiLanguage.English.tag
-    val preferred = ContentDatabase.wordsPackId(language)
-    return packs.firstOrNull { it.id == preferred }
-        ?: packs.firstOrNull { it.id == ContentDatabase.WORDS_PACK }
-}
-
-@Composable
-internal fun translationSubtitle(pack: ContentPack): String {
-    val detail = if (pack.shipped) {
-        stringResource(R.string.pack_included_suffix)
-    } else {
-        formatBytes(pack.bytes)
-    }
-    return stringResource(R.string.pack_installed, languageName(pack.language), detail)
-}
-
-/**
- * The packs of one kind, grouped by the language they speak, in the
- * alphabetical order of those languages, and alphabetical inside each group.
- * A list of choices is read, not searched: the reader looks for a name, so
- * names are in one order everywhere in the app.
- */
-@Composable
-internal fun LanguageGroups(
-    packs: List<ContentPack>,
-    type: PackType,
-    row: @Composable (ContentPack) -> Unit,
-) {
-    val groups = packs.filter { it.type == type }.groupBy { it.language }
-    val names = HashMap<String, String>()
-    for (language in groups.keys) names[language] = languageName(language)
-    groups.entries
-        .sortedBy { (names[it.key] ?: it.key).lowercase() }
-        .forEach { (language, group) ->
-            Text(
-                text = names[language] ?: language,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Block, bottom = Space.Tight),
-            )
-            group.sortedBy { it.name.lowercase() }.forEach { pack -> row(pack) }
-        }
 }
 

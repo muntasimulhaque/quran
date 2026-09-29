@@ -57,8 +57,12 @@ fun QuranApp(
     onPlaybackPermission: () -> Unit = {},
     /** Whether the phone will show this app's notifications, read from the phone. */
     notificationsBlocked: () -> Boolean = { false },
+    /** Whether the phone will keep an exact time for the daily reminder. */
+    exactAlarmsAllowed: () -> Boolean = { true },
     /** Opens the phone's own page for this app's notifications. */
     onOpenNotificationSettings: () -> Unit = {},
+    /** Opens the phone's own page where the reader grants this app an exact time. */
+    onOpenExactAlarmSettings: () -> Unit = {},
 ) {
     // A tap on the reminder opens that ayah in the study reading, which is
     // what a reminder is for: the reader meets the words, not the app. The
@@ -122,7 +126,9 @@ fun QuranApp(
                     content,
                     onPlaybackPermission,
                     notificationsBlocked,
+                    exactAlarmsAllowed,
                     onOpenNotificationSettings,
+                    onOpenExactAlarmSettings,
                 )
             }
         }

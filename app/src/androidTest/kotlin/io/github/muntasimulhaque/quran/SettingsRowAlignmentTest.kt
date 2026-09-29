@@ -4,12 +4,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.assertHeightIsAtLeast
+import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
+import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.ui.settings.PageRow
+import io.github.muntasimulhaque.quran.ui.settings.SizeRow
+import io.github.muntasimulhaque.quran.ui.settings.SpeedRow
+import io.github.muntasimulhaque.quran.ui.settings.SwitchSlot
 import io.github.muntasimulhaque.quran.ui.settings.ToggleRow
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -30,6 +40,19 @@ import org.junit.Test
  * The column is a width, not a height: the tail's 48 dp square stretched
  * every plain row where the chevron was not a control of its own, so the
  * page row's compact height is pinned here too (owner report, D-105).
+ *
+ * The switch column is the real control's width, measured here rather than
+ * assumed: when Material widened its switch the reserved column stayed 52 dp,
+ * the control overflowed its own slot to the left, and it came to sit over
+ * the chevron in front of it. The switch was then the row's last mark by
+ * nothing but luck. This test caught that (thirty-seventh session), so the
+ * number and the control are pinned together here.
+ *
+ * Three measurements of the sheet live here, because they are all the same
+ * question asked of a row: what a reader's eye gets and what a finger gets.
+ * The two tail columns and the compact height above, the name and the value
+ * sharing one line whatever the value says (owner report, 37th session), and
+ * every step of a segmented row being a full 48 dp target (D-087).
  */
 class SettingsRowAlignmentTest {
 
@@ -72,22 +95,43 @@ class SettingsRowAlignmentTest {
         val doorSwitch = compose.onNodeWithTag("switch-door", useUnmergedTree = true)
             .getUnclippedBoundsInRoot()
         assertEquals(
+            "the reserved column is the real control's own width, so a Material release that widens the track fails here",
+            SwitchSlot.value,
+            (doorSwitch.right - doorSwitch.left).value,
+            0.5f,
+        )
+        assertEquals(
             "every switch must end at one line",
             alone.right.value,
             doorSwitch.right.value,
             0.5f,
         )
 
+        // Every bound here is read the same way, in dp. `boundsInRoot` is in
+        // pixels and `getUnclippedBoundsInRoot` is in dp, and this test once
+        // compared the two: the switch's left edge in dp against the chevron's
+        // right edge in pixels, which fails on every device whose density is
+        // not one and passes on none of them. Nothing about the rows was
+        // wrong; the measurement was (thirty-seventh session).
         val chevrons = compose.onAllNodesWithTag("row-chevron", useUnmergedTree = true)
-            .fetchSemanticsNodes()
-        assertEquals("the page row and the door row draw one each", 2, chevrons.size)
-        val pageChevron = chevrons.first().boundsInRoot
-        val doorChevron = chevrons.last().boundsInRoot
-        assertEquals("every chevron must sit at one left edge", pageChevron.left, doorChevron.left, 0.5f)
-        assertEquals("every chevron must sit at one right edge", pageChevron.right, doorChevron.right, 0.5f)
+        assertEquals("the page row and the door row draw one each", 2, chevrons.fetchSemanticsNodes().size)
+        val pageChevron = chevrons[0].getUnclippedBoundsInRoot()
+        val doorChevron = chevrons[1].getUnclippedBoundsInRoot()
+        assertEquals(
+            "every chevron must sit at one left edge",
+            pageChevron.left.value,
+            doorChevron.left.value,
+            0.5f,
+        )
+        assertEquals(
+            "every chevron must sit at one right edge",
+            pageChevron.right.value,
+            doorChevron.right.value,
+            0.5f,
+        )
         assertTrue(
             "the switch must be the row's last mark, after its chevron",
-            doorChevron.right <= doorSwitch.left.value + 0.5f,
+            doorChevron.right.value <= doorSwitch.left.value + 0.5f,
         )
 
         val page = compose.onNodeWithTag("page-row").getUnclippedBoundsInRoot()
@@ -95,5 +139,91 @@ class SettingsRowAlignmentTest {
             "a page row must stay a line and its padding, not a 48 dp slot taller",
             page.bottom - page.top <= 56.dp,
         )
+    }
+
+    /**
+     * The name holds its room, whatever the value says.
+     *
+     * The owner's own sheet: the theme row's value was long enough to leave the
+     * name "Theme" a column so narrow that the word broke one letter to a line
+     * and the row became four lines tall, and "Font size" two. The value is
+     * measured inside its own share of the row now, and the name's share is
+     * the larger one, so a long value costs the value a second line at most.
+     * The two halves both fill their share, which is what keeps the chevron
+     * standing at the same place on every row (D-111).
+     */
+    @Test
+    fun aLongValueNeverSqueezesTheName() {
+        compose.setContent {
+            MaterialTheme {
+                Column {
+                    PageRow(
+                        title = "Theme",
+                        summary = "Night · day page Paper",
+                        onClick = {},
+                        modifier = Modifier.testTag("long-value"),
+                    )
+                    PageRow(
+                        title = "Font size",
+                        summary = "Arabic 25 · translation 14",
+                        onClick = {},
+                        modifier = Modifier.testTag("short-value"),
+                    )
+                }
+            }
+        }
+
+        val long = compose.onNodeWithTag("long-value").getUnclippedBoundsInRoot()
+        assertTrue(
+            "a long value may take a second line of its own, never a ladder of the name's",
+            long.bottom - long.top <= 76.dp,
+        )
+        val name = compose.onNodeWithText("Theme").getUnclippedBoundsInRoot()
+        assertTrue(
+            "the name must keep a line to itself, not one letter at a time",
+            name.right - name.left > (name.bottom - name.top) * 2f,
+        )
+
+        // Both halves fill their share, so the marks after them do not move.
+        val marks = compose.onAllNodesWithTag("row-chevron", useUnmergedTree = true)
+            .fetchSemanticsNodes()
+            .map { it.boundsInRoot }
+        assertEquals("one chevron a row", 2, marks.size)
+        val first = marks.first()
+        val last = marks.last()
+        assertEquals("every chevron must sit at one left edge", first.left, last.left, 0.5f)
+        assertEquals("every chevron must sit at one right edge", first.right, last.right, 0.5f)
+    }
+
+    /**
+     * Every step of every segmented row is a 48 dp target.
+     *
+     * The text sizes drew 38 dp cells and the pace drew 46, under the design
+     * document's own rule, and the fix named in D-087 was structural: an outer
+     * 48 dp touch box with the mark inside it. The name moved above the steps
+     * for it, because five 48 dp boxes are 250 dp wide and a name beside them
+     * would break in the middle on a small phone. The measurement is the
+     * rule's own number, read off the real controls.
+     */
+    @Test
+    fun everyStepIsAFortyEightDpTarget() {
+        compose.setContent {
+            MaterialTheme {
+                Column {
+                    SizeRow(TypeRole.Translation, 1f) {}
+                    SpeedRow(1f) {}
+                }
+            }
+        }
+        val steps = compose.onAllNodes(isSelectable(), useUnmergedTree = true)
+        assertEquals(
+            "the text size row and the pace row, five steps each",
+            10,
+            steps.fetchSemanticsNodes().size,
+        )
+        steps.onFirst().assertWidthIsAtLeast(48.dp)
+        steps.onFirst().assertHeightIsAtLeast(48.dp)
+        steps.onLast().assertWidthIsAtLeast(48.dp)
+        steps.onLast().assertHeightIsAtLeast(48.dp)
     }
 }

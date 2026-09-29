@@ -8,6 +8,14 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <!-- The daily reminder, and the only reason for an exact alarm in this
+         app: the reader chooses a minute, and on Android 12 and later only an
+         exact alarm is delivered to a phone that is locked and idle at that
+         minute. The platform does not grant it at install on a phone this
+         app targets, so the reminder works without it (a windowed alarm
+         inside the chosen minute) and the Daily page offers the reader the
+         one tap that turns it on (owner decision, D-114). -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
         android:allowBackup="false"
@@ -18,9 +26,25 @@
         android:supportsRtl="true"
         android:usesCleartextTraffic="false"
         android:theme="@style/Theme.Quran">
+        <!-- The reading's one activity. uiMode is deliberately not in its
+             configChanges: a theme change is the one configuration change this
+             app does not handle itself. The interface language is applied in
+             attachBaseContext through a context derived with
+             createConfigurationContext, a snapshot taken when the window is
+             built, and nothing in the app recomposes the page when the phone's
+             own day and night turn over underneath it. So the app promised to
+             follow the system dark mode and did not: at ten in the morning,
+             the phone in its day colours, the app on the night page it was
+             launched with, and the switch on (owner report, 37th session).
+             Leaving uiMode to the platform makes the change do what it does
+             everywhere else, which is recreate the window and draw the other
+             half of the themes. Nothing is lost in the recreation: the view
+             model keeps the reading's place, and the open settings page is
+             rememberSaveable, which is the same road a language choice
+             already takes. -->
         <activity
             android:name=".MainActivity"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode|smallestScreenSize"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>

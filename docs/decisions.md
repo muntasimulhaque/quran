@@ -5210,3 +5210,204 @@ the artifact's own checksum file, `jar verified`, signed with the shared
 upload key (`53:7D:09:D2:...:0D:9D:E5:21`). The owner submitted 2.8
 to Google Play for review and confirmed it, so the hand-off copy was deleted
 the same session; the artifact stays in build run 36448152402.
+
+## D-114: The daily reminder keeps the minute it was given
+
+Date: the thirty-seventh session, from the owner's report: the reminder was
+set for ten o'clock and the shade lit up at ten past two, and the reader did
+not find it there until they opened the app.
+
+**The two minutes were the alarm, and they were a choice this app made.**
+`AlarmManager.set` is the platform's freest alarm: it is delivered at some
+point after the trigger, with no upper bound, so the app could promise a
+minute and the platform could answer whenever the phone's own batching
+decided.
+
+A windowed alarm was the first answer, on the reasoning that a one minute
+window is delivered inside that minute. It was written, shipped to a test,
+and measured, and it is false: the platform holds a floor of ten minutes for a
+windowed alarm on Android 15, so the app's one minute ask came back in the
+phone's own alarm record as `window=+10m0s0ms`. A windowed path would have
+been no better than the inexact alarm it replaced, so it is gone. What is in
+the tree is the honest pair, and the reader's own answer on the phone chooses
+between them.
+
+**The one case a window cannot cover, and the owner's answer on it.** A
+phone that is locked and idle at the chosen minute has every inexact alarm
+deferred by the platform, windowed ones included. Only an exact alarm gets
+through, and on Android 12 and later that means `SCHEDULE_EXACT_ALARM`. The
+owner was asked and took it: the reminder is due at a minute they chose, and
+an exact alarm is the only kind of alarm that reaches a phone that is locked
+and asleep at that minute (owner decision, thirty-seventh session, and rule 2
+in `AGENTS.md` now names it among the self-declared permissions).
+
+What that decision costs, in full, so the next session is not surprised.
+Android does not grant it at install on a phone this app targets, so the
+reminder had to keep working without it, and it does: `DailyReminder.plan` is
+the one place the shape of the alarm is chosen, an exact one when the reader
+has granted it (`setExactAndAllowWhileIdle`, which arrives at the minute even
+on a phone that is locked and idle then) and the platform's own batched alarm
+when they have not (`setAndAllowWhileIdle`, which is the one inexact shape
+that still reaches a sleeping phone; a windowed alarm cannot, which is the
+second half of the measurement above). Both carry the same moment to the
+second, so a reader who grants and one who does not are both reminded at the
+minute they chose, and only the punctuality is left to the phone.
+
+The Daily page is where the reader is told what the phone is refusing, in one
+line, with one button that opens the phone's own page for it; nothing is asked
+in the middle of a flow, because the reminder works either way and a reader
+who came to look is not a reader who came to grant. The line is worded to
+what is true: without the grant the reminder "can arrive a little after the
+minute you chose", with it "keeps it to that minute".
+
+And the Play Console needs a declaration for the permission, with the reminder
+as the justification, which is the owner's to file at the release.
+
+**The moment itself is now a pure function in core**, `DailyReminder`, with
+the reader's minute to the second in their own local time, a passed minute
+coming tomorrow, a day added on the calendar rather than as 86,400,000
+milliseconds so the morning the clocks change keeps the minute they chose,
+and a number outside the day pulled back into it rather than wrapped.
+`DailyReminderTest` in core's JVM suite pins all of it, including the
+promise that a late fire never walks the hour forward and that both alarm
+shapes carry the same moment.
+
+**A launch must not move an alarm that is about to fire.** The app re-arms at
+every launch, because it holds no boot permission and a reboot is the one
+thing it cannot hear about (D-097). But an arm replaces the pending alarm,
+and the reader's own moment is the minute they are most certain to be
+holding the app, so a launch in the minute after that moment threw away a
+delivery the platform was still going to make and the morning was silent.
+Inside the window after the reader's own moment, `reArmOnLaunch` now leaves
+the alarm where the platform has it; everywhere else it re-arms, so an alarm
+that really was lost is still put back. The cost is named: a phone that
+really rebooted, with the reader opening the app inside a minute of their own
+moment, loses that one morning. The other way round loses the same morning
+to a habit, which is the commoner of the two.
+
+**The next alarm is armed before the reminder is read, not after.** The
+receiver's own KDoc claimed this and the code did the opposite: the alarm
+that fired was spent, the day's ayah was read and the notification posted,
+and only then was tomorrow armed. A receiver has seconds to live and the
+system may take the process back at any point in that window, so a reader
+whose process died mid-read got no notification *and* no further reminders
+until they opened the app again. Arming first costs nothing and makes the
+KDoc true.
+
+**The shade is now checked, not assumed.** `notificationsBlocked` read only
+`areNotificationsEnabled()`, which answers for the app; a reader who turned
+off this one channel in the phone's own settings left the app-level switch on
+and the one notification the app ever posts never appeared, and the app had
+nothing to say about it. The channel's own importance is read as well, the
+Daily page names the block, and the way out is that channel's own page rather
+than the app's whole list.
+
+**Tests.** `DailyReminderTest` (app, instrumented) sends the alarm's own
+broadcast and reads the shade back, which is the path the reader's second
+doubt is about: permission check, content read, build, post. The phone's own
+record of what it holds is read through `dumpsys`, because
+`StatusBarNotification` is not public SDK and cannot be named in a test at
+all. The two things the owner reported that the app cannot see, whether the
+phone was asleep at the chosen minute and whether the phone's own settings
+were hiding the reminder, were asked for rather than guessed at; see the
+hand-over.
+
+## D-115: The app follows the phone's own day and night
+
+Date: the thirty-seventh session, from the owner's report: the switch that
+says follow the system dark mode was on, the phone was in its day colours,
+and at ten in the morning the app was on the night page.
+
+**The cause is the manifest, and it is one attribute.**
+`MainActivity` carried `uiMode` in `configChanges`, which is a promise to the
+platform that the app handles a theme change itself, so the platform does not
+rebuild the window. The app had no path that did: the interface language is
+applied in `attachBaseContext` through a context derived with
+`createConfigurationContext`, a snapshot taken when the window is built, and
+nothing in the app recomposes the page when the phone's colours turn over
+underneath it. So the app said it would follow the system and then did not.
+`uiMode` is not claimed any more. The platform recreates the window, which
+is what every other app's does, and the whole app, the sheets and the bars
+included, is drawn on the new half of the themes. Nothing is lost in the
+recreation: the view model keeps the reading's place and the open settings
+page is `rememberSaveable`, the same road a language choice already takes.
+
+**Tests.** `SystemThemeTest` pins two halves. The cheap one is the contract
+itself: the installed activity must not claim a uiMode change. The
+behavioral one launches the app with the switch on, turns the phone's own
+night mode on and off, and reads the ground the reading is actually drawn on
+after each, from a real screen capture, because a configuration that says
+night while the page is still white is exactly the defect. It was run against
+the old manifest first, and both halves were red there: the installed
+activity claimed `CONFIG_UI_MODE` (512), and with the phone's night mode on,
+the app reported light and drew a light page. With the fix, green in twelve
+seconds. A test that does not fail on the old code is not evidence, and this
+one does.
+
+## D-116: The settings hub, read as a list
+
+Date: the thirty-seventh session, from the owner's report and their own
+photograph of the sheet: the Theme row's name broke one letter to a line and
+the row stood four lines tall, and the sheet as a whole did not read well.
+
+**The name keeps its room.** `PageRow` measured its value unweighted, so the
+value took every pixel it wanted and the name got what was left, which on a
+phone is one character. The value is now measured inside a share of the row
+and the name's share is the larger of the two; a value longer than its share
+wraps to a second right-aligned line under itself and one longer still is cut
+with an ellipsis. Both halves fill their share, which is what keeps the
+chevron and switch columns standing at the same place on every row (D-111).
+
+**A row says a state, not an explanation.** The hub is a list of where
+everything stands, and a switch that already draws its own state does not
+need a line under it restating that, or explaining what a word meaning is to
+a reader who has just turned the aid on. "Keep the screen awake" and "Show
+word meanings" carry no line now, and the daily row says "Off, set for
+8:00" when it is off, which is a state rather than a description of the
+feature. The theme row reads "Paper" in the light, and names the day page
+only in the one case where the two differ, which is the case D-097 was about:
+the old summary said "Paper · auto, day page Paper" and said the same word
+twice.
+
+**Three quiet groups.** A flat list of eleven rows is read one at a time.
+Language stays above them on its own, because it changes the words of every
+row below it; then Reading, then Recitation, then the reminder; and About
+stands at the foot on its own, which is where an app names itself. One size
+for the name of a thing and one for where it stands, the value's type now
+matching the switch rows' status line.
+
+**The last 48 dp control in the app, done (D-087).** The text size steps
+drew 38 dp cells and the playback pace 46, named in D-087 and left for a
+later pass. Every step now carries its own 48 dp touch box with the mark
+inside it, and the name of the thing moved above the steps, because five 48
+dp boxes are 250 dp wide and beside a name that would break it in the middle
+on a small phone. The two rows are one `SegmentedRow` now, so the size rule
+is one line of code rather than two copies of it.
+
+**Tests.** `SettingsRowAlignmentTest` grew the two measurements that matter
+here: a long value never squeezes the name into a ladder and the tail marks
+do not move with it, and every step of every segmented row is at least
+48 dp to touch, read off the real controls. Running it on the emulator found
+two more things, both of them in the test rather than in the sheet, and both
+of them worth the trip:
+
+* The switch column was compared against the switch's own width in two
+  different units, the switch's left edge in dp and the chevron's right edge
+  in pixels. Nothing about the rows was wrong; the measurement was, and it
+  failed on every device whose density is not one. Every bound in that test is
+  now read the same way.
+* `ListeningSettingsTest` asked for the continue switch in the merged tree,
+  where a row that opens a page reads as one control and the switch's own tag
+  is not in it, so the test was looking for a node that is not there. It asks
+  for the unmerged tree now, as every other test that names a switch in a
+  door row does.
+
+Neither of them could have been caught by CI, and the reason is a trap worth
+writing down: **the app's instrumented suite is six named classes.** The
+capture workflow runs `ScreenshotTest`, `WordByWordTest`, `MushafTurnTest`,
+`TafsirDirectionTest`, `SavedNotesTest` and `SettingsVisibilityTest` on its
+three legs, and `build.yml` runs only the data suite. Every other app test,
+the settings geometry ones included, runs on a session's own emulator or not
+at all, and two of them had been red for nobody to see. A release session
+should run the full app suite on the emulator, not only the six, which is
+what `AGENTS.md`'s release steps say and what this session did.

@@ -54,6 +54,7 @@ data class SettingsActions(
     val onDailyAyah: (Boolean) -> Unit = {},
     val onDailyAyahTime: (Int) -> Unit = {},
     val onOpenNotificationSettings: () -> Unit = {},
+    val onOpenExactAlarmSettings: () -> Unit = {},
     val onSelectRecitation: (String) -> Unit = {},
     val onTranslationPack: (String) -> Unit = {},
     val onToggleTafsir: (String) -> Unit = {},
@@ -106,6 +107,8 @@ fun SettingsSheet(
     preview: suspend () -> StudyRow?,
     downloadedSurahs: suspend (String) -> List<DownloadedSurah>,
     notificationsBlocked: () -> Boolean,
+    /** Whether the phone will keep an exact time for the reminder. */
+    exactAlarmsAllowed: () -> Boolean = { true },
     actions: SettingsActions,
     onDismiss: () -> Unit,
 ) {
@@ -200,8 +203,10 @@ fun SettingsSheet(
                     SettingsPage.Daily -> DailyPage(
                         settings = settings,
                         notificationsBlocked = notificationsBlocked(),
+                        exactAlarmsAllowed = exactAlarmsAllowed(),
                         onDailyAyahTime = actions.onDailyAyahTime,
                         onOpenNotificationSettings = actions.onOpenNotificationSettings,
+                        onOpenExactAlarmSettings = actions.onOpenExactAlarmSettings,
                     )
                     SettingsPage.Translations -> TranslationsPage(
                         settings = settings,

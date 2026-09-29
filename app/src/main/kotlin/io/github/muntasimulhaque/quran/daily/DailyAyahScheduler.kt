@@ -19,6 +19,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import io.github.muntasimulhaque.quran.MainActivity
 import io.github.muntasimulhaque.quran.R
+import io.github.muntasimulhaque.quran.core.DailyReminder
 import io.github.muntasimulhaque.quran.data.LAST_MINUTE_OF_DAY
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import kotlinx.coroutines.CoroutineScope
@@ -26,29 +27,29 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.util.Calendar
 
 /**
  * The daily reminder: one quiet notification a day, carrying one ayah of the
  * Book and, when the reader reads with a translation, its first translation.
  *
  * The reminder is the only thing in the app that has a life outside it, so it
- * is built to be counted, not trusted. It schedules itself with the system's
- * own inexact alarm: the platform may move it by minutes under Doze, and that
- * is exactly right for an invitation to read, where a wake-up at an exact
- * second is neither wanted nor worth a wake lock. Nothing here fetches
- * anything: the ayah is read from the content database that already ships on
- * the device, and the translation from a pack the reader installed
+ * is built to be counted, not trusted. It schedules itself with the best
+ * alarm the phone will give it: an exact one, when the reader has granted the
+ * phone's own exact alarm access, so the reminder arrives at that minute even
+ * on a phone that is locked and idle then, and the phone's own batched
+ * alarm otherwise, which can still reach a sleeping phone. Nothing here
+ * fetches anything: the ayah is read from the content database that already
+ * ships on the device, and the translation from a pack the reader installed
  * themselves.
  *
  * An alarm is a one-shot, so the next one is armed in the same breath the
- * current one fires: that is what makes the reminder daily without a
- * repeating alarm, and it re-anchors the moment every day instead of letting
- * the platform's deferrals walk it later and later. The alarm is armed only
- * while the reader has the switch on, and is re-armed from the app's own
- * launch too, so a reboot or a clock change costs at most the one morning
- * before the app is opened again; that is the price of not asking for a boot
- * permission this app has never needed.
+ * current one fires, and it is armed *before* the ayah is read: a receiver
+ * has seconds to live, a database read is real work, and a process the system
+ * takes back mid-read must not also be the reason there is no reminder
+ * tomorrow. The alarm is armed only while the reader has the switch on, and is
+ * re-armed from the app's own launch too, so a reboot or a clock change costs
+ * at most the one morning before the app is opened again; that is the price of
+ * not asking for a boot permission this app has never needed.
  */
 object DailyAyahScheduler {
 
@@ -57,6 +58,14 @@ object DailyAyahScheduler {
 
     /** The channel the reminder uses, created by the app's first launch. */
     const val CHANNEL_ID = "daily_ayah"
+
+    /**
+     * The one notification the reminder posts under. It is a single number for
+     * the whole life of the app, so a fire that lands twice in one morning
+     * (the reader opened the app at their own moment and the launch re-armed
+     * one) updates the one line in the shade instead of leaving two.
+     */
+    const val NOTIFICATION_ID = 2
 
     private const val REQUEST_CODE = 41
 
@@ -102,7 +111,16 @@ object DailyAyahScheduler {
      * Arms the reminder for the next occurrence of [minuteOfDay], or clears it
      * when the reader has turned it off. Re-arming the same pending intent
      * moves the alarm rather than adding a second one, so this is safe to call
-     * on every launch and after every fire.
+     * after every fire and after every change the reader makes, and it is what
+     * a launch that finds no alarm due calls too ([reArmOnLaunch]).
+     *
+     * The shape of the alarm is the phone's answer and not the app's: an
+     * exact alarm when the reader has given the app the phone's own exact
+     * alarm access, which is the only kind that arrives at the chosen minute
+     * on a phone that is locked and idle then, and the platform's own batched
+     * alarm otherwise, which is what a reader who declines the grant gets.
+     * Either way the moment is the reader's, and the choice itself is the pure
+     * `plan` in `core`, which the JVM suite pins (owner decision, D-114).
      */
     fun apply(context: Context, enabled: Boolean, minuteOfDay: Int) {
         val alarm = context.getSystemService(AlarmManager::class.java) ?: return
@@ -111,17 +129,64 @@ object DailyAyahScheduler {
             alarm.cancel(pending)
             return
         }
-        val at = nextOccurrence(minuteOfDay)
-        // Inexact on purpose: the system may move this by minutes to keep the
-        // whole phone's radios and wake ups quieter, and a reminder that is
-        // ten minutes late is a reminder.
-        alarm.set(AlarmManager.RTC, at, pending)
+        val plan = DailyReminder.plan(
+            canScheduleExact = canScheduleExact(alarm),
+            minuteOfDay = minuteOfDay,
+            now = System.currentTimeMillis(),
+            lastMinuteOfDay = LAST_MINUTE_OF_DAY,
+        )
+        when (plan.kind) {
+            DailyReminder.Kind.Exact ->
+                alarm.setExactAndAllowWhileIdle(AlarmManager.RTC, plan.triggerAtMillis, pending)
+            // The inexact fallback is the one that can reach a sleeping
+            // phone. A windowed alarm cannot: the platform gives it a floor
+            // of ten minutes on Android 15 and never delivers it from Doze, so
+            // a window was measured and dropped (D-114).
+            DailyReminder.Kind.Batched ->
+                alarm.setAndAllowWhileIdle(AlarmManager.RTC, plan.triggerAtMillis, pending)
+        }
+    }
+
+    /**
+     * Whether this app may set an exact alarm on this phone.
+     *
+     * Android 12 and later gate it behind the reader's own grant, which is
+     * not a runtime permission and is not given at install: the reader turns
+     * it on in the phone's settings, and the Daily page is where the app says
+     * so and offers the way. Before Android 12 the platform never gated exact
+     * alarms, so the answer there is a plain yes and every reader on those
+     * releases gets the exact path with nothing to grant.
+     */
+    fun canScheduleExact(alarm: AlarmManager): Boolean =
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarm.canScheduleExactAlarms()
+
+    /**
+     * The launch re-arm, and the one place it is allowed not to re-arm.
+     *
+     * Every launch re-arms the reminder, because the app hears nothing about a
+     * reboot and a dead alarm is a reminder that never comes again. But an
+     * arm replaces the pending one, and the reader's own moment is the minute
+     * they are most likely to open the app in: a launch there threw away the
+     * delivery the platform was still going to make, and the morning was
+     * silent (owner report, 37th session). Inside the window after that
+     * moment, the alarm is left exactly where the platform has it. Everywhere
+     * else, the launch re-arms, and an alarm that really was lost is put back.
+     */
+    fun reArmOnLaunch(context: Context, enabled: Boolean, minuteOfDay: Int) {
+        if (enabled &&
+            DailyReminder.stillDueToday(minuteOfDay, System.currentTimeMillis(), LAST_MINUTE_OF_DAY)
+        ) {
+            return
+        }
+        apply(context, enabled = enabled, minuteOfDay = minuteOfDay)
     }
 
     /**
      * Arms the next day's reminder from wherever the current one fired. The
      * reader's own settings are read, so a switch turned off while the phone
-     * slept is honored rather than overridden by the fire's own moment.
+     * slept is honored rather than overridden by the fire's own moment, and
+     * the alarm is anchored on the moment again rather than on the fire, so a
+     * late delivery never walks the hour forward day after day.
      */
     private suspend fun armNext(context: Context) {
         val settings = runCatching { SettingsStore(context).settings.first() }.getOrNull()
@@ -132,20 +197,15 @@ object DailyAyahScheduler {
     /**
      * The next moment the reminder should come, in the reader's own local
      * time. The hour and the minute are theirs, read off the one number the
-     * picker writes.
+     * picker writes, and the arithmetic lives in `core` so the JVM suite can
+     * pin it without an alarm manager.
      */
-    internal fun nextOccurrence(minuteOfDay: Int, now: Long = System.currentTimeMillis()): Long {
-        val minute = minuteOfDay.coerceIn(0, LAST_MINUTE_OF_DAY)
-        val calendar = Calendar.getInstance().apply {
-            timeInMillis = now
-            set(Calendar.HOUR_OF_DAY, minute / 60)
-            set(Calendar.MINUTE, minute % 60)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-            if (timeInMillis <= now) add(Calendar.DAY_OF_YEAR, 1)
-        }
-        return calendar.timeInMillis
-    }
+    internal fun nextOccurrence(minuteOfDay: Int, now: Long = System.currentTimeMillis()): Long =
+        DailyReminder.nextOccurrence(
+            minuteOfDay = minuteOfDay,
+            now = now,
+            lastMinuteOfDay = LAST_MINUTE_OF_DAY,
+        )
 
     /**
      * The reminder itself. The reader tapped nothing to get here, so the
@@ -182,6 +242,13 @@ object DailyAyahScheduler {
             val application = context.applicationContext
             workers.launch {
                 try {
+                    // The alarm that fired is spent, and tomorrow's is armed
+                    // before anything else: a receiver's process may be taken
+                    // back the moment it goes quiet, and a reader whose process
+                    // died reading the ayah must still have a reminder
+                    // tomorrow. Arming after the notification was the one order
+                    // that lost a whole day (owner report, 37th session).
+                    armNext(application)
                     val content = runCatching { DailyAyahContent.load(application) }.getOrNull()
                         ?: return@launch
                     val notification = runCatching {
@@ -221,18 +288,10 @@ object DailyAyahScheduler {
                         NotificationManagerCompat.from(application)
                             .notify(NOTIFICATION_ID, notification)
                     }
-                    // The alarm that fired is spent; tomorrow's is armed now,
-                    // from the setting the reader left, so the reminder keeps
-                    // arriving and the hour never drifts forward.
-                    armNext(application)
                 } finally {
                     pending.finish()
                 }
             }
-        }
-
-        private companion object {
-            const val NOTIFICATION_ID = 2
         }
     }
 

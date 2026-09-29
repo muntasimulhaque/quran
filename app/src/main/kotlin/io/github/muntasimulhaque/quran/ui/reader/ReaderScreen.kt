@@ -106,7 +106,9 @@ fun ReaderScreen(
     content: ContentDatabase,
     onPlaybackPermission: () -> Unit,
     notificationsBlocked: () -> Boolean,
+    exactAlarmsAllowed: () -> Boolean,
     onOpenNotificationSettings: () -> Unit,
+    onOpenExactAlarmSettings: () -> Unit,
 ) {
     val settings = viewModel.settings
     val palette = LocalPagePalette.current
@@ -495,6 +497,7 @@ fun ReaderScreen(
             // the phone's own switch even when the reader comes back from the
             // system settings without the app restarting.
             notificationsBlocked = notificationsBlocked,
+            exactAlarmsAllowed = exactAlarmsAllowed,
             actions = SettingsActions(
                 onLanguage = { tag ->
                     io.github.muntasimulhaque.quran.data.UiLanguage.of(tag)?.let { language ->
@@ -528,6 +531,7 @@ fun ReaderScreen(
                     viewModel.setDailyAyahTime(minute, onPlaybackPermission)
                 },
                 onOpenNotificationSettings = onOpenNotificationSettings,
+                onOpenExactAlarmSettings = onOpenExactAlarmSettings,
                 onSelectRecitation = { viewModel.selectRecitation(it) },
                 onToggleTranslation = { viewModel.toggleTranslationPack(it) },
                 onToggleTafsir = { viewModel.toggleTafsirPack(it) },

@@ -63,12 +63,15 @@ dead letter.
    no other host is ever contacted, and there is no analytics or telemetry of
    any kind. Everything else in the app works with no connection at all. No
    WebView.
-2. **Permissions: media, notifications, and that one network use.** The
-   self-declared permissions are exactly `INTERNET` (the download above),
-   `POST_NOTIFICATIONS`, `FOREGROUND_SERVICE`, and
-   `FOREGROUND_SERVICE_MEDIA_PLAYBACK`. Library-merged permissions are
-   documented, not fought. A new permission needs the owner's sign-off
-   written here first.
+2. **Permissions: media, notifications, the reminder's exact time, and that
+   one network use.** The self-declared permissions are exactly `INTERNET`
+   (the download above), `POST_NOTIFICATIONS`, `FOREGROUND_SERVICE`,
+   `FOREGROUND_SERVICE_MEDIA_PLAYBACK`, and `SCHEDULE_EXACT_ALARM` (the
+   daily reminder, granted by the owner in the thirty-seventh session: the
+   reminder is due at a minute the reader chose, and only an exact alarm
+   reaches a phone that is locked and idle at that minute, D-114).
+   Library-merged permissions are documented, not fought. A new permission
+   needs the owner's sign-off written here first.
 3. **No ads, no trackers, no analytics, no accounts.** AndroidX, Kotlin,
    Media3, Room, DataStore, and Glance only. Every new dependency is
    proposed here first.
@@ -186,6 +189,14 @@ at every step:
   why before committing anything.
 
 - Verify by process exit code, never by grepping piped output.
+- **The app's instrumented suite is six named classes on CI.** The capture
+  workflow runs `ScreenshotTest`, `WordByWordTest`, `MushafTurnTest`,
+  `TafsirDirectionTest`, `SavedNotesTest` and `SettingsVisibilityTest` on its
+  three legs, and `build.yml` runs only the data suite. Every other app test,
+  the settings geometry ones included, runs on a session's own emulator or not
+  at all, and two of them had been red for nobody to see (D-116). Any session
+  that changes the settings sheet, and every release session, runs the whole
+  app suite on the emulator rather than only the six.
 - `local.properties` is gitignored; recreate it with the machine's SDK
   path when it is lost.
 - Content is built by `:tools` from `content/`, verified against
@@ -946,49 +957,56 @@ fetching them again; the space is worth less than the time.
    45/45, all five owner gates are green, and 2.5 was submitted with its
    hand-off closed. The queue starts at item 1.
 
-1. **The segmented controls' touch targets.** The text size steps and the
-   playback pace draw 38 dp and 46 dp cells, under the design document's own
-   48 dp rule. They are read as one row, so the fix is structural (an outer
-   48 dp touch box with the visual cell inside it) and touches a captured,
-   tested control. Named in D-087, not yet done; the Go to Ayah grid's cells
-   were brought to 48 dp in the thirty-first session, so this is the last of
-   that class.
-2. **Mushaf text size, if the owner wants it.** The owner declined zoom and
+1. **The segmented controls' touch targets: done in the thirty-seventh
+   session.** The text size steps and the playback pace drew 38 dp and 46 dp
+   cells, under the design document's own 48 dp rule, and D-087 named the fix
+   as structural: an outer 48 dp touch box with the mark inside it. Both rows
+   are one `SegmentedRow` now, every step is 48 dp to touch, and the name of
+   the thing sits above the steps because five 48 dp boxes are 250 dp wide
+   (D-116). The Go to Ayah grid's cells were brought to 48 dp in the
+   thirty-first session, so that class is now closed.
+2. **The exact-alarm door: opened in the thirty-seventh session.** The owner
+   took `SCHEDULE_EXACT_ALARM` (rule 2 above), so the reminder is exact where
+   the reader has granted it and the platform's own batched alarm where they
+   have not, with the Daily page naming what the phone is refusing. The one
+   thing left on it is the owner's own hand at release: the Play Console
+   declaration for the permission, with the reminder as the justification.
+3. **Mushaf text size, if the owner wants it.** The owner declined zoom and
    asked what other apps do; the answer is in D-087. The honest larger-text
    path is a re-layout of the pre-justified page at a bigger em, built as a
    pure tested `PageLayout` in `core` first, and only then on the page. The
    flowing Unicode alternative is also described there. No work is queued
    unless the owner asks.
-3. **Measure on real hardware.** The numbers in D-037 come from a software
+4. **Measure on real hardware.** The numbers in D-037 come from a software
    rendered emulator, the slowest Android this app will run on. A
    Macrobenchmark module for startup and page turns, run on a phone, is the
    only way to hold the budget the design document sets (under 300 ms to the
    first painted page on a warm start) and to prove the baseline profile is
    pulling its weight.
-4. **The second language.** The strings are ready for one; the reader is not.
+5. **The second language.** The strings are ready for one; the reader is not.
    A translation pass needs a translator for the interface, a `values-xx`
    folder, and the same care the Arabic content gets: a real review, not a
    machine.
-5. **Content backlog.** More translations and tafsirs as packs (each one is a
+6. **Content backlog.** More translations and tafsirs as packs (each one is a
    dataset entry in `PackSources`, a pack definition, and a Release), and a
    second mushaf script if a font and layout are chosen.
-6. **A recording of the tour's study frames.** The screenshot set covers the
+7. **A recording of the tour's study frames.** The screenshot set covers the
    surface; a short screen recording of a page turn, a mode switch, and the
    ayah card would catch the motion a still cannot, and the pipeline already
    has an emulator to do it on.
-7. **A reading plan, if the owner wants one.** A khatm is a commitment, not a
+8. **A reading plan, if the owner wants one.** A khatm is a commitment, not a
    guess: an explicit plan (a daily portion, a finish date) is the only
    honest way to keep a linear reading place apart from casual lookups, and
    it builds on the portion the glossary already describes. The eighth
    session shipped no heuristic for it (D-045).
-8. **Instant launch, second step.** A pre-rendered bitmap of the *next* page
+9. **Instant launch, second step.** A pre-rendered bitmap of the *next* page
    in the direction the reader was reading, so the first swipe after a launch
    is also a texture draw.
-9. **Robustness, second step.** A pack that fails verification at download
+10. **Robustness, second step.** A pack that fails verification at download
     time should say which check failed (size, hash, or unpack) rather than one
     line for all three, and the content self check should offer the removal it
     recommends.
-10. **Trust work, second step.** The owner removed export and import in the
+11. **Trust work, second step.** The owner removed export and import in the
     tenth session (D-051), so this item is gone unless they ask for a different
     way to carry saved work. If they do, the shape to build is a merge preview
     and a way to move one note rather than the whole document, never the same
@@ -1011,6 +1029,53 @@ fetching them again; the space is worth less than the time.
   to right on the screen; `MushafTurnTest` now pins the direction on every
   form factor.
 
+
+## Where the project stands (end of the thirty-seventh session)
+
+**The tree answers three of the owner's reports, and nothing has been
+released: 2.8 (versionCode 29) is still the last submission, and no
+`versionCode` has moved.**
+
+- **The daily ayah keeps the minute it was given (D-114).** The alarm is
+  exact where the reader has granted the app the phone's own exact time
+  (`SCHEDULE_EXACT_ALARM`, the one new permission, the owner's word in rule
+  2), and the platform's own batched alarm where they have not, with the
+  Daily page naming what the phone is refusing and one button for it. A
+  windowed alarm was tried first and measured out: the platform's floor for
+  a window is ten minutes on Android 15, so the app's one minute ask comes
+  back as ten. Two ways the reminder could vanish entirely are closed: the
+  next alarm is armed before the ayah is read, and a launch no longer
+  replaces an alarm that is due inside its window. The channel-level block is
+  read and named, and the way out is that channel's own page.
+- **The app follows the phone's own day and night (D-115).** The activity no
+  longer claims `uiMode` in `configChanges`, which was a promise to the
+  platform the app could not keep, and the platform now rebuilds the window
+  on a theme change the way it does for every other app.
+- **The settings sheet reads as a list (D-116).** The name of a row holds
+  its room whatever the value says, a row says a state rather than an
+  explanation, the hub is in three quiet groups, the value column wears the
+  same type as a switch row's status line, and every step of a text size or a
+  pace is a full 48 dp target (D-087's named item, now done).
+
+**The suite.** The JVM suite (core 81, data 33), `:app:lintDebug`,
+`:app:assembleDebug` and `:app:compileDebugAndroidTestKotlin` are green on
+this machine. The instrumented work was done on the phone emulator:
+`SystemThemeTest` 2/2, red on the old manifest and green on the new one
+(both halves: the installed activity claimed `CONFIG_UI_MODE`, and with the
+phone's night mode on the app reported light and drew a light page);
+`DailyReminderTest` 2/2 in both permission states, with the platform's own
+alarm record read back (`window=0` for the exact alarm); `SettingsRowAlignmentTest`
+3/3; `ListeningSettingsTest` and `SettingsVisibilityTest` green. The emulator
+then vanished three times mid-run, the documented class on this machine, so
+`SettingsMergeTest`, `DailyAyahToggleTest` and the screenshot tour are CI's
+to answer on the push.
+
+**Two tests were red for nobody to see, and are fixed.** The switch column
+test compared the switch's left edge in dp against the chevron's right edge in
+pixels, and `ListeningSettingsTest` looked for a switch in the merged tree
+where a row that opens a page reads as one control. Both are named in
+`AGENTS.md` now: CI runs six named app classes, so a session that touches
+the settings runs the whole app suite on the emulator.
 
 ## Where the project stands (end of the thirty-sixth session)
 
