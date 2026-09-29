@@ -647,42 +647,29 @@ private fun AyahBlock(
             .fillMaxWidth()
             .padding(vertical = 12.dp),
     ) {
-        var textLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(14.dp))
                 .background(wash)
-                // One gesture handler owns the block's whole surface, because
-                // a second handler on the Arabic line would take the long
-                // press away from here and the pill would never rise. A long
-                // press raises the ayah's actions, as it always has; a tap
-                // that lands on the verse hears the word under the finger, and
-                // a tap anywhere else is the reader bringing the chrome up.
-                .pointerInput(onWord, textLayout, row.ayah.number) {
-                    detectTapGestures(
-                        onLongPress = {
-                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onAyah(row.ayah)
-                        },
-                        onTap = { position ->
-                            val word = onWord?.let {
-                                textLayout?.wordAt(position.x, position.y, row.words.size)
-                            }
-                            if (word != null && onWord != null) {
-                                onWord(row.ayah.number, word)
-                            } else {
-                                onBackgroundTap()
-                            }
-                        },
-                    )
-                }
+                .combinedClickable(
+                    onClick = onBackgroundTap,
+                    onLongClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onAyah(row.ayah)
+                    },
+                )
                 // The Mushaf gives every ayah a node whose action raises the
                 // pill, and the study block now gives a screen reader the
                 // same two doors a finger has: the ayah's actions, which is
                 // the one gesture the reading is built around (D-084 named
                 // this gap; this closes it), and the paper's own tap.
                 .semantics {
+                    // The Mushaf gives every ayah a node whose action raises
+                    // the pill, and the study block gives a screen reader the
+                    // same two doors a finger has: the ayah's actions, which
+                    // is the one gesture the reading is built around (D-084
+                    // named this gap; this closes it), and the paper's own tap.
                     customActions = listOf(
                         CustomAccessibilityAction(ayahActions) {
                             onAyah(row.ayah)
@@ -697,6 +684,7 @@ private fun AyahBlock(
                 .padding(horizontal = 8.dp, vertical = 10.dp),
         ) {
             val arabicLine = arabic(row, playing, playingWord)
+            var textLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
             Text(
                 text = arabicLine.text,
                 style = TextStyle(
@@ -723,6 +711,9 @@ private fun AyahBlock(
                     meanings = row.meanings,
                     hafs = hafs,
                     settings = settings,
+                    onWord = onWord?.let { hear ->
+                        { word: Int -> hear(row.ayah.number, word) }
+                    },
                     // The aid is an annotation of the ayah above it, not a
                     // second verse: a tighter break than the one before the
                     // translation groups the word list with its line, so the
@@ -807,38 +798,6 @@ private fun arabic(
     return ArabicLine(text, washRange)
 }
 
-/**
- * The word under a touch on the Arabic line, from the line's own layout.
- *
- * Tapping a word hears it again, and a link span is the wrong way to make a
- * word tappable: Compose draws a link in the link colour with an underline, so
- * the whole verse came to look like a web page, and a screen reader read a
- * line of links. The tap is resolved here from the text layout instead, so the
- * line is drawn exactly as it always was and the word under the finger is
- * found by where it actually sits.
- *
- * The trade is deliberate and it is the point of the feature: a tap on the
- * Arabic line now hears a word rather than raising and lowering the chrome.
- * The chrome is still one tap away on the paper around the text, which is
- * where a reader's hand already goes, so nothing is lost but the accidental
- * tap on a word.
- */
-private fun TextLayoutResult.wordAt(x: Float, y: Float, count: Int): Int? {
-    if (count == 0) return null
-    val offset = getOffsetForPosition(Offset(x, y))
-    // walk back over the space that separates two words, so a tap in the gap
-    // belongs to the word it is nearer
-    var index = offset.coerceIn(0, layoutInput.text.length - 1)
-    while (index > 0 && layoutInput.text[index] == ' ') index--
-    if (index >= layoutInput.text.length) index = layoutInput.text.lastIndex
-    // the words are separated by single spaces and the line holds no other
-    // characters, so the word's number is the count of spaces before it
-    var word = 1
-    for (i in 0 until index) {
-        if (layoutInput.text[i] == ' ') word++
-    }
-    return word.takeIf { it in 1..count }
-}
 
 /**
  * The current word under the reciter, drawn as one rounded wash per line it

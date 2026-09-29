@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +22,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -76,6 +82,15 @@ internal fun WordByWord(
     settings: AppSettings,
     modifier: Modifier = Modifier,
     gloss: Boolean = true,
+    /**
+     * Hears one word again, given the word's own number. The tap lives on the
+     * aid and not on the verse: the verse's tap belongs to the reader's bar and
+     * its long press to the ayah's actions, and a third meaning on the same
+     * surface takes one of them away (the 3.1 capture found both). Here the
+     * reader is already looking at the words, and nothing else is waiting for
+     * the gesture.
+     */
+    onWord: ((Int) -> Unit)? = null,
 ) {
     if (meanings.isEmpty()) return
     val density = LocalDensity.current
@@ -127,13 +142,17 @@ internal fun WordByWord(
                 verticalArrangement = Arrangement.spacedBy(Space.Block),
                 maxItemsInEachRow = columns,
             ) {
-                meanings.forEach { meaning ->
+                meanings.forEachIndexed { index, meaning ->
                     WordTile(
                         meaning = meaning,
                         wordStyle = wordStyle,
                         settings = settings,
                         gloss = gloss,
                         width = with(density) { tile.toDp() },
+                        // the word list numbers its words from one, and
+                        // they are contiguous, so the tile's place in the
+                        // ayah is the number the reciter's timings use
+                        onClick = onWord?.let { hear -> { hear(index + 1) } },
                     )
                 }
             }
@@ -155,11 +174,22 @@ private fun WordTile(
     settings: AppSettings,
     gloss: Boolean,
     width: Dp,
+    onClick: (() -> Unit)?,
 ) {
     Column(
         modifier = Modifier
             .width(width)
-            .height(IntrinsicSize.Min),
+            .height(IntrinsicSize.Min)
+            .then(
+                if (onClick == null) {
+                    Modifier
+                } else {
+                    Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .clickable(onClick = onClick)
+                        .semantics { role = Role.Button }
+                },
+            ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
