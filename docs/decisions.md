@@ -5250,6 +5250,42 @@ the real lesson, which is the one the runbook already had: a frame is only
 evidence when the file measured is the file downloaded, so the frames are
 copied into the repository before anything looks at them.
 
+**The capture, second time.** The search frame's wait was thirty seconds,
+which is the slowest thing the tour does on the slowest profile, so the
+10 inch leg failed there twice: once under a launcher window, once on the wait
+itself. It is three minutes now, and the anchor stays the result count,
+because the count is what the frame has to show. The next run
+(36542803357) came back with all three legs carrying their eight frames: the
+phone and the 10 inch green, and the 7 inch red on a Compose runtime
+`ArrayIndexOutOfBoundsException` inside `SlotWriter` in `MushafTurnTest`,
+which is a different class that ran after the tour had already written its
+frames, and which carries no app frame at all.
+
+**The store set.** Eight frames per form factor, 24 in all, from that run.
+Every frame was compared with its artifact by `cmp`: the twelve reading
+frames are byte-identical to the 2.8 set, and the twelve that differ are the
+search, settings, Browse and ayah card on each form. Measured, the search,
+Browse and ayah card frames differ *only* in the status bar clock on the
+phone and the 7 inch, with the 10 inch search frame carrying its keyboard
+chrome as well. The settings frames are the release's: the new hub on all
+three, read one at a time from copies inside the repository, with the names on
+one line each, the three groups, the switches at the sheet's edge, and the
+font size value breaking on a comma where a middle dot used to strand itself
+at the end of a line. All 24 were `cmp`'d against the artifacts after
+installing.
+
+**The bundle.** `quran-2.9-vc30.aab` from the newest green build on `main`,
+run 36542803366: 148,734,182 bytes, SHA-256
+`6bc3b5a718a58b9a65c3cc7864e67fdf3d03d4652d7d3108e29a6d6d4ae14756`, matching
+the artifact's own checksum, `jar verified`, signed with the shared upload
+key (`53:7D:09:D2:...:0D:9D:E5:21`).
+
+**One thing the owner still owes the store.** Play asks for a declaration
+where a new permission is requested, and 2.9 declares `SCHEDULE_EXACT_ALARM`
+for the daily reminder. The justification is the reminder arriving at the
+minute the reader chose on a phone that is locked and asleep at that minute.
+The form is the owner's to file.
+
 
 ## D-114: The daily reminder keeps the minute it was given
 

@@ -4,9 +4,8 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 2.8 (versionCode 29) is submitted to Google Play for review
-(D-111, D-112, D-113). The tree now carries the thirty-seventh session's
-three reports, which are not in a release yet:
+**Status:** 2.9 (versionCode 30) is built, signed and handed over for
+submission, carrying the thirty-seventh session's three reports:
 
 - The daily ayah arrives at the minute the reader chose, where the phone gives
   the app the exact time it needs to say so even on a locked, sleeping phone,

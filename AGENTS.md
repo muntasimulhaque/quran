@@ -1032,9 +1032,9 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the thirty-seventh session)
 
-**The tree answers three of the owner's reports, and nothing has been
-released: 2.8 (versionCode 29) is still the last submission, and no
-`versionCode` has moved.**
+**The tree answers three of the owner's reports, and 2.9 (versionCode 30) is
+built, signed and handed over for submission: bundle, screenshots and notes
+in one message, and the hand-over copy is deleted once Play has it.**
 
 - **The daily ayah keeps the minute it was given (D-114).** The alarm is
   exact where the reader has granted the app the phone's own exact time
@@ -1076,6 +1076,29 @@ pixels, and `ListeningSettingsTest` looked for a switch in the merged tree
 where a row that opens a page reads as one control. Both are named in
 `AGENTS.md` now: CI runs six named app classes, so a session that touches
 the settings runs the whole app suite on the emulator.
+
+**The 2.9 push.** Build run 36542803366 green: the five content gates, the
+data instrumented suite, and the signed bundle. The capture run 36542803357
+came back with all three legs' eight frames, the phone and the 10 inch green
+and the 7 inch red on a Compose runtime crash in a test class that ran after
+the tour had written its frames. Twelve frames are byte-identical to the 2.8
+set; the twelve that differ are the search, settings, Browse and ayah card on
+each form, and only the settings frames carry content: the other three differ
+in the status bar clock alone, with the 10 inch search frame's keyboard
+chrome as well. The bundle is `quran-2.9-vc30.aab`, 148,734,182 bytes, SHA-256
+`6bc3b5a7...ae14756`, `jar verified`, signed with the shared upload key.
+
+**A mistake this session made, kept in the record.** A five-chip Browse frame
+was "found" in a green artifact and a workflow change was pushed on it. The
+python on this machine is a Windows build, so a `/tmp` path in a script is
+the C: drive's temp while the same path at the bash prompt is the MSYS temp,
+and every measurement and crop had been made against a folder an earlier
+session left behind. The real artifacts match the code. The workflow change
+was undone in the same session, the hardening that is worth keeping (an
+uninstall before the tour) stayed, and the lesson is in
+`docs/screenshot-failures.md`: copy a frame into the repository before
+anything looks at it, and when a number and a picture disagree, take a third
+measurement.
 
 ## Where the project stands (end of the thirty-sixth session)
 
