@@ -27,7 +27,6 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
@@ -441,10 +440,6 @@ fun ReadingTitle(surah: String, detail: String?, modifier: Modifier = Modifier) 
                 maxLines = 1,
                 softWrap = false,
                 overflow = TextOverflow.Ellipsis,
-                // The surah the reader is in is the one heading on the reading
-                // surface, and it is how a screen reader says where they are
-                // (D-122).
-                modifier = Modifier.semantics { heading() },
             )
             if (!detail.isNullOrBlank()) {
                 Text(

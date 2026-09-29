@@ -231,24 +231,39 @@ class ScreenshotTest {
     private fun chromeIsUp(): Boolean =
         rule.onAllNodesWithContentDescription("Settings").fetchSemanticsNodes().isNotEmpty()
 
-    /** A tap on the paper brings the chrome up; the states are remembered. */
+    /**
+     * A tap on the reading's own quiet margin brings the chrome up.
+     *
+     * The page's exact centre is not a safe place to tap, and this tour found
+     * that the hard way: a control can sit under the finger there. A word by
+     * word tile is a control, and the study reading now carries the aid in the
+     * store's own frames, so a centre tap could open one of those tiles and the
+     * bar never came up, and the tour then reached for a door that was not
+     * there. The margin is the reading's quiet edge, where no control lives,
+     * which is the same rule the rest of the suite already follows through
+     * `tapThePaper`.
+     */
+    private fun tapTheReading() {
+        val node = if (inMushaf()) mushafPage() else studyPage()
+        node.performTouchInput { click(Offset(4f, height * 0.5f)) }
+    }
+
+    /** A tap on the margin brings the chrome up; the states are remembered. */
     private fun revealChrome() {
         repeat(3) {
             if (chromeIsUp()) return
-            val node = if (inMushaf()) mushafPage() else studyPage()
-            node.performTouchInput { click(Offset(width / 2f, height * 0.5f)) }
+            tapTheReading()
             runCatching {
                 rule.waitUntil(timeoutMillis = 4_000) { chromeIsUp() }
             }
         }
     }
 
-    /** And a tap puts it away again, for the captures that want the page bare. */
+    /** And a tap on the margin puts it away again, for the frames that want the page bare. */
     private fun hideChrome() {
         repeat(3) {
             if (!chromeIsUp()) return
-            val node = if (inMushaf()) mushafPage() else studyPage()
-            node.performTouchInput { click(Offset(width / 2f, height * 0.5f)) }
+            tapTheReading()
             runCatching {
                 rule.waitUntil(timeoutMillis = 4_000) { !chromeIsUp() }
             }
@@ -423,10 +438,14 @@ class ScreenshotTest {
         // the ayah's own node on the page, by the reference the tour set up
         rule.onAllNodes(hasContentDescription("2:255.", substring = true)).onFirst()
             .performTouchInput { longClick() }
-        // The actions bar slides in over the ayah; the tap on More waits for
-        // it to settle, so the press lands on the control and not on an
-        // animation.
-        Thread.sleep(1_500)
+        // The actions bar slides in over the ayah, and the tap on More waits
+        // for the bar itself rather than for a length of time: on the ten inch
+        // leg the press lands while the sheet that came before it is still
+        // leaving, and a fixed sleep is either too short there or wasted
+        // everywhere else.
+        rule.waitUntil(timeoutMillis = 20_000) {
+            rule.onAllNodesWithContentDescription("More").fetchSemanticsNodes().isNotEmpty()
+        }
         rule.onNodeWithContentDescription("More").performClick()
         // The card composes after the tap, and its capture raced ahead of it
         // the same way Browse's did; the tag waits for the card itself. The
