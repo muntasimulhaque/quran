@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -44,12 +45,18 @@ fun Group(title: String) {
         text = title,
         style = MaterialTheme.typography.labelMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(
-            start = 22.dp,
-            end = 22.dp,
-            top = Space.Block + Space.Tight,
-            bottom = Space.Line,
-        ),
+        modifier = Modifier
+            // A heading is a heading to a screen reader too, and this is the
+            // only way a reader who cannot see the sheet can jump from one
+            // group of settings to the next. TalkBack has navigated by
+            // heading since 9.1; the app marked nothing at all (D-122).
+            .semantics { heading() }
+            .padding(
+                start = 22.dp,
+                end = 22.dp,
+                top = Space.Block + Space.Tight,
+                bottom = Space.Line,
+            ),
     )
 }
 
@@ -146,7 +153,10 @@ fun PageHeader(title: String, onBack: () -> Unit) {
             text = title,
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(start = 4.dp),
+            // the page's own name, and the one heading on it
+            modifier = Modifier
+                .semantics { heading() }
+                .padding(start = 4.dp),
         )
     }
 }

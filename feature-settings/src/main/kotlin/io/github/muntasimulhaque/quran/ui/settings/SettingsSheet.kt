@@ -21,6 +21,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.data.AppSettings
@@ -158,7 +161,10 @@ fun SettingsSheet(
                         text = stringResource(R.string.settings_title),
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = 10.dp),
+                        // the sheet's own name, and its one heading (D-122)
+                        modifier = Modifier
+                            .semantics { heading() }
+                            .padding(start = 22.dp, end = 22.dp, bottom = 10.dp),
                     )
                     SettingsHub(
                         settings = settings,

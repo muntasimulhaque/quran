@@ -341,7 +341,20 @@ private fun annotated(
                     color = markerColor,
                     fontWeight = FontWeight.Medium,
                     fontSize = markerSize,
-                    baselineShift = BaselineShift.Superscript,
+                    // The shift is measured, not the platform's. Compose's
+                    // own superscript lifts a figure a full cap height, which
+                    // put the marker above the line it belongs to and, because
+                    // a baseline shift counts toward the line's height, grew
+                    // the line to make room for it: the marker of one line
+                    // then sat in the gap under the line above (D-122). A
+                    // third of the size is a raised figure that stays on its
+                    // own line.
+                    baselineShift = BaselineShift(markerSize.value * 0.30f),
+                    // Lining figures, so the number in the note reads as a
+                    // number. Literata's default figures are old-style, and an
+                    // old-style two and three at marker size are the two
+                    // shapes a footnote number must not be.
+                    fontFeatureSettings = "lnum",
                 )
                 if (onFootnote == null) {
                     withStyle(style) { append(marker.toString()) }

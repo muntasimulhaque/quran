@@ -707,14 +707,19 @@ private fun ReaderTopBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                // The scrim stays solid behind the controls and gives way
-                // only below the name, so the surah never sits on the fading
-                // edge and the page runs out from under the bar.
+                // The scrim is solid behind the controls and gives way below
+                // them, so the surah never sits on the fading edge. It used to
+                // stay solid to seventy-two percent of its own height, which
+                // is exactly where the page's own surah name falls: the gold
+                // name was measurably washed every time the bar came up (the
+                // ornament's contrast dropped from 5.0 to 4.4 on paper). The
+                // solid run is now the bar's own height, and the fade is short,
+                // so the page's first line is never under it.
                 .background(
                     Brush.verticalGradient(
                         0f to MaterialTheme.colorScheme.background,
-                        0.72f to MaterialTheme.colorScheme.background,
-                        0.9f to MaterialTheme.colorScheme.background.copy(alpha = 0.92f),
+                        0.55f to MaterialTheme.colorScheme.background,
+                        0.82f to MaterialTheme.colorScheme.background.copy(alpha = 0.88f),
                         1f to MaterialTheme.colorScheme.background.copy(alpha = 0f),
                     ),
                 )

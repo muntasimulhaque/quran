@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -41,8 +42,11 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.RichText
@@ -63,6 +67,7 @@ import io.github.muntasimulhaque.quran.ui.rich.ArabicBody
 import io.github.muntasimulhaque.quran.ui.rich.RichBlocks
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.theme.LatinReading
+import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -167,10 +172,14 @@ fun AyahCard(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface,
+        // the card is a page; the ayah and its panels take the measure (D-122)
+        sheetMaxWidth = Dp.Unspecified,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .widthIn(max = Reading.SheetMeasure)
+                .align(Alignment.CenterHorizontally)
                 .imePadding()
                 // The gate rides with the scroll: a long tafsir scrolled down
                 // and then scrolled back up is the reader reading, never a
@@ -195,6 +204,19 @@ fun AyahCard(
             // translation, and its meanings are already open on the page,
             // and only the tafsir doors remain.
             if (fromMushaf) {
+                // The ayah itself, at the head of the card, with its reference.
+                // From the Mushaf this card is the whole study surface, and
+                // the sheet covers the lower half of the page: the ayah the
+                // reader long-pressed is behind it, half hidden, so a card
+                // that began with three list rows began with none of the
+                // verse. Opened from the study reading the ayah is already on
+                // the page above the sheet, so it is not repeated here.
+                AyahHeading(
+                    ayah = ayah,
+                    surahName = surahName,
+                    hafs = hafs,
+                    settings = settings,
+                )
                 if (hasWords) {
                     // Every block of the card is named above itself: the
                     // words, the translation, the tafsir. The door below
@@ -370,9 +392,58 @@ fun AyahCard(
     }
 }
 
+/**
+ * The ayah the card is about, at its head: the surah's name, the verse in the
+ * reading's own Arabic, and the reference under it.
+ *
+ * The reference is the one thing on the card a reader can copy or say aloud,
+ * and the verse is the one thing that makes every panel below it legible: the
+ * words, the translation and the tafsir are all about this ayah, and a reader
+ * who has just long-pressed one should not have to look back at the page to
+ * remember which.
+ */
 @Composable
-private fun AddTranslation(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Row(
+private fun AyahHeading(
+    ayah: Ayah,
+    surahName: String,
+    hafs: FontFamily,
+    settings: AppSettings,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 22.dp),
+    ) {
+        Text(
+            text = surahName,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = ayah.text,
+            style = TextStyle(
+                fontFamily = hafs,
+                fontSize = settings.arabicSp.sp,
+                lineHeight = settings.arabicLineSp.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+            ),
+            textAlign = TextAlign.Right,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = Space.Line),
+        )
+        Text(
+            text = ayah.verseKey,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = Space.Tight),
+        )
+        Spacer(Modifier.height(Space.Block))
+    }
+}
+
+@Composable
+private fun AddTranslation(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {    Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))

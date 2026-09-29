@@ -76,6 +76,7 @@ import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.rich.HighlightedText
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
+import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

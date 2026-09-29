@@ -22,4 +22,16 @@ import androidx.compose.ui.unit.dp
 object Reading {
     /** The widest a column of reading prose may be. */
     val MaxMeasure: Dp = 620.dp
+
+    /**
+     * The cap for a sheet's own content on a wide screen.
+     *
+     * Material caps a modal sheet at 640 dp, so on a ten inch tablet a third
+     * of the screen sits under a grey veil on each side and the panel floats
+     * in the middle of the glass. A sheet is a page, not a card: it wants the
+     * screen's full width, and the *content* is what takes the readable
+     * measure. This is that measure, the column the study reading already
+     * uses plus the sheet's own gutter (D-122).
+     */
+    val SheetMeasure: Dp = MaxMeasure + 44.dp
 }

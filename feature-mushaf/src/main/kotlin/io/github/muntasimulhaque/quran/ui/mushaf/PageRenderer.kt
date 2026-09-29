@@ -263,10 +263,13 @@ class PageRenderer(private val context: Context) {
         val ayahBoxes = HashMap<Int, MutableList<RectF>>()
         val basmallahGlyphs = content.basmallahGlyphs()
 
-        // The page's own furniture: the juz at the left of the foot rule and
-        // the page number in its medallion, as the printed page carries them.
-        // The surah names come from the layout itself, on the ornamental line
-        // the page already has, so they are never written twice.
+        // The page's own furniture: the rule the text sits within, the juz at
+        // the left of the foot rule, and the page number in its roundel, as
+        // the printed page carries them. A manuscript page is *within* gold
+        // and black rules, and that rule is also what gives the page an edge
+        // on a wide ground: without it the page and the app's background are
+        // the same colour and the sheet of paper stops existing off a phone.
+        drawPageRule(canvas, widthPx, height, band, textWidth, rulePaint)
         drawFooter(canvas, key.page, widthPx, height, band, textWidth, fontPx, ornamentPaint, rulePaint, content)
 
         for (line in lines) {
@@ -337,6 +340,34 @@ class PageRenderer(private val context: Context) {
         return RenderedPage(bitmap, words, ayahBoxes, ayahs, palette)
     }
 
+    /**
+     * The page's own rule: a hairline frame at the text measure, from the
+     * head band to the foot band, in the ornament tone a shade quieter than
+     * the foot rule that carries the page number.
+     *
+     * A bound mushaf is ruled: the text stands within gold and black rules
+     * that run the whole page, and that is the drawing that says "page" more
+     * quietly than any ornament. It is a hairline, because it is a printed
+     * page and the paper is the subject; it is at the text measure rather than
+     * the page's edge, because the measure is where a reader's eye already is.
+     */
+    private fun drawPageRule(
+        canvas: Canvas,
+        widthPx: Int,
+        height: Int,
+        band: Float,
+        textWidth: Float,
+        rule: Paint,
+    ) {
+        val quiet = Paint(rule)
+        quiet.alpha = (rule.alpha * 0.5f).toInt().coerceIn(1, 255)
+        val left = (widthPx - textWidth) / 2f
+        val right = (widthPx + textWidth) / 2f
+        canvas.drawLine(left, band, left, height - band, quiet)
+        canvas.drawLine(right, band, right, height - band, quiet)
+        canvas.drawLine(left, band, right, band, quiet)
+    }
+
     private fun drawFooter(
         canvas: Canvas,
         page: Int,
@@ -359,7 +390,15 @@ class PageRenderer(private val context: Context) {
         )
         val radius = fontPx * MEDALLION_RATIO
         val centerY = top + band / 2f
-        canvas.drawCircle(widthPx / 2f, centerY, radius, rule)
+        // The page number stands in a hairline roundel, the way a printed
+        // page rules it, rather than in a filled disc: a disc of gold behind
+        // gold is a heavier mark than the page's own furniture is.
+        val roundel = Paint(rule).apply {
+            style = Paint.Style.STROKE
+            strokeWidth = maxOf(1f, widthPx / 900f)
+            alpha = (rule.alpha * 1.5f).toInt().coerceIn(1, 255)
+        }
+        canvas.drawCircle(widthPx / 2f, centerY, radius, roundel)
         paint.textSize = fontPx * PAGE_NUMBER_RATIO
         val metrics = paint.fontMetrics
         val baseline = centerY + (metrics.descent - metrics.ascent) / 2f - metrics.descent

@@ -309,7 +309,13 @@ class ScreenshotTest {
         val settings = SettingsStore(context)
         runBlocking {
             settings.setUiLanguage("en")
-            settings.setAyah(1)
+            // The tour photographs 2:255, and it is here rather than at 1:1
+            // because of what the store's first frame then shows. Page 42 is a
+            // full fifteen lines, where page 1 carries seven and leaves half
+            // the sheet empty; and the verse is the one a reader who has
+            // never seen the app can recognise. The frames are the store, and
+            // the store's first image is the app's promise (D-122).
+            settings.setAyah(262)
             settings.setMode(ReadingMode.Mushaf)
             settings.setTheme(AppTheme.Paper)
             settings.setTranslationPacks(setOf("translation-saheeh-en"))
@@ -414,7 +420,8 @@ class ScreenshotTest {
         revealChrome()
         rule.onNodeWithContentDescription("Switch to the Mushaf page").performClick()
         Thread.sleep(1_200)
-        rule.onAllNodes(hasContentDescription("1:1.", substring = true)).onFirst()
+        // the ayah's own node on the page, by the reference the tour set up
+        rule.onAllNodes(hasContentDescription("2:255.", substring = true)).onFirst()
             .performTouchInput { longClick() }
         // The actions bar slides in over the ayah; the tap on More waits for
         // it to settle, so the press lands on the control and not on an
