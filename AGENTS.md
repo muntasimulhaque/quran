@@ -1061,9 +1061,13 @@ fetching them again; the space is worth less than the time.
 
 ## Where the project stands (end of the thirty-eighth session)
 
+**3.0 (versionCode 31) is prepared for submission at the owner's word
+(D-118, D-119, D-120, D-121).** The hand-over is the bundle and the store
+set in one message, before the submission; the hand-off copy of the bundle is
+deleted once the owner confirms Play has it.
+
 **The tree answers the owner's three reports of this session, and 2.9
-(versionCode 30) is still the release in Google Play (D-118, D-119, D-120).
-No `versionCode` has moved.**
+(versionCode 30) is still the release in Google Play.**
 
 - **Repeat the surah, and one answer for the end of the audio.** The end of
   the recitation is one value, `core.EndOfAudio`, not three switches: repeat
@@ -1089,17 +1093,24 @@ No `versionCode` has moved.**
   margin and their values gained the room, which is what the wrapped "Arabic
   30, translation 17" needed. This reverses the other half of D-111.
 
-**The suite.** `:core:test` (91, ten new), `:data:testDebugUnitTest`,
+**The suite.** `:core:test` (91, ten new), `:data:testDebugUnitTest` (33),
 `:app:testDebugUnitTest`, `:app:lintDebug` and `:app:assembleDebug` are green
-on this machine, and `:app:compileDebugAndroidTestKotlin` compiles. There are
-no AVDs here, so `PlaybackPillTest`, `ListeningSettingsTest` and
-`SettingsRowAlignmentTest` are unrun: none of the three is among the six
-classes CI names, and the next session with an emulator, or the next release's
-full app run, is where they answer.
+on this machine, and `:app:compileDebugAndroidTestKotlin` compiles. All five
+owner gates ran green. There are no AVDs here, so `PlaybackPillTest`,
+`ListeningSettingsTest` and `SettingsRowAlignmentTest` are unrun: none of the
+three is among the six classes CI names, and the next session with an
+emulator, or the next release's full app run, is where they answer.
 
-**Stale on purpose.** `play-store/screenshots/` is the 2.9 set. The settings
-frames now differ in the tail, and no store frame carries the pill, so the
-next capture refreshes the three settings frames and nothing else.
+**The 3.0 push.** Build run 36563923564 attempt 1 green: the five gates, the
+data instrumented suite, and the signed bundle (`quran-3.0-vc31.aab`,
+148,740,218 bytes, SHA-256 `d15ca873...d1bf6154`, `jar verified`, core pack
+only). Capture run 36563923631 attempt 1 was red on the 10 inch leg alone
+with the launcher ANR over `05-search` (class 4 of
+`docs/screenshot-failures.md`, the guard refusing the frame); one rerun, and
+attempt 2 is green on all three legs. The store set is refreshed: 24 frames
+`cmp`'d against their artifacts, the four reading frames byte-identical to
+2.9, the search, Browse and card frames the status bar clock alone, and the
+settings frames carrying the new tail with Version 3.0 in the foot.
 
 ## Where the project stands (end of the thirty-seventh session)
 

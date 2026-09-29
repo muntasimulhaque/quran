@@ -4,9 +4,9 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 2.9 (versionCode 30) is submitted to Google Play for review
-(D-114, D-115, D-116). The tree now carries the thirty-eighth session's
-three reports, which are not in a release yet:
+**Status:** 3.0 (versionCode 31) is prepared for Google Play
+(D-118, D-119, D-120, D-121), carrying the thirty-eighth session's three
+reports:
 
 - The end of the recitation is one answer, not three switches: repeat the
   ayah, repeat the surah, or carry on to the next surah. Turning one on turns
@@ -19,8 +19,8 @@ three reports, which are not in a release yet:
   with the switch, a row without ends with its arrow, and the 64 dp of empty
   margin at the end of six rows is gone (D-120).
 
-**2.9** carries the thirty-seventh session's three reports (D-114, D-115,
-D-116):
+**2.9** is submitted to Google Play for review and carries the
+thirty-seventh session's three reports (D-114, D-115, D-116):
 
 - The daily ayah arrives at the minute the reader chose, where the phone gives
   the app the exact time it needs to say so even on a locked, sleeping phone,

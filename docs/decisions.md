@@ -5672,3 +5672,62 @@ which are not among the six CI names) are for a session with an emulator or
 for the next release's full app run. The settings frames in
 `play-store/screenshots/` are the 2.9 set and are now stale in the tail; the
 next capture refreshes them.
+
+## D-121: The 3.0 release
+
+Date: the thirty-eighth session, at the owner's word "go for play release".
+3.0 (versionCode 31) carries D-118, D-119, and D-120: the end of the audio is
+one answer and the surah can be it, the pill's words keep a measure or take a
+line of their own, and a settings row's own mark is the last thing in it.
+
+**The gates.** All five owner gates ran green on this machine before the
+push: `verify` 29 datasets, `audit` 0 unexplained differences (6235
+letter-identical ayahs, 1 accepted orthographic variant, 1 segmentation note),
+`fonts` all coverage checks (628,169 study codepoints, 604 pages, 22,985,678
+reading codepoints), `search` (63 Arabic and 65 Bangla round trips, 82
+non-ASCII codepoints, 465 readable excerpts), and `checkdb` (the committed
+database, 128,966,656 bytes, SHA-256 380e0442..., 10 pack files). The owner
+gates could run at all this session: `content/raw` still holds the manual QUL
+and QuranEnc exports and `content/work/verify` the extractions, which is the
+check that has to pass before a release starts rather than at gate time
+(D-078).
+
+**The suite.** `:core:test` (91), `:data:testDebugUnitTest` (33),
+`:app:testDebugUnitTest`, `:app:lintDebug`, `:app:assembleDebug`, and
+`:app:compileDebugAndroidTestKotlin` are green on this machine. There are no
+AVDs here, so the three instrumented classes this work touches
+(`PlaybackPillTest`, `ListeningSettingsTest`, `SettingsRowAlignmentTest`),
+none of which is among the six CI names, are owed rather than claimed: they
+are for a session with an emulator or the next release's full app run.
+
+**The push.** Build run 36563923564 attempt 1 green: the five gates, the data
+instrumented suite (its own job), and the signed bundle. The capture run
+36563923631 was red on the 10 inch leg alone with
+`a system window (com.google.android.apps.nexuslauncher) stayed over
+05-search`, which is class 4 in `docs/screenshot-failures.md` and the exact
+signature the 2.2 capture met: the launcher ANR over the keyboard-heavy
+search frame on the slowest leg, the guard refusing the frame, four frames
+kept, and the other two legs green on the same code. One rerun, per D-078,
+and attempt 2 is green on all three legs.
+
+**The store set.** 24 frames from that attempt, every one compared with its
+artifact by `cmp`. The four reading frames are byte-identical to the 2.9 set
+on all three form factors, and the twelve that differ are the search,
+settings, Browse, and ayah card on each. Measured, the search, Browse, and
+card frames differ in the status bar clock alone. Only the settings frames
+carry content: the new tail, with the chevron ending each row that has no
+switch, the door rows unchanged, and the About row reading Version 3.0. The
+one value that moved is the font size row's, which now breaks as "Arabic 30,
+translation" over "17" where 2.9 broke it after the comma, because the row
+gained the 52 dp the empty switch column was holding. It is the same two-line
+wrap, at a different point, and it is the one thing in the set a reader could
+call worse; widening the value's share would move every page row's name, so
+it is left at the owner's word. `tablet10/01-mushaf.png` is pixel-identical to
+its artifact and not byte-identical (a re-encode, maximum delta 2 of 255), so
+the committed frame was left in place rather than installed for nothing.
+
+**The bundle.** `quran-3.0-vc31.aab` from the newest green build on `main`,
+run 36563923564: 148,740,218 bytes, SHA-256
+`d15ca873e814a339f2b4c70f0b7b32fb515ba697c06f55ee2fa0550ad1bf6154`, matching
+the artifact's own checksum, `jar verified`, signed with the shared upload
+key (`53:7D:09:D2:...:0D:9D:E5:21`), carrying only the core pack.
