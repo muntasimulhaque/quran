@@ -6,6 +6,7 @@
     <string name="playback_unavailable">এখনও পাওয়া যাচ্ছে না</string>
     <string name="playback_repeating_ayah">আয়াত পুনরাবৃত্তি হচ্ছে</string>
     <string name="playback_repeating_surah">সূরা পুনরাবৃত্তি হচ্ছে</string>
+    <string name="playback_repeating_word">একটি শব্দ পুনরাবৃত্তি হচ্ছে</string>
     <string name="playback_retry">আবার চেষ্টা করুন</string>
     <string name="playback_continue">চালিয়ে যান</string>
     <string name="playback_download">ডাউনলোড</string>

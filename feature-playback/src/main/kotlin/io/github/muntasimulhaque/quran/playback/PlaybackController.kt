@@ -360,6 +360,16 @@ class PlaybackController(
         }
 
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+            // A word loop belongs to the ayah it was asked for: when the
+            // player leaves that ayah, for any reason, the loop ends with it.
+            // A reader who hears the next ayah was never asked to.
+            if (_state.value.loopingWord != null &&
+                mediaItem?.mediaId != _state.value.ayahNumber?.let {
+                    RecitationPlaylist.mediaId(it, _state.value.surah ?: 0)
+                }
+            ) {
+                _state.value = _state.value.copy(loopingWord = null)
+            }
             // The surah that was being heard, read before the state moves on:
             // the surah that has just ended is the one the state last
             // published, and it is the one the repeat belongs to.
@@ -432,6 +442,7 @@ class PlaybackController(
             positionMs = position,
             wordPosition = wordAt(position),
         )
+        enforceWordLoop(player, position)
     }
 
     private fun loadSegments(ayahNumber: Int) {
@@ -454,8 +465,74 @@ class PlaybackController(
         return segment.wordFrom + 1
     }
 
-    private fun maybeAppendNextSurah() {
+    /**
+     * The time span of one word of the ayah now loaded, as the word table
+     * numbers it, or null when there are no timings for it.
+     */
+    private fun spanOfWord(word: Int): Pair<Long, Long>? {
+        val segment = segments.firstOrNull { it.wordFrom + 1 == word } ?: return null
+        return segment.startMs to segment.endMs
+    }
+
+    /**
+     * Plays the ayah now playing from one word, and loops that word until the
+     * reader stops it.
+     *
+     * Repetition is how a verse is learned: a reader who taps a word wants to
+     * hear that word, and to hear it again, without leaving the ayah. The
+     * timings are already in the content (a word's start and end in the
+     * reciter's own timing data), so this is a seek and a boundary, not a new
+     * download and not a new setting: tapping a word and tapping it again is
+     * the whole of the interface, and the pill says the word is repeating so
+     * a reader is never surprised by audio that will not stop.
+     */
+    fun loopWord(word: Int) {
         val player = controller ?: return
+        val ayah = _state.value.ayahNumber ?: return
+        if (segmentedAyah != ayah) loadSegments(ayah)
+        val span = spanOfWord(word) ?: return
+        scope.launch {
+            withContext(Dispatchers.Main) {
+                player.seekTo(span.first)
+                player.play()
+            }
+            _state.value = _state.value.copy(loopingWord = word)
+        }
+    }
+
+    /** Stops the word loop and lets the ayah carry on from where it is. */
+    fun clearWordLoop() {
+        if (_state.value.loopingWord == null) return
+        _state.value = _state.value.copy(loopingWord = null)
+    }
+
+    /**
+     * When a word is looping, the player is kept inside that word's span.
+     *
+     * The boundary is the reader's, not the player's: the moment the reciter
+     * passes the word's end, playback seeks back to its start, so the word
+     * repeats until the reader stops it. The loop is cleared when the ayah
+     * ends, when playback stops, and by [clearWordLoop]; it is never a
+     * setting the reader has to find and turn off, because a loop that
+     * surprises someone is worse than no loop.
+     */
+    private fun enforceWordLoop(player: Player, positionMs: Long) {
+        val word = _state.value.loopingWord ?: return
+        if (!player.isPlaying) {
+            _state.value = _state.value.copy(loopingWord = null)
+            return
+        }
+        val span = spanOfWord(word) ?: run {
+            _state.value = _state.value.copy(loopingWord = null)
+            return
+        }
+        val (start, end) = span
+        if (positionMs >= end || positionMs < start - WORD_LOOP_SLACK_MS) {
+            player.seekTo(start)
+        }
+    }
+
+    private fun maybeAppendNextSurah() {        val player = controller ?: return
         val id = player.currentMediaItem?.mediaId ?: return
         val surah = RecitationPlaylist.surahOf(id) ?: return
         if (surah >= 114 || loadedThroughSurah != surah) return
@@ -474,5 +551,13 @@ class PlaybackController(
         /** The pace the reader may choose, and its bounds. */
         const val MIN_SPEED = 0.5f
         const val MAX_SPEED = 1.5f
+
+        /**
+         * How far before a looping word's start playback is allowed to sit
+         * before it is drawn back in. The reciter's own timing has a little
+         * slack at a word's edge, and without it the loop would catch the
+         * word mid-word every time.
+         */
+        const val WORD_LOOP_SLACK_MS = 120L
     }
 }

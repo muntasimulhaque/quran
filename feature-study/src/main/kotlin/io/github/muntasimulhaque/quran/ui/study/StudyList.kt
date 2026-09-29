@@ -54,9 +54,11 @@ import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
@@ -110,6 +112,7 @@ fun StudyList(
     playingWord: Int?,
     onAyah: (Ayah) -> Unit,
     onBackgroundTap: () -> Unit,
+    onWord: ((Int, Int) -> Unit)? = null,
     onScrolled: () -> Unit,
     onNextSurah: (Int) -> Unit,
     onAddContent: () -> Unit,
@@ -161,6 +164,7 @@ fun StudyList(
         pageDescription = pageDescription,
         onAyah = onAyah,
         onBackgroundTap = onBackgroundTap,
+        onWord = onWord,
         onScrolled = onScrolled,
         onNextSurah = onNextSurah,
         onAddContent = onAddContent,
@@ -192,6 +196,7 @@ private fun StudyRows(
     pageDescription: String,
     onAyah: (Ayah) -> Unit,
     onBackgroundTap: () -> Unit,
+    onWord: ((Int, Int) -> Unit)? = null,
     onScrolled: () -> Unit,
     onNextSurah: (Int) -> Unit,
     onAddContent: () -> Unit,
@@ -332,6 +337,7 @@ private fun StudyRows(
                 playingWord = playingWord,
                 onAyah = onAyah,
                 onBackgroundTap = dismissAbout,
+                onWord = onWord,
                 onFootnote = { number ->
                     val note = row.translations.asSequence()
                         .flatMap { it.text.footnotes.asSequence() }
@@ -622,6 +628,7 @@ private fun AyahBlock(
     onAyah: (Ayah) -> Unit,
     onBackgroundTap: () -> Unit,
     onFootnote: (Int) -> Unit,
+    onWord: ((Int, Int) -> Unit)? = null,
 ) {
     val haptics = LocalHapticFeedback.current
     val palette = LocalPagePalette.current
@@ -668,7 +675,7 @@ private fun AyahBlock(
                 }
                 .padding(horizontal = 8.dp, vertical = 10.dp),
         ) {
-            val arabicLine = arabic(row, playing, playingWord)
+            val arabicLine = arabic(row, playing, playingWord) { w -> onWord?.invoke(row.ayah.number, w) }
             var textLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
             Text(
                 text = arabicLine.text,
@@ -761,7 +768,12 @@ private data class ArabicLine(val text: AnnotatedString, val washRange: IntRange
  * boundary inside an Arabic word breaks its letter joining, and a span is
  * always a bare rectangle behind the glyphs.
  */
-private fun arabic(row: StudyRow, playing: Boolean, playingWord: Int?): ArabicLine {
+private fun arabic(
+    row: StudyRow,
+    playing: Boolean,
+    playingWord: Int?,
+    onWord: ((Int) -> Unit)? = null,
+): ArabicLine {
     val words = row.words
     if (words.isEmpty()) return ArabicLine(AnnotatedString(row.ayah.text), null)
     var washRange: IntRange? = null
@@ -769,7 +781,21 @@ private fun arabic(row: StudyRow, playing: Boolean, playingWord: Int?): ArabicLi
         words.forEachIndexed { index, word ->
             if (index > 0) append(' ')
             val start = length
-            append(word.text)
+            if (onWord == null) {
+                append(word.text)
+            } else {
+                // Every word in the line is its own tap target, the way the
+                // footnote markers already are: a reader who taps a word hears
+                // that word, and hears it again, without leaving the verse.
+                // The link carries the word's own number so the reading, and
+                // not a string, decides what was tapped.
+                withLink(
+                    LinkAnnotation.Clickable(
+                        tag = "word-${word.position}",
+                        linkInteractionListener = { onWord(word.position) },
+                    ),
+                ) { append(word.text) }
+            }
             if (playing && word.position == playingWord) washRange = start until length
         }
     }

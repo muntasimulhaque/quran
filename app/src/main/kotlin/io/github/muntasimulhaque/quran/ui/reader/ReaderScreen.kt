@@ -269,6 +269,12 @@ fun ReaderScreen(
                             selected = null
                             touch++
                         },
+                        // Tapping a word hears that word, and hears it again:
+                        // repetition is how a verse is learned, and the word
+                        // timings are already in the content.
+                        onWord = { ayahNumber, word ->
+                            viewModel.loopWord(ayahNumber, word)
+                        },
                         onScrolled = {
                             // The text is what the reader is looking at; the
                             // chrome steps out of its way the moment the page

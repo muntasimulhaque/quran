@@ -6,6 +6,7 @@
     <string name="playback_unavailable">Not available yet</string>
     <string name="playback_repeating_ayah">repeating the ayah</string>
     <string name="playback_repeating_surah">repeating the surah</string>
+    <string name="playback_repeating_word">repeating one word</string>
     <string name="playback_retry">Retry</string>
     <string name="playback_continue">Continue</string>
     <string name="playback_download">Download</string>

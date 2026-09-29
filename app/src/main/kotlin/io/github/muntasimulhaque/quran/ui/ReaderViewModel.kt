@@ -990,6 +990,46 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
+     * Hears one word again and again.
+     *
+     * A reader who taps a word in the study reading is asking to hear that
+     * word, and to hear it again: repetition is how a verse is learned. The
+     * ayah is started if it is not already playing, so the first tap on a
+     * silent ayah does what a tap on a playing one does, and the word is then
+     * looped until the reader stops it. The word timings are already in the
+     * content, so this is a seek and a boundary, never a new download and
+     * never a new setting.
+     */
+    fun loopWord(ayahNumber: Int, word: Int) {
+        // tapping the word that is already repeating lets it go, so the way
+        // out of a loop is the same gesture that made it
+        if (playback.state.value.loopingWord == word) {
+            playback.clearWordLoop()
+            return
+        }
+        viewModelScope.launch {
+            val database = contentDatabase ?: return@launch
+            val ayah = database.ayah(ayahNumber) ?: return@launch
+            val recitation = settings.recitation
+            // the word can only be heard if the ayah's audio and timings are
+            // here, so the same offer as any other listening
+            val missing = missingForListen(recitation, ayah)
+            if (missing != null) {
+                listenOffer = offerFor(recitation, ayah, missing)
+                return@launch
+            }
+            val playingThisAyah = playback.state.value.ayahNumber == ayahNumber
+            if (!playingThisAyah) {
+                playback.play(recitation, ayahNumber)
+            }
+            playback.loopWord(word)
+        }
+    }
+
+    /** Stops a word loop and lets the ayah carry on from where it is. */
+    fun stopWordLoop() = playback.clearWordLoop()
+
+    /**
      * Listening needs two things that may both be missing: the reciter's word
      * timings, and the surah's own audio. They are asked for once, named in
      * full, with the reciter changeable in the offer itself. Nothing is

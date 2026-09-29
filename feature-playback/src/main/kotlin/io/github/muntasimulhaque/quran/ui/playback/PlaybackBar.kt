@@ -380,12 +380,22 @@ private fun PlaybackStatusLine(
  * it (D-087, widened by D-118).
  */
 @Composable
-private fun playbackStatus(reference: String, speed: Float, end: EndOfAudio): String {
+private fun playbackStatus(
+    reference: String,
+    speed: Float,
+    end: EndOfAudio,
+    loopingWord: Int? = null,
+): String {
     val extras = buildList {
+        // a word that is repeating is said first: it is the one thing about
+        // the audio the reader did not expect, and the pill's whole job is to
+        // say it
+        if (loopingWord != null) add(stringResource(R.string.playback_repeating_word))
         if (abs(speed - 1f) > 0.01f) add(speedText(speed))
         if (end != EndOfAudio.OFF) add(repeatWord(end))
     }
-    return (listOf(reference) + extras).filter { it.isNotBlank() }.joinToString(" \u00b7 ")}
+    return (listOf(reference) + extras).filter { it.isNotBlank() }.joinToString(" \u00b7 ")
+}
 
 /** The word that names the end of the audio, the way the switches name it. */
 @Composable

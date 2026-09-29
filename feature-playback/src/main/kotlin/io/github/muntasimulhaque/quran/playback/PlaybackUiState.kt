@@ -10,6 +10,13 @@ data class PlaybackUiState(
     val reference: String? = null,
     /** The word being recited, as the word table numbers it; null when unknown. */
     val wordPosition: Int? = null,
+    /**
+     * The word the reader asked to hear again and again, as the word table
+     * numbers it; null when the ayah is simply playing. It is the reader's
+     * own choice, made by tapping a word, and it stops the moment the ayah
+     * ends, the playback stops, or the reader taps the word again.
+     */
+    val loopingWord: Int? = null,
     val positionMs: Long = 0,
     /** True when the chosen recitation has no published package for this surah. */
     val unavailable: Boolean = false,
