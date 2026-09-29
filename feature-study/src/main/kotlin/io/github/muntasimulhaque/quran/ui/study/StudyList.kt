@@ -633,6 +633,7 @@ private fun AyahBlock(
     val palette = LocalPagePalette.current
     val playing = row.ayah.number == playingAyah
     val ayahActions = stringResource(R.string.study_ayah_actions)
+    val paperActions = stringResource(R.string.study_paper_actions)
     val wash = when {
         isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.07f)
         playing -> palette.highlight.copy(alpha = palette.highlight.alpha * 0.55f)
@@ -646,28 +647,49 @@ private fun AyahBlock(
             .fillMaxWidth()
             .padding(vertical = 12.dp),
     ) {
+        var textLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(14.dp))
                 .background(wash)
-                .combinedClickable(
-                    onClick = onBackgroundTap,
-                    onLongClick = {
-                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onAyah(row.ayah)
-                    },
-                )
+                // One gesture handler owns the block's whole surface, because
+                // a second handler on the Arabic line would take the long
+                // press away from here and the pill would never rise. A long
+                // press raises the ayah's actions, as it always has; a tap
+                // that lands on the verse hears the word under the finger, and
+                // a tap anywhere else is the reader bringing the chrome up.
+                .pointerInput(onWord, textLayout, row.ayah.number) {
+                    detectTapGestures(
+                        onLongPress = {
+                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onAyah(row.ayah)
+                        },
+                        onTap = { position ->
+                            val word = onWord?.let {
+                                textLayout?.wordAt(position.x, position.y, row.words.size)
+                            }
+                            if (word != null && onWord != null) {
+                                onWord(row.ayah.number, word)
+                            } else {
+                                onBackgroundTap()
+                            }
+                        },
+                    )
+                }
                 // The Mushaf gives every ayah a node whose action raises the
-                // pill; the study block answered a real long press only, so a
-                // screen reader could read an ayah here but not act on it. The
-                // same action is now exposed the same way in both readings,
-                // which is the one gesture the reading is built around
-                // (D-084 named this gap; this closes it).
+                // pill, and the study block now gives a screen reader the
+                // same two doors a finger has: the ayah's actions, which is
+                // the one gesture the reading is built around (D-084 named
+                // this gap; this closes it), and the paper's own tap.
                 .semantics {
                     customActions = listOf(
                         CustomAccessibilityAction(ayahActions) {
                             onAyah(row.ayah)
+                            true
+                        },
+                        CustomAccessibilityAction(paperActions) {
+                            onBackgroundTap()
                             true
                         },
                     )
@@ -675,8 +697,6 @@ private fun AyahBlock(
                 .padding(horizontal = 8.dp, vertical = 10.dp),
         ) {
             val arabicLine = arabic(row, playing, playingWord)
-            var textLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
-            val tapWord = onWord
             Text(
                 text = arabicLine.text,
                 style = TextStyle(
@@ -689,22 +709,6 @@ private fun AyahBlock(
                 onTextLayout = { textLayout = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    // A tap on a word hears that word on repeat. The line is
-                    // drawn exactly as it always was, and the word under the
-                    // finger is found from the layout, so the reading never
-                    // becomes a page of links.
-                    .pointerInput(tapWord, textLayout) {
-                        if (tapWord == null) return@pointerInput
-                        detectTapGestures { position ->
-                            val layout = textLayout ?: return@detectTapGestures
-                            val word = layout.wordAt(
-                                position.x,
-                                position.y,
-                                row.words.size,
-                            )
-                            if (word != null) tapWord(row.ayah.number, word)
-                        }
-                    }
                     .drawWithContent {
                         val range = arabicLine.washRange
                         val layout = textLayout

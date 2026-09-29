@@ -48,6 +48,14 @@ class WordByWordTest {
                 settings.setTranslationPacks(setOf("translation-taisirul-quran-bn"))
                 settings.setWordByWord(true)
                 settings.setMode(ReadingMode.Study)
+                // The reader's own place, set here rather than inherited.
+                // These tests share one install and one process, so whatever
+                // the last test left standing is where the reader opens; the
+                // first meaning this test looks for belongs to 1:1, and the
+                // screenshot tour now leaves the reading at 2:255, so a test
+                // that did not set its own place was looking for a verse the
+                // reader was never on (found by the 3.1 capture).
+                settings.setAyah(1)
                 for (role in TypeRole.entries) settings.setTypeSize(role, TextSize.DEFAULT)
             }
         }

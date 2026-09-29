@@ -12,6 +12,7 @@
     <string name="study_next_surah">পরের সূরা</string>
     <string name="study_end_of_quran">এটি কুরআনের শেষ</string>
     <string name="study_ayah_actions">আয়াতের কাজ</string>
+    <string name="study_paper_actions">বার দেখান বা লুকান</string>
 
     <string name="card_translation_label">অনুবাদ</string>
     <string name="card_tafsir_label">তাফসীর</string>
