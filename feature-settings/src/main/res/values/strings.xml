@@ -124,7 +124,7 @@
     <string name="settings_title_translations">Translations</string>
     <string name="settings_title_tafsirs">Tafsirs</string>
     <string name="settings_title_about">About</string>
-    <string name="settings_summary_text">Arabic %1$d · translation %2$d</string>
+    <string name="settings_summary_text">Arabic %1$d, translation %2$d</string>
     <string name="settings_version_short">Version %1$s</string>
     <string name="settings_none_yet">Not added yet</string>
     <string name="settings_chosen_count">%1$d chosen</string>

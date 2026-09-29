@@ -29,7 +29,9 @@ import androidx.compose.ui.unit.dp
  * tall, and "Font size" two (owner report, 37th session). A value that is
  * longer than its share wraps to a second line, right-aligned under itself,
  * and one longer still is cut with an ellipsis, which says less rather than
- * saying nothing.
+ * saying nothing. The values are worded to break at a word: a middle dot
+ * stranded at the end of a line reads as a mistake, a comma reads as
+ * punctuation.
  *
  * Both halves fill their share, so the chevron and the switch columns that
  * follow stand at the same place on every row in the sheet whatever the value

@@ -363,8 +363,14 @@ class ScreenshotTest {
         rule.onNode(hasSetTextAction()).performTextInput("mercy")
         // The first search over a forty megabyte tafsir is the slowest thing
         // the tour does; the frame is kept once a match is on the screen, not
-        // on a sleep that lands in the middle of the query.
-        rule.waitUntil(timeoutMillis = 30_000) {
+        // on a sleep that lands in the middle of the query. The wait is in
+        // minutes, not seconds, because this is the frame where a loaded
+        // profile shows: the 10 inch leg timed out here on two runs, once
+        // under a launcher window and once on the wait itself, which is the
+        // house rule stated as a number (a slow emulator is not a failing
+        // reading aid). The count is what the frame needs, so the anchor
+        // stays the count and not a sleep.
+        rule.waitUntil(timeoutMillis = 180_000) {
             rule.onAllNodesWithText("matches", substring = true).fetchSemanticsNodes().isNotEmpty() ||
                 rule.onAllNodesWithText("match", substring = true).fetchSemanticsNodes().isNotEmpty()
         }

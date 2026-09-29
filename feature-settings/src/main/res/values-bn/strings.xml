@@ -123,7 +123,7 @@
     <string name="settings_title_translations">অনুবাদ</string>
     <string name="settings_title_tafsirs">তাফসীর</string>
     <string name="settings_title_about">অ্যাপ সম্পর্কে</string>
-    <string name="settings_summary_text">আরবি %1$d · অনুবাদ %2$d</string>
+    <string name="settings_summary_text">আরবি %1$d, অনুবাদ %2$d</string>
     <string name="settings_version_short">সংস্করণ %1$s</string>
     <string name="settings_none_yet">এখনও যোগ করা হয়নি</string>
     <string name="settings_chosen_count">%1$dটি বেছে নেওয়া</string>
