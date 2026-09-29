@@ -11,18 +11,44 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.content.R
 
-/** The interface voice: quiet, exact, never decorative. */
+/**
+ * The interface voice: quiet, exact, never decorative.
+ *
+ * Latin is Inter. Bangla is Anek Bangla, and it is a *fallback in the same
+ * family* rather than a second family: Compose resolves a family one codepoint
+ * at a time, so every string is drawn in the face that has its letters and no
+ * screen has to know which language it is in. Before this the Bangla
+ * interface fell through to whatever the phone happened to ship, which is a
+ * different voice from the one the rest of the sheet is set in, and it is the
+ * voice most of the app's readers were reading.
+ *
+ * The weights are declared for both faces because both are variable and
+ * Compose needs the same set of stops on each to pick one.
+ */
 val Inter = FontFamily(
     Font(R.font.inter_variable, FontWeight.Light),
     Font(R.font.inter_variable, FontWeight.Normal),
     Font(R.font.inter_variable, FontWeight.Medium),
     Font(R.font.inter_variable, FontWeight.SemiBold),
+    Font(R.font.anek_bangla_variable, FontWeight.Light),
+    Font(R.font.anek_bangla_variable, FontWeight.Normal),
+    Font(R.font.anek_bangla_variable, FontWeight.Medium),
+    Font(R.font.anek_bangla_variable, FontWeight.SemiBold),
 )
 
-/** The reading voice for translations and tafsir. */
+/**
+ * The reading voice for translations and tafsir.
+ *
+ * A Bangla translation is Bangla, so the reading face carries the same
+ * fallback the interface does: the verse is set in one chosen face rather
+ * than in Literata for the punctuation and the platform's idea of Bangla for
+ * the words.
+ */
 val Literata = FontFamily(
     Font(R.font.literata_variable, FontWeight.Normal),
     Font(R.font.literata_variable, FontWeight.Medium),
+    Font(R.font.anek_bangla_variable, FontWeight.Normal),
+    Font(R.font.anek_bangla_variable, FontWeight.Medium),
 )
 
 /** The display voice of the Mushaf ornaments. */

@@ -13,10 +13,13 @@ import org.junit.runner.RunWith
  * The startup profile, walked once on a device and written into the app.
  *
  * A profile is a list of the code paths the reader walks on every launch, so
- * the runtime can compile them ahead of time instead of on first use. It is
- * the one change here whose effect can be measured rather than argued: a few
- * hundred kilobytes of compressed text against a 148 MB bundle, for twenty to
- * forty percent off a cold start.
+ * the runtime can compile them ahead of time instead of on first use.
+ *
+ * The app already ships a hand-written seed profile
+ * (app/src/main/baseline-prof.txt, twenty-five rules naming the launch path by
+ * hand). What this module is for is replacing that seed with a measured one: a
+ * generated profile covers the code the reader actually walked, and the
+ * startup benchmark is the only way to know what either one is worth.
  *
  * The journey is the launch and the reading, because that is what every launch
  * does: open the reader where it was left, and turn a page. The result is
@@ -35,9 +38,9 @@ import org.junit.runner.RunWith
  * `mergeReleaseArtProfile`.
  *
  * This module is development only. It is not in the bundle, and nothing in the
- * app depends on it. What the wiring costs the bundle is the
- * `profileinstaller` library, measured at 1,886 bytes on the 3.0 release; the
- * profile text itself is a few hundred kilobytes once generated, against a
+ * app depends on it. What adding it cost the bundle is the
+ * `profileinstaller` library, measured at 1,886 bytes on the 3.0 release; a
+ * generated profile is a few hundred kilobytes of compressed text, against a
  * 148 MB bundle.
  */
 @RunWith(AndroidJUnit4::class)
