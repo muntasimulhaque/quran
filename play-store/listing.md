@@ -201,6 +201,17 @@ What each set shows, in order:
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
 
+## Release notes (next, unreleased)
+
+Word by word reads as a grid now: the words stand in columns, each over its
+own meaning, instead of drifting out of the order of the verse. The ayah card
+opens with the ayah it is about. The mushaf page carries a rule, so a page has
+an edge, and the bar no longer dims the surah's name on the page. Tap any word
+in the study reading to hear that word on repeat. Bangla is set in a chosen
+face. Settings and the reader's own surah are headings a screen reader can
+jump by, and a sheet is a page rather than a floating card. No ads, no
+trackers, no account.
+
 ## Release notes (3.0, 464 characters)
 
 Repeat the surah: the whole surah begins again when it ends, from the pill while a recitation plays and from Settings under Repeat the ayah. What happens at the end of the audio is one choice, so repeat the ayah, repeat the surah, and continue never fight each other. The pill's words keep a full line on a phone, so the surah, its ayah, the pace, and the repeat are no longer cut short. Settings rows end with the mark they carry. No ads, no trackers, no account.

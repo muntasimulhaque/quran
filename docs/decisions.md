@@ -5736,3 +5736,101 @@ run 36563923564: 148,740,218 bytes, SHA-256
 `d15ca873e814a339f2b4c70f0b7b32fb515ba697c06f55ee2fa0550ad1bf6154`, matching
 the artifact's own checksum, `jar verified`, signed with the shared upload
 key (`53:7D:09:D2:...:0D:9D:E5:21`), carrying only the core pack.
+
+## D-122: The reading answers the reader: a grid, the ayah, a ruled page, a word to hear again, and a voice for Bangla
+
+Date: the thirty-ninth session. The owner approved four things on the
+strength of a plain-language audit (the baseline profile, the widget, word
+repetition, and the Bangla face) and declined the two-page spread, and the
+icon was withdrawn: the mark is the owner's to decide and nothing in this
+record touches it. 3.0 (versionCode 31) is in Google Play and this rides the
+next release; no `versionCode` moved.
+
+**Word by word is a grid.** It was a flow of tiles each as wide as its own
+meaning, so the words drifted out of the order of the verse and the reader
+hunted for the pair. Every tile is now the width of the widest one in the
+ayah, the words stand in columns, each word sits over the meaning that is its
+own, and the meanings of a row share one baseline. The rule that decides the
+tile's width is pure arithmetic with two floors and one ceiling, and it lives
+in `core` as `WordGrid` with its own tests, because the two ways it used to go
+wrong are both arithmetic: a word that wraps stops being a word, and one long
+gloss must not widen every tile and put the verse down the page as a single
+column. The column count comes from the measure the parent has.
+
+**The ayah card opens with its ayah.** From the Mushaf the card is the whole
+study surface and the sheet covers the lower half of the page, so the verse
+the reader long-pressed was behind it and half hidden. The card now opens
+with the surah's name, the verse in the reading's own Arabic, and the
+reference, and every panel below it is about that ayah. From the study reading
+it is not repeated, because there the ayah is already on the page.
+
+**The mushaf page is ruled.** A bound page is *within* gold and black rules,
+and the rule is also what gives the sheet of paper an edge on a wide ground:
+the page and the app's background were the same colour, so off a phone the
+page stopped existing. The foot's page number stands in a hairline roundel
+rather than a disc of gold behind gold.
+
+**The bar's scrim no longer dims the page's own surah name.** It was solid to
+seventy-two percent of its height, which is exactly where the gold name falls;
+measured on the committed frames, the name's contrast dropped from 5.0 to 4.4
+on paper every time the bar came up. The solid run is the bar's own height now.
+
+**A word can be heard again and again.** Repetition is how a verse is learned,
+and the app shipped the timings for it and used them only to follow along:
+every word's start and end is in the reciter's own timing data. Tapping a
+word in the study reading starts the ayah at that word and loops it. The
+words in the line are their own tap targets, the way the footnote markers
+already were, each carrying the word's own number, so the reading decides
+what was tapped and not a string. Tapping the word that is repeating lets it
+go, the loop ends by itself when the ayah or the playback ends, and the pill
+says "repeating one word" in the reader's own language. It is a seek and a
+boundary: no new download and no new setting.
+
+**A footnote marker is a raised figure again.** Compose's own superscript
+lifts a figure a full cap height, and a baseline shift counts toward the
+line's height, so the marker grew the line to make room for it and the next
+line's marker sat in the gap under the line above. The shift is measured
+now, and the figure is a lining figure, because a footnote number must not
+be an old-style two.
+
+**A sheet is a page.** Material caps a modal sheet at 640 dp, so on a ten
+inch tablet a third of the screen was a grey veil on each side; the reader
+sheets take the screen and their content takes the readable measure, which is
+the column the rows were already written for and which Material's cap made
+unreachable.
+
+**There is a heading in the app.** The settings groups, the sheet and page
+titles, and the surah the reader is in are marked as headings, so a screen
+reader can jump by them; nothing in the app was marked before. TalkBack has
+navigated by heading since 9.1.
+
+**The store's first frame is a full page.** The tour photographs 2:255, whose
+page carries all fifteen lines, where page 1 carries seven and leaves half
+the sheet empty. The frames are the store, and the first image is the promise.
+
+**A startup profile, and its cost measured.** The app already ships a
+hand-written seed profile; `:benchmark` is here to replace that seed with a
+measured one and to measure a cold start on real hardware, which is the only
+way the design document's three hundred milliseconds is held. AGP 9 merges
+app/src/main/baseline-prof.txt on its own, so the merge side is automatic. The
+cost of the wiring is the `profileinstaller` library, measured at 1,886 bytes:
+the 3.0 bundle was 148,740,218 bytes and this one is 148,742,104. Generating
+the profile needs a connected device and is written down rather than claimed.
+
+**Bangla is set in a face the app chose.** Half the app's readers were
+reading a fallback: Inter carries no Bangla, so every Bangla string and every
+Bangla translation fell through to whatever the phone shipped. Anek Bangla
+(SIL OFL, variable, weight 100 to 800, Bangla plus its digits plus Latin) now
+sits in the same font family as the Latin face as a per-codepoint fallback, so
+a Latin string is still Inter and a Bangla string is Anek with no language
+logic in the reading path, and a Bangla verse is set in one chosen face. It is
+in the content sources; the fonts coverage gate still passes (628,169 study
+codepoints, 604 pages, 22,985,678 reading codepoints, all covered).
+
+**The suite.** `:core:test` (91 plus the seven new `WordGridTest` cases),
+`:data:testDebugUnitTest`, `:app:testDebugUnitTest`, `:app:lintDebug`,
+`:app:assembleDebug`, `:app:compileDebugAndroidTestKotlin`, `:benchmark:assembleBenchmark`
+and `:app:assembleRelease` are green on this machine, and the `fonts` gate
+passes. There are no AVDs here, so the sheets, the grid, the card, the ruled
+page and the scrim are owed to the next CI capture and to a session with an
+emulator; none of them is claimed as seen.
