@@ -5286,6 +5286,11 @@ for the daily reminder. The justification is the reminder arriving at the
 minute the reader chose on a phone that is locked and asleep at that minute.
 The form is the owner's to file.
 
+**The hand-off is closed.** The owner submitted 2.9 to Google Play for review
+and confirmed it, so the hand-off copy of the bundle was deleted the same
+session. The artifact stays in build run 36542803366 and in Play, and
+`play-store/aab/` keeps only its own note.
+
 
 ## D-114: The daily reminder keeps the minute it was given
 

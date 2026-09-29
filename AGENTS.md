@@ -1033,8 +1033,11 @@ fetching them again; the space is worth less than the time.
 ## Where the project stands (end of the thirty-seventh session)
 
 **The tree answers three of the owner's reports, and 2.9 (versionCode 30) is
-built, signed and handed over for submission: bundle, screenshots and notes
-in one message, and the hand-over copy is deleted once Play has it.**
+submitted to Google Play for review (D-114, D-115, D-116, D-117).** The hand-
+off is closed: the bundle went with the screenshots and the notes in one
+message, and the hand-over copy was deleted the same session, so the artifact
+stays in build run 36542803366 and in Play and `play-store/aab/` keeps only
+its own note.
 
 - **The daily ayah keeps the minute it was given (D-114).** The alarm is
   exact where the reader has granted the app the phone's own exact time
