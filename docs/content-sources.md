@@ -55,7 +55,7 @@ pins the fixed export (D-106).
 | QuranEnc | Tafsir As-Sa'di, `arabic_saadi`, version 1.0.0, passage ranges covering all 6236 ayahs | https://quranenc.com/api/v1/tafsir/range/arabic_saadi/1/1/114/6 | Same QuranEnc republishing terms, credited to QuranEnc.com |
 | Tanzil | Uthmani text, version 1.1, used only as the audit reference | https://tanzil.net/download/ | Verbatim copy allowed, no changes, credit Tanzil and link tanzil.net; the owner joins the Tanzil text mailing list for critical updates |
 | KFGQPC | Uthmanic Hafs and QPC V2 fonts, already in the list above | qul.tarteel.ai | Distributed free by the King Fahd Glorious Quran Printing Complex; use, copy, and distribute unmodified; bundled byte-for-byte with the notice |
-| Google Fonts | Literata, Inter, Amiri Quran, Anek Bangla | fonts.google.com | SIL Open Font License; license files bundled in `docs/` |
+| Google Fonts | Literata, Inter, Amiri Quran | fonts.google.com | SIL Open Font License; license files bundled in `docs/` |
 | QUL audio CDN | The recitation MP3 or WAV files referenced by the QUL recitation exports (`audio_url`) | audio-cdn.tarteel.ai | Downloaded once at pack build time, checksummed, bundled; the app never streams |
 
 ## How the pipeline uses them

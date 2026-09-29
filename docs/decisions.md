@@ -5817,15 +5817,20 @@ cost of the wiring is the `profileinstaller` library, measured at 1,886 bytes:
 the 3.0 bundle was 148,740,218 bytes and this one is 148,742,104. Generating
 the profile needs a connected device and is written down rather than claimed.
 
-**Bangla is set in a face the app chose.** Half the app's readers were
-reading a fallback: Inter carries no Bangla, so every Bangla string and every
-Bangla translation fell through to whatever the phone shipped. Anek Bangla
-(SIL OFL, variable, weight 100 to 800, Bangla plus its digits plus Latin) now
-sits in the same font family as the Latin face as a per-codepoint fallback, so
-a Latin string is still Inter and a Bangla string is Anek with no language
-logic in the reading path, and a Bangla verse is set in one chosen face. It is
-in the content sources; the fonts coverage gate still passes (628,169 study
-codepoints, 604 pages, 22,985,678 reading codepoints, all covered).
+**Bangla is still set in a face the phone chooses, and that is owed, not
+done.** Half the app's readers read a fallback: Inter carries no Bangla, so
+every Bangla string and every Bangla translation falls through to whatever the
+phone shipped. Anek Bangla (SIL OFL, variable, weight 100 to 800, Bangla plus
+its digits plus Latin) was added as a per-codepoint fallback in the same family
+as the Latin face, which is the right shape for it, and it made the only
+configuration that draws Bangla go red on every leg of the 3.1 capture. The
+cause was never pinned down, because this machine has no emulator and the face
+cannot be seen here, and shipping a change to the reading that cannot be seen
+is what this session has been undoing twice. So the face is out of the tree
+again and the question is owed to a session with a device: the `fonts` gate
+passes with or without it, so the coverage was never the question. What the
+device needs to answer is whether a face the app chose draws the Bangla reading
+better than the platform's, and that is a look, not a test.
 
 **The suite.** `:core:test` (91 plus the seven new `WordGridTest` cases),
 `:data:testDebugUnitTest`, `:app:testDebugUnitTest`, `:app:lintDebug`,
@@ -5850,8 +5855,8 @@ QUL and QuranEnc exports were in `content/raw` and the extractions in
 (checksums and structure), `audit` 6236 ayahs compared, 6235 letter
 identical, 1 accepted orthographic variant, 0 unexplained differences, 1
 segmentation note; `fonts` every coverage check (628,169 study codepoints,
-604 pages, 22,985,678 reading codepoints, Anek Bangla added and still
-covering all of them); `search` 65 Bangla and 63 Arabic round trips, 82
+604 pages, 22,985,678 reading codepoints, all covered); `search` 65 Bangla
+and 63 Arabic round trips, 82
 non-ASCII codepoints folding cleanly, 465 readable excerpts with no markup;
 and `checkdb` the committed database unchanged at 128,966,656 bytes, SHA-256
 `380e0442fca812d8533bad80670d709acac0880fd95215a946519a38b5ef2b56`, 10 pack

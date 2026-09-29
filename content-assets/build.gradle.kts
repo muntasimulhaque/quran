@@ -5,11 +5,8 @@ plugins {
 }
 
 // The fonts the app is drawn with live here, in one module every feature
-// reads them from: Inter for the Latin interface, Anek Bangla for Bangla,
-// Literata for reading, and Amiri Quran for ornaments and Arabic outside the
-// Mushaf. Anek Bangla is a per-codepoint fallback rather than a second family,
-// so a string is set in the face that has its letters with no language logic
-// anywhere in the reading path.
+// reads them from: Inter for the interface, Literata for reading, and Amiri
+// Quran for ornaments and Arabic outside the Mushaf.
 android {
     namespace = "io.github.muntasimulhaque.quran.content"
     compileSdk = 37
