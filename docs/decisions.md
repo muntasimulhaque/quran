@@ -5211,6 +5211,40 @@ upload key (`53:7D:09:D2:...:0D:9D:E5:21`). The owner submitted 2.8
 to Google Play for review and confirmed it, so the hand-off copy was deleted
 the same session; the artifact stays in build run 36448152402.
 
+## D-117: The 2.9 release
+
+Date: the thirty-seventh session, at the owner's word "go for play
+release". 2.9 (versionCode 30) carries D-114, D-115 and D-116.
+
+**The gates.** All five owner gates ran green on this machine before the
+push: `verify` 29 datasets, `audit` 0 unexplained differences (6235
+letter-identical ayahs, 1 accepted orthographic variant, 1 segmentation note),
+`fonts` all coverage checks (628,169 study codepoints, 604 pages, 22,985,678
+reading codepoints), `search` (63 Arabic and 65 Bangla round trips, 82
+non-ASCII translation codepoints, 465 readable excerpts), and `checkdb` (the
+committed database, 128,966,656 bytes, SHA-256 380e0442..., 10 pack files).
+
+**The capture, and the class it found.** The first capture run (36538355301)
+was green on all three legs and its Browse frames carry a fifth chip,
+"Notes", that the tree has not had since the thirty-second session (D-101) and
+that no string in the app can even produce: the frame is the Browse sheet of
+the build at commit 27f7ec1, the twenty-ninth session. The AVD cache key was
+`avd-<api>-<profile>`, so a cache hit restored a userdata image with an app
+from an earlier run still installed, and every guard passed the frame because
+an old build of the same package owns the same window name. The commit is in
+the key now, and the app and its test package are uninstalled before the tour
+runs. The set was not installed, which is the runbook's own rule and the only
+reason this was caught: `cmp` said twelve frames were identical, and reading
+the thirteen that were not is what found it (class 0 in
+`docs/screenshot-failures.md`).
+
+That is a second push for one release, which the runbook warns against, and
+the exception is deliberate: the first set is not shippable, and a workflow
+fix that waits for the next release would leave the store frame of 2.9
+carrying a tab the app does not have. The bundle is taken from the newest
+green build on `main` either way (D-093).
+
+
 ## D-114: The daily reminder keeps the minute it was given
 
 Date: the thirty-seventh session, from the owner's report: the reminder was

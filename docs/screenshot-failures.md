@@ -12,10 +12,11 @@ with `gh run view --log --job <id>` for the log. **A red run is one of the
 classes below, always.** If it is not, the class is missing from this file
 and the file is the thing to fix.
 
-## The five classes
+## The six classes
 
 | # | Class | Where it dies | What the log says | The fix |
 |---|---|---|---|---|
+| 0 | **A frame that is not this build** | nowhere: the leg is green and the frame is another build's screen | nothing: this is the class with no log at all, and it is found by reading the frame | The AVD cache carried an installed build from an earlier run, and the window guard cannot see it because an old build shares the package. The commit is in the AVD cache key now, and the app is uninstalled before the tour. See "A green leg that photographed an old build" below. |
 | 1 | **Runner infrastructure** | before the capture script, in the emulator action's own setup | `Install Android SDK` fails, `Error on ZipFile unknown archive`, or the action's own `emu kill` answers `Connection refused` | Rerun the failed leg once. A second failure in the same pre-script step is a runner outage to report, not to debug. |
 | 2 | **Device drop under load** | mid-run | `adb: device offline`, `device 'emulator-5554' not found` | The capture is too heavy for that profile. Make it lighter; never just rerun. |
 | 3 | **The tour's anchors** | in the test | `ComposeTimeoutException: Condition still not satisfied`, `could not find any node that satisfies: (ContentDescription = ...)` | Real finding: the UI moved or a label changed under the tour. Fix the anchor to a tag, in the session. |
@@ -178,6 +179,39 @@ workflow now suppresses ANR dialogs at the device level (`hide_error_dialogs
 1`, `anr_show_background 0`) and the tour checks the window list, so a
 dialog is never silently shipped.
 
+## A green leg that photographed an old build
+
+The 2.9 capture (run 36538355301) came back green on all three legs, and its
+phone and tablet Browse frames carry **five** chips: Surahs, Juz, Last Read,
+Saved and **Notes**. The tree has four tabs; the fifth was folded into Saved
+in the thirty-second session (D-101, commit 6f8b8a8), and no string in the
+app says "Notes" at all. The frame is the Browse sheet of the build at commit
+27f7ec1, the twenty-ninth session, which had exactly those five tabs.
+
+**How it got there.** The AVD cache key is `avd-<api>-<profile>`, so a cache
+hit restores a whole userdata image with whatever was installed in an earlier
+run. The capture installs today's build over it, and every other frame in the
+same artifact is today's build (the settings frame carries the new hub, and
+twelve of the twenty-four frames are byte-identical to the 2.8 set). The
+Browse frame is the one the stale install was on screen for, and every guard
+passed it: the window guard asks whether the focused window belongs to *this
+package*, and an old build of the same package shares it, and the eight-frame
+count is satisfied because the tour wrote its other seven.
+
+**What it cost and what it would have shipped.** Nothing, this time: the
+frame was caught by reading it, which is the one thing the runbook insists on
+and the only thing that could have caught it. Had it been installed, the store
+listing would have shown a tab the app does not have, for 2.9, from a build
+three weeks old.
+
+**The two fixes.** The commit SHA is part of the AVD cache key, so a code
+change never reuses an emulator that may hold another build, and the app and
+its test package are uninstalled before the tour runs, so a restored task or a
+leftover window cannot be photographed. The lesson for the catalogue is the
+one rule 3 already says, sharpened: a green leg is not proof of a good frame,
+and a frame whose *content* cannot be produced by the source is a finding
+about the workflow, not a rerun away.
+
 ## The rules this file implies
 
 1. **A red leg always leaves its frames.** If it does not, the script bug is
@@ -187,6 +221,8 @@ dialog is never silently shipped.
    window are findings about the app or the tour. They are fixed in the
    session. Rerun only class 1 (once) and, with a lighter capture, class 2.
 3. **A green leg is not proof of a good frame.** Every frame still gets
-   `cmp`'d against its artifact and read for its content before it ships.
+   `cmp`'d against its artifact and read for its content before it ships,
+   and a frame that shows something the source cannot draw is class 0: the
+   AVD carried another build, and it is fixed in the workflow, not rerun.
 4. **A new failure mode is added here before the next capture**, not
    remembered in a session note.
