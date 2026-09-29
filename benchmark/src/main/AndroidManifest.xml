@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The benchmark's manifest. The package is the app's own, because the profile
+  is generated against the app's process and its own classes, and the only
+  thing declared here is what the macrobenchmark library needs to attach to it.
+  This module is never shipped: it is a development tool that walks the app
+  once so the runtime can be told which code paths to compile ahead of time.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <queries>
+        <package android:name="io.github.muntasimulhaque.quran" />
+    </queries>
+</manifest>
