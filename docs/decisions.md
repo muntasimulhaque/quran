@@ -6209,6 +6209,17 @@ frozen choices are the same words, tightened, and the numbering is stable so
 D-114's "rule 2" still means what it meant. No constraint was dropped, and
 none was added: the file is smaller, not different.
 
+**The push started both workflows, and the reason is a comment.** The
+`ScreenshotTest` pointer fix lives under `app/src/androidTest`, which
+`screenshots.yml` watches, and `build.yml` watches `app/**`, so a path
+filter that cannot see a comment read the one line as a change to the
+tour. The build run was cancelled; the capture had already finished, with
+the phone and 7 inch legs green and the 10 inch leg red on the tour's last
+step, which is the first item of this queue and not a new finding (D-127).
+No store set was installed and no bundle was taken. The owner kept the
+comment rather than reverting it, and the rule is in D-129: a pointer in a
+test file is written once, correctly, and not nudged later.
+
 ## D-129: The classes with no code home
 
 Date: the forty-first session, with D-128. An agent's file and this log
@@ -6397,6 +6408,14 @@ classes with their evidence; what is left is Compose and the habit.
   rendered emulator can lag the composition by seconds, and a wait that
   watches text is minutes, not seconds. A "for a moment" sleep is where a
   wide leg breaks.
+- A comment under `app/src/androidTest` is a test file to a `paths` filter.
+  `build.yml` watches `app/**` and `screenshots.yml` watches
+  `app/src/androidTest/**` (a change to the tour has to trigger a
+  recapture), and neither can see a comment: the one-line pointer fix that
+  rode D-128 cost a cancelled build run and a full three-leg capture whose
+  only finding was the 10 inch tour step this queue already names. A
+  pointer written into a test file is written once, correctly, and is not
+  nudged later; a comment elsewhere in the repository is free.
 - Tapping the reading's exact center is a trap (D-097): a footnote marker
   sits in the flow of the text, so a test that wants the chrome taps the
   page's own left margin, which is where a reader taps too. Eight tests
