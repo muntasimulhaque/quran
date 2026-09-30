@@ -5,6 +5,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.isRoot
@@ -56,6 +58,21 @@ import java.io.File
  */
 @RunWith(AndroidJUnit4::class)
 class ScreenshotTest {
+
+    /**
+     * The count a search frame waits for: the digits and the word.
+     *
+     * A wait on any text holding "match" is satisfied by the sheet's own "No
+     * matches.", which is what a query that has not run yet says, so the
+     * store's search frame was a sheet that had found nothing (D-132). A count
+     * with its digits is only ever drawn by a search that came back, and
+     * Compose's own matchers match a string or a substring, so this is the one
+     * that asks for the number.
+     */
+    private val matchCount = SemanticsMatcher("a match count with its digits") { node ->
+        node.config.getOrElseNullable(SemanticsProperties.Text) { null }
+            ?.any { part -> Regex("""\d+\s+matches""").containsMatchIn(part.text) } == true
+    }
 
     @get:Rule
     val rule = createEmptyComposeRule()
@@ -388,20 +405,16 @@ class ScreenshotTest {
             rule.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty()
         }
         rule.onNode(hasSetTextAction()).performTextInput("mercy")
-        // The first search over a forty megabyte tafsir is the slowest thing
-        // the tour does; the frame is kept once a match is on the screen, not
-        // on a sleep that lands in the middle of the query. The wait is in
-        // minutes, not seconds, because this is the frame where a loaded
-        // profile shows: the 10 inch leg timed out here on two runs, once
-        // under a launcher window and once on the wait itself, which is the
-        // house rule stated as a number (a slow emulator is not a failing
-        // reading aid). The count is what the frame needs, so the anchor
-        // stays the count and not a sleep.
+        // The count is what the frame needs, so the anchor is the count and not
+        // a sleep. It has to be the count *with its digits*: the sheet draws
+        // "No matches." for a query that has not been run yet, so a wait on
+        // any text holding "match" was satisfied before the first search had
+        // started, and the store's search frame became a sheet that had found
+        // nothing (D-132). A settled query takes a moment, so the wait is a
+        // moment's worth and the frame says what the reader will see.
         rule.waitUntil(timeoutMillis = 180_000) {
-            rule.onAllNodesWithText("matches", substring = true).fetchSemanticsNodes().isNotEmpty() ||
-                rule.onAllNodesWithText("match", substring = true).fetchSemanticsNodes().isNotEmpty()
+            rule.onAllNodes(matchCount).fetchSemanticsNodes().isNotEmpty()
         }
-        Thread.sleep(600)
         captureScreen("05-search")
         back()
 
