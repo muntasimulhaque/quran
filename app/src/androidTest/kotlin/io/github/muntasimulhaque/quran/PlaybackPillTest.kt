@@ -1,7 +1,8 @@
 package io.github.muntasimulhaque.quran
 
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
@@ -13,6 +14,8 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.muntasimulhaque.quran.core.EndOfAudio
@@ -59,29 +62,64 @@ class PlaybackPillTest {
         reference: String? = "Al-Baqarah 2:255",
         pendingAudio: String? = null,
         pillWidth: Modifier = Modifier,
+        /**
+         * The measure to offer the pill instead of the screen's, for the shape
+         * a wider glass wears. See [WideBox]: a modifier cannot do this.
+         */
+        measureWidth: Dp? = null,
     ) {
         compose.setContent {
             QuranTheme(theme = AppTheme.Paper) {
-                PlaybackBar(
-                    state = state,
-                    offer = null,
-                    offerTitle = "",
-                    reciterName = "Husary",
-                    reference = reference,
-                    pendingLabel = "Continue to Al-Baqarah \u00b7 177 MB",
-                    pendingAudio = pendingAudio,
-                    speed = 1f,
-                    end = EndOfAudio.OFF,
-                    onToggle = {},
-                    onNext = {},
-                    onPrevious = {},
-                    onReciter = {},
-                    onDownload = {},
-                    onClose = {},
-                    onSpeed = onSpeed,
-                    onEndOfAudio = onEndOfAudio,
-                    modifier = pillWidth,
-                )
+                val pill: @Composable () -> Unit = {
+                    PlaybackBar(
+                        state = state,
+                        offer = null,
+                        offerTitle = "",
+                        reciterName = "Husary",
+                        reference = reference,
+                        pendingLabel = "Continue to Al-Baqarah \u00b7 177 MB",
+                        pendingAudio = pendingAudio,
+                        speed = 1f,
+                        end = EndOfAudio.OFF,
+                        onToggle = {},
+                        onNext = {},
+                        onPrevious = {},
+                        onReciter = {},
+                        onDownload = {},
+                        onClose = {},
+                        onSpeed = onSpeed,
+                        onEndOfAudio = onEndOfAudio,
+                        modifier = pillWidth,
+                    )
+                }
+                if (measureWidth == null) pill() else WideBox(measureWidth) { pill() }
+            }
+        }
+    }
+
+    /**
+     * A composable measured at a width the screen does not have.
+     *
+     * The wide pill (D-119: a tablet, or a phone in landscape, keeps the words
+     * beside the controls) cannot be asked for with a modifier. `requiredWidth`
+     * sets a child's minimum and the root still caps the constraint the child
+     * is measured with, so the pill's own `maxWidth` was the phone's 393 dp
+     * and the pill took the phone's two rows: the test measured the phone's
+     * shape and called it the tablet's. This was not seen for a long time
+     * because the class is not among the six the capture runs (D-129), and it
+     * is why a measure a test needs is given by a layout that offers it.
+     */
+    @Composable
+    private fun WideBox(width: Dp, content: @Composable () -> Unit) {
+        Layout(content = content) { measurables, _ ->
+            val offered = width.roundToPx()
+            val placeable = measurables.firstOrNull()?.measure(
+                Constraints(minWidth = 0, maxWidth = offered),
+            )
+            if (placeable == null) {
+                layout(offered, 0) {}
+            } else {
+                layout(placeable.width, placeable.height) { placeable.place(0, 0) }
             }
         }
     }
@@ -154,16 +192,29 @@ class PlaybackPillTest {
         // A tablet, or a phone in landscape: the words keep their measure, so
         // the pill is the one row it has always been.
         //
-        // `requiredWidth`, not `width`: the test's own root is the phone
-        // profile it runs on, and a plain `width` is coerced by the parent's
-        // cap, so the "wide" pill was measured at the phone's width and took
-        // the phone's two rows. This asks for the width the test is about.
-        showPill(pillWidth = Modifier.requiredWidth(840.dp))
+        // The measure is offered by a layout rather than asked for with
+        // `requiredWidth`: the root still caps the constraint a child is
+        // measured with, so the pill read the phone's own width and took the
+        // phone's two rows, and this measured the phone's shape and called it
+        // the tablet's. The class is not among the six the capture runs, which
+        // is how that survived (D-129).
+        showPill(measureWidth = 840.dp)
         val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
         val play = compose.onNodeWithContentDescription("Play or pause").getUnclippedBoundsInRoot()
+        // "Share the row" is overlap and company, not an order: both are
+        // centered in the row, and the shorter one starts lower, so asking
+        // for the transport to start above the words was asking for a shape
+        // no centered row has. What distinguishes the one row from the two is
+        // that the transport stands beside the words and overlaps them
+        // vertically (the phone's own test pins the other half of the rule:
+        // there the transport is under the words).
         assertTrue(
-            "the transport must share the words' row: ${play.top} of ${words.top}",
-            play.top.value < words.top.value,
+            "the transport must stand beside the words: play $play, words $words",
+            play.left.value > words.left.value,
+        )
+        assertTrue(
+            "the transport must share the words' row: play $play, words $words",
+            play.top.value < words.bottom.value && play.bottom.value > words.top.value,
         )
     }
 

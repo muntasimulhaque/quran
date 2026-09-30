@@ -364,7 +364,12 @@ internal fun ShareCardCapture(
             withFrameNanos { }
             withFrameNanos { }
             val image = runCatching { layer.toImageBitmap() }.getOrNull()
-            if (image == null || image.width < 1 || image.height < 1) {
+            // The width of a bitmap Android has already released throws
+            // rather than answering, so the read is guarded as well as the
+            // capture: a share card that cannot be drawn is a card the reader
+            // is not sent, and a crash is not how the app says so (D-132).
+            val pixels = runCatching { image?.let { it.width to it.height } }.getOrNull()
+            if (image == null || pixels == null || pixels.first < 1 || pixels.second < 1) {
                 stitched.recycle()
                 onFailed()
                 return@LaunchedEffect

@@ -501,7 +501,30 @@ class ScreenshotTest {
             }
         }
         if (!pillRaised) {
-            throw AssertionError("the ayah's long press did not raise the actions bar")
+            // The frame a red leg keeps, and the two facts the log alone does
+            // not carry: which page the reader is on, and whether the ayah the
+            // press looked for is on it at all. A step that fails here three
+            // times has cost three capture runs' worth of guessing; these two
+            // numbers are the whole difference between reading a cause and
+            // guessing one (D-129).
+            runCatching { capture("09-long-press-failed") }
+            val page = rule
+                .onAllNodes(hasContentDescription("Mushaf page", substring = true), useUnmergedTree = true)
+                .fetchSemanticsNodes()
+                .mapNotNull { node ->
+                    node.config.getOrElseNullable(
+                        androidx.compose.ui.semantics.SemanticsProperties.ContentDescription,
+                    ) { null }
+                }
+                .joinToString(" | ")
+            val wanted = rule
+                .onAllNodes(hasContentDescription("2:255.", substring = true), useUnmergedTree = true)
+                .fetchSemanticsNodes()
+                .size
+            throw AssertionError(
+                "the ayah's long press did not raise the actions bar: the page says [$page], " +
+                    "and $wanted node(s) carry 2:255 on it",
+            )
         }
         rule.onNodeWithContentDescription("More").performClick()
         // The card composes after the tap, and its capture raced ahead of it

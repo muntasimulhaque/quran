@@ -42,8 +42,13 @@ import kotlin.math.roundToInt
  *
  * The page is rendered at the exact pixel width it will be shown at, and the
  * touch math works in page pixels, so a tap lands on the word under the
- * finger however the screen is sized. The page never scales with the reader's
- * text size: its lines are justified to the page, not the screen.
+ * finger however the screen is sized. It is therefore drawn at its own size
+ * and centered, never stretched to fill the screen: the reader picks the
+ * page's width so the whole page fits, which on a landscape tablet is a page
+ * narrower than the glass, and stretching that page to the glass drew it two
+ * and a quarter times too large with two thirds of it off the bottom of the
+ * screen (owner report, D-132). The page never scales with the reader's text
+ * size either: its lines are justified to the page, not the screen.
  *
  * A turn is a plain horizontal slide with no lift and no cast shadow: the
  * page is the Book, not a sheet being picked up, and an edge lifted off the
@@ -102,8 +107,13 @@ fun MushafPage(
                     }
                     .pointerInput(rendered, key) {
                         val page = rendered ?: return@pointerInput
-                        val scale = size.width.toFloat() / page.widthPx
-                        val top = ((size.height - page.heightPx * scale) / 2f).coerceAtLeast(0f)
+                        val left = pageLeft(size.width.toFloat(), page.widthPx)
+                        val top = pageTop(
+                            size.width.toFloat(),
+                            size.height.toFloat(),
+                            page.widthPx,
+                            page.heightPx,
+                        )
                         detectTapGestures(
                             onTap = {
                                 // A tap anywhere belongs to the reading: it
@@ -114,9 +124,9 @@ fun MushafPage(
                                 // A long press asks about the ayah under the
                                 // finger: the ayah washes and the phone hums.
                                 val ayah = page.ayahAt(
-                                    x = offset.x / scale,
-                                    y = (offset.y - top) / scale,
-                                    slop = slop / scale,
+                                    x = offset.x - left,
+                                    y = offset.y - top,
+                                    slop = slop,
                                 )
                                 if (ayah != null) {
                                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -132,13 +142,18 @@ fun MushafPage(
                 if (page == null) {
                     // The page picture from the last session, at the same
                     // width and in the same colors, so the first frame of a
-                    // launch is already the page the reader left.
+                    // launch is already the page the reader left. It is drawn
+                    // at its own size and centered, like the real page.
                     if (placeholder != null) {
-                        val scale = size.width / placeholder.width
-                        val top = ((size.height - placeholder.height * scale) / 2f).coerceAtLeast(0f)
+                        val left = pageLeft(size.width.toFloat(), placeholder.width)
+                        val top = pageTop(
+                            size.width.toFloat(),
+                            size.height.toFloat(),
+                            placeholder.width,
+                            placeholder.height,
+                        )
                         withTransform({
-                            translate(0f, top)
-                            scale(scale, scale, pivot = Offset.Zero)
+                            translate(left, top)
                         }) {
                             drawImage(
                                 image = placeholder.asImageBitmap(),
@@ -151,11 +166,15 @@ fun MushafPage(
                     }
                     return@Canvas
                 }
-                val scale = size.width / page.widthPx
-                val top = ((size.height - page.heightPx * scale) / 2f).coerceAtLeast(0f)
+                val left = pageLeft(size.width.toFloat(), page.widthPx)
+                val top = pageTop(
+                    size.width.toFloat(),
+                    size.height.toFloat(),
+                    page.widthPx,
+                    page.heightPx,
+                )
                 withTransform({
-                    translate(0f, top)
-                    scale(scale, scale, pivot = Offset.Zero)
+                    translate(left, top)
                 }) {
                     drawImage(
                         image = page.bitmap.asImageBitmap(),
@@ -167,18 +186,22 @@ fun MushafPage(
         }
 
         // One node per ayah, in page order, over the words they name. They
-        // carry no pointer input, so a touch still belongs to the page.
+        // carry no pointer input, so a touch still belongs to the page. Each
+        // is placed where the page's own box is drawn, which is the box at the
+        // page's own size, centered: a node placed by a scale the drawing does
+        // not use is a node in the wrong place, and one wrong by enough is a
+        // node no finger can reach (D-132).
         if (active && rendered != null && availableWidth > 0f && availableHeight > 0f) {
             val read = rendered ?: return@BoxWithConstraints
-            val scale = availableWidth / read.widthPx
-            val top = ((availableHeight - read.heightPx * scale) / 2f).coerceAtLeast(0f)
+            val left = pageLeft(availableWidth, read.widthPx)
+            val top = pageTop(availableWidth, availableHeight, read.widthPx, read.heightPx)
             for (ayah in read.ayahOrder) {
                 val box = read.ayahBox(ayah.number) ?: continue
-                val width = box.width() * scale
-                val height = box.height() * scale
+                val width = box.width()
+                val height = box.height()
                 if (width <= 0f || height <= 0f) continue
-                val x = (box.left * scale).roundToInt()
-                val y = (top + box.top * scale).roundToInt()
+                val x = (left + box.left).roundToInt()
+                val y = (top + box.top).roundToInt()
                 val description = stringResource(
                     R.string.mushaf_ayah_node,
                     ayah.verseKey,
@@ -191,8 +214,7 @@ fun MushafPage(
                             width = with(density) { width.toDp() },
                             height = with(density) { height.toDp() },
                         )
-                        .semantics {
-                            contentDescription = description
+                        .semantics {                            contentDescription = description
                             onClick(label = ayahActions) {
                                 onLongState.value(ayah)
                                 true
@@ -247,3 +269,23 @@ private fun DrawScope.drawWashes(
 
 /** Height divided by width of a rendered page, from the renderer's metrics. */
 const val PAGE_ASPECT: Float = 1.586f
+
+/**
+ * Where a page of the reader's own pixel size sits inside the glass: its left
+ * edge on a surface [availableWidth] pixels wide.
+ *
+ * The page is rendered at the width it will be shown at and is never scaled
+ * afterwards, so this is the one place a page's position is decided, and the
+ * drawing, the touch math, and the ayah nodes all read it. A page wider than
+ * the surface (a tall phone) starts at the glass's own edge.
+ */
+internal fun pageLeft(availableWidth: Float, pageWidthPx: Int): Float =
+    ((availableWidth - pageWidthPx) / 2f).coerceAtLeast(0f)
+
+/** The same for the page's top edge, on a surface [availableHeight] pixels tall. */
+internal fun pageTop(
+    availableWidth: Float,
+    availableHeight: Float,
+    pageWidthPx: Int,
+    pageHeightPx: Int,
+): Float = ((availableHeight - pageHeightPx) / 2f).coerceAtLeast(0f)
