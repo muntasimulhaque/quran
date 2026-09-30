@@ -981,10 +981,22 @@ fetching them again; the space is worth less than the time.
 
 ## Next session: the remaining queue, in order
 
-0. **The instrumented suites, the store set, and the 2.5 release: done in
+0. **The ten inch tour step, then the store set, both owed by 3.1.** The
+   tour's last step, the ayah's actions, fails on the 10 inch leg while it
+   passes on the phone and the 7 inch, so that leg's set is one frame short
+   (eight frames are required, seven arrived) and the committed set is still
+   3.0's. The frames of capture run 36664066010 attempt 1 are the place to
+   start: the phone and 7 inch sets there are complete, and attempt 2 was
+   green on both. `docs/screenshot-failures.md` is the first read, then the
+   failing job's log, then the frames that leg kept. A second red class
+   appeared and then vanished as the first was fixed (`SettingsVisibilityTest`
+   on the 7 inch, in attempt 1 only), so if it returns, it is a real finding:
+   that test is one of the six CI names.
+
+1. **The instrumented suites, the store set, and the 2.5 release: done in
    the thirty-third session.** The data suite is 29/29, the app suite is
    45/45, all five owner gates are green, and 2.5 was submitted with its
-   hand-off closed. The queue starts at item 1.
+   hand-off closed.
 
 1. **The segmented controls' touch targets: done in the thirty-seventh
    session.** The text size steps and the playback pace drew 38 dp and 46 dp
@@ -1085,6 +1097,66 @@ fetching them again; the space is worth less than the time.
   every wait now waits for the thing the step is aimed at (the page, the bar,
   the sheet's own tag), which is also faster everywhere else.
 
+
+## Where the project stands (end of the thirty-ninth session)
+
+**3.1 (versionCode 32) is submitted to Google Play for review (D-122, D-124,
+D-125).** The hand-off is closed: the bundle went with the notes in one
+message, the owner submitted it, and the hand-over copy was deleted the same
+session, so the artifact stays in build run 36664066056. `play-store/aab/`
+keeps only its own note. The store set is **not** refreshed and that is on the
+record as the owner's call: the capture's phone and 7 inch sets are complete
+and the 10 inch set is one frame short, and a set refreshed after a submission
+has nothing left to be used for.
+
+- **The reading answers the reader.** Word by word is a grid, every tile the
+  width of the widest one in the ayah, and the rule that decides that width is
+  pure and lives in `core` with its own tests, because the two ways it goes
+  wrong are arithmetic: a word that wraps stops being a word, and one long
+  gloss must not put the verse down the page as a single column. The ayah card
+  opens with its ayah and its reference. The mushaf page is *within* a rule,
+  which is also what gives the page an edge off a phone. The bar's scrim no
+  longer dims the page's own surah name (the ornament's contrast was dropping
+  from 5.0 to 4.4). A footnote marker is a measured raised figure again, not
+  Compose's full cap-height superscript, and a lining figure.
+- **A word can be heard again and again.** The content already ships each
+  word's start and end, so a tap on a tile in the aid loops that word; tapping
+  it again lets it go, the loop ends with the ayah, and the pill says
+  "repeating one word" in the reader's language. It is the aid and not the
+  verse: the verse's tap is the bar's and its long press the ayah's, and a
+  third meaning on the same surface takes one of them away. That was learned
+  the hard way (below).
+- **There are headings in the app now.** Settings groups, the sheet and page
+  titles, and the reader's own surah are marked, so a screen reader can jump
+  by them; nothing was marked before.
+- **A sheet is a page.** Material caps a modal sheet at 640 dp, which on a ten
+  inch tablet left a third of the screen as grey veil on each side; the reader
+  sheets take the screen and their content takes the readable measure.
+- **A startup profile is wired and its cost measured.** The app already
+  shipped a hand-written seed; `:benchmark` is the module that replaces it
+  with a measured one. AGP 9 merges `app/src/main/baseline-prof.txt` on its
+  own, so the wiring is the `profileinstaller` library, measured at 1,886
+  bytes on the bundle; generating the profile needs a connected device and is
+  written down rather than claimed.
+- **The icon was withdrawn.** Two marks were drawn this session and the owner
+  rejected both; the icon is theirs to decide, nothing of it is in the tree,
+  and the shipped 2.8/3.0 medallion stands.
+- **The Bangla face was added and taken back out.** Anek Bangla as a
+  per-codepoint fallback is the right shape, but it made the only
+  configuration that draws Bangla go red and the cause was never found, so it
+  is out of the tree and the question (does a face the app chose read better
+  than the platform's?) is owed to a session that can see a screen.
+
+**What went wrong, and what it cost.** Six capture runs in a row were red
+before the causes were found, and four of the five diagnoses were wrong. The
+two real causes were both *mine* and both invisible without a screen: a
+`Role.Button` on a help tile merges its word and its meaning into one labelled
+node, so two tests waited forever for text that had been swallowed; and the
+tour tapped the reading's exact centre, which this file already said never to
+do, so a control sat under its finger and the bar never came up. The lessons
+are in "Traps worth remembering" above, and the honest summary is: **read the
+frames a red leg kept before touching anything, and never guess twice about the
+same failure.**
 
 ## Where the project stands (end of the thirty-eighth session)
 

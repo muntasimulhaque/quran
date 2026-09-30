@@ -5844,9 +5844,13 @@ emulator; none of them is claimed as seen.
 
 Date: the thirty-ninth session, at the owner's word: "go for play release.
 don't wait for me, so that I can just upload to the play console."
-3.1 (versionCode 32) carries D-122 and nothing else: the reading answers the
-reader, the reading surfaces are fixed, the app is faster to start and speaks
-Bangla in a face it chose.
+3.1 (versionCode 32) carries D-122 and D-124: the reading answers the reader,
+the reading surfaces are fixed, and the app is faster to start. This entry was
+written as the release was prepared and is kept for the gate record below; the
+bundle, the two test failures that held the release, and the submission are in
+**D-125**, which is the record that stands. The Bangla face it named here was
+taken back out before the release (D-122 says why), so the app still reads
+Bangla in the platform's own face.
 
 **The owner gates all ran green before the push, which is the check that has to
 pass before a release starts rather than at gate time (D-078).** The manual
@@ -5969,6 +5973,13 @@ frames of this run are in its artifacts and are not installed.
 owner's machine, and CI is green on the build run. The instrumented suites are
 green on the phone and the 7 inch form factors, and the one red class on the
 10 inch form factor is named above rather than hidden.
+
+**The release was held once, and the hold is part of the record.** When six
+capture runs in a row were red and every explanation for them was wrong, the
+work was moved to a branch and `main` was returned to 3.0 rather than hand over
+a release whose suite was red. The causes were then found (above, and D-124),
+the work came back, and the release went on. A red suite does stop a release;
+the answer is to find the cause, not to ship it.
 
 **Submitted.** The owner took the bundle from run 36664066056 and submitted 3.1
 to Google Play for review. Two things are owed to the next session, both named
