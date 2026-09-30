@@ -469,16 +469,39 @@ class ScreenshotTest {
         if (!inMushafNow) {
             throw AssertionError("the mode door did not reach the Mushaf page")
         }
-        // the ayah's own node on the page, by the reference the tour set up
-        rule.onAllNodes(hasContentDescription("2:255.", substring = true)).onFirst()
-            .performTouchInput { longClick() }
-        // The actions bar slides in over the ayah, and the tap on More waits
-        // for the bar itself rather than for a length of time: on the ten inch
-        // leg the press lands while the sheet that came before it is still
-        // leaving, and a fixed sleep is either too short there or wasted
-        // everywhere else.
-        rule.waitUntil(timeoutMillis = 20_000) {
+        // The press itself is part of what this step retries, because the
+        // press is what the race eats. The sheet from the step before is
+        // gone from the tree a whole animation before its window has left,
+        // so a door that reports success and a chrome that reports itself up
+        // can both be true while the scrim is still over the page, and the
+        // long press then lands on the scrim and the pill never rises. The
+        // earlier retry only covered the door, which is why the ten inch leg
+        // could reach the Mushaf and still time out on the pill (D-127).
+        // Each attempt waits for the bar by its own outcome, not for a
+        // length of time: a fixed sleep is too short on the widest profile
+        // and wasted on the phone.
+        val pillIsUp = {
             rule.onAllNodesWithContentDescription("More").fetchSemanticsNodes().isNotEmpty()
+        }
+        var pillRaised = false
+        repeat(3) {
+            if (pillRaised) return@repeat
+            // the ayah's own node on the page, by the reference the tour set up
+            runCatching {
+                rule.onAllNodes(hasContentDescription("2:255.", substring = true)).onFirst()
+                    .performTouchInput { longClick() }
+            }
+            pillRaised = runCatching {
+                rule.waitUntil(timeoutMillis = 20_000) { pillIsUp() }
+            }.isSuccess
+            if (!pillRaised) {
+                // put away whatever took the press, and let the page settle
+                // before the next attempt rather than pressing into a scrim
+                back()
+            }
+        }
+        if (!pillRaised) {
+            throw AssertionError("the ayah's long press did not raise the actions bar")
         }
         rule.onNodeWithContentDescription("More").performClick()
         // The card composes after the tap, and its capture raced ahead of it

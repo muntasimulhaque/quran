@@ -6030,3 +6030,73 @@ mark on its ink square (`icon_background` is the field's mid tone,
 bolder qaf so the loop survives the shade. The rasters are rendered
 programmatically at high supersampling; the generator stays off the tree
 the way D-112's did, and the numbers above are its whole definition.
+
+## D-127: The 3.2 release
+
+Date: the fortieth session, at the owner's word, "go for play release", after
+the icon session's work. 3.2 (versionCode 33) carries the qaf mark (D-126) and
+two test fixes found by the release's own instrumented run. The content is
+byte-identical to 3.1: a release that changes the face changes no content, and
+`checkdb` read the committed database at 128,966,656 bytes, unchanged.
+
+**The five owner gates ran green on the owner's machine before the push.**
+`verify` 29 datasets, `audit` 0 unexplained differences (1 accepted
+orthographic variant, 1 segmentation note), `fonts` every coverage check
+(604 pages, 22,985,678 reading codepoints), `search` 82 non-ASCII translation
+codepoints folding cleanly and 465 readable excerpts, `checkdb` 5 packs and
+10 pack files verified. The JVM suite (`:core:test` with the em-dash gate,
+`:data:testDebugUnitTest`, `:app:testDebugUnitTest`), `:app:lintDebug`, and
+`:app:assembleDebug` are green, and `:app:compileDebugAndroidTestKotlin`
+compiles.
+
+**The release session ran the whole app suite on the emulator, and it found
+two real test defects, both now fixed.** The run is what this file says a
+release session owes, and it paid for itself. `PlaybackPillTest`'s wide-pill
+case asked for an 840 dp pill with `Modifier.width`, which the phone profile's
+own root coerces to the phone's width, so the pill correctly took the phone's
+two rows and the assertion failed: the test could never pass on the profile it
+runs on, and it is not among the six classes CI names, which is how it stayed
+red for nobody to see. It asks with `requiredWidth` now. `AyahActionsTest`
+waited fifteen seconds for the study block to draw after a paper tap and timed
+out there on two cold first runs; the house rule for a wait that watches text
+is minutes, not seconds, so the wait is a minute now. The other two reds were
+this machine's documented classes, not app defects: `searchIsFastWhenWarm` on
+a cold emulator (the file names it, and CI's phone profile is its authority)
+and the emulator itself vanishing mid-run twice (`device offline` then `not
+found`), which is the loaded-emulator class this machine wears. One reboot was
+spent and the device died again, so the remaining local instrumented work is
+CI's, exactly as the file says.
+
+**The push.** One push for the release. The bundle and the screenshots are one
+delivery, and the screenshots come first: the 3.1 set was accepted by the owner
+without a refresh, so the committed store set is the 3.0 one and this release
+collects a fresh one from the capture run's artifacts if the legs are green.
+The icon changes no captured frame (the store frames never show the launcher
+icon or the share sheet), so the set is the set the ten inch leg owes.
+
+**The capture run, and the two legs it lost.** Build run 99 is green on all
+three jobs (gates, data instrumented tests, signed bundle). Capture run 68
+came back with the phone leg green and both tablet legs red, and the frames
+each leg kept were read before anything was touched, which is the only way
+this file has ever caught these. The phone set is complete (eight frames).
+The 7 inch leg's tour passed and wrote all eight frames, and the leg went
+red afterwards in `SavedNotesTest.aNoteIsReadableInTheSavedList`, a ninety
+second wait for the study page to draw on the one leg that was slow that
+minute; the same class passed on the phone and the 10 inch, and the test
+sets its own reader state, so this is the loaded-leg class and not a finding
+about the app. The 10 inch leg died where the queue said it would: the
+tour's last step, the ayah's actions, timed out on the twenty second wait
+for the actions pill after the long press, and that leg's set is one frame
+short (seven arrived), the debt 3.1 left.
+
+**The tour's last step is fixed, and the fix is the retry's own outcome.**
+The step already retried reaching the Mushaf, because a sheet outlives its
+semantics by an animation; what it did not retry was the press itself. On
+the widest profile the door reported success and the chrome reported itself
+up while the sheet's scrim was still over the page, the long press landed on
+the scrim, and the pill never rose. The step now presses inside the retry
+and judges each attempt by the pill appearing, putting away whatever took
+the press before trying again, and it names the failure outright if three
+attempts do not raise the bar. The capture verifies the fix on the push;
+this is the class-3 rule working as written, a fix made in the session and
+then measured, never a rerun away.
