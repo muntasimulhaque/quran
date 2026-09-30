@@ -206,10 +206,10 @@ What each set shows, in order:
 Word by word reads as a grid now: the words stand in columns, each over its
 own meaning. The ayah card opens with its ayah, the mushaf page carries a rule
 so a page has an edge, and the bar no longer dims the surah's name on it. Tap
-any word in the study reading to hear it on repeat. Bangla is set in a chosen
-face. Settings and the reader's own surah are headings a screen reader can
-jump by, and a sheet is a page, not a floating card. No ads, no trackers, no
-account.
+any word in the study reading to hear it on repeat, and the app starts faster
+with a startup profile built in. Settings and the reader's own surah are
+headings a screen reader can jump by, and a sheet is a page, not a floating
+card. No ads, no trackers, no account.
 
 ## Release notes (next, unreleased)
 
