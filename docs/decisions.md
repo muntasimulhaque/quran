@@ -5969,3 +5969,11 @@ frames of this run are in its artifacts and are not installed.
 owner's machine, and CI is green on the build run. The instrumented suites are
 green on the phone and the 7 inch form factors, and the one red class on the
 10 inch form factor is named above rather than hidden.
+
+**Submitted.** The owner took the bundle from run 36664066056 and submitted 3.1
+to Google Play for review. Two things are owed to the next session, both named
+above: the ten inch tour step, and a refreshed store set for all three form
+factors. The frames of run 36664066010 attempt 1 (phone and 7 inch complete)
+and its rerun are in those runs' artifacts, which is where a refreshed set
+starts from; nothing was installed after the submission, because a set
+refreshed after it has nothing left to be used for.

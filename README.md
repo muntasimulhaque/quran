@@ -4,11 +4,14 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 3.1 (versionCode 32) is ready for the Play Console and is not
-uploaded yet. The bundle is `play-store/aab/quran-3.1-vc32.aab`, signed with
-the shared upload key; the store screenshots were accepted as they stand, and
-refreshing them for the ten inch form factor is the first work of the next
-session (D-125).
+**Status:** 3.1 (versionCode 32) is submitted to Google Play for review. The
+bundle is `quran-3.1-vc32.aab`, 148,760,575 bytes, SHA-256
+`21eff23856898f0249737eb6a3c1db8cd3c9833346121be35c1a7b35460c7231`, `jar
+verified`, signed with the shared upload key; it came from build run
+36664066056, whose three jobs are green. The owner accepted the bundle without
+a refreshed screenshot set, so the store set is the 3.0 one and refreshing it
+for the ten inch form factor, with the tour's last step on that leg, is the
+first work of the next session (D-125).
 
 **What 3.1 carries.** The reading answers the reader: word by word is a grid
 instead of a heap, the ayah card opens with its ayah, the mushaf page is ruled
