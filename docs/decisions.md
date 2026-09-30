@@ -6100,3 +6100,31 @@ the press before trying again, and it names the failure outright if three
 attempts do not raise the bar. The capture verifies the fix on the push;
 this is the class-3 rule working as written, a fix made in the session and
 then measured, never a rerun away.
+
+**The tour fix did not clear the 10 inch leg, and that is the finding.**
+Capture run 36693296526 came back with the phone and the 7 inch legs green,
+eight frames each, and the 10 inch leg red again, this time by the step's own
+assertion after three attempts: the ayah's long press did not raise the
+actions bar. So the scrim race the step blamed for two runs is not the
+cause: the press itself does not register on that leg, with a back key
+between attempts and a clean step 7 frame, and the next session starts from
+that fact rather than from a theory. This is the second capture run spent on
+the same leg, which is the record's own warning about guessing twice, and the
+lessons are now in AGENTS.md: read a red leg in one pass (the runs API for
+the id, the job log for `FAILED` and `at io.github` for the test and the
+line, then the frames), treat a retry as a diagnosis only when it names the
+failure, and never install a set from a run with a leg short of eight.
+
+**The 3.2 hand-off.** The bundle is `quran-3.2-vc33.aab` from the newest
+green build on `main`, run 100, whose three jobs are green: 148,302,873
+bytes, SHA-256
+`2a52889add53499e1b1691033afc04d6a20064994a2eff195e3fc69cf0c89b60`, matching
+the artifact's own recorded checksum, `jar verified`, signed with the shared
+upload key (`53:7D:09:D2:...:0D:9D:E5:21`), carrying the core pack only (the
+committed database at 128,966,656 bytes and the page fonts, no other pack).
+The store set is not refreshed and the hand-over says so: the phone and 7
+inch sets of run 36693296526 are complete in that run's artifacts, the 10
+inch leg is one frame short for the second release running, and a set is
+never installed from one run with a leg short. The bundle went to the
+owner's hand with the notes in one message; the hand-over copy is deleted
+once Play has it.

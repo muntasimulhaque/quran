@@ -355,6 +355,19 @@ the tree (D-093).
    Play submission. Hand the notes over as a bare paragraph: no blockquote, no
    fence, no wrapping quotes, nothing on the same line as the text.
 
+**The release loop is overhead, and the owner's word on it (fortieth
+session).** Committing, pushing, waiting on CI, and collecting a set are
+the unproductive half of a session: they are the same commands every time
+and nothing in them is a judgement. They are done fast and in batches, and
+the rule for that is one command per fact and no re-reading: one call lists
+every workflow run with its id and conclusion, one call lists a run's jobs
+with their ids, one call greps a failing job's log for `FAILED` and
+`at io.github` (which answers both "which test" and "which line"), one call
+downloads the three artifacts, and one call `cmp`s the set. A fact already
+read is not read again, and a failure is never guessed at twice: the second
+guess costs a capture run, which is the most expensive thing a session
+spends.
+
 **The fast path, measured in the twenty-ninth session.** A release is about
 fifteen minutes of wall clock, and the order below is what keeps it there.
 
@@ -981,17 +994,25 @@ fetching them again; the space is worth less than the time.
 
 ## Next session: the remaining queue, in order
 
-0. **The ten inch tour step, then the store set, both owed by 3.1.** The
-   tour's last step, the ayah's actions, fails on the 10 inch leg while it
-   passes on the phone and the 7 inch, so that leg's set is one frame short
-   (eight frames are required, seven arrived) and the committed set is still
-   3.0's. The frames of capture run 36664066010 attempt 1 are the place to
-   start: the phone and 7 inch sets there are complete, and attempt 2 was
-   green on both. `docs/screenshot-failures.md` is the first read, then the
-   failing job's log, then the frames that leg kept. A second red class
-   appeared and then vanished as the first was fixed (`SettingsVisibilityTest`
-   on the 7 inch, in attempt 1 only), so if it returns, it is a real finding:
-   that test is one of the six CI names.
+0. **The ten inch tour step, then the store set, both owed by 3.1 and
+   still owed by 3.2.** The tour's last step, the ayah's actions, fails on
+   the 10 inch leg while it passes on the phone and the 7 inch, so that leg's
+   set is one frame short (eight frames are required, seven arrived) and the
+   committed set is still 3.0's. Two capture runs have now been spent on it.
+   Run 36692172406 (the 3.2 push): the 10 inch leg timed out on the twenty
+   second wait for the actions pill after the long press, and the 7 inch leg
+   wrote all eight frames and then went red in `SavedNotesTest` on a ninety
+   second wait for the study page, which passed on the other two legs and is
+   the loaded-leg class rather than a finding. Run 36693296526 (the tour fix):
+   phone and 7 inch green, the 10 inch leg red again, and this time the step
+   said so in its own words after three attempts: "the ayah's long press did
+   not raise the actions bar". So the scrim race the step used to blame is
+   not the cause: the press itself does not register on that leg, and the
+   next session's first job is to find out why with those two facts in hand
+   (three presses, each with a back key between them, none raising the pill,
+   step 7's frame clean). `docs/screenshot-failures.md` is the first read,
+   then the failing job's log, then the stack line's own file and line, then
+   the frames that leg kept.
 
 1. **The instrumented suites, the store set, and the 2.5 release: done in
    the thirty-third session.** The data suite is 29/29, the app suite is
@@ -1096,6 +1117,31 @@ fetching them again; the space is worth less than the time.
   sleeps passed on the phone and failed on the 10 inch one across three runs;
   every wait now waits for the thing the step is aimed at (the page, the bar,
   the sheet's own tag), which is also faster everywhere else.
+* **A red capture leg is read in one pass, and the read is four questions.**
+  Get the run's database id from the runs API (`gh run view <run number>`
+  answers 404; the number in `gh run list` is not the id), get the failing
+  job's id, pull its log once, and read it for the step list and then the
+  error, then take the stack line's own file and line, and only then look at
+  the frames that leg kept. Run 68 of the 3.2 release took four rounds of
+  guessing at what two `ComposeTimeoutException`s meant before the stack
+  line named both places: the tour's twenty second wait for the actions pill
+  on one leg and `SavedNotesTest`'s ninety second wait for the study page on
+  the other. They were two different findings, and the second was not a
+  finding at all. `grep -E "FAILED|at io\.github"` on the job log answers
+  both questions in one command.
+* **A retry is not a diagnosis.** The tour's last step was made to retry the
+  press and name the failure, and it did: three attempts, a back key between
+  them, and the step said the pill never rose. That disproved the scrim race
+  the step had blamed for two runs, which is worth more than a green leg
+  would have been, and it is why the next session starts from a fact instead
+  of a theory. The same applies to a longer wait: a wait that is raised to
+  cover an unexplained failure hides the finding it was raised over.
+* **A partial set is never installed.** A leg must write all eight frames
+  before any of its frames go near the store listing, and the eight must
+  come from one run, so a set is collected whole or left as it is. The 3.2
+  release shipped the committed 3.0 set for exactly this reason, with the
+  phone and 7 inch sets of two newer runs sitting complete in their
+  artifacts.
 
 
 ## Where the project stands (end of the thirty-ninth session)

@@ -4,12 +4,16 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 3.1 (versionCode 32) is submitted to Google Play for review. The
-bundle is `quran-3.1-vc32.aab`, 148,760,575 bytes, SHA-256
-`21eff23856898f0249737eb6a3c1db8cd3c9833346121be35c1a7b35460c7231`, `jar
-verified`, signed with the shared upload key; it came from build run
-36664066056, whose three jobs are green. The owner accepted the bundle without
-a refreshed screenshot set, so the store set is the 3.0 one and refreshing it
+**Status:** 3.2 (versionCode 33) is prepared for submission. The bundle is
+`quran-3.2-vc33.aab`, 148,302,873 bytes, SHA-256
+`2a52889add53499e1b1691033afc04d6a20064994a2eff195e3fc69cf0c89b60`, `jar
+verified` with the shared upload key, from the newest green build run 100.
+The store set is not refreshed: capture run 36693296526 came back with the
+phone and 7 inch legs complete and the 10 inch leg red on the tour's last
+step for the second release running, so the committed 3.0 set stands and
+the debt is named in D-127. 3.1 (versionCode 32) is submitted to Google
+Play for review; the owner accepted the bundle without a refreshed
+screenshot set, so the store set is the 3.0 one and refreshing it
 for the ten inch form factor, with the tour's last step on that leg, is the
 first work of the next session (D-125). The tree now also carries the qaf
 mark (D-126) ahead of any release: the icon, the feature graphic, the shared
