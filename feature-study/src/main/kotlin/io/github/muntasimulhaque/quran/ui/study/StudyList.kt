@@ -634,6 +634,7 @@ private fun AyahBlock(
     val playing = row.ayah.number == playingAyah
     val ayahActions = stringResource(R.string.study_ayah_actions)
     val paperActions = stringResource(R.string.study_paper_actions)
+    val hearWord = stringResource(R.string.study_hear_word)
     val wash = when {
         isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.07f)
         playing -> palette.highlight.copy(alpha = palette.highlight.alpha * 0.55f)
@@ -711,6 +712,7 @@ private fun AyahBlock(
                     meanings = row.meanings,
                     hafs = hafs,
                     settings = settings,
+                    hearLabel = hearWord,
                     onWord = onWord?.let { hear ->
                         { word: Int -> hear(row.ayah.number, word) }
                     },

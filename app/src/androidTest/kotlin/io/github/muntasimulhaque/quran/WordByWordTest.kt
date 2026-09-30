@@ -72,10 +72,12 @@ class WordByWordTest {
         // time opening the content library, and a slow machine is not a
         // failing reading aid.
         compose.waitUntil(timeoutMillis = 90_000) {
-            compose.onAllNodesWithTag("word-by-word").fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithTag("word-by-word", useUnmergedTree = true)
+                    .fetchSemanticsNodes().isNotEmpty()
         }
         compose.waitUntil(timeoutMillis = 90_000) {
-            compose.onAllNodesWithText("নামে", substring = true).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithText("নামে", substring = true, useUnmergedTree = true)
+                    .fetchSemanticsNodes().isNotEmpty()
         }
     }
 
@@ -93,15 +95,17 @@ class WordByWordTest {
     @Test
     fun aWordStandsOverItsOwnMeaning() {
         compose.waitUntil(timeoutMillis = 90_000) {
-            compose.onAllNodesWithTag("word-by-word").fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithTag("word-by-word", useUnmergedTree = true)
+                    .fetchSemanticsNodes().isNotEmpty()
         }
         compose.waitUntil(timeoutMillis = 90_000) {
-            compose.onAllNodesWithText("নামে", substring = true).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithText("নামে", substring = true, useUnmergedTree = true)
+                    .fetchSemanticsNodes().isNotEmpty()
         }
         // the first word of 1:1 exactly as the database spells it, in the reading's Arabic
-        val word = compose.onAllNodesWithText("بِسۡمِ", substring = true)
+        val word = compose.onAllNodesWithText("بِسۡمِ", substring = true, useUnmergedTree = true)
             .fetchSemanticsNodes().first()
-        val meaning = compose.onAllNodesWithText("নামে", substring = true)
+        val meaning = compose.onAllNodesWithText("নামে", substring = true, useUnmergedTree = true)
             .fetchSemanticsNodes().first()
         val wordBox = word.boundsInRoot
         val meaningBox = meaning.boundsInRoot

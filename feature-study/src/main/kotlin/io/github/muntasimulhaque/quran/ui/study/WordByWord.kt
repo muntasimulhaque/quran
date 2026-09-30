@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -81,6 +81,8 @@ internal fun WordByWord(
     meanings: List<WordMeaning>,
     hafs: FontFamily,
     settings: AppSettings,
+    /** What the tap on a tile does, said to a screen reader. */
+    hearLabel: String,
     modifier: Modifier = Modifier,
     gloss: Boolean = true,
     /**
@@ -161,6 +163,7 @@ internal fun WordByWord(
                         // they are contiguous, so the tile's place in the
                         // ayah is the number the reciter's timings use
                         onClick = onWord?.let { hear -> { hear(index + 1) } },
+                        hearLabel = hearLabel,
                     )
                 }
             }
@@ -183,6 +186,7 @@ private fun WordTile(
     gloss: Boolean,
     width: Dp,
     onClick: (() -> Unit)?,
+    hearLabel: String,
 ) {
     Column(
         modifier = Modifier
@@ -192,10 +196,15 @@ private fun WordTile(
                 if (onClick == null) {
                     Modifier
                 } else {
+                    // A tile is a control, and it must not *read* as one: a
+                    // role on this node merges its two lines into a single
+                    // labelled node, which hides the word and the meaning from
+                    // anything that reads the aid as text, screen reader and
+                    // test alike. The tap is here, and what it does is said,
+                    // without swallowing what the tile says.
                     Modifier
                         .clip(RoundedCornerShape(10.dp))
                         .clickable(onClick = onClick)
-                        .semantics { role = Role.Button }
                 },
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -226,7 +235,20 @@ private fun WordTile(
             ),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = Space.Tight),
+            modifier = Modifier
+                .padding(top = Space.Tight)
+                .semantics {
+                    // the door the tap opens, said without a role that would
+                    // merge away the tile's own words
+                    if (onClick != null) {
+                        customActions = listOf(
+                            CustomAccessibilityAction(hearLabel) {
+                                onClick()
+                                true
+                            },
+                        )
+                    }
+                },
         )
     }
 }
