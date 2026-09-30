@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 3.2 (versionCode 33)
+Version: 3.3 (versionCode 34)
 
 ## Listing
 
@@ -206,6 +206,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (3.3, 484 characters)
+
+Search is instant now: one word finds its ayahs, translations, word meanings, and tafsir in a single pass, even a common word like mercy. Word by word reads as a row of word and meaning pairs again. The mushaf page keeps its rule clear of the text, the playing pill centres the reciter, the place, and the controls, and settings rows keep their value on one line with every arrow on one line. The daily reminder asks for one permission instead of two. No ads, no trackers, no account.
 
 ## Release notes (3.2, 295 characters)
 
