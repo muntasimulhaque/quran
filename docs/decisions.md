@@ -6140,3 +6140,324 @@ set for all three form factors, which starts from the phone and 7 inch sets
 of capture run 36693296526 sitting complete in that run's artifacts. Nothing
 was installed after the submission, because a set refreshed after it has
 nothing left to be used for.
+
+## D-128: AGENTS.md and the README are thin again
+
+Date: the forty-first session, at the owner's request: read Matt Pocock's
+point that a repository stuffed with markdown makes an agent worse rather
+than better, because prose that is not executable or testable drifts, and
+then the model has two stories and guesses wrong, and rewrite the file on
+that basis. The README got the same treatment in the same session, and the
+traps went into D-129 rather than into a file of their own.
+
+**The file was 2,252 lines and about 1,100 of them were this file's own
+copy of the decision log.** Every session had appended a "Where the project
+stands" section, in prose, that restated decisions this file already holds:
+D-001 onward, 6,142 lines, the whole record. That duplication is the exact
+disease the point names. It is gone, and the session's story goes to
+decisions.md and the release's own face to the README, which is where the
+session rule already said to put them.
+
+**What the file keeps, and why code cannot say it:** the law (fourteen
+constraints, two of them the owner's own signed words about the network and
+the permission set), the style rules (a test enforces the em dash; a human
+still has to care about the rest), the commands and the CI split, this
+machine's environment facts, the map, the glossary, the frozen choices with
+their D numbers, and the five traps that save a day. About 360 lines, from
+2,252.
+
+**The rest was not deleted, it was given one home each**, and every one of
+those homes already existed:
+
+- the release runbook, the four secrets, the signature proof: already
+  `play-store/RELEASE.md`, and the AGENTS section was a second copy of it
+- the capture's failure classes, their evidence, and their fixes: already
+  `docs/screenshot-failures.md`
+- the design, the module rules, the ADRs: already `docs/design.md`,
+  `docs/architecture.md`, and here
+- the classes with no code home, about sixty of them across the content
+  sources, Compose, the stores, the tour, and this machine's edges: here, as
+  D-129. A file of their own was written first and cut the same session at
+  the owner's word: a new file is a new thing to keep true, and these are
+  exactly the kind of item that belongs beside the decisions it explains.
+- the release history the README carried: already this log (D-099 onward)
+  and `play-store/listing.md`, which is the store's own face of it
+
+**The README had drifted while it was there.** Its "What it does" list
+still promised a Notes tab and a Go to Ayah door in Browse's tab row, both
+of which D-101 folded away: notes live inside Saved, and a surah row opens
+its own ayah grid. It also said ten modules, and there are thirteen. The
+per-release prose is gone, the stale sentences are corrected against the
+code, and what is left is what a person who opens the repository needs to
+know in one screen: what the app is, what is in it, where the content comes
+from, and how to build and test it. The release-by-release story belongs to
+this log, which already held all of it, and to the listing, which is where
+a reader meets it.
+
+**The live queue left the file too.** The "next session" list was state, not
+law: the ten inch tour step and a refreshed store set are named in D-127's
+last paragraph and in the README status, and those are where a session looks
+first. A file that holds a queue is a file whose first section is always out
+of date.
+
+**One code comment moved with it.** `ScreenshotTest.waitForTag` pointed at
+AGENTS.md's "Store screenshots" section, which no longer exists, so it names
+D-129 instead. Nothing else in the tree referenced a section of the file.
+
+**The law is unchanged.** The fourteen constraints, the style rules, and the
+frozen choices are the same words, tightened, and the numbering is stable so
+D-114's "rule 2" still means what it meant. No constraint was dropped, and
+none was added: the file is smaller, not different.
+
+## D-129: The classes with no code home
+
+Date: the forty-first session, with D-128. An agent's file and this log
+both carry what a future session cannot recover from reading the code: a
+contract that lives in a script rather than in a type, a shape a source
+dataset imposes, a habit that saves an hour. A test that pins a behavior
+does not need it here, so this entry is the residue, grouped by where it
+bites, each item naming the file, the test, or the decision that owns the
+detail. An item whose owner moves is stale, and a stale item is fixed here
+rather than left.
+
+**The content sources.**
+
+- A gate that reads the content by table name is reading a **contract**, not
+  a schema. The pack split moved translations, tafsirs, word lists, and
+  surah names into their own `content/packs/*.db`, and `tools fonts` went
+  on asking the old monolith for a `translation` table, a `tafsir_passage`
+  with a `source` column, and `word.translation`. Nothing noticed for a
+  long time because the gate is owner-machine only. Change the build's
+  shape and run every `:tools:run --args=...` gate, not only the ones CI
+  runs.
+- A path that has been true for a year is not evidence it still runs: the
+  same gate also pointed at `app/src/main/res/font`, which moved to
+  `content-assets/src/main/res/font`.
+- Reading a script no bundled face carries is a **decision**, not a tofu bug.
+  Android draws Bangla with the platform's own Noto Sans Bengali, which is
+  why the Bangla packs render, and `tools fonts` names every such script in
+  one allow-list; a new script fails the gate until someone writes it down.
+- The KFGQPC text is not NFC-normalized and stays as published. Normalize
+  the derived search columns only.
+- The tafsir source carries Arabic presentation forms and an Urdu hee.
+  Display text unfolds presentation forms with NFKC and preserves the
+  Prophet's ligature U+FDFA, and Arabic letters Amiri Quran lacks fall back
+  to the bundled Hafs face per codepoint. `core/RichText.kt` and
+  `tools/Fonts.kt` mirror each other on the rule, so no codepoint reaches
+  the screen as tofu.
+- As-Sa'di's passage ranges overlap, and the shortest passage containing an
+  ayah is the one the reader should see.
+- The QUL recitation export's `ayah_number` is a global 1..6236 counter; the
+  surah and ayah are the three-digit groups in the file name. Use the file
+  name, and let `verify` check the counter.
+- The pack catalog's license line is built, never written: the licenses of
+  the datasets a pack is built from, joined with ` · ` and split by the app.
+  `tools/PackSources.kt` is the only mapping from pack to dataset.
+- Some devices ship SQLite without the `unicode61` tokenizer, which is why
+  search matches precomputed normalized columns and never an FTS index.
+  `core/Search.kt` runs the same normalization at query time so the two
+  sides always meet, and English is folded on both sides because the
+  translation writes Allāh and ʿĪsā. Change the fold and the `tools search`
+  gate in the same change.
+- The reader never sees raw tafsir HTML. A tafsir search result printed
+  `</p><h2>` for two sessions because the excerpt was cut from the stored
+  HTML for a view with no parser, and the store screenshot finally showed
+  it. `RichText.plain` is the readable form for every surface that cannot
+  draw runs, and `tools search` checks every excerpt and every surah
+  introduction for markup and for a highlight that lands. A tag is only
+  what looks like one: the sources carry real angle brackets in prose, so
+  never strip a bare `<` or `>`.
+
+**The reading and the platform.**
+
+- Android's text shaper breaks Arabic letter joining at any style boundary
+  inside a word, so never color or style part of one. Word-level
+  boundaries are safe, glyph words are safest.
+- Android's `rawQuery` binds arguments positionally: a query whose IN clause
+  is built from literals is passed `null`, never the numbers. The
+  instrumented search test exists to catch that class exactly.
+- Two modules declaring one string name is a crash, not a merge. The
+  resource table keeps one of the two, and `stringResource` throws
+  `MissingFormatArgumentException` on the main thread when the arguments do
+  not match the copy that survived, which is what `pack_downloading` did to
+  the Add button on a translation. A shared name is fine only when the whole
+  declaration is identical, and `StringNameTest` in `core` fails the build
+  otherwise.
+- A quiet alpha is not a legibility strategy (D-084): 0.45 measured 2.44:1
+  on the sepia ground and 2.82:1 on paper, under the design document's own
+  4.5:1 rule. A tone with meaning takes the theme's `onSurfaceVariant`.
+  Measure before choosing, and say "alpha" only against a ground that was
+  checked.
+- A floating control has one measure and an ellipsized name is a defect
+  (D-119). The pill's words keep 300 dp or they take a line of their own,
+  and the floor comes from the row's own numbers in one place.
+- A settings row's tail reserves a column only for a mark the row has
+  (D-120, which reverses the other half of D-111). Holding the switch
+  column empty on a row with no switch ended six hub rows with 64 dp of
+  nothing at their right edge.
+- A hardware bitmap is a texture and a texture has a size limit (D-097):
+  `toImageBitmap` makes a hardware bitmap on API 28 and up, a tall share
+  card passes the driver's limit and loses its tail, and a software canvas
+  refuses the bitmap outright. The capture stitches 2,048 px software
+  windows for that reason, and an emulator with a large limit would never
+  have shown the truncation.
+- A sheet, a dialog, and a popup are their own windows and take the
+  Activity's own resources, so a locale handed in through a composition
+  local reaches the reading and misses every sheet. The interface language
+  is applied in `MainActivity.attachBaseContext` from the synchronous
+  `LanguagePreference` mirror, and language splitting is off in the release
+  bundle so both languages are inside every install.
+- A language choice recreates the Activity, so anything the reader was
+  standing in that lives in plain `remember` goes with the old window: the
+  open page is `rememberSaveable`, and a modal sheet has Material's own
+  saveable dialog id, so state inside a sheet survives too.
+- The state a screen switches on is read in the screen's own scope. With a
+  wrapper around the screen, a `when` one lambda down missed the switch
+  from the first paint to the welcome until a configuration change forced a
+  recomposition, so `QuranApp` reads `ready` and `failure` where it decides.
+- A text-only action and a heading must not look alike on a page that draws
+  no buttons, so `ui-kit/TextButton` is the one shape a word that acts wears
+  and the note sheet's title is a heading in `titleMedium`.
+
+**The stores and the state.**
+
+- A DataStore is a flow, and re-applying every emission over in-memory state
+  lets an old stored value overwrite a choice the reader just made.
+  `SettingsStore` is read once while the library opens and never collected
+  again, and `ReaderViewModel` owns the state from then on. That is what
+  stopped the reading place from jumping back.
+- A list that draws the previous item's data while the next loads writes
+  the previous item's position, so the study list holds the loaded key
+  beside the data and draws nothing until they match. It writes the place
+  only from the reader's own drag, and the Mushaf only when the page is a
+  new one: a jump, a mode switch, or the first frame must never record a
+  place the reader did not choose.
+- The study list's indices and its ayah numbers meet only in
+  `core/AyahList`, which has a round trip test. Reading
+  `firstVisibleItemIndex` as an ayah number silently moved the reader to
+  the start of the surah.
+- The user databases are hand-rolled and separate from the content
+  database, which never touches them: `saved.db` is version 5 (`SavedStore`,
+  with `note_at` for a note's own moment and `saved_at` for the ayah's, so
+  Saved can order by the more recent of the two) and `last-read.db` is
+  `data/LastReadStore`, twenty places, one row per ayah. A schema change
+  means the version bump and the migration in the same session, with
+  `SavedStoreTest` and `LastReadStoreTest` pinning the behavior.
+- The launch picture races if two writers reach it: a settle and the flick
+  after it can both save, so `PageCache.save` is `@Synchronized` and
+  guarded whole, because the losing writer used to reach `copyTo` on a
+  temporary the winner had renamed away and the `NoSuchFileException`
+  escaped a worker and killed the app. The other half is the page LRU
+  recycling a bitmap under the writer, so
+  `PageRenderer.rememberStartupPage` copies it under the cache lock first. A
+  crash the reader meets by turning a page is this class until proven
+  otherwise. Nothing depends on the picture: it is keyed by page, pixel
+  width, and theme name, and a miss is the old first paint.
+- `getIntExtra(EXTRA, 0)` is not an absent extra. The daily reminder's
+  first cut coerced a missing ayah to 0, which became ayah 1, so every plain
+  launch jumped to the first ayah; the default is a sentinel that cannot be
+  a place (D-097).
+- A reminder scheduled outside the app needs no boot permission: the daily
+  ayah arms through `AlarmManager` and an unexported receiver and re-arms
+  on the app's own launch, which costs at most one morning after a reboot
+  and is the price of not adding `RECEIVE_BOOT_COMPLETED` to an audited
+  permission set (D-097).
+- A list keeps its own language. The Bangla surface follows the QUL Bangla
+  corpus for spelling (তাফসীর, not তাফসির) and the Listening page reads
+  অডিও, the owner's own word (D-097). Double spellings drift one string at
+  a time, so a settled word sweeps the whole Bangla surface.
+- Recitation media ids are `"ayah:surah"`, built from the player's own
+  items, and the current word comes from the segment spanning the position
+  as `wordFrom + 1` in the word table. `core/RecitationPlaylist` reads the
+  id, never string surgery at the call site, and the player skips ayahs
+  whose files are absent, which is why a partial pack plays only what is on
+  the device.
+- A surah's end arrives through two events, `STATE_ENDED` and an automatic
+  transition into the next surah, and a repeat watching only one works half
+  the time (D-118). `REPEAT_MODE_ALL` stands in for neither, because the
+  playlist grows while the reader listens, and a deliberate Next or Previous
+  is a seek and is never intercepted.
+
+**The tests and the tour.** `docs/screenshot-failures.md` has the capture's
+classes with their evidence; what is left is Compose and the habit.
+
+- A role on a node merges it: a tap target carrying a role turns its
+  children into one labeled node, so a tile whose two lines are a word and
+  its meaning stops being two pieces of text, a screen reader hears one
+  label, and a test waiting for the meaning waits forever. The word by word
+  tiles wore `Role.Button` and two tests were red on all three form factors
+  for six capture runs.
+- A tag on a container is not in the merged tree: `onAllNodesWithTag`
+  defaults to `useUnmergedTree = false`, where a tag whose node has no other
+  semantics of its own is not surfaced. The repository's `waitForTag` reads
+  the unmerged tree and so should every test that waits on a tag.
+- The tour anchors on tags and content descriptions, never on copy: a tour
+  that waited on the word "Appearance" broke when the label became "Theme".
+  It waits for two identical frames, because a capture on this software
+  rendered emulator can lag the composition by seconds, and a wait that
+  watches text is minutes, not seconds. A "for a moment" sleep is where a
+  wide leg breaks.
+- Tapping the reading's exact center is a trap (D-097): a footnote marker
+  sits in the flow of the text, so a test that wants the chrome taps the
+  page's own left margin, which is where a reader taps too. Eight tests
+  failed together from that.
+- A test must set its own reader state. The instrumented classes share one
+  install and one process, so a test that does not set the place or the mode
+  inherits whatever the last one left.
+- `createEmptyComposeRule()` beside your own `ActivityScenario` can compose
+  on a thread with no looper, and the study list's prefetch scheduler throws
+  `The current thread must have a looper` on a loaded emulator. Library
+  preparation belongs in an `ExternalResource` chained with
+  `RuleChain.outerRule(...).around(...)`, so the app starts after the packs
+  are in place.
+- A still frame cannot show which way a page turned, so `MushafTurnTest`
+  pins the direction on every form factor. The order of the words on a line
+  and the order of the pages are two different bugs.
+- Reading a red leg is one pass: the run's database id from the runs API
+  (`gh run view <run number>` answers 404, and the number in `gh run list` is
+  not the id), the job's id, one log read for the step list and then the
+  error, then the stack line's own file and line. `grep -E "FAILED|at
+  io\.github"` answers "which test" and "which line" in one command. Then
+  read the frames that leg kept, before touching anything: the log says
+  which assertion failed, the frame says what the reader was looking at,
+  and three wrong diagnoses in a row were solved by one kept frame. A
+  failure is never guessed at twice, because the second guess costs a
+  capture run. A retry is a diagnosis only when it names the failure the way
+  the 10 inch tour step does, and worth nothing when it only re-waits. A
+  partial set is never installed.
+- An emulator workflow is a machine, not a test: cache the AVD per form
+  factor, wait for `/sdcard/Android` before the test, and keep the app's
+  instrumented tests in that workflow only, because running them in
+  `build.yml` as well pays twice and pushed the slow tablet leg past its
+  timeout. A leg that dies with `device offline` while another passes the
+  same code is the capture's load, not the runner; the fix that worked was
+  one commit that made the capture lighter. A leg that dies inside the
+  emulator action's own setup, on `Install Android SDK` with `Error on
+  ZipFile unknown archive`, is a truncated download on that runner: rerun
+  once, and a second failure in the same pre-script step is an outage to
+  report. After a rerun, `gh run view --log --job <id>` serves the latest
+  attempt, so the jobs API's `run_attempt` and the artifacts endpoint's
+  `attempt` parameter are the record of which frames were installed.
+- The capture captures from the Compose root with `captureToImage`, one
+  capture per frame, never by driving the running app with full-screen
+  captures through a settle loop, which took the phone emulator down five
+  times while the tablet legs passed. A modal sheet is its own window, which
+  the root cannot PixelCopy, so the four sheet frames keep a display capture
+  only when two in a row are identical, with the window list checked first,
+  and they wait on their own test tag rather than on text the sheet covers.
+
+**This machine's edges.** After an emulator crash, injected input in the
+screen's top band can go dead through both `input tap` and the compose test's
+own injection while everything below it works, captures return older frames,
+and the clock jumps; one reboot is allowed, then it is the environment until
+CI says otherwise. A screenshot decides nothing through the read tool unless
+its caption's `original WxH` matches the artifact's real size, so read one
+frame per turn from a uniquely named copy and check a whole set with pixel
+signatures rather than by eye. A freshly wiped or freshly booted emulator
+fails `searchIsFastWhenWarm` and can raise dialogs on its first run, so let
+one run warm it. A `node -e` replacement anchored on `\n` silently no-ops
+in a CRLF file and exits 0, which is how an import edit went missing: match
+`\r?\n`, or use the edit tool, and grep afterwards. The emulator runner
+executes each script line in its own shell, so a Gradle exit status is
+saved on the Gradle line itself and every collection line is guarded, or the
+frames are lost.

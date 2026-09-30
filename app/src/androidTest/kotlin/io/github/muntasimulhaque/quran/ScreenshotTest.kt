@@ -226,7 +226,7 @@ class ScreenshotTest {
      * must never anchor on a user-visible string: a label can be renamed
      * ("Appearance" became "Theme") and the tour that waited on the old word
      * then fails in CI over a change that is otherwise correct. Tags are
-     * stable; copy is not. See AGENTS.md, "Store screenshots".
+     * stable; copy is not. See D-129, "The tests and the tour".
      */
     private fun waitForTag(tag: String, timeout: Long = 15_000) {
         rule.waitUntil(timeoutMillis = timeout) {
