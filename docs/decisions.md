@@ -6128,3 +6128,15 @@ inch leg is one frame short for the second release running, and a set is
 never installed from one run with a leg short. The bundle went to the
 owner's hand with the notes in one message; the hand-over copy is deleted
 once Play has it.
+
+**Submitted.** The owner took the bundle from build run 100 and submitted
+3.2 to Google Play for review. The hand-over copy is deleted the same
+session, so the artifact stays in build run 100 and in Play, and
+`play-store/aab/` keeps only its own note. Two things are owed to the next
+session, both named above: the ten inch tour step, which now starts from a
+fact (the press does not register on that leg, three attempts and a back key
+apart, step 7's frame clean) rather than from a theory, and a refreshed store
+set for all three form factors, which starts from the phone and 7 inch sets
+of capture run 36693296526 sitting complete in that run's artifacts. Nothing
+was installed after the submission, because a set refreshed after it has
+nothing left to be used for.
