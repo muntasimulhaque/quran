@@ -6783,3 +6783,41 @@ image's `Screenshot.capture()` does not composite a dialog window the way a
 GitHub runner's does. The tests are the local instrument; the frames are CI's.
 D-129's rule about frames that lie through the read tool has a second half: a
 frame can also lie because the machine that took it cannot see the window.
+## D-133: The store's 3.3 set, and the three defects it was carrying
+
+Date: the forty-second session, after the 3.3 hand-over. 3.3 (versionCode 34)
+is in hand; this entry is the record of the set and of what the run that made
+it found.
+
+**The set is refreshed, from run 36758466353.** Three legs, green on the first
+attempt, eight frames each. Every frame was compared with its artifact by
+`cmp` (twenty four changes against the committed set) and every one of the
+twenty four was read. This is the first complete set since 3.0's, and the
+first one a reader has seen that is 3.3's.
+
+**The bundle.** `quran-3.3-vc34.aab` from build run 36758466455:
+148,303,724 bytes, SHA-256
+`727a671481fab37ad4da2f6809318e09fad070d045f0f5d2ce887c18b3d92b83`,
+`jar verified`, signed with the shared upload key
+(`53:7D:09:D2:...:0D:9D:E5:21`), carrying only the core pack. It is in
+`play-store/aab/` for the hand-over and is deleted once Play has it.
+
+**The gate, on this machine.** The five owner gates
+(`:core:test` 97, `:data:testDebugUnitTest`, `:app:testDebugUnitTest`,
+`:app:lintDebug`, `:app:assembleDebug`) and the four content gates that can run
+here (`verify`, `audit`, `fonts`, `checkdb`, `search`) are green. The whole app
+instrumented suite ran on the `pixel35` profile here for the first time in the
+project's life: 62 tests, 60 green, and the two that are not are named in
+D-132.
+
+**What the set carries that the last one did not.** The mushaf page whole on
+every form factor (D-132), the word by word aid as a row of pairs (D-130), the
+settings rows with their values on one line and their chevrons on the switch
+margin (D-130), the search frame showing 492 matches with the highlight, and
+the footnote markers on the line they belong to (D-132).
+
+**Still owed.** `SystemThemeTest`'s second half: the app's own configuration
+says day and the drawn ground stays dark, which is D-115's promise unkept, and
+it fails with this session's changes stashed, so it is a real defect and not a
+regression. `ShareCardCaptureTest` cannot pass on a software rendered emulator,
+which has no bitmap to copy for the longest card.
