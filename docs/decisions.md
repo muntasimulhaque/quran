@@ -6639,3 +6639,67 @@ them ran here, for the reason above.
 **Two more classes for D-129**, written there rather than here: `DpRect` lost
 its `width`, `height`, and `center`, and the `word` table has no index on
 `ayah_number`, so any read of it by ayah alone is a whole pass.
+## D-131: 3.3, prepared and handed over
+
+Date: the forty-second session, at the owner's word "go for play release".
+3.3 (versionCode 34) carries D-130 and nothing else. The push is one commit
+of code and one commit of the version line, as D-093 requires: the bundle is
+taken from the newest green run rather than the first one after the bump.
+
+**The gates.** All six owner gates ran green on this machine before the
+push: `:core:test` (97), `:data:testDebugUnitTest`, `:app:testDebugUnitTest`,
+`:app:lintDebug`, `:app:assembleDebug`, and `:app:compileDebugAndroidTestKotlin`,
+plus the four content ones this machine can run: `verify` (every source hash
+and structural check), `audit` (0 unexplained differences, 6,235
+letter-identical ayahs, 1 accepted orthographic variant, 1 segmentation note),
+`fonts` (628,169 study codepoints, 604 pages, 22,985,678 reading codepoints),
+`checkdb` (the committed database, 128,966,656 bytes, SHA-256 380e0442..., ten
+pack files), and `search` (63 Arabic and 65 Bangla round trips, 82 non-ASCII
+codepoints, 465 readable excerpts, and the new column audit). `content/raw`
+still holds the manual QUL and QuranEnc exports, so the check that has to pass
+before a release starts rather than at gate time passed (D-078).
+
+**The push.** Build run 36737690152, attempt 1, green on all three jobs: the
+gates and the debug build, the signed bundle, and the data instrumented suite.
+
+**The bundle.** `quran-3.3-vc34.aab` from that run's own artifact:
+148,303,063 bytes, SHA-256
+`c72fc513074bad4a8bd467282146eefc9c283376c245f0dc0c0beaa2da9f9994`,
+`jar verified`, signed with the shared upload key
+(`53:7D:09:D2:...:0D:9D:E5:21`), carrying only the core pack. It is in
+`play-store/aab/` for the hand-over and is deleted once Play has it.
+
+**The capture, and the set that is not refreshed.** Run 36737690506 came back
+with the phone and the 7 inch legs green on both attempts, all eight frames
+each, and the 10 inch leg red on the same step it has been red on since the
+3.2 capture: `ScreenshotTest.walkTheReading` step 15, "the ayah's long press
+did not raise the actions bar", after the retry and back key D-127 gave that
+step. The one rerun was spent and it failed on the same assertion, so the set
+is not installed from a run with a leg short of eight frames (D-127, D-129)
+and the committed set stays 3.0's. The phone and 7 inch sets of both attempts
+sit complete in that run's artifacts and are where a refresh starts.
+
+**What the two green legs prove about this release, read from their frames.**
+The 10 inch study frame (the one the red leg kept, which is the frame D-129
+says to read before touching anything) shows the word by word aid as a row of
+word and meaning pairs, six pairs to a line, each word over its own meaning.
+The phone settings frame shows the font size value on one line, "Arabic 30,
+translation 17", and the chevrons of Language, Theme, Font size, Reciters,
+and Listening on the same margin a switch's right edge stands at. The phone
+mushaf frame shows the page's rule clear of the text. Those three are the
+reader's reports answered in the reader's own screenshots, not in a test's
+opinion of them.
+
+**Owed, and not claimed.** `ScreenshotTest.walkTheReading` on the 10 inch
+profile (the first item of the queue, unchanged by this session), and the
+store set that waits on it. The two instrumented classes this session's
+remaining changes live in, `PlaybackPillTest` (the pill's one centred words
+line and its centred controls) and `SettingsRowAlignmentTest` (the chevron
+mark against a switch's edge, and both of the sheet's real values on one
+line), compile and are not among the six names the capture runs; this machine
+has an AVD at last and no hypervisor to start it, so they are for a session
+with an emulator or for the next full app run.
+
+**The hand-over is one delivery.** The bundle and the notes go over together,
+before anything is uploaded, and the set stays as it is because a set refreshed
+after the submission has nothing left to be used for.

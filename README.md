@@ -4,19 +4,7 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 3.2 (versionCode 33) is submitted to Google Play for review. The
-owner took the bundle from build run 100 (`quran-3.2-vc33.aab`,
-148,302,873 bytes, SHA-256
-`2a52889add53499e1b1691033afc04d6a20064994a2eff195e3fc69cf0c89b60`, `jar
-verified`) and submitted it, and the hand-over copy was deleted the same
-session, so the artifact stays in build run 100 and in Play. The store set
-is not refreshed and that is on the record: the committed set is 3.0's,
-because the 3.2 capture's 10 inch leg came back one frame short and a set is
-never installed from a partial run (D-127). Two things are owed: the tour's
-last step on the 10 inch profile, which now starts from a fact rather than a
-theory, and a refreshed set for all three form factors. The release history
-is [`docs/decisions.md`](docs/decisions.md) and the store's own face of it
-is [`play-store/listing.md`](play-store/listing.md).
+**Status:** 3.3 (versionCode 34) is handed over for the Play Console and rides the next submission. The bundle is `play-store/aab/quran-3.3-vc34.aab` from build run 36737690152 (148,303,063 bytes, SHA-256 `c72fc513074bad4a8bd467282146eefc9c283376c245f0dc0c0beaa2da9f9994`, `jar verified`), and it carries the seven answers of D-130: word by word reads as a row of pairs again, the playing pill centres its reciter, place, and controls, the mushaf rule stands off the text, the settings hub keeps every value on one line with every arrow on the margin, search is one pass instead of three seconds of per-row reads, and the daily reminder asks for one permission. The store set is **not** refreshed and that is on the record: capture run 36737690506 came back with the phone and the 7 inch legs green and all eight frames each on both attempts, and the 10 inch leg red on the tour's long press again, the first item of the queue in D-129 (D-130). The release history is [`docs/decisions.md`](docs/decisions.md) and the store's own face of it is [`play-store/listing.md`](play-store/listing.md).
 
 ## What it does
 
