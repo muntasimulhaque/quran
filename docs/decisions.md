@@ -6703,3 +6703,83 @@ with an emulator or for the next full app run.
 **The hand-over is one delivery.** The bundle and the notes go over together,
 before anything is uploaded, and the set stays as it is because a set refreshed
 after the submission has nothing left to be used for.
+## D-132: The page was stretched to the glass, and the store has been showing half a page
+
+Date: the forty-second session, at the owner's word "all the screenshots
+should be there, try again", after the 3.3 capture came back with the 10 inch
+leg red for the fourth time running. 3.3 (versionCode 34) is in hand; the set
+is collected and installed from the run this entry names.
+
+**The emulator on this machine, and what it changed.** The owner enabled the
+Windows hypervisor and restarted, so the `pixel35` and `pixelc` AVDs here run
+accelerated, and the whole app instrumented suite ran on the phone profile
+locally for the first time in the project's life: 62 tests, 60 green. That
+single run is the reason this entry is a finding and not a rerun.
+
+**The 10 inch leg was never the test's fault.** The tour's last step long
+presses an ayah and waits for the actions bar, and on a 2560 by 1800 profile it
+failed three releases running, with the frame before it clean. The cause is in
+the app: `MushafPage` chose the page's width so the whole page fits
+(`min(availableWidth, availableHeight / PAGE_ASPECT)`), which on a landscape
+tablet is a page **narrower** than the glass, and then scaled that page up to
+the glass to draw it. A page 1,135 pixels wide was drawn 2,560 pixels wide and
+4,060 pixels tall on an 1,800 pixel screen: the top two fifths of the page
+visible, the rest below the glass. Each ayah's touch node was placed by the
+same scale, so every ayah on the lower lines of the page had a node outside
+the window, its bounds clipped to nothing, and a long press on it was injected
+at (0, 0). A reader on a tablet in landscape could not touch the lower half of
+the page at all, and the store's 10 inch first frame has been a page cut off
+mid line since 3.0.
+
+The page is now drawn at its own size and centered, and `pageLeft` and
+`pageTop` are the one place a page's position is decided, so the drawing, the
+touch math, and the ayah nodes cannot drift apart again. The 10 inch tour
+passed locally in one minute on the first attempt afterwards, and the frame
+shows all fifteen lines of page 293 with 2:255 at the foot.
+
+**The search frame was a sheet that had found nothing.** The 3.3 capture's
+phone search frame reads "No matches." for "mercy", a query that returns 492
+matches (`ContentSearchTest`, green here and in CI). The tour waited for any
+text holding "match", and the sheet draws "No matches." for a query it has not
+run yet, so the wait was satisfied before the first search had started and the
+frame was taken of a sheet that had not been asked anything. The anchor is now
+a count with its digits, which only a search that came back draws. This is the
+tour's own rule ("an anchor on copy is an anchor on whatever copy is on the
+screen") with the failure message as the counterexample, and it is why the
+frame is a *proof* rather than a photograph: a frame can only be taken once
+the search has answered.
+
+**Two faults nothing had run for a release.** `PlaybackPillTest`'s wide case
+asked for 840 dp with `Modifier.requiredWidth`, which sets a minimum the root
+still caps, so the pill was measured at the phone's 393 dp and took the phone's
+two rows: the test had been measuring the wrong shape and calling it the
+tablet's. A `Layout` that offers the measure is how a test asks for a width
+the screen does not have. And "share the row" was asserted as an order rather
+than as company: both children are centered, so the shorter one starts lower,
+and the assertion was false about a pill that was already the one row.
+`ShareCardCaptureTest`'s crash is fixed too: a bitmap Android has released
+throws on `width`, and the read is now guarded, so an undrawable card is a card
+the reader is not sent.
+
+**Still red, and neither is from this change.** `SystemThemeTest`'s second
+half: after the phone is put back to day, the app's own configuration says day
+and the drawn ground stays dark for three minutes, which is D-115's promise
+unkept. It fails identically with this session's changes stashed, so it is a
+real defect and not a regression. `ShareCardCaptureTest` cannot pass on a
+software-rendered emulator at all: the layer the long card is drawn from has
+no bitmap to copy.
+
+**The suite, locally, on the phone profile.** 62 tests, 60 green:
+`ScreenshotTest` (the tour, all eight frames), `WordByWordTest`,
+`PlaybackPillTest` (nine, all green, including the two new centred cases),
+`SettingsRowAlignmentTest` (three), `MushafTurnTest`, `TafsirDirectionTest`,
+`SavedNotesTest`, `SettingsVisibilityTest`, `ContentSearchTest` (eleven),
+`AyahActionsTest`, `SearchMeaningTest`, the data store's classes, and the rest.
+The two above are the two that are not.
+
+**The frame the emulator took is a lesson of its own.** The local `pixel35`
+capture of a *sheet* frame photographs the reading behind it, because an ATD
+image's `Screenshot.capture()` does not composite a dialog window the way a
+GitHub runner's does. The tests are the local instrument; the frames are CI's.
+D-129's rule about frames that lie through the read tool has a second half: a
+frame can also lie because the machine that took it cannot see the window.

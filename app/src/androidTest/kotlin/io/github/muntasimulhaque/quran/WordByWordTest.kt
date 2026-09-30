@@ -71,11 +71,11 @@ class WordByWordTest {
         // wait is generous on purpose: a software-rendered emulator takes its
         // time opening the content library, and a slow machine is not a
         // failing reading aid.
-        compose.waitUntil(timeoutMillis = 90_000) {
+        compose.waitUntil(timeoutMillis = 180_000) {
             compose.onAllNodesWithTag("word-by-word", useUnmergedTree = true)
                     .fetchSemanticsNodes().isNotEmpty()
         }
-        compose.waitUntil(timeoutMillis = 90_000) {
+        compose.waitUntil(timeoutMillis = 180_000) {
             compose.onAllNodesWithText("নামে", substring = true, useUnmergedTree = true)
                     .fetchSemanticsNodes().isNotEmpty()
         }
@@ -95,11 +95,11 @@ class WordByWordTest {
      */
     @Test
     fun aWordStandsOverItsOwnMeaning() {
-        compose.waitUntil(timeoutMillis = 90_000) {
+        compose.waitUntil(timeoutMillis = 180_000) {
             compose.onAllNodesWithTag("word-by-word", useUnmergedTree = true)
                     .fetchSemanticsNodes().isNotEmpty()
         }
-        compose.waitUntil(timeoutMillis = 90_000) {
+        compose.waitUntil(timeoutMillis = 180_000) {
             compose.onAllNodesWithText("নামে", substring = true, useUnmergedTree = true)
                     .fetchSemanticsNodes().isNotEmpty()
         }
