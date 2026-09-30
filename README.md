@@ -4,19 +4,25 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**In the tree, riding the next release.** The reading answers the reader:
-word by word is a grid instead of a heap, the ayah card opens with its ayah,
-the mushaf page is ruled and has an edge, the bar's scrim no longer dims the
-page's own surah name, a word in the study reading can be heard again and
-again, a footnote marker is a raised figure again, a sheet is a page rather
-than a floating card, there is a heading for a screen reader to jump by, the
-store's first frame is a full page, a startup profile is wired and its cost
-measured, and Bangla is set in a face the app chose rather than in whatever
-the phone happened to ship. D-122 has the reasoning; no `versionCode` moved
-for any of it.
+**Status:** 3.1 (versionCode 32) is ready for the Play Console and is not
+uploaded yet. The bundle is `play-store/aab/quran-3.1-vc32.aab`, signed with
+the shared upload key; the store screenshots were accepted as they stand, and
+refreshing them for the ten inch form factor is the first work of the next
+session (D-125).
 
-**Status:** 3.0 (versionCode 31) is submitted to Google Play for review
-(D-118, D-119, D-120), carrying the thirty-eighth session's three reports:
+**What 3.1 carries.** The reading answers the reader: word by word is a grid
+instead of a heap, the ayah card opens with its ayah, the mushaf page is ruled
+and has an edge, the bar's scrim no longer dims the page's own surah name, a
+word in the study reading can be heard again and again from its own tile, a
+footnote marker is a raised figure again, a sheet is a page rather than a
+floating card, there is a heading for a screen reader to jump by, the store's
+first frame is a full page, and a startup profile is wired with its cost
+measured. The Bangla face the app chose was tried and taken back out until a
+device can look at it. D-122 has the reasoning and D-124 the two test failures
+that held the release until they were found.
+
+**3.0** (versionCode 31) is the release in Google Play, and carries the
+thirty-eighth session's three reports (D-118, D-119, D-120):
 
 - The end of the recitation is one answer, not three switches: repeat the
   ayah, repeat the surah, or carry on to the next surah. Turning one on turns

@@ -5914,3 +5914,58 @@ the card with its ayah, the ruled page, the scrim, the headings, the sheets,
 the baseline profile, and the word heard from the aid. It is green on every
 JVM check and on the release build. It is not green on a device, and it does
 not go to Play until it is.
+
+## D-125: The 3.1 release
+
+Date: the thirty-ninth session, at the owner's word: "go for play release,
+don't wait for me, so I can just upload to the play console", and then, when
+the capture legs were still red on the wide form factors, "I don't need the
+screenshots now, just finish the task if the aab is there". 3.1 (versionCode
+32) carries D-122 and D-124: the reading answers the reader, and the two test
+failures that held the release were found and fixed.
+
+**What the two failures were, since they are the story of this release.**
+Both word by word tests were red on every leg because a role on a tile merged
+its word and its meaning into one labelled node, and because the tests read
+the merged semantics tree where a tag on a container is not surfaced; the
+tile now says what its tap does without swallowing its own words, and the
+tests read the unmerged tree, which is what this repository's own `waitForTag`
+has always done. The tour was red on the wide legs because it tapped the
+reading's exact centre, which the house rule says never to do, and because it
+pressed the ayah while a sheet from the step before was still on the screen;
+it taps the quiet margin now and retries on the outcome it needs.
+
+**The gates.** All five ran green on the owner's machine before the push:
+`verify` 29 datasets, `audit` 6236 ayahs compared, 6235 letter identical, 1
+accepted orthographic variant, 0 unexplained differences, `fonts` every
+coverage check (628,169 study codepoints, 604 pages, 22,985,678 reading
+codepoints), `search` 65 Bangla and 63 Arabic round trips with 465 readable
+excerpts, and `checkdb` the committed database unchanged at 128,966,656 bytes,
+SHA-256 `380e0442fca812d8533bad80670d709acac0880fd95215a946519a38b5ef2b56`. The
+content is byte-identical to 3.0, which is the point: a release that changes
+the reading changes no content.
+
+**The bundle.** From the newest green build on `main`, run 36664066056, whose
+three jobs (gates, data instrumented tests, signed bundle) are all green:
+`quran-3.1-vc32.aab`, 148,760,575 bytes, SHA-256
+`21eff23856898f0249737eb6a3c1db8cd3c9833346121be35c1a7b35460c7231`, matching
+the artifact's own recorded checksum, `jar verified`, signed with the shared
+upload key (`53:7D:09:D2:...:0D:9D:E5:21`), carrying only the core pack: no
+development pack, the page fonts, the study font, and the recitation manifest.
+
+**The screenshots are not refreshed, and that is the owner's call, on the
+record.** The runbook says the bundle and the set are one delivery; the owner
+accepted the bundle alone for this release. The capture run 36664066010 left
+the phone and the 7 inch sets complete (eight frames each) and the 10 inch set
+one frame short, because the tour's last step failed on that leg while the two
+fixed test classes passed there. So the next session's first work is: the
+10 inch tour step, then a refreshed store set for all three form factors. The
+frames of this run are in its artifacts and are not installed.
+
+**What the release is measured by.** `:core:test` (98, including the seven
+`WordGridTest` cases), `:data:testDebugUnitTest`, `:app:testDebugUnitTest`,
+`:app:lintDebug`, `:app:assembleDebug`, `:app:compileDebugAndroidTestKotlin`,
+`:benchmark:assembleBenchmark` and `:app:assembleRelease` are green on the
+owner's machine, and CI is green on the build run. The instrumented suites are
+green on the phone and the 7 inch form factors, and the one red class on the
+10 inch form factor is named above rather than hidden.
