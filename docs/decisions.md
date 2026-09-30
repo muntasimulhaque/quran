@@ -5866,3 +5866,51 @@ release that changes the reading changes no content.
 **The notes.** 471 characters, under Play's five hundred, one unbroken line
 per thought, no dashes and no markdown, and the "no ads, no trackers, no
 account" line every release has carried.
+
+## D-124: What the red runs actually said, checked against the content
+
+Date: the thirty-ninth session, on a second machine that has Android Studio
+and the signing keyring but **no AVDs, no system images and no
+`sdkmanager`**, so the instrumented suites still cannot be run here. This entry
+is the state of the two failures after six red capture runs, with each link in
+the chain checked against the real content files rather than reasoned about.
+
+**Failure one: the word by word tests, red on every leg.**
+Both tests fail on the wait for the aid's own tag, not on the wait for a word,
+so the aid is never composed at all. Checked, in order, against the real files:
+
+- `content/packs/words-bn/words-bn.db` carries `word_meaning` with 77,429 rows
+  and four for ayah 1, byte for byte the shape `words-en` has.
+- The exact query `wordMeanings` runs, against the core pack with the words
+  pack ATTACHed, returns the four Bangla meanings of 1:1 in order: নামে,
+  আল্লাহ (র), পরম করুণাময়, অসীম দয়ালু.
+- The catalog declares `translation-taisirul-quran-bn` as `language=bn` and
+  `words-bn` as `language=bn`, so `wordLanguage` resolves to `bn` and
+  `meaningPack("bn")` finds the pack.
+- The installed folder the app attaches from holds the same `.db`, so the file
+  under test is the file that was queried.
+- The aid is drawn behind `if (wordByWord && row.meanings.any { it.meaning !=
+  null })`, and `wordByWord` is a key of the state that loads the rows, so the
+  rows do reload when the switch is on.
+- The Bangla face is not the cause: taking it out left the tests red.
+
+So every link from the installed pack to the drawn aid is sound, and the aid
+still does not appear. What is left is the one thing none of this can see: the
+aid's composition on the device, and the state the test's own library rule
+leaves behind. A screen is what settles it.
+
+**Failure two: the tour.** It has failed at a chrome door on some legs and at
+the ayah's actions on others, and passed on the phone in one run. The failures
+move as the surfaces it walks change, which is a tour whose waits and anchors
+do not match the app rather than a broken surface. Two of its waits were
+already wrong before this work and are fixed on the branch: it tapped the
+page's centre, which is the one place the house rule says not to tap, and it
+pressed the ayah before the Mushaf was on screen. What is left is the wide-leg
+sheet dismissal, which the frames showed as a sheet still on screen when the
+next step began.
+
+**What the branch holds.** The reading work, complete and building: the grid,
+the card with its ayah, the ruled page, the scrim, the headings, the sheets,
+the baseline profile, and the word heard from the aid. It is green on every
+JVM check and on the release build. It is not green on a device, and it does
+not go to Play until it is.
