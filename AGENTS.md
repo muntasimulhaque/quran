@@ -1057,6 +1057,33 @@ fetching them again; the space is worth less than the time.
   lines were fixed in the fourteenth session while the pager still ran left
   to right on the screen; `MushafTurnTest` now pins the direction on every
   form factor.
+* **A role on a node merges it.** A tap target that carries a role turns its
+  children into one labelled node, so a tile whose two lines are a word and
+  its meaning stops being two pieces of text: a screen reader hears one label
+  and a test that waits for the meaning waits forever. Give the node the tap,
+  say what the tap does as an action, and leave the text alone. Found the hard
+  way: the word by word aid's tiles wore `Role.Button` and two tests were red
+  on all three form factors for six capture runs.
+* **A tag on a container is not in the merged tree.** `onAllNodesWithTag`
+  defaults to `useUnmergedTree = false`, where a tag whose node has no other
+  semantics of its own is not surfaced; the repository's own `waitForTag`
+  reads the unmerged tree and every test that waits on a tag should do the
+  same. This one cost a cycle on its own.
+* **A test must set its own reader state.** These instrumented classes share
+  one install and one process, so a test that does not set the reading place
+  or the mode inherits whatever the last one left. Every test that depends on
+  a place must set it, or moving the *store's* first frame breaks a test that
+  has nothing to do with the store.
+* **When a capture leg is red, read the frames it kept before touching
+  anything.** Three separate wrong diagnoses this session were solved by
+  looking at one kept frame: a set of underlined links, a chrome that was up
+  when the log said it was not, and a sheet still on the screen while the next
+  step pressed through it. The log tells you which assertion failed; the frame
+  tells you what the reader was looking at.
+* **A "for a moment" sleep is where a wide leg breaks.** The tour's fixed
+  sleeps passed on the phone and failed on the 10 inch one across three runs;
+  every wait now waits for the thing the step is aimed at (the page, the bar,
+  the sheet's own tag), which is also faster everywhere else.
 
 
 ## Where the project stands (end of the thirty-eighth session)

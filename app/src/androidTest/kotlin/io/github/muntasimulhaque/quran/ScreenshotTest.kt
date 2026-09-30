@@ -124,6 +124,12 @@ class ScreenshotTest {
     private fun hasSystemDialog(): Boolean = intruderWindow() != null
 
     /**
+     * Waits until no window of ours stands over the reading: a sheet is its
+     * own window, and it outlives its semantics by an animation. The tour
+     * already reads the window list to catch an intruder, so the same reading
+     * answers whether our own window has gone.
+     */
+    /**
      * The package that owns the window in front of the app, or null when only
      * ours is. Two questions are asked. Which window holds focus: that is the
      * ordinary case, and the owner's name goes into the failure message. And
@@ -432,16 +438,36 @@ class ScreenshotTest {
         // off the page meets. The Arabic line sits at the top of the block;
         // the markers, which are links, sit lower, and a link would take the
         // press instead.
-        revealChrome()
-        rule.onNodeWithContentDescription("Switch to the Mushaf page").performClick()
-        // The Mushaf has to be the reading on the screen before the ayah's
-        // node is pressed. A fixed sleep let the press land while a sheet from
-        // the step before was still leaving, and the press went to the
-        // scrim; the wait is on the page itself, which is the thing the press
-        // is aimed at.
-        rule.waitUntil(timeoutMillis = 15_000) {
-            rule.onAllNodes(hasContentDescription("Mushaf page", substring = true))
-                .fetchSemanticsNodes().isNotEmpty()
+        // The mode door takes the reader to the Mushaf, and on the ten inch
+        // leg a sheet from the step before can still be on the screen with its
+        // scrim eating the press. The question that matters is not whether the
+        // sheet is gone but whether the door worked, so the step retries on its
+        // own outcome, with a back key to put away anything still standing: a
+        // sheet outlives its semantics by an animation, which is why a wait on
+        // the tag was not enough.
+        var inMushafNow = false
+        repeat(3) {
+            if (inMushafNow) return@repeat
+            // every press in this step is tolerant: with a sheet still
+            // standing the chrome is not up, and a door that is not there yet
+            // is a reason to put the sheet away and try again, not to fail
+            revealChrome()
+            runCatching {
+                rule.onNodeWithContentDescription("Switch to the Mushaf page").performClick()
+            }
+            inMushafNow = runCatching {
+                rule.waitUntil(timeoutMillis = 8_000) {
+                    rule.onAllNodes(hasContentDescription("Mushaf page", substring = true))
+                        .fetchSemanticsNodes().isNotEmpty()
+                }
+            }.isSuccess
+            if (!inMushafNow) {
+                back()
+                Thread.sleep(800)
+            }
+        }
+        if (!inMushafNow) {
+            throw AssertionError("the mode door did not reach the Mushaf page")
         }
         // the ayah's own node on the page, by the reference the tour set up
         rule.onAllNodes(hasContentDescription("2:255.", substring = true)).onFirst()
