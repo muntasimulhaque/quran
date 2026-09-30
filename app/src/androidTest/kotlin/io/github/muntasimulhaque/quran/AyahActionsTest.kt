@@ -95,12 +95,16 @@ class AyahActionsTest {
         val studyPage = compose.activity.getString(StudyR.string.study_page_description)
         compose.onAllNodesWithContentDescription(studyPage).onFirst()
             .tapThePaper()
-        compose.waitUntil(timeoutMillis = 15_000) {
+        // Minutes, not seconds: a slow emulator is not a failing reading
+        // aid, and the house rule for a wait that watches text is the one
+        // [waitForStudy] already follows. Fifteen seconds timed out on a
+        // cold first run before the block had drawn, twice.
+        compose.waitUntil(timeoutMillis = 60_000) {
             compose.onAllNodesWithText("1:1", substring = true).fetchSemanticsNodes().isNotEmpty()
         }
         compose.onAllNodesWithText("1:1", substring = true).onFirst()
             .performTouchInput { longClick() }
-        compose.waitUntil(timeoutMillis = 15_000) {
+        compose.waitUntil(timeoutMillis = 60_000) {
             compose.onAllNodesWithContentDescription("Tafsir").fetchSemanticsNodes().isNotEmpty()
         }
     }

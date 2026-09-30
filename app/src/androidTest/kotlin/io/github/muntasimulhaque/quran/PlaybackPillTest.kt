@@ -1,5 +1,6 @@
 package io.github.muntasimulhaque.quran
 
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
@@ -148,7 +149,12 @@ class PlaybackPillTest {
     fun theWordsShareTheRowOnAWidePill() {
         // A tablet, or a phone in landscape: the words keep their measure, so
         // the pill is the one row it has always been.
-        showPill(pillWidth = Modifier.width(840.dp))
+        //
+        // `requiredWidth`, not `width`: the test's own root is the phone
+        // profile it runs on, and a plain `width` is coerced by the parent's
+        // cap, so the "wide" pill was measured at the phone's width and took
+        // the phone's two rows. This asks for the width the test is about.
+        showPill(pillWidth = Modifier.requiredWidth(840.dp))
         val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
         val play = compose.onNodeWithContentDescription("Play or pause").getUnclippedBoundsInRoot()
         assertTrue(

@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 3.1 (versionCode 32)
+Version: 3.2 (versionCode 33)
 
 ## Listing
 
@@ -200,6 +200,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (3.2, 295 characters)
+
+The app has a new face. The icon on the home screen, the themed icon, the mark in the notification shade, and the mark at the foot of a shared ayah are now the letter that begins the word Quran, drawn with a reed pen's own contrast in ivory and gold on deep ink. No ads, no trackers, no account.
 
 ## Release notes (3.1)
 
