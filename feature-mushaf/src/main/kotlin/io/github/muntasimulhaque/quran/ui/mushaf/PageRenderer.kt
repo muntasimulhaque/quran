@@ -269,8 +269,9 @@ class PageRenderer(private val context: Context) {
         // and black rules, and that rule is also what gives the page an edge
         // on a wide ground: without it the page and the app's background are
         // the same colour and the sheet of paper stops existing off a phone.
-        drawPageRule(canvas, widthPx, height, band, textWidth, rulePaint)
-        drawFooter(canvas, key.page, widthPx, height, band, textWidth, fontPx, ornamentPaint, rulePaint, content)
+        val frame = PageFrame.of(widthPx, height, band, textWidth)
+        drawPageRule(canvas, frame, rulePaint)
+        drawFooter(canvas, key.page, frame, widthPx, fontPx, ornamentPaint, rulePaint, content)
 
         for (line in lines) {
             val slotTop = band + (line.line - 1) * lineHeight
@@ -341,7 +342,7 @@ class PageRenderer(private val context: Context) {
     }
 
     /**
-     * The page's own rule: a hairline frame at the text measure, from the
+     * The page's own rule: a hairline frame around the text measure, from the
      * head band to the foot band, in the ornament tone a shade quieter than
      * the foot rule that carries the page number.
      *
@@ -350,46 +351,36 @@ class PageRenderer(private val context: Context) {
      * quietly than any ornament. It is a hairline, because it is a printed
      * page and the paper is the subject; it is at the text measure rather than
      * the page's edge, because the measure is where a reader's eye already is.
+     *
+     * The frame stands off the text rather than on it. A line of the page is
+     * justified to the measure itself, so a rule drawn on the measure touches
+     * the last glyph of every line, and a page that rules its own text with
+     * nothing between reads as a screen of boxes (owner report, D-130). The
+     * gap is the one the lines already leave above and below themselves, so
+     * the frame reads as one rectangle around the block on all four sides.
      */
-    private fun drawPageRule(
-        canvas: Canvas,
-        widthPx: Int,
-        height: Int,
-        band: Float,
-        textWidth: Float,
-        rule: Paint,
-    ) {
+    private fun drawPageRule(canvas: Canvas, frame: PageFrame, rule: Paint) {
         val quiet = Paint(rule)
         quiet.alpha = (rule.alpha * 0.5f).toInt().coerceIn(1, 255)
-        val left = (widthPx - textWidth) / 2f
-        val right = (widthPx + textWidth) / 2f
-        canvas.drawLine(left, band, left, height - band, quiet)
-        canvas.drawLine(right, band, right, height - band, quiet)
-        canvas.drawLine(left, band, right, band, quiet)
+        canvas.drawLine(frame.left, frame.head, frame.left, frame.foot, quiet)
+        canvas.drawLine(frame.right, frame.head, frame.right, frame.foot, quiet)
+        canvas.drawLine(frame.left, frame.head, frame.right, frame.head, quiet)
     }
 
     private fun drawFooter(
         canvas: Canvas,
         page: Int,
+        frame: PageFrame,
         widthPx: Int,
-        height: Int,
-        band: Float,
-        textWidth: Float,
         fontPx: Float,
         paint: Paint,
         rule: Paint,
         content: ContentDatabase,
     ) {
-        val top = height - band
-        canvas.drawLine(
-            (widthPx - textWidth) / 2f,
-            top,
-            (widthPx + textWidth) / 2f,
-            top,
-            rule,
-        )
+        val top = frame.foot
+        canvas.drawLine(frame.left, top, frame.right, top, rule)
         val radius = fontPx * MEDALLION_RATIO
-        val centerY = top + band / 2f
+        val centerY = top + frame.band / 2f
         // The page number stands in a hairline roundel, the way a printed
         // page rules it, rather than in a filled disc: a disc of gold behind
         // gold is a heavier mark than the page's own furniture is.
@@ -409,11 +400,45 @@ class PageRenderer(private val context: Context) {
         paint.textAlign = Paint.Align.LEFT
         canvas.drawText(
             "${ARABIC_JUZ} ${arabicDigits(juz)}",
-            (widthPx - textWidth) / 2f,
+            frame.left,
             baseline,
             paint,
         )
         paint.textAlign = Paint.Align.CENTER
+    }
+
+    /**
+     * The rectangle a page's own furniture is ruled in: the text measure, held
+     * off by [PageRenderer.RULE_INSET_RATIO] of the page's width so the rule
+     * has a gap of its own between itself and the text, and the foot's rule
+     * ends where the sides stand rather than a hair inside them.
+     *
+     * The inset is a share of the page's width rather than a fixed number of
+     * pixels, because the page is rendered at the width it will be shown at:
+     * a share is the same gap on a phone and on a tablet, and a number of
+     * pixels would be a hairline on one and a moat on the other.
+     */
+    private class PageFrame(
+        val left: Float,
+        val right: Float,
+        val head: Float,
+        val foot: Float,
+        /** The head band's own height, which is the room the foot's furniture sits in. */
+        val band: Float,
+    ) {
+        companion object {
+            fun of(widthPx: Int, height: Int, band: Float, textWidth: Float): PageFrame {
+                val inset = widthPx * RULE_INSET_RATIO
+                val half = (widthPx - textWidth) / 2f
+                return PageFrame(
+                    left = half - inset,
+                    right = widthPx - half + inset,
+                    head = band,
+                    foot = height - band,
+                    band = band,
+                )
+            }
+        }
     }
 
     private fun hafsTypeface(): Typeface? = hafs ?: runCatching {
@@ -437,6 +462,13 @@ class PageRenderer(private val context: Context) {
 
         /** The head and foot bands that carry the page's own furniture. */
         const val BAND_RATIO = 0.86f
+
+        /**
+         * The gap between the page's rule and its text, as a share of the
+         * page's width. About the gap the lines already leave above and below
+         * themselves, so the frame stands off the block on all four sides.
+         */
+        const val RULE_INSET_RATIO = 0.014f
         const val HEADER_RATIO = 0.34f
         const val SURAH_NAME_RATIO = 0.62f
         const val BASMALLA_RATIO = 0.8f

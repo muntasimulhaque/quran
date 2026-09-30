@@ -16,7 +16,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import io.github.muntasimulhaque.quran.daily.DailyAyahScheduler
-import io.github.muntasimulhaque.quran.daily.rememberExactAlarmsAllowed
 import io.github.muntasimulhaque.quran.daily.rememberNotificationsBlocked
 import io.github.muntasimulhaque.quran.daily.reminderChannelHidden
 import io.github.muntasimulhaque.quran.data.LanguagePreference
@@ -85,12 +84,6 @@ class MainActivity : ComponentActivity() {
             // to the foreground: the reader can change it in the system
             // settings and return without a restart.
             val notificationsBlocked = rememberNotificationsBlocked()
-            // The same shape for the one permission this app asks the reader
-            // to grant in the phone's own settings: an exact time for the
-            // reminder, so it arrives on a phone that is locked and asleep at
-            // the chosen minute. The reminder works without it, and the Daily
-            // page is where the app says what is missing and offers the tap.
-            val exactAlarmsAllowed = rememberExactAlarmsAllowed()
             QuranApp(
                 initialAyah = intent?.let { incoming ->
                     // No extra, no jump. 0 is the sentinel, and it must never
@@ -100,9 +93,7 @@ class MainActivity : ComponentActivity() {
                 },
                 onPlaybackPermission = ::ensureNotificationPermission,
                 notificationsBlocked = { notificationsBlocked.value },
-                exactAlarmsAllowed = { exactAlarmsAllowed.value },
                 onOpenNotificationSettings = ::openNotificationSettings,
-                onOpenExactAlarmSettings = ::openExactAlarmSettings,
             )
         }
     }
@@ -146,30 +137,6 @@ class MainActivity : ComponentActivity() {
         val granted = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
             PackageManager.PERMISSION_GRANTED
         if (!granted) requestNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
-    }
-
-    /**
-     * The phone's own page for exact alarms, which is where a reader grants
-     * this one: Android 12 and later do not give it at install, and the app
-     * does not interrupt anything to ask for it. The Daily page names what is
-     * missing and opens this, and the reminder is already working (inside the
-     * minute) on the way there. Releases before Android 12 never gated it, so
-     * there is nothing to open and the page never offers it.
-     */
-    private fun openExactAlarmSettings() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
-        val page = Intent(
-            Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
-            android.net.Uri.parse("package:" + packageName),
-        )
-        try {
-            startActivity(page.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-        } catch (notFound: ActivityNotFoundException) {
-            // A phone whose settings app has no such page still has the app's
-            // own notification settings, which is the next best place to find
-            // the switch, so the reader is sent there rather than nowhere.
-            openNotificationSettings()
-        }
     }
 
     companion object {

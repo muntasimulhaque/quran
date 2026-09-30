@@ -216,13 +216,20 @@ fun PlaybackBar(
                     PillControls(controls)
                 }
             } else {
-                // The words keep the whole width of the pill, and the
-                // controls sit under them, last mark at the end as they are
-                // everywhere else in the app (D-119, and the settings tail in
-                // D-120). The inset is the capsule's own: the corner of a
-                // 98 dp pill reaches further in than the corner of a 55 dp
-                // one, so the first line starts where the curve has cleared.
-                PlaybackWords(
+                // The words keep the whole width of the pill and the controls
+                // sit under them (D-119). Both lines are centred on the pill,
+                // and the words are one line rather than two: the reciter's
+                // name stood over the place with the pill's own left edge
+                // behind them both, so the reader's eye went to the corner of
+                // a capsule to find out who was reading and where they were
+                // (owner report, D-130). A row that says both, centred, with
+                // the controls centred under it, is the shape a hand expects
+                // of a control floating over the page.
+                //
+                // The inset is the capsule's own: the corner of a pill this
+                // tall reaches further in than the corner of a 55 dp one, so
+                // the lines keep clear of the curve at the top and the foot.
+                PlaybackWordsLine(
                     reciterName = reciterName,
                     status = status,
                     onReciter = onReciter,
@@ -231,14 +238,14 @@ fun PlaybackBar(
                     end = end,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 8.dp),
+                        .padding(horizontal = 20.dp, vertical = 10.dp),
                 )
                 PillControls(
                     controls = controls,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(end = 6.dp),
-                    arrangement = Arrangement.End,
+                        .padding(bottom = 6.dp),
+                    arrangement = Arrangement.Center,
                 )
             }
             if (downloading) {
@@ -259,8 +266,56 @@ fun PlaybackBar(
 }
 
 /**
- * The pill's words: who is reading, and where the reader is, and, while a
- * recitation plays, the door to the pace and to what happens at the end.
+ * The pill's words on one line, which is the shape the two-row pill wears:
+ * who is reading, and where the reader is, side by side, with the whole line
+ * centred on the pill and the controls centred under it (owner report,
+ * D-130).
+ *
+ * The reciter's name is the door to the reciter chooser and the line beside it
+ * is the door to the listening menu, which wears a chevron so it can be found
+ * without a guess. Neither door is the line around it: the row is a container
+ * for two controls, and a container that answered taps would take both.
+ */
+@Composable
+private fun PlaybackWordsLine(
+    reciterName: String,
+    status: String,
+    onReciter: () -> Unit,
+    /** The pace and the end of the audio, or null where there is nothing to hear. */
+    onListening: Pair<(Float) -> Unit, (EndOfAudio) -> Unit>?,
+    speed: Float,
+    end: EndOfAudio,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier.testTag("playback-words"),
+        horizontalArrangement = Arrangement.spacedBy(WordsGap, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = reciterName,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .clip(RoundedCornerShape(50))
+                .clickable(onClick = onReciter)
+                .padding(horizontal = 4.dp, vertical = 2.dp),
+        )
+        PlaybackStatusLine(
+            text = status,
+            onListening = onListening,
+            speed = speed,
+            end = end,
+        )
+    }
+}
+
+/**
+ * The pill's words on two lines, which is the shape the one-row pill wears: a
+ * tablet or a landscape phone has the measure for both lines beside four
+ * controls, and this is how they read there (D-119).
  *
  * The reciter's name is the door to the reciter chooser and the line under
  * it is the door to the listening menu, which wears a chevron so it can be
@@ -301,10 +356,14 @@ private fun PlaybackWords(
 }
 
 /**
- * The pill's second line: what the reader is hearing, and, while a recitation
- * plays, the door to the pace and the end of the audio. The door is the line
- * itself and it wears a chevron so it can be found without a guess; the
- * chevron is gone when there is nothing behind it.
+ * Where the reader is, and, while a recitation plays, the door to the pace
+ * and to the end of the audio. The door is the line itself and it wears a
+ * chevron so it can be found without a guess; the chevron is gone when there
+ * is nothing behind it.
+ *
+ * It is the second line of the wide pill's pair of words and the second half
+ * of the phone pill's one line, and it is the same composable in both: one
+ * place decides what the status says and what its door opens.
  */
 @Composable
 private fun PlaybackStatusLine(

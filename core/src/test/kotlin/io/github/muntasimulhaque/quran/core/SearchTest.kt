@@ -55,6 +55,28 @@ class SearchTest {
         assertTrue(Search.parse("Allah الرحمن")!!.arabic)
     }
 
+    /**
+     * The one fact the app spends work on: a query that is not Arabic carries
+     * no Arabic letter, so it cannot match a row of a column that holds only
+     * Arabic. The other half of that is the `search` gate in `tools`, which
+     * audits the Quran's own indexed column for a Latin letter or a digit, and
+     * this test is the half that lives in the query (owner report, D-130).
+     */
+    @Test
+    fun `a query that is not arabic carries no arabic letter`() {
+        for (input in listOf("mercy", "hypocrites", "2:255", "God's Mercy.", "36")) {
+            val query = Search.parse(input)!!
+            assertFalse(
+                "$input must not be read as arabic",
+                query.arabic,
+            )
+            assertTrue(
+                "$input must carry no arabic letter in its terms",
+                query.terms.none { term -> term.codePoints().anyMatch(RichText::isArabic) },
+            )
+        }
+    }
+
     @Test
     fun `wildcards in a term are escaped`() {
         assertEquals("%100\\%%", Search.pattern("100%"))

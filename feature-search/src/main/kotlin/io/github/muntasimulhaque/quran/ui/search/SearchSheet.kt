@@ -79,16 +79,35 @@ import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 /** More than a screenful of scroll is not a search; the rest is a narrower query. */
 private const val LIMIT = 200
 
 /**
+ * How long a query has to sit still before it is run.
+ *
+ * A reader's hand outruns their typing: "mercy" arrives as five queries, and
+ * each one is a pass over the whole of the reader's library. Five passes at
+ * once on a phone are five scans contending for the same four cores, so the
+ * results that land are the results of a busy machine rather than a fast one,
+ * and the search the owner reported as slow was mostly this (owner report,
+ * D-130). One search per settled query is both the promise this sheet has
+ * always made in its own words and the fastest thing to hand a reader.
+ *
+ * The wait is short enough to read as instant and long enough to be past the
+ * gap between two keys of a fast typist, and the first keystroke pays it too:
+ * a reader who types one letter and waits is answered by a real search, not
+ * by a search that is still settling.
+ */
+private const val SETTLE_MILLIS = 120L
+
+/**
  * The search sheet: one field, no modes, everything the reader has turned on.
- * Results are computed on a worker thread from index columns, so the first
- * keystroke and the hundredth cost the same, and a new query cancels the one
- * before it.
+ * Results are computed on a worker thread from index columns, one search per
+ * settled query, so the first query and the hundredth cost the same and a new
+ * one cancels the one before it (owner report, D-130).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -127,6 +146,11 @@ fun SearchSheet(
      * One search per settled keystroke, or per changed filter: a new query
      * cancels the one before it instead of queueing behind it, so the reader
      * always sees the results of what they last asked for.
+     *
+     * Settled means settled: the query waits [SETTLE_MILLIS] before it runs,
+     * because a search per key is a search per word five times over, and a
+     * search that gives up early when it is superseded (see `search`) cannot
+     * give up work that has already been handed to the database.
      */
     LaunchedEffect(text, content, sources) {
         val query = Search.parse(text)
@@ -135,7 +159,12 @@ fun SearchSheet(
             searching = false
             return@LaunchedEffect
         }
+        delay(SETTLE_MILLIS)
         searching = true
+        // The search is blocking work over the reader's whole library, so it
+        // runs on a worker; the delay above is where a superseded query is
+        // dropped, and the database checks for the same thing between its own
+        // passes so a query already inside SQLite gives up at the next source.
         val found = withContext(Dispatchers.IO) {
             content.search(
                 SearchRequest(
@@ -152,6 +181,17 @@ fun SearchSheet(
         }
         results = found
         searching = false
+    }
+
+    /*
+     * The tafsir is the one source too big to read per keystroke, so the app
+     * keeps a folded copy of the enabled packs in memory and builds it when
+     * the sheet opens rather than inside the reader's first query: opening the
+     * sheet is the moment they have said they mean to search, and the build
+     * then happens while the field is still empty (owner report, D-130).
+     */
+    LaunchedEffect(content, tafsirPacks) {
+        content.warmTafsir(tafsirPacks)
     }
 
     ModalBottomSheet(

@@ -1,26 +1,21 @@
 package io.github.muntasimulhaque.quran.ui.study
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.draw.clip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.CustomAccessibilityAction
@@ -28,14 +23,10 @@ import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.muntasimulhaque.quran.core.WordGrid
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -45,22 +36,28 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * The study reading and the ayah card draw the same aid, so a reader who
  * learns it in one place finds it in the other.
  *
- * The aid is a grid, and that is the whole of the change. A flow of tiles
- * each as wide as its own meaning reads as a heap: nothing lines up, the
- * words drift out of the order of the verse, and the eye has to hunt for the
- * pair it was told about. Here every tile is the width of the widest one in
- * this ayah, so the words stand in columns, each word sits over the meaning
- * that is its own, and the meanings of a row share one baseline. The column
- * count comes from the measure the parent actually has, so the aid reads the
- * same on a phone and on a tablet and neither is a number typed in by hand.
+ * The aid is a flow of pairs, and each pair is as wide as its own meaning.
+ * That is what it was before D-122 made it a grid, and it is what the owner
+ * put back after reading the grid on a phone: a grid measures every tile
+ * against the widest meaning in the ayah, so on a long ayah the tiles are
+ * half empty, two of them stand in a row, and the whole aid runs to twice
+ * the length of the verse it glosses. A pair that is as wide as its own
+ * words reads as one unit whatever the ayah says, and a row of them reads
+ * across the screen the way the verse above it does.
+ *
+ * The cost the grid was made to close is real and it is paid for
+ * differently: the pairs in a row are not in columns, so two long meanings
+ * can leave a short one in a gap. The eye still never hunts for a pair,
+ * because the word sits directly over its own meaning and the flow keeps
+ * the verse's own order (owner report, D-130, which reverses the grid of
+ * D-122).
  *
  * The word sits centred over its meaning, because the two are one unit: a
  * word hung at one edge of a longer meaning reads as belonging to its
- * neighbour. The Arabic is set at the ayah's own ratio to its translation, so
- * the aid is a small copy of the reading rather than a footnote under it, and
- * both sizes scale with the one choice the reader made for word meanings. Its
- * own line height is tight, because the gap between a word and its meaning is
- * the gap this grid is closing.
+ * neighbour. The Arabic is set at the ayah's own ratio to its translation,
+ * so the aid is a small copy of the reading rather than a footnote under
+ * it, and both sizes scale with the one choice the reader made for word
+ * meanings.
  *
  * The meaning takes the theme's secondary tone rather than an alpha that
  * just looks quiet: that tone is what each theme defines for secondary
@@ -73,7 +70,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * it keeps the reading's own ink. The step is small either way, so the word
  * always reads as the Quran's own.
  *
- * Arabic reads right to left, so the words wrap that way too.
+ * Arabic reads right to left, so the pairs wrap that way too.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -81,7 +78,7 @@ internal fun WordByWord(
     meanings: List<WordMeaning>,
     hafs: FontFamily,
     settings: AppSettings,
-    /** What the tap on a tile does, said to a screen reader. */
+    /** What the tap on a pair does, said to a screen reader. */
     hearLabel: String,
     modifier: Modifier = Modifier,
     gloss: Boolean = true,
@@ -96,112 +93,62 @@ internal fun WordByWord(
     onWord: ((Int) -> Unit)? = null,
 ) {
     if (meanings.isEmpty()) return
-    val density = LocalDensity.current
-    val measurer = rememberTextMeasurer()
-    val wordStyle = TextStyle(fontFamily = hafs, fontSize = settings.wordsSp.sp)
-    val glossStyle = MaterialTheme.typography.bodySmall.copy(
-        fontSize = settings.wordsMeaningSp.sp,
-    )
-
-    // The longest word and the longest meaning in this ayah, measured once, to
-    // learn how wide one tile of the grid wants to be.
-    val longestWord = remember(meanings) {
-        meanings.maxByOrNull { it.word.length }?.word.orEmpty()
-    }
-    val longestMeaning = remember(meanings) {
-        meanings.maxByOrNull { it.meaning.orEmpty().length }?.meaning.orEmpty()
-    }
-    val wordWidth = measurer.measure(
-        text = longestWord,
-        style = wordStyle,
-        constraints = Constraints(),
-    ).size.width
-    val meaningWidth = measurer.measure(
-        text = longestMeaning,
-        style = glossStyle,
-        constraints = Constraints(),
-    ).size.width
-
-    BoxWithConstraints(
-        // the aid is one surface with one name, so a test can wait for the
-        // aid itself rather than for a word that may be scrolled out of a
-        // wide screen's tree
-        modifier = modifier
-            .fillMaxWidth()
-            .testTag("word-by-word"),
-    ) {
-        val available = with(density) { maxWidth.roundToPx() }
-        // the grid's width rule is pure and lives in core, where the suite
-        // holds it: a tile is as wide as the widest thing in it, never
-        // narrower than a word, and never so wide that the aid is one word a
-        // line
-        val tile = remember(available, wordWidth, meaningWidth) {
-            WordGrid.tileWidth(
-                availablePx = available,
-                wordWidthPx = wordWidth,
-                meaningWidthPx = meaningWidth,
-                padPx = with(density) { 12.dp.roundToPx() },
-            )
-        }
-        val columns = remember(tile, available) { WordGrid.columns(available, tile) }
-
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(0.dp),
-                verticalArrangement = Arrangement.spacedBy(Space.Block),
-                maxItemsInEachRow = columns,
-            ) {
-                meanings.forEachIndexed { index, meaning ->
-                    WordTile(
-                        meaning = meaning,
-                        wordStyle = wordStyle,
-                        settings = settings,
-                        gloss = gloss,
-                        width = with(density) { tile.toDp() },
-                        // the word list numbers its words from one, and
-                        // they are contiguous, so the tile's place in the
-                        // ayah is the number the reciter's timings use
-                        onClick = onWord?.let { hear -> { hear(index + 1) } },
-                        hearLabel = hearLabel,
-                    )
-                }
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+        FlowRow(
+            // the aid is one surface with one name, so a test can wait for the
+            // aid itself rather than for a word that may be scrolled out of a
+            // wide screen's tree
+            modifier = modifier
+                .fillMaxWidth()
+                .testTag("word-by-word"),
+            horizontalArrangement = Arrangement.spacedBy(Space.Block),
+            verticalArrangement = Arrangement.spacedBy(Space.Block),
+        ) {
+            meanings.forEachIndexed { index, meaning ->
+                WordPair(
+                    meaning = meaning,
+                    settings = settings,
+                    hafs = hafs,
+                    gloss = gloss,
+                    // the word list numbers its words from one, and they are
+                    // contiguous, so the pair's place in the ayah is the
+                    // number the reciter's timings use
+                    onClick = onWord?.let { hear -> { hear(index + 1) } },
+                    hearLabel = hearLabel,
+                )
             }
         }
     }
 }
 
 /**
- * One word over its meaning, in a column of the grid's own width.
+ * One word over its own meaning, as wide as the two of them and no wider.
  *
- * The row is measured at its tallest tile, so every word of a row stands on
- * one line and the meanings below them share one baseline, however long the
- * meanings are.
+ * A pair is a control, and it must not *read* as one: a role on this node
+ * merges its two lines into a single labelled node, which hides the word and
+ * the meaning from anything that reads the aid as text, screen reader and
+ * test alike. The tap is here, and what it does is said, without swallowing
+ * what the pair says.
  */
 @Composable
-private fun WordTile(
+private fun WordPair(
     meaning: WordMeaning,
-    wordStyle: TextStyle,
     settings: AppSettings,
+    hafs: FontFamily,
     gloss: Boolean,
-    width: Dp,
     onClick: (() -> Unit)?,
     hearLabel: String,
 ) {
     Column(
         modifier = Modifier
-            .width(width)
-            .height(IntrinsicSize.Min)
+            // A pair is as small as a finger can be trusted with, which is the
+            // app's own floor: a word above one meaning line is close to it
+            // already, and a short meaning must not take the target below it.
+            .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp)
             .then(
                 if (onClick == null) {
                     Modifier
                 } else {
-                    // A tile is a control, and it must not *read* as one: a
-                    // role on this node merges its two lines into a single
-                    // labelled node, which hides the word and the meaning from
-                    // anything that reads the aid as text, screen reader and
-                    // test alike. The tap is here, and what it does is said,
-                    // without swallowing what the tile says.
                     Modifier
                         .clip(RoundedCornerShape(10.dp))
                         .clickable(onClick = onClick)
@@ -211,11 +158,13 @@ private fun WordTile(
     ) {
         Text(
             text = meaning.word,
-            style = wordStyle.copy(
-                lineHeight = (settings.wordsSp * 1.15f).sp,
-                // The tiles are the same words the ayah above already shows,
+            style = TextStyle(
+                fontFamily = hafs,
+                fontSize = settings.wordsSp.sp,
+                lineHeight = (settings.wordsSp * 1.25f).sp,
+                // The pairs are the same words the ayah above already shows,
                 // so a gloss steps the Arabic one tone down from the verse's
-                // own ink: the line stays the verse, the tiles read as its
+                // own ink: the line stays the verse, the pairs read as its
                 // gloss. Still well above the reading contrast on every
                 // theme. Standalone, the aid is the reading.
                 color = if (gloss) {
@@ -239,7 +188,7 @@ private fun WordTile(
                 .padding(top = Space.Tight)
                 .semantics {
                     // the door the tap opens, said without a role that would
-                    // merge away the tile's own words
+                    // merge away the pair's own words
                     if (onClick != null) {
                         customActions = listOf(
                             CustomAccessibilityAction(hearLabel) {

@@ -139,6 +139,25 @@ class SettingsRowAlignmentTest {
             pageSlot.left.value > doorSlot.left.value,
         )
 
+        // The mark, not only its column: a page row's chevron is the row's
+        // last mark, and a mark centred in its own column stood a whole
+        // chevron short of the line every switch ends on, which is the gap the
+        // owner read as the row not knowing where it stops (owner report,
+        // D-130). The mark is read from the unmerged tree because the slot is
+        // tagged there, so its bounds come back in pixels and are brought to
+        // dp here: this test once compared the two.
+        val density = compose.density.density
+        val marks = compose.onAllNodesWithTag("row-chevron", useUnmergedTree = true)
+            .fetchSemanticsNodes()
+        assertEquals("the page row and the door row draw one chevron each", 2, marks.size)
+        val pageMarkRight = marks[0].boundsInRoot.right / density
+        assertEquals(
+            "a row with no switch ends with its chevron on the line every switch ends on",
+            alone.right.value,
+            pageMarkRight,
+            0.5f,
+        )
+
         val page = compose.onNodeWithTag("page-row").getUnclippedBoundsInRoot()
         assertTrue(
             "a page row must stay a line and its padding, not a 48 dp slot taller",
@@ -147,15 +166,21 @@ class SettingsRowAlignmentTest {
     }
 
     /**
-     * The name holds its room, whatever the value says.
+     * The name holds its room, and the value gets one line while it can.
      *
      * The owner's own sheet: the theme row's value was long enough to leave the
      * name "Theme" a column so narrow that the word broke one letter to a line
      * and the row became four lines tall, and "Font size" two. The value is
      * measured inside its own share of the row now, and the name's share is
-     * the larger one, so a long value costs the value a second line at most.
-     * The two halves both fill their share, which is what keeps the row's end
-     * standing at the same place (D-111, D-120).
+     * the larger one, so a long value costs the value a second line at most
+     * (D-116, D-120).
+     *
+     * Both of the values the sheet really prints are longer than that share,
+     * so both of them broke to a second line under a name with room to give
+     * (owner report, D-130). The name's column is now its own width and a
+     * gap, capped at the share, so these two rows are one line each, and this
+     * is the measurement that says so: the row is a line and its padding, not
+     * a line of name above a line of value.
      */
     @Test
     fun aLongValueNeverSqueezesTheName() {
@@ -170,7 +195,7 @@ class SettingsRowAlignmentTest {
                     )
                     PageRow(
                         title = "Font size",
-                        summary = "Arabic 25 · translation 14",
+                        summary = "Arabic 25, translation 14",
                         onClick = {},
                         modifier = Modifier.testTag("short-value"),
                     )
@@ -182,6 +207,16 @@ class SettingsRowAlignmentTest {
         assertTrue(
             "a long value may take a second line of its own, never a ladder of the name's",
             long.bottom - long.top <= 76.dp,
+        )
+        assertTrue(
+            "a value that fits the room the name left must not break to a second line: " +
+                "${long.bottom - long.top}",
+            long.bottom - long.top <= 56.dp,
+        )
+        val short = compose.onNodeWithTag("short-value").getUnclippedBoundsInRoot()
+        assertTrue(
+            "every value the sheet prints must stay on the row's one line",
+            short.bottom - short.top <= 56.dp,
         )
         val name = compose.onNodeWithText("Theme").getUnclippedBoundsInRoot()
         assertTrue(

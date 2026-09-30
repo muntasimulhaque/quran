@@ -9,8 +9,10 @@ import android.util.Log
 import io.github.muntasimulhaque.quran.core.Search
 import io.github.muntasimulhaque.quran.core.SearchQuery
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
+import kotlin.coroutines.coroutineContext
 import java.util.concurrent.locks.ReentrantLock
 
 /**
@@ -562,13 +564,34 @@ class ContentDatabase private constructor(
      * ("2:255", "baqara 255"). Every source is a prepared statement against
      * an index column shaped by the same normalizer the query went through,
      * so results are exact and no index has to be built at search time.
+     *
+     * This is a suspending function because it is called per keystroke and a
+     * query the reader has already moved on from must stop rather than finish:
+     * every source checks for that between passes, so a superseded search gives
+     * up at the next source instead of holding a worker's core to the end
+     * (owner report, D-130).
+     *
+     * Two rules keep the pass itself short, and both are measured facts about
+     * the content rather than guesses:
+     *
+     * - one read per source, never per row. A common word matches a hundred
+     *   and forty ayahs, and asking the database once for each of them, or
+     *   once for each of the word lists behind them, cost more than every
+     *   scan this function does put together (the word table has no index on
+     *   `ayah_number`, so each of those reads was a whole pass over it).
+     * - a source a query cannot match is not read. The Quran's own text
+     *   holds no Latin letter and no digit, and a query that is not Arabic is
+     *   made of Latin letters and digits alone, so "mercy" cannot match a row
+     *   of the Arabic column; the `search` gate in `tools` is what holds that
+     *   about the content.
      */
-    fun search(request: SearchRequest): SearchResults {
+    suspend fun search(request: SearchRequest): SearchResults {
         val query = request.query
         val limit = request.limit
         val sources = request.sources
         val leading = ArrayList<SearchHit>(9)
         val counts = intArrayOf(0, 0, 0, 0, 0) // arabic, translation, tafsir, words, surahs
+        coroutineContext.ensureActive()
 
         if (sources.surahs) {
             leading += surahHits(query).also { counts[4] = it.size }
@@ -578,14 +601,18 @@ class ContentDatabase private constructor(
         if (referenceNumber != null) {
             ayahWithPage(referenceNumber)?.let { leading += SearchHit.ReferenceHit(it.first, it.second) }
         }
+        coroutineContext.ensureActive()
 
-        // The Arabic text, matched on the normalized column.
-        val arabicNumbers = if (sources.text) {
+        // The Arabic text, matched on the normalized column, and only for a
+        // query that could match it: a Latin query carries no Arabic letter,
+        // and the column carries no Latin one.
+        val arabicNumbers = if (sources.text && query.arabic) {
             arabicMatches(query, limit).also { counts[0] = it.size }
         } else {
             emptyList()
         }
         val arabicWords = matchedWords(arabicNumbers, query.terms)
+        coroutineContext.ensureActive()
 
         // Word meanings, in the reader's language, a single word finding its ayahs.
         val wordMatches = if (sources.words) {
@@ -594,6 +621,8 @@ class ContentDatabase private constructor(
             emptyMap()
         }
         counts[3] = wordMatches.size
+        val meaningWords = matchedWords(wordMatches.mapValues { it.value.positions })
+        coroutineContext.ensureActive()
 
         // Translations: the enabled packs, each with exact highlight ranges.
         val translationPacks = if (sources.translations) request.translationPacks else emptyList()
@@ -605,6 +634,8 @@ class ContentDatabase private constructor(
                 for (number in numbers) translationByNumber.putIfAbsent(number, pack)
             }
         }
+        val translationTexts = translationTexts(translationByNumber)
+        coroutineContext.ensureActive()
 
         // One read for every ayah any source touched, instead of one read per
         // row: a search that matched two hundred ayahs must not cost two
@@ -620,11 +651,11 @@ class ContentDatabase private constructor(
         for ((number, match) in wordMatches) {
             val row = rows[number] ?: continue
             row.meaning = match.meaning
-            row.matchedWordText = match.words
+            row.matchedWordText = meaningWords[number].orEmpty()
         }
         for ((number, pack) in translationByNumber) {
             val row = rows[number] ?: continue
-            val translation = rowTranslation(number, pack) ?: continue
+            val translation = translationTexts[pack]?.get(number) ?: continue
             row.translation = TranslationHit(
                 pack = pack,
                 packName = request.packNames[pack] ?: pack,
@@ -633,6 +664,7 @@ class ContentDatabase private constructor(
                 footnotes = translation.footnotes,
             )
         }
+        coroutineContext.ensureActive()
 
         // Tafsir: each passage that matched, shown with its own range. The
         // index holds the enabled packs, folded, so this stays a memory scan,
@@ -643,6 +675,7 @@ class ContentDatabase private constructor(
         val passageAyahs = LinkedHashMap<String, Int>()
         val matchedPassages = ArrayList<Pair<String, PassageRow>>()
         for (pack in tafsirPacks) {
+            coroutineContext.ensureActive()
             if (!installedPack(pack)) continue
             val passages = tafsirMatches(pack, query, limit)
             counts[2] += passages.size
@@ -805,16 +838,18 @@ class ContentDatabase private constructor(
 
     /**
      * The ayahs whose word *meanings* matched, each with the meaning and the
-     * Arabic of the words that carried it.
+     * positions of the words that carried it. The words themselves are read
+     * separately, for every matched ayah at once.
      *
-     * The words come from the core `word` table rather than the pack, because
-     * a pack holds the meanings and the words are the Quran's own. One query
-     * for every matched ayah and position at once, filtered back to the exact
-     * pairs in memory: row values in an `IN` clause are not on every SQLite
-     * this app runs on, and a cross product that the reader would see as
-     * words that never matched is worse than no words at all.
+     * One query finds the meanings: row values in an `IN` clause are not on
+     * every SQLite this app runs on, and a cross product that the reader would
+     * see as words that never matched is worse than no words at all.
      */
-    private fun wordMeaningMatches(query: SearchQuery, limit: Int, wordsPack: String): Map<Int, WordMatch> {
+    private fun wordMeaningMatches(
+        query: SearchQuery,
+        limit: Int,
+        wordsPack: String,
+    ): Map<Int, WordMatch> {
         if (query.arabic || !installedPack(wordsPack)) return emptyMap()
         val condition = query.terms.joinToString(" AND ") { "meaning_search LIKE ? ESCAPE '\\'" }
         val meanings = LinkedHashMap<Int, String>()
@@ -834,29 +869,64 @@ class ContentDatabase private constructor(
                 positions.getOrPut(number) { LinkedHashSet() }.add(cursor.getInt(1))
             }
         }
-        return meanings.mapValues { (number, meaning) ->
-            WordMatch(meaning, matchedWords(number, positions[number].orEmpty()))
-        }
+        return meanings.mapValues { (number, meaning) -> WordMatch(meaning, positions[number].orEmpty()) }
     }
 
-    /** The Arabic of the given word positions in one ayah, in the ayah's order. */
-    private fun matchedWords(ayahNumber: Int, positions: Set<Int>): List<String> {
-        if (positions.isEmpty()) return emptyList()
-        val list = positions.sorted().joinToString(",")
-        return query(
-            "SELECT position, text FROM word WHERE ayah_number = ? AND marker = 0 AND position IN ($list)",
-            arrayOf(ayahNumber.toString()),
-        ).use { cursor ->
-            buildList(cursor.count) {
+    /**
+     * The Arabic of the given words, for every ayah at once, each ayah's in
+     * its own order.
+     *
+     * The word table has no index on `ayah_number`, so one read per ayah is a
+     * whole pass over eighty thousand rows: a search for a common word asked
+     * the database a hundred and forty times for a hundred and forty ayahs and
+     * spent three seconds doing it, which is the search the owner reported as
+     * slow (owner report, D-130). One read for all of them, filtered back to
+     * the exact ayah and position pairs in memory, is one pass instead.
+     */
+    private fun matchedWords(wanted: Map<Int, Set<Int>>): Map<Int, List<String>> {
+        if (wanted.isEmpty()) return emptyMap()
+        val ayahs = wanted.filterValues { it.isNotEmpty() }
+        if (ayahs.isEmpty()) return emptyMap()
+        val out = LinkedHashMap<Int, MutableList<String>>(ayahs.size)
+        for (chunk in ayahs.keys.chunked(400)) {
+            val placeholders = chunk.joinToString(",") { "?" }
+            query(
+                "SELECT ayah_number, position, text FROM word " +
+                    "WHERE ayah_number IN ($placeholders) AND marker = 0 ORDER BY ayah_number, position",
+                chunk.map { it.toString() }.toTypedArray(),
+            ).use { cursor ->
                 while (cursor.moveToNext()) {
-                    if (cursor.getInt(0) in positions) add(cursor.getString(1).orEmpty().trim())
+                    val number = cursor.getInt(0)
+                    if (cursor.getInt(1) !in ayahs.getValue(number)) continue
+                    val text = cursor.getString(2).orEmpty().trim()
+                    if (text.isEmpty()) continue
+                    out.getOrPut(number) { ArrayList() }.add(text)
                 }
-            }.filter { it.isNotEmpty() }
+            }
         }
+        return out
     }
 
-    /** One ayah's matched meaning and the words that carried it. */
-    private class WordMatch(val meaning: String, val words: List<String>)
+    /** One ayah's matched meaning and the word positions that carried it. */
+    private class WordMatch(val meaning: String, val positions: Set<Int>)
+
+    /**
+     * The translations of every ayah one search matched, one read per pack.
+     *
+     * A pack's ayahs are read together rather than one at a time: a common
+     * word matched a hundred and forty ayahs, and a hundred and forty
+     * statements is a hundred and forty round trips into the database for
+     * what one statement answers (owner report, D-130).
+     */
+    private fun translationTexts(byPack: Map<Int, String>): Map<String, Map<Int, TranslationText>> {
+        if (byPack.isEmpty()) return emptyMap()
+        val out = HashMap<String, Map<Int, TranslationText>>(byPack.size)
+        for (pack in byPack.values.toSet()) {
+            val numbers = byPack.filterValues { it == pack }.keys.toList()
+            out[pack] = translations(numbers, pack)
+        }
+        return out
+    }
 
     /** Matches inside one installed pack's own schema. */
     private fun packMatches(schemaId: String, terms: List<String>, limit: Int): List<Int> {
@@ -892,11 +962,6 @@ class ContentDatabase private constructor(
         return out
     }
 
-    private fun rowTranslation(number: Int, pack: String): TranslationText? {
-        val found = translations(listOf(number), pack)
-        return found[number]
-    }
-
     private data class PassageRow(
         val sourceId: Int,
         val surah: Int,
@@ -927,20 +992,21 @@ class ContentDatabase private constructor(
 
     private inner class TafsirIndex {
         private var packs: Set<String> = emptySet()
-        private var entries: List<TafsirEntry> = emptyList()
+        private var byPack: Map<String, List<TafsirEntry>> = emptyMap()
 
         fun ensure(wanted: Set<String>) {
-            if (wanted == packs && entries.isNotEmpty()) return
-            val loaded = ArrayList<TafsirEntry>()
+            if (wanted == packs && byPack.isNotEmpty()) return
+            val loaded = LinkedHashMap<String, MutableList<TafsirEntry>>(wanted.size)
             for (id in wanted) {
                 if (!installedPack(id)) continue
+                val entries = loaded.getOrPut(id) { ArrayList() }
                 query(
                     "SELECT source_id, surah, from_ayah, to_ayah, text_search " +
                         "FROM ${schema(id)}.tafsir_passage",
                     null,
                 ).use { cursor ->
                     while (cursor.moveToNext()) {
-                        loaded += TafsirEntry(
+                        entries += TafsirEntry(
                             pack = id,
                             sourceId = cursor.getInt(0),
                             surah = cursor.getInt(1),
@@ -951,11 +1017,22 @@ class ContentDatabase private constructor(
                     }
                 }
             }
-            entries = loaded
+            byPack = loaded
             packs = wanted
         }
 
-        fun matches(terms: List<String>, limit: Int): List<TafsirEntry> {
+        /**
+         * One pack's passages that carry every term, in the Book's own order
+         * and no further than [limit].
+         *
+         * Each pack is scanned on its own entries. They used to be scanned as
+         * one list and then split, which meant every pack paid for every other
+         * pack's prose and the second tafsir a reader had installed was shown
+         * only what was left of the limit after the first had filled it
+         * (owner report, D-130).
+         */
+        fun matches(pack: String, terms: List<String>, limit: Int): List<TafsirEntry> {
+            val entries = byPack[pack] ?: return emptyList()
             if (entries.isEmpty() || terms.isEmpty()) return emptyList()
             val found = ArrayList<TafsirEntry>(limit)
             for (entry in entries) {
@@ -973,6 +1050,22 @@ class ContentDatabase private constructor(
             }
             return found.sortedWith(compareBy({ it.surah }, { it.fromAyah }))
         }
+    }
+
+    /**
+     * Builds the tafsir index for the packs a search will read, away from the
+     * keystroke's own path.
+     *
+     * The index is the only part of a search that reads tens of megabytes, and
+     * it is read once and kept, so the moment to pay for it is the moment the
+     * reader says they are going to search: the search sheet asks for this
+     * when it opens, and the first query they type finds it already built
+     * (owner report, D-130, "the search takes time"). Nothing here touches
+     * the screen, and a reader who opens the sheet and types nothing has paid
+     * for a read of prose and nothing else.
+     */
+    suspend fun warmTafsir(packs: Collection<String>) = withContext(Dispatchers.IO) {
+        synchronized(tafsirIndex) { tafsirIndex.ensure(packs.toSet()) }
     }
 
     private val tafsirIndex = TafsirIndex()
@@ -996,10 +1089,7 @@ class ContentDatabase private constructor(
     }
 
     private fun tafsirMatches(pack: String, query: SearchQuery, limit: Int): List<PassageRow> {
-        val matches = synchronized(tafsirIndex) {
-            tafsirIndex.matches(query.terms, limit)
-        }
-        val mine = matches.filter { it.pack == pack }
+        val mine = synchronized(tafsirIndex) { tafsirIndex.matches(pack, query.terms, limit) }
         if (mine.isEmpty()) return emptyList()
         val texts = passageTexts(pack, mine.map { it.sourceId })
         return mine.mapNotNull { entry ->

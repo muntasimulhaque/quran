@@ -1,6 +1,5 @@
 package io.github.muntasimulhaque.quran.daily
 
-import android.app.AlarmManager
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
@@ -60,44 +59,6 @@ fun notificationsBlocked(context: Context): Boolean =
         reminderChannelHidden(context)
 
 /**
- * Whether the phone will keep an exact time for the reminder.
- *
- * This one is not a runtime permission: on Android 12 and later it is the
- * reader's own switch in the phone's settings, called Alarms and reminders,
- * and the app never gets it without a deliberate tap. So it is read, never
- * asked for in the middle of a flow, and the page that wants it says so in
- * one line and opens the phone's own page for it. On the releases before
- * Android 12 the platform never gated exact alarms and the answer is a plain
- * yes, with nothing for the reader to do.
- */
-fun canScheduleExactAlarms(context: Context): Boolean {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true
-    val alarm = context.getSystemService(AlarmManager::class.java) ?: return false
-    return runCatching { alarm.canScheduleExactAlarms() }.getOrDefault(false)
-}
-
-/**
- * The same answer, kept live the way the notification answer is: the reader
- * leaves for the phone's own page, grants it, and comes back, and the line
- * under the switch must be gone by then. It is read on every return to the
- * foreground rather than remembered from the last time the page was drawn.
- */
-@Composable
-fun rememberExactAlarmsAllowed(): State<Boolean> {
-    val context = LocalContext.current
-    val allowed = remember { mutableStateOf(canScheduleExactAlarms(context)) }
-    val owner = LocalLifecycleOwner.current
-    DisposableEffect(owner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) allowed.value = canScheduleExactAlarms(context)
-        }
-        owner.lifecycle.addObserver(observer)
-        onDispose { owner.lifecycle.removeObserver(observer) }
-    }
-    return allowed
-}
-
-/**
  * Whether this one channel has been turned off in the phone's own settings.
  * A channel the app has not created yet is not a block: the phone's page
  * creates nothing, and the app makes the channel at its first launch.
@@ -105,6 +66,13 @@ fun rememberExactAlarmsAllowed(): State<Boolean> {
  * It is read apart from [notificationsBlocked] so the way out can be the
  * reader's own channel and not the app's whole page, which is what a reader
  * who turned this one reminder off is looking for.
+ *
+ * This file has no answer about the phone's exact alarm switch, and that is
+ * the settled shape of it (owner report, D-130): the app never asks for that
+ * grant, never names it as missing, and never opens the phone's page for it.
+ * What the phone allows is read where the alarm is armed, by
+ * [DailyAyahScheduler.canScheduleExact], and it is used there and nowhere
+ * else.
  */
 fun reminderChannelHidden(context: Context): Boolean {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return false

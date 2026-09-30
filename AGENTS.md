@@ -68,9 +68,11 @@ dead letter.
 2. **Permissions: media, notifications, the reminder's exact time, and that
    one network use.** Exactly `INTERNET`, `POST_NOTIFICATIONS`,
    `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MEDIA_PLAYBACK`, and
-   `SCHEDULE_EXACT_ALARM` (the daily reminder, D-114). Library-merged
-   permissions are documented, not fought. A new permission needs the
-   owner's sign-off written here first.
+   `SCHEDULE_EXACT_ALARM` (the daily reminder, D-114). The app asks for
+   `POST_NOTIFICATIONS` and nothing else: the exact alarm grant is never
+   asked for and never named in the UI, and the reminder takes the best alarm
+   the phone allows (D-130). Library-merged permissions are documented, not
+   fought. A new permission needs the owner's sign-off written here first.
 3. **No ads, no trackers, no analytics, no accounts.** AndroidX, Kotlin,
    Media3, Room, DataStore, and Glance only. Every new dependency is
    proposed here first.
@@ -141,9 +143,13 @@ command to rediscover.
   (Temurin; Android Studio's own JBR is Java 25 and the modules'
   `jvmToolchain(17)` finds no match in it). `local.properties` reads
   `sdk.dir=C:/Users/zn/AppData/Local/Android/Sdk` and is gitignored.
-- There are no AVDs here, so the instrumented suites are CI's. `gh` is on
-  the PATH and authenticated, so the content Releases can be published from
-  here.
+- The Android SDK here has the command-line tools, an Android 35 ATD
+  system image, and a `pixel35` AVD installed, and the emulator still cannot
+  start: "x86_64 emulation currently requires hardware acceleration",
+  because the Windows Hypervisor Platform is off and turning it on needs a
+  reboot. So the instrumented suites are CI's unless the owner enables it.
+  `gh` is on the PATH and authenticated, so the content Releases can be
+  published from here.
 - On the other machine (`Dev Pro`) the JBR is the JDK, `adb` and the
   emulator are under `C:/Users/Dev Pro/AppData/Local/Android/Sdk`, and the
   AVDs are `Pixel_4_35`, `Nexus_7_35`, `Pixel_C_35`, and `api27`. Start one
@@ -322,6 +328,9 @@ implement it and update this list. The reasoning is `docs/decisions.md`.
 - What happens at the end of the audio is one answer, not three switches:
   repeat the ayah, repeat the surah, or continue, and turning one on turns
   the other two off (D-118).
+- The app never asks for the phone's exact alarm grant, and no settings row
+  or button offers it: the reminder takes the best alarm the phone allows
+  and says nothing about the difference (D-130).
 
 ## Traps
 

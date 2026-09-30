@@ -67,20 +67,29 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * reader who came to look is not the reader who came to set, and a system
  * dialog is not a thing to spend on curiosity (owner decision, 2.3).
  *
- * The phone's own exact alarm switch is a different kind of permission: it is
- * not given at install, it lives in the phone's settings rather than in a
- * dialog, and the app never interrupts anything to ask for it. The reminder
- * works without it, inside the minute, so this page only names what is
- * missing and opens the phone's own page for it (D-114).
+ * The phone's own exact alarm switch is never asked for, and nothing here
+ * says that it is missing. It used to: a line under the time and a button
+ * that opened the phone's page for it, on the reasoning that a reminder late
+ * by a few minutes is a broken promise. It is not the reader's setting to
+ * manage and it is not the app's to spend a screen on: the phone decides,
+ * the app takes the best alarm it is given, and a reader who is not reading
+ * about a second permission keeps a page with one row and one note (owner
+ * report, D-130, which closes the page D-114 opened).
+ *
+ * The exact time is still used whenever the phone allows it, and it is still
+ * the manifest's own permission: `DailyAyahScheduler` asks the alarm manager
+ * on every arm and takes the exact path when the answer is yes, which is the
+ * answer on every release before Android 12 and on any phone the reader has
+ * granted it in. The reminder arrives inside the minute otherwise, which on
+ * a locked phone is the platform's own timing and not a choice this app
+ * makes.
  */
 @Composable
 fun DailyPage(
     settings: AppSettings,
     notificationsBlocked: Boolean,
-    exactAlarmsAllowed: Boolean,
     onDailyAyahTime: (Int) -> Unit,
     onOpenNotificationSettings: () -> Unit,
-    onOpenExactAlarmSettings: () -> Unit,
 ) {
     var choosing by remember { mutableStateOf(false) }
     Column(
@@ -117,7 +126,9 @@ fun DailyPage(
         // hides it is a page that lets the reader wonder. The phone, not the
         // app, is what has turned notifications off, so the way out is named
         // as the phone's own settings rather than as a switch that does not
-        // work.
+        // work. This is the one door the app names, and it is named once: the
+        // reader is either getting their reminder or they are not, and there
+        // is one place in the phone's settings where that is decided.
         if (notificationsBlocked) {
             Text(
                 text = stringResource(R.string.settings_daily_blocked),
@@ -129,26 +140,6 @@ fun DailyPage(
                 TextButton(
                     label = stringResource(R.string.settings_daily_blocked_action),
                     onClick = onOpenNotificationSettings,
-                )
-            }
-        }
-        // The phone may refuse to keep an exact time for this app, and then a
-        // reminder due while the phone is locked and idle waits for the phone
-        // to wake on its own. The reminder still comes, inside the minute, so
-        // this line says what is missing and what the reader's one tap buys,
-        // and it is only there when the phone really is refusing: a reader who
-        // has granted it, or a phone that never asked, sees nothing (D-114).
-        if (settings.dailyAyah && !exactAlarmsAllowed) {
-            Text(
-                text = stringResource(R.string.settings_daily_exact_note),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Line),
-            )
-            Box(Modifier.padding(start = 16.dp, top = Space.Line)) {
-                TextButton(
-                    label = stringResource(R.string.settings_daily_exact_action),
-                    onClick = onOpenExactAlarmSettings,
                 )
             }
         }

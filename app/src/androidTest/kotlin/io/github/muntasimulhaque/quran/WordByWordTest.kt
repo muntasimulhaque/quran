@@ -82,15 +82,16 @@ class WordByWordTest {
     }
 
     /**
-     * The aid is a grid, not a heap: a word stands in the same column as its
-     * own meaning, and the row beneath it is the next word's, so the reader
-     * reads down a column and never hunts for the pair.
+     * The aid is a flow of pairs, and a pair is one unit: a word stands
+     * directly over its own meaning, and the pair is as wide as the two of
+     * them.
      *
-     * This is the geometry the change was about, and a string the aid happens
-     * to contain does not prove it: two Bangla meanings of 1:1 are long enough
-     * that a naive tile would put the whole verse down the page as one
-     * column. So the test reads the first word and the first meaning and asks
-     * whether they share a column.
+     * This is the geometry the change was about (owner report, D-130, which
+     * took back the grid of D-122), and a string the aid happens to contain
+     * does not prove it: two Bangla meanings of 1:1 are long enough that a
+     * tile measured against the widest of them would put the whole verse down
+     * the page. So the test reads the first word and the first meaning and
+     * asks whether they stand in one pair.
      */
     @Test
     fun aWordStandsOverItsOwnMeaning() {
@@ -109,13 +110,17 @@ class WordByWordTest {
             .fetchSemanticsNodes().first()
         val wordBox = word.boundsInRoot
         val meaningBox = meaning.boundsInRoot
-        // a word and its meaning are one tile: their columns are the same, so
-        // the horizontal centres are within a tile's own width
-        val wordCentre = wordBox.center.x
-        val meaningCentre = meaningBox.center.x
+        // a word and its meaning are one pair: they are drawn over each other,
+        // so their centres are within the pair's own width of one another
         assertTrue(
-            "the word and its meaning stand in one column (word $wordCentre, meaning $meaningCentre)",
-            kotlin.math.abs(wordCentre - meaningCentre) < wordBox.width,
+            "the word must stand over its own meaning (word ${wordBox.center.x}, " +
+                "meaning ${meaningBox.center.x})",
+            kotlin.math.abs(wordBox.center.x - meaningBox.center.x) < wordBox.width,
+        )
+        // and the pair hangs below the word rather than beside it
+        assertTrue(
+            "the meaning must be under the word (${meaningBox.top} of ${wordBox.bottom})",
+            meaningBox.top > wordBox.top,
         )
     }
 }

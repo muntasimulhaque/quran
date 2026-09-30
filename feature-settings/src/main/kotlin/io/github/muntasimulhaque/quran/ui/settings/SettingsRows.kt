@@ -73,12 +73,21 @@ fun Group(title: String) {
  * 76 dp and turned the hub into a ladder (owner report, D-105). Where the
  * chevron does carry its own tap it keeps the square, which costs the row
  * nothing, because the switch beside it already holds 48 dp.
+ *
+ * [contentAlignment] is where the mark stands inside its slot. A row that
+ * also has a switch centres it, because the switch's own column is beside it
+ * and the two are read as a pair. A row with no switch puts the mark at the
+ * end of the slot, so its right edge is the row's own margin: that is exactly
+ * where a switch's right edge stands, and the rows that carry only a door
+ * were ending a whole chevron short of it (owner report, D-130, completing
+ * D-120).
  */
 @Composable
 private fun ChevronSlot(
     visible: Boolean,
     onOpen: (() -> Unit)? = null,
     label: String? = null,
+    contentAlignment: Alignment = Alignment.Center,
 ) {
     val tail = if (onOpen != null) Modifier.size(48.dp) else Modifier.width(48.dp)
     Box(
@@ -101,7 +110,7 @@ private fun ChevronSlot(
             // on a row that draws a chevron only, so a count of them is a
             // count of the rows that have a door (owner report, D-120).
             .then(if (visible) Modifier.testTag("chevron-slot") else Modifier),
-        contentAlignment = Alignment.Center,
+        contentAlignment = contentAlignment,
     ) {
         if (visible) {
             IconGlyph(
@@ -181,11 +190,11 @@ val SwitchSlot = 52.dp
  *
  * The switch's column exists on a row that has a switch and on no other row.
  * A row with nowhere to switch to keeps no empty room for one, so the
- * chevron in it is the row's last mark at the same line where a switch's own
- * right edge stands, and a row with both keeps the two columns exactly as
- * they were (owner report, D-120, which reverses the other half of D-111:
- * six rows in the hub ended with 64 dp of nothing at their right edge, and
- * a reader reads the gap as the row not knowing where it stops).
+ * chevron in it is the row's last mark, and the mark itself stands on the
+ * margin where a switch's own right edge stands rather than in the middle of
+ * the column in front of it (owner report, D-130, completing D-120, which
+ * had moved the column and left the mark centred inside it). A row with both
+ * keeps the two columns exactly as they have been since D-111.
  *
  * A row draws the marks it carries and leaves the chevron's column empty when
  * it has no door, so every switch ends at one line whatever a row carries.
@@ -198,7 +207,21 @@ internal fun RowTail(
     switch: (@Composable () -> Unit)? = null,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        ChevronSlot(visible = chevron, onOpen = onOpen, label = chevronLabel)
+        ChevronSlot(
+            visible = chevron,
+            onOpen = onOpen,
+            label = chevronLabel,
+            // The row's last mark is the one nearest the reader's margin: a
+            // row with a switch reads its chevron against the switch's own
+            // column, and a row without one has nothing after it but the
+            // margin, so its chevron stands on the margin (owner report,
+            // D-130).
+            contentAlignment = if (switch == null) {
+                Alignment.CenterEnd
+            } else {
+                Alignment.Center
+            },
+        )
         if (switch != null) {
             Box(
                 modifier = Modifier.width(SwitchSlot),

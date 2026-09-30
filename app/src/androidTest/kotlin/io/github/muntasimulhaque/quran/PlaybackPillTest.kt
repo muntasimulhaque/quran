@@ -41,6 +41,10 @@ import org.junit.runner.RunWith
  *    portrait cannot print the reference, the pace, and the repeat beside
  *    four 48 dp controls, and a name cut with an ellipsis is the defect
  *    D-119 exists to end. A wide pill can, and stays one row.
+ * 5. On that phone the two lines are centred, and the words are one line: the
+ *    reciter's name and the place beside each other, not the reciter's name
+ *    with the place under it against the pill's left edge (owner report,
+ *    D-130).
  */
 @RunWith(AndroidJUnit4::class)
 class PlaybackPillTest {
@@ -160,6 +164,53 @@ class PlaybackPillTest {
         assertTrue(
             "the transport must share the words' row: ${play.top} of ${words.top}",
             play.top.value < words.top.value,
+        )
+    }
+
+    @Test
+    fun thePhonePillSaysBothOnOneCentredLine() {
+        // The two-row pill the owner read on their own phone: the reciter's
+        // name and the place on one line, centred, with the controls centred
+        // under them. Before this the words were two lines against the pill's
+        // own left edge, so the pill's first line began in a corner.
+        showPill(pillWidth = Modifier.width(393.dp))
+        val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
+        val name = compose.onNodeWithText("Husary").getUnclippedBoundsInRoot()
+        val place = compose.onNodeWithText("Al-Baqarah 2:255").getUnclippedBoundsInRoot()
+        val inset = 20.dp
+        // the two share a line when they stand over one another: the overlap
+        // of their heights is most of the taller one, which a stacked pair
+        // (the name above the place) could never be
+        val overlap = kotlin.math.min(name.bottom.value, place.bottom.value) -
+            kotlin.math.max(name.top.value, place.top.value)
+        assertTrue(
+            "the reciter and the place must share one line, not one above the other: " +
+                "$name and $place",
+            overlap > (name.bottom - name.top).value / 2f,
+        )
+        assertEquals(
+            "the words' line is centred on the pill, so both ends stand off it equally",
+            (name.left - bar.left).value,
+            (bar.right - place.right).value,
+            1f,
+        )
+        assertTrue(
+            "the words' line keeps the pill's own inset from its curve",
+            name.left - bar.left >= inset - 1.dp,
+        )
+    }
+
+    @Test
+    fun thePhonePillCentresItsControls() {
+        showPill(pillWidth = Modifier.width(393.dp))
+        val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
+        val first = compose.onNodeWithContentDescription("Previous ayah").getUnclippedBoundsInRoot()
+        val last = compose.onNodeWithContentDescription("Stop").getUnclippedBoundsInRoot()
+        assertEquals(
+            "the controls stand centred under the words, not against one end",
+            (first.left - bar.left).value,
+            (bar.right - last.right).value,
+            1f,
         )
     }
 

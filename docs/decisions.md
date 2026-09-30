@@ -6270,6 +6270,13 @@ rather than left.
   sides always meet, and English is folded on both sides because the
   translation writes Allāh and ʿĪsā. Change the fold and the `tools search`
   gate in the same change.
+- The `word` table has **no index on `ayah_number`**: its two are
+  `word_ref(surah, ayah, position)` and `word_page(page, line,
+  line_position)`. A read of it by ayah alone is therefore a whole pass over
+  83,668 rows, so one query per ayah is a search that costs seconds, which is
+  exactly what search did until D-130. Reads of that table are batched by
+  ayah, in chunks of 400, and the same rule holds for anything added there
+  later.
 - The reader never sees raw tafsir HTML. A tafsir search result printed
   `</p><h2>` for two sessions because the excerpt was cut from the stored
   HTML for a view with no parser, and the store screenshot finally showed
@@ -6398,6 +6405,10 @@ classes with their evidence; what is left is Compose and the habit.
   label, and a test waiting for the meaning waits forever. The word by word
   tiles wore `Role.Button` and two tests were red on all three form factors
   for six capture runs.
+- Compose 1.11's `DpRect` has only its four edges: `width`, `height`,
+  `size`, and `center` are gone, so a measurement written against them fails
+  to compile and the fix is the edges. `Dp.plus(Dp)` is there but `DpRect`
+  plus arithmetic is not the way to find a midpoint.
 - A tag on a container is not in the merged tree: `onAllNodesWithTag`
   defaults to `useUnmergedTree = false`, where a tag whose node has no other
   semantics of its own is not surfaced. The repository's `waitForTag` reads
@@ -6480,3 +6491,151 @@ in a CRLF file and exits 0, which is how an import edit went missing: match
 executes each script line in its own shell, so a Gradle exit status is
 saved on the Gradle line itself and every collection line is guarded, or the
 frames are lost.
+
+## D-130: Seven reports, seven answers
+
+Date: the forty-second session, from the owner reading 3.2 on their own phone
+and reporting seven things about it: the word by word aid in study mode, the
+playing pill, the ruled page, the search, two rows of the settings hub, and
+the "Allow exact times" button on the Daily page. 3.2 (versionCode 33) is in
+Play; no `versionCode` moved.
+
+**Word by word is a flow again.** D-122 made the aid a grid: every tile the
+width of the widest one in the ayah, so the words stand in columns and the
+meanings of a row share a baseline. On the owner's phone that grid was two
+half-empty columns to a row, and the aid ran to twice the length of the verse
+it glosses, because one long meaning in an ayah sets the width of every tile
+in it. A pair that is as wide as its own word and its own meaning reads as
+one unit whatever the ayah says, and a row of them reads across the screen
+the way the verse above it does. So the flow is back, and `WordGrid` and its
+seven tests are gone with it: a rule nothing calls is a rule that only needs
+explaining. The cost D-122 named is real and is now paid differently: the
+pairs of a row are not in columns, so two long meanings can leave a short one
+in a gap. The eye still never hunts for a pair, because the word sits directly
+over its own meaning and the flow keeps the verse's order. What the flow did
+not have and the grid added is kept: the tile is a tap that hears one word
+again, it carries no role (a role merges a word and its meaning into one
+labelled node, D-129), and a pair is never narrower than 48 dp.
+
+**The pill's two lines are centred, and the words are one line.** D-119
+settled that a phone in portrait cannot print the reciter, the place, the pace,
+and the repeat beside four controls, so the pill takes two rows: the words
+above, the controls under. The owner read that shape and the words began in
+the pill's own corner with the reciter's name over the place, which is a
+left-aligned block on a floating capsule. Now the first line says both on one
+line (the reciter is the door to the reciter chooser, the place beside it is
+the door to the listening menu), the controls are the second line, and both
+lines are centred on the pill. The pill is also shorter by one line of words,
+about 86 dp instead of 98. The wide shape (a tablet, a landscape phone) is
+untouched: there the words share the row with the controls and the stacked
+pair is what keeps the 300 dp measure printable.
+
+**The page's rule stands off the text.** D-122 ruled the page so the sheet of
+paper would have an edge on a wide ground, and drew the frame at the text
+measure itself. Every line of the page is justified to that measure, so the
+rule touched the last glyph of every line and the page read as a screen of
+boxes. The frame is now inset by 1.4 percent of the page's width, about the
+gap the lines already leave above and below themselves, and the foot's rule
+runs to the same two edges so the frame is one rectangle. It is a share of
+the width rather than a number of pixels because the page is rendered at the
+width it will be shown at, so a share is the same gap on a phone and on a
+tablet.
+
+**Search was three seconds of database, and now it is one pass.** The owner
+reported that search takes time. Measured against the real packs on this
+machine, with the harness's own SQLite, one search for "mercy" with the
+Saheeh translation and the English word list installed cost **3,221 ms in
+per-row reads alone**, against 19 ms for the same reads done as one query
+each. The word table has no index on `ayah_number` (`word_ref` is
+`(surah, ayah, position)`), so every one of the 148 per-ayah queries was a
+whole pass over 83,668 rows, and a search for a common word did that on every
+keystroke. Four changes, all measured:
+
+| what | before | after |
+|---|---|---|
+| the words behind a matched meaning, per ayah | 3,209 ms | 18 ms |
+| the translations of a matched ayah, per ayah | 11 ms | 1 ms |
+| the Quran's own text, scanned for a Latin query | 5 ms | 0 ms |
+| the tafsir index, built inside the first query | 47 ms | built when the sheet opens |
+
+The Arabic scan is skipped for a query that is not Arabic, which is a fact
+about the content and not a hope: the Quran's indexed column holds no Latin
+letter and no digit, and `tools search` now audits every row of it for that,
+so the app's short cut is held by a gate that runs in CI. `search` is now a
+suspending function and checks for cancellation between its sources, so a
+query the reader has already moved on from gives up at the next source, and
+the sheet waits 120 ms for the query to settle before it runs it: a search per
+key is a search per word five times over, and five at once on a phone are five
+scans contending for the same four cores. The tafsir index is built when the
+sheet opens rather than inside the first query, which is the moment the reader
+has said they mean to search. Each tafsir pack is also scanned on its own
+entries now: they were scanned as one list and then split, so every pack paid
+for every other pack's prose and a second tafsir was shown only what was left
+of the limit after the first had filled it. That was a defect the speed work
+found, and it is fixed with it.
+
+**A settings row's value gets one line, and its chevron stands on the margin.**
+The hub's values are measured inside a share of the row and the name's share
+is the larger of the two (D-116). On a 360 dp phone the value's 45 percent is
+125 dp, and both values the sheet really prints are longer than that: "Night ·
+day page Paper" and "Arabic 25, translation 14" each broke to a second line
+under a name with room to give. The name's column is now its own width and a
+gap, capped at the same share, and the value takes everything the name did
+not, so the case almost every row is in fits on one line and a value too long
+for what is left still costs the value a second line and never the name a word.
+The rule is pure arithmetic and lives in `core` as `SettingsRow` with five
+tests. The chevron of a row with no switch is also no longer centred in its
+own 48 dp column: the mark itself now stands at the end of the column, so its
+right edge is the row's margin, which is exactly where a switch's right edge
+stands. D-120 moved the column and left the mark inside it; this completes it.
+
+**The Daily page has no second permission.** The page carried a line and a
+button, "Allow exact times", that opened the phone's own page for the exact
+alarm grant. The owner's word: one permission to answer for a reminder is
+enough, and a second door into the phone's settings is complexity that costs
+readers. So the line, the button, the strings in both languages, the intent,
+and the plumbing through five composables are gone. The feature is not: the
+manifest still declares `SCHEDULE_EXACT_ALARM`, `DailyAyahScheduler` still
+asks the alarm manager on every arm, and the exact path is still taken
+whenever the phone allows it, which is every release before Android 12 and any
+phone where the reader granted it of their own accord. Otherwise the reminder
+is armed with the phone's own batched alarm, which still reaches a sleeping
+phone (D-114), and it arrives inside the minute. The notification door stays,
+because a reminder that cannot arrive is a broken promise and one named door
+is a door; it is one line and one button, and it is the only one.
+
+**What the platform cannot give, and the owner's call on it.** The one thing
+this change cannot do is make the exact minute a permission the reader has
+already granted: `SCHEDULE_EXACT_ALARM` is not a runtime permission, and no
+amount of not asking for it makes the phone grant it. There is one way to
+have it without an ask at all, `USE_EXACT_ALARM`, which the platform grants at
+install, and it is the owner's to decide because of what it asks of the
+store: Google Play reserves it for apps whose core function is an alarm
+clock, a timer, or a calendar, and this is a reader. Declaring it is one line
+in the manifest and it would make the reminder exact with nothing to ask; not
+declaring it is what ships now. It is not decided
+here and it is not asked mid-session.
+
+**The emulator, on this machine, at last.** The command-line tools, an Android
+35 ATD system image, and a `pixel35` AVD (Pixel 5, 1080 by 2340 at 440 dpi)
+are installed here, and the emulator refuses to start: "x86_64 emulation
+currently requires hardware acceleration", because the Windows Hypervisor
+Platform is not enabled on this machine and enabling it needs a reboot. So the
+instrumented suites are still CI's, and the four surfaces this session
+changes are owed to the next capture rather than claimed as seen.
+
+**The gates.** `:core:test` (97: the seven `WordGridTest` cases went with
+the rule, five new `SettingsRowTest` cases and one on the query came), `:data:testDebugUnitTest`, `:app:testDebugUnitTest`,
+`:app:lintDebug`, `:app:assembleDebug`, and
+`:app:compileDebugAndroidTestKotlin` are green on this machine, and
+`:tools:run --args="search"` passes with the new column audit
+(`search: the Quran's indexed text holds Arabic only`). `WordByWordTest`,
+`PlaybackPillTest` (two new cases: the words share one centred line, and the
+controls are centred under them), `SettingsRowAlignmentTest` (the chevron
+mark against a switch's edge, and both of the sheet's real values on one line)
+and `ScreenshotTest` are the instrumented classes this work touches; none of
+them ran here, for the reason above.
+
+**Two more classes for D-129**, written there rather than here: `DpRect` lost
+its `width`, `height`, and `center`, and the `word` table has no index on
+`ayah_number`, so any read of it by ayah alone is a whole pass.

@@ -151,11 +151,17 @@ object DailyAyahScheduler {
      * Whether this app may set an exact alarm on this phone.
      *
      * Android 12 and later gate it behind the reader's own grant, which is
-     * not a runtime permission and is not given at install: the reader turns
-     * it on in the phone's settings, and the Daily page is where the app says
-     * so and offers the way. Before Android 12 the platform never gated exact
-     * alarms, so the answer there is a plain yes and every reader on those
-     * releases gets the exact path with nothing to grant.
+     * not a runtime permission and is not given at install. The app never asks
+     * for it and never says anything about it in the settings sheet (owner
+     * report, D-130): the reader has one notification to answer for, not two,
+     * and a second door into the phone's own pages is a thing a reader has to
+     * understand before they can turn one thing on. So this answer is asked
+     * where the alarm is armed and used there and nowhere else. The exact
+     * path is still taken whenever the phone allows it, which is every
+     * release before Android 12 and any phone where the reader has granted it
+     * in the phone's settings of their own accord; otherwise the reminder is
+     * armed with the phone's own batched alarm, which still reaches a
+     * sleeping phone (D-114).
      */
     fun canScheduleExact(alarm: AlarmManager): Boolean =
         Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarm.canScheduleExactAlarms()

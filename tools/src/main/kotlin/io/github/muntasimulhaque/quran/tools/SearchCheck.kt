@@ -71,6 +71,7 @@ class SearchCheck(private val root: File) {
         }
 
         auditNonAscii(nonAscii)
+        auditArabicColumn()
         auditScriptRoundTrip("content/quran.db", "bn")
         auditPlainWords(translations)
         auditReadableText()
@@ -78,6 +79,7 @@ class SearchCheck(private val root: File) {
         if (problems.isEmpty()) {
             println("search: $arabicChecked arabic round trips passed")
             println("search: ${nonAscii.size} distinct non-ASCII translation codepoints fold cleanly")
+            println("search: the Quran's indexed text holds Arabic only")
             println("search: plain english words match")
             println("search: ${readableChecked} readable excerpts carry no markup")
             return 0
@@ -106,7 +108,29 @@ class SearchCheck(private val root: File) {
         }
     }
 
-    /** The words a reader types without diacritics must find the text. */
+    /**
+     * The Quran's own indexed column holds nothing but Arabic.
+     *
+     * A query that is not Arabic is made of Latin letters and digits alone
+     * (`Search.parse`), so a Latin query cannot match a row of a column that
+     * holds no Latin letter and no digit, and the app skips that scan on every
+     * keystroke (owner report, D-130). This gate is where that fact about the
+     * content is held rather than assumed: a Latin letter or a digit in this
+     * column would make the app's own short cut quietly wrong, and the only
+     * place it can be caught is before the content is committed.
+     */
+    private fun auditArabicColumn() {
+        openSqlite(File(root, "content/quran.db")).use { connection ->
+            connection.each("SELECT number, text_search FROM ayah ORDER BY number") { rs ->
+                val number = rs.getInt(1)
+                for (codepoint in (rs.getString(2) ?: "").codePoints()) {
+                    if (RichText.isArabic(codepoint) || Character.isWhitespace(codepoint)) continue
+                    problems += "ayah $number indexes U+${hex(codepoint)}, which a Latin query could match"
+                }
+            }
+        }
+    }
+
     /**
      * A second script must round trip like the first: the longest word of a
      * sample of its ayahs, normalized the way a query is, must find its own
