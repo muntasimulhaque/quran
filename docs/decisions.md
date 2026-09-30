@@ -5988,3 +5988,45 @@ factors. The frames of run 36664066010 attempt 1 (phone and 7 inch complete)
 and its rerun are in those runs' artifacts, which is where a refreshed set
 starts from; nothing was installed after the submission, because a set
 refreshed after it has nothing left to be used for.
+
+## D-126: The qaf mark
+
+Date: the fortieth session, at the owner's word. The icon was theirs to
+decide (two earlier marks were rejected and withdrawn), and they asked for
+the best app icon in the world, drawn from scratch, with every surface the
+mark touches remade with it: the launcher layers, the store icon and
+feature graphic, the shared card's mark, and the reminder's small icon.
+
+**The mark is the letter qaf, the first letter of the word Quran.** One
+glyph, the way the strong icons are one shape. The loop is drawn with a
+reed pen's contrast, thin where the nib runs flat and swelling where it
+bites; the tail sweeps left below the baseline and tapers to the flat cut
+a qalam leaves; the two dots are a scribe's rhombi in the gold of an
+illuminated initial. The field is deep ink, `#0D1A2E` at the edge with a
+quiet light behind the letter, `#1D3A5E` at its heart; the letter is warm
+ivory `#F2EAD8`, the dots `#E2BE78`. Every earlier concept (the mushaf
+cover, the shamsa, the word set in Amiri) was set aside at the owner's
+word: this one was commissioned as a new drawing, not a revision.
+
+**Why a letter.** The app is a book, and the most ownable mark a book can
+wear is the first letter of its name: ق reads as Q to a Latin eye and as
+the opening of القرآن to an Arabic one, needs no translation in either,
+reduces to the status bar, and holds as a pure silhouette on a themed home
+screen. The pen contrast is what keeps it a letter and not a digit: a
+monoline loop with a tail reads as 9, so the geometry carries the nib's
+own swell and taper. The drawing is parametric, computed rather than
+traced, so any size is rendered exactly from one definition: head center
+(58.5, 50.5), radii 12.8 and 13.8, stroke 7.4, nib angle 24 degrees, dots
+at plus or minus 7.6 of the head's centerline, tail the cubic (66.0, 62.6),
+(70.2, 75.0), (51.7, 82.2), (34.2, 72.4), on a 108 by 108 canvas with all
+ink inside the 66 unit safe circle.
+
+**Every surface carries the one drawing.** The adaptive background,
+foreground, and monochrome layers (the mono silhouette a little sturdier),
+the legacy launcher icons pre-26 launchers still need, the Play icon at
+512, the feature graphic at 1024 by 500 in 24-bit, the shared card's foot
+mark on its ink square (`icon_background` is the field's mid tone,
+`#122D4A`), and `ic_daily`, the reminder's status bar icon, redrawn as a
+bolder qaf so the loop survives the shade. The rasters are rendered
+programmatically at high supersampling; the generator stays off the tree
+the way D-112's did, and the numbers above are its whole definition.

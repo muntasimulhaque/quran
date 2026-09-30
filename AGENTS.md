@@ -1138,9 +1138,13 @@ has nothing left to be used for.
   own, so the wiring is the `profileinstaller` library, measured at 1,886
   bytes on the bundle; generating the profile needs a connected device and is
   written down rather than claimed.
-- **The icon was withdrawn.** Two marks were drawn this session and the owner
-  rejected both; the icon is theirs to decide, nothing of it is in the tree,
-  and the shipped 2.8/3.0 medallion stands.
+- **The icon is the qaf mark.** Two marks were drawn this session and the
+  owner rejected both, so the icon stayed theirs to decide; in the fortieth
+  session they commissioned one from scratch: the letter that begins the
+  word Quran, drawn with a reed pen's contrast in ivory on deep ink, its two
+  dots in gold. The launcher layers, the store icon and feature graphic, the
+  shared card's mark, and the reminder's small icon all carry the one
+  drawing (D-126).
 - **The Bangla face was added and taken back out.** Anek Bangla as a
   per-codepoint fallback is the right shape, but it made the only
   configuration that draws Bangla go red and the cause was never found, so it

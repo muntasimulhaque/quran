@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The manuscript mark: an illuminated mushaf opening on lapis, drawn from the
-  physical page, a carpet page facing the first page of Al-Fatihah. The store
-  icon rings it with the cover's own ruled border; the adaptive layers carry
-  the book alone, on the lapis field. The monochrome layer lets Android 13
-  and later draw a themed icon from the same drawing, so the app belongs on a
-  themed home screen too.
+  The qaf mark: the letter that begins the word Quran, drawn the way a
+  reed pen draws it, the loop thinning where the nib runs flat and
+  swelling where it bites, the tail tapering to a flat pen cut, and the
+  two dots as a scribe's rhombi in the gold of an illuminated initial.
+  The field is deep ink with a quiet light behind the letter. The
+  monochrome layer carries the same silhouette a little sturdier, so a
+  themed home screen keeps the mark (owner decision, D-126).
 -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@mipmap/ic_launcher_bg" />

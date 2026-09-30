@@ -152,10 +152,9 @@ internal suspend fun loadShareCard(
 @Composable
 internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier) {
     val hafs = rememberHafs()
-    // The medallion the launcher icon is built around, sized for a foot:
-    // the launcher's illustration is a whole illuminated opening, and a
-    // whole opening at 20 dp would be mud, so the card carries the star the
-    // icon's carpet page is built on (owner decision, D-112).
+    // The mark the launcher icon is built around, sized for a foot: the
+    // qaf that begins the word Quran, in ivory with its two dots in gold,
+    // on a square of the icon's own ink (owner decision, D-126).
     val mark = painterResource(R.drawable.ic_share_mark)
     val lapis = colorResource(R.color.icon_background)
     val paper = lightColorScheme(
@@ -237,7 +236,7 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
     }
 }
 
-/** The app's mark at a foot's size: the medallion star on its lapis square. */
+/** The app's mark at a foot's size: the qaf on its ink square. */
 @Composable
 private fun AppMark(mark: Painter, ground: Color, modifier: Modifier = Modifier) {
     Box(

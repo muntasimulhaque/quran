@@ -2,6 +2,6 @@
 <resources>
     <color name="paper">#F8F5EF</color>
     <color name="night">#101720</color>
-    <!-- The launcher icon ground: the lapis of a manuscript cover. -->
-    <color name="icon_background">#143A5C</color>
+    <!-- The launcher icon's ground: the deep ink field behind the qaf mark. -->
+    <color name="icon_background">#122D4A</color>
 </resources>

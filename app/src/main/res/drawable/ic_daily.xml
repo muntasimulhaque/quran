@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The reminder's small icon: the app's own mark, the eight point manuscript
-  star. It is drawn the way a manuscript constructs the same star, as two
-  overlapping squares, the second turned on its corner, in one outline. It is
-  deliberately not a bell or a clock: every other reminder in the shade wears
-  one of those, and this one is the app's own mark. Only the alpha channel is
-  read, and the system tints the silhouette with the notification color on
-  every skin.
+  The reminder's small icon: the app's own mark, the qaf that begins the
+  word Quran, drawn bolder than the launcher glyph so the loop, the two
+  dots, and the sweeping tail survive the status bar's size. It is
+  deliberately not a bell or a clock: every other reminder in the shade
+  wears one of those, and this one is the app's own mark. Only the alpha
+  channel is read, and the system tints the silhouette with the
+  notification color on every skin (owner decision, D-126).
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
@@ -16,8 +16,15 @@
     <path
         android:fillColor="#00000000"
         android:strokeColor="#FFFFFFFF"
-        android:strokeWidth="1.7"
-        android:strokeLineJoin="miter"
-        android:pathData="M6.6,6.6 L17.4,6.6 L17.4,17.4 L6.6,17.4 Z
-        M12,3.4 L20.6,12.0 L12,20.6 L3.4,12.0 Z" />
+        android:strokeWidth="2.4"
+        android:pathData="M12.7,7.0 C14.63,7.0 16.2,8.7 16.2,10.8 C16.2,12.9 14.63,14.6 12.7,14.6 C10.77,14.6 9.2,12.9 9.2,10.8 C9.2,8.7 10.77,7.0 12.7,7.0 Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="2.4"
+        android:strokeLineCap="round"
+        android:pathData="M15.6,14.0 C16.6,17.2 11.8,19.4 7.4,17.6" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M10.8,1.95 L12.25,3.4 L10.8,4.85 L9.35,3.4 Z M14.6,1.95 L16.05,3.4 L14.6,4.85 L13.15,3.4 Z" />
 </vector>

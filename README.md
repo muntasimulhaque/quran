@@ -11,7 +11,10 @@ verified`, signed with the shared upload key; it came from build run
 36664066056, whose three jobs are green. The owner accepted the bundle without
 a refreshed screenshot set, so the store set is the 3.0 one and refreshing it
 for the ten inch form factor, with the tour's last step on that leg, is the
-first work of the next session (D-125).
+first work of the next session (D-125). The tree now also carries the qaf
+mark (D-126) ahead of any release: the icon, the feature graphic, the shared
+card's mark, and the reminder's small icon redrawn as the letter that begins
+the word Quran.
 
 **What 3.1 carries.** The reading answers the reader: word by word is a grid
 instead of a heap, the ayah card opens with its ayah, the mushaf page is ruled
