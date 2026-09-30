@@ -349,7 +349,16 @@ private fun annotated(
                     // then sat in the gap under the line above (D-122). A
                     // third of the size is a raised figure that stays on its
                     // own line.
-                    baselineShift = BaselineShift(markerSize.value * 0.30f),
+                    //
+                    // The value is in **ems**, so it is a third and not a
+                    // third of the size: this read `markerSize.value * 0.3f`
+                    // and lifted every marker three whole ems, which put the
+                    // markers of a paragraph in a band two lines above the
+                    // text they belong to. It reached the store because the
+                    // ayah card's frame photographs 2:255, whose six markers
+                    // are three digits each, and the committed set was captured
+                    // before the change (D-132).
+                    baselineShift = BaselineShift(0.30f),
                     // Lining figures, so the number in the note reads as a
                     // number. Literata's default figures are old-style, and an
                     // old-style two and three at marker size are the two
