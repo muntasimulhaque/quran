@@ -120,7 +120,12 @@ class ScreenshotTest {
             Thread.sleep(600)
             val intruder = intruderWindow()
             if (intruder != null) {
-                dismissDialog()
+                // A dialog answers the back key; a window that merely holds
+                // the foreground does not. The launcher can crash and come
+                // back over the tour on a loaded emulator, and pressing back
+                // at it eight times only loses the leg. After two
+                // unanswered backs, put our own task in front again.
+                if (attempt >= 2) bringAppForward() else dismissDialog()
                 if (attempt == 7) {
                     throw AssertionError("a system window ($intruder) stayed over $name")
                 }
@@ -176,6 +181,23 @@ class ScreenshotTest {
         } ?: return null
         val owner = Regex("""Window\{[^}]*?\s([^\s/}]+)/""").find(focus)?.groupValues?.get(1)
         return if (owner == null || owner == ours) null else owner
+    }
+
+    /**
+     * Puts the tour's own task back in front after a system window took the
+     * foreground. A plain launch would start a second activity and bury the
+     * sheet the tour is standing in, so the running instance is reordered to
+     * the front of its task instead (the flag is
+     * FLAG_ACTIVITY_REORDER_TO_FRONT).
+     */
+    private fun bringAppForward() {
+        runCatching {
+            val ours = InstrumentationRegistry.getInstrumentation().targetContext.packageName
+            InstrumentationRegistry.getInstrumentation().uiAutomation
+                .executeShellCommand("am start -n $ours/.MainActivity -f 0x00020000")
+                .close()
+        }
+        Thread.sleep(1_500)
     }
 
     private fun dismissDialog() {

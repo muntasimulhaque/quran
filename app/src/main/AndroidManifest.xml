@@ -14,7 +14,7 @@
          minute. The platform does not grant it at install on a phone this
          app targets, so the reminder works without it (a windowed alarm
          inside the chosen minute) and the Daily page offers the reader the
-         one tap that turns it on (owner decision, D-114). -->
+         one tap that turns it on (owner decision). -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application

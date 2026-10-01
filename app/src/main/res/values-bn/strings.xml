@@ -32,7 +32,7 @@
 
     <!-- The question before a save that carries a note is removed: the note
          is the reader's own writing, so it is asked about, never taken by
-         one tap (D-101). -->
+         one tap. -->
     <string name="remove_saved_title">সংরক্ষিত আয়াতটি মুছবেন?</string>
     <string name="remove_saved_body">এতে লেখা নোটটিও মুছে যাবে।</string>
     <string name="remove_saved_action">মুছুন</string>

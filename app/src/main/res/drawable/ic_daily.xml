@@ -6,7 +6,7 @@
   deliberately not a bell or a clock: every other reminder in the shade
   wears one of those, and this one is the app's own mark. Only the alpha
   channel is read, and the system tints the silhouette with the
-  notification color on every skin (owner decision, D-126).
+  notification color on every skin (owner decision).
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
