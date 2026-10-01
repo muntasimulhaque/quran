@@ -321,7 +321,10 @@ fun AyahCard(
                         )
                         translationReady -> Text(
                             text = stringResource(R.string.card_no_translation),
-                            style = LocalReadingVoice.current.style.copy(fontSize = 15.sp),
+                            style = LocalReadingVoice.current.style.copy(
+                                fontSize = 15.sp,
+                                fontFamily = LocalReadingVoice.current.atSize(15f),
+                            ),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = Space.Block, start = 22.dp, end = 22.dp),
                         )
@@ -638,6 +641,7 @@ private fun NoteEditor(initial: String?, onSave: (String?) -> Unit, onClear: () 
                 color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 16.sp,
                 lineHeight = 24.sp,
+                fontFamily = LocalReadingVoice.current.atSize(16f),
             ),
             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
             modifier = Modifier
@@ -650,7 +654,10 @@ private fun NoteEditor(initial: String?, onSave: (String?) -> Unit, onClear: () 
                     if (draft.isEmpty()) {
                         Text(
                             text = stringResource(R.string.card_note_hint),
-                            style = LocalReadingVoice.current.style.copy(fontSize = 16.sp),
+                            style = LocalReadingVoice.current.style.copy(
+                                fontSize = 16.sp,
+                                fontFamily = LocalReadingVoice.current.atSize(16f),
+                            ),
                             // The hint is the one thing in an empty field, so it
                             // has to be read to be a hint at all. The theme's
                             // secondary tone measures 6.1:1 and up on every

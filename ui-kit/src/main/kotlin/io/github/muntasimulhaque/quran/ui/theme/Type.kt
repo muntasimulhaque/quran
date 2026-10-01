@@ -5,9 +5,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.content.R
@@ -101,6 +103,29 @@ val QuranTypography = typographyFor(Inter)
  */
 val BanglaTypography = typographyFor(NotoSansBengali)
 
+/**
+ * Literata at the size it is about to be drawn. The face's optical size
+ * axis runs 7 to 72 with the default at 12, so a 17 sp body would otherwise
+ * be set in the cut drawn for footnotes. Faces without the axis (the
+ * Bengali voices) have one cut and never come through here, and below
+ * API 26 the platform ignores the setting.
+ */
+@OptIn(ExperimentalTextApi::class)
+fun literataAt(sizeSp: Float, weight: FontWeight = FontWeight.Normal): FontFamily {
+    val key = sizeSp.toBits() xor (weight.weight shl 1)
+    return literataCuts.getOrPut(key) {
+        FontFamily(
+            Font(
+                R.font.literata_variable,
+                weight,
+                variationSettings = FontVariation.Settings(FontVariation.Setting("opsz", sizeSp)),
+            ),
+        )
+    }
+}
+
+private val literataCuts = java.util.concurrent.ConcurrentHashMap<Int, FontFamily>()
+
 /** The Latin reading voice, for translations, tafsir, and notes. */
 val LatinReading = TextStyle(
     fontFamily = Literata,
@@ -124,11 +149,16 @@ val BengaliReading = TextStyle(
 )
 
 /**
- * The reading voice of the language being read: the style, and the line a
+ * The reading voice of the language being read: the style, the line a
  * paragraph of it gets per em of text (an Arabic line is its own, taller
- * thing, and never takes this one). The theme sets it once from the reader's
- * language; every reading surface takes it from here.
+ * thing, and never takes this one), and the face cut for an exact drawn
+ * size. The theme sets it once from the reader's language; every reading
+ * surface takes it from here.
  */
-class ReadingVoice(val style: TextStyle, val lineRatio: Float)
+class ReadingVoice(
+    val style: TextStyle,
+    val lineRatio: Float,
+    val atSize: (Float) -> FontFamily,
+)
 
-val LocalReadingVoice = staticCompositionLocalOf { ReadingVoice(LatinReading, 1.6f) }
+val LocalReadingVoice = staticCompositionLocalOf { ReadingVoice(LatinReading, 1.6f, ::literataAt) }

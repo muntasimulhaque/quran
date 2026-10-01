@@ -75,6 +75,7 @@ fun TranslationBody(
     val base = voice.style.copy(
         fontSize = body.sp,
         lineHeight = line.sp,
+        fontFamily = voice.atSize(body),
         lineHeightStyle = LineHeightStyle(
             alignment = LineHeightStyle.Alignment.Center,
             trim = LineHeightStyle.Trim.None,
@@ -272,6 +273,7 @@ fun RichBlocks(
                     style = LocalReadingVoice.current.style.copy(
                         fontSize = sizeSp.sp,
                         lineHeight = line.sp,
+                        fontFamily = LocalReadingVoice.current.atSize(sizeSp),
                         // A block resolves its own direction from its first
                         // strong character, never from the interface around
                         // it: an Arabic paragraph in an English tafsir must
