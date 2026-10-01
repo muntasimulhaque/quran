@@ -99,8 +99,10 @@ jobs:
             content/quran.db
           key: content-work-${{ hashFiles('content/manifest.json', 'content/build-report.json') }}
 
-      - name: Core tests
-        run: ./gradlew :core:test --console=plain
+      # The whole JVM suite, not only :core: a unit test that no run
+      # executes is a rule nobody hears break.
+      - name: Unit tests
+        run: ./gradlew :core:test :data:testDebugUnitTest :ui-kit:testDebugUnitTest :app:testDebugUnitTest --console=plain
 
       - name: Fetch content
         run: ./gradlew :tools:run --args="fetch" --console=plain
@@ -238,8 +240,8 @@ jobs:
 
       # The bundle is only as good as the content inside it, so the two gates
       # a runner can run come first, exactly as they do in the gates job.
-      - name: Core tests
-        run: ./gradlew :core:test --console=plain
+      - name: Unit tests
+        run: ./gradlew :core:test :data:testDebugUnitTest :ui-kit:testDebugUnitTest :app:testDebugUnitTest --console=plain
 
       - name: Fetch content
         run: ./gradlew :tools:run --args="fetch" --console=plain
