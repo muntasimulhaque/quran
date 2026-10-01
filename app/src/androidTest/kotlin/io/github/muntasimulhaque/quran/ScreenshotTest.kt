@@ -127,7 +127,7 @@ class ScreenshotTest {
                 // unanswered backs, put our own task in front again.
                 if (attempt >= 2) bringAppForward() else dismissDialog()
                 if (attempt == 7) {
-                    throw AssertionError("a system window ($intruder) stayed over $name")
+                    throw AssertionError("a system window ($intruder) stayed over $name; ${focusEvidence()}")
                 }
             } else {
                 val bitmap = androidx.test.runner.screenshot.Screenshot.capture().bitmap
@@ -204,6 +204,21 @@ class ScreenshotTest {
         }
         return false
     }
+
+    /**
+     * The evidence a red leg keeps: the focus line from the window dump at
+     * the moment the guard gave up, so the failure names the world it died
+     * in rather than only the window it blamed.
+     */
+    private fun focusEvidence(): String = runCatching {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        instrumentation.uiAutomation.executeShellCommand("dumpsys window windows").use { command ->
+            val text = java.io.FileInputStream(command.fileDescriptor).bufferedReader().use { it.readText() }
+            text.lineSequence().firstOrNull { line ->
+                line.contains("mCurrentFocus=") || line.contains("mFocusedWindow=")
+            }?.trim() ?: "no focus line"
+        }
+    }.getOrElse { "dumpsys failed: ${it.message}" }
 
     /**
      * Puts the tour's own task back in front after a system window took the
