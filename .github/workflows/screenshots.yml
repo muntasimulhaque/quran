@@ -97,13 +97,15 @@ jobs:
       # execution history live here, not in ~/.gradle, so the Gradle setup
       # step alone never restores them. On a hit, configuration is skipped
       # and the up-to-date checks have their history, which was most of a
-      # leg's build time.
+      # leg's build time. The key is scoped to the job: a cache entry is
+      # immutable once written, and two jobs sharing one key would hand each
+      # other a configuration cache for the wrong task graph forever.
       - name: Cache project Gradle state
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: .gradle
-          key: project-gradle-${{ hashFiles('**/*.gradle.kts', 'gradle.properties', 'gradle/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties') }}
-          restore-keys: project-gradle-
+          key: project-gradle-${{ github.job }}-${{ hashFiles('**/*.gradle.kts', 'gradle.properties', 'gradle/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: project-gradle-${{ github.job }}-
 
       # Hardware acceleration for the emulator on the GitHub runner.
       - name: Enable KVM
