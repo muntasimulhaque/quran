@@ -155,6 +155,20 @@ command to rediscover.
   AVDs are `Pixel_4_35`, `Nexus_7_35`, `Pixel_C_35`, and `api27`. Start one
   headless with `-no-window -gpu swiftshader_indirect` and wait for
   `sys.boot_completed` to report `1`.
+- That machine runs Gradle on `~/.jdks/jdk-17.0.19+10` (Temurin), not on the
+  JBR: with the JBR the daemon died inside `jvm.dll` under
+  `compileDebugAndroidTestKotlin`. The emulator there dies of the tour's load
+  on a full debug build (class 2 of `docs/screenshot-failures.md`), so the
+  tour runs against the lean `-Pquran.devPacks=screenshot` APK. AGP uninstalls
+  the app when `connectedDebugAndroidTest` returns, so a frame is only
+  readable this way: install both APKs, `am instrument -w -e class
+  io.github.muntasimulhaque.quran.ScreenshotTest -e additionalTestOutputDir
+  /data/user/0/io.github.muntasimulhaque.quran/files/shots` with MSYS path
+  conversion off, then `adb exec-out run-as io.github.muntasimulhaque.quran
+  cat files/shots/<name>.png`. The output directory has to be inside the
+  app's own storage: `/sdcard` root is EPERM for the app, and a directory
+  under `Android/data/<package>/files` does not exist until something calls
+  `getExternalFilesDir`.
 - MSYS rewrites `/sdcard/...` arguments, so prefix `adb shell`, `adb push`,
   and `adb pull` with `MSYS_NO_PATHCONV=1`, and the same for `gh api` (with
   its leading slash dropped). adb is a Windows binary: `/tmp/x` is
