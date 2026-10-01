@@ -164,7 +164,10 @@ class ScreenshotTest {
      *
      * The visible check reads the window blocks themselves, so a dialog whose
      * surface is gone (the stale record the old phrase search tripped on)
-     * is never called an intruder: only `mHasSurface=true` counts.
+     * is never called an intruder: only `mHasSurface=true` counts. The focus
+     * check is held to the same standard: a window can die under the tour
+     * and keep the focus line as a stale record, and its own block's
+     * `mHasSurface=true` is what makes it real.
      */
     private fun intruderWindow(): String? = runCatching {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
@@ -180,7 +183,26 @@ class ScreenshotTest {
             line.contains("mCurrentFocus=") || line.contains("mFocusedWindow=")
         } ?: return null
         val owner = Regex("""Window\{[^}]*?\s([^\s/}]+)/""").find(focus)?.groupValues?.get(1)
-        return if (owner == null || owner == ours) null else owner
+        if (owner == null || owner == ours) return null
+        // A focused window without a live surface is a ghost: the launcher
+        // can crash under the tour and keep the focus line while its window
+        // is gone, and pressing back at a ghost only loses the leg.
+        val token = Regex("""Window\{([^}\s]+)\s""").find(focus)?.groupValues?.get(1)
+            ?: return owner
+        return if (windowHasSurface(text, token)) owner else null
+    }
+
+    /** True when the block of the named window token reports a live surface. */
+    private fun windowHasSurface(text: String, token: String): Boolean {
+        var inBlock = false
+        for (line in text.lineSequence()) {
+            if (line.contains("Window #") && line.contains("Window{")) {
+                if (inBlock) return false
+                inBlock = line.contains("Window{$token ")
+            }
+            if (inBlock && line.contains("mHasSurface=true")) return true
+        }
+        return false
     }
 
     /**
