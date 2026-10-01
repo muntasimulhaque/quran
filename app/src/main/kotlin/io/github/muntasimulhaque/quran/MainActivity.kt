@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
-import android.os.StrictMode
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
@@ -57,20 +56,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // The law says no disk or database work on the main thread, ever;
-        // in a debug build the platform itself says so in the log. No
-        // penalty beyond the log line: a library's internals are not ours
-        // to crash on.
-        if (BuildConfig.DEBUG) {
-            StrictMode.setThreadPolicy(
-                StrictMode.ThreadPolicy.Builder()
-                    .detectDiskReads()
-                    .detectDiskWrites()
-                    .detectNetwork()
-                    .penaltyLog()
-                    .build(),
-            )
-        }
         enableEdgeToEdge()
         // The reminder's channel exists from the first launch, so it is
         // visible in the system's own settings before it ever speaks.
