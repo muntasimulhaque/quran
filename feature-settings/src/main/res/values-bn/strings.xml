@@ -93,9 +93,15 @@
     <string name="credit_literata">লিটারাটা</string>
     <string name="credit_literata_by">টাইপটুগেদার, SIL ওপেন ফন্ট লাইসেন্স 1.1</string>
     <string name="credit_literata_use">অনুবাদ ও তাফসীর</string>
+    <string name="credit_noto_serif_bengali">নোটো সেরিফ বাংলা</string>
+    <string name="credit_noto_serif_bengali_by">গুগল, SIL ওপেন ফন্ট লাইসেন্স 1.1</string>
+    <string name="credit_noto_serif_bengali_use">বাংলা অনুবাদ ও তাফসীর</string>
     <string name="credit_inter">ইন্টার</string>
     <string name="credit_inter_by">রাসমুস অ্যান্ডারসন, SIL ওপেন ফন্ট লাইসেন্স 1.1</string>
     <string name="credit_inter_use">ইন্টারফেস</string>
+    <string name="credit_noto_sans_bengali">নোটো স্যান্স বাংলা</string>
+    <string name="credit_noto_sans_bengali_by">গুগল, SIL ওপেন ফন্ট লাইসেন্স 1.1</string>
+    <string name="credit_noto_sans_bengali_use">বাংলা ইন্টারফেস</string>
     <string name="credit_minshawi">মিনশাবী</string>
     <string name="credit_minshawi_by">মুহাম্মদ সিদ্দিক আল-মিনশাবী, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে</string>
     <string name="credit_minshawi_use">মুরাত্তাল</string>

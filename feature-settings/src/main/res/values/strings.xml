@@ -94,9 +94,15 @@
     <string name="credit_literata">Literata</string>
     <string name="credit_literata_by">TypeTogether, SIL Open Font License 1.1</string>
     <string name="credit_literata_use">Translations and tafsir</string>
+    <string name="credit_noto_serif_bengali">Noto Serif Bengali</string>
+    <string name="credit_noto_serif_bengali_by">Google, SIL Open Font License 1.1</string>
+    <string name="credit_noto_serif_bengali_use">Bangla translations and tafsir</string>
     <string name="credit_inter">Inter</string>
     <string name="credit_inter_by">Rasmus Andersson, SIL Open Font License 1.1</string>
     <string name="credit_inter_use">The interface</string>
+    <string name="credit_noto_sans_bengali">Noto Sans Bengali</string>
+    <string name="credit_noto_sans_bengali_by">Google, SIL Open Font License 1.1</string>
+    <string name="credit_noto_sans_bengali_use">The Bangla interface</string>
     <string name="credit_minshawi">Minshawi</string>
     <string name="credit_minshawi_by">Muhammad Siddiq Al-Minshawi, via the Quranic Universal Library</string>
     <string name="credit_minshawi_use">Murattal</string>

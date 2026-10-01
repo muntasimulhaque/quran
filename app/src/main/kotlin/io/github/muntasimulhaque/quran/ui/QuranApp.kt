@@ -33,6 +33,7 @@ import io.github.muntasimulhaque.quran.ui.reader.ReaderScreen
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.LocalPageThemeName
+import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.data.isDark
 import io.github.muntasimulhaque.quran.data.resolved
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
@@ -73,7 +74,7 @@ fun QuranApp(
         autoNight = settings.autoNight,
         systemDark = isSystemInDarkTheme(),
     )
-    QuranTheme(theme) {
+    QuranTheme(theme, language = UiLanguage.of(settings.uiLanguage) ?: UiLanguage.English) {
         // The status and navigation bars belong to the theme the reader
         // chose, not to the system's own idea of day and night: on a night
         // page the icons must be light, or they vanish into it.

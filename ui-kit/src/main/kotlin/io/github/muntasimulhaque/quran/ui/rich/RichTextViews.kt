@@ -40,8 +40,7 @@ import io.github.muntasimulhaque.quran.core.ScriptMix
 import io.github.muntasimulhaque.quran.core.scriptMix
 import io.github.muntasimulhaque.quran.data.Footnote
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
-import io.github.muntasimulhaque.quran.ui.theme.Inter
-import io.github.muntasimulhaque.quran.ui.theme.LatinReading
+import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 
 /**
  * Draws parsed runs with the manuscript's two voices: Literata for Latin and
@@ -66,14 +65,15 @@ fun TranslationBody(
     /** True on a surface that centers its lines, such as the share card. */
     centered: Boolean = false,
 ) {
-    val latin = sizeSp ?: LatinReading.fontSize.value
+    val voice = LocalReadingVoice.current
+    val body = sizeSp ?: voice.style.fontSize.value
     val line = lineHeightFor(
         mix = scriptMix(runs),
-        latinLine = lineSp ?: latin * 1.6f,
+        latinLine = lineSp ?: body * voice.lineRatio,
         arabicSp = arabicSp,
     )
-    val base = LatinReading.copy(
-        fontSize = latin.sp,
+    val base = voice.style.copy(
+        fontSize = body.sp,
         lineHeight = line.sp,
         lineHeightStyle = LineHeightStyle(
             alignment = LineHeightStyle.Alignment.Center,
@@ -84,7 +84,7 @@ fun TranslationBody(
         text = annotated(
             runs,
             arabicSize = arabicSp.sp,
-            markerSize = (latin * 0.65f).sp,
+            markerSize = (body * 0.65f).sp,
             quoteColor = null,
             onFootnote = onFootnote,
         ),
@@ -140,10 +140,11 @@ fun HighlightedText(
     text: String,
     ranges: List<IntRange>,
     modifier: Modifier = Modifier,
-    style: TextStyle = LatinReading,
+    style: TextStyle? = null,
     color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     maxLines: Int = 4,
 ) {
+    val resolvedStyle = style ?: LocalReadingVoice.current.style
     val wash = MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
     val weight = FontWeight.Medium
     Text(
@@ -162,7 +163,7 @@ fun HighlightedText(
             }
             if (index < text.length) append(text.substring(index))
         },
-        style = style,
+        style = resolvedStyle,
         color = color,
         maxLines = maxLines,
         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
@@ -204,7 +205,7 @@ fun FootnoteList(
                     append(footnote.text)
                 },
                 style = MaterialTheme.typography.bodySmall
-                    .merge(SpanStyle(fontFamily = Inter, fontSize = sizeSp.sp))
+                    .merge(SpanStyle(fontSize = sizeSp.sp))
                     .plus(
                         ParagraphStyle(
                             lineHeight = (sizeSp * 1.5f).sp,
@@ -268,7 +269,7 @@ fun RichBlocks(
                         markerSize = (sizeSp * 0.65f).sp,
                         quoteColor = MaterialTheme.colorScheme.onBackground,
                     ),
-                    style = LatinReading.copy(
+                    style = LocalReadingVoice.current.style.copy(
                         fontSize = sizeSp.sp,
                         lineHeight = line.sp,
                         // A block resolves its own direction from its first

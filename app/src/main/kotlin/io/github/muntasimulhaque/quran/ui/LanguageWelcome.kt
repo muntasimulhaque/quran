@@ -35,6 +35,8 @@ import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
+import io.github.muntasimulhaque.quran.ui.theme.Inter
+import io.github.muntasimulhaque.quran.ui.theme.NotoSansBengali
 import io.github.muntasimulhaque.quran.ui.theme.Reading
 
 /**
@@ -145,7 +147,11 @@ private fun LanguageCard(
         Column(Modifier.weight(1f)) {
             Text(
                 text = name,
-                style = MaterialTheme.typography.titleMedium,
+                // The welcome runs before the theme has a language, so a name
+                // in Bengali script asks for its face directly.
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontFamily = if (language == UiLanguage.Bangla) NotoSansBengali else Inter,
+                ),
                 color = MaterialTheme.colorScheme.onSurface,
             )
             if (suggested) {

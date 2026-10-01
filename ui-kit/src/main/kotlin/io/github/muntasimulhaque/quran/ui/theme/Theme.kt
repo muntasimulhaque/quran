@@ -8,6 +8,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import io.github.muntasimulhaque.quran.data.AppTheme
+import io.github.muntasimulhaque.quran.data.UiLanguage
 
 /**
  * The four grounds, in one place, each one fully spoken for.
@@ -183,8 +184,18 @@ private val BlackPage = PagePalette(
 val LocalPagePalette = staticCompositionLocalOf { PaperPage }
 val LocalPageThemeName = staticCompositionLocalOf { "paper" }
 
+/**
+ * The theme is the whole app: the four grounds, and the voice everything is
+ * written in. The voice follows the reader's one language choice: English
+ * speaks Inter and Literata, Bangla speaks Noto Sans Bengali and Noto Serif
+ * Bengali, and the switch is made here so no surface picks a face of its own.
+ */
 @Composable
-fun QuranTheme(theme: AppTheme = AppTheme.Paper, content: @Composable () -> Unit) {
+fun QuranTheme(
+    theme: AppTheme = AppTheme.Paper,
+    language: UiLanguage = UiLanguage.English,
+    content: @Composable () -> Unit,
+) {
     val colors = when (theme) {
         AppTheme.Paper -> PaperScheme
         AppTheme.Sepia -> SepiaScheme
@@ -206,7 +217,15 @@ fun QuranTheme(theme: AppTheme = AppTheme.Paper, content: @Composable () -> Unit
     CompositionLocalProvider(
         LocalPagePalette provides palette,
         LocalPageThemeName provides name,
+        LocalReadingVoice provides when (language) {
+            UiLanguage.Bangla -> ReadingVoice(BengaliReading, 1.706f)
+            UiLanguage.English -> ReadingVoice(LatinReading, 1.6f)
+        },
     ) {
-        MaterialTheme(colorScheme = colors, typography = QuranTypography, content = content)
+        val typography = when (language) {
+            UiLanguage.Bangla -> BanglaTypography
+            UiLanguage.English -> QuranTypography
+        }
+        MaterialTheme(colorScheme = colors, typography = typography, content = content)
     }
 }

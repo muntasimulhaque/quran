@@ -66,7 +66,7 @@ import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.rich.ArabicBody
 import io.github.muntasimulhaque.quran.ui.rich.RichBlocks
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
-import io.github.muntasimulhaque.quran.ui.theme.LatinReading
+import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlinx.coroutines.Dispatchers
@@ -321,7 +321,7 @@ fun AyahCard(
                         )
                         translationReady -> Text(
                             text = stringResource(R.string.card_no_translation),
-                            style = LatinReading.copy(fontSize = 15.sp),
+                            style = LocalReadingVoice.current.style.copy(fontSize = 15.sp),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = Space.Block, start = 22.dp, end = 22.dp),
                         )
@@ -634,7 +634,7 @@ private fun NoteEditor(initial: String?, onSave: (String?) -> Unit, onClear: () 
         BasicTextField(
             value = draft,
             onValueChange = { draft = it },
-            textStyle = LatinReading.copy(
+            textStyle = LocalReadingVoice.current.style.copy(
                 color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 16.sp,
                 lineHeight = 24.sp,
@@ -650,7 +650,7 @@ private fun NoteEditor(initial: String?, onSave: (String?) -> Unit, onClear: () 
                     if (draft.isEmpty()) {
                         Text(
                             text = stringResource(R.string.card_note_hint),
-                            style = LatinReading.copy(fontSize = 16.sp),
+                            style = LocalReadingVoice.current.style.copy(fontSize = 16.sp),
                             // The hint is the one thing in an empty field, so it
                             // has to be read to be a hint at all. The theme's
                             // secondary tone measures 6.1:1 and up on every

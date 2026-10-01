@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
-import io.github.muntasimulhaque.quran.ui.theme.Literata
+import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -62,7 +62,7 @@ fun RemoveSavedSheet(
                 Text(
                     text = note,
                     style = MaterialTheme.typography.bodyMedium.copy(
-                        fontFamily = Literata,
+                        fontFamily = LocalReadingVoice.current.style.fontFamily,
                         lineHeight = 20.sp,
                     ),
                     color = MaterialTheme.colorScheme.onSurface,

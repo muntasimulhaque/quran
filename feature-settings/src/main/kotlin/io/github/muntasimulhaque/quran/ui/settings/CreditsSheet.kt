@@ -117,9 +117,19 @@ fun CreditsSheet(
                 stringResource(R.string.credit_literata_use),
             )
             Credit(
+                stringResource(R.string.credit_noto_serif_bengali),
+                stringResource(R.string.credit_noto_serif_bengali_by),
+                stringResource(R.string.credit_noto_serif_bengali_use),
+            )
+            Credit(
                 stringResource(R.string.credit_inter),
                 stringResource(R.string.credit_inter_by),
                 stringResource(R.string.credit_inter_use),
+            )
+            Credit(
+                stringResource(R.string.credit_noto_sans_bengali),
+                stringResource(R.string.credit_noto_sans_bengali_by),
+                stringResource(R.string.credit_noto_sans_bengali_use),
             )
 
             Group(stringResource(R.string.about_group_recitations))
