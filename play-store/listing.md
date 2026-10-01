@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 3.3 (versionCode 34)
+Version: 3.4 (versionCode 35)
 
 ## Listing
 
@@ -200,6 +200,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (3.4, 388 characters)
+
+The mushaf page breathes: the printed rule now stands off the text on all four sides, so the page reads as a page. Settings finally speak one language: every row wears its value under its own name, and every row that opens something ends in the same arrow, on the About page too. Search, word by word, tafsir, recitation, and the daily ayah are unchanged. No ads, no trackers, no account.
 
 ## Release notes (3.3, 484 characters)
 
