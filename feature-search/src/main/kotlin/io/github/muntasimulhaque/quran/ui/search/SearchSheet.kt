@@ -407,7 +407,7 @@ private fun SearchField(
                                 // The hint is the only text in an empty field,
                                 // so it has to be read to be a hint at all. The
                                 // 0.55 alpha it wore measured 2.5:1, under the
-                                // design document's 4.5:1 rule.
+                                // theme's 4.5:1 rule.
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
@@ -633,7 +633,7 @@ private fun AyahRow(
                     style = MaterialTheme.typography.labelMedium,
                     // A pack's name is read, so it keeps the theme's own
                     // secondary tone; the 0.7 alpha it wore measured 3.3:1,
-                    // under the design document's 4.5:1 rule.
+                    // under the theme's 4.5:1 rule.
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 4.dp),
                 )

@@ -79,7 +79,7 @@ Project text. The translation is Saheeh International, issued by Noor
 International Center and distributed by QuranEnc.com. Scripts, layouts,
 tafsirs, metadata, and recitations come from the Quranic Universal Library
 (QUL) by Tarteel. Every dataset carries its source, version, and credit, and
-every license is honored: see [`docs/content-sources.md`](docs/content-sources.md).
+every license is honored: see [`content/manifest.json`](content/manifest.json).
 
 | Language | Translation | Tafsir | Word meanings |
 |---|---|---|---|
@@ -92,10 +92,8 @@ every license is honored: see [`docs/content-sources.md`](docs/content-sources.m
 Thirteen Gradle modules with dependencies pointing one way, and a JVM
 content pipeline. Every sentence the reader can see lives in a `strings.xml`
 in the module that draws it, so the interface can be translated without
-hunting through Kotlin. The module rules are in
-[`docs/architecture.md`](docs/architecture.md) and the design constitution in
-[`docs/design.md`](docs/design.md). The reason a thing is the way it is lives
-beside that thing in the code.
+hunting through Kotlin. The working rules are [`AGENTS.md`](AGENTS.md); the
+reason a thing is the way it is lives beside that thing in the code.
 
 ```
 :core :data :content-assets :ui-kit
@@ -140,4 +138,4 @@ nowhere.
 
 The code is MIT: see [LICENSE](LICENSE). The Quran text, translation, tafsir,
 fonts, and recitations are not ours to license and keep their own terms and
-credits, recorded in [`docs/content-sources.md`](docs/content-sources.md).
+credits, recorded in [`content/manifest.json`](content/manifest.json).

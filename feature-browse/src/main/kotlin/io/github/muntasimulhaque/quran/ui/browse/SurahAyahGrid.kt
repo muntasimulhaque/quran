@@ -171,7 +171,7 @@ private fun SurahGridHeader(surah: Surah, onBack: () -> Unit) {
  * ayah filled, and both states spoken so the grid means the same thing to
  * TalkBack.
  *
- * The cell is 48 dp tall, the design document's own floor for a thing a finger
+ * The cell is 48 dp tall, the floor for a thing a finger
  * aims at, and the grid's columns are as wide as that: a picker of small
  * numbers is exactly the surface where a target under the floor is felt, since
  * the reader aims at a two- or three-digit shape and not at a word.

@@ -446,11 +446,20 @@ class Build(private val root: File) {
      * app needs one vocabulary for all of them.
      */
     private fun insertPacks(connection: Connection, manifest: Manifest) {
+        // A pack's credit and license are its datasets', resolved through
+        // PackSources: the pack id and the dataset id do not share names
+        // (the Saheeh pack is built from the translation dataset and its
+        // cross-check), so a lookup by pack id alone silently fell back to
+        // "Built in" for the one translation every reader starts with.
         fun creditOf(id: String): String =
-            manifest.datasets.firstOrNull { it.id == id }?.credit.orEmpty()
+            PackSources.datasets(id)
+                .mapNotNull { dataset -> manifest.datasets.firstOrNull { it.id == dataset }?.credit }
+                .filter { it.isNotBlank() }
+                .distinct()
+                .joinToString(" · ")
 
         fun licenseOf(id: String): String =
-            manifest.datasets.firstOrNull { it.id == id }?.license.orEmpty()
+            PackSources.licenses(manifest, id).joinToString(" · ")
 
         data class Pack(
             val id: String,
@@ -492,8 +501,8 @@ class Build(private val root: File) {
                 statement.setString(2, pack.type)
                 statement.setString(3, pack.name)
                 statement.setString(4, pack.language)
-                statement.setString(5, creditOf(pack.id).ifEmpty { "Built in" })
-                statement.setString(6, licenseOf(pack.id).ifEmpty { "See docs/content-sources.md" })
+                statement.setString(5, creditOf(pack.id).ifEmpty { "No credit recorded" })
+                statement.setString(6, licenseOf(pack.id).ifEmpty { "No license recorded" })
                 statement.setString(7, pack.version)
                 statement.setInt(8, 1)
                 statement.setInt(9, ayahs.toInt())

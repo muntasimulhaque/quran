@@ -192,7 +192,7 @@ jobs:
   #
   # The artifact is private and short lived: only someone signed in to this
   # repository can download it, and GitHub deletes it on its own after two
-  # weeks. Ask for it where the runbook says to:
+  # weeks. Ask for it from the newest green run:
   #
   #   gh run download <run> -n quran-signed-aab -D play-store/aab
   #
@@ -266,7 +266,7 @@ jobs:
         run: |
           if [ -z "$KEYSTORE_BASE64" ]; then
             echo "::error::KEYSTORE_BASE64 is not set, so this build could not be signed."
-            echo "::error::Add the four secrets named in play-store/RELEASE.md, then re-run this workflow."
+            echo "::error::Add the four secrets (KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD) to the repository, then re-run this workflow."
             exit 1
           fi
           mkdir -p "$RUNNER_TEMP/signing"

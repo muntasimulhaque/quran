@@ -14,16 +14,8 @@ Package: `io.github.muntasimulhaque.quran`, permanent.
 
 **The code is the source of truth.** Why a thing is the way it is lives in
 the KDoc beside that thing, and a settled choice is tagged
-`owner decision`, so `git grep "owner decision"` finds them. Everything
-else has one file and one job:
-
-| File | What only it can say |
-| --- | --- |
-| `AGENTS.md` | the law, the commands, the map, the vocabulary |
-| `docs/design.md` | the reading surfaces, the type, the color, the budget |
-| `docs/architecture.md` | the module rules and the one direction between them |
-| `play-store/RELEASE.md` | the release runbook, the secrets, the signature proof |
-| `docs/screenshot-failures.md` | every way a capture leg can fail, with its class and its fix |
+`owner decision`, so `git grep "owner decision"` finds them. This file is
+the only rulebook: the law, the commands, the map, the vocabulary.
 
 If this file and the code disagree, the code wins and this file is fixed in
 the same change. Do not grow this into a second codebase written in prose.
@@ -157,7 +149,7 @@ command to rediscover.
 - That machine runs Gradle on `~/.jdks/jdk-17.0.19+10` (Temurin), not on the
   JBR: with the JBR the daemon died inside `jvm.dll` under
   `compileDebugAndroidTestKotlin`. The emulator there dies of the tour's load
-  on a full debug build (class 2 of `docs/screenshot-failures.md`), so the
+  on a full debug build, so the
   tour runs against the lean `-Pquran.devPacks=screenshot` APK. AGP uninstalls
   the app when `connectedDebugAndroidTest` returns, so a frame is only
   readable this way: install both APKs, `am instrument -w -e class
@@ -214,9 +206,10 @@ at every step:
   content/raw` before a release starts: if the manual QUL and QuranEnc
   exports are gone, say so before the release begins rather than at gate
   time.
-- The committed `content/quran.db` is the shipped content and a local
-  rebuild must reproduce its SHA-256 exactly. If it does not, stop and find
-  out why before committing anything.
+- `content/quran.db` is the shipped content, built by `tools/` and fetched
+  from its hash-addressed release on a fresh machine. A local rebuild must
+  reproduce its SHA-256 exactly; if it does not, stop and find out why
+  before committing anything.
 - **Verify by process exit code**, never by grepping piped output.
 - CI runs the JVM suite, the content gates it can run, the data instrumented
   tests, and the signed bundle in `build.yml`, which filters pushes by path
@@ -239,9 +232,6 @@ at every step:
   here. The Gradle wrapper is committed.
 
 ## Release
-
-The full runbook is `play-store/RELEASE.md`; the capture's failure classes
-are `docs/screenshot-failures.md`. What belongs here is the law around it.
 
 1. **The owner's word first.** One build carries the whole session, and the
    bundle and the screenshots are one delivery: collected, checked, and
@@ -284,9 +274,8 @@ are `docs/screenshot-failures.md`. What belongs here is the law around it.
 | `ui-kit/` | the shared look: theme and palettes, the hand-drawn icons, the rich text views, the small formatters |
 | `content-assets/` | the shipped assets the app reads: the 604 page fonts, the study and UI faces, the core pack, and the pack catalog |
 | `tools/` | the offline pipeline: fetch, verify, audit, build, fonts, packs, audio |
-| `content/` | `quran.db` (built and committed), `packs/`, `manifest.json`, `recitation-manifest.json`, `audit-report.md`; `raw/` is local and gitignored |
-| `docs/` | the design and the architecture, this file's siblings in the table above |
-| `play-store/` | listing, screenshots per form factor, the hand-off AAB, the runbook |
+| `content/` | `quran.db` (built by `tools/`, gitignored, fetched or rebuilt from its hash), `packs/`, `manifest.json`, `recitation-manifest.json`, `audit-report.md`; `raw/` is local and gitignored |
+| `play-store/` | listing, screenshots per form factor, the hand-off AAB |
 | `benchmark/` | the startup profile's generator, development only, never in the bundle |
 | `.github/workflows/` | `build.yml` (gates, data tests, signed bundle), `screenshots.yml` (the store set) |
 
@@ -335,7 +324,9 @@ implement it and update this list.
 - Ibn Kathir and As-Sa'di are the tafsirs.
 - Minshawi and Husary are the only reciters.
 - No streaks, no gamification.
-- The design direction is the manuscript language of `docs/design.md`.
+- The design direction is the manuscript language: the page is the
+  interface, chrome is summoned and never resident, one accent, hairlines
+  over boxes.
 - Content is sourced from QUL and QuranEnc, with every license
   honored and a takedown path in About.
 - Continue to the next surah is off by default and is the reader's one-time

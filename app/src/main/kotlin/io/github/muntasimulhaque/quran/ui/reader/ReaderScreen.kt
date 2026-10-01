@@ -636,7 +636,7 @@ private fun MushafReader(
         // moves the pager from here. A far jump lands at once: animating
         // across three hundred pages would render all of them on the way. A
         // reader who asked the system to reduce motion lands at once for a
-        // near jump too, the jump the design document names.
+        // near jump too.
         LaunchedEffect(viewModel.page, reducedMotion) {
             val target = (viewModel.page - 1).coerceIn(0, 603)
             val current = pagerState.currentPage

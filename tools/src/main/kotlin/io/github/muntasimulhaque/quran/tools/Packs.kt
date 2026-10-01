@@ -337,6 +337,6 @@ class Packs(private val root: File) {
         const val SEPARATOR = " · "
 
         /** Only reached when a pack has no dataset recorded. */
-        const val NO_LICENSE = "See docs/content-sources.md"
+        const val NO_LICENSE = "No license recorded"
     }
 }

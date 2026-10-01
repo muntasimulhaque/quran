@@ -552,7 +552,7 @@ private fun TafsirPanel(view: TafsirView, arabic: Boolean, settings: AppSettings
             // passage begins and ends. It takes the theme's own secondary
             // tone, which is measured at 6.1:1 and up on every ground, rather
             // than a quiet alpha. The 0.7 alpha it wore measured 3.3:1 on the
-            // sepia surface, under the design document's own 4.5:1 rule for
+            // sepia surface, under the theme's own 4.5:1 rule for
             // muted text, and this is the pass that closes it.
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 12.dp),

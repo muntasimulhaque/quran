@@ -32,7 +32,7 @@ on:
       # decide what the pixels say: a search rule (`arabicLineFor`), a display
       # model, or a formatter changes a frame without touching a UI module. A
       # capture that skipped them shipped a store set of the old frames once,
-      # which is the runbook's own definition of wasted work.
+      # which is wasted work by this workflow's own definition.
       - "data/src/main/**"
       - "core/src/main/**"
       - ".github/workflows/screenshots.yml"
