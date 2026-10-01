@@ -321,7 +321,8 @@ implement it and update this list. The reasoning is `docs/decisions.md`.
 
 - The name and the three strings are frozen (D-001).
 - A settings row's value is under its name, on every row in the sheet, and
-  never in a column at the right (D-134).
+  never in a column at the right; a row that opens something ends in a
+  chevron, whatever page it is on (D-134).
 - Reader-first, no tab bar (D-008).
 - Both reading modes ship together (D-008).
 - The reading modes are one switch in the top bar, and the reader's other

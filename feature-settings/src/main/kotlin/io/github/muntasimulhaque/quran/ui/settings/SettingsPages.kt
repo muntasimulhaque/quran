@@ -249,6 +249,17 @@ fun TafsirsPage(
 
 /**
  * The app itself: its version, its credits, and a way to check its content.
+ *
+ * The page is the sheet's own list: a fact carries no mark, and both of its
+ * doors are [PageRow]s, so a reader who came here sees the same rows as the
+ * hub above. They used to be a row shape of their own, a name in the accent
+ * color with nothing at the right, which made the About page the one page in
+ * the sheet where a door had no chevron (owner decision, D-134).
+ *
+ * The one line in the accent color here is the check's own result, under the
+ * row that runs it: that is the outcome of what the reader just did rather
+ * than where a setting stands, and the accent is what the sheet already means
+ * by the heading of a group.
  */
 @Composable
 fun AboutPage(
@@ -260,13 +271,12 @@ fun AboutPage(
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_about))
         ValueRow(stringResource(R.string.settings_version), version)
-        TextRow(title = stringResource(R.string.settings_credits), onClick = onCredits)
+        PageRow(title = stringResource(R.string.settings_credits), summary = null) { onCredits() }
         Group(stringResource(R.string.settings_group_content))
-        TextRow(
+        PageRow(
             title = stringResource(R.string.settings_check_content),
-            subtitle = stringResource(R.string.settings_check_content_subtitle),
-            onClick = onCheckContent,
-        )
+            summary = stringResource(R.string.settings_check_content_subtitle),
+        ) { onCheckContent() }
         contentCheck?.let { check ->
             Text(
                 text = when (check) {

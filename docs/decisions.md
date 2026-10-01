@@ -6906,6 +6906,37 @@ and on the name's own left edge, on the sheet's two longest values, and that
 the marks after the words still sit at one left edge and one right edge
 whatever the value says.
 
+**One door in the sheet.** The owner's next question was what to do with the
+one row shape the sheet still had: `TextRow`, a name in the accent color with
+nothing at the right, used for `Credits and licenses` and `Check installed
+content` on the About page and for `Corrections and rights` in Credits. It is
+gone, and its three rows are `PageRow` now. So the sheet's rule is complete
+and one sentence long: **a name, the value or the one note under it, and the
+marks at the right; a row that opens something ends with a chevron on the
+margin, and a row with no door ends with nothing.** The About page reads as
+the hub does, and D-120's chevron count, "a count of the rows that have a
+door", is true on that page for the first time.
+
+The accent color keeps **one** meaning now: the heading of a group, and the
+one line of live feedback under the row that produced it, which is the content
+check's own result. It used to mean "this row happens to be tappable" as
+well, so the About page answered "does this open something?" with a color on
+one page and with a mark on every other, and the color and the chevron beside
+it were saying the same thing twice.
+
+**What was deliberately left alone.** Browse's place and surah lists keep
+their accent-colored names with no chevron, and Search's `Go to` keeps its
+own. Those are lists of places being chosen, not lists of settings: there the
+accent is the name you pick, and a chevron on every surah row would be a mark
+saying nothing. Unifying those too would change store frames 4 and 7, and the
+sheet's problem was never theirs. The content check's result line also stays a
+separate line under its row rather than becoming that row's value: it is the
+outcome of something the reader just did, not where a setting stands, and it
+is the one place in the sheet where the accent means feedback.
+
+`everyDoorOnTheAboutPageEndsInAChevron` is the measurement: two clickable rows
+on that page, two chevrons, and both chevrons on one line.
+
 **The gates.** `:core:test` (100: the five `SettingsRowTest` cases went with
 the rule, eight `PageFrameTest` cases came), `:data:testDebugUnitTest` (33),
 `:app:testDebugUnitTest`, `:app:lintDebug`, `:app:assembleDebug`, and
@@ -6918,26 +6949,41 @@ D-133 left owing, `SystemThemeTest`'s dark-ground half and
 saw are a different renderer from the `pixel35` profile CI uses, so that is
 worth knowing rather than worth claiming.
 
-**What the store is owed.** The mushaf page is store frame 1 and the settings
-hub is frame 6, and both are different from the set in `play-store/` now: the
-page has its rule off the text and 2 percent less type, and the hub has one
-row grammar. The next capture run owns the refresh, and this entry is why.
+**After the one-door change**, the sweep was run again and the emulator was
+lost twice under the load of a full sweep on a four-core machine (class 2 of
+`docs/screenshot-failures.md`, twice now on this profile), so what the About
+page is proved by is the sweep's own parts that touch it, each run alone:
+`SettingsRowAlignmentTest` with the new case, `SettingsMergeTest`,
+`SettingsVisibilityTest`, `ListeningSettingsTest`, and `DailyAyahToggleTest`,
+**12 tests green**, and the tour green with all eight frames. The one case
+that went red before the device dropped was `AyahActionsTest` waiting sixty
+seconds for the study block to draw on a cold emulator, which is the wait its
+own KDoc records as having timed out on a cold run before, and which is green
+on a fresh device: the study surface is not what this session touched. The
+frame the store is owed was measured rather than assumed: frame 6 after this
+change differs from frame 6 before it in thirty one rows, all of them in the
+status bar's clock, and frame 1 is byte identical.
 
-**The machine, this once.** The JBR is Java 25 and the daemon died inside
-`jvm.dll` under `:app:compileDebugAndroidTestKotlin`, so the JDK here is
-`~/.jdks/jdk-17.0.19+10` (Temurin) and every Gradle call on this machine
-needs `JAVA_HOME` set to it. Two further facts cost an hour and are worth
-having written down: the emulator dies if the tour runs against a full debug
-build with every pack on a four-core machine (class 2 of
-`docs/screenshot-failures.md`, and the fix there, the lean
-`-Pquran.devPacks=screenshot` build, is the fix), and AGP uninstalls the app
-after `connectedAndroidTest`, so the tour's frames are gone by the time the
-Gradle call returns. To read a frame on this machine: install both APKs, run
-`am instrument -w -e class io.github.muntasimulhaque.quran.ScreenshotTest -e
-additionalTestOutputDir /data/user/0/io.github.muntasimulhaque.quran/files/shots`
-(MSYS path conversion off), and pull each frame with
-`adb exec-out run-as io.github.muntasimulhaque.quran cat files/shots/<name>.png`.
-The output directory has to be inside the app's own storage: `/sdcard` root is
-EPERM for the app even when it owns the directory, and a directory under
-`Android/data/<package>/files` does not exist until something calls
-`getExternalFilesDir`, so it cannot be created by the argument alone.
+**What the store is owed.** The mushaf page is store frame 1 (and frame 2
+over it) and the settings hub is frame 6, and all three are different from
+the set in `play-store/` now: the page has its rule off the text and 2 percent
+less type, and the hub has one row grammar. The About page and the Credits
+sheet are not in the eight, so this session's second half owes the store
+nothing more. The next capture run owns the refresh, and this entry is why.
+
+**The machine, this once.** Three facts cost an hour here, and all three are
+now in AGENTS.md's own machine notes with the commands that work. The JBR is
+Java 25 and the Gradle daemon died inside `jvm.dll` under
+`:app:compileDebugAndroidTestKotlin`, so every Gradle call on this machine
+needs `JAVA_HOME` set to `~/.jdks/jdk-17.0.19+10` (Temurin). The emulator
+dies of the tour's load on a full debug build with every pack, which is class
+2 of `docs/screenshot-failures.md` and is fixed there by the lean
+`-Pquran.devPacks=screenshot` APK. And AGP uninstalls the app when
+`connectedDebugAndroidTest` returns, so the tour's frames are gone by the time
+the Gradle call returns: a frame is readable by installing both APKs and
+running `am instrument` with `additionalTestOutputDir` inside the app's own
+internal storage, then pulling each frame with `adb exec-out run-as <package>
+cat files/shots/<name>.png`. `/sdcard` root is EPERM for the app even when it
+owns the directory, and a directory under `Android/data/<package>/files` does
+not exist until something calls `getExternalFilesDir`, which is why the
+directory has to be the internal one.

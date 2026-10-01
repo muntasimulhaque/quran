@@ -136,9 +136,9 @@ fun CreditsSheet(
 
             Group(stringResource(R.string.about_group_app))
             ValueRow(stringResource(R.string.settings_license_label), stringResource(R.string.about_license))
-            TextRow(
+            PageRow(
                 title = stringResource(R.string.settings_rights),
-                subtitle = stringResource(R.string.settings_rights_note),
+                summary = stringResource(R.string.settings_rights_note),
             ) {
                 onOpenLink(RIGHTS_URL)
             }

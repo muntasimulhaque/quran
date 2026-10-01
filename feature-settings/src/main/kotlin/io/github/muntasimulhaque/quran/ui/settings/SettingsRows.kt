@@ -318,34 +318,6 @@ fun ToggleRow(
     }
 }
 
-/** A row of two lines that opens a door. */
-@Composable
-fun TextRow(
-    title: String,
-    subtitle: String? = null,
-    onClick: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 22.dp, vertical = 14.dp),
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.primary,
-        )
-        if (!subtitle.isNullOrBlank()) {
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-}
-
 /**
  * A line the reader cannot change: a version, a license, what stands where.
  *

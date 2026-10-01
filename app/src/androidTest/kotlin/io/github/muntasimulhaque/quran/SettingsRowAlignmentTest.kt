@@ -7,6 +7,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
+import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -16,6 +17,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.TypeRole
+import io.github.muntasimulhaque.quran.ui.settings.AboutPage
 import io.github.muntasimulhaque.quran.ui.settings.PageRow
 import io.github.muntasimulhaque.quran.ui.settings.SizeRow
 import io.github.muntasimulhaque.quran.ui.settings.SpeedRow
@@ -271,6 +273,53 @@ class SettingsRowAlignmentTest {
         val last = marks.last()
         assertEquals("every chevron must sit at one left edge", first.left, last.left, 0.5f)
         assertEquals("every chevron must sit at one right edge", first.right, last.right, 0.5f)
+    }
+
+    /**
+     * A row that opens something ends in a chevron, on every page of the sheet.
+     *
+     * The About page held the exception. Its two doors were drawn by a row
+     * shape of their own: a name in the accent color with nothing at the
+     * right, where every row around it is a dark name with a chevron on the
+     * margin. So the sheet answered "does this row open something?" with a
+     * color on one page and with a mark on all the others, and the count of
+     * chevrons that D-120 calls a count of the doors was wrong on exactly
+     * that page (owner decision, D-134). Both doors are the hub's own row now,
+     * and the version line beside them is a fact: it is not clickable, and it
+     * carries no mark.
+     */
+    @Test
+    fun everyDoorOnTheAboutPageEndsInAChevron() {
+        compose.setContent {
+            MaterialTheme {
+                AboutPage(
+                    version = "3.3 (34)",
+                    contentCheck = null,
+                    onCredits = {},
+                    onCheckContent = {},
+                )
+            }
+        }
+
+        val doors = compose.onAllNodes(hasClickAction(), useUnmergedTree = true)
+            .fetchSemanticsNodes()
+        assertEquals("the page holds two doors and one fact", 2, doors.size)
+        val slots = compose.onAllNodesWithTag("chevron-slot", useUnmergedTree = true)
+        assertEquals("and every door carries a chevron", doors.size, slots.fetchSemanticsNodes().size)
+        val first = slots[0].getUnclippedBoundsInRoot()
+        val last = slots[1].getUnclippedBoundsInRoot()
+        assertEquals(
+            "the sheet's chevrons stand at one left edge",
+            first.left.value,
+            last.left.value,
+            0.5f,
+        )
+        assertEquals(
+            "the sheet's chevrons stand at one right edge",
+            first.right.value,
+            last.right.value,
+            0.5f,
+        )
     }
 
     /**
