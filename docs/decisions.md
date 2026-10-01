@@ -6987,3 +6987,45 @@ cat files/shots/<name>.png`. `/sdcard` root is EPERM for the app even when it
 owns the directory, and a directory under `Android/data/<package>/files` does
 not exist until something calls `getExternalFilesDir`, which is why the
 directory has to be the internal one.
+
+## D-135: 3.4 is handed over
+
+Date: the forty-fourth session, at the owner's word "go for play release",
+an hour after D-134's two changes. 3.4 (versionCode 35) carries D-134 and
+nothing else.
+
+**The bundle.** `quran-3.4-vc35.aab` from build run 36848336493:
+148,299,194 bytes, SHA-256
+`c3666dc8bc76ca69f6b125c489d88d333db3124ef445d1d802f60f7132120c79`,
+`jar verified`, signed with the shared upload key
+(`53:7D:09:D2:...:0D:9D:E5:21`). It is in `play-store/aab/` for the
+hand-over and is deleted once Play has it. The run is the one that carries
+the version bump, and the README commit that follows is a path the build
+workflow does not watch, so this run is still the newest green `build` run on
+`main` (D-093).
+
+**The gates, on the owner's machine.** `:core:test` (100),
+`:data:testDebugUnitTest` (33), `:app:testDebugUnitTest`, `:app:lintDebug`,
+`:app:assembleDebug`, and every content gate this machine can run with the
+raw exports present: `verify`, `checkdb`, `search`, `audit`, `build`,
+`checkdb` again, `fonts`, `packs`. The rebuild reproduced the committed
+`content/quran.db` and the packs: the only files the gates touched are
+`build-report.json` and `catalog.json`, and `git diff` is empty on both
+(the working copy's line endings differ from the index's and nothing else,
+which is the CRLF trap AGENTS.md names). CI's `Gates and debug build`,
+`Data instrumented tests`, and `Signed bundle` jobs are green on the same
+commit.
+
+**The set.** Capture run 36848336545, three legs green on the first attempt,
+eight frames each. Every frame was compared with its artifact by `cmp`:
+**eighteen of the twenty four changed and six are byte identical**, and the
+six are the study reading and the surah opening on all three legs, which is
+what a session that touched the page and the settings sheet should leave
+alone. The frames that carry the release are 01 and 02 (the page and the
+chrome over it) and 06 (the settings hub), on all three form factors; the
+rest differ in the status bar's clock. The frames were measured in the
+repository and not under a temp path, which is the rule in
+`docs/screenshot-failures.md` after the thirty-seventh session: the python on
+this machine is a Windows build, so a path written `/tmp/...` inside a script
+resolves to `C:\tmp`, and an earlier reading of the same comparison against
+that folder's older files said every frame had changed.
