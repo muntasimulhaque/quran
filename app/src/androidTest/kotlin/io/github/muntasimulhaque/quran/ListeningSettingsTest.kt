@@ -20,13 +20,13 @@ import org.junit.runner.RunWith
 /**
  * The Listening page carries the pace and the three ends.
  *
- * The three ends are three switches over one value (owner decision, D-118),
+ * The three ends are three switches over one value (owner decision),
  * so each row reports the answer it names and nothing else: the exclusivity
  * itself is the plan in `core`, which the JVM suite pins, and what this
  * proves is that the page sends that answer rather than a pair of booleans
  * that could be turned on together. The continuation switch is the reader's
  * word for the packages that follow, so the row must be there and must
- * report the choice it was given (owner decision, D-105).
+ * report the choice it was given (owner decision).
  *
  * The switch is looked for in the unmerged tree, and it has to be: the row
  * itself is the door and the switch is its own control inside it, so the
@@ -82,7 +82,7 @@ class ListeningSettingsTest {
         showPage(end = EndOfAudio.REPEAT_SURAH)
         // The page is a view of one value, so exactly one of the three rows
         // can read on. Two of them on is the state the player cannot keep
-        // (D-118), and a page that drew it would be lying before the reader
+        //, and a page that drew it would be lying before the reader
         // pressed anything.
         compose.onNodeWithText("Repeat the surah").assertIsOn()
         compose.onNodeWithText("Repeat the ayah").assertIsOff()

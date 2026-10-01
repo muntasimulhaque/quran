@@ -38,7 +38,7 @@ data class TextBlock(val kind: TextBlockKind, val runs: List<TextRun>)
  * is an English paragraph with a quotation, and giving every line of it the
  * Arabic paragraph's air is what made the tafsir's gaps uneven. The names
  * are the block's, not the line's, because Compose sets line height per
- * paragraph and a line cannot be given its own (see D-090).
+ * paragraph and a line cannot be given its own.
  */
 enum class ScriptMix { LATIN, MIXED, ARABIC }
 

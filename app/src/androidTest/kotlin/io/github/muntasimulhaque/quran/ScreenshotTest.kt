@@ -64,7 +64,7 @@ class ScreenshotTest {
      *
      * A wait on any text holding "match" is satisfied by the sheet's own "No
      * matches.", which is what a query that has not run yet says, so the
-     * store's search frame was a sheet that had found nothing (D-132). A count
+     * store's search frame was a sheet that had found nothing. A count
      * with its digits is only ever drawn by a search that came back, and
      * Compose's own matchers match a string or a substring, so this is the one
      * that asks for the number.
@@ -243,7 +243,7 @@ class ScreenshotTest {
      * must never anchor on a user-visible string: a label can be renamed
      * ("Appearance" became "Theme") and the tour that waited on the old word
      * then fails in CI over a change that is otherwise correct. Tags are
-     * stable; copy is not. See D-129, "The tests and the tour".
+     * stable; copy is not.
      */
     private fun waitForTag(tag: String, timeout: Long = 15_000) {
         rule.waitUntil(timeoutMillis = timeout) {
@@ -352,7 +352,7 @@ class ScreenshotTest {
             // full fifteen lines, where page 1 carries seven and leaves half
             // the sheet empty; and the verse is the one a reader who has
             // never seen the app can recognise. The frames are the store, and
-            // the store's first image is the app's promise (D-122).
+            // the store's first image is the app's promise.
             settings.setAyah(262)
             settings.setMode(ReadingMode.Mushaf)
             settings.setTheme(AppTheme.Paper)
@@ -410,7 +410,7 @@ class ScreenshotTest {
         // "No matches." for a query that has not been run yet, so a wait on
         // any text holding "match" was satisfied before the first search had
         // started, and the store's search frame became a sheet that had found
-        // nothing (D-132). A settled query takes a moment, so the wait is a
+        // nothing. A settled query takes a moment, so the wait is a
         // moment's worth and the frame says what the reader will see.
         rule.waitUntil(timeoutMillis = 180_000) {
             rule.onAllNodes(matchCount).fetchSemanticsNodes().isNotEmpty()
@@ -489,7 +489,7 @@ class ScreenshotTest {
         // can both be true while the scrim is still over the page, and the
         // long press then lands on the scrim and the pill never rises. The
         // earlier retry only covered the door, which is why the ten inch leg
-        // could reach the Mushaf and still time out on the pill (D-127).
+        // could reach the Mushaf and still time out on the pill.
         // Each attempt waits for the bar by its own outcome, not for a
         // length of time: a fixed sleep is too short on the widest profile
         // and wasted on the phone.
@@ -519,7 +519,7 @@ class ScreenshotTest {
             // press looked for is on it at all. A step that fails here three
             // times has cost three capture runs' worth of guessing; these two
             // numbers are the whole difference between reading a cause and
-            // guessing one (D-129).
+            // guessing one.
             runCatching { capture("09-long-press-failed") }
             val page = rule
                 .onAllNodes(hasContentDescription("Mushaf page", substring = true), useUnmergedTree = true)

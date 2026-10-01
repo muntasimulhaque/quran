@@ -569,7 +569,7 @@ class ContentDatabase private constructor(
      * query the reader has already moved on from must stop rather than finish:
      * every source checks for that between passes, so a superseded search gives
      * up at the next source instead of holding a worker's core to the end
-     * (owner report, D-130).
+     * (owner report).
      *
      * Two rules keep the pass itself short, and both are measured facts about
      * the content rather than guesses:
@@ -880,7 +880,7 @@ class ContentDatabase private constructor(
      * whole pass over eighty thousand rows: a search for a common word asked
      * the database a hundred and forty times for a hundred and forty ayahs and
      * spent three seconds doing it, which is the search the owner reported as
-     * slow (owner report, D-130). One read for all of them, filtered back to
+     * slow (owner report). One read for all of them, filtered back to
      * the exact ayah and position pairs in memory, is one pass instead.
      */
     private fun matchedWords(wanted: Map<Int, Set<Int>>): Map<Int, List<String>> {
@@ -916,7 +916,7 @@ class ContentDatabase private constructor(
      * A pack's ayahs are read together rather than one at a time: a common
      * word matched a hundred and forty ayahs, and a hundred and forty
      * statements is a hundred and forty round trips into the database for
-     * what one statement answers (owner report, D-130).
+     * what one statement answers (owner report).
      */
     private fun translationTexts(byPack: Map<Int, String>): Map<String, Map<Int, TranslationText>> {
         if (byPack.isEmpty()) return emptyMap()
@@ -1029,7 +1029,7 @@ class ContentDatabase private constructor(
          * one list and then split, which meant every pack paid for every other
          * pack's prose and the second tafsir a reader had installed was shown
          * only what was left of the limit after the first had filled it
-         * (owner report, D-130).
+         * (owner report).
          */
         fun matches(pack: String, terms: List<String>, limit: Int): List<TafsirEntry> {
             val entries = byPack[pack] ?: return emptyList()
@@ -1060,7 +1060,7 @@ class ContentDatabase private constructor(
      * it is read once and kept, so the moment to pay for it is the moment the
      * reader says they are going to search: the search sheet asks for this
      * when it opens, and the first query they type finds it already built
-     * (owner report, D-130, "the search takes time"). Nothing here touches
+     * (owner report, "the search takes time"). Nothing here touches
      * the screen, and a reader who opens the sheet and types nothing has paid
      * for a read of prose and nothing else.
      */

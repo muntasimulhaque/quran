@@ -15,7 +15,7 @@ package io.github.muntasimulhaque.quran.data
  * Before this, one Mushaf-order list mixed the kinds: a translation match for
  * 2:2 sat above an Arabic match for 2:255. The Book's own order is still kept,
  * it just no longer mixes what kind of thing a reader found (owner decision,
- * 28, D-090). A surah name leads a typed reference (owner decision, D-108):
+ * 28). A surah name leads a typed reference (owner decision):
  * a bare number is the only query that yields both, and the surah card is
  * the better landing there than an arbitrary first ayah.
  *

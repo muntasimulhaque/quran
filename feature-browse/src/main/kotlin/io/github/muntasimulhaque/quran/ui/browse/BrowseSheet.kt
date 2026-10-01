@@ -68,13 +68,13 @@ private enum class BrowseTab(val labelRes: Int) {
  * list stays one line per surah, and a tap opens the surah's numbers with the
  * reader's own place marked and in view, so a jump inside a long surah is a
  * tap on a number instead of a scroll, and the surah list is the only list of
- * surahs the sheet needs (owner decision, D-101).
+ * surahs the sheet needs (owner decision).
  *
  * Four tabs, and every tab was asked for: Surahs and Juz are the Book's own
  * divisions, Saved is the reader's own work, and Last Read is the way back to
  * a place they left. A note is written on a kept ayah, so it lives in Saved
  * with the note previewed under its place, and there is no second list for
- * the same work (owner decision, D-101).
+ * the same work (owner decision).
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -98,7 +98,7 @@ fun BrowseSheet(
     // The surah whose ayahs are on screen, or null while the tabs are. The
     // grid is a page inside the sheet, not a second sheet over it: one
     // window, one scrim, and the phone's back returns to the list it came
-    // from before it leaves the sheet (owner decision, D-101).
+    // from before it leaves the sheet (owner decision).
     var gridSurah by remember { mutableStateOf<Int?>(null) }
     // Each tab keeps its own list state so its place is remembered while the
     // reader moves between tabs, and each list carries a gate so a scroll
@@ -121,7 +121,7 @@ fun BrowseSheet(
     // surah they opened is the one they are in, and otherwise the newest
     // place they left in that surah. The current ayah is one place and the
     // history is around it, so a surah the reader is not in still has a
-    // place of its own (owner report, D-101).
+    // place of its own (owner report).
     fun placeIn(surahNumber: Int): Int? {
         if (currentSurah == surahNumber) return currentAyah
         return lastRead.firstOrNull {

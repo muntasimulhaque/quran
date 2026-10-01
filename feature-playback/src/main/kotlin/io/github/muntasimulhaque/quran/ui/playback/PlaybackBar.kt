@@ -49,7 +49,7 @@ import kotlin.math.abs
 /**
  * The gutter a floating control keeps from the glass. A pill that reaches
  * the screen's own edge stops reading as a control over the page and starts
- * reading as a sheet the app forgot to inset (owner report, D-090).
+ * reading as a sheet the app forgot to inset (owner report).
  */
 private val BarGutter = 16.dp
 
@@ -62,7 +62,7 @@ private val BarGutter = 16.dp
  * dp, which is fourteen characters at the size the status line is set: a
  * surah name and its ayah break across lines, the pace and the repeat are
  * cut with an ellipsis, and the reader is left with a name they cannot read
- * (owner report, D-119).
+ * (owner report).
  *
  * So the pill is two rows wherever the words cannot keep that measure, and
  * one row where they can: a tablet, a landscape phone, and nowhere else. A
@@ -112,7 +112,7 @@ fun PlaybackBar(
     /**
      * The pending surah's name and size, said while its package downloads
      * on its own: the auto-continue path had no offer, so this is where the
-     * reader sees what is arriving (owner decision, D-105). The offer states
+     * reader sees what is arriving (owner decision). The offer states
      * do not need it; they carried the name and the size before the tap.
      */
     pendingAudio: String? = null,
@@ -217,12 +217,12 @@ fun PlaybackBar(
                 }
             } else {
                 // The words keep the whole width of the pill and the controls
-                // sit under them (D-119). Both lines are centred on the pill,
+                // sit under them. Both lines are centred on the pill,
                 // and the words are one line rather than two: the reciter's
                 // name stood over the place with the pill's own left edge
                 // behind them both, so the reader's eye went to the corner of
                 // a capsule to find out who was reading and where they were
-                // (owner report, D-130). A row that says both, centred, with
+                // (owner report). A row that says both, centred, with
                 // the controls centred under it, is the shape a hand expects
                 // of a control floating over the page.
                 //
@@ -268,8 +268,7 @@ fun PlaybackBar(
 /**
  * The pill's words on one line, which is the shape the two-row pill wears:
  * who is reading, and where the reader is, side by side, with the whole line
- * centred on the pill and the controls centred under it (owner report,
- * D-130).
+ * centred on the pill and the controls centred under it (owner report).
  *
  * The reciter's name is the door to the reciter chooser and the line beside it
  * is the door to the listening menu, which wears a chevron so it can be found
@@ -315,7 +314,7 @@ private fun PlaybackWordsLine(
 /**
  * The pill's words on two lines, which is the shape the one-row pill wears: a
  * tablet or a landscape phone has the measure for both lines beside four
- * controls, and this is how they read there (D-119).
+ * controls, and this is how they read there.
  *
  * The reciter's name is the door to the reciter chooser and the line under
  * it is the door to the listening menu, which wears a chevron so it can be
@@ -436,7 +435,7 @@ private fun PlaybackStatusLine(
  * which end of the audio repeats. A reader who set 1.5x a week ago and
  * forgot, or who turned a repeat on and then wondered why the reading would
  * not move on, reads the answer here instead of hunting through settings for
- * it (D-087, widened by D-118).
+ * it.
  */
 @Composable
 private fun playbackStatus(

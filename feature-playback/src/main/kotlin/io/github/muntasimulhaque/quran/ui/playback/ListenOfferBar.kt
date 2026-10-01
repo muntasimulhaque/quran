@@ -44,7 +44,7 @@ import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
  *
  * The offer keeps its own single row whatever the width, and that is not an
  * oversight: it carries two controls, never four, and the one line it prints
- * is a name and a size (D-119).
+ * is a name and a size.
  */
 @Composable
 internal fun ListenOfferBar(

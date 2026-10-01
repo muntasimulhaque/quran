@@ -68,7 +68,7 @@ fun notificationsBlocked(context: Context): Boolean =
  * who turned this one reminder off is looking for.
  *
  * This file has no answer about the phone's exact alarm switch, and that is
- * the settled shape of it (owner report, D-130): the app never asks for that
+ * the settled shape of it (owner report): the app never asks for that
  * grant, never names it as missing, and never opens the phone's page for it.
  * What the phone allows is read where the alarm is armed, by
  * [DailyAyahScheduler.canScheduleExact], and it is used there and nowhere

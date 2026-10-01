@@ -120,7 +120,7 @@ object DailyAyahScheduler {
      * on a phone that is locked and idle then, and the platform's own batched
      * alarm otherwise, which is what a reader who declines the grant gets.
      * Either way the moment is the reader's, and the choice itself is the pure
-     * `plan` in `core`, which the JVM suite pins (owner decision, D-114).
+     * `plan` in `core`, which the JVM suite pins (owner decision).
      */
     fun apply(context: Context, enabled: Boolean, minuteOfDay: Int) {
         val alarm = context.getSystemService(AlarmManager::class.java) ?: return
@@ -141,7 +141,7 @@ object DailyAyahScheduler {
             // The inexact fallback is the one that can reach a sleeping
             // phone. A windowed alarm cannot: the platform gives it a floor
             // of ten minutes on Android 15 and never delivers it from Doze, so
-            // a window was measured and dropped (D-114).
+            // a window was measured and dropped.
             DailyReminder.Kind.Batched ->
                 alarm.setAndAllowWhileIdle(AlarmManager.RTC, plan.triggerAtMillis, pending)
         }
@@ -153,7 +153,7 @@ object DailyAyahScheduler {
      * Android 12 and later gate it behind the reader's own grant, which is
      * not a runtime permission and is not given at install. The app never asks
      * for it and never says anything about it in the settings sheet (owner
-     * report, D-130): the reader has one notification to answer for, not two,
+     * report): the reader has one notification to answer for, not two,
      * and a second door into the phone's own pages is a thing a reader has to
      * understand before they can turn one thing on. So this answer is asked
      * where the alarm is armed and used there and nowhere else. The exact
@@ -161,7 +161,7 @@ object DailyAyahScheduler {
      * release before Android 12 and any phone where the reader has granted it
      * in the phone's settings of their own accord; otherwise the reminder is
      * armed with the phone's own batched alarm, which still reaches a
-     * sleeping phone (D-114).
+     * sleeping phone.
      */
     fun canScheduleExact(alarm: AlarmManager): Boolean =
         Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarm.canScheduleExactAlarms()
@@ -318,7 +318,7 @@ object DailyAyahScheduler {
  * wearing Arabic letters. Center is direction-neutral, so it needs no bidi
  * mark and cannot turn the translation's closing punctuation around. If the
  * system ignores paragraph spans, the text is exactly what it was before
- * this (owner decision, D-108).
+ * this (owner decision).
  */
 private fun centered(text: CharSequence): CharSequence {
     if (text.isEmpty()) return text

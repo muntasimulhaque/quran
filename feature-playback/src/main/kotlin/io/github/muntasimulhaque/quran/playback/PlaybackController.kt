@@ -41,7 +41,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
  *
  * What happens at the end of the audio is [EndOfAudio], one value, and the
  * surah repeat is the one answer the player cannot give by itself
- * (owner decision, D-118).
+ * (owner decision).
  */
 class PlaybackController(
     private val context: Context,
@@ -197,12 +197,12 @@ class PlaybackController(
      * name and size, so nothing is fetched behind the reader's back; on, the
      * package is fetched with the reciter being heard and plays on, and the
      * pill carries the size, the progress, and the cancel while it does
-     * (owner decision, D-105).
+     * (owner decision).
      */
     private fun offerNextSurah() {
         // A surah that is repeating has not ended; it has begun again, so
         // there is nothing to offer and no package to fetch. This is the
-        // same word the reader gave by turning the repeat on (D-105, D-118).
+        // same word the reader gave by turning the repeat on.
         if (end == EndOfAudio.REPEAT_SURAH) return
         val surah = _state.value.surah ?: return
         val recitation = recitationId ?: return
@@ -270,7 +270,7 @@ class PlaybackController(
      * What happens at the end of the audio: the ayah again, the surah again,
      * or the surah after this one. One value, and the three switches that
      * show it in the pill and on the Listening page are three views of it
-     * (owner decision, D-118).
+     * (owner decision).
      *
      * The ayah repeat is the player's own, so the item itself loops and the
      * surah-end offer never appears while the reader is repeating. The surah

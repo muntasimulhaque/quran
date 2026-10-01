@@ -98,7 +98,7 @@ private val CardWidth = 320.dp
 /**
  * A share in progress: the card, and whether the reader has asked for the
  * picture. The words-only door never composes a bitmap, and the capture
- * never runs before the choice (D-090).
+ * never runs before the choice.
  */
 internal data class ShareRequest(val card: ShareCard, val capture: Boolean = false)
 
@@ -146,7 +146,7 @@ internal suspend fun loadShareCard(
  * app's own face is what the people there should see. It is drawn at one
  * fixed text scale for the same reason: a picture is one artifact shared
  * with everyone, while the reading itself stays as large as the reader asked
- * for. The colors are the theme's own (D-010), reached through a
+ * for. The colors are the theme's own, reached through a
  * MaterialTheme of the paper, so the shared card and the app are one hand.
  */
 @Composable
@@ -154,7 +154,7 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
     val hafs = rememberHafs()
     // The mark the launcher icon is built around, sized for a foot: the
     // qaf that begins the word Quran, in ivory with its two dots in gold,
-    // on a square of the icon's own ink (owner decision, D-126).
+    // on a square of the icon's own ink (owner decision).
     val mark = painterResource(R.drawable.ic_share_mark)
     val lapis = colorResource(R.color.icon_background)
     val paper = lightColorScheme(
@@ -177,7 +177,7 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
             // The card is one plaque, and everything on it is centered: the
             // reference that names the ayah, the ayah, its translation, and
             // the app's own foot. Before this, four different alignments met
-            // on one narrow card (owner report, D-090): the Arabic right,
+            // on one narrow card (owner report): the Arabic right,
             // the translation left, the reference right, the name left.
             Text(
                 text = card.reference,
@@ -267,7 +267,7 @@ private class CardHeight(var px: Int = 0)
  * takes the card in slices this tall and stitches them into one software
  * bitmap. The limit is deliberately under the smallest known texture size,
  * and one slice covers every ordinary card, so the common case pays nothing
- * for the guarantee (owner report, D-097).
+ * for the guarantee (owner report).
  */
 private const val CaptureSlicePx = 2048
 
@@ -367,7 +367,7 @@ internal fun ShareCardCapture(
             // The width of a bitmap Android has already released throws
             // rather than answering, so the read is guarded as well as the
             // capture: a share card that cannot be drawn is a card the reader
-            // is not sent, and a crash is not how the app says so (D-132).
+            // is not sent, and a crash is not how the app says so.
             val pixels = runCatching { image?.let { it.width to it.height } }.getOrNull()
             if (image == null || pixels == null || pixels.first < 1 || pixels.second < 1) {
                 stitched.recycle()
@@ -380,7 +380,7 @@ internal fun ShareCardCapture(
             // bitmap first: the slice is under the texture limit by
             // construction, so the copy is the whole window, and the
             // stitched result is software, which the PNG writer can encode
-            // directly (owner report, D-097). Below API 26 there is no
+            // directly (owner report). Below API 26 there is no
             // hardware config at all, so the copy is skipped.
             val source = image.asAndroidBitmap()
             val piece = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
@@ -425,7 +425,7 @@ internal fun writeShareCard(context: Context, image: ImageBitmap): File? = runCa
 /**
  * The chooser with the card as its image. The image goes alone: the plain
  * text used to ride along as a caption, which put the ayah in a chat twice,
- * once printed into the picture and once as type (owner report, D-090). A
+ * once printed into the picture and once as type (owner report). A
  * reader who wants the words has their own door for them, `shareAyahText`.
  * The URI is read-granted to whoever the reader picks, the provider exposes
  * only this one folder, and false (rather than a thrown error) is the answer
@@ -463,7 +463,7 @@ internal fun shareAyahText(context: Context, text: String): Boolean = runCatchin
  *
  * The card used to leave the app sight unseen, with its text welded to the
  * picture as a caption; a reader could not know what they were sending or
- * choose the plain words instead (owner report, D-090). Here the real card
+ * choose the plain words instead (owner report). Here the real card
  * is drawn at its own scale as a preview, and the doors are named: **Share
  * image** (the default) and **Share text**. The preview is the same
  * composable the capture draws, so what the reader sees is what the picture
@@ -545,7 +545,7 @@ internal fun ShareCardPreview(card: ShareCard) {
  * caps the viewport, so a taller card still measures at its real height and
  * the reader scrolls to the foot of it; the other order caps the card
  * itself, and the clip cut a long ayah off at the cap with no scroll to
- * reach the rest (owner report, D-097). The corner clip stays outside the
+ * reach the rest (owner report). The corner clip stays outside the
  * cap so the sheet's own shape is cut once.
  */
 @Composable

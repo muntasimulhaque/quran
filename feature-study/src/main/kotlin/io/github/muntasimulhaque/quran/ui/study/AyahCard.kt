@@ -172,7 +172,7 @@ fun AyahCard(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface,
-        // the card is a page; the ayah and its panels take the measure (D-122)
+        // the card is a page; the ayah and its panels take the measure
         sheetMaxWidth = Dp.Unspecified,
     ) {
         Column(
@@ -191,7 +191,7 @@ fun AyahCard(
                 // frame photographs a card missing its translation. The tag
                 // says when the card is whole, and the tour waits on it: the
                 // reader never sees the gap (the sheet is animating open), but
-                // a still frame does (owner report, D-090).
+                // a still frame does (owner report).
                 .testTag(if (translationReady) "ayah-card" else "ayah-card-loading"),
         ) {
             // From the Mushaf the card is the study surface, so the word by
@@ -553,7 +553,7 @@ private fun TafsirPanel(view: TafsirView, arabic: Boolean, settings: AppSettings
             // tone, which is measured at 6.1:1 and up on every ground, rather
             // than a quiet alpha. The 0.7 alpha it wore measured 3.3:1 on the
             // sepia surface, under the design document's own 4.5:1 rule for
-            // muted text, and this is the pass that closes it (D-084).
+            // muted text, and this is the pass that closes it.
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 12.dp),
         )
@@ -655,7 +655,7 @@ private fun NoteEditor(initial: String?, onSave: (String?) -> Unit, onClear: () 
                             // has to be read to be a hint at all. The theme's
                             // secondary tone measures 6.1:1 and up on every
                             // ground; the 0.5 alpha it wore measured 2.2:1 on
-                            // sepia and is closed here (D-084).
+                            // sepia and is closed here.
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }

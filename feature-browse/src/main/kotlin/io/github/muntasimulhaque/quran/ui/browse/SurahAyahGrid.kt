@@ -46,12 +46,12 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * The ayahs of one surah, opened from its row in Browse: the surah's own
  * numbers, with the reader's place marked and in view. This is the whole of
  * "go to ayah" now, and the surah list is its first step, so the sheet holds
- * one list of surahs instead of two (owner decision, D-101).
+ * one list of surahs instead of two (owner decision).
  *
  * The grid opens on the place the reader is being shown, centered in the
  * viewport rather than pinned to its top: a number that answers "go to" has
  * to be unmistakably the one the reader is standing on, and on a tall grid a
- * top-aligned row reads as any other row (owner report, D-097). The place is
+ * top-aligned row reads as any other row (owner report). The place is
  * a key beside the surah, so a jump that changes the reader's ayah while this
  * page is composed can never leave the grid on a place that is no longer
  * theirs. A surah with no place of its own starts at its first ayah, which is
@@ -90,7 +90,7 @@ internal fun SurahAyahGrid(
         // The gap between the header and the numbers lives outside the grid,
         // not in its content padding: padding scrolls away with the first
         // row, and the reader met the header and a clipped pill touching once
-        // the grid moved under them (owner report, D-090 closed the resting
+        // the grid moved under them (owner report closed the resting
         // frame; this closes the scrolled one).
         Spacer(Modifier.height(Space.Block))
         LazyVerticalGrid(

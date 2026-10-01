@@ -14,7 +14,7 @@ import java.security.MessageDigest
 /**
  * The second look that keeps a pack current: a file whose bytes no longer
  * match the catalog is found and named, and a file that does match is left
- * alone. This is the detection behind the quiet refresh (D-109); the refresh
+ * alone. This is the detection behind the quiet refresh; the refresh
  * itself is a network path and is not tested here.
  */
 @RunWith(AndroidJUnit4::class)

@@ -361,7 +361,7 @@ class PageRenderer(private val context: Context) {
      * line's marks and 5 dp from the last glyph of every line, with its own
      * foot a band away, so one rectangle read as a wire pressed against the
      * text at the top and the left and as a page at the foot (owner report,
-     * the forty-fourth session; before that, D-122 and D-130).
+     * the forty-fourth session).
      */
     private fun drawPageRule(canvas: Canvas, frame: PageFrame, rule: Paint) {
         val quiet = Paint(rule)

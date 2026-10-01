@@ -45,7 +45,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * The daily reminder's own page: the moment it arrives, and the one thing
  * that can stop it arriving. The switch is not here: it lives on the hub row,
  * which is the one place a setting is set, and this page carries the moment
- * (owner report, D-105).
+ * (owner report).
  *
  * The hour used to be a strip of hour chips that unfolded under the switch in
  * the hub, and a reader reported two things about it: it filled the hub with
@@ -74,7 +74,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * manage and it is not the app's to spend a screen on: the phone decides,
  * the app takes the best alarm it is given, and a reader who is not reading
  * about a second permission keeps a page with one row and one note (owner
- * report, D-130, which closes the page D-114 opened).
+ * report).
  *
  * The exact time is still used whenever the phone allows it, and it is still
  * the manifest's own permission: `DailyAyahScheduler` asks the alarm manager
@@ -99,7 +99,7 @@ fun DailyPage(
             .testTag("daily-page"),
     ) {
         // The switch lives on the hub row and nowhere else; this page is the
-        // moment (owner report, D-105). The row stays live when the reminder
+        // moment (owner report). The row stays live when the reminder
         // is off: a reader who came to move the time is not asked to turn the
         // reminder on first, and a time that is set is a time that is shown,
         // whether or not it will arrive.

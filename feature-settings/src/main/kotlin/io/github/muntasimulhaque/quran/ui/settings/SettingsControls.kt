@@ -46,8 +46,8 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * The four grounds, as swatches: each one is the page it will paint. The
  * swatch that is filled is the page the reader is actually reading on, not
  * the stored day choice: with automatic night mode on and the phone in dark
- * mode, Night draws the app, so Night is what the row says (owner report,
- * D-097). The day choice is named in the note under the switch, and a tap
+ * mode, Night draws the app, so Night is what the row says (owner report).
+ * The day choice is named in the note under the switch, and a tap
  * still sets the day page.
  */
 @Composable
@@ -214,8 +214,8 @@ fun SpeedRow(value: Float, onChange: (Float) -> Unit) {
  * name that would leave the name 60-odd dp on a small phone: "Playback speed"
  * would break in the middle and the Bengali names would break anywhere. Above,
  * the name has the row to itself and the choices have the row's middle, and
- * the pair reads as one block (D-087: these cells were 38 and 46 dp, named
- * there and not done until now).
+ * the pair reads as one block (these cells were 38 and 46 dp once, named
+ * and not done until later).
  */
 @Composable
 private fun SegmentedRow(
@@ -254,7 +254,7 @@ private fun SegmentedRow(
                     modifier = Modifier
                         // The 48 dp is the whole reason this control has a
                         // shape of its own: the mark inside is smaller, and the
-                        // target a finger gets is not (D-087).
+                        // target a finger gets is not.
                         .size(48.dp)
                         .clip(RoundedCornerShape(50))
                         .background(

@@ -22,8 +22,8 @@ import org.junit.runner.RunWith
  * The height cap has to sit on the viewport, outside the scroll. With the
  * two swapped the cap lands on the card itself, the card is held at 340 dp,
  * the scroll has nothing to scroll, and the tail is clipped off the bottom:
- * a reader with a long ayah sees the first lines and a cut (owner report,
- * D-097). The test draws the same box the sheet draws, with the longest ayah
+ * a reader with a long ayah sees the first lines and a cut (owner report).
+ * The test draws the same box the sheet draws, with the longest ayah
  * in the Book, and scrolls the translation's last words into view. A clipped
  * card cannot answer that scroll, so this fails on the old order and passes
  * on the new one.

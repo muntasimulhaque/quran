@@ -5,7 +5,7 @@ package io.github.muntasimulhaque.quran.core
  * surah again, or the surah after this one.
  *
  * These are three answers to one question, so they are one value and not
- * three switches (owner decision, D-118). Two of them on at once is a
+ * three switches (owner decision). Two of them on at once is a
  * promise the player cannot keep: a surah that repeats never ends, so
  * "continue to the next surah" would never come, and a reader who had turned
  * both on would sit waiting for a surah that never arrives. One reader has

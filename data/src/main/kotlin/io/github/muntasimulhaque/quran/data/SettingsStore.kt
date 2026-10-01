@@ -82,10 +82,10 @@ data class AppSettings(
      *
      * One value and not three switches, because two of them on at once is a
      * promise the player cannot keep: a surah that repeats never ends, so
-     * the continuation would never come (owner decision, D-118). The
+     * the continuation would never come (owner decision). The
      * continuation is off by default, and a download still waits for the
      * reader's word: this is that word, given once for every surah that
-     * follows (owner decision, D-105).
+     * follows (owner decision).
      */
     val endOfAudio: EndOfAudio = EndOfAudio.OFF,
     val translationPacks: Set<String> = emptySet(),
@@ -256,7 +256,7 @@ class SettingsStore(private val context: Context) {
      * The keys move together or not at all: a process that died between two
      * writes would leave a reader with the ayah repeating and the next surah
      * being fetched behind it, which is the impossible pair the value above
-     * exists to prevent (owner decision, D-118).
+     * exists to prevent (owner decision).
      */
     suspend fun setEndOfAudio(end: EndOfAudio) {
         val plan = RepeatPlan.OFF.with(end)
@@ -327,7 +327,7 @@ class SettingsStore(private val context: Context) {
     /**
      * The end of the audio, as the three stored keys stand.
      *
-     * A build before the exclusivity (D-118) let a reader turn two of them
+     * A build before the exclusivity let a reader turn two of them
      * on, so the read settles that case the way [RepeatPlan.end] does: the
      * narrower promise is the one kept, because it is the one the reader can
      * still hear working.
@@ -389,7 +389,7 @@ class SettingsStore(private val context: Context) {
         /**
          * The three keys one answer is stored as. `repeat_ayah` and
          * `continue_surah` were written before the answer was one value;
-         * `repeat_surah` is the third key that made, added in D-118 and
+         * `repeat_surah` is the third key that made, added later and
          * absent from every install before it, which costs a reader
          * nothing: an unwritten key reads as off.
          */

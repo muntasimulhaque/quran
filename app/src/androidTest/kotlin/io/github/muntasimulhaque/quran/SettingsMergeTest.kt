@@ -32,8 +32,8 @@ import org.junit.runner.RunWith
  * The reading's switches and the packs behind them are one row each.
  *
  * The hub used to carry a switch and, four rows below it, a separate page for
- * the same thing, which read as two controls for one decision (owner report,
- * D-097). Each switch now carries the chevron that opens its own list, so the
+ * the same thing, which read as two controls for one decision (owner report).
+ * Each switch now carries the chevron that opens its own list, so the
  * translation's row is the translation's door. This test turns the
  * translation off at its switch and opens its list from the same row.
  */

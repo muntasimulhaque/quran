@@ -34,11 +34,11 @@ import kotlin.math.abs
  * viewport, not at the top of the surah. Landing it at the top edge answers
  * "go to" with a screenful of the surah's first ayahs: the one number the
  * reader came for sits in the same corner as every row above it, so the place
- * has to be centered to be read as the place (owner report, D-097).
+ * has to be centered to be read as the place (owner report).
  *
  * The place itself comes from two sources, and both are pinned here: the
  * reader's own ayah when the surah they open is the one they are in, and the
- * newest place they left in that surah when it is not (owner report, D-101).
+ * newest place they left in that surah when it is not (owner report).
  * The reader is standing at Al-Baqarah 2:84 and has a history place at
  * Al-Fatihah 1:5.
  */
@@ -113,7 +113,7 @@ class SurahAyahsScrollTest {
         waitForTag("surah-ayahs")
         // Al-Fatihah's own place is the history entry, not the current ayah:
         // the reader is standing in Al-Baqarah, so the mark has to come from
-        // the history and not from where they are (owner report, D-101).
+        // the history and not from where they are (owner report).
         waitForAyah(5)
         compose.onNodeWithContentDescription("Ayah 5", useUnmergedTree = true)
             .assert(

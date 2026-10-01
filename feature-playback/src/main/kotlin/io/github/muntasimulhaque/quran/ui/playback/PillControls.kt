@@ -32,7 +32,7 @@ import io.github.muntasimulhaque.quran.ui.kit.TextButton
  * that answers a tap.
  *
  * They are one list because the row's shape is a function of how many of
- * them there are (owner report, D-119): the words either share the row with
+ * them there are (owner report): the words either share the row with
  * the controls or take a line of their own, and a count read from a second
  * `when` beside this one is a number that drifts from the row it measures.
  */

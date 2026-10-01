@@ -33,21 +33,20 @@ import org.junit.runner.RunWith
  * The pill's own promises, pinned without a device reading behind it:
  *
  * 1. It keeps a gutter from the glass whatever the label says, so a long
- *    offer cannot grow into the screen's edge (owner report, D-090).
+ *    offer cannot grow into the screen's edge (owner report).
  * 2. The status line is the door to the pace and to what happens at the end
  *    of the audio, and all of them call the same setter the Listening page
  *    calls, so there is one value with two doors rather than two values to
- *    keep in step (D-087, widened by D-118).
+ *    keep in step.
  * 3. The automatic download says what it is fetching: the name and the size
- *    are on the pill even when no offer preceded it (owner decision, D-105).
+ *    are on the pill even when no offer preceded it (owner decision).
  * 4. The words keep a measure or they take a line of their own: a phone in
  *    portrait cannot print the reference, the pace, and the repeat beside
  *    four 48 dp controls, and a name cut with an ellipsis is the defect
- *    D-119 exists to end. A wide pill can, and stays one row.
+ *    the wide pill exists to end. A wide pill can, and stays one row.
  * 5. On that phone the two lines are centred, and the words are one line: the
  *    reciter's name and the place beside each other, not the reciter's name
- *    with the place under it against the pill's left edge (owner report,
- *    D-130).
+ *    with the place under it against the pill's left edge (owner report).
  */
 @RunWith(AndroidJUnit4::class)
 class PlaybackPillTest {
@@ -100,13 +99,13 @@ class PlaybackPillTest {
     /**
      * A composable measured at a width the screen does not have.
      *
-     * The wide pill (D-119: a tablet, or a phone in landscape, keeps the words
+     * The wide pill (a tablet, or a phone in landscape, keeps the words
      * beside the controls) cannot be asked for with a modifier. `requiredWidth`
      * sets a child's minimum and the root still caps the constraint the child
      * is measured with, so the pill's own `maxWidth` was the phone's 393 dp
      * and the pill took the phone's two rows: the test measured the phone's
      * shape and called it the tablet's. This was not seen for a long time
-     * because the class is not among the six the capture runs (D-129), and it
+     * because the class is not among the six the capture runs, and it
      * is why a measure a test needs is given by a layout that offers it.
      */
     @Composable
@@ -177,7 +176,7 @@ class PlaybackPillTest {
     @Test
     fun theWordsTakeTheirOwnLineOnAPhone() {
         // A phone in portrait: four controls and the words cannot share the
-        // row at the measure the pill prints at (D-119).
+        // row at the measure the pill prints at.
         showPill(pillWidth = Modifier.width(393.dp))
         val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
         val play = compose.onNodeWithContentDescription("Play or pause").getUnclippedBoundsInRoot()
@@ -197,7 +196,7 @@ class PlaybackPillTest {
         // measured with, so the pill read the phone's own width and took the
         // phone's two rows, and this measured the phone's shape and called it
         // the tablet's. The class is not among the six the capture runs, which
-        // is how that survived (D-129).
+        // is how that survived.
         showPill(measureWidth = 840.dp)
         val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
         val play = compose.onNodeWithContentDescription("Play or pause").getUnclippedBoundsInRoot()
@@ -278,7 +277,7 @@ class PlaybackPillTest {
             pendingAudio = "Al-Baqarah \u00b7 177 MB",
         )
         // The auto-continue path has no offer, so the name and the size must
-        // be on the pill while the package downloads (owner decision, D-105).
+        // be on the pill while the package downloads (owner decision).
         compose.onNodeWithText("Al-Baqarah \u00b7 177 MB \u00b7 50%").assertIsDisplayed()
     }
 }

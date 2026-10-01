@@ -11,7 +11,7 @@ package io.github.muntasimulhaque.quran.core
  * very start makes the first strong character Latin, so the block reads left
  * to right and every punctuation mark stays where it was written, while the
  * Arabic itself still shapes from right to left inside its own line (owner
- * report, D-103).
+ * report).
  */
 object ShareText {
 

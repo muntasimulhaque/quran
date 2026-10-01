@@ -51,7 +51,7 @@ fun SettingsPage.title(): String = stringResource(
  * The page a choice reads as, with the automatic switch said in the same
  * breath, so the hub row never claims a page the reader is not on: in dark
  * mode with auto-night on, the row says Night, the page drawing, and names
- * the day choice after it (owner report, D-097).
+ * the day choice after it (owner report).
  *
  * The row carries the page that is drawing and nothing more. With the switch
  * on and the phone in the light, that is the reader's own day page, so the
@@ -59,7 +59,7 @@ fun SettingsPage.title(): String = stringResource(
  * Paper", which repeated the same word twice, and its length is what pushed
  * the row's name into four lines (owner report, 37th session). The second
  * half is kept for the only case it says anything, when the phone is in dark
- * mode and the day page the reader chose is the one being named (D-097).
+ * mode and the day page the reader chose is the one being named.
  */
 @Composable
 private fun themeSummary(settings: AppSettings): String {
@@ -200,7 +200,7 @@ private fun reciterName(settings: AppSettings, recitations: List<Recitation>): S
  * moment is read from the same value the alarm is armed with, so the row never
  * promises a time the reminder does not keep, and it says the moment whether
  * the reminder is on or off, because the page stays live while it is off and a
- * reader who has set a time is owed to see it (D-105).
+ * reader who has set a time is owed to see it.
  */
 @Composable
 private fun dailySubtitle(settings: AppSettings): String = stringResource(
@@ -217,7 +217,7 @@ private fun dailySubtitle(settings: AppSettings): String = stringResource(
  * at the end of the audio. A reader who set a pace and forgot it must be able
  * to see it from the hub, or the reading sounds slow for a reason they cannot
  * find, and the end of the audio is the other thing a reader sets once and
- * then forgets (D-087, widened by D-118).
+ * then forgets.
  */
 @Composable
 private fun listeningSummary(settings: AppSettings): String {
@@ -234,7 +234,7 @@ private fun listeningSummary(settings: AppSettings): String {
  * the ayah or the surah being heard ends. Both are about hearing, not about
  * the page, so they sit together under the reciter whose voice they shape.
  *
- * The three ends are three switches over one value (owner decision, D-118).
+ * The three ends are three switches over one value (owner decision).
  * Each row is the answer it names, checked only when it is the answer, and
  * turning one on leaves the other two off, because two of them on at once is
  * a promise the player cannot keep: a surah that repeats never ends, so the
@@ -266,7 +266,7 @@ fun ListeningPage(
         )
         // The surah, the same answer one unit larger: the whole surah begins
         // again at its first ayah on the device, and nothing is fetched to do
-        // it, so it is available wherever the surah is (D-118).
+        // it, so it is available wherever the surah is.
         EndRow(
             title = stringResource(R.string.settings_repeat_surah_title),
             subtitle = stringResource(R.string.settings_repeat_surah_subtitle),
@@ -278,7 +278,7 @@ fun ListeningPage(
         // what happens at the end of the ayah. Turning it on is the reader's
         // word for the packages that follow, so the next surah needs no
         // second approval; it still announces itself on the pill with its
-        // size and a cancel while it downloads (owner decision, D-105).
+        // size and a cancel while it downloads (owner decision).
         EndRow(
             title = stringResource(R.string.settings_continue_title),
             subtitle = stringResource(R.string.settings_continue_subtitle),

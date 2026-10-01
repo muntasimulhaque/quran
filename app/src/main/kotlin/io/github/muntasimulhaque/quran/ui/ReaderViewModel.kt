@@ -527,11 +527,11 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * or the next surah.
      *
      * One setter for all three, because they are one answer and the plan
-     * behind them keeps at most one on (owner decision, D-118). Turning one
+     * behind them keeps at most one on (owner decision). Turning one
      * on leaves the other two off, so a reader can never be waiting for a
      * surah that a repeating one will never end. The continuation is the
      * reader's word for the packages that follow, and it still announces
-     * itself on the pill with its size and a cancel (owner decision, D-105).
+     * itself on the pill with its size and a cancel (owner decision).
      */
     fun setEndOfAudio(choice: EndOfAudio) {
         settings = settings.copy(endOfAudio = choice)
@@ -939,7 +939,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * the catalog recorded. When something is behind and the connection
      * allows, the check repairs it in the same breath rather than only
      * naming it, so the reader's own second look ends in a clean library
-     * instead of a list of work (D-109).
+     * instead of a list of work.
      */
     fun checkContent() {
         viewModelScope.launch {

@@ -102,7 +102,7 @@ internal data class AyahText(
  * under the place when there is one, and nothing under the rows without.
  * Save and Note are two actions but one list, because a note is written on a
  * kept ayah and a reader looking for either is looking for the same thing
- * (owner decision, D-101).
+ * (owner decision).
  *
  * The order is the most recent of the row's own moments, not the save's
  * alone: an ayah saved last year and noted today is today's row, and the

@@ -170,7 +170,7 @@ class ContentSearchTest {
 
     /**
      * The kinds run from the verse outward, each still in Mushaf order
-     * inside itself (owner decision, 28, D-090). The exact ordering is
+     * inside itself (owner decision, 28). The exact ordering is
      * pinned by `SearchOrderTest` in the JVM suite, which does not depend on
      * how many of one kind a query happens to return; what this checks is
      * that a real query against the shipped database comes back in that

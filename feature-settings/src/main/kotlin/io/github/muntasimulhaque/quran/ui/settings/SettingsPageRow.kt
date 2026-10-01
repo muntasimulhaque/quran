@@ -14,14 +14,14 @@ import androidx.compose.ui.unit.dp
  * One category in the settings hub: what it is called, where it stands right
  * now, and the chevron that says it opens something. The chevron is the row's
  * own last mark, standing on the margin where a switch's right edge stands
- * (owner report, D-120, completed by D-130).
+ * (owner report).
  *
  * The row wears the same words as every other row in the sheet: its name, and
  * under it the value, in [RowName]. The value used to stand at the right of
  * the name in a column of its own, measured so that the name kept its room
- * (D-116, D-130), which made this row the one place in the sheet where a grey
+ *, which made this row the one place in the sheet where a grey
  * value sat beside its name while the rows with a switch printed it underneath
- * (owner decision, D-134). It is under the name here for the same reason it
+ * (owner decision). It is under the name here for the same reason it
  * is there, and the row's padding is the switch row's padding, so the sheet
  * has one rhythm as well as one grammar.
  *

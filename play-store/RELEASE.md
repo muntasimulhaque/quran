@@ -84,7 +84,7 @@ keytool -printcert -jarfile app/build/outputs/bundle/release/app-release.aab | g
 
 The certificate must be
 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`
-(the shared upload key, D-017). The same check runs inside the CI job, so a
+(the shared upload key). The same check runs inside the CI job, so a
 run that uploaded an artifact has already passed it.
 
 ## 3c. The secrets CI signs with

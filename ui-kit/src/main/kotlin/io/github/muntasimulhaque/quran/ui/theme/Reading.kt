@@ -31,7 +31,7 @@ object Reading {
      * in the middle of the glass. A sheet is a page, not a card: it wants the
      * screen's full width, and the *content* is what takes the readable
      * measure. This is that measure, the column the study reading already
-     * uses plus the sheet's own gutter (D-122).
+     * uses plus the sheet's own gutter.
      */
     val SheetMeasure: Dp = MaxMeasure + 44.dp
 }

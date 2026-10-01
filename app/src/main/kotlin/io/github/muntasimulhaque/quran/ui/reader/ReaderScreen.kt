@@ -178,7 +178,7 @@ fun ReaderScreen(
     /**
      * The words alone, wherever a door sends them. The card and the words
      * are two separate intents now: putting the text on the picture's own
-     * intent is what made every receiver post the ayah twice (D-090).
+     * intent is what made every receiver post the ayah twice.
      */
     fun sharePlainText(text: String) {
         if (!shareAyahText(context, text)) {

@@ -9,7 +9,7 @@ package io.github.muntasimulhaque.quran.core
  *
  * This is pure arithmetic, kept here because the surah repeat needs it and
  * cannot be left inside the controller where nothing can reach it
- * (owner decision, D-118). The playlist is the surah being heard *and*
+ * (owner decision). The playlist is the surah being heard *and*
  * whatever has been appended after it, so the player's own
  * `REPEAT_MODE_ALL` would loop everything that is loaded rather than one
  * surah: the surah repeat is a seek to the index this returns.

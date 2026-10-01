@@ -5,7 +5,7 @@ downloaded before the app can be built. This file is the human-readable
 companion to `content/manifest.json`, which is the machine-readable
 source of truth.
 
-Two rules from the owner decision (D-003) shape everything here: existing
+Two rules from the owner decision shape everything here: existing
 licenses are honored, and every dataset must be swappable through
 `tools/` without an app change.
 
@@ -45,7 +45,7 @@ Also useful, for cross-checking only: Saheeh International on QUL
 (translation/193, `translation-with-inline-footnote.sqlite`) as an
 independent copy of the translation we ship. Tafsir Ibn Kathir (English)
 was re-downloaded on 2026-09-24 for QUL's 2:238 typo fix; the manifest
-pins the fixed export (D-106).
+pins the fixed export.
 
 ## Downloads that need no account
 

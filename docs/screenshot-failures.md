@@ -108,7 +108,7 @@ question: the suppression flags were set (`hide_error_dialogs 1` and
 test), a launcher ANR still came up over the keyboard-heavy search frame on
 the slowest of the three legs, and the **guard refused to ship it**. Both
 tablet legs passed the same code first try, which is the signature of the
-environment rather than the app. One rerun, per D-078 and the rule below;
+environment rather than the app. One rerun, per the rule below;
 attempt 2 is green on all three legs and its artifact is the store set.
 The tell in the kept frames: 01 to 04 are healthy and complete, and frame
 01 is byte-identical to the previous release's, so nothing in the app had

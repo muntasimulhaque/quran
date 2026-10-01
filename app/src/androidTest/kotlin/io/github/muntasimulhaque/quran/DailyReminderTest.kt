@@ -23,7 +23,7 @@ import java.util.Calendar
  * The reader reported two things about the daily ayah: it came two minutes
  * after the ten o'clock they had set, and they did not find it in the shade
  * until they opened the app. The first was the alarm, and it is now the best
- * one the phone will give the app (D-114). This file is the second: everything
+ * one the phone will give the app. This file is the second: everything
  * between an alarm and the shade is the receiver, a permission check, a read
  * of the day's ayah out of the content database, a build, and a post. Every
  * step of that can be true while the reader sees nothing, and nothing else in
@@ -139,7 +139,7 @@ class DailyReminderTest {
             if (exact) {
                 assertTrue(
                     "a phone that grants the exact time must be given an exact alarm, " +
-                        "so it arrives on a locked, idle phone (owner decision, D-114): $record",
+                        "so it arrives on a locked, idle phone (owner decision): $record",
                     record.contains("window=0"),
                 )
             } else {

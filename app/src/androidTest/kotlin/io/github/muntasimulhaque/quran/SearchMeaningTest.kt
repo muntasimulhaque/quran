@@ -23,8 +23,8 @@ import org.junit.runner.RunWith
  * A search row never says the same match twice.
  *
  * The owner searched "mercy" and saw the translation's highlight and, under
- * it, a labelled Word meaning block carrying the same match (owner report,
- * D-097). Against the shipped database the two sources are both real: the
+ * it, a labelled Word meaning block carrying the same match (owner report).
+ * Against the shipped database the two sources are both real: the
  * translation matches hundreds of ayahs and the word list matches its own,
  * and a row can carry both. The rule is pinned pure in the data unit tests;
  * this proves the real query produces rows the rule reads as one-evidence

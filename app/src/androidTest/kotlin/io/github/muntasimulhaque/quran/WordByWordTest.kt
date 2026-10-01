@@ -86,8 +86,8 @@ class WordByWordTest {
      * directly over its own meaning, and the pair is as wide as the two of
      * them.
      *
-     * This is the geometry the change was about (owner report, D-130, which
-     * took back the grid of D-122), and a string the aid happens to contain
+     * This is the geometry the change was about (owner report, which
+     * took back the grid), and a string the aid happens to contain
      * does not prove it: two Bangla meanings of 1:1 are long enough that a
      * tile measured against the widest of them would put the whole verse down
      * the page. So the test reads the first word and the first meaning and

@@ -46,7 +46,7 @@ fun Group(title: String) {
             // A heading is a heading to a screen reader too, and this is the
             // only way a reader who cannot see the sheet can jump from one
             // group of settings to the next. TalkBack has navigated by
-            // heading since 9.1; the app marked nothing at all (D-122).
+            // heading since 9.1; the app marked nothing at all.
             .semantics { heading() }
             .padding(
                 start = 22.dp,
@@ -60,14 +60,13 @@ fun Group(title: String) {
 /**
  * The chevron at the end of a settings row: 48 dp wide, drawn when the row
  * has a page behind it and held empty when it does not, so every switch in
- * the sheet stands at one place whatever the row carries (owner report,
- * D-111).
+ * the sheet stands at one place whatever the row carries (owner report).
  *
  * The slot owns a 48 dp square only when the chevron is a control of its
  * own. On every other row it is a width, not a height: a square tail is
  * taller than the line of text beside it, and a Row takes the height of its
  * tallest child, so an empty square stretched every plain row from 51 dp to
- * 76 dp and turned the hub into a ladder (owner report, D-105). Where the
+ * 76 dp and turned the hub into a ladder (owner report). Where the
  * chevron does carry its own tap it keeps the square, which costs the row
  * nothing, because the switch beside it already holds 48 dp.
  *
@@ -76,8 +75,7 @@ fun Group(title: String) {
  * and the two are read as a pair. A row with no switch puts the mark at the
  * end of the slot, so its right edge is the row's own margin: that is exactly
  * where a switch's right edge stands, and the rows that carry only a door
- * were ending a whole chevron short of it (owner report, D-130, completing
- * D-120).
+ * were ending a whole chevron short of it (owner report).
  */
 @Composable
 private fun ChevronSlot(
@@ -105,7 +103,7 @@ private fun ChevronSlot(
             // The slot, not the mark: a mark is centred in its slot, so the
             // slot's edges are what a row's alignment is about. The tag is
             // on a row that draws a chevron only, so a count of them is a
-            // count of the rows that have a door (owner report, D-120).
+            // count of the rows that have a door (owner report).
             .then(if (visible) Modifier.testTag("chevron-slot") else Modifier),
         contentAlignment = contentAlignment,
     ) {
@@ -189,9 +187,9 @@ val SwitchSlot = 52.dp
  * A row with nowhere to switch to keeps no empty room for one, so the
  * chevron in it is the row's last mark, and the mark itself stands on the
  * margin where a switch's own right edge stands rather than in the middle of
- * the column in front of it (owner report, D-130, completing D-120, which
- * had moved the column and left the mark centred inside it). A row with both
- * keeps the two columns exactly as they have been since D-111.
+ * the column in front of it (owner report: the column had moved and left
+ * the mark centred inside it). A row with both
+ * keeps the two columns exactly as they have always been.
  *
  * A row draws the marks it carries and leaves the chevron's column empty when
  * it has no door, so every switch ends at one line whatever a row carries.
@@ -211,8 +209,7 @@ internal fun RowTail(
             // The row's last mark is the one nearest the reader's margin: a
             // row with a switch reads its chevron against the switch's own
             // column, and a row without one has nothing after it but the
-            // margin, so its chevron stands on the margin (owner report,
-            // D-130).
+            // margin, so its chevron stands on the margin (owner report).
             contentAlignment = if (switch == null) {
                 Alignment.CenterEnd
             } else {
@@ -237,7 +234,7 @@ internal fun RowTail(
  * The three reading switches and the packs behind them used to live in two
  * places: a switch here and a separate row for the packs, so a reader who
  * turned the translation off still had a "Translations" row below that read
- * as a second, unexplained control (owner report, D-097). One row now carries
+ * as a second, unexplained control (owner report). One row now carries
  * both halves, and the two halves answer to different taps (owner report,
  * 2.3): the switch alone turns the reading on or off, while a tap anywhere
  * else on the row opens the page. A row that toggled wherever a finger landed
@@ -253,7 +250,7 @@ internal fun RowTail(
  * nowhere to go owes a finger. The switch is the row's last mark, at the
  * row's own margin, and the chevron sits one column before it whether the
  * row has a door or not, so every switch in the sheet ends at one line
- * (owner report, D-111). The chevron keeps its own touch target and its own
+ * (owner report). The chevron keeps its own touch target and its own
  * spoken name beside the door, so TalkBack reads a switch and a door rather
  * than one crowded control.
  */
@@ -323,7 +320,7 @@ fun ToggleRow(
  *
  * It is the same words every other row wears, in the same place, and it ends
  * in no mark at all: there is nothing here to tap and nothing here to open, so
- * a chevron would promise a page that is not there (owner decision, D-134).
+ * a chevron would promise a page that is not there (owner decision).
  */
 @Composable
 fun ValueRow(title: String, value: String) {

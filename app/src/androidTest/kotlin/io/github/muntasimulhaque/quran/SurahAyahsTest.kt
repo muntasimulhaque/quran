@@ -32,7 +32,7 @@ import org.junit.runner.RunWith
  * A surah row is the door to its own ayahs. Browse holds one list of surahs,
  * and a tap on one opens its numbers with the reader's own place marked and
  * in view, so a jump inside a long surah is a tap on a number instead of a
- * scroll (owner decision, D-101). The test opens Al-Baqarah, jumps to 2:12,
+ * scroll (owner decision). The test opens Al-Baqarah, jumps to 2:12,
  * and comes back to the list through the grid's own back mark.
  *
  * The library is prepared before the activity starts, the order a reader
@@ -99,7 +99,7 @@ class SurahAyahsTest {
             .getUnclippedBoundsInRoot()
         // The name's line height is its type: titleMedium in both places,
         // where the header used to draw it a size larger than the row the
-        // reader tapped (owner report, D-103).
+        // reader tapped (owner report).
         assertEquals(
             "the grid header must name the surah at the list row's own size",
             fromList.height.value,

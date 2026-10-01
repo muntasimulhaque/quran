@@ -19,7 +19,7 @@ import androidx.compose.ui.test.performTouchInput
  * control reaches into it. Tapping the page's exact center is not safe: a
  * translation's footnote marker sits in the flow of the text, and at the
  * center of Al-Fatihah 1:1 one of them is under the finger, so the tap opens
- * the footnote sheet instead of the chrome (found by this suite, D-097).
+ * the footnote sheet instead of the chrome (found by this suite).
  */
 fun SemanticsNodeInteraction.tapThePaper() = performTouchInput {
     click(Offset(4f, centerY))

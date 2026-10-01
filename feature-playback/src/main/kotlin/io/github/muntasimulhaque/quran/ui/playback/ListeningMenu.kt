@@ -41,7 +41,7 @@ import io.github.muntasimulhaque.quran.ui.kit.speedText
  * so it reads as the pill opening rather than a foreign sheet laid over it.
  *
  * The three end answers are three switches over one value
- * (owner decision, D-118): each reports the answer it carries, and the plan
+ * (owner decision): each reports the answer it carries, and the plan
  * the app keeps is that answer alone, so the reader can never be in a state
  * where the ayah repeats and the surah also repeats.
  */
@@ -121,7 +121,7 @@ internal fun ListeningMenu(
         )
         // The surah, the same answer one unit larger: the ayah that has just
         // ended begins again, and so does the whole surah, at its first ayah
-        // that is on the device (owner decision, D-118).
+        // that is on the device (owner decision).
         EndSwitch(
             label = stringResource(R.string.playback_repeat_surah),
             choice = EndOfAudio.REPEAT_SURAH,
@@ -130,7 +130,7 @@ internal fun ListeningMenu(
         )
         // The end of the surah, where the two above are the end of the ayah.
         // On, the next surah is fetched with the reciter being heard and
-        // plays on; off, the pill offers it with its size (D-105).
+        // plays on; off, the pill offers it with its size.
         EndSwitch(
             label = stringResource(R.string.playback_continue_next),
             choice = EndOfAudio.CONTINUE,

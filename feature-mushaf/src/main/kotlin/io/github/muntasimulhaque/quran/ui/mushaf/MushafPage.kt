@@ -48,7 +48,7 @@ import kotlin.math.roundToInt
  * page's width so the whole page fits, which on a landscape tablet is a page
  * narrower than the glass, and stretching that page to the glass drew it two
  * and a quarter times too large with two thirds of it off the bottom of the
- * screen (owner report, D-132). The page never scales with the reader's text
+ * screen (owner report). The page never scales with the reader's text
  * size either: its lines are justified to the page, not the screen.
  *
  * A turn is a plain horizontal slide with no lift and no cast shadow: the
@@ -191,7 +191,7 @@ fun MushafPage(
         // is placed where the page's own box is drawn, which is the box at the
         // page's own size, centered: a node placed by a scale the drawing does
         // not use is a node in the wrong place, and one wrong by enough is a
-        // node no finger can reach (D-132).
+        // node no finger can reach.
         if (active && rendered != null && availableWidth > 0f && availableHeight > 0f) {
             val read = rendered ?: return@BoxWithConstraints
             val left = pageLeft(availableWidth, read.widthPx)

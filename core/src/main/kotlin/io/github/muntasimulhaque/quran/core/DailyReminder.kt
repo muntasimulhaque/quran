@@ -34,7 +34,7 @@ import java.util.TimeZone
  * Which of the two alarms is available is the reader's own setting in the
  * phone, never the app's to assume, so [plan] is where the choice is made and
  * it is a pure function: the JVM suite pins both halves, and the instrumented
- * suite pins the alarm the platform actually holds (owner decision, D-114).
+ * suite pins the alarm the platform actually holds (owner decision).
  */
 object DailyReminder {
 
@@ -43,7 +43,7 @@ object DailyReminder {
      * time: one minute, the narrowest ask the platform allows, and still a
      * request and not a promise, because the platform's own floor is ten
      * minutes on Android 15. The inexact path is therefore never described to
-     * the reader as arriving to the minute (D-114).
+     * the reader as arriving to the minute.
      */
     const val WINDOW_MILLIS = 60_000L
 
@@ -86,7 +86,7 @@ object DailyReminder {
      * kinds differ only in the window, never in the moment, so a reader who
      * grants the permission and one who does not are both reminded at the
      * minute they chose, with only the punctuality left to the phone
-     * (owner decision, D-114).
+     * (owner decision).
      */
     fun plan(
         canScheduleExact: Boolean,
@@ -137,7 +137,7 @@ object DailyReminder {
      *
      * The app re-arms the reminder at every launch, because it asks for no
      * boot permission and a reboot is the one thing it cannot hear about
-     * (D-097). Re-arming replaces the pending alarm, and the moment the reader
+     *. Re-arming replaces the pending alarm, and the moment the reader
      * set has just passed, so a launch inside that minute throws away a
      * delivery the platform is still going to make and the morning's reminder
      * never arrives at all (owner report, 37th session). The platform is never

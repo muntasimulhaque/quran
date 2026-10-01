@@ -42,7 +42,7 @@ import io.github.muntasimulhaque.quran.core.RichText
  * The filled swatch is the page drawing right now. With automatic night mode
  * on and the phone in dark mode, that is Night, even though the stored choice
  * is the day page under it; the note names the day page so the choice is
- * never lost (owner report, D-097). The system's own state is read from the
+ * never lost (owner report). The system's own state is read from the
  * resources here rather than from a composition local, because a sheet is its
  * own window and never sees the activity's composition.
  */
@@ -171,7 +171,7 @@ fun TranslationsPage(
         )
         // The master switch lives on the hub row and nowhere else: this page
         // is the list of translations, and a switch at its head re-asked a
-        // decision the hub already owns (owner report, D-105). The line below
+        // decision the hub already owns (owner report). The line below
         // only says what the reading is doing while the switch is off, so a
         // reader standing here is never left to wonder why nothing changed.
         if (!settings.showTranslation) {
@@ -218,7 +218,7 @@ fun TafsirsPage(
             modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
         )
         // The same rule as the translations list: the hub row owns the
-        // switch, and this page owns the list (owner report, D-105). The line
+        // switch, and this page owns the list (owner report). The line
         // says what the reading is doing while the switch is off.
         if (!settings.showTafsir) {
             Text(
@@ -254,7 +254,7 @@ fun TafsirsPage(
  * doors are [PageRow]s, so a reader who came here sees the same rows as the
  * hub above. They used to be a row shape of their own, a name in the accent
  * color with nothing at the right, which made the About page the one page in
- * the sheet where a door had no chevron (owner decision, D-134).
+ * the sheet where a door had no chevron (owner decision).
  *
  * The one line in the accent color here is the check's own result, under the
  * row that runs it: that is the outcome of what the reader just did rather

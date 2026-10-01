@@ -14,22 +14,19 @@ Package: `io.github.muntasimulhaque.quran`, permanent.
 
 **The code is the source of truth.** Why a thing is the way it is lives in
 the KDoc beside that thing, and a settled choice is tagged
-`owner decision, <n>`, so `git grep "owner decision"` finds them. Everything
+`owner decision`, so `git grep "owner decision"` finds them. Everything
 else has one file and one job:
 
 | File | What only it can say |
 | --- | --- |
 | `AGENTS.md` | the law, the commands, the map, the vocabulary |
-| `docs/decisions.md` | the ADRs, D-001 onward: why this and not the alternatives, and each session's record |
 | `docs/design.md` | the reading surfaces, the type, the color, the budget |
 | `docs/architecture.md` | the module rules and the one direction between them |
 | `play-store/RELEASE.md` | the release runbook, the secrets, the signature proof |
 | `docs/screenshot-failures.md` | every way a capture leg can fail, with its class and its fix |
 
 If this file and the code disagree, the code wins and this file is fixed in
-the same change. Do not grow this into a second codebase written in prose: a
-session's story belongs in `docs/decisions.md` as an entry, never as a new
-section here.
+the same change. Do not grow this into a second codebase written in prose.
 
 ## This file is not the final word
 
@@ -49,14 +46,13 @@ dead letter.
 2. Do the work, then ask one question: anything else? The build waits for
    the owner's word, and no `versionCode` moves until the session is done
    and the owner says so.
-3. Session end: append the session's entry to `docs/decisions.md`, bring the
-   README status and the release notes current, and leave the tree clean.
+3. Session end: bring the README status and the release notes current, and
+   leave the tree clean.
 
 ## The law (non-negotiable)
 
 1. **Offline except one thing.** `INTERNET` serves exactly one purpose:
-   content from the project's own GitHub Releases, per D-023 as amended in
-   D-105 and D-109. The reads are a content pack the reader asks for after
+   content from the project's own GitHub Releases. The reads are a content pack the reader asks for after
    seeing its size, a recitation package for one surah after the reader
    taps Play and approves the shown size (or after they have turned on
    Continue to the next surah, which is their word, given once), and a quiet
@@ -68,10 +64,10 @@ dead letter.
 2. **Permissions: media, notifications, the reminder's exact time, and that
    one network use.** Exactly `INTERNET`, `POST_NOTIFICATIONS`,
    `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MEDIA_PLAYBACK`, and
-   `SCHEDULE_EXACT_ALARM` (the daily reminder, D-114). The app asks for
+   `SCHEDULE_EXACT_ALARM` (the daily reminder). The app asks for
    `POST_NOTIFICATIONS` and nothing else: the exact alarm grant is never
    asked for and never named in the UI, and the reminder takes the best alarm
-   the phone allows (D-130). Library-merged permissions are documented, not
+   the phone allows. Library-merged permissions are documented, not
    fought. A new permission needs the owner's sign-off written here first.
 3. **No ads, no trackers, no analytics, no accounts.** AndroidX, Kotlin,
    Media3, Room, DataStore, and Glance only. Every new dependency is
@@ -92,7 +88,7 @@ dead letter.
 8. **Two UI languages, one content language each.** English and Bangla ship
    together, the interface strings in each module's `values-bn`, and the
    reader's choice sets the translation, the tafsir, and the word meanings
-   too (D-067). Arabic is data, not a locale; RTL support stays on. A new
+   too. Arabic is data, not a locale; RTL support stays on. A new
    language needs a real translation pass, a `values-xx` folder, and the
    same review the Arabic content gets. The frozen names (`app_name`,
    `first_paint_title`, `first_paint_subtitle`, the store title) are never
@@ -139,10 +135,13 @@ dead letter.
 Environment facts the harness does not tell you, each one worth a failed
 command to rediscover.
 
-- Every Gradle call begins with `export JAVA_HOME="/c/Users/zn/jdks/jdk-17"`
-  (Temurin; Android Studio's own JBR is Java 25 and the modules'
-  `jvmToolchain(17)` finds no match in it). `local.properties` reads
-  `sdk.dir=C:/Users/zn/AppData/Local/Android/Sdk` and is gitignored.
+- Every Gradle call begins with
+  `export JAVA_HOME="/c/Program Files/Android/Android Studio/jbr"`. The
+  Android Studio JBR is the only JDK on this machine and the build is shaped
+  so that is enough: no module pins `jvmToolchain`, every module targets
+  Java 17 bytecode and lets the running JDK compile it (owner decision).
+  `local.properties` reads `sdk.dir=C:/Users/zn/AppData/Local/Android/Sdk`
+  and is gitignored.
 - The Android SDK here has the command-line tools, an Android 35 ATD
   system image, and a `pixel35` AVD installed, and the emulator still cannot
   start: "x86_64 emulation currently requires hardware acceleration",
@@ -178,7 +177,7 @@ command to rediscover.
 - `python3` is intercepted by the Store alias. The working interpreter is
   the harness's own under
   `C:/Users/zn/AppData/Local/hermes/tools/`, with Pillow, fontTools,
-  arabic-reshaper, and python-bidi installed by hand (D-112). Nothing in
+  arabic-reshaper, and python-bidi installed by hand. Nothing in
   the build depends on it.
 
 ## Build, test, verify
@@ -214,7 +213,7 @@ at every step:
   `content/work/verify`, so they run on the owner's machine only. `ls
   content/raw` before a release starts: if the manual QUL and QuranEnc
   exports are gone, say so before the release begins rather than at gate
-  time (D-078).
+  time.
 - The committed `content/quran.db` is the shipped content and a local
   rebuild must reproduce its SHA-256 exactly. If it does not, stop and find
   out why before committing anything.
@@ -226,7 +225,7 @@ at every step:
   six classes: `ScreenshotTest`, `WordByWordTest`, `MushafTurnTest`,
   `TafsirDirectionTest`, `SavedNotesTest`, `SettingsVisibilityTest`. Every
   other app test runs on a session's own emulator or not at all, and two of
-  them had been red for nobody to see (D-116), so a session that changes
+  them had been red for nobody to see, so a session that changes
   the settings sheet, and every release session, runs the whole app suite
   rather than only the six.
 - Do not hand-drive the app to verify UI. After an emulator crash the
@@ -235,9 +234,9 @@ at every step:
   JVM suite and lint locally, push, then read the tour's frames from the
   capture run. Every UI claim in a hand-over is backed by a CI frame or a
   compose-test run, never by hand-taps.
-- Toolchain: JDK 17, current AGP, Kotlin, Gradle, and the SDK levels in the
-  build files. Versions live in `gradle/libs.versions.toml`, never here.
-  The Gradle wrapper is committed.
+- Bytecode target: Java 17; current AGP, Kotlin, Gradle, and the SDK levels
+  in the build files. Versions live in `gradle/libs.versions.toml`, never
+  here. The Gradle wrapper is committed.
 
 ## Release
 
@@ -263,13 +262,13 @@ are `docs/screenshot-failures.md`. What belongs here is the law around it.
    kept in step, never hand-captured.
 4. **The bundle comes from the newest green `build` run on `main`**, not the
    first one after the version bump: everything committed after the bump is
-   in the later run and in nothing else (D-093). The run's artifact carries
+   in the later run and in nothing else. The run's artifact carries
    the bundle and its SHA-256, and GitHub deletes it after two weeks, so a
    signed build is never sitting in public. Delete the hand-off copy in
    `play-store/aab/` once Play has it.
 5. **Signing is proved by its words.** `jarsigner -verify` exits 0 on an
    unsigned file, so the check reads "jar verified" and prints the
-   certificate's SHA-256 (`53:7D:09:D2:...:0D:9D:E5:21`, D-017). The
+   certificate's SHA-256 (`53:7D:09:D2:...:0D:9D:E5:21`). The
    `signed-bundle` job fails when the four secrets are absent rather than
    producing an unsigned artifact, because "it built" must not be mistaken
    for "it is signed".
@@ -286,7 +285,7 @@ are `docs/screenshot-failures.md`. What belongs here is the law around it.
 | `content-assets/` | the shipped assets the app reads: the 604 page fonts, the study and UI faces, the core pack, and the pack catalog |
 | `tools/` | the offline pipeline: fetch, verify, audit, build, fonts, packs, audio |
 | `content/` | `quran.db` (built and committed), `packs/`, `manifest.json`, `recitation-manifest.json`, `audit-report.md`; `raw/` is local and gitignored |
-| `docs/` | the ADRs and the design, this file's siblings in the table above |
+| `docs/` | the design and the architecture, this file's siblings in the table above |
 | `play-store/` | listing, screenshots per form factor, the hand-off AAB, the runbook |
 | `benchmark/` | the startup profile's generator, development only, never in the bundle |
 | `.github/workflows/` | `build.yml` (gates, data tests, signed bundle), `screenshots.yml` (the store set) |
@@ -317,43 +316,41 @@ are `docs/screenshot-failures.md`. What belongs here is the law around it.
 ## Frozen choices (do not reopen without approval)
 
 Appealable: bring a genuinely better idea to the owner and, if approved,
-implement it and update this list. The reasoning is `docs/decisions.md`.
+implement it and update this list.
 
-- The name and the three strings are frozen (D-001).
+- The name and the three strings are frozen.
 - A settings row's value is under its name, on every row in the sheet, and
   never in a column at the right; a row that opens something ends in a
-  chevron, whatever page it is on (D-134).
-- Reader-first, no tab bar (D-008).
-- Both reading modes ship together (D-008).
+  chevron, whatever page it is on.
+- Reader-first, no tab bar.
+- Both reading modes ship together.
 - The reading modes are one switch in the top bar, and the reader's other
-  doors are Browse, Search, and Settings; there is no bottom bar (D-051).
+  doors are Browse, Search, and Settings; there is no bottom bar.
 - Last Read is the fourth Browse tab beside Surahs, Juz, and Saved, and a
-  note lives inside Saved with the ayah it was written on (D-051, D-074,
-  D-101).
+  note lives inside Saved with the ayah it was written on.
 - A surah row in Browse opens its own ayah grid; there is no separate Go to
-  Ayah tab (D-101).
-- Text sizes are 0.65, 0.75, 0.85, 1, 1.2 (D-051, D-074).
-- Saheeh International is the only translation (D-004).
-- Ibn Kathir and As-Sa'di are the tafsirs (D-005).
-- Minshawi and Husary are the only reciters (D-007).
-- No streaks, no gamification (D-009).
-- The design direction is the manuscript language described in D-010.
-- Content is sourced from QUL and QuranEnc under D-003, with every license
+  Ayah tab.
+- Text sizes are 0.65, 0.75, 0.85, 1, 1.2.
+- Saheeh International is the only translation.
+- Ibn Kathir and As-Sa'di are the tafsirs.
+- Minshawi and Husary are the only reciters.
+- No streaks, no gamification.
+- The design direction is the manuscript language of `docs/design.md`.
+- Content is sourced from QUL and QuranEnc, with every license
   honored and a takedown path in About.
 - Continue to the next surah is off by default and is the reader's one-time
-  word for the packages that follow the surah being heard (D-105).
+  word for the packages that follow the surah being heard.
 - What happens at the end of the audio is one answer, not three switches:
   repeat the ayah, repeat the surah, or continue, and turning one on turns
-  the other two off (D-118).
+  the other two off.
 - The app never asks for the phone's exact alarm grant, and no settings row
   or button offers it: the reminder takes the best alarm the phone allows
-  and says nothing about the difference (D-130).
+  and says nothing about the difference.
 
 ## Traps
 
-D-129 in `docs/decisions.md` holds the classes that cost a session to find,
-one entry each, with the file, test, or decision that owns the detail. Five
-of them are worth reading before any run:
+The classes that cost a session to find live here, one entry each. Five of
+them are worth reading before any run:
 
 - **Read the frames a red leg kept before touching anything.** The log says
   which assertion failed; the frame says what the reader was looking at.

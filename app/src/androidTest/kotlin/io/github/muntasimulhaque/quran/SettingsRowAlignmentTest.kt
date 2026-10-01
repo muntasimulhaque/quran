@@ -38,7 +38,7 @@ import org.junit.Test
  * the test reads the real bounds: every switch ends at one line at the
  * sheet's edge, a row with no switch ends with its chevron on that same
  * line, and the switch of a row with a door comes after that row's chevron
- * (owner report, D-111, and D-120 for the row with no switch).
+ * (owner report).
  *
  * The chevron's slot is measured, not the mark: a mark is centred in its
  * slot, so the slot's edges are what a row's alignment is about, and the
@@ -46,7 +46,7 @@ import org.junit.Test
  *
  * The column is a width, not a height: the tail's 48 dp square stretched
  * every plain row where the chevron was not a control of its own, so the
- * page row's compact height is pinned here too (owner report, D-105).
+ * page row's compact height is pinned here too (owner report).
  *
  * The switch column is the real control's width, measured here rather than
  * assumed: when Material widened its switch the reserved column stayed 52 dp,
@@ -58,8 +58,8 @@ import org.junit.Test
  * Three measurements of the sheet live here, because they are all the same
  * question asked of a row: what a reader's eye gets and what a finger gets.
  * The two tail columns and the compact height above, the name and the value in
- * one place whatever the row carries (owner decision, D-134), and every step
- * of a segmented row being a full 48 dp target (D-087).
+ * one place whatever the row carries (owner decision), and every step
+ * of a segmented row being a full 48 dp target.
  */
 class SettingsRowAlignmentTest {
 
@@ -164,8 +164,8 @@ class SettingsRowAlignmentTest {
         // The mark, not only its column: a page row's chevron is the row's
         // last mark, and a mark centred in its own column stood a whole
         // chevron short of the line every switch ends on, which is the gap the
-        // owner read as the row not knowing where it stops (owner report,
-        // D-130). The mark is read from the unmerged tree because the slot is
+        // owner read as the row not knowing where it stops (owner report).
+        // The mark is read from the unmerged tree because the slot is
         // tagged there, so its bounds come back in pixels and are brought to
         // dp here: this test once compared the two.
         val density = compose.density.density
@@ -197,9 +197,9 @@ class SettingsRowAlignmentTest {
      *
      * The hub used to answer the same question twice: a row with no switch
      * printed its value in a column at the right, measured so that the name
-     * kept its room (D-116), and a row with a switch printed the same grey
-     * line under its name, so one list read as two grammars (owner decision,
-     * D-134). This is the measurement that says the value is under the name
+     * kept its room, and a row with a switch printed the same grey
+     * line under its name, so one list read as two grammars (owner decision).
+     * This is the measurement that says the value is under the name
      * now: on the sheet's two longest values, the value begins below the name
      * and on the name's own left edge, and the name still holds a line of its
      * own rather than one letter at a time.
@@ -282,9 +282,9 @@ class SettingsRowAlignmentTest {
      * shape of their own: a name in the accent color with nothing at the
      * right, where every row around it is a dark name with a chevron on the
      * margin. So the sheet answered "does this row open something?" with a
-     * color on one page and with a mark on all the others, and the count of
-     * chevrons that D-120 calls a count of the doors was wrong on exactly
-     * that page (owner decision, D-134). Both doors are the hub's own row now,
+     * color on one page and with a mark on all the others, and counting
+     * chevrons as a count of the doors was wrong on exactly
+     * that page (owner decision). Both doors are the hub's own row now,
      * and the version line beside them is a fact: it is not clickable, and it
      * carries no mark.
      */
@@ -326,7 +326,7 @@ class SettingsRowAlignmentTest {
      * Every step of every segmented row is a 48 dp target.
      *
      * The text sizes drew 38 dp cells and the pace drew 46, under the design
-     * document's own rule, and the fix named in D-087 was structural: an outer
+     * document's own rule, and the fix was structural: an outer
      * 48 dp touch box with the mark inside it. The name moved above the steps
      * for it, because five 48 dp boxes are 250 dp wide and a name beside them
      * would break in the middle on a small phone. The measurement is the

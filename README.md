@@ -4,7 +4,7 @@ A free, open source Quran reader for Android. It opens on the page you left,
 turns like paper, and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 3.4 (versionCode 35) is submitted to the Play Console and waiting for review. The bundle is `play-store/aab/quran-3.4-vc35.aab` from build run 36848336493 (148,299,194 bytes, SHA-256 `c3666dc8bc76ca69f6b125c489d88d333db3124ef445d1d802f60f7132120c79`, `jar verified`, signed with the shared upload key). It carries D-134: the mushaf page's rule stands off the text on all four sides, and the settings sheet speaks one grammar, every value under its own name and every door ending in a chevron. The store set **is** refreshed, from capture run 36848336545: three green legs, eight frames each, eighteen of the twenty four frames changed by `cmp` against the artifacts. The release history is [`docs/decisions.md`](docs/decisions.md) and the store's own face of it is [`play-store/listing.md`](play-store/listing.md).
+**Status:** 3.4 (versionCode 35) is submitted to the Play Console and waiting for review. The bundle is `play-store/aab/quran-3.4-vc35.aab` from build run 36848336493 (148,299,194 bytes, SHA-256 `c3666dc8bc76ca69f6b125c489d88d333db3124ef445d1d802f60f7132120c79`, `jar verified`, signed with the shared upload key). It carries the settings grammar pass: the mushaf page's rule stands off the text on all four sides, and the settings sheet speaks one grammar, every value under its own name and every door ending in a chevron. The store set **is** refreshed, from capture run 36848336545: three green legs, eight frames each, eighteen of the twenty four frames changed by `cmp` against the artifacts. The store's own face of the release history is [`play-store/listing.md`](play-store/listing.md).
 
 ## What it does
 
@@ -93,9 +93,9 @@ Thirteen Gradle modules with dependencies pointing one way, and a JVM
 content pipeline. Every sentence the reader can see lives in a `strings.xml`
 in the module that draws it, so the interface can be translated without
 hunting through Kotlin. The module rules are in
-[`docs/architecture.md`](docs/architecture.md), the design constitution in
-[`docs/design.md`](docs/design.md), and the reasons behind every decision in
-[`docs/decisions.md`](docs/decisions.md).
+[`docs/architecture.md`](docs/architecture.md) and the design constitution in
+[`docs/design.md`](docs/design.md). The reason a thing is the way it is lives
+beside that thing in the code.
 
 ```
 :core :data :content-assets :ui-kit

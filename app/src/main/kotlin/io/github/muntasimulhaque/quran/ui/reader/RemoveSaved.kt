@@ -31,7 +31,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * note itself is drawn in the sheet, so the reader sees what is at stake
  * before they answer. Keep is the filled door, because the safe answer is the
  * one the sheet leads with; Remove keeps the quiet shape every removing word
- * wears (owner decision, D-101).
+ * wears (owner decision).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

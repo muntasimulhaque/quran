@@ -62,6 +62,16 @@ val canSignRelease = keystoreStoreFile != null &&
 val contentAssets = layout.buildDirectory.dir("generated/contentAssets")
 val devPackAssets = layout.buildDirectory.dir("generated/devPackAssets")
 
+// Captured at configuration time so the task's action never touches the
+// project at execution time: the configuration cache forbids that.
+val contentDir = rootProject.file("content")
+val contentPacksDir = File(contentDir, "packs")
+val contentFontsV2Dir = File(contentDir, "work/fonts-v2")
+val contentFontsHafsDir = File(contentDir, "work/fonts-hafs")
+val contentBuildReport = File(contentDir, "build-report.json")
+val contentCatalogFile = File(contentDir, "catalog.json")
+val contentRecitationManifest = File(contentDir, "recitation-manifest.json")
+
 /**
  * Which development packs a build carries.
  *
@@ -80,55 +90,107 @@ val screenshotPacks = setOf(
     "words-bn.db",
 )
 
-val prepareContentAssets = tasks.register("prepareContentAssets") {
-    group = "content"
-    description = "Copies the core pack, the pack catalog, the fonts, and the recitation manifest."
-    dependsOn(":tools:fetchAssets")
-    inputs.file(rootProject.file("content/build-report.json"))
-    inputs.file(rootProject.file("content/catalog.json"))
-    inputs.file(rootProject.file("content/recitation-manifest.json"))
-    inputs.dir(rootProject.file("content/packs"))
-    inputs.dir(rootProject.file("content/work/fonts-hafs"))
-    inputs.dir(rootProject.file("content/work/fonts-v2"))
-    inputs.property("leanDevPacks", leanDevPacks)
-    outputs.dir(contentAssets)
-    outputs.dir(devPackAssets)
-    doLast {
-        val out = contentAssets.get().asFile
+/**
+ * The asset copy as a real task class rather than a script closure: the
+ * configuration cache cannot serialize a closure owned by the build script,
+ * and a cacheable task lets a cold CI runner restore the output (the core
+ * pack and all 604 page fonts) from the build cache instead of copying it
+ * again, which was about forty seconds of every capture leg.
+ */
+@CacheableTask
+abstract class PrepareContentAssets : DefaultTask() {
+
+    /** Whether only the screenshot tour's packs are carried. */
+    @get:Input
+    abstract val leanScreenshot: Property<Boolean>
+
+    /** The packs a lean build carries. */
+    @get:Input
+    abstract val packNames: SetProperty<String>
+
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val buildReportFile: RegularFileProperty
+
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val catalogFile: RegularFileProperty
+
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val recitationManifestFile: RegularFileProperty
+
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val packsDir: DirectoryProperty
+
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val fontsHafsDir: DirectoryProperty
+
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val fontsV2Dir: DirectoryProperty
+
+    @get:OutputDirectory
+    abstract val contentAssetsOut: DirectoryProperty
+
+    @get:OutputDirectory
+    abstract val devPackAssetsOut: DirectoryProperty
+
+    @TaskAction
+    fun copyAssets() {
+        val out = contentAssetsOut.get().asFile
         out.deleteRecursively()
-        val content = File(out, "content").apply { mkdirs() }
         // The app ships the Quran text and its page layout, and nothing else:
         // one small pack, plus the catalog of what can be downloaded.
-        val packs = rootProject.file("content/packs")
-        packs.resolve("core.db").copyTo(File(content, "core.db"), overwrite = true)
-        rootProject.file("content/catalog.json").copyTo(File(content, "catalog.json"), overwrite = true)
+        val content = File(out, "content").apply { mkdirs() }
+        File(packsDir.get().asFile, "core.db").copyTo(File(content, "core.db"), overwrite = true)
+        catalogFile.get().asFile.copyTo(File(content, "catalog.json"), overwrite = true)
         // Development builds carry every pack, so the whole app works with no
         // network at all while it is being built and tested. They are written
         // to the debug variant's own asset directory, never to the main one.
-        val devPacks = devPackAssets.get().asFile
+        val devPacks = devPackAssetsOut.get().asFile
         devPacks.deleteRecursively()
         File(devPacks, "packs").mkdirs()
-        packs.listFiles { file -> file.name.endsWith(".db") }
-            ?.filter { !leanDevPacks || it.name in screenshotPacks }
+        val lean = leanScreenshot.get()
+        val names = packNames.get()
+        packsDir.get().asFile.listFiles { file -> file.name.endsWith(".db") }
+            ?.filter { !lean || it.name in names }
             ?.forEach { pack ->
                 pack.copyTo(File(File(devPacks, "packs"), pack.name), overwrite = true)
             }
-        val studyFont = rootProject.file("content/work/fonts-hafs").walkTopDown()
+        val studyFont = fontsHafsDir.get().asFile.walkTopDown()
             .firstOrNull { it.isFile && it.name.endsWith(".ttf") }
             ?: throw GradleException("the study font is missing; run ./gradlew :tools:run --args=fetch")
         val fonts = File(out, "fonts").apply { mkdirs() }
         studyFont.copyTo(File(fonts, studyFont.name), overwrite = true)
         val pages = File(fonts, "pages").apply { mkdirs() }
-        project.copy {
-            from(rootProject.file("content/work/fonts-v2/fonts/pages")) { include("*.ttf") }
-            into(pages)
-        }
-        val manifest = rootProject.file("content/recitation-manifest.json")
+        File(fontsV2Dir.get().asFile, "fonts/pages")
+            .listFiles { file -> file.name.endsWith(".ttf") }
+            ?.forEach { it.copyTo(File(pages, it.name), overwrite = true) }
+        val manifest = recitationManifestFile.get().asFile
         if (manifest.exists()) {
             val recitations = File(out, "recitations").apply { mkdirs() }
             manifest.copyTo(File(recitations, "manifest.json"), overwrite = true)
         }
     }
+}
+
+val prepareContentAssets = tasks.register<PrepareContentAssets>("prepareContentAssets") {
+    group = "content"
+    description = "Copies the core pack, the pack catalog, the fonts, and the recitation manifest."
+    dependsOn(":tools:fetchAssets")
+    leanScreenshot.set(leanDevPacks)
+    packNames.set(screenshotPacks)
+    buildReportFile.fileValue(contentBuildReport)
+    catalogFile.fileValue(contentCatalogFile)
+    recitationManifestFile.fileValue(contentRecitationManifest)
+    packsDir.fileValue(contentPacksDir)
+    fontsHafsDir.fileValue(contentFontsHafsDir)
+    fontsV2Dir.fileValue(contentFontsV2Dir)
+    contentAssetsOut.set(contentAssets)
+    devPackAssetsOut.set(devPackAssets)
 }
 
 val copyAudioDevAssets = tasks.register<Sync>("copyAudioDevAssets") {

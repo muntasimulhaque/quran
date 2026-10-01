@@ -663,14 +663,14 @@ private fun AyahBlock(
                 // The Mushaf gives every ayah a node whose action raises the
                 // pill, and the study block now gives a screen reader the
                 // same two doors a finger has: the ayah's actions, which is
-                // the one gesture the reading is built around (D-084 named
-                // this gap; this closes it), and the paper's own tap.
+                // the one gesture the reading is built around, and the
+                // paper's own tap.
                 .semantics {
                     // The Mushaf gives every ayah a node whose action raises
                     // the pill, and the study block gives a screen reader the
                     // same two doors a finger has: the ayah's actions, which
-                    // is the one gesture the reading is built around (D-084
-                    // named this gap; this closes it), and the paper's own tap.
+                    // is the one gesture the reading is built around, and
+                    // the paper's own tap.
                     customActions = listOf(
                         CustomAccessibilityAction(ayahActions) {
                             onAyah(row.ayah)

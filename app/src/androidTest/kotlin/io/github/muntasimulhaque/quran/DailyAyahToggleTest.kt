@@ -99,8 +99,8 @@ class DailyAyahToggleTest {
         // The row is a door: it opens the page and it does not toggle. If it
         // toggled as well, the switch would read off again and the page would
         // come up with the reminder it was meant to be setting turned off.
-        // The page carries the moment and no second switch (owner report,
-        // D-105), so its own mark is what the wait holds on to.
+        // The page carries the moment and no second switch (owner report),
+        // so its own mark is what the wait holds on to.
         compose.onNodeWithText(title).performClick()
         compose.waitUntil(timeoutMillis = 15_000) {
             compose.onAllNodesWithTag("daily-page", useUnmergedTree = true)

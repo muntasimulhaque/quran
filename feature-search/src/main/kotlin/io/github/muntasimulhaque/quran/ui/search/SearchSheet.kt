@@ -92,8 +92,8 @@ private const val LIMIT = 200
  * each one is a pass over the whole of the reader's library. Five passes at
  * once on a phone are five scans contending for the same four cores, so the
  * results that land are the results of a busy machine rather than a fast one,
- * and the search the owner reported as slow was mostly this (owner report,
- * D-130). One search per settled query is both the promise this sheet has
+ * and the search the owner reported as slow was mostly this (owner report).
+ * One search per settled query is both the promise this sheet has
  * always made in its own words and the fastest thing to hand a reader.
  *
  * The wait is short enough to read as instant and long enough to be past the
@@ -107,7 +107,7 @@ private const val SETTLE_MILLIS = 120L
  * The search sheet: one field, no modes, everything the reader has turned on.
  * Results are computed on a worker thread from index columns, one search per
  * settled query, so the first query and the hundredth cost the same and a new
- * one cancels the one before it (owner report, D-130).
+ * one cancels the one before it (owner report).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -188,7 +188,7 @@ fun SearchSheet(
      * keeps a folded copy of the enabled packs in memory and builds it when
      * the sheet opens rather than inside the reader's first query: opening the
      * sheet is the moment they have said they mean to search, and the build
-     * then happens while the field is still empty (owner report, D-130).
+     * then happens while the field is still empty (owner report).
      */
     LaunchedEffect(content, tafsirPacks) {
         content.warmTafsir(tafsirPacks)
@@ -407,7 +407,7 @@ private fun SearchField(
                                 // The hint is the only text in an empty field,
                                 // so it has to be read to be a hint at all. The
                                 // 0.55 alpha it wore measured 2.5:1, under the
-                                // design document's 4.5:1 rule (D-084).
+                                // design document's 4.5:1 rule.
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
@@ -633,7 +633,7 @@ private fun AyahRow(
                     style = MaterialTheme.typography.labelMedium,
                     // A pack's name is read, so it keeps the theme's own
                     // secondary tone; the 0.7 alpha it wore measured 3.3:1,
-                    // under the design document's 4.5:1 rule (D-084).
+                    // under the design document's 4.5:1 rule.
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 4.dp),
                 )
@@ -643,7 +643,7 @@ private fun AyahRow(
         // of the match; the rule is pure and tested in `data` beside the
         // result ordering. When the translation above already carries the
         // wash, the meaning is a second copy of the same fact and the owner
-        // read it as noise (owner report, D-097). A row that matched only a
+        // read it as noise (owner report). A row that matched only a
         // meaning keeps it, named: an unlabelled line under the ayah would be
         // read as a translation, and it is not one.
         hit.wordMeaning?.takeIf { shouldShowWordMeaning(hit) }?.let { meaning ->

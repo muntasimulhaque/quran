@@ -45,7 +45,7 @@ words. Everything else is a guest.
   and the paper left outside the rule is the same margin again: the rule is
   one rectangle that holds the page rather than a box drawn around the text.
   The measure gives up two percent of the page's width to hold it, which is
-  the only thing the mushaf's own type is ever spent on (D-134).
+  the only thing the mushaf's own type is ever spent on.
 * One page per screen, turned by a horizontal swipe. Adjacent pages are
   pre-rendered, so a turn is a texture draw, never a render.
 * While the reader swipes, the page simply slides: nothing is lifted, nothing
@@ -75,7 +75,7 @@ Revealed by a tap on the paper, faded out after seven seconds of no touch.
   Saved is gone: the switch is one door at the top that offers the *other*
   mode (the icon shown is the mode a tap will reach, never the one the reader
   is in), Saved lives in Browse with Last Read beside it, and listening is the
-  play action on an ayah and in its card (D-051).
+  play action on an ayah and in its card.
 * The chrome floats on a vertical gradient of the paper color, so the text
   under it stays legible even at its edge.
 
@@ -137,7 +137,7 @@ it, so it is the deeper material and nothing else:
   will be sent, then sends the picture alone (the default) or the words
   alone. The picture never carries the text as a caption, because a receiver
   then posts the ayah twice; the card itself is one centered column, from
-  the reference at its head to the app's own foot (D-090).
+  the reference at its head to the app's own foot.
 
 ## 5. Search
 
@@ -164,7 +164,7 @@ Searched, in one pass:
   color, exactly, without disturbing the rest of the sentence. A row never
   says the same match twice: the word meaning is drawn only when it is the
   row's only evidence of the match, so a translation highlight is never
-  repeated as a meaning block under it (D-097).
+  repeated as a meaning block under it.
 * Tapping a result opens the ayah in the reader and, in the study card, its
   context.
 * The indexes are built in the background after the first page appears, so
@@ -178,7 +178,7 @@ Searched, in one pass:
 * **Last read**: the places the reader has been reading, newest first, each
   row carrying the ayah, the mode it was read in, and when it was left. One
   row per ayah, so a place returned to moves up instead of piling up, and the
-  list is capped at twenty (D-051).
+  list is capped at twenty.
 * **Saved**: the ayahs the reader saved, newest save first, each row naming
   the place and the moment it was saved.
 * **Notes**: the ayahs a note was written on, newest note first, each row
@@ -189,9 +189,9 @@ Searched, in one pass:
   on marked and the grid landed on it. The surah is a card of its own quiet
   fill, the grid opens a block under it rather than a finger's width, and
   the header, the card, and the grid share one gutter, so the picker reads
-  as one page (D-090). The reader's own ayah is centered in the grid's view,
+  as one page. The reader's own ayah is centered in the grid's view,
   not pinned to its top edge: a number flush against the viewport's edge
-  reads as any other row, and the place has to be unmistakable (D-097).
+  reads as any other row, and the place has to be unmistakable.
   Tapping a number opens that ayah and closes the sheet, so a long surah
   never has to be scrolled to reach a place in it. The door never takes the
   chips' chosen fill: the picker swaps in over the lists and the reader's
@@ -205,7 +205,7 @@ it, nothing is scheduled while it is off, and nothing is fetched at any
 time: the ayah and its translation are read from the content already on the
 device. The ayah is the local day's own, walking the Book in order so a
 reader who keeps the reminder meets the whole Quran rather than the same
-short list of favorites (D-097). The notification carries the Arabic and,
+short list of favorites. The notification carries the Arabic and,
 when the reader reads with a translation, the first enabled one, in plain
 words with no footnote markers, because the shade has no door for a note. A
 tap opens that ayah in the study reading, whatever mode the reader was last
@@ -214,35 +214,35 @@ own exact alarm access, the reminder is an exact alarm and arrives at that
 minute even on a phone that is locked and asleep then; where they have not,
 it is the platform's own batched alarm, which can still reach a sleeping
 phone and can be minutes late, and the page says so in one line rather than
-promising the minute (D-114).
+promising the minute.
 
 ## 7. Settings
 
 A hub, not a scroll: one row per category, each carrying where it stands
 right now,
 and each opening a page of its own. Back steps out of a page before it
-closes the sheet, and the hub keeps its place while a page is open (D-046).
+closes the sheet, and the hub keeps its place while a page is open.
 The rows sit in three quiet groups, so a list of eleven is read at a glance
 rather than one row at a time, and a row says a state and not an
 explanation: a switch that already shows its own state carries no line under
-it restating it (D-116). Every row wears the same words in the same place:
+it restating it. Every row wears the same words in the same place:
 the name, and under it the value, or the one note the row has to say. The
 value is under the name on every row that carries one, never in a column at
 the right, because the tail is the marks' own column and because some of the
-sheet's grey lines are sentences rather than values (D-134). The two tail
-columns stand at one place on every row (D-111, D-116, D-130). A row of
+sheet's grey lines are sentences rather than values. The two tail
+columns stand at one place on every row. A row of
 choices draws its name above the choices, so every step of a segmented
-control is a full 48 dp target (D-087, D-116).
+control is a full 48 dp target.
 
 * **Appearance**: Paper, Sepia, Night, Black, as swatches that are the page
   each one paints. The theme is the whole app: the page, the sheets, the bars.
   The filled swatch is the page drawing right now: with automatic night mode
   on and the phone in dark mode, Night is filled, and the day page the reader
-  chose is named under the switch (D-097). With that switch on, the app
+  chose is named under the switch. With that switch on, the app
   follows the phone's own day and night as it changes, without waiting to be
   restarted: the window is rebuilt by the platform, which is the one way the
   whole app, the sheets and the bars included, sees the new colours at once
-  (D-115).
+ .
 * **Text**: the Quran text, the translation, the tafsir, and the word
   meanings aid, each with its own five steps, above a sample drawn from the
   reader's own ayah so a change is judged on the page it is about to change.
@@ -260,28 +260,28 @@ control is a full 48 dp target (D-087, D-116).
   Continue to the next surah is off by default; on, the end of a surah
   fetches the next package with the reciter being heard and plays on, and
   the player still shows the size, the progress, and the cancel while it
-  does (D-105). A pace or a repeat that is not the ordinary one is said on
+  does. A pace or a repeat that is not the ordinary one is said on
   the playback pill too, and the pill's own line is the door to all three
   while an ayah plays: the same values, the same five steps, set where the
-  reader feels the need for them (D-090). The Settings page keeps them as
+  reader feels the need for them. The Settings page keeps them as
   the default the next ayah starts from; there is one value with two doors,
   not a remembered setting and a hidden session value.
 * **Show translation and Show tafsir**: each switch says whether the reading
   draws what it names, and the chevron on the same row opens the list it is
   chosen from. The packs say what the reader has; the switch says what the
   page shows. One row, one decision, and no second door for the same thing
-  (D-097). The list page carries the list alone, with a quiet line when the
+ . The list page carries the list alone, with a quiet line when the
   reading is hiding it; the switch lives on the hub row and nowhere else
-  (D-105). Both are on by default, so a reader who added one sees it.
+ . Both are on by default, so a reader who added one sees it.
 * **Word meanings**: the switch, and the lists by language. The meaning under
   an Arabic word is only useful in the language the reader is reading in, so
-  the list follows the chosen translation rather than asking (D-046).
+  the list follows the chosen translation rather than asking.
 * **Daily ayah**: one switch on the hub row and one hour on its own page.
   The switch is the hub's, the page carries the moment, and the page stays
   live while the reminder is off, so a reader who came to move the time is
-  not asked to turn the reminder on first (D-105). The reminder is on with
+  not asked to turn the reminder on first. The reminder is on with
   the app, nothing is fetched at any time, and the ayah is read from the
-  content already on the device (D-097).
+  content already on the device.
 * **About**: the version, the credits and licenses, the corrections and
   rights contact, and a self check that reads every installed pack back and
   names anything damaged.
@@ -305,8 +305,8 @@ Rules:
 * A paragraph takes the line height of the script actually in it: the
   Arabic line for a block that is only Arabic, a shorter one for a Latin
   paragraph that carries a quotation, and the Latin line for a block with no
-  Arabic at all, never the Arabic's room where there is no Arabic (D-049,
-  D-090). The ratios are measured against the sources' own glyph ink, not
+  Arabic at all, never the Arabic's room where there is no Arabic. The
+  ratios are measured against the sources' own glyph ink, not
   chosen by eye.
 * No more than three sizes of type on one surface: a label, a reading size,
   and a display size.
@@ -379,14 +379,15 @@ done for a page the reader cannot see. The page the reader left is kept as a
 picture on disk and is the first thing painted on the next launch, so a
 launch is the Book rather than a wait. The measured numbers, from a minified
 release build on a software rendered emulator (the slowest Android this app
-will ever run on), are in D-037.
+will ever run on); the budget is re-measured the same way whenever a change
+comes near it.
 
 ## 13. Content packs
 
 The app ships the Quran text and its page layout and nothing else: the QPC V2
 page script and glyph system, the KFGQPC Hafs study font, and the navigation
 data. Ten megabytes, complete, offline, and enough to read the Book end to
-end. The page fonts ship in the base app rather than an asset pack (D-018).
+end. The page fonts ship in the base app rather than an asset pack.
 
 Everything else is a pack. A pack is a file with a manifest and a payload,
 keyed by SHA-256, downloaded only on the reader's word, from the project's
@@ -410,7 +411,7 @@ The seams exist from today, even with one pack of each kind:
 
 * The always-visible top bar with three text buttons.
 * The bottom pill that recited page, juz, and hizb numbers at all times.
-* The bottom bar's Listen and Saved doors (D-051).
+* The bottom bar's Listen and Saved doors.
 * The page-locked study view that cut ayahs in half at page boundaries.
 * The row of eight action pills in the ayah card.
 * Footnote number chips and boxed highlight chrome.

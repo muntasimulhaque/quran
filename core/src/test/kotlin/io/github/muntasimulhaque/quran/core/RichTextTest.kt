@@ -219,7 +219,7 @@ class RichTextTest {
     fun `the prophet ligature alone makes a paragraph mixed`() {
         // The ligature is Arabic inside English prose, and it is the case the
         // mixed rule exists for: at the inline size its marks reach past a
-        // Latin line box (measured in D-090).
+        // Latin line box (measured, not eyeballed).
         val runs = RichText.runs("the Prophet ﷺ said")
         assertEquals(ScriptMix.MIXED, scriptMix(runs))
     }

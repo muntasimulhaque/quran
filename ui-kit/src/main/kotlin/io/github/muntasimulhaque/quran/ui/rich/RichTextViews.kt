@@ -100,7 +100,7 @@ fun TranslationBody(
  *
  * Arabic draws its diacritics above and its descenders below letters, so an
  * Arabic paragraph needs more air than a Latin one. The mistake this fixes
- * (owner report, D-090) was giving a whole Latin paragraph the Arabic
+ * (owner report) was giving a whole Latin paragraph the Arabic
  * paragraph's air because one quotation appeared in it: every line of an
  * English tafsir paragraph breathed at 42.6 px for one inline word.
  *
@@ -115,7 +115,7 @@ fun TranslationBody(
  * [MixedAir] at 1.35 covers the whole distribution while bringing the mixed
  * line down from the old 1.9: at the default tafsir size that is 30.2 px of
  * line instead of 42.6 for a 16 sp body, which is the change that made the
- * tafsir's gaps even (owner report, D-090). A block whose inline Arabic is
+ * tafsir's gaps even (owner report). A block whose inline Arabic is
  * taller than any the sources carry today would need this constant raised
  * with it; the measurement is written here so the next session can redo it
  * rather than guess.
@@ -213,7 +213,7 @@ fun FootnoteList(
                     ),
                 // A footnote is read. It keeps the theme's own secondary tone,
                 // measured at 6.1:1 and up on every ground; the 0.8 alpha it
-                // wore measured 3.7:1 and is closed here (D-084).
+                // wore measured 3.7:1 and is closed here.
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -337,7 +337,7 @@ private fun annotated(
                 val style = SpanStyle(
                     // The marker is a door to the note; it is read, so it keeps
                     // the theme's secondary tone rather than the 0.75 alpha that
-                    // measured 3.7:1 on paper and sepia (D-084).
+                    // measured 3.7:1 on paper and sepia.
                     color = markerColor,
                     fontWeight = FontWeight.Medium,
                     fontSize = markerSize,
@@ -346,7 +346,7 @@ private fun annotated(
                     // put the marker above the line it belongs to and, because
                     // a baseline shift counts toward the line's height, grew
                     // the line to make room for it: the marker of one line
-                    // then sat in the gap under the line above (D-122). A
+                    // then sat in the gap under the line above. A
                     // third of the size is a raised figure that stays on its
                     // own line.
                     //
@@ -357,7 +357,7 @@ private fun annotated(
                     // text they belong to. It reached the store because the
                     // ayah card's frame photographs 2:255, whose six markers
                     // are three digits each, and the committed set was captured
-                    // before the change (D-132).
+                    // before the change.
                     baselineShift = BaselineShift(0.30f),
                     // Lining figures, so the number in the note reads as a
                     // number. Literata's default figures are old-style, and an

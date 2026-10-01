@@ -6,7 +6,7 @@ import kotlin.math.roundToInt
  * The rectangle a Mushaf page's rule stands in, and the page's own
  * proportions, in ems of the page's own text.
  *
- * The rule is the page's furniture (D-122) and it is also what gives the sheet
+ * The rule is the page's furniture and it is also what gives the sheet
  * of paper an edge on a wide ground, where the page and the app's ground are
  * the same tone. It is one rectangle with one margin on all four sides, and
  * the margin *inside* it is one number, [AIR_EM], measured from the text's ink

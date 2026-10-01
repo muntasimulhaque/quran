@@ -114,7 +114,7 @@ class SearchCheck(private val root: File) {
      * A query that is not Arabic is made of Latin letters and digits alone
      * (`Search.parse`), so a Latin query cannot match a row of a column that
      * holds no Latin letter and no digit, and the app skips that scan on every
-     * keystroke (owner report, D-130). This gate is where that fact about the
+     * keystroke (owner report). This gate is where that fact about the
      * content is held rather than assumed: a Latin letter or a digit in this
      * column would make the app's own short cut quietly wrong, and the only
      * place it can be caught is before the content is committed.

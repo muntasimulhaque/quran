@@ -28,8 +28,8 @@ import org.junit.runner.RunWith
 /**
  * A note is written on a kept ayah, so it lives in Saved, previewed under its
  * place: one list for the reader's own work, and the note is recognised by
- * what the reader wrote rather than by the place alone (owner decision,
- * D-101). Removing a save that carries a note asks first, because the note
+ * what the reader wrote rather than by the place alone (owner decision).
+ * Removing a save that carries a note asks first, because the note
  * goes with it. This test writes a note on 2:255 before the activity starts,
  * reads it back in the list, and walks the removal through its question.
  */

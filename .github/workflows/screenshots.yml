@@ -31,9 +31,8 @@ on:
       # `data` and `core` put no pixels on the screen themselves, but they
       # decide what the pixels say: a search rule (`arabicLineFor`), a display
       # model, or a formatter changes a frame without touching a UI module. A
-      # capture that skipped them shipped a store set of the old frames once
-      # (the D-099 refinement), which is the runbook's own definition of wasted
-      # work.
+      # capture that skipped them shipped a store set of the old frames once,
+      # which is the runbook's own definition of wasted work.
       - "data/src/main/**"
       - "core/src/main/**"
       - ".github/workflows/screenshots.yml"
@@ -94,6 +93,32 @@ jobs:
             content/packs
           key: content-work-${{ hashFiles('content/manifest.json', 'content/build-report.json') }}
 
+      # The project-local Gradle state: the configuration cache and the task
+      # execution history live here, not in ~/.gradle, so the Gradle setup
+      # step alone never restores them. On a hit, configuration is skipped
+      # and the up-to-date checks have their history, which was most of a
+      # leg's build time.
+      - name: Cache project Gradle state
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: .gradle
+          key: project-gradle-${{ hashFiles('**/*.gradle.kts', 'gradle.properties', 'gradle/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: project-gradle-
+
+      # The emulator, the platform, and the system image are installed on
+      # every leg otherwise, about forty seconds each time. They are pinned
+      # by the API level; bump v1 to take a newer emulator build.
+      - name: Cache SDK components
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            /usr/local/lib/android/sdk/emulator
+            /usr/local/lib/android/sdk/platforms
+            /usr/local/lib/android/sdk/system-images
+            /usr/local/lib/android/sdk/build-tools
+            /usr/local/lib/android/sdk/platform-tools
+          key: sdk-${{ env.API_LEVEL }}-v1
+
       # Hardware acceleration for the emulator on the GitHub runner.
       - name: Enable KVM
         run: |
@@ -126,6 +151,9 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: ${{ matrix.profile }}
+          # The hosted runners have four cores; the emulator's default of
+          # two leaves the boot and the tour CPU-bound.
+          cores: 4
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -no-snapshot
           disable-animations: true
@@ -138,6 +166,9 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: ${{ matrix.profile }}
+          # The hosted runners have four cores; the emulator's default of
+          # two leaves the boot and the tour CPU-bound.
+          cores: 4
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -no-snapshot
           disable-animations: true
@@ -179,7 +210,7 @@ jobs:
             #
             # The exit code is saved to a file so the frames are collected even
             # when the tour fails: a red leg keeps its capture to be read
-            # (D-075). The save must be on the SAME line as the Gradle call,
+            #. The save must be on the SAME line as the Gradle call,
             # because the emulator runner executes each script line in its own
             # shell: `set +e` on one line and `gradle_status=$?` on the next
             # never shared a shell, so the old shape silently lost every red

@@ -37,7 +37,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * learns it in one place finds it in the other.
  *
  * The aid is a flow of pairs, and each pair is as wide as its own meaning.
- * That is what it was before D-122 made it a grid, and it is what the owner
+ * That is what it was before it became a grid, and it is what the owner
  * put back after reading the grid on a phone: a grid measures every tile
  * against the widest meaning in the ayah, so on a long ayah the tiles are
  * half empty, two of them stand in a row, and the whole aid runs to twice
@@ -49,8 +49,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * differently: the pairs in a row are not in columns, so two long meanings
  * can leave a short one in a gap. The eye still never hunts for a pair,
  * because the word sits directly over its own meaning and the flow keeps
- * the verse's own order (owner report, D-130, which reverses the grid of
- * D-122).
+ * the verse's own order (owner report, which reverses the grid).
  *
  * The word sits centred over its meaning, because the two are one unit: a
  * word hung at one edge of a longer meaning reads as belonging to its

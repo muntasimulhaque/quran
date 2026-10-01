@@ -158,7 +158,7 @@ fun SettingsSheet(
                         text = stringResource(R.string.settings_title),
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurface,
-                        // the sheet's own name, and its one heading (D-122)
+                        // the sheet's own name, and its one heading
                         modifier = Modifier
                             .semantics { heading() }
                             .padding(start = 22.dp, end = 22.dp, bottom = 10.dp),

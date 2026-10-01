@@ -6,7 +6,7 @@ package io.github.muntasimulhaque.quran.data
  * The meaning was drawn as its own labelled block under every row that had
  * one, and a reader who searched a word that also appears in the translation
  * saw the same fact twice: the translation already carried the highlight, and
- * the block repeated it (owner report, D-097). The block is now drawn only
+ * the block repeated it (owner report). The block is now drawn only
  * when it is the row's **only** evidence of the match, so a row is never a
  * list of the same match said twice.
  *
@@ -40,7 +40,7 @@ fun shouldShowWordMeaning(hit: SearchHit.AyahHit): Boolean =
  * Anything else draws no Arabic at all, and a row the translation already
  * washed is in that group on purpose: the word line would be the same match
  * said twice, which is the very thing this rule's neighbour exists to stop
- * (D-097). Dropping the rest is a legibility decision, not a simplification:
+ *. Dropping the rest is a legibility decision, not a simplification:
  * four lines of Arabic that never matched is the tallest thing on the row and
  * the least informative.
  */

@@ -60,7 +60,7 @@ class SearchTest {
      * no Arabic letter, so it cannot match a row of a column that holds only
      * Arabic. The other half of that is the `search` gate in `tools`, which
      * audits the Quran's own indexed column for a Latin letter or a digit, and
-     * this test is the half that lives in the query (owner report, D-130).
+     * this test is the half that lives in the query (owner report).
      */
     @Test
     fun `a query that is not arabic carries no arabic letter`() {

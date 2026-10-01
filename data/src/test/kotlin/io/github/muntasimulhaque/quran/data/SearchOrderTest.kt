@@ -12,7 +12,7 @@ import org.junit.Test
  * one query, and the query returned so many translation matches that the cap
  * hid the other kinds, so the assertion failed on the test's own assumption
  * rather than on the order. The order is a pure function now; this is its
- * test (D-090).
+ * test.
  */
 class SearchOrderTest {
 

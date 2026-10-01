@@ -98,7 +98,7 @@ internal fun NumberCell(
  * about to open, so the name, the place, and the Arabic name read at one
  * size wherever the surah is named. The grid header used a larger name than
  * the row that opened it, which made the same surah look like two different
- * things one tap apart (owner report, D-103).
+ * things one tap apart (owner report).
  *
  * [nameMaxLines] is one where the header shares its row with the back mark
  * and the name may have to give; the list row lets its name run whole.
@@ -170,7 +170,7 @@ internal fun SurahRow(
             // The number is read, so it takes the theme's own secondary
             // tone and not a quiet alpha: onSurfaceVariant measures 6.1:1
             // and up on every ground, where the 0.7 alpha it wore measured
-            // 3.3:1 (D-084).
+            // 3.3:1.
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(end = 16.dp),
         )
