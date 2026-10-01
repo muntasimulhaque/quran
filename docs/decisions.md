@@ -7029,3 +7029,21 @@ repository and not under a temp path, which is the rule in
 this machine is a Windows build, so a path written `/tmp/...` inside a script
 resolves to `C:\tmp`, and an earlier reading of the same comparison against
 that folder's older files said every frame had changed.
+
+## D-136: 3.4 is submitted, and the hand-over is closed
+
+Date: the forty-fourth session, at the owner's word "submitted for play
+review", minutes after D-135 handed the bundle over.
+
+The bundle has served its purpose and is gone: `play-store/aab/` holds only
+its README, which is where the checksum and the size live for the rest of the
+release's life (`c3666dc8bc76ca69f6b125c489d88d333db3124ef445d1d802f60f7132120c79`,
+148,299,194 bytes, D-135). The store set stays in `play-store/screenshots/`:
+it is the face of the store page Play is showing, and the next release
+replaces it only when a frame moves.
+
+The owner's notes went over as a bare paragraph, with no blockquote, no code
+fence, and no quotes, because a paste into the Play Console carries every
+character the message wears. AGENTS.md already said so and this session wore
+one anyway, which is the kind of rule a session forgets by reading it as
+style rather than as paste.
