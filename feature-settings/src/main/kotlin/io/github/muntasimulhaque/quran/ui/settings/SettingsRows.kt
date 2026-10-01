@@ -13,7 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,8 +25,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.reader.Icon
@@ -286,30 +283,19 @@ fun ToggleRow(
             .padding(start = 22.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // The name and its note keep a clear gap from the switch, the way the
+        // The name and its value keep a clear gap from the switch, the way the
         // marks in the rows above keep theirs from the names they select: a
-        // subtitle set flush against the control reads as part of it, and on
-        // a long line the two merge into one crowded shape. The gap is the
-        // same one a choice row puts on the other side of its trailing
-        // control, so the whole sheet answers with one measurement.
-        Column(
-            Modifier
+        // value set flush against the control reads as part of it, and on a
+        // long line the two merge into one crowded shape. The gap is the same
+        // one every row in the sheet keeps, so a row that opens a page and a
+        // row that carries a switch are one shape.
+        RowName(
+            title = title,
+            value = subtitle,
+            modifier = Modifier
                 .weight(1f)
                 .padding(end = 12.dp),
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            if (!subtitle.isNullOrBlank()) {
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
+        )
         // Where the row opens a page, the switch is the only thing that
         // switches, so it takes its own clicks and carries the row's name: a
         // control that reads "on" with nothing to say who is on tells TalkBack
@@ -360,26 +346,21 @@ fun TextRow(
     }
 }
 
-/** A line the reader cannot change: a version, a size, what stands where. */
+/**
+ * A line the reader cannot change: a version, a license, what stands where.
+ *
+ * It is the same words every other row wears, in the same place, and it ends
+ * in no mark at all: there is nothing here to tap and nothing here to open, so
+ * a chevron would promise a page that is not there (owner decision, D-134).
+ */
 @Composable
 fun ValueRow(title: String, value: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 22.dp, vertical = 10.dp),
+            .padding(start = 22.dp, end = 22.dp, top = 12.dp, bottom = 12.dp),
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(0.4f),
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(0.6f),
-        )
+        RowName(title = title, value = value)
     }
 }
 

@@ -40,6 +40,12 @@ words. Everything else is a guest.
   hairline rule with the juz at its left and the page number in a small gold
   medallion at its center. This is what a printed Mushaf has, so the page
   reads as a book.
+* The text stands inside a hairline rule with the same air on all four
+  sides, about three quarters of an em, measured from the text's own ink,
+  and the paper left outside the rule is the same margin again: the rule is
+  one rectangle that holds the page rather than a box drawn around the text.
+  The measure gives up two percent of the page's width to hold it, which is
+  the only thing the mushaf's own type is ever spent on (D-134).
 * One page per screen, turned by a horizontal swipe. Adjacent pages are
   pre-rendered, so a turn is a texture draw, never a render.
 * While the reader swipes, the page simply slides: nothing is lifted, nothing
@@ -219,10 +225,14 @@ closes the sheet, and the hub keeps its place while a page is open (D-046).
 The rows sit in three quiet groups, so a list of eleven is read at a glance
 rather than one row at a time, and a row says a state and not an
 explanation: a switch that already shows its own state carries no line under
-it restating it (D-116). The name of a row keeps its room whatever the
-value beside it says, and the two tail columns stand at one place on every
-row (D-111, D-116). A row of choices draws its name above the choices, so
-every step of a segmented control is a full 48 dp target (D-087, D-116).
+it restating it (D-116). Every row wears the same words in the same place:
+the name, and under it the value, or the one note the row has to say. The
+value is under the name on every row that carries one, never in a column at
+the right, because the tail is the marks' own column and because some of the
+sheet's grey lines are sentences rather than values (D-134). The two tail
+columns stand at one place on every row (D-111, D-116, D-130). A row of
+choices draws its name above the choices, so every step of a segmented
+control is a full 48 dp target (D-087, D-116).
 
 * **Appearance**: Paper, Sepia, Night, Black, as swatches that are the page
   each one paints. The theme is the whole app: the page, the sheets, the bars.

@@ -55,9 +55,9 @@ import org.junit.Test
  *
  * Three measurements of the sheet live here, because they are all the same
  * question asked of a row: what a reader's eye gets and what a finger gets.
- * The two tail columns and the compact height above, the name and the value
- * sharing one line whatever the value says (owner report, 37th session), and
- * every step of a segmented row being a full 48 dp target (D-087).
+ * The two tail columns and the compact height above, the name and the value in
+ * one place whatever the row carries (owner decision, D-134), and every step
+ * of a segmented row being a full 48 dp target (D-087).
  */
 class SettingsRowAlignmentTest {
 
@@ -91,6 +91,15 @@ class SettingsRowAlignmentTest {
                         openLabel = "Open translations",
                         switchTag = "switch-door",
                     )
+                    // A row with nothing to say about itself: it is a name and
+                    // a chevron, and it must not be stretched to the height of
+                    // the rows that carry a value.
+                    PageRow(
+                        title = "About",
+                        summary = null,
+                        onClick = {},
+                        modifier = Modifier.testTag("bare-row"),
+                    )
                 }
             }
         }
@@ -119,9 +128,20 @@ class SettingsRowAlignmentTest {
         // not one and passes on none of them. Nothing about the rows was
         // wrong; the measurement was (thirty-seventh session).
         val slots = compose.onAllNodesWithTag("chevron-slot", useUnmergedTree = true)
-        assertEquals("the page row and the door row draw one each", 2, slots.fetchSemanticsNodes().size)
+        assertEquals(
+            "the page row, the door row and the row with nothing to say draw one each",
+            3,
+            slots.fetchSemanticsNodes().size,
+        )
         val pageSlot = slots[0].getUnclippedBoundsInRoot()
         val doorSlot = slots[1].getUnclippedBoundsInRoot()
+        val bareSlot = slots[2].getUnclippedBoundsInRoot()
+        assertEquals(
+            "a row that says nothing about itself ends on the same line as one that does",
+            pageSlot.right.value,
+            bareSlot.right.value,
+            0.5f,
+        )
         assertEquals(
             "a row with no switch ends with its chevron on the line every switch ends on",
             doorSwitch.right.value,
@@ -149,7 +169,7 @@ class SettingsRowAlignmentTest {
         val density = compose.density.density
         val marks = compose.onAllNodesWithTag("row-chevron", useUnmergedTree = true)
             .fetchSemanticsNodes()
-        assertEquals("the page row and the door row draw one chevron each", 2, marks.size)
+        assertEquals("the three door rows draw one chevron each", 3, marks.size)
         val pageMarkRight = marks[0].boundsInRoot.right / density
         assertEquals(
             "a row with no switch ends with its chevron on the line every switch ends on",
@@ -160,30 +180,34 @@ class SettingsRowAlignmentTest {
 
         val page = compose.onNodeWithTag("page-row").getUnclippedBoundsInRoot()
         assertTrue(
-            "a page row must stay a line and its padding, not a 48 dp slot taller",
-            page.bottom - page.top <= 56.dp,
+            "a page row must stay its two lines and its padding, not a 48 dp slot taller",
+            page.bottom - page.top <= 72.dp,
+        )
+        val bare = compose.onNodeWithTag("bare-row").getUnclippedBoundsInRoot()
+        assertTrue(
+            "a row with no value must stay a line and its padding, not a 48 dp slot taller",
+            bare.bottom - bare.top <= 56.dp,
         )
     }
 
     /**
-     * The name holds its room, and the value gets one line while it can.
+     * A row's value is under its name, on every row that has one.
      *
-     * The owner's own sheet: the theme row's value was long enough to leave the
-     * name "Theme" a column so narrow that the word broke one letter to a line
-     * and the row became four lines tall, and "Font size" two. The value is
-     * measured inside its own share of the row now, and the name's share is
-     * the larger one, so a long value costs the value a second line at most
-     * (D-116, D-120).
+     * The hub used to answer the same question twice: a row with no switch
+     * printed its value in a column at the right, measured so that the name
+     * kept its room (D-116), and a row with a switch printed the same grey
+     * line under its name, so one list read as two grammars (owner decision,
+     * D-134). This is the measurement that says the value is under the name
+     * now: on the sheet's two longest values, the value begins below the name
+     * and on the name's own left edge, and the name still holds a line of its
+     * own rather than one letter at a time.
      *
-     * Both of the values the sheet really prints are longer than that share,
-     * so both of them broke to a second line under a name with room to give
-     * (owner report, D-130). The name's column is now its own width and a
-     * gap, capped at the share, so these two rows are one line each, and this
-     * is the measurement that says so: the row is a line and its padding, not
-     * a line of name above a line of value.
+     * The tail is what decided it, and that is measurable too: the marks after
+     * the words sit at one left edge and one right edge whatever the value
+     * says, which is what a value in that tail would have had to fight for.
      */
     @Test
-    fun aLongValueNeverSqueezesTheName() {
+    fun aValueIsUnderItsNameAndNeverSqueezesIt() {
         compose.setContent {
             MaterialTheme {
                 Column {
@@ -203,28 +227,42 @@ class SettingsRowAlignmentTest {
             }
         }
 
-        val long = compose.onNodeWithTag("long-value").getUnclippedBoundsInRoot()
-        assertTrue(
-            "a long value may take a second line of its own, never a ladder of the name's",
-            long.bottom - long.top <= 76.dp,
+        val values = listOf(
+            "Night · day page Paper" to compose.onNodeWithTag("long-value").getUnclippedBoundsInRoot(),
+            "Arabic 25, translation 14" to compose.onNodeWithTag("short-value").getUnclippedBoundsInRoot(),
         )
-        assertTrue(
-            "a value that fits the room the name left must not break to a second line: " +
-                "${long.bottom - long.top}",
-            long.bottom - long.top <= 56.dp,
-        )
-        val short = compose.onNodeWithTag("short-value").getUnclippedBoundsInRoot()
-        assertTrue(
-            "every value the sheet prints must stay on the row's one line",
-            short.bottom - short.top <= 56.dp,
-        )
-        val name = compose.onNodeWithText("Theme").getUnclippedBoundsInRoot()
-        assertTrue(
-            "the name must keep a line to itself, not one letter at a time",
-            name.right - name.left > (name.bottom - name.top) * 2f,
-        )
+        val names = listOf("Theme", "Font size")
+        values.forEachIndexed { index, (value, row) ->
+            val name = compose.onNodeWithText(names[index], useUnmergedTree = true)
+                .getUnclippedBoundsInRoot()
+            val said = compose.onNodeWithText(value, useUnmergedTree = true)
+                .getUnclippedBoundsInRoot()
+            assertTrue(
+                "the value is under the name, not beside it: $value",
+                said.top >= name.bottom - 1.dp,
+            )
+            assertEquals(
+                "the value is on the name's own left edge: $value",
+                name.left.value,
+                said.left.value,
+                0.5f,
+            )
+            assertTrue(
+                "the value stays inside the row it belongs to: $value",
+                said.right <= row.right,
+            )
+            assertTrue(
+                "the name keeps a line of its own, not one letter at a time: ${names[index]}",
+                name.right - name.left > (name.bottom - name.top) * 2f,
+            )
+            assertTrue(
+                "a row is its name, its value and its padding, and never a ladder: $value",
+                row.bottom - row.top <= 76.dp,
+            )
+        }
 
-        // Both halves fill their share, so the marks after them do not move.
+        // The marks after the words do not move with the value: the tail is
+        // the marks' own column, which is why the value is not in it.
         val marks = compose.onAllNodesWithTag("chevron-slot", useUnmergedTree = true)
             .fetchSemanticsNodes()
             .map { it.boundsInRoot }

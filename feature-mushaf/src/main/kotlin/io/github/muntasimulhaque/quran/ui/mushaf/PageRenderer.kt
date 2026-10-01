@@ -10,6 +10,7 @@ import android.util.LruCache
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.res.ResourcesCompat
 import io.github.muntasimulhaque.quran.content.R
+import io.github.muntasimulhaque.quran.core.PageFrame
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.PageFontStore
@@ -19,7 +20,6 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.math.roundToInt
 
 /**
  * A rendered Mushaf page: the paper, the glyphs, and the geometry of every
@@ -223,20 +223,24 @@ class PageRenderer(private val context: Context) {
     ): RenderedPage? {
         val typeface = fonts.typeface(key.page) ?: return null
         val widthPx = key.widthPx
-        val textWidth = widthPx * TEXT_WIDTH_RATIO
-        val fontPx = textWidth / EM_PER_LINE
-        val lineHeight = fontPx * LINE_HEIGHT_RATIO
-        val band = lineHeight * BAND_RATIO
-        val height = (band * 2 + lineHeight * LINES).roundToInt()
-        val bitmap = Bitmap.createBitmap(widthPx, height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        canvas.drawColor(palette.paper.toArgb())
-
+        val textWidth = widthPx * PageFrame.TEXT_WIDTH_RATIO
+        val fontPx = textWidth / PageFrame.EM_PER_LINE
+        val lineHeight = fontPx * PageFrame.LINE_HEIGHT_RATIO
         val glyphPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             this.typeface = typeface
             textSize = fontPx
             color = palette.ink.toArgb()
         }
+        // The rule is ruled against the text's own ink, so the frame is
+        // measured from the font and not from the slots: these faces carry
+        // their marks above the letters, and a frame ruled off the slots
+        // stands on them.
+        val ink = glyphPaint.fontMetrics.let { it.descent - it.ascent } / fontPx
+        val frame = PageFrame.of(widthPx, ink)
+        val bitmap = Bitmap.createBitmap(widthPx, frame.heightPx, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        canvas.drawColor(palette.paper.toArgb())
+
         val hafsPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             this.typeface = hafsTypeface() ?: typeface
             textSize = fontPx * BASMALLA_RATIO
@@ -269,12 +273,11 @@ class PageRenderer(private val context: Context) {
         // and black rules, and that rule is also what gives the page an edge
         // on a wide ground: without it the page and the app's background are
         // the same colour and the sheet of paper stops existing off a phone.
-        val frame = PageFrame.of(widthPx, height, band, textWidth)
         drawPageRule(canvas, frame, rulePaint)
         drawFooter(canvas, key.page, frame, widthPx, fontPx, ornamentPaint, rulePaint, content)
 
         for (line in lines) {
-            val slotTop = band + (line.line - 1) * lineHeight
+            val slotTop = frame.slotTop + (line.line - 1) * lineHeight
             when (line.type) {
                 "surah_name" -> {
                     val name = content.surah(line.surah)?.nameArabic ?: ""
@@ -342,22 +345,23 @@ class PageRenderer(private val context: Context) {
     }
 
     /**
-     * The page's own rule: a hairline frame around the text measure, from the
-     * head band to the foot band, in the ornament tone a shade quieter than
-     * the foot rule that carries the page number.
+     * The page's own rule: a hairline frame around the text, in the ornament
+     * tone a shade quieter than the foot rule that carries the page number.
      *
      * A bound mushaf is ruled: the text stands within gold and black rules
      * that run the whole page, and that is the drawing that says "page" more
      * quietly than any ornament. It is a hairline, because it is a printed
-     * page and the paper is the subject; it is at the text measure rather than
-     * the page's edge, because the measure is where a reader's eye already is.
+     * page and the paper is the subject.
      *
-     * The frame stands off the text rather than on it. A line of the page is
-     * justified to the measure itself, so a rule drawn on the measure touches
-     * the last glyph of every line, and a page that rules its own text with
-     * nothing between reads as a screen of boxes (owner report, D-130). The
-     * gap is the one the lines already leave above and below themselves, so
-     * the frame reads as one rectangle around the block on all four sides.
+     * Where the rule stands is [PageFrame]'s one number, and it stands the
+     * same distance inside the page on all four sides, with the same air
+     * between itself and the text. The frame used to be four numbers: a share
+     * of the page's width at the sides, the first slot at the head, and a
+     * whole band at the foot. That left the rule about 4 dp above the first
+     * line's marks and 5 dp from the last glyph of every line, with its own
+     * foot a band away, so one rectangle read as a wire pressed against the
+     * text at the top and the left and as a page at the foot (owner report,
+     * the forty-fourth session; before that, D-122 and D-130).
      */
     private fun drawPageRule(canvas: Canvas, frame: PageFrame, rule: Paint) {
         val quiet = Paint(rule)
@@ -379,8 +383,10 @@ class PageRenderer(private val context: Context) {
     ) {
         val top = frame.foot
         canvas.drawLine(frame.left, top, frame.right, top, rule)
-        val radius = fontPx * MEDALLION_RATIO
-        val centerY = top + frame.band / 2f
+        val radius = fontPx * PageFrame.ROUNDEL_EM
+        // The roundel stands in the middle of the room the foot's rule leaves,
+        // so it is as far from the text above it as from the page's own edge.
+        val centerY = top + (frame.heightPx - top) / 2f
         // The page number stands in a hairline roundel, the way a printed
         // page rules it, rather than in a filled disc: a disc of gold behind
         // gold is a heavier mark than the page's own furniture is.
@@ -408,39 +414,11 @@ class PageRenderer(private val context: Context) {
     }
 
     /**
-     * The rectangle a page's own furniture is ruled in: the text measure, held
-     * off by [PageRenderer.RULE_INSET_RATIO] of the page's width so the rule
-     * has a gap of its own between itself and the text, and the foot's rule
-     * ends where the sides stand rather than a hair inside them.
-     *
-     * The inset is a share of the page's width rather than a fixed number of
-     * pixels, because the page is rendered at the width it will be shown at:
-     * a share is the same gap on a phone and on a tablet, and a number of
-     * pixels would be a hairline on one and a moat on the other.
+     * The rectangle a page's own furniture is ruled in is `PageFrame`'s, and
+     * it is one number on all four sides rather than one per side: the rule
+     * stands off the text by the air the glyphs carry above their own letters,
+     * and the margin left outside it is the same margin at the head.
      */
-    private class PageFrame(
-        val left: Float,
-        val right: Float,
-        val head: Float,
-        val foot: Float,
-        /** The head band's own height, which is the room the foot's furniture sits in. */
-        val band: Float,
-    ) {
-        companion object {
-            fun of(widthPx: Int, height: Int, band: Float, textWidth: Float): PageFrame {
-                val inset = widthPx * RULE_INSET_RATIO
-                val half = (widthPx - textWidth) / 2f
-                return PageFrame(
-                    left = half - inset,
-                    right = widthPx - half + inset,
-                    head = band,
-                    foot = height - band,
-                    band = band,
-                )
-            }
-        }
-    }
-
     private fun hafsTypeface(): Typeface? = hafs ?: runCatching {
         Typeface.createFromAsset(context.assets, "fonts/UthmanicHafs_V22.ttf")
     }.getOrNull()?.also { hafs = it }
@@ -454,25 +432,16 @@ class PageRenderer(private val context: Context) {
         const val TAG = "PageRenderer"
         const val CACHE_PAGES = 6
 
-        /** A full line of glyphs sums to this many em. */
-        const val EM_PER_LINE = 15.6f
-        const val LINE_HEIGHT_RATIO = 1.644f
-        const val LINES = 15
-        const val TEXT_WIDTH_RATIO = 0.90f
-
-        /** The head and foot bands that carry the page's own furniture. */
-        const val BAND_RATIO = 0.86f
-
-        /**
-         * The gap between the page's rule and its text, as a share of the
-         * page's width. About the gap the lines already leave above and below
-         * themselves, so the frame stands off the block on all four sides.
-         */
-        const val RULE_INSET_RATIO = 0.014f
+        /** The juz's own size at the left end of the foot's rule, in ems. */
         const val HEADER_RATIO = 0.34f
+
+        /** The surah name's own size between two rules, in ems. */
         const val SURAH_NAME_RATIO = 0.62f
+
+        /** The basmallah's own size, which is a smaller hand than the page. */
         const val BASMALLA_RATIO = 0.8f
-        const val MEDALLION_RATIO = 0.34f
+
+        /** The page number's own size inside its roundel, in ems. */
         const val PAGE_NUMBER_RATIO = 0.4f
         const val ARABIC_JUZ = "\u0627\u0644\u062C\u0632\u0621"
     }

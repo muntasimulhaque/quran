@@ -29,6 +29,7 @@ import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.core.PageFrame
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.PageFontStore
@@ -267,8 +268,13 @@ private fun DrawScope.drawWashes(
     }
 }
 
-/** Height divided by width of a rendered page, from the renderer's metrics. */
-const val PAGE_ASPECT: Float = 1.586f
+/**
+ * Height divided by width of a rendered page, taken from the page's own
+ * geometry rather than remembered beside it: it is the share of the tallest
+ * page the rule can draw, so a page is never taller than the room the pager
+ * gave it, whatever font it turns out to be carrying (PageFrame).
+ */
+val PAGE_ASPECT: Float = PageFrame.aspect(PageFrame.INK_EM_TALLEST)
 
 /**
  * Where a page of the reader's own pixel size sits inside the glass: its left

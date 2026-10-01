@@ -6821,3 +6821,123 @@ says day and the drawn ground stays dark, which is D-115's promise unkept, and
 it fails with this session's changes stashed, so it is a real defect and not a
 regression. `ShareCardCaptureTest` cannot pass on a software rendered emulator,
 which has no bitmap to copy for the longest card.
+
+## D-134: The rule stands off the page, and a row's value is under its name
+
+Date: the forty-fourth session, from two reports on 3.3 read on the owner's
+own phone: the Mushaf's border, which the owner read as too close to the text
+to look good, and the settings hub, which answered the same question in two
+places. 3.3 (versionCode 34) is in Play; no `versionCode` moved.
+
+**The page's rule is one number on four sides.** D-122 ruled the page so the
+sheet of paper would have an edge on a wide ground, D-130 moved the frame off
+the measure so it would not touch the last glyph of every line, and the frame
+was still four numbers: a share of the page's width at the sides (1.4
+percent), the top of the first line's slot at the head, and a whole band at
+the foot. Measured on the page in the owner's report, the rule stood **9 px
+above the first line's marks, 10 px from the last glyph of every line, and 23
+px below the last one**: three margins, three numbers, and the rectangle read
+as a wire pressed against the text at the top and the left and as a page at
+the foot. It is `PageFrame.AIR_EM`, **0.75 em**, on all four sides now,
+measured from the text's own ink rather than from its slots (these faces
+carry their marks above the letters, so the ink reaches further up than the
+slot says, and a frame ruled off the slots stands on them), and the paper left
+outside the rule is whatever margin the measure has left over, so the rule
+stands the same distance inside the page on every side too.
+
+Measured on the same page after the change, on the `Pixel_4_35` profile at
+1080 by 2280: **44 px above, 46 px below, 43 px at the left, 44 px at the
+right**, against 9, 23 and 10 before. The four are one number inside the
+antialiasing, which is the whole claim.
+
+**What it cost, and why that.** The mushaf's measure goes from 90 percent of
+the page's width to 88, which is the two percent that pays for the air: the
+type is 2.2 percent smaller, the line pitch 32.4 dp instead of 34.1 on a 360
+dp phone, and the page itself is within half a percent of the aspect it had.
+The type is the one thing in the app that is not spent on furniture, and
+0.86 is written into `PageFrameTest` as the floor it may not go below. The
+alternative, keeping the measure at 90, buys the air by putting the rule 1.4 dp
+from the page's own edge, which is not a page rule at all but the screen's
+edge drawn once more.
+
+**`PageFrame` is in `core`, and it is pure.** The geometry is arithmetic in
+ems and nothing else, it needs no Android, and the four margins are
+invisible in a build and very visible on a page: eight cases in
+`PageFrameTest` pin the one air on all four sides, the paper outside the rule,
+every line inside the frame, the foot holding the roundel, the type not being
+spent, and the pager reserving the tallest page any of the 604 fonts can draw
+so a page is never taller than the room the pager gave it.
+`PAGE_ASPECT` is no longer a remembered 1.586: it is the geometry's own share
+at the tallest ink the fonts carry (1.8 em, measured out of the pack), with a
+tenth of an em of slack over it. `SettingsRow` went the other way and is gone
+with its five cases, because the rule that decided the settings row's split
+was the rule this session removed (D-130).
+
+**A row's value is under its name, on every row.** The hub's rows with no
+switch printed their value in a column at the right ("Paper", "Arabic 25,
+translation 14") and the rows with a switch printed the same grey line under
+the name ("Saheeh International", "Ibn Kathir"), so one list read as two
+grammars and the owner's eye had to change how it read half way down the
+sheet. Under the name is where it belongs, for three reasons that are about
+the reading and not about taste:
+
+1. the tail of every row is the marks, and the marks already end every row at
+   one line (D-111, D-120, D-130); a value there had to be measured into
+   what was left, and on a 360 dp phone that was 125 dp for two values that
+   are both longer than it, which is where `SettingsRow.nameColumn` and two
+   rounds of owner reports came from (D-116, D-130);
+2. some of the sheet's grey lines are sentences and not values ("Add English
+   words, 4.2 MB", "The whole surah begins again at its first ayah"), and a
+   sentence in a right-hand column is worse than a sentence under a name; a
+   value that stays at the right keeps the split, only with the sentences
+   moved;
+3. the sheet's other rows already say it this way. A pack row is a name over
+   its note with its action at the right, and a segmented row is a name over
+   its steps (D-087), so the hub was the one place in the sheet that did
+   something else.
+
+`RowName` is now the one block of words a row wears, and `PageRow`,
+`ToggleRow`, and `ValueRow` all wear it: a name, and under it the value or
+the one note the row has. The cost is height, about 80 dp on the hub, which
+now scrolls where it once fitted, and that is the price of one grammar. The
+alternative is a sheet that answers the same question in two places.
+`SettingsRowAlignmentTest` now measures that the value begins below the name
+and on the name's own left edge, on the sheet's two longest values, and that
+the marks after the words still sit at one left edge and one right edge
+whatever the value says.
+
+**The gates.** `:core:test` (100: the five `SettingsRowTest` cases went with
+the rule, eight `PageFrameTest` cases came), `:data:testDebugUnitTest` (33),
+`:app:testDebugUnitTest`, `:app:lintDebug`, `:app:assembleDebug`, and
+`:app:compileDebugAndroidTestKotlin` are green on this machine, and the whole
+app instrumented suite ran on the `Pixel_4_35` AVD here: **62 tests, 62
+green**, which is the rule D-116 set after two tests were red for nobody to
+see, and which a session that changes the settings sheet is held to. The two
+D-133 left owing, `SystemThemeTest`'s dark-ground half and
+`ShareCardCaptureTest`, are green on this profile as well; the pixels they
+saw are a different renderer from the `pixel35` profile CI uses, so that is
+worth knowing rather than worth claiming.
+
+**What the store is owed.** The mushaf page is store frame 1 and the settings
+hub is frame 6, and both are different from the set in `play-store/` now: the
+page has its rule off the text and 2 percent less type, and the hub has one
+row grammar. The next capture run owns the refresh, and this entry is why.
+
+**The machine, this once.** The JBR is Java 25 and the daemon died inside
+`jvm.dll` under `:app:compileDebugAndroidTestKotlin`, so the JDK here is
+`~/.jdks/jdk-17.0.19+10` (Temurin) and every Gradle call on this machine
+needs `JAVA_HOME` set to it. Two further facts cost an hour and are worth
+having written down: the emulator dies if the tour runs against a full debug
+build with every pack on a four-core machine (class 2 of
+`docs/screenshot-failures.md`, and the fix there, the lean
+`-Pquran.devPacks=screenshot` build, is the fix), and AGP uninstalls the app
+after `connectedAndroidTest`, so the tour's frames are gone by the time the
+Gradle call returns. To read a frame on this machine: install both APKs, run
+`am instrument -w -e class io.github.muntasimulhaque.quran.ScreenshotTest -e
+additionalTestOutputDir /data/user/0/io.github.muntasimulhaque.quran/files/shots`
+(MSYS path conversion off), and pull each frame with
+`adb exec-out run-as io.github.muntasimulhaque.quran cat files/shots/<name>.png`.
+The output directory has to be inside the app's own storage: `/sdcard` root is
+EPERM for the app even when it owns the directory, and a directory under
+`Android/data/<package>/files` does not exist until something calls
+`getExternalFilesDir`, so it cannot be created by the argument alone.
