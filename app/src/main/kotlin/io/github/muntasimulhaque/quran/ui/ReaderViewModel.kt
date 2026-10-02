@@ -179,6 +179,58 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Int, StudyRow>?): Boolean = size > 160
     }
 
+    /**
+     * The reciters the pill's chooser offers, each with what it would still
+     * need for the surah the reader is hearing. It is the same list the
+     * offer carries, read once per surah and per reciter rather than per
+     * tap: a menu that did its reading as it opened would show the reader
+     * an empty list for a frame.
+     *
+     * This and the ayah below are declared here, with the rest of the state,
+     * and not further down where they were written first, because the
+     * collector in `init` reads them. `viewModelScope` runs on the main
+     * dispatcher immediately, so that collector's first read happens while
+     * the view model is still being built, and a property declared after
+     * `init` has no backing value yet: reading one is a crash, not a
+     * default. The 3.6 capture run found it on all three legs at once.
+     */
+    var pillReciters by mutableStateOf<List<ListenOption>>(emptyList())
+        private set
+
+    /**
+     * The ayah the pill is about: the one the reader last asked to hear.
+     * The player knows the ayah it is on, but not the one it was asked for
+     * while a package is on its way, and that is the one a reciter chosen
+     * now has to be asked about.
+     */
+    private var listenTarget by mutableIntStateOf(0)
+
+    /**
+     * What the pill's chooser offers, read for one surah and one reciter. A
+     * surah or a reciter the app cannot name is the same answer as a surah
+     * with no package published for anyone: nothing to offer, and an empty
+     * menu rather than a menu of dead rows.
+     */
+    private suspend fun readPillReciters(scope: PillScope) {
+        // The recitation is asked before the surah is looked up, so the very
+        // first reading, which happens while the library is still opening and
+        // the surah index is still empty, stops here rather than caching an
+        // empty surah map that the library is about to replace.
+        if (scope.recitation == null) {
+            pillReciters = emptyList()
+            return
+        }
+        val surah = scope.surah ?: surahOf(listenTarget)?.number
+        if (surah == null) {
+            pillReciters = emptyList()
+            return
+        }
+        pillReciters = listenOptions(surah)
+    }
+
+    /** The one reading the chooser's numbers belong to: who, and which surah. */
+    private data class PillScope(val recitation: String?, val surah: Int?)
+
     init {
         // The page picture comes first: it is the reader's place, and it must
         // be ready before the content database has even opened.
@@ -1148,42 +1200,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     var listenOffer by mutableStateOf<ListenOffer?>(null)
         private set
     private var listenJob: Job? = null
-
-    /**
-     * The reciters the pill's chooser offers, each with what it would still
-     * need for the surah the reader is hearing. It is the same list the
-     * offer carries, read once per surah and per reciter rather than per
-     * tap: a menu that did its reading as it opened would show the reader
-     * an empty list for a frame.
-     */
-    var pillReciters by mutableStateOf<List<ListenOption>>(emptyList())
-        private set
-
-    /**
-     * What the pill's chooser offers, read for one surah and one reciter. A
-     * surah or a reciter the app cannot name is the same answer as a surah
-     * with no package published for anyone: nothing to offer, and an empty
-     * menu rather than a menu of dead rows.
-     */
-    private suspend fun readPillReciters(scope: PillScope) {
-        val surah = scope.surah ?: surahOf(listenTarget)?.number
-        if (scope.recitation == null || surah == null) {
-            pillReciters = emptyList()
-            return
-        }
-        pillReciters = listenOptions(surah)
-    }
-
-    /** The one reading the chooser's numbers belong to: who, and which surah. */
-    private data class PillScope(val recitation: String?, val surah: Int?)
-
-    /**
-     * The ayah the pill is about: the one the reader last asked to hear.
-     * The player knows the ayah it is on, but not the one it was asked for
-     * while a package is on its way, and that is the one a reciter chosen
-     * now has to be asked about.
-     */
-    private var listenTarget by mutableIntStateOf(0)
 
     /**
      * The reader chose a reciter on the pill rather than in the settings:
