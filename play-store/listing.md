@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 3.4 (versionCode 35)
+Version: 3.5 (versionCode 36)
 
 ## Listing
 
@@ -200,6 +200,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (3.5, 480 characters)
+
+Bangla now has its own type: the interface speaks Noto Sans Bengali and the reading speaks Noto Serif Bengali, both bundled with the app, with line spacing measured for Bengali script so nothing clips. The English reading face now draws every size in the cut its designer made for that size. About shows the full credit and license of the Saheeh International translation. And on Android 13 to 15 the back gesture now previews the sheet it closes. No ads, no trackers, no account.
 
 ## Release notes (3.4, 388 characters)
 
