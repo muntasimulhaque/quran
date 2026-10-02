@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 3.6 (versionCode 37)
+Version: 3.7 (versionCode 38)
 
 ## Listing
 
@@ -201,7 +201,7 @@ What each set shows, in order:
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
 
-## Release notes (next, unreleased)
+## Release notes (3.7, 491 characters)
 
 A note is a note and a save is a save: writing a note on an ayah now lights the note and leaves the bookmark alone, and the bookmark is lit only where you pressed Save. The two popups on the playing pill, the reciters and the listening answers, open in the middle of the pill instead of at its ends. Settings is regrouped: language, theme, and font size sit together under the interface, and the reading, the recitation, and the reminder each keep their own. No ads, no trackers, no account.
 
