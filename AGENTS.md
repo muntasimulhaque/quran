@@ -234,9 +234,13 @@ at every step:
 ## Release
 
 1. **The owner's word first.** One build carries the whole session, and the
-   bundle and the screenshots are one delivery: collected, checked, and
-   handed over together, before the owner submits anything. A set refreshed
-   after the submission has nothing left to be used for.
+   bundle, the store note, and the screenshots are one delivery: collected,
+   checked, and handed over together, before the owner submits anything. The
+   note is always in the hand-over message itself, beside the bundle's own
+   facts, never only in `play-store/listing.md`: the owner copies it into the
+   console from the message, and a note that has to be fetched from a file is
+   a note that can be pasted from the wrong release (owner decision). A set
+   refreshed after the submission has nothing left to be used for.
 2. **Version convention.** `versionCode` by 1; `versionName` up one tenth
    within the major line, 0.1 through 0.9, then 1.0, then 1.1 through 1.9,
    then 2.0. There is no 0.10 and never a two-digit minor. The version line
