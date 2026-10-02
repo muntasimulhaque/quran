@@ -240,9 +240,6 @@ fun AyahCard(
                             meanings = words,
                             hafs = hafs,
                             settings = settings,
-                            // from the Mushaf there is no playing ayah behind
-                            // this card, so the aid is a reading, not a door
-                            hearLabel = stringResource(R.string.card_word_by_word),
                             modifier = Modifier.padding(horizontal = 22.dp, vertical = Space.Block),
                             // The card opened from the Mushaf carries no
                             // ayah of its own, so the aid is the only

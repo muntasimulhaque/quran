@@ -1,9 +1,7 @@
 package io.github.muntasimulhaque.quran.ui.playback
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,90 +9,23 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.ListenOffer
+import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
-import io.github.muntasimulhaque.quran.ui.reader.Icon
-import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
-import io.github.muntasimulhaque.quran.ui.kit.speedText
-import kotlin.math.abs
-
-/**
- * The gutter a floating control keeps from the glass. A pill that reaches
- * the screen's own edge stops reading as a control over the page and starts
- * reading as a sheet the app forgot to inset (owner report).
- */
-private val BarGutter = 16.dp
-
-/**
- * The measure the pill's words keep, or the words take a line of their own.
- *
- * 300 dp is the whole line the pill can print at its longest: the longest
- * surah name and its ayah, the slowest pace, and the surah repeat. Below
- * that the words share the row with four 48 dp controls and get about ninety
- * dp, which is fourteen characters at the size the status line is set: a
- * surah name and its ayah break across lines, the pace and the repeat are
- * cut with an ellipsis, and the reader is left with a name they cannot read
- * (owner report).
- *
- * So the pill is two rows wherever the words cannot keep that measure, and
- * one row where they can: a tablet, a landscape phone, and nowhere else. A
- * phone in portrait always takes the two rows, and pays for it in height.
- */
-private val WordsMeasure = 300.dp
-
-/**
- * What the pill's own row spends before the words get a pixel of it: the
- * row's padding, the gap, the controls, and the status line's chevron. Four
- * controls, the playing state, is 544 dp, which is a tablet and a landscape
- * phone and no phone in portrait.
- */
-private fun oneRowFloor(controls: Int): Dp =
-    RowInsets + WordsGap + (TransportSize * controls) + ChevronRoom + WordsMeasure
-
-/** The row's own padding: 16 at the start, 6 at the end. */
-private val RowInsets = 22.dp
-
-/** The gap between the words and the controls, in both shapes. */
-private val WordsGap = 12.dp
-
-/**
- * One control's own target, which is the app's floor and what
- * `minimumInteractiveComponentSize` gives it. A Material release that widens
- * it has to widen this number with it, or the one-row shape is measured
- * against a row that no longer exists.
- */
-private val TransportSize = 48.dp
-
-/** The status line's own chevron: 12 for the mark, 4 before it, 2 after the text. */
-private val ChevronRoom = 18.dp
 
 /**
  * The playback pill. It speaks in four voices: asking to download a surah,
@@ -107,6 +38,15 @@ fun PlaybackBar(
     offer: ListenOffer?,
     offerTitle: String,
     reciterName: String,
+    /** The reciter in use, by id, so the chooser can put its check on it. */
+    reciterId: String? = null,
+    /**
+     * The reciters the chooser offers, with what each would still need for
+     * the ayah the pill is about. Empty where there are none to offer, and
+     * [onReciter] null where the choice cannot be made now, which is while a
+     * package is on its way.
+     */
+    reciterOptions: List<ListenOption> = emptyList(),
     reference: String?,
     pendingLabel: String?,
     /**
@@ -118,12 +58,12 @@ fun PlaybackBar(
     pendingAudio: String? = null,
     /** The reader's pace, shown only when it is not the ordinary one. */
     speed: Float = 1f,
-    /** What happens at the end of the audio, and what the pill therefore says. */
+    /** What happens at the end of the audio, set from the pill's own menu. */
     end: EndOfAudio = EndOfAudio.OFF,
     onToggle: () -> Unit,
     onNext: () -> Unit,
     onPrevious: () -> Unit,
-    onReciter: () -> Unit,
+    onReciter: (String) -> Unit,
     onDownload: () -> Unit,
     onClose: () -> Unit,
     onOfferConfirm: () -> Unit = {},
@@ -166,7 +106,7 @@ fun PlaybackBar(
         }
         needsDownload -> pendingLabel.orEmpty()
         state.unavailable -> stringResource(R.string.playback_unavailable)
-        else -> playbackStatus(reference.orEmpty(), speed, end)
+        else -> playbackStatus(reference.orEmpty(), speed)
     }
     val controls = pillControls(
         state = state,
@@ -178,6 +118,11 @@ fun PlaybackBar(
         onDownload = onDownload,
         onClose = onClose,
     )
+    // The reciter is a choice, not a hop: while a package is on its way there
+    // is nothing to choose between, and a list with nothing in it is not a
+    // door, so the door is closed rather than open and inert.
+    val chooseReciter = if (downloading || reciterOptions.isEmpty()) null else onReciter
+    val listening = if (playing) onSpeed to onEndOfAudio else null
     BoxWithConstraints(
         modifier = modifier
             .padding(horizontal = BarGutter)
@@ -203,9 +148,11 @@ fun PlaybackBar(
                 ) {
                     PlaybackWords(
                         reciterName = reciterName,
+                        reciterId = reciterId,
+                        reciterOptions = reciterOptions,
+                        onReciter = chooseReciter,
                         status = status,
-                        onReciter = onReciter,
-                        onListening = if (playing) onSpeed to onEndOfAudio else null,
+                        onListening = listening,
                         speed = speed,
                         end = end,
                         modifier = Modifier
@@ -231,9 +178,11 @@ fun PlaybackBar(
                 // the lines keep clear of the curve at the top and the foot.
                 PlaybackWordsLine(
                     reciterName = reciterName,
+                    reciterId = reciterId,
+                    reciterOptions = reciterOptions,
+                    onReciter = chooseReciter,
                     status = status,
-                    onReciter = onReciter,
-                    onListening = if (playing) onSpeed to onEndOfAudio else null,
+                    onListening = listening,
                     speed = speed,
                     end = end,
                     modifier = Modifier
@@ -263,202 +212,4 @@ fun PlaybackBar(
             }
         }
     }
-}
-
-/**
- * The pill's words on one line, which is the shape the two-row pill wears:
- * who is reading, and where the reader is, side by side, with the whole line
- * centred on the pill and the controls centred under it (owner report).
- *
- * The reciter's name is the door to the reciter chooser and the line beside it
- * is the door to the listening menu, which wears a chevron so it can be found
- * without a guess. Neither door is the line around it: the row is a container
- * for two controls, and a container that answered taps would take both.
- */
-@Composable
-private fun PlaybackWordsLine(
-    reciterName: String,
-    status: String,
-    onReciter: () -> Unit,
-    /** The pace and the end of the audio, or null where there is nothing to hear. */
-    onListening: Pair<(Float) -> Unit, (EndOfAudio) -> Unit>?,
-    speed: Float,
-    end: EndOfAudio,
-    modifier: Modifier = Modifier,
-) {
-    Row(
-        modifier = modifier.testTag("playback-words"),
-        horizontalArrangement = Arrangement.spacedBy(WordsGap, Alignment.CenterHorizontally),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = reciterName,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier
-                .clip(RoundedCornerShape(50))
-                .clickable(onClick = onReciter)
-                .padding(horizontal = 4.dp, vertical = 2.dp),
-        )
-        PlaybackStatusLine(
-            text = status,
-            onListening = onListening,
-            speed = speed,
-            end = end,
-        )
-    }
-}
-
-/**
- * The pill's words on two lines, which is the shape the one-row pill wears: a
- * tablet or a landscape phone has the measure for both lines beside four
- * controls, and this is how they read there.
- *
- * The reciter's name is the door to the reciter chooser and the line under
- * it is the door to the listening menu, which wears a chevron so it can be
- * found without a guess. Two doors on two lines, and the second one says its
- * own state to TalkBack whether or not it can fit the words as well.
- */
-@Composable
-private fun PlaybackWords(
-    reciterName: String,
-    status: String,
-    onReciter: () -> Unit,
-    /** The pace and the end of the audio, or null where there is nothing to hear. */
-    onListening: Pair<(Float) -> Unit, (EndOfAudio) -> Unit>?,
-    speed: Float,
-    end: EndOfAudio,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(50))
-            .clickable(onClick = onReciter)
-            .testTag("playback-words"),
-    ) {
-        Text(
-            text = reciterName,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        PlaybackStatusLine(
-            text = status,
-            onListening = onListening,
-            speed = speed,
-            end = end,
-        )
-    }
-}
-
-/**
- * Where the reader is, and, while a recitation plays, the door to the pace
- * and to the end of the audio. The door is the line itself and it wears a
- * chevron so it can be found without a guess; the chevron is gone when there
- * is nothing behind it.
- *
- * It is the second line of the wide pill's pair of words and the second half
- * of the phone pill's one line, and it is the same composable in both: one
- * place decides what the status says and what its door opens.
- */
-@Composable
-private fun PlaybackStatusLine(
-    text: String,
-    onListening: Pair<(Float) -> Unit, (EndOfAudio) -> Unit>?,
-    speed: Float,
-    end: EndOfAudio,
-) {
-    // Read here, in the composable's own scope: a semantics lambda is not a
-    // composable, and a stringResource inside one is a compile error.
-    val repetition = repeatWord(end)
-    var open by remember { mutableStateOf(false) }
-    if (onListening == null) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        return
-    }
-    Box {
-        Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(50))
-                .clickable(role = Role.Button) { open = true }
-                .padding(end = 2.dp)
-                .testTag("playback-listening")
-                .semantics {
-                    contentDescription = text
-                    val spoken = buildList {
-                        if (abs(speed - 1f) > 0.01f) add(speedText(speed))
-                        if (end != EndOfAudio.OFF) add(repetition)
-                    }.joinToString(", ")
-                    if (spoken.isNotEmpty()) stateDescription = spoken
-                },
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f, fill = false),
-            )
-            IconGlyph(
-                icon = Icon.Chevron,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .padding(start = 4.dp)
-                    .size(12.dp),
-            )
-        }
-        ListeningMenu(
-            open = open,
-            onDismiss = { open = false },
-            speed = speed,
-            end = end,
-            onSpeed = onListening.first,
-            onEndOfAudio = onListening.second,
-        )
-    }
-}
-
-/**
- * What the pill says under the reciter's name while an ayah plays: where the
- * reader is, and, only when it is not the ordinary answer, the pace and
- * which end of the audio repeats. A reader who set 1.5x a week ago and
- * forgot, or who turned a repeat on and then wondered why the reading would
- * not move on, reads the answer here instead of hunting through settings for
- * it.
- */
-@Composable
-private fun playbackStatus(
-    reference: String,
-    speed: Float,
-    end: EndOfAudio,
-    loopingWord: Int? = null,
-): String {
-    val extras = buildList {
-        // a word that is repeating is said first: it is the one thing about
-        // the audio the reader did not expect, and the pill's whole job is to
-        // say it
-        if (loopingWord != null) add(stringResource(R.string.playback_repeating_word))
-        if (abs(speed - 1f) > 0.01f) add(speedText(speed))
-        if (end != EndOfAudio.OFF) add(repeatWord(end))
-    }
-    return (listOf(reference) + extras).filter { it.isNotBlank() }.joinToString(" \u00b7 ")
-}
-
-/** The word that names the end of the audio, the way the switches name it. */
-@Composable
-private fun repeatWord(end: EndOfAudio): String = when (end) {
-    EndOfAudio.REPEAT_AYAH -> stringResource(R.string.playback_repeating_ayah)
-    EndOfAudio.REPEAT_SURAH -> stringResource(R.string.playback_repeating_surah)
-    EndOfAudio.CONTINUE, EndOfAudio.OFF -> ""
 }

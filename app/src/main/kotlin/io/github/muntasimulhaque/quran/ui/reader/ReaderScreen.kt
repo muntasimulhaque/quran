@@ -56,6 +56,7 @@ import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.SavedAyah
+import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.browse.BrowseSheet
@@ -267,12 +268,6 @@ fun ReaderScreen(
                             selected = null
                             touch++
                         },
-                        // Tapping a word hears that word, and hears it again:
-                        // repetition is how a verse is learned, and the word
-                        // timings are already in the content.
-                        onWord = { ayahNumber, word ->
-                            viewModel.loopWord(ayahNumber, word)
-                        },
                         onScrolled = {
                             // The text is what the reader is looking at; the
                             // chrome steps out of its way the moment the page
@@ -388,11 +383,13 @@ fun ReaderScreen(
                     scope.launch { sharing = loadShareCard(context, viewModel, ayah) }
                 },
                 onTouch = { touch++ },
-                onReciter = { sheet = ReaderSheet.Settings },
+                onReciter = { viewModel.choosePillReciter(it) },
+                reciterId = settings.recitation,
                 reciterName = shortReciterName(
                     settings.recitation,
                     viewModel.recitations.firstOrNull { it.id == settings.recitation }?.name.orEmpty(),
                 ),
+                reciterOptions = viewModel.pillReciters,
             )
         }
 
@@ -788,8 +785,10 @@ private fun BottomStack(
     onMore: (Ayah) -> Unit,
     onShare: (Ayah) -> Unit,
     onTouch: () -> Unit,
-    onReciter: () -> Unit,
+    onReciter: (String) -> Unit,
+    reciterId: String,
     reciterName: String,
+    reciterOptions: List<ListenOption>,
 ) {
     Column(
         modifier = Modifier
@@ -895,6 +894,8 @@ private fun BottomStack(
                 onOfferCancel = { viewModel.cancelListen() },
                 onOfferReciter = { viewModel.chooseListenReciter(it) },
                 reciterName = reciterName,
+                reciterId = reciterId,
+                reciterOptions = reciterOptions,
                 reference = playback.reference,
                 pendingLabel = pendingSurahName?.let { name ->
                     val size = formatBytes(playback.pendingDownloadBytes)

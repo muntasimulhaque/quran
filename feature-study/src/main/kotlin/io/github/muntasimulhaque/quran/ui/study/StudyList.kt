@@ -111,7 +111,6 @@ fun StudyList(
     playingWord: Int?,
     onAyah: (Ayah) -> Unit,
     onBackgroundTap: () -> Unit,
-    onWord: ((Int, Int) -> Unit)? = null,
     onScrolled: () -> Unit,
     onNextSurah: (Int) -> Unit,
     onAddContent: () -> Unit,
@@ -163,7 +162,6 @@ fun StudyList(
         pageDescription = pageDescription,
         onAyah = onAyah,
         onBackgroundTap = onBackgroundTap,
-        onWord = onWord,
         onScrolled = onScrolled,
         onNextSurah = onNextSurah,
         onAddContent = onAddContent,
@@ -195,7 +193,6 @@ private fun StudyRows(
     pageDescription: String,
     onAyah: (Ayah) -> Unit,
     onBackgroundTap: () -> Unit,
-    onWord: ((Int, Int) -> Unit)? = null,
     onScrolled: () -> Unit,
     onNextSurah: (Int) -> Unit,
     onAddContent: () -> Unit,
@@ -336,7 +333,6 @@ private fun StudyRows(
                 playingWord = playingWord,
                 onAyah = onAyah,
                 onBackgroundTap = dismissAbout,
-                onWord = onWord,
                 onFootnote = { number ->
                     val note = row.translations.asSequence()
                         .flatMap { it.text.footnotes.asSequence() }
@@ -627,14 +623,12 @@ private fun AyahBlock(
     onAyah: (Ayah) -> Unit,
     onBackgroundTap: () -> Unit,
     onFootnote: (Int) -> Unit,
-    onWord: ((Int, Int) -> Unit)? = null,
 ) {
     val haptics = LocalHapticFeedback.current
     val palette = LocalPagePalette.current
     val playing = row.ayah.number == playingAyah
     val ayahActions = stringResource(R.string.study_ayah_actions)
     val paperActions = stringResource(R.string.study_paper_actions)
-    val hearWord = stringResource(R.string.study_hear_word)
     val wash = when {
         isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.07f)
         playing -> palette.highlight.copy(alpha = palette.highlight.alpha * 0.55f)
@@ -712,10 +706,6 @@ private fun AyahBlock(
                     meanings = row.meanings,
                     hafs = hafs,
                     settings = settings,
-                    hearLabel = hearWord,
-                    onWord = onWord?.let { hear ->
-                        { word: Int -> hear(row.ayah.number, word) }
-                    },
                     // The aid is an annotation of the ayah above it, not a
                     // second verse: a tighter break than the one before the
                     // translation groups the word list with its line, so the

@@ -50,11 +50,13 @@ trackers, no accounts, nothing collected, ever.
   translation, the word meanings, and the tafsir, each kind in the Book's
   own order.
 - **Recitation.** Minshawi and Husary, one surah at a time, asked for once:
-  one offer names the reciter, the surah, and the size, the reciter can be
-  swapped in that offer, and the word being recited is washed as it is read.
-  A tap in the word by word aid loops that one word. The page can follow
-  the reciter, and an offer you do not want is one tap from gone. The pace
-  and what happens at the end of the audio sit on the playing pill itself
+  one offer names the reciter, the surah, and the size, and the reciter can
+  be swapped in that offer and from the reciter's own name on the playing
+  pill, where each one is shown with what it would still cost for the surah
+  at hand. The word being recited is washed as it is read, and a long press
+  on an ayah is how it is heard. The page can follow the reciter, and
+  an offer you do not want is one tap from gone. The pace and what happens at
+  the end of the audio are set from the menu the pill's status line opens,
   and in Settings as the default: the ayah again, the surah again, or the
   next surah on its own.
 - **A library you choose.** The app ships the Quran text and its page layout

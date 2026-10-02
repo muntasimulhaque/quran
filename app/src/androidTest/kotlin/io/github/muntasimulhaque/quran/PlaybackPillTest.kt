@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.data.AppTheme
+import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.playback.PlaybackBar
 import io.github.muntasimulhaque.quran.ui.theme.QuranTheme
@@ -47,6 +48,14 @@ import org.junit.runner.RunWith
  * 5. On that phone the two lines are centred, and the words are one line: the
  *    reciter's name and the place beside each other, not the reciter's name
  *    with the place under it against the pill's left edge (owner report).
+ * 6. The reciter's name is the chooser and not a hop to the settings, and
+ *    the chooser carries every reciter with what it would still cost for
+ *    the surah at hand, so the choice is made with the number in view
+ *    (owner report).
+ * 7. The pill says where the reader is and, when it is not the ordinary
+ *    one, the pace. It does not say what happens at the end of the audio:
+ *    the sentence does not fit the line, and the switch that carries the
+ *    answer says its own state where the reader turned it (owner report).
  */
 @RunWith(AndroidJUnit4::class)
 class PlaybackPillTest {
@@ -57,6 +66,7 @@ class PlaybackPillTest {
     private fun showPill(
         onSpeed: (Float) -> Unit = {},
         onEndOfAudio: (EndOfAudio) -> Unit = {},
+        onReciter: (String) -> Unit = {},
         state: PlaybackUiState = PlaybackUiState(),
         reference: String? = "Al-Baqarah 2:255",
         pendingAudio: String? = null,
@@ -66,6 +76,8 @@ class PlaybackPillTest {
          * a wider glass wears. See [WideBox]: a modifier cannot do this.
          */
         measureWidth: Dp? = null,
+        speed: Float = 1f,
+        end: EndOfAudio = EndOfAudio.OFF,
     ) {
         compose.setContent {
             QuranTheme(theme = AppTheme.Paper) {
@@ -75,15 +87,20 @@ class PlaybackPillTest {
                         offer = null,
                         offerTitle = "",
                         reciterName = "Husary",
+                        reciterId = "husary",
+                        reciterOptions = listOf(
+                            ListenOption("husary", "Husary", 0L),
+                            ListenOption("minshawi", "Minshawi", 177_000_000L),
+                        ),
                         reference = reference,
                         pendingLabel = "Continue to Al-Baqarah \u00b7 177 MB",
                         pendingAudio = pendingAudio,
-                        speed = 1f,
-                        end = EndOfAudio.OFF,
+                        speed = speed,
+                        end = end,
                         onToggle = {},
                         onNext = {},
                         onPrevious = {},
-                        onReciter = {},
+                        onReciter = onReciter,
                         onDownload = {},
                         onClose = {},
                         onSpeed = onSpeed,
@@ -274,10 +291,47 @@ class PlaybackPillTest {
                 downloadProgress = 0.5f,
             ),
             reference = null,
-            pendingAudio = "Al-Baqarah \u00b7 177 MB",
+            pendingAudio = "Al-Baqarah \u00b7 177 MB \u00b7 50%",
         )
         // The auto-continue path has no offer, so the name and the size must
         // be on the pill while the package downloads (owner decision).
         compose.onNodeWithText("Al-Baqarah \u00b7 177 MB \u00b7 50%").assertIsDisplayed()
+    }
+
+    @Test
+    fun theReciterNameIsTheChooserAndNotTheSettings() {
+        var chosen: String? = null
+        showPill(onReciter = { chosen = it })
+        compose.onNodeWithTag("playback-reciter").performClick()
+        // Every reciter, and what it would still cost for this surah, so the
+        // choice is made with the number in view.
+        compose.onNodeWithText("Minshawi").assertIsDisplayed()
+        compose.onNodeWithText("177 MB").assertIsDisplayed()
+        compose.onNodeWithText("Ready to play").assertIsDisplayed()
+        compose.onNodeWithText("Minshawi").performClick()
+        assertEquals("minshawi", chosen)
+    }
+
+    @Test
+    fun thePillDoesNotCarryTheEndOfTheAudio() {
+        // The repeat is a switch the reader turned on, and that switch says so
+        // where it is turned. The pill is a control over the page, and the
+        // sentence does not fit the line it has (owner report).
+        showPill(end = EndOfAudio.REPEAT_SURAH)
+        compose.onNodeWithText("Al-Baqarah 2:255").assertIsDisplayed()
+        assertEquals(
+            "the pill must not carry the end of the audio",
+            0,
+            compose.onAllNodesWithText("repeating the surah", substring = true)
+                .fetchSemanticsNodes().size,
+        )
+    }
+
+    @Test
+    fun thePillStillCarriesThePace() {
+        // A recitation at 0.75x is a mark and not a sentence, and it is the
+        // one thing about the audio a reader notices without being told.
+        showPill(speed = 0.75f)
+        compose.onNodeWithText("Al-Baqarah 2:255 \u00b7 0.75x").assertIsDisplayed()
     }
 }

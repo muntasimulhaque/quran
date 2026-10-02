@@ -207,6 +207,17 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
                     settings = settings.copy(ayah = ayahNumber)
                 }
         }
+        // The pill's chooser names every reciter with that reciter's price for
+        // the surah under the reader's finger, so the list is read again
+        // when the surah or the reciter changes and never on a tick: the
+        // state publishes five times a second, and a directory listing that
+        // often would be a directory listing the reader never asked for.
+        viewModelScope.launch {
+            playback.state
+                .map { PillScope(it.recitation, it.surah ?: it.pendingDownloadSurah) }
+                .distinctUntilChanged()
+                .collect { scope -> readPillReciters(scope) }
+        }
     }
 
     /**
@@ -976,6 +987,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun playAyah(ayahNumber: Int) {
+        listenTarget = ayahNumber
         viewModelScope.launch {
             val database = contentDatabase ?: return@launch
             val ayah = database.ayah(ayahNumber) ?: return@launch
@@ -988,46 +1000,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             listenOffer = offerFor(recitation, ayah, missing)
         }
     }
-
-    /**
-     * Hears one word again and again.
-     *
-     * A reader who taps a word in the study reading is asking to hear that
-     * word, and to hear it again: repetition is how a verse is learned. The
-     * ayah is started if it is not already playing, so the first tap on a
-     * silent ayah does what a tap on a playing one does, and the word is then
-     * looped until the reader stops it. The word timings are already in the
-     * content, so this is a seek and a boundary, never a new download and
-     * never a new setting.
-     */
-    fun loopWord(ayahNumber: Int, word: Int) {
-        // tapping the word that is already repeating lets it go, so the way
-        // out of a loop is the same gesture that made it
-        if (playback.state.value.loopingWord == word) {
-            playback.clearWordLoop()
-            return
-        }
-        viewModelScope.launch {
-            val database = contentDatabase ?: return@launch
-            val ayah = database.ayah(ayahNumber) ?: return@launch
-            val recitation = settings.recitation
-            // the word can only be heard if the ayah's audio and timings are
-            // here, so the same offer as any other listening
-            val missing = missingForListen(recitation, ayah)
-            if (missing != null) {
-                listenOffer = offerFor(recitation, ayah, missing)
-                return@launch
-            }
-            val playingThisAyah = playback.state.value.ayahNumber == ayahNumber
-            if (!playingThisAyah) {
-                playback.play(recitation, ayahNumber)
-            }
-            playback.loopWord(word)
-        }
-    }
-
-    /** Stops a word loop and lets the ayah carry on from where it is. */
-    fun stopWordLoop() = playback.clearWordLoop()
 
     /**
      * Listening needs two things that may both be missing: the reciter's word
@@ -1050,13 +1022,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     private suspend fun offerFor(recitation: String, ayah: Ayah, bytes: Long): ListenOffer {
-        val options = recitations.map { reciter ->
-            ListenOption(
-                reciter = reciter.id,
-                name = reciter.name,
-                bytes = listenBytes(reciter.id, ayah),
-            )
-        }
+        val options = listenOptions(ayah.surah)
         return ListenOffer(
             reciter = recitation,
             reciterName = recitations.firstOrNull { it.id == recitation }?.name ?: recitation,
@@ -1069,17 +1035,27 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         )
     }
 
-    /** What one reciter would still need for one ayah, in bytes. */
-    private suspend fun listenBytes(recitation: String, ayah: Ayah): Long {
+    /** What one reciter would still need for one surah, in bytes. */
+    private suspend fun listenBytes(recitation: String, surah: Int): Long {
         val timingsId = ContentDatabase.reciterPack(recitation)
         val timings = if (timingsId in installed) 0L else catalog.get(timingsId)?.bytes ?: 0L
-        val audio = if (downloadedSurahs(recitation).any { it.surah == ayah.surah }) {
+        val audio = if (downloadedSurahs(recitation).any { it.surah == surah }) {
             0L
         } else {
-            manifest.packageFor(recitation, ayah.surah)?.bytes ?: 0L
+            manifest.packageFor(recitation, surah)?.bytes ?: 0L
         }
         return timings + audio
     }
+
+    /** Every reciter, with what it would still need for one surah. */
+    private suspend fun listenOptions(surah: Int): List<ListenOption> =
+        recitations.map { reciter ->
+            ListenOption(
+                reciter = reciter.id,
+                name = reciter.name,
+                bytes = listenBytes(reciter.id, surah),
+            )
+        }
 
     /** The reader approved the offer: fetch the timings and the audio, then play. */
     fun confirmListen() {
@@ -1135,7 +1111,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         setRecitation(reciter)
         viewModelScope.launch {
             val ayah = contentDatabase?.ayah(offer.ayah) ?: return@launch
-            val bytes = listenBytes(reciter, ayah)
+            val bytes = listenBytes(reciter, ayah.surah)
             // A reciter whose audio is already on the device needs no offer.
             if (bytes <= 0L) {
                 listenOffer = null
@@ -1172,6 +1148,65 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     var listenOffer by mutableStateOf<ListenOffer?>(null)
         private set
     private var listenJob: Job? = null
+
+    /**
+     * The reciters the pill's chooser offers, each with what it would still
+     * need for the surah the reader is hearing. It is the same list the
+     * offer carries, read once per surah and per reciter rather than per
+     * tap: a menu that did its reading as it opened would show the reader
+     * an empty list for a frame.
+     */
+    var pillReciters by mutableStateOf<List<ListenOption>>(emptyList())
+        private set
+
+    /**
+     * What the pill's chooser offers, read for one surah and one reciter. A
+     * surah or a reciter the app cannot name is the same answer as a surah
+     * with no package published for anyone: nothing to offer, and an empty
+     * menu rather than a menu of dead rows.
+     */
+    private suspend fun readPillReciters(scope: PillScope) {
+        val surah = scope.surah ?: surahOf(listenTarget)?.number
+        if (scope.recitation == null || surah == null) {
+            pillReciters = emptyList()
+            return
+        }
+        pillReciters = listenOptions(surah)
+    }
+
+    /** The one reading the chooser's numbers belong to: who, and which surah. */
+    private data class PillScope(val recitation: String?, val surah: Int?)
+
+    /**
+     * The ayah the pill is about: the one the reader last asked to hear.
+     * The player knows the ayah it is on, but not the one it was asked for
+     * while a package is on its way, and that is the one a reciter chosen
+     * now has to be asked about.
+     */
+    private var listenTarget by mutableIntStateOf(0)
+
+    /**
+     * The reader chose a reciter on the pill rather than in the settings:
+     * it becomes their reciter, and the ayah they are hearing moves to it
+     * through the same door Play uses, so a reciter whose audio is not on
+     * the device is offered with its size instead of reported as
+     * unavailable (owner decision).
+     */
+    fun choosePillReciter(reciter: String) {
+        val target = listenTarget
+        if (target <= 0 || reciter == settings.recitation) return
+        setRecitation(reciter)
+        viewModelScope.launch {
+            val ayah = contentDatabase?.ayah(target) ?: return@launch
+            val bytes = listenBytes(reciter, ayah.surah)
+            if (bytes <= 0L) {
+                listenOffer = null
+                playback.play(reciter, target)
+                return@launch
+            }
+            listenOffer = offerFor(reciter, ayah, bytes)
+        }
+    }
 
     fun togglePlayback() = playback.toggle()
 

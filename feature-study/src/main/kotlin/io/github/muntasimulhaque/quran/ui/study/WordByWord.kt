@@ -1,31 +1,23 @@
 package io.github.muntasimulhaque.quran.ui.study
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.CustomAccessibilityAction
-import androidx.compose.ui.semantics.customActions
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.WordMeaning
@@ -63,11 +55,18 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * text, so the meaning stays readable on paper and on sepia alike.
  *
  * [gloss] says what the aid is standing on. Under the study reading's ayah
- * the tiles repeat words the verse above already shows, so the Arabic steps
+ * the pairs repeat words the verse above already shows, so the Arabic steps
  * one tone down and the line stays the verse. In the ayah card, opened from
  * the Mushaf, there is no line above: the aid is the only Arabic there, so
  * it keeps the reading's own ink. The step is small either way, so the word
  * always reads as the Quran's own.
+ *
+ * The aid is a reading and not a control, and nothing here answers a touch.
+ * Hearing one word on its own was in this app and is out of it: the word was
+ * reached by a tap that could not be offered without a mark, a way out, and
+ * a reciter ready, and the reader has the whole verse in front of them
+ * either way. The ayah is heard from the ayah, where Play already is, a
+ * long press away (owner decision).
  *
  * Arabic reads right to left, so the pairs wrap that way too.
  */
@@ -77,19 +76,8 @@ internal fun WordByWord(
     meanings: List<WordMeaning>,
     hafs: FontFamily,
     settings: AppSettings,
-    /** What the tap on a pair does, said to a screen reader. */
-    hearLabel: String,
     modifier: Modifier = Modifier,
     gloss: Boolean = true,
-    /**
-     * Hears one word again, given the word's own number. The tap lives on the
-     * aid and not on the verse: the verse's tap belongs to the reader's bar and
-     * its long press to the ayah's actions, and a third meaning on the same
-     * surface takes one of them away (the 3.1 capture found both). Here the
-     * reader is already looking at the words, and nothing else is waiting for
-     * the gesture.
-     */
-    onWord: ((Int) -> Unit)? = null,
 ) {
     if (meanings.isEmpty()) return
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
@@ -103,17 +91,12 @@ internal fun WordByWord(
             horizontalArrangement = Arrangement.spacedBy(Space.Block),
             verticalArrangement = Arrangement.spacedBy(Space.Block),
         ) {
-            meanings.forEachIndexed { index, meaning ->
+            meanings.forEach { meaning ->
                 WordPair(
                     meaning = meaning,
                     settings = settings,
                     hafs = hafs,
                     gloss = gloss,
-                    // the word list numbers its words from one, and they are
-                    // contiguous, so the pair's place in the ayah is the
-                    // number the reciter's timings use
-                    onClick = onWord?.let { hear -> { hear(index + 1) } },
-                    hearLabel = hearLabel,
                 )
             }
         }
@@ -123,11 +106,10 @@ internal fun WordByWord(
 /**
  * One word over its own meaning, as wide as the two of them and no wider.
  *
- * A pair is a control, and it must not *read* as one: a role on this node
- * merges its two lines into a single labelled node, which hides the word and
- * the meaning from anything that reads the aid as text, screen reader and
- * test alike. The tap is here, and what it does is said, without swallowing
- * what the pair says.
+ * The pair is type and not a control: a role on this node would merge its
+ * two lines into a single labelled node, which hides the word and the
+ * meaning from anything that reads the aid as text, and a shape around it
+ * would read as a button where there is nothing to press.
  */
 @Composable
 private fun WordPair(
@@ -135,26 +117,8 @@ private fun WordPair(
     settings: AppSettings,
     hafs: FontFamily,
     gloss: Boolean,
-    onClick: (() -> Unit)?,
-    hearLabel: String,
 ) {
-    Column(
-        modifier = Modifier
-            // A pair is as small as a finger can be trusted with, which is the
-            // app's own floor: a word above one meaning line is close to it
-            // already, and a short meaning must not take the target below it.
-            .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp)
-            .then(
-                if (onClick == null) {
-                    Modifier
-                } else {
-                    Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .clickable(onClick = onClick)
-                },
-            ),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = meaning.word,
             style = TextStyle(
@@ -183,20 +147,7 @@ private fun WordPair(
             ),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
-            modifier = Modifier
-                .padding(top = Space.Tight)
-                .semantics {
-                    // the door the tap opens, said without a role that would
-                    // merge away the pair's own words
-                    if (onClick != null) {
-                        customActions = listOf(
-                            CustomAccessibilityAction(hearLabel) {
-                                onClick()
-                                true
-                            },
-                        )
-                    }
-                },
+            modifier = Modifier.padding(top = Space.Tight),
         )
     }
 }
