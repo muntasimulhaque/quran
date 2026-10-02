@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 3.5 (versionCode 36)
+Version: 3.6 (versionCode 37)
 
 ## Listing
 
@@ -200,6 +200,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (3.6, 485 characters)
+
+The reciter can be changed from the playing pill: the name beside the place opens every reciter with what it would still cost for the surah, and a surah that is not on the device is asked for by size as before. The pill no longer carries the end of the audio on its face, because the switch already says which one you chose. Word by word is a reading again: the tap that looped a single word is gone, and every pair is drawn as wide as its own meaning. No ads, no trackers, no account.
 
 ## Release notes (3.5, 480 characters)
 
