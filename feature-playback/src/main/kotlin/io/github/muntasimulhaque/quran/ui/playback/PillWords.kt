@@ -2,7 +2,6 @@ package io.github.muntasimulhaque.quran.ui.playback
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -11,10 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,19 +19,10 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import io.github.muntasimulhaque.quran.core.EndOfAudio
-import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import kotlin.math.abs
-
-/**
- * The pill's words: the reciter who is reading, where the reader is, and the
- * two doors those two lines are. Nothing else is written here, because the
- * pill is a control over the page, and a control that has to say a sentence
- * stops being one (owner report).
- */
 
 /**
  * The pill's words on one line, which is the shape the two-row pill wears:
@@ -47,18 +33,23 @@ import kotlin.math.abs
  * is the door to the listening menu, which wears a chevron so it can be found
  * without a guess. Neither door is the line around it: the row is a container
  * for two controls, and a container that answered taps would take both.
+ *
+ * Nothing else is written here, because the pill is a control over the page,
+ * and a control that has to say a sentence stops being one (owner report).
+ *
+ * The two words carry no menu of their own. A menu takes its shape from the
+ * anchor it hangs on, and the anchor the reader wants is the pill's own
+ * centre, not the edge of the word they touched (owner report), so the
+ * capsule holds the menu and these two only say which one was asked for.
  */
 @Composable
 internal fun PlaybackWordsLine(
     reciterName: String,
-    reciterId: String?,
-    reciterOptions: List<ListenOption>,
-    onReciter: ((String) -> Unit)?,
+    /** The door to the chooser, or null where there is no choice to make. */
+    onOpenReciters: (() -> Unit)?,
     status: String,
-    /** The pace and the end of the audio, or null where there is nothing to hear. */
-    onListening: Pair<(Float) -> Unit, (EndOfAudio) -> Unit>?,
-    speed: Float,
-    end: EndOfAudio,
+    /** The door to the pace and the end of the audio, or null where there is nothing to hear. */
+    onOpenListening: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -66,18 +57,8 @@ internal fun PlaybackWordsLine(
         horizontalArrangement = Arrangement.spacedBy(WordsGap, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        ReciterDoor(
-            name = reciterName,
-            selected = reciterId,
-            options = reciterOptions,
-            onChoose = onReciter,
-        )
-        PlaybackStatusLine(
-            text = status,
-            onListening = onListening,
-            speed = speed,
-            end = end,
-        )
+        ReciterDoor(name = reciterName, onOpen = onOpenReciters)
+        PlaybackStatusLine(text = status, onOpen = onOpenListening)
     }
 }
 
@@ -89,34 +70,20 @@ internal fun PlaybackWordsLine(
  * The reciter's name is the door to the reciter chooser and the line under
  * it is the door to the listening menu, which wears a chevron so it can be
  * found without a guess. Two doors on two lines, and the column around them
- * is not a door of its own.
+ * is not a door of its own. The menus themselves hang from the capsule's own
+ * centre, as they do on the phone's one line.
  */
 @Composable
 internal fun PlaybackWords(
     reciterName: String,
-    reciterId: String?,
-    reciterOptions: List<ListenOption>,
-    onReciter: ((String) -> Unit)?,
+    onOpenReciters: (() -> Unit)?,
     status: String,
-    /** The pace and the end of the audio, or null where there is nothing to hear. */
-    onListening: Pair<(Float) -> Unit, (EndOfAudio) -> Unit>?,
-    speed: Float,
-    end: EndOfAudio,
+    onOpenListening: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.testTag("playback-words")) {
-        ReciterDoor(
-            name = reciterName,
-            selected = reciterId,
-            options = reciterOptions,
-            onChoose = onReciter,
-        )
-        PlaybackStatusLine(
-            text = status,
-            onListening = onListening,
-            speed = speed,
-            end = end,
-        )
+        ReciterDoor(name = reciterName, onOpen = onOpenReciters)
+        PlaybackStatusLine(text = status, onOpen = onOpenListening)
     }
 }
 
@@ -138,55 +105,38 @@ internal fun PlaybackWords(
 @Composable
 private fun ReciterDoor(
     name: String,
-    selected: String?,
-    options: List<ListenOption>,
-    onChoose: ((String) -> Unit)?,
+    onOpen: (() -> Unit)?,
 ) {
-    var open by remember { mutableStateOf(false) }
-    Box {
-        Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(50))
-                .then(
-                    if (onChoose == null) {
-                        Modifier
-                    } else {
-                        Modifier.clickable(role = Role.Button) { open = true }
-                    },
-                )
-                .padding(horizontal = 4.dp, vertical = 2.dp)
-                .testTag("playback-reciter")
-                .semantics { contentDescription = name },
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = name,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f, fill = false),
-            )
-            if (onChoose != null) {
-                IconGlyph(
-                    icon = Icon.Chevron,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .padding(start = 4.dp)
-                        .size(12.dp),
-                )
-            }
-        }
-        if (onChoose != null) {
-            ReciterMenu(
-                open = open,
-                options = options,
-                selected = selected,
-                onChoose = {
-                    open = false
-                    onChoose(it)
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .then(
+                if (onOpen == null) {
+                    Modifier
+                } else {
+                    Modifier.clickable(role = Role.Button, onClick = onOpen)
                 },
-                onDismiss = { open = false },
+            )
+            .padding(horizontal = 4.dp, vertical = 2.dp)
+            .testTag("playback-reciter")
+            .semantics { contentDescription = name },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = name,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f, fill = false),
+        )
+        if (onOpen != null) {
+            IconGlyph(
+                icon = Icon.Chevron,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .padding(start = 4.dp)
+                    .size(12.dp),
             )
         }
     }
@@ -200,17 +150,15 @@ private fun ReciterDoor(
  *
  * It is the second line of the wide pill's pair of words and the second half
  * of the phone pill's one line, and it is the same composable in both: one
- * place decides what the status says and what its door opens.
+ * place says what the status is, and the capsule says which menu that line
+ * opened.
  */
 @Composable
 private fun PlaybackStatusLine(
     text: String,
-    onListening: Pair<(Float) -> Unit, (EndOfAudio) -> Unit>?,
-    speed: Float,
-    end: EndOfAudio,
+    onOpen: (() -> Unit)?,
 ) {
-    var open by remember { mutableStateOf(false) }
-    if (onListening == null) {
+    if (onOpen == null) {
         Text(
             text = text,
             style = MaterialTheme.typography.bodySmall,
@@ -220,39 +168,29 @@ private fun PlaybackStatusLine(
         )
         return
     }
-    Box {
-        Row(
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .clickable(role = Role.Button, onClick = onOpen)
+            .padding(end = 2.dp)
+            .testTag("playback-listening")
+            .semantics { contentDescription = text },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f, fill = false),
+        )
+        IconGlyph(
+            icon = Icon.Chevron,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
-                .clip(RoundedCornerShape(50))
-                .clickable(role = Role.Button) { open = true }
-                .padding(end = 2.dp)
-                .testTag("playback-listening")
-                .semantics { contentDescription = text },
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f, fill = false),
-            )
-            IconGlyph(
-                icon = Icon.Chevron,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .padding(start = 4.dp)
-                    .size(12.dp),
-            )
-        }
-        ListeningMenu(
-            open = open,
-            onDismiss = { open = false },
-            speed = speed,
-            end = end,
-            onSpeed = onListening.first,
-            onEndOfAudio = onListening.second,
+                .padding(start = 4.dp)
+                .size(12.dp),
         )
     }
 }

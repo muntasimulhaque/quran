@@ -57,6 +57,21 @@ internal val ChevronRoom = 18.dp
 internal val ReciterChevronRoom = 16.dp
 
 /**
+ * The measure of a popup the pill opens, and of the anchor it hangs from.
+ *
+ * Both numbers are the same on purpose: a menu takes its own left edge from
+ * the anchor it was given, so an anchor of another measure would stand the
+ * menu beside the pill's centre rather than on it. The anchor is this wide
+ * and centred, and the menu is this wide, so the two land on one centre
+ * whatever the pill's own width is (owner report).
+ *
+ * It is the reciter menu's old maximum and the listening menu's own need: the
+ * five paces at their 48 dp target with the padding around them, which is the
+ * measure the listener has to get, and the widest the two ever were.
+ */
+internal val PillMenuMeasure = 288.dp
+
+/**
  * What the pill's own row spends before the words get a pixel of it: the
  * row's padding, the gap, the controls, and the two chevrons the words
  * wear. Four controls, the playing state, is 560 dp, which is a tablet and

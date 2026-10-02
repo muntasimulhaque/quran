@@ -29,6 +29,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
@@ -382,9 +383,21 @@ fun IconButton(
 
 /**
  * One quiet text action with an icon above it, for the ayah bar.
+ *
+ * A mark on the action is a colour, and a colour is not spoken: [state] is
+ * what the control says about that mark, in the words of the module that
+ * draws the pill, so a reader who cannot see the lit glyph is told which of
+ * the ayah's marks are theirs. It is null on an action that carries no mark,
+ * because an answer to a tap is not a switch and must not read as one.
  */
 @Composable
-fun TextAction(label: String, icon: Icon, onClick: () -> Unit, active: Boolean = false) {
+fun TextAction(
+    label: String,
+    icon: Icon,
+    onClick: () -> Unit,
+    active: Boolean = false,
+    state: String? = null,
+) {
     Column(
         modifier = Modifier
             .minimumInteractiveComponentSize()
@@ -393,6 +406,7 @@ fun TextAction(label: String, icon: Icon, onClick: () -> Unit, active: Boolean =
             .padding(horizontal = 6.dp, vertical = 4.dp)
             .semantics {
                 contentDescription = label
+                if (state != null) stateDescription = state
                 role = Role.Button
             },
         horizontalAlignment = Alignment.CenterHorizontally,

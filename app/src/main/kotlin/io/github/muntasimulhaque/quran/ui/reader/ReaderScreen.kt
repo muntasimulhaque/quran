@@ -844,9 +844,14 @@ private fun BottomStack(
             }
         }
         selected?.let { ayah ->
+            val row = saved.firstOrNull { it.ayahNumber == ayah.number }
             AyahActions(
-                isSaved = saved.any { it.ayahNumber == ayah.number && it.saved },
-                hasNote = saved.any { it.ayahNumber == ayah.number && !it.note.isNullOrBlank() },
+                // The two marks are the reader's own two hands: the note they
+                // wrote, and the bookmark they pressed. A note keeps its ayah
+                // in Saved, but it never lights the bookmark, so one tap of a
+                // note does not claim to be a save (owner report).
+                isSaved = row?.marked == true,
+                hasNote = !row?.note.isNullOrBlank(),
                 // The deeper door names what is actually behind it: from the
                 // study reading the card is only the tafsir doors, so the
                 // action says Tafsir; from the Mushaf the card is the whole
@@ -858,10 +863,11 @@ private fun BottomStack(
                 // the action goes with the door.
                 showTafsir = viewModel.settings.showTafsir,
                 onSave = {
-                    // A save that carries a note asks before it goes, so the
-                    // reader's own words are never removed by one tap.
-                    val row = saved.firstOrNull { it.ayahNumber == ayah.number }
-                    if (row?.saved == true && !row.note.isNullOrBlank()) {
+                    // A save of the reader's own, carrying a note, asks
+                    // before it goes, so the reader's own words are never
+                    // removed by one tap. An ayah that only a note kept has
+                    // no save to remove, and one tap of Save makes it.
+                    if (row?.marked == true && !row.note.isNullOrBlank()) {
                         onRemoveSaved(ayah)
                     } else {
                         viewModel.toggleSaved(ayah)
@@ -937,6 +943,25 @@ internal fun PlaybackUiState.isAnything(): Boolean =
 private fun surahName(viewModel: ReaderViewModel, ayah: Int): String =
     viewModel.surahOf(ayah)?.nameSimple ?: stringResource(R.string.reader_fallback_title)
 
+/**
+ * What one of the pill's marks says about itself, in the app's own words. The
+ * mark a reader cannot see is a mark they were never told about, and the
+ * glyph's colour is not a sentence.
+ */
+@Composable
+private fun markState(on: Boolean): String =
+    stringResource(if (on) R.string.action_state_on else R.string.action_state_off)
+
+/**
+ * The ayah's own actions, on the pill a long press raises: hear it, write on
+ * it, keep it, share it, and the deeper door.
+ *
+ * Each action carries its own mark, and a mark says the tap that made it: the
+ * note glyph is lit by a note and the bookmark by a Save, never the one by the
+ * other. The two marked actions also say their state out loud, because a lit
+ * glyph is a colour and colour is not something a reader who cannot see it is
+ * told (owner report).
+ */
 @Composable
 private fun AyahActions(
     isSaved: Boolean,
@@ -959,17 +984,21 @@ private fun AyahActions(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         TextAction(stringResource(R.string.action_play), Icon.Play, onPlay)
+        // The two marked actions say their state; the three that only answer a
+        // tap say nothing, so nothing on the pill reads as a switch it is not.
         TextAction(
             label = stringResource(R.string.action_note),
             icon = Icon.Note,
             onClick = onNote,
             active = hasNote,
+            state = markState(hasNote),
         )
         TextAction(
             label = stringResource(R.string.action_save),
             icon = if (isSaved) Icon.BookmarkFilled else Icon.Bookmark,
             onClick = onSave,
             active = isSaved,
+            state = markState(isSaved),
         )
         TextAction(stringResource(R.string.action_share), Icon.Share, onShare)
         if (fromMushaf || showTafsir) {

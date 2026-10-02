@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,6 +40,10 @@ import io.github.muntasimulhaque.quran.ui.kit.speedText
  * cloth: the same floating tone and rounded shape the reciter chooser wears,
  * so it reads as the pill opening rather than a foreign sheet laid over it.
  *
+ * It is the pill's own [PillMenuMeasure], which is also the measure of the
+ * anchor the playing pill hangs it from, so the menu stands on the capsule's
+ * centre rather than beside the word that opened it (owner report).
+ *
  * The three end answers are three switches over one value
  * (owner decision): each reports the answer it carries, and the plan
  * the app keeps is that answer alone, so the reader can never be in a state
@@ -61,7 +65,7 @@ internal fun ListeningMenu(
         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         tonalElevation = 0.dp,
         shadowElevation = 0.dp,
-        modifier = Modifier.widthIn(min = 232.dp),
+        modifier = Modifier.width(PillMenuMeasure),
     ) {
         Text(
             text = stringResource(R.string.playback_speed_label),

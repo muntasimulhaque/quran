@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +38,11 @@ import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
  * rounded shape of its own, and no depth the pill does not have. The pill
  * carries no border and casts no shadow, so a menu that did read as a
  * foreign sheet laid over it.
+ *
+ * Its measure is the pill's own [PillMenuMeasure], which is also the measure
+ * of the anchor the playing pill hangs it from: a menu takes the left edge of
+ * the anchor it is given, so the two have to be one width for the menu to
+ * stand on the pill's centre (owner report).
  */
 @Composable
 internal fun ReciterMenu(
@@ -55,7 +60,7 @@ internal fun ReciterMenu(
         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         tonalElevation = 0.dp,
         shadowElevation = 0.dp,
-        modifier = Modifier.widthIn(min = 216.dp, max = 288.dp),
+        modifier = Modifier.width(PillMenuMeasure),
     ) {
         options.forEach { option ->
             ReciterChoiceRow(

@@ -56,6 +56,10 @@ import org.junit.runner.RunWith
  *    one, the pace. It does not say what happens at the end of the audio:
  *    the sentence does not fit the line, and the switch that carries the
  *    answer says its own state where the reader turned it (owner report).
+ * 8. Both popups stand on the capsule's own centre. A menu takes the shape of
+ *    the anchor it hangs from, and an anchor on the word the reader touched
+ *    put the reciter chooser at one end of the pill and the listening menu at
+ *    the other: two popups in two places on one control (owner report).
  */
 @RunWith(AndroidJUnit4::class)
 class PlaybackPillTest {
@@ -334,4 +338,57 @@ class PlaybackPillTest {
         showPill(speed = 0.75f)
         compose.onNodeWithText("Al-Baqarah 2:255 \u00b7 0.75x").assertIsDisplayed()
     }
+
+    /**
+     * The reciter chooser hangs from the capsule's centre, on the phone's two
+     * rows and on the wide pill's one row alike. The two are measured against
+     * the pill they were opened from, because a menu centred on the screen and
+     * a menu centred on the capsule are the same thing here only while the
+     * capsule is centred itself, and this asserts the capsule's own centre.
+     */
+    @Test
+    fun theReciterMenuStandsOnThePillsCentre() {
+        assertTheMenuStandsOnThePillCentre("playback-reciter", "Minshawi")
+    }
+
+    /**
+     * And so does the listening menu, which was the second of the two to sit
+     * at one end while the other sat at the other (owner report).
+     */
+    @Test
+    fun theListeningMenuStandsOnThePillCentre() {
+        assertTheMenuStandsOnThePillCentre("playback-listening", "Repeat the ayah")
+    }
+
+    private fun assertTheMenuStandsOnThePillCentre(door: String, rowInMenu: String) {
+        showPill(pillWidth = Modifier.width(393.dp))
+        compose.onNodeWithTag(door).performClick()
+        compose.waitForIdle()
+        // Every rectangle is read in the window's own pixels. A menu is a
+        // composition of its own, and one root's coordinates are not one frame
+        // for two windows, so the only rectangles that can honestly be
+        // compared are the ones the window measured.
+        val pill = windowBounds("playback-bar")
+        val anchor = windowBounds("pill-menu-anchor")
+        // The row is as wide as the menu it sits in, so its middle is the
+        // menu's middle.
+        val menu = compose.onNodeWithText(rowInMenu).fetchSemanticsNode().boundsInWindow
+        assertEquals(
+            "the anchor must stand on the capsule's centre: pill $pill, anchor $anchor",
+            middle(pill),
+            middle(anchor),
+            1f,
+        )
+        assertEquals(
+            "the $door menu must stand on the anchor's centre, not beside the word: " +
+                "anchor $anchor, menu $menu",
+            middle(anchor),
+            middle(menu),
+            1f,
+        )
+    }
+
+    private fun windowBounds(tag: String) = compose.onNodeWithTag(tag).fetchSemanticsNode().boundsInWindow
+
+    private fun middle(rect: androidx.compose.ui.geometry.Rect) = (rect.left + rect.right) / 2f
 }

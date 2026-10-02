@@ -15,6 +15,7 @@
     <string name="settings_auto_night_subtitle">Night when your phone is in dark mode, your page otherwise</string>
     <string name="settings_summary_theme_auto">%1$s · day page %2$s</string>
 
+    <string name="settings_group_interface">The interface</string>
     <string name="settings_group_reading">Reading</string>
     <string name="settings_group_recitation">Recitation</string>
     <string name="settings_group_reminder">The reminder</string>

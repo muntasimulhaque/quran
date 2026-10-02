@@ -29,12 +29,53 @@ import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.data.resolved
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
+import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
+import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.rich.ArabicFonts
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import androidx.compose.ui.platform.LocalContext
 import io.github.muntasimulhaque.quran.core.RichText
-/** The pages the settings hub opens, one at a time. */
+
+/**
+ * The language page: the interface's language, and with it the language of
+ * the translation, the tafsir, and the word meanings. Each choice is named
+ * in its own script, because a reader who cannot read the current interface
+ * must still be able to find their own language on this page.
+ */
+@Composable
+fun LanguagePage(
+    settings: AppSettings,
+    onLanguage: (String) -> Unit,
+) {
+    Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
+        Group(stringResource(R.string.settings_group_language))
+        Text(
+            text = stringResource(R.string.settings_language_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
+        )
+        // A list of choices is read, not searched: the languages are sorted by
+        // the name the interface itself shows them under, so Bangla sits above
+        // English in an English interface and each language's own alphabet is
+        // respected in its own interface. Each row is named in the language's
+        // own script first, which the reader must recognise before they can
+        // read anything else here, with the English name beside it so the two
+        // names are never a guess.
+        val entries = UiLanguage.entries.map { it to languageName(it.tag) }
+        entries.sortedBy { it.second.lowercase() }.forEach { (language, _) ->
+            ChoiceRow(
+                title = languageChoiceName(language.tag),
+                subtitle = stringResource(R.string.settings_language_subtitle),
+                selected = settings.uiLanguage == language.tag,
+                onClick = { onLanguage(language.tag) },
+            )
+        }
+        Spacer(Modifier.height(Space.Section))
+    }
+}
+
 /**
  * The appearance page: the four grounds, and the switch that lets the system
  * choose between the day and the night halves of them.

@@ -30,6 +30,11 @@
     <string name="action_close">বন্ধ</string>
     <string name="action_cancel">বাতিল</string>
 
+    <!-- What an ayah's own two marks say about themselves, so a lit glyph is
+         not the only way a reader learns that an ayah is noted or saved. -->
+    <string name="action_state_on">চালু</string>
+    <string name="action_state_off">বন্ধ</string>
+
     <!-- The question before a save that carries a note is removed: the note
          is the reader's own writing, so it is asked about, never taken by
          one tap. -->

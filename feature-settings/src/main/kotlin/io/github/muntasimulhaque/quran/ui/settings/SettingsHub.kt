@@ -4,31 +4,25 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.core.EndOfAudio
-import io.github.muntasimulhaque.quran.core.chosenBy
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.Recitation
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.data.resolved
 import io.github.muntasimulhaque.quran.feature.settings.R
-import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.clockText
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
-import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
+import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.theme.Space
+
 /** The pages the settings hub opens, one at a time. */
 enum class SettingsPage { Language, Theme, FontSize, Reciters, Listening, Daily, Translations, Tafsirs, About }
 
@@ -79,13 +73,15 @@ private fun themeSummary(settings: AppSettings): String {
  * The hub: one row per category, each carrying where it stands, so a reader
  * can see their own setup at a glance and open only what they came to change.
  *
- * The rows are in three quiet groups, because a flat list of eleven rows is
+ * The rows are in four quiet groups, because a flat list of eleven rows is
  * read one at a time and a list with a name over each part of it is read at a
- * glance: what the page looks like and what it draws, then what the reader
- * hears, then the one reminder. The language stays above the groups on its
- * own, since it changes the words of every row below it, and About stands at
- * the foot on its own, which is where an app names itself (owner report,
- * 37th session).
+ * glance. The groups are the three things a reader does with the app and the
+ * one thing it does for them: the app itself, the reading, the recitation,
+ * and the reminder. The interface comes first because it is the app's own
+ * words, its page, and its type, and a reader who has come to change one of
+ * those is not looking for the reading (owner report). About stands at the
+ * foot on its own, which is where an app names itself (owner report, 37th
+ * session).
  */
 @Composable
 fun SettingsHub(
@@ -103,11 +99,19 @@ fun SettingsHub(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier.fillMaxWidth().testTag("settings-hub")) {
+        // What the app itself is: the words it speaks, the page it draws, and
+        // the size of its type. The three were one row and a group above it,
+        // with the language alone over the top on its own, and a reader
+        // looking for the theme had to read past a group name to find the
+        // first of the three (owner report). The language is the group's own
+        // first row: it changes the words of every row below it, so a reader
+        // who changes it reads the whole sheet again in the new language, and
+        // it is said here rather than only behind its own page.
+        Group(stringResource(R.string.settings_group_interface))
         PageRow(
             title = stringResource(R.string.settings_title_language),
             summary = languageChoiceName(settings.uiLanguage ?: UiLanguage.English.tag),
         ) { onOpen(SettingsPage.Language) }
-        Group(stringResource(R.string.settings_group_reading))
         PageRow(
             title = stringResource(R.string.settings_title_appearance),
             summary = themeSummary(settings),
@@ -126,7 +130,10 @@ fun SettingsHub(
         // reading shows what it names, and the rest of the row opens the list
         // it is chosen from. The switch is the only thing that switches, so a
         // reader who came to look at the translations never changes the reading
-        // by looking (owner report, 2.3).
+        // by looking (owner report, 2.3). The screen staying awake belongs
+        // here too: it is about the reading in front of the reader and not
+        // about what the app looks like (owner report).
+        Group(stringResource(R.string.settings_group_reading))
         WordByWordRow(settings, packs, packSetup, onWordByWord)
         ToggleRow(
             title = stringResource(R.string.settings_show_translation_title),
@@ -146,12 +153,11 @@ fun SettingsHub(
             openLabel = stringResource(R.string.settings_open_tafsirs),
             switchTag = "switch-tafsir",
         )
-        // Reading with the screen awake sits in the reading itself, beside
-        // the other whole-app choices: it is one switch with no page behind it,
-        // and a page that held only this one row was a door to a single tap.
-        // It says nothing under its name: the switch is the whole of what it
-        // is, and a line of explanation under a control that already shows its
-        // own state is the sheet talking to itself.
+        // The screen staying awake is one switch with no page behind it, and a
+        // page that held only this one row was a door to a single tap. It says
+        // nothing under its name: the switch is the whole of what it is, and a
+        // line of explanation under a control that already shows its own state
+        // is the sheet talking to itself.
         ToggleRow(
             title = stringResource(R.string.settings_keep_awake_title),
             subtitle = null,
@@ -230,87 +236,6 @@ private fun listeningSummary(settings: AppSettings): String {
 }
 
 /**
- * The listening page: how fast the recitation plays, and what happens when
- * the ayah or the surah being heard ends. Both are about hearing, not about
- * the page, so they sit together under the reciter whose voice they shape.
- *
- * The three ends are three switches over one value (owner decision).
- * Each row is the answer it names, checked only when it is the answer, and
- * turning one on leaves the other two off, because two of them on at once is
- * a promise the player cannot keep: a surah that repeats never ends, so the
- * continuation would never come.
- */
-@Composable
-fun ListeningPage(
-    settings: AppSettings,
-    onSpeed: (Float) -> Unit,
-    onEndOfAudio: (EndOfAudio) -> Unit,
-) {
-    Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
-        Group(stringResource(R.string.settings_group_speed))
-        Text(
-            text = stringResource(R.string.settings_speed_note),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
-        )
-        SpeedRow(value = settings.playbackSpeed, onChange = onSpeed)
-        Spacer(Modifier.height(Space.Section))
-        Group(stringResource(R.string.settings_group_repeat))
-        EndRow(
-            title = stringResource(R.string.settings_repeat_title),
-            subtitle = stringResource(R.string.settings_repeat_subtitle),
-            choice = EndOfAudio.REPEAT_AYAH,
-            end = settings.endOfAudio,
-            onEndOfAudio = onEndOfAudio,
-        )
-        // The surah, the same answer one unit larger: the whole surah begins
-        // again at its first ayah on the device, and nothing is fetched to do
-        // it, so it is available wherever the surah is.
-        EndRow(
-            title = stringResource(R.string.settings_repeat_surah_title),
-            subtitle = stringResource(R.string.settings_repeat_surah_subtitle),
-            choice = EndOfAudio.REPEAT_SURAH,
-            end = settings.endOfAudio,
-            onEndOfAudio = onEndOfAudio,
-        )
-        // Continue: what happens at the end of the surah, where repeat is
-        // what happens at the end of the ayah. Turning it on is the reader's
-        // word for the packages that follow, so the next surah needs no
-        // second approval; it still announces itself on the pill with its
-        // size and a cancel while it downloads (owner decision).
-        EndRow(
-            title = stringResource(R.string.settings_continue_title),
-            subtitle = stringResource(R.string.settings_continue_subtitle),
-            choice = EndOfAudio.CONTINUE,
-            end = settings.endOfAudio,
-            onEndOfAudio = onEndOfAudio,
-            switchTag = "switch-continue",
-        )
-        Spacer(Modifier.height(Space.Section))
-    }
-}
-
-/** One of the three ends, as a switch row that reports only its own answer. */
-@Composable
-private fun EndRow(
-    title: String,
-    subtitle: String,
-    choice: EndOfAudio,
-    end: EndOfAudio,
-    onEndOfAudio: (EndOfAudio) -> Unit,
-    switchTag: String? = null,
-) {
-    ToggleRow(
-        title = title,
-        subtitle = subtitle,
-        checked = end == choice,
-        onChange = { onEndOfAudio(chosenBy(it, choice)) },
-        switchTag = switchTag,
-    )
-}
-
-/**
  * The word by word switch, and the state of the list behind it. The row is
  * checked only when the aid is on and the list it needs is on the device, so
  * a switch that reads on always means meanings are being drawn; when the
@@ -353,44 +278,5 @@ internal fun WordByWordRow(
         checked = settings.wordByWord && installed,
         onChange = onWordByWord,
     )
-}
-
-/**
- * The language page: the interface's language, and with it the language of
- * the translation, the tafsir, and the word meanings. Each choice is named
- * in its own script, because a reader who cannot read the current interface
- * must still be able to find their own language on this page.
- */
-@Composable
-fun LanguagePage(
-    settings: AppSettings,
-    onLanguage: (String) -> Unit,
-) {
-    Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
-        Group(stringResource(R.string.settings_group_language))
-        Text(
-            text = stringResource(R.string.settings_language_note),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
-        )
-        // A list of choices is read, not searched: the languages are sorted by
-        // the name the interface itself shows them under, so Bangla sits above
-        // English in an English interface and each language's own alphabet is
-        // respected in its own interface. Each row is named in the language's
-        // own script first, which the reader must recognise before they can
-        // read anything else here, with the English name beside it so the two
-        // names are never a guess.
-        val entries = UiLanguage.entries.map { it to languageName(it.tag) }
-        entries.sortedBy { it.second.lowercase() }.forEach { (language, _) ->
-            ChoiceRow(
-                title = languageChoiceName(language.tag),
-                subtitle = stringResource(R.string.settings_language_subtitle),
-                selected = settings.uiLanguage == language.tag,
-                onClick = { onLanguage(language.tag) },
-            )
-        }
-        Spacer(Modifier.height(Space.Section))
-    }
 }
 

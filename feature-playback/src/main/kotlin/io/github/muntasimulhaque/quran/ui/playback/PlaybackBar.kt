@@ -2,6 +2,7 @@ package io.github.muntasimulhaque.quran.ui.playback
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +15,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,6 +36,13 @@ import io.github.muntasimulhaque.quran.playback.PlaybackUiState
  * The playback pill. It speaks in four voices: asking to download a surah,
  * reporting progress, reporting a failure, and playing. Downloading only ever
  * starts from the reader's own tap on Download, and only for one surah.
+ *
+ * The pill is also where its two popups hang. A menu takes the shape of the
+ * anchor it is given, and an anchor on the word the reader touched stood the
+ * reciter chooser at one end of the capsule and the listening menu at the other
+ * (owner report): two popups in two places on one control. So the capsule
+ * holds both, from one anchor on its own centre, and the words only say which
+ * of the two was asked for.
  */
 @Composable
 fun PlaybackBar(
@@ -122,7 +134,19 @@ fun PlaybackBar(
     // is nothing to choose between, and a list with nothing in it is not a
     // door, so the door is closed rather than open and inert.
     val chooseReciter = if (downloading || reciterOptions.isEmpty()) null else onReciter
-    val listening = if (playing) onSpeed to onEndOfAudio else null
+    // The capsule holds the two menus, so the words answer a tap with the
+    // name of one rather than each raising a sheet of its own.
+    var openMenu by remember { mutableStateOf<PillMenu?>(null) }
+    val openReciters: (() -> Unit)? = if (chooseReciter == null) {
+        null
+    } else {
+        { openMenu = PillMenu.Reciters }
+    }
+    val openListening: (() -> Unit)? = if (playing) {
+        { openMenu = PillMenu.Listening }
+    } else {
+        null
+    }
     BoxWithConstraints(
         modifier = modifier
             .padding(horizontal = BarGutter)
@@ -136,6 +160,31 @@ fun PlaybackBar(
     ) {
         val oneRow = maxWidth >= oneRowFloor(controls.size)
         Column {
+            // Both menus hang from the capsule's own centre, so the reader's
+            // eye is sent to one place on the control rather than to two.
+            PillMenuAnchor {
+                when (openMenu) {
+                    PillMenu.Reciters -> ReciterMenu(
+                        open = true,
+                        options = reciterOptions,
+                        selected = reciterId,
+                        onChoose = {
+                            openMenu = null
+                            onReciter(it)
+                        },
+                        onDismiss = { openMenu = null },
+                    )
+                    PillMenu.Listening -> ListeningMenu(
+                        open = true,
+                        onDismiss = { openMenu = null },
+                        speed = speed,
+                        end = end,
+                        onSpeed = onSpeed,
+                        onEndOfAudio = onEndOfAudio,
+                    )
+                    null -> Unit
+                }
+            }
             if (oneRow) {
                 Row(
                     modifier = Modifier.padding(
@@ -148,13 +197,9 @@ fun PlaybackBar(
                 ) {
                     PlaybackWords(
                         reciterName = reciterName,
-                        reciterId = reciterId,
-                        reciterOptions = reciterOptions,
-                        onReciter = chooseReciter,
+                        onOpenReciters = openReciters,
                         status = status,
-                        onListening = listening,
-                        speed = speed,
-                        end = end,
+                        onOpenListening = openListening,
                         modifier = Modifier
                             .weight(1f, fill = false)
                             .padding(horizontal = 4.dp, vertical = 2.dp),
@@ -178,13 +223,9 @@ fun PlaybackBar(
                 // the lines keep clear of the curve at the top and the foot.
                 PlaybackWordsLine(
                     reciterName = reciterName,
-                    reciterId = reciterId,
-                    reciterOptions = reciterOptions,
-                    onReciter = chooseReciter,
+                    onOpenReciters = openReciters,
                     status = status,
-                    onListening = listening,
-                    speed = speed,
-                    end = end,
+                    onOpenListening = openListening,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp, vertical = 10.dp),
@@ -211,5 +252,23 @@ fun PlaybackBar(
                 )
             }
         }
+    }
+}
+
+/**
+ * The anchor the pill's own popups hang from: the capsule's own width, with
+ * the popup's measure centred on it and its top edge as the line they drop
+ * from.
+ *
+ * A menu takes the left edge of the anchor it is given, so the anchor and the
+ * menu are one width on purpose: centred, they stand on one centre whatever
+ * the pill's own width is (owner report). The anchor draws nothing and takes
+ * no room, because a popup is a window of its own and only its position is
+ * read from here.
+ */
+@Composable
+private fun PillMenuAnchor(content: @Composable () -> Unit) {
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Box(Modifier.width(PillMenuMeasure).testTag("pill-menu-anchor")) { content() }
     }
 }

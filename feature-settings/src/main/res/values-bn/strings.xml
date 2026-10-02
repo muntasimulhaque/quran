@@ -15,6 +15,7 @@
     <string name="settings_auto_night_subtitle">ফোন ডার্ক মোডে থাকলে রাতের থিম, নাহলে আপনার পাতা</string>
     <string name="settings_summary_theme_auto">%1$s · দিনের পাতা %2$s</string>
 
+    <string name="settings_group_interface">ইন্টারফেস</string>
     <string name="settings_group_reading">পড়া</string>
     <string name="settings_group_recitation">তিলাওয়াত</string>
     <string name="settings_group_reminder">মনে করানো</string>

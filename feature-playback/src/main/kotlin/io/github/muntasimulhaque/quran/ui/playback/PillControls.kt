@@ -52,6 +52,16 @@ internal class WordControl(
 ) : PillControl
 
 /**
+ * The two popups the pill's own words open, named so the capsule can say
+ * which one is standing: the reciter's name opens the chooser, and the place
+ * under it opens the pace and the end of the audio.
+ *
+ * The capsule draws both, from one anchor on its own centre, so the reader's
+ * eye is sent to one place on the control rather than to two (owner report).
+ */
+internal enum class PillMenu { Reciters, Listening }
+
+/**
  * What the pill offers in the state it is in.
  *
  * Downloading only ever starts from the reader's own tap, the offer states
