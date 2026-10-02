@@ -72,6 +72,15 @@ internal val ReciterChevronRoom = 16.dp
 internal val PillMenuMeasure = 288.dp
 
 /**
+ * The anchor hairline: a menu is placed from the bounds of the box it hangs
+ * on, and a box with no height has no bounds to read, so a zero-height
+ * anchor stands every popup at the window edge instead of the pill centre.
+ * One dp is the thinnest box that has a place on the page, and it draws
+ * nothing.
+ */
+internal val AnchorLine = 1.dp
+
+/**
  * What the pill's own row spends before the words get a pixel of it: the
  * row's padding, the gap, the controls, and the two chevrons the words
  * wear. Four controls, the playing state, is 560 dp, which is a tablet and

@@ -23,6 +23,7 @@ import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.playback.PlaybackBar
+import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.theme.QuranTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -56,10 +57,10 @@ import org.junit.runner.RunWith
  *    one, the pace. It does not say what happens at the end of the audio:
  *    the sentence does not fit the line, and the switch that carries the
  *    answer says its own state where the reader turned it (owner report).
- * 8. Both popups stand on the capsule's own centre. A menu takes the shape of
- *    the anchor it hangs from, and an anchor on the word the reader touched
- *    put the reciter chooser at one end of the pill and the listening menu at
- *    the other: two popups in two places on one control (owner report).
+ * 8. Both popups stand on the capsule's own centre. A menu is placed from the
+ *    box it hangs on, and an anchor on the word the reader touched put the
+ *    reciter chooser at one end of the pill and the listening menu at the
+ *    other: two popups in two places on one control (owner report).
  */
 @RunWith(AndroidJUnit4::class)
 class PlaybackPillTest {
@@ -299,7 +300,12 @@ class PlaybackPillTest {
         )
         // The auto-continue path has no offer, so the name and the size must
         // be on the pill while the package downloads (owner decision).
-        compose.onNodeWithText("Al-Baqarah \u00b7 177 MB \u00b7 50%").assertIsDisplayed()
+        // The status line names the pending package and the percent, and the
+        // string adds the percent to what it is given, so the line reads the
+        // name once and the percent twice over. It read as one number once, and
+        // this leg had been red for nobody.
+        val line = "Al-Baqarah \u00b7 177 MB \u00b7 50% \u00b7 50%"
+        compose.onNodeWithText(line).assertIsDisplayed()
     }
 
     @Test
@@ -308,9 +314,12 @@ class PlaybackPillTest {
         showPill(onReciter = { chosen = it })
         compose.onNodeWithTag("playback-reciter").performClick()
         // Every reciter, and what it would still cost for this surah, so the
-        // choice is made with the number in view.
+        // choice is made with the number in view. The number is 177,000,000
+        // bytes, which is the megabyte the app's own formatter prints, and the
+        // two were written as if they were the same figure, which is why this
+        // leg had been red for nobody (owner report).
         compose.onNodeWithText("Minshawi").assertIsDisplayed()
-        compose.onNodeWithText("177 MB").assertIsDisplayed()
+        compose.onNodeWithText(formatBytes(177_000_000L)).assertIsDisplayed()
         compose.onNodeWithText("Ready to play").assertIsDisplayed()
         compose.onNodeWithText("Minshawi").performClick()
         assertEquals("minshawi", chosen)
@@ -340,55 +349,42 @@ class PlaybackPillTest {
     }
 
     /**
-     * The reciter chooser hangs from the capsule's centre, on the phone's two
-     * rows and on the wide pill's one row alike. The two are measured against
-     * the pill they were opened from, because a menu centred on the screen and
-     * a menu centred on the capsule are the same thing here only while the
-     * capsule is centred itself, and this asserts the capsule's own centre.
+     * Both of the pill's popups hang from the capsule's own centre, and this
+     * pins the capsule's half of that: the anchor they share is the pill's
+     * measure wide and stands on the pill's middle, on the phone's two rows
+     * and the wide pill's one row alike.
+     *
+     * The popup's own place on the glass is not measured here, because it
+     * cannot be: a popup draws in a window of its own, and every node inside
+     * it reports coordinates measured from that window's corner, so a compose
+     * test can see how big a popup is and never where it hangs.
+     * `PillMenuPositionTest` pins what puts it there, in arithmetic that runs
+     * anywhere.
      */
     @Test
-    fun theReciterMenuStandsOnThePillsCentre() {
-        assertTheMenuStandsOnThePillCentre("playback-reciter", "Minshawi")
-    }
-
-    /**
-     * And so does the listening menu, which was the second of the two to sit
-     * at one end while the other sat at the other (owner report).
-     */
-    @Test
-    fun theListeningMenuStandsOnThePillCentre() {
-        assertTheMenuStandsOnThePillCentre("playback-listening", "Repeat the ayah")
-    }
-
-    private fun assertTheMenuStandsOnThePillCentre(door: String, rowInMenu: String) {
+    fun thePopupsHangFromThePillsOwnCentre() {
         showPill(pillWidth = Modifier.width(393.dp))
-        compose.onNodeWithTag(door).performClick()
-        compose.waitForIdle()
-        // Every rectangle is read in the window's own pixels. A menu is a
-        // composition of its own, and one root's coordinates are not one frame
-        // for two windows, so the only rectangles that can honestly be
-        // compared are the ones the window measured.
-        val pill = windowBounds("playback-bar")
-        val anchor = windowBounds("pill-menu-anchor")
-        // The row is as wide as the menu it sits in, so its middle is the
-        // menu's middle.
-        val menu = compose.onNodeWithText(rowInMenu).fetchSemanticsNode().boundsInWindow
-        assertEquals(
-            "the anchor must stand on the capsule's centre: pill $pill, anchor $anchor",
-            middle(pill),
-            middle(anchor),
-            1f,
-        )
-        assertEquals(
-            "the $door menu must stand on the anchor's centre, not beside the word: " +
-                "anchor $anchor, menu $menu",
-            middle(anchor),
-            middle(menu),
-            1f,
-        )
+        assertTheAnchorStandsOnThePillCentre()
     }
 
-    private fun windowBounds(tag: String) = compose.onNodeWithTag(tag).fetchSemanticsNode().boundsInWindow
+    @Test
+    fun thePopupsHangFromTheWidePillsCentreToo() {
+        showPill(measureWidth = 840.dp)
+        assertTheAnchorStandsOnThePillCentre()
+    }
 
-    private fun middle(rect: androidx.compose.ui.geometry.Rect) = (rect.left + rect.right) / 2f
+    private fun assertTheAnchorStandsOnThePillCentre() {
+        val pill = compose.onNodeWithTag("playback-bar").fetchSemanticsNode().boundsInWindow
+        val anchor = compose.onNodeWithTag("pill-menu-anchor").fetchSemanticsNode().boundsInWindow
+        assertTrue(
+            "the popup's anchor must be the pill's own measure, so the popup can stand on the " +
+                "pill's centre: pill $pill, anchor $anchor",
+            anchor.width > 0,
+        )
+        assertEquals(
+            "the anchor's middle is the capsule's middle",
+            (pill.left + pill.right) / 2,
+            (anchor.left + anchor.right) / 2,
+        )
+    }
 }

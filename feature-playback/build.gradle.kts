@@ -40,4 +40,5 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.session)
+    testImplementation(libs.junit)
 }

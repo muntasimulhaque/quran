@@ -23,8 +23,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.feature.playback.R
@@ -160,29 +163,34 @@ fun PlaybackBar(
     ) {
         val oneRow = maxWidth >= oneRowFloor(controls.size)
         Column {
-            // Both menus hang from the capsule's own centre, so the reader's
-            // eye is sent to one place on the control rather than to two.
-            PillMenuAnchor {
-                when (openMenu) {
-                    PillMenu.Reciters -> ReciterMenu(
-                        open = true,
-                        options = reciterOptions,
-                        selected = reciterId,
-                        onChoose = {
-                            openMenu = null
-                            onReciter(it)
-                        },
-                        onDismiss = { openMenu = null },
-                    )
-                    PillMenu.Listening -> ListeningMenu(
-                        open = true,
-                        onDismiss = { openMenu = null },
-                        speed = speed,
-                        end = end,
-                        onSpeed = onSpeed,
-                        onEndOfAudio = onEndOfAudio,
-                    )
-                    null -> Unit
+            // Both popups hang from the capsule's own centre, so the reader's
+            // eye is sent to one place on the control rather than to two. The
+            // anchor is a box of the popup's own measure in the middle of the
+            // pill, and the place it stands on the screen is read from there,
+            // once, while the pill is laid out.
+            PillMenuAnchor { anchor ->
+                PillPopup(
+                    open = openMenu != null,
+                    anchor = anchor,
+                    onDismiss = { openMenu = null },
+                ) {
+                    when (openMenu) {
+                        PillMenu.Reciters -> ReciterChoices(
+                            options = reciterOptions,
+                            selected = reciterId,
+                            onChoose = {
+                                openMenu = null
+                                onReciter(it)
+                            },
+                        )
+                        PillMenu.Listening -> ListeningMenu(
+                            speed = speed,
+                            end = end,
+                            onSpeed = onSpeed,
+                            onEndOfAudio = onEndOfAudio,
+                        )
+                        null -> Unit
+                    }
                 }
             }
             if (oneRow) {
@@ -260,15 +268,26 @@ fun PlaybackBar(
  * the popup's measure centred on it and its top edge as the line they drop
  * from.
  *
- * A menu takes the left edge of the anchor it is given, so the anchor and the
- * menu are one width on purpose: centred, they stand on one centre whatever
- * the pill's own width is (owner report). The anchor draws nothing and takes
- * no room, because a popup is a window of its own and only its position is
- * read from here.
+ * The anchor and the popup are one measure on purpose, and the anchor is read
+ * back to the caller so the popup is placed from the anchor's own place and
+ * not from whatever the library would take from a box it cannot see the
+ * bounds of (owner report). It draws nothing and takes one hairline of room,
+ * because a box with no height has no bounds to read: a zero-height anchor
+ * stands every popup at the window's own edge instead of the capsule's centre.
  */
 @Composable
-private fun PillMenuAnchor(content: @Composable () -> Unit) {
+private fun PillMenuAnchor(content: @Composable (anchor: IntRect) -> Unit) {
+    var anchor by remember { mutableStateOf(IntRect.Zero) }
     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-        Box(Modifier.width(PillMenuMeasure).testTag("pill-menu-anchor")) { content() }
+        Box(
+            Modifier
+                .width(PillMenuMeasure)
+                .height(AnchorLine)
+                .testTag("pill-menu-anchor")
+                .onGloballyPositioned {
+                    val box = it.boundsInWindow()
+                    anchor = IntRect(box.left.toInt(), box.top.toInt(), box.right.toInt(), box.bottom.toInt())
+                },
+        ) { content(anchor) }
     }
 }

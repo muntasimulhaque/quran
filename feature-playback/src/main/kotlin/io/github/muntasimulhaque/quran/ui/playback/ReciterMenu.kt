@@ -25,24 +25,46 @@ import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 
 /**
- * The reciters, in a menu the pill opened.
+ * The reciters, as the list both the playing pill and the download offer
+ * carry.
  *
  * One list, in one shape, wherever the choice is offered: the playing pill
- * carries it beside the reciter it is hearing, and the offer carries it
- * above the size it is asking for, and a reader who learned one has learned
- * both. A reciter who is already chosen wears the check, and every other row
- * says what that reciter would still need for the surah at hand, so the
- * choice is made with the price in view rather than by trying it.
+ * carries it beside the reciter it is hearing, and the offer carries it above
+ * the size it is asking for, and a reader who learned one has learned both. A
+ * reciter who is already chosen wears the check, and every other row says what
+ * that reciter would still need for the surah at hand, so the choice is made
+ * with the price in view rather than by trying it.
  *
- * The menu wears the pill's own cloth: the same surface color, the same
- * rounded shape of its own, and no depth the pill does not have. The pill
- * carries no border and casts no shadow, so a menu that did read as a
- * foreign sheet laid over it.
+ * The rows are drawn at the pill's own [PillMenuMeasure], which is also the
+ * measure of the anchor the playing pill hangs them from, so the list stands
+ * on the capsule's centre rather than beside the word that opened it (owner
+ * report).
+ */
+@Composable
+internal fun ReciterChoices(
+    options: List<ListenOption>,
+    /** The reciter in use, by id; null where none of them is. */
+    selected: String?,
+    onChoose: (String) -> Unit,
+) {
+    options.forEach { option ->
+        ReciterChoiceRow(
+            option = option,
+            selected = option.reciter == selected,
+            onClick = { onChoose(option.reciter) },
+        )
+    }
+}
+
+/**
+ * The same list in a menu of its own, for the one place that is not the
+ * playing pill: the offer bar asks before anything is fetched, and its menu
+ * hangs from the reciter's name above the size it is asking for.
  *
- * Its measure is the pill's own [PillMenuMeasure], which is also the measure
- * of the anchor the playing pill hangs it from: a menu takes the left edge of
- * the anchor it is given, so the two have to be one width for the menu to
- * stand on the pill's centre (owner report).
+ * The menu wears the same cloth as the pill's: the same surface color, the
+ * same rounded shape, and no depth the pill does not have, because the pill
+ * carries no border and casts no shadow, so a menu that did read as a foreign
+ * sheet laid over it.
  */
 @Composable
 internal fun ReciterMenu(
@@ -62,13 +84,7 @@ internal fun ReciterMenu(
         shadowElevation = 0.dp,
         modifier = Modifier.width(PillMenuMeasure),
     ) {
-        options.forEach { option ->
-            ReciterChoiceRow(
-                option = option,
-                selected = option.reciter == selected,
-                onClick = { onChoose(option.reciter) },
-            )
-        }
+        ReciterChoices(options = options, selected = selected, onChoose = onChoose)
     }
 }
 

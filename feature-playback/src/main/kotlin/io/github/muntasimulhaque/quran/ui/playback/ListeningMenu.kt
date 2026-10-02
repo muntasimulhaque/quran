@@ -8,11 +8,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
@@ -36,13 +34,10 @@ import io.github.muntasimulhaque.quran.ui.kit.SpeedSteps
 import io.github.muntasimulhaque.quran.ui.kit.speedText
 
 /**
- * The pace, and what happens at the end of the audio, in the pill's own
- * cloth: the same floating tone and rounded shape the reciter chooser wears,
- * so it reads as the pill opening rather than a foreign sheet laid over it.
- *
- * It is the pill's own [PillMenuMeasure], which is also the measure of the
- * anchor the playing pill hangs it from, so the menu stands on the capsule's
- * centre rather than beside the word that opened it (owner report).
+ * The pace, and what happens at the end of the audio, as the list the pill
+ * opens from its own middle, in the pill's own cloth: the same floating tone
+ * and rounded shape the reciter chooser wears, so it reads as the pill opening
+ * rather than a foreign sheet laid over it.
  *
  * The three end answers are three switches over one value
  * (owner decision): each reports the answer it carries, and the plan
@@ -51,97 +46,85 @@ import io.github.muntasimulhaque.quran.ui.kit.speedText
  */
 @Composable
 internal fun ListeningMenu(
-    open: Boolean,
-    onDismiss: () -> Unit,
     speed: Float,
     end: EndOfAudio,
     onSpeed: (Float) -> Unit,
     onEndOfAudio: (EndOfAudio) -> Unit,
 ) {
-    DropdownMenu(
-        expanded = open,
-        onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(20.dp),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        tonalElevation = 0.dp,
-        shadowElevation = 0.dp,
-        modifier = Modifier.width(PillMenuMeasure),
+    Text(
+        text = stringResource(R.string.playback_speed_label),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 6.dp),
+    )
+    // One row, five paces, the chosen one filled: the same shape the
+    // Listening page draws, so one control is learned once.
+    Row(
+        modifier = Modifier
+            .padding(horizontal = 10.dp)
+            .clip(RoundedCornerShape(50))
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            .padding(3.dp),
+        horizontalArrangement = Arrangement.spacedBy(1.dp),
     ) {
-        Text(
-            text = stringResource(R.string.playback_speed_label),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 6.dp),
-        )
-        // One row, five paces, the chosen one filled: the same shape the
-        // Listening page draws, so one control is learned once.
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 10.dp)
-                .clip(RoundedCornerShape(50))
-                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-                .padding(3.dp),
-            horizontalArrangement = Arrangement.spacedBy(1.dp),
-        ) {
-            SpeedSteps.forEach { step ->
-                val active = kotlin.math.abs(step - speed) < 0.01f
-                val description = stringResource(
-                    R.string.playback_speed_option,
-                    speedText(step),
-                    stringResource(R.string.playback_speed_label),
-                )
-                Box(
-                    modifier = Modifier
-                        .minimumInteractiveComponentSize()
-                        .clip(RoundedCornerShape(50))
-                        .background(
-                            if (active) {
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
-                            } else {
-                                Color.Transparent
-                            },
-                        )
-                        .selectable(selected = active, role = Role.RadioButton) { onSpeed(step) }
-                        .semantics { contentDescription = description },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = speedText(step),
-                        style = MaterialTheme.typography.labelLarge.copy(fontSize = 12.sp),
-                        color = if (active) {
-                            MaterialTheme.colorScheme.primary
+        SpeedSteps.forEach { step ->
+            val active = kotlin.math.abs(step - speed) < 0.01f
+            val description = stringResource(
+                R.string.playback_speed_option,
+                speedText(step),
+                stringResource(R.string.playback_speed_label),
+            )
+            Box(
+                modifier = Modifier
+                    .minimumInteractiveComponentSize()
+                    .clip(RoundedCornerShape(50))
+                    .background(
+                        if (active) {
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
                         } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
+                            Color.Transparent
                         },
                     )
-                }
+                    .selectable(selected = active, role = Role.RadioButton) { onSpeed(step) }
+                    .semantics { contentDescription = description },
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = speedText(step),
+                    style = MaterialTheme.typography.labelLarge.copy(fontSize = 12.sp),
+                    color = if (active) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                )
             }
         }
-        EndSwitch(
-            label = stringResource(R.string.playback_repeat_ayah),
-            choice = EndOfAudio.REPEAT_AYAH,
-            chosen = end,
-            onEndOfAudio = onEndOfAudio,
-        )
-        // The surah, the same answer one unit larger: the ayah that has just
-        // ended begins again, and so does the whole surah, at its first ayah
-        // that is on the device (owner decision).
-        EndSwitch(
-            label = stringResource(R.string.playback_repeat_surah),
-            choice = EndOfAudio.REPEAT_SURAH,
-            chosen = end,
-            onEndOfAudio = onEndOfAudio,
-        )
-        // The end of the surah, where the two above are the end of the ayah.
-        // On, the next surah is fetched with the reciter being heard and
-        // plays on; off, the pill offers it with its size.
-        EndSwitch(
-            label = stringResource(R.string.playback_continue_next),
-            choice = EndOfAudio.CONTINUE,
-            chosen = end,
-            onEndOfAudio = onEndOfAudio,
-        )
     }
+    EndSwitch(
+        label = stringResource(R.string.playback_repeat_ayah),
+        choice = EndOfAudio.REPEAT_AYAH,
+        chosen = end,
+        onEndOfAudio = onEndOfAudio,
+    )
+    // The surah, the same answer one unit larger: the ayah that has just
+    // ended begins again, and so does the whole surah, at its first ayah
+    // that is on the device (owner decision).
+    EndSwitch(
+        label = stringResource(R.string.playback_repeat_surah),
+        choice = EndOfAudio.REPEAT_SURAH,
+        chosen = end,
+        onEndOfAudio = onEndOfAudio,
+    )
+    // The end of the surah, where the two above are the end of the ayah.
+    // On, the next surah is fetched with the reciter being heard and
+    // plays on; off, the pill offers it with its size.
+    EndSwitch(
+        label = stringResource(R.string.playback_continue_next),
+        choice = EndOfAudio.CONTINUE,
+        chosen = end,
+        onEndOfAudio = onEndOfAudio,
+    )
 }
 
 /**

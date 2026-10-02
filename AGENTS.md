@@ -134,13 +134,16 @@ command to rediscover.
   Java 17 bytecode and lets the running JDK compile it (owner decision).
   `local.properties` reads `sdk.dir=C:/Users/zn/AppData/Local/Android/Sdk`
   and is gitignored.
-- The Android SDK here has the command-line tools, an Android 35 ATD
-  system image, and a `pixel35` AVD installed, and the emulator still cannot
-  start: "x86_64 emulation currently requires hardware acceleration",
-  because the Windows Hypervisor Platform is off and turning it on needs a
-  reboot. So the instrumented suites are CI's unless the owner enables it.
-  `gh` is on the PATH and authenticated, so the content Releases can be
-  published from here.
+- The Android SDK here has the command-line tools, two system images, and two
+  AVDs, and **the emulator runs here**: `emulator-check accel` reports
+  `WHPX(10.0.26300) is installed and usable`, and the instrumented suites are
+  not CI's only home. `pixel35` (the Android 35 ATD image) and `pixelc` are
+  both installed. Start one headless with `-no-window -no-audio -no-boot-anim
+  -gpu host` and wait for `sys.boot_completed` to report `1`: this machine has
+  a dedicated GPU (an AMD Radeon), so the host renderer is both faster and
+  closer to a real device than `swiftshader_indirect`. A full `:app:connectedDebugAndroidTest`
+  takes about seven and a half minutes here. `gh` is on the PATH and
+  authenticated, so the content Releases can be published from here.
 - On the other machine (`Dev Pro`) the JBR is the JDK, `adb` and the
   emulator are under `C:/Users/Dev Pro/AppData/Local/Android/Sdk`, and the
   AVDs are `Pixel_4_35`, `Nexus_7_35`, `Pixel_C_35`, and `api27`. Start one
@@ -159,7 +162,15 @@ command to rediscover.
   cat files/shots/<name>.png`. The output directory has to be inside the
   app's own storage: `/sdcard` root is EPERM for the app, and a directory
   under `Android/data/<package>/files` does not exist until something calls
-  `getExternalFilesDir`.
+  `getExternalFilesDir`. The same two commands work here, and a whole
+  capture can be kept without it.
+- Two facts about the ATD image here, both worth a failed command of your own
+  to learn: `Screenshot.capture()` returns a **black frame**, because the
+  display is off, so a sheet or a popup has to be read through a compose
+  node's own `captureToImage()`; and AGP uninstalls the app when
+  `connectedDebugAndroidTest` returns, so anything it wrote under the app's
+  own storage is gone by the time you go to read it (the two commands above
+  are how it is read anyway).
 - MSYS rewrites `/sdcard/...` arguments, so prefix `adb shell`, `adb push`,
   and `adb pull` with `MSYS_NO_PATHCONV=1`, and the same for `gh api` (with
   its leading slash dropped). adb is a Windows binary: `/tmp/x` is
@@ -175,7 +186,7 @@ command to rediscover.
 ## Build, test, verify
 
 ```bash
-./gradlew :core:test :data:testDebugUnitTest :ui-kit:testDebugUnitTest :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
+./gradlew :core:test :data:testDebugUnitTest :ui-kit:testDebugUnitTest :feature-playback:testDebugUnitTest :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
 ./gradlew :data:connectedDebugAndroidTest   # saved store, last read, recitation manifest
 ./gradlew :app:connectedDebugAndroidTest    # the app surfaces and the screenshot tour
 ```
@@ -217,10 +228,13 @@ at every step:
   `screenshots.yml` on the three store form factors, and that workflow names
   six classes: `ScreenshotTest`, `WordByWordTest`, `MushafTurnTest`,
   `TafsirDirectionTest`, `SavedNotesTest`, `SettingsVisibilityTest`. Every
-  other app test runs on a session's own emulator or not at all, and two of
-  them had been red for nobody to see, so a session that changes
-  the settings sheet, and every release session, runs the whole app suite
-  rather than only the six.
+  other app test runs on a session's own emulator, which this machine has, so
+  a session that changes the settings sheet, and every release session, runs
+  the whole app suite rather than only the six. Two legs are red here and red
+  on `main`: `ShareCardCaptureTest.captureTheLongestAyahWhole`, whose hardware
+  layer read-back this emulator's graphics stack refuses, and
+  `SystemThemeTest.theReadingFollowsThePhonesDayAndNight`, which waits for a
+  ground the phone's own night mode has not drawn yet.
 - Do not hand-drive the app to verify UI. After an emulator crash the
   injected input in the screen's top band can go dead while the rest keeps
   working, captures return older frames, and the clock jumps. The loop is:
@@ -350,6 +364,16 @@ them are worth reading before any run:
 - **Read the frames a red leg kept before touching anything.** The log says
   which assertion failed; the frame says what the reader was looking at.
   Three wrong diagnoses in a row were solved by one kept frame.
+- **A red leg on this machine is a fact to baseline, not a verdict.** Four of
+  the app's own legs were red here for nobody to see, and every one of them was
+  red on `main` too: `git worktree add` a copy of the parent commit and run the
+  class there before believing that a change of yours did it.
+- **A popup's place on the glass cannot be read by a compose test.** A popup
+  draws in a window of its own, and every node inside it reports coordinates
+  measured from that window's own corner, so a test can see how big a popup is
+  and never where it hangs. Pin the rule that places it instead, as arithmetic
+  in a JVM test, and pin the anchor it is placed from in the compose test that
+  can see that.
 - **A retry is not a diagnosis.** It is worth one when it names the failure
   the way the 10 inch tour step does, and worth nothing when it only
   re-waits.
