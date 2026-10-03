@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 3.7 (versionCode 38)
+Version: 3.8 (versionCode 39)
 
 ## Listing
 
@@ -200,6 +200,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (3.8, 378 characters)
+
+Each day now brings a different ayah: the reminder deals from a shuffled deck rather than walking the Book in order, and every ayah still comes once before it starts over. The reminder asks for its notification on the first screen, so the ayah of the day can arrive from your first morning, and a morning your phone held on to is no longer lost. No ads, no trackers, no account.
 
 ## Release notes (3.7, 491 characters)
 
