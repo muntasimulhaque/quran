@@ -26,7 +26,7 @@
     <string name="settings_daily_subtitle_on">প্রতিদিন একটি আয়াত, %1$s-এ</string>
         <string name="settings_open_daily">প্রতিদিনের আয়াতের সেটিংস</string>
     <string name="settings_daily_time_title">সময়</string>
-    <string name="settings_daily_note">প্রতিদিন একটি আয়াত, কোনো শব্দ না। এটি নোটিফিকেশনে দিনের আয়াত ও তার অনুবাদ নিয়ে অপেক্ষা করে; ট্যাপ করলে আপনি যেখানে পড়ছেন সেখানে খোলে। আয়াতগুলো কুরআনের নিজের ক্রমে আসে, তাই প্রতিদিন পরের আয়াতটি আসে।</string>
+    <string name="settings_daily_note">প্রতিদিন একটি আয়াত, কোনো শব্দ না। এটি নোটিফিকেশনে দিনের আয়াত ও তার অনুবাদ নিয়ে অপেক্ষা করে; ট্যাপ করলে আপনি যেখানে পড়ছেন সেখানে খোলে। প্রতিদিন একটি ভিন্ন আয়াত আসে, আর কুরআনের প্রতিটি আয়াত একবার এলে পরের চক্র শুরু হয়।</string>
     <string name="settings_daily_off">প্রতিদিনের আয়াত বন্ধ আছে</string>
     <string name="settings_daily_blocked">আপনার ফোন এই মনে করানোটি দেখাচ্ছে না, তাই প্রতিদিনের আয়াত আসবে না।</string>
     <string name="settings_daily_blocked_action">নোটিফিকেশন সেটিংস</string>

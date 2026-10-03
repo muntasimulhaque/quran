@@ -26,7 +26,7 @@
     <string name="settings_daily_subtitle_on">One ayah a day, at %1$s</string>
     <string name="settings_open_daily">Daily ayah settings</string>
     <string name="settings_daily_time_title">Time</string>
-    <string name="settings_daily_note">The reminder makes no sound. It waits in your notifications with the day\'s ayah and its translation, and a tap opens it where you read. The ayahs come in the Book\'s own order, so each day brings the next one.</string>
+    <string name="settings_daily_note">The reminder makes no sound. It waits in your notifications with the day\'s ayah and its translation, and a tap opens it where you read. Each day brings a different ayah, and every ayah in the Book comes once before the deck is filled again.</string>
     <string name="settings_daily_off">The reminder is off</string>
     <string name="settings_daily_blocked">Your phone is not showing this reminder, so it cannot arrive.</string>
     <string name="settings_daily_blocked_action">Notification settings</string>
