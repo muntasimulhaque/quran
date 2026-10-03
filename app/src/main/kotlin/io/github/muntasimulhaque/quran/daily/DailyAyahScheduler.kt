@@ -27,6 +27,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.util.Calendar
+import java.util.TimeZone
 
 /**
  * The daily reminder: one quiet notification a day, carrying one ayah of the
@@ -50,6 +52,16 @@ import kotlinx.coroutines.launch
  * re-armed from the app's own launch too, so a reboot or a clock change costs
  * at most the one morning before the app is opened again; that is the price of
  * not asking for a boot permission this app has never needed.
+ *
+ * Every alarm is armed under its own day's request code, which is the whole
+ * of the launch re-arm. A pending intent is identified by the code as well as
+ * by the intent, so an alarm for a moment that has passed and an alarm for
+ * tomorrow are two different alarms rather than one alarm moved: opening the
+ * app in the afternoon can no longer throw away the eight o'clock the phone is
+ * still holding, which on a phone that does not grant the exact time is the
+ * difference between a reminder that arrived late and a morning with nothing
+ * in it (owner report). Re-arming today is still a re-arm, because the same
+ * day is the same slot.
  */
 object DailyAyahScheduler {
 
@@ -62,12 +74,10 @@ object DailyAyahScheduler {
     /**
      * The one notification the reminder posts under. It is a single number for
      * the whole life of the app, so a fire that lands twice in one morning
-     * (the reader opened the app at their own moment and the launch re-armed
-     * one) updates the one line in the shade instead of leaving two.
+     * (a reader who changed the time with one already held, say) updates the
+     * one line in the shade instead of leaving two.
      */
     const val NOTIFICATION_ID = 2
-
-    private const val REQUEST_CODE = 41
 
     /**
      * The receiver's own worker, one per process. A receiver is finished the
@@ -109,32 +119,38 @@ object DailyAyahScheduler {
 
     /**
      * Arms the reminder for the next occurrence of [minuteOfDay], or clears it
-     * when the reader has turned it off. Re-arming the same pending intent
-     * moves the alarm rather than adding a second one, so this is safe to call
-     * after every fire and after every change the reader makes, and it is what
-     * a launch that finds no alarm due calls too ([reArmOnLaunch]).
+     * when the reader has turned it off. This is also the launch re-arm, and
+     * it is safe to call at any moment: an alarm for a moment still ahead is
+     * the same day's slot and is replaced by an identical one, and an alarm
+     * for a moment already past belongs to a day that is over, so arming
+     * tomorrow leaves it where the platform is holding it.
      *
      * The shape of the alarm is the phone's answer and not the app's: an
-     * exact alarm when the reader has given the app the phone's own exact
-     * alarm access, which is the only kind that arrives at the chosen minute
-     * on a phone that is locked and idle then, and the platform's own batched
-     * alarm otherwise, which is what a reader who declines the grant gets.
-     * Either way the moment is the reader's, and the choice itself is the pure
+     * exact alarm when the phone allows the app the exact time, which is the
+     * only kind that arrives at the chosen minute on a phone that is locked
+     * and idle then, and the platform's own batched alarm otherwise. Either
+     * way the moment is the reader's, and the choice itself is the pure
      * `plan` in `core`, which the JVM suite pins (owner decision).
      */
     fun apply(context: Context, enabled: Boolean, minuteOfDay: Int) {
         val alarm = context.getSystemService(AlarmManager::class.java) ?: return
-        val pending = pendingIntent(context)
+        val now = System.currentTimeMillis()
         if (!enabled) {
-            alarm.cancel(pending)
+            // Every alarm this app ever arms belongs to today or to tomorrow,
+            // because an arm always asks for the next occurrence of the
+            // reader's own minute. Those two slots are the whole of what a
+            // switch being turned off has to clear.
+            alarm.cancel(pendingIntent(context, localDay(now)))
+            alarm.cancel(pendingIntent(context, localDay(tomorrowFrom(now))))
             return
         }
         val plan = DailyReminder.plan(
             canScheduleExact = canScheduleExact(alarm),
             minuteOfDay = minuteOfDay,
-            now = System.currentTimeMillis(),
+            now = now,
             lastMinuteOfDay = LAST_MINUTE_OF_DAY,
         )
+        val pending = pendingIntent(context, localDay(plan.triggerAtMillis))
         when (plan.kind) {
             DailyReminder.Kind.Exact ->
                 alarm.setExactAndAllowWhileIdle(AlarmManager.RTC, plan.triggerAtMillis, pending)
@@ -151,54 +167,39 @@ object DailyAyahScheduler {
      * Whether this app may set an exact alarm on this phone.
      *
      * Android 12 and later gate it behind the reader's own grant, which is
-     * not a runtime permission and is not given at install. The app never asks
-     * for it and never says anything about it in the settings sheet (owner
-     * report): the reader has one notification to answer for, not two,
-     * and a second door into the phone's own pages is a thing a reader has to
-     * understand before they can turn one thing on. So this answer is asked
-     * where the alarm is armed and used there and nowhere else. The exact
-     * path is still taken whenever the phone allows it, which is every
-     * release before Android 12 and any phone where the reader has granted it
-     * in the phone's settings of their own accord; otherwise the reminder is
-     * armed with the phone's own batched alarm, which still reaches a
-     * sleeping phone.
+     * not a runtime permission and is not given at install, and since
+     * Android 14 it starts out denied on any install that targets Android 13
+     * or later, which this app does. The app never asks for it, never names
+     * it as missing, and has no row or button anywhere for it (owner
+     * decision): the reader has one notification to answer for, not two, and
+     * the moment the reminder is on is the moment the reader is told about
+     * the one permission there is. So this answer is asked where the alarm is
+     * armed and used there and nowhere else. The exact path is taken whenever
+     * the phone allows it, which is every release before Android 12 and any
+     * phone where the reader has turned it on in the phone's settings of
+     * their own accord; otherwise the reminder is armed with the phone's own
+     * batched alarm, which still reaches a sleeping phone.
      */
     fun canScheduleExact(alarm: AlarmManager): Boolean =
         Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarm.canScheduleExactAlarms()
 
-    /**
-     * The launch re-arm, and the one place it is allowed not to re-arm.
-     *
-     * Every launch re-arms the reminder, because the app hears nothing about a
-     * reboot and a dead alarm is a reminder that never comes again. But an
-     * arm replaces the pending one, and the reader's own moment is the minute
-     * they are most likely to open the app in: a launch there threw away the
-     * delivery the platform was still going to make, and the morning was
-     * silent (owner report, 37th session). Inside the window after that
-     * moment, the alarm is left exactly where the platform has it. Everywhere
-     * else, the launch re-arms, and an alarm that really was lost is put back.
-     */
-    fun reArmOnLaunch(context: Context, enabled: Boolean, minuteOfDay: Int) {
-        if (enabled &&
-            DailyReminder.stillDueToday(minuteOfDay, System.currentTimeMillis(), LAST_MINUTE_OF_DAY)
-        ) {
-            return
-        }
-        apply(context, enabled = enabled, minuteOfDay = minuteOfDay)
-    }
+    /** The reader's own day number, the one the alarm's request code is. */
+    private fun localDay(millis: Long): Int =
+        Math.floorDiv(
+            millis + TimeZone.getDefault().getOffset(millis),
+            DAY_MILLIS,
+        ).toInt()
 
     /**
-     * Arms the next day's reminder from wherever the current one fired. The
-     * reader's own settings are read, so a switch turned off while the phone
-     * slept is honored rather than overridden by the fire's own moment, and
-     * the alarm is anchored on the moment again rather than on the fire, so a
-     * late delivery never walks the hour forward day after day.
+     * Tomorrow by the reader's own calendar rather than by 86,400,000
+     * milliseconds, so the day number a cleared alarm is looked up under is
+     * the right one on a morning the clocks change.
      */
-    private suspend fun armNext(context: Context) {
-        val settings = runCatching { SettingsStore(context).settings.first() }.getOrNull()
-            ?: return
-        apply(context, enabled = settings.dailyAyah, minuteOfDay = settings.dailyAyahMinute)
-    }
+    private fun tomorrowFrom(now: Long): Long =
+        Calendar.getInstance().apply {
+            timeInMillis = now
+            add(Calendar.DAY_OF_YEAR, 1)
+        }.timeInMillis
 
     /**
      * The next moment the reminder should come, in the reader's own local
@@ -222,7 +223,9 @@ object DailyAyahScheduler {
      * A receiver runs with seconds to live and no process, so the work is
      * small and every failure is a skipped morning rather than a crash: the
      * ayah is looked up, and if it cannot be, the reminder is simply not
-     * posted.
+     * posted. A switch the reader turned off while the phone slept is honored
+     * here too: a held alarm from a day the reminder was still on must not
+     * speak for a reader who has since turned it off.
      */
     class Receiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent?) {
@@ -253,8 +256,20 @@ object DailyAyahScheduler {
                     // back the moment it goes quiet, and a reader whose process
                     // died reading the ayah must still have a reminder
                     // tomorrow. Arming after the notification was the one order
-                    // that lost a whole day (owner report, 37th session).
-                    armNext(application)
+                    // that lost a whole day (owner report, 37th session). The
+                    // reader's own settings are read here rather than taken
+                    // from the fire, so a switch turned off while the phone
+                    // slept is honored and the alarm is anchored on the
+                    // moment again rather than on the fire, so a late delivery
+                    // never walks the hour forward day after day.
+                    val settings = runCatching { SettingsStore(application).settings.first() }
+                        .getOrNull() ?: return@launch
+                    apply(
+                        context = application,
+                        enabled = settings.dailyAyah,
+                        minuteOfDay = settings.dailyAyahMinute,
+                    )
+                    if (!settings.dailyAyah) return@launch
                     val content = runCatching { DailyAyahContent.load(application) }.getOrNull()
                         ?: return@launch
                     val notification = runCatching {
@@ -301,15 +316,26 @@ object DailyAyahScheduler {
         }
     }
 
-    private fun pendingIntent(context: Context): PendingIntent {
+    /**
+     * The reminder's own pending intent, one per day.
+     *
+     * The request code is the reader's day number, so an alarm for a moment
+     * that has passed and an alarm for tomorrow are two alarms rather than one
+     * alarm moved, and a launch, a time change, or a fire touches only the
+     * day it means to. The day number is a small positive number for the
+     * life of any phone that is running, so the codes never collide.
+     */
+    private fun pendingIntent(context: Context, day: Int): PendingIntent {
         val intent = Intent(context, Receiver::class.java).setAction(ACTION_SHOW)
         return PendingIntent.getBroadcast(
             context,
-            REQUEST_CODE,
+            day,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
     }
+
+    private const val DAY_MILLIS = 86_400_000L
 }
 
 /**

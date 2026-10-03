@@ -50,7 +50,20 @@ class MainActivity : ComponentActivity() {
         super.attachBaseContext(newBase.createConfigurationContext(configuration))
     }
 
-    // Asked the first time the reader starts a recitation, never at launch.
+    // Asked once, at the one screen before the reading, because the reminder
+    // is the only thing this app does with the app closed and a permission
+    // asked for at the first recitation leaves the first mornings silent
+    // (owner decision). The reader has one notification to answer for and the
+    // exact alarm grant is never asked for at all, so this is the whole of
+    // what is put in front of them: one system dialog, on the screen they
+    // have already answered, and then the reading.
+    private val askOnFirstScreen =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { recreate() }
+
+    // The same permission, asked again at the moment a reader starts a
+    // recitation: that is when the app needs a notification of its own for the
+    // playback controls, and it is the second chance for a reader who did not
+    // grant it on the first screen.
     private val requestNotifications =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
@@ -63,15 +76,14 @@ class MainActivity : ComponentActivity() {
         // The alarm is armed here rather than at the moment the switch is
         // flipped, so a reboot, a timezone change, or a Doze deferral is
         // corrected on the next launch. Nothing is scheduled while the
-        // switch is off: the setting is read, and no alarm is set. The one
-        // moment a launch leaves the alarm alone is the minute after the
-        // reader's own, where moving it would throw away a delivery the
-        // platform is still going to make.
+        // switch is off: the setting is read, and no alarm is set. A launch
+        // cannot throw away a delivery the platform is still holding, because
+        // each day is armed under its own pending intent.
         val scope = CoroutineScope(Dispatchers.Default)
         scope.launch {
             val settings = runCatching { SettingsStore(this@MainActivity).settings.first() }
                 .getOrNull() ?: return@launch
-            DailyAyahScheduler.reArmOnLaunch(
+            DailyAyahScheduler.apply(
                 this@MainActivity,
                 enabled = settings.dailyAyah,
                 minuteOfDay = settings.dailyAyahMinute,
@@ -92,6 +104,7 @@ class MainActivity : ComponentActivity() {
                     incoming.getIntExtra(EXTRA_AYAH, 0).takeIf { it > 0 }
                 },
                 onPlaybackPermission = ::ensureNotificationPermission,
+                afterFirstScreen = ::leaveFirstScreen,
                 notificationsBlocked = { notificationsBlocked.value },
                 onOpenNotificationSettings = ::openNotificationSettings,
             )
@@ -132,12 +145,35 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun ensureNotificationPermission() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
-        val granted = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
-            PackageManager.PERMISSION_GRANTED
-        if (!granted) requestNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+    /**
+     * The end of the one screen before the reading.
+     *
+     * The notification permission is asked here and nowhere else on this path:
+     * the reminder arrives whether or not the app is open, and a reader who
+     * is asked for it at the first recitation has already had every morning
+     * before that one silently. It is asked once, it is the only permission
+     * this app ever asks for, and the exact alarm grant is not one of them.
+     * The Activity is recreated when the answer lands, which is what brings
+     * every window up in the language that was just chosen.
+     */
+    private fun leaveFirstScreen() {
+        if (needsNotificationPermission()) {
+            askOnFirstScreen.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            recreate()
+        }
     }
+
+    private fun ensureNotificationPermission() {
+        if (needsNotificationPermission()) {
+            requestNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
+    private fun needsNotificationPermission(): Boolean =
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
 
     companion object {
         /**

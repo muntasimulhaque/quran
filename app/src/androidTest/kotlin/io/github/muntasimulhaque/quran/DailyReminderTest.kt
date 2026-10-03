@@ -59,6 +59,12 @@ class DailyReminderTest {
         // reader who has set the reminder has granted it. A receiver that
         // finds it ungranted returns in silence, which is the correct
         // behavior and useless as a test of the rest of the path.
+        //
+        // The reminder is turned on here too, and this is its own doing: the
+        // receiver reads the reader's settings and a fire whose switch is off
+        // stays silent, which is right and means a test that inherits an off
+        // switch from an earlier class is testing the switch and not the
+        // path.
         InstrumentationRegistry.getInstrumentation().uiAutomation.grantRuntimePermission(
             context.packageName,
             Manifest.permission.POST_NOTIFICATIONS,
@@ -69,6 +75,7 @@ class DailyReminderTest {
             SettingsStore(context).apply {
                 setUiLanguage("en")
                 setTranslationPacks(setOf("translation-saheeh-en"))
+                setDailyAyah(true)
             }
         }
         DailyAyahScheduler.createChannel(context)

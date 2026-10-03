@@ -31,6 +31,12 @@ import java.util.TimeZone
  * the reminder at the new local minute, and a change of zone is corrected on
  * the next launch of the app.
  *
+ * What comes back is a moment, and nothing here says what the app does with
+ * an alarm it finds already pending for a moment that has passed: that is
+ * settled where the alarm is armed, by giving each day its own pending
+ * intent, so a launch can put tomorrow's alarm back without touching the one
+ * the phone is still holding.
+ *
  * Which of the two alarms is available is the reader's own setting in the
  * phone, never the app's to assume, so [plan] is where the choice is made and
  * it is a pure function: the JVM suite pins both halves, and the instrumented
@@ -129,51 +135,6 @@ object DailyReminder {
             // calendar day keeps the reminder at the minute they chose and
             // adding a fixed length would not.
             if (timeInMillis <= now) add(Calendar.DAY_OF_YEAR, 1)
-        }.timeInMillis
-    }
-
-    /**
-     * Whether the platform may still be holding today's alarm.
-     *
-     * The app re-arms the reminder at every launch, because it asks for no
-     * boot permission and a reboot is the one thing it cannot hear about
-     *. Re-arming replaces the pending alarm, and the moment the reader
-     * set has just passed, so a launch inside that minute throws away a
-     * delivery the platform is still going to make and the morning's reminder
-     * never arrives at all (owner report, 37th session). The platform is never
-     * late by more than the window, so "the moment passed less than a window
-     * ago" is the whole test: leave the alarm exactly where it is.
-     *
-     * The cost is honest and small: an alarm that really was lost, on a phone
-     * that really did reboot, and a reader who opens the app within a minute
-     * of their own moment, loses that one morning. The other way round loses
-     * the same morning to a habit, which is the commoner of the two.
-     */
-    fun stillDueToday(
-        minuteOfDay: Int,
-        now: Long,
-        lastMinuteOfDay: Int,
-        timeZone: TimeZone = TimeZone.getDefault(),
-    ): Boolean {
-        val moment = todayAt(minuteOfDay, now, lastMinuteOfDay, timeZone)
-        val late = now - moment
-        return late in 0 until WINDOW_MILLIS
-    }
-
-    /** Today's moment, at the reader's minute to the second, past or not. */
-    private fun todayAt(
-        minuteOfDay: Int,
-        now: Long,
-        lastMinuteOfDay: Int,
-        timeZone: TimeZone,
-    ): Long {
-        val minute = minuteOfDay.coerceIn(0, lastMinuteOfDay)
-        return Calendar.getInstance(timeZone).apply {
-            timeInMillis = now
-            set(Calendar.HOUR_OF_DAY, minute / 60)
-            set(Calendar.MINUTE, minute % 60)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
         }.timeInMillis
     }
 }

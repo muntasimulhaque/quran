@@ -57,10 +57,14 @@ dead letter.
    one network use.** Exactly `INTERNET`, `POST_NOTIFICATIONS`,
    `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MEDIA_PLAYBACK`, and
    `SCHEDULE_EXACT_ALARM` (the daily reminder). The app asks for
-   `POST_NOTIFICATIONS` and nothing else: the exact alarm grant is never
-   asked for and never named in the UI, and the reminder takes the best alarm
-   the phone allows. Library-merged permissions are documented, not
-   fought. A new permission needs the owner's sign-off written here first.
+   `POST_NOTIFICATIONS` and nothing else, and it asks for it once, at the one
+   screen before the reading, so the first morning is not silently missed:
+   that is the whole of what a reader is put in front of. The exact alarm
+   grant is never asked for, never named in the UI, and has no row or button
+   anywhere; the reminder takes the best alarm the phone allows, which is the
+   exact one on any phone that permits it. Library-merged permissions are
+   documented, not fought. A new permission needs the owner's sign-off
+   written here first.
 3. **No ads, no trackers, no analytics, no accounts.** AndroidX, Kotlin,
    Media3, Room, DataStore, and Glance only. Every new dependency is
    proposed here first.
@@ -89,9 +93,10 @@ dead letter.
    home screen, no dashboard, and no permanent tab bar; index, search,
    library, and settings are sheets raised from a slim bar.
 10. **Simple to the bone.** Any age, any device. No account, no wizard
-    beyond one optional first screen, no dialog before reading, no feature
-    that asks a choice before the text. If a feature adds friction, it is
-    cut. Every added choice must earn its place against the reading.
+    beyond one optional first screen and the one notification permission asked
+    from it, no other dialog before reading, no feature that asks a choice
+    before the text. If a feature adds friction, it is cut. Every added
+    choice must earn its place against the reading.
 11. **Fast to the point of invisible.** Cold start lands on readable text
     with no spinner. A page turn is a pre-rendered swipe, not a render.
     Nothing blocks the main thread, ever.
@@ -310,6 +315,8 @@ at every step:
   page down to one word and its rendered shape.
 - **the reference**: an ayah key in `surah:ayah` form, for example 2:255.
 - **the portion**: the reader's chosen daily amount. Never called a streak.
+- **the deck**: the day's ayah is one card of a shuffled 6,236, dealt by the
+  day number and reshuffled every pass, so nothing about it is stored.
 - **the study card**: the sheet one ayah opens: its text, the translation
   with footnotes, and the Words, Ibn Kathir, and As-Sa'di panels.
 - **the text button**: `ui-kit/TextButton`, the one shape a word that acts
@@ -352,9 +359,14 @@ implement it and update this list.
 - What happens at the end of the audio is one answer, not three switches:
   repeat the ayah, repeat the surah, or continue, and turning one on turns
   the other two off.
-- The app never asks for the phone's exact alarm grant, and no settings row
-  or button offers it: the reminder takes the best alarm the phone allows
-  and says nothing about the difference.
+- **The app never asks for the phone's exact alarm grant, and no settings row
+  or button offers it: the reminder takes the best alarm the phone allows and
+  says nothing about the difference.** The reader is asked for one permission,
+  the notification one, once at the first screen, and that is the whole of the
+  asking (owner decision).
+- The day's ayah is dealt from a shuffled deck rather than walked in the
+  Book's order: a different ayah every morning, every ayah once before the
+  deck is filled again, and nothing stored (owner decision).
 
 ## Traps
 

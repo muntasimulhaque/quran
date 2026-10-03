@@ -56,6 +56,12 @@ fun QuranApp(
     /** The ayah a reminder's tap asked for, before the reading is on screen. */
     initialAyah: Int? = null,
     onPlaybackPermission: () -> Unit = {},
+    /**
+     * The reader has answered the one screen before the reading. The shell
+     * asks the one permission there is from it and brings the Activity back
+     * up in the language just chosen.
+     */
+    afterFirstScreen: () -> Unit = {},
     /** Whether the phone will show this app's notifications, read from the phone. */
     notificationsBlocked: () -> Boolean = { false },
     /** Opens the phone's own page for this app's notifications. */
@@ -107,9 +113,11 @@ fun QuranApp(
                     suggested = systemLanguage(),
                     onChoose = { language ->
                         viewModel.chooseLanguage(language)
-                        // The locale belongs to the Activity's own resources;
-                        // the recreation brings every window up speaking it.
-                        (view.context as? Activity)?.recreate()
+                        // The locale belongs to the Activity's own resources,
+                        // so the recreation (or the one the notification
+                        // permission's answer waits for) brings every window
+                        // up speaking it.
+                        afterFirstScreen()
                     },
                 )
             }

@@ -73,41 +73,6 @@ class DailyReminderTest {
     }
 
     /**
-     * A launch must not move an alarm the platform is still going to deliver.
-     *
-     * The reader opens the app at the minute they set the reminder for, which
-     * is the one minute of the day they are most certain to be holding it. An
-     * arm inside that window threw away the pending delivery and the morning
-     * was silent (owner report, 37th session), so the window after the
-     * reader's own moment is the one moment a launch leaves the alarm alone.
-     */
-    @Test
-    fun aLaunchInsideTheWindowLeavesTheAlarmAlone() {
-        val moment = utc.millisOf(2026, Calendar.SEPTEMBER, 29, 10, 0)
-        val window = DailyReminder.WINDOW_MILLIS
-        assertTrue(
-            "seconds after the reader's own moment, the alarm is still coming",
-            DailyReminder.stillDueToday(10 * 60, moment + 1_000L, lastMinute, utc),
-        )
-        assertTrue(
-            "and at the far end of the window",
-            DailyReminder.stillDueToday(10 * 60, moment + window - 1L, lastMinute, utc),
-        )
-        assertTrue(
-            "but not before it: a launch early must re-arm, and re-arming is harmless",
-            !DailyReminder.stillDueToday(10 * 60, moment - 60_000L, lastMinute, utc),
-        )
-        assertTrue(
-            "and not a second past the window",
-            !DailyReminder.stillDueToday(10 * 60, moment + window, lastMinute, utc),
-        )
-        assertTrue(
-            "and not at any hour of the day that is not the reader's",
-            !DailyReminder.stillDueToday(10 * 60, utc.millisOf(2026, Calendar.SEPTEMBER, 29, 15, 0), lastMinute, utc),
-        )
-    }
-
-    /**
      * Both ends of the day are reachable, and a number outside the day is
      * pulled back into it rather than wrapped: a reader who set 23:59 gets
      * 23:59, and a value past midnight never becomes the small hours of the
