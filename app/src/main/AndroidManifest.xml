@@ -11,15 +11,14 @@
     <!-- The daily reminder, and the only reason for an exact alarm in this
          app: the reader chooses a minute, and the reminder is a promise that
          it arrives at that minute even on a phone that is locked and idle
-         then. Before Android 14 the install grants SCHEDULE_EXACT_ALARM;
-         from Android 14 that permission starts out denied for apps this app
-         targets, and USE_EXACT_ALARM is the declaration that restores the
-         grant at install, because a reminder at the reader's own minute is
-         the one time-critical promise this app makes (owner decision). Both
-         are install-time grants: the reader is never asked for either, never
-         sees either named, and neither carries a status bar icon. -->
+         then. Before Android 14 the install grants this permission; from
+         Android 14 it starts out denied, and the app asks for it once, in
+         the phone's own screen, at the two moments the reminder is set.
+         USE_EXACT_ALARM is not declared and must not be: Play accepts it for
+         an alarm clock or a calendar only, and rejected the 3.9 build over
+         it. The grant is no row in the settings hub, and the reminder wears
+         no alarm icon (owner decision). -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <!-- A reboot takes every alarm with it, and a reminder that waits for the
          next app open after a restart is not the reminder the reader set, so
          the boot receiver below puts the alarm back (owner decision). -->

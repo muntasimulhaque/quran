@@ -13,6 +13,8 @@ import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -138,9 +140,11 @@ class DailyReminderTest {
     fun theArmedAlarmIsTheOneThisPhoneOffers() {
         // The moment is half an hour out, so the alarm is one the platform is
         // holding rather than one it is about to deliver, and the reader's
-        // own minute is not the moment this test happens to run in.
+        // own minute is not the moment this test happens to run in. The
+        // exact grant is given first, the way a reader gives it in the
+        // phone's own screen, so this walks the path the app actually ships.
+        grantExactAlarm()
         val alarm = context.getSystemService(android.app.AlarmManager::class.java)
-        val exact = DailyAyahScheduler.canScheduleExact(alarm)
         val minute = (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) * 60 +
             Calendar.getInstance().get(Calendar.MINUTE) + 30) % (24 * 60)
         DailyAyahScheduler.apply(context, enabled = true, minuteOfDay = minute)
@@ -148,45 +152,47 @@ class DailyReminderTest {
             val record = awaitAlarmRecord() ?: throw AssertionError(
                 "the reminder armed no alarm. The phone is holding:\n" + alarmDump()
             )
-            if (exact) {
-                assertTrue(
-                    "a phone that grants the exact time must be given an exact alarm, " +
-                        "so it arrives on a locked, idle phone (owner decision): $record",
-                    record.contains("window=0"),
-                )
-            } else {
-                // What the inexact path may not be is a promise of the minute,
-                // and what it must be is an alarm at all: the platform's own
-                // window is its own number, not this app's.
-                assertTrue(
-                    "a phone that refuses must still be holding an alarm for the " +
-                        "reminder, and it must not be pretending to be exact: $record",
-                    !record.contains("window=0") || !record.contains("exactAllowReason"),
-                )
-            }
+            assertTrue(
+                "a phone that grants the exact time must be given an exact alarm, " +
+                    "so it arrives on a locked, idle phone (owner decision): $record",
+                record.contains("window=0"),
+            )
         } finally {
+            // The alarm goes before the grant would: taking the grant back while this
+            // process is alive makes the system kill it to drop its exact alarms,
+            // and a killed process reads as a crash. The grant is left as the
+            // reader gave it; the connected run uninstalls the app, which clears
+            // it, so no test has to take it back.
             DailyAyahScheduler.apply(context, enabled = false, minuteOfDay = minute)
         }
     }
 
     /**
-     * The two declarations the whole fix rests on, read back from the merged
-     * manifest. `USE_EXACT_ALARM` is what makes the exact alarm an install
-     * grant on Android 14 and later, so the reminder arrives at the minute
-     * without the reader ever being asked; `RECEIVE_BOOT_COMPLETED` and the
-     * boot receiver are what put the alarm back after a restart. Both are
-     * invisible, so a future edit that drops one of them would be this bug
-     * again with nothing to catch it.
+     * The declarations the whole fix rests on, read back from the merged
+     * manifest. `SCHEDULE_EXACT_ALARM` is what an exact reminder needs, and
+     * the phone asks for it once at each of the two acts that set the
+     * reminder; `RECEIVE_BOOT_COMPLETED` and the boot receiver are what put
+     * the alarm back after a restart. And `USE_EXACT_ALARM` must be absent:
+     * Play accepts it for an alarm clock or a calendar, and rejected the 3.9
+     * build over it, so it is pinned here as a negative because a future
+     * edit that readds it costs a release.
      */
     @Test
+    @Suppress("DEPRECATION")
     fun theExactAlarmAndTheBootReceiverAreDeclared() {
-        assertEquals(
-            "the exact alarm is an install-time grant through USE_EXACT_ALARM",
-            PackageManager.PERMISSION_GRANTED,
-            context.packageManager.checkPermission(
-                "android.permission.USE_EXACT_ALARM",
-                context.packageName,
-            ),
+        val requested = context.packageManager
+            .getPackageInfo(context.packageName, PackageManager.GET_PERMISSIONS)
+            .requestedPermissions
+            .orEmpty()
+            .toSet()
+        assertTrue(
+            "the exact alarm is the ordinary permission, asked once at the two acts that set the reminder",
+            requested.contains("android.permission.SCHEDULE_EXACT_ALARM"),
+        )
+        assertTrue(
+            "USE_EXACT_ALARM must never be declared: Play accepts it for an alarm clock or a " +
+                "calendar only, and rejected 3.9 for it (owner decision)",
+            !requested.contains("android.permission.USE_EXACT_ALARM"),
         )
         assertEquals(
             "a reboot must not cost a morning",
@@ -196,11 +202,6 @@ class DailyReminderTest {
                 context.packageName,
             ),
         )
-        val alarm = context.getSystemService(android.app.AlarmManager::class.java)
-        assertTrue(
-            "the phone must answer yes to exact alarms on a fresh install",
-            DailyAyahScheduler.canScheduleExact(alarm),
-        )
         runCatching {
             context.packageManager.getReceiverInfo(
                 ComponentName(context, DailyAyahBootReceiver::class.java),
@@ -209,6 +210,55 @@ class DailyReminderTest {
         }.onFailure {
             throw AssertionError("the boot receiver is missing from the merged manifest")
         }
+    }
+
+    /**
+     * The exact alarm is the reader's to give on Android 14 and later, and
+     * the phone is asked in its own screen. The grant is read and cleared
+     * here through the phone's own app-op, which is what the reader's screen
+     * sets, so the whole shape is pinned: with the phone withholding it the
+     * app is offered the exact alarm's screen, and with it granted the alarm
+     * that goes out is exact.
+     */
+    @Test
+    fun theGrantTurnsTheExactAlarmOn() {
+        val minute = (Calendar.getInstance().get(Calendar.HOUR_OF_DAY) * 60 +
+            Calendar.getInstance().get(Calendar.MINUTE) + 50) % (24 * 60)
+        // The withheld state is read, not forced: taking the grant back while
+        // this process is alive makes the system kill it, so a run that
+        // inherited the grant from another test checks the granted half only,
+        // and the half it does check is the one the reader meets.
+        if (DailyAyahScheduler.exactGrantWithheld(context)) {
+            assertNotNull(
+                "a phone that withholds the exact time has a screen to ask on",
+                DailyAyahScheduler.exactGrantRequest(context),
+            )
+        }
+        grantExactAlarm()
+        assertTrue(
+            "the reader's answer is the phone's, and the app reads it",
+            !DailyAyahScheduler.exactGrantWithheld(context),
+        )
+        assertNull(
+            "and there is nothing left to ask for",
+            DailyAyahScheduler.exactGrantRequest(context),
+        )
+        DailyAyahScheduler.apply(context, enabled = true, minuteOfDay = minute)
+        try {
+            val record = awaitAlarmRecord() ?: throw AssertionError(
+                "the granted reminder armed no alarm. The phone is holding:\n" + alarmDump(),
+            )
+            assertTrue(
+                "an exact alarm, window and all, so it arrives on a locked idle phone: $record",
+                record.contains("window=0"),
+            )
+        } finally {
+            DailyAyahScheduler.apply(context, enabled = false, minuteOfDay = minute)
+        }
+    }
+
+    private fun grantExactAlarm() {
+        shell("appops set ${context.packageName} SCHEDULE_EXACT_ALARM allow")
     }
 
     /**

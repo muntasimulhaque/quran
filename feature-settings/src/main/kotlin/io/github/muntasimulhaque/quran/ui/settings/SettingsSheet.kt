@@ -58,6 +58,8 @@ data class SettingsActions(
     val onDailyAyah: (Boolean) -> Unit = {},
     val onDailyAyahTime: (Int) -> Unit = {},
     val onOpenNotificationSettings: () -> Unit = {},
+    /** The phone's own screen for the exact alarm, when it is still withheld. */
+    val onAskExactAlarm: () -> Unit = {},
     val onSelectRecitation: (String) -> Unit = {},
     val onTranslationPack: (String) -> Unit = {},
     val onToggleTafsir: (String) -> Unit = {},
@@ -110,6 +112,7 @@ fun SettingsSheet(
     preview: suspend () -> StudyRow?,
     downloadedSurahs: suspend (String) -> List<DownloadedSurah>,
     notificationsBlocked: () -> Boolean,
+    exactGrantWithheld: () -> Boolean,
     actions: SettingsActions,
     onDismiss: () -> Unit,
 ) {
@@ -206,8 +209,10 @@ fun SettingsSheet(
                     SettingsPage.Daily -> DailyPage(
                         settings = settings,
                         notificationsBlocked = notificationsBlocked(),
+                        exactGrantWithheld = exactGrantWithheld(),
                         onDailyAyahTime = actions.onDailyAyahTime,
                         onOpenNotificationSettings = actions.onOpenNotificationSettings,
+                        onAskExactAlarm = actions.onAskExactAlarm,
                     )
                     SettingsPage.Translations -> TranslationsPage(
                         settings = settings,

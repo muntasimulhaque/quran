@@ -16,6 +16,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import io.github.muntasimulhaque.quran.daily.DailyAyahScheduler
+import io.github.muntasimulhaque.quran.daily.rememberExactGrantWithheld
 import io.github.muntasimulhaque.quran.daily.rememberNotificationsBlocked
 import io.github.muntasimulhaque.quran.daily.reminderChannelHidden
 import io.github.muntasimulhaque.quran.data.LanguagePreference
@@ -53,10 +54,11 @@ class MainActivity : ComponentActivity() {
     // Asked once, at the one screen before the reading, because the reminder
     // is the only thing this app does with the app closed and a permission
     // asked for at the first recitation leaves the first mornings silent
-    // (owner decision). The reader has one notification to answer for and the
-    // exact alarm grant is never asked for at all, so this is the whole of
-    // what is put in front of them: one system dialog, on the screen they
-    // have already answered, and then the reading.
+    // (owner decision). The reader has one notification to answer for here,
+    // so this is the whole of what is put in front of them: one system
+    // dialog, on the screen they have already answered, and then the reading.
+    // The exact alarm is not asked for at this screen: it is asked for at the
+    // two moments the reminder is set.
     private val askOnFirstScreen =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { recreate() }
 
@@ -66,6 +68,24 @@ class MainActivity : ComponentActivity() {
     // grant it on the first screen.
     private val requestNotifications =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
+
+    // The notification permission, asked from the two acts that set the
+    // reminder: the reminder cannot arrive without it, so it goes first, and
+    // its answer leads on to the exact alarm's own screen.
+    private val askReminderNotifications =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+            askExactAlarmIfNeeded()
+        }
+
+    // The exact alarm, asked once in the phone's own screen, at each of those
+    // two acts, on the phones that withhold it from Android 14 on (owner
+    // decision, after Play rejected USE_EXACT_ALARM). Whatever the answer
+    // was, the alarm is armed again from the reader's own settings, so an
+    // exact one replaces the batched one within the minute.
+    private val askExactAlarm =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            DailyAyahScheduler.rearm(this)
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,6 +116,10 @@ class MainActivity : ComponentActivity() {
             // to the foreground: the reader can change it in the system
             // settings and return without a restart.
             val notificationsBlocked = rememberNotificationsBlocked()
+            // And the second thing the phone can withhold, read the same way:
+            // the Daily page says whether the exact time is still being held
+            // back, and the answer changes in the phone's own screen, not here.
+            val exactGrantWithheld = rememberExactGrantWithheld()
             QuranApp(
                 initialAyah = intent?.let { incoming ->
                     // No extra, no jump. 0 is the sentinel, and it must never
@@ -104,9 +128,12 @@ class MainActivity : ComponentActivity() {
                     incoming.getIntExtra(EXTRA_AYAH, 0).takeIf { it > 0 }
                 },
                 onPlaybackPermission = ::ensureNotificationPermission,
+                onReminderPermission = ::ensureReminderPermissions,
                 afterFirstScreen = ::leaveFirstScreen,
                 notificationsBlocked = { notificationsBlocked.value },
+                exactGrantWithheld = { exactGrantWithheld.value },
                 onOpenNotificationSettings = ::openNotificationSettings,
+                onAskExactAlarm = ::askExactAlarmIfNeeded,
             )
         }
     }
@@ -151,10 +178,11 @@ class MainActivity : ComponentActivity() {
      * The notification permission is asked here and nowhere else on this path:
      * the reminder arrives whether or not the app is open, and a reader who
      * is asked for it at the first recitation has already had every morning
-     * before that one silently. It is asked once, it is the only permission
-     * this app ever asks for, and the exact alarm grant is not one of them.
-     * The Activity is recreated when the answer lands, which is what brings
-     * every window up in the language that was just chosen.
+     * before that one silently. It is asked once, and it is the only
+     * permission asked at this screen; the exact alarm is asked for at the
+     * two acts that set the reminder. The Activity is recreated when the
+     * answer lands, which is what brings every window up in the language that
+     * was just chosen.
      */
     private fun leaveFirstScreen() {
         if (needsNotificationPermission()) {
@@ -167,6 +195,36 @@ class MainActivity : ComponentActivity() {
     private fun ensureNotificationPermission() {
         if (needsNotificationPermission()) {
             requestNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
+    /**
+     * What the two acts that set the reminder ask for: the notification
+     * first, since nothing can arrive without it, and then the phone's own
+     * screen for the exact time. Neither is asked twice: each is asked only
+     * while it is missing, so a reader who has already granted both hears
+     * nothing at all.
+     */
+    private fun ensureReminderPermissions() {
+        if (needsNotificationPermission()) {
+            askReminderNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            askExactAlarmIfNeeded()
+        }
+    }
+
+    /**
+     * The phone's own screen for the exact alarm, on the phones that are
+     * withholding it. A phone with no such screen keeps the batched alarm,
+     * and the Daily page still says the exact time is being held back, which
+     * is the truth rather than a promise the phone cannot keep.
+     */
+    private fun askExactAlarmIfNeeded() {
+        val request = DailyAyahScheduler.exactGrantRequest(this) ?: return
+        try {
+            askExactAlarm.launch(request)
+        } catch (notFound: ActivityNotFoundException) {
+            Toast.makeText(this, R.string.exact_alarm_settings_unavailable, Toast.LENGTH_LONG).show()
         }
     }
 

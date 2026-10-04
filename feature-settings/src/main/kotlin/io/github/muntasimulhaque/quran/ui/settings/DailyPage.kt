@@ -65,33 +65,35 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * prove the reader wants the reminder, which the shell wires up: turning it
  * on, and moving its moment. Never when the page is merely opened, because a
  * reader who came to look is not the reader who came to set, and a system
- * dialog is not a thing to spend on curiosity (owner decision, 2.3).
+ * dialog is not a thing to spend on curiosity (owner decision, 2.3). The
+ * exact alarm is asked for at those same two moments, and only on the phones
+ * that withhold it.
  *
- * The phone's own exact alarm switch is never asked for, and nothing here
- * says that it is missing. It used to: a line under the time and a button
- * that opened the phone's page for it, on the reasoning that a reminder late
- * by a few minutes is a broken promise. It is not the reader's setting to
- * manage and it is not the app's to spend a screen on: the phone decides,
- * the app takes the best alarm it is given, and a reader who is not reading
- * about a second permission keeps a page with one row and one note (owner
- * report).
+ * The phone's own exact alarm used to be asked for nowhere, and nothing here
+ * said that it was missing, on the reasoning that a reminder late by a few
+ * minutes is a broken promise. Play has settled that: USE_EXACT_ALARM is for
+ * an alarm clock or a calendar, and the 3.9 build was rejected for it. So the
+ * ask is back, it is made once at each of the two acts in the phone's own
+ * screen, and the page again carries the one line that says where it stands,
+ * the same shape as the notification line, with the one door the phone
+ * offers (owner decision).
  *
  * The exact time is the manifest's own promise: `SCHEDULE_EXACT_ALARM` is
- * granted at install before Android 14, and from Android 14 the app's own
- * `USE_EXACT_ALARM` declaration restores that grant at install, so
- * `DailyAyahScheduler` takes the exact path on every phone and the reminder
- * arrives at the minute even on a phone that is locked and idle then.
- * Nothing about any of it is shown here: the phone's own batched alarm is
- * left only for a reader who has turned the phone's special access off
- * themselves, and the page neither asks nor says anything about that (owner
- * decision).
+ * granted at install before Android 14, and from Android 14 it starts out
+ * denied, so the reminder arrives at the minute even on a phone that is
+ * locked and idle then exactly when that grant has been given. Nothing about
+ * it is said here except where it stands: the phone's own batched alarm is
+ * left for the reader who declines, the page says so in one line, and it
+ * names the one screen where the answer is taken (owner decision).
  */
 @Composable
 fun DailyPage(
     settings: AppSettings,
     notificationsBlocked: Boolean,
+    exactGrantWithheld: Boolean,
     onDailyAyahTime: (Int) -> Unit,
     onOpenNotificationSettings: () -> Unit,
+    onAskExactAlarm: () -> Unit,
 ) {
     var choosing by remember { mutableStateOf(false) }
     Column(
@@ -136,6 +138,25 @@ fun DailyPage(
                 TextButton(
                     label = stringResource(R.string.settings_daily_blocked_action),
                     onClick = onOpenNotificationSettings,
+                )
+            }
+        }
+        // The exact time is the other thing the phone can withhold, and it is
+        // the same shape of truth: the ask was made at the act of setting,
+        // and what is left here is state, so a reader who said no, or who
+        // answered on a phone that could not ask, knows the ayah can be late
+        // and has the one door the phone offers.
+        if (settings.dailyAyah && exactGrantWithheld) {
+            Text(
+                text = stringResource(R.string.settings_daily_exact_blocked),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Line),
+            )
+            Box(Modifier.padding(start = 16.dp, top = Space.Line)) {
+                TextButton(
+                    label = stringResource(R.string.settings_daily_exact_action),
+                    onClick = onAskExactAlarm,
                 )
             }
         }

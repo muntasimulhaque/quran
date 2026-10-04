@@ -58,4 +58,5 @@
     <string name="daily_channel_description">প্রতিদিন একটি আয়াত, আপনি যে সময় বেছে নেবেন।</string>
     <string name="daily_notification_title">%1$s %2$d:%3$d</string>
     <string name="notification_settings_unavailable">এই ফোনে নোটিফিকেশন সেটিংস নেই।</string>
+    <string name="exact_alarm_settings_unavailable">এই ফোনে সঠিক সময়ের অনুমতি নেওয়ার কোনো পর্দা নেই।</string>
 </resources>

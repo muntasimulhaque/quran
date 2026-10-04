@@ -57,6 +57,12 @@ fun QuranApp(
     initialAyah: Int? = null,
     onPlaybackPermission: () -> Unit = {},
     /**
+     * What the two acts that set the reminder ask for: the notification,
+     * and then, on the phones that withhold it, the exact alarm in the
+     * phone's own screen.
+     */
+    onReminderPermission: () -> Unit = {},
+    /**
      * The reader has answered the one screen before the reading. The shell
      * asks the one permission there is from it and brings the Activity back
      * up in the language just chosen.
@@ -64,8 +70,12 @@ fun QuranApp(
     afterFirstScreen: () -> Unit = {},
     /** Whether the phone will show this app's notifications, read from the phone. */
     notificationsBlocked: () -> Boolean = { false },
+    /** Whether the phone is still withholding the exact alarm. */
+    exactGrantWithheld: () -> Boolean = { false },
     /** Opens the phone's own page for this app's notifications. */
     onOpenNotificationSettings: () -> Unit = {},
+    /** Opens the phone's own screen for the exact alarm. */
+    onAskExactAlarm: () -> Unit = {},
 ) {
     // A tap on the reminder opens that ayah in the study reading, which is
     // what a reminder is for: the reader meets the words, not the app. The
@@ -130,8 +140,11 @@ fun QuranApp(
                     viewModel,
                     content,
                     onPlaybackPermission,
+                    onReminderPermission,
                     notificationsBlocked,
+                    exactGrantWithheld,
                     onOpenNotificationSettings,
+                    onAskExactAlarm,
                 )
             }
         }

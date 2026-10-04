@@ -9,7 +9,9 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import android.text.Layout
 import android.text.Spannable
 import android.text.SpannableString
@@ -36,15 +38,16 @@ import java.util.TimeZone
  *
  * The reminder is the only thing in the app that has a life outside it, so it
  * is built to be counted, not trusted. It schedules itself with the exact
- * alarm on every phone: `SCHEDULE_EXACT_ALARM` is granted at install before
- * Android 14, and from Android 14 the app's own `USE_EXACT_ALARM` declaration
- * restores that grant at install, because a reminder at the reader's own
- * minute is the one time-critical promise this app makes. So the reminder
- * arrives at that minute even on a phone that is locked and idle then, and
- * the reader is never asked for anything to make it so. The phone's own
- * batched alarm is left for the one case where the exact grant is gone, a
- * reader who has turned the phone's special access off themselves; it can
- * still reach a sleeping phone and can be minutes late. Nothing here fetches
+ * alarm: `SCHEDULE_EXACT_ALARM` is granted at install before Android 14, and
+ * from Android 14 it starts out denied, so the app asks for it once in the
+ * phone's own screen, at the two moments a reader sets the reminder, and the
+ * reminder then arrives at that minute even on a phone that is locked and
+ * idle then. `USE_EXACT_ALARM` is not declared: Play accepts it for an alarm
+ * clock or a calendar, and rejected this app's 3.9 build over it (owner
+ * decision), and the reminder wears no alarm icon, because an alarm mark
+ * standing in every status bar is the reader's own grievance (owner report).
+ * The phone's batched alarm is left for the reader who says no, so a
+ * reminder still comes, late, rather than not at all. Nothing here fetches
  * anything: the ayah is read from the content database that already ships on
  * the device, and the translation from a pack the reader installed
  * themselves.
@@ -213,21 +216,38 @@ object DailyAyahScheduler {
      *
      * Android 12 and later gate it behind a special access that is not a
      * runtime permission. Before Android 14 the install grants it; from
-     * Android 14 it starts out denied for apps this app targets, and the
-     * manifest's own `USE_EXACT_ALARM` declaration restores the grant at
-     * install, because a reminder at the reader's own minute is the one
-     * time-critical promise this app makes (owner decision). The app never
-     * asks for the grant, never names it as missing, and has no row or button
-     * anywhere for it: the reader has one notification to answer for, not
-     * two, and the moment the reminder is on is the moment the reader is told
-     * about the one permission there is. So this answer is asked where the
-     * alarm is armed and used there and nowhere else. The exact path is
-     * therefore taken on every phone by default, and the phone's own batched
-     * alarm is armed only when a reader has turned the special access off
-     * themselves, because it still reaches a sleeping phone, late.
+     * Android 14 it starts out denied, and the answer is the reader's to
+     * give, in the phone's own screen, which the app asks for once at each
+     * of the two acts that set the reminder (owner decision, after Play
+     * rejected `USE_EXACT_ALARM`). It is asked for nowhere else, it is no
+     * row in the settings hub, and the reminder never wears an alarm icon.
+     * So this answer is asked where the alarm is armed and where the Daily
+     * page reads whether it is still being withheld, and nowhere else.
      */
     fun canScheduleExact(alarm: AlarmManager): Boolean =
         Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarm.canScheduleExactAlarms()
+
+    /**
+     * Whether the phone is withholding the exact alarm, which is what Android
+     * 14 and later do from the start for an app this one targets. Read where
+     * the page draws the state and where the ask is made, so the two never
+     * disagree about whether there is anything to ask.
+     */
+    fun exactGrantWithheld(context: Context): Boolean {
+        val alarm = context.getSystemService(AlarmManager::class.java) ?: return false
+        return !canScheduleExact(alarm)
+    }
+
+    /**
+     * The phone's own screen for the exact alarm grant, or null when this
+     * phone has nothing to ask for. It is the system's dialog, not the app's:
+     * the only answer it takes is the reader's, and it names itself.
+     */
+    fun exactGrantRequest(context: Context): Intent? {
+        if (!exactGrantWithheld(context)) return null
+        return Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+            .setData(Uri.parse("package:" + context.packageName))
+    }
 
     /** The reader's own day number, the one the alarm's request code is. */
     private fun localDay(millis: Long): Int =

@@ -26,6 +26,8 @@
     <string name="settings_daily_off">The reminder is off</string>
     <string name="settings_daily_blocked">Your phone is not showing this reminder, so it cannot arrive.</string>
     <string name="settings_daily_blocked_action">Notification settings</string>
+    <string name="settings_daily_exact_blocked">Your phone is holding the exact time back, so the ayah can arrive late.</string>
+    <string name="settings_daily_exact_action">Allow the exact time</string>
     <string name="settings_daily_picker_title">When the daily ayah arrives</string>
     <string name="settings_daily_picker_keyboard">Type the time instead</string>
     <string name="settings_daily_picker_clock">Turn the clock instead</string>

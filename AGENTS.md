@@ -56,16 +56,15 @@ dead letter.
 2. **Permissions: media, notifications, the reminder's exact time and its
    survival of a reboot, and that one network use.** Exactly `INTERNET`,
    `POST_NOTIFICATIONS`, `FOREGROUND_SERVICE`,
-   `FOREGROUND_SERVICE_MEDIA_PLAYBACK`, `SCHEDULE_EXACT_ALARM` and
-   `USE_EXACT_ALARM` (the daily reminder's exact time, granted at install on
-   every release), and `RECEIVE_BOOT_COMPLETED` (re-arming the reminder after
-   a reboot). The app asks for `POST_NOTIFICATIONS` and nothing else, and it
-   asks for it once, at the one screen before the reading, so the first
-   morning is not silently missed: that is the whole of what a reader is put
-   in front of. The exact alarm grant is never asked for, never named in the
-   UI, and has no row or button anywhere; the reminder is armed with the
-   exact alarm on every phone, and the phone's own batched alarm is left only
-   for a reader who has turned the phone's special access off themselves
+   `FOREGROUND_SERVICE_MEDIA_PLAYBACK`, `SCHEDULE_EXACT_ALARM` (the daily
+   reminder's exact time), and `RECEIVE_BOOT_COMPLETED` (re-arming the
+   reminder after a reboot). `USE_EXACT_ALARM` is never declared: Play
+   accepts it for an alarm clock or a calendar only, and rejected the 3.9
+   build over it. The app asks for `POST_NOTIFICATIONS` and for the phone's
+   own exact-alarm screen, and nothing else: the notification once at the one
+   screen before the reading, and the exact alarm once at each of the two acts
+   that set the reminder, and only on the phones that withhold it. The exact
+   alarm is no row in the settings hub, and the reminder wears no alarm icon
    (owner decision). Library-merged permissions are documented, not fought. A
    new permission needs the owner's sign-off written here first.
 3. **No ads, no trackers, no analytics, no accounts.** AndroidX, Kotlin,
@@ -364,14 +363,14 @@ implement it and update this list.
 - What happens at the end of the audio is one answer, not three switches:
   repeat the ayah, repeat the surah, or continue, and turning one on turns
   the other two off.
-- **The app never asks for the phone's exact alarm grant, and no settings row
-  or button offers it: the reminder takes the exact alarm on every phone and
-  says nothing about the difference.** `USE_EXACT_ALARM` makes the exact alarm
-  the install-time default from Android 14, and the phone's own batched alarm
-  is left only for a reader who has turned the phone's special access off
-  themselves. The reader is asked for one permission, the notification one,
-  once at the first screen, and that is the whole of the asking (owner
-  decision).
+- **The app asks for the exact alarm only at the two acts that set the
+  reminder, only while the phone is withholding it, and the reminder wears no
+  alarm icon.** `SCHEDULE_EXACT_ALARM` is granted at install before Android
+  14 and is asked for once after it, in the phone's own screen; the Daily
+  page names it again only as state, with the one door that screen offers,
+  and the hub has no row for it. `USE_EXACT_ALARM` is never declared: Play
+  accepts it for an alarm clock or a calendar only, and a Quran reader is
+  neither (owner decision).
 - The day's ayah is dealt from a shuffled deck rather than walked in the
   Book's order: a different ayah every morning, every ayah once before the
   deck is filled again, and nothing stored (owner decision).

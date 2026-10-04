@@ -60,6 +60,14 @@ class DailyAyahToggleTest {
                 instrumentation.targetContext.packageName,
                 android.Manifest.permission.POST_NOTIFICATIONS,
             )
+            // The same two acts also ask, in the phone's own screen, for the
+            // exact alarm, which Android 14 and later withhold until the
+            // reader allows it. That screen would cover the app and take the
+            // compose hierarchy with it, so the test answers it the way a
+            // reader who wants the reminder would: once, up front.
+            instrumentation.uiAutomation.executeShellCommand(
+                "appops set ${context.packageName} SCHEDULE_EXACT_ALARM allow",
+            ).close()
             LanguagePreference(context).set("en")
             runBlocking {
                 SettingsStore(context).apply {
@@ -79,6 +87,16 @@ class DailyAyahToggleTest {
                     setDailyAyahTime(8 * 60)
                 }
             }
+            // The reminder's own alarm goes when its switch does, so no exact
+            // alarm is left standing. The exact grant itself is left as the
+            // reader gave it: taking it back while this process is alive makes
+            // the system kill it, and the connected run uninstalls the app,
+            // which clears the grant anyway.
+            io.github.muntasimulhaque.quran.daily.DailyAyahScheduler.apply(
+                context,
+                enabled = false,
+                minuteOfDay = 8 * 60,
+            )
         }
     }
 

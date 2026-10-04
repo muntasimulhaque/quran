@@ -26,6 +26,8 @@
     <string name="settings_daily_off">প্রতিদিনের আয়াত বন্ধ আছে</string>
     <string name="settings_daily_blocked">আপনার ফোন এই মনে করানোটি দেখাচ্ছে না, তাই প্রতিদিনের আয়াত আসবে না।</string>
     <string name="settings_daily_blocked_action">নোটিফিকেশন সেটিংস</string>
+    <string name="settings_daily_exact_blocked">আপনার ফোন সঠিক সময়ের অনুমতি আটকে রাখছে, তাই আয়াত সামান্য দেরিতে আসতে পারে।</string>
+    <string name="settings_daily_exact_action">সঠিক সময়ের অনুমতি দিন</string>
     <string name="settings_daily_picker_title">কখন আসবে</string>
     <string name="settings_daily_picker_keyboard">সময় লিখুন</string>
     <string name="settings_daily_picker_clock">সময় বাছাই করুন</string>

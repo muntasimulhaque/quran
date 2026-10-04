@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The qaf mark: the letter that begins the word Quran, drawn the way a
-  reed pen draws it, the loop thinning where the nib runs flat and
-  swelling where it bites, the tail tapering to a flat pen cut, and the
-  two dots as a scribe's rhombi in the gold of an illuminated initial.
-  The field is deep ink with a quiet light behind the letter. The
-  monochrome layer carries the same silhouette a little sturdier, so a
-  themed home screen keeps the mark (owner decision).
+  The illuminated spread: an open mushaf, the way the app reads. The
+  pages are warm ivory, their top and bottom edges rising into a gutter
+  and falling to the outer corners, with a soft crease in the valley.
+  Each page carries a gold frame, the way a mushaf's own pages do: the
+  right page holds the word Quran in Amiri, the left page the written
+  lines. The field is the app's deep ink with the quiet light behind
+  the book. The monochrome layer carries the same silhouette, a little
+  sturdier, so a themed home screen keeps the mark (owner decision).
 -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@mipmap/ic_launcher_bg" />
