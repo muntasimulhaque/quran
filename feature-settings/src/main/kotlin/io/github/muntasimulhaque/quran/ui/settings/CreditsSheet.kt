@@ -148,7 +148,7 @@ fun CreditsSheet(
             ValueRow(stringResource(R.string.settings_license_label), stringResource(R.string.about_license))
             PageRow(
                 title = stringResource(R.string.settings_rights),
-                summary = stringResource(R.string.settings_rights_note),
+                summary = null,
             ) {
                 onOpenLink(RIGHTS_URL)
             }

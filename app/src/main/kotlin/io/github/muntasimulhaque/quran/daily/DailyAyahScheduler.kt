@@ -35,13 +35,18 @@ import java.util.TimeZone
  * Book and, when the reader reads with a translation, its first translation.
  *
  * The reminder is the only thing in the app that has a life outside it, so it
- * is built to be counted, not trusted. It schedules itself with the best
- * alarm the phone will give it: an exact one, when the reader has granted the
- * phone's own exact alarm access, so the reminder arrives at that minute even
- * on a phone that is locked and idle then, and the phone's own batched
- * alarm otherwise, which can still reach a sleeping phone. Nothing here
- * fetches anything: the ayah is read from the content database that already
- * ships on the device, and the translation from a pack the reader installed
+ * is built to be counted, not trusted. It schedules itself with the exact
+ * alarm on every phone: `SCHEDULE_EXACT_ALARM` is granted at install before
+ * Android 14, and from Android 14 the app's own `USE_EXACT_ALARM` declaration
+ * restores that grant at install, because a reminder at the reader's own
+ * minute is the one time-critical promise this app makes. So the reminder
+ * arrives at that minute even on a phone that is locked and idle then, and
+ * the reader is never asked for anything to make it so. The phone's own
+ * batched alarm is left for the one case where the exact grant is gone, a
+ * reader who has turned the phone's special access off themselves; it can
+ * still reach a sleeping phone and can be minutes late. Nothing here fetches
+ * anything: the ayah is read from the content database that already ships on
+ * the device, and the translation from a pack the reader installed
  * themselves.
  *
  * An alarm is a one-shot, so the next one is armed in the same breath the
@@ -49,19 +54,21 @@ import java.util.TimeZone
  * has seconds to live, a database read is real work, and a process the system
  * takes back mid-read must not also be the reason there is no reminder
  * tomorrow. The alarm is armed only while the reader has the switch on, and is
- * re-armed from the app's own launch too, so a reboot or a clock change costs
- * at most the one morning before the app is opened again; that is the price of
- * not asking for a boot permission this app has never needed.
+ * re-armed from the app's own launch too, and from the phone's boot, its own
+ * clock or zone change, and the app's own update through
+ * [DailyAyahBootReceiver], so a reboot no longer costs a morning. A reader
+ * who force-stops the app loses its alarms until the next launch, which is
+ * platform law and nothing here can change (owner decision).
  *
  * Every alarm is armed under its own day's request code, which is the whole
  * of the launch re-arm. A pending intent is identified by the code as well as
  * by the intent, so an alarm for a moment that has passed and an alarm for
  * tomorrow are two different alarms rather than one alarm moved: opening the
  * app in the afternoon can no longer throw away the eight o'clock the phone is
- * still holding, which on a phone that does not grant the exact time is the
- * difference between a reminder that arrived late and a morning with nothing
- * in it (owner report). Re-arming today is still a re-arm, because the same
- * day is the same slot.
+ * still holding, which when only the batched alarm is left is the difference
+ * between a reminder that arrived late and a morning with nothing in it
+ * (owner report). Re-arming today is still a re-arm, because the same day is
+ * the same slot.
  */
 object DailyAyahScheduler {
 
@@ -125,12 +132,14 @@ object DailyAyahScheduler {
      * for a moment already past belongs to a day that is over, so arming
      * tomorrow leaves it where the platform is holding it.
      *
-     * The shape of the alarm is the phone's answer and not the app's: an
-     * exact alarm when the phone allows the app the exact time, which is the
-     * only kind that arrives at the chosen minute on a phone that is locked
-     * and idle then, and the platform's own batched alarm otherwise. Either
-     * way the moment is the reader's, and the choice itself is the pure
-     * `plan` in `core`, which the JVM suite pins (owner decision).
+     * The shape of the alarm is the phone's answer and not the app's: the
+     * exact alarm, which every phone in the app's own support range grants at
+     * install, and which is the only kind that arrives at the chosen minute on
+     * a phone that is locked and idle then; the phone's own batched alarm
+     * only when the exact grant is gone, which is a reader who has turned the
+     * phone's special access off themselves. Either way the moment is the
+     * reader's, and the choice itself is the pure `plan` in `core`, which the
+     * JVM suite pins (owner decision).
      */
     fun apply(context: Context, enabled: Boolean, minuteOfDay: Int) {
         val alarm = context.getSystemService(AlarmManager::class.java) ?: return
@@ -154,31 +163,68 @@ object DailyAyahScheduler {
         when (plan.kind) {
             DailyReminder.Kind.Exact ->
                 alarm.setExactAndAllowWhileIdle(AlarmManager.RTC, plan.triggerAtMillis, pending)
-            // The inexact fallback is the one that can reach a sleeping
-            // phone. A windowed alarm cannot: the platform gives it a floor
-            // of ten minutes on Android 15 and never delivers it from Doze, so
-            // a window was measured and dropped.
+            // The batched fallback is the one that can reach a sleeping
+            // phone, late. The exact path is the default on every phone now,
+            // so this branch is left for a reader who has turned the phone's
+            // own special access off. A windowed alarm is never used: the
+            // platform gives it a floor of ten minutes on Android 15 and
+            // never delivers it from Doze, so a window was measured and
+            // dropped.
             DailyReminder.Kind.Batched ->
                 alarm.setAndAllowWhileIdle(AlarmManager.RTC, plan.triggerAtMillis, pending)
         }
     }
 
     /**
+     * The reminder's re-arm after the phone's own events: a boot, an app
+     * update, a clock change, or a time zone change. An alarm is a one-shot
+     * and a reboot takes it with it, so without this a restart could cost a
+     * morning (owner report); the reader's settings are read fresh and the
+     * alarm is put back exactly as the app's own launch puts it back.
+     *
+     * A receiver has seconds to live, so the work runs on the reminder's own
+     * worker scope and [onFinished] is called when it is done, which is what
+     * lets the caller hold its process with `goAsync` until the alarm is
+     * really armed. Every failure is silence: a boot is not a place to show
+     * anyone a crash, and the next launch of the app arms the alarm again
+     * anyway.
+     */
+    internal fun rearm(context: Context, onFinished: () -> Unit = {}) {
+        val application = context.applicationContext
+        workers.launch {
+            try {
+                val settings = runCatching { SettingsStore(application).settings.first() }
+                    .getOrNull() ?: return@launch
+                runCatching {
+                    apply(
+                        context = application,
+                        enabled = settings.dailyAyah,
+                        minuteOfDay = settings.dailyAyahMinute,
+                    )
+                }
+            } finally {
+                onFinished()
+            }
+        }
+    }
+
+    /**
      * Whether this app may set an exact alarm on this phone.
      *
-     * Android 12 and later gate it behind the reader's own grant, which is
-     * not a runtime permission and is not given at install, and since
-     * Android 14 it starts out denied on any install that targets Android 13
-     * or later, which this app does. The app never asks for it, never names
-     * it as missing, and has no row or button anywhere for it (owner
-     * decision): the reader has one notification to answer for, not two, and
-     * the moment the reminder is on is the moment the reader is told about
-     * the one permission there is. So this answer is asked where the alarm is
-     * armed and used there and nowhere else. The exact path is taken whenever
-     * the phone allows it, which is every release before Android 12 and any
-     * phone where the reader has turned it on in the phone's settings of
-     * their own accord; otherwise the reminder is armed with the phone's own
-     * batched alarm, which still reaches a sleeping phone.
+     * Android 12 and later gate it behind a special access that is not a
+     * runtime permission. Before Android 14 the install grants it; from
+     * Android 14 it starts out denied for apps this app targets, and the
+     * manifest's own `USE_EXACT_ALARM` declaration restores the grant at
+     * install, because a reminder at the reader's own minute is the one
+     * time-critical promise this app makes (owner decision). The app never
+     * asks for the grant, never names it as missing, and has no row or button
+     * anywhere for it: the reader has one notification to answer for, not
+     * two, and the moment the reminder is on is the moment the reader is told
+     * about the one permission there is. So this answer is asked where the
+     * alarm is armed and used there and nowhere else. The exact path is
+     * therefore taken on every phone by default, and the phone's own batched
+     * alarm is armed only when a reader has turned the special access off
+     * themselves, because it still reaches a sleeping phone, late.
      */
     fun canScheduleExact(alarm: AlarmManager): Boolean =
         Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarm.canScheduleExactAlarms()

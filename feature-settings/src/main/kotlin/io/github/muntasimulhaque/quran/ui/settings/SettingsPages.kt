@@ -50,12 +50,6 @@ fun LanguagePage(
 ) {
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_language))
-        Text(
-            text = stringResource(R.string.settings_language_note),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
-        )
         // A list of choices is read, not searched: the languages are sorted by
         // the name the interface itself shows them under, so Bangla sits above
         // English in an English interface and each language's own alphabet is
@@ -67,7 +61,7 @@ fun LanguagePage(
         entries.sortedBy { it.second.lowercase() }.forEach { (language, _) ->
             ChoiceRow(
                 title = languageChoiceName(language.tag),
-                subtitle = stringResource(R.string.settings_language_subtitle),
+                subtitle = null,
                 selected = settings.uiLanguage == language.tag,
                 onClick = { onLanguage(language.tag) },
             )
@@ -82,10 +76,11 @@ fun LanguagePage(
  *
  * The filled swatch is the page drawing right now. With automatic night mode
  * on and the phone in dark mode, that is Night, even though the stored choice
- * is the day page under it; the note names the day page so the choice is
- * never lost (owner report). The system's own state is read from the
- * resources here rather than from a composition local, because a sheet is its
- * own window and never sees the activity's composition.
+ * is the day page under it; the day page the choice rests on is named on the
+ * hub's own row when the two differ, so the choice is never lost (owner
+ * report). The system's own state is read from the resources here rather than
+ * from a composition local, because a sheet is its own window and never sees
+ * the activity's composition.
  */
 @Composable
 fun AppearancePage(
@@ -107,24 +102,9 @@ fun AppearancePage(
         Spacer(Modifier.height(Space.Section))
         ToggleRow(
             title = stringResource(R.string.settings_auto_night_title),
-            subtitle = stringResource(R.string.settings_auto_night_subtitle),
+            subtitle = null,
             checked = settings.autoNight,
             onChange = onAutoNight,
-        )
-        Text(
-            text = if (settings.autoNight) {
-                stringResource(R.string.settings_theme_note_auto, settings.theme.name())
-            } else {
-                stringResource(R.string.settings_theme_note)
-            },
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(
-                start = 22.dp,
-                end = 22.dp,
-                top = Space.Block,
-                bottom = Space.Section,
-            ),
         )
     }
 }
@@ -204,12 +184,6 @@ fun TranslationsPage(
 ) {
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_translations))
-        Text(
-            text = stringResource(R.string.settings_translations_note),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
-        )
         // The master switch lives on the hub row and nowhere else: this page
         // is the list of translations, and a switch at its head re-asked a
         // decision the hub already owns (owner report). The line below
@@ -252,12 +226,6 @@ fun TafsirsPage(
 ) {
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_tafsirs))
-        Text(
-            text = stringResource(R.string.settings_tafsirs_note),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
-        )
         // The same rule as the translations list: the hub row owns the
         // switch, and this page owns the list (owner report). The line
         // says what the reading is doing while the switch is off.
@@ -316,7 +284,7 @@ fun AboutPage(
         Group(stringResource(R.string.settings_group_content))
         PageRow(
             title = stringResource(R.string.settings_check_content),
-            summary = stringResource(R.string.settings_check_content_subtitle),
+            summary = null,
         ) { onCheckContent() }
         contentCheck?.let { check ->
             Text(

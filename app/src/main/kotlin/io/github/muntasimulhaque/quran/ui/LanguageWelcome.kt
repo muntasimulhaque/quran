@@ -97,13 +97,6 @@ fun LanguageWelcome(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 40.dp),
             )
-            Text(
-                text = stringResource(R.string.welcome_body),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 10.dp),
-            )
             Column(
                 modifier = Modifier.padding(top = 26.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),

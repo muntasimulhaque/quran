@@ -4,14 +4,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.core.chosenBy
 import io.github.muntasimulhaque.quran.data.AppSettings
@@ -41,18 +37,11 @@ fun ListeningPage(
 ) {
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_speed))
-        Text(
-            text = stringResource(R.string.settings_speed_note),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
-        )
         SpeedRow(value = settings.playbackSpeed, onChange = onSpeed)
         Spacer(Modifier.height(Space.Section))
         Group(stringResource(R.string.settings_group_repeat))
         EndRow(
             title = stringResource(R.string.settings_repeat_title),
-            subtitle = stringResource(R.string.settings_repeat_subtitle),
             choice = EndOfAudio.REPEAT_AYAH,
             end = settings.endOfAudio,
             onEndOfAudio = onEndOfAudio,
@@ -62,7 +51,6 @@ fun ListeningPage(
         // it, so it is available wherever the surah is.
         EndRow(
             title = stringResource(R.string.settings_repeat_surah_title),
-            subtitle = stringResource(R.string.settings_repeat_surah_subtitle),
             choice = EndOfAudio.REPEAT_SURAH,
             end = settings.endOfAudio,
             onEndOfAudio = onEndOfAudio,
@@ -74,7 +62,6 @@ fun ListeningPage(
         // size and a cancel while it downloads (owner decision).
         EndRow(
             title = stringResource(R.string.settings_continue_title),
-            subtitle = stringResource(R.string.settings_continue_subtitle),
             choice = EndOfAudio.CONTINUE,
             end = settings.endOfAudio,
             onEndOfAudio = onEndOfAudio,
@@ -88,7 +75,6 @@ fun ListeningPage(
 @Composable
 private fun EndRow(
     title: String,
-    subtitle: String,
     choice: EndOfAudio,
     end: EndOfAudio,
     onEndOfAudio: (EndOfAudio) -> Unit,
@@ -96,7 +82,7 @@ private fun EndRow(
 ) {
     ToggleRow(
         title = title,
-        subtitle = subtitle,
+        subtitle = null,
         checked = end == choice,
         onChange = { onEndOfAudio(chosenBy(it, choice)) },
         switchTag = switchTag,

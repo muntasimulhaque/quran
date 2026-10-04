@@ -76,13 +76,15 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * about a second permission keeps a page with one row and one note (owner
  * report).
  *
- * The exact time is still used whenever the phone allows it, and it is still
- * the manifest's own permission: `DailyAyahScheduler` asks the alarm manager
- * on every arm and takes the exact path when the answer is yes, which is the
- * answer on every release before Android 12 and on any phone the reader has
- * granted it in. The reminder arrives inside the minute otherwise, which on
- * a locked phone is the platform's own timing and not a choice this app
- * makes.
+ * The exact time is the manifest's own promise: `SCHEDULE_EXACT_ALARM` is
+ * granted at install before Android 14, and from Android 14 the app's own
+ * `USE_EXACT_ALARM` declaration restores that grant at install, so
+ * `DailyAyahScheduler` takes the exact path on every phone and the reminder
+ * arrives at the minute even on a phone that is locked and idle then.
+ * Nothing about any of it is shown here: the phone's own batched alarm is
+ * left only for a reader who has turned the phone's special access off
+ * themselves, and the page neither asks nor says anything about that (owner
+ * decision).
  */
 @Composable
 fun DailyPage(
@@ -115,12 +117,6 @@ fun DailyPage(
             title = stringResource(R.string.settings_daily_time_title),
             summary = clockText(settings.dailyAyahMinute),
             onClick = { choosing = true },
-        )
-        Text(
-            text = stringResource(R.string.settings_daily_note),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Section),
         )
         // The reminder has one dependency outside the app, and a page that
         // hides it is a page that lets the reader wonder. The phone, not the

@@ -26,7 +26,6 @@
     <!-- The one screen before the reading, shown once. Each language is named
          in its own script there, so these lines only carry the question. -->
     <string name="welcome_title">Choose your language</string>
-    <string name="welcome_body">The app, the translation, the tafsir, and the word meanings all read in the language you choose.</string>
     <string name="welcome_later">You can change this any time in Settings.</string>
     <string name="welcome_suggested">Suggested</string>
 

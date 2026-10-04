@@ -53,18 +53,21 @@ dead letter.
    is fetched at launch, no other host is ever contacted, and there is no
    analytics or telemetry of any kind. Everything else works with no
    connection. No WebView.
-2. **Permissions: media, notifications, the reminder's exact time, and that
-   one network use.** Exactly `INTERNET`, `POST_NOTIFICATIONS`,
-   `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MEDIA_PLAYBACK`, and
-   `SCHEDULE_EXACT_ALARM` (the daily reminder). The app asks for
-   `POST_NOTIFICATIONS` and nothing else, and it asks for it once, at the one
-   screen before the reading, so the first morning is not silently missed:
-   that is the whole of what a reader is put in front of. The exact alarm
-   grant is never asked for, never named in the UI, and has no row or button
-   anywhere; the reminder takes the best alarm the phone allows, which is the
-   exact one on any phone that permits it. Library-merged permissions are
-   documented, not fought. A new permission needs the owner's sign-off
-   written here first.
+2. **Permissions: media, notifications, the reminder's exact time and its
+   survival of a reboot, and that one network use.** Exactly `INTERNET`,
+   `POST_NOTIFICATIONS`, `FOREGROUND_SERVICE`,
+   `FOREGROUND_SERVICE_MEDIA_PLAYBACK`, `SCHEDULE_EXACT_ALARM` and
+   `USE_EXACT_ALARM` (the daily reminder's exact time, granted at install on
+   every release), and `RECEIVE_BOOT_COMPLETED` (re-arming the reminder after
+   a reboot). The app asks for `POST_NOTIFICATIONS` and nothing else, and it
+   asks for it once, at the one screen before the reading, so the first
+   morning is not silently missed: that is the whole of what a reader is put
+   in front of. The exact alarm grant is never asked for, never named in the
+   UI, and has no row or button anywhere; the reminder is armed with the
+   exact alarm on every phone, and the phone's own batched alarm is left only
+   for a reader who has turned the phone's special access off themselves
+   (owner decision). Library-merged permissions are documented, not fought. A
+   new permission needs the owner's sign-off written here first.
 3. **No ads, no trackers, no analytics, no accounts.** AndroidX, Kotlin,
    Media3, Room, DataStore, and Glance only. Every new dependency is
    proposed here first.
@@ -154,9 +157,11 @@ command to rediscover.
   AVDs are `Pixel_4_35`, `Nexus_7_35`, `Pixel_C_35`, and `api27`. Start one
   headless with `-no-window -gpu swiftshader_indirect` and wait for
   `sys.boot_completed` to report `1`.
-- That machine runs Gradle on `~/.jdks/jdk-17.0.19+10` (Temurin), not on the
-  JBR: with the JBR the daemon died inside `jvm.dll` under
-  `compileDebugAndroidTestKotlin`. The emulator there dies of the tour's load
+- That machine runs Gradle on the Android Studio JBR
+  (`/c/Program Files/Android/Android Studio/jbr`), which is the only runtime
+  installed on it: the Temurin JDK was removed and every Gradle call there
+  begins with that `JAVA_HOME` (owner decision). The emulator there dies of
+  the tour's load
   on a full debug build, so the
   tour runs against the lean `-Pquran.devPacks=screenshot` APK. AGP uninstalls
   the app when `connectedDebugAndroidTest` returns, so a frame is only
@@ -360,10 +365,13 @@ implement it and update this list.
   repeat the ayah, repeat the surah, or continue, and turning one on turns
   the other two off.
 - **The app never asks for the phone's exact alarm grant, and no settings row
-  or button offers it: the reminder takes the best alarm the phone allows and
-  says nothing about the difference.** The reader is asked for one permission,
-  the notification one, once at the first screen, and that is the whole of the
-  asking (owner decision).
+  or button offers it: the reminder takes the exact alarm on every phone and
+  says nothing about the difference.** `USE_EXACT_ALARM` makes the exact alarm
+  the install-time default from Android 14, and the phone's own batched alarm
+  is left only for a reader who has turned the phone's special access off
+  themselves. The reader is asked for one permission, the notification one,
+  once at the first screen, and that is the whole of the asking (owner
+  decision).
 - The day's ayah is dealt from a shuffled deck rather than walked in the
   Book's order: a different ayah every morning, every ayah once before the
   deck is filled again, and nothing stored (owner decision).
