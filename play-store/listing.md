@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 3.8 (versionCode 39)
+Version: 3.9 (versionCode 40)
 
 ## Listing
 
@@ -200,6 +200,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (3.9, 312 characters)
+
+The daily ayah now arrives at the minute you set, even with your phone locked and asleep, and a restart no longer costs the morning. Settings is quieter: the explanatory lines under the groups, the options, and the rows are gone, and every row keeps its name and where it stands. No ads, no trackers, no account.
 
 ## Release notes (3.8, 378 characters)
 
