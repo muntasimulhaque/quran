@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 3.9 (versionCode 41)
+Version: 4.0 (versionCode 42)
 
 ## Listing
 
@@ -200,6 +200,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (4.0, 378 characters)
+
+Every switch now reads in every theme: on the night pages an off switch was one flat lump, because its knob was the same tone as the track it sat in. Settings rows now use the width they were holding empty. Long-pressing an ayah raises Play, Save, Note, Share and More, and the card behind More opens on the study rather than on the verse again. No ads, no trackers, no account.
 
 ## Release notes (3.9, 331 characters)
 
