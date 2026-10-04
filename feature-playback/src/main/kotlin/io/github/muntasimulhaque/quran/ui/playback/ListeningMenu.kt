@@ -1,25 +1,22 @@
 package io.github.muntasimulhaque.quran.ui.playback
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -32,6 +29,7 @@ import io.github.muntasimulhaque.quran.core.chosenBy
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.ui.kit.SpeedSteps
 import io.github.muntasimulhaque.quran.ui.kit.speedText
+import io.github.muntasimulhaque.quran.ui.theme.appSwitchColors
 
 /**
  * The pace, and what happens at the end of the audio, as the list the pill
@@ -128,9 +126,16 @@ internal fun ListeningMenu(
 }
 
 /**
- * One of the three end answers, as a switch the pill drew itself: the label
- * takes the room, the app's own mark says the state, and the whole row is
- * the target.
+ * One of the three end answers, as a switch the pill's menu carries: the
+ * label takes the room, the switch is the app's own control in the theme's
+ * colors for this ground, and the whole row is the target.
+ *
+ * The switch draws the state and takes no clicks of its own, because the row
+ * is the control and a second target inside it would answer one tap twice. It
+ * is Material's switch rather than a mark drawn here, so that every switch in
+ * the app is one shape in one set of colors: the pill's menu and the settings
+ * sheet ask the same question in two places, and they answer it with the
+ * same control (owner decision, forty-sixth session).
  */
 @Composable
 private fun EndSwitch(
@@ -155,27 +160,10 @@ private fun EndSwitch(
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f),
         )
-        SwitchMark(checked = on)
-    }
-}
-
-/** The app's own switch mark: a rounded track and a knob, drawn by hand. */
-@Composable
-private fun SwitchMark(checked: Boolean) {
-    val track = if (checked) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.22f)
-    }
-    val knob = if (checked) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.surface
-    Canvas(Modifier.size(width = 38.dp, height = 22.dp)) {
-        val corner = size.height / 2f
-        drawRoundRect(
-            color = track,
-            cornerRadius = CornerRadius(corner),
+        Switch(
+            checked = on,
+            onCheckedChange = null,
+            colors = appSwitchColors(),
         )
-        val radius = size.height / 2f - 2.dp.toPx()
-        val cx = if (checked) size.width - corner else corner
-        drawCircle(color = knob, radius = radius, center = Offset(cx, corner))
     }
 }

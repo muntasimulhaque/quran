@@ -31,10 +31,15 @@ import io.github.muntasimulhaque.quran.data.UiLanguage
  * `surfaceTint` is transparent in all four. Material lifts a raised surface
  * by tinting it toward the primary; on a manuscript that would awake a blue
  * wash under every sheet, so the lift is a chosen tone and a shadow instead.
+ *
+ * `surfaceContainerHighest` is the ground a switch's own track is filled
+ * with, and it is named with the switch in `Switch.kt`: a control that reads
+ * as a control is the one thing a scheme role should not be left to answer
+ * for by accident.
  */
 private val PaperScheme = lightColorScheme(
     primary = Lapis,
-    onPrimary = Color(0xFFFDFBF6),
+    onPrimary = PaperOnPrimary,
     primaryContainer = Color(0xFFD3E4F5),
     onPrimaryContainer = Color(0xFF0B2A45),
     secondary = PaperMuted,
@@ -51,7 +56,7 @@ private val PaperScheme = lightColorScheme(
     surfaceContainerLow = Color(0xFFFBF8F1),
     surfaceContainer = Color(0xFFF7F3EA),
     surfaceContainerHigh = Color(0xFFFFFEFB),
-    surfaceContainerHighest = Color(0xFFFFFFFF),
+    surfaceContainerHighest = PaperControl,
     surfaceTint = Color.Transparent,
     inverseSurface = PaperInk,
     inverseOnSurface = PaperSurface,
@@ -63,7 +68,7 @@ private val PaperScheme = lightColorScheme(
 
 private val SepiaScheme = lightColorScheme(
     primary = Lapis,
-    onPrimary = Color(0xFFFDF8ED),
+    onPrimary = SepiaOnPrimary,
     primaryContainer = Color(0xFFE7D9BE),
     onPrimaryContainer = Color(0xFF1C3A56),
     secondary = SepiaMuted,
@@ -80,7 +85,7 @@ private val SepiaScheme = lightColorScheme(
     surfaceContainerLow = Color(0xFFF7EEDE),
     surfaceContainer = Color(0xFFF2E8D5),
     surfaceContainerHigh = Color(0xFFFCF5E8),
-    surfaceContainerHighest = Color(0xFFFEF9F0),
+    surfaceContainerHighest = SepiaControl,
     surfaceTint = Color.Transparent,
     inverseSurface = SepiaInk,
     inverseOnSurface = SepiaSurface,
@@ -92,7 +97,7 @@ private val SepiaScheme = lightColorScheme(
 
 private val NightScheme = darkColorScheme(
     primary = LapisLight,
-    onPrimary = Color(0xFF08243D),
+    onPrimary = NightOnPrimary,
     primaryContainer = Color(0xFF24405C),
     onPrimaryContainer = Color(0xFFD3E4F5),
     secondary = NightMuted,
@@ -109,7 +114,7 @@ private val NightScheme = darkColorScheme(
     surfaceContainerLow = Color(0xFF121B25),
     surfaceContainer = Color(0xFF17222E),
     surfaceContainerHigh = Color(0xFF1E2B39),
-    surfaceContainerHighest = Color(0xFF263443),
+    surfaceContainerHighest = NightControl,
     surfaceTint = Color.Transparent,
     inverseSurface = NightText,
     inverseOnSurface = NightBackground,
@@ -121,7 +126,7 @@ private val NightScheme = darkColorScheme(
 
 private val BlackScheme = darkColorScheme(
     primary = LapisLight,
-    onPrimary = Color(0xFF061A2C),
+    onPrimary = BlackOnPrimary,
     primaryContainer = Color(0xFF1E3448),
     onPrimaryContainer = Color(0xFFD3E4F5),
     secondary = BlackMuted,
@@ -138,7 +143,7 @@ private val BlackScheme = darkColorScheme(
     surfaceContainerLow = Color(0xFF080C11),
     surfaceContainer = Color(0xFF0D131A),
     surfaceContainerHigh = Color(0xFF151E28),
-    surfaceContainerHighest = Color(0xFF1D2834),
+    surfaceContainerHighest = BlackControl,
     surfaceTint = Color.Transparent,
     inverseSurface = BlackText,
     inverseOnSurface = BlackBackground,
@@ -214,9 +219,16 @@ fun QuranTheme(
         AppTheme.Night -> "night"
         AppTheme.Black -> "black"
     }
+    val switches = when (theme) {
+        AppTheme.Paper -> PaperSwitch
+        AppTheme.Sepia -> SepiaSwitch
+        AppTheme.Night -> NightSwitch
+        AppTheme.Black -> BlackSwitch
+    }
     CompositionLocalProvider(
         LocalPagePalette provides palette,
         LocalPageThemeName provides name,
+        LocalSwitchPalette provides switches,
         LocalReadingVoice provides when (language) {
             UiLanguage.Bangla -> ReadingVoice(BengaliReading, 1.706f) { NotoSerifBengali }
             UiLanguage.English -> ReadingVoice(LatinReading, 1.6f, ::literataAt)

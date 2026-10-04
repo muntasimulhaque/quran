@@ -45,7 +45,6 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -204,19 +203,18 @@ fun AyahCard(
             // translation, and its meanings are already open on the page,
             // and only the tafsir doors remain.
             if (fromMushaf) {
-                // The ayah itself, at the head of the card, with its reference.
-                // From the Mushaf this card is the whole study surface, and
-                // the sheet covers the lower half of the page: the ayah the
-                // reader long-pressed is behind it, half hidden, so a card
-                // that began with three list rows began with none of the
-                // verse. Opened from the study reading the ayah is already on
-                // the page above the sheet, so it is not repeated here.
-                AyahHeading(
-                    ayah = ayah,
-                    surahName = surahName,
-                    hafs = hafs,
-                    settings = settings,
-                )
+                // The card opens on the study, not on the verse again. It did
+                // open with the surah's name, the Arabic and the reference,
+                // because the sheet covers the lower half of the Mushaf page
+                // and the ayah the reader long-pressed was behind it, half
+                // hidden. The owner read that back as a card that began with
+                // the ayah rather than with what the ayah is for, and on a
+                // long verse the heading filled the whole first screen, which
+                // is what the store's own frame of this card was showing. The
+                // page still marks the ayah the card was raised over, and the
+                // footnote sheet still names the ayah a note belongs to, so
+                // the reference is not lost with the heading (owner decision,
+                // forty-sixth session).
                 if (hasWords) {
                     // Every block of the card is named above itself: the
                     // words, the translation, the tafsir. The door below
@@ -392,56 +390,6 @@ fun AyahCard(
             lineSp = open.lineSp,
             onDismiss = { footnote = null },
         )
-    }
-}
-
-/**
- * The ayah the card is about, at its head: the surah's name, the verse in the
- * reading's own Arabic, and the reference under it.
- *
- * The reference is the one thing on the card a reader can copy or say aloud,
- * and the verse is the one thing that makes every panel below it legible: the
- * words, the translation and the tafsir are all about this ayah, and a reader
- * who has just long-pressed one should not have to look back at the page to
- * remember which.
- */
-@Composable
-private fun AyahHeading(
-    ayah: Ayah,
-    surahName: String,
-    hafs: FontFamily,
-    settings: AppSettings,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 22.dp),
-    ) {
-        Text(
-            text = surahName,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(
-            text = ayah.text,
-            style = TextStyle(
-                fontFamily = hafs,
-                fontSize = settings.arabicSp.sp,
-                lineHeight = settings.arabicLineSp.sp,
-                color = MaterialTheme.colorScheme.onSurface,
-            ),
-            textAlign = TextAlign.Right,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = Space.Line),
-        )
-        Text(
-            text = ayah.verseKey,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = Space.Tight),
-        )
-        Spacer(Modifier.height(Space.Block))
     }
 }
 

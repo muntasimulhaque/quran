@@ -56,3 +56,25 @@ val LapisLight = Color(0xFF7FB2E5)
 // gold sat at 3.2:1 and 4.1:1, under the rule, and were darkened without
 // changing the hue.
 val Gold = Color(0xFF856411)
+
+// The switch's own two tones that are not already a word's tone: the ground a
+// switch's track is filled with while it is off, and the ink its knob wears
+// while it is on. The knob of an off switch and the ring around that track are
+// the ground's muted voice, which is already a named tone above, and the track
+// of an on switch is the accent.
+//
+// These are Material's `surfaceContainerHighest` and `onPrimary`, lifted out
+// of the four schemes and named here, because a control's colors are the
+// theme's business and were being taken from two scheme roles that each mean
+// something else: the off knob was `outline`, which is the hairline every
+// divider in the app wears, and on the two night grounds it measured 1.03:1
+// against its own track, so an off switch had no knob in it at all (owner
+// report, forty-sixth session). See `Switch.kt` for the whole control.
+val PaperControl = Color(0xFFFFFFFF)
+val PaperOnPrimary = Color(0xFFFDFBF6)
+val SepiaControl = Color(0xFFFEF9F0)
+val SepiaOnPrimary = Color(0xFFFDF8ED)
+val NightControl = Color(0xFF263443)
+val NightOnPrimary = Color(0xFF08243D)
+val BlackControl = Color(0xFF1D2834)
+val BlackOnPrimary = Color(0xFF061A2C)

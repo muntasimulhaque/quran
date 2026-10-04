@@ -30,6 +30,7 @@ import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.theme.appSwitchColors
 
 /**
  * A quiet heading over a group of rows. It opens the group with more room
@@ -59,16 +60,26 @@ fun Group(title: String) {
 
 /**
  * The chevron at the end of a settings row: 48 dp wide, drawn when the row
- * has a page behind it and held empty when it does not, so every switch in
- * the sheet stands at one place whatever the row carries (owner report).
+ * has a page behind it and taking no width at all when it does not, so every
+ * switch in the sheet stands at one place whatever the row carries and no
+ * label is shortened for a mark the row does not draw.
+ *
+ * The column used to be reserved on every row, drawn or not, so a row with
+ * no door carried 48 dp of empty sheet in front of its switch and its name
+ * was 48 dp shorter than a row that had one. It was not what kept the
+ * switches on one line: a switch stands at the row's own margin whatever is
+ * in front of it, so the empty column never moved one. What it bought was a
+ * row that grows a door later keeping its switch where it was, which is a
+ * convenience for whoever edits this file next and not a thing a reader can
+ * see (owner decision, forty-sixth session).
  *
  * The slot owns a 48 dp square only when the chevron is a control of its
- * own. On every other row it is a width, not a height: a square tail is
- * taller than the line of text beside it, and a Row takes the height of its
- * tallest child, so an empty square stretched every plain row from 51 dp to
- * 76 dp and turned the hub into a ladder (owner report). Where the
- * chevron does carry its own tap it keeps the square, which costs the row
- * nothing, because the switch beside it already holds 48 dp.
+ * own. On a row where the whole row is the door it is a width, not a height:
+ * a square tail is taller than the line of text beside it, and a Row takes
+ * the height of its tallest child, so an empty square stretched every plain
+ * row from 51 dp to 76 dp and turned the hub into a ladder (owner report).
+ * Where the chevron does carry its own tap it keeps the square, which costs
+ * the row nothing, because the switch beside it already holds 48 dp.
  *
  * [contentAlignment] is where the mark stands inside its slot. A row that
  * also has a switch centres it, because the switch's own column is beside it
@@ -84,6 +95,11 @@ private fun ChevronSlot(
     label: String? = null,
     contentAlignment: Alignment = Alignment.Center,
 ) {
+    // No mark to draw and no tap of its own to answer: the row keeps no width
+    // for the arrow. A row that opens something always draws one, so the two
+    // conditions are one in practice, and both are asked here so that a day
+    // when they are not, a tap is never the thing that goes missing.
+    if (!visible && onOpen == null) return
     val tail = if (onOpen != null) Modifier.size(48.dp) else Modifier.width(48.dp)
     Box(
         modifier = tail
@@ -184,15 +200,16 @@ val SwitchSlot = 52.dp
  * them: the chevron's column, then the switch's.
  *
  * The switch's column exists on a row that has a switch and on no other row.
- * A row with nowhere to switch to keeps no empty room for one, so the
+ * The chevron's column exists on a row that draws a chevron and on no other
+ * row: a row with nowhere to switch to keeps no empty room for one, so the
  * chevron in it is the row's last mark, and the mark itself stands on the
  * margin where a switch's own right edge stands rather than in the middle of
- * the column in front of it (owner report: the column had moved and left
- * the mark centred inside it). A row with both
- * keeps the two columns exactly as they have always been.
+ * an empty column in front of it (owner report: the column had moved and left
+ * the mark centred inside it).
  *
- * A row draws the marks it carries and leaves the chevron's column empty when
- * it has no door, so every switch ends at one line whatever a row carries.
+ * Every switch ends at the row's own margin, with or without a chevron in
+ * front of it, and that is the whole of the alignment: both columns are read
+ * from their right edges, and a right edge never moves.
  */
 @Composable
 internal fun RowTail(
@@ -309,6 +326,11 @@ fun ToggleRow(
             Switch(
                 checked = checked,
                 onCheckedChange = if (opens) onChange else null,
+                // The switch wears the theme's own pair for this ground, and
+                // not Material's two scheme roles: the off knob would be the
+                // app's hairline, which on the night grounds is the same paint
+                // as the track it sits in and left no knob in the control.
+                colors = appSwitchColors(),
                 modifier = switchModifier,
             )
         }

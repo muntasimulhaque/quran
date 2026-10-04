@@ -321,8 +321,10 @@ at every step:
 - **the portion**: the reader's chosen daily amount. Never called a streak.
 - **the deck**: the day's ayah is one card of a shuffled 6,236, dealt by the
   day number and reshuffled every pass, so nothing about it is stored.
-- **the study card**: the sheet one ayah opens: its text, the translation
-  with footnotes, and the Words, Ibn Kathir, and As-Sa'di panels.
+- **the study card**: the sheet one ayah opens: the Words, the translation
+  with footnotes, and the Ibn Kathir and As-Sa'di panels. From the Mushaf it
+  is the whole study surface; from the study reading it is only the tafsirs.
+  The ayah is not drawn on it, because the page behind carries it.
 - **the text button**: `ui-kit/TextButton`, the one shape a word that acts
   wears. A heading, a name, or a label is bare type; anything that answers a
   touch is a rounded shape.

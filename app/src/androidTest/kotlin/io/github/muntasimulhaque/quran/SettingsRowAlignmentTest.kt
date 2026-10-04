@@ -16,6 +16,7 @@ import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.ui.settings.AboutPage
 import io.github.muntasimulhaque.quran.ui.settings.PageRow
@@ -23,6 +24,7 @@ import io.github.muntasimulhaque.quran.ui.settings.SizeRow
 import io.github.muntasimulhaque.quran.ui.settings.SpeedRow
 import io.github.muntasimulhaque.quran.ui.settings.SwitchSlot
 import io.github.muntasimulhaque.quran.ui.settings.ToggleRow
+import io.github.muntasimulhaque.quran.ui.theme.QuranTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -189,6 +191,76 @@ class SettingsRowAlignmentTest {
         assertTrue(
             "a row with no value must stay a line and its padding, not a 48 dp slot taller",
             bare.bottom - bare.top <= 56.dp,
+        )
+    }
+
+    /**
+     * A row keeps no width for a mark it does not draw.
+     *
+     * The chevron's column used to be reserved on every row, drawn or not, so
+     * a row with no door carried 48 dp of empty sheet in front of its switch.
+     * A switch stands at the row's own margin whatever is in front of it, so
+     * the empty column never kept a switch on one line; what it bought was a
+     * row that grows a door later keeping its switch where it was, which is a
+     * convenience for whoever edits the file and not a thing a reader can see
+     * (owner decision, forty-sixth session).
+     *
+     * This measures the two halves. A row that draws no chevron composes no
+     * chevron slot, so there is no empty column left to be empty, and neither
+     * switch moved to pay for the one that is gone.
+     *
+     * It does not measure whether a label fits on one line, because that is a
+     * question about the words and the phone, not about the column.
+     */
+    @Test
+    fun aRowKeepsNoWidthForAMarkItDoesNotDraw() {
+        compose.setContent {
+            QuranTheme(theme = AppTheme.Paper) {
+                // Two rows side by side in the app's own voice, one with a
+                // door and one without, carrying the same name so the only
+                // variable is the chevron column.
+                Column {
+                    ToggleRow(
+                        title = "Show translation",
+                        subtitle = null,
+                        checked = true,
+                        onChange = {},
+                        switchTag = "long-alone",
+                    )
+                    ToggleRow(
+                        title = "Show translation",
+                        subtitle = null,
+                        checked = true,
+                        onChange = {},
+                        onOpen = {},
+                        openLabel = "Open translations",
+                        switchTag = "short-door",
+                    )
+                }
+            }
+        }
+
+        // The crispest half of the sentence: a row that draws no chevron
+        // composes no chevron slot, so there is nothing there to be empty.
+        // The slot's own tag is on a row that draws one, which is what makes
+        // this a count of the rows that have a door.
+        val slots = compose.onAllNodesWithTag("chevron-slot", useUnmergedTree = true)
+            .fetchSemanticsNodes()
+        assertEquals(
+            "only the row that draws a chevron composes one",
+            1,
+            slots.size,
+        )
+
+        val alone = compose.onNodeWithTag("long-alone", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
+        val doorSwitch = compose.onNodeWithTag("short-door", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
+        assertEquals(
+            "and releasing the chevron column moved no switch",
+            alone.right.value,
+            doorSwitch.right.value,
+            0.5f,
         )
     }
 

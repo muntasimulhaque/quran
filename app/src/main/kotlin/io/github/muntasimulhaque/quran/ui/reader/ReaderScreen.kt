@@ -958,8 +958,16 @@ private fun markState(on: Boolean): String =
     stringResource(if (on) R.string.action_state_on else R.string.action_state_off)
 
 /**
- * The ayah's own actions, on the pill a long press raises: hear it, write on
- * it, keep it, share it, and the deeper door.
+ * The ayah's own actions, on the pill a long press raises: hear it, keep it,
+ * write on it, share it, and the deeper door.
+ *
+ * The keep comes before the note because the keep is the lighter tap and the
+ * note is the writing: Save lands where it stands, and Note opens a sheet and
+ * a keyboard. On a pill held in one hand the left is the easiest reach, so the
+ * tap a reader repeats belongs nearer the front. A note keeps its ayah in
+ * Saved and never lights the bookmark (below), so the keep is the fact and the
+ * note is what is written on it, and a parent before its child reads in the
+ * order the eye lands (owner decision, forty-sixth session).
  *
  * Each action carries its own mark, and a mark says the tap that made it: the
  * note glyph is lit by a note and the bookmark by a Save, never the one by the
@@ -992,18 +1000,18 @@ private fun AyahActions(
         // The two marked actions say their state; the three that only answer a
         // tap say nothing, so nothing on the pill reads as a switch it is not.
         TextAction(
-            label = stringResource(R.string.action_note),
-            icon = Icon.Note,
-            onClick = onNote,
-            active = hasNote,
-            state = markState(hasNote),
-        )
-        TextAction(
             label = stringResource(R.string.action_save),
             icon = if (isSaved) Icon.BookmarkFilled else Icon.Bookmark,
             onClick = onSave,
             active = isSaved,
             state = markState(isSaved),
+        )
+        TextAction(
+            label = stringResource(R.string.action_note),
+            icon = Icon.Note,
+            onClick = onNote,
+            active = hasNote,
+            state = markState(hasNote),
         )
         TextAction(stringResource(R.string.action_share), Icon.Share, onShare)
         if (fromMushaf || showTafsir) {
