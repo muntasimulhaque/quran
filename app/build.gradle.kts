@@ -309,6 +309,10 @@ dependencies {
     implementation(project(":feature-browse"))
     implementation(project(":feature-playback"))
     implementation(project(":feature-settings"))
+    // The manifest permission pin runs as a JVM test: the law names
+    // the exact set, and only a test catches a dependency that merges
+    // a new permission in.
+    testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(platform(libs.androidx.compose.bom))

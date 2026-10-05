@@ -38,8 +38,8 @@ dead letter.
 2. Do the work, then ask one question: anything else? The build waits for
    the owner's word, and no `versionCode` moves until the session is done
    and the owner says so.
-3. Session end: bring the README status and the release notes current, and
-   leave the tree clean.
+3. Session end: bring the README status and the release notes current,
+   update the Map against `settings.gradle.kts`, and leave the tree clean.
 
 ## The law (non-negotiable)
 
@@ -119,8 +119,11 @@ dead letter.
   dashes. Release notes fit the 500-character field, counted before
   hand-off, and are handed over as a bare paragraph: no blockquote, no code
   fence, no quotes, no label on the same line.
-- **Small pieces.** Files under 400 lines, functions under 40. Split early;
-  a name that says the idea beats a name that says the screen.
+- **Small pieces, no numbers.** Keep modules small and the codebase
+  modular: for code, the codebase is all you need, so memory and docs
+  stay out of it, and at most a little maintained map says where what
+  is. Split early; a name that says the idea beats a name that says
+  the screen.
 - **User-facing strings** live in a `strings.xml` in the module that draws
   them, nowhere in Kotlin: `app` for the shell, each feature for its own
   surface, `ui-kit` for the two mode names. Arabic content stays data.
