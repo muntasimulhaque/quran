@@ -6,9 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,38 +51,6 @@ internal fun ReciterChoices(
             selected = option.reciter == selected,
             onClick = { onChoose(option.reciter) },
         )
-    }
-}
-
-/**
- * The same list in a menu of its own, for the one place that is not the
- * playing pill: the offer bar asks before anything is fetched, and its menu
- * hangs from the reciter's name above the size it is asking for.
- *
- * The menu wears the same cloth as the pill's: the same surface color, the
- * same rounded shape, and no depth the pill does not have, because the pill
- * carries no border and casts no shadow, so a menu that did read as a foreign
- * sheet laid over it.
- */
-@Composable
-internal fun ReciterMenu(
-    open: Boolean,
-    options: List<ListenOption>,
-    /** The reciter in use, by id; null where none of them is. */
-    selected: String?,
-    onChoose: (String) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    DropdownMenu(
-        expanded = open,
-        onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(20.dp),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        tonalElevation = 0.dp,
-        shadowElevation = 0.dp,
-        modifier = Modifier.width(PillMenuMeasure),
-    ) {
-        ReciterChoices(options = options, selected = selected, onChoose = onChoose)
     }
 }
 

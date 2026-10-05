@@ -66,7 +66,6 @@
     <string name="reader_pack_downloading">Downloading %1$d%% · %2$s</string>
     <string name="pack_download_failed">Could not download. Check your connection.</string>
 
-    <string name="playback_continue_to">Continue to %1$s · %2$s</string>
     <string name="playback_offer">%1$s · %2$s</string>
 
     <string name="content_problem_title">The Quran text could not be opened</string>

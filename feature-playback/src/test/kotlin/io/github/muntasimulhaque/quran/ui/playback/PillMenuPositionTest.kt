@@ -19,11 +19,22 @@ import org.junit.Test
  * capsule is pinned in `PlaybackPillTest`, which can see that.
  *
  * The two together are the promise: the anchor stands on the capsule's centre,
- * and the popup stands on the anchor's. The owner's complaint was a reciter
- * chooser at one end of the pill and the listening answers at the other, two
- * popups in two places on one control (owner report).
+ * and the popup stands above the anchor's own top edge with [PopupGap] of
+ * ground between the two: with one cloth and no shadow, that ground is the
+ * only thing that says the popup and the capsule are two surfaces. The first
+ * owner report was a reciter chooser at one end of the pill and the listening
+ * answers at the other, two popups in two places on one control; the second
+ * was the popup standing on the capsule's own edge, where the flat edges met
+ * and the corners kissed (owner report).
  */
 class PillMenuPositionTest {
+
+    /**
+     * The ground the rule keeps between the popup's foot and the capsule, in
+     * pixels. The rule is arithmetic and knows no density, so any number
+     * here pins it; 40 is easy to follow through the sums.
+     */
+    private val gap = 40
 
     @Test
     fun thePopupIsCentredOnTheAnchor() {
@@ -44,13 +55,38 @@ class PillMenuPositionTest {
     }
 
     @Test
-    fun thePopupRisesOutOfTheCapsulesTopEdge() {
+    fun thePopupRisesOutOfTheCapsulesTopEdgeWithGroundBetween() {
         val anchor = IntRect(left = 144, top = 1_800, right = 936, bottom = 1_803)
         val at = place(anchor = anchor, content = IntSize(792, 304), window = IntSize(1080, 2_340))
         assertEquals(
-            "the popup stands above the capsule, not over it",
-            anchor.top - 304,
+            "the popup stands above the capsule with the gap kept, not over it",
+            anchor.top - gap - 304,
             at.y,
+        )
+        assertEquals(
+            "the popup's foot keeps the gap above the capsule's top edge",
+            gap,
+            anchor.top - (at.y + 304),
+        )
+    }
+
+    /**
+     * The ground is absolute: the popup takes no more room than the ground
+     * above the capsule, less the gap, so the position rule never clamps and
+     * the two shapes cannot meet on any window. What does not fit scrolls
+     * inside the popup (owner decision).
+     */
+    @Test
+    fun thePopupNeverGrowsPastTheGroundAboveTheCapsule() {
+        assertEquals(
+            "the room is the capsule's own top edge less the gap",
+            1_800 - 40,
+            popupRoom(1_800, 40),
+        )
+        assertEquals(
+            "a window too short for the gap has no room rather than less than none",
+            0,
+            popupRoom(10, 40),
         )
     }
 
@@ -64,7 +100,7 @@ class PillMenuPositionTest {
         val anchor = IntRect(left = 1_224, top = 600, right = 2_016, bottom = 603)
         val at = place(anchor = anchor, content = IntSize(792, 304), window = IntSize(2_400, 1_600))
         assertEquals(anchor.left, at.x)
-        assertEquals(anchor.top - 304, at.y)
+        assertEquals(anchor.top - gap - 304, at.y)
     }
 
     /**
@@ -91,7 +127,7 @@ class PillMenuPositionTest {
     }
 
     private fun place(anchor: IntRect, content: IntSize, window: IntSize): IntOffset =
-        PillMenuPosition(anchor).calculatePosition(
+        PillMenuPosition(anchor, gap).calculatePosition(
             anchorBounds = anchor,
             windowSize = window,
             layoutDirection = LayoutDirection.Ltr,

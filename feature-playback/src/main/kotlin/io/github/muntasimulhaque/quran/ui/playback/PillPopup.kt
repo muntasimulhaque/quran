@@ -2,6 +2,7 @@ package io.github.muntasimulhaque.quran.ui.playback
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
@@ -30,12 +32,20 @@ import androidx.compose.ui.window.PopupProperties
  * reader's eye went to two ends of one control for two questions (owner
  * report). The placement is therefore the app's own: the anchor is the
  * capsule's centre at the popup's own measure, and the popup is centred on it
- * and rises above the capsule's top edge, the shape a menu opening out of a
- * capsule at the foot of a page is expected to have.
+ * and rises above the capsule's top edge with [PopupGap] of the page's own
+ * ground between, the shape a menu opening out of a capsule at the foot of a
+ * page is expected to have.
  *
  * It wears the pill's own surface and the pill's own rounded shape, and casts
  * no shadow, because the pill casts none and a popup that did read as a
- * foreign sheet laid over it. A tap outside puts it away, as a dropdown's does.
+ * foreign sheet laid over it. The ground is what keeps that reading honest:
+ * with one cloth and no shadow, the space between the two silhouettes is the
+ * only thing that says they are two, and a popup standing on the capsule's
+ * own edge met the capsule's curve with nothing between (owner report). The
+ * popup takes no taller a measure than the ground above the gap, so the
+ * ground is kept on a window too short for the content, and what does not
+ * fit scrolls inside it (owner decision). A tap outside puts it away, as a
+ * dropdown's does.
  */
 @Composable
 internal fun PillPopup(
@@ -46,14 +56,24 @@ internal fun PillPopup(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     if (!open) return
+    // The rule is arithmetic in pixels, so the gap is converted once, here,
+    // where the density is known.
+    val density = LocalDensity.current
+    val gap = with(density) { PopupGap.roundToPx() }
+    // The popup may take no more than the ground above the capsule, less the
+    // gap, so the position rule below never has to clamp: a popup free to
+    // grow on a short window was pushed down until the ground was gone
+    // (owner decision). What does not fit scrolls.
+    val room = with(density) { popupRoom(anchor.top, gap).toDp() }
     Popup(
         onDismissRequest = onDismiss,
         properties = PopupProperties(focusable = true),
-        popupPositionProvider = PillMenuPosition(anchor),
+        popupPositionProvider = PillMenuPosition(anchor, gap),
     ) {
         Column(
             modifier = Modifier
                 .width(PillMenuMeasure)
+                .heightIn(max = room)
                 .clip(RoundedCornerShape(20.dp))
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                 .verticalScroll(rememberScrollState()),
@@ -64,7 +84,8 @@ internal fun PillPopup(
 
 /**
  * Where the pill's popup stands: centred on the anchor, rising above the
- * capsule's own top edge, and never off the screen on either side.
+ * capsule's own top edge with [gap] of ground between, and never off the
+ * screen on either side.
  *
  * The anchor is a box, and the box's own bounds are read here rather than left
  * to the library: this is the one place in the app that says where a popup
@@ -74,7 +95,11 @@ internal fun PillPopup(
  * cannot be read back through a compose test, so the rule itself is what
  * carries the promise (owner report).
  */
-internal class PillMenuPosition(private val anchor: IntRect) : PopupPositionProvider {
+internal class PillMenuPosition(
+    private val anchor: IntRect,
+    /** [PopupGap] in pixels, converted where the density is known. */
+    private val gap: Int,
+) : PopupPositionProvider {
     override fun calculatePosition(
         anchorBounds: IntRect,
         windowSize: IntSize,
@@ -84,11 +109,11 @@ internal class PillMenuPosition(private val anchor: IntRect) : PopupPositionProv
         val x = (anchor.center.x - popupContentSize.width / 2)
             .coerceIn(0, (windowSize.width - popupContentSize.width).coerceAtLeast(0))
         // The capsule floats at the foot of the reading, so its popup rises
-        // out of the capsule's top edge rather than dropping over the capsule
-        // and the bar below it. A popup too tall for the room above starts at
-        // the top of the screen and scrolls, which is where the window's own
-        // edge is the honest place to stop.
-        val y = (anchor.top - popupContentSize.height).coerceAtLeast(0)
+        // above the capsule's top edge with the gap between rather than
+        // dropping over the capsule and the bar below it. The clamp is the
+        // rule's own floor: [PillPopup] already keeps the popup within the
+        // room above the gap, so this only answers a caller that did not.
+        val y = (anchor.top - gap - popupContentSize.height).coerceAtLeast(0)
         return IntOffset(x, y)
     }
 }

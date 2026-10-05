@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 4.0 (versionCode 42)
+Version: 4.1 (versionCode 43)
 
 ## Listing
 
@@ -200,6 +200,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (4.1, 366 characters)
+
+The menus that open above the playback bar, the reciter chooser and the playback answers, now stand clear of the capsule instead of running into it, with the page's own ground between them. Playback speed keeps its distance from the top of its popup, and the next-surah offer names the surah and its size with Continue on the button. No ads, no trackers, no account.
 
 ## Release notes (4.0, 378 characters)
 

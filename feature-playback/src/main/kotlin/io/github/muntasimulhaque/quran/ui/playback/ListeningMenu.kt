@@ -49,11 +49,16 @@ internal fun ListeningMenu(
     onSpeed: (Float) -> Unit,
     onEndOfAudio: (EndOfAudio) -> Unit,
 ) {
+    // The label is the popup's first line, so it keeps the top inset the
+    // reciter chooser's first row already opens with: with no room over the
+    // leading the label sat against the popup's own top edge at a small
+    // fraction of that inset (owner report). The room sits over the leading,
+    // and the label still stands nearer the paces it names than the top edge.
     Text(
         text = stringResource(R.string.playback_speed_label),
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 6.dp),
+        modifier = Modifier.padding(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 6.dp),
     )
     // One row, five paces, the chosen one filled: the same shape the
     // Listening page draws, so one control is learned once.

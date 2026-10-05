@@ -1,7 +1,10 @@
 package io.github.muntasimulhaque.quran
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
@@ -113,7 +116,18 @@ class PlaybackPillTest {
                         modifier = pillWidth,
                     )
                 }
-                if (measureWidth == null) pill() else WideBox(measureWidth) { pill() }
+                // The app keeps the pill at the foot of the reading, so the
+                // popups have the window above them to stand in. The harness
+                // used to stand the pill at the window's own top, where the
+                // popup's room rule, which caps it at the ground above the
+                // capsule, left the menu no room at all and the legs failed
+                // on a ground the app never gives the pill.
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.BottomCenter,
+                ) {
+                    if (measureWidth == null) pill() else WideBox(measureWidth) { pill() }
+                }
             }
         }
     }

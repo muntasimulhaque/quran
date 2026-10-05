@@ -81,6 +81,22 @@ internal val PillMenuMeasure = 288.dp
 internal val AnchorLine = 1.dp
 
 /**
+ * The ground the pill's popup keeps between its own foot and the capsule's
+ * top edge.
+ *
+ * The popup wears the pill's own cloth, carries no border, and casts no
+ * shadow, so the space between the two silhouettes is the only thing that
+ * says they are two surfaces. With the popup's foot on the capsule's own
+ * top edge (owner report) the flat edges met along the middle, where no
+ * seam can be seen, and the popup's foot corners and the capsule's
+ * shoulders kissed at each end, so the two read as one shape with a waist.
+ * Ten dp stands clear of the capsule's own 6 dp shadow and well inside the
+ * popup's 20 dp corner, so the band reads as the page's own ground rather
+ * than as a seam, and the popup still hangs from the capsule's middle.
+ */
+internal val PopupGap = 10.dp
+
+/**
  * What the pill's own row spends before the words get a pixel of it: the
  * row's padding, the gap, the controls, and the two chevrons the words
  * wear. Four controls, the playing state, is 560 dp, which is a tablet and
@@ -89,3 +105,18 @@ internal val AnchorLine = 1.dp
 internal fun oneRowFloor(controls: Int): Dp =
     RowInsets + WordsGap + (TransportSize * controls) + ChevronRoom +
         ReciterChevronRoom + WordsMeasure
+
+/**
+ * The room a popup the pill opens may take, in pixels: the ground between
+ * the window's own top and the line the popup keeps above the capsule.
+ *
+ * The popup's own scroll takes the content past this measure rather than
+ * over the capsule. With the popup free to grow, a window too short for it
+ * made the position rule clamp to the window's top, push the popup's foot
+ * down, and take the ground away again, so the one place the two shapes met
+ * was the place the screen was tightest (owner decision). A popup no taller
+ * than this measure leaves the position rule unclamped, and the ground holds
+ * on the shortest window as it does on the tallest.
+ */
+internal fun popupRoom(anchorTop: Int, gap: Int): Int =
+    (anchorTop - gap).coerceAtLeast(0)

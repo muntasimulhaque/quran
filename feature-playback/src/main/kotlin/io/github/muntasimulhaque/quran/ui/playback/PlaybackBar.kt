@@ -264,9 +264,9 @@ fun PlaybackBar(
 }
 
 /**
- * The anchor the pill's own popups hang from: the capsule's own width, with
- * the popup's measure centred on it and its top edge as the line they drop
- * from.
+ * The anchor the pill's own popups hang from, on both of the bars it wears:
+ * the capsule's own width, with the popup's measure centred on it and its top
+ * edge as the line they drop from.
  *
  * The anchor and the popup are one measure on purpose, and the anchor is read
  * back to the caller so the popup is placed from the anchor's own place and
@@ -274,9 +274,11 @@ fun PlaybackBar(
  * bounds of (owner report). It draws nothing and takes one hairline of room,
  * because a box with no height has no bounds to read: a zero-height anchor
  * stands every popup at the window's own edge instead of the capsule's centre.
+ * The playing capsule and the offer bar both stand it, so the one chooser
+ * opens from the same place wherever it is asked.
  */
 @Composable
-private fun PillMenuAnchor(content: @Composable (anchor: IntRect) -> Unit) {
+internal fun PillMenuAnchor(content: @Composable (anchor: IntRect) -> Unit) {
     var anchor by remember { mutableStateOf(IntRect.Zero) }
     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         Box(

@@ -908,13 +908,12 @@ private fun BottomStack(
                 reciterId = reciterId,
                 reciterOptions = reciterOptions,
                 reference = playback.reference,
+                // The button says Continue; the words name the surah and its
+                // size, so the offer does not say the verb twice (owner
+                // decision). The continuation and the plain offer read the
+                // same way here, which is the point.
                 pendingLabel = pendingSurahName?.let { name ->
-                    val size = formatBytes(playback.pendingDownloadBytes)
-                    if (playback.pendingIsContinuation) {
-                        stringResource(R.string.playback_continue_to, name, size)
-                    } else {
-                        stringResource(R.string.playback_offer, name, size)
-                    }
+                    stringResource(R.string.playback_offer, name, formatBytes(playback.pendingDownloadBytes))
                 },
                 pendingAudio = pendingSurahName?.let { name ->
                     stringResource(R.string.playback_offer, name, formatBytes(playback.pendingDownloadBytes))

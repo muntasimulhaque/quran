@@ -2,7 +2,6 @@ package io.github.muntasimulhaque.quran.ui.playback
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -59,65 +58,73 @@ internal fun ListenOfferBar(
             .clip(RoundedCornerShape(50))
             .background(MaterialTheme.colorScheme.surfaceContainerHigh),
     ) {
-        Row(
-            modifier = Modifier.padding(start = 16.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(Modifier.weight(1f, fill = false)) {
-                Column(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(50))
-                        .clickable(enabled = progress == null, role = Role.Button) { chooser = true }
-                        .padding(horizontal = 4.dp, vertical = 2.dp),
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = offer.reciterName,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f, fill = false),
-                        )
-                        // The name is the door to the other reciters; the
-                        // mark says so, so the choice is found without a
-                        // guess, and it goes away once the download starts.
-                        if (progress == null) {
-                            IconGlyph(
-                                icon = Icon.Chevron,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier
-                                    .padding(start = 4.dp)
-                                    .size(14.dp),
-                            )
-                        }
-                    }
-                    Text(
-                        text = when {
-                            offer.failed -> stringResource(R.string.playback_download_failed)
-                            progress != null -> stringResource(
-                                R.string.playback_downloading,
-                                (progress * 100).toInt(),
-                            )
-                            else -> title
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-                // The same menu the playing pill opens, so the choice is
-                // learned once and wears the same shape in both places.
-                ReciterMenu(
-                    open = chooser,
+        // The chooser hangs from the bar's own centre with its ground above,
+        // exactly as the chooser on the playing pill does: one list opens the
+        // same way in both of its homes, instead of the framework's menu,
+        // which stood on the bar's own edge and met its shoulder (owner
+        // decision).
+        PillMenuAnchor { anchor ->
+            PillPopup(
+                open = chooser,
+                anchor = anchor,
+                onDismiss = { chooser = false },
+            ) {
+                ReciterChoices(
                     options = offer.options,
                     selected = offer.reciter,
                     onChoose = {
                         chooser = false
                         onReciter(it)
                     },
-                    onDismiss = { chooser = false },
+                )
+            }
+        }
+        Row(
+            modifier = Modifier.padding(start = 16.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f, fill = false)
+                    .clip(RoundedCornerShape(50))
+                    .clickable(enabled = progress == null, role = Role.Button) { chooser = true }
+                    .padding(horizontal = 4.dp, vertical = 2.dp),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = offer.reciterName,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    // The name is the door to the other reciters; the
+                    // mark says so, so the choice is found without a
+                    // guess, and it goes away once the download starts.
+                    if (progress == null) {
+                        IconGlyph(
+                            icon = Icon.Chevron,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .padding(start = 4.dp)
+                                .size(14.dp),
+                        )
+                    }
+                }
+                Text(
+                    text = when {
+                        offer.failed -> stringResource(R.string.playback_download_failed)
+                        progress != null -> stringResource(
+                            R.string.playback_downloading,
+                            (progress * 100).toInt(),
+                        )
+                        else -> title
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
             Spacer(Modifier.padding(horizontal = 6.dp))
