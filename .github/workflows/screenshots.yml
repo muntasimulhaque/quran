@@ -184,6 +184,20 @@ jobs:
             adb -s emulator-5554 shell pm uninstall io.github.muntasimulhaque.quran >/dev/null 2>&1 || true
             adb -s emulator-5554 shell pm uninstall io.github.muntasimulhaque.quran.test >/dev/null 2>&1 || true
             adb -s emulator-5554 shell am start -a android.intent.action.MAIN -c android.intent.category.HOME >/dev/null 2>&1 || true
+            # The launcher is the only app that can come over the tour,
+            # and on a software-rendered emulator it is the one that
+            # does: under the tour's load it raises its own "isn't
+            # responding" window, which keeps a live surface the guard
+            # reads even while the system hides the dialog (runs
+            # 36911766796 and 37265959390, both the 10 inch leg, both
+            # over 05-search). The tour never goes home and the presses
+            # above have already cleared the task, so the home app is
+            # removed outright: no launcher, no launcher window, and
+            # the guard stays as the second net for whatever is left.
+            # An image that refuses the uninstall is disabled instead,
+            # and a home that does not exist cannot be pressed by
+            # anything that follows.
+            adb -s emulator-5554 shell pm uninstall --user 0 com.google.android.apps.nexuslauncher 2>&1 || adb -s emulator-5554 shell pm disable-user --user 0 com.google.android.apps.nexuslauncher 2>&1 || true
             # One Gradle run: a second connectedAndroidTest invocation would
             # replace the previous additional output, and with it the
             # screenshots, so the three capture classes are named in one call.
@@ -200,6 +214,14 @@ jobs:
             # Gradle line before anything was collected (runs 35463781932 and
             # 35974207613, tablet10).
             ./gradlew :app:connectedDebugAndroidTest --console=plain -Pquran.devPacks=screenshot -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest,io.github.muntasimulhaque.quran.WordByWordTest,io.github.muntasimulhaque.quran.MushafTurnTest,io.github.muntasimulhaque.quran.TafsirDirectionTest,io.github.muntasimulhaque.quran.SavedNotesTest,io.github.muntasimulhaque.quran.SettingsVisibilityTest ; echo $? > /tmp/gradle_status
+            # One automatic rerun of the tour when the first pass loses
+            # an emulator race: the residual flake is the slow-render
+            # timeout, the launcher class above is designed out, and one
+            # rerun is the owner's manual rerun made automatic. A real
+            # failure fails twice and the leg stays red, and the reinstall
+            # below starts the second pass from the same clean state the
+            # first had.
+            status=$(cat /tmp/gradle_status 2>/dev/null || echo 1) ; if [ "$status" != "0" ]; then echo "the tour failed once, so the emulator gets one recovery rerun" ; sleep 30 ; adb -s emulator-5554 shell pm uninstall io.github.muntasimulhaque.quran >/dev/null 2>&1 || true ; adb -s emulator-5554 shell pm uninstall io.github.muntasimulhaque.quran.test >/dev/null 2>&1 || true ; ./gradlew :app:connectedDebugAndroidTest --console=plain -Pquran.devPacks=screenshot -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest,io.github.muntasimulhaque.quran.WordByWordTest,io.github.muntasimulhaque.quran.MushafTurnTest,io.github.muntasimulhaque.quran.TafsirDirectionTest,io.github.muntasimulhaque.quran.SavedNotesTest,io.github.muntasimulhaque.quran.SettingsVisibilityTest ; echo $? > /tmp/gradle_status ; fi
             # AGP copies the test's additional output off-device (before it
             # uninstalls the app) into the connected additional output folder.
             # Every collection line is guarded, because the runner aborts the
