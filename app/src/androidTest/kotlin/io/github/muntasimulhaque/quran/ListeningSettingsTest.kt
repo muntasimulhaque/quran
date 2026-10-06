@@ -18,15 +18,15 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * The Listening page carries the pace and the three ends.
+ * The Listening page carries the pace and the four answers.
  *
- * The three ends are three switches over one value (owner decision),
- * so each row reports the answer it names and nothing else: the exclusivity
- * itself is the plan in `core`, which the JVM suite pins, and what this
- * proves is that the page sends that answer rather than a pair of booleans
- * that could be turned on together. The continuation switch is the reader's
- * word for the packages that follow, so the row must be there and must
- * report the choice it was given (owner decision).
+ * The answers are four switches over one value (owner decision), so each row
+ * reports the answer it names and nothing else: the exclusivity itself is the
+ * plan in `core`, which the JVM suite pins, and what this proves is that the
+ * page sends that answer rather than a set of booleans that could be turned on
+ * together. The default row, continuing to the next ayah, is the one switch
+ * whose off is the stop, so it reports the stop rather than a choice
+ * (owner decision).
  *
  * The switch is looked for in the unmerged tree, and it has to be: the row
  * itself is the door and the switch is its own control inside it, so the
@@ -42,7 +42,7 @@ class ListeningSettingsTest {
     val compose = createComposeRule()
 
     private fun showPage(
-        end: EndOfAudio = EndOfAudio.OFF,
+        end: EndOfAudio = EndOfAudio.CONTINUE_AYAH,
         onEndOfAudio: (EndOfAudio) -> Unit = {},
     ) {
         compose.setContent {
@@ -57,11 +57,27 @@ class ListeningSettingsTest {
     }
 
     @Test
+    fun theDefaultSwitchReportsTheStopWhenTurnedOff() {
+        var reported: EndOfAudio? = null
+        showPage { reported = it }
+        compose.onNodeWithTag("switch-continue-ayah", useUnmergedTree = true).performClick()
+        assertEquals(
+            "turning the default off is the reader's stop",
+            EndOfAudio.STOP_AFTER_AYAH,
+            reported,
+        )
+    }
+
+    @Test
     fun theContinuationSwitchReportsItsOwnChoice() {
         var reported: EndOfAudio? = null
         showPage { reported = it }
         compose.onNodeWithTag("switch-continue", useUnmergedTree = true).performClick()
-        assertEquals("the continue switch must report the choice", EndOfAudio.CONTINUE, reported)
+        assertEquals(
+            "the continue switch must report the choice",
+            EndOfAudio.CONTINUE_SURAH,
+            reported,
+        )
     }
 
     @Test
@@ -80,12 +96,21 @@ class ListeningSettingsTest {
     @Test
     fun theAnswerThePageShowsIsTheOnlyOneChecked() {
         showPage(end = EndOfAudio.REPEAT_SURAH)
-        // The page is a view of one value, so exactly one of the three rows
-        // can read on. Two of them on is the state the player cannot keep
-        //, and a page that drew it would be lying before the reader
-        // pressed anything.
+        // The page is a view of one value, so exactly one of the four rows can
+        // read on. Two of them on is the state the player cannot keep, and a
+        // page that drew it would be lying before the reader pressed anything.
         compose.onNodeWithText("Repeat the surah").assertIsOn()
-        compose.onNodeWithText("Repeat the ayah").assertIsOff()
+        compose.onNodeWithText("Continue to the next ayah").assertIsOff()
         compose.onNodeWithText("Continue to the next surah").assertIsOff()
+        compose.onNodeWithText("Repeat the ayah").assertIsOff()
+    }
+
+    @Test
+    fun theDefaultIsTheOnlyOneCheckedOutOfTheBox() {
+        showPage()
+        compose.onNodeWithText("Continue to the next ayah").assertIsOn()
+        compose.onNodeWithText("Continue to the next surah").assertIsOff()
+        compose.onNodeWithText("Repeat the ayah").assertIsOff()
+        compose.onNodeWithText("Repeat the surah").assertIsOff()
     }
 }

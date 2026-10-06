@@ -220,10 +220,12 @@ private fun dailySubtitle(settings: AppSettings): String = stringResource(
 
 /**
  * Where the listening choices stand, in one line: the pace, and what happens
- * at the end of the audio. A reader who set a pace and forgot it must be able
+ * as the reading moves on. A reader who set a pace and forgot it must be able
  * to see it from the hub, or the reading sounds slow for a reason they cannot
- * find, and the end of the audio is the other thing a reader sets once and
- * then forgets.
+ * find, and the answer at the end of an ayah is the other thing a reader sets
+ * once and then forgets. A reading told to stop after each ayah says so here,
+ * because a stopped reading is the one state a reader must be able to see
+ * without opening the page.
  */
 @Composable
 private fun listeningSummary(settings: AppSettings): String {
@@ -231,7 +233,8 @@ private fun listeningSummary(settings: AppSettings): String {
     return when (settings.endOfAudio) {
         EndOfAudio.REPEAT_AYAH -> stringResource(R.string.settings_listening_summary_repeat, speed)
         EndOfAudio.REPEAT_SURAH -> stringResource(R.string.settings_listening_summary_repeat_surah, speed)
-        EndOfAudio.CONTINUE, EndOfAudio.OFF -> speed
+        EndOfAudio.STOP_AFTER_AYAH -> stringResource(R.string.settings_listening_summary_stop, speed)
+        EndOfAudio.CONTINUE_AYAH, EndOfAudio.CONTINUE_SURAH -> speed
     }
 }
 

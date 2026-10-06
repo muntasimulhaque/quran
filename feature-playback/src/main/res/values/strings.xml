@@ -19,5 +19,6 @@
     <string name="playback_speed_option">%1$s, %2$s</string>
     <string name="playback_repeat_ayah">Repeat the ayah</string>
     <string name="playback_repeat_surah">Repeat the surah</string>
-    <string name="playback_continue_next">Continue to the next surah</string>
+    <string name="playback_continue_ayah">Continue to the next ayah</string>
+    <string name="playback_continue_surah">Continue to the next surah</string>
 </resources>

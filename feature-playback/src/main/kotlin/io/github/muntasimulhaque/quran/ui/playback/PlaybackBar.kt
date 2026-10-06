@@ -73,8 +73,8 @@ fun PlaybackBar(
     pendingAudio: String? = null,
     /** The reader's pace, shown only when it is not the ordinary one. */
     speed: Float = 1f,
-    /** What happens at the end of the audio, set from the pill's own menu. */
-    end: EndOfAudio = EndOfAudio.OFF,
+    /** What happens as the reading moves on, set from the pill's own menu. */
+    end: EndOfAudio = EndOfAudio.CONTINUE_AYAH,
     onToggle: () -> Unit,
     onNext: () -> Unit,
     onPrevious: () -> Unit,
@@ -139,7 +139,24 @@ fun PlaybackBar(
     val chooseReciter = if (downloading || reciterOptions.isEmpty()) null else onReciter
     // The capsule holds the two menus, so the words answer a tap with the
     // name of one rather than each raising a sheet of its own.
-    var openMenu by remember { mutableStateOf<PillMenu?>(null) }
+    //
+    // The menu belongs to the pill that opened it, so it closes when the pill
+    // becomes a different pill: when its voice changes from playing to an
+    // offer or a download, and when the reading moves to another ayah or
+    // another surah. Keying the remember on those is what closes it, and
+    // leaving pause, speed, and the switches out of the keys is what keeps it
+    // open while the reader is using it (owner report: a menu stayed over the
+    // continuation pill that had replaced the one it belonged to).
+    val voice = when {
+        state.downloadFailed -> PillVoice.Failed
+        downloading -> PillVoice.Downloading
+        needsDownload -> PillVoice.Offer
+        state.unavailable -> PillVoice.Unavailable
+        else -> PillVoice.Playing
+    }
+    var openMenu by remember(voice, state.ayahNumber, state.surah) {
+        mutableStateOf<PillMenu?>(null)
+    }
     val openReciters: (() -> Unit)? = if (chooseReciter == null) {
         null
     } else {
@@ -262,6 +279,14 @@ fun PlaybackBar(
         }
     }
 }
+
+/**
+ * The face the pill is wearing, so a menu can tell when it has become another
+ * pill. Playing is the reading itself; the rest are the states a pill takes
+ * while a package is offered, fetched, or refused, each with its own words and
+ * its own controls.
+ */
+private enum class PillVoice { Playing, Offer, Downloading, Failed, Unavailable }
 
 /**
  * The anchor the pill's own popups hang from, on both of the bars it wears:

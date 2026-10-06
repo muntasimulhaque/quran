@@ -19,5 +19,6 @@
     <string name="playback_speed_option">%1$s, %2$s</string>
     <string name="playback_repeat_ayah">আয়াত পুনরাবৃত্তি করুন</string>
     <string name="playback_repeat_surah">সূরা পুনরাবৃত্তি করুন</string>
-    <string name="playback_continue_next">পরের সূরায় চালিয়ে যান</string>
+    <string name="playback_continue_ayah">পরের আয়াতে চালিয়ে যান</string>
+    <string name="playback_continue_surah">পরের সূরায় চালিয়ে যান</string>
 </resources>

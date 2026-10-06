@@ -25,7 +25,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.EndOfAudio
-import io.github.muntasimulhaque.quran.core.chosenBy
+import io.github.muntasimulhaque.quran.core.toggled
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.ui.kit.SpeedSteps
 import io.github.muntasimulhaque.quran.ui.kit.speedText
@@ -37,10 +37,12 @@ import io.github.muntasimulhaque.quran.ui.theme.appSwitchColors
  * and rounded shape the reciter chooser wears, so it reads as the pill opening
  * rather than a foreign sheet laid over it.
  *
- * The three end answers are three switches over one value
- * (owner decision): each reports the answer it carries, and the plan
- * the app keeps is that answer alone, so the reader can never be in a state
- * where the ayah repeats and the surah also repeats.
+ * The four answers are four switches over one value (owner decision): each
+ * reports the answer it carries, and the plan the app keeps is that answer
+ * alone, so the reader can never be in a state where the ayah repeats and the
+ * surah also repeats. The default, continuing to the next ayah, is the one
+ * switch that is on with nothing else, and turning it off is the stop, which
+ * needs no switch of its own.
  */
 @Composable
 internal fun ListeningMenu(
@@ -105,35 +107,41 @@ internal fun ListeningMenu(
         }
     }
     EndSwitch(
+        label = stringResource(R.string.playback_continue_ayah),
+        choice = EndOfAudio.CONTINUE_AYAH,
+        chosen = end,
+        onEndOfAudio = onEndOfAudio,
+    )
+    // The surah, the same answer one unit larger: the next surah is fetched
+    // with the reciter being heard and plays on. Off, the end of the surah is
+    // offered with its size instead of fetched.
+    EndSwitch(
+        label = stringResource(R.string.playback_continue_surah),
+        choice = EndOfAudio.CONTINUE_SURAH,
+        chosen = end,
+        onEndOfAudio = onEndOfAudio,
+    )
+    // The ayah again: the player's own loop, the answer that never advances.
+    EndSwitch(
         label = stringResource(R.string.playback_repeat_ayah),
         choice = EndOfAudio.REPEAT_AYAH,
         chosen = end,
         onEndOfAudio = onEndOfAudio,
     )
-    // The surah, the same answer one unit larger: the ayah that has just
-    // ended begins again, and so does the whole surah, at its first ayah
-    // that is on the device (owner decision).
+    // The surah, the same answer one unit larger: the whole surah begins
+    // again at its first ayah that is on the device (owner decision).
     EndSwitch(
         label = stringResource(R.string.playback_repeat_surah),
         choice = EndOfAudio.REPEAT_SURAH,
         chosen = end,
         onEndOfAudio = onEndOfAudio,
     )
-    // The end of the surah, where the two above are the end of the ayah.
-    // On, the next surah is fetched with the reciter being heard and
-    // plays on; off, the pill offers it with its size.
-    EndSwitch(
-        label = stringResource(R.string.playback_continue_next),
-        choice = EndOfAudio.CONTINUE,
-        chosen = end,
-        onEndOfAudio = onEndOfAudio,
-    )
 }
 
 /**
- * One of the three end answers, as a switch the pill's menu carries: the
- * label takes the room, the switch is the app's own control in the theme's
- * colors for this ground, and the whole row is the target.
+ * One of the answers the pill's menu carries: the label takes the room, the
+ * switch is the app's own control in the theme's colors for this ground, and
+ * the whole row is the target.
  *
  * The switch draws the state and takes no clicks of its own, because the row
  * is the control and a second target inside it would answer one tap twice. It
@@ -155,7 +163,7 @@ private fun EndSwitch(
             .fillMaxWidth()
             .padding(horizontal = 6.dp, vertical = 6.dp)
             .clip(RoundedCornerShape(14.dp))
-            .toggleable(value = on, role = Role.Switch) { onEndOfAudio(chosenBy(it, choice)) }
+            .toggleable(value = on, role = Role.Switch) { onEndOfAudio(toggled(it, choice)) }
             .padding(horizontal = 10.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

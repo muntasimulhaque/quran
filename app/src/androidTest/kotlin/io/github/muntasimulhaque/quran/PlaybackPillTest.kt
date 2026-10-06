@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.Modifier
@@ -85,7 +87,7 @@ class PlaybackPillTest {
          */
         measureWidth: Dp? = null,
         speed: Float = 1f,
-        end: EndOfAudio = EndOfAudio.OFF,
+        end: EndOfAudio = EndOfAudio.CONTINUE_AYAH,
     ) {
         compose.setContent {
             QuranTheme(theme = AppTheme.Paper) {
@@ -127,6 +129,38 @@ class PlaybackPillTest {
                     contentAlignment = Alignment.BottomCenter,
                 ) {
                     if (measureWidth == null) pill() else WideBox(measureWidth) { pill() }
+                }
+            }
+        }
+    }
+
+    /**
+     * The same pill, with a state the test can change under it, so a menu can
+     * be watched as the pill becomes another pill.
+     */
+    private fun showMutablePill(state: MutableState<PlaybackUiState>) {
+        compose.setContent {
+            QuranTheme(theme = AppTheme.Paper) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.BottomCenter,
+                ) {
+                    PlaybackBar(
+                        state = state.value,
+                        offer = null,
+                        offerTitle = "",
+                        reciterName = "Husary",
+                        reciterId = "husary",
+                        reciterOptions = listOf(ListenOption("husary", "Husary", 0L)),
+                        reference = state.value.reference,
+                        pendingLabel = "Continue to Al-Baqarah \u00b7 177 MB",
+                        onToggle = {},
+                        onNext = {},
+                        onPrevious = {},
+                        onReciter = {},
+                        onDownload = {},
+                        onClose = {},
+                    )
                 }
             }
         }
@@ -206,7 +240,18 @@ class PlaybackPillTest {
         showPill(onEndOfAudio = { end = it })
         compose.onNodeWithTag("playback-listening").performClick()
         compose.onNodeWithText("Continue to the next surah").performClick()
-        assertEquals(EndOfAudio.CONTINUE, end)
+        assertEquals(EndOfAudio.CONTINUE_SURAH, end)
+    }
+
+    @Test
+    fun theListeningMenuCarriesTheStopOnTheDefaultSwitch() {
+        var end: EndOfAudio? = null
+        showPill(onEndOfAudio = { end = it })
+        compose.onNodeWithTag("playback-listening").performClick()
+        // The default row is the one switch whose off is the stop, so this is
+        // the reader's one-tap door to a reading that stops after the ayah.
+        compose.onNodeWithText("Continue to the next ayah").performClick()
+        assertEquals(EndOfAudio.STOP_AFTER_AYAH, end)
     }
 
     @Test
@@ -298,6 +343,52 @@ class PlaybackPillTest {
             (bar.right - last.right).value,
             1f,
         )
+    }
+
+    @Test
+    fun theMenuClosesWhenThePillBecomesTheContinuationOffer() {
+        val state = mutableStateOf(
+            PlaybackUiState(
+                connected = true,
+                ayahNumber = 2,
+                surah = 1,
+                reference = "Al-Fatihah 1:2",
+            ),
+        )
+        showMutablePill(state)
+        compose.onNodeWithTag("playback-listening").performClick()
+        compose.onNodeWithText("Continue to the next surah").assertExists()
+        // The surah ended and the next package is offered: the pill underneath
+        // is another pill, so the menu it belonged to goes with the old one.
+        compose.runOnUiThread {
+            state.value = PlaybackUiState(
+                connected = true,
+                surah = 1,
+                pendingDownloadSurah = 2,
+                pendingDownloadBytes = 185_000_000L,
+                pendingIsContinuation = true,
+            )
+        }
+        compose.onNodeWithText("Continue to the next surah").assertDoesNotExist()
+    }
+
+    @Test
+    fun theMenuClosesWhenTheReadingMovesToAnotherAyah() {
+        val state = mutableStateOf(
+            PlaybackUiState(
+                connected = true,
+                ayahNumber = 2,
+                surah = 1,
+                reference = "Al-Fatihah 1:2",
+            ),
+        )
+        showMutablePill(state)
+        compose.onNodeWithTag("playback-listening").performClick()
+        compose.onNodeWithText("Continue to the next surah").assertExists()
+        compose.runOnUiThread {
+            state.value = state.value.copy(ayahNumber = 3, reference = "Al-Fatihah 1:3")
+        }
+        compose.onNodeWithText("Continue to the next surah").assertDoesNotExist()
     }
 
     @Test

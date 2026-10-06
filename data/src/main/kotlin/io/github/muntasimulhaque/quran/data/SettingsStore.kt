@@ -77,17 +77,18 @@ data class AppSettings(
     /** How fast the recitation plays: the reader's own pace, remembered. */
     val playbackSpeed: Float = 1f,
     /**
-     * What happens when the recitation being heard ends: the ayah again, the
-     * surah again, or the surah after this one.
+     * What happens as the recitation being heard moves on: the next ayah,
+     * nothing further after this one, the ayah again, the surah again, or the
+     * surah after this one.
      *
-     * One value and not three switches, because two of them on at once is a
+     * One value and not four switches, because two of them on at once is a
      * promise the player cannot keep: a surah that repeats never ends, so
-     * the continuation would never come (owner decision). The
-     * continuation is off by default, and a download still waits for the
-     * reader's word: this is that word, given once for every surah that
-     * follows (owner decision).
+     * the continuation would never come (owner decision). Continuing to the
+     * next ayah is the default; turning it off is the stop, and a download
+     * still waits for the reader's word: the continuation is that word,
+     * given once for every surah that follows (owner decision).
      */
-    val endOfAudio: EndOfAudio = EndOfAudio.OFF,
+    val endOfAudio: EndOfAudio = EndOfAudio.CONTINUE_AYAH,
     val translationPacks: Set<String> = emptySet(),
     val tafsirPacks: Set<String> = emptySet(),
     /**
@@ -250,8 +251,8 @@ class SettingsStore(private val context: Context) {
     }
 
     /**
-     * What happens at the end of the audio, written as the three keys it has
-     * always been written as, in one edit.
+     * What happens as the reading moves on, written as the keys it has always
+     * been written as, in one edit.
      *
      * The keys move together or not at all: a process that died between two
      * writes would leave a reader with the ayah repeating and the next surah
@@ -259,8 +260,9 @@ class SettingsStore(private val context: Context) {
      * exists to prevent (owner decision).
      */
     suspend fun setEndOfAudio(end: EndOfAudio) {
-        val plan = RepeatPlan.OFF.with(end)
+        val plan = RepeatPlan().with(end)
         context.settingsStore.edit {
+            it[CONTINUE_AYAH] = plan.continueAyah
             it[REPEAT_AYAH] = plan.ayah
             it[REPEAT_SURAH] = plan.surah
             it[CONTINUE_SURAH] = plan.next
@@ -325,14 +327,17 @@ class SettingsStore(private val context: Context) {
     }
 
     /**
-     * The end of the audio, as the three stored keys stand.
+     * The reading's chosen answer, as the stored keys stand.
      *
      * A build before the exclusivity let a reader turn two of them
      * on, so the read settles that case the way [RepeatPlan.end] does: the
      * narrower promise is the one kept, because it is the one the reader can
-     * still hear working.
+     * still hear working. `continue_ayah` is absent from every install
+     * before this one, and an unwritten key reads as on, which is the
+     * behavior those installs already had.
      */
     private fun storedEnd(preferences: Preferences): EndOfAudio = RepeatPlan(
+        continueAyah = preferences[CONTINUE_AYAH] ?: true,
         ayah = preferences[REPEAT_AYAH] ?: false,
         surah = preferences[REPEAT_SURAH] ?: false,
         next = preferences[CONTINUE_SURAH] ?: false,
@@ -387,12 +392,14 @@ class SettingsStore(private val context: Context) {
         val FOLLOW_RECITER = booleanPreferencesKey("follow_reciter")
         val PLAYBACK_SPEED = floatPreferencesKey("playback_speed")
         /**
-         * The three keys one answer is stored as. `repeat_ayah` and
+         * The keys one answer is stored as. `repeat_ayah` and
          * `continue_surah` were written before the answer was one value;
-         * `repeat_surah` is the third key that made, added later and
-         * absent from every install before it, which costs a reader
-         * nothing: an unwritten key reads as off.
+         * `repeat_surah` is the third key that made, added later; and
+         * `continue_ayah` is the default's own key, added last. An install
+         * that predates any of them reads the missing key as its own
+         * default, which costs a reader nothing.
          */
+        val CONTINUE_AYAH = booleanPreferencesKey("continue_ayah")
         val REPEAT_AYAH = booleanPreferencesKey("repeat_ayah")
         val REPEAT_SURAH = booleanPreferencesKey("repeat_surah")
         val CONTINUE_SURAH = booleanPreferencesKey("continue_surah")

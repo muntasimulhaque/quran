@@ -9,25 +9,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import io.github.muntasimulhaque.quran.core.EndOfAudio
-import io.github.muntasimulhaque.quran.core.chosenBy
+import io.github.muntasimulhaque.quran.core.toggled
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
- * The listening page: how fast the recitation plays, and what happens when
- * the ayah or the surah being heard ends. Both are about hearing, not about
+ * The listening page: how fast the recitation plays, and what happens as the
+ * ayah or the surah being heard moves on. Both are about hearing, not about
  * the page, so they sit together under the reciter whose voice they shape.
  *
- * The three ends are three switches over one value (owner decision).
- * Each row is the answer it names, checked only when it is the answer, and
- * turning one on leaves the other two off, because two of them on at once is
- * a promise the player cannot keep: a surah that repeats never ends, so the
- * continuation would never come.
+ * The answers are four switches over one value (owner decision). Each row is
+ * the answer it names, checked only when it is the answer, and turning one on
+ * leaves the others off, because two of them on at once is a promise the
+ * player cannot keep: a surah that repeats never ends, so the continuation
+ * would never come. The default, continuing to the next ayah, is the one
+ * switch that is on with nothing else, and turning it off is the stop, which
+ * needs no switch of its own.
  *
- * The pill opens the same two answers, from its own listening menu, and both
- * doors call the one value kept here.
+ * The two rows about the ayah and the two about the surah are the two groups
+ * the reader thinks in, and the pill opens the same four in the same order,
+ * from its own listening menu, calling the one value kept here.
  */
 @Composable
 fun ListeningPage(
@@ -38,6 +41,27 @@ fun ListeningPage(
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_speed))
         SpeedRow(value = settings.playbackSpeed, onChange = onSpeed)
+        Spacer(Modifier.height(Space.Section))
+        Group(stringResource(R.string.settings_group_continue))
+        // The default, and the stop: turning this one off is the only way to
+        // a reading that stops when the ayah ends (owner decision).
+        EndRow(
+            title = stringResource(R.string.settings_continue_ayah_title),
+            choice = EndOfAudio.CONTINUE_AYAH,
+            end = settings.endOfAudio,
+            onEndOfAudio = onEndOfAudio,
+            switchTag = "switch-continue-ayah",
+        )
+        // Continue to the next surah: the packages that follow need no second
+        // approval, and the next surah still announces itself on the pill
+        // with its size and a cancel while it downloads (owner decision).
+        EndRow(
+            title = stringResource(R.string.settings_continue_surah_title),
+            choice = EndOfAudio.CONTINUE_SURAH,
+            end = settings.endOfAudio,
+            onEndOfAudio = onEndOfAudio,
+            switchTag = "switch-continue",
+        )
         Spacer(Modifier.height(Space.Section))
         Group(stringResource(R.string.settings_group_repeat))
         EndRow(
@@ -55,23 +79,11 @@ fun ListeningPage(
             end = settings.endOfAudio,
             onEndOfAudio = onEndOfAudio,
         )
-        // Continue: what happens at the end of the surah, where repeat is
-        // what happens at the end of the ayah. Turning it on is the reader's
-        // word for the packages that follow, so the next surah needs no
-        // second approval; it still announces itself on the pill with its
-        // size and a cancel while it downloads (owner decision).
-        EndRow(
-            title = stringResource(R.string.settings_continue_title),
-            choice = EndOfAudio.CONTINUE,
-            end = settings.endOfAudio,
-            onEndOfAudio = onEndOfAudio,
-            switchTag = "switch-continue",
-        )
         Spacer(Modifier.height(Space.Section))
     }
 }
 
-/** One of the three ends, as a switch row that reports only its own answer. */
+/** One of the answers, as a switch row that reports only its own. */
 @Composable
 private fun EndRow(
     title: String,
@@ -84,7 +96,7 @@ private fun EndRow(
         title = title,
         subtitle = null,
         checked = end == choice,
-        onChange = { onEndOfAudio(chosenBy(it, choice)) },
+        onChange = { onEndOfAudio(toggled(it, choice)) },
         switchTag = switchTag,
     )
 }

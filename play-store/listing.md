@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 4.1 (versionCode 43)
+Version: 4.2 (versionCode 44)
 
 ## Listing
 
@@ -200,6 +200,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (4.2, 419 characters)
+
+Listening gains a Continue to the next ayah switch, on by default, so a reading keeps moving ayah by ayah as before. Turn it off and the recitation stops when the current ayah ends. It sits with Continue to the next surah, Repeat the ayah, and Repeat the surah, and only one answer can be on. A menu opened from the playing pill now closes when the pill changes or the reading moves on. No ads, no trackers, no account.
 
 ## Release notes (4.1, 366 characters)
 

@@ -2,11 +2,13 @@ package io.github.muntasimulhaque.quran.playback
 
 import android.content.ComponentName
 import android.content.Context
+import android.os.Bundle
 import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
+import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionToken
 import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.core.RecitationPlaylist
@@ -61,9 +63,9 @@ class PlaybackController(
     private var downloadJob: Job? = null
     private var requestedAyah: Int? = null
 
-    /** The reader's pace, repeat, and continuation, applied on connect. */
+    /** The reader's pace, their answer as the reading moves on, applied on connect. */
     private var speed = 1f
-    private var end = EndOfAudio.OFF
+    private var end = EndOfAudio.CONTINUE_AYAH
 
     private val _state = MutableStateFlow(PlaybackUiState())
     val state: StateFlow<PlaybackUiState> = _state.asStateFlow()
@@ -193,17 +195,18 @@ class PlaybackController(
 
     /**
      * The surah ended and the next one is not on the device. The reader's
-     * Continue choice decides: off, the offer waits with the next surah's
-     * name and size, so nothing is fetched behind the reader's back; on, the
-     * package is fetched with the reciter being heard and plays on, and the
-     * pill carries the size, the progress, and the cancel while it does
-     * (owner decision).
+     * Continue to the next surah choice decides: off, the offer waits with
+     * the next surah's name and size, so nothing is fetched behind the
+     * reader's back; on, the package is fetched with the reciter being heard
+     * and plays on, and the pill carries the size, the progress, and the
+     * cancel while it does (owner decision).
      */
     private fun offerNextSurah() {
         // A surah that is repeating has not ended; it has begun again, so
-        // there is nothing to offer and no package to fetch. This is the
-        // same word the reader gave by turning the repeat on.
-        if (end == EndOfAudio.REPEAT_SURAH) return
+        // there is nothing to offer and no package to fetch. A reading told
+        // to stop after each ayah never reaches a surah's end at all. Both
+        // are the reader's own word, and neither asks for the next package.
+        if (end == EndOfAudio.REPEAT_SURAH || end == EndOfAudio.STOP_AFTER_AYAH) return
         val surah = _state.value.surah ?: return
         val recitation = recitationId ?: return
         val next = surah + 1
@@ -218,7 +221,7 @@ class PlaybackController(
             downloadProgress = null,
             downloadFailed = false,
         )
-        if (end == EndOfAudio.CONTINUE) confirmDownload()
+        if (end == EndOfAudio.CONTINUE_SURAH) confirmDownload()
     }
 
     /**
@@ -267,10 +270,10 @@ class PlaybackController(
     }
 
     /**
-     * What happens at the end of the audio: the ayah again, the surah again,
-     * or the surah after this one. One value, and the three switches that
-     * show it in the pill and on the Listening page are three views of it
-     * (owner decision).
+     * What happens as the reading moves on: the next ayah, the stop, the ayah
+     * again, the surah again, or the surah after this one. One value, and the
+     * four switches that show it in the pill and on the Listening page are
+     * four views of it (owner decision).
      *
      * The ayah repeat is the player's own, so the item itself loops and the
      * surah-end offer never appears while the reader is repeating. The surah
@@ -278,12 +281,33 @@ class PlaybackController(
      * appended while the reader is in this one), so `REPEAT_MODE_ALL` would
      * loop everything that is loaded rather than one surah. It is therefore
      * ours, and [restartSurah] does it from the two events a surah's end
-     * arrives through.
+     * arrives through. The stop is the player's own pause-at-end, which a
+     * controller cannot set and so is sent to the service.
      */
     fun setEndOfAudio(value: EndOfAudio) {
         end = value
-        controller?.repeatMode =
+        controller?.let { applyEndOfAudio(it, value) }
+    }
+
+    /** The answer, on the player: the ayah repeat, the stop, or neither. */
+    private fun applyEndOfAudio(player: MediaController, value: EndOfAudio) {
+        player.repeatMode =
             if (value == EndOfAudio.REPEAT_AYAH) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
+        setPauseAtEnd(player, value == EndOfAudio.STOP_AFTER_AYAH)
+    }
+
+    /**
+     * The reader's stop, sent to the one player that can keep it. The command
+     * is advertised by [PlaybackService] on connect; a controller that somehow
+     * did not get it is left as it is rather than crashed.
+     */
+    private fun setPauseAtEnd(player: MediaController, pause: Boolean) {
+        val command = SessionCommand(PlaybackService.COMMAND_PAUSE_AT_END, Bundle.EMPTY)
+        if (!player.availableSessionCommands.contains(command)) return
+        player.sendCustomCommand(
+            command,
+            Bundle().apply { putBoolean(PlaybackService.ARG_PAUSE_AT_END, pause) },
+        )
     }
 
     fun next() {
@@ -311,16 +335,11 @@ class PlaybackController(
                     try {
                         val player = future.get().also {
                             it.addListener(listener)
-                            // The reader's own pace and repeat choice arrive
-                            // with the connection, so the first ayah plays the
-                            // way the last session was being heard.
+                            // The reader's own pace and answer arrive with
+                            // the connection, so the first ayah plays the way
+                            // the last session was being heard.
                             it.setPlaybackSpeed(speed)
-                            it.repeatMode =
-                                if (end == EndOfAudio.REPEAT_AYAH) {
-                                    Player.REPEAT_MODE_ONE
-                                } else {
-                                    Player.REPEAT_MODE_OFF
-                                }
+                            applyEndOfAudio(it, end)
                         }
                         controller = player
                         _state.value = _state.value.copy(connected = true)
