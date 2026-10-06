@@ -238,19 +238,14 @@ jobs:
             content/quran.db
           key: content-work-${{ hashFiles('content/manifest.json', 'content/build-report.json') }}
 
-      # The bundle is only as good as the content inside it, so the two gates
-      # a runner can run come first, exactly as they do in the gates job.
-      - name: Unit tests
-        run: ./gradlew :core:test :data:testDebugUnitTest :ui-kit:testDebugUnitTest :app:testDebugUnitTest --console=plain
-
+      # The bundle is only as good as the content inside it, so the content is
+      # fetched before it is built. The unit tests and the two content gates
+      # are not run here: the gates job runs them on this same commit, and a
+      # bundle is handed over only from a run whose every job is green, so a
+      # bundle whose tests failed is a bundle nobody ever uses. This job
+      # builds and signs, and does nothing a green run already did.
       - name: Fetch content
         run: ./gradlew :tools:run --args="fetch" --console=plain
-
-      - name: Database check
-        run: ./gradlew :tools:run --args="checkdb" --console=plain
-
-      - name: Search check
-        run: ./gradlew :tools:run --args="search" --console=plain
 
       # A missing secret is a failure, never a quiet unsigned build: the
       # artifact this job exists to produce is a signed one, and "it built"
