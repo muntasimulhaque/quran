@@ -11,7 +11,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
@@ -36,16 +38,17 @@ import androidx.compose.ui.window.PopupProperties
  * ground between, the shape a menu opening out of a capsule at the foot of a
  * page is expected to have.
  *
- * It wears the pill's own surface and the pill's own rounded shape, and casts
- * no shadow, because the pill casts none and a popup that did read as a
- * foreign sheet laid over it. The ground is what keeps that reading honest:
- * with one cloth and no shadow, the space between the two silhouettes is the
- * only thing that says they are two, and a popup standing on the capsule's
- * own edge met the capsule's curve with nothing between (owner report). The
- * popup takes no taller a measure than the ground above the gap, so the
- * ground is kept on a window too short for the content, and what does not
- * fit scrolls inside it (owner decision). A tap outside puts it away, as a
- * dropdown's does.
+ * It wears the pill's own surface, the pill's own rounded shape, and the
+ * pill's own lift: a menu that floats over the reading is the same kind of
+ * thing the capsule is, so it reads as a height above the page and not as a
+ * patch on it (owner decision, forty-seventh session). The ground is still
+ * what keeps the two silhouettes apart: the popup rises above the capsule's
+ * top edge with [PopupGap] of the page's own ground between, and a popup
+ * standing on the capsule's own edge met the capsule's curve with nothing
+ * between (owner report). The popup takes no taller a measure than the
+ * ground above the gap, so the ground is kept on a window too short for the
+ * content, and what does not fit scrolls inside it (owner decision). A tap
+ * outside puts it away, as a dropdown's does.
  */
 @Composable
 internal fun PillPopup(
@@ -74,8 +77,10 @@ internal fun PillPopup(
             modifier = Modifier
                 .width(PillMenuMeasure)
                 .heightIn(max = room)
+                .shadow(elevation = PillLift, shape = RoundedCornerShape(20.dp))
                 .clip(RoundedCornerShape(20.dp))
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .testTag("pill-popup")
                 .verticalScroll(rememberScrollState()),
             content = content,
         )

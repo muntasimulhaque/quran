@@ -20,12 +20,13 @@ import org.junit.Test
  *
  * The two together are the promise: the anchor stands on the capsule's centre,
  * and the popup stands above the anchor's own top edge with [PopupGap] of
- * ground between the two: with one cloth and no shadow, that ground is the
- * only thing that says the popup and the capsule are two surfaces. The first
- * owner report was a reciter chooser at one end of the pill and the listening
- * answers at the other, two popups in two places on one control; the second
- * was the popup standing on the capsule's own edge, where the flat edges met
- * and the corners kissed (owner report).
+ * ground between the two. Since the popup wears the pill's own lift as well
+ * as its cloth (owner decision, forty-seventh session), that ground is what
+ * keeps the two silhouettes apart, and the lift is what says both stand
+ * above the page. The first owner report was a reciter chooser at one end of
+ * the pill and the listening answers at the other, two popups in two places
+ * on one control; the second was the popup standing on the capsule's own
+ * edge, where the flat edges met and the corners kissed (owner report).
  */
 class PillMenuPositionTest {
 

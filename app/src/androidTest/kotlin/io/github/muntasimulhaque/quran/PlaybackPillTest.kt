@@ -221,6 +221,27 @@ class PlaybackPillTest {
         assertEquals(0.5f, speed)
     }
 
+    /**
+     * The pace keeps the settings page's own place: the label is a bare line
+     * at the menu's left inset, and the five paces stand centred under it
+     * (owner decision, forty-seventh session). Against the menu's left edge
+     * they were 10 dp from one side and 28 from the other.
+     */
+    @Test
+    fun thePaceStandsCentredInTheListeningMenu() {
+        showPill()
+        compose.onNodeWithTag("playback-listening").performClick()
+        compose.onNodeWithText("Playback speed").assertExists()
+        val menu = compose.onNodeWithTag("pill-popup").fetchSemanticsNode().boundsInWindow
+        val pace = compose.onNodeWithTag("playback-speed").fetchSemanticsNode().boundsInWindow
+        assertEquals(
+            "the pace's own middle is the menu's middle",
+            (menu.left + menu.right) / 2f,
+            (pace.left + pace.right) / 2f,
+            1f,
+        )
+    }
+
     @Test
     fun theListeningMenuCarriesTheSurahRepeat() {
         var end: EndOfAudio? = null
@@ -490,6 +511,13 @@ class PlaybackPillTest {
             "the anchor's middle is the capsule's middle",
             (pill.left + pill.right) / 2,
             (anchor.left + anchor.right) / 2,
+            // One pixel, which is the rounding the layout can do and not a
+            // second centre: the anchor is 288 dp centred in a capsule whose
+            // own width can be an odd number of pixels, so the two middles
+            // can land a pixel apart on a profile the ATD phone never drew
+            // (owner report, forty-seventh session). The promise is one
+            // centre, not one integer.
+            1f,
         )
     }
 }

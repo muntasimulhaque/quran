@@ -144,16 +144,20 @@ command to rediscover.
   Java 17 bytecode and lets the running JDK compile it (owner decision).
   `local.properties` reads `sdk.dir=C:/Users/zn/AppData/Local/Android/Sdk`
   and is gitignored.
-- The Android SDK here has the command-line tools, two system images, and two
-  AVDs, and **the emulator runs here**: `emulator-check accel` reports
+- The Android SDK here has the command-line tools, the Android 35
+  `google_apis` image, and three display-on AVDs, the three store profiles:
+  `quran_phone` (Pixel 2), `quran_tablet7` (Nexus 7), and `quran_tablet10`
+  (Pixel C). The old ATD AVDs (`pixel35`, `pixelc`) and their image were
+  removed because their display was off and no frame could be read from it
+  (owner decision). **The emulator runs here**: `emulator-check accel` reports
   `WHPX(10.0.26300) is installed and usable`, and the instrumented suites are
-  not CI's only home. `pixel35` (the Android 35 ATD image) and `pixelc` are
-  both installed. Start one headless with `-no-window -no-audio -no-boot-anim
+  not CI's only home. Start one headless with `-no-window -no-audio -no-boot-anim
   -gpu host` and wait for `sys.boot_completed` to report `1`: this machine has
   a dedicated GPU (an AMD Radeon), so the host renderer is both faster and
   closer to a real device than `swiftshader_indirect`. A full `:app:connectedDebugAndroidTest`
-  takes about seven and a half minutes here. `gh` is on the PATH and
-  authenticated, so the content Releases can be published from here.
+  takes about six minutes here and is green on `quran_phone`, the two legs the
+  ATD image could not draw included. `gh` is on the PATH and authenticated, so
+  the content Releases can be published from here.
 - On the other machine (`Dev Pro`) the JBR is the JDK, `adb` and the
   emulator are under `C:/Users/Dev Pro/AppData/Local/Android/Sdk`, and the
   AVDs are `Pixel_4_35`, `Nexus_7_35`, `Pixel_C_35`, and `api27`. Start one
@@ -176,13 +180,15 @@ command to rediscover.
   under `Android/data/<package>/files` does not exist until something calls
   `getExternalFilesDir`. The same two commands work here, and a whole
   capture can be kept without it.
-- Two facts about the ATD image here, both worth a failed command of your own
-  to learn: `Screenshot.capture()` returns a **black frame**, because the
-  display is off, so a sheet or a popup has to be read through a compose
-  node's own `captureToImage()`; and AGP uninstalls the app when
-  `connectedDebugAndroidTest` returns, so anything it wrote under the app's
-  own storage is gone by the time you go to read it (the two commands above
-  are how it is read anyway).
+- Two facts worth a failed command of your own to learn: the `google_apis`
+  AVDs draw a real display headless, so `Screenshot.capture()`,
+  `adb exec-out screencap -p`, and a popup's own `captureToImage()` all
+  return pixels, and a menu's shadow can be read on the glass (the old ATD
+  image returned a black frame for the first and a blank window for the
+  last); and AGP uninstalls the app when `connectedDebugAndroidTest` returns,
+  so anything it wrote under the app's own storage is gone by the time you go
+  to read it (the `am instrument` command and the `run-as` read above are how
+  it is read anyway).
 - MSYS rewrites `/sdcard/...` arguments, so prefix `adb shell`, `adb push`,
   and `adb pull` with `MSYS_NO_PATHCONV=1`, and the same for `gh api` (with
   its leading slash dropped). The same rewrite bites `gh run view --json ...
@@ -247,11 +253,11 @@ at every step:
   `TafsirDirectionTest`, `SavedNotesTest`, `SettingsVisibilityTest`. Every
   other app test runs on a session's own emulator, which this machine has, so
   a session that changes the settings sheet, and every release session, runs
-  the whole app suite rather than only the six. Two legs are red here and red
-  on `main`: `ShareCardCaptureTest.captureTheLongestAyahWhole`, whose hardware
-  layer read-back this emulator's graphics stack refuses, and
-  `SystemThemeTest.theReadingFollowsThePhonesDayAndNight`, which waits for a
-  ground the phone's own night mode has not drawn yet.
+  the whole app suite rather than only the six. On `quran_phone` the whole
+  suite is green, 80 of 80, including the share card's hardware read-back and
+  the phone's own night mode, which the removed ATD image refused. On a cold
+  google_apis run `SurahAyahsTest` can time out in `openBrowse` once, the
+  ninety-second wait meeting a loaded boot, and it passes on a retry.
 - Do not hand-drive the app to verify UI. After an emulator crash the
   injected input in the screen's top band can go dead while the rest keeps
   working, captures return older frames, and the clock jumps. The loop is:

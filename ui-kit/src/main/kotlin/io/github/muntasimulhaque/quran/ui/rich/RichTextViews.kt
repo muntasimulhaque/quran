@@ -44,7 +44,7 @@ import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 
 /**
  * Draws parsed runs with the manuscript's two voices: Literata for Latin and
- * Amiri Quran for Arabic, footnote markers as quiet superscripts, and no
+ * Amiri Quran for Arabic, footnote markers as accent superscripts, and no
  * styling ever inside a word.
  *
  * A paragraph can carry Arabic at a much larger size than its Latin text, and
@@ -85,7 +85,7 @@ fun TranslationBody(
         text = annotated(
             runs,
             arabicSize = arabicSp.sp,
-            markerSize = (body * 0.65f).sp,
+            markerSize = markerSp(body, 0.65f),
             quoteColor = null,
             onFootnote = onFootnote,
         ),
@@ -132,6 +132,18 @@ private const val MixedAir = 1.35f
 
 /** The air an all-Arabic paragraph gives its diacritics; unchanged at 1.9. */
 private const val ArabicAir = 1.9f
+
+/**
+ * The floor under a footnote marker's size. The marker is set at a share of
+ * the body it annotates, so at the smallest translation step a 0.65 share
+ * is about 7 sp: a figure too small to read and too thin to find (owner
+ * decision, forty-seventh session). Nine is the smallest that still reads
+ * as a number and holds its own above the line.
+ */
+private const val MarkerFloor = 9f
+
+/** A marker's size: its share of the body, never below [MarkerFloor]. */
+private fun markerSp(bodySp: Float, share: Float) = maxOf(bodySp * share, MarkerFloor).sp
 /**
  * A plain sentence with the matched words washed in the accent color. Used by
  * search results, where the text is a snippet rather than rich runs.
@@ -251,7 +263,7 @@ fun RichBlocks(
                     text = annotated(
                         block.runs,
                         arabicSize = arabicSp.sp,
-                        markerSize = (sizeSp * 0.65f).sp,
+                        markerSize = markerSp(sizeSp, 0.65f),
                         quoteColor = null,
                     ),
                     style = MaterialTheme.typography.titleSmall.copy(
@@ -267,7 +279,7 @@ fun RichBlocks(
                     text = annotated(
                         block.runs,
                         arabicSize = arabicSp.sp,
-                        markerSize = (sizeSp * 0.65f).sp,
+                        markerSize = markerSp(sizeSp, 0.65f),
                         quoteColor = MaterialTheme.colorScheme.onBackground,
                     ),
                     style = LocalReadingVoice.current.style.copy(
@@ -303,7 +315,7 @@ fun ArabicBody(runs: List<TextRun>, modifier: Modifier = Modifier, sizeSp: Float
         text = annotated(
             runs,
             arabicSize = sizeSp.sp,
-            markerSize = (sizeSp * 0.6f).sp,
+            markerSize = markerSp(sizeSp, 0.6f),
             quoteColor = MaterialTheme.colorScheme.onBackground,
         ),
         style = TextStyle(
@@ -329,8 +341,18 @@ private fun annotated(
     quoteColor: Color?,
     onFootnote: ((Int) -> Unit)? = null,
 ): AnnotatedString {
-    val markerColor = MaterialTheme.colorScheme.onSurfaceVariant
-    val primary = markerColor
+    // The marker is a door to the note, so it wears the theme's one action
+    // color, the same ink the reciter's name, the chevrons, and the note's
+    // own sheet title wear: at a share of the body's size and in the body's
+    // own tone it read as a smaller word and not as something to touch
+    // (owner decision, forty-seventh session). The accent clears the 4.5:1
+    // the small figure needs on every ground: 8.1:1 on paper, 7.3:1 on
+    // sepia, 8.1:1 on night, 9.4:1 on black.
+    val markerColor = MaterialTheme.colorScheme.primary
+    // What a quoted run falls back to where the caller has no quote color of
+    // its own: the reading's secondary tone, never the accent, which now
+    // belongs to the marker alone.
+    val quoteFallback = MaterialTheme.colorScheme.onSurfaceVariant
     val context = LocalContext.current
     val arabicFonts = remember(context) { ArabicFonts(context) }
     return buildAnnotatedString {
@@ -338,9 +360,11 @@ private fun annotated(
             val marker = run.marker
             if (marker != null) {
                 val style = SpanStyle(
-                    // The marker is a door to the note; it is read, so it keeps
-                    // the theme's secondary tone rather than the 0.75 alpha that
-                    // measured 3.7:1 on paper and sepia.
+                    // The marker is a door to the note; it wears the action
+                    // color rather than the 0.75 alpha that measured 3.7:1 on
+                    // paper and sepia, and rather than the reading's own
+                    // secondary tone, which the sentence around it wears
+                    // (owner decision, forty-seventh session).
                     color = markerColor,
                     fontWeight = FontWeight.Medium,
                     fontSize = markerSize,
@@ -382,7 +406,7 @@ private fun annotated(
                     ) { withStyle(style) { append(marker.toString()) } }
                 }
             } else if (run.arabic) {
-                val color = if (run.quote) quoteColor ?: primary else Color.Unspecified
+                val color = if (run.quote) quoteColor ?: quoteFallback else Color.Unspecified
                 var index = 0
                 while (index < run.text.length) {
                     val codepoint = run.text.codePointAt(index)
@@ -409,7 +433,7 @@ private fun annotated(
                     SpanStyle(
                         fontWeight = if (run.bold) FontWeight.SemiBold else null,
                         fontStyle = if (run.italic) FontStyle.Italic else null,
-                        color = if (run.quote) quoteColor ?: primary else Color.Unspecified,
+                        color = if (run.quote) quoteColor ?: quoteFallback else Color.Unspecified,
                     ),
                 ) { append(run.text) }
             }

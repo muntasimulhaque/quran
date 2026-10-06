@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 4.2 (versionCode 44)
+Version: 4.3 (versionCode 45)
 
 ## Listing
 
@@ -200,6 +200,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (4.3, 411 characters)
+
+The playback menu is tidier: the speed selector is centered under its label as it is in Settings, the listening switches keep the settings page's spacing, and the popup floats with the same soft shadow as the pill it opens from. Footnote numbers in the translation now wear the app's accent and never shrink below a readable size, so a translator's note is easy to find and tap. No ads, no trackers, no account.
 
 ## Release notes (4.2, 419 characters)
 

@@ -3,6 +3,7 @@ package io.github.muntasimulhaque.quran.ui.playback
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -37,6 +39,10 @@ import io.github.muntasimulhaque.quran.ui.theme.appSwitchColors
  * and rounded shape the reciter chooser wears, so it reads as the pill opening
  * rather than a foreign sheet laid over it.
  *
+ * The pace keeps the settings page's own shape: the label is a bare line at
+ * the menu's left inset and the five paces stand centred under it, as they
+ * stand on the Listening page (owner decision, forty-seventh session).
+ *
  * The four answers are four switches over one value (owner decision): each
  * reports the answer it carries, and the plan the app keeps is that answer
  * alone, so the reader can never be in a state where the ayah repeats and the
@@ -45,7 +51,7 @@ import io.github.muntasimulhaque.quran.ui.theme.appSwitchColors
  * needs no switch of its own.
  */
 @Composable
-internal fun ListeningMenu(
+internal fun ColumnScope.ListeningMenu(
     speed: Float,
     end: EndOfAudio,
     onSpeed: (Float) -> Unit,
@@ -63,12 +69,17 @@ internal fun ListeningMenu(
         modifier = Modifier.padding(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 6.dp),
     )
     // One row, five paces, the chosen one filled: the same shape the
-    // Listening page draws, so one control is learned once.
+    // Listening page draws, so one control is learned once. It stands
+    // centred on the menu rather than against its left edge, where it left
+    // 10 dp of ground on one side and 28 on the other and read as a row that
+    // had slipped (owner decision, forty-seventh session).
     Row(
         modifier = Modifier
+            .align(Alignment.CenterHorizontally)
             .padding(horizontal = 10.dp)
             .clip(RoundedCornerShape(50))
             .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            .testTag("playback-speed")
             .padding(3.dp),
         horizontalArrangement = Arrangement.spacedBy(1.dp),
     ) {
@@ -148,7 +159,11 @@ internal fun ListeningMenu(
  * is Material's switch rather than a mark drawn here, so that every switch in
  * the app is one shape in one set of colors: the pill's menu and the settings
  * sheet ask the same question in two places, and they answer it with the
- * same control (owner decision, forty-sixth session).
+ * same control (owner decision, forty-sixth session). The menu keeps the
+ * settings page's rhythm too: the row's own 10 dp over 2 dp of outer room
+ * leaves 24 dp from one switch track to the next, the same band the four keep
+ * on the Listening page, instead of the 32 dp the menu used to spend (owner
+ * decision, forty-seventh session).
  */
 @Composable
 private fun EndSwitch(
@@ -161,7 +176,7 @@ private fun EndSwitch(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 6.dp, vertical = 6.dp)
+            .padding(horizontal = 6.dp, vertical = 2.dp)
             .clip(RoundedCornerShape(14.dp))
             .toggleable(value = on, role = Role.Switch) { onEndOfAudio(toggled(it, choice)) }
             .padding(horizontal = 10.dp, vertical = 10.dp),

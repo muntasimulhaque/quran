@@ -21,6 +21,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.Layout
@@ -120,18 +121,20 @@ fun IconGlyph(
                     drawPath(path, tint, style = Stroke(width = w * 0.08f))
                 }
             }
+            // One polyline rather than two lines: two flat caps met at the
+            // elbow and left a notch on its underside, which at the 18 dp
+            // the chooser draws read as a clipped corner (owner report). The
+            // round join carries the stroke through the turn, and the tips
+            // stay butt-cut, the way every other glyph in the set ends.
             Icon.Check -> {
-                drawLine(
+                drawPath(
+                    Path().apply {
+                        moveTo(w * 0.16f, h * 0.52f)
+                        lineTo(w * 0.42f, h * 0.78f)
+                        lineTo(w * 0.84f, h * 0.22f)
+                    },
                     tint,
-                    Offset(w * 0.16f, h * 0.52f),
-                    Offset(w * 0.42f, h * 0.78f),
-                    strokeWidth = w * 0.13f,
-                )
-                drawLine(
-                    tint,
-                    Offset(w * 0.42f, h * 0.78f),
-                    Offset(w * 0.84f, h * 0.22f),
-                    strokeWidth = w * 0.13f,
+                    style = Stroke(width = w * 0.13f, join = StrokeJoin.Round),
                 )
             }
             Icon.Play -> drawPath(playPath(w, h), tint)

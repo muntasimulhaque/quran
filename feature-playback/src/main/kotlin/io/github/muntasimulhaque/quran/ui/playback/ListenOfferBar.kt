@@ -54,7 +54,7 @@ internal fun ListenOfferBar(
     val progress = offer.progress
     Column(
         modifier = modifier
-            .shadow(elevation = 6.dp, shape = RoundedCornerShape(50))
+            .shadow(elevation = PillLift, shape = RoundedCornerShape(50))
             .clip(RoundedCornerShape(50))
             .background(MaterialTheme.colorScheme.surfaceContainerHigh),
     ) {

@@ -170,7 +170,7 @@ fun PlaybackBar(
     BoxWithConstraints(
         modifier = modifier
             .padding(horizontal = BarGutter)
-            .shadow(elevation = 6.dp, shape = RoundedCornerShape(50))
+            .shadow(elevation = PillLift, shape = RoundedCornerShape(50))
             .clip(RoundedCornerShape(50))
             // The playback bar floats over the reading, so it wears the
             // floating tone and a soft lift: the page is visible around it
