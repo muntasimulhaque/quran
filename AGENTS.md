@@ -185,7 +185,12 @@ command to rediscover.
   are how it is read anyway).
 - MSYS rewrites `/sdcard/...` arguments, so prefix `adb shell`, `adb push`,
   and `adb pull` with `MSYS_NO_PATHCONV=1`, and the same for `gh api` (with
-  its leading slash dropped). adb is a Windows binary: `/tmp/x` is
+  its leading slash dropped). The same rewrite bites `gh run view --json ...
+  -q`: a `/` inside a jq string becomes `C:/Program Files/Git/`, so a
+  completed run never equals `completed/success` and a green run reads as
+  still running for as long as the wait is allowed to last. Prefix `gh run
+  view` with `MSYS_NO_PATHCONV=1`, or watch with `MSYS_NO_PATHCONV=1 gh run
+  watch <id> --exit-status`. adb is a Windows binary: `/tmp/x` is
   `C:\tmp\x` to it and to the read tool alike.
 - Two tool calls in one block run in parallel. Never edit a file and read
   it in the same block, and never two reads whose order matters.
