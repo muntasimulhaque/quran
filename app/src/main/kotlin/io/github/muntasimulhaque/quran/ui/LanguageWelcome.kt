@@ -30,7 +30,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.R
+import io.github.muntasimulhaque.quran.data.DEFAULT_DAILY_MINUTE
 import io.github.muntasimulhaque.quran.data.UiLanguage
+import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.kit.clockText
 import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
@@ -170,4 +173,90 @@ private fun LanguageCard(
 @Composable
 fun systemLanguage(): UiLanguage =
     UiLanguage.suggested(LocalConfiguration.current.locales[0].language)
+
+/**
+ * The second half of the one screen before the reading, in the language the
+ * reader just chose: the daily reminder is on for a new reader, and this is
+ * where they are told so and asked for the two grants it needs, the
+ * notification and the phone's own exact time. The card is the whole of the
+ * ask: no switch to find, no page to learn, and either answer leads to the
+ * reading.
+ *
+ * The two answers say the truth. Turning it on asks the phone for the two
+ * grants at once; Not now turns the reminder off rather than leaving a switch
+ * on under a permission that will never arrive, and the Daily page can turn
+ * it on again later, where the same two asks happen at the act of setting
+ * it.
+ */
+@Composable
+fun WelcomeReminder(
+    onTurnOn: () -> Unit,
+    onNotNow: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            modifier = Modifier
+                .widthIn(max = Reading.MaxMeasure)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 28.dp, vertical = 36.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = stringResource(R.string.first_paint_title),
+                style = TextStyle(
+                    fontFamily = Amiri,
+                    fontSize = 54.sp,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.9f),
+                ),
+            )
+            Text(
+                text = stringResource(R.string.first_paint_subtitle),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+            Text(
+                text = stringResource(R.string.welcome_reminder_title),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 40.dp),
+            )
+            Text(
+                text = stringResource(
+                    R.string.welcome_reminder_body,
+                    clockText(DEFAULT_DAILY_MINUTE),
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 12.dp),
+            )
+            Text(
+                text = stringResource(R.string.welcome_later),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 22.dp),
+            )
+            TextButton(
+                label = stringResource(R.string.welcome_reminder_turn_on),
+                onClick = onTurnOn,
+                modifier = Modifier.padding(top = 18.dp),
+            )
+            TextButton(
+                label = stringResource(R.string.welcome_reminder_not_now),
+                onClick = onNotNow,
+                modifier = Modifier.padding(top = 6.dp),
+                quiet = true,
+            )
+        }
+    }
+}
 

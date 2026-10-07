@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 4.4 (versionCode 46)
+Version: 4.5 (versionCode 47)
 
 ## Listing
 
@@ -200,6 +200,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (4.5, 397 characters)
+
+Choosing English or Bangla now brings that language's translation and tafsir with it, and the first choice opens in Al-Fatiha. One quiet screen asks for the daily ayah's notifications and exact time, word meanings wait off until you turn them on, search keeps its sources behind one door, the playback answers are one clear list, and Husary is the default reciter. No ads, no trackers, no account.
 
 ## Release notes (4.4, 387 characters)
 

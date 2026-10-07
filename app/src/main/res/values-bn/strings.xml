@@ -11,6 +11,14 @@
     <string name="welcome_later">সেটিংস থেকে যেকোনো সময় এটি বদলাতে পারবেন।</string>
     <string name="welcome_suggested">প্রস্তাবিত</string>
 
+    <!-- The second half of the one screen before the reading: the reminder is
+         on for a new reader, and this is where they are told so and asked for
+         the two grants it needs, the notification and the exact time. -->
+    <string name="welcome_reminder_title">প্রতিদিন একটি আয়াত</string>
+    <string name="welcome_reminder_body">আপনার জন্য নির্ধারিত %1$s-এ একটি নীরব বার্তা। সময়মতো পৌঁছাতে নোটিফিকেশন ও ফোনের অ্যালার্মের অনুমতি দিন।</string>
+    <string name="welcome_reminder_turn_on">চালু করুন</string>
+    <string name="welcome_reminder_not_now">এখন নয়</string>
+
     <string name="hint_long_press_ayah">যেকোনো আয়াতে চাপ দিয়ে ধরে রাখলে তার কাজগুলো দেখা যাবে</string>
 
     <string name="action_browse">কুরআন ব্রাউজ করুন</string>

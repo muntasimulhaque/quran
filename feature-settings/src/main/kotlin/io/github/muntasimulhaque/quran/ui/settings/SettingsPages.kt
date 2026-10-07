@@ -122,9 +122,7 @@ fun TextPage(
 ) {
     val row by produceState<StudyRow?>(initialValue = null, settings.translationPacks) { value = preview() }
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
-        if (row != null) {
-            SizeSample(row = row!!, settings = settings)
-        }
+        row?.let { sample -> SizeSample(row = sample, settings = settings) }
         Group(stringResource(R.string.settings_group_sizes))
         SizeRow(TypeRole.Arabic, settings.arabicSize) { onSize(TypeRole.Arabic, it) }
         SizeRow(TypeRole.Translation, settings.translationSize) { onSize(TypeRole.Translation, it) }

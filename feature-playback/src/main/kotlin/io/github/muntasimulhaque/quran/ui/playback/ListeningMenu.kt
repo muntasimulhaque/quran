@@ -6,12 +6,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
@@ -27,11 +27,11 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.EndOfAudio
-import io.github.muntasimulhaque.quran.core.toggled
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.ui.kit.SpeedSteps
 import io.github.muntasimulhaque.quran.ui.kit.speedText
-import io.github.muntasimulhaque.quran.ui.theme.appSwitchColors
+import io.github.muntasimulhaque.quran.ui.reader.Icon
+import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 
 /**
  * The pace, and what happens at the end of the audio, as the list the pill
@@ -43,12 +43,12 @@ import io.github.muntasimulhaque.quran.ui.theme.appSwitchColors
  * the menu's left inset and the five paces stand centred under it, as they
  * stand on the Listening page (owner decision, forty-seventh session).
  *
- * The four answers are four switches over one value (owner decision): each
- * reports the answer it carries, and the plan the app keeps is that answer
- * alone, so the reader can never be in a state where the ayah repeats and the
- * surah also repeats. The default, continuing to the next ayah, is the one
- * switch that is on with nothing else, and turning it off is the stop, which
- * needs no switch of its own.
+ * The answers are one value and one list (owner decision, 4.5): the five
+ * answers are rows with one check, so the exclusivity is the shape of the
+ * control rather than a rule the reader has to learn, and the stop has its
+ * own row rather than living at the off end of another. The order is the
+ * reader's own: what happens when the ayah ends, then what happens when the
+ * surah ends.
  */
 @Composable
 internal fun ColumnScope.ListeningMenu(
@@ -117,31 +117,42 @@ internal fun ColumnScope.ListeningMenu(
             }
         }
     }
-    EndSwitch(
+    Text(
+        text = stringResource(R.string.playback_end_label),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 16.dp, top = 14.dp, end = 16.dp, bottom = 6.dp),
+    )
+    // When the ayah ends: the normal continuation, saying it again, and the
+    // stop, in the pill the reader is already holding.
+    EndChoice(
         label = stringResource(R.string.playback_continue_ayah),
         choice = EndOfAudio.CONTINUE_AYAH,
         chosen = end,
         onEndOfAudio = onEndOfAudio,
     )
-    // The surah, the same answer one unit larger: the next surah is fetched
-    // with the reciter being heard and plays on. Off, the end of the surah is
-    // offered with its size instead of fetched.
-    EndSwitch(
-        label = stringResource(R.string.playback_continue_surah),
-        choice = EndOfAudio.CONTINUE_SURAH,
-        chosen = end,
-        onEndOfAudio = onEndOfAudio,
-    )
-    // The ayah again: the player's own loop, the answer that never advances.
-    EndSwitch(
+    EndChoice(
         label = stringResource(R.string.playback_repeat_ayah),
         choice = EndOfAudio.REPEAT_AYAH,
         chosen = end,
         onEndOfAudio = onEndOfAudio,
     )
-    // The surah, the same answer one unit larger: the whole surah begins
-    // again at its first ayah that is on the device (owner decision).
-    EndSwitch(
+    EndChoice(
+        label = stringResource(R.string.playback_stop_after_ayah),
+        choice = EndOfAudio.STOP_AFTER_AYAH,
+        chosen = end,
+        onEndOfAudio = onEndOfAudio,
+    )
+    Box(Modifier.height(6.dp))
+    // When the surah ends: the same two answers one unit larger. The next
+    // surah is fetched with the reciter being heard and plays on.
+    EndChoice(
+        label = stringResource(R.string.playback_continue_surah),
+        choice = EndOfAudio.CONTINUE_SURAH,
+        chosen = end,
+        onEndOfAudio = onEndOfAudio,
+    )
+    EndChoice(
         label = stringResource(R.string.playback_repeat_surah),
         choice = EndOfAudio.REPEAT_SURAH,
         chosen = end,
@@ -150,23 +161,13 @@ internal fun ColumnScope.ListeningMenu(
 }
 
 /**
- * One of the answers the pill's menu carries: the label takes the room, the
- * switch is the app's own control in the theme's colors for this ground, and
- * the whole row is the target.
- *
- * The switch draws the state and takes no clicks of its own, because the row
- * is the control and a second target inside it would answer one tap twice. It
- * is Material's switch rather than a mark drawn here, so that every switch in
- * the app is one shape in one set of colors: the pill's menu and the settings
- * sheet ask the same question in two places, and they answer it with the
- * same control (owner decision, forty-sixth session). The menu keeps the
- * settings page's rhythm too: the row's own 10 dp over 2 dp of outer room
- * leaves 24 dp from one switch track to the next, the same band the four keep
- * on the Listening page, instead of the 32 dp the menu used to spend (owner
- * decision, forty-seventh session).
+ * One answer in the pill's one list: the label takes the room, the mark is
+ * the app's own check, and the whole row is the target. A radio row rather
+ * than a switch, because one answer is kept at a time; the stop has its own
+ * row so the reader never learns it as the off position of another.
  */
 @Composable
-private fun EndSwitch(
+private fun EndChoice(
     label: String,
     choice: EndOfAudio,
     chosen: EndOfAudio,
@@ -178,7 +179,7 @@ private fun EndSwitch(
             .fillMaxWidth()
             .padding(horizontal = 6.dp, vertical = 2.dp)
             .clip(RoundedCornerShape(14.dp))
-            .toggleable(value = on, role = Role.Switch) { onEndOfAudio(toggled(it, choice)) }
+            .selectable(selected = on, role = Role.RadioButton) { onEndOfAudio(choice) }
             .padding(horizontal = 10.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -188,10 +189,12 @@ private fun EndSwitch(
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f),
         )
-        Switch(
-            checked = on,
-            onCheckedChange = null,
-            colors = appSwitchColors(),
-        )
+        if (on) {
+            IconGlyph(
+                icon = Icon.Check,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(18.dp),
+            )
+        }
     }
 }

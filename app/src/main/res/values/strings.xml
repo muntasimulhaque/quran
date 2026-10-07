@@ -29,6 +29,14 @@
     <string name="welcome_later">You can change this any time in Settings.</string>
     <string name="welcome_suggested">Suggested</string>
 
+    <!-- The second half of the one screen before the reading: the reminder is
+         on for a new reader, and this is where they are told so and asked for
+         the two grants it needs, the notification and the exact time. -->
+    <string name="welcome_reminder_title">One ayah, once a day</string>
+    <string name="welcome_reminder_body">A quiet notification at %1$s, the time we chose for you. Allow notifications and your phone\'s alarms so it always arrives on time.</string>
+    <string name="welcome_reminder_turn_on">Turn it on</string>
+    <string name="welcome_reminder_not_now">Not now</string>
+
     <string name="hint_long_press_ayah">Press and hold any ayah for its actions</string>
 
     <string name="action_browse">Browse the Quran</string>

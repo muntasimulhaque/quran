@@ -265,13 +265,13 @@ class PlaybackPillTest {
     }
 
     @Test
-    fun theListeningMenuCarriesTheStopOnTheDefaultSwitch() {
+    fun theListeningMenuCarriesTheStopAsItsOwnRow() {
         var end: EndOfAudio? = null
         showPill(onEndOfAudio = { end = it })
         compose.onNodeWithTag("playback-listening").performClick()
-        // The default row is the one switch whose off is the stop, so this is
-        // the reader's one-tap door to a reading that stops after the ayah.
-        compose.onNodeWithText("Continue to the next ayah").performClick()
+        // The stop is a row of its own now: the reader finds it by its name,
+        // not at the off end of the default switch.
+        compose.onNodeWithText("Stop after this ayah").performClick()
         assertEquals(EndOfAudio.STOP_AFTER_AYAH, end)
     }
 

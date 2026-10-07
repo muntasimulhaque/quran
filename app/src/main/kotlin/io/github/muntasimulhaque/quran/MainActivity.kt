@@ -51,16 +51,19 @@ class MainActivity : ComponentActivity() {
         super.attachBaseContext(newBase.createConfigurationContext(configuration))
     }
 
-    // Asked once, at the one screen before the reading, because the reminder
-    // is the only thing this app does with the app closed and a permission
-    // asked for at the first recitation leaves the first mornings silent
-    // (owner decision). The reader has one notification to answer for here,
-    // so this is the whole of what is put in front of them: one system
-    // dialog, on the screen they have already answered, and then the reading.
-    // The exact alarm is not asked for at this screen: it is asked for at the
-    // two moments the reminder is set.
+    // Asked once, at the reminder card that ends the one screen before the
+    // reading, because the reminder is the only thing this app does with the
+    // app closed. The reader has one notification to answer for here, so this
+    // is the whole of what is put in front of them: one system dialog, on the
+    // card they have already answered, and then the phone's own screen for
+    // the exact time when it withholds it, and then the reading. The exact
+    // alarm is not asked for at this screen when the notification was
+    // refused: an exact alarm with nothing to show is a promise the phone
+    // cannot keep.
     private val askOnFirstScreen =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { recreate() }
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) askExactAlarmIfNeeded()
+        }
 
     // The same permission, asked again at the moment a reader starts a
     // recitation: that is when the app needs a notification of its own for the
@@ -129,7 +132,8 @@ class MainActivity : ComponentActivity() {
                 },
                 onPlaybackPermission = ::ensureNotificationPermission,
                 onReminderPermission = ::ensureReminderPermissions,
-                afterFirstScreen = ::leaveFirstScreen,
+                afterFirstScreen = { recreate() },
+                onFirstScreenDone = ::finishFirstScreen,
                 notificationsBlocked = { notificationsBlocked.value },
                 exactGrantWithheld = { exactGrantWithheld.value },
                 onOpenNotificationSettings = ::openNotificationSettings,
@@ -173,22 +177,21 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * The end of the one screen before the reading.
+     * The end of the reminder card.
      *
-     * The notification permission is asked here and nowhere else on this path:
-     * the reminder arrives whether or not the app is open, and a reader who
-     * is asked for it at the first recitation has already had every morning
-     * before that one silently. It is asked once, and it is the only
-     * permission asked at this screen; the exact alarm is asked for at the
-     * two acts that set the reminder. The Activity is recreated when the
-     * answer lands, which is what brings every window up in the language that
-     * was just chosen.
+     * When the reader turned the daily ayah on, the two grants it needs are
+     * asked here: the notification first, and then, if it was granted and the
+     * phone withholds it, the exact alarm in the phone's own screen. When the
+     * reader said Not now, nothing is asked and the reminder is already off.
+     * The locale was brought up by the recreation at the language step, so
+     * this is the whole of what follows the card.
      */
-    private fun leaveFirstScreen() {
+    private fun finishFirstScreen(reminderOn: Boolean) {
+        if (!reminderOn) return
         if (needsNotificationPermission()) {
             askOnFirstScreen.launch(Manifest.permission.POST_NOTIFICATIONS)
         } else {
-            recreate()
+            askExactAlarmIfNeeded()
         }
     }
 
@@ -220,6 +223,10 @@ class MainActivity : ComponentActivity() {
      * is the truth rather than a promise the phone cannot keep.
      */
     private fun askExactAlarmIfNeeded() {
+        // Without the notification granted, an exact alarm fires into a shade
+        // that shows nothing, so the exact-time screen waits for a reader who
+        // will actually hear the reminder.
+        if (needsNotificationPermission()) return
         val request = DailyAyahScheduler.exactGrantRequest(this) ?: return
         try {
             askExactAlarm.launch(request)

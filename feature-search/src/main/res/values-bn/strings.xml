@@ -23,23 +23,10 @@
     <string name="search_filter_translations">অনুবাদ</string>
     <string name="search_filter_words">শব্দের অর্থ</string>
     <string name="search_filter_tafsirs">তাফসীর</string>
+    <string name="search_filter_all">সবকিছু</string>
+    <string name="search_filter_some">%2$dটির মধ্যে %1$dটি</string>
 
     <plurals name="search_matches">
         <item quantity="other">%1$dটি মিল</item>
-    </plurals>
-    <plurals name="search_part_surah_names">
-        <item quantity="other">%1$dটি সূরার নাম</item>
-    </plurals>
-    <plurals name="search_part_text">
-        <item quantity="other">লেখায় %1$dটি</item>
-    </plurals>
-    <plurals name="search_part_translation">
-        <item quantity="other">অনুবাদে %1$dটি</item>
-    </plurals>
-    <plurals name="search_part_words">
-        <item quantity="other">শব্দের অর্থে %1$dটি</item>
-    </plurals>
-    <plurals name="search_part_tafsir">
-        <item quantity="other">তাফসীরে %1$dটি</item>
     </plurals>
 </resources>

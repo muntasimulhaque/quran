@@ -117,11 +117,11 @@
     <string name="settings_group_speed">গতি</string>
     <string name="settings_speed_label">তিলাওয়াতের গতি</string>
     <string name="settings_speed_option">%1$s, %2$s</string>
-    <string name="settings_group_continue">চালিয়ে যাওয়া</string>
+    <string name="settings_group_end_of_audio">তিলাওয়াত শেষ হলে</string>
     <string name="settings_continue_ayah_title">পরের আয়াতে চালিয়ে যান</string>
-    <string name="settings_continue_surah_title">পরের সূরায় চালিয়ে যান</string>
-    <string name="settings_group_repeat">পুনরাবৃত্তি</string>
     <string name="settings_repeat_title">আয়াত পুনরাবৃত্তি করুন</string>
+    <string name="settings_stop_after_ayah_title">এই আয়াতের পর থামুন</string>
+    <string name="settings_continue_surah_title">পরের সূরায় চালিয়ে যান</string>
     <string name="settings_repeat_surah_title">সূরা পুনরাবৃত্তি করুন</string>
     <string name="settings_title_translations">অনুবাদ</string>
     <string name="settings_title_tafsirs">তাফসীর</string>

@@ -3,6 +3,9 @@ package io.github.muntasimulhaque.quran.ui
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import android.app.Application
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
@@ -277,6 +280,12 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
                 .distinctUntilChanged()
                 .collect { scope -> readPillReciters(scope) }
         }
+        // A language's tafsir waits for Wi-Fi on a metered connection: the
+        // queue drains the moment an unmetered network arrives.
+        runCatching {
+            getApplication<Application>().getSystemService(ConnectivityManager::class.java)
+                ?.registerDefaultNetworkCallback(networkCallback)
+        }
     }
 
     /**
@@ -349,6 +358,9 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             setPlace(stored.ayah, database, persist = false)
             lastReadStore.record(stored.ayah, stored.mode)
             ready = true
+            // A language choice from this launch or an earlier one: whatever
+            // is still missing arrives now, without another question.
+            viewModelScope.launch { drainPendingPacks() }
             // The tafsir index is the one thing a first search would wait for,
             // so it is built now, on a worker, while the reader is reading.
             withContext(Dispatchers.IO) { database.prewarmSearch(stored.tafsirPacks.toList()) }
@@ -730,20 +742,43 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * offered language's defaults, so a reader who moves from Bangla to
      * English never keeps two defaults fighting; a pack the reader added by
      * hand, like the second translation, is left exactly where it was.
+     *
+     * The first choice is the reader's first arrival, so it lands in the study
+     * reading of Al-Fatiha, where the Arabic and its meaning meet at once
+     * (owner decision, 4.5). Later changes only move the content; the place
+     * stays the reader's own.
+     *
+     * The language's reading is fetched without another question: the
+     * translation and the tafsir join the pending queue, and the queue brings
+     * them one at a time, the tafsir on an unmetered connection. The word
+     * list is not fetched here: it is off by default, and the toggle is its
+     * own ask when the reader wants it.
      */
     fun chooseLanguage(language: UiLanguage) {
+        val firstRun = settings.uiLanguage == null
         val next = settings.withLanguage(language)
-        settings = next
+        val chosen = if (firstRun) next.copy(mode = ReadingMode.Study, ayah = 1) else next
+        settings = chosen
         clearRowCache()
         // The boot-time mirror lands before anything else, so the Activity
         // that recreates for the new locale comes up speaking it.
         languagePreference.set(language.tag)
         viewModelScope.launch {
             settingsStore.setLanguage(language, next.translationPacks, next.tafsirPacks)
+            if (firstRun) {
+                settingsStore.setMode(ReadingMode.Study)
+                settingsStore.setAyah(1)
+                contentDatabase?.let { setPlace(1, it, persist = false) }
+                lastReadStore.record(1, ReadingMode.Study)
+            }
+            settingsStore.addPendingPacks(
+                setOf(language.content.translation, language.content.tafsir),
+            )
+            drainPendingPacks()
         }
         // A reader who already reads with word meanings is given the word
         // list of the new language, through the same door the toggle uses.
-        if (next.wordByWord) ensureWordsPack()
+        if (chosen.wordByWord) ensureWordsPack()
     }
 
     /** The active language's word list, fetched when it is not yet here. */
@@ -790,34 +825,89 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
     /**
      * Brings a pack onto the device, or turns it on when it is already here.
-     * A download never starts without the reader having seen the size, and
-     * the pack is verified before it joins the library.
+     * The reader's tap is the ask; the pack is verified before it joins the
+     * library, and what is left of the queue is written down so an
+     * interrupted download continues rather than being forgotten.
      */
     fun installPack(id: String) {
-        val pack = catalog.get(id) ?: return
+        viewModelScope.launch {
+            if (installNow(id)) settingsStore.removePendingPacks(setOf(id))
+        }
+    }
+
+    /**
+     * One pack onto the device, from the app's own assets when the build
+     * carries it and from its release page when it does not. Answers whether
+     * it is here now. It asks nothing of the reader: the tap or the language
+     * choice was the ask, and progress is shown while it runs.
+     */
+    private suspend fun installNow(id: String): Boolean {
+        val pack = catalog.get(id) ?: return false
         if (pack.installed) {
             selectPack(pack)
-            return
+            return true
         }
         // A pack already on its way is not asked for twice; a failed one is,
-        // because the second tap is the reader's retry.
-        if (packSetup?.let { it.pack.id == id && !it.failed } == true) return
-        viewModelScope.launch {
-            packSetup = PackSetup(pack, progress = 0f)
-            if (store.install(id)) {
-                finishInstall(pack)
-                return@launch
+        // because the second attempt is the retry.
+        if (packSetup?.let { it.pack.id == id && !it.failed } == true) return false
+        packSetup = PackSetup(pack, progress = 0f)
+        if (store.install(id)) {
+            finishInstall(pack)
+            return true
+        }
+        val result = downloader.download(pack) { read, total ->
+            packSetup = PackSetup(
+                pack,
+                progress = if (total > 0) (read.toFloat() / total).coerceIn(0f, 1f) else null,
+            )
+        }
+        if (result.isSuccess) {
+            finishInstall(pack)
+            return true
+        }
+        packSetup = PackSetup(pack, progress = null, failed = true)
+        return false
+    }
+
+    /**
+     * Brings the packs the reader's language asked for onto the device, one
+     * at a time, and remembers what is left: a download the process or the
+     * connection interrupts is picked up on the next attempt instead of being
+     * forgotten. The tafsir waits for an unmetered connection, so a language
+     * choice never spends the reader's data on the big pack without being
+     * told; the translation, which is small, arrives on any connection.
+     */
+    private suspend fun drainPendingPacks() {
+        if (draining) return
+        draining = true
+        try {
+            while (true) {
+                val next = settingsStore.pendingPacks().firstOrNull { id ->
+                    val pack = catalog.get(id) ?: return@firstOrNull false
+                    !pack.installed && (pack.type != PackType.Tafsir || packUpdater.canRefresh())
+                } ?: break
+                if (!installNow(next)) break
+                settingsStore.removePendingPacks(setOf(next))
             }
-            val result = downloader.download(pack) { read, total ->
-                packSetup = PackSetup(
-                    pack,
-                    progress = if (total > 0) (read.toFloat() / total).coerceIn(0f, 1f) else null,
-                )
-            }
-            if (result.isSuccess) {
-                finishInstall(pack)
-            } else {
-                packSetup = PackSetup(pack, progress = null, failed = true)
+        } finally {
+            draining = false
+        }
+    }
+
+    private var draining = false
+
+    /**
+     * A language's tafsir waits for Wi-Fi when the phone is on cellular; the
+     * moment an unmetered network arrives while the app is open, the queue
+     * drains. Nothing is listened for when nothing is pending.
+     */
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onCapabilitiesChanged(
+            network: Network,
+            networkCapabilities: NetworkCapabilities,
+        ) {
+            if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)) {
+                viewModelScope.launch { drainPendingPacks() }
             }
         }
     }
@@ -861,6 +951,8 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         if (pack.shipped) return
         val reciter = id.removePrefix(ContentDatabase.RECITER_PREFIX)
         viewModelScope.launch {
+            // A pack the reader removes is not asked for again by the queue.
+            settingsStore.removePendingPacks(setOf(id))
             withContext(Dispatchers.IO) {
                 store.remove(id)
                 if (pack.type == PackType.Recitation) {
@@ -1323,6 +1415,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     override fun onCleared() {
         savedStore.close()
         lastReadStore.close()
+        runCatching {
+            getApplication<Application>().getSystemService(ConnectivityManager::class.java)
+                ?.unregisterNetworkCallback(networkCallback)
+        }
         // The process is going away; the connection is let go without waiting
         // on the main thread for whatever speculative work is still reading it.
         contentDatabase?.retire()

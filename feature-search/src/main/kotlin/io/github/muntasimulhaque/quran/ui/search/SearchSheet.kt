@@ -2,6 +2,7 @@ package io.github.muntasimulhaque.quran.ui.search
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -258,19 +259,17 @@ private fun key(hit: SearchHit): String = when (hit) {
 }
 
 /**
- * The filter row under the field: a labelled group of chips for the sources a
- * query reads, each one on until the reader turns it off. It is a quiet line,
- * not a mode: it never hides the field and never asks for a confirmation, so a
- * reader who ignores it searches exactly as before.
+ * The sources a query reads, folded away behind one quiet door.
+ *
+ * The six chips were a wall over the results on a phone, and a reader who
+ * ignores them searches everything, which is what the app means by search.
+ * The door says what the search reads in two words, and opens the same chips
+ * for the reader who wants to narrow it; the fold is remembered for the
+ * sheet's own life, so a reader who opened it once does not open it twice.
  *
  * The chips wrap instead of scrolling sideways. A row that runs off the edge
- * hides its own contents: a reader cannot turn off a source they cannot see,
- * and a source they cannot see is a source they do not know is on. The label
- * above the group says what the chips are, because "Translations" beside a
- * search field could as easily be a filter as a result type.
- *
- * A source the reader does not have (a translation they have not added, a
- * tafsir that is not installed) is not offered, rather than offered and
+ * hides its own contents: a reader cannot turn off a source they cannot see.
+ * A source the reader does not have is not offered, rather than offered and
  * empty.
  */
 @Composable
@@ -280,43 +279,69 @@ private fun FilterRow(
     hasTafsirs: Boolean,
     onChange: (SearchSources) -> Unit,
 ) {
+    var open by remember { mutableStateOf(false) }
+    val offered = buildList {
+        add(sources.text)
+        add(sources.surahs)
+        add(sources.references)
+        if (hasTranslations) {
+            add(sources.translations)
+            add(sources.words)
+        }
+        if (hasTafsirs) add(sources.tafsirs)
+    }
+    val chosen = offered.count { it }
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 22.dp, end = 22.dp, top = Space.Line, bottom = Space.Tight),
     ) {
-        Text(
-            text = stringResource(R.string.search_filter),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        FlowRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = Space.Line),
-            horizontalArrangement = Arrangement.spacedBy(Space.Line),
-            verticalArrangement = Arrangement.spacedBy(Space.Line),
-        ) {
-            FilterChip(stringResource(R.string.search_filter_text), sources.text) {
-                onChange(sources.copy(text = it))
-            }
-            FilterChip(stringResource(R.string.search_filter_surahs), sources.surahs) {
-                onChange(sources.copy(surahs = it))
-            }
-            FilterChip(stringResource(R.string.search_filter_references), sources.references) {
-                onChange(sources.copy(references = it))
-            }
-            if (hasTranslations) {
-                FilterChip(stringResource(R.string.search_filter_translations), sources.translations) {
-                    onChange(sources.copy(translations = it))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            TextButton(
+                label = stringResource(R.string.search_filter),
+                onClick = { open = !open },
+                quiet = true,
+            )
+            Text(
+                text = if (chosen == offered.size) {
+                    stringResource(R.string.search_filter_all)
+                } else {
+                    stringResource(R.string.search_filter_some, chosen, offered.size)
+                },
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 10.dp),
+            )
+        }
+        AnimatedVisibility(visible = open) {
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Space.Line),
+                horizontalArrangement = Arrangement.spacedBy(Space.Line),
+                verticalArrangement = Arrangement.spacedBy(Space.Line),
+            ) {
+                FilterChip(stringResource(R.string.search_filter_text), sources.text) {
+                    onChange(sources.copy(text = it))
                 }
-                FilterChip(stringResource(R.string.search_filter_words), sources.words) {
-                    onChange(sources.copy(words = it))
+                FilterChip(stringResource(R.string.search_filter_surahs), sources.surahs) {
+                    onChange(sources.copy(surahs = it))
                 }
-            }
-            if (hasTafsirs) {
-                FilterChip(stringResource(R.string.search_filter_tafsirs), sources.tafsirs) {
-                    onChange(sources.copy(tafsirs = it))
+                FilterChip(stringResource(R.string.search_filter_references), sources.references) {
+                    onChange(sources.copy(references = it))
+                }
+                if (hasTranslations) {
+                    FilterChip(stringResource(R.string.search_filter_translations), sources.translations) {
+                        onChange(sources.copy(translations = it))
+                    }
+                    FilterChip(stringResource(R.string.search_filter_words), sources.words) {
+                        onChange(sources.copy(words = it))
+                    }
+                }
+                if (hasTafsirs) {
+                    FilterChip(stringResource(R.string.search_filter_tafsirs), sources.tafsirs) {
+                        onChange(sources.copy(tafsirs = it))
+                    }
                 }
             }
         }
@@ -433,33 +458,6 @@ private fun StatusLine(
     hasSources: Boolean,
 ) {
     val total = results.counts.total
-    val counts = results.counts
-    val partSurahs = if (counts.surahs > 0) {
-        pluralStringResource(R.plurals.search_part_surah_names, counts.surahs, counts.surahs)
-    } else {
-        null
-    }
-    val partText = if (counts.arabic > 0) {
-        pluralStringResource(R.plurals.search_part_text, counts.arabic, counts.arabic)
-    } else {
-        null
-    }
-    val partTranslation = if (counts.translation > 0) {
-        pluralStringResource(R.plurals.search_part_translation, counts.translation, counts.translation)
-    } else {
-        null
-    }
-    val partWords = if (counts.words > 0) {
-        pluralStringResource(R.plurals.search_part_words, counts.words, counts.words)
-    } else {
-        null
-    }
-    val partTafsir = if (counts.tafsir > 0) {
-        pluralStringResource(R.plurals.search_part_tafsir, counts.tafsir, counts.tafsir)
-    } else {
-        null
-    }
-    val capped = if (results.capped) stringResource(R.string.search_status_capped, LIMIT) else null
     val message = when {
         !hasSources -> stringResource(R.string.search_status_no_sources)
         query == null -> stringResource(R.string.search_status_prompt)
@@ -467,17 +465,9 @@ private fun StatusLine(
         total == 0 -> stringResource(R.string.search_status_no_matches)
         else -> buildString {
             append(pluralStringResource(R.plurals.search_matches, total, total))
-            val parts = listOfNotNull(
-                partSurahs,
-                partText,
-                partTranslation,
-                partWords,
-                partTafsir,
-                capped,
-            )
-            if (parts.isNotEmpty()) {
+            if (results.capped) {
                 append("  \u00B7  ")
-                append(parts.joinToString(", "))
+                append(stringResource(R.string.search_status_capped, LIMIT))
             }
         }
     }

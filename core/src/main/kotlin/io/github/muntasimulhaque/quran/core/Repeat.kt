@@ -5,16 +5,14 @@ package io.github.muntasimulhaque.quran.core
  * further, the ayah again, the surah again, or the next surah.
  *
  * These are five answers to one question, so they are one value and not five
- * switches (owner decision). Two of them on at once is a promise the player
+ * controls (owner decision). Two of them on at once is a promise the player
  * cannot keep: a surah that repeats never ends, so "continue to the next
- * surah" would never come, and a reader who had turned both on would sit
- * waiting for a surah that never arrives. One reader has one answer, and the
- * switch that carries it is the one they last turned on.
+ * surah" would never come. One reader has one answer, and the list that
+ * carries it shows that answer with one mark.
  *
- * The state with no answer at all is [STOP_AFTER_AYAH]: the reading stops when
- * the current ayah ends. The reader reaches it by turning off [CONTINUE_AYAH],
- * the default, which is why the stop has no switch of its own (owner
- * decision).
+ * [STOP_AFTER_AYAH] is an answer like the rest: the reading stops when the
+ * current ayah ends, and it has its own row in the list, so the reader never
+ * learns it as the off position of another control (owner decision, 4.5).
  */
 enum class EndOfAudio {
     /** Move to the next ayah. The default, and the way the app has always played. */
@@ -29,7 +27,7 @@ enum class EndOfAudio {
 }
 
 /**
- * The four switches read as the one answer they stand for.
+ * The four stored keys read as the one answer they stand for.
  *
  * The switches are still stored as their own keys, because that is the shape
  * every install already has and a key nobody has written yet costs a reader
@@ -74,18 +72,4 @@ data class RepeatPlan(
         }
 }
 
-/**
- * What a switch says when it is tapped.
- *
- * Tapping an off switch chooses the answer it names. Tapping it on again
- * leaves that answer, and the reading returns to the default, continuing to
- * the next ayah, which is what the reader was doing before they asked for
- * anything special. The default switch is the one exception: turning
- * [CONTINUE_AYAH] off is the reader's stop, and it is the only door to
- * [STOP_AFTER_AYAH], so the stop needs no switch of its own.
- */
-fun toggled(turnedOn: Boolean, choice: EndOfAudio): EndOfAudio = when {
-    turnedOn -> choice
-    choice == EndOfAudio.CONTINUE_AYAH -> EndOfAudio.STOP_AFTER_AYAH
-    else -> EndOfAudio.CONTINUE_AYAH
-}
+

@@ -14,6 +14,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,11 +67,18 @@ fun QuranApp(
      */
     onReminderPermission: () -> Unit = {},
     /**
-     * The reader has answered the one screen before the reading. The shell
-     * asks the one permission there is from it and brings the Activity back
-     * up in the language just chosen.
+     * The reader has chosen a language, before the reminder card. The shell
+     * brings the Activity back up in the language just chosen, so the card
+     * and every window after it speak it.
      */
     afterFirstScreen: () -> Unit = {},
+    /**
+     * The reminder card's answer: whether the reader turned the daily ayah
+     * on. The shell asks for the two grants it needs (the notification, and
+     * the phone's own exact time) when it is on, and the reading opens in
+     * either case.
+     */
+    onFirstScreenDone: (Boolean) -> Unit = {},
     /** Whether the phone will show this app's notifications, read from the phone. */
     notificationsBlocked: () -> Boolean = { false },
     /** Whether the phone is still withholding the exact alarm. */
@@ -105,6 +116,12 @@ fun QuranApp(
         }
 
         val content = viewModel.content
+        // The language just chosen but the reminder card still on screen: the
+        // value survives the recreation that brings the new locale up, so the
+        // card speaks the chosen language. It is forgotten with the process,
+        // which costs the reader nothing: the reading opens and the reminder
+        // stays on, its state told on the Daily page.
+        var welcomePending by rememberSaveable { mutableStateOf<String?>(null) }
         // These are read here, in the screen's own scope, and not only inside
         // a nested lambda: the first paint gives way to the reading the
         // moment the library opens, and that switch must never wait for a
@@ -123,11 +140,30 @@ fun QuranApp(
                     suggested = systemLanguage(),
                     onChoose = { language ->
                         viewModel.chooseLanguage(language)
+                        welcomePending = language.tag
                         // The locale belongs to the Activity's own resources,
-                        // so the recreation (or the one the notification
-                        // permission's answer waits for) brings every window
-                        // up speaking it.
+                        // so the recreation brings every window up speaking
+                        // the language the reminder card is about to ask in.
                         afterFirstScreen()
+                    },
+                )
+            }
+            welcomePending != null -> {
+                WelcomeReminder(
+                    onTurnOn = {
+                        welcomePending = null
+                        // The two grants are asked by the shell once the card
+                        // is answered; the view model only writes the choice.
+                        viewModel.setDailyAyah(enabled = true, onPermission = {})
+                        onFirstScreenDone(true)
+                    },
+                    onNotNow = {
+                        welcomePending = null
+                        // Off rather than on under a permission that will
+                        // never arrive; the Daily page asks again at the act
+                        // of setting it.
+                        viewModel.setDailyAyah(enabled = false, onPermission = {})
+                        onFirstScreenDone(false)
                     },
                 )
             }

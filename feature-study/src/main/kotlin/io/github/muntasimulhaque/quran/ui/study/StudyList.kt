@@ -135,6 +135,10 @@ fun StudyList(
     // scroll through it would write a place in the wrong surah.
     val loaded by produceState<Pair<Int, List<StudyRow>>?>(
         initialValue = null,
+        // The library is a key too: a pack arriving replaces the database, and
+        // the rows read from the old one would never show the new
+        // translation under the ayah.
+        content,
         surah.number,
         settings.translationPacks,
         settings.wordByWord,

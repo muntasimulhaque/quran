@@ -128,6 +128,9 @@ fun AyahCard(
     }
     val lines by produceState<List<TranslationLine>>(
         initialValue = emptyList(),
+        // The library is a key: a translation that lands while the card is
+        // open replaces the database, and the card must read the new one.
+        content,
         ayah.number,
         translations.map { it.id },
         fromMushaf,
@@ -147,7 +150,7 @@ fun AyahCard(
             value = withContext(Dispatchers.IO) { content.wordMeanings(ayah.number, wordLanguage) }
         }
     }
-    val tafsir by produceState<TafsirView?>(initialValue = null, ayah.number, door) {
+    val tafsir by produceState<TafsirView?>(initialValue = null, content, ayah.number, door) {
         val pack = (door as? Door.Tafsir)?.pack
         value = if (pack == null) {
             null

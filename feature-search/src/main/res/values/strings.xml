@@ -23,29 +23,11 @@
     <string name="search_filter_translations">Translations</string>
     <string name="search_filter_words">Word meanings</string>
     <string name="search_filter_tafsirs">Tafsirs</string>
+    <string name="search_filter_all">Everything</string>
+    <string name="search_filter_some">%1$d of %2$d</string>
 
     <plurals name="search_matches">
         <item quantity="one">1 match</item>
         <item quantity="other">%1$d matches</item>
-    </plurals>
-    <plurals name="search_part_surah_names">
-        <item quantity="one">1 surah name</item>
-        <item quantity="other">%1$d surah names</item>
-    </plurals>
-    <plurals name="search_part_text">
-        <item quantity="one">1 in the text</item>
-        <item quantity="other">%1$d in the text</item>
-    </plurals>
-    <plurals name="search_part_translation">
-        <item quantity="one">1 in the translation</item>
-        <item quantity="other">%1$d in the translation</item>
-    </plurals>
-    <plurals name="search_part_words">
-        <item quantity="one">1 in word meanings</item>
-        <item quantity="other">%1$d in word meanings</item>
-    </plurals>
-    <plurals name="search_part_tafsir">
-        <item quantity="one">1 in tafsir</item>
-        <item quantity="other">%1$d in tafsir</item>
     </plurals>
 </resources>

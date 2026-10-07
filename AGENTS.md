@@ -44,13 +44,18 @@ dead letter.
 ## The law (non-negotiable)
 
 1. **Offline except one thing.** `INTERNET` serves exactly one purpose:
-   content from the project's own GitHub Releases. The reads are a content pack the reader asks for after
-   seeing its size, a recitation package for one surah after the reader
-   taps Play and approves the shown size (or after they have turned on
-   Continue to the next surah, which is their word, given once), and a quiet
-   refresh of a pack they already have, only when the app carries a newer
-   version, only unmetered, only after the first page is readable. Nothing
-   is fetched at launch, no other host is ever contacted, and there is no
+   content from the project's own GitHub Releases. The reads are the language the reader chose, fetched without another
+   question: the chosen language's translation arrives at once, and its
+   tafsir follows on the same choice, waiting for an unmetered connection
+   when the phone is on cellular (owner decision, 4.5); the word list is off
+   by default, and the reading toggle that turns it on is the ask for that
+   language's list. The reads are also a recitation package for one surah
+   after the reader taps Play and approves the shown size (or after they
+   have turned on Continue to the next surah, which is their word, given
+   once), and a quiet refresh of a pack they already have, only when the app
+   carries a newer version, only unmetered, only after the first page is
+   readable. Nothing is fetched before the reader's word, no other host is
+   ever contacted, and there is no
    analytics or telemetry of any kind. Everything else works with no
    connection. No WebView.
 2. **Permissions: media, notifications, the reminder's exact time and its
@@ -61,9 +66,13 @@ dead letter.
    reminder after a reboot). `USE_EXACT_ALARM` is never declared: Play
    accepts it for an alarm clock or a calendar only, and rejected the 3.9
    build over it. The app asks for `POST_NOTIFICATIONS` and for the phone's
-   own exact-alarm screen, and nothing else: the notification once at the one
-   screen before the reading, and the exact alarm once at each of the two acts
-   that set the reminder, and only on the phones that withhold it. The exact
+   own exact-alarm screen, and nothing else: the notification once at the
+   reminder card that ends the one screen before the reading, the exact
+   alarm once there too when the reader turns the reminder on, and again at
+   each of the two acts that set the reminder, and only on the phones that
+   withhold it; the exact alarm is not asked where the notification was
+   refused, because an exact alarm with nothing to show is a promise the
+   phone cannot keep. The exact
    alarm is no row in the settings hub, and the reminder wears no alarm icon
    (owner decision). Library-merged permissions are documented, not fought. A
    new permission needs the owner's sign-off written here first.
@@ -81,7 +90,10 @@ dead letter.
    lorem text, stock iconography, generic Material defaults. Every string is
    a real sentence, every color is chosen, every icon is drawn for this app.
 7. **Accessibility is a rule, not a feature.** TalkBack works end to end.
-   Study mode honors the system font scale; Mushaf mode zooms. Contrast
+   Study mode honors the system font scale; the Mushaf page is drawn at
+   the largest width that fits the screen, and the phone's own magnification
+   covers the rest (a large-print Mushaf edition is a content project of its
+   own, owner decision, 4.5). Contrast
    targets live in the theme and are measured.
 8. **Two UI languages, one content language each.** English and Bangla ship
    together, the interface strings in each module's `values-bn`, and the
@@ -367,7 +379,14 @@ implement it and update this list.
 - Text sizes are 0.65, 0.75, 0.85, 1, 1.2.
 - Saheeh International is the only translation.
 - Ibn Kathir is the tafsir.
-- Minshawi and Husary are the only reciters.
+- Minshawi and Husary are the only reciters, and Husary is the reciter of
+  a new install; a reader's own choice is never moved (owner decision, 4.5).
+- The first screen is two steps on one screen: the language, then the daily
+  reminder card that asks for the notification and the exact time. The
+  chosen language's translation and tafsir arrive with the choice; the word
+  list arrives with the toggle that turns it on. The first choice lands in
+  the study reading of Al-Fatiha 1:1, and every launch after that opens
+  where the reader left off (owner decision, 4.5).
 - No streaks, no gamification.
 - The design direction is the manuscript language: the page is the
   interface, chrome is summoned and never resident, one accent, hairlines
@@ -376,9 +395,10 @@ implement it and update this list.
   honored and a takedown path in About.
 - Continue to the next surah is off by default and is the reader's one-time
   word for the packages that follow the surah being heard.
-- What happens at the end of the audio is one answer, not three switches:
-  repeat the ayah, repeat the surah, or continue, and turning one on turns
-  the other two off.
+- What happens at the end of the audio is one answer, drawn as one list
+  with one check (owner decision, 4.5): continue to the next ayah (the
+  default), repeat the ayah, stop after this ayah, continue to the next
+  surah, or repeat the surah, in that order.
 - **The app asks for the exact alarm only at the two acts that set the
   reminder, only while the phone is withholding it, and the reminder wears no
   alarm icon.** `SCHEDULE_EXACT_ALARM` is granted at install before Android

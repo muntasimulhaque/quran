@@ -7,10 +7,10 @@ import org.junit.Test
 /**
  * One reader has one answer to "what happens as the reading moves on".
  *
- * The rule is small, and small rules that four separate switches depend on
+ * The rule is small, and small rules that one list of five rows depends on
  * are exactly the ones that rot, so it is pinned here over every stored
  * combination rather than over one example of each. The fifth answer, the
- * stop, is the state where no switch is on at all.
+ * stop, is the state where no stored key is on at all.
  */
 class RepeatTest {
 
@@ -78,23 +78,5 @@ class RepeatTest {
                 }
             }
         }
-    }
-
-    @Test
-    fun aSwitchSaysItsAnswerOrTheDefault() {
-        assertEquals(EndOfAudio.REPEAT_SURAH, toggled(true, EndOfAudio.REPEAT_SURAH))
-        assertEquals(EndOfAudio.CONTINUE_AYAH, toggled(false, EndOfAudio.REPEAT_SURAH))
-        assertEquals(EndOfAudio.CONTINUE_SURAH, toggled(true, EndOfAudio.CONTINUE_SURAH))
-        assertEquals(EndOfAudio.CONTINUE_AYAH, toggled(false, EndOfAudio.CONTINUE_SURAH))
-        assertEquals(EndOfAudio.REPEAT_AYAH, toggled(true, EndOfAudio.REPEAT_AYAH))
-        assertEquals(EndOfAudio.CONTINUE_AYAH, toggled(false, EndOfAudio.REPEAT_AYAH))
-    }
-
-    @Test
-    fun turningOffTheDefaultIsTheStop() {
-        // The default switch is the only door to the stop, and it opens both
-        // ways: off is the stop, on is the reading carrying on again.
-        assertEquals(EndOfAudio.STOP_AFTER_AYAH, toggled(false, EndOfAudio.CONTINUE_AYAH))
-        assertEquals(EndOfAudio.CONTINUE_AYAH, toggled(true, EndOfAudio.CONTINUE_AYAH))
     }
 }

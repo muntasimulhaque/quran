@@ -13,6 +13,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.core.RepeatPlan
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 private val Context.settingsStore: DataStore<Preferences> by preferencesDataStore("reading")
@@ -71,7 +72,12 @@ data class AppSettings(
     val translationSize: Float = TextSize.DEFAULT,
     val tafsirSize: Float = TextSize.DEFAULT,
     val wordsSize: Float = TextSize.DEFAULT,
-    val recitation: String = "minshawi",
+    /**
+     * The reader's reciter. Husary is the default for a new install (owner
+     * decision, 4.5): the murattal voice most readers know, with the quiet
+     * second voice kept as the fallback when a reciter is removed.
+     */
+    val recitation: String = "husary",
     val keepAwake: Boolean = true,
     val followReciter: Boolean = true,
     /** How fast the recitation plays: the reader's own pace, remembered. */
@@ -167,7 +173,7 @@ class SettingsStore(private val context: Context) {
             translationSize = sizeOf(choices, TRANSLATION_SIZE, legacy),
             tafsirSize = sizeOf(choices, TAFSIR_SIZE, legacy),
             wordsSize = sizeOf(choices, WORDS_SIZE, legacy),
-            recitation = preferences[RECITATION] ?: "minshawi",
+            recitation = preferences[RECITATION] ?: "husary",
             keepAwake = preferences[KEEP_AWAKE] ?: true,
             followReciter = preferences[FOLLOW_RECITER] ?: true,
             playbackSpeed = (preferences[PLAYBACK_SPEED] ?: 1f).coerceIn(MIN_SPEED, MAX_SPEED),
@@ -303,6 +309,29 @@ class SettingsStore(private val context: Context) {
     }
 
     /**
+     * The packs a language choice asked for, kept across a launch: the reader
+     * chose a language, so its reading arrives without another question, and a
+     * download interrupted by the process or the connection continues on the
+     * next attempt instead of being forgotten.
+     */
+    suspend fun pendingPacks(): Set<String> =
+        context.settingsStore.data.first()[PENDING_PACKS] ?: emptySet()
+
+    suspend fun addPendingPacks(packs: Set<String>) {
+        if (packs.isEmpty()) return
+        context.settingsStore.edit {
+            it[PENDING_PACKS] = (it[PENDING_PACKS] ?: emptySet()) + packs
+        }
+    }
+
+    suspend fun removePendingPacks(packs: Set<String>) {
+        if (packs.isEmpty()) return
+        context.settingsStore.edit {
+            it[PENDING_PACKS] = (it[PENDING_PACKS] ?: emptySet()) - packs
+        }
+    }
+
+    /**
      * One stored size as a scale. The preference is read by name off the raw
      * map, not through a typed key, because the build that shipped 0.2 wrote
      * these as step indices: reading an Int through a Float key throws, and a
@@ -406,6 +435,7 @@ class SettingsStore(private val context: Context) {
         val TRANSLATION_PACK = stringPreferencesKey("translation_pack")
         val TRANSLATION_PACKS = stringSetPreferencesKey("translation_packs")
         val TAFSIR_PACKS = stringSetPreferencesKey("tafsir_packs")
+        val PENDING_PACKS = stringSetPreferencesKey("pending_packs")
         val SHOW_TRANSLATION = booleanPreferencesKey("show_translation")
         val SHOW_TAFSIR = booleanPreferencesKey("show_tafsir")
         val WORD_BY_WORD = booleanPreferencesKey("word_by_word")

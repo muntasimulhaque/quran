@@ -21,4 +21,6 @@
     <string name="playback_repeat_surah">Repeat the surah</string>
     <string name="playback_continue_ayah">Continue to the next ayah</string>
     <string name="playback_continue_surah">Continue to the next surah</string>
+    <string name="playback_stop_after_ayah">Stop after this ayah</string>
+    <string name="playback_end_label">When the audio ends</string>
 </resources>
