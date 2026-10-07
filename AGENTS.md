@@ -324,7 +324,7 @@ at every step:
 | `data/` | read-only content access, the saved-ayah and last-read user databases, the page font store, preferences |
 | `app/` | the shell: activity, view model, the screen that composes the features, the shell's strings |
 | `feature-*/` | one reading surface each (mushaf, study, search, browse, playback, settings), each owning its own strings and icons |
-| `ui-kit/` | the shared look: theme and palettes, the hand-drawn icons, the rich text views, the app's choice row, the small formatters |
+| `ui-kit/` | the shared look: theme and palettes, the hand-drawn icons, the rich text views, the app's choice row, the one floating lift, the small formatters |
 | `content-assets/` | the shipped assets the app reads: the 604 page fonts, the study and UI faces, the core pack, and the pack catalog |
 | `tools/` | the offline pipeline: fetch, verify, audit, build, fonts, packs, audio |
 | `content/` | `quran.db` (built by `tools/`, gitignored, fetched or rebuilt from its hash), `packs/`, `manifest.json`, `recitation-manifest.json`, `audit-report.md`; `raw/` is local and gitignored |

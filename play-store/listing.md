@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 4.6 (versionCode 48)
+Version: 4.7 (versionCode 49)
 
 ## Listing
 
@@ -200,6 +200,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (4.7, 312 characters)
+
+Controls that float over the page now wear one soft, even shadow. The playback pill, the ayah actions, and the menus they open keep a gentle lift in place of the platform's dark cast, so the line of Quran under them stays clear and the same control looks the same on every phone. No ads, no trackers, no account.
 
 ## Release notes (4.6, 395 characters)
 
