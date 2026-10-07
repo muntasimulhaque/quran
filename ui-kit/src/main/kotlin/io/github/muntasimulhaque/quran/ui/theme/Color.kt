@@ -57,6 +57,13 @@ val LapisLight = Color(0xFF7FB2E5)
 // changing the hue.
 val Gold = Color(0xFF856411)
 
+// The one shadow the app casts, black at ten percent, where the platform's
+// own cast from a theme is a nineteen percent spot and a four percent
+// ambient. The floating tone is the lift and the shadow only anchors it, so
+// a Quran line under a control keeps its contrast and no edge of the screen
+// wears a darker cast than another (owner decision, forty-ninth session).
+val FloatingShadow = Color(0x1A000000)
+
 // The switch's own two tones that are not already a word's tone: the ground a
 // switch's track is filled with while it is off, and the ink its knob wears
 // while it is on. The knob of an off switch and the ring around that track are

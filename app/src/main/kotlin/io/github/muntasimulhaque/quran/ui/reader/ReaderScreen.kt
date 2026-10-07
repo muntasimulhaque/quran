@@ -38,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalDensity
@@ -64,6 +63,7 @@ import io.github.muntasimulhaque.quran.ui.mushaf.MushafPage
 import io.github.muntasimulhaque.quran.ui.mushaf.PAGE_ASPECT
 import io.github.muntasimulhaque.quran.ui.playback.PlaybackBar
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.kit.shortReciterName
@@ -326,7 +326,7 @@ fun ReaderScreen(
                 Row(
                     modifier = Modifier
                         .padding(horizontal = 24.dp)
-                        .shadow(elevation = 6.dp, shape = RoundedCornerShape(18.dp))
+                        .floatingLift(RoundedCornerShape(18.dp))
                         .clip(RoundedCornerShape(18.dp))
                         // A control that floats over the reading wears the
                         // floating tone and a soft lift, not the sheet's own
@@ -806,7 +806,7 @@ private fun BottomStack(
         viewModel.packSetup?.let { setup ->
             Row(
                 modifier = Modifier
-                    .shadow(elevation = 6.dp, shape = RoundedCornerShape(50))
+                    .floatingLift(RoundedCornerShape(50))
                     .clip(RoundedCornerShape(50))
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                     .padding(start = 18.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
@@ -989,7 +989,7 @@ private fun AyahActions(
     val shape = RoundedCornerShape(50)
     Row(
         modifier = Modifier
-            .shadow(elevation = 6.dp, shape = shape)
+            .floatingLift(shape)
             .clip(shape)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .padding(horizontal = 6.dp, vertical = 5.dp),

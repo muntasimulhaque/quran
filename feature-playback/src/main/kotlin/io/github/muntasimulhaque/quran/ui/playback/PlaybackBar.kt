@@ -22,7 +22,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
@@ -34,6 +33,7 @@ import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.ListenOffer
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
+import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 
 /**
  * The playback pill. It speaks in four voices: asking to download a surah,
@@ -170,7 +170,7 @@ fun PlaybackBar(
     BoxWithConstraints(
         modifier = modifier
             .padding(horizontal = BarGutter)
-            .shadow(elevation = PillLift, shape = RoundedCornerShape(50))
+            .floatingLift(RoundedCornerShape(50))
             .clip(RoundedCornerShape(50))
             // The playback bar floats over the reading, so it wears the
             // floating tone and a soft lift: the page is visible around it

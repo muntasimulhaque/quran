@@ -11,7 +11,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.foundation.layout.ColumnScope
@@ -23,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
+import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 
 /**
  * A popup the pill opens, in the pill's own cloth and hung from the capsule's
@@ -77,7 +77,7 @@ internal fun PillPopup(
             modifier = Modifier
                 .width(PillMenuMeasure)
                 .heightIn(max = room)
-                .shadow(elevation = PillLift, shape = RoundedCornerShape(20.dp))
+                .floatingLift(RoundedCornerShape(20.dp))
                 .clip(RoundedCornerShape(20.dp))
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                 .testTag("pill-popup")

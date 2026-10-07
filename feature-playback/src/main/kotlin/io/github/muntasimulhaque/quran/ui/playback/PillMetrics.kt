@@ -81,19 +81,6 @@ internal val PillMenuMeasure = 288.dp
 internal val AnchorLine = 1.dp
 
 /**
- * The lift the capsule and the popup it opens both wear, so the menu can
- * never read as a different height than the control it hangs from (owner
- * decision, forty-seventh session).
- *
- * It sits under the 8 dp a popup's own window sets aside for a child's
- * shadow (Compose's `PopupLayout.maxSupportedElevation`): the window
- * allocates that much surface around its content so a composable can draw
- * its shadow, and a lift past it would meet the window's edge. The capsule,
- * the offer bar, and the popup all use this one number.
- */
-internal val PillLift = 6.dp
-
-/**
  * The ground the pill's popup keeps between its own foot and the capsule's
  * top edge.
  *
@@ -104,7 +91,7 @@ internal val PillLift = 6.dp
  * (owner report) the flat edges met along the middle, where no seam can be
  * seen, and the popup's foot corners and the capsule's shoulders kissed at
  * each end, so the two read as one shape with a waist. Ten dp keeps the
- * capsule's own [PillLift] from reaching the popup's foot and sits well
+ * capsule's own lift from reaching the popup's foot and sits well
  * inside the popup's 20 dp corner, so the two silhouettes never meet, and
  * the popup still hangs from the capsule's middle.
  */
