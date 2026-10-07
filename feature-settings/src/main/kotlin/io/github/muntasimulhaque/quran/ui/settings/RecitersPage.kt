@@ -34,6 +34,7 @@ import io.github.muntasimulhaque.quran.data.DownloadedSurah
 import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.Recitation
 import io.github.muntasimulhaque.quran.feature.settings.R
+import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
@@ -75,6 +76,7 @@ fun RecitersPage(
                     title = pack.name,
                     subtitle = null,
                     selected = selected,
+                    radio = true,
                     onClick = { actions.onSelectRecitation(id) },
                     // The downloads door follows the reciter it belongs to,
                     // so the reciter's own room at the foot would read as a

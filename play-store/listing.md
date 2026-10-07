@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 4.5 (versionCode 47)
+Version: 4.6 (versionCode 48)
 
 ## Listing
 
@@ -200,6 +200,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (4.6, 395 characters)
+
+Every choice now wears one shape. The five answers for the end of the recitation are one list with one leading mark and one even gap, in the pill menu and on the Listening page alike, and the answer you chose wears the same dot in both. The reciter chooser marks your reciter the same way, and a chosen translation or tafsir keeps its check inside the same ring. No ads, no trackers, no account.
 
 ## Release notes (4.5, 397 characters)
 

@@ -9,9 +9,9 @@ import org.junit.Test
  * ground, a knob reads against the track it sits in, and against the sheet the
  * whole control stands on, at 3:1 or better.
  *
- * A control boundary owes 3:1, which is the same rule the choice rows already
- * hold their marks to in `SettingsChoiceRows`, and it is a rule about a shape
- * rather than about words, which is why it has its own class beside
+ * A control boundary owes 3:1, which is the same rule the app's choice rows
+ * already hold their marks to in `ui.kit.ChoiceRow`, and it is a rule about a
+ * shape rather than about words, which is why it has its own class beside
  * `ContrastTest` rather than inside it.
  *
  * This test exists because the switch's colors were nobody's choice. Material

@@ -1,26 +1,16 @@
 package io.github.muntasimulhaque.quran.ui.playback
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.ListenOption
+import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
-import io.github.muntasimulhaque.quran.ui.reader.Icon
-import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 
 /**
  * The reciters, as the list both the playing pill and the download offer
@@ -28,10 +18,13 @@ import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
  *
  * One list, in one shape, wherever the choice is offered: the playing pill
  * carries it beside the reciter it is hearing, and the offer carries it above
- * the size it is asking for, and a reader who learned one has learned both. A
- * reciter who is already chosen wears the check, and every other row says what
- * that reciter would still need for the surah at hand, so the choice is made
- * with the price in view rather than by trying it.
+ * the size it is asking for, and a reader who learned one has learned both.
+ * A reciter who is already chosen wears the app's one leading radio mark, so
+ * the pill and the Reciters page draw the same control and a screen reader
+ * hears the chosen row as the chosen one; every other row says what that
+ * reciter would still need for the surah at hand, so the choice is made with
+ * the price in view rather than by trying it (owner decision, forty-eighth
+ * session).
  *
  * The rows are drawn at the pill's own [PillMenuMeasure], which is also the
  * measure of the anchor the playing pill hangs them from, so the list stands
@@ -46,62 +39,21 @@ internal fun ReciterChoices(
     onChoose: (String) -> Unit,
 ) {
     options.forEach { option ->
-        ReciterChoiceRow(
-            option = option,
+        ChoiceRow(
+            title = option.name,
+            subtitle = if (option.bytes > 0L) {
+                formatBytes(option.bytes)
+            } else {
+                stringResource(R.string.playback_reciter_ready)
+            },
             selected = option.reciter == selected,
+            radio = true,
             onClick = { onChoose(option.reciter) },
+            // The pill's own cloth, as the listening menu wears it: the row
+            // clips into the popup's rounded shape.
+            modifier = Modifier
+                .padding(horizontal = 6.dp)
+                .clip(RoundedCornerShape(14.dp)),
         )
-    }
-}
-
-/**
- * One reciter in the chooser: the name, what still needs fetching, and a
- * check on the one already chosen. It is rounded and it is the pill's own
- * surface, so the choice reads as part of the pill it opened from.
- */
-@Composable
-private fun ReciterChoiceRow(
-    option: ListenOption,
-    selected: Boolean,
-    onClick: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 6.dp, vertical = 2.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 9.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(Modifier.weight(1f)) {
-            Text(
-                text = option.name,
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (selected) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurface
-                },
-            )
-            Text(
-                text = if (option.bytes > 0L) {
-                    formatBytes(option.bytes)
-                } else {
-                    stringResource(R.string.playback_reciter_ready)
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        if (selected) {
-            IconGlyph(
-                icon = Icon.Check,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .padding(start = 10.dp)
-                    .size(18.dp),
-            )
-        }
     }
 }

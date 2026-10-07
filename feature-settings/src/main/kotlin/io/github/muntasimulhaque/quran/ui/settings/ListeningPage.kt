@@ -11,6 +11,7 @@ import androidx.compose.ui.res.stringResource
 import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.feature.settings.R
+import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
@@ -20,15 +21,18 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * the page, so they sit together under the reciter whose voice they shape.
  *
  * The answers are one value and one list (owner decision, 4.5): the page
- * draws the five answers as rows with one radio mark, so the exclusivity is
- * the shape of the control rather than a rule the reader has to learn. The
- * stop is its own row, because the state with no answer at all is an answer
- * the reader should be able to name. The order is the reader's own: what
- * happens when the ayah ends, then what happens when the surah ends.
+ * draws the five answers as rows of the app's own [ChoiceRow], one radio
+ * mark leading each name, so the exclusivity is the shape of the control
+ * rather than a rule the reader has to learn. The stop is its own row,
+ * because the state with no answer at all is an answer the reader should be
+ * able to name. The order is the reader's own: what happens when the ayah
+ * ends, then what happens when the surah ends.
  *
- * The two rows about the ayah and the two about the surah are the two groups
- * the reader thinks in, and the pill opens the same four in the same order,
- * from its own listening menu, calling the one value kept here.
+ * The five keep one gap, the row's own 24 dp: a wider break between the two
+ * contexts read as a second control, and the words ("the ayah", "the
+ * surah") already say which is which. The pill opens the same five in the
+ * same order, from its own listening menu, through the same row, calling
+ * the one value kept here (owner decision, forty-eighth session).
  */
 @Composable
 fun ListeningPage(
@@ -62,9 +66,11 @@ fun ListeningPage(
             end = settings.endOfAudio,
             onEndOfAudio = onEndOfAudio,
         )
-        Spacer(Modifier.height(Space.Block))
         // When the surah ends: the same two answers one unit larger. The
         // next surah is fetched with the reciter being heard and plays on.
+        // The five stand in one list with one gap, so the words carry the
+        // difference between the contexts and the spacing carries nothing
+        // (owner decision, forty-eighth session).
         EndChoice(
             title = stringResource(R.string.settings_continue_surah_title),
             choice = EndOfAudio.CONTINUE_SURAH,
@@ -97,6 +103,7 @@ private fun EndChoice(
         title = title,
         subtitle = null,
         selected = end == choice,
+        radio = true,
         onClick = { onEndOfAudio(choice) },
     )
 }

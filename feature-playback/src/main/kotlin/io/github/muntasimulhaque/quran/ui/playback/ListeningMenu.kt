@@ -5,10 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -28,10 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.feature.playback.R
+import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.SpeedSteps
 import io.github.muntasimulhaque.quran.ui.kit.speedText
-import io.github.muntasimulhaque.quran.ui.reader.Icon
-import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 
 /**
  * The pace, and what happens at the end of the audio, as the list the pill
@@ -44,11 +40,13 @@ import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
  * stand on the Listening page (owner decision, forty-seventh session).
  *
  * The answers are one value and one list (owner decision, 4.5): the five
- * answers are rows with one check, so the exclusivity is the shape of the
- * control rather than a rule the reader has to learn, and the stop has its
- * own row rather than living at the off end of another. The order is the
- * reader's own: what happens when the ayah ends, then what happens when the
- * surah ends.
+ * answers are rows of the app's own [ChoiceRow], one radio mark leading each
+ * name, so the exclusivity is the shape of the control rather than a rule the
+ * reader has to learn, and the stop has its own row rather than living at the
+ * off end of another. The order is the reader's own: what happens when the
+ * ayah ends, then what happens when the surah ends. The five keep one gap and
+ * the same leading mark the Listening page draws, so the same answer wears one
+ * shape whichever door opened its list (owner decision, forty-eighth session).
  */
 @Composable
 internal fun ColumnScope.ListeningMenu(
@@ -143,9 +141,10 @@ internal fun ColumnScope.ListeningMenu(
         chosen = end,
         onEndOfAudio = onEndOfAudio,
     )
-    Box(Modifier.height(6.dp))
     // When the surah ends: the same two answers one unit larger. The next
-    // surah is fetched with the reciter being heard and plays on.
+    // surah is fetched with the reciter being heard and plays on. The five
+    // stand in one list with one gap; the words carry the difference between
+    // the contexts, not the spacing (owner decision, forty-eighth session).
     EndChoice(
         label = stringResource(R.string.playback_continue_surah),
         choice = EndOfAudio.CONTINUE_SURAH,
@@ -161,10 +160,11 @@ internal fun ColumnScope.ListeningMenu(
 }
 
 /**
- * One answer in the pill's one list: the label takes the room, the mark is
- * the app's own check, and the whole row is the target. A radio row rather
- * than a switch, because one answer is kept at a time; the stop has its own
- * row so the reader never learns it as the off position of another.
+ * One answer in the pill's one list: the same row the Listening page draws,
+ * so the pill and the page keep one shape, one leading mark, and one gap. A
+ * radio row rather than a switch, because one answer is kept at a time; the
+ * stop has its own row so the reader never learns it as the off position of
+ * another.
  */
 @Composable
 private fun EndChoice(
@@ -173,28 +173,16 @@ private fun EndChoice(
     chosen: EndOfAudio,
     onEndOfAudio: (EndOfAudio) -> Unit,
 ) {
-    val on = chosen == choice
-    Row(
+    ChoiceRow(
+        title = label,
+        subtitle = null,
+        selected = chosen == choice,
+        radio = true,
+        onClick = { onEndOfAudio(choice) },
+        // The pill's own cloth: the row clips into the popup's rounded shape,
+        // so the ripple cannot draw a square corner over the menu's curve.
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 6.dp, vertical = 2.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .selectable(selected = on, role = Role.RadioButton) { onEndOfAudio(choice) }
-            .padding(horizontal = 10.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f),
-        )
-        if (on) {
-            IconGlyph(
-                icon = Icon.Check,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(18.dp),
-            )
-        }
-    }
+            .padding(horizontal = 6.dp)
+            .clip(RoundedCornerShape(14.dp)),
+    )
 }

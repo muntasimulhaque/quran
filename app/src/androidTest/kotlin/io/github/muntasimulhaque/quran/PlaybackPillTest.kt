@@ -9,9 +9,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -66,6 +73,10 @@ import org.junit.runner.RunWith
  *    box it hangs on, and an anchor on the word the reader touched put the
  *    reciter chooser at one end of the pill and the listening menu at the
  *    other: two popups in two places on one control (owner report).
+ * 9. Both menus wear the app's own choice row: one leading mark, one 24 dp
+ *    gap, and one 48 dp target, the same the Listening page draws, so an
+ *    answer cannot change its shape from one door to the other (owner
+ *    decision, forty-eighth session).
  */
 @RunWith(AndroidJUnit4::class)
 class PlaybackPillTest {
@@ -273,6 +284,54 @@ class PlaybackPillTest {
         // not at the off end of the default switch.
         compose.onNodeWithText("Stop after this ayah").performClick()
         assertEquals(EndOfAudio.STOP_AFTER_AYAH, end)
+    }
+
+    /**
+     * The listening menu wears the app's own choice row: the same leading
+     * radio mark, the same 24 dp gap, and the same 48 dp target the Listening
+     * page draws, so the same answer cannot change its shape from one door to
+     * the other (owner decision, forty-eighth session).
+     */
+    @Test
+    fun theListeningMenuWearsTheAppChoiceRow() {
+        showPill()
+        compose.onNodeWithTag("playback-listening").performClick()
+        compose.onAllNodesWithTag("choice-mark", useUnmergedTree = true).assertCountEquals(5)
+        val mark = compose.onAllNodesWithTag("choice-mark", useUnmergedTree = true).onFirst()
+            .getUnclippedBoundsInRoot()
+        val name = compose.onNodeWithText("Continue to the next ayah", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
+        assertTrue(
+            "the mark must lead the name in the pill too: mark $mark, name $name",
+            mark.left.value < name.left.value,
+        )
+        compose.onNodeWithText("Continue to the next ayah").assertHeightIsAtLeast(48.dp)
+    }
+
+    /**
+     * The reciter chooser is a choice, not a button: the chosen reciter wears
+     * the app's leading mark and its row is the one a screen reader reports as
+     * selected, where the check beside a Role.Button said neither (owner
+     * decision, forty-eighth session).
+     */
+    @Test
+    fun theReciterChooserWearsTheAppChoiceRow() {
+        showPill()
+        compose.onNodeWithTag("playback-reciter").performClick()
+        val chosen = compose.onNode(
+            hasText("Husary") and hasAnyAncestor(hasTestTag("pill-popup")),
+        )
+        chosen.assertIsSelected()
+        val mark = compose.onAllNodesWithTag("choice-mark", useUnmergedTree = true).onFirst()
+            .getUnclippedBoundsInRoot()
+        val name = compose.onNode(
+            hasText("Husary") and hasAnyAncestor(hasTestTag("pill-popup")),
+            useUnmergedTree = true,
+        ).getUnclippedBoundsInRoot()
+        assertTrue(
+            "the mark must lead the chosen reciter's name: mark $mark, name $name",
+            mark.left.value < name.left.value,
+        )
     }
 
     @Test
