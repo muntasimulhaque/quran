@@ -70,7 +70,6 @@ class Build(private val root: File) {
             insertPageLines(connection, pageLines)
             insertTranslation(connection, translation)
             insertTafsirIbnKathir(connection, ayahNumbers)
-            insertTafsirSaadi(connection, ayahNumbers)
             // The Bangla library, built only when its sources are present, so
             // a fresh clone without them still produces a complete English app.
             if (sourceDb("translation-taisirul-quran-bn") != null) {
@@ -432,9 +431,8 @@ class Build(private val root: File) {
             put("text_source", "KFGQPC Hafs word by word, audited against Tanzil Uthmani 1.1")
             put("translation_source", "Saheeh International, Noor International Center, QuranEnc version 1.1.2")
             put("tafsir_english", "Tafsir Ibn Kathir, via the Quranic Universal Library")
-            put("tafsir_arabic", "Tafsir As-Sa'di, QuranEnc arabic_saadi version 1.0.0")
             put("reciters", "Muhammad Siddiq Al-Minshawi, Mahmoud Khalil Al-Husary")
-            put("packs", "translation-saheeh-en tafsir-ibn-kathir-en tafsir-as-sadi-ar")
+            put("packs", "translation-saheeh-en tafsir-ibn-kathir-en")
             statement.executeBatch()
         }
     }
@@ -472,7 +470,6 @@ class Build(private val root: File) {
         val packs = listOf(
             Pack("translation-saheeh-en", "translation", "Saheeh International", "en", "1.1.2"),
             Pack("tafsir-ibn-kathir-en", "tafsir", "Ibn Kathir", "en", "QUL"),
-            Pack("tafsir-as-sadi-ar", "tafsir", "As-Sa'di", "ar", "1.0.0"),
             Pack("translation-taisirul-quran-bn", "translation", "Taisirul Quran", "bn", "QUL"),
             Pack("tafsir-ibn-kathir-bn", "tafsir", "Ibn Kathir", "bn", "QUL"),
         )
@@ -748,71 +745,6 @@ class Build(private val root: File) {
                     }
                     insertMapping.executeBatch()
                 }
-            }
-        }
-    }
-
-    private fun insertTafsirSaadi(connection: Connection, ayahNumbers: Map<String, Int>) {
-        val file = sourceDir("tafsir-as-sadi-ar").firstWithExtension(".json") ?: return fail("no As-Sa'di json")
-        val element = Json.parseToJsonElement(file.readText())
-        val array: JsonArray = when (element) {
-            is JsonArray -> element
-            is JsonObject -> (element["result"] ?: element["tafsirs"])?.jsonArray ?: JsonArray(emptyList())
-            else -> JsonArray(emptyList())
-        }
-        connection.prepareStatement(
-            "INSERT INTO tafsir_passage(pack, source_id, surah, from_ayah, to_ayah, text, text_search) " +
-                "VALUES(?,?,?,?,?,?,?)",
-        ).use { insertPassage ->
-            data class Entry(val id: Int, val surah: Int, val from: Int, val to: Int, val text: String)
-            val entries = ArrayList<Entry>(6600)
-            for (entry in array) {
-                val o = entry.jsonObject
-                val id = o["id"]?.jsonPrimitive?.intOrNull ?: continue
-                val surah = o["sura"]?.jsonPrimitive?.intOrNull ?: continue
-                val from = o["from_aya"]?.jsonPrimitive?.intOrNull ?: continue
-                val to = o["to_aya"]?.jsonPrimitive?.intOrNull ?: continue
-                val text = o["text"]?.jsonPrimitive?.contentOrNull ?: ""
-                entries += Entry(id, surah, from, to, text)
-                insertPassage.setString(1, "tafsir-as-sadi-ar")
-                insertPassage.setInt(2, id)
-                insertPassage.setInt(3, surah)
-                insertPassage.setInt(4, from)
-                insertPassage.setInt(5, to)
-                insertPassage.setString(6, sanitize(text))
-                insertPassage.setString(7, Search.normalizeForIndex(sanitize(text)))
-                insertPassage.addBatch()
-            }
-            insertPassage.executeBatch()
-
-            // Passage ranges overlap. The commentary the reader should see for
-            // an ayah is the shortest passage that contains it, which is the
-            // most specific one.
-            val chosen = HashMap<Int, Pair<Int, Int>>(7000)
-            for (entry in entries) {
-                val length = entry.to - entry.from
-                for (ayah in entry.from..entry.to) {
-                    val number = ayahNumbers["${entry.surah}:$ayah"] ?: continue
-                    val current = chosen[number]
-                    if (current == null || length < current.second) {
-                        chosen[number] = entry.id to length
-                    }
-                }
-            }
-            connection.prepareStatement(
-                "INSERT INTO tafsir_ayah(pack, ayah_number, passage_id) VALUES(?,?,?)",
-            ).use { insertMapping ->
-                for (number in 1..6236) {
-                    val passage = chosen[number] ?: run {
-                        fail("As-Sa'di: ayah $number has no passage")
-                        continue
-                    }
-                    insertMapping.setString(1, "tafsir-as-sadi-ar")
-                    insertMapping.setInt(2, number)
-                    insertMapping.setInt(3, passage.first)
-                    insertMapping.addBatch()
-                }
-                insertMapping.executeBatch()
             }
         }
     }

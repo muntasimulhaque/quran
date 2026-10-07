@@ -241,9 +241,10 @@ class Fonts(private val root: File) {
             }
         }
         for (file in packs.listFiles { it -> it.isFile && it.name.startsWith("tafsir-") }.orEmpty()) {
-            // An Arabic tafsir is quoted prose, drawn in Amiri like the rest of
-            // the Arabic outside the Mushaf; a Latin one is paragraphs and
-            // headings, drawn in Literata and Inter.
+            // A tafsir whose own language is Arabic is quoted prose, drawn in
+            // Amiri like the rest of the Arabic outside the Mushaf; the
+            // offered tafsirs are Latin, paragraphs and headings drawn in
+            // Literata and Inter.
             val arabic = file.name.endsWith("-ar.db")
             openSqlite(file).use { connection ->
                 connection.each("SELECT text FROM tafsir_passage") { rs ->

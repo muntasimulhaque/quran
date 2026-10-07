@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,6 +27,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -117,6 +119,25 @@ fun BrowseSheet(
     val currentSurah = remember(surahs, surahStarts, currentAyah) {
         surahOfAyah(surahs, surahStarts, currentAyah) ?: surahs.firstOrNull()?.number ?: 1
     }
+    // The centering happens once in a sheet, the first time a division of
+    // the Book is shown, and never again: each tab keeps its own list state
+    // so its place is remembered while the reader moves between tabs, and a
+    // re-centering on every return would take that place away.
+    var surahsCentered by remember { mutableStateOf(false) }
+    var juzCentered by remember { mutableStateOf(false) }
+    // The reader's own surah is put in the middle of the Surahs list, the
+    // way the grid puts their ayah in the middle of the numbers: Browse is
+    // a door to the reader's place, and Al-Fatiha is a long walk from
+    // Maryam. The ends of the Book clamp the scroll, so the first surah
+    // stays at the top and the last at the bottom without a special case
+    // (owner decision).
+    LaunchedEffect(tab, surahs, currentSurah) {
+        if (tab != BrowseTab.Surahs || surahsCentered) return@LaunchedEffect
+        val index = surahs.indexOfFirst { it.number == currentSurah }
+        if (index < 0) return@LaunchedEffect
+        centerListItem(surahsList, index)
+        surahsCentered = true
+    }
     // The place the grid marks when it opens: the reader's own ayah when the
     // surah they opened is the one they are in, and otherwise the newest
     // place they left in that surah. The current ayah is one place and the
@@ -135,6 +156,20 @@ fun BrowseSheet(
     // on a narrower stand-in.
     val juzStarts by produceState(initialValue = emptyList<JuzStart>(), content) {
         value = withContext(Dispatchers.IO) { content.juzStarts() }
+    }
+    // The reader's juz, the way currentSurah is the reader's surah: the last
+    // juz that begins at or before the ayah they are standing on. It is put
+    // in the middle of the Juz list by the same rule as the surah, so the
+    // two divisions of the Book open the same way (owner decision).
+    val currentJuz = remember(juzStarts, currentAyah) {
+        juzStarts.lastOrNull { it.ayah <= currentAyah }?.juz
+    }
+    LaunchedEffect(tab, juzStarts, currentJuz) {
+        if (tab != BrowseTab.Juz || juzCentered || currentJuz == null) return@LaunchedEffect
+        val index = juzStarts.indexOfFirst { it.juz == currentJuz }
+        if (index < 0) return@LaunchedEffect
+        centerListItem(juzList, index)
+        juzCentered = true
     }
     val surahNumberWidth = rememberNumberWidth(surahs.map { it.number })
     val juzNumberWidth = rememberNumberWidth(juzStarts.map { it.juz })
@@ -245,7 +280,9 @@ fun BrowseSheet(
                     }
                     BrowseTab.Juz -> LazyColumn(
                         state = juzList,
-                        modifier = Modifier.sheetDragGate(juzGate),
+                        modifier = Modifier
+                            .sheetDragGate(juzGate)
+                            .testTag("browse-juz"),
                         contentPadding = PaddingValues(bottom = 28.dp),
                     ) {
                         itemsIndexedCompat(juzStarts) { index, start ->
@@ -325,6 +362,23 @@ private fun surahOfAyah(surahs: List<Surah>, starts: Map<Int, Int>, ayah: Int): 
     surahs.sortedBy { it.number }
         .lastOrNull { (starts[it.number] ?: Int.MAX_VALUE) <= ayah }
         ?.number
+
+/**
+ * Puts one row in the middle of its list, as far as the Book's ends allow.
+ * The row is scrolled to the top first so its height can be measured, then
+ * scrolled again by the offset that centers it: a row's own height is not
+ * known before it is measured, and the reader's place is the one row that
+ * has to be found without a hunt. It is the rule the ayah grid already
+ * follows, drawn on a list instead of a grid.
+ */
+private suspend fun centerListItem(state: LazyListState, index: Int) {
+    state.scrollToItem(index)
+    val viewport = state.layoutInfo.viewportSize.height
+    val row = state.layoutInfo.visibleItemsInfo.firstOrNull { it.index == index }?.size ?: 0
+    if (viewport > row && row > 0) {
+        state.scrollToItem(index, scrollOffset = -((viewport - row) / 2))
+    }
+}
 
 // A tiny helper so the juz list can use its index as the juz number.
 private fun <T> androidx.compose.foundation.lazy.LazyListScope.itemsIndexedCompat(

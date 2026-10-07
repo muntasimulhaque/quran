@@ -220,12 +220,19 @@ fun IconGlyph(
                     )
                 }
             }
+            // The connectors stop at each ring's outer edge rather than at
+            // its centre: a line run through a hollow ring left a stub
+            // hanging inside it, which at the 19 dp the action bar draws
+            // read as a clipped mark (owner report). The dot stays whole,
+            // the rings stay hollow, and each line meets its ring where the
+            // ring begins.
             Icon.Share -> {
                 val top = Offset(w * 0.62f, h * 0.22f)
                 val left = Offset(w * 0.28f, h * 0.5f)
                 val bottom = Offset(w * 0.62f, h * 0.78f)
-                drawLine(tint, left, top, w * 0.06f)
-                drawLine(tint, left, bottom, w * 0.06f)
+                val ringEdge = w * 0.145f
+                drawLine(tint, left, stopBefore(top, left, ringEdge), w * 0.06f)
+                drawLine(tint, left, stopBefore(bottom, left, ringEdge), w * 0.06f)
                 drawCircle(tint, radius = w * 0.11f, center = top, style = Stroke(w * 0.07f))
                 drawCircle(tint, radius = w * 0.11f, center = bottom, style = Stroke(w * 0.07f))
                 drawCircle(tint, radius = w * 0.09f, center = left)
@@ -266,9 +273,22 @@ fun IconGlyph(
                 drawLine(tint, Offset(w * 0.4f, h * 0.43f), Offset(w * 0.6f, h * 0.43f), stroke)
                 drawLine(tint, Offset(w * 0.4f, h * 0.57f), Offset(w * 0.6f, h * 0.57f), stroke)
             }
+            // One polyline rather than two lines, the same rule the check
+            // follows: two flat caps met at the elbow and left a notch on
+            // the outside of the turn, which at the 18 dp a settings row
+            // draws read as a clipped corner (owner report). The round join
+            // carries the stroke through the turn, and the tips stay
+            // butt-cut, the way every other glyph in the set ends.
             Icon.Chevron -> {
-                drawLine(tint, Offset(w * 0.28f, h * 0.4f), Offset(w * 0.5f, h * 0.62f), w * 0.085f)
-                drawLine(tint, Offset(w * 0.5f, h * 0.62f), Offset(w * 0.72f, h * 0.4f), w * 0.085f)
+                drawPath(
+                    Path().apply {
+                        moveTo(w * 0.28f, h * 0.4f)
+                        lineTo(w * 0.5f, h * 0.62f)
+                        lineTo(w * 0.72f, h * 0.4f)
+                    },
+                    tint,
+                    style = Stroke(width = w * 0.085f, join = StrokeJoin.Round),
+                )
             }
             // A clock with the hour hand at ten and the minute hand at two,
             // the reading position a clock face is drawn in everywhere, so the
@@ -341,6 +361,18 @@ private fun DrawScope.pageOutline(tint: Color) {
         cornerRadius = CornerRadius(w * 0.08f),
         style = Stroke(width = w * 0.075f),
     )
+}
+
+/**
+ * The point [distance] from [center] on the way back to [from], the point a
+ * stroke meets a ring of that outer radius instead of running into it.
+ */
+private fun stopBefore(center: Offset, from: Offset, distance: Float): Offset {
+    val dx = center.x - from.x
+    val dy = center.y - from.y
+    val length = kotlin.math.hypot(dx, dy)
+    if (length < 0.0001f) return center
+    return Offset(center.x - dx / length * distance, center.y - dy / length * distance)
 }
 
 private fun playPath(w: Float, h: Float, offset: Offset = Offset.Zero, flip: Boolean = false): Path =

@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 4.3 (versionCode 45)
+Version: 4.4 (versionCode 46)
 
 ## Listing
 
@@ -20,8 +20,8 @@ King Fahd Complex typeset them, with the QPC V2 page fonts, so every page
 matches the printed copy line for line.
 
 Study mode gives each ayah its Saheeh International translation with the
-original footnotes, word by word meanings, and two tafsirs: Ibn Kathir in
-English and As-Sa'di in Arabic, with the Quran quotations set apart. Bangla
+original footnotes, word by word meanings, and Ibn Kathir in English,
+with the Quran quotations set apart. Bangla
 readers get the Taisirul Quran translation, Ibn Kathir in Bangla, and Bangla
 word meanings, and the whole interface can be read in English or Bangla.
 
@@ -53,8 +53,8 @@ Wi-Fi only.
 Credits: Quran text by the King Fahd Complex for the Printing of the Holy
 Quran, audited against the Tanzil Uthmani reference. Translation by
 Saheeh International via QuranEnc. Tafsir Ibn Kathir and the recitations
-via the Quranic Universal Library by Tarteel. Tafsir As-Sa'di via
-QuranEnc. Full credits and licenses are in the app and in the repository.
+via the Quranic Universal Library by Tarteel. Full credits and licenses
+are in the app and in the repository.
 
 ## Classification
 
@@ -200,6 +200,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (4.4, 387 characters)
+
+Browse opens where you are: the Surahs and Juz lists now put your own surah or juz in the middle, so Al-Fatiha is no longer a long scroll away from Maryam. The Arabic As-Sa'di tafsir is gone, leaving Ibn Kathir in English and Bangla. Every chevron and check is drawn whole, the theme pages wear no outline, and the font size sample follows your language. No ads, no trackers, no account.
 
 ## Release notes (4.3, 411 characters)
 
@@ -441,7 +445,6 @@ size shown before a byte moves and a SHA-256 check before it is used:
 | Language | Translation | Tafsir | Word by word |
 |---|---|---|---|
 | English | Saheeh International (2.2 MB) | Ibn Kathir (23 MB) | 4.6 MB |
-| Arabic | the Quran itself | As-Sa'di (15 MB) | |
 | Bangla | Taisirul Quran (5.1 MB) | Ibn Kathir (47 MB) | 6.5 MB |
 
 Recitations: Minshawi and Husary, one surah at a time (0.2 to 122 MB each),

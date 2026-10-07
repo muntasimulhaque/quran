@@ -78,16 +78,6 @@ class Packs(private val root: File) {
             ayahs = 6236,
         ),
         Pack(
-            id = "tafsir-as-sadi-ar",
-            type = "tafsir",
-            name = "As-Sa'di",
-            language = "ar",
-            credit = "Tafsir As-Sa'di, via QuranEnc",
-            version = "1.0.0",
-            shipped = false,
-            ayahs = 6236,
-        ),
-        Pack(
             id = "translation-taisirul-quran-bn",
             type = "translation",
             name = "Taisirul Quran",

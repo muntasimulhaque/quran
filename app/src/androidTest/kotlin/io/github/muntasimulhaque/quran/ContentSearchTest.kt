@@ -41,7 +41,6 @@ class ContentSearchTest {
         for (id in listOf(
             "translation-saheeh-en",
             "tafsir-ibn-kathir-en",
-            "tafsir-as-sadi-ar",
             "words-en",
         )) {
             store.install(id)

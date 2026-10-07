@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.reader.Icon
+import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 
 /** One choice among several: the reader takes one, and the mark says which. */
 @Composable
@@ -153,7 +155,13 @@ private fun SettingRow(
     }
 }
 
-/** The app's own mark: a drawn ring and dot, or a check, never a stock icon. */
+/**
+ * The app's own mark: a drawn ring and dot, or the one check the app draws,
+ * never a stock icon. The check is [IconGlyph]'s own so this row and the
+ * reciter chooser can never drift apart: the private copy that used to live
+ * here kept the two flat-capped lines the chooser's check was fixed away
+ * from (owner report).
+ */
 @Composable
 private fun Mark(selected: Boolean, radio: Boolean) {
     val accent = MaterialTheme.colorScheme.primary
@@ -161,42 +169,36 @@ private fun Mark(selected: Boolean, radio: Boolean) {
         modifier = Modifier.size(22.dp),
         contentAlignment = Alignment.Center,
     ) {
-        androidx.compose.foundation.Canvas(Modifier.size(22.dp)) {
-            val w = size.width
-            val h = size.height
-            if (radio) {
-                drawCircle(
-                    // An unselected mark is a control boundary, so it holds the
-                    // 3:1 a control owes; 0.6 of the accent was measured at
-                    // 3.0:1 and up on all four grounds, where the 0.35 it wore
-                    // measured 1.8:1 and read as nothing.
-                    color = if (selected) accent else accent.copy(alpha = 0.6f),
-                    radius = w * 0.42f,
-                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = w * 0.09f),
-                )
-                if (selected) {
-                    drawCircle(color = accent, radius = w * 0.2f)
+        if (!radio && selected) {
+            IconGlyph(
+                icon = Icon.Check,
+                tint = accent,
+                modifier = Modifier.size(22.dp),
+            )
+        } else {
+            androidx.compose.foundation.Canvas(Modifier.size(22.dp)) {
+                val w = size.width
+                if (radio) {
+                    drawCircle(
+                        // An unselected mark is a control boundary, so it holds the
+                        // 3:1 a control owes; 0.6 of the accent was measured at
+                        // 3.0:1 and up on all four grounds, where the 0.35 it wore
+                        // measured 1.8:1 and read as nothing.
+                        color = if (selected) accent else accent.copy(alpha = 0.6f),
+                        radius = w * 0.42f,
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = w * 0.09f),
+                    )
+                    if (selected) {
+                        drawCircle(color = accent, radius = w * 0.2f)
+                    }
+                } else {
+                    drawCircle(
+                        // The same control-boundary rule as the radio mark above.
+                        color = accent.copy(alpha = 0.6f),
+                        radius = w * 0.42f,
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = w * 0.09f),
+                    )
                 }
-            } else if (selected) {
-                drawLine(
-                    color = accent,
-                    start = androidx.compose.ui.geometry.Offset(w * 0.16f, h * 0.52f),
-                    end = androidx.compose.ui.geometry.Offset(w * 0.42f, h * 0.78f),
-                    strokeWidth = w * 0.13f,
-                )
-                drawLine(
-                    color = accent,
-                    start = androidx.compose.ui.geometry.Offset(w * 0.42f, h * 0.78f),
-                    end = androidx.compose.ui.geometry.Offset(w * 0.84f, h * 0.22f),
-                    strokeWidth = w * 0.13f,
-                )
-            } else {
-                drawCircle(
-                    // The same control-boundary rule as the radio mark above.
-                    color = accent.copy(alpha = 0.6f),
-                    radius = w * 0.42f,
-                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = w * 0.09f),
-                )
             }
         }
     }

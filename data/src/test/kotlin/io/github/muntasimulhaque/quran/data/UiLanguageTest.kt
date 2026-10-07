@@ -9,8 +9,8 @@ import org.junit.Test
  * The language choice is one decision with three content consequences, and
  * this is the only place that maps one to the other. A fresh install gets
  * exactly its language's three packs; moving between the offered languages
- * swaps the old language's defaults for the new one's; and a pack the reader
- * added by hand is never touched by a language change.
+ * swaps the old language's defaults for the new one's; and a pack that is
+ * not one of those defaults is never touched by a language change.
  */
 class UiLanguageTest {
 
@@ -67,14 +67,19 @@ class UiLanguageTest {
     }
 
     @Test
-    fun aHandAddedPackSurvivesTheMove() {
+    fun aPackThatIsNotTheOtherLanguagesDefaultSurvivesTheMove() {
+        // Only the two packs the leaving language owns step aside. Anything
+        // else in the reader's list is not one of them and stays exactly
+        // where they put it. The id is synthetic because the offered packs
+        // are only the two defaults; the rule is about the next pack the
+        // catalog offers.
         val before = AppSettings(
             uiLanguage = "en",
             translationPacks = setOf("translation-saheeh-en"),
-            tafsirPacks = setOf("tafsir-ibn-kathir-en", "tafsir-as-sadi-ar"),
+            tafsirPacks = setOf("tafsir-ibn-kathir-en", "tafsir-added-by-hand"),
         )
         val after = before.withLanguage(UiLanguage.Bangla)
-        assertTrue("As-Sa'di was added by hand and must stay", "tafsir-as-sadi-ar" in after.tafsirPacks)
+        assertTrue("the added tafsir must stay", "tafsir-added-by-hand" in after.tafsirPacks)
         assertTrue("the Bangla tafsir joins it", "tafsir-ibn-kathir-bn" in after.tafsirPacks)
         assertTrue("the English default steps aside", "tafsir-ibn-kathir-en" !in after.tafsirPacks)
         assertEquals(setOf("translation-taisirul-quran-bn"), after.translationPacks)

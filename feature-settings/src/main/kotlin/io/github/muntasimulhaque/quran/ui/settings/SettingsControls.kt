@@ -74,27 +74,47 @@ fun ThemeRow(
                     .padding(horizontal = 6.dp, vertical = 8.dp),
             ) {
                 val (ground, ink) = theme.swatch()
+                // The chosen page wears its halo outside the swatch, with a
+                // gap. A ring on the fill's own edge read as a border and
+                // ate the page's color where the eye looks for it; a ring
+                // around the fill reads as the choice (owner report).
                 Box(
                     modifier = Modifier
-                        .size(46.dp)
-                        .clip(CircleShape)
-                        .background(ground)
-                        .border(
-                            width = if (theme == shown) 2.dp else 1.dp,
-                            color = if (theme == shown) {
-                                MaterialTheme.colorScheme.primary
+                        .size(54.dp)
+                        .then(
+                            if (theme == shown) {
+                                Modifier.border(
+                                    width = 2.dp,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    shape = CircleShape,
+                                )
                             } else {
-                                MaterialTheme.colorScheme.outline
+                                Modifier
                             },
-                            shape = CircleShape,
                         ),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(
-                        text = "\u0627",
-                        style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp),
-                        color = ink,
-                    )
+                    // The edge is the page's own shade, not the theme's
+                    // hairline: a pale page on a pale sheet and a dark page
+                    // on a dark sheet both keep their circle without either
+                    // wearing a chrome outline (owner report).
+                    Box(
+                        modifier = Modifier
+                            .size(46.dp)
+                            .background(ground, CircleShape)
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f),
+                                shape = CircleShape,
+                            ),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = "\u0627",
+                            style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp),
+                            color = ink,
+                        )
+                    }
                 }
                 Text(
                     text = theme.name(),

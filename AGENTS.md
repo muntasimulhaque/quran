@@ -4,8 +4,8 @@
 other command: `git fetch`, then `git pull origin main`.**
 
 A free, offline Android Quran reader. Two reading modes on one text: the
-Mushaf page and a study view with Saheeh International, word-by-word, Tafsir
-Ibn Kathir, and Tafsir As-Sa'di, with recitation by Al-Minshawi and
+Mushaf page and a study view with Saheeh International, word-by-word, and
+Tafsir Ibn Kathir, with recitation by Al-Minshawi and
 Al-Husary. No ads, no trackers, no accounts, no network. Code is MIT; each
 content dataset keeps its own source, version, and license.
 
@@ -336,7 +336,7 @@ at every step:
 - **the deck**: the day's ayah is one card of a shuffled 6,236, dealt by the
   day number and reshuffled every pass, so nothing about it is stored.
 - **the study card**: the sheet one ayah opens: the Words, the translation
-  with footnotes, and the Ibn Kathir and As-Sa'di panels. From the Mushaf it
+  with footnotes, and the Ibn Kathir panel. From the Mushaf it
   is the whole study surface; from the study reading it is only the tafsirs.
   The ayah is not drawn on it, because the page behind carries it.
 - **the text button**: `ui-kit/TextButton`, the one shape a word that acts
@@ -366,7 +366,7 @@ implement it and update this list.
   Ayah tab.
 - Text sizes are 0.65, 0.75, 0.85, 1, 1.2.
 - Saheeh International is the only translation.
-- Ibn Kathir and As-Sa'di are the tafsirs.
+- Ibn Kathir is the tafsir.
 - Minshawi and Husary are the only reciters.
 - No streaks, no gamification.
 - The design direction is the manuscript language: the page is the

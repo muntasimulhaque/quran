@@ -63,7 +63,8 @@ data class LanguageContent(
  * The settings after a language choice: the tag is stored, and the language's
  * translation and tafsir replace the other offered language's own defaults,
  * so a reader who moves from Bangla to English never keeps two defaults
- * fighting. A pack the reader added by hand, like As-Sa'di, is never removed.
+ * fighting. A pack that is not a language default is left exactly where it
+ * was.
  */
 fun AppSettings.withLanguage(language: UiLanguage): AppSettings {
     val content = language.content

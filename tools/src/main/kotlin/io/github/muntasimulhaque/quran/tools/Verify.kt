@@ -73,7 +73,6 @@ class Verify(private val root: File) {
             "translation-saheeh" -> checkSaheeh(dataset.id, dir)
             "saheeh-qul-crosscheck" -> checkSimpleCount(dataset.id, dir, "translation", 6236)
             "tafsir-ibn-kathir-en" -> checkTafsirQul(dataset.id, dir)
-            "tafsir-as-sadi-ar" -> checkSaadiQuranEnc(dataset.id, dir)
             "word-by-word-english" -> checkWordTranslation(dataset.id, dir)
             "recitation-minshawi", "recitation-husary", "recitation-husary-muallim",
             "recitation-husary-mujawwad" -> checkRecitation(dataset.id, dir)
@@ -209,38 +208,6 @@ class Verify(private val root: File) {
             )
             if (orphans != 0L) fail(id, "$orphans ayahs have no tafsir passage to resolve to")
         }
-    }
-
-    private fun checkSaadiQuranEnc(id: String, dir: File) {
-        val file = dir.walkTopDown().firstOrNull { it.isFile && it.name.endsWith(".json") }
-            ?: return fail(id, "no json file found")
-        val element = Json.parseToJsonElement(file.readText())
-        val array = when (element) {
-            is JsonArray -> element
-            is JsonObject -> (element["result"] ?: element["tafsirs"])?.jsonArray
-            else -> null
-        } ?: return fail(id, "unexpected json shape")
-        if (array.size < 6500) fail(id, "expected at least 6500 passages, found ${array.size}")
-        val counts = surahVerseCounts()
-        val covered = BooleanArray(6237)
-        for (entry in array) {
-            val o = try {
-                entry.jsonObject
-            } catch (e: IllegalArgumentException) {
-                continue
-            }
-            val sura = o["sura"]?.jsonPrimitive?.content?.toIntOrNull() ?: 0
-            val from = o["from_aya"]?.jsonPrimitive?.content?.toIntOrNull() ?: 0
-            val to = o["to_aya"]?.jsonPrimitive?.content?.toIntOrNull() ?: 0
-            val last = counts[sura]
-            if (sura !in 1..114 || from < 1 || to < from || to > last) {
-                fail(id, "passage $sura:$from-$to is out of range")
-                continue
-            }
-            for (ayah in from..to) covered[globalIndex(counts, sura, ayah)] = true
-        }
-        val missing = (1..6236).filter { !covered[it] }
-        if (missing.isNotEmpty()) fail(id, "${missing.size} ayahs have no passage")
     }
 
     private fun surahVerseCounts(): IntArray {

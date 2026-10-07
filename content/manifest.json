@@ -138,21 +138,6 @@
       "assetUrl": null
     },
     {
-      "id": "tafsir-as-sadi-ar",
-      "name": "Tafsir As-Sa'di (Arabic), arabic_saadi, version 1.0.0",
-      "source": "QuranEnc.com",
-      "url": "https://quranenc.com/en/browse/arabic_saadi",
-      "resourceId": "arabic_saadi",
-      "format": "json",
-      "license": "QuranEnc republishing terms: no modification, credit publisher and source, show version, no inappropriate ads",
-      "credit": "Tafsir As-Sa'di, distributed by QuranEnc.com, version 1.0.0",
-      "usedFor": "Arabic tafsir, full ayah coverage via passage ranges",
-      "path": "content/raw/quranenc/arabic_saadi.json",
-      "bytes": 19513113,
-      "sha256": "6edf25ae9c8c4d88b5533d2f5f5d247f88d91050067d4b937d6e43734ddbf738",
-      "assetUrl": null
-    },
-    {
       "id": "surah-info-en",
       "name": "Surah Info, English",
       "source": "Quranic Universal Library (QUL) by Tarteel",

@@ -28,7 +28,6 @@ object PackSources {
         ),
         "translation-saheeh-en" to listOf("translation-saheeh", "saheeh-qul-crosscheck"),
         "tafsir-ibn-kathir-en" to listOf("tafsir-ibn-kathir-en"),
-        "tafsir-as-sadi-ar" to listOf("tafsir-as-sadi-ar"),
         "translation-taisirul-quran-bn" to listOf("translation-taisirul-quran-bn"),
         "tafsir-ibn-kathir-bn" to listOf("tafsir-ibn-kathir-bn"),
         "words-en" to listOf("word-by-word-english", "surah-info-en"),

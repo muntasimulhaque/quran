@@ -192,7 +192,8 @@ internal fun JuzRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onJuz)
-            .padding(horizontal = 22.dp, vertical = 13.dp),
+            .padding(horizontal = 22.dp, vertical = 13.dp)
+            .testTag("juz-row-$juz"),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         NumberCell(

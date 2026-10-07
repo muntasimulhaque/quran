@@ -13,9 +13,9 @@
             "shipped": true,
             "ayahs": 6236,
             "bytes": 10010624,
-            "sha256": "ed1ef01f731f1e06156a32d47371099960243c67be42ec7715d11b59029a728d",
-            "tag": "pack-core-ed1ef01f",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-ed1ef01f/core.db"
+            "sha256": "5ef3e5dfa78361363d9a756966f0f3622e169a740e59c2b0f78f0fbacee4453b",
+            "tag": "pack-core-5ef3e5df",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-5ef3e5df/core.db"
         },
         {
             "id": "translation-saheeh-en",
@@ -46,21 +46,6 @@
             "sha256": "cd36142c0263235446ac8d679a26260b0c610231fdc37ceb4362e4488dc7c8c4",
             "tag": "pack-tafsir-ibn-kathir-en-cd36142c",
             "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-tafsir-ibn-kathir-en-cd36142c/tafsir-ibn-kathir-en.db"
-        },
-        {
-            "id": "tafsir-as-sadi-ar",
-            "type": "tafsir",
-            "name": "As-Sa'di",
-            "language": "ar",
-            "credit": "Tafsir As-Sa'di, via QuranEnc",
-            "license": "QuranEnc republishing terms: no modification, credit publisher and source, show version, no inappropriate ads",
-            "version": "1.0.0",
-            "shipped": false,
-            "ayahs": 6236,
-            "bytes": 15859712,
-            "sha256": "5945528bd8ed6a173c56c5d65138ceff9bcce2f8e9fe36e266aa43e3c85b6f50",
-            "tag": "pack-tafsir-as-sadi-ar-5945528b",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-tafsir-as-sadi-ar-5945528b/tafsir-as-sadi-ar.db"
         },
         {
             "id": "translation-taisirul-quran-bn",

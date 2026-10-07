@@ -175,6 +175,13 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     var contentCheck by mutableStateOf<ContentCheck?>(null)
         private set
 
+    /**
+     * One ayah's row, built from the packs the reader has on and the word
+     * list their language speaks. Anything that shapes a row clears it
+     * through [clearRowCache]: a row cached under one language and read
+     * back under another put the Bangla translation in an English Font size
+     * sample (owner report).
+     */
     private val rowCache = object : LinkedHashMap<Int, StudyRow>(64, 0.75f, true) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Int, StudyRow>?): Boolean = size > 160
     }
@@ -286,6 +293,26 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             // is present is never offered as missing and a language switch
             // never re-fetches what is already here.
             catalog = PackCatalog.load(application).withInstalled(installed)
+            // A pack the catalog no longer names can never be read again, and
+            // its bytes are dead weight: drop it here, the way the As-Sa'di
+            // tafsir left the app for a reader who had added it. The known
+            // set comes from the shipped catalog, so a pack a later release
+            // offers again is never touched by this, and an unreadable
+            // catalog removes nothing: an empty menu is not an empty app.
+            val known = catalog.all().mapTo(HashSet()) { it.id }
+            val stray = if (known.isEmpty()) {
+                emptySet()
+            } else {
+                withContext(Dispatchers.IO) {
+                    (installed - known).also { lost ->
+                        lost.forEach { store.remove(it) }
+                    }
+                }
+            }
+            if (stray.isNotEmpty()) {
+                installed = installed - stray
+                catalog = catalog.withInstalled(installed)
+            }
             val opened = runCatching { ContentDatabase.open(application, catalog, installed) }
             val database = opened.getOrElse {
                 android.util.Log.e(TAG, "the content library could not be opened", it)
@@ -297,7 +324,19 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             // The reader's settings are read once, and everything that follows
             // uses that same value: the store is not read twice for one launch.
             val stored = settingsStore.settings.first()
-            settings = stored
+            settings = if (stray.isEmpty()) {
+                stored
+            } else {
+                // The choice that named a removed pack goes with it, so no
+                // dead id lingers in the reader's settings.
+                stored.copy(
+                    translationPacks = stored.translationPacks - stray,
+                    tafsirPacks = stored.tafsirPacks - stray,
+                ).also { cleaned ->
+                    settingsStore.setTranslationPacks(cleaned.translationPacks)
+                    settingsStore.setTafsirPacks(cleaned.tafsirPacks)
+                }
+            }
             // The reader's pace and their answer to what happens at the end
             // of the audio are theirs from the last session, and the player
             // must be told before the first ayah.
@@ -660,6 +699,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     fun setWordByWord(show: Boolean) {
         if (!show) {
             settings = settings.copy(wordByWord = false)
+            clearRowCache()
             viewModelScope.launch { settingsStore.setWordByWord(false) }
             return
         }
@@ -671,6 +711,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         val pack = catalog.get(wanted)
         if (pack == null || pack.installed) {
             settings = settings.copy(wordByWord = true)
+            clearRowCache()
             viewModelScope.launch { settingsStore.setWordByWord(true) }
             return
         }
@@ -688,11 +729,12 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * follows it. The language's own translation and tafsir replace the other
      * offered language's defaults, so a reader who moves from Bangla to
      * English never keeps two defaults fighting; a pack the reader added by
-     * hand, like As-Sa'di, is left exactly where it was.
+     * hand, like the second translation, is left exactly where it was.
      */
     fun chooseLanguage(language: UiLanguage) {
         val next = settings.withLanguage(language)
         settings = next
+        clearRowCache()
         // The boot-time mirror lands before anything else, so the Activity
         // that recreates for the new locale comes up speaking it.
         languagePreference.set(language.tag)
@@ -719,6 +761,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
     fun setTranslationPacks(packs: Set<String>) {
         settings = settings.copy(translationPacks = packs)
+        clearRowCache()
         viewModelScope.launch { settingsStore.setTranslationPacks(packs) }
     }
 
