@@ -340,6 +340,16 @@ object DailyAyahScheduler {
                         ?: return@launch
                     val notification = runCatching {
                         NotificationCompat.Builder(application, CHANNEL_ID)
+                            // The reminder wears the app's mark, the cover's
+                            // medallion. The drawable is the ornament alone
+                            // with no ground, because the shade reads only its
+                            // alpha channel and paints it in the notification
+                            // color, so the ground would be thrown away and
+                            // the plate under it would be a lie. At the status
+                            // bar's size the ornament turns to dust, and the
+                            // mark keeps the cover's own weight anyway: a
+                            // sturdier cut was drawn and read, and it closed
+                            // into a dark lozenge (owner decision).
                             .setSmallIcon(R.drawable.ic_daily)
                             .setContentTitle(
                                 application.getString(

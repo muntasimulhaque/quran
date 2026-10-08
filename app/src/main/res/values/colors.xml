@@ -2,6 +2,9 @@
 <resources>
     <color name="paper">#F8F5EF</color>
     <color name="night">#101720</color>
-    <!-- The launcher icon's ground: the deep ink field behind the qaf mark. -->
+    <!-- The share card's own blue: the deep navy its rules and its mark are
+         drawn in. It was the launcher icon's field once; the launcher now
+         carries the cover's medallion on the app's blue ink, and this color
+         stayed behind with the card that still uses it. -->
     <color name="icon_background">#122D4A</color>
 </resources>

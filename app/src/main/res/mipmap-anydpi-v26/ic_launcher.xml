@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The illuminated spread: an open mushaf, the way the app reads. The
-  pages are warm ivory, their top and bottom edges rising into a gutter
-  and falling to the outer corners, with a soft crease in the valley.
-  Each page carries a gold frame, the way a mushaf's own pages do: the
-  right page holds the word Quran in Amiri, the left page the written
-  lines. The field is the app's deep ink with the quiet light behind
-  the book. The monochrome layer carries the same silhouette, a little
-  sturdier, so a themed home screen keeps the mark (owner decision).
+  The app's mark: the medallion of the cover the app was built from, its
+  gold ornament and its calligraphy traced from the cover itself, set on
+  the app's own blue ink. The mark is the same drawing in the launcher, in
+  the reminder's small icon, on the store page, and in the feature graphic.
+  The background is the ink alone, so the layers can be masked to any
+  shape, and the monochrome layer carries the medallion's silhouette,
+  sturdier than the mark, so a themed home screen keeps the shape (owner
+  decision).
 -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@mipmap/ic_launcher_bg" />
