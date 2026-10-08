@@ -412,19 +412,12 @@ implement it and update this list.
 - The day's ayah is dealt from a shuffled deck rather than walked in the
   Book's order: a different ayah every morning, every ayah once before the
   deck is filled again, and nothing stored (owner decision).
-- The app's mark is the cover's medallion, drawn as line-work in the gold
-  `#E3C063` on the app's blue ink `#16202C`: the crown palmette, the
-  mandorla frame and its inner echo, the swept shoulder wings, the
-  rosettes, the heart drop, and the title القرآن set in Amiri Bold, the
-  study face. It was traced from the cover photograph once (owner decision,
-  4.8); the trace read soaked in oil and lost the calligraphy at every
-  size, so the owner retired the trace and the mark is now a drawing fitted
-  whole inside the launcher's safe circle, with the title stepping down to
-  a raised seal disc where it would stop being legible (owner decision,
-  4.9). The launcher (with the medallion's silhouette as its monochrome
-  layer), the reminder's small icon (the ornament alone, no ground, since
-  the shade reads only its alpha), the store icon, and the feature graphic
-  all carry it.
+- The app's mark is the cover's medallion: the gold ornament and its
+  calligraphy traced from the cover photograph, never redrawn, set on the
+  app's blue ink `#16202C` in the gold `#E3C063`. The launcher (with the
+  medallion's silhouette as its monochrome layer), the reminder's small icon
+  (the ornament alone, no ground, since the shade reads only its alpha), the
+  store icon, and the feature graphic all carry it (owner decision, 4.8).
 
 ## Traps
 

@@ -38,8 +38,3 @@ content/packs/
 # recording anything permanent.
 play-store/aab/*.aab
 play-store/aab/*.sha256
-
-# The mark's working area: the drawn mark's generator, the Amiri face it
-# sets, and its previews. The committed PNGs are the deliverables; this
-# folder is the workshop and may go with the other working areas.
-art/

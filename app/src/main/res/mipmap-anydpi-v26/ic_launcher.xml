@@ -1,18 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The app's mark: the cover's medallion, drawn: the crown palmette, the
-  mandorla frame and its inner echo, the swept shoulder wings, the
-  rosettes, and the heart drop around the title al-Qur'an set in Amiri
-  Bold, the study face, as gold line-work on the app's own blue ink. The
-  mark is the same drawing in the launcher, in the reminder's small icon,
-  on the store page, and in the feature graphic. The background is the ink
-  alone, so the layers can be masked to any shape, and the monochrome
-  layer carries the medallion's silhouette, sturdier than the mark, so a
-  themed home screen keeps the shape (owner decision). The drawing fits
-  the whole medallion inside the launcher's safe circle, and the title
-  steps down to a raised seal disc where it would stop being legible
-  (owner decision, 4.9): the traced photograph it replaces read soaked in
-  oil and its calligraphy was lost at any size.
+  The app's mark: the medallion of the cover the app was built from, its
+  gold ornament and its calligraphy traced from the cover itself, set on
+  the app's own blue ink. The mark is the same drawing in the launcher, in
+  the reminder's small icon, on the store page, and in the feature graphic.
+  The background is the ink alone, so the layers can be masked to any
+  shape, and the monochrome layer carries the medallion's silhouette,
+  sturdier than the mark, so a themed home screen keeps the shape (owner
+  decision).
 -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@mipmap/ic_launcher_bg" />
