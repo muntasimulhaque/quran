@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 4.8 (versionCode 50)
+Version: 4.9 (versionCode 51)
 
 ## Listing
 
@@ -218,6 +218,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (4.9, 482 characters)
+
+The face sits right. The medallion keeps ink around it in the launcher tile instead of filling it, on every surface the icon shows: the launcher, the reminder, the store icon. The share card wears the launcher's own medallion beside the name now, and the store banner is rebuilt from the cover's own border bands over the medallion and the name. The reading is untouched: the same pages, the same study view, the same recitations, offline as always. No ads, no trackers, no account.
 
 ## Release notes (4.8, 420 characters)
 
