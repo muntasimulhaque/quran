@@ -212,11 +212,17 @@ command to rediscover.
   `C:\tmp\x` to it and to the read tool alike.
 - Two tool calls in one block run in parallel. Never edit a file and read
   it in the same block, and never two reads whose order matters.
-- `python3` is intercepted by the Store alias. The working interpreter is
-  the harness's own under
-  `C:/Users/zn/AppData/Local/hermes/tools/`, with Pillow, fontTools,
-  arabic-reshaper, and python-bidi installed by hand. Nothing in
-  the build depends on it.
+- `python3` and `python` are both intercepted by the Store alias: an
+  interpreter exists at
+  `C:/Users/zn/AppData/Local/hermes/tools/python-3.14.7+20260901-win32-x64/`
+  (Pillow, fontTools, arabic-reshaper, and python-bidi were installed by hand
+  into it), and there is no py launcher, no python.org install, and no Store
+  package anywhere else on PATH. Those hand-installed packages have been
+  reset once mid-session, leaving pip alone; the one-command recovery is
+  `uv venv` against that interpreter, with the harness `uv` at
+  `C:/Users/zn/AppData/Local/hermes/tools/uv-0.12.3-win32-x64/uv.exe`, then
+  `uv pip install` the packages back. Nothing in the build depends on any of
+  it, so a missing Python only ever costs a scratch tool of its own.
 
 ## Build, test, verify
 
@@ -331,6 +337,7 @@ at every step:
 | `play-store/` | listing, screenshots per form factor, the hand-off AAB |
 | `benchmark/` | the startup profile's generator, development only, never in the bundle |
 | `.github/workflows/` | `build.yml` (gates, data tests, signed bundle), `screenshots.yml` (the store set) |
+| `docs/` | the Pages site: the landing page and the privacy policy Play links to |
 
 ## Glossary
 
