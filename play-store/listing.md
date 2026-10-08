@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 5.1 (versionCode 53)
+Version: 5.2 (versionCode 54)
 
 ## Listing
 
@@ -220,6 +220,10 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (5.2, 462 characters)
+
+The Mushaf page is now set from the Book's own words in the King Fahd Complex's own typeface, at your own text size, with the page's rule, its numbered roundels, and its juz as the printed page carries them. The page no longer ships as font files, so the app is a fraction of its former size, and its text answers to the same five sizes as the study reading. The reading, the recitations, and everything offline are as they were. No ads, no trackers, no account.
 
 ## Release notes (5.1, 401 characters)
 
