@@ -2,9 +2,8 @@
 <resources>
     <color name="paper">#F8F5EF</color>
     <color name="night">#101720</color>
-    <!-- The share card's own blue: the deep navy its rules and its mark are
-         drawn in. It was the launcher icon's field once; the launcher now
-         carries the cover's medallion on the app's blue ink, and this color
-         stayed behind with the card that still uses it. -->
-    <color name="icon_background">#122D4A</color>
+    <!-- The chip beside the share card's name: the app's own blue ink,
+         the same field the launcher icon stands on, so the medallion on
+         it reads as the app's icon. -->
+    <color name="icon_background">#16202C</color>
 </resources>
