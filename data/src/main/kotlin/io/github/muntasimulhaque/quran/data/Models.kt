@@ -25,17 +25,16 @@ data class Word(
     val id: Int,
     val position: Int,
     val text: String,
-    val glyph: String,
     val translation: String?,
 )
 
-/** One glyph on a Mushaf page, with the ayah and word it belongs to. */
+/** One word on a Mushaf page, with the ayah and word it belongs to. */
 data class PageWord(
     val id: Int,
     val ayah: Int,
     val position: Int,
     val marker: Boolean,
-    val glyph: String,
+    val text: String,
 )
 
 data class Ayah(

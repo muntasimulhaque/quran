@@ -130,6 +130,9 @@ fun TextPage(
         SizeRow(TypeRole.Translation, settings.translationSize) { onSize(TypeRole.Translation, it) }
         SizeRow(TypeRole.Tafsir, settings.tafsirSize) { onSize(TypeRole.Tafsir, it) }
         SizeRow(TypeRole.Words, settings.wordsSize) { onSize(TypeRole.Words, it) }
+        // The page's own text: the one reading surface that is drawn to its
+        // own geometry, so its size is the page's business alone.
+        SizeRow(TypeRole.Mushaf, settings.mushafSize) { onSize(TypeRole.Mushaf, it) }
         Spacer(Modifier.height(Space.Section))
     }
 }

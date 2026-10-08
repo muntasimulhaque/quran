@@ -6,6 +6,16 @@ trackers, no accounts, nothing collected, ever.
 
 **Status:** 5.1 (versionCode 53) is submitted to the Play Console and waiting for review. The bundle was `play-store/aab/quran-5.1-vc53.aab` (149,038,014 bytes, SHA-256 `60f176775922f5c18a14f2b74b0b873d83923272061e47cff1005ef1775f091b`, `jar verified`, signed with the shared upload key, certificate `53:7D:09:D2:...:0D:9D:E5:21`), built from a906daf by CI run 37805267406 on main and collected from that run's own signed-bundle artifact, and the hand-off copy is deleted now that Play has it. The capture run 37805267422 is green on all three legs, eight frames each: twelve of the twenty-four frames are byte-identical with the set in `play-store/screenshots/`, and every differing frame stands in the status bar clock and icons, except the 7 inch search frame, whose head-of-field strip is the captured text caret and whose keyboard suggestion bar is the soft keyboard's chrome, the class the set already records. The release's own change, the mark in the reader's colors on the launcher, the store icon, the reminder's small icon, the share card, and the banner, is in none of the eight frames, so the store set stands as the store has it. The store's own face of the release history is [`play-store/listing.md`](play-store/listing.md).
 
+**In the working tree, awaiting the owner's word:** the Mushaf is now a
+text page. It is drawn from the Book's own words with the one Arabic face
+that already sets the study reading, at the reader's own text size, instead
+of 604 per-page font files: the release build is about 8 MB where 5.1 was
+about 149 MB, and the page joins every other text in the app in answering
+to the reader's size. The print's own lines are kept wherever its words
+still fit at the usual size, a larger size re-sets a page's lines and the
+reader pans it, and the page's rule, roundels, and juz are as they were.
+No ads, no trackers, no account.
+
 **In 5.1.** The mark wears the reader's own colors: the open book on its rehal, drawn in the app's ink on the app's paper with the stand in the Mushaf's ornament gold, where the cover's burgundy used to be. It stands in the launcher's adaptive layers and legacy tiles, on the store page, in the reminder's small icon as the silhouette the shade paints, on the share card in its own colors, and in a feature graphic rebuilt from scratch: the mark at the left, the name at the right, every element inside the safe area Play keeps. The reading is untouched: the same pages, the same study view, the same recitations, offline as always. No ads, no trackers, no account.
 
 **In 5.0.** The cover comes home: the app icon, the store icon, and the feature graphic now wear the physical Mushaf's own colors, its deep burgundy field and its gold leaf medallion sampled from the cover, and the banner's top and bottom border is the cover's own band, drawn thin and clear of the edges. The share card carries the medallion alone, painted in the cover's burgundy, where the rounded chip used to stand. The reading is untouched: the same pages, the same study view, the same recitations, offline as always. No ads, no trackers, no account.

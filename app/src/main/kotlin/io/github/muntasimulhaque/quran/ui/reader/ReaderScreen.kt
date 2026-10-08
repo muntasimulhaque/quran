@@ -613,6 +613,10 @@ private fun MushafReader(
         // The page's height follows from its width; every page is rendered at
         // the width it will actually be drawn at, and never larger.
         val pageWidth = min(availableWidth, availableHeight / PAGE_ASPECT).toInt().coerceAtLeast(1)
+        // The reader's own text size for the page, as a share of the
+        // measure's em: the page is drawn at it, and never scaled to the
+        // screen afterwards.
+        val textScale = viewModel.mushafScale
         val reducedMotion by rememberReducedMotion()
         val pagerState = rememberPagerState(
             initialPage = (viewModel.page - 1).coerceIn(0, 603),
@@ -670,10 +674,10 @@ private fun MushafReader(
         ) { index ->
             MushafPage(
                 content = content,
-                fonts = viewModel.fonts,
                 renderer = viewModel.renderer,
                 page = index + 1,
                 pageWidth = pageWidth,
+                textScale = textScale,
                 palette = palette,
                 themeKey = themeKey,
                 selectedAyah = selectedAyah,
@@ -683,7 +687,10 @@ private fun MushafReader(
                 onBackgroundTap = onBackgroundTap,
                 active = index == pagerState.currentPage,
                 placeholder = startup
-                    ?.takeIf { it.page == index + 1 && it.widthPx == pageWidth && it.theme == themeKey }
+                    ?.takeIf {
+                        it.page == index + 1 && it.widthPx == pageWidth &&
+                            it.theme == themeKey && it.scale == textScale
+                    }
                     ?.bitmap,
             )
         }

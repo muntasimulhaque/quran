@@ -17,21 +17,7 @@
       "sha256": "64b59c7ae3dae32f3650c534cb5a40c91089e0a6319372ded9500181a3cc6a47",
       "assetUrl": null
     },
-    {
-      "id": "mushaf-glyph-v2",
-      "name": "QPC V2 Glyph, word by word",
-      "source": "Quranic Universal Library (QUL) by Tarteel",
-      "url": "https://qul.tarteel.ai/resources/quran-script/61",
-      "resourceId": "61",
-      "format": "sqlite",
-      "license": "KFGQPC font and text terms, distributed via QUL",
-      "credit": "King Fahd Glorious Quran Printing Complex (KFGQPC), via QUL",
-      "usedFor": "Mushaf mode glyph codes",
-      "path": "content/raw/qul/qpc-v2-glyph-word-by-word.sqlite.zip",
-      "bytes": 1197952,
-      "sha256": "a766a033cad47b36f00f493f5f0541d5f07e1336857eaa6feba92465af3f68bb",
-      "assetUrl": null
-    },
+    
     {
       "id": "mushaf-layout-v2",
       "name": "KFGQPC V2 layout (1421H print)",
@@ -47,21 +33,7 @@
       "sha256": "697cbc7f16db1f56b6d95c4d11a9eea074ad4759babd2d75abcad5738e2fdf96",
       "assetUrl": null
     },
-    {
-      "id": "mushaf-fonts-v2",
-      "name": "QPC V2 Font",
-      "source": "Quranic Universal Library (QUL) by Tarteel",
-      "url": "https://qul.tarteel.ai/resources/font/249",
-      "resourceId": "249",
-      "format": "ttf",
-      "license": "KFGQPC fonts: use, copy and distribute unmodified",
-      "credit": "King Fahd Glorious Quran Printing Complex (KFGQPC), via QUL",
-      "usedFor": "Mushaf page fonts",
-      "path": "content/raw/qul/qpc-v2-font.zip",
-      "bytes": 136208148,
-      "sha256": "9ead3836904f22324b5805c079c2911e13f384f2ca820254a36b8a22c28de555",
-      "assetUrl": "https://github.com/muntasimulhaque/quran/releases/download/qpc-v2-fonts/qpc-v2-font.zip"
-    },
+    
     {
       "id": "quran-font-hafs",
       "name": "QPC Hafs font",
@@ -71,7 +43,7 @@
       "format": "ttf",
       "license": "KFGQPC fonts: use, copy and distribute unmodified",
       "credit": "King Fahd Glorious Quran Printing Complex (KFGQPC), via QUL",
-      "usedFor": "Study mode Arabic font",
+      "usedFor": "Arabic text font: the study reading and the Mushaf page",
       "path": "content/raw/qul/qpc-hafs-font.zip",
       "bytes": 147220,
       "sha256": "f1e3d78acbf8a6db4a1ec1cf3ef10031a7e3914106c472ee23c49708caf04670",

@@ -90,11 +90,13 @@ dead letter.
    lorem text, stock iconography, generic Material defaults. Every string is
    a real sentence, every color is chosen, every icon is drawn for this app.
 7. **Accessibility is a rule, not a feature.** TalkBack works end to end.
-   Study mode honors the system font scale; the Mushaf page is drawn at
-   the largest width that fits the screen, and the phone's own magnification
-   covers the rest (a large-print Mushaf edition is a content project of its
-   own, owner decision, 4.5). Contrast
-   targets live in the theme and are measured.
+   Study mode honors the system font scale; the Mushaf page is drawn from
+   the Book's own words at the reader's own text size, set to the same five
+   steps every sized text uses, and a page set taller than the glass is
+   panned (owner decision, this session: the page's usual size holds all
+   604 pages inside the room the pager gives, measured over every page of
+   the Book; the phone's own magnification still covers anything beyond it).
+   Contrast targets live in the theme and are measured.
 8. **Two UI languages, one content language each.** English and Bangla ship
    together, the interface strings in each module's `values-bn`, and the
    reader's choice sets the translation, the tafsir, and the word meanings
@@ -250,9 +252,10 @@ at every step:
 ./gradlew :tools:run --args="packs publish"   # the content packs, content addressed
 ```
 
-- `fetch` runs once on a machine that lacks the page fonts (about a minute)
-  and is offline after that. Never delete or replace the `qpc-v2-fonts`
-  Release: its SHA-256 is pinned in `content/manifest.json`.
+- `fetch` runs once on a machine that lacks the Arabic text font (about a
+  minute) and is offline after that. The `qpc-v2-fonts` Release stands
+  unreferenced since the Mushaf became a text page: its SHA-256 is no longer
+  pinned, and the font is no longer part of the app.
 - `verify`, `audit`, and `fonts` read only `content/raw` and
   `content/work/verify`, so they run on the owner's machine only. `ls
   content/raw` before a release starts: if the manual QUL and QuranEnc
@@ -327,11 +330,11 @@ at every step:
 | Path | What is there |
 | --- | --- |
 | `core/` | pure JVM Kotlin, zero `android.*` imports: references, search normalization, rich text parsing, models |
-| `data/` | read-only content access, the saved-ayah and last-read user databases, the page font store, preferences |
+| `data/` | read-only content access, the saved-ayah and last-read user databases, preferences |
 | `app/` | the shell: activity, view model, the screen that composes the features, the shell's strings |
 | `feature-*/` | one reading surface each (mushaf, study, search, browse, playback, settings), each owning its own strings and icons |
 | `ui-kit/` | the shared look: theme and palettes, the hand-drawn icons, the rich text views, the app's choice row, the one floating lift, the small formatters |
-| `content-assets/` | the shipped assets the app reads: the 604 page fonts, the study and UI faces, the core pack, and the pack catalog |
+| `content-assets/` | the shipped assets the app reads: the Arabic text face, the study and UI faces, the core pack, and the pack catalog |
 | `tools/` | the offline pipeline: fetch, verify, audit, build, fonts, packs, audio |
 | `content/` | `quran.db` (built by `tools/`, gitignored, fetched or rebuilt from its hash), `packs/`, `manifest.json`, `recitation-manifest.json`, `audit-report.md`; `raw/` is local and gitignored |
 | `play-store/` | listing, screenshots per form factor, the hand-off AAB |
@@ -345,11 +348,14 @@ at every step:
   manifest, shipped as an asset, replaced wholesale on update.
 - **the manifest**: `content/manifest.json`, the one place a dataset's
   source, version, license, and checksum are recorded.
-- **Mushaf mode**: the 15-line page, glyph-rendered, swiped.
+- **Mushaf mode**: the 15-line page, drawn from the Book's own words at the
+  reader's own text size, swiped.
 - **study mode**: the ayah-by-ayah reader with translation, word-by-word,
   and tafsir.
-- **the page / the line / the word / the glyph**: the Mushaf geometry, from
-  page down to one word and its rendered shape.
+- **the page / the line / the word**: the Mushaf geometry, from the page
+  down to one word and the shape the page's own face gives it.
+- **the measure**: the page's own line, 15.6 ems of its text wide, which the
+  print justifies to and the reader's text size shares out.
 - **the reference**: an ayah key in `surah:ayah` form, for example 2:255.
 - **the portion**: the reader's chosen daily amount. Never called a streak.
 - **the deck**: the day's ayah is one card of a shuffled 6,236, dealt by the

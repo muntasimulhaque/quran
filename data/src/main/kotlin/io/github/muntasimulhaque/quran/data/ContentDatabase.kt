@@ -190,10 +190,10 @@ class ContentDatabase private constructor(
             }
         }
 
-    /** Every glyph on one page, in reading order, markers included. */
+    /** Every word on one page, in reading order, markers included. */
     fun pageWords(page: Int): List<PageWord> =
         query(
-            "SELECT id, ayah_number, position, marker, glyph FROM word " +
+            "SELECT id, ayah_number, position, marker, text FROM word " +
                 "WHERE page = ? ORDER BY line, line_position",
             arrayOf(page.toString()),
         ).use { cursor ->
@@ -205,7 +205,7 @@ class ContentDatabase private constructor(
                             ayah = cursor.getInt(1),
                             position = cursor.getInt(2),
                             marker = cursor.getInt(3) == 1,
-                            glyph = cursor.getString(4),
+                            text = cursor.getString(4),
                         ),
                     )
                 }
@@ -224,22 +224,24 @@ class ContentDatabase private constructor(
         id = cursor.getInt(offset + 0),
         position = cursor.getInt(offset + 1),
         text = cursor.getString(offset + 2),
-        glyph = cursor.getString(offset + 3),
         translation = null,
     )
 
     /**
-     * The basmallah glyphs, borrowed from Al-Fatihah's first ayah. The page
-     * fonts carry no basmallah line of their own; the same four words open
-     * every surah, so they are drawn with the same page font.
+     * The basmallah's own words, as the page's text. The page fonts carry no
+     * basmallah line of their own; the same four words open every surah, so
+     * they are drawn with the page's own face.
      */
-    fun basmallahGlyphs(): String =
+    fun basmallahText(): String =
         query(
-            "SELECT glyph FROM word WHERE ayah_number = 1 AND marker = 0 ORDER BY position",
+            "SELECT text FROM word WHERE ayah_number = 1 AND marker = 0 ORDER BY position LIMIT 4",
             null,
         ).use { cursor ->
             buildString {
-                while (cursor.moveToNext()) append(cursor.getString(0))
+                while (cursor.moveToNext()) {
+                    if (isNotEmpty()) append(' ')
+                    append(cursor.getString(0))
+                }
             }
         }
 
@@ -389,7 +391,7 @@ class ContentDatabase private constructor(
         if (numbers.isEmpty()) return emptyMap()
         val inClause = numbers.joinToString(",")
         return query(
-            "SELECT ayah_number, id, position, text, glyph FROM word " +
+            "SELECT ayah_number, id, position, text FROM word " +
                 "WHERE ayah_number IN ($inClause) AND marker = 0 ORDER BY ayah_number, position",
             null,
         ).use { cursor ->

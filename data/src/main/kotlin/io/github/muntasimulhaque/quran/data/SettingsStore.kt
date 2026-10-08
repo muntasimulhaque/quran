@@ -73,6 +73,12 @@ data class AppSettings(
     val tafsirSize: Float = TextSize.DEFAULT,
     val wordsSize: Float = TextSize.DEFAULT,
     /**
+     * The Mushaf page's own text size, in the reader's steps. The page is
+     * drawn to its own geometry, so its step is a share of the measure's
+     * em (see MushafText) and not an sp size like the reading's.
+     */
+    val mushafSize: Float = TextSize.DEFAULT,
+    /**
      * The reader's reciter. Husary is the default for a new install (owner
      * decision, 4.5): the murattal voice most readers know, with the quiet
      * second voice kept as the fallback when a reciter is removed.
@@ -138,6 +144,7 @@ data class AppSettings(
         TypeRole.Translation -> translationSize
         TypeRole.Tafsir -> tafsirSize
         TypeRole.Words -> wordsSize
+        TypeRole.Mushaf -> mushafSize
     }
 }
 
@@ -173,6 +180,7 @@ class SettingsStore(private val context: Context) {
             translationSize = sizeOf(choices, TRANSLATION_SIZE, legacy),
             tafsirSize = sizeOf(choices, TAFSIR_SIZE, legacy),
             wordsSize = sizeOf(choices, WORDS_SIZE, legacy),
+            mushafSize = sizeOf(choices, MUSHAF_SIZE, legacy),
             recitation = preferences[RECITATION] ?: "husary",
             keepAwake = preferences[KEEP_AWAKE] ?: true,
             followReciter = preferences[FOLLOW_RECITER] ?: true,
@@ -399,6 +407,7 @@ class SettingsStore(private val context: Context) {
         TypeRole.Translation -> TRANSLATION_SIZE
         TypeRole.Tafsir -> TAFSIR_SIZE
         TypeRole.Words -> WORDS_SIZE
+        TypeRole.Mushaf -> MUSHAF_SIZE
     }
 
     private companion object {
@@ -416,6 +425,7 @@ class SettingsStore(private val context: Context) {
         val TRANSLATION_SIZE = floatPreferencesKey("translation_size")
         val TAFSIR_SIZE = floatPreferencesKey("tafsir_size")
         val WORDS_SIZE = floatPreferencesKey("words_size")
+        val MUSHAF_SIZE = floatPreferencesKey("mushaf_size")
         val RECITATION = stringPreferencesKey("recitation")
         val KEEP_AWAKE = booleanPreferencesKey("keep_awake")
         val FOLLOW_RECITER = booleanPreferencesKey("follow_reciter")

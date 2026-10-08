@@ -68,7 +68,6 @@ class Verify(private val root: File) {
     private fun check(dataset: Dataset, dir: File) {
         when (dataset.id) {
             "quran-script-kfgqpc" -> checkKfgqpcScript(dataset.id, dir)
-            "mushaf-glyph-v2" -> checkGlyphScript(dataset.id, dir)
             "mushaf-layout-v2" -> checkLayout(dataset.id, dir)
             "translation-saheeh" -> checkSaheeh(dataset.id, dir)
             "saheeh-qul-crosscheck" -> checkSimpleCount(dataset.id, dir, "translation", 6236)
@@ -88,7 +87,6 @@ class Verify(private val root: File) {
             "mutashabihat" -> checkJsonMinKeys(dataset.id, dir, 100)
             "surah-info-en" -> checkJsonKeys(dataset.id, dir, 114)
             "tanzil-uthmani" -> checkTanzil(dataset.id, dir)
-            "mushaf-fonts-v2" -> checkFonts(dataset.id, dir, expected = 604)
             "quran-font-hafs" -> checkFonts(dataset.id, dir, expected = 1)
         }
     }
@@ -112,42 +110,6 @@ class Verify(private val root: File) {
                 val text = rs.getString(2) ?: ""
                 if (text.isBlank()) fail(id, "blank text at $location")
                 if (text.contains('\u25CC')) fail(id, "dotted circle artifact at $location")
-            }
-        }
-    }
-
-    private fun checkGlyphScript(id: String, dir: File) {
-        openSqlite(db(dir)).use { connection ->
-            val rows = connection.count("words")
-            if (rows != 83_668L) fail(id, "expected 83668 words, found $rows")
-            connection.each("SELECT text FROM words") { rs ->
-                for (ch in rs.getString(1) ?: "") {
-                    val cp = ch.code
-                    if (cp < 0xFB50 || cp > 0xFEFF) {
-                        fail(id, "glyph text contains U+${cp.toString(16).uppercase()}, outside presentation forms")
-                        return@each
-                    }
-                }
-            }
-        }
-        val script = openSqlite(
-            File(work, "quran-script-kfgqpc").firstWithExtension(".db")
-                ?: error("script database not extracted yet"),
-        )
-        openSqlite(db(dir)).use { glyph ->
-            script.use { text ->
-                val a = text.createStatement().executeQuery("SELECT id, location FROM words ORDER BY id")
-                val b = glyph.createStatement().executeQuery("SELECT id, location FROM words ORDER BY id")
-                var mismatches = 0
-                while (a.next() && b.next()) {
-                    if (a.getInt(1) != b.getInt(1) || a.getString(2) != b.getString(2)) {
-                        mismatches++
-                        if (mismatches <= 5) {
-                            fail(id, "glyph row ${b.getInt(1)} ${b.getString(2)} does not match ${a.getInt(1)} ${a.getString(2)}")
-                        }
-                    }
-                }
-                if (mismatches > 5) fail(id, "$mismatches glyph rows do not align with the text rows")
             }
         }
     }
@@ -329,9 +291,5 @@ class Verify(private val root: File) {
     private fun checkFonts(id: String, dir: File, expected: Int) {
         val fonts = dir.walkTopDown().filter { it.isFile && it.name.endsWith(".ttf") }.toList()
         if (fonts.size != expected) fail(id, "expected $expected font files, found ${fonts.size}")
-        if (expected == 604) {
-            val missing = (1..604).filter { page -> fonts.none { it.name == "p$page.ttf" } }
-            if (missing.isNotEmpty()) fail(id, "missing page fonts: ${missing.take(5)}...")
-        }
     }
 }

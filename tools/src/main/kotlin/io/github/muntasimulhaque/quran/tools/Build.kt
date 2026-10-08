@@ -35,7 +35,6 @@ class Build(private val root: File) {
         val ayah: Int,
         val position: Int,
         val text: String,
-        val glyph: String,
         val marker: Boolean,
         var page: Int = 0,
         var line: Int = 0,
@@ -120,29 +119,23 @@ class Build(private val root: File) {
             ?: error("no database for $id; run verify first")
 
     private fun readWords(): List<Word> {
+        // The Book's own text, word by word, straight from the source script:
+        // the page is drawn from these words and from nothing else.
         val script = openSqlite(sourceDb("quran-script-kfgqpc"))
-        val glyph = openSqlite(sourceDb("mushaf-glyph-v2"))
-        val glyphs = HashMap<Int, String>(90_000)
-        glyph.use { it.each("SELECT id, text FROM words") { rs -> glyphs[rs.getInt(1)] = rs.getString(2) } }
         val words = ArrayList<Word>(83_668)
         script.use { connection ->
             connection.each("SELECT id, surah, ayah, word, text FROM words ORDER BY id") { rs ->
-                val text = rs.getString(5) ?: ""
-                val id = rs.getInt(1)
                 words += Word(
-                    id = id,
+                    id = rs.getInt(1),
                     surah = rs.getInt(2),
                     ayah = rs.getInt(3),
                     position = rs.getInt(4),
-                    text = text,
-                    glyph = glyphs[id] ?: "",
-                    marker = Arabic.skeleton(text).isEmpty(),
+                    text = rs.getString(5) ?: "",
+                    marker = Arabic.skeleton(rs.getString(5) ?: "").isEmpty(),
                 )
             }
         }
-        glyph.close()
         if (words.size != 83_668) fail("expected 83668 words, found ${words.size}")
-        if (words.any { it.glyph.isBlank() }) fail("a word has no glyph text")
         return words
     }
 
@@ -369,7 +362,7 @@ class Build(private val root: File) {
             statement.execute(
                 "CREATE TABLE word (id INTEGER PRIMARY KEY, ayah_number INTEGER NOT NULL, surah INTEGER NOT NULL, " +
                     "ayah INTEGER NOT NULL, position INTEGER NOT NULL, marker INTEGER NOT NULL, text TEXT NOT NULL, " +
-                    "glyph TEXT NOT NULL, text_search TEXT NOT NULL, " +
+                    "text_search TEXT NOT NULL, " +
                     "page INTEGER NOT NULL, " +
                     "line INTEGER NOT NULL, line_position INTEGER NOT NULL)",
             )
@@ -593,8 +586,8 @@ class Build(private val root: File) {
         }
 
         connection.prepareStatement(
-            "INSERT INTO word(id, ayah_number, surah, ayah, position, marker, text, glyph, text_search, " +
-                "page, line, line_position) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+            "INSERT INTO word(id, ayah_number, surah, ayah, position, marker, text, text_search, " +
+                "page, line, line_position) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
         ).use { statement ->
             for (word in words) {
                 statement.setInt(1, word.id)
@@ -604,11 +597,10 @@ class Build(private val root: File) {
                 statement.setInt(5, word.position)
                 statement.setInt(6, if (word.marker) 1 else 0)
                 statement.setString(7, word.text)
-                statement.setString(8, word.glyph)
-                statement.setString(9, if (word.marker) "" else Search.normalizeForIndex(word.text))
-                statement.setInt(10, word.page)
-                statement.setInt(11, word.line)
-                statement.setInt(12, word.linePosition)
+                statement.setString(8, if (word.marker) "" else Search.normalizeForIndex(word.text))
+                statement.setInt(9, word.page)
+                statement.setInt(10, word.line)
+                statement.setInt(11, word.linePosition)
                 statement.addBatch()
             }
             statement.executeBatch()

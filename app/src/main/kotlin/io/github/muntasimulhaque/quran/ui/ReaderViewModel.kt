@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.muntasimulhaque.quran.core.EndOfAudio
+import io.github.muntasimulhaque.quran.core.MushafText
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.core.ShareText
 import io.github.muntasimulhaque.quran.data.Ayah
@@ -24,7 +25,6 @@ import io.github.muntasimulhaque.quran.data.PackDownloader
 import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.PackUpdater
 import io.github.muntasimulhaque.quran.data.PackVerifier
-import io.github.muntasimulhaque.quran.data.PageFontStore
 import io.github.muntasimulhaque.quran.data.PagePosition
 import io.github.muntasimulhaque.quran.data.LastReadStore
 import io.github.muntasimulhaque.quran.data.LanguagePreference
@@ -77,7 +77,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
     private val settingsStore = SettingsStore(application)
     private val languagePreference = LanguagePreference(application)
-    private val pageFonts = PageFontStore(application)
     private val savedStore = SavedStore(application)
     private val lastReadStore = LastReadStore(application)
     private val playback = PlaybackController(application, viewModelScope)
@@ -131,8 +130,14 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
     private var pageCacheJob: Job? = null
 
+    /**
+     * The page's own text size for the reader's chosen step, as a share
+     * of the measure's em: the number the page is drawn at. The step is
+     * snapped to the five every sized text uses, as the reading's are.
+     */
+    val mushafScale: Float get() = MushafText.scale(TextSize.step(settings.mushafSize))
+
     val content: ContentDatabase? get() = contentDatabase
-    val fonts: PageFontStore get() = pageFonts
     val saved: StateFlow<List<SavedAyah>> = savedStore.saved
 
     /** Where the reader has been reading, newest first. */
@@ -453,7 +458,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             pageCacheJob?.cancel()
             pageCacheJob = viewModelScope.launch {
                 delay(PAGE_CACHE_DELAY_MS)
-                renderer.rememberStartupPage(PageKey(page, widthPx, theme))
+                renderer.rememberStartupPage(PageKey(page, widthPx, theme, mushafScale))
             }
         }
     }
@@ -615,6 +620,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             TypeRole.Translation -> settings.copy(translationSize = value)
             TypeRole.Tafsir -> settings.copy(tafsirSize = value)
             TypeRole.Words -> settings.copy(wordsSize = value)
+            TypeRole.Mushaf -> settings.copy(mushafSize = value)
         }
         viewModelScope.launch { settingsStore.setTypeSize(role, value) }
     }

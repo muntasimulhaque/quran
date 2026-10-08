@@ -235,7 +235,7 @@ class Packs(private val root: File) {
                         statement.execute("CREATE TABLE ayah AS SELECT * FROM src.ayah")
                         statement.execute(
                             "CREATE TABLE word AS SELECT id, ayah_number, surah, ayah, position, marker, " +
-                                "text, glyph, text_search, page, line, line_position FROM src.word",
+                                "text, text_search, page, line, line_position FROM src.word",
                         )
                         statement.execute("CREATE TABLE page_line AS SELECT * FROM src.page_line")
                         statement.execute("CREATE INDEX word_ref ON word(surah, ayah, position)")

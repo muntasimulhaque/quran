@@ -78,6 +78,18 @@ class PageFrame private constructor(
         const val ROUNDEL_EM = 0.34f
 
         /**
+         * An ayah's own number in its roundel, as a share of the em, as a
+         * radius. The printed page ends an ayah with its number in a small
+         * roundel, and it is drawn here rather than carried in a font: a
+         * number the app draws is a number the reader can also touch, and a
+         * roundel drawn in the ornament keeps the line it stands on neutral.
+         */
+        const val MARKER_EM = 0.30f
+
+        /** The digits inside an ayah's roundel, as a share of the em. */
+        const val MARKER_DIGITS_EM = 0.32f
+
+        /**
          * The tallest ink any of the 604 page fonts carries, in ems, which is
          * what the pager reserves room for: the tall fonts measure 1.8, and a
          * future pack is given a tenth of an em of slack over that.
@@ -88,20 +100,34 @@ class PageFrame private constructor(
          * The frame of a page [pageWidthPx] pixels wide whose lines carry
          * [inkEm] of ink above and below their baseline, which is the font's
          * own ascent plus its descent in ems.
+         *
+         * [lines] is how many visual lines the page is drawn with: fifteen
+         * for the print's own page, and more only when a reader has asked
+         * for text large enough that a line of the print no longer holds
+         * its words. [scale] is the reader's text size as a share of the
+         * measure's own em: the line pitch and the text's ink follow it,
+         * because they are the text's, while the rule, the air, and the
+         * foot's room stay the page's own, in the measure's em, so the
+         * parchment keeps its proportions at every size.
          */
-        fun of(pageWidthPx: Int, inkEm: Float): PageFrame {
+        fun of(
+            pageWidthPx: Int,
+            inkEm: Float,
+            lines: Int = LINES,
+            scale: Float = 1f,
+        ): PageFrame {
             val em = em(pageWidthPx)
-            val line = em * LINE_HEIGHT_RATIO
+            val line = em * LINE_HEIGHT_RATIO * scale
             val air = em * AIR_EM
             // The rule stands the air inside the measure, and whatever margin
             // is left outside it is the same margin at the head, so the frame
             // is one rectangle drawn inside the page on every side.
             val margin = (pageWidthPx - pageWidthPx * TEXT_WIDTH_RATIO) / 2f - air
-            val ink = inkEm * em
+            val ink = inkEm * em * scale
             val halfLeading = (line - ink) / 2f
             val head = margin
             val slotTop = head + air - halfLeading
-            val foot = head + air + (LINES - 1) * line + ink + air
+            val foot = head + air + (lines - 1) * line + ink + air
             return PageFrame(
                 left = margin,
                 right = pageWidthPx - margin,

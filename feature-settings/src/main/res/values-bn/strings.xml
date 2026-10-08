@@ -136,6 +136,7 @@
     <string name="settings_size_translation">অনুবাদ</string>
     <string name="settings_size_tafsir">তাফসীর</string>
     <string name="settings_size_words">শব্দের অর্থ</string>
+    <string name="settings_size_mushaf">মুসহাফ পৃষ্ঠা</string>
     <string name="settings_group_reciters">তিলাওয়াতকারী</string>
     <string name="settings_group_translations">অনুবাদ</string>
     <string name="settings_translation_hidden">পাঠে অনুবাদ দেখানো হচ্ছে না</string>

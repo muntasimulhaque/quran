@@ -12,9 +12,13 @@ import java.util.TreeMap
  *
  * One rule, three checks:
  * - every non-digit codepoint of the canonical Unicode text is drawable by
- *   the KFGQPC Uthmanic Hafs font used in study mode;
- * - every codepoint of every word's glyph sequence is drawable by that page's
- *   own font, so a Mushaf page can never show tofu or a missing word;
+ *   the KFGQPC Uthmanic Hafs font, which draws the study reading and the
+ *   Mushaf page's own words both, so a page can never show tofu or a
+ *   missing word;
+ * - the page's own furniture (every ayah's roundel number, the page number,
+ *   the juz, and each surah's band) is drawable by the face that draws it,
+ *   which is the ornament, because that furniture is drawn here rather than
+ *   carried in a font;
  * - every run of reading text is drawable by the font the app draws it with,
  *   with a script the app hands to the platform allowed only by name here.
  *
@@ -22,6 +26,12 @@ import java.util.TreeMap
  * translation or tafsir in a script no bundled face carries is not a tofu bug
  * (Android draws it with the system font), but it is a decision, and the
  * allow-list is where that decision is written down.
+ *
+ * The page's own text size (MushafText.DEFAULT_SCALE) is pinned by the
+ * instrumented MushafPagesTest, which lays out every page of the Book on a
+ * real device with the face's real metrics: the calibration is a property of
+ * this font, and the font is hash-pinned in the manifest, so the two move
+ * never.
  */
 class Fonts(private val root: File) {
 
@@ -58,7 +68,7 @@ class Fonts(private val root: File) {
 
     fun run(): Int {
         checkUnicodeCoverage()
-        checkGlyphCoverage()
+        checkPageFurniture()
         checkReadingFonts()
         if (problems.isEmpty()) {
             println("fonts: all coverage checks passed")
@@ -70,6 +80,7 @@ class Fonts(private val root: File) {
     }
 
     private fun checkUnicodeCoverage() {
+        // The one Arabic face: the study reading's, and the page's own.
         val hafs = loadFont(File(verify, "quran-font-hafs"))
         val uncovered = TreeMap<Int, Int>()
         var codepoints = 0
@@ -95,52 +106,43 @@ class Fonts(private val root: File) {
         println("fonts: study text codepoints checked: $codepoints, digits skipped: $digits")
     }
 
-    private fun checkGlyphCoverage() {
-        val wordsByPage = wordsByPage()
-        var pages = 0
-        var codepoints = 0
-        for ((page, words) in wordsByPage) {
-            val fontFile = File(verify, "mushaf-fonts-v2").walkTopDown()
-                .firstOrNull { it.isFile && it.name == "p$page.ttf" }
-                ?: run {
-                    problems += "page $page has no font file"
-                    continue
+    /**
+     * The page's furniture, drawn here rather than carried in a font: the
+     * ornament face draws every ayah's roundel number and the page's own
+     * number, the juz, and each surah's band. A digit or a name the ornament
+     * cannot draw would be a hole in the printed page's furniture.
+     */
+    private fun checkPageFurniture() {
+        val amiri = loadFontFile(File(root, "content-assets/src/main/res/font/amiri_quran.ttf"))
+        val uncovered = mutableSetOf<Int>()
+        fun probe(text: String, what: String) {
+            for (codepoint in text.codePoints()) {
+                if (codepoint <= 32) continue
+                if (!amiri.canDisplay(codepoint)) {
+                    uncovered += codepoint
+                    problems += "page furniture ($what) cannot draw U+" +
+                        codepoint.toString(16).uppercase()
                 }
-            val font = Font.createFont(Font.TRUETYPE_FONT, fontFile)
-            val uncovered = mutableSetOf<Int>()
-            for (text in words) {
-                for (cp in text.codePoints()) {
-                    codepoints++
-                    if (!font.canDisplay(cp)) uncovered += cp
+            }
+        }
+        // Arabic-Indic digits: every ayah's number, the page number, the juz.
+        for (ch in "٠١٢٣٤٥٦٧٨٩") probe(
+            ch.toString(),
+            "ayah number",
+        )
+        // The juz's own label and the surahs' names, drawn in the band.
+        probe("الجزء", "juz")
+        val packs = File(root, "content/packs")
+        if (packs.isDirectory) {
+            openSqlite(File(packs, "core.db")).use { connection ->
+                connection.each("SELECT name_arabic FROM surah") { rs ->
+                    probe(rs.getString(1) ?: "", "surah band")
                 }
             }
-            if (uncovered.isNotEmpty()) {
-                val sample = uncovered.take(8).joinToString(" ") { "U+${it.toString(16).uppercase()}" }
-                problems += "page $page font cannot draw ${uncovered.size} codepoints: $sample"
-            }
-            pages++
         }
-        println("fonts: mushaf pages checked: $pages, glyph codepoints: $codepoints")
-    }
-
-    private fun wordsByPage(): Map<Int, List<String>> {
-        val pageOfWord = HashMap<Int, Int>(90_000)
-        openSqlite(sourceDb("mushaf-layout-v2")).use { connection ->
-            connection.each(
-                "SELECT page_number, first_word_id, last_word_id FROM pages WHERE line_type='ayah'",
-            ) { rs ->
-                val page = rs.getInt(1)
-                for (id in rs.getInt(2)..rs.getInt(3)) pageOfWord[id] = page
-            }
+        if (uncovered.isEmpty()) {
+            println("fonts: page furniture checked: digits, juz, surah bands")
         }
-        val out = HashMap<Int, MutableList<String>>(700)
-        openSqlite(sourceDb("mushaf-glyph-v2")).use { connection ->
-            connection.each("SELECT id, text FROM words") { rs ->
-                val page = pageOfWord[rs.getInt(1)] ?: return@each
-                out.getOrPut(page) { mutableListOf() }.add(rs.getString(2) ?: "")
-            }
-        }
-        return out
     }
 
     private fun loadFont(directory: File): Font {

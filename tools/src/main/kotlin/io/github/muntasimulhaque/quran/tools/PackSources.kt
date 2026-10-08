@@ -16,10 +16,8 @@ object PackSources {
     private val sources: Map<String, List<String>> = mapOf(
         "core" to listOf(
             "quran-script-kfgqpc",
-            "mushaf-glyph-v2",
             "mushaf-layout-v2",
             "quran-font-hafs",
-            "mushaf-fonts-v2",
             "metadata-surah-names",
             "metadata-ayah",
             "metadata-juz",

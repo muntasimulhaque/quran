@@ -66,7 +66,6 @@ val devPackAssets = layout.buildDirectory.dir("generated/devPackAssets")
 // project at execution time: the configuration cache forbids that.
 val contentDir = rootProject.file("content")
 val contentPacksDir = File(contentDir, "packs")
-val contentFontsV2Dir = File(contentDir, "work/fonts-v2")
 val contentFontsHafsDir = File(contentDir, "work/fonts-hafs")
 val contentBuildReport = File(contentDir, "build-report.json")
 val contentCatalogFile = File(contentDir, "catalog.json")
@@ -128,10 +127,6 @@ abstract class PrepareContentAssets : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val fontsHafsDir: DirectoryProperty
 
-    @get:InputDirectory
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val fontsV2Dir: DirectoryProperty
-
     @get:OutputDirectory
     abstract val contentAssetsOut: DirectoryProperty
 
@@ -160,15 +155,13 @@ abstract class PrepareContentAssets : DefaultTask() {
             ?.forEach { pack ->
                 pack.copyTo(File(File(devPacks, "packs"), pack.name), overwrite = true)
             }
-        val studyFont = fontsHafsDir.get().asFile.walkTopDown()
+        // The one Arabic face: it sets the study reading and the Mushaf
+        // page both, so the page and the reading are one letterform.
+        val textFont = fontsHafsDir.get().asFile.walkTopDown()
             .firstOrNull { it.isFile && it.name.endsWith(".ttf") }
-            ?: throw GradleException("the study font is missing; run ./gradlew :tools:run --args=fetch")
+            ?: throw GradleException("the text font is missing; run ./gradlew :tools:run --args=fetch")
         val fonts = File(out, "fonts").apply { mkdirs() }
-        studyFont.copyTo(File(fonts, studyFont.name), overwrite = true)
-        val pages = File(fonts, "pages").apply { mkdirs() }
-        File(fontsV2Dir.get().asFile, "fonts/pages")
-            .listFiles { file -> file.name.endsWith(".ttf") }
-            ?.forEach { it.copyTo(File(pages, it.name), overwrite = true) }
+        textFont.copyTo(File(fonts, textFont.name), overwrite = true)
         val manifest = recitationManifestFile.get().asFile
         if (manifest.exists()) {
             val recitations = File(out, "recitations").apply { mkdirs() }
@@ -179,7 +172,7 @@ abstract class PrepareContentAssets : DefaultTask() {
 
 val prepareContentAssets = tasks.register<PrepareContentAssets>("prepareContentAssets") {
     group = "content"
-    description = "Copies the core pack, the pack catalog, the fonts, and the recitation manifest."
+    description = "Copies the core pack, the pack catalog, the text font, and the recitation manifest."
     dependsOn(":tools:fetchAssets")
     leanScreenshot.set(leanDevPacks)
     packNames.set(screenshotPacks)
@@ -188,7 +181,6 @@ val prepareContentAssets = tasks.register<PrepareContentAssets>("prepareContentA
     recitationManifestFile.fileValue(contentRecitationManifest)
     packsDir.fileValue(contentPacksDir)
     fontsHafsDir.fileValue(contentFontsHafsDir)
-    fontsV2Dir.fileValue(contentFontsV2Dir)
     contentAssetsOut.set(contentAssets)
     devPackAssetsOut.set(devPackAssets)
 }

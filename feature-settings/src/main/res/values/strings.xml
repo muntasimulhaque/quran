@@ -137,6 +137,7 @@
     <string name="settings_size_translation">Translation</string>
     <string name="settings_size_tafsir">Tafsir</string>
     <string name="settings_size_words">Word meanings</string>
+    <string name="settings_size_mushaf">Mushaf page</string>
     <string name="settings_group_reciters">Reciters</string>
     <string name="settings_group_translations">Translations</string>
     <string name="settings_translation_hidden">Translation is hidden in the reading</string>

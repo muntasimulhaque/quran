@@ -12,8 +12,9 @@ import java.nio.file.StandardCopyOption
  * into place. A file that is already present and correct is left alone, so a
  * machine that received the file by other means never touches the network.
  *
- * The 604 page fonts are the only such dataset. The small QUL exports stay
- * local to the maintainer and are listed for manual download when missing.
+ * The one Arabic text font is the only such dataset. The small QUL exports
+ * stay local to the maintainer and are listed for manual download when
+ * missing.
  */
 class Fetch(private val root: File) {
 
@@ -23,7 +24,6 @@ class Fetch(private val root: File) {
      * value is the directory that receives the zip's contents.
      */
     private val unpackTargets = mapOf(
-        "mushaf-fonts-v2" to "content/work/fonts-v2/fonts/pages",
         "quran-font-hafs" to "content/work/fonts-hafs",
     )
 
@@ -85,13 +85,12 @@ class Fetch(private val root: File) {
         if (!isZip(archive)) return
         val target = File(root, targetPath)
         val expected = when (id) {
-            "mushaf-fonts-v2" -> 604
             "quran-font-hafs" -> 1
             else -> return
         }
         val present = target.walkTopDown().count { it.isFile && it.name.endsWith(".ttf") }
         if (present == expected) {
-            println("fetch: $id already unpacked ($present fonts)")
+            println("fetch: $id already unpacked")
             return
         }
         println("fetch: unpacking $id to $targetPath")

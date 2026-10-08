@@ -15,9 +15,10 @@ Full description (plain prose; Play strips markdown):
 A Quran app built to be read. It opens where you left off, turns pages the
 way a printed Mushaf does, and never asks you to learn its interface first.
 
-Mushaf mode renders the 604 pages of the Madinah Mushaf exactly as the
-King Fahd Complex typeset them, with the QPC V2 page fonts, so every page
-matches the printed copy line for line.
+Mushaf mode is the 604 pages of the Madinah Mushaf, set from the Book's own
+words in the King Fahd Complex's own Arabic typeface at your own text size,
+with the page's rule, its numbered roundels, and its juz as the printed page
+carries them.
 
 Study mode gives each ayah its Saheeh International translation with the
 original footnotes, word by word meanings, and Ibn Kathir in English,
@@ -484,8 +485,8 @@ sets are produced by the same test on the taller and wider profiles.
 
 ## What the app carries, and what a reader adds
 
-The app ships the Quran text and its page layout only: about ten megabytes,
-a complete offline Mushaf that needs no network and no account. Everything
+The app ships the Quran text and its page layout only: about eight
+megabytes, a complete offline Mushaf that needs no network and no account. Everything
 else is added by the reader, from the project's own GitHub Releases, with the
 size shown before a byte moves and a SHA-256 check before it is used:
 
