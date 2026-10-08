@@ -7,7 +7,9 @@
   The background is the ink alone, so the layers can be masked to any
   shape, and the monochrome layer carries the medallion's silhouette,
   sturdier than the mark, so a themed home screen keeps the shape (owner
-  decision).
+  decision). The medallion is sized to about 48 percent of the icon canvas
+  on every surface that shows it, so a launcher's mask leaves air around
+  the gold instead of the mark filling the tile (owner decision, 4.9).
 -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@mipmap/ic_launcher_bg" />

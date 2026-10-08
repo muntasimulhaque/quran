@@ -418,6 +418,9 @@ implement it and update this list.
   medallion's silhouette as its monochrome layer), the reminder's small icon
   (the ornament alone, no ground, since the shade reads only its alpha), the
   store icon, and the feature graphic all carry it (owner decision, 4.8).
+  The medallion is sized to about 48 percent of the icon canvas on every
+  surface that shows it, so a launcher's mask leaves air around the gold
+  instead of the mark filling the tile (owner decision, 4.9).
 
 ## Traps
 
