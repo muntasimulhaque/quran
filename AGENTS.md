@@ -412,21 +412,27 @@ implement it and update this list.
 - The day's ayah is dealt from a shuffled deck rather than walked in the
   Book's order: a different ayah every morning, every ayah once before the
   deck is filled again, and nothing stored (owner decision).
-- The app's mark is the cover's medallion: the gold ornament and its
-  calligraphy traced from the cover photograph, never redrawn, set on the
-  cover's own burgundy `#5C1418`, sampled from the cover's face, in the
-  cover's own gold leaf, the photograph's gold tempered to `#E5C684` so the
-  fine tracing keeps its contrast at icon size. The launcher (with the
-  medallion's silhouette as its monochrome layer), the reminder's small icon
-  (the ornament alone, no ground, since the shade reads only its alpha), the
-  store icon, and the feature graphic all carry it, and the share card
-  carries the medallion alone, painted in the burgundy, with no chip behind
-  it (owner decision). The medallion is sized to about 48 percent of
-  the icon canvas on every surface that shows it, so a launcher's mask
-  leaves air around the gold instead of the mark filling the tile (owner
-  decision, 4.9). The feature graphic's top and bottom borders are the
-  cover's own border band, exact from the photograph, drawn thin and clear
-  of the canvas edges, so no part of them is cut (owner decision).
+- The app's mark is an open book on its rehal: the owner's own reference
+  drawing, redrawn clean for this app as uniform line art, the book in the
+  theme's ink on the theme's paper, `#1C1B18` on `#F8F5EF`, the stand in the
+  Mushaf's ornament gold `#856411`, with the pages filled in the paper so
+  the book occludes the stand behind it and a paper margin keeps the stand's
+  lines clear of the book's edge (owner decision, this session: the mark
+  wears the app's own theme tones, and the cover's burgundy is not one of
+  them). The launcher, its monochrome layer (the book's silhouette on each
+  plank, sturdier than the mark), the store icon, the reminder's small icon
+  (the silhouette alone, no ground, since the shade reads only its alpha and
+  paints it in the notification color), the share card (the drawing in its
+  own colors on the card's own paper), and the feature graphic all carry it.
+  The drawing is sized so the whole mark sits inside the launcher's 66 dp
+  circle, about half the canvas wide, so a mask leaves air around it instead
+  of the mark filling the tile.
+- The feature graphic is the same world at banner size: the paper field, the
+  page's gold hairline frame, the mark at the left, and the store's two names
+  at the right, Quran in Literata over The Noble Book in Inter. Every
+  element stands inside the safe area, well clear of the edges Play may crop
+  or overlay, and the file is 24-bit PNG with no alpha (owner decision, this
+  session).
 
 ## Traps
 

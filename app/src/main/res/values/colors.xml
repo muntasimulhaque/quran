@@ -2,9 +2,12 @@
 <resources>
     <color name="paper">#F8F5EF</color>
     <color name="night">#101720</color>
-    <!-- The field the app's mark is set on: the cover's own burgundy,
-         sampled from the cover photograph, the same field the launcher
-         icon stands on. The share card paints the medallion in it on the
-         card's paper. -->
-    <color name="icon_background">#5C1418</color>
+    <!-- The app's mark is drawn in the theme's own colors: the paper field
+         the reading opens on, the ink the page's text wears, and the
+         Mushaf's ornament gold for the stand. The values mirror the ui-kit
+         theme's PaperInk and Gold, which are Compose tones and cannot be
+         read from a drawable (owner decision, this session). -->
+    <color name="icon_background">@color/paper</color>
+    <color name="icon_ink">#1C1B18</color>
+    <color name="icon_gold">#856411</color>
 </resources>

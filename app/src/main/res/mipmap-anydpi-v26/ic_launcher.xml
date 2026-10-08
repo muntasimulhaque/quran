@@ -1,19 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The app's mark: the medallion of the cover the app was built from, its
-  gold ornament and its calligraphy traced from the cover itself, set on
-  the cover's own burgundy in the cover's own gold leaf, both sampled from
-  the cover photograph. The mark is the same drawing in the launcher, in
-  the reminder's small icon, on the store page, and in the feature graphic.
-  The background is the burgundy alone, so the layers can be masked to any
-  shape, and the monochrome layer carries the medallion's silhouette,
-  sturdier than the mark, so a themed home screen keeps the shape (owner
-  decision). The medallion is sized to about 48 percent of the icon canvas
-  on every surface that shows it, so a launcher's mask leaves air around
-  the gold instead of the mark filling the tile (owner decision, 4.9).
+  The app's mark: an open book on its rehal, drawn for this app as
+  uniform line art, the book in the theme's ink on the theme's paper,
+  the stand in the Mushaf's ornament gold (owner decision: the owner's
+  own reference for the drawing). The mark is the same drawing in the
+  launcher, on the store page, in the share card, and in the feature
+  graphic. The background is the paper alone, so the layers can be
+  masked to any shape, and the monochrome layer carries the book's
+  silhouette so a themed home screen keeps the shape.
 -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@mipmap/ic_launcher_bg" />
-    <foreground android:drawable="@mipmap/ic_launcher_fg" />
-    <monochrome android:drawable="@mipmap/ic_launcher_mono" />
+    <background android:drawable="@color/icon_background" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+    <monochrome android:drawable="@drawable/ic_launcher_monochrome" />
 </adaptive-icon>

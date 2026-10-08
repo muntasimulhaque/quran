@@ -40,8 +40,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -52,7 +50,6 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -153,11 +150,10 @@ internal suspend fun loadShareCard(
 @Composable
 internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier) {
     val hafs = rememberHafs()
-    // The app's mark, sized for a foot: the cover's medallion, the
-    // launcher's own drawing, painted in the cover's burgundy on the card's
-    // paper, so the foot reads as the printed device it is (owner decision).
+    // The app's mark, sized for a foot: the launcher's own drawing, the book
+    // in the theme's ink with the stand in the Mushaf's ornament gold, set
+    // on the card's own paper (owner decision, this session).
     val mark = painterResource(R.drawable.ic_share_mark)
-    val field = colorResource(R.color.icon_background)
     val paper = lightColorScheme(
         primary = Lapis,
         background = PaperBackground,
@@ -221,7 +217,7 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
                 modifier = Modifier.padding(top = Space.Block),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                AppMark(mark = mark, field = field, modifier = Modifier.size(20.dp))
+                AppMark(mark = mark, modifier = Modifier.size(20.dp))
                 Text(
                     // The card carries the store's own name, not the
                     // launcher's: this picture leaves the app and lands
@@ -238,21 +234,19 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
 }
 
 /**
- * The app's mark at a foot's size: the cover's medallion alone, painted in
- * the icon's own burgundy, the way the cover paints its ornament on the
- * field it stands on. The mark used to stand on a rounded square of the
- * icon's ground, which read as a chip of the icon rather than as the mark,
- * and the gold medallion alone on the card's paper was almost invisible.
- * The same shape fills the reminder's small icon, where the shade paints it
- * in the notification color: the mark is a shape wherever it stands.
+ * The app's mark at a foot's size: the launcher's own drawing, the book in
+ * the theme's ink with the stand in the Mushaf's ornament gold, carried by
+ * the drawable in its own colors on the card's own paper, so the foot is the
+ * same drawing the home screen shows, never a tint of it. The same shape
+ * fills the reminder's small icon, where the shade paints it in the
+ * notification color, because a small icon is read as an alpha mask.
  */
 @Composable
-private fun AppMark(mark: Painter, field: Color, modifier: Modifier = Modifier) {
+private fun AppMark(mark: Painter, modifier: Modifier = Modifier) {
     Image(
         painter = mark,
         contentDescription = null,
         contentScale = ContentScale.Fit,
-        colorFilter = ColorFilter.tint(field),
         modifier = modifier,
     )
 }
