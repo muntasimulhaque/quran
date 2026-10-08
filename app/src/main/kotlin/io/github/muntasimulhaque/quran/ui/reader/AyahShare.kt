@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -153,10 +154,10 @@ internal suspend fun loadShareCard(
 internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier) {
     val hafs = rememberHafs()
     // The app's mark, sized for a foot: the cover's medallion, the
-    // launcher's own drawing, in the icon's gold on the icon's ink, so the
-    // foot reads as the app's icon (owner decision, 4.9).
+    // launcher's own drawing, painted in the cover's burgundy on the card's
+    // paper, so the foot reads as the printed device it is (owner decision).
     val mark = painterResource(R.drawable.ic_share_mark)
-    val lapis = colorResource(R.color.icon_background)
+    val field = colorResource(R.color.icon_background)
     val paper = lightColorScheme(
         primary = Lapis,
         background = PaperBackground,
@@ -220,7 +221,7 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
                 modifier = Modifier.padding(top = Space.Block),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                AppMark(mark = mark, ground = lapis, modifier = Modifier.size(20.dp))
+                AppMark(mark = mark, field = field, modifier = Modifier.size(20.dp))
                 Text(
                     // The card carries the store's own name, not the
                     // launcher's: this picture leaves the app and lands
@@ -236,21 +237,24 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
     }
 }
 
-/** The app's mark at a foot's size: the medallion on its ink square. */
+/**
+ * The app's mark at a foot's size: the cover's medallion alone, painted in
+ * the icon's own burgundy, the way the cover paints its ornament on the
+ * field it stands on. The mark used to stand on a rounded square of the
+ * icon's ground, which read as a chip of the icon rather than as the mark,
+ * and the gold medallion alone on the card's paper was almost invisible.
+ * The same shape fills the reminder's small icon, where the shade paints it
+ * in the notification color: the mark is a shape wherever it stands.
+ */
 @Composable
-private fun AppMark(mark: Painter, ground: Color, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(percent = 22))
-            .background(ground),
-    ) {
-        Image(
-            painter = mark,
-            contentDescription = null,
-            contentScale = ContentScale.Fit,
-            modifier = Modifier.fillMaxWidth(),
-        )
-    }
+private fun AppMark(mark: Painter, field: Color, modifier: Modifier = Modifier) {
+    Image(
+        painter = mark,
+        contentDescription = null,
+        contentScale = ContentScale.Fit,
+        colorFilter = ColorFilter.tint(field),
+        modifier = modifier,
+    )
 }
 
 /** The measured height of the card, which can stand taller than the screen. */

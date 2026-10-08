@@ -414,13 +414,19 @@ implement it and update this list.
   deck is filled again, and nothing stored (owner decision).
 - The app's mark is the cover's medallion: the gold ornament and its
   calligraphy traced from the cover photograph, never redrawn, set on the
-  app's blue ink `#16202C` in the gold `#E3C063`. The launcher (with the
+  cover's own burgundy `#5C1418`, sampled from the cover's face, in the
+  cover's own gold leaf, the photograph's gold tempered to `#E5C684` so the
+  fine tracing keeps its contrast at icon size. The launcher (with the
   medallion's silhouette as its monochrome layer), the reminder's small icon
   (the ornament alone, no ground, since the shade reads only its alpha), the
-  store icon, and the feature graphic all carry it (owner decision, 4.8).
-  The medallion is sized to about 48 percent of the icon canvas on every
-  surface that shows it, so a launcher's mask leaves air around the gold
-  instead of the mark filling the tile (owner decision, 4.9).
+  store icon, and the feature graphic all carry it, and the share card
+  carries the medallion alone, painted in the burgundy, with no chip behind
+  it (owner decision). The medallion is sized to about 48 percent of
+  the icon canvas on every surface that shows it, so a launcher's mask
+  leaves air around the gold instead of the mark filling the tile (owner
+  decision, 4.9). The feature graphic's top and bottom borders are the
+  cover's own border band, exact from the photograph, drawn thin and clear
+  of the canvas edges, so no part of them is cut (owner decision).
 
 ## Traps
 

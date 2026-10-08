@@ -2,8 +2,9 @@
 <resources>
     <color name="paper">#F8F5EF</color>
     <color name="night">#101720</color>
-    <!-- The chip beside the share card's name: the app's own blue ink,
-         the same field the launcher icon stands on, so the medallion on
-         it reads as the app's icon. -->
-    <color name="icon_background">#16202C</color>
+    <!-- The field the app's mark is set on: the cover's own burgundy,
+         sampled from the cover photograph, the same field the launcher
+         icon stands on. The share card paints the medallion in it on the
+         card's paper. -->
+    <color name="icon_background">#5C1418</color>
 </resources>
