@@ -495,6 +495,6 @@ the catalog pins), and `play-store/screenshots/` (the store set).
 | `play-store/aab/*.aab` | the `signed-bundle` artifact from the newest green `build` run |
 | every `build/` directory | any `./gradlew` build |
 | `content/work/verify` | `./gradlew :tools:run --args="verify"` |
-| `content/work/fonts-v2`, `qpc-v2-font` | `./gradlew :tools:run --args="fetch"` |
+| `content/work/fonts-hafs` | `./gradlew :tools:run --args="fetch"` |
 | `content/work/db`, `json`, `qpc-v2.db` | `./gradlew :tools:run --args="build"` |
 | `content/work/audio-dev` | `./gradlew :tools:run --args="audio sample"` |
