@@ -483,7 +483,7 @@ something Play would reject.
 | `screenshots/tablet7/*.png` | 800 x 1280 | 7 inch tablet screenshots (8) |
 | `screenshots/tablet10/*.png` | 2560 x 1800 | 10 inch tablet screenshots (8) |
 
-Screenshots: the Mushaf page, the summoned chrome, the study reading, the
+The set stands for 5.2: the capture run 37859582337 is green on all three legs first try, eight frames each, and every frame was compared with its artifact before the copy. Twelve of the twenty-four frames carry the new page: the three Mushaf, the three chrome, the three ayah card frames, and the phone search frame, at 319,891, 186,767, 402,083, 317,050, 185,199, 396,600, 5,111, 85,044, 230,262, and 11,188 pixels below the status bar against the set they replace. Six more stand in the status bar clock and icons alone, and the six study and surah opening frames are byte-identical: the reading did not move, and the release's own change is only the page. Screenshots: the Mushaf page, the summoned chrome, the study reading, the
 surah opening, search, the settings hub, Browse, and the ayah card. The tablet
 sets are produced by the same test on the taller and wider profiles.
 
