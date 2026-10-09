@@ -491,7 +491,7 @@ something Play would reject.
 | `screenshots/tablet7/*.png` | 800 x 1280 | 7 inch tablet screenshots (8) |
 | `screenshots/tablet10/*.png` | 2560 x 1800 | 10 inch tablet screenshots (8) |
 
-The set below is replaced on this branch by the single-reading set: eight frames per form factor (the reading, the chrome, the surah opening, search, settings, Browse, the ayah card, and the tafsir open on the card), captured on the three store AVDs with the new tour green on each leg and every frame read. It ships with the release that carries the Mushaf removal.
+The set stands for 5.4: the capture run 37985337719 is green on all three legs first try, eight frames each, and every frame was compared with its artifact before the copy. The eight are the new single-reading tour: the reading, the chrome, the surah opening, search, settings, Browse, the ayah card, and the tafsir open on the card. Every frame was read; each leg shows the one reading with no mode door and no Mushaf page.
 
 The set stands for 5.2: the capture run 37859582337 is green on all three legs first try, eight frames each, and every frame was compared with its artifact before the copy. Twelve of the twenty-four frames carry the new page: the three Mushaf, the three chrome, the three ayah card frames, and the phone search frame, at 319,891, 186,767, 402,083, 317,050, 185,199, 396,600, 5,111, 85,044, 230,262, and 11,188 pixels below the status bar against the set they replace. Six more stand in the status bar clock and icons alone, and the six study and surah opening frames are byte-identical: the reading did not move, and the release's own change is only the page. Screenshots: the reading, the summoned chrome, the
 surah opening, search, the settings hub, Browse, the ayah card, and the
