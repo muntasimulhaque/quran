@@ -8,9 +8,9 @@ import kotlin.math.abs
  * wants a bigger translation does not want the tafsir to move with it, so
  * each is its own choice.
  *
- * [Mushaf] is the page's own text, whose size lives in the measure's ems
- * rather than in sp: the page is drawn to its own geometry, so its step is
- * a share of the measure (see `MushafText`), and no `sp` base stands for it.
+ * [Mushaf] is the reader's share of the page's own type, which is the print's
+ * own type for that page rather than a size in sp: it is a share of a
+ * letterform, so no `sp` base stands for it.
  */
 enum class TypeRole { Arabic, Translation, Tafsir, Words, Mushaf }
 
@@ -90,10 +90,10 @@ object TextSize {
         // The word list is derived from [meaningSp] at the ayah's own ratio;
         // this entry is that derivation, written as the number it comes to.
         TypeRole.Words -> MEANING_BASE * 30f / 17f
-        // The page's own text is sized in the measure's ems, not in sp, and
-        // carries no base here: its step is a share of the page's own
-        // measure (see `MushafText`). The entry keeps the `when` whole for a
-        // role that never reads it.
+        // The page's own step is a share of the page's own type, which
+        // PageTextLayout measures from the Book's own words, so it carries no
+        // sp base here. The entry keeps the `when` whole for a role that
+        // never reads it.
         TypeRole.Mushaf -> 30f
     }
 

@@ -11,7 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.muntasimulhaque.quran.core.EndOfAudio
-import io.github.muntasimulhaque.quran.core.MushafText
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.core.ShareText
 import io.github.muntasimulhaque.quran.data.Ayah
@@ -131,11 +130,14 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     private var pageCacheJob: Job? = null
 
     /**
-     * The page's own text size for the reader's chosen step, as a share
-     * of the measure's em: the number the page is drawn at. The step is
-     * snapped to the five every sized text uses, as the reading's are.
+     * The reader's text size for the page, as a share of the page's own
+     * type. The page's own type is the print's own for that page: the largest
+     * at which the page's fullest line still stands inside the measure, which
+     * PageTextLayout measures from the Book's own words. So this is the
+     * reader's share of the print, not a size in sp, and the step is snapped to
+     * the five every sized text uses, as the reading's are.
      */
-    val mushafScale: Float get() = MushafText.scale(TextSize.step(settings.mushafSize))
+    val mushafStep: Float get() = TextSize.step(settings.mushafSize)
 
     val content: ContentDatabase? get() = contentDatabase
     val saved: StateFlow<List<SavedAyah>> = savedStore.saved
@@ -436,7 +438,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         if (persist && settings.ayah != clamped) settingsStore.setAyah(clamped)
     }
 
-    fun onPageSettled(page: Int, widthPx: Int, theme: String) {
+    fun onPageSettled(page: Int, glassWidthPx: Int, glassHeightPx: Int, theme: String) {
         val database = contentDatabase ?: return
         this.page = page
         position = database.pagePosition(page)
@@ -454,11 +456,19 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         }
         // The page picture is written once the reader rests, not while they
         // swipe: a settle that is followed by another cancels the write.
-        if (widthPx > 0) {
+        if (glassWidthPx > 0 && glassHeightPx > 0) {
             pageCacheJob?.cancel()
             pageCacheJob = viewModelScope.launch {
                 delay(PAGE_CACHE_DELAY_MS)
-                renderer.rememberStartupPage(PageKey(page, widthPx, theme, mushafScale))
+                renderer.rememberStartupPage(
+                    PageKey(
+                        page = page,
+                        glassWidthPx = glassWidthPx,
+                        glassHeightPx = glassHeightPx,
+                        theme = theme,
+                        step = mushafStep,
+                    ),
+                )
             }
         }
     }

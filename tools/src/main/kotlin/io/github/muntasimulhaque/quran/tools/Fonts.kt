@@ -27,11 +27,12 @@ import java.util.TreeMap
  * (Android draws it with the system font), but it is a decision, and the
  * allow-list is where that decision is written down.
  *
- * The page's own text size (MushafText.DEFAULT_SCALE) is pinned by the
- * instrumented MushafPagesTest, which lays out every page of the Book on a
- * real device with the face's real metrics: the calibration is a property of
- * this font, and the font is hash-pinned in the manifest, so the two move
- * never.
+ * The page's own type is a property of this font and the Book's own words, and
+ * it is pinned by the instrumented MushafPagesTest, which lays out every page
+ * of the Book on a real device with the face's real metrics and fails if one
+ * page's fullest line no longer stands inside the measure. The font is
+ * hash-pinned in the manifest, so the font and the page move together or not
+ * at all.
  */
 class Fonts(private val root: File) {
 

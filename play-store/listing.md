@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 5.2 (versionCode 54)
+Version: 5.3 (versionCode 55)
 
 ## Listing
 
@@ -220,6 +220,16 @@ What each set shows, in order:
 6. The settings hub
 7. Browse, Surahs
 8. The ayah card, with its tafsir doors
+
+## Release notes (5.3, 470 characters)
+
+The Mushaf page is the printed page now. Every one of the 604 pages stands
+on the print's own fifteen lines, with the print's own ayahs on them and
+its own type sized to the page's own words. A line is filled the way the
+print fills it, by lengthening the connecting stroke of a word rather than
+by opening the space between two words, and the page fills the screen with
+a margin of paper at its four sides. Everything else is as it was. No ads,
+no trackers, no account.
 
 ## Release notes (5.2, 462 characters)
 

@@ -51,12 +51,19 @@ import kotlin.math.sqrt
  * The page is rendered at the exact pixel width it will be shown at, and the
  * touch math works in page pixels, so a tap lands on the word under the
  * finger however the screen is sized. It is therefore drawn at its own size
- * and centered, never stretched to fill the screen: the reader picks the
- * page's width so the whole page fits, which on a landscape tablet is a page
- * narrower than the glass, and stretching that page to the glass drew it two
- * and a quarter times too large with two thirds of it off the bottom of the
- * screen (owner report). The page never scales with the reader's text
- * size either: its lines are set to the page, not to the screen.
+ * and centered, never stretched to fill the screen: the page's own width is
+ * solved for the glass it is given ([PageGeometry]), and stretching a page to
+ * the glass drew it two and a quarter times too large with two thirds of it
+ * off the bottom of the screen (owner report). A page the glass cannot hold
+ * is panned, not clipped.
+ *
+ * The page's width and its pitch both come from the glass, so the glass is
+ * part of the page's key: the same page on a phone and on a tablet, or the
+ * same page on a phone turned round, are two pages.
+ *
+ * A page taller than the glass is panned from where the reader left off: the
+ * page's last lines are still the Book's, and the only thing that has moved
+ * is where the page stands.
  *
  * A turn is a plain horizontal slide with no lift and no cast shadow: the
  * page is the Book, not a sheet being picked up, and an edge lifted off the
@@ -71,9 +78,7 @@ fun MushafPage(
     content: ContentDatabase,
     renderer: PageRenderer,
     page: Int,
-    /** The pixel width the page is drawn at, decided once for the whole pager. */
-    pageWidth: Int,
-    /** The reader's text size for this page, as a share of the measure's em. */
+    /** The reader's text size for this page, as a share of the page's own type. */
     textScale: Float,
     palette: PagePalette,
     themeKey: String,
@@ -92,7 +97,13 @@ fun MushafPage(
         val density = LocalDensity.current
         val availableWidth = with(density) { maxWidth.toPx() }
         val availableHeight = with(density) { maxHeight.toPx() }
-        val key = PageKey(page, pageWidth, themeKey, textScale)
+        val key = PageKey(
+            page = page,
+            glassWidthPx = availableWidth.roundToInt(),
+            glassHeightPx = availableHeight.roundToInt(),
+            theme = themeKey,
+            step = textScale,
+        )
 
         val rendered by produceState(initialValue = renderer.peek(key), key, palette) {
             value = renderer.get(key, content, palette)
@@ -374,14 +385,6 @@ private fun DrawScope.drawWashes(
         }
     }
 }
-
-/**
- * Height divided by width of a rendered page, taken from the page's own
- * geometry rather than remembered beside it: it is the share of the tallest
- * page the rule can draw, so a page is never taller than the room the pager
- * gave it, whatever font it turns out to be carrying (PageFrame).
- */
-val PAGE_ASPECT: Float = PageFrame.aspect(PageFrame.INK_EM_TALLEST)
 
 /**
  * Where a page of the reader's own pixel size sits inside the glass: its left

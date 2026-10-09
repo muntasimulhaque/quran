@@ -238,8 +238,11 @@ private fun FirstPaint(startup: StartupPage?) {
     ) {
         val density = LocalDensity.current
         val widthPx = with(density) { maxWidth.toPx() }.toInt()
+        val heightPx = with(density) { maxHeight.toPx() }.toInt()
         val theme = LocalPageThemeName.current
-        val bitmap = startup?.takeIf { it.widthPx == widthPx && it.theme == theme }?.bitmap
+        val bitmap = startup?.takeIf {
+            it.glassWidthPx == widthPx && it.glassHeightPx == heightPx && it.theme == theme
+        }?.bitmap
         if (bitmap != null) {
             Image(
                 bitmap = bitmap.asImageBitmap(),

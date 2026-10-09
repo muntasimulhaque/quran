@@ -64,6 +64,14 @@ object Arabic {
     private fun isStripped(codePoint: Int): Boolean =
         codePoint == TATWEEL || STRIPPED_RANGES.any { codePoint in it }
 
+    /**
+     * Whether [codePoint] is a mark, a format character, or the tatweel
+     * itself: the parts of a word that are not its letters. The Mushaf's line
+     * engine reads this to find where a word's letters are, because a tatweel
+     * belongs between two letters and never between a letter and its mark.
+     */
+    fun isMark(codePoint: Int): Boolean = isStripped(codePoint)
+
     private fun fold(codePoint: Int): Int = FOLDED_CODEPOINTS[codePoint] ?: codePoint
 
     private fun toAsciiDigit(codePoint: Int): Int = when (codePoint) {

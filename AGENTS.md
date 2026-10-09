@@ -91,11 +91,13 @@ dead letter.
    a real sentence, every color is chosen, every icon is drawn for this app.
 7. **Accessibility is a rule, not a feature.** TalkBack works end to end.
    Study mode honors the system font scale; the Mushaf page is drawn from
-   the Book's own words at the reader's own text size, set to the same five
-   steps every sized text uses, and a page set taller than the glass is
-   panned (owner decision, this session: the page's usual size holds all
-   604 pages inside the room the pager gives, measured over every page of
-   the Book; the phone's own magnification still covers anything beyond it).
+   the Book's own words at the page's own type, and the reader's own five
+   steps are a share of it, so a reader who asks for larger text gets a page
+   whose fullest lines flow onto a second and is panned through it rather
+   than shown a page whose lines were re-set (owner decision, this session:
+   the page's own type holds all 604 pages inside the measure at the usual
+   step, measured over every page of the Book on a real device; the phone's
+   own magnification still covers anything beyond it).
    Contrast targets live in the theme and are measured.
 8. **Two UI languages, one content language each.** English and Bangla ship
    together, the interface strings in each module's `values-bn`, and the
@@ -356,13 +358,23 @@ at every step:
 - **the manifest**: `content/manifest.json`, the one place a dataset's
   source, version, license, and checksum are recorded.
 - **Mushaf mode**: the 15-line page, drawn from the Book's own words at the
-  reader's own text size, swiped.
+  page's own type, with the print's own lines and the print's own fill,
+  swiped.
 - **study mode**: the ayah-by-ayah reader with translation, word-by-word,
   and tafsir.
 - **the page / the line / the word**: the Mushaf geometry, from the page
   down to one word and the shape the page's own face gives it.
 - **the measure**: the page's own line, 15.6 ems of its text wide, which the
-  print justifies to and the reader's text size shares out.
+  print justifies to. The type is the page's own and the reader's size is a
+  share of it.
+- **the page's own type**: the largest at which that page's fullest line still
+  stands inside the measure, measured from the Book's own words and the shipped
+  face. A dense page is set smaller than a sparse one, as the print sets them.
+- **the tatweel**: the stroke the print lengthens to fill a line. It is written
+  into the string the canvas draws and never into the Book's own text.
+- **the pitch**: the distance between two lines. It is the page's own leading,
+  and the only thing about a page the glass decides: the glass opens the page
+  out to fill itself and never tightens it under its own leading.
 - **the reference**: an ayah key in `surah:ayah` form, for example 2:255.
 - **the portion**: the reader's chosen daily amount. Never called a streak.
 - **the deck**: the day's ayah is one card of a shuffled 6,236, dealt by the

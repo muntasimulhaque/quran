@@ -47,6 +47,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.core.net.toUri
 import io.github.muntasimulhaque.quran.BuildConfig
@@ -60,7 +61,6 @@ import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.browse.BrowseSheet
 import io.github.muntasimulhaque.quran.ui.mushaf.MushafPage
-import io.github.muntasimulhaque.quran.ui.mushaf.PAGE_ASPECT
 import io.github.muntasimulhaque.quran.ui.playback.PlaybackBar
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
@@ -610,13 +610,12 @@ private fun MushafReader(
         val density = LocalDensity.current
         val availableWidth = with(density) { maxWidth.toPx() }
         val availableHeight = with(density) { maxHeight.toPx() }
-        // The page's height follows from its width; every page is rendered at
-        // the width it will actually be drawn at, and never larger.
-        val pageWidth = min(availableWidth, availableHeight / PAGE_ASPECT).toInt().coerceAtLeast(1)
-        // The reader's own text size for the page, as a share of the
-        // measure's em: the page is drawn at it, and never scaled to the
-        // screen afterwards.
-        val textScale = viewModel.mushafScale
+        // The page's own width and pitch are solved for the glass it is given
+        // (PageGeometry), so every page is drawn at its own size and never
+        // larger. The glass is part of that, so the glass is what the settle
+        // carries: a page the reader left on a phone is not the page a tablet
+        // would draw.
+        val textScale = viewModel.mushafStep
         val reducedMotion by rememberReducedMotion()
         val pagerState = rememberPagerState(
             initialPage = (viewModel.page - 1).coerceIn(0, 603),
@@ -627,7 +626,12 @@ private fun MushafReader(
 
         LaunchedEffect(pagerState) {
             snapshotFlow { pagerState.settledPage }.collect { settled ->
-                viewModel.onPageSettled(settled + 1, pageWidth, themeKey)
+                viewModel.onPageSettled(
+                    page = settled + 1,
+                    glassWidthPx = availableWidth.roundToInt(),
+                    glassHeightPx = availableHeight.roundToInt(),
+                    theme = themeKey,
+                )
             }
         }
         // A page that has stopped moving marks its settle with one light tick.
@@ -676,7 +680,6 @@ private fun MushafReader(
                 content = content,
                 renderer = viewModel.renderer,
                 page = index + 1,
-                pageWidth = pageWidth,
                 textScale = textScale,
                 palette = palette,
                 themeKey = themeKey,
@@ -688,8 +691,9 @@ private fun MushafReader(
                 active = index == pagerState.currentPage,
                 placeholder = startup
                     ?.takeIf {
-                        it.page == index + 1 && it.widthPx == pageWidth &&
-                            it.theme == themeKey && it.scale == textScale
+                        it.page == index + 1 && it.glassWidthPx == availableWidth.roundToInt() &&
+                            it.glassHeightPx == availableHeight.roundToInt() &&
+                            it.theme == themeKey && it.step == textScale
                     }
                     ?.bitmap,
             )

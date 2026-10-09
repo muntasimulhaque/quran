@@ -4,30 +4,22 @@ import kotlin.math.roundToInt
 
 /**
  * The rectangle a Mushaf page's rule stands in, and the page's own
- * proportions, in ems of the page's own text.
+ * proportions, in ems of the page's own measure.
  *
- * The rule is the page's furniture and it is also what gives the sheet
- * of paper an edge on a wide ground, where the page and the app's ground are
- * the same tone. It is one rectangle with one margin on all four sides, and
- * the margin *inside* it is one number, [AIR_EM], measured from the text's ink
- * and not from its slots: these fonts carry their marks above the letters, so
- * a line's ink reaches further up than its slot says, and a frame ruled off
- * the slots stands on the marks.
+ * The measure is the page's and the type is the page's own too: it is the
+ * largest at which that page's fullest line still stands inside the measure,
+ * because a page whose line runs past the measure is a page whose words have
+ * been re-set, and the arrangement of the Book is not the app's to re-set.
+ * Every page therefore carries its own scale, [PageTextLayout] computes it
+ * from the Book's own words, and [of] draws the page at it.
  *
- * Before this the four margins were four numbers. The sides were a share of
- * the page's width (1.4 percent), the head was the top of the first slot, and
- * the foot was a whole band away: on the page in that report the rule stood
- * 5 dp from the glyphs at the sides, 4 dp above them, and 11 dp below the last
- * line, so one rectangle read as a wire pressed against the text at the top
- * and left and as a page at the foot (owner report, the forty-fourth session).
- * The measure gives up the two percent of the page's width it takes to hold
- * the rule where a page holds it, which is 2 percent of the mushaf's own type
- * and nothing else, and the paper outside the rule is the margin that is left
- * over, so the rule is the same distance inside the page on every side.
- *
- * Everything is in ems because the page is rendered at the width it will be
- * shown at: a share of the width is the same gap on a phone and on a tablet,
- * and a number of pixels would be a hairline on one and a moat on the other.
+ * Everything here is in ems of the measure because the page is rendered at
+ * the width it will be shown at: a share of the width is the same gap on a
+ * phone and on a tablet, and a number of pixels would be a hairline on one
+ * and a moat on the other. The one number that is not the page's is the
+ * pitch: it belongs to the glass, and it is the only thing about a page that
+ * the glass decides, because a page of fifteen lines at the print's own type
+ * is narrower than a phone is tall and must be opened out to fill it.
  */
 class PageFrame private constructor(
     /** The rule's own left edge, in page pixels. */
@@ -40,6 +32,8 @@ class PageFrame private constructor(
     val foot: Float,
     /** Where the page's first line begins: the top of its own slot. */
     val slotTop: Float,
+    /** The pitch of two lines, in page pixels. */
+    val pitchPx: Float,
     /** The page's own height, in pixels, which its aspect is measured against. */
     val heightPx: Int,
 ) {
@@ -47,16 +41,7 @@ class PageFrame private constructor(
         /** A full line of the page's glyphs sums to this many em. */
         const val EM_PER_LINE = 15.6f
 
-        /** The pitch of two lines, as a share of the em. */
-        const val LINE_HEIGHT_RATIO = 1.644f
-
-        /** The lines of the page. */
-        const val LINES = 15
-
-        /**
-         * The measure, as a share of the page's own width: what is left over
-         * is the page's margin, and [AIR_EM] of it is the air inside the rule.
-         */
+        /** The measure, as a share of the page's own width. */
         const val TEXT_WIDTH_RATIO = 0.88f
 
         /**
@@ -74,85 +59,148 @@ class PageFrame private constructor(
          */
         const val FOOT_EM = 1.38f
 
-        /** The page number's roundel, as a share of the em, as a radius. */
-        const val ROUNDEL_EM = 0.34f
-
-        /**
-         * An ayah's own number in its roundel, as a share of the em, as a
-         * radius. The printed page ends an ayah with its number in a small
-         * roundel, and it is drawn here rather than carried in a font: a
-         * number the app draws is a number the reader can also touch, and a
-         * roundel drawn in the ornament keeps the line it stands on neutral.
-         */
+        /** An ayah's own number in its roundel, as a share of the em, as a radius. */
         const val MARKER_EM = 0.30f
+
+        /** The page number own roundel, as a share of the em, as a radius. */
+        const val ROUNDEL_EM_PAGE = 0.34f
+
+        /** The room an ayah roundel keeps inside itself for its number. */
+        const val ROUNDEL_PAD_EM = 0.14f
 
         /** The digits inside an ayah's roundel, as a share of the em. */
         const val MARKER_DIGITS_EM = 0.32f
 
         /**
-         * The tallest ink any of the 604 page fonts carries, in ems, which is
-         * what the pager reserves room for: the tall fonts measure 1.8, and a
-         * future pack is given a tenth of an em of slack over that.
+         * One Arabic-Indic digit of the ornament face, as a share of its em,
+         * measured from the face itself: the roundel is as wide as the number
+         * it carries, and a number the app draws is a number the app must
+         * also reserve room for.
+         */
+        const val ORNAMENT_DIGIT_EM = 0.585f
+
+        /**
+         * The shipped text face's own ink above and below its baseline, in
+         * ems of that face, measured from the face itself: its hhea ascent
+         * and descent over its units per em.
+         */
+        const val INK_EM = 1.7578f
+
+        /**
+         * The tallest ink any face the page might be drawn with is allowed to
+         * carry, in ems. The gate reads this, so a face whose metrics move
+         * fails the build rather than drawing a page whose marks cross the
+         * rule.
          */
         const val INK_EM_TALLEST = 2.0f
 
         /**
-         * The frame of a page [pageWidthPx] pixels wide whose lines carry
-         * [inkEm] of ink above and below their baseline, which is the font's
-         * own ascent plus its descent in ems.
+         * The pitch as a share of the type: the page's own leading. It is the
+         * floor the pitch never goes under, and the glass raises it above it
+         * to fill whatever room the fifteen lines are given.
+         */
+        const val LINE_HEIGHT_RATIO = 1.644f
+
+        /** The lines of the page. */
+        const val LINES = 15
+
+        /** The page's own em in pixels: the measure at a page of [pageWidthPx]. */
+        fun em(pageWidthPx: Int): Float = pageWidthPx * TEXT_WIDTH_RATIO / EM_PER_LINE
+
+        /**
+         * An ayah number's roundel, as wide as the drawer draws it, in ems of
+         * the measure. The printed page ends an ayah with its number in a
+         * small oval whose width is its own height or the width of its
+         * digits, whichever is wider, and the engine reserves exactly that: a
+         * flat reservation sets every three-digit number on the word before
+         * it, which is a touch target in the wrong place.
+         */
+        fun roundelWidthEm(ayah: Int): Float {
+            val digits = if (ayah <= 0) 1 else ayah.toString().length
+            val digitsWidth = digits * ORNAMENT_DIGIT_EM * MARKER_DIGITS_EM
+            return maxOf(2f * MARKER_EM, digitsWidth + 2f * ROUNDEL_PAD_EM)
+        }
+
+        /**
+         * The widest a page of [lines] lines carrying [inkEm] of ink at
+         * [scale] of the measure can be and still stand, at its own pitch,
+         * inside a glass [glassHeightPx] tall.
          *
-         * [lines] is how many visual lines the page is drawn with: fifteen
-         * for the print's own page, and more only when a reader has asked
-         * for text large enough that a line of the print no longer holds
-         * its words. [scale] is the reader's text size as a share of the
-         * measure's own em: the line pitch and the text's ink follow it,
-         * because they are the text's, while the rule, the air, and the
-         * foot's room stay the page's own, in the measure's em, so the
-         * parchment keeps its proportions at every size.
+         * The page's height at its own pitch is a straight line in its width:
+         * the margins, the air and the foot are shares of the width, and the
+         * pitch and the ink are shares of the type, which is itself a share
+         * of the width. So the width is solved rather than guessed, and every
+         * page is drawn at the width its own words allow it.
+         */
+        fun widestPagePx(
+            glassWidthPx: Float,
+            glassHeightPx: Float,
+            lines: Int,
+            inkEm: Float,
+            scale: Float,
+        ): Int {
+            val widthEm = EM_PER_LINE / TEXT_WIDTH_RATIO
+            // Every share of the page's height is a share of its width: the
+            // margin is, the air is, the foot is, and the pitch and the ink
+            // are shares of the type, which is a share of the width too. The
+            // air is counted once, because the margin gives it back.
+            val perWidth = (1f - TEXT_WIDTH_RATIO) / 2f +
+                TEXT_WIDTH_RATIO / EM_PER_LINE * (
+                AIR_EM + (lines - 1) * scale * LINE_HEIGHT_RATIO + inkEm * scale + FOOT_EM
+                )
+            if (perWidth <= 0f) return glassWidthPx.roundToInt().coerceAtLeast(1)
+            val solved = glassHeightPx / perWidth
+            return minOf(glassWidthPx, solved).roundToInt().coerceAtLeast(1)
+        }
+
+        /**
+         * How tall a page of this geometry is, as a share of its width, for
+         * [lines] lines of [inkEm] at [scale] at a pitch of [pitchEm] ems.
+         */
+        fun aspect(lines: Int, inkEm: Float, scale: Float, pitchEm: Float): Float {
+            val widthEm = EM_PER_LINE / TEXT_WIDTH_RATIO
+            val heightEm = widthEm * (1f - TEXT_WIDTH_RATIO) / 2f +
+                AIR_EM + (lines - 1) * pitchEm + inkEm * scale + FOOT_EM
+            return heightEm / widthEm
+        }
+
+        /**
+         * The frame of a page [pageWidthPx] wide, [lines] lines long, drawn at
+         * [scale] of the measure with a pitch of [pitchEm] ems of the measure.
+         *
+         * [inkEm] is the face's own ink in its ems: the rule is measured from
+         * the text's ink and not from its slots, because these faces carry
+         * their marks above their letters and a frame ruled off the slots
+         * stands on them.
          */
         fun of(
             pageWidthPx: Int,
-            inkEm: Float,
-            lines: Int = LINES,
-            scale: Float = 1f,
+            lines: Int,
+            scale: Float,
+            pitchEm: Float,
+            inkEm: Float = INK_EM,
         ): PageFrame {
             val em = em(pageWidthPx)
-            val line = em * LINE_HEIGHT_RATIO * scale
+            val pitch = pitchEm * em
             val air = em * AIR_EM
             // The rule stands the air inside the measure, and whatever margin
             // is left outside it is the same margin at the head, so the frame
             // is one rectangle drawn inside the page on every side.
-            val margin = (pageWidthPx - pageWidthPx * TEXT_WIDTH_RATIO) / 2f - air
+            val margin = pageWidthPx * (1f - TEXT_WIDTH_RATIO) / 2f - air
             val ink = inkEm * em * scale
-            val halfLeading = (line - ink) / 2f
+            val halfLeading = (pitch - ink) / 2f
             val head = margin
             val slotTop = head + air - halfLeading
-            val foot = head + air + (lines - 1) * line + ink + air
+            val foot = head + air + (lines - 1) * pitch + ink + air
             return PageFrame(
                 left = margin,
                 right = pageWidthPx - margin,
                 head = head,
                 foot = foot,
                 slotTop = slotTop,
+                pitchPx = pitch,
                 heightPx = (foot + FOOT_EM * em).roundToInt().coerceAtLeast(1),
             )
-        }
-
-        /** The page's own em in pixels: the measure at a page of [pageWidthPx]. */
-        fun em(pageWidthPx: Int): Float = pageWidthPx * TEXT_WIDTH_RATIO / EM_PER_LINE
-
-        /**
-         * How tall a page of this geometry is, as a share of its width, for
-         * lines carrying [inkEm] of ink. The pager reads this before it has
-         * chosen a page and so before it knows the font, and reserves
-         * [aspect] of [INK_EM_TALLEST]: a page is then never taller than the
-         * room it was given, on any font in the pack.
-         */
-        fun aspect(inkEm: Float): Float {
-            val widthEm = EM_PER_LINE / TEXT_WIDTH_RATIO
-            val heightEm = widthEm * (1f - TEXT_WIDTH_RATIO) / 2f + AIR_EM +
-                (LINES - 1) * LINE_HEIGHT_RATIO + inkEm + FOOT_EM
-            return heightEm / widthEm
         }
     }
 }

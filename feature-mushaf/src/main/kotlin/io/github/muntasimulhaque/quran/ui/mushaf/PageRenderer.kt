@@ -10,14 +10,14 @@ import android.util.LruCache
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.res.ResourcesCompat
 import io.github.muntasimulhaque.quran.content.R
+import io.github.muntasimulhaque.quran.core.PageFrame
+import io.github.muntasimulhaque.quran.core.PageGeometry
 import io.github.muntasimulhaque.quran.core.LayoutLine
 import io.github.muntasimulhaque.quran.core.LayoutWord
-import io.github.muntasimulhaque.quran.core.PageFrame
 import io.github.muntasimulhaque.quran.core.PageTextLayout
 import io.github.muntasimulhaque.quran.core.SlotKind
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
-import io.github.muntasimulhaque.quran.data.PageWord
 import io.github.muntasimulhaque.quran.ui.theme.PagePalette
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -32,6 +32,8 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class RenderedPage(
     val bitmap: Bitmap,
+    /** How many visual lines the page was drawn with: the print's own count. */
+    val lines: Int,
     val words: List<WordBox>,
     private val ayahBoxes: Map<Int, List<RectF>>,
     private val ayahs: Map<Int, Ayah>,
@@ -131,25 +133,28 @@ data class WordBox(
 )
 
 /**
- * What one rendered page is: its number, the pixel width it was drawn at,
- * the theme it was drawn for, and the reader's text size it was drawn with.
- * A page is never redrawn for a new size: it is a new page with the same
- * number.
+ * What one rendered page is: its number, the glass it was drawn for, the theme
+ * it was drawn for, and the reader's text size it was drawn with.
+ *
+ * The glass is in the key because the page's width and its pitch are the
+ * glass's: a page drawn for a phone is not the page a tablet draws, and the
+ * same phone rotated is a different page again. A page is never redrawn for a
+ * new size: it is a new page with the same number.
  */
-data class PageKey(val page: Int, val widthPx: Int, val theme: String, val scale: Float)
+data class PageKey(val page: Int, val glassWidthPx: Int, val glassHeightPx: Int, val theme: String, val step: Float)
 
 /**
  * Renders page bitmaps on worker threads, keeps a few of them, and never
  * renders the same page twice at once. A page turn is a texture draw because
  * the neighbouring pages are already there.
  *
- * The page is drawn from the Book's own text with the one Arabic face the
- * app ships, at the reader's own text size: the words are laid out by
- * [PageTextLayout], which keeps the printed page's lines wherever its words
- * still fit the reader's measure and re-sets them where they no longer do.
- * The page's furniture (the rule, the surah's band, the basmallah, the foot's
- * roundel and juz) is the page's own, in the measure's em, so it keeps its
- * proportions at every text size.
+ * The page is drawn from the Book's own text with the one Arabic face the app
+ * ships, at the page's own type, which [PageTextLayout] measures from the
+ * Book's own words. The words are laid out on the print's own fifteen lines,
+ * and a line is filled the way the print fills it: with the tatweel, the
+ * stroke the print's own hand lengthens. The page's furniture (the rule, the
+ * surah's band, the basmallah, the foot's roundel and juz) is the page's own,
+ * in the measure's em, so it keeps its proportions at every size.
  */
 class PageRenderer(private val context: Context) {
 
@@ -198,7 +203,7 @@ class PageRenderer(private val context: Context) {
         } ?: return
         withContext(Dispatchers.IO) {
             try {
-                lastPage.save(key.page, key.widthPx, key.theme, key.scale, copy)
+                lastPage.save(key.page, key.glassWidthPx, key.glassHeightPx, key.theme, key.step, copy)
             } finally {
                 copy.recycle()
             }
@@ -244,26 +249,18 @@ class PageRenderer(private val context: Context) {
         palette: PagePalette,
     ): RenderedPage? {
         val typeface = textTypeface() ?: return null
-        val widthPx = key.widthPx
-        val pageEm = PageFrame.em(widthPx)
-        val fontPx = pageEm * key.scale
 
-        val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        // Every width the engine is given is measured once at one large size
+        // and expressed in the typeface's own ems, so the arithmetic is the
+        // same on every screen and the page is the same page everywhere.
+        val measuring = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             this.typeface = typeface
-            textSize = fontPx
-            color = palette.ink.toArgb()
+            textSize = MEASURE_PX
         }
-        val metrics = textPaint.fontMetrics
-        // The rule is ruled against the text's own ink, so the frame is
-        // measured from the font and not from the slots: this face carries
-        // its marks above the letters, and a frame ruled off the slots
-        // stands on them.
-        val inkEm = (metrics.descent - metrics.ascent) / fontPx
+        fun measure(text: String): Float = measuring.measureText(text) / MEASURE_PX
 
-        // The page's lines: the print's own, kept where its words still fit
-        // the reader's measure, re-set where they do not.
         val pageWords = content.pageWords(key.page)
-        val wordsById = HashMap<Int, LayoutWord>(pageWords.size)
+        val wordsById = HashMap<Int, io.github.muntasimulhaque.quran.core.LayoutWord>(pageWords.size)
         for (word in pageWords) {
             wordsById[word.id] = LayoutWord(
                 id = word.id,
@@ -273,34 +270,48 @@ class PageRenderer(private val context: Context) {
                 text = word.text,
             )
         }
-        val spaceEm = textPaint.measureText(" ") / fontPx
-        // An ayah's number stands in a roundel drawn at display time; the
-        // engine only reserves its room, which is the roundel's own width
-        // and the word gap that stands between it and the word before it.
-        val markerEm = (2f * PageFrame.MARKER_EM) / key.scale + spaceEm
-        val layout = PageTextLayout.layout(
-            lines = content.pageLines(key.page).map { line ->
-                LayoutLine(
-                    line = line.line,
-                    type = line.type,
-                    centered = line.centered,
-                    firstWordId = line.firstWordId,
-                    lastWordId = line.lastWordId,
-                    surah = line.surah,
-                )
-            },
-            words = wordsById,
-            capacityEm = PageFrame.EM_PER_LINE / key.scale,
-            measure = { text -> textPaint.measureText(text) / fontPx },
-            spaceEm = spaceEm,
-            markerEm = markerEm,
-        )
+        val lines = content.pageLines(key.page).map { line ->
+            LayoutLine(
+                line = line.line,
+                type = line.type,
+                centered = line.centered,
+                firstWordId = line.firstWordId,
+                lastWordId = line.lastWordId,
+                surah = line.surah,
+            )
+        }
 
-        val frame = PageFrame.of(widthPx, inkEm, lines = layout.lines, scale = key.scale)
+        val layout = PageTextLayout.layout(
+            lines = lines,
+            words = wordsById,
+            measure = ::measure,
+            spaceEm = measure(" "),
+            roundelEm = PageFrame::roundelWidthEm,
+            step = key.step,
+        )
+        val scale = layout.scale
+
+        val geometry = PageGeometry.of(
+            glassWidthPx = key.glassWidthPx.toFloat(),
+            glassHeightPx = key.glassHeightPx.toFloat(),
+            lines = layout.lines,
+            scale = scale,
+        )
+        val widthPx = geometry.widthPx
+        val frame = geometry.frame
+        val pageEm = PageFrame.em(widthPx)
+        val fontPx = pageEm * scale
+
         val bitmap = Bitmap.createBitmap(widthPx, frame.heightPx, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         canvas.drawColor(palette.paper.toArgb())
 
+        val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            this.typeface = typeface
+            textSize = fontPx
+            color = palette.ink.toArgb()
+        }
+        val metrics = textPaint.fontMetrics
         val ornamentPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             this.typeface = ornamentTypeface()
             textAlign = Paint.Align.CENTER
@@ -326,12 +337,11 @@ class PageRenderer(private val context: Context) {
             strokeWidth = maxOf(1f, widthPx / 900f)
             alpha = 170
         }
-        val lineHeight = fontPx * PageFrame.LINE_HEIGHT_RATIO
+        val lineHeight = frame.pitchPx
         val textWidth = widthPx * PageFrame.TEXT_WIDTH_RATIO
         // The measure's right edge: the Book is read from it, right to left.
         val measureRight = widthPx - (widthPx - textWidth) / 2f
-        val roundelHeight = 2f * PageFrame.MARKER_EM * pageEm
-        val roundelPad = pageEm * ROUNDEL_PAD_EM
+        val gapPx = measure(" ") * fontPx
 
         // The page's own furniture: the rule the text sits within, the juz at
         // the left of the foot rule, and the page number in its roundel, as
@@ -396,10 +406,10 @@ class PageRenderer(private val context: Context) {
                                 canvas = canvas,
                                 ayah = word.ayah,
                                 right = right,
-                                gapPx = spaceEm * fontPx,
+                                gapPx = gapPx,
                                 centerY = centerY,
-                                height = roundelHeight,
-                                pad = roundelPad,
+                                height = 2f * PageFrame.MARKER_EM * pageEm,
+                                width = PageFrame.roundelWidthEm(word.ayah) * pageEm,
                                 paint = roundelPaint,
                                 ring = roundelRing,
                             )
@@ -420,7 +430,7 @@ class PageRenderer(private val context: Context) {
                             continue
                         }
                         val left = right - placed.width * fontPx
-                        canvas.drawText(word.text, left, baseline, textPaint)
+                        canvas.drawText(placed.text, left, baseline, textPaint)
                         val box = RectF(
                             left,
                             baseline + metrics.ascent,
@@ -442,7 +452,7 @@ class PageRenderer(private val context: Context) {
                 }
             }
         }
-        return RenderedPage(bitmap, words, ayahBoxes, ayahs, palette)
+        return RenderedPage(bitmap, layout.lines, words, ayahBoxes, ayahs, palette)
     }
 
     /**
@@ -453,7 +463,10 @@ class PageRenderer(private val context: Context) {
      *
      * [right] is where the marker's atom stands against the previous word's
      * gap, and [gapPx] is that gap: the roundel sits inside its atom, with
-     * the gap between the ayah's last word and its number.
+     * the gap between the ayah's last word and its number. [width] is the
+     * atom's own width, which is the roundel's: [PageFrame.roundelWidthEm] is
+     * the one number the engine reserves it and the drawer draws it from, so
+     * what a finger touches is what the eye sees.
      */
     private fun drawRoundel(
         canvas: Canvas,
@@ -462,14 +475,13 @@ class PageRenderer(private val context: Context) {
         gapPx: Float,
         centerY: Float,
         height: Float,
-        pad: Float,
+        width: Float,
         paint: Paint,
         ring: Paint,
     ): RectF {
         val text = arabicDigits(ayah)
-        val digits = paint.measureText(text)
         val roundelRight = right - gapPx
-        val left = roundelRight - maxOf(height, digits + pad)
+        val left = roundelRight - width
         val top = centerY - height / 2f
         val bottom = centerY + height / 2f
         canvas.drawOval(left, top, roundelRight, bottom, ring)
@@ -490,13 +502,7 @@ class PageRenderer(private val context: Context) {
      *
      * Where the rule stands is [PageFrame]'s one number, and it stands the
      * same distance inside the page on all four sides, with the same air
-     * between itself and the text. The frame used to be four numbers: a share
-     * of the page's width at the sides, the first slot at the head, and a
-     * whole band at the foot. That left the rule about 4 dp above the first
-     * line's marks and 5 dp from the last glyph of every line, with its own
-     * foot a band away, so one rectangle read as a wire pressed against the
-     * text at the top and the left and as a page at the foot (owner report,
-     * the forty-fourth session).
+     * between itself and the text.
      */
     private fun drawPageRule(canvas: Canvas, frame: PageFrame, rule: Paint) {
         val quiet = Paint(rule)
@@ -518,7 +524,7 @@ class PageRenderer(private val context: Context) {
     ) {
         val top = frame.foot
         canvas.drawLine(frame.left, top, frame.right, top, rule)
-        val radius = pageEm * PageFrame.ROUNDEL_EM
+        val radius = pageEm * PageFrame.ROUNDEL_EM_PAGE
         // The roundel stands in the middle of the room the foot's rule leaves,
         // so it is as far from the text above it as from the page's own edge.
         val centerY = top + (frame.heightPx - top) / 2f
@@ -552,7 +558,7 @@ class PageRenderer(private val context: Context) {
      * The page's own face: the one Arabic typeface the app ships, the same
      * that sets the study reading, so the page and the reading are one
      * letterform. It is loaded once and kept: a page is rendered at the
-     * reader's own size, and the face carries every size.
+     * page's own size, and the face carries every size.
      */
     private fun textTypeface(): Typeface? = textFace ?: runCatching {
         Typeface.createFromAsset(context.assets, "fonts/UthmanicHafs_V22.ttf")
@@ -568,15 +574,19 @@ class PageRenderer(private val context: Context) {
         const val TAG = "PageRenderer"
 
         /**
+         * The size every width is measured at, in the typeface's own units.
+         * Measuring at one size and dividing is the same measurement at every
+         * size, done in floating point rather than in a scaled paint.
+         */
+        const val MEASURE_PX = 1000f
+
+        /**
          * The rendered pages kept in memory, by the bytes they take: a page
          * set small is about 7 MB and a page set large is half again as
          * much, so a reader with large text holds fewer pages rather than
          * more memory.
          */
         const val MAX_CACHE_BYTES = 48 * 1024 * 1024
-
-        /** The room an ayah's roundel keeps inside itself for its number. */
-        const val ROUNDEL_PAD_EM = 0.14f
 
         /** The juz's own size at the left end of the foot's rule, in ems. */
         const val HEADER_RATIO = 0.34f

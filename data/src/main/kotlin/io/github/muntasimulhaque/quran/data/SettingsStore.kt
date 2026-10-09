@@ -73,9 +73,9 @@ data class AppSettings(
     val tafsirSize: Float = TextSize.DEFAULT,
     val wordsSize: Float = TextSize.DEFAULT,
     /**
-     * The Mushaf page's own text size, in the reader's steps. The page is
-     * drawn to its own geometry, so its step is a share of the measure's
-     * em (see MushafText) and not an sp size like the reading's.
+     * The reader's text size for the Mushaf page, in the reader's steps. The
+     * page's own type is the print's own for that page, so the step is a share
+     * of it and not an sp size like the reading's.
      */
     val mushafSize: Float = TextSize.DEFAULT,
     /**
