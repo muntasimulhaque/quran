@@ -133,6 +133,13 @@ dead letter.
   dashes. Release notes fit the 500-character field, counted before
   hand-off, and are handed over as a bare paragraph: no blockquote, no code
   fence, no quotes, no label on the same line.
+- **The release note in the hand-over message is bare text.** The note is
+  given once, in the message itself, standing on its own as plain
+  paragraphs with nothing around it: no blockquote, no quotation marks, no
+  heading or label of its own, no horizontal rule, no vertical bar, and no
+  copy inside a table. The owner copies it from the message straight into
+  the console's box, and anything wrapped around it has to be unwrapped
+  before it can be pasted.
 - **Small pieces, no numbers.** Keep modules small and the codebase
   modular: for code, the codebase is all you need, so memory and docs
   stay out of it, and at most a little maintained map says where what
