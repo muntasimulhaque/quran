@@ -16,7 +16,7 @@ import io.github.muntasimulhaque.quran.content.R
 
 /**
  * The voices of the app. Arabic is the Book's own: the QPC page fonts on the
- * Mushaf and the KFGQPC Hafs face in the study reading, with Amiri for
+ * the KFGQPC Hafs face in the reading, with Amiri for
  * ornaments. Everything else follows the reader's one language choice: the
  * interface speaks Inter in English and Noto Sans Bengali in Bangla, and the
  * reading (translation, tafsir, word meanings, notes) is Literata in English
@@ -53,7 +53,7 @@ val NotoSerifBengali = FontFamily(
     Font(R.font.noto_serif_bengali, FontWeight.Medium),
 )
 
-/** The display voice of the Mushaf ornaments. */
+/** The display voice of the ornaments. */
 val Amiri = FontFamily(Font(R.font.amiri_quran))
 
 /**

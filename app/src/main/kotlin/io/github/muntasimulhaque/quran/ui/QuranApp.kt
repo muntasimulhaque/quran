@@ -1,14 +1,11 @@
 package io.github.muntasimulhaque.quran.ui
 
 import android.app.Activity
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,10 +17,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -32,11 +25,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.muntasimulhaque.quran.R
-import io.github.muntasimulhaque.quran.ui.mushaf.StartupPage
 import io.github.muntasimulhaque.quran.ui.reader.ReaderScreen
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
-import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
-import io.github.muntasimulhaque.quran.ui.theme.LocalPageThemeName
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.data.isDark
 import io.github.muntasimulhaque.quran.data.resolved
@@ -45,14 +35,10 @@ import io.github.muntasimulhaque.quran.ui.theme.QuranTheme
 
 
 /**
- * The app: one theme, one screen, and a first paint that is never blank. The
- * reader's page is painted from the picture the last session left on disk,
- * and the content opens behind it.
+ * The app: one theme, one screen, and a first paint that is never blank.
  *
  * The theme is resolved once, here, from the reader's choice and, when they
- * asked for it, the system's own day and night. Everything below reads the
- * resolved theme, including the launch picture, so a launch in the night
- * never paints the day's page for a frame.
+ * asked for it, the system's own day and night.
  */
 @Composable
 fun QuranApp(
@@ -88,7 +74,7 @@ fun QuranApp(
     /** Opens the phone's own screen for the exact alarm. */
     onAskExactAlarm: () -> Unit = {},
 ) {
-    // A tap on the reminder opens that ayah in the study reading, which is
+    // A tap on the reminder opens that ayah in the reading, which is
     // what a reminder is for: the reader meets the words, not the app. The
     // jump runs once, after the library has opened, and the same ayah is
     // written down as the place, so closing the app leaves it there.
@@ -130,7 +116,7 @@ fun QuranApp(
         val failed = viewModel.failure
         when {
             failed -> ContentProblem(onRetry = { viewModel.retryOpen() })
-            !ready || content == null -> FirstPaint(viewModel.startupPage)
+            !ready || content == null -> FirstPaint()
             settings.uiLanguage == null -> {
                 // The first screen is on screen; the system can stop counting.
                 LaunchedEffect(Unit) {
@@ -225,53 +211,34 @@ private fun ContentProblem(onRetry: () -> Unit) {
 }
 
 /**
- * What the reader sees in the first moments: the page they left, drawn at the
- * width they left it, or, on the very first launch, the paper and the name of
+ * What the reader sees in the first moments: the paper and the name of
  * the Book in the script it was written in. No spinner, no logo animation.
  */
 @Composable
-private fun FirstPaint(startup: StartupPage?) {
-    BoxWithConstraints(
+private fun FirstPaint() {
+    Box(
         Modifier
             .fillMaxSize()
-            .background(LocalPagePalette.current.paper),
+            .background(MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.Center,
     ) {
-        val density = LocalDensity.current
-        val widthPx = with(density) { maxWidth.toPx() }.toInt()
-        val heightPx = with(density) { maxHeight.toPx() }.toInt()
-        val theme = LocalPageThemeName.current
-        val bitmap = startup?.takeIf {
-            it.glassWidthPx == widthPx && it.glassHeightPx == heightPx && it.theme == theme
-        }?.bitmap
-        if (bitmap != null) {
-            Image(
-                bitmap = bitmap.asImageBitmap(),
-                contentDescription = null,
-                contentScale = ContentScale.FillWidth,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.TopCenter),
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = stringResource(R.string.first_paint_title),
+                style = TextStyle(
+                    fontFamily = Amiri,
+                    fontSize = 52.sp,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.88f),
+                ),
             )
-        } else {
-            Column(
-                modifier = Modifier.align(Alignment.Center),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = stringResource(R.string.first_paint_title),
-                    style = TextStyle(
-                        fontFamily = Amiri,
-                        fontSize = 52.sp,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.88f),
-                    ),
-                )
-                Text(
-                    text = stringResource(R.string.first_paint_subtitle),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 10.dp),
-                )
-            }
+            Text(
+                text = stringResource(R.string.first_paint_subtitle),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 10.dp),
+            )
         }
     }
 }

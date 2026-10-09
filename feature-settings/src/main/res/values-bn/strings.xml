@@ -83,10 +83,10 @@
 
     <string name="credit_page_fonts">QPC V2 পেজ ফন্ট</string>
     <string name="credit_page_fonts_by">বাদশাহ ফাহদ গ্লোরিয়াস কুরআন প্রিন্টিং কমপ্লেক্স, অপরিবর্তিত</string>
-    <string name="credit_page_fonts_use">অধ্যয়ন ও মুসহাফের লেখা</string>
+    <string name="credit_page_fonts_use">আরবি লেখা</string>
     <string name="credit_amiri">আমিরি কুরআন</string>
     <string name="credit_amiri_by">খালেদ হোসনী, SIL ওপেন ফন্ট লাইসেন্স 1.1</string>
-    <string name="credit_amiri_use">মুসহাফের বাইরের অলংকরণ ও আরবি</string>
+    <string name="credit_amiri_use">অলংকরণ ও আরবি</string>
     <string name="credit_literata">লিটারাটা</string>
     <string name="credit_literata_by">টাইপটুগেদার, SIL ওপেন ফন্ট লাইসেন্স 1.1</string>
     <string name="credit_literata_use">অনুবাদ ও তাফসীর</string>
@@ -136,7 +136,6 @@
     <string name="settings_size_translation">অনুবাদ</string>
     <string name="settings_size_tafsir">তাফসীর</string>
     <string name="settings_size_words">শব্দের অর্থ</string>
-    <string name="settings_size_mushaf">মুসহাফ পৃষ্ঠা</string>
     <string name="settings_group_reciters">তিলাওয়াতকারী</string>
     <string name="settings_group_translations">অনুবাদ</string>
     <string name="settings_translation_hidden">পাঠে অনুবাদ দেখানো হচ্ছে না</string>

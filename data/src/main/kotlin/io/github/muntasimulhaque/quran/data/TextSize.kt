@@ -8,11 +8,8 @@ import kotlin.math.abs
  * wants a bigger translation does not want the tafsir to move with it, so
  * each is its own choice.
  *
- * [Mushaf] is the reader's share of the page's own type, which is the print's
- * own type for that page rather than a size in sp: it is a share of a
- * letterform, so no `sp` base stands for it.
  */
-enum class TypeRole { Arabic, Translation, Tafsir, Words, Mushaf }
+enum class TypeRole { Arabic, Translation, Tafsir, Words }
 
 /**
  * The five scales every sized text is drawn at, as a multiplier over the base
@@ -22,9 +19,7 @@ enum class TypeRole { Arabic, Translation, Tafsir, Words, Mushaf }
  * small next to the space the diacritics need, so at the same nominal size it
  * reads visibly smaller than Latin text.
  *
- * The largest step stops at 1.2. Past that the study reading turns into a
- * page of headings, and the Mushaf page, which does not scale, is left
- * behind. The smallest, 0.65, is there for a reader who wants more of an
+ * The largest step stops at 1.2. Past that the reading turns into a page of headings. The smallest, 0.65, is there for a reader who wants more of an
  * ayah on one screen than 0.75 gives: a reader who once chose 1.4 keeps the
  * largest step, which is now 1.2, so no choice ever loses its meaning.
  */
@@ -90,11 +85,6 @@ object TextSize {
         // The word list is derived from [meaningSp] at the ayah's own ratio;
         // this entry is that derivation, written as the number it comes to.
         TypeRole.Words -> MEANING_BASE * 30f / 17f
-        // The page's own step is a share of the page's own type, which
-        // PageTextLayout measures from the Book's own words, so it carries no
-        // sp base here. The entry keeps the `when` whole for a role that
-        // never reads it.
-        TypeRole.Mushaf -> 30f
     }
 
     /** Arabic carries diacritics above and below every line, so it needs more. */

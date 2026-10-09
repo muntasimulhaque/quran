@@ -15,10 +15,8 @@
 
     <string name="last_read_empty_title">এখনও কোনো পড়ার স্থান নেই</string>
     <string name="last_read_empty_body">আপনি যেসব আয়াত পড়েছেন সেগুলো এখানে রাখা হয়, নতুনটি আগে, যাতে ছেড়ে আসা স্থানে ফিরে যেতে পারেন।</string>
-    <string name="last_read_detail">%1$s পড়া · %2$s</string>
+    <string name="last_read_detail">%1$s পড়া</string>
     <string name="last_read_ayah_label">আয়াত %1$d</string>
-    <string name="last_read_mode_mushaf">মুসহাফে</string>
-    <string name="last_read_mode_study">অধ্যয়নে</string>
     <string name="last_read_just_now">এইমাত্র</string>
     <plurals name="last_read_minutes">
         <item quantity="other">%1$d মিনিট আগে</item>

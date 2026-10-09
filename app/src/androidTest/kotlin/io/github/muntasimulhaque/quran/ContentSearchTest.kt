@@ -168,7 +168,7 @@ class ContentSearchTest {
     }
 
     /**
-     * The kinds run from the verse outward, each still in Mushaf order
+     * The kinds run from the verse outward, each still in Quran order
      * inside itself (owner decision, 28). The exact ordering is
      * pinned by `SearchOrderTest` in the JVM suite, which does not depend on
      * how many of one kind a query happens to return; what this checks is

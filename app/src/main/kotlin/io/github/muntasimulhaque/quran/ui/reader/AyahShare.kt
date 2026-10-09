@@ -151,7 +151,7 @@ internal suspend fun loadShareCard(
 internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier) {
     val hafs = rememberHafs()
     // The app's mark, sized for a foot: the launcher's own drawing, the book
-    // in the theme's ink with the stand in the Mushaf's ornament gold, set
+    // in the theme's ink with the stand in the ornament gold, set
     // on the card's own paper (owner decision, this session).
     val mark = painterResource(R.drawable.ic_share_mark)
     val paper = lightColorScheme(
@@ -235,7 +235,7 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
 
 /**
  * The app's mark at a foot's size: the launcher's own drawing, the book in
- * the theme's ink with the stand in the Mushaf's ornament gold, carried by
+ * the theme's ink with the stand in the ornament gold, carried by
  * the drawable in its own colors on the card's own paper, so the foot is the
  * same drawing the home screen shows, never a tint of it. The same shape
  * fills the reminder's small icon, where the shade paints it in the

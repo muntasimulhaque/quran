@@ -34,7 +34,6 @@ import org.junit.runner.RunWith
 import androidx.test.core.app.ActivityScenario
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.PackStore
-import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
@@ -270,24 +269,16 @@ class ScreenshotTest {
         return base
     }
 
-    private fun mushafPage() = rule.onAllNodes(hasContentDescription("Mushaf page", substring = true)).onFirst()
-
-    private fun studyPage() = rule.onAllNodesWithContentDescription("Study page").onFirst()
+    private fun readingPage() = rule.onAllNodesWithContentDescription("Reading").onFirst()
 
     private fun waitForAReading() {
         rule.waitUntil(timeoutMillis = 30_000) {
-            rule.onAllNodes(hasContentDescription("Mushaf page", substring = true))
-                .fetchSemanticsNodes().isNotEmpty() ||
-                rule.onAllNodesWithContentDescription("Study page").fetchSemanticsNodes().isNotEmpty()
+            rule.onAllNodesWithContentDescription("Reading").fetchSemanticsNodes().isNotEmpty()
         }
         // The window is not ready for a gesture in the frame it appears in;
         // the first tap of a run must not be swallowed by startup.
         Thread.sleep(1_500)
     }
-
-    private fun inMushaf(): Boolean =
-        rule.onAllNodes(hasContentDescription("Mushaf page", substring = true))
-            .fetchSemanticsNodes().isNotEmpty()
 
     private fun back() {
         // A raw back key is used instead of Espresso: it needs no window
@@ -326,8 +317,7 @@ class ScreenshotTest {
      * `tapThePaper`.
      */
     private fun tapTheReading() {
-        val node = if (inMushaf()) mushafPage() else studyPage()
-        node.performTouchInput { click(Offset(4f, height * 0.5f)) }
+        readingPage().performTouchInput { click(Offset(4f, height * 0.5f)) }
     }
 
     /** A tap on the margin brings the chrome up; the states are remembered. */
@@ -407,13 +397,10 @@ class ScreenshotTest {
         runBlocking {
             settings.setUiLanguage("en")
             // The tour photographs 2:255, and it is here rather than at 1:1
-            // because of what the store's first frame then shows. Page 42 is a
-            // full fifteen lines, where page 1 carries seven and leaves half
-            // the sheet empty; and the verse is the one a reader who has
-            // never seen the app can recognise. The frames are the store, and
-            // the store's first image is the app's promise.
+            // because the verse is one a reader who has never seen the app
+            // can recognise. The frames are the store, and the store's
+            // first image is the app's promise.
             settings.setAyah(262)
-            settings.setMode(ReadingMode.Mushaf)
             settings.setTheme(AppTheme.Paper)
             settings.setTranslationPacks(setOf("translation-saheeh-en"))
             settings.setTafsirPacks(setOf("tafsir-ibn-kathir-en"))
@@ -428,203 +415,90 @@ class ScreenshotTest {
     private fun runTheTour() {
         waitForAReading()
 
-        // 1. The Mushaf, with nothing over it.
-        if (!inMushaf()) {
-            revealChrome()
-            rule.onNodeWithContentDescription("Switch to the Mushaf page").performClick()
-            Thread.sleep(1_000)
-        }
+        // 1. The reading at 2:255, with nothing over it. The list opens on
+        // the reader's place, so the verse is on screen until anything
+        // scrolls it away.
         hideChrome()
-        capture("01-mushaf")
+        capture("01-reading")
 
-        // 2. The chrome over the page: the mode door, Browse, Search, and
-        // Settings, which is every door the reader has.
+        // 2. The chrome over the reading: Browse, Search, and Settings.
         revealChrome()
         capture("02-chrome")
+        hideChrome()
 
-        // 3. The study reading of the same place, with its translation.
-        rule.onNodeWithContentDescription("Switch to the study reading").performClick()
-        rule.waitUntil(timeoutMillis = 15_000) {
-            rule.onAllNodesWithContentDescription("Study page").fetchSemanticsNodes().isNotEmpty()
+        // 3. An ayah's actions, and the card they open. The card carries
+        // the tafsir doors, which is the deeper surface a reader meets off
+        // the reading. This runs before any scrolling, while 2:255 is still
+        // the verse on screen.
+        val pillIsUp = {
+            rule.onAllNodesWithContentDescription("Tafsir").fetchSemanticsNodes().isNotEmpty()
         }
-        Thread.sleep(1_200)
-        capture("03-study")
+        var pillRaised = false
+        repeat(3) {
+            if (pillRaised) return@repeat
+            runCatching {
+                rule.onAllNodesWithText("2:255", substring = true).onFirst()
+                    .performTouchInput { longClick() }
+            }
+            pillRaised = runCatching {
+                rule.waitUntil(timeoutMillis = 20_000) { pillIsUp() }
+            }.isSuccess
+            if (!pillRaised) back()
+        }
+        if (!pillRaised) {
+            runCatching { capture("09-long-press-failed") }
+            throw AssertionError("the ayah's long press did not raise the actions bar")
+        }
+        rule.onNodeWithContentDescription("Tafsir").performClick()
+        waitForTag("ayah-card", timeout = 30_000)
+        Thread.sleep(600)
+        captureScreen("07-ayah-card")
 
-        // 4. The surah opening, which is the top of the study list.
-        rule.onNodeWithContentDescription("Study page")
+        // 4. The tafsir open on the card: Ibn Kathir for 2:255.
+        rule.onNodeWithText("Ibn Kathir").performClick()
+        Thread.sleep(1_200)
+        captureScreen("08-tafsir")
+        back()
+        rule.waitUntil(timeoutMillis = 10_000) {
+            rule.onAllNodesWithTag("ayah-card", useUnmergedTree = true)
+                .fetchSemanticsNodes().isEmpty()
+        }
+
+        // 5. The surah opening, which is the top of the reading list.
+        rule.onNodeWithContentDescription("Reading")
             .performTouchInput { swipeDown(startY = height * 0.25f, endY = height * 0.85f, durationMillis = 200) }
         Thread.sleep(800)
-        capture("04-surah-opening")
+        capture("03-surah-opening")
 
-        // 5. Search, with a word a reader would type, and the filter group
-        // under the field.
+        // 6. Search, with a word a reader would type.
         revealChrome()
         rule.onNodeWithContentDescription("Search").performClick()
         rule.waitUntil(timeoutMillis = 10_000) {
             rule.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty()
         }
         rule.onNode(hasSetTextAction()).performTextInput("mercy")
-        // The count is what the frame needs, so the anchor is the count and not
-        // a sleep. It has to be the count *with its digits*: the sheet draws
-        // "No matches." for a query that has not been run yet, so a wait on
-        // any text holding "match" was satisfied before the first search had
-        // started, and the store's search frame became a sheet that had found
-        // nothing. A settled query takes a moment, so the wait is a
-        // moment's worth and the frame says what the reader will see.
         rule.waitUntil(timeoutMillis = 180_000) {
             rule.onAllNodes(matchCount).fetchSemanticsNodes().isNotEmpty()
         }
-        captureScreen("05-search")
+        captureScreen("04-search")
         back()
 
-        // 6. The settings hub.
+        // 7. The settings hub.
         revealChrome()
         rule.onNodeWithContentDescription("Settings").performClick()
         waitForTag("settings-hub")
-        captureScreen("06-settings")
+        captureScreen("05-settings")
         back()
 
-        // 7. Browse, the surah list.
+        // 8. Browse, the surah list.
         revealChrome()
         rule.onNodeWithContentDescription("Browse the Quran").performClick()
-        // The anchor is the sheet itself, by tag: the reader's own title sits
-        // behind the sheet and matches a text wait at once, which let the
-        // capture run before the sheet existed and photographed the reader.
         waitForTag("browse-sheet")
-        captureScreen("07-browse")
+        captureScreen("06-browse")
         back()
-        // The back key must actually close Browse before the next screen is
-        // asked for. When a system dialog swallowed it, the card used to
-        // open over the still-open sheet and the last two frames
-        // photographed a screen two steps behind the tour while the leg was
-        // green (twenty-ninth session). If the sheet is still there, the
-        // wait fails and the leg is red, which is the honest answer.
         rule.waitUntil(timeoutMillis = 10_000) {
             rule.onAllNodesWithTag("browse-sheet", useUnmergedTree = true)
                 .fetchSemanticsNodes().isEmpty()
-        }
-
-        // 8. An ayah's actions, and the card they open, captured from the
-        // Mushaf: there the card carries the translation, word by word, and
-        // the tafsir, which is the richer surface and the one a reader coming
-        // off the page meets. The Arabic line sits at the top of the block;
-        // the markers, which are links, sit lower, and a link would take the
-        // press instead.
-        // The mode door takes the reader to the Mushaf, and on the ten inch
-        // leg a sheet from the step before can still be on the screen with its
-        // scrim eating the press. The question that matters is not whether the
-        // sheet is gone but whether the door worked, so the step retries on its
-        // own outcome, with a back key to put away anything still standing: a
-        // sheet outlives its semantics by an animation, which is why a wait on
-        // the tag was not enough.
-        var inMushafNow = false
-        repeat(3) {
-            if (inMushafNow) return@repeat
-            // every press in this step is tolerant: with a sheet still
-            // standing the chrome is not up, and a door that is not there yet
-            // is a reason to put the sheet away and try again, not to fail
-            revealChrome()
-            runCatching {
-                rule.onNodeWithContentDescription("Switch to the Mushaf page").performClick()
-            }
-            inMushafNow = runCatching {
-                rule.waitUntil(timeoutMillis = 8_000) {
-                    rule.onAllNodes(hasContentDescription("Mushaf page", substring = true))
-                        .fetchSemanticsNodes().isNotEmpty()
-                }
-            }.isSuccess
-            if (!inMushafNow) {
-                back()
-                Thread.sleep(800)
-            }
-        }
-        if (!inMushafNow) {
-            throw AssertionError("the mode door did not reach the Mushaf page")
-        }
-        // The press itself is part of what this step retries, because the
-        // press is what the race eats. The sheet from the step before is
-        // gone from the tree a whole animation before its window has left,
-        // so a door that reports success and a chrome that reports itself up
-        // can both be true while the scrim is still over the page, and the
-        // long press then lands on the scrim and the pill never rises. The
-        // earlier retry only covered the door, which is why the ten inch leg
-        // could reach the Mushaf and still time out on the pill.
-        // Each attempt waits for the bar by its own outcome, not for a
-        // length of time: a fixed sleep is too short on the widest profile
-        // and wasted on the phone.
-        val pillIsUp = {
-            rule.onAllNodesWithContentDescription("More").fetchSemanticsNodes().isNotEmpty()
-        }
-        var pillRaised = false
-        repeat(3) {
-            if (pillRaised) return@repeat
-            // the ayah's own node on the page, by the reference the tour set up
-            runCatching {
-                rule.onAllNodes(hasContentDescription("2:255.", substring = true)).onFirst()
-                    .performTouchInput { longClick() }
-            }
-            pillRaised = runCatching {
-                rule.waitUntil(timeoutMillis = 20_000) { pillIsUp() }
-            }.isSuccess
-            if (!pillRaised) {
-                // put away whatever took the press, and let the page settle
-                // before the next attempt rather than pressing into a scrim
-                back()
-            }
-        }
-        if (!pillRaised) {
-            // The frame a red leg keeps, and the two facts the log alone does
-            // not carry: which page the reader is on, and whether the ayah the
-            // press looked for is on it at all. A step that fails here three
-            // times has cost three capture runs' worth of guessing; these two
-            // numbers are the whole difference between reading a cause and
-            // guessing one.
-            runCatching { capture("09-long-press-failed") }
-            val page = rule
-                .onAllNodes(hasContentDescription("Mushaf page", substring = true), useUnmergedTree = true)
-                .fetchSemanticsNodes()
-                .mapNotNull { node ->
-                    node.config.getOrElseNullable(
-                        androidx.compose.ui.semantics.SemanticsProperties.ContentDescription,
-                    ) { null }
-                }
-                .joinToString(" | ")
-            val wanted = rule
-                .onAllNodes(hasContentDescription("2:255.", substring = true), useUnmergedTree = true)
-                .fetchSemanticsNodes()
-                .size
-            throw AssertionError(
-                "the ayah's long press did not raise the actions bar: the page says [$page], " +
-                    "and $wanted node(s) carry 2:255 on it",
-            )
-        }
-        rule.onNodeWithContentDescription("More").performClick()
-        // The card composes after the tap, and its capture raced ahead of it
-        // the same way Browse's did; the tag waits for the card itself. The
-        // card's content is read off the database on a worker, so the first
-        // ready tag can arrive before its translation does; the tour waits a
-        // bounded moment for the whole card and keeps the frame either way,
-        // because a card that is genuinely empty on a device where nothing
-        // is installed is a true frame, not a race.
-        waitForTag("ayah-card", timeout = 30_000)
-        runCatching {
-            rule.waitUntil(timeoutMillis = 10_000) {
-                rule.onAllNodesWithTag("ayah-card-loading", useUnmergedTree = true)
-                    .fetchSemanticsNodes().isEmpty()
-            }
-        }
-        Thread.sleep(600)
-        captureScreen("08-ayah-card")
-        back()
-
-        // Leave the app on the Mushaf page for the next run. The card was
-        // captured from the Mushaf, so the door already offers the study
-        // reading when the tour is here; asking for the Mushaf again would
-        // look for a door that is not on the bar.
-        if (!inMushaf()) {
-            revealChrome()
-            rule.onNodeWithContentDescription("Switch to the Mushaf page").performClick()
-            Thread.sleep(800)
         }
     }
 }

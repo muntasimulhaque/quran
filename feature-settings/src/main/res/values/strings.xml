@@ -84,10 +84,10 @@
 
     <string name="credit_page_fonts">QPC V2 page fonts</string>
     <string name="credit_page_fonts_by">King Fahd Glorious Quran Printing Complex, unmodified</string>
-    <string name="credit_page_fonts_use">Study and Mushaf text</string>
+    <string name="credit_page_fonts_use">Arabic text</string>
     <string name="credit_amiri">Amiri Quran</string>
     <string name="credit_amiri_by">Khaled Hosny, SIL Open Font License 1.1</string>
-    <string name="credit_amiri_use">Ornaments and Arabic outside the Mushaf</string>
+    <string name="credit_amiri_use">Ornaments and Arabic</string>
     <string name="credit_literata">Literata</string>
     <string name="credit_literata_by">TypeTogether, SIL Open Font License 1.1</string>
     <string name="credit_literata_use">Translations and tafsir</string>
@@ -137,7 +137,6 @@
     <string name="settings_size_translation">Translation</string>
     <string name="settings_size_tafsir">Tafsir</string>
     <string name="settings_size_words">Word meanings</string>
-    <string name="settings_size_mushaf">Mushaf page</string>
     <string name="settings_group_reciters">Reciters</string>
     <string name="settings_group_translations">Translations</string>
     <string name="settings_translation_hidden">Translation is hidden in the reading</string>

@@ -4,7 +4,7 @@
     <color name="night">#101720</color>
     <!-- The app's mark is drawn in the theme's own colors: the paper field
          the reading opens on, the ink the page's text wears, and the
-         Mushaf's ornament gold for the stand. The values mirror the ui-kit
+         ornament gold for the stand. The values mirror the ui-kit
          theme's PaperInk and Gold, which are Compose tones and cannot be
          read from a drawable (owner decision, this session). -->
     <color name="icon_background">@color/paper</color>

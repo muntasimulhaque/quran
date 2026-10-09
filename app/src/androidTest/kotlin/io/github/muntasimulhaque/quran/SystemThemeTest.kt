@@ -12,7 +12,6 @@ import androidx.test.runner.screenshot.Screenshot
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.PackStore
-import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -56,7 +55,6 @@ class SystemThemeTest {
             SettingsStore(context).apply {
                 setUiLanguage("en")
                 setAyah(1)
-                setMode(ReadingMode.Mushaf)
                 setTheme(AppTheme.Paper)
                 setAutoNight(true)
             }

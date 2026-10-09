@@ -53,7 +53,7 @@ val canSignRelease = keystoreStoreFile != null &&
     releaseKeystore.containsKey("keyPassword")
 
 // The fonts, the core pack, and the catalog are owned by :content-assets;
-// this module generates the runtime assets (the page fonts, the study font,
+// this module generates the runtime assets (the text font,
 // the core pack, the catalog, and the recitation manifest) and wires them in.
 //
 // The packs a build carries are decided by its variant, not by a condition:
@@ -93,8 +93,7 @@ val screenshotPacks = setOf(
  * The asset copy as a real task class rather than a script closure: the
  * configuration cache cannot serialize a closure owned by the build script,
  * and a cacheable task lets a cold CI runner restore the output (the core
- * pack and all 604 page fonts) from the build cache instead of copying it
- * again, which was about forty seconds of every capture leg.
+ * pack) from the build cache instead of copying it again, which was about forty seconds of every capture leg.
  */
 @CacheableTask
 abstract class PrepareContentAssets : DefaultTask() {
@@ -155,8 +154,7 @@ abstract class PrepareContentAssets : DefaultTask() {
             ?.forEach { pack ->
                 pack.copyTo(File(File(devPacks, "packs"), pack.name), overwrite = true)
             }
-        // The one Arabic face: it sets the study reading and the Mushaf
-        // page both, so the page and the reading are one letterform.
+        // The one Arabic face: it sets the reading, so the words are one letterform.
         val textFont = fontsHafsDir.get().asFile.walkTopDown()
             .firstOrNull { it.isFile && it.name.endsWith(".ttf") }
             ?: throw GradleException("the text font is missing; run ./gradlew :tools:run --args=fetch")
@@ -199,8 +197,8 @@ android {
         applicationId = "io.github.muntasimulhaque.quran"
         minSdk = 24
         targetSdk = 37
-        versionCode = 55
-        versionName = "5.3"
+        versionCode = 56
+        versionName = "5.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -295,7 +293,6 @@ dependencies {
     implementation(project(":data"))
     implementation(project(":content-assets"))
     implementation(project(":ui-kit"))
-    implementation(project(":feature-mushaf"))
     implementation(project(":feature-study"))
     implementation(project(":feature-search"))
     implementation(project(":feature-browse"))

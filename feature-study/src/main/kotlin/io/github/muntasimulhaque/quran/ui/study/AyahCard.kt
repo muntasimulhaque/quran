@@ -35,7 +35,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -43,8 +42,6 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,8 +51,6 @@ import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.TafsirPassage
-import io.github.muntasimulhaque.quran.data.TranslationLine
-import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.feature.study.R
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.languageName
@@ -64,7 +59,6 @@ import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.rich.ArabicBody
 import io.github.muntasimulhaque.quran.ui.rich.RichBlocks
-import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -73,7 +67,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 private sealed interface Door {
-    data object Words : Door
     data class Tafsir(val pack: ContentPack) : Door
 }
 
@@ -87,12 +80,8 @@ private data class TafsirView(
  * The ayah card: one screen per ayah that holds everything deeper without
  * asking the reader to learn an interface.
  *
- * What it shows follows the reading the reader came from. From the Mushaf,
- * where the page carries neither translation nor meanings, the card is the
- * whole study surface: word by word, the translation, and each tafsir. From
- * the study reading, where the ayah and its translation and meanings are
- * already on the page, the card does not repeat them: it opens only the
- * tafsirs. The note is not here at all: it belongs to the pill that the long
+ * The ayah and its translation and meanings are already on the page, so the
+ * card does not repeat them: it opens only the tafsirs. The note is not here at all: it belongs to the pill that the long
  * press raises, one tap away rather than a scroll to the foot of a card.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -101,55 +90,15 @@ fun AyahCard(
     content: ContentDatabase,
     ayah: Ayah,
     surahName: String,
-    translations: List<ContentPack>,
     tafsirPacks: List<ContentPack>,
     settings: AppSettings,
-    wordLanguage: String,
-    hasWords: Boolean,
-    fromMushaf: Boolean,
     onAddContent: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val hafs = remember {
-        FontFamily(Font(path = "fonts/UthmanicHafs_V22.ttf", assetManager = context.assets))
-    }
     var door by remember(ayah.number) { mutableStateOf<Door?>(null) }
     var footnote by remember(ayah.number) { mutableStateOf<OpenFootnote?>(null) }
 
-    // Every translation the reader turned on, each read once. A card with no
-    // translation chosen is not a failure: it is a reader who has not chosen
-    // one yet, so the card offers the door instead of a line that sounds like
-    // a bug. From the study reading the lines are already on the page, so
-    // they are not read again.
-    var translationReady by remember(ayah.number, translations.map { it.id }) {
-        mutableStateOf(false)
-    }
-    val lines by produceState<List<TranslationLine>>(
-        initialValue = emptyList(),
-        // The library is a key: a translation that lands while the card is
-        // open replaces the database, and the card must read the new one.
-        content,
-        ayah.number,
-        translations.map { it.id },
-        fromMushaf,
-    ) {
-        if (!fromMushaf) return@produceState
-        value = withContext(Dispatchers.IO) {
-            translations.mapNotNull { pack ->
-                content.translations(listOf(ayah.number), pack.id)[ayah.number]?.let { text ->
-                    TranslationLine(pack.id, pack.name, pack.language, text)
-                }
-            }
-        }
-        translationReady = true
-    }
-    val words by produceState<List<WordMeaning>>(initialValue = emptyList(), ayah.number, door) {
-        if (fromMushaf && door == Door.Words) {
-            value = withContext(Dispatchers.IO) { content.wordMeanings(ayah.number, wordLanguage) }
-        }
-    }
     val tafsir by produceState<TafsirView?>(initialValue = null, content, ayah.number, door) {
         val pack = (door as? Door.Tafsir)?.pack
         value = if (pack == null) {
@@ -194,149 +143,15 @@ fun AyahCard(
                 // says when the card is whole, and the tour waits on it: the
                 // reader never sees the gap (the sheet is animating open), but
                 // a still frame does (owner report).
-                .testTag(if (translationReady) "ayah-card" else "ayah-card-loading"),
+                .testTag("ayah-card"),
         ) {
-            // From the Mushaf the card is the study surface, so the word by
-            // word meanings, the translation, and the tafsirs are here, in
-            // that order: it is the order the study reading draws them in,
-            // the words under the ayah and the translation under the words.
-            // The ayah itself is not drawn: the reader came from it and it is
-            // on the page behind the card, so repeating the Arabic here would
-            // only push the study down. From the study reading the ayah, its
-            // translation, and its meanings are already open on the page,
-            // and only the tafsir doors remain.
-            if (fromMushaf) {
-                // The card opens on the study, not on the verse again. It did
-                // open with the surah's name, the Arabic and the reference,
-                // because the sheet covers the lower half of the Mushaf page
-                // and the ayah the reader long-pressed was behind it, half
-                // hidden. The owner read that back as a card that began with
-                // the ayah rather than with what the ayah is for, and on a
-                // long verse the heading filled the whole first screen, which
-                // is what the store's own frame of this card was showing. The
-                // page still marks the ayah the card was raised over, and the
-                // footnote sheet still names the ayah a note belongs to, so
-                // the reference is not lost with the heading (owner decision,
-                // forty-sixth session).
-                if (hasWords) {
-                    // Every block of the card is named above itself: the
-                    // words, the translation, the tafsir. The door below
-                    // this label does not repeat it; it names what is inside,
-                    // the list in the language the reading speaks, the way a
-                    // tafsir door names its pack.
-                    Text(
-                        text = stringResource(R.string.card_word_by_word),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Block),
-                    )
-                    DoorRow(
-                        title = languageName(wordLanguage),
-                        subtitle = "",
-                        open = door == Door.Words,
-                        onClick = { door = if (door == Door.Words) null else Door.Words },
-                    )
-                    if (door == Door.Words) {
-                        WordByWord(
-                            meanings = words,
-                            hafs = hafs,
-                            settings = settings,
-                            modifier = Modifier.padding(horizontal = 22.dp, vertical = Space.Block),
-                            // The card opened from the Mushaf carries no
-                            // ayah of its own, so the aid is the only
-                            // Arabic here and keeps the reading ink.
-                            gloss = false,
-                        )
-                    }
-                } else {
-                    Spacer(Modifier.height(Space.Block))
-                    DoorRow(
-                        title = stringResource(R.string.card_add_word_by_word),
-                        subtitle = "",
-                        open = null,
-                        onClick = onAddContent,
-                    )
-                }
-
-                // What each block is is said in words, not with a rule: a
-                // name over the text tells the reader more than a horizontal
-                // line ever could, and the app draws no such rule anywhere
-                // else. The translation is named once because it is one
-                // block even when more than one translation is on; the
-                // pack's own name stays on the lines, where it says whose
-                // reading it is. A reader who hid translations in Settings
-                // draws no lines and no doors for them.
-                val drawnLines = if (settings.showTranslation) lines else emptyList()
-                if (drawnLines.isNotEmpty()) {
-                    Text(
-                        text = stringResource(R.string.card_translation_label),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Block),
-                    )
-                }
-                drawnLines.forEach { line ->
-                    if (drawnLines.size > 1) {
-                        Text(
-                            text = line.packName,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f),
-                            modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = 14.dp),
-                        )
-                    }
-                    TranslationBody(
-                        runs = remember(line.text.text) { RichText.footnotes(line.text.text) },
-                        modifier = Modifier.padding(
-                            start = 22.dp,
-                            end = 22.dp,
-                            top = if (drawnLines.size > 1) Space.Tight else Space.Line,
-                        ),
-                        sizeSp = settings.translationSp,
-                        lineSp = settings.translationLineSp,
-                        arabicSp = settings.arabicSp * 0.8f,
-                        onFootnote = { number ->
-                            // A footnote is a door here too: the marker opens the
-                            // note where it stands, the way it does in the study
-                            // reading, instead of the card printing every note as
-                            // a block at the foot of the page.
-                            line.text.footnotes.firstOrNull { it.number == number }?.let { note ->
-                                footnote = OpenFootnote(
-                                    note = note,
-                                    reference = "${ayah.surah}:${ayah.ayah}",
-                                    sizeSp = settings.translationSp,
-                                    lineSp = settings.translationLineSp,
-                                )
-                            }
-                        },
-                    )
-                }
-                if (settings.showTranslation && drawnLines.isEmpty()) {
-                    when {
-                        translations.isEmpty() -> AddTranslation(
-                            text = stringResource(R.string.card_add_translation),
-                            onClick = onAddContent,
-                            modifier = Modifier.padding(top = Space.Block, start = 22.dp, end = 22.dp),
-                        )
-                        translationReady -> Text(
-                            text = stringResource(R.string.card_no_translation),
-                            style = LocalReadingVoice.current.style.copy(
-                                fontSize = 15.sp,
-                                fontFamily = LocalReadingVoice.current.atSize(15f),
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = Space.Block, start = 22.dp, end = 22.dp),
-                        )
-                        else -> Unit
-                    }
-                }
-            }
             // The tafsir is drawn only while the reader shows it. The packs
             // still stand in for search; this is what the ayah card draws.
             if (settings.showTafsir) {
-                if (!fromMushaf && tafsirPacks.isEmpty()) {
-                    // From the study reading the card is only the tafsir doors, so
-                    // a reader with none open gets the door to add one rather than
-                    // a sheet with nothing in it.
+                if (tafsirPacks.isEmpty()) {
+                    // The card is only the tafsir doors, so a reader with none
+                    // open gets the door to add one rather than a sheet with
+                    // nothing in it.
                     AddTranslation(
                         text = stringResource(R.string.card_add_tafsir),
                         onClick = onAddContent,

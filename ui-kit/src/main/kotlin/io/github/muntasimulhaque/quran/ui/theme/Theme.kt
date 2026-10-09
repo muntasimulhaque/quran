@@ -153,7 +153,7 @@ private val BlackScheme = darkColorScheme(
     scrim = Color(0xFF000000),
 )
 
-/** The Mushaf page colors, which turn over with the theme. */
+/** The reading colors, which turn over with the theme. */
 private val PaperPage = PagePalette(
     paper = PaperBackground,
     ink = PaperInk,

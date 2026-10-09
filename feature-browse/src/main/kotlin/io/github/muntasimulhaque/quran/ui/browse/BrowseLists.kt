@@ -21,7 +21,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.ReadPlace
-import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
@@ -31,7 +30,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 /**
  * Where the reader has been reading, newest first. Each row names the place
  * the way a reader says it: the surah's own name on the first line, the ayah
- * under it ("Al-Fatihah" then "Ayah 1"), and the mode and the moment as the
+ * under it ("Al-Fatihah" then "Ayah 1"), and the moment as the
  * quiet third line, so a place is recognised by its name first and by when it
  * was left second.
  *
@@ -69,7 +68,6 @@ internal fun LastReadList(
                 ayah = text?.ayahLabel,
                 detail = stringResource(
                     R.string.last_read_detail,
-                    readingModeName(place.mode),
                     moment(place.readAt),
                 ),
                 onClick = { onAyah(place.ayahNumber) },
@@ -79,13 +77,6 @@ internal fun LastReadList(
     }
 }
 
-@Composable
-private fun readingModeName(mode: ReadingMode): String = stringResource(
-    when (mode) {
-        ReadingMode.Mushaf -> R.string.last_read_mode_mushaf
-        ReadingMode.Study -> R.string.last_read_mode_study
-    },
-)
 
 /**
  * The names one row draws: the surah as a reader says it, and the ayah's own

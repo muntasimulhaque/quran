@@ -30,7 +30,6 @@ import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.LAST_MINUTE_OF_DAY
 import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.ReadPlace
-import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.Recitation
 import io.github.muntasimulhaque.quran.data.RecitationManifest
 import io.github.muntasimulhaque.quran.data.RecitationStore
@@ -50,9 +49,6 @@ import io.github.muntasimulhaque.quran.playback.ListenOffer
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.settings.ContentCheck
-import io.github.muntasimulhaque.quran.ui.mushaf.PageKey
-import io.github.muntasimulhaque.quran.ui.mushaf.PageRenderer
-import io.github.muntasimulhaque.quran.ui.mushaf.StartupPage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -64,13 +60,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.LinkedHashMap
 
-/** One row of the study list: a surah's opening, or an ayah. */
+/** One row of the reading: a surah's opening, or an ayah. */
 /**
  * Holds the reader's place, their choices, and the content they read.
  *
- * The place is one ayah, not a page: the Mushaf derives its page from it and
- * the study list derives its scroll position from it, so switching modes
- * never loses the reader, and closing the app never loses either.
+ * The place is one ayah: the reading derives its scroll position from it.
  */
 class ReaderViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -96,8 +90,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     private var catalog: PackCatalog = PackCatalog.parse("{}")
     private var installed: Set<String> = emptySet()
 
-    val renderer = PageRenderer(application)
-
     var settings by mutableStateOf(AppSettings())
         private set
     var surahs by mutableStateOf<List<Surah>>(emptyList())
@@ -113,31 +105,13 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     var failure by mutableStateOf(false)
         private set
 
-    /** The Mushaf page of the reader's place, kept in step with the pager. */
+    /** The page number of the reader's place, for reference. */
     var page by mutableIntStateOf(1)
         private set
     var position by mutableStateOf<PagePosition?>(null)
         private set
 
-    /**
-     * The page picture from the last session. It is loaded before anything
-     * else and shown until the reader's page paints, so a launch lands on the
-     * page the reader left instead of on a blank sheet.
-     */
-    var startupPage by mutableStateOf<StartupPage?>(null)
-        private set
 
-    private var pageCacheJob: Job? = null
-
-    /**
-     * The reader's text size for the page, as a share of the page's own
-     * type. The page's own type is the print's own for that page: the largest
-     * at which the page's fullest line still stands inside the measure, which
-     * PageTextLayout measures from the Book's own words. So this is the
-     * reader's share of the print, not a size in sp, and the step is snapped to
-     * the five every sized text uses, as the reading's are.
-     */
-    val mushafStep: Float get() = TextSize.step(settings.mushafSize)
 
     val content: ContentDatabase? get() = contentDatabase
     val saved: StateFlow<List<SavedAyah>> = savedStore.saved
@@ -251,7 +225,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     init {
         // The page picture comes first: it is the reader's place, and it must
         // be ready before the content database has even opened.
-        viewModelScope.launch { startupPage = renderer.loadStartupPage() }
         openLibrary()
         viewModelScope.launch { savedStore.load() }
         viewModelScope.launch { lastReadStore.load() }
@@ -363,7 +336,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             packs = database.packs()
             recitations = database.recitations()
             setPlace(stored.ayah, database, persist = false)
-            lastReadStore.record(stored.ayah, stored.mode)
+            lastReadStore.record(stored.ayah)
             ready = true
             // A language choice from this launch or an earlier one: whatever
             // is still missing arrives now, without another question.
@@ -438,52 +411,12 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         if (persist && settings.ayah != clamped) settingsStore.setAyah(clamped)
     }
 
-    fun onPageSettled(page: Int, glassWidthPx: Int, glassHeightPx: Int, theme: String) {
-        val database = contentDatabase ?: return
-        this.page = page
-        position = database.pagePosition(page)
-        // A page the reader turned is a new place. A page they arrived at by
-        // switching modes is not: their ayah is already on it, and the exact
-        // ayah is worth keeping, so the study view opens on the same one.
-        if (database.pageOfAyah(settings.ayah) != page) {
-            val ayah = database.firstAyahOfPage(page)
-            if (settings.ayah != ayah) {
-                leaveSurah(surahOf(ayah)?.number)
-                settings = settings.copy(ayah = ayah)
-                viewModelScope.launch { settingsStore.setAyah(ayah) }
-                notePlace(ayah, ReadingMode.Mushaf)
-            }
-        }
-        // The page picture is written once the reader rests, not while they
-        // swipe: a settle that is followed by another cancels the write.
-        if (glassWidthPx > 0 && glassHeightPx > 0) {
-            pageCacheJob?.cancel()
-            pageCacheJob = viewModelScope.launch {
-                delay(PAGE_CACHE_DELAY_MS)
-                renderer.rememberStartupPage(
-                    PageKey(
-                        page = page,
-                        glassWidthPx = glassWidthPx,
-                        glassHeightPx = glassHeightPx,
-                        theme = theme,
-                        step = mushafStep,
-                    ),
-                )
-            }
-        }
-    }
-
-    /** The picture has been replaced by the real page; it can be let go. */
-    fun releaseStartupPage() {
-        startupPage = null
-    }
-
-    /** The reader scrolled the study list and stopped. */
-    fun onStudySettled(ayah: Int) {
+    /** The reader scrolled the reading and stopped. */
+    fun onReadingSettled(ayah: Int) {
         if (settings.ayah == ayah) return
         settings = settings.copy(ayah = ayah)
         viewModelScope.launch { settingsStore.setAyah(ayah) }
-        notePlace(ayah, ReadingMode.Study)
+        notePlace(ayah)
     }
 
     /**
@@ -493,11 +426,11 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * finger crossed. One place per sitting is the intent, and this is what
      * makes it true when the reader is scrolling.
      */
-    private fun notePlace(ayah: Int, mode: ReadingMode) {
+    private fun notePlace(ayah: Int) {
         placeJob?.cancel()
         placeJob = viewModelScope.launch {
             delay(PLACE_SETTLE_MS)
-            lastReadStore.record(ayah, mode)
+            lastReadStore.record(ayah)
         }
     }
 
@@ -525,29 +458,21 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     fun jumpToAyah(ayah: Int) {
         val database = contentDatabase ?: return
         val clamped = ayah.coerceIn(1, 6236)
-        val mode = settings.mode
         leaveSurah(surahOf(clamped)?.number)
         settings = settings.copy(ayah = clamped)
         viewModelScope.launch {
             setPlace(clamped, database, persist = true)
-            lastReadStore.record(clamped, mode)
+            lastReadStore.record(clamped)
         }
     }
 
     /**
-     * Opens one ayah in the study reading. A tap on the daily reminder asks
-     * for a verse to read, not for the mode the reader last happened to be
-     * in, so the reading moves to study whatever it was, and the place is
-     * written down the same way any other jump writes it (owner decision,
-     * 30).
+     * Opens one ayah for reading. A tap on the daily reminder asks for a
+     * verse to read, and the place is written down the same way any other
+     * jump writes it (owner decision, 30).
      */
     fun jumpToAyahInStudy(ayah: Int) {
-        val clamped = ayah.coerceIn(1, 6236)
-        if (settings.mode != ReadingMode.Study) {
-            settings = settings.copy(mode = ReadingMode.Study)
-            viewModelScope.launch { settingsStore.setMode(ReadingMode.Study) }
-        }
-        jumpToAyah(clamped)
+        jumpToAyah(ayah.coerceIn(1, 6236))
     }
 
     /**
@@ -570,7 +495,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
-     * The surah whose opening item the study reading should land on, once.
+     * The surah whose opening item the reading should land on, once.
      * Browse asks for the top of a surah and the list answers by scrolling to
      * the surah's opening; the request is then cleared, so neither a later
      * place change nor a recomposition is pulled up with it.
@@ -581,8 +506,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     /**
      * Opens a surah from Browse. A reader who has a place in that surah lands
      * on the place; a reader who does not lands on the top of the surah, its
-     * opening item in study mode and the page of its first ayah in the
-     * Mushaf. The first ayah is still the place written down, so the next
+     * opening item. The first ayah is still the place written down, so the next
      * launch returns there.
      */
     fun openSurah(surah: Int) {
@@ -596,15 +520,9 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         jumpToAyah(database.firstAyahOfSurah(surah))
     }
 
-    /** The study list has landed on the surah's opening; the request is done. */
+    /** The reading has landed on the surah's opening; the request is done. */
     fun consumeSurahOpening(surah: Int) {
         if (startAtSurahOpening == surah) startAtSurahOpening = null
-    }
-
-    fun switchMode(newMode: ReadingMode) {
-        if (newMode == settings.mode) return
-        settings = settings.copy(mode = newMode)
-        viewModelScope.launch { settingsStore.setMode(newMode) }
     }
 
     fun setTheme(theme: AppTheme) {
@@ -630,7 +548,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             TypeRole.Translation -> settings.copy(translationSize = value)
             TypeRole.Tafsir -> settings.copy(tafsirSize = value)
             TypeRole.Words -> settings.copy(wordsSize = value)
-            TypeRole.Mushaf -> settings.copy(mushafSize = value)
         }
         viewModelScope.launch { settingsStore.setTypeSize(role, value) }
     }
@@ -773,7 +690,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     fun chooseLanguage(language: UiLanguage) {
         val firstRun = settings.uiLanguage == null
         val next = settings.withLanguage(language)
-        val chosen = if (firstRun) next.copy(mode = ReadingMode.Study, ayah = 1) else next
+        val chosen = if (firstRun) next.copy(ayah = 1) else next
         settings = chosen
         clearRowCache()
         // The boot-time mirror lands before anything else, so the Activity
@@ -782,10 +699,9 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch {
             settingsStore.setLanguage(language, next.translationPacks, next.tafsirPacks)
             if (firstRun) {
-                settingsStore.setMode(ReadingMode.Study)
                 settingsStore.setAyah(1)
                 contentDatabase?.let { setPlace(1, it, persist = false) }
-                lastReadStore.record(1, ReadingMode.Study)
+                lastReadStore.record(1)
             }
             settingsStore.addPendingPacks(
                 setOf(language.content.translation, language.content.tafsir),
@@ -1454,7 +1370,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         const val FALLBACK_RECITER = "husary"
 
         /** How long a settled page waits before its picture is written. */
-        const val PAGE_CACHE_DELAY_MS = 350L
 
         /**
          * How long a place waits before it is written down. A reader who is

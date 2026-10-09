@@ -57,7 +57,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * [gloss] says what the aid is standing on. Under the study reading's ayah
  * the pairs repeat words the verse above already shows, so the Arabic steps
  * one tone down and the line stays the verse. In the ayah card, opened from
- * the Mushaf, there is no line above: the aid is the only Arabic there, so
+ * the card, there is no line above: the aid is the only Arabic there, so
  * it keeps the reading's own ink. The step is small either way, so the word
  * always reads as the Quran's own.
  *

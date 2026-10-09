@@ -14,7 +14,6 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.LanguagePreference
-import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.SavedStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.feature.study.R as StudyR
@@ -31,7 +30,7 @@ import org.junit.runner.RunWith
  * The deeper door names what is behind it, and each mark says the tap that
  * made it.
  *
- * In the study reading the ayah card holds only the tafsir doors, so the
+ * The ayah card holds only the tafsir doors, so the
  * pill's last action reads Tafsir with its scroll mark. That is the first
  * assertion here. The second is the pair of marks on the same pill: a note
  * keeps its ayah in Saved and never presses Save, so a note written before
@@ -55,7 +54,6 @@ class AyahActionsTest {
                 SettingsStore(context).apply {
                     setUiLanguage("en")
                     setAyah(1)
-                    setMode(ReadingMode.Study)
                 }
                 // The note the marks are read against, on the ayah the press
                 // below raises the pill over.
@@ -81,36 +79,21 @@ class AyahActionsTest {
 
     @Test
     fun theDeeperDoorNamesTheReadingItWasRaisedOver() {
-        waitForStudy()
+        waitForReading()
 
-        // Study reading: the card behind the door is only the tafsirs.
-        longPressStudyAyah()
+        // The card behind the door is only the tafsirs.
+        longPressReadingAyah()
         compose.onNodeWithContentDescription("Tafsir").assertExists()
-
-        // A tap on the paper puts the pill away and brings the chrome back,
-        // then the mode door offers the Mushaf. Nothing from the study pill
-        // can survive into the next assertion: the pill is raised again by a
-        // real press on the Mushaf ayah.
-        val studyPage = compose.activity.getString(StudyR.string.study_page_description)
-        compose.onAllNodesWithContentDescription(studyPage).onFirst()
-            .tapThePaper()
-        compose.onNodeWithContentDescription("Switch to the Mushaf page").performClick()
-        compose.waitUntil(timeoutMillis = 30_000) {
-            compose.onAllNodes(hasContentDescription("Mushaf page", substring = true))
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-        longPressMushafAyah()
-        compose.onNodeWithContentDescription("More").assertExists()
     }
 
-    @Test
+        @Test
     fun anAyahsNoteIsNotItsSave() {
         // The app's own words for a mark, so the test reads what the pill
         // says rather than a copy of it that a rename would leave behind.
         val on = compose.activity.getString(R.string.action_state_on)
         val off = compose.activity.getString(R.string.action_state_off)
-        waitForStudy()
-        longPressStudyAyah()
+        waitForReading()
+        longPressReadingAyah()
 
         // The note is the reader's own writing and the Save is their own tap,
         // so a note alone lights one and not the other.
@@ -156,7 +139,7 @@ class AyahActionsTest {
         .config
         .getOrElseNullable(SemanticsProperties.StateDescription) { null }
 
-    private fun waitForStudy() {
+    private fun waitForReading() {
         val studyPage = compose.activity.getString(StudyR.string.study_page_description)
         compose.waitUntil(timeoutMillis = 90_000) {
             compose.onAllNodesWithContentDescription(studyPage).fetchSemanticsNodes().isNotEmpty()
@@ -167,13 +150,13 @@ class AyahActionsTest {
      * The chrome comes up on a tap on the paper, and the pill on a long press
      * of the ayah's own reference line, which the block owns.
      */
-    private fun longPressStudyAyah() {
+    private fun longPressReadingAyah() {
         val studyPage = compose.activity.getString(StudyR.string.study_page_description)
         compose.onAllNodesWithContentDescription(studyPage).onFirst()
             .tapThePaper()
         // Minutes, not seconds: a slow emulator is not a failing reading
         // aid, and the house rule for a wait that watches text is the one
-        // [waitForStudy] already follows. Fifteen seconds timed out on a
+        // [waitForReading] already follows. Fifteen seconds timed out on a
         // cold first run before the block had drawn, twice.
         compose.waitUntil(timeoutMillis = 60_000) {
             compose.onAllNodesWithText("1:1", substring = true).fetchSemanticsNodes().isNotEmpty()
@@ -182,21 +165,6 @@ class AyahActionsTest {
             .performTouchInput { longClick() }
         compose.waitUntil(timeoutMillis = 60_000) {
             compose.onAllNodesWithContentDescription("Tafsir").fetchSemanticsNodes().isNotEmpty()
-        }
-    }
-
-    /** The Mushaf's own ayah nodes carry the action the press raises. */
-    private fun longPressMushafAyah() {
-        // The page renders after the mode switch; the node exists only once
-        // the rendered page is measured, so the press waits for it.
-        compose.waitUntil(timeoutMillis = 30_000) {
-            compose.onAllNodesWithContentDescription("1:1.", substring = true)
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onAllNodesWithContentDescription("1:1.", substring = true).onFirst()
-            .performTouchInput { longClick() }
-        compose.waitUntil(timeoutMillis = 15_000) {
-            compose.onAllNodesWithContentDescription("More").fetchSemanticsNodes().isNotEmpty()
         }
     }
 

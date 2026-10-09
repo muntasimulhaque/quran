@@ -13,7 +13,6 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.LanguagePreference
-import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.SavedStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.feature.study.R as StudyR
@@ -46,7 +45,6 @@ class SavedNotesTest {
                 SettingsStore(context).apply {
                     setUiLanguage("en")
                     setAyah(1)
-                    setMode(ReadingMode.Study)
                 }
                 SavedStore(context).apply {
                     setNote(AYAT_AL_KURSI, NOTE)

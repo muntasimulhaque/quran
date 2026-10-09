@@ -89,7 +89,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * The study reading of one surah: its opening, then a continuous scroll
+ * The reading of one surah: its opening, then a continuous scroll
  * through every ayah to the end of the surah, and a quiet closing line that
  * offers the next surah.
  *
@@ -428,7 +428,7 @@ private fun SurahOpening(
         // The opening of a surah is the one arrival in the reading, so it is
         // built to the same model as the printed page: the Arabic name in the
         // ornament gold, a short gold rule under it, and the name and place in
-        // quiet type. The Mushaf page draws exactly this on its surah line, so
+        // quiet type, so
         // the two readings open a surah the same way.
         Text(
             text = surah.nameArabic,
@@ -658,13 +658,13 @@ private fun AyahBlock(
                         onAyah(row.ayah)
                     },
                 )
-                // The Mushaf gives every ayah a node whose action raises the
+                // Every ayah has a node whose action raises the
                 // pill, and the study block now gives a screen reader the
                 // same two doors a finger has: the ayah's actions, which is
                 // the one gesture the reading is built around, and the
                 // paper's own tap.
                 .semantics {
-                    // The Mushaf gives every ayah a node whose action raises
+                    // Every ayah has a node whose action raises
                     // the pill, and the study block gives a screen reader the
                     // same two doors a finger has: the ayah's actions, which
                     // is the one gesture the reading is built around, and

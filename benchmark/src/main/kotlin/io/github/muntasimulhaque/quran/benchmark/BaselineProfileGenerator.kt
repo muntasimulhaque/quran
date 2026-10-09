@@ -22,7 +22,7 @@ import org.junit.runner.RunWith
  * startup benchmark is the only way to know what either one is worth.
  *
  * The journey is the launch and the reading, because that is what every launch
- * does: open the reader where it was left, and turn a page. The result is
+ * does: open the reader where it was left, and scroll the reading. The result is
  * written to app/src/main/baseline-prof.txt and committed, because a profile
  * that is not in the tree is a profile nobody ships.
  *
@@ -55,9 +55,9 @@ class BaselineProfileGenerator {
         rule.collect(packageName = PACKAGE, includeInStartupProfile = true) {
             pressHome()
             startActivityAndWait()
-            device.wait(Until.hasObject(By.text("Mushaf")), 10_000)
-            // the reader's own work: read, then turn a page and come back
-            device.findObject(By.desc("Next page"))?.click()
+            device.wait(Until.hasObject(By.desc("Reading")), 10_000)
+            // the reader's own work: read, then scroll and come back
+            device.swipe(500, 1500, 500, 500, 20)
             device.waitForIdle()
         }
     }

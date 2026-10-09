@@ -66,7 +66,7 @@ object Arabic {
 
     /**
      * Whether [codePoint] is a mark, a format character, or the tatweel
-     * itself: the parts of a word that are not its letters. The Mushaf's line
+     * itself: the parts of a word that are not its letters. A justification line
      * engine reads this to find where a word's letters are, because a tatweel
      * belongs between two letters and never between a letter and its mark.
      */

@@ -13,7 +13,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.PackStore
-import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.feature.study.R as StudyR
 import kotlinx.coroutines.runBlocking
@@ -48,7 +47,6 @@ class SettingsVisibilityTest {
                 SettingsStore(context).apply {
                     setUiLanguage("en")
                     setAyah(1)
-                    setMode(ReadingMode.Study)
                     setTranslationPacks(setOf(TRANSLATION))
                     setShowTranslation(false)
                     setShowTafsir(true)

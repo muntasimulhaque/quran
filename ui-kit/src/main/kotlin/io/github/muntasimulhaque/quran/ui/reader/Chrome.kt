@@ -25,7 +25,6 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -34,8 +33,6 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
-import io.github.muntasimulhaque.quran.data.ReadingMode
-import io.github.muntasimulhaque.quran.uikit.R
 
 /** Every glyph the interface needs, drawn by hand so nothing is borrowed. */
 enum class Icon {
@@ -50,8 +47,6 @@ enum class Icon {
     Next,
     Previous,
     Close,
-    MushafPage,
-    StudyPage,
     Share,
     More,
     Tafsir,
@@ -154,72 +149,6 @@ fun IconGlyph(
                 drawLine(tint, Offset(w * 0.26f, h * 0.26f), Offset(w * 0.74f, h * 0.74f), w * 0.09f)
                 drawLine(tint, Offset(w * 0.74f, h * 0.26f), Offset(w * 0.26f, h * 0.74f), w * 0.09f)
             }
-            // The two reading modes are one pair, so they are drawn as one
-            // pair and never as two lookalikes. The Mushaf is the Book
-            // itself, open: the two pages rise from the fold and the spine
-            // dips below them at the foot, so the shape reads as a book and
-            // not as its inverse. The study reading is a single flat page
-            // with an ayah and its reading set in under it. Both use the
-            // stroke weight the other glyphs use, and neither leans on a
-            // lighter tone that nothing else in the set carries.
-            Icon.MushafPage -> {
-                val stroke = w * 0.075f
-                val spine = w * 0.5f
-                val outer = w * 0.14f
-                val inner = w * 0.354f
-                val curveOuter = w * 0.457f
-                val top = h * 0.24f
-                val foldTop = h * 0.377f
-                val bottom = h * 0.713f
-                val foldBottom = h * 0.82f
-                // The left page: a flat head and foot, with the paper
-                // curving down into the fold on the spine side.
-                drawPath(
-                    Path().apply {
-                        moveTo(outer, top)
-                        lineTo(inner, top)
-                        cubicTo(curveOuter, top, spine, h * 0.316f, spine, foldTop)
-                        lineTo(spine, foldBottom)
-                        cubicTo(spine, h * 0.751f, curveOuter, bottom, inner, bottom)
-                        lineTo(outer, bottom)
-                        close()
-                    },
-                    tint,
-                    style = Stroke(width = stroke),
-                )
-                // The right page, the left one's mirror.
-                drawPath(
-                    Path().apply {
-                        moveTo(w - outer, top)
-                        lineTo(w - inner, top)
-                        cubicTo(w - curveOuter, top, spine, h * 0.316f, spine, foldTop)
-                        lineTo(spine, foldBottom)
-                        cubicTo(spine, h * 0.751f, w - curveOuter, bottom, w - inner, bottom)
-                        lineTo(w - outer, bottom)
-                        close()
-                    },
-                    tint,
-                    style = Stroke(width = stroke),
-                )
-            }
-            Icon.StudyPage -> {
-                pageOutline(tint)
-                for (index in 0 until 2) {
-                    val top = h * (0.32f + index * 0.3f)
-                    drawLine(
-                        color = tint,
-                        start = Offset(w * 0.29f, top),
-                        end = Offset(w * 0.71f, top),
-                        strokeWidth = w * 0.075f,
-                    )
-                    drawLine(
-                        color = tint,
-                        start = Offset(w * 0.29f, top + h * 0.13f),
-                        end = Offset(w * 0.61f, top + h * 0.13f),
-                        strokeWidth = w * 0.075f,
-                    )
-                }
-            }
             // The connectors stop at each ring's outer edge rather than at
             // its centre: a line run through a hollow ring left a stub
             // hanging inside it, which at the 19 dp the action bar draws
@@ -243,9 +172,8 @@ fun IconGlyph(
                 }
             }
             // A tafsir: a scroll, the commentary a reader unrolls beside the
-            // page. It is deliberately not a book: the Mushaf and the study
-            // reading are already two book-like marks, and a third would
-            // read as another mode. A scroll is one sheet between two rolls,
+            // page. It is deliberately not a book, so it never reads as the
+            // reading itself. A scroll is one sheet between two rolls,
             // with two lines of explanation on it, drawn to the weight of
             // the rest of the set.
             Icon.Tafsir -> {
@@ -351,17 +279,6 @@ fun IconGlyph(
     }
 }
 
-private fun DrawScope.pageOutline(tint: Color) {
-    val w = size.width
-    val h = size.height
-    drawRoundRect(
-        color = tint,
-        topLeft = Offset(w * 0.18f, h * 0.12f),
-        size = Size(w * 0.64f, h * 0.76f),
-        cornerRadius = CornerRadius(w * 0.08f),
-        style = Stroke(width = w * 0.075f),
-    )
-}
 
 /**
  * The point [distance] from [center] on the way back to [from], the point a

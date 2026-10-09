@@ -18,8 +18,6 @@ import kotlinx.coroutines.flow.map
 
 private val Context.settingsStore: DataStore<Preferences> by preferencesDataStore("reading")
 
-enum class ReadingMode { Mushaf, Study }
-
 enum class AppTheme { Paper, Sepia, Night, Black }
 
 /**
@@ -53,12 +51,10 @@ fun AppTheme.resolved(autoNight: Boolean, systemDark: Boolean): AppTheme = when 
 /**
  * Everything the reader has chosen, in one place: where they are, how the
  * page looks, how big each kind of text is, which reciter they hear, and
- * which content packs are on. Page is not stored; the ayah is, so both
- * reading modes share one position.
+ * which content packs are on. Page is not stored; the ayah is the place.
  */
 data class AppSettings(
     val ayah: Int = 1,
-    val mode: ReadingMode = ReadingMode.Mushaf,
     val theme: AppTheme = AppTheme.Paper,
     /** When on, the page turns over with the system's own day and night. */
     val autoNight: Boolean = false,
@@ -72,12 +68,6 @@ data class AppSettings(
     val translationSize: Float = TextSize.DEFAULT,
     val tafsirSize: Float = TextSize.DEFAULT,
     val wordsSize: Float = TextSize.DEFAULT,
-    /**
-     * The reader's text size for the Mushaf page, in the reader's steps. The
-     * page's own type is the print's own for that page, so the step is a share
-     * of it and not an sp size like the reading's.
-     */
-    val mushafSize: Float = TextSize.DEFAULT,
     /**
      * The reader's reciter. Husary is the default for a new install (owner
      * decision, 4.5): the murattal voice most readers know, with the quiet
@@ -144,14 +134,11 @@ data class AppSettings(
         TypeRole.Translation -> translationSize
         TypeRole.Tafsir -> tafsirSize
         TypeRole.Words -> wordsSize
-        TypeRole.Mushaf -> mushafSize
     }
 }
 
 /**
- * Reads and writes the reader's choices. It stores an ayah, not a page, so
- * switching between the Mushaf and the study view never loses the place; the
- * page is derived from the ayah when it is needed.
+ * Reads and writes the reader's choices. It stores an ayah, not a page.
  */
 class SettingsStore(private val context: Context) {
 
@@ -164,10 +151,6 @@ class SettingsStore(private val context: Context) {
         val legacy = sizeOf(choices, TEXT_SIZE)
         AppSettings(
             ayah = ayah.coerceIn(1, 6236),
-            mode = when (preferences[MODE]) {
-                "study" -> ReadingMode.Study
-                else -> ReadingMode.Mushaf
-            },
             theme = when (preferences[THEME]) {
                 "sepia" -> AppTheme.Sepia
                 "night" -> AppTheme.Night
@@ -180,7 +163,6 @@ class SettingsStore(private val context: Context) {
             translationSize = sizeOf(choices, TRANSLATION_SIZE, legacy),
             tafsirSize = sizeOf(choices, TAFSIR_SIZE, legacy),
             wordsSize = sizeOf(choices, WORDS_SIZE, legacy),
-            mushafSize = sizeOf(choices, MUSHAF_SIZE, legacy),
             recitation = preferences[RECITATION] ?: "husary",
             keepAwake = preferences[KEEP_AWAKE] ?: true,
             followReciter = preferences[FOLLOW_RECITER] ?: true,
@@ -199,10 +181,6 @@ class SettingsStore(private val context: Context) {
 
     suspend fun setAyah(ayah: Int) {
         context.settingsStore.edit { it[AYAH] = ayah.coerceIn(1, 6236) }
-    }
-
-    suspend fun setMode(mode: ReadingMode) {
-        context.settingsStore.edit { it[MODE] = if (mode == ReadingMode.Study) "study" else "mushaf" }
     }
 
     suspend fun setTheme(theme: AppTheme) {
@@ -407,7 +385,6 @@ class SettingsStore(private val context: Context) {
         TypeRole.Translation -> TRANSLATION_SIZE
         TypeRole.Tafsir -> TAFSIR_SIZE
         TypeRole.Words -> WORDS_SIZE
-        TypeRole.Mushaf -> MUSHAF_SIZE
     }
 
     private companion object {
@@ -416,7 +393,6 @@ class SettingsStore(private val context: Context) {
         const val MAX_SPEED = 1.5f
 
         val AYAH = intPreferencesKey("ayah")
-        val MODE = stringPreferencesKey("mode")
         val THEME = stringPreferencesKey("theme")
         val AUTO_NIGHT = booleanPreferencesKey("auto_night")
         val UI_LANGUAGE = stringPreferencesKey("ui_language")
@@ -425,7 +401,6 @@ class SettingsStore(private val context: Context) {
         val TRANSLATION_SIZE = floatPreferencesKey("translation_size")
         val TAFSIR_SIZE = floatPreferencesKey("tafsir_size")
         val WORDS_SIZE = floatPreferencesKey("words_size")
-        val MUSHAF_SIZE = floatPreferencesKey("mushaf_size")
         val RECITATION = stringPreferencesKey("recitation")
         val KEEP_AWAKE = booleanPreferencesKey("keep_awake")
         val FOLLOW_RECITER = booleanPreferencesKey("follow_reciter")

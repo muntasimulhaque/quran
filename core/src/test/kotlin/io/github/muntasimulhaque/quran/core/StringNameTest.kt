@@ -22,7 +22,6 @@ class StringNameTest {
     private val moduleDirectories = listOf(
         "app",
         "feature-browse",
-        "feature-mushaf",
         "feature-playback",
         "feature-search",
         "feature-settings",

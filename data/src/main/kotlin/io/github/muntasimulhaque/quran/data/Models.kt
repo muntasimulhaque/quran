@@ -12,29 +12,11 @@ data class Surah(
     val bismillahPre: Boolean = false,
 )
 
-data class PageLine(
-    val line: Int,
-    val type: String,
-    val centered: Boolean,
-    val firstWordId: Int,
-    val lastWordId: Int,
-    val surah: Int,
-)
-
 data class Word(
     val id: Int,
     val position: Int,
     val text: String,
     val translation: String?,
-)
-
-/** One word on a Mushaf page, with the ayah and word it belongs to. */
-data class PageWord(
-    val id: Int,
-    val ayah: Int,
-    val position: Int,
-    val marker: Boolean,
-    val text: String,
 )
 
 data class Ayah(

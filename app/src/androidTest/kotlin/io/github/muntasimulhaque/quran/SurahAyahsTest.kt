@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.height
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.LanguagePreference
-import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.feature.study.R as StudyR
 import kotlinx.coroutines.runBlocking
@@ -51,7 +50,6 @@ class SurahAyahsTest {
                 SettingsStore(context).apply {
                     setUiLanguage("en")
                     setAyah(1)
-                    setMode(ReadingMode.Study)
                 }
             }
         }

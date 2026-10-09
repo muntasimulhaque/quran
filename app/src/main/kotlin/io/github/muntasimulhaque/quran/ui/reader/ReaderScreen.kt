@@ -11,7 +11,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -21,8 +20,6 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -33,39 +30,30 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import kotlin.math.roundToInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.core.net.toUri
 import io.github.muntasimulhaque.quran.BuildConfig
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
-import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.browse.BrowseSheet
-import io.github.muntasimulhaque.quran.ui.mushaf.MushafPage
 import io.github.muntasimulhaque.quran.ui.playback.PlaybackBar
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
-import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.kit.shortReciterName
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
@@ -77,11 +65,8 @@ import io.github.muntasimulhaque.quran.ui.study.AyahCard
 import io.github.muntasimulhaque.quran.ui.study.AyahNoteSheet
 import io.github.muntasimulhaque.quran.ui.study.StudyList
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
-import io.github.muntasimulhaque.quran.ui.theme.PagePalette
-import io.github.muntasimulhaque.quran.ui.theme.LocalPageThemeName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.min
@@ -97,7 +82,7 @@ private val BarEnd = 8.dp
 private enum class ReaderSheet { None, Browse, Search, Settings }
 
 /**
- * The reading screen: one surface, two modes, and chrome that only appears
+ * The reading screen: one reading, and chrome that only appears
  * when it is asked for. Everything else in the app happens in a sheet over
  * this surface or in the ayah card, so the page itself is never crowded.
  */
@@ -113,8 +98,6 @@ fun ReaderScreen(
     onAskExactAlarm: () -> Unit,
 ) {
     val settings = viewModel.settings
-    val palette = LocalPagePalette.current
-    val themeKey = LocalPageThemeName.current
     val playback by viewModel.playbackState.collectAsStateWithLifecycle()
     val saved by viewModel.saved.collectAsStateWithLifecycle()
     val lastRead by viewModel.lastRead.collectAsStateWithLifecycle()
@@ -223,72 +206,49 @@ fun ReaderScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        when (settings.mode) {
-            ReadingMode.Mushaf -> MushafReader(
-                viewModel = viewModel,
-                content = content,
-                palette = palette,
-                themeKey = themeKey,
-                selectedAyah = washedAyah,
-                playback = playback,
-                onAyah = { ayah ->
-                    selected = if (selected?.number == ayah.number) null else ayah
-                    chrome = false
-                    touch++
-                },
-                onBackgroundTap = {
-                    chrome = !chrome
-                    selected = null
-                    touch++
-                },
-            )
-            ReadingMode.Study -> {
-                val surah = viewModel.surahOf(settings.ayah)
-                if (surah != null) {
-                    StudyList(
-                        content = content,
-                        surah = surah,
-                        loadRows = {
-                            viewModel.studyRows(
-                                surah = surah.number,
-                                wordByWord = settings.wordByWord,
-                            )
-                        },
-                        settings = settings,
-                        hasTranslation = viewModel.enabledTranslationPacks.isNotEmpty(),
-                        nextSurahName = viewModel.surahs
-                            .firstOrNull { it.number == surah.number + 1 }?.nameSimple,
-                        selectedAyah = washedAyah,
-                        playingAyah = playback.ayahNumber,
-                        playingWord = playback.wordPosition,
-                        onAyah = { ayah ->
-                            selected = ayah
+        run {
+            val surah = viewModel.surahOf(settings.ayah)
+            if (surah != null) {
+                StudyList(
+                    content = content,
+                    surah = surah,
+                    loadRows = {
+                        viewModel.studyRows(
+                            surah = surah.number,
+                            wordByWord = settings.wordByWord,
+                        )
+                    },
+                    settings = settings,
+                    hasTranslation = viewModel.enabledTranslationPacks.isNotEmpty(),
+                    nextSurahName = viewModel.surahs
+                        .firstOrNull { it.number == surah.number + 1 }?.nameSimple,
+                    selectedAyah = washedAyah,
+                    playingAyah = playback.ayahNumber,
+                    playingWord = playback.wordPosition,
+                    onAyah = { ayah ->
+                        selected = ayah
+                        chrome = false
+                        touch++
+                    },
+                    onBackgroundTap = {
+                        chrome = !chrome
+                        selected = null
+                        touch++
+                    },
+                    onScrolled = {
+                        if (chrome) {
                             chrome = false
                             touch++
-                        },
-                        onBackgroundTap = {
-                            chrome = !chrome
-                            selected = null
-                            touch++
-                        },
-                        onScrolled = {
-                            // The text is what the reader is looking at; the
-                            // chrome steps out of its way the moment the page
-                            // starts moving under a finger.
-                            if (chrome) {
-                                chrome = false
-                                touch++
-                            }
-                        },
-                        onNextSurah = { number -> viewModel.jumpToSurah(number) },
-                        onAddContent = { sheet = ReaderSheet.Settings },
-                        onPlaceChanged = { ayah -> viewModel.onStudySettled(ayah) },
-                        startAtOpening = viewModel.startAtSurahOpening == surah.number,
-                        onOpeningReached = { viewModel.consumeSurahOpening(surah.number) },
-                        contentPaddingTop = 64.dp,
-                        contentPaddingBottom = 120.dp,
-                    )
-                }
+                        }
+                    },
+                    onNextSurah = { number -> viewModel.jumpToSurah(number) },
+                    onAddContent = { sheet = ReaderSheet.Settings },
+                    onPlaceChanged = { ayah -> viewModel.onReadingSettled(ayah) },
+                    startAtOpening = viewModel.startAtSurahOpening == surah.number,
+                    onOpeningReached = { viewModel.consumeSurahOpening(surah.number) },
+                    contentPaddingTop = 64.dp,
+                    contentPaddingBottom = 120.dp,
+                )
             }
         }
 
@@ -299,8 +259,6 @@ fun ReaderScreen(
             onBrowse = { sheet = ReaderSheet.Browse },
             onSearch = { sheet = ReaderSheet.Search },
             onSettings = { sheet = ReaderSheet.Settings },
-            mode = settings.mode,
-            onMode = { viewModel.switchMode(it) },
             modifier = Modifier.align(Alignment.TopCenter),
         )
 
@@ -367,7 +325,6 @@ fun ReaderScreen(
                 playback = playback,
                 saved = saved,
                 selected = selected,
-                fromMushaf = settings.mode == ReadingMode.Mushaf,
                 onPlay = { ayah ->
                     onPlaybackPermission()
                     viewModel.playAyah(ayah.number)
@@ -557,12 +514,8 @@ fun ReaderScreen(
             ayah = ayah,
             surahName = viewModel.surahs.firstOrNull { it.number == ayah.surah }?.nameSimple
                 ?: stringResource(R.string.surah_fallback_name, ayah.surah),
-            translations = viewModel.enabledTranslationPacks,
             tafsirPacks = viewModel.enabledTafsirPacks,
             settings = settings,
-            wordLanguage = viewModel.wordLanguage,
-            hasWords = content.meaningPack(viewModel.wordLanguage) != null,
-            fromMushaf = settings.mode == ReadingMode.Mushaf,
             onAddContent = {
                 cardAyah = null
                 sheet = ReaderSheet.Settings
@@ -596,112 +549,6 @@ fun ReaderScreen(
 }
 
 @Composable
-private fun MushafReader(
-    viewModel: ReaderViewModel,
-    content: ContentDatabase,
-    palette: PagePalette,
-    themeKey: String,
-    selectedAyah: Int?,
-    playback: PlaybackUiState,
-    onAyah: (Ayah) -> Unit,
-    onBackgroundTap: () -> Unit,
-) {
-    BoxWithConstraints(Modifier.fillMaxSize()) {
-        val density = LocalDensity.current
-        val availableWidth = with(density) { maxWidth.toPx() }
-        val availableHeight = with(density) { maxHeight.toPx() }
-        // The page's own width and pitch are solved for the glass it is given
-        // (PageGeometry), so every page is drawn at its own size and never
-        // larger. The glass is part of that, so the glass is what the settle
-        // carries: a page the reader left on a phone is not the page a tablet
-        // would draw.
-        val textScale = viewModel.mushafStep
-        val reducedMotion by rememberReducedMotion()
-        val pagerState = rememberPagerState(
-            initialPage = (viewModel.page - 1).coerceIn(0, 603),
-            pageCount = { 604 },
-        )
-        val haptics = LocalHapticFeedback.current
-        val startup = viewModel.startupPage
-
-        LaunchedEffect(pagerState) {
-            snapshotFlow { pagerState.settledPage }.collect { settled ->
-                viewModel.onPageSettled(
-                    page = settled + 1,
-                    glassWidthPx = availableWidth.roundToInt(),
-                    glassHeightPx = availableHeight.roundToInt(),
-                    theme = themeKey,
-                )
-            }
-        }
-        // A page that has stopped moving marks its settle with one light tick.
-        LaunchedEffect(pagerState) {
-            snapshotFlow { pagerState.isScrollInProgress }
-                .distinctUntilChanged()
-                .collect { scrolling ->
-                    if (!scrolling) haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
-                }
-        }
-        // A jump from the cards or the sheets moves the pager; a swipe never
-        // moves the pager from here. A far jump lands at once: animating
-        // across three hundred pages would render all of them on the way. A
-        // reader who asked the system to reduce motion lands at once for a
-        // near jump too.
-        LaunchedEffect(viewModel.page, reducedMotion) {
-            val target = (viewModel.page - 1).coerceIn(0, 603)
-            val current = pagerState.currentPage
-            if (current == target) return@LaunchedEffect
-            if (reducedMotion || kotlin.math.abs(target - current) > 2) {
-                pagerState.scrollToPage(target)
-            } else {
-                pagerState.animateScrollToPage(target)
-            }
-        }
-        // Once the first real page is on screen the picture has served its
-        // purpose and its memory is given back.
-        LaunchedEffect(pagerState.settledPage, startup) {
-            if (startup != null && startup.page == pagerState.settledPage + 1) {
-                delay(600)
-                viewModel.releaseStartupPage()
-            }
-        }
-
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier
-                .fillMaxSize()
-                .semantics(mergeDescendants = false) { },
-            // An Arabic Mushaf opens on the right: the next page lies to the
-            // left of this one, so a swipe to the right turns forward.
-            reverseLayout = true,
-            beyondViewportPageCount = 1,
-        ) { index ->
-            MushafPage(
-                content = content,
-                renderer = viewModel.renderer,
-                page = index + 1,
-                textScale = textScale,
-                palette = palette,
-                themeKey = themeKey,
-                selectedAyah = selectedAyah,
-                playingAyah = playback.ayahNumber,
-                playingWord = playback.wordPosition,
-                onLongPressAyah = onAyah,
-                onBackgroundTap = onBackgroundTap,
-                active = index == pagerState.currentPage,
-                placeholder = startup
-                    ?.takeIf {
-                        it.page == index + 1 && it.glassWidthPx == availableWidth.roundToInt() &&
-                            it.glassHeightPx == availableHeight.roundToInt() &&
-                            it.theme == themeKey && it.step == textScale
-                    }
-                    ?.bitmap,
-            )
-        }
-    }
-}
-
-@Composable
 private fun ReaderTopBar(
     title: String,
     detail: String?,
@@ -709,8 +556,6 @@ private fun ReaderTopBar(
     onBrowse: () -> Unit,
     onSearch: () -> Unit,
     onSettings: () -> Unit,
-    mode: ReadingMode,
-    onMode: (ReadingMode) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     AnimatedVisibility(
@@ -742,13 +587,10 @@ private fun ReaderTopBar(
                 .padding(start = BarStart, end = BarEnd, top = 8.dp, bottom = 22.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // The bar is one row: Browse and the mode door lead, the surah
-            // and its juz sit centered between the two pairs, and Search and
-            // Settings close it. Two doors on each side is what keeps the
-            // title on the screen's own center, and the single mode icon
-            // leaves the name the room the old two-choice switch took.
+            // The bar is one row: Browse leads, the surah
+            // and its juz sit centered, and Search and
+            // Settings close it.
             IconButton(Icon.Browse, stringResource(R.string.action_browse), onBrowse)
-            ModeDoor(mode, onMode)
             ReadingTitle(
                 surah = title,
                 detail = detail,
@@ -762,30 +604,6 @@ private fun ReaderTopBar(
     }
 }
 
-/**
- * The two reading modes as one door: the glyph shows the mode the reader is
- * not in, and a tap takes them there. One icon instead of a two-choice
- * switch, so the bar keeps a single row and the surah name keeps its room;
- * the accent says this door is the reading itself, not another tool.
- */
-@Composable
-private fun ModeDoor(mode: ReadingMode, onMode: (ReadingMode) -> Unit) {
-    val other = if (mode == ReadingMode.Mushaf) ReadingMode.Study else ReadingMode.Mushaf
-    val description = stringResource(
-        if (other == ReadingMode.Mushaf) {
-            io.github.muntasimulhaque.quran.uikit.R.string.mode_switch_to_mushaf
-        } else {
-            io.github.muntasimulhaque.quran.uikit.R.string.mode_switch_to_study
-        },
-    )
-    IconButton(
-        icon = if (other == ReadingMode.Mushaf) Icon.MushafPage else Icon.StudyPage,
-        description = description,
-        onClick = { onMode(other) },
-        active = true,
-    )
-}
-
 /** Everything that can sit at the foot of the page, stacked in one place. */
 @Composable
 private fun BottomStack(
@@ -793,7 +611,6 @@ private fun BottomStack(
     playback: PlaybackUiState,
     saved: List<SavedAyah>,
     selected: Ayah?,
-    fromMushaf: Boolean,
     onPlay: (Ayah) -> Unit,
     onDeselect: () -> Unit,
     onNote: (Ayah) -> Unit,
@@ -868,15 +685,9 @@ private fun BottomStack(
                 // note does not claim to be a save (owner report).
                 isSaved = row?.marked == true,
                 hasNote = !row?.note.isNullOrBlank(),
-                // The deeper door names what is actually behind it: from the
-                // study reading the card is only the tafsir doors, so the
-                // action says Tafsir; from the Mushaf the card is the whole
-                // study surface (the meanings, the translation, the tafsirs),
-                // so the name stays More and the glyph promises everything.
-                fromMushaf = fromMushaf,
-                // From the study reading the door opens tafsir and nothing
-                // else, so a reader who hid tafsir has nothing behind it and
-                // the action goes with the door.
+                // The deeper door opens tafsir and nothing else, so a reader
+                // who hid tafsir has nothing behind it and the action goes
+                // with the door.
                 showTafsir = viewModel.settings.showTafsir,
                 onSave = {
                     // A save of the reader's own, carrying a note, asks
@@ -989,7 +800,6 @@ private fun markState(on: Boolean): String =
 private fun AyahActions(
     isSaved: Boolean,
     hasNote: Boolean,
-    fromMushaf: Boolean,
     showTafsir: Boolean,
     onSave: () -> Unit,
     onPlay: () -> Unit,
@@ -1024,12 +834,10 @@ private fun AyahActions(
             state = markState(hasNote),
         )
         TextAction(stringResource(R.string.action_share), Icon.Share, onShare)
-        if (fromMushaf || showTafsir) {
+        if (showTafsir) {
             TextAction(
-                label = stringResource(
-                    if (fromMushaf) R.string.action_more else R.string.action_tafsir,
-                ),
-                icon = if (fromMushaf) Icon.More else Icon.Tafsir,
+                label = stringResource(R.string.action_tafsir),
+                icon = Icon.Tafsir,
                 onClick = onMore,
             )
         }

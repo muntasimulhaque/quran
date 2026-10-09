@@ -3,8 +3,7 @@
 **The first task of every session, before reading this file and before any
 other command: `git fetch`, then `git pull origin main`.**
 
-A free, offline Android Quran reader. Two reading modes on one text: the
-Mushaf page and a study view with Saheeh International, word-by-word, and
+A free, offline Android Quran reader. One reading with Saheeh International, word-by-word, and
 Tafsir Ibn Kathir, with recitation by Al-Minshawi and
 Al-Husary. No ads, no trackers, no accounts, no network. Code is MIT; each
 content dataset keeps its own source, version, and license.
@@ -90,14 +89,8 @@ dead letter.
    lorem text, stock iconography, generic Material defaults. Every string is
    a real sentence, every color is chosen, every icon is drawn for this app.
 7. **Accessibility is a rule, not a feature.** TalkBack works end to end.
-   Study mode honors the system font scale; the Mushaf page is drawn from
-   the Book's own words at the page's own type, and the reader's own five
-   steps are a share of it, so a reader who asks for larger text gets a page
-   whose fullest lines flow onto a second and is panned through it rather
-   than shown a page whose lines were re-set (owner decision, this session:
-   the page's own type holds all 604 pages inside the measure at the usual
-   step, measured over every page of the Book on a real device; the phone's
-   own magnification still covers anything beyond it).
+   The reading honors the system font scale at the reader's own five steps;
+   the phone's own magnification covers anything beyond them.
    Contrast targets live in the theme and are measured.
 8. **Two UI languages, one content language each.** English and Bangla ship
    together, the interface strings in each module's `values-bn`, and the
@@ -279,12 +272,13 @@ at every step:
   tests, and the signed bundle in `build.yml`, which filters pushes by path
   so a doc-only commit triggers nothing. The app instrumented tests run in
   `screenshots.yml` on the three store form factors, and that workflow names
-  six classes: `ScreenshotTest`, `WordByWordTest`, `MushafTurnTest`,
+  five classes: `ScreenshotTest`, `WordByWordTest`,
   `TafsirDirectionTest`, `SavedNotesTest`, `SettingsVisibilityTest`. Every
   other app test runs on a session's own emulator, which this machine has, so
   a session that changes the settings sheet, and every release session, runs
-  the whole app suite rather than only the six. On `quran_phone` the whole
-  suite is green, 80 of 80, including the share card's hardware read-back and
+  the whole app suite rather than only the five. On `quran_phone` the whole
+  suite is green, 84 of 84 on a session's own emulator,
+  including the share card's hardware read-back and
   the phone's own night mode, which the removed ATD image refused. On a cold
   google_apis run `SurahAyahsTest` can time out in `openBrowse` once, the
   ninety-second wait meeting a loaded boot, and it passes on a retry.
@@ -341,7 +335,7 @@ at every step:
 | `core/` | pure JVM Kotlin, zero `android.*` imports: references, search normalization, rich text parsing, models |
 | `data/` | read-only content access, the saved-ayah and last-read user databases, preferences |
 | `app/` | the shell: activity, view model, the screen that composes the features, the shell's strings |
-| `feature-*/` | one reading surface each (mushaf, study, search, browse, playback, settings), each owning its own strings and icons |
+| `feature-*/` | one reading surface each (study, search, browse, playback, settings), each owning its own strings and icons |
 | `ui-kit/` | the shared look: theme and palettes, the hand-drawn icons, the rich text views, the app's choice row, the one floating lift, the small formatters |
 | `content-assets/` | the shipped assets the app reads: the Arabic text face, the study and UI faces, the core pack, and the pack catalog |
 | `tools/` | the offline pipeline: fetch, verify, audit, build, fonts, packs, audio |
@@ -357,37 +351,20 @@ at every step:
   manifest, shipped as an asset, replaced wholesale on update.
 - **the manifest**: `content/manifest.json`, the one place a dataset's
   source, version, license, and checksum are recorded.
-- **Mushaf mode**: the 15-line page, drawn from the Book's own words at the
-  page's own type, with the print's own lines and the print's own fill,
-  swiped.
-- **study mode**: the ayah-by-ayah reader with translation, word-by-word,
-  and tafsir.
-- **the page / the line / the word**: the Mushaf geometry, from the page
-  down to one word and the shape the page's own face gives it.
-- **the measure**: the page's own line, 15.6 ems of its text wide, which the
-  print justifies to. The type is the page's own and the reader's size is a
-  share of it.
-- **the page's own type**: the largest at which that page's fullest line still
-  stands inside the measure, measured from the Book's own words and the shipped
-  face. A dense page is set smaller than a sparse one, as the print sets them.
-- **the tatweel**: the stroke the print lengthens to fill a line. It is written
-  into the string the canvas draws and never into the Book's own text.
-- **the pitch**: the distance between two lines. It is the page's own leading,
-  and the only thing about a page the glass decides: the glass opens the page
-  out to fill itself and never tightens it under its own leading.
+- **the reading**: the ayah-by-ayah reader with translation, word-by-word,
+  and tafsir. There is one reading and it has no mode name.
 - **the reference**: an ayah key in `surah:ayah` form, for example 2:255.
 - **the portion**: the reader's chosen daily amount. Never called a streak.
 - **the deck**: the day's ayah is one card of a shuffled 6,236, dealt by the
   day number and reshuffled every pass, so nothing about it is stored.
-- **the study card**: the sheet one ayah opens: the Words, the translation
-  with footnotes, and the Ibn Kathir panel. From the Mushaf it
-  is the whole study surface; from the study reading it is only the tafsirs.
-  The ayah is not drawn on it, because the page behind carries it.
+- **the ayah card**: the sheet one ayah opens: the Ibn Kathir panel. The ayah,
+  its translation, and its meanings are already on the reading, so the card
+  does not repeat them.
 - **the text button**: `ui-kit/TextButton`, the one shape a word that acts
   wears. A heading, a name, or a label is bare type; anything that answers a
   touch is a rounded shape.
 - **the search sheet**: one field over the Arabic text, the translation, and
-  the surah names; results stay in Mushaf order.
+  the surah names; results stay in Quran order.
 - **the pack**: one downloadable set of content or recitation, addressed by
   its own hash. The app reads a pack and never hotlinks one.
 
@@ -401,9 +378,9 @@ implement it and update this list.
   never in a column at the right; a row that opens something ends in a
   chevron, whatever page it is on.
 - Reader-first, no tab bar.
-- Both reading modes ship together.
-- The reading modes are one switch in the top bar, and the reader's other
-  doors are Browse, Search, and Settings; there is no bottom bar.
+- One reading with no mode name. The reader's doors are Browse, Search, and
+  Settings; there is no bottom bar and no mode switch (owner decision, this
+  session: the Mushaf page is removed because it could not match the print).
 - Last Read is the fourth Browse tab beside Surahs, Juz, and Saved, and a
   note lives inside Saved with the ayah it was written on.
 - A surah row in Browse opens its own ayah grid; there is no separate Go to
@@ -417,7 +394,7 @@ implement it and update this list.
   reminder card that asks for the notification and the exact time. The
   chosen language's translation and tafsir arrive with the choice; the word
   list arrives with the toggle that turns it on. The first choice lands in
-  the study reading of Al-Fatiha 1:1, and every launch after that opens
+  Al-Fatiha 1:1, and every launch after that opens
   where the reader left off (owner decision, 4.5).
 - No streaks, no gamification.
 - The design direction is the manuscript language: the page is the
@@ -447,7 +424,7 @@ implement it and update this list.
 - The app's mark is an open book on its rehal: the owner's own reference
   drawing, redrawn clean for this app as uniform line art, the book in the
   theme's ink on the theme's paper, `#1C1B18` on `#F8F5EF`, the stand in the
-  Mushaf's ornament gold `#856411`, with the pages filled in the paper so
+  ornament gold `#856411`, with the pages filled in the paper so
   the book occludes the stand behind it and a paper margin keeps the stand's
   lines clear of the book's edge (owner decision, this session: the mark
   wears the app's own theme tones, and the cover's burgundy is not one of

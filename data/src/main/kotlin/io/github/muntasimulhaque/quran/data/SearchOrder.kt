@@ -12,7 +12,7 @@ package io.github.muntasimulhaque.quran.data
  * 6. **Tafsir** passages, which are a comment about a verse rather than the
  *    verse.
  *
- * Before this, one Mushaf-order list mixed the kinds: a translation match for
+ * Before this, one Quran-order list mixed the kinds: a translation match for
  * 2:2 sat above an Arabic match for 2:255. The Book's own order is still kept,
  * it just no longer mixes what kind of thing a reader found (owner decision,
  * 28). A surah name leads a typed reference (owner decision):

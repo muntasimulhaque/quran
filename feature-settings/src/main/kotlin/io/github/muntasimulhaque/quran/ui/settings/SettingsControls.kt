@@ -162,7 +162,6 @@ fun SizeRow(role: TypeRole, step: Float, onChange: (Float) -> Unit) {
             TypeRole.Translation -> R.string.settings_size_translation
             TypeRole.Tafsir -> R.string.settings_size_tafsir
             TypeRole.Words -> R.string.settings_size_words
-            TypeRole.Mushaf -> R.string.settings_size_mushaf
         },
     )
     SegmentedRow(

@@ -168,50 +168,6 @@ class ContentDatabase private constructor(
         ).use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
     }
 
-    fun pageLines(page: Int): List<PageLine> =
-        query(
-            "SELECT line, type, centered, first_word_id, last_word_id, surah FROM page_line " +
-                "WHERE page = ? ORDER BY line",
-            arrayOf(page.toString()),
-        ).use { cursor ->
-            buildList(cursor.count) {
-                while (cursor.moveToNext()) {
-                    add(
-                        PageLine(
-                            line = cursor.getInt(0),
-                            type = cursor.getString(1),
-                            centered = cursor.getInt(2) == 1,
-                            firstWordId = cursor.getInt(3),
-                            lastWordId = cursor.getInt(4),
-                            surah = cursor.getInt(5),
-                        ),
-                    )
-                }
-            }
-        }
-
-    /** Every word on one page, in reading order, markers included. */
-    fun pageWords(page: Int): List<PageWord> =
-        query(
-            "SELECT id, ayah_number, position, marker, text FROM word " +
-                "WHERE page = ? ORDER BY line, line_position",
-            arrayOf(page.toString()),
-        ).use { cursor ->
-            buildList(cursor.count) {
-                while (cursor.moveToNext()) {
-                    add(
-                        PageWord(
-                            id = cursor.getInt(0),
-                            ayah = cursor.getInt(1),
-                            position = cursor.getInt(2),
-                            marker = cursor.getInt(3) == 1,
-                            text = cursor.getString(4),
-                        ),
-                    )
-                }
-            }
-        }
-
     fun firstAyahOfPage(page: Int): Int =
         query("SELECT MIN(number) FROM ayah WHERE page = ?", arrayOf(page.toString()))
             .use { cursor -> if (cursor.moveToFirst()) cursor.getInt(0) else 1 }
@@ -226,34 +182,6 @@ class ContentDatabase private constructor(
         text = cursor.getString(offset + 2),
         translation = null,
     )
-
-    /**
-     * The basmallah's own words, as the page's text. The page fonts carry no
-     * basmallah line of their own; the same four words open every surah, so
-     * they are drawn with the page's own face.
-     */
-    fun basmallahText(): String =
-        query(
-            "SELECT text FROM word WHERE ayah_number = 1 AND marker = 0 ORDER BY position LIMIT 4",
-            null,
-        ).use { cursor ->
-            buildString {
-                while (cursor.moveToNext()) {
-                    if (isNotEmpty()) append(' ')
-                    append(cursor.getString(0))
-                }
-            }
-        }
-
-    fun ayahsForPage(page: Int): List<Ayah> =
-        query(
-            "SELECT number, surah, ayah, verse_key, text FROM ayah WHERE page = ? ORDER BY number",
-            arrayOf(page.toString()),
-        ).use { cursor ->
-            buildList(cursor.count) {
-                while (cursor.moveToNext()) add(ayahOf(cursor))
-            }
-        }
 
     fun ayah(number: Int): Ayah? =
         query(
@@ -722,7 +650,7 @@ class ContentDatabase private constructor(
                 matchedWordText = row.matchedWordText,
             )
         }
-        // The kinds run from the verse outward, each still in Mushaf order
+        // The kinds run from the verse outward, each still in Quran order
         // inside itself; the pure function carries the reasoning and the
         // test, so this call site only has to hand it what it found.
         val (hits, capped) = orderSearchHits(leading, ayahHits, tafsirHits, limit)

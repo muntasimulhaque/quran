@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- The mode door's spoken label: the glyph shows the mode the reader is
-         not in, so the label names where the tap goes, never the mode they
-         are already reading. -->
-    <string name="mode_switch_to_mushaf">Switch to the Mushaf page</string>
-    <string name="mode_switch_to_study">Switch to the study reading</string>
-</resources>

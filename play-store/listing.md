@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 5.3 (versionCode 55)
+Version: 5.4 (versionCode 56)
 
 ## Listing
 
@@ -8,19 +8,14 @@ Title (21 characters):
 Quran: The Noble Book
 
 Short description (under 80 characters):
-The Quran, offline: Mushaf pages, translation, tafsir, search, recitation.
+The Quran, offline: translation, tafsir, search, recitation.
 
 Full description (plain prose; Play strips markdown):
 
-A Quran app built to be read. It opens where you left off, turns pages the
-way a printed Mushaf does, and never asks you to learn its interface first.
+A Quran app built to be read. It opens where you left off and never asks
+you to learn its interface first.
 
-Mushaf mode is the 604 pages of the Madinah Mushaf, set from the Book's own
-words in the King Fahd Complex's own Arabic typeface at your own text size,
-with the page's rule, its numbered roundels, and its juz as the printed page
-carries them.
-
-Study mode gives each ayah its Saheeh International translation with the
+The reading gives each ayah its Saheeh International translation with the
 original footnotes, word by word meanings, and Ibn Kathir in English,
 with the Quran quotations set apart. Bangla
 readers get the Taisirul Quran translation, Ibn Kathir in Bangla, and Bangla
@@ -33,9 +28,8 @@ you kept, with your note under the ayah it was written on, and a Last read
 list that keeps the places you have been reading so you can return to one
 you left.
 
-The two readings are one door at the top of the page, and it always
-offers the other one: the printed page, or the study view. There is no
-bottom bar to learn. More than one translation may be on at once, and
+Browse, Search, and Settings are doors at the top of the reading. There
+is no bottom bar to learn. More than one translation may be on at once, and
 each one draws in its own place under the ayah.
 
 Recitation plays Minshawi or Husary, with the page following the reciter
@@ -60,7 +54,7 @@ are in the app and in the repository.
 ## Classification
 
 - Category: Books & Reference
-- Tags: Quran, Islam, Mushaf, Tafsir, Recitation
+- Tags: Quran, Islam, Tafsir, Recitation
 - Content rating: Everyone
 - Contains ads: No
 - In-app purchases: No
@@ -96,7 +90,7 @@ for.
 The icon and the feature graphic are the app's own mark: an open book on its
 rehal, the owner's own reference drawing, redrawn clean for this app as
 uniform line art, the book in the theme's ink `#1C1B18` on the theme's paper
-`#F8F5EF`, the stand in the Mushaf's ornament gold `#856411`. These are the
+`#F8F5EF`, the stand in the ornament gold `#856411`. These are the
 colors the reader already sees inside the app; the cover's burgundy belongs to
 the cover. The launcher carries the mark at five densities and in its adaptive
 layers, the background the paper alone and the monochrome layer the book's
@@ -212,14 +206,18 @@ changes.
 
 What each set shows, in order:
 
-1. The Mushaf page
-2. The chrome: the mode door, Browse, Search, and Settings
-3. The study reading with its translation
-4. The surah opening
-5. Search with the matched word marked, and the filters under the field
-6. The settings hub
-7. Browse, Surahs
-8. The ayah card, with its tafsir doors
+1. The reading with its translation
+2. The chrome: Browse, Search, and Settings
+3. The surah opening
+4. Search with the matched word marked, and the filters under the field
+5. The settings hub
+6. Browse, Surahs
+7. The ayah card, with its tafsir doors
+8. The tafsir open on the card
+
+## Release notes (5.4, 352 characters)
+
+The Mushaf page is gone, leaving one reading with no mode to switch. It could not match the printed page it promised, so it is removed rather than kept half done. The reading gives each ayah its translation with footnotes, word meanings, and Ibn Kathir, with recitation, search, Browse, and the daily ayah as they were. No ads, no trackers, no account.
 
 ## Release notes (5.3, 470 characters)
 
@@ -493,14 +491,17 @@ something Play would reject.
 | `screenshots/tablet7/*.png` | 800 x 1280 | 7 inch tablet screenshots (8) |
 | `screenshots/tablet10/*.png` | 2560 x 1800 | 10 inch tablet screenshots (8) |
 
-The set stands for 5.2: the capture run 37859582337 is green on all three legs first try, eight frames each, and every frame was compared with its artifact before the copy. Twelve of the twenty-four frames carry the new page: the three Mushaf, the three chrome, the three ayah card frames, and the phone search frame, at 319,891, 186,767, 402,083, 317,050, 185,199, 396,600, 5,111, 85,044, 230,262, and 11,188 pixels below the status bar against the set they replace. Six more stand in the status bar clock and icons alone, and the six study and surah opening frames are byte-identical: the reading did not move, and the release's own change is only the page. Screenshots: the Mushaf page, the summoned chrome, the study reading, the
-surah opening, search, the settings hub, Browse, and the ayah card. The tablet
+The set below is replaced on this branch by the single-reading set: eight frames per form factor (the reading, the chrome, the surah opening, search, settings, Browse, the ayah card, and the tafsir open on the card), captured on the three store AVDs with the new tour green on each leg and every frame read. It ships with the release that carries the Mushaf removal.
+
+The set stands for 5.2: the capture run 37859582337 is green on all three legs first try, eight frames each, and every frame was compared with its artifact before the copy. Twelve of the twenty-four frames carry the new page: the three Mushaf, the three chrome, the three ayah card frames, and the phone search frame, at 319,891, 186,767, 402,083, 317,050, 185,199, 396,600, 5,111, 85,044, 230,262, and 11,188 pixels below the status bar against the set they replace. Six more stand in the status bar clock and icons alone, and the six study and surah opening frames are byte-identical: the reading did not move, and the release's own change is only the page. Screenshots: the reading, the summoned chrome, the
+surah opening, search, the settings hub, Browse, the ayah card, and the
+tafsir open on the card. The tablet
 sets are produced by the same test on the taller and wider profiles.
 
 ## What the app carries, and what a reader adds
 
-The app ships the Quran text and its page layout only: about eight
-megabytes, a complete offline Mushaf that needs no network and no account. Everything
+The app ships the Quran text only: about eight
+megabytes, a complete offline reading that needs no network and no account. Everything
 else is added by the reader, from the project's own GitHub Releases, with the
 size shown before a byte moves and a SHA-256 check before it is used:
 

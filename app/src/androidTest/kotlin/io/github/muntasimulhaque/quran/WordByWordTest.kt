@@ -7,7 +7,6 @@ import org.junit.Assert.assertTrue
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.PackStore
-import io.github.muntasimulhaque.quran.data.ReadingMode
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
@@ -48,7 +47,6 @@ class WordByWordTest {
                 settings.setUiLanguage("en")
                 settings.setTranslationPacks(setOf("translation-taisirul-quran-bn"))
                 settings.setWordByWord(true)
-                settings.setMode(ReadingMode.Study)
                 // The reader's own place, set here rather than inherited.
                 // These tests share one install and one process, so whatever
                 // the last test left standing is where the reader opens; the

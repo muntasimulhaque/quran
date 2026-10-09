@@ -10,20 +10,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 
-/** One place the reader paused: the ayah, the moment, and how they were reading it. */
+/** One place the reader paused: the ayah and the moment. */
 data class ReadPlace(
     val ayahNumber: Int,
-    val mode: ReadingMode,
     val readAt: Long,
 )
 
 /**
  * Where the reader has been reading, newest first.
  *
- * The reader's *place* is one thing and lives in the settings: the app opens
- * on it, and it is written whenever they settle on a new ayah. This is the
- * history around that place, so a reader who jumped to Al-Kahf on a Tuesday
- * can find the ayah they were actually reading on the Monday before it.
+ * The reader's place lives in the settings: the app opens on it. This is the history around it.
  *
  * One row per ayah, never two: returning to an ayah moves its visit to the
  * top instead of adding a copy, so the list is places, not a log. It is
@@ -39,7 +35,7 @@ class LastReadStore(context: Context) {
     suspend fun load() = withContext(Dispatchers.IO) { refresh() }
 
     /** Notes that the reader rested on this ayah, at this moment. */
-    suspend fun record(ayahNumber: Int, mode: ReadingMode, at: Long = System.currentTimeMillis()) =
+    suspend fun record(ayahNumber: Int, at: Long = System.currentTimeMillis()) =
         withContext(Dispatchers.IO) {
             if (ayahNumber !in 1..6236) return@withContext
             database().insertWithOnConflict(
@@ -47,7 +43,7 @@ class LastReadStore(context: Context) {
                 null,
                 ContentValues().apply {
                     put(COLUMN_AYAH, ayahNumber)
-                    put(COLUMN_MODE, if (mode == ReadingMode.Study) MODE_STUDY else MODE_MUSHAF)
+                    put(COLUMN_MODE, MODE_SINGLE)
                     put(COLUMN_READ_AT, at)
                 },
                 SQLiteDatabase.CONFLICT_REPLACE,
@@ -70,7 +66,7 @@ class LastReadStore(context: Context) {
 
     private fun refresh() {
         _places.value = database().rawQuery(
-            "SELECT $COLUMN_AYAH, $COLUMN_MODE, $COLUMN_READ_AT FROM $TABLE " +
+            "SELECT $COLUMN_AYAH, $COLUMN_READ_AT FROM $TABLE " +
                 "ORDER BY $COLUMN_READ_AT DESC LIMIT $CAP",
             null,
         ).use { cursor ->
@@ -79,12 +75,7 @@ class LastReadStore(context: Context) {
                     add(
                         ReadPlace(
                             ayahNumber = cursor.getInt(0),
-                            mode = if (cursor.getString(1) == MODE_STUDY) {
-                                ReadingMode.Study
-                            } else {
-                                ReadingMode.Mushaf
-                            },
-                            readAt = cursor.getLong(2),
+                            readAt = cursor.getLong(1),
                         ),
                     )
                 }
@@ -118,8 +109,7 @@ class LastReadStore(context: Context) {
         const val COLUMN_AYAH = "ayah_number"
         const val COLUMN_MODE = "mode"
         const val COLUMN_READ_AT = "read_at"
-        const val MODE_STUDY = "study"
-        const val MODE_MUSHAF = "mushaf"
+        const val MODE_SINGLE = "single"
 
         /**
          * How many places are kept: twenty. One sitting is a handful of them,

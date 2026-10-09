@@ -41,14 +41,14 @@ val BlackHairline = BlackOutline
 val BlackGold = Color(0xFF9C7C38)
 
 // The one interactive accent, and the ornament gold that belongs to the
-// Mushaf.
+// Reading.
 //
 // Lapis carries every action; its two tones differ by ground because a lapis
 // that reads as ink on paper reads as nothing at all on a night page.
 val Lapis = Color(0xFF1B4D7A)
 val LapisLight = Color(0xFF7FB2E5)
 
-// Gold is the Mushaf's own ornament, and it is read: the page's number, its
+// Gold is the ornament tone, and it is read:
 // juz, the surah names drawn into the page, and the ornamental name at the
 // head of the study reading. It therefore meets the same 4.5:1 rule every
 // other text tone does, on each ground it is drawn on: 5.0:1 on paper,
