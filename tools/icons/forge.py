@@ -647,10 +647,11 @@ def banner_png(out=None, ss=1):
 
 def banner_text(im):
     # the name and the caption as one centered stack, spaced by the shipped
-    # file's own measured ink rows: the title's ink runs 303..349, the rule
-    # sits nearly equidistant at 355..358, the caption's ink runs 365..381,
-    # and the block keeps 44 of air above it and 43 of air above the inner
-    # frame at 424, so the stack reads as one held group
+    # file's own measured ink rows: the title's ink runs 299..345, the rule
+    # keeps 9 of air on each side at 354..357, the caption's ink runs
+    # 366..382, and the block splits the band evenly, 40 of air above it and
+    # 40 above the inner frame at 422, so the stack reads as one held group
+    # with the bar breathing between the two lines of type
     dr = ImageDraw.Draw(im)
     s = im.size[0] // 1024
     title = 'Quran'
@@ -659,9 +660,9 @@ def banner_text(im):
     size = int(round(120*s * 300.0/max(1, bb[2]-bb[0])))
     f = _font(LITERATA, size, 'Regular')
     bb = _inner_bbox(title, f)
-    dr.text((512*s - (bb[0]+bb[2])/2, 303*s - bb[1]), title, font=f, fill=INK)
+    dr.text((512*s - (bb[0]+bb[2])/2, 299*s - bb[1]), title, font=f, fill=INK)
     # the short gold rule between the name and the caption
-    dr.rectangle([467*s, 355*s, 557*s, 358*s], fill=HAIR)
+    dr.rectangle([467*s, 354*s, 557*s, 357*s], fill=HAIR)
     # the caption in tracked small caps, centered on the axis; the caption's
     # em top sits 5 above its ink, measured on the shipped file
     cap = 'THE NOBLE BOOK'
@@ -670,7 +671,7 @@ def banner_text(im):
     widths = [dr.textlength(c, font=f2) for c in cap]
     x = 512*s - (sum(widths) + track*(len(cap)-1)) / 2
     for c, w in zip(cap, widths):
-        dr.text((x, 360*s), c, font=f2, fill=MUTED)
+        dr.text((x, 361*s), c, font=f2, fill=MUTED)
         x += w + track
     return im
 
