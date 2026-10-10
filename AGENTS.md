@@ -439,12 +439,15 @@ implement it and update this list.
   The drawing is sized so the whole mark sits inside the launcher's 66 dp
   circle, about half the canvas wide, so a mask leaves air around it instead
   of the mark filling the tile.
-- The feature graphic is the same world at banner size: the paper field, the
-  page's gold hairline frame, the mark at the left, and the store's two names
-  at the right, Quran in Literata over The Noble Book in Inter. Every
-  element stands inside the safe area, well clear of the edges Play may crop
-  or overlay, and the file is 24-bit PNG with no alpha (owner decision, this
-  session).
+- The feature graphic is the book's own title page: the paper field with a
+  double gold hairline (a fine line at the margin, the page's own frame inside
+  it), the mark centered on the axis as a seal, and beneath it the name Quran
+  in Literata, a short gold rule, and The Noble Book in tracked small caps in
+  Inter, the gaps between them held tight so the caption keeps air above the
+  frame's foot. Every element stands inside the safe area, well clear of the
+  edges Play may crop or overlay, and the file is 24-bit PNG with no alpha
+  (owner decision, this session: the banner is the frontispiece, drawn by the
+  mark's generator).
 
 ## Traps
 

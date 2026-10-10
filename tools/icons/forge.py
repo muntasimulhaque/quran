@@ -615,11 +615,12 @@ def banner_png(out=None, ss=1):
     im = Image.new('RGBA', big, (0, 0, 0, 0))
     paper_bg(im)
     dr = ImageDraw.Draw(im)
-    # the mark: ink width 319/1024 like the current banner, centered (279.5, 254.5)
+    # the mark as a seal over the name, ink width 196, centered on the axis
+    # at the banner's optical center (512, 176)
     p = fg_pieces()
     ids = [p[k] for k in ('pl', 'pm', 'wa', 'wb', 'pc', 'pcM')]
-    scale, xc, yc = fit_for(ids, None, span_w=319.0)
-    cx, cy = 279.5*ss, 254.5*ss + (AX_Y-yc)*scale*ss
+    scale, xc, yc = fit_for(ids, None, span_w=196.0)
+    cx, cy = 512*ss, 176*ss + (AX_Y-yc)*scale*ss
     s = ss
     lw = STROKE*scale
     def m(raw, step=60):
@@ -633,7 +634,9 @@ def banner_png(out=None, ss=1):
         pts = m(p[k]); fill_pts(dr, pts, PAPER); stroke_pts(dr, pts, INK, max(1, round(lw*s)))
     for k in ('ca', 'cb'):
         stroke_pts(dr, m(p[k]), GOLD, max(1, round(lw*s)))
-    # frame
+    # the bookmaker's double rule: a fine line at the margin, the page's own
+    # frame inside it
+    dr.rectangle([58*ss, 54*ss, 966*ss, 446*ss], outline=HAIR, width=max(1, round(1.4*ss)))
     fr = [80*ss, 76*ss, 944*ss, 424*ss]
     dr.rectangle(fr, outline=HAIR, width=max(1, round(2.2*ss)))
     # texts
@@ -643,29 +646,30 @@ def banner_png(out=None, ss=1):
     return im2
 
 def banner_text(im):
+    # the name and the caption as one centered stack, the gaps between them
+    # held tight so the caption never crowds the frame's foot: the title's ink
+    # ends 367, the rule sits 9 under it, and the caption's ink ends 401 with
+    # 23 of air above the inner frame at 424 (measured at ss=1)
     dr = ImageDraw.Draw(im)
     s = im.size[0] // 1024
-    # title: Literata regular, ink width 310, left 533 top 169
     title = 'Quran'
-    f = _font(LITERATA, 128*s, 'Regular')
+    f = _font(LITERATA, 120*s, 'Regular')
     bb = _inner_bbox(title, f)
-    target_w = 310.0
-    size = int(round(128*s * target_w/max(1, bb[2]-bb[0])))
+    size = int(round(120*s * 300.0/max(1, bb[2]-bb[0])))
     f = _font(LITERATA, size, 'Regular')
     bb = _inner_bbox(title, f)
-    dr.text((533*s - bb[0], 169*s - bb[1]), title, font=f, fill=INK)
-    # dash
-    dr.rectangle([528*s, 295.5*s, 582.5*s, 298.5*s], fill=HAIR)
-    # subtitle: Inter regular muted, ink width 262, left 528 top ~312? measure current: bbox incl dash was (528,296)-(790,348): text below dash
-    sub = 'The Noble Book'
-    f2 = _font(INTERF, 40*s, 'Regular')
-    bb2 = _inner_bbox(sub, f2)
-    target_w2 = 262.0
-    size2 = int(round(40*s * target_w2/max(1, bb2[2]-bb2[0])))
-    f2 = _font(INTERF, size2, 'Regular')
-    bb2 = _inner_bbox(sub, f2)
-    top = 318*s
-    dr.text((528*s - bb2[0], top - bb2[1]), sub, font=f2, fill=MUTED)
+    dr.text((512*s - (bb[0]+bb[2])/2, 284*s - bb[1]), title, font=f, fill=INK)
+    # the short gold rule between the name and the caption
+    dr.rectangle([467*s, 376*s, 557*s, 379*s], fill=HAIR)
+    # the caption in tracked small caps, centered on the axis
+    cap = 'THE NOBLE BOOK'
+    f2 = _font(INTERF, 21*s, 'Regular')
+    track = 5.0*s
+    widths = [dr.textlength(c, font=f2) for c in cap]
+    x = 512*s - (sum(widths) + track*(len(cap)-1)) / 2
+    for c, w in zip(cap, widths):
+        dr.text((x, 386*s), c, font=f2, fill=MUTED)
+        x += w + track
     return im
 
 def _inner_bbox(text, font):
