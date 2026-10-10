@@ -470,6 +470,10 @@ them are worth reading before any run:
   only the ones CI runs.
 - **One fact, one command, read once.** A failure is never guessed at
   twice: the second guess costs a capture run.
+- **A removed screen takes its test nodes with it.** The tour pressed a
+  Mushaf node on a reading that no longer draws one, and the pill never
+  rose: after deleting a surface, grep its content descriptions before
+  running anything.
 
 ## Housekeeping
 
