@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 5.4 (versionCode 56)
+Version: 5.5 (versionCode 57)
 
 ## Listing
 
@@ -221,6 +221,10 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (5.5, 464 characters)
+
+The app's mark is redrawn whole from its reference: the open book on its rehal, each plank built to the drawing's own fit and each foot closing in one clean tip. The same drawing stands in the launcher at every size, the themed home screen, the reminder, the share card, the store icon, and the banner, which is the book's own title page now. The reading, recitations, search, Browse, settings, and the daily ayah are as they were. No ads, no trackers, no account.
 
 ## Release notes (5.4, 352 characters)
 
