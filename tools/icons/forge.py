@@ -13,8 +13,9 @@
 # play-store/feature-graphic-1024x500.png, rebuilt with the repo's own
 # Literata and Inter over the paper field and the gold hairline frame.
 # The drawing traces the owner's reference set: the pages are sail arcs
-# diving into a spine that hangs a short tail, each plank folds onto the
-# page's outer edge, and its lower end fans into a closed wedge foot.
+# diving into a spine that ends at the V where the two pages meet, each
+# plank folds onto the page's outer edge, and each lower end meets the
+# closing arc at one shared foot tip.
 
 import math, os, sys
 from PIL import Image, ImageDraw, ImageFont
@@ -37,13 +38,17 @@ PAGE_P   = (56.5, 52.15)
 PAGE_E1  = (39.6, 57.4)
 PAGE_E2  = (38.6, 101.4)
 PAGE_J   = (85.5, 113.7)
-TAIL_END = (85.5, 118.7)
 
 CROSS     = (85.5, 128.9)   # where the two planks cross
-PLANK_END = (145.6, 149.6)   # the left-arm plank runs through the crossing
+PLANK_END = (143.8, 148.8)   # the leg ends on its own line at the wedge's mouth
                              # and out to the mirrored (right) foot's corner
 WEDGE_O   = (54.15, 118.25)
-WEDGE_F   = (26.6, 149.4)
+# the closing sweep now lands on the plank's own tip, so each foot is one
+# clean tapered face with no open mouth: the sliver between arc and leg was
+# the only spot of the mark that turned to mud at home-screen sizes
+WEDGE_C1  = (44.0, 126.0)
+WEDGE_C2  = (25.6, 137.4)
+WEDGE_F   = (28.5, 149.0)
 
 ARM_P_F, BAR_P_F = 3.0, 4.6
 RING_F, JUNC_F   = 3.0, 1.2
@@ -143,13 +148,14 @@ def mir_segs(segs):
 def page():
     d_edge = line_dir(PAGE_E1, PAGE_E2)
     d_bot  = line_dir(PAGE_E2, PAGE_J)
-    t1E1, cE1, t2E1, din, _ = fillet(PAGE_E1, PAGE_P, PAGE_E2, RING_F)
     t1E2, cE2, t2E2, _, _ = fillet(PAGE_E2, PAGE_E1, PAGE_J, RING_F)
     t1J, cJ, t2J, _, _ = fillet(PAGE_J, PAGE_E2, (85.5, PAGE_J[1] - 44.0), JUNC_F)
     P = [('M', PAGE_N)]
     P += [('C', (75.5, 54.2), (64.0, 52.05), PAGE_P)]
-    P += [('C', (49.5, 52.2), (41.8, 53.8), t1E1)]
-    P += arc_cubics(cE1, t1E1, t2E1, din, d_edge)
+    # the sail cubic flows straight into the edge's own direction at the top
+    # corner: tangent continuous by construction, so the outline never kinks
+    c2top = (PAGE_E1[0] - d_edge[0]*5.2, PAGE_E1[1] - d_edge[1]*5.2)
+    P += [('C', (49.5, 52.2), c2top, PAGE_E1)]
     P += [('L', t1E2)]
     P += arc_cubics(cE2, t1E2, t2E2, d_edge, d_bot)
     P += [('C', (54.0, 104.4), (73.5, 109.4), t1J)]
@@ -175,10 +181,9 @@ def plank():
     return S_
 
 def wedge_arc():
-    return [('M', WEDGE_O), ('C', (46.0, 125.7), (25.0, 141.6), WEDGE_F)]
-
-def tail_seg():
-    return [('M', (85.5, 112.9)), ('L', TAIL_END)]
+    # the face's closing sweep: it leaves the plank's upper line past the
+    # knee and closes into the leg's own tip, so the mouth is shut
+    return [('M', WEDGE_O), ('C', WEDGE_C1, WEDGE_C2, WEDGE_F)]
 
 def cap_redraw():
     return [('M', (CAP_TIP_X, 61.8)), ('L', (CAP_BACK_X, 61.8))]
@@ -219,12 +224,9 @@ def book_silhouette():
 
 def wedge_face_pts():
     pts = [CROSS, WEDGE_O]
-    pts += cub_pts(WEDGE_O, (46.0, 125.7), (25.0, 141.6), WEDGE_F, 24)
-    pts += [mirp(PLANK_END), CROSS]
+    pts += cub_pts(WEDGE_O, WEDGE_C1, WEDGE_C2, WEDGE_F, 24)
+    pts += [CROSS]
     return pts
-
-def tail_tri():
-    return [(84.2, 113.4), (86.8, 113.4), (85.5, 118.95)]
 
 # ------------------------------------------------------------- flatten / RDP
 def flatten(path, step=40):
@@ -378,9 +380,8 @@ def fg_pieces():
     pl = plank(); pm = mir_segs(pl)
     wa = wedge_arc(); wb = mir_segs(wa)
     pc = page(); pcM = mir_segs(pc)
-    tl = tail_seg()
     ca = cap_redraw(); cb = mir_segs(ca)
-    return dict(pl=pl, pm=pm, wa=wa, wb=wb, pc=pc, pcM=pcM, tl=tl, ca=ca, cb=cb)
+    return dict(pl=pl, pm=pm, wa=wa, wb=wb, pc=pc, pcM=pcM, ca=ca, cb=cb)
 
 # the themed silhouette's own weights: the band's half-width and the margin
 # of air cut around the book, both in trace units, tuned against the old set
@@ -396,8 +397,7 @@ def mono_shapes():
     faceL = wedge_face_pts()
     faceR = [mirp(x) for x in faceL]
     book = as_pts(book_silhouette(), 40)
-    tt = tail_tri()
-    return dict(bandA=bandA, bandB=bandB, cut=cut, faceL=faceL, faceR=faceR, book=book, tail=tt)
+    return dict(bandA=bandA, bandB=bandB, cut=cut, faceL=faceL, faceR=faceR, book=book)
 
 def mono_pathdata():
     d = mono_shapes()
@@ -405,7 +405,7 @@ def mono_pathdata():
     bandA = svg_poly(d['bandA'], scale, cx, cy) + ' ' + svg_poly(d['cut'], scale, cx, cy)
     bandB = svg_poly(d['bandB'], scale, cx, cy) + ' ' + svg_poly(d['cut'], scale, cx, cy)
     faces = svg_poly(d['faceL'], scale, cx, cy) + ' ' + svg_poly(d['faceR'], scale, cx, cy)
-    book  = svg_segs(book_silhouette(), scale, cx, cy) + ' ' + svg_poly(d['tail'], scale, cx, cy)
+    book  = svg_segs(book_silhouette(), scale, cx, cy)
     return bandA, bandB, faces, book
 
 def fg_xml(note):
@@ -427,7 +427,6 @@ def fg_xml(note):
         parts.append(P('@color/paper', '@color/paper', halo_w, svg_segs(p[k], scale, cx, cy)))
     for k in ('pc', 'pcM'):
         parts.append(P('@color/paper', '@color/icon_ink', STROKE, svg_segs(p[k], scale, cx, cy)))
-    parts.append(P(None, '@color/icon_ink', STROKE, svg_segs(p['tl'], scale, cx, cy)))
     for k in ('ca', 'cb'):
         parts.append(P(None, '@color/icon_gold', STROKE, svg_segs(p[k], scale, cx, cy)))
     body = '\n'.join(parts)
@@ -484,7 +483,6 @@ def draw_fg(im, scale, cx, cy, ss=SS, dy=0.0):
         pts = m(p[k]); fill_pts(dr, pts, PAPER); stroke_pts(dr, pts, PAPER, max(1, round(halo_w*scale*ss)))
     for k in ('pc', 'pcM'):
         pts = m(p[k]); fill_pts(dr, pts, PAPER); stroke_pts(dr, pts, INK, max(1, round(lw)))
-    stroke_pts(dr, m(p['tl']), INK, max(1, round(lw)))
     for k in ('ca', 'cb'):
         stroke_pts(dr, m(p[k]), GOLD, max(1, round(lw)))
     return im
@@ -502,7 +500,6 @@ def draw_mono(im, scale, cx, cy, ycen, ss=SS, color=WHITE):
     for k in ('faceL', 'faceR'):
         fill_pts(dr, m(d[k]), color)
     fill_pts(dr, m(d['book']), color)
-    fill_pts(dr, m(d['tail']), color)
     return im
 
 def trace_bbox(items):
@@ -535,7 +532,7 @@ def fit_for(item_lists, box, span_w=None, ycen=None):
 def render_store(size=512, out=None, ss=4):
     im = raster_canvas(size, ss)
     p = fg_pieces()
-    ids = [p[k] for k in ('pl', 'pm', 'wa', 'wb', 'pc', 'pcM', 'tl')]
+    ids = [p[k] for k in ('pl', 'pm', 'wa', 'wb', 'pc', 'pcM')]
     scale, xc, yc = fit_for(ids, None, span_w=size*0.498)
     paper_bg(im)
     draw_fg(im, scale, size/2*ss - (xc-AX_X)*scale*ss, size/2*ss + (AX_Y - yc)*scale*ss, ss)
@@ -551,7 +548,7 @@ DENS = [('mdpi', 48, 48), ('hdpi', 72, 72), ('xhdpi', 96, 96),
 def legacy_png(size, out=None):
     im = raster_canvas(size, 4)
     p = fg_pieces()
-    ids = [p[k] for k in ('pl', 'pm', 'wa', 'wb', 'pc', 'pcM', 'tl')]
+    ids = [p[k] for k in ('pl', 'pm', 'wa', 'wb', 'pc', 'pcM')]
     scale, xc, yc = fit_for(ids, None, span_w=size*0.495)
     paper_bg(im)
     draw_fg(im, scale, size/2*4 - (xc-AX_X)*scale*4, size/2*4 + (AX_Y-yc)*scale*4, 4)
@@ -560,7 +557,7 @@ def legacy_png(size, out=None):
 def share_png(size, out=None):
     im = raster_canvas(size, 4)
     p = fg_pieces()
-    ids = [p[k] for k in ('pl', 'pm', 'wa', 'wb', 'pc', 'pcM', 'tl')]
+    ids = [p[k] for k in ('pl', 'pm', 'wa', 'wb', 'pc', 'pcM')]
     scale, xc, yc = fit_for(ids, None, span_w=size*0.855)
     dr = ImageDraw.Draw(im)
     ink_w = 3.59*scale      # the mark's own stroke, in trace units
@@ -578,7 +575,6 @@ def share_png(size, out=None):
         stroke_pts(dr, m(p[k]), GOLD, max(1, round(lw)))
     for k in ('pc', 'pcM'):
         pts = m(p[k]); fill_pts(dr, pts, PAPER); stroke_pts(dr, pts, INK, max(1, round(lw)))
-    stroke_pts(dr, m(p['tl']), INK, max(1, round(lw)))
     im2 = im.resize((size, size), Image.LANCZOS)
     if out:
         im2.save(out)
@@ -594,7 +590,7 @@ def daily_png(size, out=None):
     return im2
 
 def daily_ids():
-    return [plank(), mir_segs(plank()), wedge_arc(), mir_segs(wedge_arc()), book_silhouette(), [TAIL_END]]
+    return [plank(), mir_segs(plank()), wedge_arc(), mir_segs(wedge_arc()), book_silhouette()]
 
 # --------------------------------------------------------------------- banner
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -621,7 +617,7 @@ def banner_png(out=None, ss=1):
     dr = ImageDraw.Draw(im)
     # the mark: ink width 319/1024 like the current banner, centered (279.5, 254.5)
     p = fg_pieces()
-    ids = [p[k] for k in ('pl', 'pm', 'wa', 'wb', 'pc', 'pcM', 'tl')]
+    ids = [p[k] for k in ('pl', 'pm', 'wa', 'wb', 'pc', 'pcM')]
     scale, xc, yc = fit_for(ids, None, span_w=319.0)
     cx, cy = 279.5*ss, 254.5*ss + (AX_Y-yc)*scale*ss
     s = ss
@@ -635,7 +631,6 @@ def banner_png(out=None, ss=1):
         pts = m(p[k]); fill_pts(dr, pts, PAPER); stroke_pts(dr, pts, PAPER, max(1, round(halo_w*s)))
     for k in ('pc', 'pcM'):
         pts = m(p[k]); fill_pts(dr, pts, PAPER); stroke_pts(dr, pts, INK, max(1, round(lw*s)))
-    stroke_pts(dr, m(p['tl']), INK, max(1, round(lw*s)))
     for k in ('ca', 'cb'):
         stroke_pts(dr, m(p[k]), GOLD, max(1, round(lw*s)))
     # frame
@@ -690,7 +685,7 @@ def preview():
     # the mark on paper, with an optional reference sheet beside it when the
     # session carries one: point QURAN_MARK_REFERENCE at the source image
     p = fg_pieces()
-    ids = [p[k] for k in ('pl', 'pm', 'wa', 'wb', 'pc', 'pcM', 'tl')]
+    ids = [p[k] for k in ('pl', 'pm', 'wa', 'wb', 'pc', 'pcM')]
     panels = []
     overlays = os.environ.get('QURAN_MARK_REFERENCE')
     if overlays and os.path.exists(overlays):
