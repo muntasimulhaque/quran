@@ -422,13 +422,16 @@ implement it and update this list.
   Book's order: a different ayah every morning, every ayah once before the
   deck is filled again, and nothing stored (owner decision).
 - The app's mark is an open book on its rehal: the owner's own reference
-  drawing, redrawn clean for this app as uniform line art, the book in the
-  theme's ink on the theme's paper, `#1C1B18` on `#F8F5EF`, the stand in the
-  ornament gold `#856411`, with the pages filled in the paper so
-  the book occludes the stand behind it and a paper margin keeps the stand's
-  lines clear of the book's edge (owner decision, this session: the mark
-  wears the app's own theme tones, and the cover's burgundy is not one of
-  them). The launcher, its monochrome layer (the book's silhouette on each
+  drawing, redrawn clean for this app as uniform line art on the reference's
+  own reading: the pages are sail arcs diving into a spine that hangs a short
+  tail, each plank folds onto the page's outer edge, runs down beside the
+  book, crosses below it, and its lower end fans into a closed wedge foot
+  sealed by a tall outward arc; the book in the theme's ink on the theme's
+  paper, `#1C1B18` on `#F8F5EF`, the stand in the ornament gold `#856411`,
+  with the pages filled in the paper so the book occludes the stand behind it
+  and a paper margin keeps the stand's lines clear of the book's edge (owner
+  decision, this session: the mark wears the app's own theme tones, and the
+  drawing follows the reference's own reading). The launcher, its monochrome layer (the book's silhouette on each
   plank, sturdier than the mark), the store icon, the reminder's small icon
   (the silhouette alone, no ground, since the shade reads only its alpha and
   paints it in the notification color), the share card (the drawing in its

@@ -89,7 +89,11 @@ for.
 
 The icon and the feature graphic are the app's own mark: an open book on its
 rehal, the owner's own reference drawing, redrawn clean for this app as
-uniform line art, the book in the theme's ink `#1C1B18` on the theme's paper
+uniform line art on the reference's own reading: the pages are sail arcs
+diving into a spine that hangs a short tail, each plank folds onto the page's
+outer edge, runs down beside the book, crosses below it, and its lower end
+fans into a closed wedge foot sealed by a tall outward arc. The book is in the
+theme's ink `#1C1B18` on the theme's paper
 `#F8F5EF`, the stand in the ornament gold `#856411`. These are the
 colors the reader already sees inside the app; the cover's burgundy belongs to
 the cover. The launcher carries the mark at five densities and in its adaptive
