@@ -87,6 +87,16 @@ import kotlinx.coroutines.withContext
 private const val LIMIT = 200
 
 /**
+ * The air a line of Arabic in a result gives its diacritics, as a share of
+ * its size. Both Arabic lines a result can draw (the whole ayah, and the
+ * matched words alone) breathe at this one ratio, the one the reading
+ * itself sets its Arabic at: a verse in a result reads like the verse on
+ * the page, and the two line kinds cannot drift apart at the hand of
+ * whoever edits one of them next.
+ */
+private const val SearchArabicAir = 1.9f
+
+/**
  * How long a query has to sit still before it is run.
  *
  * A reader's hand outruns their typing: "mercy" arrives as five queries, and
@@ -583,7 +593,7 @@ private fun AyahRow(
                     style = TextStyle(
                         fontFamily = hafs,
                         fontSize = 22.sp,
-                        lineHeight = 42.sp,
+                        lineHeight = (22f * SearchArabicAir).sp,
                         color = MaterialTheme.colorScheme.onSurface,
                     ),
                     textAlign = TextAlign.Right,
@@ -599,7 +609,7 @@ private fun AyahRow(
                     style = TextStyle(
                         fontFamily = hafs,
                         fontSize = 24.sp,
-                        lineHeight = 40.sp,
+                        lineHeight = (24f * SearchArabicAir).sp,
                         color = MaterialTheme.colorScheme.onSurface,
                     ),
                     textAlign = TextAlign.Right,

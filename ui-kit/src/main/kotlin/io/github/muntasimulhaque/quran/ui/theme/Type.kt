@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -126,15 +127,19 @@ val BanglaTypography = typographyFor(NotoSansBengali)
  * alone loads every member at the file's default 400, so a bold run would
  * be drawn exactly like the regular text around it (the same silence a
  * static face has, made worse by the family looking correct).
+ *
+ * The opsz is the size the text is actually drawn at, the reader's own
+ * scale included: a reader whose scale is doubled reads the cut Literata
+ * drew for double size, not the small-text cut stretched over it.
  */
-@OptIn(ExperimentalTextApi::class)
+@Composable
 fun literataAt(sizeSp: Float): FontFamily {
-    val key = sizeSp.toBits()
-    return literataCuts.getOrPut(key) {
+    val drawn = sizeSp * LocalDensity.current.fontScale
+    return literataCuts.getOrPut(drawn.toBits()) {
         FontFamily(
-            literataCut(sizeSp, FontWeight.Normal),
-            literataCut(sizeSp, FontWeight.Medium),
-            literataCut(sizeSp, FontWeight.SemiBold),
+            literataCut(drawn, FontWeight.Normal),
+            literataCut(drawn, FontWeight.Medium),
+            literataCut(drawn, FontWeight.SemiBold),
         )
     }
 }
@@ -183,7 +188,7 @@ val BengaliReading = TextStyle(
 class ReadingVoice(
     val style: TextStyle,
     val lineRatio: Float,
-    val atSize: (Float) -> FontFamily,
+    val atSize: @Composable (Float) -> FontFamily,
 )
 
 val LocalReadingVoice = staticCompositionLocalOf { ReadingVoice(LatinReading, 1.6f, ::literataAt) }

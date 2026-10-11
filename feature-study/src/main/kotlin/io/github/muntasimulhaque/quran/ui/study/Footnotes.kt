@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.Footnote
 import io.github.muntasimulhaque.quran.feature.study.R
+import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -41,6 +42,10 @@ internal data class OpenFootnote(
  * The note is set at the size of the text it belongs to, passed in by the
  * caller, so the translation's notes follow the translation size setting and
  * a tafsir's notes will follow the tafsir size the day a tafsir carries one.
+ * It speaks the reading's own voice with it: a translator's note is part of
+ * the sentence it explains, drawn on the page that sentence is drawn on, so
+ * it wears the face the translation wears rather than the interface's, the
+ * same voice the reader's own note is written in.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,7 +76,7 @@ internal fun FootnoteSheet(
             )
             Text(
                 text = footnote.text,
-                style = MaterialTheme.typography.bodyLarge.copy(
+                style = LocalReadingVoice.current.style.copy(
                     fontSize = sizeSp.sp,
                     lineHeight = lineSp.sp,
                 ),

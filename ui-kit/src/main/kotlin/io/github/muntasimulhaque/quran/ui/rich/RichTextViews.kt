@@ -1,11 +1,8 @@
 package io.github.muntasimulhaque.quran.ui.rich
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -16,7 +13,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
@@ -27,7 +23,6 @@ import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
-import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
@@ -38,7 +33,6 @@ import io.github.muntasimulhaque.quran.core.TextBlockKind
 import io.github.muntasimulhaque.quran.core.TextRun
 import io.github.muntasimulhaque.quran.core.ScriptMix
 import io.github.muntasimulhaque.quran.core.scriptMix
-import io.github.muntasimulhaque.quran.data.Footnote
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 
@@ -182,57 +176,6 @@ fun HighlightedText(
         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
         modifier = modifier.fillMaxWidth(),
     )
-}
-
-/** The footnote list of one ayah, hung under its translation. */
-@Composable
-fun FootnoteList(
-    footnotes: List<Footnote>,
-    modifier: Modifier = Modifier,
-    quiet: Boolean = false,
-    sizeSp: Float = 13f,
-) {
-    if (footnotes.isEmpty()) return
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(top = if (quiet) 6.dp else 12.dp),
-        verticalArrangement = Arrangement.spacedBy(if (quiet) 22.dp else 8.dp),
-    ) {
-        if (quiet) {
-            Box(
-                Modifier
-                    .fillMaxWidth(0.14f)
-                    .height(1.dp)
-                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
-            )
-        }
-        val primary = MaterialTheme.colorScheme.onSurfaceVariant
-        footnotes.forEach { footnote ->
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(
-                        SpanStyle(color = primary, fontWeight = FontWeight.Medium, fontSize = (sizeSp - 2).sp),
-                    ) { append(footnote.number.toString()) }
-                    append("  ")
-                    append(footnote.text)
-                },
-                style = MaterialTheme.typography.bodySmall
-                    .merge(SpanStyle(fontSize = sizeSp.sp))
-                    .plus(
-                        ParagraphStyle(
-                            lineHeight = (sizeSp * 1.5f).sp,
-                            textIndent = TextIndent(firstLine = 0.sp, restLine = 14.sp),
-                        ),
-                    ),
-                // A footnote is read. It keeps the theme's own secondary tone,
-                // measured at 6.1:1 and up on every ground; the 0.8 alpha it
-                // wore measured 3.7:1 and is closed here.
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-    }
 }
 
 /**

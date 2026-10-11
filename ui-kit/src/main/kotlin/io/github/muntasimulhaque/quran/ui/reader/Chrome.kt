@@ -378,7 +378,10 @@ fun TextAction(
             // point smaller. 10 sp was under Material's floor and under the
             // size the rest of the app's smallest type uses, so the one word
             // naming each action was the hardest word on the page to read.
-            style = MaterialTheme.typography.labelSmall,
+            // 11 sp held the floor exactly; 12 sp is the size the sheet's
+            // quiet words already use, so the bar and the sheet agree, and a
+            // finger never shrinks to fit it.
+            style = MaterialTheme.typography.labelMedium,
             color = if (active) {
                 MaterialTheme.colorScheme.primary
             } else {

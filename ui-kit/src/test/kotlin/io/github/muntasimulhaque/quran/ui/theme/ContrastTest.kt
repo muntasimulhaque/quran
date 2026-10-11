@@ -1,5 +1,6 @@
 package io.github.muntasimulhaque.quran.ui.theme
 
+import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -9,8 +10,11 @@ import org.junit.Test
  * that carries words reads at 4.5:1 or better on every ground it is drawn
  * on, in each of the three themes. The pairs are the ones the schemes wire:
  * the reading ink, the muted voice, the gold of the page furniture, and the
- * lapis of an action. A palette edit that sinks a pair fails here, on the
- * machine, rather than on a reader's eyes.
+ * lapis of an action. The muted voice is held against every ground a sheet
+ * or a floating control stands on, not only against the sheet's own tone,
+ * because the quiet words of a label travel with the surfaces they sit on.
+ * A palette edit that sinks a pair fails here, on the machine, rather than
+ * on a reader's eyes.
  */
 class ContrastTest {
 
@@ -20,6 +24,7 @@ class ContrastTest {
         assertReadable(PaperInk, PaperSurface)
         assertReadable(PaperMuted, PaperBackground)
         assertReadable(PaperMuted, PaperSurface)
+        assertSheetGrounds(PaperScheme)
         assertReadable(Gold, PaperBackground)
         assertReadable(Lapis, PaperBackground)
         assertReadable(Lapis, PaperSurface)
@@ -32,6 +37,7 @@ class ContrastTest {
         assertReadable(SepiaInk, SepiaSurface)
         assertReadable(SepiaMuted, SepiaBackground)
         assertReadable(SepiaMuted, SepiaSurface)
+        assertSheetGrounds(SepiaScheme)
         assertReadable(SepiaGold, SepiaBackground)
         assertReadable(Lapis, SepiaBackground)
         assertReadable(Lapis, SepiaSurface)
@@ -44,10 +50,26 @@ class ContrastTest {
         assertReadable(NightText, NightSurface)
         assertReadable(NightMuted, NightBackground)
         assertReadable(NightMuted, NightSurface)
+        assertSheetGrounds(NightScheme)
         assertReadable(NightGold, NightBackground)
         assertReadable(LapisLight, NightBackground)
         assertReadable(LapisLight, NightSurface)
         assertReadable(Color(0xFF08243D), LapisLight)
+    }
+
+    /**
+     * The quiet words of a sheet, on every ground a sheet or a floating
+     * control stands on: the sheet's own surface, the variant a component
+     * asks for, and the two containers a lifted control wears. These pairs
+     * are read off the scheme itself, so a test can never pin a value the
+     * app no longer draws with.
+     */
+    private fun assertSheetGrounds(scheme: ColorScheme) {
+        val quiet = scheme.onSurfaceVariant
+        assertReadable(quiet, scheme.surfaceVariant)
+        assertReadable(quiet, scheme.surfaceContainer)
+        assertReadable(quiet, scheme.surfaceContainerHigh)
+        assertReadable(quiet, scheme.surfaceContainerHighest)
     }
 
     private fun assertReadable(ink: Color, ground: Color) {

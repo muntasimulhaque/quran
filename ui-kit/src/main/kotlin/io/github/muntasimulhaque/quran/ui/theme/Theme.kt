@@ -37,7 +37,7 @@ import io.github.muntasimulhaque.quran.data.UiLanguage
  * as a control is the one thing a scheme role should not be left to answer
  * for by accident.
  */
-private val PaperScheme = lightColorScheme(
+internal val PaperScheme = lightColorScheme(
     primary = Lapis,
     onPrimary = PaperOnPrimary,
     primaryContainer = Color(0xFFD3E4F5),
@@ -66,7 +66,7 @@ private val PaperScheme = lightColorScheme(
     scrim = Color(0xFF14130F),
 )
 
-private val SepiaScheme = lightColorScheme(
+internal val SepiaScheme = lightColorScheme(
     primary = Lapis,
     onPrimary = SepiaOnPrimary,
     primaryContainer = Color(0xFFE7D9BE),
@@ -95,7 +95,7 @@ private val SepiaScheme = lightColorScheme(
     scrim = Color(0xFF241B0E),
 )
 
-private val NightScheme = darkColorScheme(
+internal val NightScheme = darkColorScheme(
     primary = LapisLight,
     onPrimary = NightOnPrimary,
     primaryContainer = Color(0xFF24405C),
