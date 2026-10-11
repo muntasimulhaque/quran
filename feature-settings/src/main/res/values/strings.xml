@@ -8,7 +8,6 @@
     <string name="settings_theme_paper">Paper</string>
     <string name="settings_theme_sepia">Sepia</string>
     <string name="settings_theme_night">Night</string>
-    <string name="settings_theme_black">Black</string>
     <string name="settings_auto_night_title">Follow the system dark mode</string>
     <string name="settings_summary_theme_auto">%1$s · day page %2$s</string>
 

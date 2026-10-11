@@ -30,16 +30,6 @@ val NightMuted = Color(0xFFA6B1BD)
 val NightHairline = NightOutline
 val NightGold = Color(0xFFB08E45)
 
-// Black
-val BlackBackground = Color(0xFF000000)
-val BlackSurface = Color(0xFF0B0F14)
-val BlackOutline = Color(0xFF202834)
-val BlackText = Color(0xFFDDD8CC)
-val BlackInk = Color(0xFFCFC9BA)
-val BlackMuted = Color(0xFF9AA3AF)
-val BlackHairline = BlackOutline
-val BlackGold = Color(0xFF9C7C38)
-
 // The one interactive accent, and the ornament gold that belongs to the
 // Reading.
 //
@@ -52,7 +42,7 @@ val LapisLight = Color(0xFF7FB2E5)
 // juz, the surah names drawn into the page, and the ornamental name at the
 // head of the study reading. It therefore meets the same 4.5:1 rule every
 // other text tone does, on each ground it is drawn on: 5.0:1 on paper,
-// 5.1:1 on sepia, 5.8:1 on night, 5.4:1 on black. The older paper and sepia
+// 5.1:1 on sepia, 5.8:1 on night. The older paper and sepia
 // gold sat at 3.2:1 and 4.1:1, under the rule, and were darkened without
 // changing the hue.
 val Gold = Color(0xFF856411)
@@ -71,10 +61,10 @@ val FloatingShadow = Color(0x1A000000)
 // of an on switch is the accent.
 //
 // These are Material's `surfaceContainerHighest` and `onPrimary`, lifted out
-// of the four schemes and named here, because a control's colors are the
+// of the three schemes and named here, because a control's colors are the
 // theme's business and were being taken from two scheme roles that each mean
 // something else: the off knob was `outline`, which is the hairline every
-// divider in the app wears, and on the two night grounds it measured 1.03:1
+// divider in the app wears, and on the night ground it measured 1.03:1
 // against its own track, so an off switch had no knob in it at all (owner
 // report, forty-sixth session). See `Switch.kt` for the whole control.
 val PaperControl = Color(0xFFFFFFFF)
@@ -83,5 +73,3 @@ val SepiaControl = Color(0xFFFEF9F0)
 val SepiaOnPrimary = Color(0xFFFDF8ED)
 val NightControl = Color(0xFF263443)
 val NightOnPrimary = Color(0xFF08243D)
-val BlackControl = Color(0xFF1D2834)
-val BlackOnPrimary = Color(0xFF061A2C)

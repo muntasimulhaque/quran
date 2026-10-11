@@ -90,7 +90,14 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     private var catalog: PackCatalog = PackCatalog.parse("{}")
     private var installed: Set<String> = emptySet()
 
-    var settings by mutableStateOf(AppSettings())
+    /**
+     * The reader's choices, seeded from the synchronous mirror the store
+     * keeps of the page and its switch: the first frame is composed on the
+     * page the reader last chose, and everything else waits for the store's
+     * own read in the init below. A plain default would paint a Night
+     * reader a frame or two of Paper before the stored page landed.
+     */
+    var settings by mutableStateOf(settingsStore.snapshot())
         private set
     var surahs by mutableStateOf<List<Surah>>(emptyList())
         private set

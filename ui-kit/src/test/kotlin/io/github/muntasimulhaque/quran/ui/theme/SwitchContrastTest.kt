@@ -16,8 +16,8 @@ import org.junit.Test
  *
  * This test exists because the switch's colors were nobody's choice. Material
  * read the unchecked knob from `outline` and the unchecked track from
- * `surfaceContainerHighest`, which on the two night grounds are four levels
- * apart: 1.03:1 on Night and 1.01:1 on Black, so an off switch had no knob in
+ * `surfaceContainerHighest`, which on the night ground are four levels
+ * apart: 1.03:1 on Night, so an off switch had no knob in
  * it at all. Every pair here is declared in `Switch.kt`, and a ground whose
  * knob or ring is moved back toward its own track fails here.
  */
@@ -36,11 +36,6 @@ class SwitchContrastTest {
     @Test
     fun nightHolds() {
         assertControl(NightSwitch)
-    }
-
-    @Test
-    fun blackHolds() {
-        assertControl(BlackSwitch)
     }
 
     private fun assertControl(palette: SwitchPalette) {

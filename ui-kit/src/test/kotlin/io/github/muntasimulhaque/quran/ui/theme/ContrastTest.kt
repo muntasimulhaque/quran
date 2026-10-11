@@ -7,7 +7,7 @@ import org.junit.Test
 /**
  * The contrast rule, enforced by arithmetic instead of by memory: every tone
  * that carries words reads at 4.5:1 or better on every ground it is drawn
- * on, in each of the four themes. The pairs are the ones the schemes wire:
+ * on, in each of the three themes. The pairs are the ones the schemes wire:
  * the reading ink, the muted voice, the gold of the page furniture, and the
  * lapis of an action. A palette edit that sinks a pair fails here, on the
  * machine, rather than on a reader's eyes.
@@ -48,18 +48,6 @@ class ContrastTest {
         assertReadable(LapisLight, NightBackground)
         assertReadable(LapisLight, NightSurface)
         assertReadable(Color(0xFF08243D), LapisLight)
-    }
-
-    @Test
-    fun blackHolds() {
-        assertReadable(BlackText, BlackBackground)
-        assertReadable(BlackText, BlackSurface)
-        assertReadable(BlackMuted, BlackBackground)
-        assertReadable(BlackMuted, BlackSurface)
-        assertReadable(BlackGold, BlackBackground)
-        assertReadable(LapisLight, BlackBackground)
-        assertReadable(LapisLight, BlackSurface)
-        assertReadable(Color(0xFF061A2C), LapisLight)
     }
 
     private fun assertReadable(ink: Color, ground: Color) {

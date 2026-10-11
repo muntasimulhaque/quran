@@ -143,8 +143,8 @@ class SystemThemeTest {
     /**
      * Whether the page on screen is a night page, read from a pixel in the
      * lower part of the reading, where the page is paper and neither the chrome
-     * above nor the phone's own bars below reach. The four grounds are chosen
-     * far apart (the paper grounds are near white, the night grounds are near
+     * above nor the phone's own bars below reach. The grounds are chosen
+     * far apart (the paper grounds are near white, the night ground is near
      * black), so one measured sum against the middle of the range tells them
      * apart without naming a color.
      */

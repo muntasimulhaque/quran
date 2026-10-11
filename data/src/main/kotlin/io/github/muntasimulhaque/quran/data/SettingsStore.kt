@@ -18,7 +18,17 @@ import kotlinx.coroutines.flow.map
 
 private val Context.settingsStore: DataStore<Preferences> by preferencesDataStore("reading")
 
-enum class AppTheme { Paper, Sepia, Night, Black }
+/**
+ * The pages the reader can read on. Paper, Sepia, and Night: one ground for
+ * the day, one warm page for the evening, and the dark ground for the
+ * night. There is no fourth: a page that only differs from Night by its
+ * blackness is a choice a reader cannot articulate, and pure black is the
+ * ground the reading science argues against (owner decision, this session:
+ * the dark gray of Night reads for longer without halation, and the OLED
+ * power a true black saves over a near-black is a rounding error on a page
+ * of text).
+ */
+enum class AppTheme { Paper, Sepia, Night }
 
 /**
  * The minute the daily reminder arrives when the reader has never chosen one:
@@ -29,8 +39,8 @@ const val DEFAULT_DAILY_MINUTE = 8 * 60
 /** The last minute a day has, 23:59. */
 const val LAST_MINUTE_OF_DAY = 24 * 60 - 1
 
-/** True for the two themes that turn the page over into the dark. */
-fun AppTheme.isDark(): Boolean = this == AppTheme.Night || this == AppTheme.Black
+/** True for the theme that turns the page over into the dark. */
+fun AppTheme.isDark(): Boolean = this == AppTheme.Night
 
 /**
  * The page the reader actually reads on, once the system has a say.
@@ -142,6 +152,21 @@ data class AppSettings(
  */
 class SettingsStore(private val context: Context) {
 
+    /**
+     * The synchronous mirror of the page and its switch, read by a launch
+     * before the DataStore has answered. It is written beside every write
+     * above, so the two can never drift.
+     */
+    private val themePreference = ThemePreference(context)
+
+    /**
+     * The settings as they stood at launch: the page and its automatic
+     * switch, read before any coroutine runs, so the first frame is
+     * composed on the page the reader last chose. Everything else stays at
+     * its default until the store's own read lands below.
+     */
+    fun snapshot(): AppSettings = themePreference.snapshot()
+
     val settings: Flow<AppSettings> = context.settingsStore.data.map { preferences ->
         val choices = preferences.asMap()
         val ayah = preferences[AYAH] ?: 1
@@ -153,8 +178,9 @@ class SettingsStore(private val context: Context) {
             ayah = ayah.coerceIn(1, 6236),
             theme = when (preferences[THEME]) {
                 "sepia" -> AppTheme.Sepia
-                "night" -> AppTheme.Night
-                "black" -> AppTheme.Black
+                // "black" was the fourth page; an install that
+                // chose it lands on the Night that replaced it.
+                "night", "black" -> AppTheme.Night
                 else -> AppTheme.Paper
             },
             autoNight = preferences[AUTO_NIGHT] ?: false,
@@ -189,13 +215,14 @@ class SettingsStore(private val context: Context) {
                 AppTheme.Paper -> "paper"
                 AppTheme.Sepia -> "sepia"
                 AppTheme.Night -> "night"
-                AppTheme.Black -> "black"
             }
         }
+        themePreference.setTheme(theme)
     }
 
     suspend fun setAutoNight(follow: Boolean) {
         context.settingsStore.edit { it[AUTO_NIGHT] = follow }
+        themePreference.setAutoNight(follow)
     }
 
     suspend fun setUiLanguage(tag: String) {

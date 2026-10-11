@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.Color
  * is `outline` and the track is `surfaceContainerHighest`. On a night ground
  * those two are the same paint. The night hairline is `#2A3644` and its
  * container tone is `#263443`, four levels away, so the knob measured 1.03:1
- * against the track it sits in and 1.01:1 on Black: an off switch was one
+ * against the track it sits in: an off switch was one
  * flat lump with no knob in it, and the ring that was supposed to draw its
  * edge was the same lump again (owner report, forty-sixth session). Paper
  * only read because its hairline happens to sit 24 levels off white, which
@@ -32,7 +32,7 @@ import androidx.compose.ui.graphics.Color
  * not in the palette the rest of the app draws with.
  *
  * The pair a switch is on in is the scheme's own accent and its own ink on
- * that accent, declared here so that all four grounds answer for the whole
+ * that accent, declared here so that all three grounds answer for the whole
  * control in one place. It is the pair that was already there, and it already
  * measured 7.07:1 on Night and up on every ground.
  *
@@ -71,14 +71,6 @@ internal val NightSwitch = SwitchPalette(
     onTrack = LapisLight,
     onKnob = NightOnPrimary,
     ground = NightSurface,
-)
-
-internal val BlackSwitch = SwitchPalette(
-    offTrack = BlackControl,
-    offKnob = BlackMuted,
-    onTrack = LapisLight,
-    onKnob = BlackOnPrimary,
-    ground = BlackSurface,
 )
 
 internal val LocalSwitchPalette = staticCompositionLocalOf { PaperSwitch }

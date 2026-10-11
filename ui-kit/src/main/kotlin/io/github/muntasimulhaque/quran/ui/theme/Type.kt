@@ -47,10 +47,16 @@ val Literata = FontFamily(
     Font(R.font.literata_variable, FontWeight.Medium),
 )
 
-/** The Bangla reading voice, for translations, tafsir, and notes. */
+/**
+ * The Bangla reading voice, for translations, tafsir, and notes. The
+ * SemiBold member is what a bold run of the tafsir asks for; without it a
+ * family is matched to the nearest declared weight and the emphasis would
+ * render at Medium.
+ */
 val NotoSerifBengali = FontFamily(
     Font(R.font.noto_serif_bengali, FontWeight.Normal),
     Font(R.font.noto_serif_bengali, FontWeight.Medium),
+    Font(R.font.noto_serif_bengali, FontWeight.SemiBold),
 )
 
 /** The display voice of the ornaments. */
@@ -104,25 +110,44 @@ val QuranTypography = typographyFor(Inter)
 val BanglaTypography = typographyFor(NotoSansBengali)
 
 /**
- * Literata at the size it is about to be drawn. The face's optical size
- * axis runs 7 to 72 with the default at 12, so a 17 sp body would otherwise
- * be set in the cut drawn for footnotes. Faces without the axis (the
- * Bengali voices) have one cut and never come through here, and below
- * API 26 the platform ignores the setting.
+ * Literata at the size it is about to be drawn, in the three weights a
+ * paragraph of reading can ask for. The face's optical size axis runs 7 to
+ * 72 with the default at 12, so a 17 sp body would otherwise be set in the
+ * cut drawn for footnotes. Faces without the axis (the Bengali voices) have
+ * one cut and never come through here, and below API 26 the platform
+ * ignores the setting.
+ *
+ * The three members are the whole of what the reading requests: the regular
+ * text, the Medium a footnote marker wears, and the SemiBold a bold run of
+ * the tafsir wears. A family is matched by the weight each member declares,
+ * so a member must exist for every weight a span can request, and each one
+ * carries its own wght axis beside the opsz: Compose applies only the
+ * variation settings a Font declares, and a family built with the opsz
+ * alone loads every member at the file's default 400, so a bold run would
+ * be drawn exactly like the regular text around it (the same silence a
+ * static face has, made worse by the family looking correct).
  */
 @OptIn(ExperimentalTextApi::class)
-fun literataAt(sizeSp: Float, weight: FontWeight = FontWeight.Normal): FontFamily {
-    val key = sizeSp.toBits() xor (weight.weight shl 1)
+fun literataAt(sizeSp: Float): FontFamily {
+    val key = sizeSp.toBits()
     return literataCuts.getOrPut(key) {
         FontFamily(
-            Font(
-                R.font.literata_variable,
-                weight,
-                variationSettings = FontVariation.Settings(FontVariation.Setting("opsz", sizeSp)),
-            ),
+            literataCut(sizeSp, FontWeight.Normal),
+            literataCut(sizeSp, FontWeight.Medium),
+            literataCut(sizeSp, FontWeight.SemiBold),
         )
     }
 }
+
+@OptIn(ExperimentalTextApi::class)
+private fun literataCut(sizeSp: Float, weight: FontWeight): Font = Font(
+    R.font.literata_variable,
+    weight,
+    variationSettings = FontVariation.Settings(
+        FontVariation.Setting("opsz", sizeSp),
+        FontVariation.weight(weight.weight),
+    ),
+)
 
 private val literataCuts = java.util.concurrent.ConcurrentHashMap<Int, FontFamily>()
 

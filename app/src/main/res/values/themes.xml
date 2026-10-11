@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--
+      The window the system shows before the app draws its own first frame.
+
+      This ground is the one thing in the app that cannot know the reader's
+      page: the system paints it before any app code runs, and the only
+      themes it can choose between are the ones declared here, which is why
+      there are two and why they follow the system's own day and night. A
+      reader whose stored page disagrees with their system sees this ground
+      for the length of a launch and nothing more: the first Compose frame
+      is seeded from the synchronous mirror in ThemePreference, so it opens
+      on the page the reader last chose. There is no per-reader starting
+      window on Android: postSplashScreenTheme is a static manifest theme
+      too, and windowDisablePreview would trade this for a black flash for
+      every reader (owner decision, this session).
+    -->
     <style name="Theme.Quran" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/paper</item>
         <item name="android:statusBarColor">@android:color/transparent</item>

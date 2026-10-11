@@ -11,7 +11,7 @@ import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.UiLanguage
 
 /**
- * The four grounds, in one place, each one fully spoken for.
+ * The three grounds, in one place, each one fully spoken for.
  *
  * Every role Material draws from is set here rather than left to its default.
  * A default that falls through is a color nobody chose, and on a page whose
@@ -124,35 +124,6 @@ private val NightScheme = darkColorScheme(
     scrim = Color(0xFF000000),
 )
 
-private val BlackScheme = darkColorScheme(
-    primary = LapisLight,
-    onPrimary = BlackOnPrimary,
-    primaryContainer = Color(0xFF1E3448),
-    onPrimaryContainer = Color(0xFFD3E4F5),
-    secondary = BlackMuted,
-    onSecondary = Color(0xFF05080B),
-    tertiary = BlackMuted,
-    onTertiary = Color(0xFF05080B),
-    background = BlackBackground,
-    onBackground = BlackText,
-    surface = BlackSurface,
-    onSurface = BlackText,
-    surfaceVariant = Color(0xFF141C26),
-    onSurfaceVariant = BlackMuted,
-    surfaceContainerLowest = Color(0xFF000000),
-    surfaceContainerLow = Color(0xFF080C11),
-    surfaceContainer = Color(0xFF0D131A),
-    surfaceContainerHigh = Color(0xFF151E28),
-    surfaceContainerHighest = BlackControl,
-    surfaceTint = Color.Transparent,
-    inverseSurface = BlackText,
-    inverseOnSurface = BlackBackground,
-    inversePrimary = Lapis,
-    outline = BlackOutline,
-    outlineVariant = BlackOutline,
-    scrim = Color(0xFF000000),
-)
-
 /** The reading colors, which turn over with the theme. */
 private val PaperPage = PagePalette(
     paper = PaperBackground,
@@ -178,20 +149,12 @@ private val NightPage = PagePalette(
     highlight = Color(0x477FB2E5),
 )
 
-private val BlackPage = PagePalette(
-    paper = BlackBackground,
-    ink = BlackInk,
-    ornament = BlackGold,
-    selection = Color(0x337FB2E5),
-    highlight = Color(0x4D7FB2E5),
-)
-
 val LocalPagePalette = staticCompositionLocalOf { PaperPage }
 val LocalPageThemeName = staticCompositionLocalOf { "paper" }
 
 /**
- * The theme is the whole app: the four grounds, and the voice everything is
- * written in. The voice follows the reader's one language choice: English
+ * The theme is the whole app: the three grounds, and the voice everything
+ * is written in. The voice follows the reader's one language choice: English
  * speaks Inter and Literata, Bangla speaks Noto Sans Bengali and Noto Serif
  * Bengali, and the switch is made here so no surface picks a face of its own.
  */
@@ -205,25 +168,21 @@ fun QuranTheme(
         AppTheme.Paper -> PaperScheme
         AppTheme.Sepia -> SepiaScheme
         AppTheme.Night -> NightScheme
-        AppTheme.Black -> BlackScheme
     }
     val palette = when (theme) {
         AppTheme.Paper -> PaperPage
         AppTheme.Sepia -> SepiaPage
         AppTheme.Night -> NightPage
-        AppTheme.Black -> BlackPage
     }
     val name = when (theme) {
         AppTheme.Paper -> "paper"
         AppTheme.Sepia -> "sepia"
         AppTheme.Night -> "night"
-        AppTheme.Black -> "black"
     }
     val switches = when (theme) {
         AppTheme.Paper -> PaperSwitch
         AppTheme.Sepia -> SepiaSwitch
         AppTheme.Night -> NightSwitch
-        AppTheme.Black -> BlackSwitch
     }
     CompositionLocalProvider(
         LocalPagePalette provides palette,
