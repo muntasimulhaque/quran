@@ -97,18 +97,14 @@ internal val NightScheme = darkColorScheme(
 
 /** The reading colors, which turn over with the theme. */
 private val PaperPage = PagePalette(
-    paper = PaperBackground,
     ink = PaperInk,
     ornament = Gold,
-    selection = Color(0x1F1B4D7A),
     highlight = Color(0x381B4D7A),
 )
 
 private val NightPage = PagePalette(
-    paper = NightBackground,
     ink = NightInk,
     ornament = NightGold,
-    selection = Color(0x2E7FB2E5),
     highlight = Color(0x477FB2E5),
 )
 
@@ -148,8 +144,8 @@ fun QuranTheme(
         LocalPageThemeName provides name,
         LocalSwitchPalette provides switches,
         LocalReadingVoice provides when (language) {
-            UiLanguage.Bangla -> ReadingVoice(BengaliReading, 1.706f) { NotoSerifBengali }
-            UiLanguage.English -> ReadingVoice(LatinReading, 1.6f, ::literataAt)
+            UiLanguage.Bangla -> ReadingVoice(BengaliReading, 1.706f, { NotoSerifBengali }, 0.425f)
+            UiLanguage.English -> ReadingVoice(LatinReading, 1.6f, ::literataAt, 0.471f)
         },
     ) {
         val typography = when (language) {

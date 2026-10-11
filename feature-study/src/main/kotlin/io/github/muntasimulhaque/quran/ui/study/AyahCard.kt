@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -42,7 +41,6 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.RichText
@@ -62,6 +60,7 @@ import io.github.muntasimulhaque.quran.ui.rich.RichBlocks
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.theme.Wash
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -119,17 +118,23 @@ fun AyahCard(
         }
     }
 
+    // The card is a page: the tafsir takes the reader's own measure, plus the
+    // gutter each side, so a ten inch screen centers a readable column instead
+    // of stretching one line across the glass. The old widthIn sat behind
+    // fillMaxWidth, which forced the full width first, so the cap never took
+    // effect and a tafsir line ran to about 150 characters on a tablet
+    // (owner report, the audio and type audit session).
+    val sheetWidth = Reading.proseMeasure(LocalReadingVoice.current, settings.tafsirSp) +
+        Reading.Gutter * 2
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface,
-        // the card is a page; the ayah and its panels take the measure
-        sheetMaxWidth = Dp.Unspecified,
+        sheetMaxWidth = sheetWidth,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .widthIn(max = Reading.SheetMeasure)
                 .align(Alignment.CenterHorizontally)
                 .imePadding()
                 // The gate rides with the scroll: a long tafsir scrolled down
@@ -216,7 +221,7 @@ private fun AddTranslation(text: String, onClick: () -> Unit, modifier: Modifier
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.05f))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = Wash.Door))
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,

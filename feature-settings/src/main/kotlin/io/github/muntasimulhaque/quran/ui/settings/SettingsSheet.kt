@@ -145,7 +145,7 @@ fun SettingsSheet(
                 // keeps a column a person can read across, centered on the
                 // ground, the way every other sheet and the study reading do.
                 .align(Alignment.CenterHorizontally)
-                .widthIn(max = Reading.MaxMeasure + 44.dp)
+                .widthIn(max = Reading.SheetMeasure)
                 .fillMaxWidth()
                 .imePadding()
                 .padding(bottom = 30.dp),

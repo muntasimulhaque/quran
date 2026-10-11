@@ -33,13 +33,16 @@ import io.github.muntasimulhaque.quran.core.TextBlockKind
 import io.github.muntasimulhaque.quran.core.TextRun
 import io.github.muntasimulhaque.quran.core.ScriptMix
 import io.github.muntasimulhaque.quran.core.scriptMix
-import io.github.muntasimulhaque.quran.ui.theme.Amiri
+import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
+import io.github.muntasimulhaque.quran.ui.theme.Wash
+import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 
 /**
  * Draws parsed runs with the manuscript's two voices: Literata for Latin and
- * Amiri Quran for Arabic, footnote markers as accent superscripts, and no
- * styling ever inside a word.
+ * the Hafs face for Arabic, the Quran's own hand, with Amiri Quran only for
+ * the few letters Hafs does not carry. Footnote markers are accent
+ * superscripts, and no styling is ever taken inside a word.
  *
  * A paragraph can carry Arabic at a much larger size than its Latin text, and
  * a superscript marker that sits above the line. The line height is therefore
@@ -58,6 +61,13 @@ fun TranslationBody(
     onFootnote: ((Int) -> Unit)? = null,
     /** True on a surface that centers its lines, such as the share card. */
     centered: Boolean = false,
+    /**
+     * The ink of the words. The reading's own ink is the default; a surface
+     * drawn on a ground of its own, such as the share card's paper, passes
+     * the ink of that ground instead (owner report, the audio and type audit
+     * session).
+     */
+    color: Color = LocalPagePalette.current.ink,
 ) {
     val voice = LocalReadingVoice.current
     val body = sizeSp ?: voice.style.fontSize.value
@@ -80,11 +90,11 @@ fun TranslationBody(
             runs,
             arabicSize = arabicSp.sp,
             markerSize = markerSp(body, 0.70f),
-            quoteColor = null,
+            quoteColor = color,
             onFootnote = onFootnote,
         ),
         style = base,
-        color = MaterialTheme.colorScheme.onBackground,
+        color = color,
         textAlign = if (centered) TextAlign.Center else TextAlign.Unspecified,
         modifier = modifier.fillMaxWidth(),
     )
@@ -114,6 +124,11 @@ fun TranslationBody(
  * taller than any the sources carry today would need this constant raised
  * with it; the measurement is written here so the next session can redo it
  * rather than guess.
+ *
+ * The quotations moved from Amiri to the Hafs face in the audio and type
+ * audit (owner decision), and Hafs is the shorter face: its whole ink is
+ * 1.751 em against Amiri's 2.699, so the Arabic-only and mixed measurements
+ * above stay as they were and are now conservative rather than tight.
  */
 private fun lineHeightFor(mix: ScriptMix, latinLine: Float, arabicSp: Float): Float = when (mix) {
     ScriptMix.LATIN -> latinLine
@@ -148,11 +163,11 @@ fun HighlightedText(
     ranges: List<IntRange>,
     modifier: Modifier = Modifier,
     style: TextStyle? = null,
-    color: Color = MaterialTheme.colorScheme.onBackground,
+    color: Color = LocalPagePalette.current.ink,
     maxLines: Int = 4,
 ) {
     val resolvedStyle = style ?: LocalReadingVoice.current.style
-    val wash = MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
+    val wash = MaterialTheme.colorScheme.primary.copy(alpha = Wash.Match)
     val weight = FontWeight.Medium
     Text(
         text = buildAnnotatedString {
@@ -213,7 +228,12 @@ fun RichBlocks(
                         quoteColor = null,
                     ),
                     style = MaterialTheme.typography.titleSmall.copy(
-                        color = MaterialTheme.colorScheme.primary,
+                        // Ink with weight (owner decision, the audio and type
+                        // audit session): blue is the app's action color
+                        // everywhere else, so a heading in it reads as a
+                        // link; the heading keeps its step up in size and
+                        // weight instead.
+                        color = LocalPagePalette.current.ink,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = (sizeSp + 1).sp,
                         lineHeight = line.sp,
@@ -226,7 +246,7 @@ fun RichBlocks(
                         block.runs,
                         arabicSize = arabicSp.sp,
                         markerSize = markerSp(sizeSp, 0.70f),
-                        quoteColor = MaterialTheme.colorScheme.onBackground,
+                        quoteColor = LocalPagePalette.current.ink,
                     ),
                     style = LocalReadingVoice.current.style.copy(
                         fontSize = sizeSp.sp,
@@ -246,7 +266,7 @@ fun RichBlocks(
                             trim = LineHeightStyle.Trim.None,
                         ),
                     ),
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = LocalPagePalette.current.ink,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -262,10 +282,10 @@ fun ArabicBody(runs: List<TextRun>, modifier: Modifier = Modifier, sizeSp: Float
             runs,
             arabicSize = sizeSp.sp,
             markerSize = markerSp(sizeSp, 0.6f),
-            quoteColor = MaterialTheme.colorScheme.onBackground,
+            quoteColor = LocalPagePalette.current.ink,
         ),
         style = TextStyle(
-            fontFamily = Amiri,
+            fontFamily = rememberHafs(),
             fontSize = sizeSp.sp,
             lineHeight = (sizeSp * 1.9f).sp,
             // As-Sa'di is Arabic prose from its first letter; the paragraph's
@@ -273,7 +293,7 @@ fun ArabicBody(runs: List<TextRun>, modifier: Modifier = Modifier, sizeSp: Float
             // can never disagree about which edge a wrapped line starts from.
             textDirection = TextDirection.Rtl,
         ),
-        color = MaterialTheme.colorScheme.onBackground,
+        color = LocalPagePalette.current.ink,
         textAlign = TextAlign.Right,
         modifier = modifier.fillMaxWidth(),
     )
@@ -298,7 +318,7 @@ private fun annotated(
     // What a quoted run falls back to where the caller has no quote color of
     // its own: the reading's ink, never the accent, which now
     // belongs to the marker alone.
-    val quoteFallback = MaterialTheme.colorScheme.onBackground
+    val quoteFallback = LocalPagePalette.current.ink
     val context = LocalContext.current
     val arabicFonts = remember(context) { ArabicFonts(context) }
     return buildAnnotatedString {

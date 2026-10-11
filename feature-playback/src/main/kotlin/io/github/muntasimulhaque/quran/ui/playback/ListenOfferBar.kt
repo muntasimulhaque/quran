@@ -31,6 +31,7 @@ import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
+import io.github.muntasimulhaque.quran.ui.theme.Wash
 
 /**
  * One request, named in full: which reciter, which surah, how much, and the
@@ -164,7 +165,7 @@ internal fun ListenOfferBar(
                     .height(2.dp)
                     .clip(RoundedCornerShape(50)),
                 color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                trackColor = MaterialTheme.colorScheme.primary.copy(alpha = Wash.Control),
             )
         }
     }

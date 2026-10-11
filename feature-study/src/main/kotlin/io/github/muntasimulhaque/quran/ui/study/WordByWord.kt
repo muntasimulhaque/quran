@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.WordMeaning
+import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -132,9 +133,9 @@ private fun WordPair(
                 // gloss. Still well above the reading contrast on every
                 // theme. Standalone, the aid is the reading.
                 color = if (gloss) {
-                    MaterialTheme.colorScheme.onBackground.copy(alpha = 0.78f)
+                    LocalPagePalette.current.ink.copy(alpha = 0.78f)
                 } else {
-                    MaterialTheme.colorScheme.onBackground
+                    LocalPagePalette.current.ink
                 },
             ),
             textAlign = TextAlign.Center,
@@ -146,7 +147,7 @@ private fun WordPair(
                 fontSize = settings.wordsMeaningSp.sp,
                 lineHeight = (settings.wordsMeaningSp * 1.6f).sp,
             ),
-            color = MaterialTheme.colorScheme.onBackground,
+            color = LocalPagePalette.current.ink,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = Space.Tight),
         )

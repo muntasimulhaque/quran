@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.ui.theme.Wash
 
 /**
  * The app's one text-only button: a word that acts, worn in a rounded shape
@@ -38,9 +39,9 @@ fun TextButton(
     quiet: Boolean = false,
 ) {
     val fill = if (quiet) {
-        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f)
+        MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
     } else {
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
+        MaterialTheme.colorScheme.primary.copy(alpha = Wash.Button)
     }
     val ink = if (quiet) {
         MaterialTheme.colorScheme.onSurfaceVariant

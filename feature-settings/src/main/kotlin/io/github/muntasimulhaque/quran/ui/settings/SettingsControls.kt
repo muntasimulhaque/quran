@@ -37,6 +37,7 @@ import io.github.muntasimulhaque.quran.ui.theme.NightText
 import io.github.muntasimulhaque.quran.ui.theme.PaperBackground
 import io.github.muntasimulhaque.quran.ui.theme.PaperInk
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.theme.Wash
 
 /**
  * The two grounds, as swatches: each one is the page it will paint. The
@@ -255,7 +256,7 @@ private fun SegmentedRow(
                 .padding(top = Space.Line)
                 .align(Alignment.CenterHorizontally)
                 .clip(RoundedCornerShape(50))
-                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door))
                 .padding(3.dp),
             horizontalArrangement = Arrangement.spacedBy(1.dp),
         ) {
@@ -271,7 +272,7 @@ private fun SegmentedRow(
                         .clip(RoundedCornerShape(50))
                         .background(
                             if (active) {
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                                MaterialTheme.colorScheme.primary.copy(alpha = Wash.Control)
                             } else {
                                 Color.Transparent
                             },

@@ -28,6 +28,7 @@ import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.SpeedSteps
 import io.github.muntasimulhaque.quran.ui.kit.speedText
+import io.github.muntasimulhaque.quran.ui.theme.Wash
 
 /**
  * The pace, and what happens at the end of the audio, as the list the pill
@@ -76,7 +77,7 @@ internal fun ColumnScope.ListeningMenu(
             .align(Alignment.CenterHorizontally)
             .padding(horizontal = 10.dp)
             .clip(RoundedCornerShape(50))
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door))
             .testTag("playback-speed")
             .padding(3.dp),
         horizontalArrangement = Arrangement.spacedBy(1.dp),
@@ -94,7 +95,7 @@ internal fun ColumnScope.ListeningMenu(
                     .clip(RoundedCornerShape(50))
                     .background(
                         if (active) {
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+                            MaterialTheme.colorScheme.primary.copy(alpha = Wash.Control)
                         } else {
                             Color.Transparent
                         },

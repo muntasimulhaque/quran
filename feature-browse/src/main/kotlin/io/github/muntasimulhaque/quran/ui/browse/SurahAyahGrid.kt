@@ -41,6 +41,7 @@ import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.theme.Wash
 
 /**
  * The ayahs of one surah, opened from its row in Browse: the surah's own
@@ -189,7 +190,7 @@ private fun AyahNumberCell(number: Int, current: Boolean, onClick: () -> Unit) {
                 if (current) {
                     MaterialTheme.colorScheme.primary
                 } else {
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f)
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
                 },
             )
             .clickable(onClick = onClick)

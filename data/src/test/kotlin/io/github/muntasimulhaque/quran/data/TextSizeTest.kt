@@ -4,7 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /**
- * The five scales are a choice the reader made once and expects to keep: the
+ * The four scales are a choice the reader made once and expects to keep: the
  * list is pinned here so a session that trims or grows it must also say what
  * happens to every stored scale. The steps are the reader's own, and a stored
  * value keeps its meaning by landing on the nearest step, never on an index
@@ -13,8 +13,8 @@ import org.junit.Test
 class TextSizeTest {
 
     @Test
-    fun theStepsRunFrom65To120() {
-        assertEquals(listOf(0.65f, 0.75f, 0.85f, 1f, 1.2f), TextSize.STEPS)
+    fun theStepsRunFrom75To120() {
+        assertEquals(listOf(0.75f, 0.85f, 1f, 1.2f), TextSize.STEPS)
     }
 
     @Test
@@ -31,7 +31,10 @@ class TextSizeTest {
     @Test
     fun anUnknownValueLandsOnTheNearestStep() {
         assertEquals(1f, TextSize.step(0.95f))
-        assertEquals(0.65f, TextSize.step(0.6f))
+        // The 0.65 step is retired (owner decision, the audio and type audit
+        // session): a reader who stored it lands on the smallest step there
+        // is, never on a step below the platform floor.
+        assertEquals(0.75f, TextSize.step(0.6f))
     }
 
     @Test
@@ -50,11 +53,19 @@ class TextSizeTest {
     }
 
     @Test
-    fun theArabicLineHoldsTheFrameDecidedRatio() {
-        // 1.85: a twelfth of an em behind the Hafs face's own 1.758 line
-        // box, decided on the tour's reading frame (owner approval, this
-        // session). Anything less overcrowds the marks; anything more was
-        // unmeasured headroom the page no longer pays for.
-        assertEquals(32f * 1.85f, TextSize.lineSp(TypeRole.Arabic, 1f))
+    fun theArabicLineHoldsTheMeasuredRatio() {
+        // 1.9 (owner decision, the audio and type audit session): at 1.85 the
+        // worst frame left about 0.7 dp of air at its tightest point, inside
+        // the Hafs face's own 1.758 line box by a hair; 1.9 lifts it to about
+        // 2.3 dp for about 2.6 percent of the page.
+        assertEquals(32f * 1.9f, TextSize.lineSp(TypeRole.Arabic, 1f))
+    }
+
+    @Test
+    fun theWordMeaningSitsAStepUnderTheTranslation() {
+        // 15 sp against the translation's 17 (owner decision, the audio and
+        // type audit session): the gloss is read at length under every word,
+        // so it stays a small reading rather than a footnote.
+        assertEquals(15f, TextSize.meaningSp(1f))
     }
 }

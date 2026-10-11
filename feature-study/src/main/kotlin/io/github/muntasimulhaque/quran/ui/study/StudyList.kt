@@ -83,6 +83,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.theme.Wash
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.withContext
@@ -283,14 +284,19 @@ private fun StudyRows(
         }
     }
 
-    // The reading sits in a column of a readable width, centered when the
-    // screen is wider than the measure. A translation laid across the whole
-    // of a ten inch tablet is over two hundred characters a line, and the eye
-    // stops returning to the margin on its own; a book never does that. The
-    // list itself stays full width, so the paper around the column still
-    // answers a tap with the chrome and a drag with the scroll.
+    // The reading sits in a column a person can read, centered when the
+    // screen is wider than it. The column is the reader's own measure: the
+    // character cap of the voice the translation is read in and of the Arabic
+    // above it, whichever is narrower, so neither text runs past a line the
+    // eye can follow back to its margin on its own. The list itself stays
+    // full width, so the paper around the column still answers a tap with the
+    // chrome and a drag with the scroll.
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val side = maxOf(20.dp, (screenWidth - Reading.MaxMeasure) / 2)
+    val measure = minOf(
+        Reading.proseMeasure(LocalReadingVoice.current, settings.translationSp),
+        Reading.quranMeasure(settings.arabicSp),
+    )
+    val side = maxOf(20.dp, (screenWidth - measure) / 2)
     LazyColumn(
         state = listState,
         modifier = modifier
@@ -386,7 +392,7 @@ private fun AddContent(text: String, onClick: () -> Unit) {
             .fillMaxWidth()
             .padding(horizontal = 22.dp, vertical = 4.dp)
             .clip(RoundedCornerShape(14.dp))
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.05f))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = Wash.Door))
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -421,7 +427,9 @@ private fun SurahOpening(
             null
         }
     }
-    val ornament = LocalPagePalette.current.ornament
+    val palette = LocalPagePalette.current
+    val ornament = palette.ornament
+    val ink = palette.ink
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -478,7 +486,7 @@ private fun SurahOpening(
                 style = TextStyle(
                     fontFamily = Amiri,
                     fontSize = 26.sp,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = ink,
                 ),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
@@ -493,7 +501,7 @@ private fun SurahOpening(
             // the long press leaves behind. A press on it answers in the same
             // lapis rather than the gray an unstyled ripple would flash.
             val wash = if (expanded) {
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.07f)
+                MaterialTheme.colorScheme.primary.copy(alpha = Wash.Selected)
             } else {
                 Color.Transparent
             }
@@ -512,7 +520,7 @@ private fun SurahOpening(
                     lineHeight = settings.translationLineSp.sp,
                     fontFamily = LocalReadingVoice.current.atSize(settings.translationSp),
                 ),
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.78f),
+                color = ink.copy(alpha = 0.78f),
                 // Opened, the whole introduction is the reader's; it was
                 // asked for with a press, and a cap on it would cut the
                 // paragraphs the app only shows on request. Closed, the first
@@ -591,7 +599,7 @@ private fun SurahEnd(
                     .fillMaxWidth()
                     .padding(top = Space.Block)
                     .clip(RoundedCornerShape(14.dp))
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.05f))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = Wash.Door))
                     .clickable { onNextSurah(next) }
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -648,7 +656,7 @@ private fun AyahBlock(
     val ayahActions = stringResource(R.string.study_ayah_actions)
     val paperActions = stringResource(R.string.study_paper_actions)
     val wash = when {
-        isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.07f)
+        isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = Wash.Selected)
         playing -> palette.highlight.copy(alpha = palette.highlight.alpha * 0.55f)
         else -> androidx.compose.ui.graphics.Color.Transparent
     }
@@ -704,7 +712,7 @@ private fun AyahBlock(
                     fontFamily = hafs,
                     fontSize = settings.arabicSp.sp,
                     lineHeight = settings.arabicLineSp.sp,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = palette.ink,
                 ),
                 textAlign = TextAlign.Right,
                 onTextLayout = { textLayout = it },

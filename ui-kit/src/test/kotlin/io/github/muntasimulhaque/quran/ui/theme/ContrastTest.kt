@@ -35,6 +35,11 @@ class ContrastTest {
     fun nightHolds() {
         assertReadable(NightText, NightBackground)
         assertReadable(NightText, NightSurface)
+        // The reading's own ink, which is softer than the interface's word so
+        // a long night read does not bloom: it is still past the floor on
+        // both grounds the reading is drawn on.
+        assertReadable(NightInk, NightBackground)
+        assertReadable(NightInk, NightSurface)
         assertReadable(NightMuted, NightBackground)
         assertReadable(NightMuted, NightSurface)
         assertSheetGrounds(NightScheme)

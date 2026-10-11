@@ -76,9 +76,9 @@ import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.rich.HighlightedText
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
-import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.theme.Wash
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -209,6 +209,12 @@ fun SearchSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface,
+        // The snippets are the one prose the sheet draws, and they take the
+        // same character measure as the reading: about 65 characters at the
+        // 14 sp they are set in, rather than the 85 the default 640 dp sheet
+        // gave them on a tablet (owner report, the audio and type audit
+        // session).
+        sheetMaxWidth = Reading.SearchMeasure,
     ) {
         Column(
             modifier = Modifier
@@ -373,7 +379,7 @@ private fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit) 
                 if (on) {
                     MaterialTheme.colorScheme.primary
                 } else {
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f)
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
                 },
             )
             .toggleable(value = on, role = Role.Checkbox, onValueChange = onChange)
@@ -417,7 +423,7 @@ private fun SearchField(
             modifier = Modifier
                 .weight(1f)
                 .clip(RoundedCornerShape(50))
-                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.06f))
+                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door))
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -700,8 +706,10 @@ private fun TafsirRow(hit: SearchHit.TafsirHitResult, onAyah: (Ayah, Int) -> Uni
 /** Words in a wash, which is how the ayah's own match is drawn above. */
 @Composable
 private fun washed(text: String): AnnotatedString {
-    val base = LocalPagePalette.current.highlight
-    val wash = base.copy(alpha = base.alpha.coerceAtLeast(0.25f))
+    // A match wears the same wash everywhere: the accent at [Wash.Match],
+    // never the reciter's highlight, which says a word is being heard
+    // (owner decision, the audio and type audit session).
+    val wash = MaterialTheme.colorScheme.primary.copy(alpha = Wash.Match)
     return buildAnnotatedString { withStyle(SpanStyle(background = wash)) { append(text) } }
 }
 
@@ -711,8 +719,10 @@ private fun arabic(hit: SearchHit.AyahHit, hafs: FontFamily, terms: List<String>
     val text = hit.ayah.text
     val ranges = remember(text, terms) { Search.matchRanges(text, terms, arabic = true) }
     if (ranges.isEmpty()) return AnnotatedString(text)
-    val base = LocalPagePalette.current.highlight
-    val wash = base.copy(alpha = base.alpha.coerceAtLeast(0.25f))
+    // A match wears the same wash everywhere: the accent at [Wash.Match],
+    // never the reciter's highlight, which says a word is being heard
+    // (owner decision, the audio and type audit session).
+    val wash = MaterialTheme.colorScheme.primary.copy(alpha = Wash.Match)
     return buildAnnotatedString {
         var index = 0
         for (range in ranges) {

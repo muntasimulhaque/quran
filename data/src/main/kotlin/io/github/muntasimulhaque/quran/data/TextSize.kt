@@ -12,7 +12,7 @@ import kotlin.math.abs
 enum class TypeRole { Arabic, Translation, Tafsir, Words }
 
 /**
- * The five scales every sized text is drawn at, as a multiplier over the base
+ * The four scales every sized text is drawn at, as a multiplier over the base
  * the text was designed for.
  *
  * Arabic is set well above the Latin sizes on purpose: its letter bodies are
@@ -22,13 +22,17 @@ enum class TypeRole { Arabic, Translation, Tafsir, Words }
  * the ayah is the one text every reader reads most, and the room the larger
  * base takes is paid for in the scroll, which costs a reader nothing.
  *
- * The largest step stops at 1.2. Past that the reading turns into a page of headings. The smallest, 0.65, is there for a reader who wants more of an
- * ayah on one screen than 0.75 gives: a reader who once chose 1.4 keeps the
- * largest step, which is now 1.2, so no choice ever loses its meaning.
+ * The largest step stops at 1.2. Past that the reading turns into a page of
+ * headings. The smallest was 0.65 and is 0.75 (owner decision, the audio and
+ * type audit session): at 0.65 a translation stood at 11 sp and a word
+ * meaning at 9 sp, under every platform floor for text read at length, while
+ * 0.75 keeps the compact choice and puts the translation at 12.75 sp. A
+ * reader who once chose 1.4 keeps the largest step, which is now 1.2, so no
+ * choice ever loses its meaning.
  */
 object TextSize {
 
-    val STEPS = listOf(0.65f, 0.75f, 0.85f, 1f, 1.2f)
+    val STEPS = listOf(0.75f, 0.85f, 1f, 1.2f)
 
     /** The middle step: comfortable for most readers, on most screens. */
     const val DEFAULT = 1f
@@ -96,21 +100,37 @@ object TextSize {
 
     /** Arabic carries diacritics above and below every line, so it needs more. */
     private fun ratio(role: TypeRole): Float = when (role) {
-        // 1.85, decided by the tour's reading frame this session: the Hafs
-        // face's own line box is 1.758 em (2400 over 1200, at 2048 upm), so
-        // 1.85 holds about a twelfth of an em behind the face's own design
-        // room, and the frame of Al-Baqarah 2:254, the one ayah that carries
-        // every mark class on consecutive lines, keeps every stack clear of
-        // the line above and below (owner approval, this session; the
-        // standing 2.0 was unmeasured headroom).
-        TypeRole.Arabic -> 1.85f
+        // 1.9, decided by the audio and type audit (owner decision, this
+        // session): the Hafs face's own line box is 1.758 em (2400 over 1200,
+        // at 2048 upm), and at 1.85 the frame of Al-Baqarah 2:254, the ayah
+        // that carries every mark class on consecutive lines, left about
+        // 0.7 dp of air at its tightest point (2 pixels on the phone
+        // capture). 1.9 lifts that air to about 2.3 dp for about 2.6 percent
+        // of the page, which is the one place in the app that sat within a
+        // hair of the face's own ink.
+        TypeRole.Arabic -> 1.9f
         TypeRole.Words -> 1.8f
         else -> 1.6f
     }
 
-    /** The size the meaning under a word is read at, before any scaling. */
-    private const val MEANING_BASE = 14f
+    /**
+     * The size the meaning under a word is read at, before any scaling. 15 sp
+     * rather than 14 (owner decision, the audio and type audit session): the
+     * meaning is read at length under every word, and at the smallest step
+     * the old 14 sp put it at 10.5 while the translation stood at 12.75; 15
+     * keeps the gloss a step under the translation rather than a footnote to
+     * it.
+     */
+    private const val MEANING_BASE = 15f
 
-    /** Arabic beside Latin, at the stand the reading already uses: 1.4 to 1. */
-    private const val INLINE_ARABIC_RATIO = 1.4f
+    /**
+     * Arabic beside Latin, at the stand the reading already uses: the study
+     * translation draws its inline Arabic at 0.8 of the 32 sp Arabic against
+     * the 17 sp translation, which is 1.5 to 1. The tafsir's quotations are
+     * drawn in the same Hafs face since the audit, so the stand is the same
+     * 1.5 rather than the 1.4 that stood when the quotations wore Amiri,
+     * whose letters are a size larger (owner decision, the audio and type
+     * audit session).
+     */
+    private const val INLINE_ARABIC_RATIO = 1.5f
 }

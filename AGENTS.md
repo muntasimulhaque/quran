@@ -89,7 +89,7 @@ dead letter.
    lorem text, stock iconography, generic Material defaults. Every string is
    a real sentence, every color is chosen, every icon is drawn for this app.
 7. **Accessibility is a rule, not a feature.** TalkBack works end to end.
-   The reading honors the system font scale at the reader's own five steps;
+   The reading honors the system font scale at the reader's own four steps;
    the phone's own magnification covers anything beyond them.
    Contrast targets live in the theme and are measured.
 8. **Two UI languages, one content language each.** English and Bangla ship
@@ -385,7 +385,7 @@ implement it and update this list.
   note lives inside Saved with the ayah it was written on.
 - A surah row in Browse opens its own ayah grid; there is no separate Go to
   Ayah tab.
-- Text sizes are 0.65, 0.75, 0.85, 1, 1.2.
+- Text sizes are 0.75, 0.85, 1, 1.2.
 - Saheeh International is the only translation.
 - Ibn Kathir is the tafsir.
 - Minshawi and Husary are the only reciters, and Husary is the reciter of

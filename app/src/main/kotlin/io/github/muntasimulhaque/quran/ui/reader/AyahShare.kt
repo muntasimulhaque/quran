@@ -204,6 +204,10 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
                     lineSp = 23f,
                     arabicSp = 21f,
                     centered = true,
+                    // The card is parchment whatever page the reader is on,
+                    // so its words wear the paper ink and never the night
+                    // page's softer tone.
+                    color = PaperInk,
                 )
             }
             Box(

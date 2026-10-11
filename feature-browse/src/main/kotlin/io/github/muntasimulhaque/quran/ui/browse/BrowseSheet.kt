@@ -53,6 +53,7 @@ import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.theme.Wash
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -339,7 +340,7 @@ private fun BrowseTabChip(
                 if (active) {
                     MaterialTheme.colorScheme.primary
                 } else {
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f)
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
                 },
             )
             .clickable(role = Role.RadioButton, onClick = onClick)

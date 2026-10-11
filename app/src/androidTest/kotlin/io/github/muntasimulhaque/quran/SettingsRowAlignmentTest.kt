@@ -400,9 +400,10 @@ class SettingsRowAlignmentTest {
      * The text sizes drew 38 dp cells and the pace drew 46, under the design
      * document's own rule, and the fix was structural: an outer
      * 48 dp touch box with the mark inside it. The name moved above the steps
-     * for it, because five 48 dp boxes are 250 dp wide and a name beside them
-     * would break in the middle on a small phone. The measurement is the
-     * rule's own number, read off the real controls.
+     * for it, because five 48 dp boxes are 250 dp wide (four where the text
+     * sizes stand today) and a name beside them would break in the middle on
+     * a small phone. The measurement is the rule's own number, read off the
+     * real controls.
      */
     @Test
     fun everyStepIsAFortyEightDpTarget() {
@@ -416,8 +417,8 @@ class SettingsRowAlignmentTest {
         }
         val steps = compose.onAllNodes(isSelectable(), useUnmergedTree = true)
         assertEquals(
-            "the text size row and the pace row, five steps each",
-            10,
+            "the text size row's four steps and the pace row's five",
+            9,
             steps.fetchSemanticsNodes().size,
         )
         steps.onFirst().assertWidthIsAtLeast(48.dp)

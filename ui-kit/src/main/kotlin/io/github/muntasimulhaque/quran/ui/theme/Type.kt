@@ -175,11 +175,40 @@ private fun interAt(weight: FontWeight, drawnSp: Float): FontFamily =
 private val interCuts = java.util.concurrent.ConcurrentHashMap<Int, FontFamily>()
 
 /**
- * The interface in Bangla. The same sizes and line heights Inter gets: Noto
- * Sans Bengali's natural line box (1.325 of the em against Inter's 1.210)
- * sits inside them with room, so one scale serves both voices.
+ * The interface in Bangla. The same sizes and weights Inter gets, with line
+ * heights of its own: Noto Sans Bengali's own line box is 1.325 of the em and
+ * its ink reaches 1.403, past the 1.27 to 1.33 the smallest labels and the
+ * largest headlines wear in the English ladder, where a stack of Bengali
+ * marks would be crowded by a box borrowed from another script. Every style
+ * is therefore set at 1.45 of its size, so the two voices keep one ladder and
+ * each script keeps its own air (owner decision, the audio and type audit
+ * session).
  */
-val BanglaTypography = typographyFor(NotoSansBengali)
+val BanglaTypography = Typography(
+    displayLarge = banglaStyle(FontWeight.SemiBold, 48f),
+    displayMedium = banglaStyle(FontWeight.SemiBold, 40f),
+    displaySmall = banglaStyle(FontWeight.SemiBold, 34f),
+    headlineLarge = banglaStyle(FontWeight.SemiBold, 30f),
+    headlineMedium = banglaStyle(FontWeight.SemiBold, 26f),
+    headlineSmall = banglaStyle(FontWeight.SemiBold, 23f),
+    titleLarge = banglaStyle(FontWeight.SemiBold, 20f),
+    titleMedium = banglaStyle(FontWeight.Medium, 16f),
+    titleSmall = banglaStyle(FontWeight.Medium, 15f),
+    bodyLarge = banglaStyle(FontWeight.Normal, 16f),
+    bodyMedium = banglaStyle(FontWeight.Normal, 14f),
+    bodySmall = banglaStyle(FontWeight.Normal, 13f),
+    labelLarge = banglaStyle(FontWeight.Medium, 14f),
+    labelMedium = banglaStyle(FontWeight.Medium, 12f),
+    labelSmall = banglaStyle(FontWeight.Medium, 11f),
+)
+
+/** One style of the Bangla ladder, at the 1.45 line its script needs. */
+private fun banglaStyle(weight: FontWeight, sizeSp: Float) = TextStyle(
+    fontFamily = NotoSansBengali,
+    fontWeight = weight,
+    fontSize = sizeSp.sp,
+    lineHeight = (sizeSp * 1.45f).sp,
+)
 
 /**
  * Literata at the size it is about to be drawn, in the three weights a
@@ -263,14 +292,16 @@ val BengaliReading = TextStyle(
 /**
  * The reading voice of the language being read: the style, the line a
  * paragraph of it gets per em of text (an Arabic line is its own, taller
- * thing, and never takes this one), and the face cut for an exact drawn
- * size. The theme sets it once from the reader's language; every reading
- * surface takes it from here.
+ * thing, and never takes this one), the face cut for an exact drawn size, and
+ * the face's measured average advance, which is what turns the reading's
+ * character measure into a column width. The theme sets it once from the
+ * reader's language; every reading surface takes it from here.
  */
 class ReadingVoice(
     val style: TextStyle,
     val lineRatio: Float,
     val atSize: @Composable (Float) -> FontFamily,
+    val advance: Float,
 )
 
-val LocalReadingVoice = staticCompositionLocalOf { ReadingVoice(LatinReading, 1.6f, ::literataAt) }
+val LocalReadingVoice = staticCompositionLocalOf { ReadingVoice(LatinReading, 1.6f, ::literataAt, 0.471f) }

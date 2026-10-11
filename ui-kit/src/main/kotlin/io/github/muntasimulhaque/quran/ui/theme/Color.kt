@@ -18,20 +18,30 @@ val PaperHairline = PaperOutline
  * best without, and the cost of leaving it is a brown-gray that reads as
  * lamplight on old paper rather than as a screen (owner decision, this
  * session). The text, the ink, and the gold were already warm; only the
- * grounds and the quiet voice moved. The family keeps the old ground's
- * lightness step for step, so every contrast pair the theme already held
- * still holds, and the accent stays lapis: one
+ * grounds and the quiet voice moved. The accent stays lapis: one
  * cool thing on the page is the action color, and it is the one thing a
  * reader looks for.
+ *
+ * The ground is a step lighter than the first night page (owner decision,
+ * this session): the reading ink was measured at 14.9:1 on a near black
+ * ground, the pairing that blooms on an OLED panel. The lift and the
+ * softer page ink below bring the reading to 12.7:1, still past every
+ * contrast rule, with less halation in a dark room. The sheet keeps its
+ * own step above the page, as it was.
  */
-val NightBackground = Color(0xFF14100C)
+val NightBackground = Color(0xFF17130E)
 val NightSurface = Color(0xFF1D1813)
 val NightOutline = Color(0xFF332B22)
 val NightText = Color(0xFFE8E4DA)
+/** The reading's own ink on the night page: softer than the interface's word. */
 val NightInk = Color(0xFFD9D3C4)
-val NightMuted = Color(0xFFB0A693)
+/** The small gray words. Lifted in the type audit: the old #B0A693 read
+ * 7.9:1 but sat under the perceptual floor (APCA -57.6) for the small
+ * gray words every sheet carries; this tone clears -60 on every ground a
+ * sheet stands on. */
+val NightMuted = Color(0xFFBAB09D)
 val NightHairline = NightOutline
-val NightGold = Color(0xFFB08E45)
+val NightGold = Color(0xFFC09A50)
 
 // The one interactive accent, and the ornament gold that belongs to the
 // Reading.
@@ -45,8 +55,10 @@ val LapisLight = Color(0xFF7FB2E5)
 // juz, the surah names drawn into the page, and the ornamental name at the
 // head of the study reading. It therefore meets the same 4.5:1 rule every
 // other text tone does, on each ground it is drawn on: 5.0:1 on paper and
-// 6.1:1 on night. The older paper gold sat at 3.2:1, under the rule, and
-// was darkened without changing the hue.
+// 7.0:1 on night. The older paper gold sat at 3.2:1, under the rule, and
+// was darkened without changing the hue; the night gold was lifted in the
+// type audit so the ornament reads as gold rather than olive and clears
+// the perceptual floor for large text.
 val Gold = Color(0xFF856411)
 
 // The one shadow the app casts, black at ten percent, where the platform's

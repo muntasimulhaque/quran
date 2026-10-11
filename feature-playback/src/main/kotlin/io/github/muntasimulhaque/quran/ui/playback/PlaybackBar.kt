@@ -34,6 +34,7 @@ import io.github.muntasimulhaque.quran.playback.ListenOffer
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
+import io.github.muntasimulhaque.quran.ui.theme.Wash
 
 /**
  * The playback pill. It speaks in four voices: asking to download a surah,
@@ -273,7 +274,7 @@ fun PlaybackBar(
                         .height(2.dp)
                         .clip(RoundedCornerShape(50)),
                     color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = Wash.Control),
                 )
             }
         }

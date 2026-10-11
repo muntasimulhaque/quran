@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="paper">#F8F5EF</color>
-    <color name="night">#14100C</color>
+    <color name="night">#17130E</color>
     <!-- The app's mark is drawn in the theme's own colors: the paper field
          the reading opens on, the ink the page's text wears, and the
          ornament gold for the stand. The values mirror the ui-kit

@@ -404,7 +404,7 @@ fun ReadingTitle(surah: String, detail: String?, modifier: Modifier = Modifier) 
         content = {
             Text(
                 text = surah,
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 1,
                 softWrap = false,
