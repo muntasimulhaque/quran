@@ -44,17 +44,19 @@ val NotoSansBengali = FontFamily(
 )
 
 /**
- * The reading voice for translations and tafsir. The italic members keep an
- * emphasized run inside Literata: without them a span that asks for italic
- * falls through to the platform default, which breaks the page voice mid
- * sentence. The variable file carries one upright cut, so the italic here
- * is the skew of that cut until a true italic variable file joins the assets.
+ * The reading voice for translations and tafsir. The italic members come
+ * from the face's own italic variable file (the roman-italic pair of the
+ * same Literata 3.103 release, same axes, same metrics), so an emphasized
+ * run keeps the page voice mid sentence instead of falling through to the
+ * platform default. Only italic spans reach this family; no shipped content
+ * carries one today, so the italic stays a face the page is ready for
+ * rather than a face the page is drawing (owner decision, this session).
  */
 val Literata = FontFamily(
     Font(R.font.literata_variable, FontWeight.Normal),
     Font(R.font.literata_variable, FontWeight.Medium),
-    Font(R.font.literata_variable, FontWeight.Normal, FontStyle.Italic),
-    Font(R.font.literata_variable, FontWeight.Medium, FontStyle.Italic),
+    Font(R.font.literata_italic_variable, FontWeight.Normal, FontStyle.Italic),
+    Font(R.font.literata_italic_variable, FontWeight.Medium, FontStyle.Italic),
 )
 
 /**
@@ -109,8 +111,68 @@ private fun typographyFor(voice: FontFamily) = Typography(
     labelSmall = TextStyle(fontFamily = voice, fontWeight = FontWeight.Medium, fontSize = 11.sp, lineHeight = 14.sp),
 )
 
-/** The interface in English. */
-val QuranTypography = typographyFor(Inter)
+/**
+ * The interface in English: the same ladder as [typographyFor], with each
+ * style's typeface resolved at the size the style draws at, so Inter's
+ * optical axis shapes the headline and display sizes in display cuts
+ * instead of the text cut at its 14 sp floor (owner decision, this session:
+ * an optical axis that was in the file and never switched on). The drawn
+ * size scales with the system font scale, the way [literataAt] does for the
+ * reading voice, so a reader at 2.0 scale reads the cut for double size.
+ */
+@Composable
+internal fun quranTypography(): Typography {
+    val scale = LocalDensity.current.fontScale
+    return Typography(
+        displayLarge = interStyle(FontWeight.SemiBold, 48f, 56f, scale),
+        displayMedium = interStyle(FontWeight.SemiBold, 40f, 48f, scale),
+        displaySmall = interStyle(FontWeight.SemiBold, 34f, 42f, scale),
+        headlineLarge = interStyle(FontWeight.SemiBold, 30f, 38f, scale),
+        headlineMedium = interStyle(FontWeight.SemiBold, 26f, 34f, scale),
+        headlineSmall = interStyle(FontWeight.SemiBold, 23f, 30f, scale),
+        titleLarge = interStyle(FontWeight.SemiBold, 20f, 26f, scale),
+        titleMedium = interStyle(FontWeight.Medium, 16f, 22f, scale),
+        titleSmall = interStyle(FontWeight.Medium, 15f, 20f, scale),
+        bodyLarge = interStyle(FontWeight.Normal, 16f, 23f, scale),
+        bodyMedium = interStyle(FontWeight.Normal, 14f, 20f, scale),
+        bodySmall = interStyle(FontWeight.Normal, 13f, 18f, scale),
+        labelLarge = interStyle(FontWeight.Medium, 14f, 19f, scale),
+        labelMedium = interStyle(FontWeight.Medium, 12f, 16f, scale),
+        labelSmall = interStyle(FontWeight.Medium, 11f, 14f, scale),
+    )
+}
+
+private fun interStyle(weight: FontWeight, sizeSp: Float, lineHeightSp: Float, scale: Float): TextStyle =
+    TextStyle(
+        fontFamily = interAt(weight, sizeSp * scale),
+        fontWeight = weight,
+        fontSize = sizeSp.sp,
+        lineHeight = lineHeightSp.sp,
+    )
+
+/**
+ * Inter cut at the drawn size and weight: the file's optical axis set to the
+ * size it is drawn at, clamped to the axis's own 14 to 32 range, beside the
+ * weight the style asks for. Set once per cut and cached, the way the
+ * Literata cuts are; a family built without the settings would draw every
+ * size in the file's default 14 cut.
+ */
+@OptIn(ExperimentalTextApi::class)
+private fun interAt(weight: FontWeight, drawnSp: Float): FontFamily =
+    interCuts.getOrPut(31 * drawnSp.toBits() + weight.weight) {
+        FontFamily(
+            Font(
+                R.font.inter_variable,
+                weight,
+                variationSettings = FontVariation.Settings(
+                    FontVariation.Setting("opsz", drawnSp.coerceIn(14f, 32f)),
+                    FontVariation.weight(weight.weight),
+                ),
+            ),
+        )
+    }
+
+private val interCuts = java.util.concurrent.ConcurrentHashMap<Int, FontFamily>()
 
 /**
  * The interface in Bangla. The same sizes and line heights Inter gets: Noto
@@ -159,7 +221,11 @@ fun literataAt(sizeSp: Float): FontFamily {
 
 @OptIn(ExperimentalTextApi::class)
 private fun literataCut(sizeSp: Float, weight: FontWeight, style: FontStyle): Font = Font(
-    R.font.literata_variable,
+    // The roman and italic cuts are the face's two variable files, a matched
+    // pair of the same release; the italic members load the italic file, so
+    // an italic run draws the true italic shapes rather than the platform's
+    // skew of the roman.
+    if (style == FontStyle.Italic) R.font.literata_italic_variable else R.font.literata_variable,
     weight,
     style,
     variationSettings = FontVariation.Settings(

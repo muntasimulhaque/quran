@@ -528,6 +528,7 @@ fun ReaderScreen(
         val savedRow = saved.firstOrNull { it.ayahNumber == ayahNumber }
         AyahNoteSheet(
             note = savedRow?.note,
+            settings = settings,
             onSave = { note ->
                 viewModel.setNote(ayahNumber, note)
                 cardNote = null

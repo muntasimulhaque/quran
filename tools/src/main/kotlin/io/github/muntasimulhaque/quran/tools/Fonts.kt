@@ -230,7 +230,10 @@ class Fonts(private val root: File) {
                 // The English list also carries the surah introductions.
                 if (file.name == "words-en.db") {
                     connection.each("SELECT text FROM surah_info") { rs ->
-                        probe(inter, RichText.plain(rs.getString(1) ?: ""), "surah-info")
+                        // The introduction reads in the reading's voice at
+                        // the translation's size, so it is probed against
+                        // the face that will draw it, which is Literata.
+                        probe(literata, RichText.plain(rs.getString(1) ?: ""), "surah-info")
                     }
                 }
             }

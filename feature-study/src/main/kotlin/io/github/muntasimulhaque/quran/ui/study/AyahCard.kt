@@ -335,6 +335,7 @@ private fun TafsirPanel(view: TafsirView, arabic: Boolean, settings: AppSettings
 @Composable
 fun AyahNoteSheet(
     note: String?,
+    settings: AppSettings,
     onSave: (String?) -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -350,14 +351,24 @@ fun AyahNoteSheet(
                 .imePadding()
                 .padding(bottom = 28.dp),
         ) {
-            NoteEditor(initial = note, onSave = onSave, onClear = { onSave(null) })
+            NoteEditor(
+                initial = note,
+                settings = settings,
+                onSave = onSave,
+                onClear = { onSave(null) },
+            )
         }
     }
 }
 
 /** The note's own editor: the reader's words, or the quiet door to writing them. */
 @Composable
-private fun NoteEditor(initial: String?, onSave: (String?) -> Unit, onClear: () -> Unit) {
+private fun NoteEditor(
+    initial: String?,
+    settings: AppSettings,
+    onSave: (String?) -> Unit,
+    onClear: () -> Unit,
+) {
     var draft by remember(initial) { mutableStateOf(initial.orEmpty()) }
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) {
@@ -400,11 +411,16 @@ private fun NoteEditor(initial: String?, onSave: (String?) -> Unit, onClear: () 
         BasicTextField(
             value = draft,
             onValueChange = { draft = it },
+            // The reader writes their note in the reading's own voice at the
+            // size they read at, not at a fixed point: it is one voice, the
+            // reader's own, and it follows the choice they made for the
+            // translation (owner decision, this session: the fixed 16 sp is
+            // out, the reading voice is in).
             textStyle = LocalReadingVoice.current.style.copy(
                 color = MaterialTheme.colorScheme.onSurface,
-                fontSize = 16.sp,
-                lineHeight = 24.sp,
-                fontFamily = LocalReadingVoice.current.atSize(16f),
+                fontSize = settings.translationSp.sp,
+                lineHeight = settings.translationLineSp.sp,
+                fontFamily = LocalReadingVoice.current.atSize(settings.translationSp),
             ),
             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
             modifier = Modifier
@@ -418,8 +434,9 @@ private fun NoteEditor(initial: String?, onSave: (String?) -> Unit, onClear: () 
                         Text(
                             text = stringResource(R.string.card_note_hint),
                             style = LocalReadingVoice.current.style.copy(
-                                fontSize = 16.sp,
-                                fontFamily = LocalReadingVoice.current.atSize(16f),
+                                fontSize = settings.translationSp.sp,
+                                lineHeight = settings.translationLineSp.sp,
+                                fontFamily = LocalReadingVoice.current.atSize(settings.translationSp),
                             ),
                             // The hint is the one thing in an empty field, so it
                             // has to be read to be a hint at all. The theme's

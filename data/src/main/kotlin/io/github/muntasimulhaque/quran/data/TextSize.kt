@@ -84,7 +84,11 @@ object TextSize {
     private fun base(role: TypeRole): Float = when (role) {
         TypeRole.Arabic -> 32f
         TypeRole.Translation -> 17f
-        TypeRole.Tafsir -> 16f
+        // The tafsir is the longest prose the app draws, read in the same
+        // sitting as the translation it opens from, so it stands at the
+        // translation's own size and not a point under it (owner decision,
+        // this session; the two sizes read as one voice now).
+        TypeRole.Tafsir -> 17f
         // The word list is derived from [meaningSp] at the ayah's own ratio;
         // this entry is that derivation, written as the number it comes to.
         TypeRole.Words -> MEANING_BASE * 32f / 17f
@@ -92,7 +96,14 @@ object TextSize {
 
     /** Arabic carries diacritics above and below every line, so it needs more. */
     private fun ratio(role: TypeRole): Float = when (role) {
-        TypeRole.Arabic -> 2f
+        // 1.85, decided by the tour's reading frame this session: the Hafs
+        // face's own line box is 1.758 em (2400 over 1200, at 2048 upm), so
+        // 1.85 holds about a twelfth of an em behind the face's own design
+        // room, and the frame of Al-Baqarah 2:254, the one ayah that carries
+        // every mark class on consecutive lines, keeps every stack clear of
+        // the line above and below (owner approval, this session; the
+        // standing 2.0 was unmeasured headroom).
+        TypeRole.Arabic -> 1.85f
         TypeRole.Words -> 1.8f
         else -> 1.6f
     }

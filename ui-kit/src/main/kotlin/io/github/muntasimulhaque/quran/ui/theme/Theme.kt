@@ -154,7 +154,7 @@ fun QuranTheme(
     ) {
         val typography = when (language) {
             UiLanguage.Bangla -> BanglaTypography
-            UiLanguage.English -> QuranTypography
+            UiLanguage.English -> quranTypography()
         }
         MaterialTheme(colorScheme = colors, typography = typography, content = content)
     }

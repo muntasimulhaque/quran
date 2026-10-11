@@ -78,6 +78,7 @@ import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
+import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.Reading
@@ -314,6 +315,7 @@ private fun StudyRows(
                 expanded = aboutOpen,
                 onExpandedChange = { aboutOpen = it },
                 onPaperTap = { if (!aboutOpen) onBackgroundTap() },
+                settings = settings,
             )
             // The door asks for a translation only while translations are
             // something the reading draws at all: a reader who hid them in
@@ -410,6 +412,7 @@ private fun SurahOpening(
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     onPaperTap: () -> Unit,
+    settings: AppSettings,
 ) {
     val info by produceState<String?>(initialValue = null, surah.number, expanded) {
         value = if (expanded) {
@@ -497,7 +500,18 @@ private fun SurahOpening(
             val press = remember { MutableInteractionSource() }
             Text(
                 text = RichText.paragraphs(info.orEmpty()),
-                style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                // Opened, the introduction is the reader's prose, and it
+                // reads at the reading's own voice and size, not at a
+                // caption's: it is the longest text beside the tafsir on
+                // this page, so it takes the same room the translation
+                // takes (owner decision, this session). The runs are drawn
+                // plain by design: [RichText.paragraphs] draws no spans
+                // here, so the tags in the source never reach one.
+                style = LocalReadingVoice.current.style.copy(
+                    fontSize = settings.translationSp.sp,
+                    lineHeight = settings.translationLineSp.sp,
+                    fontFamily = LocalReadingVoice.current.atSize(settings.translationSp),
+                ),
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.78f),
                 // Opened, the whole introduction is the reader's; it was
                 // asked for with a press, and a cap on it would cut the

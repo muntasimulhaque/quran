@@ -181,14 +181,17 @@ fun HighlightedText(
 /**
  * Draws the tafsir's paragraphs and headings. The size the reader chose for
  * the tafsir moves the whole block, headings included, and the line height
- * gives the quoted Arabic inside a Latin paragraph room to breathe.
+ * gives the quoted Arabic inside a Latin paragraph room to breathe. The
+ * defaults stand at the reading's own two sizes a rich block is drawn at:
+ * the tafsir's body and line, which TafsirDirectionTest overrides with its
+ * own when it pins the direction rule.
  */
 @Composable
 fun RichBlocks(
     blocks: List<TextBlock>,
     modifier: Modifier = Modifier,
-    sizeSp: Float = 16f,
-    lineSp: Float = 26f,
+    sizeSp: Float = 17f,
+    lineSp: Float = 27f,
     arabicSp: Float = 18f,
 ) {
     Column(
@@ -349,6 +352,12 @@ private fun annotated(
                     ) { withStyle(style) { append(marker.toString()) } }
                 }
             } else if (run.arabic) {
+                // No shipped content puts bold or italic on an Arabic run, and
+                // the script's faces have no other weight or style to be
+                // found: emphasis that reached here would be synthesized by
+                // the platform, a fake bold that thickens Naskh hairlines and
+                // a skew that has no place on calligraphy. The run draws in
+                // the faces' own shape, always (owner decision, this session).
                 val color = if (run.quote) quoteColor ?: quoteFallback else Color.Unspecified
                 var index = 0
                 while (index < run.text.length) {
@@ -364,8 +373,6 @@ private fun annotated(
                         SpanStyle(
                             fontFamily = family,
                             fontSize = arabicSize,
-                            fontWeight = if (run.bold) FontWeight.SemiBold else null,
-                            fontStyle = if (run.italic) FontStyle.Italic else null,
                             color = color,
                         ),
                     ) { append(run.text.substring(index, end)) }
