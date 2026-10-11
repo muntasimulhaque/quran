@@ -36,12 +36,10 @@ import io.github.muntasimulhaque.quran.ui.theme.NightBackground
 import io.github.muntasimulhaque.quran.ui.theme.NightText
 import io.github.muntasimulhaque.quran.ui.theme.PaperBackground
 import io.github.muntasimulhaque.quran.ui.theme.PaperInk
-import io.github.muntasimulhaque.quran.ui.theme.SepiaBackground
-import io.github.muntasimulhaque.quran.ui.theme.SepiaInk
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
- * The three grounds, as swatches: each one is the page it will paint. The
+ * The two grounds, as swatches: each one is the page it will paint. The
  * swatch that is filled is the page the reader is actually reading on, not
  * the stored day choice: with automatic night mode on and the phone in dark
  * mode, Night draws the app, so Night is what the row says (owner report).
@@ -131,7 +129,6 @@ fun ThemeRow(
 
 fun AppTheme.swatch(): Pair<Color, Color> = when (this) {
     AppTheme.Paper -> PaperBackground to PaperInk
-    AppTheme.Sepia -> SepiaBackground to SepiaInk
     AppTheme.Night -> NightBackground to NightText
 }
 
@@ -139,7 +136,6 @@ fun AppTheme.swatch(): Pair<Color, Color> = when (this) {
 fun AppTheme.name(): String = stringResource(
     when (this) {
         AppTheme.Paper -> R.string.settings_theme_paper
-        AppTheme.Sepia -> R.string.settings_theme_sepia
         AppTheme.Night -> R.string.settings_theme_night
     },
 )

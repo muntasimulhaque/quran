@@ -11,7 +11,7 @@ import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.UiLanguage
 
 /**
- * The three grounds, in one place, each one fully spoken for.
+ * The two grounds, in one place, each one fully spoken for.
  *
  * Every role Material draws from is set here rather than left to its default.
  * A default that falls through is a color nobody chose, and on a page whose
@@ -28,7 +28,7 @@ import io.github.muntasimulhaque.quran.data.UiLanguage
  * - `outline` and `outlineVariant` are the hairlines, never carrying meaning
  *   on their own.
  *
- * `surfaceTint` is transparent in all four. Material lifts a raised surface
+ * `surfaceTint` is transparent in both. Material lifts a raised surface
  * by tinting it toward the primary; on a manuscript that would awake a blue
  * wash under every sheet, so the lift is a chosen tone and a shadow instead.
  *
@@ -64,35 +64,6 @@ internal val PaperScheme = lightColorScheme(
     outline = PaperOutline,
     outlineVariant = PaperOutline,
     scrim = Color(0xFF14130F),
-)
-
-internal val SepiaScheme = lightColorScheme(
-    primary = Lapis,
-    onPrimary = SepiaOnPrimary,
-    primaryContainer = Color(0xFFE7D9BE),
-    onPrimaryContainer = Color(0xFF1C3A56),
-    secondary = SepiaMuted,
-    onSecondary = Color(0xFFFDF8ED),
-    tertiary = SepiaMuted,
-    onTertiary = Color(0xFFFDF8ED),
-    background = SepiaBackground,
-    onBackground = SepiaInk,
-    surface = SepiaSurface,
-    onSurface = SepiaInk,
-    surfaceVariant = Color(0xFFEDE1CB),
-    onSurfaceVariant = SepiaMuted,
-    surfaceContainerLowest = Color(0xFFFDF6EA),
-    surfaceContainerLow = Color(0xFFF7EEDE),
-    surfaceContainer = Color(0xFFF2E8D5),
-    surfaceContainerHigh = Color(0xFFFCF5E8),
-    surfaceContainerHighest = SepiaControl,
-    surfaceTint = Color.Transparent,
-    inverseSurface = SepiaInk,
-    inverseOnSurface = SepiaSurface,
-    inversePrimary = LapisLight,
-    outline = SepiaOutline,
-    outlineVariant = SepiaOutline,
-    scrim = Color(0xFF241B0E),
 )
 
 internal val NightScheme = darkColorScheme(
@@ -133,14 +104,6 @@ private val PaperPage = PagePalette(
     highlight = Color(0x381B4D7A),
 )
 
-private val SepiaPage = PagePalette(
-    paper = SepiaBackground,
-    ink = SepiaInk,
-    ornament = SepiaGold,
-    selection = Color(0x221B4D7A),
-    highlight = Color(0x3D1B4D7A),
-)
-
 private val NightPage = PagePalette(
     paper = NightBackground,
     ink = NightInk,
@@ -153,7 +116,7 @@ val LocalPagePalette = staticCompositionLocalOf { PaperPage }
 val LocalPageThemeName = staticCompositionLocalOf { "paper" }
 
 /**
- * The theme is the whole app: the three grounds, and the voice everything
+ * The theme is the whole app: the two grounds, and the voice everything
  * is written in. The voice follows the reader's one language choice: English
  * speaks Inter and Literata, Bangla speaks Noto Sans Bengali and Noto Serif
  * Bengali, and the switch is made here so no surface picks a face of its own.
@@ -166,22 +129,18 @@ fun QuranTheme(
 ) {
     val colors = when (theme) {
         AppTheme.Paper -> PaperScheme
-        AppTheme.Sepia -> SepiaScheme
         AppTheme.Night -> NightScheme
     }
     val palette = when (theme) {
         AppTheme.Paper -> PaperPage
-        AppTheme.Sepia -> SepiaPage
         AppTheme.Night -> NightPage
     }
     val name = when (theme) {
         AppTheme.Paper -> "paper"
-        AppTheme.Sepia -> "sepia"
         AppTheme.Night -> "night"
     }
     val switches = when (theme) {
         AppTheme.Paper -> PaperSwitch
-        AppTheme.Sepia -> SepiaSwitch
         AppTheme.Night -> NightSwitch
     }
     CompositionLocalProvider(

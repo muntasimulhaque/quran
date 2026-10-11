@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 5.6 (versionCode 58)
+Version: 5.7 (versionCode 59)
 
 ## Listing
 
@@ -221,6 +221,10 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (5.7, 397 characters)
+
+The reading is easier on the eyes now. Translation, tafsir, and word meanings are drawn in full ink instead of gray, the word list has room to breathe, footnote markers are larger and easier to tap, and tafsir paragraphs stand further apart. Sepia is gone, leaving Paper for day and Night for night, and Bangla reading sits at its own size for parity with English. No ads, no trackers, no account.
 
 ## Release notes (5.6, 469 characters)
 

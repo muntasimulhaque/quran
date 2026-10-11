@@ -29,11 +29,6 @@ class SwitchContrastTest {
     }
 
     @Test
-    fun sepiaHolds() {
-        assertControl(SepiaSwitch)
-    }
-
-    @Test
     fun nightHolds() {
         assertControl(NightSwitch)
     }

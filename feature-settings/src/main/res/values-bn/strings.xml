@@ -6,7 +6,6 @@
     <string name="settings_group_language">অ্যাপের ভাষা</string>
 
     <string name="settings_theme_paper">পেপার</string>
-    <string name="settings_theme_sepia">সেপিয়া</string>
     <string name="settings_theme_night">নাইট</string>
     <string name="settings_auto_night_title">সিস্টেমের ডার্ক মোড অনুসরণ করুন</string>
     <string name="settings_summary_theme_auto">%1$s · দিনের পাতা %2$s</string>

@@ -10,6 +10,7 @@ import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
@@ -42,10 +43,18 @@ val NotoSansBengali = FontFamily(
     Font(R.font.noto_sans_bengali, FontWeight.SemiBold),
 )
 
-/** The reading voice for translations and tafsir. */
+/**
+ * The reading voice for translations and tafsir. The italic members keep an
+ * emphasized run inside Literata: without them a span that asks for italic
+ * falls through to the platform default, which breaks the page voice mid
+ * sentence. The variable file carries one upright cut, so the italic here
+ * is the skew of that cut until a true italic variable file joins the assets.
+ */
 val Literata = FontFamily(
     Font(R.font.literata_variable, FontWeight.Normal),
     Font(R.font.literata_variable, FontWeight.Medium),
+    Font(R.font.literata_variable, FontWeight.Normal, FontStyle.Italic),
+    Font(R.font.literata_variable, FontWeight.Medium, FontStyle.Italic),
 )
 
 /**
@@ -112,15 +121,16 @@ val BanglaTypography = typographyFor(NotoSansBengali)
 
 /**
  * Literata at the size it is about to be drawn, in the three weights a
- * paragraph of reading can ask for. The face's optical size axis runs 7 to
- * 72 with the default at 12, so a 17 sp body would otherwise be set in the
- * cut drawn for footnotes. Faces without the axis (the Bengali voices) have
- * one cut and never come through here, and below API 26 the platform
- * ignores the setting.
+ * paragraph of reading can ask for, upright and italic. The face's optical
+ * size axis runs 7 to 72 with the default at 12, so a 17 sp body would
+ * otherwise be set in the cut drawn for footnotes. Faces without the axis
+ * (the Bengali voices) have one cut and never come through here, and below
+ * API 26 the platform ignores the setting.
  *
- * The three members are the whole of what the reading requests: the regular
+ * The six members are the whole of what the reading requests: the regular
  * text, the Medium a footnote marker wears, and the SemiBold a bold run of
- * the tafsir wears. A family is matched by the weight each member declares,
+ * the tafsir wears, each upright and italic. A family is matched by the
+ * weight and style each member declares,
  * so a member must exist for every weight a span can request, and each one
  * carries its own wght axis beside the opsz: Compose applies only the
  * variation settings a Font declares, and a family built with the opsz
@@ -137,17 +147,21 @@ fun literataAt(sizeSp: Float): FontFamily {
     val drawn = sizeSp * LocalDensity.current.fontScale
     return literataCuts.getOrPut(drawn.toBits()) {
         FontFamily(
-            literataCut(drawn, FontWeight.Normal),
-            literataCut(drawn, FontWeight.Medium),
-            literataCut(drawn, FontWeight.SemiBold),
+            literataCut(drawn, FontWeight.Normal, FontStyle.Normal),
+            literataCut(drawn, FontWeight.Medium, FontStyle.Normal),
+            literataCut(drawn, FontWeight.SemiBold, FontStyle.Normal),
+            literataCut(drawn, FontWeight.Normal, FontStyle.Italic),
+            literataCut(drawn, FontWeight.Medium, FontStyle.Italic),
+            literataCut(drawn, FontWeight.SemiBold, FontStyle.Italic),
         )
     }
 }
 
 @OptIn(ExperimentalTextApi::class)
-private fun literataCut(sizeSp: Float, weight: FontWeight): Font = Font(
+private fun literataCut(sizeSp: Float, weight: FontWeight, style: FontStyle): Font = Font(
     R.font.literata_variable,
     weight,
+    style,
     variationSettings = FontVariation.Settings(
         FontVariation.Setting("opsz", sizeSp),
         FontVariation.weight(weight.weight),
@@ -165,17 +179,19 @@ val LatinReading = TextStyle(
 )
 
 /**
- * The Bangla reading voice. The body is the same 17 sp; the line is the
- * face's own natural line plus the air Literata's gets: Noto Serif Bengali's
- * natural line is 1.594 of the em, Literata's 1.485 is lifted to 1.588, so
- * the Bangla line is 29. Bengali script stacks its vowel marks above and
- * below the line, and a tighter box clips them.
+ * The Bangla reading voice. The body is 18 sp against the Latin 17: Bengali
+ * glyphs read smaller than Latin at the same nominal size, so parity needs
+ * the extra point. The line is the face's own natural line plus the air
+ * Literata's gets: Noto Serif Bengali's natural line is 1.594 of the em,
+ * Literata's 1.485 is lifted to 1.588, so at 18 sp the Bangla line is 31.
+ * Bengali script stacks its vowel marks above and below the line, and a
+ * tighter box clips them.
  */
 val BengaliReading = TextStyle(
     fontFamily = NotoSerifBengali,
     fontWeight = FontWeight.Normal,
-    fontSize = 17.sp,
-    lineHeight = 29.sp,
+    fontSize = 18.sp,
+    lineHeight = 31.sp,
 )
 
 /**

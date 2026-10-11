@@ -8,7 +8,7 @@ import org.junit.Test
 /**
  * The contrast rule, enforced by arithmetic instead of by memory: every tone
  * that carries words reads at 4.5:1 or better on every ground it is drawn
- * on, in each of the three themes. The pairs are the ones the schemes wire:
+ * on, in each of the two themes. The pairs are the ones the schemes wire:
  * the reading ink, the muted voice, the gold of the page furniture, and the
  * lapis of an action. The muted voice is held against every ground a sheet
  * or a floating control stands on, not only against the sheet's own tone,
@@ -29,19 +29,6 @@ class ContrastTest {
         assertReadable(Lapis, PaperBackground)
         assertReadable(Lapis, PaperSurface)
         assertReadable(Color(0xFFFDFBF6), Lapis)
-    }
-
-    @Test
-    fun sepiaHolds() {
-        assertReadable(SepiaInk, SepiaBackground)
-        assertReadable(SepiaInk, SepiaSurface)
-        assertReadable(SepiaMuted, SepiaBackground)
-        assertReadable(SepiaMuted, SepiaSurface)
-        assertSheetGrounds(SepiaScheme)
-        assertReadable(SepiaGold, SepiaBackground)
-        assertReadable(Lapis, SepiaBackground)
-        assertReadable(Lapis, SepiaSurface)
-        assertReadable(Color(0xFFFDF8ED), Lapis)
     }
 
     @Test

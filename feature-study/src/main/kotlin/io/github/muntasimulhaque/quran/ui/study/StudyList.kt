@@ -749,7 +749,7 @@ private fun AyahBlock(
             // numbers its verses: after the reader has read the ayah, not as
             // a heading before it. It takes the theme's secondary tone
             // rather than a quiet alpha, because an alpha that whispers on
-            // paper sinks under 4.5:1 on the sepia ground.
+            // paper sinks under 4.5:1.
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

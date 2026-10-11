@@ -19,16 +19,16 @@ import kotlinx.coroutines.flow.map
 private val Context.settingsStore: DataStore<Preferences> by preferencesDataStore("reading")
 
 /**
- * The pages the reader can read on. Paper, Sepia, and Night: one ground for
- * the day, one warm page for the evening, and the dark ground for the
- * night. There is no fourth: a page that only differs from Night by its
- * blackness is a choice a reader cannot articulate, and pure black is the
- * ground the reading science argues against (owner decision, this session:
- * the dark gray of Night reads for longer without halation, and the OLED
- * power a true black saves over a near-black is a rounding error on a page
- * of text).
+ * The pages the reader can read on. Paper and Night: one warm ground for
+ * the day and the dark ground for the night. There is no third: a second
+ * light page is a choice a reader cannot articulate against Paper, and a
+ * page that only differs from Night by its blackness is one they cannot
+ * articulate either. Pure black is the ground the reading science argues
+ * against (owner decision: the dark gray of Night reads for longer without
+ * halation, and the OLED power a true black saves over a near-black is a
+ * rounding error on a page of text).
  */
-enum class AppTheme { Paper, Sepia, Night }
+enum class AppTheme { Paper, Night }
 
 /**
  * The minute the daily reminder arrives when the reader has never chosen one:
@@ -177,9 +177,9 @@ class SettingsStore(private val context: Context) {
         AppSettings(
             ayah = ayah.coerceIn(1, 6236),
             theme = when (preferences[THEME]) {
-                "sepia" -> AppTheme.Sepia
-                // "black" was the fourth page; an install that
-                // chose it lands on the Night that replaced it.
+                // "sepia" was the second light page and "black" the fourth
+                // page; an install that chose either lands on the page that
+                // replaced it.
                 "night", "black" -> AppTheme.Night
                 else -> AppTheme.Paper
             },
@@ -213,7 +213,6 @@ class SettingsStore(private val context: Context) {
         context.settingsStore.edit {
             it[THEME] = when (theme) {
                 AppTheme.Paper -> "paper"
-                AppTheme.Sepia -> "sepia"
                 AppTheme.Night -> "night"
             }
         }

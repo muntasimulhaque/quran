@@ -43,16 +43,17 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * because the word sits directly over its own meaning and the flow keeps
  * the verse's own order (owner report, which reverses the grid).
  *
- * The word sits centred over its meaning, because the two are one unit: a
+ * The word sits centered over its meaning, because the two are one unit: a
  * word hung at one edge of a longer meaning reads as belonging to its
  * neighbour. The Arabic is set at the ayah's own ratio to its translation,
  * so the aid is a small copy of the reading rather than a footnote under
  * it, and both sizes scale with the one choice the reader made for word
  * meanings.
  *
- * The meaning takes the theme's secondary tone rather than an alpha that
- * just looks quiet: that tone is what each theme defines for secondary
- * text, so the meaning stays readable on paper and on sepia alike.
+ * The meaning takes the reading's ink rather than an alpha that
+ * just looks quiet or the theme's secondary tone: body copy in the
+ * secondary tone tires the eye over a long reading, so the meaning
+ * stays readable on paper and on night alike.
  *
  * [gloss] says what the aid is standing on. Under the study reading's ayah
  * the pairs repeat words the verse above already shows, so the Arabic steps
@@ -124,7 +125,7 @@ private fun WordPair(
             style = TextStyle(
                 fontFamily = hafs,
                 fontSize = settings.wordsSp.sp,
-                lineHeight = (settings.wordsSp * 1.25f).sp,
+                lineHeight = (settings.wordsSp * 1.7f).sp,
                 // The pairs are the same words the ayah above already shows,
                 // so a gloss steps the Arabic one tone down from the verse's
                 // own ink: the line stays the verse, the pairs read as its
@@ -143,9 +144,9 @@ private fun WordPair(
             text = meaning.meaning.orEmpty(),
             style = MaterialTheme.typography.bodySmall.copy(
                 fontSize = settings.wordsMeaningSp.sp,
-                lineHeight = (settings.wordsMeaningSp * 1.45f).sp,
+                lineHeight = (settings.wordsMeaningSp * 1.6f).sp,
             ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = Space.Tight),
         )

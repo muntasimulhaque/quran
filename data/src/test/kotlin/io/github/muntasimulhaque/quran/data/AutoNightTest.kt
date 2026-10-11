@@ -33,7 +33,6 @@ class AutoNightTest {
     @Test
     fun aLightSystemKeepsThePageTheReaderChose() {
         assertEquals(AppTheme.Paper, AppTheme.Paper.resolved(autoNight = true, systemDark = false))
-        assertEquals(AppTheme.Sepia, AppTheme.Sepia.resolved(autoNight = true, systemDark = false))
     }
 
     @Test
@@ -45,6 +44,5 @@ class AutoNightTest {
     fun darkAndLightAreTheTwoHalves() {
         assertTrue(AppTheme.Night.isDark())
         assertFalse(AppTheme.Paper.isDark())
-        assertFalse(AppTheme.Sepia.isDark())
     }
 }

@@ -79,12 +79,12 @@ fun TranslationBody(
         text = annotated(
             runs,
             arabicSize = arabicSp.sp,
-            markerSize = markerSp(body, 0.65f),
+            markerSize = markerSp(body, 0.70f),
             quoteColor = null,
             onFootnote = onFootnote,
         ),
         style = base,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        color = MaterialTheme.colorScheme.onBackground,
         textAlign = if (centered) TextAlign.Center else TextAlign.Unspecified,
         modifier = modifier.fillMaxWidth(),
     )
@@ -129,12 +129,12 @@ private const val ArabicAir = 1.9f
 
 /**
  * The floor under a footnote marker's size. The marker is set at a share of
- * the body it annotates, so at the smallest translation step a 0.65 share
- * is about 7 sp: a figure too small to read and too thin to find (owner
- * decision, forty-seventh session). Nine is the smallest that still reads
- * as a number and holds its own above the line.
+ * the body it annotates, so at the smallest translation step a 0.70 share
+ * is about 8 sp: a figure too small to read and too thin to tap (owner
+ * decision, forty-seventh session). Ten is the smallest that still reads
+ * as a number, holds its own above the line, and gives the finger room.
  */
-private const val MarkerFloor = 9f
+private const val MarkerFloor = 10f
 
 /** A marker's size: its share of the body, never below [MarkerFloor]. */
 private fun markerSp(bodySp: Float, share: Float) = maxOf(bodySp * share, MarkerFloor).sp
@@ -148,7 +148,7 @@ fun HighlightedText(
     ranges: List<IntRange>,
     modifier: Modifier = Modifier,
     style: TextStyle? = null,
-    color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    color: Color = MaterialTheme.colorScheme.onBackground,
     maxLines: Int = 4,
 ) {
     val resolvedStyle = style ?: LocalReadingVoice.current.style
@@ -193,7 +193,7 @@ fun RichBlocks(
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
         blocks.forEach { block ->
             val line = lineHeightFor(
@@ -206,7 +206,7 @@ fun RichBlocks(
                     text = annotated(
                         block.runs,
                         arabicSize = arabicSp.sp,
-                        markerSize = markerSp(sizeSp, 0.65f),
+                        markerSize = markerSp(sizeSp, 0.70f),
                         quoteColor = null,
                     ),
                     style = MaterialTheme.typography.titleSmall.copy(
@@ -222,7 +222,7 @@ fun RichBlocks(
                     text = annotated(
                         block.runs,
                         arabicSize = arabicSp.sp,
-                        markerSize = markerSp(sizeSp, 0.65f),
+                        markerSize = markerSp(sizeSp, 0.70f),
                         quoteColor = MaterialTheme.colorScheme.onBackground,
                     ),
                     style = LocalReadingVoice.current.style.copy(
@@ -243,7 +243,7 @@ fun RichBlocks(
                             trim = LineHeightStyle.Trim.None,
                         ),
                     ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -270,7 +270,7 @@ fun ArabicBody(runs: List<TextRun>, modifier: Modifier = Modifier, sizeSp: Float
             // can never disagree about which edge a wrapped line starts from.
             textDirection = TextDirection.Rtl,
         ),
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        color = MaterialTheme.colorScheme.onBackground,
         textAlign = TextAlign.Right,
         modifier = modifier.fillMaxWidth(),
     )
@@ -289,13 +289,13 @@ private fun annotated(
     // own sheet title wear: at a share of the body's size and in the body's
     // own tone it read as a smaller word and not as something to touch
     // (owner decision, forty-seventh session). The accent clears the 4.5:1
-    // the small figure needs on every ground: 8.1:1 on paper, 7.3:1 on
-    // sepia, 8.5:1 on night.
+    // the small figure needs on every ground: 8.1:1 on paper and
+    // 8.5:1 on night.
     val markerColor = MaterialTheme.colorScheme.primary
     // What a quoted run falls back to where the caller has no quote color of
-    // its own: the reading's secondary tone, never the accent, which now
+    // its own: the reading's ink, never the accent, which now
     // belongs to the marker alone.
-    val quoteFallback = MaterialTheme.colorScheme.onSurfaceVariant
+    val quoteFallback = MaterialTheme.colorScheme.onBackground
     val context = LocalContext.current
     val arabicFonts = remember(context) { ArabicFonts(context) }
     return buildAnnotatedString {
@@ -305,7 +305,7 @@ private fun annotated(
                 val style = SpanStyle(
                     // The marker is a door to the note; it wears the action
                     // color rather than the 0.75 alpha that measured 3.7:1 on
-                    // paper and sepia, and rather than the reading's own
+                    // paper, and rather than the reading's own
                     // secondary tone, which the sentence around it wears
                     // (owner decision, forty-seventh session).
                     color = markerColor,

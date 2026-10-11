@@ -32,7 +32,7 @@ import androidx.compose.ui.graphics.Color
  * not in the palette the rest of the app draws with.
  *
  * The pair a switch is on in is the scheme's own accent and its own ink on
- * that accent, declared here so that all three grounds answer for the whole
+ * that accent, declared here so that both grounds answer for the whole
  * control in one place. It is the pair that was already there, and it already
  * measured 7.07:1 on Night and up on every ground.
  *
@@ -55,14 +55,6 @@ internal val PaperSwitch = SwitchPalette(
     onTrack = Lapis,
     onKnob = PaperOnPrimary,
     ground = PaperSurface,
-)
-
-internal val SepiaSwitch = SwitchPalette(
-    offTrack = SepiaControl,
-    offKnob = SepiaMuted,
-    onTrack = Lapis,
-    onKnob = SepiaOnPrimary,
-    ground = SepiaSurface,
 )
 
 internal val NightSwitch = SwitchPalette(

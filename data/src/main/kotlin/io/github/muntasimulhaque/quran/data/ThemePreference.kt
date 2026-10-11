@@ -18,8 +18,9 @@ import android.content.Context
  * and night, and a reader who reads both values here is owed the same answer
  * the app settles on once the DataStore read lands.
  *
- * A stored "black" is the page that was removed and reads as Night
- * here, so an install that chose it lands on the page that replaced it.
+ * A stored "sepia" reads as Paper and a stored "black" as Night here:
+ * both pages were removed, so an install that chose either lands on the
+ * page that replaced it.
  */
 class ThemePreference(context: Context) {
 
@@ -31,7 +32,6 @@ class ThemePreference(context: Context) {
      * has always had a default, so this never answers null.
      */
     fun theme(): AppTheme = when (preferences.getString(KEY_THEME, null)) {
-        "sepia" -> AppTheme.Sepia
         "night", "black" -> AppTheme.Night
         else -> AppTheme.Paper
     }

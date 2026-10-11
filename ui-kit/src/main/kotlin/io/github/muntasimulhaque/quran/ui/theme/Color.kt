@@ -11,15 +11,6 @@ val PaperInk = Color(0xFF1C1B18)
 val PaperMuted = Color(0xFF5F5B53)
 val PaperHairline = PaperOutline
 
-// Sepia
-val SepiaBackground = Color(0xFFF3E9D7)
-val SepiaSurface = Color(0xFFFAF1E2)
-val SepiaOutline = Color(0xFFDFD2BA)
-val SepiaInk = Color(0xFF3A2F1F)
-val SepiaMuted = Color(0xFF61543C)
-val SepiaHairline = SepiaOutline
-val SepiaGold = Color(0xFF7E5C1C)
-
 /**
  * The night ground, and the family that gives up its blue. Night is the
  * page a reader opens before sleep, so its ground is warm: the blue of a
@@ -53,10 +44,9 @@ val LapisLight = Color(0xFF7FB2E5)
 // Gold is the ornament tone, and it is read:
 // juz, the surah names drawn into the page, and the ornamental name at the
 // head of the study reading. It therefore meets the same 4.5:1 rule every
-// other text tone does, on each ground it is drawn on: 5.0:1 on paper,
-// 5.1:1 on sepia, 6.1:1 on night. The older paper and sepia
-// gold sat at 3.2:1 and 4.1:1, under the rule, and were darkened without
-// changing the hue.
+// other text tone does, on each ground it is drawn on: 5.0:1 on paper and
+// 6.1:1 on night. The older paper gold sat at 3.2:1, under the rule, and
+// was darkened without changing the hue.
 val Gold = Color(0xFF856411)
 
 // The one shadow the app casts, black at ten percent, where the platform's
@@ -73,7 +63,7 @@ val FloatingShadow = Color(0x1A000000)
 // of an on switch is the accent.
 //
 // These are Material's `surfaceContainerHighest` and `onPrimary`, lifted out
-// of the three schemes and named here, because a control's colors are the
+// of the two schemes and named here, because a control's colors are the
 // theme's business and were being taken from two scheme roles that each mean
 // something else: the off knob was `outline`, which is the hairline every
 // divider in the app wears, and on the night ground it measured 1.03:1
@@ -81,7 +71,5 @@ val FloatingShadow = Color(0x1A000000)
 // report, forty-sixth session). See `Switch.kt` for the whole control.
 val PaperControl = Color(0xFFFFFFFF)
 val PaperOnPrimary = Color(0xFFFDFBF6)
-val SepiaControl = Color(0xFFFEF9F0)
-val SepiaOnPrimary = Color(0xFFFDF8ED)
 val NightControl = Color(0xFF2C251D)
 val NightOnPrimary = Color(0xFF08243D)
