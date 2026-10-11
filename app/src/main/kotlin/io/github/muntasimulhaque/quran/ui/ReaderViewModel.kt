@@ -23,7 +23,6 @@ import io.github.muntasimulhaque.quran.data.PackCatalog
 import io.github.muntasimulhaque.quran.data.PackDownloader
 import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.PackUpdater
-import io.github.muntasimulhaque.quran.data.PackVerifier
 import io.github.muntasimulhaque.quran.data.PagePosition
 import io.github.muntasimulhaque.quran.data.LastReadStore
 import io.github.muntasimulhaque.quran.data.LanguagePreference
@@ -48,7 +47,6 @@ import io.github.muntasimulhaque.quran.playback.PlaybackController
 import io.github.muntasimulhaque.quran.playback.ListenOffer
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
-import io.github.muntasimulhaque.quran.ui.settings.ContentCheck
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -160,10 +158,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     )
 
     var packSetup by mutableStateOf<PackSetup?>(null)
-        private set
-
-    /** What the content self check is doing, or what it found. */
-    var contentCheck by mutableStateOf<ContentCheck?>(null)
         private set
 
     /**
@@ -358,6 +352,16 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             viewModelScope.launch {
                 if (packUpdater.refresh(catalog).isNotEmpty()) reopenLibrary()
             }
+            // The same library is read back against the catalog's hashes once
+            // a day, on the reader's behalf, so a pack a storage problem or an
+            // interrupted copy has damaged is repaired without anyone asking.
+            // There is no row for it and nothing is shown: a reader should
+            // never meet the word for it (owner decision, this session). It is
+            // unmetered, once a day, and after the first page is readable, all
+            // of which PackUpdater keeps.
+            viewModelScope.launch {
+                if (packUpdater.dailyIntegrityRefresh(catalog).isNotEmpty()) reopenLibrary()
+            }
         }
     }
 
@@ -535,16 +539,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     fun setTheme(theme: AppTheme) {
         settings = settings.copy(theme = theme)
         viewModelScope.launch { settingsStore.setTheme(theme) }
-    }
-
-    /**
-     * The page follows the system's own day and night. The choice of page is
-     * kept, not cleared: turning the switch off returns the reader to the
-     * page they had, which is the page the night was standing in for.
-     */
-    fun setAutoNight(follow: Boolean) {
-        settings = settings.copy(autoNight = follow)
-        viewModelScope.launch { settingsStore.setAutoNight(follow) }
     }
 
     /** One kind of text changes size; nothing else moves with it. */
@@ -1069,33 +1063,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     /** A place the reader is done with, dropped from Last Read. */
     fun forgetPlace(ayahNumber: Int) {
         viewModelScope.launch { lastReadStore.remove(ayahNumber) }
-    }
-
-    /**
-     * Reads every installed pack back and compares it with the fingerprint
-     * the catalog recorded. When something is behind and the connection
-     * allows, the check repairs it in the same breath rather than only
-     * naming it, so the reader's own second look ends in a clean library
-     * instead of a list of work.
-     */
-    fun checkContent() {
-        viewModelScope.launch {
-            contentCheck = ContentCheck.Running
-            val verifier = PackVerifier(getApplication())
-            val behind = runCatching { verifier.needsRefresh(packs) }.getOrNull().orEmpty()
-            if (behind.isEmpty()) {
-                contentCheck = ContentCheck.Done(emptyList())
-                return@launch
-            }
-            if (packUpdater.canRefresh()) {
-                contentCheck = ContentCheck.Updating
-                if (packUpdater.refresh(catalog, force = true).isNotEmpty()) {
-                    reopenLibrary()
-                }
-            }
-            val left = runCatching { verifier.needsRefresh(behind) }.getOrNull().orEmpty()
-            contentCheck = ContentCheck.Done(left.map { it.name })
-        }
     }
 
     /** Writes the reader's note on one ayah. It is keyed by number because

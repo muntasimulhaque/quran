@@ -1,5 +1,6 @@
 package io.github.muntasimulhaque.quran.ui.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -9,6 +10,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.UiLanguage
+import io.github.muntasimulhaque.quran.data.resolved
 
 /**
  * The two grounds, in one place, each one fully spoken for.
@@ -37,7 +39,7 @@ import io.github.muntasimulhaque.quran.data.UiLanguage
  * as a control is the one thing a scheme role should not be left to answer
  * for by accident.
  */
-internal val PaperScheme = lightColorScheme(
+internal val LightScheme = lightColorScheme(
     primary = Lapis,
     onPrimary = PaperOnPrimary,
     primaryContainer = Color(0xFFD3E4F5),
@@ -66,7 +68,7 @@ internal val PaperScheme = lightColorScheme(
     scrim = Color(0xFF14130F),
 )
 
-internal val NightScheme = darkColorScheme(
+internal val DarkScheme = darkColorScheme(
     primary = LapisLight,
     onPrimary = NightOnPrimary,
     primaryContainer = Color(0xFF24405C),
@@ -96,48 +98,58 @@ internal val NightScheme = darkColorScheme(
 )
 
 /** The reading colors, which turn over with the theme. */
-private val PaperPage = PagePalette(
+private val LightPage = PagePalette(
     ink = PaperInk,
     ornament = Gold,
     highlight = Color(0x381B4D7A),
 )
 
-private val NightPage = PagePalette(
+private val DarkPage = PagePalette(
     ink = NightInk,
     ornament = NightGold,
     highlight = Color(0x477FB2E5),
 )
 
-val LocalPagePalette = staticCompositionLocalOf { PaperPage }
-val LocalPageThemeName = staticCompositionLocalOf { "paper" }
+val LocalPagePalette = staticCompositionLocalOf { LightPage }
+val LocalPageThemeName = staticCompositionLocalOf { "light" }
 
 /**
  * The theme is the whole app: the two grounds, and the voice everything
  * is written in. The voice follows the reader's one language choice: English
  * speaks Inter and Literata, Bangla speaks Noto Sans Bengali and Noto Serif
  * Bengali, and the switch is made here so no surface picks a face of its own.
+ *
+ * The ground may be handed as any of the three values, System among them:
+ * System is resolved here against the phone's own day and night, so a caller
+ * that passes the reader's raw choice still gets one ground drawn. The shell
+ * resolves it too, for the status and navigation bars, and hands Light or
+ * Dark, which resolve to themselves.
  */
 @Composable
 fun QuranTheme(
-    theme: AppTheme = AppTheme.Paper,
+    theme: AppTheme = AppTheme.Light,
     language: UiLanguage = UiLanguage.English,
     content: @Composable () -> Unit,
 ) {
-    val colors = when (theme) {
-        AppTheme.Paper -> PaperScheme
-        AppTheme.Night -> NightScheme
+    // System becomes the phone's own ground; Light and Dark are already one,
+    // so `shown` is only ever Light or Dark and the `else` below is the light
+    // ground (owner decision, this session).
+    val shown = theme.resolved(isSystemInDarkTheme())
+    val colors = when (shown) {
+        AppTheme.Dark -> DarkScheme
+        else -> LightScheme
     }
-    val palette = when (theme) {
-        AppTheme.Paper -> PaperPage
-        AppTheme.Night -> NightPage
+    val palette = when (shown) {
+        AppTheme.Dark -> DarkPage
+        else -> LightPage
     }
-    val name = when (theme) {
-        AppTheme.Paper -> "paper"
-        AppTheme.Night -> "night"
+    val name = when (shown) {
+        AppTheme.Dark -> "dark"
+        else -> "light"
     }
-    val switches = when (theme) {
-        AppTheme.Paper -> PaperSwitch
-        AppTheme.Night -> NightSwitch
+    val switches = when (shown) {
+        AppTheme.Dark -> DarkSwitch
+        else -> LightSwitch
     }
     CompositionLocalProvider(
         LocalPagePalette provides palette,

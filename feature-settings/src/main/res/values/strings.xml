@@ -5,10 +5,9 @@
     <string name="settings_title_language">Language</string>
     <string name="settings_group_language">App language</string>
 
-    <string name="settings_theme_paper">Paper</string>
-    <string name="settings_theme_night">Night</string>
-    <string name="settings_auto_night_title">Follow the system dark mode</string>
-    <string name="settings_summary_theme_auto">%1$s · day page %2$s</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_system">System</string>
 
     <string name="settings_group_interface">Interface</string>
     <string name="settings_group_reading">Reading</string>
@@ -59,20 +58,12 @@
     <string name="settings_pack_downloading">Downloading %1$d%%</string>
     <string name="pack_installed">%1$s · %2$s</string>
 
-    <string name="settings_check_content">Check installed content</string>
-    <string name="settings_check_running">Checking installed content…</string>
-    <string name="settings_check_updating">Updating…</string>
-    <string name="settings_check_ok">Everything installed is intact.</string>
-    <string name="settings_check_available">Update available: %1$s</string>
 
     <string name="settings_version">Version</string>
     <string name="settings_license_label">License</string>
 
     <string name="settings_rights">Corrections and rights</string>
-    <string name="settings_credits">Credits and licenses</string>
 
-    <string name="about_title" translatable="false">Quran: The Noble Book</string>
-    <string name="about_subtitle">Version %1$s</string>
     <string name="about_group_content">Content</string>
     <string name="about_group_fonts">Fonts</string>
     <string name="about_group_recitations">Recitations</string>
@@ -108,20 +99,6 @@
     <string name="settings_title_appearance">Theme</string>
     <string name="settings_title_text">Font size</string>
     <string name="settings_title_reciters">Reciters</string>
-    <string name="settings_title_listening">Listening</string>
-    <string name="settings_listening_speed_value">%1$s speed</string>
-    <string name="settings_listening_summary_repeat">%1$s · one ayah repeats</string>
-    <string name="settings_listening_summary_repeat_surah">%1$s · the surah repeats</string>
-    <string name="settings_listening_summary_stop">%1$s · stops after each ayah</string>
-    <string name="settings_group_speed">Speed</string>
-    <string name="settings_speed_label">Playback speed</string>
-    <string name="settings_speed_option">%1$s, %2$s</string>
-    <string name="settings_group_end_of_audio">When the audio ends</string>
-    <string name="settings_continue_ayah_title">Continue to the next ayah</string>
-    <string name="settings_repeat_title">Repeat the ayah</string>
-    <string name="settings_stop_after_ayah_title">Stop after this ayah</string>
-    <string name="settings_continue_surah_title">Continue to the next surah</string>
-    <string name="settings_repeat_surah_title">Repeat the surah</string>
     <string name="settings_title_translations">Translations</string>
     <string name="settings_title_tafsirs">Tafsirs</string>
     <string name="settings_title_about">About</string>
@@ -141,6 +118,5 @@
     <string name="settings_group_tafsirs">Tafsirs</string>
     <string name="settings_tafsir_hidden">Tafsir is hidden in the reading</string>
     <string name="settings_group_about">App</string>
-    <string name="settings_group_content">Content on this device</string>
     <string name="settings_back">Back</string>
 </resources>

@@ -6,6 +6,7 @@ import android.net.NetworkCapabilities
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.security.MessageDigest
+import java.util.TimeZone
 
 /**
  * Keeps the packs a reader already has current, without a tap.
@@ -75,6 +76,47 @@ class PackUpdater(private val context: Context) {
             replaced
         }
 
+    /**
+     * A quiet integrity pass, at most once a day, that reads every installed
+     * pack back and compares it with the catalog's hash, repairing what a
+     * storage problem or an interrupted copy has damaged. [refresh] only
+     * re-examines the catalog when its fingerprints change, which is an app
+     * update; this is the second look that runs on the reader's behalf,
+     * without a tap, so a reader never has to know the word for it (owner
+     * decision, this session: the check a reader would not understand is gone
+     * from the surface and kept here instead).
+     *
+     * It is kind to the reader the way [refresh] is: only on an unmetered
+     * connection, only after the reading is already open, and the day it last
+     * ran is remembered so the pass is once a day and not once a launch. A
+     * reader who is offline or metered pays nothing and the pass is retried on
+     * a later launch. A stale pack keeps working while a replacement is
+     * fetched. Returns the ids that changed, so the caller can reopen the
+     * library over them; a failure is left for the next day rather than shown.
+     */
+    suspend fun dailyIntegrityRefresh(catalog: PackCatalog): List<String> =
+        mutex.withLock {
+            if (!unmetered()) return@withLock emptyList()
+            val today = localDay(System.currentTimeMillis())
+            if (preferences.getInt(KEY_INTEGRITY_DAY, -1) == today) {
+                return@withLock emptyList()
+            }
+            // The day is remembered whether or not work was found: the SHA-256
+            // read is the cost, and it is paid once a day rather than held open
+            // until something is actually wrong.
+            preferences.edit().putInt(KEY_INTEGRITY_DAY, today).apply()
+            val stale = runCatching { PackVerifier(context).needsRefresh(catalog.all()) }
+                .getOrNull() ?: return@withLock emptyList()
+            if (stale.isEmpty()) return@withLock emptyList()
+            val downloader = PackDownloader(context)
+            val replaced = ArrayList<String>(stale.size)
+            for (pack in stale) {
+                val result = runCatching { downloader.download(pack) { _, _ -> } }.getOrNull()
+                if (result?.isSuccess == true) replaced += pack.id
+            }
+            replaced
+        }
+
     /** True only on a connected, unmetered network. */
     private fun unmetered(): Boolean {
         val manager = context.getSystemService(ConnectivityManager::class.java) ?: return false
@@ -100,7 +142,16 @@ class PackUpdater(private val context: Context) {
         return digest.digest().joinToString("") { "%02x".format(it) }
     }
 
+    /** The reader's own day number, so the integrity pass is once a day. */
+    private fun localDay(millis: Long): Int =
+        Math.floorDiv(
+            millis + TimeZone.getDefault().getOffset(millis),
+            DAY_MILLIS,
+        ).toInt()
+
     private companion object {
         const val KEY = "catalog"
+        const val KEY_INTEGRITY_DAY = "integrity_day"
+        const val DAY_MILLIS = 86_400_000L
     }
 }

@@ -23,7 +23,7 @@ import org.junit.runner.RunWith
 /**
  * The app follows the phone's own day and night, at the moment it changes.
  *
- * The reader turned on the one switch that says so, and the app carried
+ * The reader chose the System theme, which says so, and the app carried
  * `uiMode` in its `configChanges`, which is a promise to the platform to
  * handle a theme change itself. It did not: the interface language is applied
  * in `attachBaseContext` through a context derived with
@@ -55,22 +55,20 @@ class SystemThemeTest {
             SettingsStore(context).apply {
                 setUiLanguage("en")
                 setAyah(1)
-                setTheme(AppTheme.Paper)
-                setAutoNight(true)
+                setTheme(AppTheme.System)
             }
         }
     }
 
     @After
     fun tearDown() {
-        // The app's own night override goes back to the day, and the switch
-        // goes off with it: a suite that leaves the app on the night page
-        // photographs a night page in whatever runs next. The "follow the
-        // system" value is a hidden constant on the platform, so the test
-        // pins the day instead, which is the state every other test wants.
+        // The app's own night override goes back to the day: a suite that
+        // leaves the app on the night page photographs a night page in
+        // whatever runs next. The "follow the system" value is a hidden
+        // constant on the platform, so the test pins the day instead, which is
+        // the state every other test wants.
         runCatching { uiMode.setApplicationNightMode(UiModeManager.MODE_NIGHT_NO) }
         runCatching { InstrumentationRegistry.getInstrumentation().waitForIdleSync() }
-        runBlocking { SettingsStore(context).setAutoNight(false) }
     }
 
     /**

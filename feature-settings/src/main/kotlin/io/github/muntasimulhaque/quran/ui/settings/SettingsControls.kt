@@ -1,5 +1,6 @@
 package io.github.muntasimulhaque.quran.ui.settings
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -30,8 +31,6 @@ import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.feature.settings.R
-import io.github.muntasimulhaque.quran.ui.kit.SpeedSteps
-import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.theme.NightBackground
 import io.github.muntasimulhaque.quran.ui.theme.NightText
 import io.github.muntasimulhaque.quran.ui.theme.PaperBackground
@@ -40,18 +39,19 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
 
 /**
- * The two grounds, as swatches: each one is the page it will paint. The
- * swatch that is filled is the page the reader is actually reading on, not
- * the stored day choice: with automatic night mode on and the phone in dark
- * mode, Night draws the app, so Night is what the row says (owner report).
- * The day choice is named in the note under the switch, and a tap
- * still sets the day page.
+ * The three grounds, as swatches: Light, Dark, and System, which follows the
+ * phone's own day and night. The swatch that is filled is the page the reader
+ * is actually reading on: with System chosen and the phone in dark mode, that
+ * is Dark, even though System itself is what is selected (owner report). The
+ * choice is one list of three, the shape every other single choice in the
+ * sheet already wears, so there is no switch beside it to reconcile (owner
+ * decision, this session).
  */
 @Composable
 fun ThemeRow(
     selected: AppTheme,
     onSelect: (AppTheme) -> Unit,
-    /** The page drawn right now, when the system has a say. */
+    /** The page drawn right now, when System has a say. */
     shown: AppTheme = selected,
 ) {
     Row(
@@ -70,49 +70,7 @@ fun ThemeRow(
                     }
                     .padding(horizontal = 6.dp, vertical = 8.dp),
             ) {
-                val (ground, ink) = theme.swatch()
-                // The chosen page wears its halo outside the swatch, with a
-                // gap. A ring on the fill's own edge read as a border and
-                // ate the page's color where the eye looks for it; a ring
-                // around the fill reads as the choice (owner report).
-                Box(
-                    modifier = Modifier
-                        .size(54.dp)
-                        .then(
-                            if (theme == shown) {
-                                Modifier.border(
-                                    width = 2.dp,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    shape = CircleShape,
-                                )
-                            } else {
-                                Modifier
-                            },
-                        ),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    // The edge is the page's own shade, not the theme's
-                    // hairline: a pale page on a pale sheet and a dark page
-                    // on a dark sheet both keep their circle without either
-                    // wearing a chrome outline (owner report).
-                    Box(
-                        modifier = Modifier
-                            .size(46.dp)
-                            .background(ground, CircleShape)
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f),
-                                shape = CircleShape,
-                            ),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = "\u0627",
-                            style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp),
-                            color = ink,
-                        )
-                    }
-                }
+                ThemeSwatch(theme = theme, chosen = theme == shown)
                 Text(
                     text = theme.name(),
                     style = MaterialTheme.typography.labelSmall,
@@ -128,16 +86,84 @@ fun ThemeRow(
     }
 }
 
-fun AppTheme.swatch(): Pair<Color, Color> = when (this) {
-    AppTheme.Paper -> PaperBackground to PaperInk
-    AppTheme.Night -> NightBackground to NightText
+/**
+ * One ground as a swatch. Light and Dark are the page they will paint, with
+ * the ayah's own letter standing on it; System is the two halves of the
+ * phone's own day and night, split down the middle, the mark the whole
+ * industry uses for "follow the system" and the one thing a single filled
+ * circle cannot say (owner decision, this session).
+ *
+ * The chosen swatch wears its halo outside the fill, with a gap: a ring on
+ * the fill's own edge read as a border and ate the page's color where the eye
+ * looks for it, and a ring around the fill reads as the choice (owner report).
+ * The edge is the page's own shade, not the theme's hairline, so a pale page
+ * on a pale sheet and a dark page on a dark sheet both keep their circle
+ * (owner report).
+ */
+@Composable
+private fun ThemeSwatch(theme: AppTheme, chosen: Boolean) {
+    Box(
+        modifier = Modifier
+            .size(54.dp)
+            .then(
+                if (chosen) {
+                    Modifier.border(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = CircleShape,
+                    )
+                } else {
+                    Modifier
+                },
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(46.dp)
+                .clip(CircleShape)
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f),
+                    shape = CircleShape,
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Canvas(Modifier.size(46.dp)) {
+                val radius = size.minDimension / 2f
+                when (theme) {
+                    AppTheme.Light -> drawCircle(PaperBackground, radius = radius)
+                    AppTheme.Dark -> drawCircle(NightBackground, radius = radius)
+                    // The left half is the day page and the right half the
+                    // night, so the swatch says "the phone decides" without
+                    // a word. Angles run from three o'clock, clockwise: 90 to
+                    // 270 is the left half, 270 to 90 the right.
+                    AppTheme.System -> {
+                        drawArc(PaperBackground, startAngle = 90f, sweepAngle = 180f, useCenter = true)
+                        drawArc(NightBackground, startAngle = 270f, sweepAngle = 180f, useCenter = true)
+                    }
+                }
+            }
+            // The letter stands on a single ground, so it is drawn only where
+            // there is one: on System the split is the mark and a letter
+            // straddling both halves would read as neither.
+            if (theme != AppTheme.System) {
+                Text(
+                    text = "\u0627",
+                    style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp),
+                    color = if (theme == AppTheme.Dark) NightText else PaperInk,
+                )
+            }
+        }
+    }
 }
 
 @Composable
 fun AppTheme.name(): String = stringResource(
     when (this) {
-        AppTheme.Paper -> R.string.settings_theme_paper
-        AppTheme.Night -> R.string.settings_theme_night
+        AppTheme.Light -> R.string.settings_theme_light
+        AppTheme.Dark -> R.string.settings_theme_dark
+        AppTheme.System -> R.string.settings_theme_system
     },
 )
 
@@ -184,37 +210,6 @@ fun SizeRow(role: TypeRole, step: Float, onChange: (Float) -> Unit) {
             TextSize.STEPS.size,
             label,
         )
-    }
-}
-
-/**
- * The pace of the recitation, in the same segmented shape the text sizes
- * use: one control, learned once. The pace belongs to hearing the way the
- * size belongs to reading, so a reader who learned one has learned the other.
- * The value is in numbers, because "slow" and "fast" are not the same for
- * every reader.
- */
-@Composable
-fun SpeedRow(value: Float, onChange: (Float) -> Unit) {
-    val label = stringResource(R.string.settings_speed_label)
-    SegmentedRow(
-        label = label,
-        value = value,
-        steps = SpeedSteps,
-        onSelect = onChange,
-        cell = { index, active ->
-            Text(
-                text = speedText(SpeedSteps[index]),
-                style = MaterialTheme.typography.labelLarge.copy(fontSize = 12.sp),
-                color = if (active) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
-            )
-        },
-    ) { chosen ->
-        stringResource(R.string.settings_speed_option, speedText(chosen), label)
     }
 }
 

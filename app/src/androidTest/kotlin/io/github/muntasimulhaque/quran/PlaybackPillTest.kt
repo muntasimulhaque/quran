@@ -101,7 +101,7 @@ class PlaybackPillTest {
         end: EndOfAudio = EndOfAudio.CONTINUE_AYAH,
     ) {
         compose.setContent {
-            QuranTheme(theme = AppTheme.Paper) {
+            QuranTheme(theme = AppTheme.Light) {
                 val pill: @Composable () -> Unit = {
                     PlaybackBar(
                         state = state,
@@ -151,7 +151,7 @@ class PlaybackPillTest {
      */
     private fun showMutablePill(state: MutableState<PlaybackUiState>) {
         compose.setContent {
-            QuranTheme(theme = AppTheme.Paper) {
+            QuranTheme(theme = AppTheme.Light) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.BottomCenter,

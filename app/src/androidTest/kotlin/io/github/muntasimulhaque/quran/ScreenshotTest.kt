@@ -401,7 +401,7 @@ class ScreenshotTest {
             // can recognise. The frames are the store, and the store's
             // first image is the app's promise.
             settings.setAyah(262)
-            settings.setTheme(AppTheme.Paper)
+            settings.setTheme(AppTheme.Light)
             settings.setTranslationPacks(setOf("translation-saheeh-en"))
             settings.setTafsirPacks(setOf("tafsir-ibn-kathir-en"))
             settings.setShowTranslation(true)

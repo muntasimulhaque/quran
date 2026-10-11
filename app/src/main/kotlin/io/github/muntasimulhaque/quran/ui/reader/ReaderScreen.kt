@@ -450,7 +450,6 @@ fun ReaderScreen(
                 )
             },
             recitations = viewModel.recitations,
-            contentCheck = viewModel.contentCheck,
             version = BuildConfig.VERSION_NAME,
             preview = { viewModel.sizePreviewRow() },
             downloadedSurahs = { recitation -> viewModel.downloadedSurahs(recitation) },
@@ -473,7 +472,6 @@ fun ReaderScreen(
                     }
                 },
                 onTheme = { viewModel.setTheme(it) },
-                onAutoNight = { viewModel.setAutoNight(it) },
                 onTypeSize = { role, step -> viewModel.setTypeSize(role, step) },
                 onKeepAwake = { viewModel.setKeepAwake(it) },
                 onFollowReciter = { viewModel.setFollowReciter(it) },
@@ -501,7 +499,6 @@ fun ReaderScreen(
                 onRemoveDownloads = { recitation, surah ->
                     viewModel.removeDownloads(recitation, surah)
                 },
-                onCheckContent = { viewModel.checkContent() },
                 onOpenLink = { url -> openLink(url) },
             ),
             onDismiss = { sheet = ReaderSheet.None },
@@ -780,21 +777,30 @@ private fun markState(on: Boolean): String =
     stringResource(if (on) R.string.action_state_on else R.string.action_state_off)
 
 /**
- * The ayah's own actions, on the pill a long press raises: hear it, keep it,
- * write on it, share it, and the deeper door.
+ * The ayah's own actions, on the pill a long press raises: hear it, understand
+ * it, keep it, write on it, and send it out.
  *
- * The keep comes before the note because the keep is the lighter tap and the
- * note is the writing: Save lands where it stands, and Note opens a sheet and
- * a keyboard. On a pill held in one hand the left is the easiest reach, so the
- * tap a reader repeats belongs nearer the front. A note keeps its ayah in
- * Saved and never lights the bookmark (below), so the keep is the fact and the
- * note is what is written on it, and a parent before its child reads in the
- * order the eye lands (owner decision, forty-sixth session).
+ * The order is the reader's intent, not the control's kind (owner decision,
+ * this session). The two reasons to long-press lead: hear the ayah (Play) and
+ * understand it (Tafsir), the deep door this reading is built around. Then the
+ * two that keep the ayah, Save before Note, because the keep is the lighter
+ * tap and the note is the writing: Save lands where it stands, and Note opens
+ * a sheet and a keyboard. A note keeps its ayah in Saved and never lights the
+ * bookmark (below), so the keep is the fact and the note is what is written on
+ * it, and a parent before its child reads in the order the eye lands (owner
+ * decision, forty-sixth session). Share stands last: it is the only action
+ * that leaves the app, the least common, and the one a stray tap is most costed
+ * by, so it takes the far edge, away from where the thumb rests.
+ *
+ * Tafsir sits in the second slot when the reader shows tafsir and is absent
+ * otherwise; Play is always first, Save is always before Note, and Share is
+ * always last, so the three fixed actions never move and only the deep door
+ * comes and goes with the reader's own choice.
  *
  * Each action carries its own mark, and a mark says the tap that made it: the
  * note glyph is lit by a note and the bookmark by a Save, never the one by the
  * other. The two marked actions also say their state out loud, because a lit
- * glyph is a colour and colour is not something a reader who cannot see it is
+ * glyph is a color and color is not something a reader who cannot see it is
  * told (owner report).
  */
 @Composable
@@ -818,6 +824,13 @@ private fun AyahActions(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         TextAction(stringResource(R.string.action_play), Icon.Play, onPlay)
+        if (showTafsir) {
+            TextAction(
+                label = stringResource(R.string.action_tafsir),
+                icon = Icon.Tafsir,
+                onClick = onMore,
+            )
+        }
         // The two marked actions say their state; the three that only answer a
         // tap say nothing, so nothing on the pill reads as a switch it is not.
         TextAction(
@@ -835,13 +848,6 @@ private fun AyahActions(
             state = markState(hasNote),
         )
         TextAction(stringResource(R.string.action_share), Icon.Share, onShare)
-        if (showTafsir) {
-            TextAction(
-                label = stringResource(R.string.action_tafsir),
-                icon = Icon.Tafsir,
-                onClick = onMore,
-            )
-        }
     }
 }
 

@@ -386,6 +386,15 @@ implement it and update this list.
 - A surah row in Browse opens its own ayah grid; there is no separate Go to
   Ayah tab.
 - Text sizes are 0.75, 0.85, 1, 1.2.
+- The theme is one choice of three: Light, Dark, and System, drawn as one
+  swatch row with no switch beside it (owner decision, this session). The
+  two grounds keep their names, Light and Dark, the words every phone already
+  uses, so a reader never has to work out whether a ground is a color or a
+  mode; System follows the phone's own day and night and replaces the
+  follow-system toggle the two-swatch page used to carry, which was the source
+  of the one state a reader could not explain (a Night choice shown as the day
+  page). The warm paper and lamplight pigments are unchanged; only the names
+  and the control moved.
 - Saheeh International is the only translation.
 - Ibn Kathir is the tafsir.
 - Minshawi and Husary are the only reciters, and Husary is the reciter of
@@ -401,13 +410,29 @@ implement it and update this list.
   interface, chrome is summoned and never resident, one accent, hairlines
   over boxes.
 - Content is sourced from QUL and QuranEnc, with every license
-  honored and a takedown path in About.
+  honored and a takedown path in About. The credits stand on the About page
+  itself, always visible, not behind a door (owner decision, this session):
+  every license is honored by being read where a reader already is, and the
+  takedown path is the one thing on the page that still opens.
+- The Listening settings page is gone (owner decision, this session): the
+  pace and the end-of-audio answer live in the pill's own listening menu,
+  where a reader already is while hearing, and a second door to the same two
+  settings was friction. Speed is reached by playing an ayah and tapping the
+  status line.
+- The content is checked on the reader's behalf, once a day, without a row or
+  a word for it (owner decision, this session): "Check installed content" is
+  gone from About, and the integrity read-back runs quietly on launch, only
+  unmetered, only after the first page is readable, repairing what it finds
+  and saying nothing. A reader should never meet a word they would not
+  understand.
 - Continue to the next surah is off by default and is the reader's one-time
   word for the packages that follow the surah being heard.
 - What happens at the end of the audio is one answer, drawn as one list
-  with one leading radio mark and one 24 dp gap, in the pill and in the
-  settings page alike (owner decision, 4.5; the mark and the gap are the
-  app's one choice row, owner decision, forty-eighth session): continue to
+  with one leading radio mark and one 24 dp gap, in the pill's own listening
+  menu (owner decision, 4.5; the mark and the gap are the app's one choice
+  row, owner decision, forty-eighth session; it lives in the pill alone, the
+  Listening settings page removed as a duplicate of it, owner decision, this
+  session): continue to
   the next ayah (the default), repeat the ayah, stop after this ayah,
   continue to the next surah, or repeat the surah, in that order.
 - **The app asks for the exact alarm only at the two acts that set the

@@ -31,7 +31,8 @@ import org.junit.runner.RunWith
  * made it.
  *
  * The ayah card holds only the tafsir doors, so the
- * pill's last action reads Tafsir with its scroll mark. That is the first
+ * pill carries a Tafsir action with its scroll mark, standing beside Play at
+ * the front of the bar. That is the first
  * assertion here. The second is the pair of marks on the same pill: a note
  * keeps its ayah in Saved and never presses Save, so a note written before
  * the activity starts lights Note and leaves Save dark, one tap of Save then

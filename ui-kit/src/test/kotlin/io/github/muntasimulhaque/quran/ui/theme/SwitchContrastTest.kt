@@ -24,13 +24,13 @@ import org.junit.Test
 class SwitchContrastTest {
 
     @Test
-    fun paperHolds() {
-        assertControl(PaperSwitch)
+    fun lightHolds() {
+        assertControl(LightSwitch)
     }
 
     @Test
-    fun nightHolds() {
-        assertControl(NightSwitch)
+    fun darkHolds() {
+        assertControl(DarkSwitch)
     }
 
     private fun assertControl(palette: SwitchPalette) {

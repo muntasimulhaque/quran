@@ -83,10 +83,7 @@ fun QuranApp(
         viewModel.jumpToAyahInStudy(initialAyah)
     }
     val settings = viewModel.settings
-    val theme = settings.theme.resolved(
-        autoNight = settings.autoNight,
-        systemDark = isSystemInDarkTheme(),
-    )
+    val theme = settings.theme.resolved(systemDark = isSystemInDarkTheme())
     QuranTheme(theme, language = UiLanguage.of(settings.uiLanguage) ?: UiLanguage.English) {
         // The status and navigation bars belong to the theme the reader
         // chose, not to the system's own idea of day and night: on a night

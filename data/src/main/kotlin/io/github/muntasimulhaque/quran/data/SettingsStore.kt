@@ -19,16 +19,22 @@ import kotlinx.coroutines.flow.map
 private val Context.settingsStore: DataStore<Preferences> by preferencesDataStore("reading")
 
 /**
- * The pages the reader can read on. Paper and Night: one warm ground for
- * the day and the dark ground for the night. There is no third: a second
- * light page is a choice a reader cannot articulate against Paper, and a
- * page that only differs from Night by its blackness is one they cannot
- * articulate either. Pure black is the ground the reading science argues
- * against (owner decision: the dark gray of Night reads for longer without
- * halation, and the OLED power a true black saves over a near-black is a
- * rounding error on a page of text).
+ * The pages the reader can read on. Light and Dark: one warm ground for
+ * the day and the dark ground for the night, and System, which follows the
+ * phone's own day and night. There is no fourth light page and no pure
+ * black: a second light page is a choice a reader cannot articulate against
+ * Light, and a page that only differs from Dark by its blackness is one they
+ * cannot articulate either. Pure black is the ground the reading science
+ * argues against (owner decision: the dark gray of Dark reads for longer
+ * without halation, and the OLED power a true black saves over a near-black
+ * is a rounding error on a page of text).
+ *
+ * System is the third value rather than a switch beside the two (owner
+ * decision, this session): one choice the whole industry already knows, in
+ * place of a swatch and a toggle whose interaction a reader had to work out,
+ * and it deletes the state where a Night choice sat under a light system day.
  */
-enum class AppTheme { Paper, Night }
+enum class AppTheme { Light, Dark, System }
 
 /**
  * The minute the daily reminder arrives when the reader has never chosen one:
@@ -40,21 +46,18 @@ const val DEFAULT_DAILY_MINUTE = 8 * 60
 const val LAST_MINUTE_OF_DAY = 24 * 60 - 1
 
 /** True for the theme that turns the page over into the dark. */
-fun AppTheme.isDark(): Boolean = this == AppTheme.Night
+fun AppTheme.isDark(): Boolean = this == AppTheme.Dark
 
 /**
  * The page the reader actually reads on, once the system has a say.
  *
- * With automatic night mode off, the choice is the choice. With it on, the
- * system's dark mode selects Night, and a light system day shows the page the
- * reader chose; a reader whose own choice is a night page is shown Paper in
- * the light, because a switch that changed nothing by day would not be a
- * switch at all.
+ * System follows the phone's own dark mode: a dark system is Dark and a
+ * light one is Light. Light and Dark are the reader's own and never move,
+ * which is the whole of the difference from the switch this replaced (owner
+ * decision, this session).
  */
-fun AppTheme.resolved(autoNight: Boolean, systemDark: Boolean): AppTheme = when {
-    !autoNight -> this
-    systemDark -> AppTheme.Night
-    isDark() -> AppTheme.Paper
+fun AppTheme.resolved(systemDark: Boolean): AppTheme = when (this) {
+    AppTheme.System -> if (systemDark) AppTheme.Dark else AppTheme.Light
     else -> this
 }
 
@@ -65,9 +68,7 @@ fun AppTheme.resolved(autoNight: Boolean, systemDark: Boolean): AppTheme = when 
  */
 data class AppSettings(
     val ayah: Int = 1,
-    val theme: AppTheme = AppTheme.Paper,
-    /** When on, the page turns over with the system's own day and night. */
-    val autoNight: Boolean = false,
+    val theme: AppTheme = AppTheme.Light,
     /**
      * The language the interface is written in, and the content it reads.
      * Null until the reader has chosen, which is what shows the welcome
@@ -176,14 +177,7 @@ class SettingsStore(private val context: Context) {
         val legacy = sizeOf(choices, TEXT_SIZE)
         AppSettings(
             ayah = ayah.coerceIn(1, 6236),
-            theme = when (preferences[THEME]) {
-                // "sepia" was the second light page and "black" the fourth
-                // page; an install that chose either lands on the page that
-                // replaced it.
-                "night", "black" -> AppTheme.Night
-                else -> AppTheme.Paper
-            },
-            autoNight = preferences[AUTO_NIGHT] ?: false,
+            theme = storedTheme(preferences),
             uiLanguage = preferences[UI_LANGUAGE],
             arabicSize = sizeOf(choices, ARABIC_SIZE, legacy),
             translationSize = sizeOf(choices, TRANSLATION_SIZE, legacy),
@@ -212,16 +206,12 @@ class SettingsStore(private val context: Context) {
     suspend fun setTheme(theme: AppTheme) {
         context.settingsStore.edit {
             it[THEME] = when (theme) {
-                AppTheme.Paper -> "paper"
-                AppTheme.Night -> "night"
+                AppTheme.Light -> "light"
+                AppTheme.Dark -> "dark"
+                AppTheme.System -> "system"
             }
         }
         themePreference.setTheme(theme)
-    }
-
-    suspend fun setAutoNight(follow: Boolean) {
-        context.settingsStore.edit { it[AUTO_NIGHT] = follow }
-        themePreference.setAutoNight(follow)
     }
 
     suspend fun setUiLanguage(tag: String) {
@@ -368,6 +358,26 @@ class SettingsStore(private val context: Context) {
     }
 
     /**
+     * The page the reader reads on, read from whichever shape this install
+     * stored. The theme was two grounds and a separate automatic switch; it
+     * is now one of three values, System among them. An install that turned
+     * the switch on lands on System, the value that does what the switch did;
+     * one that left it off keeps the ground it chose, the old Paper as Light
+     * and Night as Dark. The removed "sepia" and "black" pages land on the
+     * ground that replaced them, as they always have.
+     */
+    private fun storedTheme(preferences: Preferences): AppTheme {
+        val auto = preferences[AUTO_NIGHT] == true
+        return when (preferences[THEME]) {
+            "light" -> AppTheme.Light
+            "dark" -> AppTheme.Dark
+            "system" -> AppTheme.System
+            "night", "black" -> if (auto) AppTheme.System else AppTheme.Dark
+            else -> if (auto) AppTheme.System else AppTheme.Light
+        }
+    }
+
+    /**
      * The reading's chosen answer, as the stored keys stand.
      *
      * A build before the exclusivity let a reader turn two of them
@@ -420,6 +430,11 @@ class SettingsStore(private val context: Context) {
 
         val AYAH = intPreferencesKey("ayah")
         val THEME = stringPreferencesKey("theme")
+        /**
+         * The automatic switch the third theme value replaced. Written by no
+         * build since System became a value; read only to carry an install
+         * that had it on across to System (owner decision, this session).
+         */
         val AUTO_NIGHT = booleanPreferencesKey("auto_night")
         val UI_LANGUAGE = stringPreferencesKey("ui_language")
         val TEXT_SIZE = floatPreferencesKey("text_size")

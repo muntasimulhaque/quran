@@ -45,7 +45,6 @@ import io.github.muntasimulhaque.quran.ui.theme.Reading
 data class SettingsActions(
     val onLanguage: (String) -> Unit = {},
     val onTheme: (AppTheme) -> Unit = {},
-    val onAutoNight: (Boolean) -> Unit = {},
     val onTypeSize: (TypeRole, Float) -> Unit = { _, _ -> },
     val onKeepAwake: (Boolean) -> Unit = {},
     val onFollowReciter: (Boolean) -> Unit = {},
@@ -68,7 +67,6 @@ data class SettingsActions(
     val onRemovePack: (String) -> Unit = {},
     val onPackSetupCancel: () -> Unit = {},
     val onRemoveDownloads: suspend (String, Int) -> Unit = { _, _ -> },
-    val onCheckContent: () -> Unit = {},
     val onOpenLink: (String) -> Unit = {},
 )
 
@@ -81,24 +79,13 @@ data class PackSetupState(
     val failed: Boolean,
 )
 
-/** What the content self check is doing, or what it found. */
-sealed interface ContentCheck {
-    data object Running : ContentCheck
-
-    /** The check found work and is repairing it, on a connection that allows. */
-    data object Updating : ContentCheck
-
-    /** What the check could not repair, usually because the connection did not allow it. */
-    data class Done(val remaining: List<String>) : ContentCheck
-}
-
 /**
  * Settings: a hub of one row per category, each carrying where it stands, and
  * a page behind every row. Nothing is more than one tap from the hub, and a
  * reader who only came to change one thing never scrolls past the rest.
  *
- * The hub keeps its own scroll position, so closing a page, or the credits
- * behind the About page, returns the reader to the row they came from.
+ * The hub keeps its own scroll position, so closing a page returns the reader
+ * to the row they came from.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -107,7 +94,6 @@ fun SettingsSheet(
     packs: List<ContentPack>,
     packSetup: PackSetupState?,
     recitations: List<Recitation>,
-    contentCheck: ContentCheck?,
     version: String,
     preview: suspend () -> StudyRow?,
     downloadedSurahs: suspend (String) -> List<DownloadedSurah>,
@@ -124,7 +110,6 @@ fun SettingsSheet(
     // are written into the saved state, so the sheet comes back up where the
     // choice was made, in the language just chosen.
     var page by rememberSaveable { mutableStateOf<SettingsPage?>(null) }
-    var credits by rememberSaveable { mutableStateOf(false) }
     val hubScroll = rememberScrollState()
 
     ModalBottomSheet(
@@ -190,7 +175,6 @@ fun SettingsSheet(
                     SettingsPage.Theme -> AppearancePage(
                         settings = settings,
                         onTheme = actions.onTheme,
-                        onAutoNight = actions.onAutoNight,
                     )
                     SettingsPage.FontSize -> TextPage(settings, preview) { role, step ->
                         actions.onTypeSize(role, step)
@@ -200,11 +184,6 @@ fun SettingsSheet(
                         packs = packs,
                         downloadedSurahs = downloadedSurahs,
                         actions = actions,
-                    )
-                    SettingsPage.Listening -> ListeningPage(
-                        settings = settings,
-                        onSpeed = actions.onPlaybackSpeed,
-                        onEndOfAudio = actions.onEndOfAudio,
                     )
                     SettingsPage.Daily -> DailyPage(
                         settings = settings,
@@ -227,23 +206,13 @@ fun SettingsSheet(
                         actions = actions,
                     )
                     SettingsPage.About -> AboutPage(
+                        packs = packs,
                         version = version,
-                        contentCheck = contentCheck,
-                        onCredits = { credits = true },
-                        onCheckContent = actions.onCheckContent,
+                        onOpenLink = actions.onOpenLink,
                     )
                 }
             }
         }
-    }
-
-    if (credits) {
-        CreditsSheet(
-            packs = packs,
-            version = version,
-            onOpenLink = actions.onOpenLink,
-            onDismiss = { credits = false },
-        )
     }
 }
 

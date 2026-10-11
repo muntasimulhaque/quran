@@ -21,7 +21,6 @@ import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.ui.settings.AboutPage
 import io.github.muntasimulhaque.quran.ui.settings.PageRow
 import io.github.muntasimulhaque.quran.ui.settings.SizeRow
-import io.github.muntasimulhaque.quran.ui.settings.SpeedRow
 import io.github.muntasimulhaque.quran.ui.settings.SwitchSlot
 import io.github.muntasimulhaque.quran.ui.settings.ToggleRow
 import io.github.muntasimulhaque.quran.ui.theme.QuranTheme
@@ -215,7 +214,7 @@ class SettingsRowAlignmentTest {
     @Test
     fun aRowKeepsNoWidthForAMarkItDoesNotDraw() {
         compose.setContent {
-            QuranTheme(theme = AppTheme.Paper) {
+            QuranTheme(theme = AppTheme.Light) {
                 // Two rows side by side in the app's own voice, one with a
                 // door and one without, carrying the same name so the only
                 // variable is the chevron column.
@@ -286,8 +285,8 @@ class SettingsRowAlignmentTest {
             MaterialTheme {
                 Column {
                     PageRow(
-                        title = "Theme",
-                        summary = "Night · day page Paper",
+                        title = "Translation",
+                        summary = "Saheeh International",
                         onClick = {},
                         modifier = Modifier.testTag("long-value"),
                     )
@@ -302,10 +301,10 @@ class SettingsRowAlignmentTest {
         }
 
         val values = listOf(
-            "Night · day page Paper" to compose.onNodeWithTag("long-value").getUnclippedBoundsInRoot(),
+            "Saheeh International" to compose.onNodeWithTag("long-value").getUnclippedBoundsInRoot(),
             "Arabic 25, translation 14" to compose.onNodeWithTag("short-value").getUnclippedBoundsInRoot(),
         )
-        val names = listOf("Theme", "Font size")
+        val names = listOf("Translation", "Font size")
         values.forEachIndexed { index, (value, row) ->
             val name = compose.onNodeWithText(names[index], useUnmergedTree = true)
                 .getUnclippedBoundsInRoot()
@@ -350,59 +349,48 @@ class SettingsRowAlignmentTest {
     /**
      * A row that opens something ends in a chevron, on every page of the sheet.
      *
-     * The About page held the exception. Its two doors were drawn by a row
-     * shape of their own: a name in the accent color with nothing at the
-     * right, where every row around it is a dark name with a chevron on the
-     * margin. So the sheet answered "does this row open something?" with a
-     * color on one page and with a mark on all the others, and counting
-     * chevrons as a count of the doors was wrong on exactly
-     * that page (owner decision). Both doors are the hub's own row now,
-     * and the version line beside them is a fact: it is not clickable, and it
-     * carries no mark.
+     * The About page holds one door now, the takedown path, and it is the
+     * sheet's own [PageRow] with a chevron on the margin, the same as every
+     * other door in the sheet. The credits beside it are inherent text, not
+     * doors: a name a reader reads, carrying no mark and answering no tap, so
+     * counting chevrons as a count of the doors is right on this page too
+     * (owner decision). The version line is a fact: not clickable, no mark.
      */
     @Test
     fun everyDoorOnTheAboutPageEndsInAChevron() {
         compose.setContent {
             MaterialTheme {
                 AboutPage(
+                    packs = emptyList(),
                     version = "3.3 (34)",
-                    contentCheck = null,
-                    onCredits = {},
-                    onCheckContent = {},
+                    onOpenLink = {},
                 )
             }
         }
 
         val doors = compose.onAllNodes(hasClickAction(), useUnmergedTree = true)
-            .fetchSemanticsNodes()
-        assertEquals("the page holds two doors and one fact", 2, doors.size)
+        assertEquals("the page holds one door: the takedown path", 1, doors.fetchSemanticsNodes().size)
         val slots = compose.onAllNodesWithTag("chevron-slot", useUnmergedTree = true)
-        assertEquals("and every door carries a chevron", doors.size, slots.fetchSemanticsNodes().size)
-        val first = slots[0].getUnclippedBoundsInRoot()
-        val last = slots[1].getUnclippedBoundsInRoot()
-        assertEquals(
-            "the sheet's chevrons stand at one left edge",
-            first.left.value,
-            last.left.value,
-            0.5f,
-        )
-        assertEquals(
-            "the sheet's chevrons stand at one right edge",
-            first.right.value,
-            last.right.value,
-            0.5f,
+        assertEquals("and the one door carries a chevron", 1, slots.fetchSemanticsNodes().size)
+        // The chevron stands at the row's own margin, the line every switch in
+        // the sheet ends on: its right edge is the door row's right edge, less
+        // only the row's end padding, never floating inside the row.
+        val row = doors[0].getUnclippedBoundsInRoot()
+        val slot = slots[0].getUnclippedBoundsInRoot()
+        assertTrue(
+            "the chevron stands at the row's margin, not floating inside it",
+            slot.right.value <= row.right.value && row.right.value - slot.right.value < 24f,
         )
     }
 
     /**
      * Every step of every segmented row is a 48 dp target.
      *
-     * The text sizes drew 38 dp cells and the pace drew 46, under the design
-     * document's own rule, and the fix was structural: an outer
-     * 48 dp touch box with the mark inside it. The name moved above the steps
-     * for it, because five 48 dp boxes are 250 dp wide (four where the text
-     * sizes stand today) and a name beside them would break in the middle on
-     * a small phone. The measurement is the rule's own number, read off the
+     * The text sizes drew 38 dp cells, under the design document's own rule,
+     * and the fix was structural: an outer 48 dp touch box with the mark
+     * inside it. The name moved above the steps for it, because four 48 dp
+     * boxes are 200 dp wide and a name beside them would break in the middle
+     * on a small phone. The measurement is the rule's own number, read off the
      * real controls.
      */
     @Test
@@ -411,14 +399,13 @@ class SettingsRowAlignmentTest {
             MaterialTheme {
                 Column {
                     SizeRow(TypeRole.Translation, 1f) {}
-                    SpeedRow(1f) {}
                 }
             }
         }
         val steps = compose.onAllNodes(isSelectable(), useUnmergedTree = true)
         assertEquals(
-            "the text size row's four steps and the pace row's five",
-            9,
+            "the text size row's four steps",
+            4,
             steps.fetchSemanticsNodes().size,
         )
         steps.onFirst().assertWidthIsAtLeast(48.dp)

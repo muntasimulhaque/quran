@@ -49,7 +49,7 @@ data class SwitchPalette(
     val ground: Color,
 )
 
-internal val PaperSwitch = SwitchPalette(
+internal val LightSwitch = SwitchPalette(
     offTrack = PaperControl,
     offKnob = PaperMuted,
     onTrack = Lapis,
@@ -57,7 +57,7 @@ internal val PaperSwitch = SwitchPalette(
     ground = PaperSurface,
 )
 
-internal val NightSwitch = SwitchPalette(
+internal val DarkSwitch = SwitchPalette(
     offTrack = NightControl,
     offKnob = NightMuted,
     onTrack = LapisLight,
@@ -65,7 +65,7 @@ internal val NightSwitch = SwitchPalette(
     ground = NightSurface,
 )
 
-internal val LocalSwitchPalette = staticCompositionLocalOf { PaperSwitch }
+internal val LocalSwitchPalette = staticCompositionLocalOf { LightSwitch }
 
 /** The switch as the ground the reading is drawn on says it should look. */
 @Composable

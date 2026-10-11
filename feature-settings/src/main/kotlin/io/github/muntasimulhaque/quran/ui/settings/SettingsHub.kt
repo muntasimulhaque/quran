@@ -9,7 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.Recitation
@@ -20,11 +19,10 @@ import io.github.muntasimulhaque.quran.ui.kit.clockText
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
 import io.github.muntasimulhaque.quran.ui.kit.languageName
-import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /** The pages the settings hub opens, one at a time. */
-enum class SettingsPage { Language, Theme, FontSize, Reciters, Listening, Daily, Translations, Tafsirs, About }
+enum class SettingsPage { Language, Theme, FontSize, Reciters, Daily, Translations, Tafsirs, About }
 
 @Composable
 fun SettingsPage.title(): String = stringResource(
@@ -33,7 +31,6 @@ fun SettingsPage.title(): String = stringResource(
         SettingsPage.Theme -> R.string.settings_title_appearance
         SettingsPage.FontSize -> R.string.settings_title_text
         SettingsPage.Reciters -> R.string.settings_title_reciters
-        SettingsPage.Listening -> R.string.settings_title_listening
         SettingsPage.Daily -> R.string.settings_daily_title
         SettingsPage.Translations -> R.string.settings_title_translations
         SettingsPage.Tafsirs -> R.string.settings_title_tafsirs
@@ -42,31 +39,19 @@ fun SettingsPage.title(): String = stringResource(
 )
 
 /**
- * The page a choice reads as, with the automatic switch said in the same
- * breath, so the hub row never claims a page the reader is not on: in dark
- * mode with auto-night on, the row says Night, the page drawing, and names
- * the day choice after it (owner report).
- *
- * The row carries the page that is drawing and nothing more. With the switch
- * on and the phone in the light, that is the reader's own day page, so the
- * row reads "Paper" and stops: the old summary said "Paper · auto, day page
- * Paper", which repeated the same word twice, and its length is what pushed
- * the row's name into four lines (owner report, 37th session). The second
- * half is kept for the only case it says anything, when the phone is in dark
- * mode and the day page the reader chose is the one being named.
+ * Where the theme stands, in one line: the ground the reader is reading on
+ * right now. With System on a dark phone that is Dark; on a light phone it is
+ * Light; a fixed choice always says itself. There is no second half to name,
+ * because System is the value and the phone is the only thing that moves it,
+ * so the row never claims a page the reader is not on (owner decision, this
+ * session).
  */
 @Composable
 private fun themeSummary(settings: AppSettings): String {
     val dark = (LocalContext.current.resources.configuration.uiMode and
         android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
         android.content.res.Configuration.UI_MODE_NIGHT_YES
-    val shown = settings.theme.resolved(autoNight = settings.autoNight, systemDark = dark)
-    val name = shown.name()
-    return if (settings.autoNight && shown != settings.theme) {
-        stringResource(R.string.settings_summary_theme_auto, name, settings.theme.name())
-    } else {
-        name
-    }
+    return settings.theme.resolved(systemDark = dark).name()
 }
 
 /**
@@ -169,10 +154,6 @@ fun SettingsHub(
             title = stringResource(R.string.settings_title_reciters),
             summary = reciterName(settings, recitations),
         ) { onOpen(SettingsPage.Reciters) }
-        PageRow(
-            title = stringResource(R.string.settings_title_listening),
-            summary = listeningSummary(settings),
-        ) { onOpen(SettingsPage.Listening) }
         // The daily reminder: one ayah a day, at the reader's own moment. It
         // comes on with the app, and this row is the door to the page that
         // turns it off or moves its time, so the switch and the clock are read
@@ -217,26 +198,6 @@ private fun dailySubtitle(settings: AppSettings): String = stringResource(
     },
     clockText(settings.dailyAyahMinute),
 )
-
-/**
- * Where the listening choices stand, in one line: the pace, and what happens
- * as the reading moves on. A reader who set a pace and forgot it must be able
- * to see it from the hub, or the reading sounds slow for a reason they cannot
- * find, and the answer at the end of an ayah is the other thing a reader sets
- * once and then forgets. A reading told to stop after each ayah says so here,
- * because a stopped reading is the one state a reader must be able to see
- * without opening the page.
- */
-@Composable
-private fun listeningSummary(settings: AppSettings): String {
-    val speed = stringResource(R.string.settings_listening_speed_value, speedText(settings.playbackSpeed))
-    return when (settings.endOfAudio) {
-        EndOfAudio.REPEAT_AYAH -> stringResource(R.string.settings_listening_summary_repeat, speed)
-        EndOfAudio.REPEAT_SURAH -> stringResource(R.string.settings_listening_summary_repeat_surah, speed)
-        EndOfAudio.STOP_AFTER_AYAH -> stringResource(R.string.settings_listening_summary_stop, speed)
-        EndOfAudio.CONTINUE_AYAH, EndOfAudio.CONTINUE_SURAH -> speed
-    }
-}
 
 /**
  * The word by word switch, and the state of the list behind it. The row is

@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 5.9 (versionCode 61)
+Version: 6.0 (versionCode 62)
 
 ## Listing
 
@@ -221,6 +221,10 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (6.0, 481 characters)
+
+The theme is one simple choice now: Light, Dark, or System, which follows your phone. The ayah actions a long press raises are reordered, so hearing and understanding come first and sharing comes last. Listening settings moved into the player, where you already are while you listen. About shows its credits on the page, and the app checks your content each day on its own. The reading, recitations, search, Browse, and daily ayah are as they were. No ads, no trackers, no account.
 
 ## Release notes (5.9, 473 characters)
 

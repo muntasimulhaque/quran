@@ -19,12 +19,12 @@ import org.junit.Test
 class ContrastTest {
 
     @Test
-    fun paperHolds() {
+    fun lightHolds() {
         assertReadable(PaperInk, PaperBackground)
         assertReadable(PaperInk, PaperSurface)
         assertReadable(PaperMuted, PaperBackground)
         assertReadable(PaperMuted, PaperSurface)
-        assertSheetGrounds(PaperScheme)
+        assertSheetGrounds(LightScheme)
         assertReadable(Gold, PaperBackground)
         assertReadable(Lapis, PaperBackground)
         assertReadable(Lapis, PaperSurface)
@@ -32,7 +32,7 @@ class ContrastTest {
     }
 
     @Test
-    fun nightHolds() {
+    fun darkHolds() {
         assertReadable(NightText, NightBackground)
         assertReadable(NightText, NightSurface)
         // The reading's own ink, which is softer than the interface's word so
@@ -42,7 +42,7 @@ class ContrastTest {
         assertReadable(NightInk, NightSurface)
         assertReadable(NightMuted, NightBackground)
         assertReadable(NightMuted, NightSurface)
-        assertSheetGrounds(NightScheme)
+        assertSheetGrounds(DarkScheme)
         assertReadable(NightGold, NightBackground)
         assertReadable(LapisLight, NightBackground)
         assertReadable(LapisLight, NightSurface)
