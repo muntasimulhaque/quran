@@ -20,13 +20,25 @@ val SepiaMuted = Color(0xFF61543C)
 val SepiaHairline = SepiaOutline
 val SepiaGold = Color(0xFF7E5C1C)
 
-// Night
-val NightBackground = Color(0xFF101720)
-val NightSurface = Color(0xFF16202C)
-val NightOutline = Color(0xFF2A3644)
+/**
+ * The night ground, and the family that gives up its blue. Night is the
+ * page a reader opens before sleep, so its ground is warm: the blue of a
+ * conventional dark theme is the short-wavelength light the evening eye is
+ * best without, and the cost of leaving it is a brown-gray that reads as
+ * lamplight on old paper rather than as a screen (owner decision, this
+ * session). The text, the ink, and the gold were already warm; only the
+ * grounds and the quiet voice moved. The family keeps the old ground's
+ * lightness step for step, so every contrast pair the theme already held
+ * still holds, and the accent stays lapis: one
+ * cool thing on the page is the action color, and it is the one thing a
+ * reader looks for.
+ */
+val NightBackground = Color(0xFF14100C)
+val NightSurface = Color(0xFF1D1813)
+val NightOutline = Color(0xFF332B22)
 val NightText = Color(0xFFE8E4DA)
 val NightInk = Color(0xFFD9D3C4)
-val NightMuted = Color(0xFFA6B1BD)
+val NightMuted = Color(0xFFB0A693)
 val NightHairline = NightOutline
 val NightGold = Color(0xFFB08E45)
 
@@ -42,7 +54,7 @@ val LapisLight = Color(0xFF7FB2E5)
 // juz, the surah names drawn into the page, and the ornamental name at the
 // head of the study reading. It therefore meets the same 4.5:1 rule every
 // other text tone does, on each ground it is drawn on: 5.0:1 on paper,
-// 5.1:1 on sepia, 5.8:1 on night. The older paper and sepia
+// 5.1:1 on sepia, 6.1:1 on night. The older paper and sepia
 // gold sat at 3.2:1 and 4.1:1, under the rule, and were darkened without
 // changing the hue.
 val Gold = Color(0xFF856411)
@@ -71,5 +83,5 @@ val PaperControl = Color(0xFFFFFFFF)
 val PaperOnPrimary = Color(0xFFFDFBF6)
 val SepiaControl = Color(0xFFFEF9F0)
 val SepiaOnPrimary = Color(0xFFFDF8ED)
-val NightControl = Color(0xFF263443)
+val NightControl = Color(0xFF2C251D)
 val NightOnPrimary = Color(0xFF08243D)

@@ -290,7 +290,7 @@ private fun annotated(
     // own tone it read as a smaller word and not as something to touch
     // (owner decision, forty-seventh session). The accent clears the 4.5:1
     // the small figure needs on every ground: 8.1:1 on paper, 7.3:1 on
-    // sepia, 8.1:1 on night.
+    // sepia, 8.5:1 on night.
     val markerColor = MaterialTheme.colorScheme.primary
     // What a quoted run falls back to where the caller has no quote color of
     // its own: the reading's secondary tone, never the accent, which now

@@ -17,7 +17,10 @@ enum class TypeRole { Arabic, Translation, Tafsir, Words }
  *
  * Arabic is set well above the Latin sizes on purpose: its letter bodies are
  * small next to the space the diacritics need, so at the same nominal size it
- * reads visibly smaller than Latin text.
+ * reads visibly smaller than Latin text. The base is 32 sp rather than 30
+ * (owner decision, this session): the KFGQPC face reads small for its em,
+ * the ayah is the one text every reader reads most, and the room the larger
+ * base takes is paid for in the scroll, which costs a reader nothing.
  *
  * The largest step stops at 1.2. Past that the reading turns into a page of headings. The smallest, 0.65, is there for a reader who wants more of an
  * ayah on one screen than 0.75 gives: a reader who once chose 1.4 keeps the
@@ -60,7 +63,7 @@ object TextSize {
 
     /**
      * The Arabic word in the word by word aid, standing to its meaning as the
-     * ayah stands to its translation (30 to 17). A word list that kept the
+     * ayah stands to its translation (32 to 17). A word list that kept the
      * old flat 14 sp drew its Arabic smaller than its Latin meaning, which
      * read as a footnote to itself; the proportion is the one the reading
      * already uses, so the aid looks like a small copy of the page.
@@ -72,19 +75,19 @@ object TextSize {
      * visibly smaller, so a quoted passage disappears into the prose around
      * it; the quotation is the Quran or the Prophet's words and must read as
      * the reading, not as a footnote. The stand is the one the study
-     * translation already gives its inline Arabic (0.8 of the 30 sp Arabic
+     * translation already gives its inline Arabic (0.8 of the 32 sp Arabic
      * against the 17 sp translation), so the app has one answer to how much
      * larger the Arabic is than the text beside it.
      */
     fun tafsirArabic(step: Float): Float = sp(TypeRole.Tafsir, step) * INLINE_ARABIC_RATIO
 
     private fun base(role: TypeRole): Float = when (role) {
-        TypeRole.Arabic -> 30f
+        TypeRole.Arabic -> 32f
         TypeRole.Translation -> 17f
         TypeRole.Tafsir -> 16f
         // The word list is derived from [meaningSp] at the ayah's own ratio;
         // this entry is that derivation, written as the number it comes to.
-        TypeRole.Words -> MEANING_BASE * 30f / 17f
+        TypeRole.Words -> MEANING_BASE * 32f / 17f
     }
 
     /** Arabic carries diacritics above and below every line, so it needs more. */
