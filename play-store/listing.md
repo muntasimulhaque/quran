@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 5.5 (versionCode 57)
+Version: 5.6 (versionCode 58)
 
 ## Listing
 
@@ -221,6 +221,10 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (5.6, 469 characters)
+
+The reading reads better now. Bold words in the tafsir are bold, the ayah stands a size taller at every size you choose, and the night page is a warm brown instead of a cold blue, easier on the eyes before sleep. The app opens on your own page from the first frame, so a night reader never sees a flash of day. The Black page is gone, and readers who chose it now open on Night. Footnotes and word meanings speak the reading's own type. No ads, no trackers, no account.
 
 ## Release notes (5.5, 464 characters)
 
