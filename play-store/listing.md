@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 5.7 (versionCode 59)
+Version: 5.8 (versionCode 60)
 
 ## Listing
 
@@ -221,6 +221,10 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (5.8, 502 characters)
+
+The Arabic page sits closer now: ayah lines carry less air between them, so more of each surah fits on the screen while every mark keeps its clear ground. The tafsir reads at the same size as the translation, so the reading keeps one voice from verse to commentary. The surah's introduction and your notes follow the text size you chose instead of a fixed size. Headlines read slightly sharper at large sizes, and the Bengali fonts were trimmed, making the app smaller. No ads, no trackers, no account.
 
 ## Release notes (5.7, 397 characters)
 
