@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 5.8 (versionCode 60)
+Version: 5.9 (versionCode 61)
 
 ## Listing
 
@@ -221,6 +221,10 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (5.9, 473 characters)
+
+The reading fits every screen now: a line holds about 65 characters, so a tablet centers a book-like page instead of running text across the glass, and the tafsir card no longer stretches edge to edge. The Arabic is a little more open, word meanings read larger, and the smallest text size no longer falls too small. Night is gentler, with a warmer page and a softer ink, and the tafsir's Quran quotations are drawn in the Quran's own hand. No ads, no trackers, no account.
 
 ## Release notes (5.8, 502 characters)
 
