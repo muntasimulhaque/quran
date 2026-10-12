@@ -237,7 +237,18 @@ class Packs(private val root: File) {
                             "CREATE TABLE word AS SELECT id, ayah_number, surah, ayah, position, marker, " +
                                 "text, text_search FROM src.word",
                         )
-                        statement.execute("CREATE INDEX word_ref ON word(surah, ayah, position)")
+                        // The core pack is the one place the running ayah number had
+                        // no index of its own: every other pack indexes its
+                        // `ayah_number`, and the index this replaces led on
+                        // the surah and the ayah inside it, which no query in
+                        // the app reads. Opening a surah was a whole pass
+                        // over the eighty thousand rows of this table, 11.2
+                        // ms however few ayahs were asked for, and a search's
+                        // read of the matched words back was another 10.2
+                        // ms. With this index both land under a tenth of a
+                        // millisecond. See `Build` for the same index on the
+                        // library the tools read.
+                        statement.execute("CREATE INDEX word_ayah ON word(ayah_number, position)")
                         statement.execute("CREATE INDEX ayah_surah ON ayah(surah, ayah)")
                     }
                     "translation" -> {

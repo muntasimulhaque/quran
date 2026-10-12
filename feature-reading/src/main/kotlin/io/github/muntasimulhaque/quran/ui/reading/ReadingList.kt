@@ -70,7 +70,7 @@ import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.Surah
-import io.github.muntasimulhaque.quran.data.AppSettings
+import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.ReadingRow
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
@@ -105,7 +105,18 @@ fun ReadingList(
     content: ContentDatabase,
     surah: Surah,
     loadRows: suspend () -> List<ReadingRow>,
-    settings: AppSettings,
+    /**
+     * The rows already on hand for a surah, when there are any: the copy the
+     * app read ahead while the reader was still in the surah before it. Read
+     * here, during composition, so a turn at the end of a surah lands on text
+     * that is already measured rather than on a blank frame.
+     */
+    cachedRows: (Int) -> List<ReadingRow>?,
+    /** Reads the surah after this one while the reader is still in it. */
+    onReadAhead: (Int) -> Unit,
+    metrics: ReadingMetrics,
+    /** The reader's place, which moves the list and never the other way round. */
+    place: Int,
     hasTranslation: Boolean,
     nextSurahName: String?,
     selectedAyah: Int?,
@@ -135,18 +146,34 @@ fun ReadingList(
     // in hand the paper is shown, never the surah the reader just left: a
     // stale list would be measured with the new surah's name on it, and a
     // scroll through it would write a place in the wrong surah.
+    //
+    // The library is a key, because a pack arriving replaces the database and
+    // the rows read from the old one would never show the new translation
+    // under the ayah. The packs the reading draws are a key of their own,
+    // because turning one on replaces the rows without reopening it.
     val loaded by produceState<Pair<Int, List<ReadingRow>>?>(
         initialValue = null,
-        // The library is a key too: a pack arriving replaces the database, and
-        // the rows read from the old one would never show the new
-        // translation under the ayah.
         content,
         surah.number,
-        settings.translationPacks,
-        settings.wordByWord,
+        metrics.translationPacks,
+        metrics.wordByWord,
     ) { value = surah.number to loadRows() }
-    val rows = loaded?.takeIf { it.first == surah.number }?.second.orEmpty()
+    // The copy read ahead in the surah before this one. It is this surah's
+    // own, checked against the surah's number, so a stale list can never be
+    // measured under the new surah's name; and it is there in the very frame
+    // the surah changes, because it is read during composition rather than
+    // from an effect. That is what makes the turn at the end of a surah land
+    // on text instead of on the paper.
+    val ahead = remember(content, surah.number, metrics.wordByWord) {
+        cachedRows(surah.number)
+    }
+    val rows = ahead ?: loaded?.takeIf { it.first == surah.number }?.second.orEmpty()
     val ayahs = remember(rows) { rows.map { it.ayah.number } }
+
+    // The surah after this one is read while the reader is still in this one,
+    // so the turn at its end has its text on hand when it comes.
+    LaunchedEffect(surah.number, content, metrics.wordByWord) { onReadAhead(surah.number) }
+
     var footnote by remember { mutableStateOf<OpenFootnote?>(null) }
     if (ayahs.isEmpty()) {
         // The paper is already there; the text is a frame away.
@@ -158,7 +185,8 @@ fun ReadingList(
         surah = surah,
         rows = rows,
         ayahs = ayahs,
-        settings = settings,
+        metrics = metrics,
+        place = place,
         hasTranslation = hasTranslation,
         nextSurahName = nextSurahName,
         selectedAyah = selectedAyah,
@@ -189,7 +217,8 @@ private fun ReadingRows(
     surah: Surah,
     rows: List<ReadingRow>,
     ayahs: List<Int>,
-    settings: AppSettings,
+    metrics: ReadingMetrics,
+    place: Int,
     hasTranslation: Boolean,
     nextSurahName: String?,
     selectedAyah: Int?,
@@ -212,7 +241,7 @@ private fun ReadingRows(
     modifier: Modifier = Modifier,
 ) {
     val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = AyahList.indexOf(ayahs, settings.ayah),
+        initialFirstVisibleItemIndex = AyahList.indexOf(ayahs, place),
     )
 
     // The surah's introduction opens from its quiet door; once it is open, a
@@ -254,8 +283,8 @@ private fun ReadingRows(
     // The reader's place moves the list, exactly, and the list never moves
     // itself. The place is an ayah, so a round trip through the list has to
     // land on the same item; anything less leaves the place behind.
-    LaunchedEffect(settings.ayah, surah.number, ayahs) {
-        val target = AyahList.indexOf(ayahs, settings.ayah)
+    LaunchedEffect(place, surah.number, ayahs) {
+        val target = AyahList.indexOf(ayahs, place)
         if (target != listState.firstVisibleItemIndex) listState.scrollToItem(target)
     }
 
@@ -275,7 +304,7 @@ private fun ReadingRows(
     val reducedMotion by rememberReducedMotion()
     LaunchedEffect(playingAyah, ayahs, reducedMotion) {
         val ayahNumber = playingAyah ?: return@LaunchedEffect
-        if (!settings.followReciter) return@LaunchedEffect
+        if (!metrics.followReciter) return@LaunchedEffect
         val target = AyahList.indexOf(ayahs, ayahNumber)
         val current = listState.firstVisibleItemIndex
         if (target < current || target > current + 3) {
@@ -293,8 +322,8 @@ private fun ReadingRows(
     // chrome and a drag with the scroll.
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val measure = minOf(
-        Reading.proseMeasure(LocalReadingVoice.current, settings.translationSp),
-        Reading.quranMeasure(settings.arabicSp),
+        Reading.proseMeasure(LocalReadingVoice.current, metrics.translationSp),
+        Reading.quranMeasure(metrics.arabicSp),
     )
     val side = maxOf(20.dp, (screenWidth - measure) / 2)
     LazyColumn(
@@ -321,12 +350,12 @@ private fun ReadingRows(
                 expanded = aboutOpen,
                 onExpandedChange = { aboutOpen = it },
                 onPaperTap = { if (!aboutOpen) onBackgroundTap() },
-                settings = settings,
+                metrics = metrics,
             )
             // The door asks for a translation only while translations are
             // something the reading draws at all: a reader who hid them in
             // Settings is not looking for one here.
-            if (settings.showTranslation && !hasTranslation) {
+            if (metrics.showTranslation && !hasTranslation) {
                 AddContent(
                     text = stringResource(R.string.reading_add_translation),
                     onClick = onAddContent,
@@ -338,8 +367,7 @@ private fun ReadingRows(
             AyahBlock(
                 row = row,
                 hafs = hafs,
-                settings = settings,
-                wordByWord = settings.wordByWord,
+                metrics = metrics,
                 isSelected = selectedAyah == row.ayah.number,
                 playingAyah = playingAyah,
                 playingWord = playingWord,
@@ -354,8 +382,8 @@ private fun ReadingRows(
                             OpenFootnote(
                                 note = note,
                                 reference = "${row.ayah.surah}:${row.ayah.ayah}",
-                                sizeSp = settings.translationSp,
-                                lineSp = settings.translationLineSp,
+                                sizeSp = metrics.translationSp,
+                                lineSp = metrics.translationLineSp,
                             ),
                         )
                     }
@@ -418,7 +446,7 @@ private fun SurahOpening(
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     onPaperTap: () -> Unit,
-    settings: AppSettings,
+    metrics: ReadingMetrics,
 ) {
     val info by produceState<String?>(initialValue = null, surah.number, expanded) {
         value = if (expanded) {
@@ -513,9 +541,9 @@ private fun SurahOpening(
                 // plain by design: [RichText.paragraphs] draws no spans
                 // here, so the tags in the source never reach one.
                 style = LocalReadingVoice.current.style.copy(
-                    fontSize = settings.translationSp.sp,
-                    lineHeight = settings.translationLineSp.sp,
-                    fontFamily = LocalReadingVoice.current.atSize(settings.translationSp),
+                    fontSize = metrics.translationSp.sp,
+                    lineHeight = metrics.translationLineSp.sp,
+                    fontFamily = LocalReadingVoice.current.atSize(metrics.translationSp),
                 ),
                 color = ink.copy(alpha = 0.78f),
                 // Opened, the whole introduction is the reader's; it was
@@ -638,8 +666,7 @@ private fun SurahEnd(
 private fun AyahBlock(
     row: ReadingRow,
     hafs: FontFamily,
-    settings: AppSettings,
-    wordByWord: Boolean,
+    metrics: ReadingMetrics,
     isSelected: Boolean,
     playingAyah: Int?,
     playingWord: Int?,
@@ -707,8 +734,8 @@ private fun AyahBlock(
                 text = arabicLine.text,
                 style = TextStyle(
                     fontFamily = hafs,
-                    fontSize = settings.arabicSp.sp,
-                    lineHeight = settings.arabicLineSp.sp,
+                    fontSize = metrics.arabicSp.sp,
+                    lineHeight = metrics.arabicLineSp.sp,
                     color = palette.ink,
                 ),
                 textAlign = TextAlign.Right,
@@ -724,11 +751,11 @@ private fun AyahBlock(
                         drawContent()
                     },
             )
-            if (wordByWord && row.meanings.any { it.meaning != null }) {
+            if (metrics.wordByWord && row.meanings.any { it.meaning != null }) {
                 WordByWord(
                     meanings = row.meanings,
                     hafs = hafs,
-                    settings = settings,
+                    metrics = metrics,
                     // The aid is an annotation of the ayah above it, not a
                     // second verse: a tighter break than the one before the
                     // translation groups the word list with its line, so the
@@ -742,7 +769,7 @@ private fun AyahBlock(
             // they are looking at. The library still reads the translation
             // for the font size sample; the reading draws it only when the
             // reader asked to see it.
-            if (settings.showTranslation) {
+            if (metrics.showTranslation) {
                 row.translations.forEach { line ->
                     if (row.translations.size > 1) {
                         Text(
@@ -757,9 +784,9 @@ private fun AyahBlock(
                         modifier = Modifier.padding(
                             top = if (row.translations.size > 1) Space.Tight else Space.Block,
                         ),
-                        sizeSp = settings.translationSp,
-                        lineSp = settings.translationLineSp,
-                        arabicSp = settings.arabicSp * 0.8f,
+                        sizeSp = metrics.translationSp,
+                        lineSp = metrics.translationLineSp,
+                        arabicSp = metrics.arabicSp * 0.8f,
                         onFootnote = onFootnote,
                     )
                 }

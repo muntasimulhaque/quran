@@ -181,6 +181,33 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
+     * The library the rows on hand belong to. It is bumped by
+     * [clearRowCache], and both caches carry the value they were read under,
+     * so a row read for one set of packs can never be drawn under another.
+     *
+     * Both caches and the generation they share are guarded by [rowLock],
+     * which is also what makes dropping them atomic: a read that lands while
+     * the library is turning over is dropped rather than kept, because the
+     * check and the store happen under one lock.
+     */
+    private val rowLock = Any()
+    private var libraryGeneration = 0L
+
+    /**
+     * The surah after the one being read, read ahead while the reader is
+     * still in this one. One entry, replaced each time, and dropped whenever
+     * the library turns over.
+     */
+    private var readAhead: ReadAhead? = null
+
+    /** One surah's rows, read ahead, and the library they were read under. */
+    private class ReadAhead(
+        val generation: Long,
+        val surah: Int,
+        val rows: List<ReadingRow>,
+    )
+
+    /**
      * The reciters the pill's chooser offers, each with what it would still
      * need for the surah the reader is hearing. It is the same list the
      * offer carries, read once per surah and per reciter rather than per
@@ -503,6 +530,20 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             jumpToAyah(place.ayahNumber)
             return
         }
+        startAtSurahOpening = surah
+        jumpToAyah(database.firstAyahOfSurah(surah))
+    }
+
+    /**
+     * The top of the surah the reader is in: its opening, which is where a
+     * reader flips to when they want the beginning of a surah rather than the
+     * place they had got to in it. It is the same landing [openSurah] gives a
+     * surah the reader has never been in, and it never carries them back down
+     * to a remembered place first.
+     */
+    fun jumpToSurahOpening(ayah: Int) {
+        val database = contentDatabase ?: return
+        val surah = surahOf(ayah)?.number ?: return
         startAtSurahOpening = surah
         jumpToAyah(database.firstAyahOfSurah(surah))
     }
@@ -962,6 +1003,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      */
     suspend fun readingRows(surah: Int, wordByWord: Boolean): List<ReadingRow> =
         withContext(Dispatchers.IO) {
+            cachedRows(surah)?.let { return@withContext it }
             val database = contentDatabase ?: return@withContext emptyList()
             val ayahs = database.ayahsOfSurah(surah)
             if (ayahs.isEmpty()) return@withContext emptyList()
@@ -1027,8 +1069,50 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     suspend fun sizePreviewRow(): ReadingRow? =
         withContext(Dispatchers.IO) { readingRow(SIZE_PREVIEW_AYAH) }
 
+    /**
+     * The read-ahead copy of one surah's rows, when the library has not
+     * turned over since they were read.
+     *
+     * Null on the first arrival at a surah and after any change of packs,
+     * which is when the database is the only honest answer. It is read during
+     * composition, so it must stay a plain field read and nothing more.
+     */
+    fun cachedRows(surah: Int): List<ReadingRow>? = synchronized(rowLock) {
+        readAhead?.takeIf { it.generation == libraryGeneration && it.surah == surah }?.rows
+    }
+
+    /**
+     * Reads the surah after [surah] while the reader is still in this one, so
+     * the turn at the end of a surah lands on text that is already measured
+     * instead of on the paper.
+     *
+     * One surah ahead is the whole of it: the reader who taps Next surah is
+     * the reader this is for, and a surah they never reach is a read nobody
+     * asked for. Nothing is read past the end of the Book.
+     */
+    fun readAheadSurah(surah: Int) {
+        val next = surah + 1
+        if (next > TOTAL_SURAHS) return
+        viewModelScope.launch {
+            val generation = synchronized(rowLock) { libraryGeneration }
+            val rows = readingRows(next, settings.wordByWord)
+            // The library turned over under this read: the rows belong to
+            // packs that are no longer on the device, so they are dropped
+            // rather than offered to the next surah. The check and the store
+            // are under one lock, so a clear that lands while this read was
+            // running cannot leave the stale copy behind it.
+            synchronized(rowLock) {
+                if (libraryGeneration == generation) readAhead = ReadAhead(generation, next, rows)
+            }
+        }
+    }
+
     private fun clearRowCache() {
-        synchronized(rowCache) { rowCache.clear() }
+        synchronized(rowLock) {
+            libraryGeneration++
+            rowCache.clear()
+            readAhead = null
+        }
     }
 
     fun toggleSaved(ayah: Ayah) {
@@ -1311,6 +1395,9 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
         /** The Quran's ayah count; the numbering is one ascending run. */
         const val TOTAL_AYAHS = 6236
+
+        /** The Quran's surah count. */
+        const val TOTAL_SURAHS = 114
 
         /** Al-Ikhlas 112:1, the short ayah the size page previews. */
         const val SIZE_PREVIEW_AYAH = 6222

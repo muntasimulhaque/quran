@@ -45,6 +45,7 @@ import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.SavedAyah
+import io.github.muntasimulhaque.quran.data.readingMetrics
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
@@ -209,7 +210,14 @@ fun ReaderScreen(
                             wordByWord = settings.wordByWord,
                         )
                     },
-                    settings = settings,
+                    // The copy read ahead while the reader was still in the
+                    // surah before this one, and the read of the surah after
+                    // it. Together they make the turn at the end of a surah
+                    // land on text rather than on the paper.
+                    cachedRows = { viewModel.cachedRows(it) },
+                    onReadAhead = { viewModel.readAheadSurah(it) },
+                    metrics = settings.readingMetrics(),
+                    place = settings.ayah,
                     hasTranslation = viewModel.enabledTranslationPacks.isNotEmpty(),
                     nextSurahName = viewModel.surahs
                         .firstOrNull { it.number == surah.number + 1 }?.nameSimple,
@@ -247,6 +255,10 @@ fun ReaderScreen(
             title = surahName(viewModel, settings.ayah),
             detail = stringResource(R.string.juz_label, viewModel.juz),
             visible = chrome,
+            // A tap on the surah's name is the way back to its top, the way
+            // a reader flips to the beginning of a surah in a printed copy.
+            titleAction = stringResource(R.string.action_surah_top),
+            onTitle = { viewModel.jumpToSurahOpening(settings.ayah) },
             onBrowse = { sheet = ReaderSheet.Browse },
             onSearch = { sheet = ReaderSheet.Search },
             onSettings = { sheet = ReaderSheet.Settings },
@@ -541,6 +553,9 @@ private fun ReaderTopBar(
     title: String,
     detail: String?,
     visible: Boolean,
+    /** What a tap on the title does, said out loud; null when it does nothing. */
+    titleAction: String?,
+    onTitle: () -> Unit,
     onBrowse: () -> Unit,
     onSearch: () -> Unit,
     onSettings: () -> Unit,
@@ -582,6 +597,8 @@ private fun ReaderTopBar(
             ReadingTitle(
                 surah = title,
                 detail = detail,
+                action = titleAction,
+                onClick = onTitle,
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 4.dp),

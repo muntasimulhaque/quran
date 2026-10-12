@@ -19,7 +19,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
-import io.github.muntasimulhaque.quran.data.AppSettings
+import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -77,7 +77,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 internal fun WordByWord(
     meanings: List<WordMeaning>,
     hafs: FontFamily,
-    settings: AppSettings,
+    metrics: ReadingMetrics,
     modifier: Modifier = Modifier,
     gloss: Boolean = true,
 ) {
@@ -96,7 +96,7 @@ internal fun WordByWord(
             meanings.forEach { meaning ->
                 WordPair(
                     meaning = meaning,
-                    settings = settings,
+                    metrics = metrics,
                     hafs = hafs,
                     gloss = gloss,
                 )
@@ -116,7 +116,7 @@ internal fun WordByWord(
 @Composable
 private fun WordPair(
     meaning: WordMeaning,
-    settings: AppSettings,
+    metrics: ReadingMetrics,
     hafs: FontFamily,
     gloss: Boolean,
 ) {
@@ -125,8 +125,8 @@ private fun WordPair(
             text = meaning.word,
             style = TextStyle(
                 fontFamily = hafs,
-                fontSize = settings.wordsSp.sp,
-                lineHeight = (settings.wordsSp * 1.7f).sp,
+                fontSize = metrics.wordsSp.sp,
+                lineHeight = (metrics.wordsSp * 1.7f).sp,
                 // The pairs are the same words the ayah above already shows,
                 // so a gloss steps the Arabic one tone down from the verse's
                 // own ink: the line stays the verse, the pairs read as its
@@ -144,8 +144,8 @@ private fun WordPair(
         Text(
             text = meaning.meaning.orEmpty(),
             style = MaterialTheme.typography.bodySmall.copy(
-                fontSize = settings.wordsMeaningSp.sp,
-                lineHeight = (settings.wordsMeaningSp * 1.6f).sp,
+                fontSize = metrics.wordsMeaningSp.sp,
+                lineHeight = (metrics.wordsMeaningSp * 1.6f).sp,
             ),
             color = LocalPagePalette.current.ink,
             textAlign = TextAlign.Center,

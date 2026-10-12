@@ -13,6 +13,8 @@ import androidx.media3.session.SessionToken
 import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.core.RecitationPlaylist
 import io.github.muntasimulhaque.quran.data.ContentDatabase
+import io.github.muntasimulhaque.quran.data.PlaybackPosition
+import io.github.muntasimulhaque.quran.data.PlaybackPositionStore
 import io.github.muntasimulhaque.quran.data.RecitationAyah
 import io.github.muntasimulhaque.quran.data.RecitationDownloader
 import io.github.muntasimulhaque.quran.data.RecitationManifest
@@ -48,6 +50,12 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 class PlaybackController(
     private val context: Context,
     private val scope: CoroutineScope,
+    /**
+     * Where the recitation was last heard. It is written as it is heard, so a
+     * process that dies mid-ayah is answered by the rest of that ayah rather
+     * than by its top.
+     */
+    private val positionStore: PlaybackPositionStore = PlaybackPositionStore(context),
 ) {
 
     private val store = RecitationStore(context)
@@ -63,6 +71,14 @@ class PlaybackController(
     private var downloadJob: Job? = null
     private var requestedAyah: Int? = null
 
+    /**
+     * The ayah the last written position belonged to, and when it was
+     * written. They live here rather than being read back out of the store,
+     * because the throttle has to know both without a disk read.
+     */
+    private var heardAyah: Int? = null
+    private var heardWrittenAt = 0L
+
     /** The reader's pace, their answer as the reading moves on, applied on connect. */
     private var speed = 1f
     private var end = EndOfAudio.CONTINUE_AYAH
@@ -72,10 +88,12 @@ class PlaybackController(
 
     fun attach(content: ContentDatabase) {
         this.content = content
-        startTicker()
+        // The tick is for the word being recited, and it runs only while
+        // something is being recited.
+        syncTicker()
     }
 
-    suspend fun play(recitation: String, ayahNumber: Int) {
+    suspend fun play(recitation: String, ayahNumber: Int, resume: Boolean = true) {
         val database = content ?: return
         val ayah = withContext(Dispatchers.IO) {
             database.ayah(ayahNumber)
@@ -121,11 +139,18 @@ class PlaybackController(
             return
         }
         val player = connect()
+        // The offset this ayah was last heard at, under this reciter. A
+        // process that died mid-ayah is answered by the rest of it. A
+        // different ayah, a different reciter, and a surah whose audio has
+        // just been fetched all start at the beginning, because none of them
+        // is the place the reader left.
+        val startAt = if (resume) resumeOffset(recitation, ayahNumber) else 0L
         withContext(Dispatchers.Main) {
-            player.setMediaItems(items, index, 0L)
+            player.setMediaItems(items, index, startAt)
             player.prepare()
             player.play()
         }
+        startTicker()
         loadedThroughSurah = ayah.surah
         _state.value = _state.value.copy(
             recitation = recitation,
@@ -134,6 +159,22 @@ class PlaybackController(
             downloadProgress = null,
             downloadFailed = false,
         )
+    }
+
+    /**
+     * How far into [ayahNumber] the recitation was last heard, for this
+     * reciter and no other.
+     *
+     * Zero when nothing is remembered, when the reader has since been heard
+     * somewhere else, or when a different reciter was last heard: none of
+     * those is the place the reader left, and a resume that drops them into
+     * the middle of an ayah they never started is worse than no resume.
+     */
+    private suspend fun resumeOffset(recitation: String, ayahNumber: Int): Long {
+        val remembered = withContext(Dispatchers.IO) { positionStore.read() } ?: return 0L
+        if (remembered.recitation != recitation) return 0L
+        if (remembered.ayahNumber != ayahNumber) return 0L
+        return remembered.positionMs.coerceAtLeast(0L)
     }
 
     /**
@@ -175,7 +216,9 @@ class PlaybackController(
             }
             if (result.isSuccess) {
                 _state.value = _state.value.copy(pendingDownloadSurah = null, downloadProgress = null)
-                play(recitation, ayah)
+                // The audio has just been fetched, so the reader hears it from
+                // its beginning and not from wherever they were last heard.
+                play(recitation, ayah, resume = false)
             } else {
                 _state.value = _state.value.copy(downloadProgress = null, downloadFailed = true)
             }
@@ -323,6 +366,11 @@ class PlaybackController(
         player.stop()
         player.clearMediaItems()
         _state.value = PlaybackUiState(connected = true)
+        // The reader put the recitation away themselves, so where it was
+        // heard is not a place to offer them again.
+        heardAyah = null
+        syncTicker()
+        scope.launch { positionStore.clear() }
     }
 
     private suspend fun connect(): MediaController {
@@ -414,20 +462,40 @@ class PlaybackController(
                 isPlaying = false,
                 ayahNumber = null,
                 wordPosition = null,
-                positionMs = 0,
             )
+            // The surah is over, so the offset inside its last ayah is not a
+            // place to come back to.
+            heardAyah = null
+            scope.launch { positionStore.clear() }
             offerNextSurah()
         }
     }
 
+    /**
+     * The tick that keeps the recited word marked. It publishes five times a
+     * second while something is being heard and does not run at all while
+     * nothing is: a word cannot move inside a paused player, and a loop that
+     * wakes four cores to learn nothing is the last thing a reading app
+     * should spend its battery on.
+     */
     private fun startTicker() {
         if (ticker?.isActive == true) return
         ticker = scope.launch {
             while (isActive) {
                 controller?.let { publish(it) }
-                delay(200)
+                delay(TICK_MILLIS)
             }
         }
+    }
+
+    private fun stopTicker() {
+        ticker?.cancel()
+        ticker = null
+    }
+
+    /** Starts the tick when something is being heard, and stops it when it is not. */
+    private fun syncTicker() {
+        if (_state.value.isPlaying) startTicker() else stopTicker()
     }
 
     private fun publish(player: Player?) {
@@ -439,7 +507,7 @@ class PlaybackController(
         val id = player.currentMediaItem?.mediaId ?: return
         val ayahNumber = RecitationPlaylist.ayahOf(id) ?: return
         val surah = RecitationPlaylist.surahOf(id)
-        val position = player.currentPosition.coerceAtLeast(0)
+        val at = player.currentPosition.coerceAtLeast(0)
         if (segmentedAyah != ayahNumber) loadSegments(ayahNumber)
         _state.value = _state.value.copy(
             connected = true,
@@ -448,9 +516,31 @@ class PlaybackController(
             ayahNumber = ayahNumber,
             surah = surah,
             reference = player.currentMediaItem?.mediaMetadata?.title?.toString(),
-            positionMs = position,
-            wordPosition = wordAt(position),
+            wordPosition = wordAt(at),
         )
+        rememberHeard(recitationId, ayahNumber, at, player.isPlaying)
+        syncTicker()
+    }
+
+    /**
+     * Writes the place the recitation was heard down, so a process that dies
+     * mid-ayah is answered by the same ayah at the same offset rather than by
+     * the top of it.
+     *
+     * The offset is written on a throttle: it moves five times a second and
+     * the disk does not need to, and a resume a few seconds out is one nobody
+     * can tell from the real one. A change of ayah and a pause are each
+     * written at once, because the ayah is the part nothing else can put back
+     * and the pause is the moment the reader stepped away.
+     */
+    private fun rememberHeard(recitation: String?, ayahNumber: Int, at: Long, playing: Boolean) {
+        if (recitation == null) return
+        val moved = heardAyah != ayahNumber
+        heardAyah = ayahNumber
+        val now = System.currentTimeMillis()
+        if (!moved && playing && now - heardWrittenAt < POSITION_WRITE_MS) return
+        heardWrittenAt = now
+        scope.launch { positionStore.write(PlaybackPosition(recitation, ayahNumber, at)) }
     }
 
     private fun loadSegments(ayahNumber: Int) {
@@ -493,5 +583,15 @@ class PlaybackController(
         const val MIN_SPEED = 0.5f
         const val MAX_SPEED = 1.5f
 
+        /** How often the recited word is published while something is heard. */
+        const val TICK_MILLIS = 200L
+
+        /**
+         * How far apart two writes of the heard offset may be. The ayah it
+         * belongs to is written the moment it changes; this is the offset
+         * inside it, which moves constantly and costs a disk write to keep
+         * exact.
+         */
+        const val POSITION_WRITE_MS = 3_000L
     }
 }

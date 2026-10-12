@@ -149,6 +149,47 @@ data class AppSettings(
 }
 
 /**
+ * The sizes and switches the reading draws at, taken out of [AppSettings] as
+ * one value of their own.
+ *
+ * The reading hands this to every ayah it draws instead of the whole settings
+ * object. A settled scroll writes a new [AppSettings] with the reader's place
+ * in it, so the object is unequal to itself on every turn of the wheel, and a
+ * parameter that changed invalidates the composable that holds it: handing
+ * the whole object to every ayah on the page recomposed every one of them to
+ * redraw nothing. A size or a switch the reader actually changed still moves
+ * every ayah, because that is what it is for.
+ */
+data class ReadingMetrics(
+    val showTranslation: Boolean,
+    val wordByWord: Boolean,
+    /** Whether the reading follows the reciter as it moves from ayah to ayah. */
+    val followReciter: Boolean,
+    /** The packs the reading draws, which shape every row it loads. */
+    val translationPacks: Set<String>,
+    val arabicSp: Float,
+    val arabicLineSp: Float,
+    val translationSp: Float,
+    val translationLineSp: Float,
+    val wordsSp: Float,
+    val wordsMeaningSp: Float,
+)
+
+/** The reading's own view of the reader's choices. */
+fun AppSettings.readingMetrics(): ReadingMetrics = ReadingMetrics(
+    showTranslation = showTranslation,
+    wordByWord = wordByWord,
+    followReciter = followReciter,
+    translationPacks = translationPacks,
+    arabicSp = arabicSp,
+    arabicLineSp = arabicLineSp,
+    translationSp = translationSp,
+    translationLineSp = translationLineSp,
+    wordsSp = wordsSp,
+    wordsMeaningSp = wordsMeaningSp,
+)
+
+/**
  * Reads and writes the reader's choices. It stores an ayah, not a page.
  */
 class SettingsStore(private val context: Context) {

@@ -25,8 +25,10 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -397,9 +399,21 @@ fun TextAction(
  * controls. The juz label is drawn only when it truly fits beside the whole
  * name: the name of the surah is what the reader looks for, and a tight bar
  * must shorten the label, never the name.
+ *
+ * When [onClick] is given the title answers a tap, which is the way back to
+ * the top of a long surah without a scroll. It then wears the rounded shape
+ * every other control in the bar wears, and it says what the tap does, so a
+ * word that answers a touch never reads as bare type.
  */
 @Composable
-fun ReadingTitle(surah: String, detail: String?, modifier: Modifier = Modifier) {
+fun ReadingTitle(
+    surah: String,
+    detail: String?,
+    modifier: Modifier = Modifier,
+    /** What a tap on the title does, said out loud. */
+    action: String? = null,
+    onClick: (() -> Unit)? = null,
+) {
     Layout(
         content = {
             Text(
@@ -421,7 +435,28 @@ fun ReadingTitle(surah: String, detail: String?, modifier: Modifier = Modifier) 
                 )
             }
         },
-        modifier = modifier,
+        modifier = modifier.then(
+            if (onClick != null) {
+                Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable(role = Role.Button, onClick = onClick)
+                    // The surah's own name and its juz are the node's text and
+                    // stay what a screen reader reads first; the tap is said
+                    // beside them as an action rather than over them, because
+                    // a description here would replace the name the reader is
+                    // looking for.
+                    .semantics {
+                        customActions = listOf(
+                            CustomAccessibilityAction(action.orEmpty()) {
+                                onClick()
+                                true
+                            },
+                        )
+                    }
+            } else {
+                Modifier
+            },
+        ),
     ) { measurables, constraints ->
         val gap = 8.dp.roundToPx()
         val name = measurables[0].measure(constraints.copy(minWidth = 0, minHeight = 0))

@@ -10,7 +10,6 @@ data class PlaybackUiState(
     val reference: String? = null,
     /** The word being recited, as the word table numbers it; null when unknown. */
     val wordPosition: Int? = null,
-    val positionMs: Long = 0,
     /** True when the chosen recitation has no published package for this surah. */
     val unavailable: Boolean = false,
     /** The surah waiting for the reader's download approval. */
