@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 6.3 (versionCode 65)
+Version: 6.4 (versionCode 66)
 
 ## Listing
 
@@ -133,9 +133,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (6.3, 381 characters)
-
-The juz number beside the surah now follows you as you read. Scroll from one juz into the next and it changes with you, instead of waiting for a jump to catch up. Jumps hold too: open an ayah from Browse, Search, or the daily reminder and the next launch returns to it. The reading, recitations, search, Browse, and the daily ayah are as they were. No ads, no trackers, no account.
+## Release notes (6.4, 386 characters)
+Reading is quicker and smoother. A surah opens without a wait, and turning to the next surah now lands on its text instead of a blank frame. Tap the surah's name to go back to its top. A recitation you were listening to picks up where it stopped, even if the app was closed. The reading, recitations, search, Browse, and the daily ayah are as they were. No ads, no trackers, no account.
 
 ## Before each release
 
