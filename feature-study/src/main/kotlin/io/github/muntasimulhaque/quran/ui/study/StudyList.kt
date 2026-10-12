@@ -436,11 +436,9 @@ private fun SurahOpening(
             .padding(top = 40.dp, bottom = 14.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // The opening of a surah is the one arrival in the reading, so it is
-        // built to the same model as the printed page: the Arabic name in the
-        // ornament gold, a short gold rule under it, and the name and place in
-        // quiet type, so
-        // the two readings open a surah the same way.
+        // The opening of a surah is the one arrival in the reading: the Arabic
+        // name in the ornament gold, a short gold rule under it, and the name
+        // and place in quiet type, so every surah opens the same way.
         Text(
             text = surah.nameArabic,
             style = TextStyle(
@@ -449,10 +447,9 @@ private fun SurahOpening(
                 color = ornament,
             ),
         )
-        // The rule is ornament, never a separator: it sits under the Arabic
-        // name the way the printed page rules its surah line, and it carries
-        // no meaning a reader would lose without it. It is a hairline of the
-        // same gold, held well inside the measure.
+        // The rule is ornament, never a separator: a short gold rule under the
+        // Arabic name, carrying no meaning a reader would lose without it. It
+        // is a hairline of the same gold, held well inside the measure.
         Box(
             Modifier
                 .padding(top = 14.dp)

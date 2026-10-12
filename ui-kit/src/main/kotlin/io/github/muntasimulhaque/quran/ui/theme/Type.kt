@@ -17,8 +17,8 @@ import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.content.R
 
 /**
- * The voices of the app. Arabic is the Book's own: the QPC page fonts on the
- * the KFGQPC Hafs face in the reading, with Amiri for
+ * The voices of the app. Arabic is the Book's own: the KFGQPC Hafs face draws
+ * the canonical text in the reading, with Amiri for Arabic prose and
  * ornaments. Everything else follows the reader's one language choice: the
  * interface speaks Inter in English and Noto Sans Bengali in Bangla, and the
  * reading (translation, tafsir, word meanings, notes) is Literata in English

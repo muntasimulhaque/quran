@@ -12,11 +12,10 @@ import java.util.TreeMap
  *
  * One rule, three checks:
  * - every non-digit codepoint of the canonical Unicode text is drawable by
- *   the KFGQPC Uthmanic Hafs font, which draws the study reading and the
- *   Mushaf page's own words both, so a page can never show tofu or a
- *   missing word;
- * - the page's own furniture (every ayah's roundel number, the page number,
- *   the juz, and each surah's band) is drawable by the face that draws it,
+ *   the KFGQPC Uthmanic Hafs font, which draws the reading's own words, so
+ *   the reading can never show tofu or a missing word;
+ * - the reading's own furniture (ayah numbers, the page number, the juz, and
+ *   each surah's name) is drawable by the face that draws it,
  *   which is the ornament, because that furniture is drawn here rather than
  *   carried in a font;
  * - every run of reading text is drawable by the font the app draws it with,
@@ -27,12 +26,9 @@ import java.util.TreeMap
  * (Android draws it with the system font), but it is a decision, and the
  * allow-list is where that decision is written down.
  *
- * The page's own type is a property of this font and the Book's own words, and
- * it is pinned by the instrumented MushafPagesTest, which lays out every page
- * of the Book on a real device with the face's real metrics and fails if one
- * page's fullest line no longer stands inside the measure. The font is
- * hash-pinned in the manifest, so the font and the page move together or not
- * at all.
+ * The reading's own type is a property of this font and the Book's own words.
+ * The font is hash-pinned in the manifest, so the font and the text move
+ * together or not at all.
  */
 class Fonts(private val root: File) {
 
@@ -81,7 +77,7 @@ class Fonts(private val root: File) {
     }
 
     private fun checkUnicodeCoverage() {
-        // The one Arabic face: the study reading's, and the page's own.
+        // The one Arabic face: the reading's own.
         val hafs = loadFont(File(verify, "quran-font-hafs"))
         val uncovered = TreeMap<Int, Int>()
         var codepoints = 0
@@ -154,7 +150,7 @@ class Fonts(private val root: File) {
 
     /**
      * The app draws four voices: Inter for interface and headings, Literata for
-     * English reading, Amiri Quran for Arabic outside the Mushaf, and the Hafs
+     * English reading, Amiri Quran for Arabic outside the reading, and the Hafs
      * font for the canonical words already checked above. Every run the reader
      * will actually see is probed against the font it will be drawn with,
      * script by script, so a tofu box can never reach a screen.
@@ -248,7 +244,7 @@ class Fonts(private val root: File) {
         }
         for (file in packs.listFiles { it -> it.isFile && it.name.startsWith("tafsir-") }.orEmpty()) {
             // A tafsir whose own language is Arabic is quoted prose, drawn in
-            // Amiri like the rest of the Arabic outside the Mushaf; the
+            // Amiri like the rest of the Arabic outside the reading; the
             // offered tafsirs are Latin, paragraphs and headings drawn in
             // Literata and Inter.
             val arabic = file.name.endsWith("-ar.db")
