@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.muntasimulhaque.quran.core.EndOfAudio
+import io.github.muntasimulhaque.quran.core.JuzIndex
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.core.ShareText
 import io.github.muntasimulhaque.quran.data.Ayah
@@ -109,11 +110,22 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     var failure by mutableStateOf(false)
         private set
 
-    /** The juz of the reader's place, for reference. */
-    var juz by mutableIntStateOf(1)
-        private set
+    /**
+     * The juz of every ayah number, built from the content's own boundaries
+     * when the library opens. State rather than a plain field because the
+     * label has to redraw the moment the index lands, though it is built
+     * once per library.
+     */
+    private var juzAt by mutableStateOf(IntArray(0))
 
-
+    /**
+     * The juz of the reader's place, for reference. It is derived from the
+     * place rather than kept beside it: a scroll moves the place and the
+     * label in one breath, and a second value cannot fall behind (owner
+     * report: the label stayed on Juz 1 while the reader scrolled into
+     * Juz 2).
+     */
+    val juz: Int get() = juzAt.getOrElse(settings.ayah.coerceIn(1, TOTAL_AYAHS)) { 1 }
 
     val content: ContentDatabase? get() = contentDatabase
     val saved: StateFlow<List<SavedAyah>> = savedStore.saved
@@ -241,9 +253,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
                 .map { Triple(it.ayahNumber, it.isPlaying, settings.followReciter) }
                 .distinctUntilChanged()
                 .collect { (ayahNumber, playing, follow) ->
-                    val database = contentDatabase
-                    if (!playing || ayahNumber == null || database == null || !follow) return@collect
-                    setPlace(ayahNumber, database, persist = true)
+                    if (!playing || ayahNumber == null || contentDatabase == null || !follow) return@collect
+                    // A repeat of the place the reader is already on is not a
+                    // second write.
+                    if (settings.ayah != ayahNumber) settingsStore.setAyah(ayahNumber)
                     settings = settings.copy(ayah = ayahNumber)
                 }
         }
@@ -299,9 +312,9 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             playback.setEndOfAudio(stored.endOfAudio)
             surahs = database.surahs()
             indexSurahs()
+            indexJuz(database)
             packs = database.packs()
             recitations = database.recitations()
-            setPlace(stored.ayah, database, persist = false)
             lastReadStore.record(stored.ayah)
             ready = true
             // A language choice from this launch or an earlier one: whatever
@@ -355,6 +368,15 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     private var firstAyahOf: IntArray = IntArray(0)
 
     /**
+     * The juz of every ayah, built where the surah index is built: one
+     * query for the content's thirty boundaries, then a lookup the label
+     * can consult on every move without touching the disk.
+     */
+    private fun indexJuz(database: ContentDatabase) {
+        juzAt = JuzIndex.of(database.juzStarts().map { it.ayah }, TOTAL_AYAHS)
+    }
+
+    /**
      * The surah of an ayah, from the index already in memory. One array read,
      * and never a disk lookup.
      */
@@ -375,16 +397,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         get() = surahIndexByNumber ?: surahs.associateBy { it.number }.also { surahIndexByNumber = it }
 
     private var surahIndexByNumber: Map<Int, Surah>? = null
-
-    /**
-     * Moves the reader's place: the juz follows the ayah, and the ayah is
-     * written down when the change is the reader's own.
-     */
-    private suspend fun setPlace(ayah: Int, database: ContentDatabase, persist: Boolean) {
-        val clamped = ayah.coerceIn(1, 6236)
-        juz = database.juzOfAyah(clamped)
-        if (persist && settings.ayah != clamped) settingsStore.setAyah(clamped)
-    }
 
     /** The reader scrolled the reading and stopped. */
     fun onReadingSettled(ayah: Int) {
@@ -431,12 +443,12 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun jumpToAyah(ayah: Int) {
-        val database = contentDatabase ?: return
+        if (contentDatabase == null) return
         val clamped = ayah.coerceIn(1, 6236)
         leaveSurah(surahOf(clamped)?.number)
         settings = settings.copy(ayah = clamped)
         viewModelScope.launch {
-            setPlace(clamped, database, persist = true)
+            settingsStore.setAyah(clamped)
             lastReadStore.record(clamped)
         }
     }
@@ -665,7 +677,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             settingsStore.setLanguage(language, next.translationPacks, next.tafsirPacks)
             if (firstRun) {
                 settingsStore.setAyah(1)
-                contentDatabase?.let { setPlace(1, it, persist = false) }
                 lastReadStore.record(1)
             }
             settingsStore.addPendingPacks(
