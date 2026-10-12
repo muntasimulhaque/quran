@@ -1,7 +1,7 @@
 package io.github.muntasimulhaque.quran.core
 
 /**
- * The study list shows one surah as an opening item, then one item per ayah,
+ * The reading list shows one surah as an opening item, then one item per ayah,
  * then a closing line. The reader's place is an ayah; the list speaks in
  * indices. This is the only place the two meet.
  *

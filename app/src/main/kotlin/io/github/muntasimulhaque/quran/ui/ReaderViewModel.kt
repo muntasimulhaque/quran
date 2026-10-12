@@ -35,7 +35,7 @@ import io.github.muntasimulhaque.quran.data.RecitationStore
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.data.SavedStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
-import io.github.muntasimulhaque.quran.data.StudyRow
+import io.github.muntasimulhaque.quran.data.ReadingRow
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TranslationLine
@@ -167,8 +167,8 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * back under another put the Bangla translation in an English Font size
      * sample (owner report).
      */
-    private val rowCache = object : LinkedHashMap<Int, StudyRow>(64, 0.75f, true) {
-        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Int, StudyRow>?): Boolean = size > 160
+    private val rowCache = object : LinkedHashMap<Int, ReadingRow>(64, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Int, ReadingRow>?): Boolean = size > 160
     }
 
     /**
@@ -454,7 +454,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      */
     suspend fun ayahShareText(ayah: Ayah): String {
         val translation = withContext(Dispatchers.IO) {
-            studyRow(ayah.number)?.translations?.firstOrNull()?.text?.text
+            readingRow(ayah.number)?.translations?.firstOrNull()?.text?.text
         }
         val surahName = surahs.firstOrNull { it.number == ayah.surah }?.nameSimple ?: "Surah ${ayah.surah}"
         return ShareText.ayah(
@@ -482,7 +482,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * verse to read, and the place is written down the same way any other
      * jump writes it (owner decision, 30).
      */
-    fun jumpToAyahInStudy(ayah: Int) {
+    fun jumpToAyahInReading(ayah: Int) {
         jumpToAyah(ayah.coerceIn(1, 6236))
     }
 
@@ -677,8 +677,8 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * English never keeps two defaults fighting; a pack the reader added by
      * hand, like the second translation, is left exactly where it was.
      *
-     * The first choice is the reader's first arrival, so it lands in the study
-     * reading of Al-Fatiha, where the Arabic and its meaning meet at once
+     * The first choice is the reader's first arrival, so it lands in the reading
+     * of Al-Fatiha, where the Arabic and its meaning meet at once
      * (owner decision, 4.5). Later changes only move the content; the place
      * stays the reader's own.
      *
@@ -942,7 +942,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         // screen can pick up a database whose turn has passed. The retire is
         // not a close: it waits for the last query still reading the old
         // connection to finish, then closes it, so an in-flight Browse or
-        // study load is never killed under the reader.
+        // reading load is never killed under the reader.
         val old = contentDatabase
         contentDatabase = fresh
         playback.attach(fresh)
@@ -981,11 +981,11 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     /**
      * Every row of one surah in a single pass: the ayahs, their words, every
      * translation the reader turned on, and the word by word aid. One query
-     * per source instead of one per ayah, and the study list is drawn
+     * per source instead of one per ayah, and the reading list is drawn
      * complete, so the reader's place lands exactly and nothing shifts under
      * them while they read.
      */
-    suspend fun studyRows(surah: Int, wordByWord: Boolean): List<StudyRow> =
+    suspend fun readingRows(surah: Int, wordByWord: Boolean): List<ReadingRow> =
         withContext(Dispatchers.IO) {
             val database = contentDatabase ?: return@withContext emptyList()
             val ayahs = database.ayahsOfSurah(surah)
@@ -999,7 +999,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
                 emptyMap()
             }
             ayahs.map { ayah ->
-                StudyRow(
+                ReadingRow(
                     ayah = ayah,
                     words = words[ayah.number].orEmpty(),
                     translations = lines[ayah.number].orEmpty(),
@@ -1028,7 +1028,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         return out
     }
 
-    fun studyRow(ayahNumber: Int): StudyRow? {
+    fun readingRow(ayahNumber: Int): ReadingRow? {
         val database = contentDatabase ?: return null
         synchronized(rowCache) { rowCache[ayahNumber] }?.let { return it }
         val ayah = database.ayah(ayahNumber) ?: return null
@@ -1039,7 +1039,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         } else {
             emptyList()
         }
-        val row = StudyRow(ayah, words, translations, meanings)
+        val row = ReadingRow(ayah, words, translations, meanings)
         synchronized(rowCache) { rowCache[ayahNumber] = row }
         return row
     }
@@ -1049,8 +1049,8 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * purpose: the sample is there to judge a size, and a long ayah would
      * push the steps off the screen before the reader reached them.
      */
-    suspend fun sizePreviewRow(): StudyRow? =
-        withContext(Dispatchers.IO) { studyRow(SIZE_PREVIEW_AYAH) }
+    suspend fun sizePreviewRow(): ReadingRow? =
+        withContext(Dispatchers.IO) { readingRow(SIZE_PREVIEW_AYAH) }
 
     private fun clearRowCache() {
         synchronized(rowCache) { rowCache.clear() }

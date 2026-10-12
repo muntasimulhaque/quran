@@ -53,7 +53,7 @@ class DailyAyahJumpTest {
     @Test
     fun theReminderSJumpLandsOnTheAyah() {
         val target = 7 + 255
-        viewModel.jumpToAyahInStudy(target)
+        viewModel.jumpToAyahInReading(target)
         awaitPlace(target)
         assertEquals("the place must be the ayah the reminder named", target, viewModel.settings.ayah)
     }
@@ -61,7 +61,7 @@ class DailyAyahJumpTest {
     @Test
     fun aJumpWhileReadingStaysOnTheAyah() {
                 val target = 7 + 84
-        viewModel.jumpToAyahInStudy(target)
+        viewModel.jumpToAyahInReading(target)
         awaitPlace(target)
         assertEquals(target, viewModel.settings.ayah)
             }

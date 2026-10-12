@@ -14,7 +14,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
-import io.github.muntasimulhaque.quran.feature.study.R as StudyR
+import io.github.muntasimulhaque.quran.feature.reading.R as ReadingR
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -69,7 +69,7 @@ class SettingsVisibilityTest {
 
     @Test
     fun hidingTheTranslationHidesItAndTheSwitchBringsItBack() {
-        awaitStudy()
+        awaitReading()
         Thread.sleep(1_500)
         assertTrue(
             "the translation must not be drawn while the switch is off",
@@ -94,16 +94,16 @@ class SettingsVisibilityTest {
         }
     }
 
-    private fun awaitStudy() {
-        val studyPage = compose.activity.getString(StudyR.string.study_page_description)
+    private fun awaitReading() {
+        val readingPage = compose.activity.getString(ReadingR.string.reading_page_description)
         compose.waitUntil(timeoutMillis = 90_000) {
-            compose.onAllNodesWithContentDescription(studyPage).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithContentDescription(readingPage).fetchSemanticsNodes().isNotEmpty()
         }
     }
 
     private fun revealChrome() {
-        val studyPage = compose.activity.getString(StudyR.string.study_page_description)
-        compose.onAllNodesWithContentDescription(studyPage).onFirst()
+        val readingPage = compose.activity.getString(ReadingR.string.reading_page_description)
+        compose.onAllNodesWithContentDescription(readingPage).onFirst()
             .tapThePaper()
         compose.waitUntil(timeoutMillis = 15_000) {
             compose.onAllNodesWithContentDescription(

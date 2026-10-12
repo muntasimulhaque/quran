@@ -16,7 +16,7 @@ rootProject.name = "Quran"
 include(":core")
 include(":content-assets")
 include(":ui-kit")
-include(":feature-study")
+include(":feature-reading")
 include(":feature-search")
 include(":feature-browse")
 include(":feature-playback")

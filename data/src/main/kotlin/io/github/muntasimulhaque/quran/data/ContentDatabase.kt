@@ -46,7 +46,7 @@ class ContentDatabase private constructor(
      * The reader's library is reopened when a pack arrives, leaves, or the
      * interface language changes the packs it reads. The old database used to
      * be closed the moment the new one was ready, which closed it under any
-     * query still running on a worker (the study list loading, a tafsir index
+     * query still running on a worker (the reading list loading, a tafsir index
      * warming, a Browse column) and took the process down. Every query now
      * holds a read ticket from the moment it starts until its cursor is
      * closed, and [close] waits for every ticket to be returned before it
@@ -233,7 +233,7 @@ class ContentDatabase private constructor(
      * here and in English when it is not, so a reader who has any word list
      * always sees meanings rather than empty slots.
      *
-     * This is the whole surah at once: the study list asks for every ayah it
+     * This is the whole surah at once: the reading list asks for every ayah it
      * is about to draw, so it never waits per ayah and never shifts under the
      * reader while it loads.
      */

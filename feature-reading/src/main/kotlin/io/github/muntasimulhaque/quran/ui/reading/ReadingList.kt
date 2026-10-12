@@ -1,4 +1,4 @@
-package io.github.muntasimulhaque.quran.ui.study
+package io.github.muntasimulhaque.quran.ui.reading
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -71,8 +71,8 @@ import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.AppSettings
-import io.github.muntasimulhaque.quran.data.StudyRow
-import io.github.muntasimulhaque.quran.feature.study.R
+import io.github.muntasimulhaque.quran.data.ReadingRow
+import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.reader.Icon
@@ -101,10 +101,10 @@ import kotlin.math.min
  * about the ayah under the finger.
  */
 @Composable
-fun StudyList(
+fun ReadingList(
     content: ContentDatabase,
     surah: Surah,
-    loadRows: suspend () -> List<StudyRow>,
+    loadRows: suspend () -> List<ReadingRow>,
     settings: AppSettings,
     hasTranslation: Boolean,
     nextSurahName: String?,
@@ -125,7 +125,7 @@ fun StudyList(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val pageDescription = stringResource(R.string.study_page_description)
+    val pageDescription = stringResource(R.string.reading_page_description)
     val hafs = remember {
         FontFamily(Font(path = "fonts/UthmanicHafs_V22.ttf", assetManager = context.assets))
     }
@@ -135,7 +135,7 @@ fun StudyList(
     // in hand the paper is shown, never the surah the reader just left: a
     // stale list would be measured with the new surah's name on it, and a
     // scroll through it would write a place in the wrong surah.
-    val loaded by produceState<Pair<Int, List<StudyRow>>?>(
+    val loaded by produceState<Pair<Int, List<ReadingRow>>?>(
         initialValue = null,
         // The library is a key too: a pack arriving replaces the database, and
         // the rows read from the old one would never show the new
@@ -153,7 +153,7 @@ fun StudyList(
         Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
         return
     }
-    StudyRows(
+    ReadingRows(
         content = content,
         surah = surah,
         rows = rows,
@@ -184,10 +184,10 @@ fun StudyList(
 
 /** The surah's rows, drawn and driven once the text is on hand. */
 @Composable
-private fun StudyRows(
+private fun ReadingRows(
     content: ContentDatabase,
     surah: Surah,
-    rows: List<StudyRow>,
+    rows: List<ReadingRow>,
     ayahs: List<Int>,
     settings: AppSettings,
     hasTranslation: Boolean,
@@ -328,7 +328,7 @@ private fun StudyRows(
             // Settings is not looking for one here.
             if (settings.showTranslation && !hasTranslation) {
                 AddContent(
-                    text = stringResource(R.string.study_add_translation),
+                    text = stringResource(R.string.reading_add_translation),
                     onClick = onAddContent,
                 )
             }
@@ -404,7 +404,7 @@ private fun AddContent(text: String, onClick: () -> Unit) {
             modifier = Modifier.weight(1f),
         )
         Text(
-            text = stringResource(R.string.study_action_add),
+            text = stringResource(R.string.reading_action_add),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary,
         )
@@ -465,11 +465,11 @@ private fun SurahOpening(
         )
         Text(
             text = stringResource(
-                R.string.study_surah_meta,
+                R.string.reading_surah_meta,
                 if (surah.revelationPlace.equals("makkah", true)) {
-                    stringResource(R.string.study_place_makkah)
+                    stringResource(R.string.reading_place_makkah)
                 } else {
-                    stringResource(R.string.study_place_madinah)
+                    stringResource(R.string.reading_place_madinah)
                 },
                 surah.versesCount,
             ),
@@ -550,7 +550,7 @@ private fun SurahOpening(
         // opened, it is the Hide that puts the introduction away again.
         TextButton(
             label = stringResource(
-                if (expanded) R.string.study_hide else R.string.study_about_surah,
+                if (expanded) R.string.reading_hide else R.string.reading_about_surah,
             ),
             onClick = { onExpandedChange(!expanded) },
             modifier = Modifier.padding(top = if (info == null) Space.Section else 10.dp),
@@ -581,7 +581,7 @@ private fun SurahEnd(
                 .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)),
         )
         Text(
-            text = stringResource(R.string.study_surah_complete, surah.nameSimple),
+            text = stringResource(R.string.reading_surah_complete, surah.nameSimple),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 16.dp),
@@ -603,7 +603,7 @@ private fun SurahEnd(
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = stringResource(R.string.study_next_surah),
+                        text = stringResource(R.string.reading_next_surah),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -624,7 +624,7 @@ private fun SurahEnd(
             }
         } else if (next > 114) {
             Text(
-                text = stringResource(R.string.study_end_of_quran),
+                text = stringResource(R.string.reading_end_of_quran),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(top = 10.dp),
@@ -636,7 +636,7 @@ private fun SurahEnd(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun AyahBlock(
-    row: StudyRow,
+    row: ReadingRow,
     hafs: FontFamily,
     settings: AppSettings,
     wordByWord: Boolean,
@@ -650,8 +650,8 @@ private fun AyahBlock(
     val haptics = LocalHapticFeedback.current
     val palette = LocalPagePalette.current
     val playing = row.ayah.number == playingAyah
-    val ayahActions = stringResource(R.string.study_ayah_actions)
-    val paperActions = stringResource(R.string.study_paper_actions)
+    val ayahActions = stringResource(R.string.reading_ayah_actions)
+    val paperActions = stringResource(R.string.reading_paper_actions)
     val wash = when {
         isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = Wash.Selected)
         playing -> palette.highlight.copy(alpha = palette.highlight.alpha * 0.55f)
@@ -678,13 +678,13 @@ private fun AyahBlock(
                     },
                 )
                 // Every ayah has a node whose action raises the
-                // pill, and the study block now gives a screen reader the
+                // pill, and the reading block now gives a screen reader the
                 // same two doors a finger has: the ayah's actions, which is
                 // the one gesture the reading is built around, and the
                 // paper's own tap.
                 .semantics {
                     // Every ayah has a node whose action raises
-                    // the pill, and the study block gives a screen reader the
+                    // the pill, and the reading block gives a screen reader the
                     // same two doors a finger has: the ayah's actions, which
                     // is the one gesture the reading is built around, and
                     // the paper's own tap.
@@ -764,7 +764,7 @@ private fun AyahBlock(
                     )
                 }
             }
-            // The reference closes the block the way a printed study Quran
+            // The reference closes the block the way a printed copy
             // numbers its verses: after the reader has read the ayah, not as
             // a heading before it. It takes the theme's secondary tone
             // rather than a quiet alpha, because an alpha that whispers on
@@ -795,7 +795,7 @@ private data class ArabicLine(val text: AnnotatedString, val washRange: IntRange
  * always a bare rectangle behind the glyphs.
  */
 private fun arabic(
-    row: StudyRow,
+    row: ReadingRow,
     playing: Boolean,
     playingWord: Int?,
 ): ArabicLine {

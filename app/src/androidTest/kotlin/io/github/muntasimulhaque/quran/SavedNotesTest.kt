@@ -15,7 +15,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.SavedStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
-import io.github.muntasimulhaque.quran.feature.study.R as StudyR
+import io.github.muntasimulhaque.quran.feature.reading.R as ReadingR
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
@@ -100,13 +100,13 @@ class SavedNotesTest {
     }
 
     private fun openBrowse() {
-        val studyPage = compose.activity.getString(StudyR.string.study_page_description)
+        val readingPage = compose.activity.getString(ReadingR.string.reading_page_description)
         compose.waitUntil(timeoutMillis = 90_000) {
-            compose.onAllNodesWithContentDescription(studyPage).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithContentDescription(readingPage).fetchSemanticsNodes().isNotEmpty()
         }
         // The chrome comes up on a tap on the paper; the reading below it
         // keeps its own gestures, so the tap is the same one a reader makes.
-        compose.onAllNodesWithContentDescription(studyPage).onFirst()
+        compose.onAllNodesWithContentDescription(readingPage).onFirst()
             .tapThePaper()
         val browse = compose.activity.getString(R.string.action_browse)
         compose.waitUntil(timeoutMillis = 15_000) {

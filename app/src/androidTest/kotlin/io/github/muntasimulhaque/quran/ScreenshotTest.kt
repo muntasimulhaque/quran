@@ -309,7 +309,7 @@ class ScreenshotTest {
      *
      * The page's exact centre is not a safe place to tap, and this tour found
      * that the hard way: a control can sit under the finger there. A word by
-     * word tile is a control, and the study reading now carries the aid in the
+     * word tile is a control, and the reading now carries the aid in the
      * store's own frames, so a centre tap could open one of those tiles and the
      * bar never came up, and the tour then reached for a door that was not
      * there. The margin is the reading's quiet edge, where no control lives,

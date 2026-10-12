@@ -25,7 +25,7 @@ class StringNameTest {
         "feature-playback",
         "feature-search",
         "feature-settings",
-        "feature-study",
+        "feature-reading",
         "ui-kit",
     )
 

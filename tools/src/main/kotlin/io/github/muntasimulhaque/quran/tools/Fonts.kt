@@ -98,9 +98,9 @@ class Fonts(private val root: File) {
             val sample = uncovered.entries.take(12).joinToString(" ") {
                 "U+${it.key.toString(16).uppercase()}(x${it.value})"
             }
-            problems += "study font cannot draw ${uncovered.size} codepoints: $sample"
+            problems += "reading font cannot draw ${uncovered.size} codepoints: $sample"
         }
-        println("fonts: study text codepoints checked: $codepoints, digits skipped: $digits")
+        println("fonts: reading text codepoints checked: $codepoints, digits skipped: $digits")
     }
 
     /**
@@ -210,7 +210,7 @@ class Fonts(private val root: File) {
         }
 
         // The surah names and the word meanings: names are drawn in Inter, and
-        // each word list's meanings in Literata, exactly as the study view
+        // each word list's meanings in Literata, exactly as the reading
         // draws them.
         openSqlite(File(packs, "core.db")).use { connection ->
             connection.each("SELECT name_simple, name_latin FROM surah") { rs ->

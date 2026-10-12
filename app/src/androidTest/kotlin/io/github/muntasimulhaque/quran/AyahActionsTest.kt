@@ -16,7 +16,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.SavedStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
-import io.github.muntasimulhaque.quran.feature.study.R as StudyR
+import io.github.muntasimulhaque.quran.feature.reading.R as ReadingR
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -141,9 +141,9 @@ class AyahActionsTest {
         .getOrElseNullable(SemanticsProperties.StateDescription) { null }
 
     private fun waitForReading() {
-        val studyPage = compose.activity.getString(StudyR.string.study_page_description)
+        val readingPage = compose.activity.getString(ReadingR.string.reading_page_description)
         compose.waitUntil(timeoutMillis = 90_000) {
-            compose.onAllNodesWithContentDescription(studyPage).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithContentDescription(readingPage).fetchSemanticsNodes().isNotEmpty()
         }
     }
 
@@ -152,8 +152,8 @@ class AyahActionsTest {
      * of the ayah's own reference line, which the block owns.
      */
     private fun longPressReadingAyah() {
-        val studyPage = compose.activity.getString(StudyR.string.study_page_description)
-        compose.onAllNodesWithContentDescription(studyPage).onFirst()
+        val readingPage = compose.activity.getString(ReadingR.string.reading_page_description)
+        compose.onAllNodesWithContentDescription(readingPage).onFirst()
             .tapThePaper()
         // Minutes, not seconds: a slow emulator is not a failing reading
         // aid, and the house rule for a wait that watches text is the one

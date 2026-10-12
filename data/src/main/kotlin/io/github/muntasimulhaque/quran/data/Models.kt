@@ -237,8 +237,8 @@ data class JuzStart(
 /** One downloaded surah of one reciter, offered for removal. */
 data class DownloadedSurah(val surah: Int, val name: String, val bytes: Long)
 
-/** Everything one study row needs: the ayah, its words, and its translations. */
-data class StudyRow(
+/** Everything one reading row needs: the ayah, its words, and its translations. */
+data class ReadingRow(
     val ayah: Ayah,
     val words: List<Word>,
     val translations: List<TranslationLine> = emptyList(),

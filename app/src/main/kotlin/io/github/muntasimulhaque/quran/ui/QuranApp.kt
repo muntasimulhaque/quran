@@ -80,7 +80,7 @@ fun QuranApp(
     // written down as the place, so closing the app leaves it there.
     LaunchedEffect(initialAyah, viewModel.ready) {
         if (initialAyah == null || !viewModel.ready) return@LaunchedEffect
-        viewModel.jumpToAyahInStudy(initialAyah)
+        viewModel.jumpToAyahInReading(initialAyah)
     }
     val settings = viewModel.settings
     val theme = settings.theme.resolved(systemDark = isSystemInDarkTheme())

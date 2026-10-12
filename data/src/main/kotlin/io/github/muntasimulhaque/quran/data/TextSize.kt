@@ -81,8 +81,8 @@ object TextSize {
      * The Arabic inside a Latin tafsir. Arabic set at the Latin size reads
      * visibly smaller, so a quoted passage disappears into the prose around
      * it; the quotation is the Quran or the Prophet's words and must read as
-     * the reading, not as a footnote. The stand is the one the study
-     * translation already gives its inline Arabic (0.8 of the 32 sp Arabic
+     * the reading, not as a footnote. The stand is the one the translation
+     * already gives its inline Arabic (0.8 of the 32 sp Arabic
      * against the 17 sp translation), so the app has one answer to how much
      * larger the Arabic is than the text beside it.
      */
@@ -127,11 +127,11 @@ object TextSize {
     private const val MEANING_BASE = 15f
 
     /**
-     * Arabic beside Latin, at the stand the reading already uses: the study
-     * translation draws its inline Arabic at 0.8 of the 32 sp Arabic against
-     * the 17 sp translation, which is 1.5 to 1. The tafsir's quotations are
-     * drawn in the same Hafs face since the audit, so the stand is the same
-     * 1.5 rather than the 1.4 that stood when the quotations wore Amiri,
+     * Arabic beside Latin, at the stand the reading already uses: the translation
+     * draws its inline Arabic at 0.8 of the 32 sp Arabic against
+     * the 17 sp translation, which is 1.5 to 1. The tafsir's quotations wear
+     * Amiri again after the return, so the stand stays at the audit's 1.5
+     * rather than the 1.4 that stood before it.
      * whose letters are a size larger (owner decision, the audio and type
      * audit session).
      */

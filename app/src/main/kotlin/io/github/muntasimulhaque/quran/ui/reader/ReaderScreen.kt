@@ -60,9 +60,9 @@ import io.github.muntasimulhaque.quran.ui.search.SearchSheet
 import io.github.muntasimulhaque.quran.ui.settings.PackSetupState
 import io.github.muntasimulhaque.quran.ui.settings.SettingsActions
 import io.github.muntasimulhaque.quran.ui.settings.SettingsSheet
-import io.github.muntasimulhaque.quran.ui.study.AyahCard
-import io.github.muntasimulhaque.quran.ui.study.AyahNoteSheet
-import io.github.muntasimulhaque.quran.ui.study.StudyList
+import io.github.muntasimulhaque.quran.ui.reading.AyahCard
+import io.github.muntasimulhaque.quran.ui.reading.AyahNoteSheet
+import io.github.muntasimulhaque.quran.ui.reading.ReadingList
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -200,11 +200,11 @@ fun ReaderScreen(
         run {
             val surah = viewModel.surahOf(settings.ayah)
             if (surah != null) {
-                StudyList(
+                ReadingList(
                     content = content,
                     surah = surah,
                     loadRows = {
-                        viewModel.studyRows(
+                        viewModel.readingRows(
                             surah = surah.number,
                             wordByWord = settings.wordByWord,
                         )

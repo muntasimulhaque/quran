@@ -76,7 +76,7 @@ val Amiri = FontFamily(Font(R.font.amiri_quran))
 
 /**
  * The reading voice of the Quran's own text: the KFGQPC Hafs face, the same
- * one the study reading and the word by word aid are drawn in. It is a font
+ * one the reading and the word by word aid are drawn in. It is a font
  * file rather than a resource, so it is loaded from the assets; use
  * [rememberHafs] to get the family on a surface that shows an ayah.
  */

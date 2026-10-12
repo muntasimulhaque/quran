@@ -23,7 +23,7 @@ import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.PackType
-import io.github.muntasimulhaque.quran.data.StudyRow
+import io.github.muntasimulhaque.quran.data.ReadingRow
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.feature.settings.R
@@ -102,10 +102,10 @@ fun AppearancePage(
 @Composable
 fun TextPage(
     settings: AppSettings,
-    preview: suspend () -> StudyRow?,
+    preview: suspend () -> ReadingRow?,
     onSize: (TypeRole, Float) -> Unit,
 ) {
-    val row by produceState<StudyRow?>(initialValue = null, settings.translationPacks) { value = preview() }
+    val row by produceState<ReadingRow?>(initialValue = null, settings.translationPacks) { value = preview() }
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         row?.let { sample -> SizeSample(row = sample, settings = settings) }
         Group(stringResource(R.string.settings_group_sizes))
@@ -118,7 +118,7 @@ fun TextPage(
 }
 
 @Composable
-private fun SizeSample(row: StudyRow, settings: AppSettings) {
+private fun SizeSample(row: ReadingRow, settings: AppSettings) {
     val context = LocalContext.current
     val hafs = remember(context) { ArabicFonts(context).hafsFamily }
     Column(

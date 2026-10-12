@@ -215,7 +215,7 @@ private fun DownloadedSurahRow(row: DownloadedSurah, onRemove: () -> Unit) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = 12.dp),
         )
-        // The size and the button are two readings of the same row, so they
+        // The size and the button are two ways to read the same row, so they
         // keep the 12 dp the choice rows keep between their words and their
         // trailing control: a size set flush against Remove reads as part of
         // the button instead of as what it weighs.

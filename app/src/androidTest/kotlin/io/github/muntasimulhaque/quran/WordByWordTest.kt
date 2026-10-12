@@ -19,7 +19,7 @@ import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 /**
  * The word by word reading aid, end to end: a translation and its word list
- * are installed, the switch is turned on, and the study reading is checked to
+ * are installed, the switch is turned on, and the reading is checked to
  * show a meaning under a word, in the language of the chosen translation.
  *
  * The library is assembled before the reader screen starts, which is the
@@ -28,7 +28,7 @@ import org.junit.runner.RunWith
  * the compose rule: the compose rule owns the activity, so the activity
  * launches after the library is in place, and it is the supported pairing for
  * this test (an empty rule beside a separately launched activity could
- * compose on a thread without a looper and take the study list's prefetch
+ * compose on a thread without a looper and take the reading list's prefetch
  * scheduler down with it).
  */
 @RunWith(AndroidJUnit4::class)

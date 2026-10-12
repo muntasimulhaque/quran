@@ -1,4 +1,4 @@
-package io.github.muntasimulhaque.quran.ui.study
+package io.github.muntasimulhaque.quran.ui.reading
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -49,7 +49,7 @@ import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.TafsirPassage
-import io.github.muntasimulhaque.quran.feature.study.R
+import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
@@ -233,7 +233,7 @@ private fun AddTranslation(text: String, onClick: () -> Unit, modifier: Modifier
             modifier = Modifier.weight(1f),
         )
         Text(
-            text = stringResource(R.string.study_action_add),
+            text = stringResource(R.string.reading_action_add),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary,
         )
@@ -408,7 +408,7 @@ private fun NoteEditor(
                 )
             }
             TextButton(
-                label = stringResource(R.string.study_note_save),
+                label = stringResource(R.string.reading_note_save),
                 onClick = { onSave(draft.trim().takeIf { it.isNotEmpty() }) },
                 modifier = Modifier.padding(start = Space.Line),
             )

@@ -53,7 +53,7 @@ val LapisLight = Color(0xFF7FB2E5)
 
 // Gold is the ornament tone, and it is read:
 // juz, the surah names drawn into the page, and the ornamental name at the
-// head of the study reading. It therefore meets the same 4.5:1 rule every
+// head of the reading. It therefore meets the same 4.5:1 rule every
 // other text tone does, on each ground it is drawn on: 5.0:1 on paper and
 // 7.0:1 on night. The older paper gold sat at 3.2:1, under the rule, and
 // was darkened without changing the hue; the night gold was lifted in the

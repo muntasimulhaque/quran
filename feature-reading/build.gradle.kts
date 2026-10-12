@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "io.github.muntasimulhaque.quran.feature.study"
+    namespace = "io.github.muntasimulhaque.quran.feature.reading"
     compileSdk = 37
 
     defaultConfig {

@@ -1,4 +1,4 @@
-package io.github.muntasimulhaque.quran.ui.study
+package io.github.muntasimulhaque.quran.ui.reading
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,7 +26,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
  * Word by word: each Arabic word with the meaning the word list gives it.
- * The study reading and the ayah card draw the same aid, so a reader who
+ * The reading and the ayah card draw the same aid, so a reader who
  * learns it in one place finds it in the other.
  *
  * The aid is a flow of pairs, and each pair is as wide as its own meaning.
@@ -56,7 +56,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * secondary tone tires the eye over a long reading, so the meaning
  * stays readable on paper and on night alike.
  *
- * [gloss] says what the aid is standing on. Under the study reading's ayah
+ * [gloss] says what the aid is standing on. Under the reading's ayah
  * the pairs repeat words the verse above already shows, so the Arabic steps
  * one tone down and the line stays the verse. In the ayah card, opened from
  * the card, there is no line above: the aid is the only Arabic there, so

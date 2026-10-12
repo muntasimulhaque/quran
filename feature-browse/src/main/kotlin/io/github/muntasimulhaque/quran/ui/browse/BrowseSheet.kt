@@ -229,7 +229,7 @@ fun BrowseSheet(
                     onBack = { gridSurah = null },
                     onAyah = { number ->
                         // The first ayah of a surah the reader never read
-                        // opens the surah itself, so study mode still lands
+                        // opens the surah itself, so the reading still lands
                         // on its opening rather than mid-list at ayah 1; any
                         // other number is the jump the reader asked for.
                         val first = surahStarts[openSurah.number] ?: 1

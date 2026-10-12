@@ -7,7 +7,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
-import io.github.muntasimulhaque.quran.feature.study.R as StudyR
+import io.github.muntasimulhaque.quran.feature.reading.R as ReadingR
 import java.io.File
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -54,9 +54,9 @@ class RemovedPackCleanupTest {
 
     @Test
     fun aPackTheCatalogNoLongerNamesIsRemoved() {
-        val studyPage = compose.activity.getString(StudyR.string.study_page_description)
+        val readingPage = compose.activity.getString(ReadingR.string.reading_page_description)
         compose.waitUntil(timeoutMillis = 90_000) {
-            compose.onAllNodesWithContentDescription(studyPage).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithContentDescription(readingPage).fetchSemanticsNodes().isNotEmpty()
         }
         assertTrue(
             "the stray pack must be gone from the device",

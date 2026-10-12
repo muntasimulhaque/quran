@@ -284,7 +284,7 @@ object DailyAyahScheduler {
      * The reminder itself. The reader tapped nothing to get here, so the
      * notification carries the whole thought: the Arabic, the translation
      * when they read with one, and the place, with the tap opening that ayah
-     * in the study reading.
+     * in the reading.
      *
      * A receiver runs with seconds to live and no process, so the work is
      * small and every failure is a skipped morning rather than a crash: the

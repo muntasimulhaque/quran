@@ -234,7 +234,7 @@ class SearchCheck(private val root: File) {
 
         // A surah's introduction is drawn block by block, heading over its
         // own paragraph, so it must read as prose: no tag survives into the
-        // study view's "About this surah".
+        // reading's "About this surah".
         val infoPack = File(packs, "words-en.db")
         if (infoPack.isFile) {
             openSqlite(infoPack).use { connection ->

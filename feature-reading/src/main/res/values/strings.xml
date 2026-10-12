@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reading_page_description">Reading</string>
+    <string name="reading_add_translation">Add a translation to read this surah in your language</string>
+    <string name="reading_action_add">Add</string>
+    <string name="reading_place_makkah">Makkah</string>
+    <string name="reading_place_madinah">Madinah</string>
+    <string name="reading_surah_meta">%1$s  ·  %2$d ayahs</string>
+    <string name="reading_about_surah">About this surah</string>
+    <string name="reading_hide">Hide</string>
+    <string name="reading_surah_complete">%1$s complete</string>
+    <string name="reading_next_surah">Next surah</string>
+    <string name="reading_end_of_quran">This is the end of the Quran</string>
+    <string name="reading_ayah_actions">Ayah actions</string>
+    <string name="reading_paper_actions">Show or hide the bar</string>
+
+    <string name="card_tafsir_label">Tafsir</string>
+    <string name="card_add_tafsir">Add a tafsir to read this ayah deeper</string>
+    <string name="card_opening_pack">Opening %1$s…</string>
+    <string name="card_door_shown">Shown</string>
+    <string name="card_door_hidden">Hidden</string>
+    <string name="card_note_take">Take a note</string>
+    <string name="card_note_edit">Edit note</string>
+    <string name="card_note_hint">Write a note for this ayah</string>
+    <string name="action_clear">Clear</string>
+    <string name="reading_note_save">Save</string>
+    <string name="reading_footnote_title">Footnote %1$d  ·  %2$s %3$s</string>
+</resources>

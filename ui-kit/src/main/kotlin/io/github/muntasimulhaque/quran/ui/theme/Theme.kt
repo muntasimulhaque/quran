@@ -21,7 +21,7 @@ import io.github.muntasimulhaque.quran.data.resolved
  * as wrong. The names are Material's, so a control that asks for a container
  * gets the tone this app meant by one:
  *
- * - `background` is the reading itself, the page or the study paper.
+ * - `background` is the reading itself, the page or the reading paper.
  * - `surface` is anything that covers the reading: a sheet, a panel.
  * - `surfaceContainerHigh` is a control that floats *over* the reading with
  *   the page still visible around it: the ayah pill, the playback bar. It

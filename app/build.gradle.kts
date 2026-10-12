@@ -293,7 +293,7 @@ dependencies {
     implementation(project(":data"))
     implementation(project(":content-assets"))
     implementation(project(":ui-kit"))
-    implementation(project(":feature-study"))
+    implementation(project(":feature-reading"))
     implementation(project(":feature-search"))
     implementation(project(":feature-browse"))
     implementation(project(":feature-playback"))

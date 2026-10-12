@@ -117,7 +117,7 @@ internal suspend fun loadShareCard(
     viewModel: ReaderViewModel,
     ayah: Ayah,
 ): ShareRequest = withContext(Dispatchers.IO) {
-    val line = viewModel.studyRow(ayah.number)?.translations?.firstOrNull()
+    val line = viewModel.readingRow(ayah.number)?.translations?.firstOrNull()
     val runs = line?.text?.text
         ?.takeIf { it.isNotBlank() }
         ?.let { text -> RichText.footnotes(text).filter { it.marker == null } }

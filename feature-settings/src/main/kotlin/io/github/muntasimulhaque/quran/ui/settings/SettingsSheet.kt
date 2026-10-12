@@ -30,7 +30,7 @@ import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.DownloadedSurah
 import io.github.muntasimulhaque.quran.data.Recitation
-import io.github.muntasimulhaque.quran.data.StudyRow
+import io.github.muntasimulhaque.quran.data.ReadingRow
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.feature.settings.R
@@ -94,7 +94,7 @@ fun SettingsSheet(
     packSetup: PackSetupState?,
     recitations: List<Recitation>,
     version: String,
-    preview: suspend () -> StudyRow?,
+    preview: suspend () -> ReadingRow?,
     downloadedSurahs: suspend (String) -> List<DownloadedSurah>,
     notificationsBlocked: () -> Boolean,
     exactGrantWithheld: () -> Boolean,
@@ -127,7 +127,7 @@ fun SettingsSheet(
                 // A settings row is a name and the place it stands, and on a
                 // wide screen those two ends drift a foot apart. The sheet
                 // keeps a column a person can read across, centered on the
-                // ground, the way every other sheet and the study reading do.
+                // ground, the way every other sheet and the reading do.
                 .align(Alignment.CenterHorizontally)
                 .widthIn(max = Reading.SheetMeasure)
                 .fillMaxWidth()
