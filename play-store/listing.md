@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 6.2 (versionCode 64)
+Version: 6.3 (versionCode 65)
 
 ## Listing
 
@@ -133,9 +133,9 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (6.2, 345 characters)
+## Release notes (6.3, 381 characters)
 
-Tafsir Arabic now reads correctly. Commas and punctuation that showed as dotted marks are proper Arabic punctuation again. Underneath, the app is simpler: one reading, no leftover page machinery, and a smaller download for the core text. The reading, recitations, search, Browse, and daily ayah are as they were. No ads, no trackers, no account.
+The juz number beside the surah now follows you as you read. Scroll from one juz into the next and it changes with you, instead of waiting for a jump to catch up. Jumps hold too: open an ayah from Browse, Search, or the daily reminder and the next launch returns to it. The reading, recitations, search, Browse, and the daily ayah are as they were. No ads, no trackers, no account.
 
 ## Before each release
 
