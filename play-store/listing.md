@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 6.0 (versionCode 62)
+Version: 6.1 (versionCode 63)
 
 ## Listing
 
@@ -221,6 +221,10 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (6.1, 439 characters)
+
+The System theme now selects like the other two: tap it and the ring stays on System while the page follows your phone. Text sizes are five steps with your current size in the middle, so you can go two steps smaller or larger. Settings sheets no longer bounce when flicked, and About is one App group of facts with nothing to open. The reading, recitations, search, Browse, and daily ayah are as they were. No ads, no trackers, no account.
 
 ## Release notes (6.0, 481 characters)
 

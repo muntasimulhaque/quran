@@ -6,14 +6,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.Recitation
 import io.github.muntasimulhaque.quran.data.UiLanguage
-import io.github.muntasimulhaque.quran.data.resolved
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.clockText
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
@@ -39,20 +37,13 @@ fun SettingsPage.title(): String = stringResource(
 )
 
 /**
- * Where the theme stands, in one line: the ground the reader is reading on
- * right now. With System on a dark phone that is Dark; on a light phone it is
- * Light; a fixed choice always says itself. There is no second half to name,
- * because System is the value and the phone is the only thing that moves it,
- * so the row never claims a page the reader is not on (owner decision, this
- * session).
+ * Where the theme stands, in one line: the stored choice, Light, Dark, or
+ * System, exactly as the reader chose it. The ring on the appearance page
+ * says the same, so the hub never contradicts it by naming the page the
+ * phone happens to be showing (owner decision).
  */
 @Composable
-private fun themeSummary(settings: AppSettings): String {
-    val dark = (LocalContext.current.resources.configuration.uiMode and
-        android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
-        android.content.res.Configuration.UI_MODE_NIGHT_YES
-    return settings.theme.resolved(systemDark = dark).name()
-}
+private fun themeSummary(settings: AppSettings): String = settings.theme.name()
 
 /**
  * The hub: one row per category, each carrying where it stands, so a reader

@@ -40,7 +40,6 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.core.net.toUri
 import io.github.muntasimulhaque.quran.BuildConfig
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.data.Ayah
@@ -190,14 +189,6 @@ fun ReaderScreen(
             val file = withContext(Dispatchers.IO) { writeShareCard(context, image) }
             val opened = file != null && startShareCard(context, file)
             if (!opened) sharePlainText(text)
-        }
-    }
-
-    fun openLink(target: String) {
-        runCatching {
-            context.startActivity(
-                android.content.Intent(android.content.Intent.ACTION_VIEW, target.toUri()),
-            )
         }
     }
 
@@ -499,7 +490,6 @@ fun ReaderScreen(
                 onRemoveDownloads = { recitation, surah ->
                     viewModel.removeDownloads(recitation, surah)
                 },
-                onOpenLink = { url -> openLink(url) },
             ),
             onDismiss = { sheet = ReaderSheet.None },
         )

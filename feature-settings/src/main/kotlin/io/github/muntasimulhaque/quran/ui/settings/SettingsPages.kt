@@ -13,7 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import android.content.res.Configuration
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -27,7 +26,6 @@ import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.StudyRow
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.UiLanguage
-import io.github.muntasimulhaque.quran.data.resolved
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
@@ -75,16 +73,10 @@ fun LanguagePage(
 
 /**
  * The appearance page: the three grounds, as one list. Light, Dark, and
- * System, which follows the phone's own day and night.
- *
- * The filled swatch is the page drawing right now. With System chosen and
- * the phone in dark mode, that is Dark, even though System itself is what is
- * selected; the choice is never lost, because System is the value stored and
- * the swatch only says what is on screen (owner report). The system's own
- * state is read from the resources here rather than from a composition local,
- * because a sheet is its own window and never sees the activity's
- * composition.
- *
+ * System, which follows the phone's own day and night. The ring stands on
+ * the stored choice (owner decision): with System chosen the ring is on
+ * System on every phone, because the ring says what the reader chose and
+ * the phone itself says what is on screen.
  * The switch that used to stand under the swatches is gone: System is the
  * third swatch, so following the phone is one tap in the same list as the two
  * fixed grounds, and a reader never reconciles a swatch with a toggle (owner
@@ -95,12 +87,9 @@ fun AppearancePage(
     settings: AppSettings,
     onTheme: (AppTheme) -> Unit,
 ) {
-    val systemDark = (LocalContext.current.resources.configuration.uiMode and
-        Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-    val shown = settings.theme.resolved(systemDark = systemDark)
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_theme))
-        ThemeRow(selected = settings.theme, shown = shown, onSelect = onTheme)
+        ThemeRow(selected = settings.theme, onSelect = onTheme)
         Spacer(Modifier.height(Space.Section))
     }
 }
@@ -250,26 +239,21 @@ fun TafsirsPage(
     }
 }
 
-/** Where a correction or a rights request is heard. */
-internal const val RIGHTS_URL = "https://github.com/muntasimulhaque/quran/issues"
-
 /** How the catalog joins the licenses of one pack's datasets. */
 private const val LICENSE_SEPARATOR = " · "
 
 /**
- * The app itself: its version, who made what it carries and under what terms,
- * and the one door to a person when something is wrong.
+ * The app itself: its version, who made what it carries and under what terms.
  *
  * The credits stand here, on the page, rather than behind a row that opens
  * them (owner decision, this session): every license is honored by being read
  * where a reader already is, not by a door they have to think to open, and a
  * reader who wonders who made the text meets the answer the moment they open
- * About. The takedown path is the one thing that still opens, because it is a
- * door to a person and not a fact to read.
+ * About.
  *
- * The page is the sheet's own list: a fact carries no mark, and its one door
- * is a [PageRow], so a reader who came here sees the same row as the hub
- * above (owner decision). Nothing here needs a connection to read.
+ * The page is facts only: every row is read and nothing opens (owner
+ * decision). Corrections and rights requests travel through the store
+ * listing's contact and the project repository rather than through the app.
  *
  * The content is checked on the reader's behalf, once a day, without being
  * asked; there is no row for it here, because a reader should never have to
@@ -279,11 +263,11 @@ private const val LICENSE_SEPARATOR = " · "
 fun AboutPage(
     packs: List<ContentPack>,
     version: String,
-    onOpenLink: (String) -> Unit,
 ) {
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_about))
         ValueRow(stringResource(R.string.settings_version), version)
+        ValueRow(stringResource(R.string.settings_license_label), stringResource(R.string.about_license))
 
         Group(stringResource(R.string.about_group_content))
         packs.forEach { pack ->
@@ -360,14 +344,6 @@ fun AboutPage(
             ),
         )
 
-        Group(stringResource(R.string.about_group_app))
-        ValueRow(stringResource(R.string.settings_license_label), stringResource(R.string.about_license))
-        PageRow(
-            title = stringResource(R.string.settings_rights),
-            summary = null,
-        ) {
-            onOpenLink(RIGHTS_URL)
-        }
         Spacer(Modifier.height(Space.Section))
     }
 }

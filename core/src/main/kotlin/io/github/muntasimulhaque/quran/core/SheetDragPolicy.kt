@@ -18,6 +18,11 @@ package io.github.muntasimulhaque.quran.core
  * [endGesture] answer with what the policy keeps in the list's stead. The
  * caller hands the results to the nested scroll system, so the sheet never
  * sees them.
+ *
+ * Upward is always kept, whatever the list's place: every sheet in the app
+ * opens fully expanded, so an upward pull has no sheet left to expand and
+ * only ever bounced the sheet on its top anchor (owner report). Downward
+ * keeps the gesture's own rule, so pulling down to close still works.
  */
 class SheetDragPolicy {
 
@@ -51,16 +56,24 @@ class SheetDragPolicy {
         }
     }
 
-    /** What of the leftover scroll this policy keeps, in pixels. */
+    /**
+     * What of the leftover scroll this policy keeps, in pixels. Upward
+     * (negative) is always kept: a fully open sheet has nowhere to expand
+     * to, and the energy only bounced it (owner report). Downward keeps the
+     * gesture's own rule, so a pull that started at the top still closes.
+     */
     fun leftoverScroll(available: Float): Float =
-        if (dragging && !startedAtTop) available else 0f
+        if (available < 0f || (dragging && !startedAtTop)) available else 0f
 
     /**
      * Ends the gesture and answers with what of the leftover fling velocity
-     * the policy keeps. The next gesture is judged from its own beginning.
+     * the policy keeps. Upward is kept the same as the scroll itself, so a
+     * fling the list could not use dies quietly instead of kicking a sheet
+     * that is already open. The next gesture is judged from its own
+     * beginning.
      */
     fun endGesture(available: Float): Float {
-        val kept = if (dragging && !startedAtTop) available else 0f
+        val kept = if (available < 0f || (dragging && !startedAtTop)) available else 0f
         dragging = false
         startedAtTop = true
         return kept

@@ -62,12 +62,9 @@
     <string name="settings_version">সংস্করণ</string>
     <string name="settings_license_label">লাইসেন্স</string>
 
-    <string name="settings_rights">সংশোধন ও অধিকার</string>
-
     <string name="about_group_content">কনটেন্ট</string>
     <string name="about_group_fonts">ফন্ট</string>
     <string name="about_group_recitations">তিলাওয়াত</string>
-    <string name="about_group_app">অ্যাপ</string>
     <string name="about_license">MIT</string>
     <string name="about_pack_title">%1$s · %2$s</string>
 

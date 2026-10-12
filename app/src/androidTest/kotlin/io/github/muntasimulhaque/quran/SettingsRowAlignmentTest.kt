@@ -347,40 +347,29 @@ class SettingsRowAlignmentTest {
     }
 
     /**
-     * A row that opens something ends in a chevron, on every page of the sheet.
+     * Nothing on the About page opens.
      *
-     * The About page holds one door now, the takedown path, and it is the
-     * sheet's own [PageRow] with a chevron on the margin, the same as every
-     * other door in the sheet. The credits beside it are inherent text, not
-     * doors: a name a reader reads, carrying no mark and answering no tap, so
-     * counting chevrons as a count of the doors is right on this page too
-     * (owner decision). The version line is a fact: not clickable, no mark.
+     * The page is facts only: version, license, and credits, each read where
+     * the reader already is (owner decision). Corrections and rights requests
+     * travel through the store listing's contact and the project repository
+     * rather than through the app, so the page holds no door and draws no
+     * chevron anywhere.
      */
     @Test
-    fun everyDoorOnTheAboutPageEndsInAChevron() {
+    fun nothingOnTheAboutPageOpens() {
         compose.setContent {
             MaterialTheme {
                 AboutPage(
                     packs = emptyList(),
                     version = "3.3 (34)",
-                    onOpenLink = {},
                 )
             }
         }
 
         val doors = compose.onAllNodes(hasClickAction(), useUnmergedTree = true)
-        assertEquals("the page holds one door: the takedown path", 1, doors.fetchSemanticsNodes().size)
+        assertEquals("the page holds no door", 0, doors.fetchSemanticsNodes().size)
         val slots = compose.onAllNodesWithTag("chevron-slot", useUnmergedTree = true)
-        assertEquals("and the one door carries a chevron", 1, slots.fetchSemanticsNodes().size)
-        // The chevron stands at the row's own margin, the line every switch in
-        // the sheet ends on: its right edge is the door row's right edge, less
-        // only the row's end padding, never floating inside the row.
-        val row = doors[0].getUnclippedBoundsInRoot()
-        val slot = slots[0].getUnclippedBoundsInRoot()
-        assertTrue(
-            "the chevron stands at the row's margin, not floating inside it",
-            slot.right.value <= row.right.value && row.right.value - slot.right.value < 24f,
-        )
+        assertEquals("and draws no chevron", 0, slots.fetchSemanticsNodes().size)
     }
 
     /**
@@ -388,8 +377,8 @@ class SettingsRowAlignmentTest {
      *
      * The text sizes drew 38 dp cells, under the design document's own rule,
      * and the fix was structural: an outer 48 dp touch box with the mark
-     * inside it. The name moved above the steps for it, because four 48 dp
-     * boxes are 200 dp wide and a name beside them would break in the middle
+     * inside it. The name moved above the steps for it, because five 48 dp
+     * boxes are 250 dp wide and a name beside them would break in the middle
      * on a small phone. The measurement is the rule's own number, read off the
      * real controls.
      */
@@ -404,8 +393,8 @@ class SettingsRowAlignmentTest {
         }
         val steps = compose.onAllNodes(isSelectable(), useUnmergedTree = true)
         assertEquals(
-            "the text size row's four steps",
-            4,
+            "the text size row's five steps",
+            5,
             steps.fetchSemanticsNodes().size,
         )
         steps.onFirst().assertWidthIsAtLeast(48.dp)

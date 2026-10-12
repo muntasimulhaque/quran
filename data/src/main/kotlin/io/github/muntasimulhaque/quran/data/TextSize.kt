@@ -12,7 +12,7 @@ import kotlin.math.abs
 enum class TypeRole { Arabic, Translation, Tafsir, Words }
 
 /**
- * The four scales every sized text is drawn at, as a multiplier over the base
+ * The five scales every sized text is drawn at, as a multiplier over the base
  * the text was designed for.
  *
  * Arabic is set well above the Latin sizes on purpose: its letter bodies are
@@ -23,7 +23,10 @@ enum class TypeRole { Arabic, Translation, Tafsir, Words }
  * base takes is paid for in the scroll, which costs a reader nothing.
  *
  * The largest step stops at 1.2. Past that the reading turns into a page of
- * headings. The smallest was 0.65 and is 0.75 (owner decision, the audio and
+ * headings. The default step is 1, the middle of the five (owner decision):
+ * a reader who opens the text page can go two steps either way, smaller or
+ * larger, from where every text already stands. The smallest was 0.65 and is
+ * 0.75 (owner decision, the audio and
  * type audit session): at 0.65 a translation stood at 11 sp and a word
  * meaning at 9 sp, under every platform floor for text read at length, while
  * 0.75 keeps the compact choice and puts the translation at 12.75 sp. A
@@ -32,7 +35,7 @@ enum class TypeRole { Arabic, Translation, Tafsir, Words }
  */
 object TextSize {
 
-    val STEPS = listOf(0.75f, 0.85f, 1f, 1.2f)
+    val STEPS = listOf(0.75f, 0.85f, 1f, 1.1f, 1.2f)
 
     /** The middle step: comfortable for most readers, on most screens. */
     const val DEFAULT = 1f

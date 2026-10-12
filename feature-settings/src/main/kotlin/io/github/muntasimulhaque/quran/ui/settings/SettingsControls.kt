@@ -40,19 +40,16 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
 
 /**
  * The three grounds, as swatches: Light, Dark, and System, which follows the
- * phone's own day and night. The swatch that is filled is the page the reader
- * is actually reading on: with System chosen and the phone in dark mode, that
- * is Dark, even though System itself is what is selected (owner report). The
- * choice is one list of three, the shape every other single choice in the
- * sheet already wears, so there is no switch beside it to reconcile (owner
- * decision, this session).
+ * phone's own day and night. The ring stands on the stored choice, the same
+ * as every other single choice in the sheet: tapping System rings System,
+ * and Light and Dark carry no ring while it is chosen (owner decision). The
+ * phone following underneath is used only where the colors are picked, never
+ * for any mark or label here.
  */
 @Composable
 fun ThemeRow(
     selected: AppTheme,
     onSelect: (AppTheme) -> Unit,
-    /** The page drawn right now, when System has a say. */
-    shown: AppTheme = selected,
 ) {
     Row(
         modifier = Modifier
@@ -65,16 +62,16 @@ fun ThemeRow(
                 modifier = Modifier
                     .minimumInteractiveComponentSize()
                     .clip(RoundedCornerShape(14.dp))
-                    .selectable(selected = theme == shown, role = Role.RadioButton) {
+                    .selectable(selected = theme == selected, role = Role.RadioButton) {
                         onSelect(theme)
                     }
                     .padding(horizontal = 6.dp, vertical = 8.dp),
             ) {
-                ThemeSwatch(theme = theme, chosen = theme == shown)
+                ThemeSwatch(theme = theme, chosen = theme == selected)
                 Text(
                     text = theme.name(),
                     style = MaterialTheme.typography.labelSmall,
-                    color = if (theme == shown) {
+                    color = if (theme == selected) {
                         MaterialTheme.colorScheme.primary
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant

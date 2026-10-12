@@ -62,12 +62,9 @@
     <string name="settings_version">Version</string>
     <string name="settings_license_label">License</string>
 
-    <string name="settings_rights">Corrections and rights</string>
-
     <string name="about_group_content">Content</string>
     <string name="about_group_fonts">Fonts</string>
     <string name="about_group_recitations">Recitations</string>
-    <string name="about_group_app">App</string>
     <string name="about_license">MIT</string>
     <string name="about_pack_title">%1$s · %2$s</string>
 

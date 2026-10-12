@@ -4,7 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /**
- * The four scales are a choice the reader made once and expects to keep: the
+ * The five scales are a choice the reader made once and expects to keep: the
  * list is pinned here so a session that trims or grows it must also say what
  * happens to every stored scale. The steps are the reader's own, and a stored
  * value keeps its meaning by landing on the nearest step, never on an index
@@ -13,8 +13,9 @@ import org.junit.Test
 class TextSizeTest {
 
     @Test
-    fun theStepsRunFrom75To120() {
-        assertEquals(listOf(0.75f, 0.85f, 1f, 1.2f), TextSize.STEPS)
+    fun theStepsRunFrom75To120WithTheDefaultInTheMiddle() {
+        assertEquals(listOf(0.75f, 0.85f, 1f, 1.1f, 1.2f), TextSize.STEPS)
+        assertEquals(TextSize.DEFAULT, TextSize.STEPS[TextSize.STEPS.size / 2])
     }
 
     @Test

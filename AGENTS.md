@@ -89,7 +89,7 @@ dead letter.
    lorem text, stock iconography, generic Material defaults. Every string is
    a real sentence, every color is chosen, every icon is drawn for this app.
 7. **Accessibility is a rule, not a feature.** TalkBack works end to end.
-   The reading honors the system font scale at the reader's own four steps;
+   The reading honors the system font scale at the reader's own five steps;
    the phone's own magnification covers anything beyond them.
    Contrast targets live in the theme and are measured.
 8. **Two UI languages, one content language each.** English and Bangla ship
@@ -385,7 +385,7 @@ implement it and update this list.
   note lives inside Saved with the ayah it was written on.
 - A surah row in Browse opens its own ayah grid; there is no separate Go to
   Ayah tab.
-- Text sizes are 0.75, 0.85, 1, 1.2.
+- Text sizes are 0.75, 0.85, 1, 1.1, 1.2, with 1 the middle step.
 - The theme is one choice of three: Light, Dark, and System, drawn as one
   swatch row with no switch beside it (owner decision, this session). The
   two grounds keep their names, Light and Dark, the words every phone already
@@ -393,7 +393,9 @@ implement it and update this list.
   mode; System follows the phone's own day and night and replaces the
   follow-system toggle the two-swatch page used to carry, which was the source
   of the one state a reader could not explain (a Night choice shown as the day
-  page). The warm paper and lamplight pigments are unchanged; only the names
+  page). The ring stands on the stored choice on every phone: with System
+  chosen the ring is on System and never on Light or Dark, and the hub row
+  names the stored choice too (owner decision). The warm paper and lamplight pigments are unchanged; only the names
   and the control moved.
 - Saheeh International is the only translation.
 - Ibn Kathir is the tafsir.
@@ -410,10 +412,11 @@ implement it and update this list.
   interface, chrome is summoned and never resident, one accent, hairlines
   over boxes.
 - Content is sourced from QUL and QuranEnc, with every license
-  honored and a takedown path in About. The credits stand on the About page
-  itself, always visible, not behind a door (owner decision, this session):
-  every license is honored by being read where a reader already is, and the
-  takedown path is the one thing on the page that still opens.
+  honored on the About page itself. The credits stand there, always visible,
+  not behind a door (owner decision, this session): every license is honored
+  by being read where a reader already is. The page is facts only and opens
+  nothing; corrections and rights requests travel through the store listing's
+  contact and the project repository (owner decision).
 - The Listening settings page is gone (owner decision, this session): the
   pace and the end-of-audio answer live in the pill's own listening menu,
   where a reader already is while hearing, and a second door to the same two

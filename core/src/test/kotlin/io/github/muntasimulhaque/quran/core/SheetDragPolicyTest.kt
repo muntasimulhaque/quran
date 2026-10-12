@@ -11,8 +11,29 @@ import org.junit.Test
 class SheetDragPolicyTest {
 
     @Test
-    fun aGestureFromTheTopLeavesEverythingToTheSheet() {
+    fun anUpwardLeftoverNeverReachesTheSheet() {
         val policy = SheetDragPolicy()
+        // The sheet is already fully open and the list took nothing: the
+        // upward energy used to bounce the whole sheet on its top anchor
+        // (owner report), so the gate swallows it wherever the gesture began.
+        policy.onUserInput(atTop = true)
+        assertEquals(-120f, policy.leftoverScroll(-120f), 0.001f)
+        assertEquals(-400f, policy.endGesture(-400f), 0.001f)
+    }
+
+    @Test
+    fun anUpwardLeftoverIsKeptMidGestureToo() {
+        val policy = SheetDragPolicy()
+        policy.onUserInput(atTop = false)
+        assertEquals(-80f, policy.leftoverScroll(-80f), 0.001f)
+        assertEquals(-250f, policy.endGesture(-250f), 0.001f)
+    }
+
+    @Test
+    fun aDownwardPullFromTheTopStillCloses() {
+        val policy = SheetDragPolicy()
+        // The close gesture is untouched: downward from the top belongs to
+        // the sheet, so a short page still dismisses by pulling down.
         policy.onUserInput(atTop = true)
         assertEquals(0f, policy.leftoverScroll(120f), 0.001f)
         assertEquals(0f, policy.endGesture(400f), 0.001f)

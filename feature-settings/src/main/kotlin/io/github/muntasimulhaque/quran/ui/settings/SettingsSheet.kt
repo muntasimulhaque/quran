@@ -67,7 +67,6 @@ data class SettingsActions(
     val onRemovePack: (String) -> Unit = {},
     val onPackSetupCancel: () -> Unit = {},
     val onRemoveDownloads: suspend (String, Int) -> Unit = { _, _ -> },
-    val onOpenLink: (String) -> Unit = {},
 )
 
 /** A pack the reader asked for, while it downloads. */
@@ -208,7 +207,6 @@ fun SettingsSheet(
                     SettingsPage.About -> AboutPage(
                         packs = packs,
                         version = version,
-                        onOpenLink = actions.onOpenLink,
                     )
                 }
             }

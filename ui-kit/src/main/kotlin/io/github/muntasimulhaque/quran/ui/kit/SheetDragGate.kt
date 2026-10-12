@@ -42,7 +42,9 @@ import io.github.muntasimulhaque.quran.core.SheetDragPolicy
  * scroll in a column rather than a list, and a scroll back to the top of a
  * long tafsir closed the card the same way it once closed Browse. The gate is
  * worn the same way everywhere, so one gesture behaves the same in all of
- * them.
+ * them. Upward leftovers never reach any sheet: every sheet opens fully
+ * expanded, so upward energy only ever bounced it on its top anchor (owner
+ * report), while downward from the top still closes.
  */
 class SheetDragGate(
     private val atTop: () -> Boolean,
