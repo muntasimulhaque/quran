@@ -44,11 +44,6 @@
     <string name="settings_downloaded_label">Downloaded surahs (%1$d)</string>
     <string name="settings_downloaded_empty">No surahs downloaded for this reciter yet. Tap Play on any ayah to add one.</string>
 
-    <string name="pack_type_translation">Translation</string>
-    <string name="pack_type_tafsir">Tafsir</string>
-    <string name="pack_type_words">Word meanings</string>
-    <string name="pack_type_recitation">Recitation</string>
-    <string name="pack_type_script">Script</string>
     <string name="pack_included_suffix">included</string>
     <string name="pack_action_add">Add</string>
     <string name="pack_action_remove">Remove</string>

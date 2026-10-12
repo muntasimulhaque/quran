@@ -55,7 +55,6 @@ import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
-import io.github.muntasimulhaque.quran.ui.rich.ArabicBody
 import io.github.muntasimulhaque.quran.ui.rich.RichBlocks
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Reading
@@ -193,7 +192,7 @@ fun AyahCard(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             } else {
-                                TafsirPanel(view, arabic = pack.language == "ar", settings = settings)
+                                TafsirPanel(view, settings = settings)
                             }
                         }
                     }
@@ -297,25 +296,18 @@ private fun DoorRow(
 }
 
 @Composable
-private fun TafsirPanel(view: TafsirView, arabic: Boolean, settings: AppSettings) {
+private fun TafsirPanel(view: TafsirView, settings: AppSettings) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 4.dp),
     ) {
-        if (arabic) {
-            ArabicBody(
-                runs = remember(view.passage.text) { RichText.quotes(view.passage.text) },
-                sizeSp = settings.tafsirSp,
-            )
-        } else {
-            RichBlocks(
-                blocks = remember(view.passage.text) { RichText.parseHtml(view.passage.text) },
-                sizeSp = settings.tafsirSp,
-                lineSp = settings.tafsirLineSp,
-                arabicSp = settings.tafsirArabicSp,
-            )
-        }
+        RichBlocks(
+            blocks = remember(view.passage.text) { RichText.parseHtml(view.passage.text) },
+            sizeSp = settings.tafsirSp,
+            lineSp = settings.tafsirLineSp,
+            arabicSp = settings.tafsirArabicSp,
+        )
         Text(
             text = view.range,
             style = MaterialTheme.typography.labelMedium,

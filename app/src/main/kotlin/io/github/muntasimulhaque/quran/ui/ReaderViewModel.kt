@@ -280,26 +280,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             // is present is never offered as missing and a language switch
             // never re-fetches what is already here.
             catalog = PackCatalog.load(application).withInstalled(installed)
-            // A pack the catalog no longer names can never be read again, and
-            // its bytes are dead weight: drop it here, the way the As-Sa'di
-            // tafsir left the app for a reader who had added it. The known
-            // set comes from the shipped catalog, so a pack a later release
-            // offers again is never touched by this, and an unreadable
-            // catalog removes nothing: an empty menu is not an empty app.
-            val known = catalog.all().mapTo(HashSet()) { it.id }
-            val stray = if (known.isEmpty()) {
-                emptySet()
-            } else {
-                withContext(Dispatchers.IO) {
-                    (installed - known).also { lost ->
-                        lost.forEach { store.remove(it) }
-                    }
-                }
-            }
-            if (stray.isNotEmpty()) {
-                installed = installed - stray
-                catalog = catalog.withInstalled(installed)
-            }
             val opened = runCatching { ContentDatabase.open(application, catalog, installed) }
             val database = opened.getOrElse {
                 android.util.Log.e(TAG, "the content library could not be opened", it)
@@ -311,19 +291,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             // The reader's settings are read once, and everything that follows
             // uses that same value: the store is not read twice for one launch.
             val stored = settingsStore.settings.first()
-            settings = if (stray.isEmpty()) {
-                stored
-            } else {
-                // The choice that named a removed pack goes with it, so no
-                // dead id lingers in the reader's settings.
-                stored.copy(
-                    translationPacks = stored.translationPacks - stray,
-                    tafsirPacks = stored.tafsirPacks - stray,
-                ).also { cleaned ->
-                    settingsStore.setTranslationPacks(cleaned.translationPacks)
-                    settingsStore.setTafsirPacks(cleaned.tafsirPacks)
-                }
-            }
+            settings = stored
             // The reader's pace and their answer to what happens at the end
             // of the audio are theirs from the last session, and the player
             // must be told before the first ayah.

@@ -99,20 +99,6 @@ class RichTextTest {
     }
 
     @Test
-    fun `quoted passages are marked`() {
-        val runs = RichText.quotes("هو {الثناء على الله} بصفات الكمال")
-        assertEquals(1, runs.count { it.quote })
-        assertEquals("{الثناء على الله}", runs.single { it.quote }.text)
-        assertTrue(runs.filter { it.text.isNotBlank() }.all { it.arabic })
-    }
-
-    @Test
-    fun `unclosed quote keeps its text`() {
-        val runs = RichText.quotes("قال {الحمد")
-        assertEquals("{الحمد", runs.single { it.quote }.text)
-    }
-
-    @Test
     fun `adjacent runs with equal styling merge`() {
         val runs = RichText.parseHtml("<p>one<em></em> two</p>").single().runs
         assertEquals("one two", runs.single().text)

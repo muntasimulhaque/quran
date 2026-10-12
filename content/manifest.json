@@ -1,6 +1,6 @@
 {
   "contentVersion": "1.0.2",
-  "note": "Machine-readable source of truth for bundled content. Human-readable notes in docs/content-sources.md.",
+  "note": "Machine-readable source of truth for bundled content.",
   "datasets": [
     {
       "id": "quran-script-kfgqpc",

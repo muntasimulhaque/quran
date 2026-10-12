@@ -44,11 +44,6 @@
     <string name="settings_downloaded_label">ডাউনলোড করা সূরা (%1$d)</string>
     <string name="settings_downloaded_empty">এই তিলাওয়াতকারীর জন্য এখনও কোনো সূরা ডাউনলোড হয়নি। যেকোনো আয়াতে প্লে ট্যাপ করে একটি যোগ করুন।</string>
 
-    <string name="pack_type_translation">অনুবাদ</string>
-    <string name="pack_type_tafsir">তাফসীর</string>
-    <string name="pack_type_words">শব্দের অর্থ</string>
-    <string name="pack_type_recitation">তিলাওয়াত</string>
-    <string name="pack_type_script">লিপি</string>
     <string name="pack_included_suffix">অন্তর্ভুক্ত</string>
     <string name="pack_action_add">যোগ করুন</string>
     <string name="pack_action_remove">মুছুন</string>

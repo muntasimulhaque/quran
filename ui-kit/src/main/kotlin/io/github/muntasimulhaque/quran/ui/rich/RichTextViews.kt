@@ -33,7 +33,6 @@ import io.github.muntasimulhaque.quran.core.TextBlockKind
 import io.github.muntasimulhaque.quran.core.TextRun
 import io.github.muntasimulhaque.quran.core.ScriptMix
 import io.github.muntasimulhaque.quran.core.scriptMix
-import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Wash
@@ -271,31 +270,6 @@ fun RichBlocks(
             }
         }
     }
-}
-
-/** Draws the As-Sa'di tafsir: Arabic prose with the Quran quotes set apart. */
-@Composable
-fun ArabicBody(runs: List<TextRun>, modifier: Modifier = Modifier, sizeSp: Float = 20f) {
-    Text(
-        text = annotated(
-            runs,
-            arabicSize = sizeSp.sp,
-            markerSize = markerSp(sizeSp, 0.6f),
-            quoteColor = LocalPagePalette.current.ink,
-        ),
-        style = TextStyle(
-            fontFamily = Amiri,
-            fontSize = sizeSp.sp,
-            lineHeight = (sizeSp * 1.9f).sp,
-            // As-Sa'di is Arabic prose from its first letter; the paragraph's
-            // own direction is stated beside the right alignment so the two
-            // can never disagree about which edge a wrapped line starts from.
-            textDirection = TextDirection.Rtl,
-        ),
-        color = LocalPagePalette.current.ink,
-        textAlign = TextAlign.Right,
-        modifier = modifier.fillMaxWidth(),
-    )
 }
 
 @Composable

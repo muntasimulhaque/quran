@@ -256,7 +256,7 @@ at every step:
 
 - `fetch` runs once on a machine that lacks the Arabic text font (about a
   minute) and is offline after that. The `qpc-v2-fonts` Release stands
-  unreferenced since the Mushaf became a text page: its SHA-256 is no longer
+  unreferenced since the printed page became a text page: its SHA-256 is no longer
   pinned, and the font is no longer part of the app.
 - `verify`, `audit`, and `fonts` read only `content/raw` and
   `content/work/verify`, so they run on the owner's machine only. `ls
@@ -305,8 +305,7 @@ at every step:
 2. **Version convention.** `versionCode` by 1; `versionName` up one tenth
    within the major line, 0.1 through 0.9, then 1.0, then 1.1 through 1.9,
    then 2.0. There is no 0.10 and never a two-digit minor. The version line
-   goes to `play-store/listing.md` with the notes beside it, and the
-   previous release's notes stay under their own heading.
+   goes to `play-store/listing.md` with the notes beside it, and older notes are not kept.
 3. **Screenshots before the hand-off, whenever visible UI changed.** The
    push starts the capture on its own, and the set is collected whole from
    one run: all three form factors, eight frames each, every frame
@@ -380,7 +379,7 @@ implement it and update this list.
 - Reader-first, no tab bar.
 - One reading with no mode name. The reader's doors are Browse, Search, and
   Settings; there is no bottom bar and no mode switch (owner decision, this
-  session: the Mushaf page is removed because it could not match the print).
+  session: the printed page is removed because it could not match the print).
 - Last Read is the fourth Browse tab beside Surahs, Juz, and Saved, and a
   note lives inside Saved with the ayah it was written on.
 - A surah row in Browse opens its own ayah grid; there is no separate Go to
@@ -507,7 +506,7 @@ them are worth reading before any run:
 - **One fact, one command, read once.** A failure is never guessed at
   twice: the second guess costs a capture run.
 - **A removed screen takes its test nodes with it.** The tour pressed a
-  Mushaf node on a reading that no longer draws one, and the pill never
+  removed screen's node on a reading that no longer draws one, and the pill never
   rose: after deleting a surface, grep its content descriptions before
   running anything.
 

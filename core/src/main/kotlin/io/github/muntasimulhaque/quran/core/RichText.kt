@@ -231,25 +231,6 @@ object RichText {
         return coalesce(runs)
     }
 
-    /** Marks the Arabic passages As-Sa'di wraps in braces, braces included. */
-    fun quotes(text: String): List<TextRun> {
-        val runs = mutableListOf<TextRun>()
-        var index = 0
-        while (index < text.length) {
-            val open = text.indexOf('{', index)
-            if (open < 0) {
-                runs += splitRuns(text.substring(index))
-                break
-            }
-            if (open > index) runs += splitRuns(text.substring(index, open))
-            val close = text.indexOf('}', open + 1)
-            val end = if (close < 0) text.length else close + 1
-            runs += splitRuns(text.substring(open, end), quote = true)
-            index = end
-        }
-        return coalesce(runs)
-    }
-
     /**
      * The readable form of a marked-up document read from its first word to
      * its last: every heading and every paragraph of the source becomes its
