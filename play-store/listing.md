@@ -113,7 +113,7 @@ caption keeps air above the frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is refreshed for 6.0 from capture run 38157474099: all three legs green with eight frames each, and fifteen of the twenty-four frames changed against the 5.9 set and were read. The three settings frames carry the release's own change: the Listening row is gone and the Theme row reads Light. The three search frames also stand in the captured text caret, and every other changed frame differs only in the status bar clock; the reading, chrome, surah-opening, Browse, ayah-card, and tafsir content is unchanged.
+The set is refreshed for 6.0 from capture run 38157474099: all three legs green with eight frames each, and fifteen of the twenty-four frames changed against the 5.9 set and were read. The three settings frames carry the release's own change: the Listening row is gone and the Theme row reads Light. The three search frames also stand in the captured text caret, and every other changed frame differs only in the status bar clock; the reading, chrome, surah-opening, Browse, ayah-card, and tafsir content is unchanged. The tablet tafsir frames were refreshed from the green run on main after the return to Amiri: every frame compared with its artifact by `cmp`, the two changed frames read, the dotted-circle placeholders gone and the commas in their place.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
