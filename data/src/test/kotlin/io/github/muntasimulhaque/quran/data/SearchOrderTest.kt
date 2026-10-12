@@ -19,7 +19,6 @@ class SearchOrderTest {
     private fun ayah(number: Int, arabic: Int = 0, translation: Boolean = false, meaning: String? = null) =
         SearchHit.AyahHit(
             ayah = Ayah(number, 1, number, "1:$number", "text $number"),
-            page = 1,
             arabicMatchedWords = (1..arabic).toSet(),
             translation = if (translation) {
                 TranslationHit("p", "Pack", "text", emptyList(), emptyList())
@@ -37,7 +36,6 @@ class SearchOrderTest {
         fromAyah = from,
         toAyah = from,
         ayah = Ayah(from, 1, from, "1:$from", "text"),
-        page = 1,
         text = "excerpt",
         ranges = emptyList(),
     )
@@ -66,7 +64,7 @@ class SearchOrderTest {
 
     @Test
     fun aSurahAndAReferenceComeBeforeEveryAyah() {
-        val reference = SearchHit.ReferenceHit(Ayah(255, 2, 255, "2:255", "text"), 42)
+        val reference = SearchHit.ReferenceHit(Ayah(255, 2, 255, "2:255", "text"))
         val surah = SearchHit.SurahHit(Surah(2, "البقرة", "Al-Baqarah", "Al-Baqarah", "madinah", 286))
         val (hits, _) = orderSearchHits(
             leading = listOf(surah, reference),

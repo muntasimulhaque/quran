@@ -187,10 +187,10 @@ fun BrowseSheet(
         value = withContext(Dispatchers.IO) {
             val numbers = (saved.map { it.ayahNumber } + lastRead.map { it.ayahNumber }).distinct()
             if (numbers.isEmpty()) return@withContext emptyMap()
-            val ayahs = content.ayahsWithPages(numbers).associateBy { it.ayah.number }
+            val ayahs = content.ayahsByNumbers(numbers).associateBy { it.number }
             val surahs = content.surahs().associateBy { it.number }
             numbers.associateWith { number ->
-                val ayah = ayahs[number]?.ayah
+                val ayah = ayahs[number]
                 AyahText(
                     // The reader's own way of naming the place: the surah as
                     // they know it, and the ayah's own number under it.

@@ -1,5 +1,5 @@
 {
-  "contentVersion": "1.0.1",
+  "contentVersion": "1.0.2",
   "note": "Machine-readable source of truth for bundled content. Human-readable notes in docs/content-sources.md.",
   "datasets": [
     {
@@ -15,22 +15,6 @@
       "path": "content/raw/qul/kfgqpc-hafs-word-by-word.sqlite.zip",
       "bytes": 1581385,
       "sha256": "64b59c7ae3dae32f3650c534cb5a40c91089e0a6319372ded9500181a3cc6a47",
-      "assetUrl": null
-    },
-    
-    {
-      "id": "mushaf-layout-v2",
-      "name": "KFGQPC V2 layout (1421H print)",
-      "source": "Quranic Universal Library (QUL) by Tarteel",
-      "url": "https://qul.tarteel.ai/resources/mushaf-layout/10",
-      "resourceId": "10",
-      "format": "sqlite",
-      "license": "KFGQPC layout, distributed via QUL",
-      "credit": "King Fahd Glorious Quran Printing Complex (KFGQPC), via QUL",
-      "usedFor": "Page, line, and word geometry for the reader's place",
-      "path": "content/raw/qul/kfgqpc-v2-layout.sqlite.zip",
-      "bytes": 99483,
-      "sha256": "697cbc7f16db1f56b6d95c4d11a9eea074ad4759babd2d75abcad5738e2fdf96",
       "assetUrl": null
     },
     

@@ -23,7 +23,6 @@ import io.github.muntasimulhaque.quran.data.PackCatalog
 import io.github.muntasimulhaque.quran.data.PackDownloader
 import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.PackUpdater
-import io.github.muntasimulhaque.quran.data.PagePosition
 import io.github.muntasimulhaque.quran.data.LastReadStore
 import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.LAST_MINUTE_OF_DAY
@@ -110,10 +109,8 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     var failure by mutableStateOf(false)
         private set
 
-    /** The page number of the reader's place, for reference. */
-    var page by mutableIntStateOf(1)
-        private set
-    var position by mutableStateOf<PagePosition?>(null)
+    /** The juz of the reader's place, for reference. */
+    var juz by mutableIntStateOf(1)
         private set
 
 
@@ -412,13 +409,12 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     private var surahIndexByNumber: Map<Int, Surah>? = null
 
     /**
-     * Moves the reader's place: the page follows the ayah, and the ayah is
+     * Moves the reader's place: the juz follows the ayah, and the ayah is
      * written down when the change is the reader's own.
      */
     private suspend fun setPlace(ayah: Int, database: ContentDatabase, persist: Boolean) {
         val clamped = ayah.coerceIn(1, 6236)
-        page = database.pageOfAyah(clamped)
-        position = database.pagePosition(page)
+        juz = database.juzOfAyah(clamped)
         if (persist && settings.ayah != clamped) settingsStore.setAyah(clamped)
     }
 

@@ -245,7 +245,7 @@ fun ReaderScreen(
 
         ReaderTopBar(
             title = surahName(viewModel, settings.ayah),
-            detail = viewModel.position?.let { stringResource(R.string.juz_label, it.juz) },
+            detail = stringResource(R.string.juz_label, viewModel.juz),
             visible = chrome,
             onBrowse = { sheet = ReaderSheet.Browse },
             onSearch = { sheet = ReaderSheet.Search },
@@ -419,7 +419,7 @@ fun ReaderScreen(
             packLanguages = viewModel.packs.associate { it.id to it.language },
             wordsPack = content.meaningPack(viewModel.wordLanguage) ?: ContentDatabase.WORDS_PACK,
             onDismiss = { sheet = ReaderSheet.None },
-            onAyah = { ayah, _ ->
+            onAyah = { ayah ->
                 sheet = ReaderSheet.None
                 viewModel.jumpToAyah(ayah.number)
             },

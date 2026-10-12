@@ -19,7 +19,6 @@ class SearchMeaningTest {
         words: List<String> = emptyList(),
     ) = SearchHit.AyahHit(
         ayah = Ayah(1, 1, 1, "1:1", "text"),
-        page = 1,
         arabicMatchedWords = (1..arabic).toSet(),
         translation = if (translationRanges.isEmpty()) {
             null

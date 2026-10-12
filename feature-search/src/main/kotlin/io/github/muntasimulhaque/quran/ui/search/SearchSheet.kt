@@ -130,7 +130,7 @@ fun SearchSheet(
     packLanguages: Map<String, String>,
     wordsPack: String,
     onDismiss: () -> Unit,
-    onAyah: (Ayah, Int) -> Unit,
+    onAyah: (Ayah) -> Unit,
     onSurah: (Surah) -> Unit,
 ) {
     val context = LocalContext.current
@@ -496,11 +496,11 @@ private fun StatusLine(
 }
 
 @Composable
-private fun ReferenceRow(ayah: Ayah, onAyah: (Ayah, Int) -> Unit) {
+private fun ReferenceRow(ayah: Ayah, onAyah: (Ayah) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onAyah(ayah, 0) }
+            .clickable { onAyah(ayah) }
             .padding(horizontal = 22.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -523,7 +523,7 @@ private fun ReferenceRow(ayah: Ayah, onAyah: (Ayah, Int) -> Unit) {
         // control keeps, so the two never read as one crowded shape.
         TextButton(
             label = stringResource(R.string.search_action_open),
-            onClick = { onAyah(ayah, 0) },
+            onClick = { onAyah(ayah) },
             modifier = Modifier.padding(start = 12.dp),
         )
     }
@@ -574,12 +574,12 @@ private fun AyahRow(
     hafs: FontFamily,
     terms: List<String>,
     showSource: Boolean,
-    onAyah: (Ayah, Int) -> Unit,
+    onAyah: (Ayah) -> Unit,
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onAyah(hit.ayah, hit.page) }
+            .clickable { onAyah(hit.ayah) }
             .padding(horizontal = 22.dp, vertical = 14.dp),
     ) {
         Text(
@@ -672,11 +672,11 @@ private fun AyahRow(
 }
 
 @Composable
-private fun TafsirRow(hit: SearchHit.TafsirHitResult, onAyah: (Ayah, Int) -> Unit) {
+private fun TafsirRow(hit: SearchHit.TafsirHitResult, onAyah: (Ayah) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onAyah(hit.ayah, hit.page) }
+            .clickable { onAyah(hit.ayah) }
             .padding(horizontal = 22.dp, vertical = 14.dp),
     ) {
         Text(

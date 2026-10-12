@@ -77,25 +77,25 @@ class PlaybackController(
 
     suspend fun play(recitation: String, ayahNumber: Int) {
         val database = content ?: return
-        val location = withContext(Dispatchers.IO) {
-            database.ayahsWithPages(listOf(ayahNumber)).firstOrNull()
+        val ayah = withContext(Dispatchers.IO) {
+            database.ayah(ayahNumber)
         } ?: return
         recitationId = recitation
         requestedAyah = ayahNumber
-        val items = withContext(Dispatchers.IO) { itemsFor(recitation, location.ayah.surah) }
+        val items = withContext(Dispatchers.IO) { itemsFor(recitation, ayah.surah) }
         if (items.isEmpty()) {
             // Without the reciter's word timings there is no audio to point
             // at, and downloading the surah would not change that: say so
             // rather than offer a download that cannot help.
             val timings = withContext(Dispatchers.IO) {
-                database.recitationAyah(recitation, location.ayah.number)
+                database.recitationAyah(recitation, ayah.number)
             }
-            val packageToFetch = manifest.packageFor(recitation, location.ayah.surah)
+            val packageToFetch = manifest.packageFor(recitation, ayah.surah)
                 ?.takeIf { timings != null }
             _state.value = _state.value.copy(
                 recitation = recitation,
                 unavailable = packageToFetch == null,
-                pendingDownloadSurah = if (packageToFetch == null) null else location.ayah.surah,
+                pendingDownloadSurah = if (packageToFetch == null) null else ayah.surah,
                 pendingDownloadBytes = packageToFetch?.bytes ?: 0,
                 pendingIsContinuation = false,
                 downloadProgress = null,
@@ -104,15 +104,15 @@ class PlaybackController(
             return
         }
         val index = items.indexOfFirst {
-            it.mediaId == RecitationPlaylist.mediaId(location.ayah.number, location.ayah.surah)
+            it.mediaId == RecitationPlaylist.mediaId(ayah.number, ayah.surah)
         }
         if (index < 0) {
             // The surah is not fully on the device; ask before fetching it.
-            val packageToFetch = manifest.packageFor(recitation, location.ayah.surah)
+            val packageToFetch = manifest.packageFor(recitation, ayah.surah)
             _state.value = _state.value.copy(
                 recitation = recitation,
                 unavailable = packageToFetch == null,
-                pendingDownloadSurah = if (packageToFetch == null) null else location.ayah.surah,
+                pendingDownloadSurah = if (packageToFetch == null) null else ayah.surah,
                 pendingDownloadBytes = packageToFetch?.bytes ?: 0,
                 pendingIsContinuation = false,
                 downloadProgress = null,
@@ -126,7 +126,7 @@ class PlaybackController(
             player.prepare()
             player.play()
         }
-        loadedThroughSurah = location.ayah.surah
+        loadedThroughSurah = ayah.surah
         _state.value = _state.value.copy(
             recitation = recitation,
             unavailable = false,

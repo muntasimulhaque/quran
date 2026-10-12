@@ -22,7 +22,6 @@ class CheckDb(private val root: File) {
         Expectation("surah", 114),
         Expectation("ayah", 6236),
         Expectation("word", 83_668),
-        Expectation("page_line", 9046),
         Expectation("recitation_ayah", 24_944),
         Expectation("surah_info", 114),
     )

@@ -168,12 +168,8 @@ class ContentDatabase private constructor(
         ).use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
     }
 
-    fun firstAyahOfPage(page: Int): Int =
-        query("SELECT MIN(number) FROM ayah WHERE page = ?", arrayOf(page.toString()))
-            .use { cursor -> if (cursor.moveToFirst()) cursor.getInt(0) else 1 }
-
-    fun pageOfAyah(number: Int): Int =
-        query("SELECT page FROM ayah WHERE number = ?", arrayOf(number.toString()))
+    fun juzOfAyah(number: Int): Int =
+        query("SELECT juz FROM ayah WHERE number = ?", arrayOf(number.toString()))
             .use { cursor -> if (cursor.moveToFirst()) cursor.getInt(0) else 1 }
 
     private fun wordOf(cursor: android.database.Cursor, offset: Int) = Word(
@@ -372,15 +368,6 @@ class ContentDatabase private constructor(
         }
     }
 
-    fun pagePosition(page: Int): PagePosition? =
-        query(
-            "SELECT surah, juz, hizb FROM ayah WHERE page = ? ORDER BY number LIMIT 1",
-            arrayOf(page.toString()),
-        ).use { cursor ->
-            if (!cursor.moveToFirst()) return null
-            PagePosition(cursor.getInt(0), cursor.getInt(1), cursor.getInt(2))
-        }
-
     fun firstAyahOfSurah(surah: Int): Int =
         query("SELECT MIN(number) FROM ayah WHERE surah = ?", arrayOf(surah.toString()))
             .use { cursor -> if (cursor.moveToFirst()) cursor.getInt(0) else 1 }
@@ -409,22 +396,17 @@ class ContentDatabase private constructor(
             }
         }
 
-    fun ayahsWithPages(numbers: List<Int>): List<AyahLocation> {
+    fun ayahsByNumbers(numbers: List<Int>): List<Ayah> {
         if (numbers.isEmpty()) return emptyList()
         val inClause = numbers.joinToString(",")
         return query(
-            "SELECT number, surah, ayah, verse_key, text, page FROM ayah " +
+            "SELECT number, surah, ayah, verse_key, text FROM ayah " +
                 "WHERE number IN ($inClause) ORDER BY number",
             null,
         ).use { cursor ->
             buildList(cursor.count) {
                 while (cursor.moveToNext()) {
-                    add(
-                        AyahLocation(
-                            ayah = ayahOf(cursor),
-                            page = cursor.getInt(5),
-                        ),
-                    )
+                    add(ayahOf(cursor))
                 }
             }
         }
@@ -529,7 +511,7 @@ class ContentDatabase private constructor(
 
         val referenceNumber = if (sources.references) referencedAyahNumber(query.input) else null
         if (referenceNumber != null) {
-            ayahWithPage(referenceNumber)?.let { leading += SearchHit.ReferenceHit(it.first, it.second) }
+            ayah(referenceNumber)?.let { leading += SearchHit.ReferenceHit(it) }
         }
         coroutineContext.ensureActive()
 
@@ -634,7 +616,6 @@ class ContentDatabase private constructor(
                 fromAyah = passage.fromAyah,
                 toAyah = passage.toAyah,
                 ayah = row.ayah,
-                page = row.page,
                 text = excerpt,
                 ranges = ranges,
             )
@@ -643,7 +624,6 @@ class ContentDatabase private constructor(
         val ayahHits = rows.values.map { row ->
             SearchHit.AyahHit(
                 ayah = row.ayah,
-                page = row.page,
                 arabicMatchedWords = row.matchedWords,
                 translation = row.translation,
                 wordMeaning = row.meaning,
@@ -661,7 +641,7 @@ class ContentDatabase private constructor(
         )
     }
 
-    private class Row(val ayah: Ayah, val page: Int) {
+    private class Row(val ayah: Ayah) {
         var matchedWords: Set<Int> = emptySet()
         var translation: TranslationHit? = null
         var meaning: String? = null
@@ -729,14 +709,6 @@ class ContentDatabase private constructor(
         val first = firstAyahCache[surah] ?: return null
         return first + ayah - 1
     }
-
-    private fun ayahWithPage(number: Int): Pair<Ayah, Int>? =
-        query(
-            "SELECT number, surah, ayah, verse_key, text, page FROM ayah WHERE number = ?",
-            arrayOf(number.toString()),
-        ).use { cursor ->
-            if (!cursor.moveToFirst()) null else ayahOf(cursor) to cursor.getInt(5)
-        }
 
     private fun arabicMatches(query: SearchQuery, limit: Int): List<Int> {
         val condition = query.terms.joinToString(" AND ") { "text_search LIKE ? ESCAPE '\\'" }
@@ -879,13 +851,13 @@ class ContentDatabase private constructor(
         for (chunk in numbers.toList().chunked(400)) {
             val placeholders = chunk.joinToString(",") { "?" }
             query(
-                "SELECT number, surah, ayah, verse_key, text, page FROM ayah " +
+                "SELECT number, surah, ayah, verse_key, text FROM ayah " +
                     "WHERE number IN ($placeholders) ORDER BY number",
                 chunk.map { it.toString() }.toTypedArray(),
             ).use { cursor ->
                 while (cursor.moveToNext()) {
                     val ayah = ayahOf(cursor)
-                    out[ayah.number] = Row(ayah, cursor.getInt(5))
+                    out[ayah.number] = Row(ayah)
                 }
             }
         }

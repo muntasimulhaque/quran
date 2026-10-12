@@ -27,8 +27,6 @@ data class Ayah(
     val text: String,
 )
 
-data class AyahLocation(val ayah: Ayah, val page: Int)
-
 data class Footnote(val number: Int, val text: String)
 
 data class TranslationText(val text: String, val footnotes: List<Footnote>)
@@ -78,7 +76,7 @@ sealed interface SearchHit {
     data class SurahHit(val surah: Surah) : SearchHit
 
     /** A direct hit on a reference the reader typed; always first. */
-    data class ReferenceHit(val ayah: Ayah, val page: Int) : SearchHit
+    data class ReferenceHit(val ayah: Ayah) : SearchHit
 
     /**
      * One ayah, with every source that matched it. A row can carry the Arabic
@@ -86,7 +84,6 @@ sealed interface SearchHit {
      */
     data class AyahHit(
         val ayah: Ayah,
-        val page: Int,
         val arabicMatchedWords: Set<Int>,
         val translation: TranslationHit?,
         val wordMeaning: String?,
@@ -110,7 +107,6 @@ sealed interface SearchHit {
         val fromAyah: Int,
         val toAyah: Int,
         val ayah: Ayah,
-        val page: Int,
         val text: String,
         val ranges: List<IntRange>,
     ) : SearchHit
@@ -178,12 +174,6 @@ data class SearchRequest(
     /** The sources the reader has not filtered out. */
     val sources: SearchSources = SearchSources.ALL,
     val limit: Int = 200,
-)
-
-data class PagePosition(
-    val surah: Int,
-    val juz: Int,
-    val hizb: Int,
 )
 
 enum class PackType {

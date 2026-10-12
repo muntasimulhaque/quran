@@ -50,9 +50,9 @@ class Packs(private val root: File) {
         Pack(
             id = "core",
             type = "script",
-            name = "Quran text and page layout",
+            name = "Quran text",
             language = "ar",
-            credit = "KFGQPC Hafs word by word, QPC V2 layout, audited against Tanzil Uthmani",
+            credit = "KFGQPC Hafs word by word, audited against Tanzil Uthmani",
             version = "1",
             shipped = true,
             ayahs = 6236,
@@ -235,12 +235,9 @@ class Packs(private val root: File) {
                         statement.execute("CREATE TABLE ayah AS SELECT * FROM src.ayah")
                         statement.execute(
                             "CREATE TABLE word AS SELECT id, ayah_number, surah, ayah, position, marker, " +
-                                "text, text_search, page, line, line_position FROM src.word",
+                                "text, text_search FROM src.word",
                         )
-                        statement.execute("CREATE TABLE page_line AS SELECT * FROM src.page_line")
                         statement.execute("CREATE INDEX word_ref ON word(surah, ayah, position)")
-                        statement.execute("CREATE INDEX word_page ON word(page, line, line_position)")
-                        statement.execute("CREATE INDEX ayah_page ON ayah(page)")
                         statement.execute("CREATE INDEX ayah_surah ON ayah(surah, ayah)")
                     }
                     "translation" -> {

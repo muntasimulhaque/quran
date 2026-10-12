@@ -16,7 +16,7 @@ import java.sql.Connection
 
 /**
  * Builds the read-only content database the app ships: the canonical text
- * with its geometry, the translation, both tafsirs with group resolution,
+ * word by word, the translation, both tafsirs with group resolution,
  * search columns, recitations with segments, and the navigation metadata.
  *
  * Every insert is deterministic, ordered, and inside one transaction, so the
@@ -36,9 +36,6 @@ class Build(private val root: File) {
         val position: Int,
         val text: String,
         val marker: Boolean,
-        var page: Int = 0,
-        var line: Int = 0,
-        var linePosition: Int = 0,
     )
 
     fun run(): Int {
@@ -48,8 +45,6 @@ class Build(private val root: File) {
         if (database.exists()) database.delete()
 
         val words = readWords()
-        val pageLines = readPageLines()
-        assignGeometry(words, pageLines)
         val ayahNumbers = indexAyahs(words)
         val translation = readTranslation()
         val wordLists = buildMap {
@@ -66,7 +61,6 @@ class Build(private val root: File) {
             schema(connection)
             insertSurahs(connection, surahs)
             val inserted = insertAyahsAndWords(connection, words, ayahNumbers, wordLists, navigation)
-            insertPageLines(connection, pageLines)
             insertTranslation(connection, translation)
             insertTafsirIbnKathir(connection, ayahNumbers)
             // The Bangla library, built only when its sources are present, so
@@ -120,7 +114,7 @@ class Build(private val root: File) {
 
     private fun readWords(): List<Word> {
         // The Book's own text, word by word, straight from the source script:
-        // the page is drawn from these words and from nothing else.
+        // the reading is drawn from these words and from nothing else.
         val script = openSqlite(sourceDb("quran-script-kfgqpc"))
         val words = ArrayList<Word>(83_668)
         script.use { connection ->
@@ -137,59 +131,6 @@ class Build(private val root: File) {
         }
         if (words.size != 83_668) fail("expected 83668 words, found ${words.size}")
         return words
-    }
-
-    private data class PageLine(
-        val page: Int,
-        val line: Int,
-        val type: String,
-        val centered: Boolean,
-        val firstWordId: Int,
-        val lastWordId: Int,
-        val surah: Int,
-    )
-
-    private fun readPageLines(): List<PageLine> {
-        val lines = ArrayList<PageLine>(9046)
-        openSqlite(sourceDb("mushaf-layout-v2")).use { connection ->
-            connection.each(
-                "SELECT page_number, line_number, line_type, is_centered, first_word_id, last_word_id, surah_number " +
-                    "FROM pages ORDER BY page_number, CAST(line_number AS INTEGER)",
-            ) { rs ->
-                val first = rs.getString(5)?.toIntOrNull() ?: 0
-                val last = rs.getString(6)?.toIntOrNull() ?: 0
-                lines += PageLine(
-                    page = rs.getInt(1),
-                    line = rs.getInt(2),
-                    type = rs.getString(3),
-                    centered = rs.getInt(4) == 1,
-                    firstWordId = first,
-                    lastWordId = last,
-                    surah = rs.getString(7)?.toIntOrNull() ?: 0,
-                )
-            }
-        }
-        return lines
-    }
-
-    private fun assignGeometry(words: List<Word>, pageLines: List<PageLine>) {
-        val byId = words.associateBy { it.id }
-        for (line in pageLines) {
-            if (line.type != "ayah") continue
-            var position = 0
-            for (id in line.firstWordId..line.lastWordId) {
-                val word = byId[id]
-                if (word == null) {
-                    fail("layout references unknown word $id")
-                    continue
-                }
-                word.page = line.page
-                word.line = line.line
-                word.linePosition = position++
-            }
-        }
-        val unplaced = words.count { it.page == 0 }
-        if (unplaced != 0) fail("$unplaced words were not placed on a page")
     }
 
     private fun indexAyahs(words: List<Word>): LinkedHashMap<String, Int> {
@@ -353,30 +294,21 @@ class Build(private val root: File) {
             )
             statement.execute(
                 "CREATE TABLE ayah (number INTEGER PRIMARY KEY, surah INTEGER NOT NULL, ayah INTEGER NOT NULL, " +
-                    "verse_key TEXT NOT NULL, words_count INTEGER NOT NULL, page INTEGER NOT NULL, juz INTEGER NOT NULL, " +
+                    "verse_key TEXT NOT NULL, words_count INTEGER NOT NULL, juz INTEGER NOT NULL, " +
                     "hizb INTEGER NOT NULL, rub INTEGER NOT NULL, manzil INTEGER NOT NULL, ruku INTEGER NOT NULL, " +
                     "sajdah INTEGER NOT NULL, sajdah_type TEXT, text TEXT NOT NULL, text_search TEXT NOT NULL)",
             )
             statement.execute("CREATE INDEX ayah_surah ON ayah(surah, ayah)")
-            statement.execute("CREATE INDEX ayah_page ON ayah(page)")
             statement.execute(
                 "CREATE TABLE word (id INTEGER PRIMARY KEY, ayah_number INTEGER NOT NULL, surah INTEGER NOT NULL, " +
                     "ayah INTEGER NOT NULL, position INTEGER NOT NULL, marker INTEGER NOT NULL, text TEXT NOT NULL, " +
-                    "text_search TEXT NOT NULL, " +
-                    "page INTEGER NOT NULL, " +
-                    "line INTEGER NOT NULL, line_position INTEGER NOT NULL)",
+                    "text_search TEXT NOT NULL)",
             )
             statement.execute("CREATE INDEX word_ref ON word(surah, ayah, position)")
-            statement.execute("CREATE INDEX word_page ON word(page, line, line_position)")
             statement.execute(
                 "CREATE TABLE word_meaning (word_id INTEGER NOT NULL, ayah_number INTEGER NOT NULL, " +
                     "position INTEGER NOT NULL, language TEXT NOT NULL, meaning TEXT NOT NULL, " +
                     "meaning_search TEXT NOT NULL, PRIMARY KEY (language, word_id))",
-            )
-            statement.execute(
-                "CREATE TABLE page_line (page INTEGER NOT NULL, line INTEGER NOT NULL, type TEXT NOT NULL, " +
-                    "centered INTEGER NOT NULL, first_word_id INTEGER NOT NULL, last_word_id INTEGER NOT NULL, " +
-                    "surah INTEGER NOT NULL, PRIMARY KEY (page, line))",
             )
             statement.execute(
                 "CREATE TABLE pack (id TEXT PRIMARY KEY, type TEXT NOT NULL, name TEXT NOT NULL, " +
@@ -534,29 +466,27 @@ class Build(private val root: File) {
         for (word in words) grouped.getOrPut("${word.surah}:${word.ayah}") { mutableListOf() }.add(word)
 
         connection.prepareStatement(
-            "INSERT INTO ayah(number, surah, ayah, verse_key, words_count, page, juz, hizb, rub, manzil, ruku, " +
-                "sajdah, sajdah_type, text, text_search) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            "INSERT INTO ayah(number, surah, ayah, verse_key, words_count, juz, hizb, rub, manzil, ruku, " +
+                "sajdah, sajdah_type, text, text_search) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         ).use { statement ->
             for ((key, group) in grouped) {
                 val number = ayahNumbers[key] ?: continue
                 val textWords = group.filterNot { it.marker }
                 val text = textWords.joinToString(" ") { it.text }
-                val page = group.minOf { it.page }
                 statement.setInt(1, number)
                 statement.setInt(2, group.first().surah)
                 statement.setInt(3, group.first().ayah)
                 statement.setString(4, key)
                 statement.setInt(5, textWords.size)
-                statement.setInt(6, page)
-                statement.setInt(7, nav.juz[number])
-                statement.setInt(8, nav.hizb[number])
-                statement.setInt(9, nav.rub[number])
-                statement.setInt(10, nav.manzil[number])
-                statement.setInt(11, nav.ruku[number])
-                statement.setInt(12, nav.sajdah[number])
-                statement.setString(13, nav.sajdahType[number])
-                statement.setString(14, text)
-                statement.setString(15, Search.normalizeForIndex(text))
+                statement.setInt(6, nav.juz[number])
+                statement.setInt(7, nav.hizb[number])
+                statement.setInt(8, nav.rub[number])
+                statement.setInt(9, nav.manzil[number])
+                statement.setInt(10, nav.ruku[number])
+                statement.setInt(11, nav.sajdah[number])
+                statement.setString(12, nav.sajdahType[number])
+                statement.setString(13, text)
+                statement.setString(14, Search.normalizeForIndex(text))
                 statement.addBatch()
             }
             statement.executeBatch()
@@ -586,8 +516,8 @@ class Build(private val root: File) {
         }
 
         connection.prepareStatement(
-            "INSERT INTO word(id, ayah_number, surah, ayah, position, marker, text, text_search, " +
-                "page, line, line_position) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+            "INSERT INTO word(id, ayah_number, surah, ayah, position, marker, text, text_search) " +
+                "VALUES(?,?,?,?,?,?,?,?)",
         ).use { statement ->
             for (word in words) {
                 statement.setInt(1, word.id)
@@ -598,32 +528,11 @@ class Build(private val root: File) {
                 statement.setInt(6, if (word.marker) 1 else 0)
                 statement.setString(7, word.text)
                 statement.setString(8, if (word.marker) "" else Search.normalizeForIndex(word.text))
-                statement.setInt(9, word.page)
-                statement.setInt(10, word.line)
-                statement.setInt(11, word.linePosition)
                 statement.addBatch()
             }
             statement.executeBatch()
         }
         return grouped.size
-    }
-
-    private fun insertPageLines(connection: Connection, lines: List<PageLine>) {
-        connection.prepareStatement(
-            "INSERT INTO page_line(page, line, type, centered, first_word_id, last_word_id, surah) VALUES(?,?,?,?,?,?,?)",
-        ).use { statement ->
-            for (line in lines) {
-                statement.setInt(1, line.page)
-                statement.setInt(2, line.line)
-                statement.setString(3, line.type)
-                statement.setInt(4, if (line.centered) 1 else 0)
-                statement.setInt(5, line.firstWordId)
-                statement.setInt(6, line.lastWordId)
-                statement.setInt(7, line.surah)
-                statement.addBatch()
-            }
-            statement.executeBatch()
-        }
     }
 
     private fun insertTranslation(

@@ -5,17 +5,17 @@
         {
             "id": "core",
             "type": "script",
-            "name": "Quran text and page layout",
+            "name": "Quran text",
             "language": "ar",
-            "credit": "KFGQPC Hafs word by word, QPC V2 layout, audited against Tanzil Uthmani",
-            "license": "KFGQPC font and text terms, distributed via QUL · KFGQPC layout, distributed via QUL · KFGQPC fonts: use, copy and distribute unmodified · Distributed via QUL · Creative Commons Attribution 3.0, no changes, credit and link tanzil.net",
+            "credit": "KFGQPC Hafs word by word, audited against Tanzil Uthmani",
+            "license": "KFGQPC font and text terms, distributed via QUL · KFGQPC fonts: use, copy and distribute unmodified · Distributed via QUL · Creative Commons Attribution 3.0, no changes, credit and link tanzil.net",
             "version": "1",
             "shipped": true,
             "ayahs": 6236,
-            "bytes": 9658368,
-            "sha256": "090654bc1dd1bd0c6bd57afb3c95db832e28c60eb9e3d9b2a0ee76317e078837",
-            "tag": "pack-core-090654bc",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-090654bc/core.db"
+            "bytes": 7589888,
+            "sha256": "58a8378b89e8b0e1932f1eeed473a78dc54d0a6e878dc77b2421ad876cac609d",
+            "tag": "pack-core-58a8378b",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-58a8378b/core.db"
         },
         {
             "id": "translation-saheeh-en",

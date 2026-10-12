@@ -68,7 +68,6 @@ class Verify(private val root: File) {
     private fun check(dataset: Dataset, dir: File) {
         when (dataset.id) {
             "quran-script-kfgqpc" -> checkKfgqpcScript(dataset.id, dir)
-            "mushaf-layout-v2" -> checkLayout(dataset.id, dir)
             "translation-saheeh" -> checkSaheeh(dataset.id, dir)
             "saheeh-qul-crosscheck" -> checkSimpleCount(dataset.id, dir, "translation", 6236)
             "tafsir-ibn-kathir-en" -> checkTafsirQul(dataset.id, dir)
@@ -110,34 +109,6 @@ class Verify(private val root: File) {
                 val text = rs.getString(2) ?: ""
                 if (text.isBlank()) fail(id, "blank text at $location")
                 if (text.contains('\u25CC')) fail(id, "dotted circle artifact at $location")
-            }
-        }
-    }
-
-    private fun checkLayout(id: String, dir: File) {
-        openSqlite(db(dir)).use { connection ->
-            val pages = connection.scalarLong("SELECT COUNT(DISTINCT page_number) FROM pages")
-            if (pages != 604L) fail(id, "expected 604 pages, found $pages")
-            val rows = connection.count("pages")
-            if (rows != 9046L) fail(id, "expected 9046 page lines, found $rows")
-            val types = connection.scalarLong("SELECT COUNT(*) FROM pages WHERE line_type NOT IN ('ayah','basmallah','surah_name')")
-            if (types != 0L) fail(id, "$types rows have an unknown line type")
-            val surahNames = connection.scalarLong("SELECT COUNT(*) FROM pages WHERE line_type='surah_name'")
-            if (surahNames != 114L) fail(id, "expected 114 surah name lines, found $surahNames")
-            val basmallahs = connection.scalarLong("SELECT COUNT(*) FROM pages WHERE line_type='basmallah'")
-            if (basmallahs != 112L) fail(id, "expected 112 basmala lines, found $basmallahs")
-            connection.each(
-                "SELECT page_number, line_number, line_type, first_word_id, last_word_id FROM pages",
-            ) { rs ->
-                val line = rs.getInt(2)
-                if (line < 1 || line > 15) fail(id, "page ${rs.getInt(1)} has line $line")
-                if (rs.getString(3) == "ayah") {
-                    val first = rs.getLong(4)
-                    val last = rs.getLong(5)
-                    if (first < 1 || last > 83_668 || first > last) {
-                        fail(id, "page ${rs.getInt(1)} line $line has bad word range $first..$last")
-                    }
-                }
             }
         }
     }
