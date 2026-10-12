@@ -196,10 +196,10 @@ class Fonts(private val root: File) {
                     probe(latin, run.text, label)
                     continue
                 }
-                // Arabic runs are drawn in the Hafs face, and a letter Hafs
-                // does not have falls back to Amiri Quran, exactly as the app
-                // does it. Anything neither font nor the platform can draw
-                // fails the gate.
+                // Arabic runs are drawn in Amiri Quran, and a letter Amiri
+                // does not have falls back to the Hafs face, exactly as the
+                // app does it. Anything neither font nor the platform can
+                // draw fails the gate.
                 for (codepoint in run.text.codePoints()) {
                     if (codepoint <= 32) continue
                     codepoints++
@@ -248,7 +248,7 @@ class Fonts(private val root: File) {
         }
         for (file in packs.listFiles { it -> it.isFile && it.name.startsWith("tafsir-") }.orEmpty()) {
             // A tafsir whose own language is Arabic is quoted prose, drawn in
-            // the Hafs face like every other Arabic run in the reading; the
+            // Amiri like the rest of the Arabic outside the Mushaf; the
             // offered tafsirs are Latin, paragraphs and headings drawn in
             // Literata and Inter.
             val arabic = file.name.endsWith("-ar.db")

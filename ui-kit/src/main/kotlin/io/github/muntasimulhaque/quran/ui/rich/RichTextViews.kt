@@ -33,15 +33,15 @@ import io.github.muntasimulhaque.quran.core.TextBlockKind
 import io.github.muntasimulhaque.quran.core.TextRun
 import io.github.muntasimulhaque.quran.core.ScriptMix
 import io.github.muntasimulhaque.quran.core.scriptMix
+import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Wash
-import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 
 /**
  * Draws parsed runs with the manuscript's two voices: Literata for Latin and
- * the Hafs face for Arabic, the Quran's own hand, with Amiri Quran only for
- * the few letters Hafs does not carry. Footnote markers are accent
+ * Amiri Quran for Arabic, with the Hafs face only for the few letters Amiri
+ * does not carry. Footnote markers are accent
  * superscripts, and no styling is ever taken inside a word.
  *
  * A paragraph can carry Arabic at a much larger size than its Latin text, and
@@ -125,10 +125,9 @@ fun TranslationBody(
  * with it; the measurement is written here so the next session can redo it
  * rather than guess.
  *
- * The quotations moved from Amiri to the Hafs face in the audio and type
- * audit (owner decision), and Hafs is the shorter face: its whole ink is
- * 1.751 em against Amiri's 2.699, so the Arabic-only and mixed measurements
- * above stay as they were and are now conservative rather than tight.
+ * The tafsir briefly read its Arabic in Hafs (owner decision, the audio and
+ * type audit session) and is back in Amiri (owner decision, this session):
+ * the measurements above were taken in Amiri ink, so they stand as measured.
  */
 private fun lineHeightFor(mix: ScriptMix, latinLine: Float, arabicSp: Float): Float = when (mix) {
     ScriptMix.LATIN -> latinLine
@@ -285,7 +284,7 @@ fun ArabicBody(runs: List<TextRun>, modifier: Modifier = Modifier, sizeSp: Float
             quoteColor = LocalPagePalette.current.ink,
         ),
         style = TextStyle(
-            fontFamily = rememberHafs(),
+            fontFamily = Amiri,
             fontSize = sizeSp.sp,
             lineHeight = (sizeSp * 1.9f).sp,
             // As-Sa'di is Arabic prose from its first letter; the paragraph's
