@@ -39,8 +39,11 @@ fun PageRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .minimumInteractiveComponentSize()
+            // The click owns the 48 dp node, so a row without a summary is
+            // still a full target to a finger and to a screen reader (owner
+            // decision, the accessibility test).
             .clickable(onClick = onClick)
+            .minimumInteractiveComponentSize()
             .padding(start = Space.Gutter, end = 12.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

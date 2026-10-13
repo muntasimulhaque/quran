@@ -156,10 +156,14 @@ private fun interStyle(weight: FontWeight, sizeSp: Float, lineHeightSp: Float, s
  * weight the style asks for. Set once per cut and cached, the way the
  * Literata cuts are; a family built without the settings would draw every
  * size in the file's default 14 cut.
+ *
+ * The cache key is the pair itself, as a string: it used to be a hash of the
+ * two numbers, which can collide, and a collision would hand one size the
+ * cut another size had already cached (owner report, this session).
  */
 @OptIn(ExperimentalTextApi::class)
 private fun interAt(weight: FontWeight, drawnSp: Float): FontFamily =
-    interCuts.getOrPut(31 * drawnSp.toBits() + weight.weight) {
+    interCuts.getOrPut("$drawnSp/${weight.weight}") {
         FontFamily(
             Font(
                 R.font.inter_variable,
@@ -172,7 +176,7 @@ private fun interAt(weight: FontWeight, drawnSp: Float): FontFamily =
         )
     }
 
-private val interCuts = java.util.concurrent.ConcurrentHashMap<Int, FontFamily>()
+private val interCuts = java.util.concurrent.ConcurrentHashMap<String, FontFamily>()
 
 /**
  * The interface in Bangla. The same sizes and weights Inter gets, with line

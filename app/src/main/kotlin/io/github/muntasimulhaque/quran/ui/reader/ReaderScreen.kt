@@ -8,19 +8,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
@@ -30,8 +20,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -41,20 +29,11 @@ import io.github.muntasimulhaque.quran.BuildConfig
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
-import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.data.readingMetrics
-import io.github.muntasimulhaque.quran.playback.ListenOption
-import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.browse.BrowseSheet
-import io.github.muntasimulhaque.quran.ui.playback.PlaybackBar
-import io.github.muntasimulhaque.quran.ui.kit.TextButton
-import io.github.muntasimulhaque.quran.ui.kit.floatingLift
-import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.kit.shortReciterName
-import io.github.muntasimulhaque.quran.ui.reader.Icon
-import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.search.SearchSheet
 import io.github.muntasimulhaque.quran.ui.settings.PackSetupState
 import io.github.muntasimulhaque.quran.ui.settings.SettingsActions
@@ -62,14 +41,10 @@ import io.github.muntasimulhaque.quran.ui.settings.SettingsSheet
 import io.github.muntasimulhaque.quran.ui.reading.AyahCard
 import io.github.muntasimulhaque.quran.ui.reading.AyahNoteSheet
 import io.github.muntasimulhaque.quran.ui.reading.ReadingList
-import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
-import io.github.muntasimulhaque.quran.ui.theme.Radii
-import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.math.min
 
 /** How long the chrome stays after a touch before it steps back. */
 private const val CHROME_MILLIS = 7000L
@@ -227,7 +202,9 @@ fun ReaderScreen(
                     onReadAhead = { viewModel.readAheadSurah(it) },
                     metrics = settings.readingMetrics(),
                     place = settings.ayah,
+                    placeOffset = settings.ayahOffset,
                     hasTranslation = viewModel.enabledTranslationPacks.isNotEmpty(),
+                    contentLanguage = viewModel.readingLanguage,
                     nextSurahName = viewModel.surahs
                         .firstOrNull { it.number == surah.number + 1 }?.nameSimple,
                     selectedAyah = washedAyah,
@@ -254,7 +231,7 @@ fun ReaderScreen(
                     // The reader's own pinch steps the Quran's size, on the
                     // same five steps the settings page shows.
                     onSizeStep = { delta -> viewModel.stepArabicSize(delta) },
-                    onPlaceChanged = { ayah -> viewModel.onReadingSettled(ayah) },
+                    onPlaceChanged = { ayah, offset -> viewModel.onReadingSettled(ayah, offset) },
                     startAtOpening = viewModel.startAtSurahOpening == surah.number,
                     onOpeningReached = { viewModel.consumeSurahOpening(surah.number) },
                     contentPaddingTop = 64.dp,
@@ -359,6 +336,7 @@ fun ReaderScreen(
         )
     }
 
+    val wordsPack = ContentDatabase.wordsPackId(viewModel.readingLanguage)
     when (sheet) {
         ReaderSheet.None -> Unit
         ReaderSheet.Browse -> BrowseSheet(
@@ -411,7 +389,8 @@ fun ReaderScreen(
             // The word list follows the same one language, and never falls
             // back to another: a reader who chose Bangla must not meet
             // English meanings in the results.
-            wordsPack = ContentDatabase.wordsPackId(viewModel.readingLanguage),
+            wordsPack = wordsPack,
+            wordsInstalled = content.installedPack(wordsPack),
             onDismiss = { sheet = ReaderSheet.None },
             onAyah = { ayah ->
                 sheet = ReaderSheet.None
@@ -460,8 +439,6 @@ fun ReaderScreen(
                 onTypeSize = { role, step -> viewModel.setTypeSize(role, step) },
                 onKeepAwake = { viewModel.setKeepAwake(it) },
                 onFollowReciter = { viewModel.setFollowReciter(it) },
-                onPlaybackSpeed = { viewModel.setPlaybackSpeed(it) },
-                onEndOfAudio = { viewModel.setEndOfAudio(it) },
                 onShowTranslation = { viewModel.setShowTranslation(it) },
                 onShowTafsir = { viewModel.setShowTafsir(it) },
                 onWordByWord = { viewModel.setWordByWord(it) },
@@ -531,317 +508,5 @@ fun ReaderScreen(
 }
 
 @Composable
-private fun ReaderTopBar(
-    title: String,
-    detail: String?,
-    visible: Boolean,
-    reducedMotion: Boolean,
-    /** What a tap on the title does, said out loud; null when it does nothing. */
-    titleAction: String?,
-    onTitle: () -> Unit,
-    onBrowse: () -> Unit,
-    onSearch: () -> Unit,
-    onSettings: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    AnimatedVisibility(
-        visible = visible,
-        enter = if (reducedMotion) fadeIn() else fadeIn() + slideInVertically { -it / 3 },
-        exit = if (reducedMotion) fadeOut() else fadeOut() + slideOutVertically { -it / 3 },
-        modifier = modifier,
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                // The scrim is solid behind the controls and gives way below
-                // them, so the surah never sits on the fading edge. It used to
-                // stay solid to seventy-two percent of its own height, which
-                // is exactly where the page's own surah name falls: the gold
-                // name was measurably washed every time the bar came up (the
-                // ornament's contrast dropped from 5.0 to 4.4 on paper). The
-                // solid run is now the bar's own height, and the fade is short,
-                // so the page's first line is never under it.
-                .background(
-                    Brush.verticalGradient(
-                        0f to MaterialTheme.colorScheme.background,
-                        0.55f to MaterialTheme.colorScheme.background,
-                        0.82f to MaterialTheme.colorScheme.background.copy(alpha = 0.88f),
-                        1f to MaterialTheme.colorScheme.background.copy(alpha = 0f),
-                    ),
-                )
-                .windowInsetsPadding(WindowInsets.statusBars)
-                .padding(start = BarStart, end = BarEnd, top = 8.dp, bottom = Space.Gutter),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            // The bar is one row: Browse leads, the surah
-            // and its juz sit centered, and Search and
-            // Settings close it.
-            IconButton(Icon.Browse, stringResource(R.string.action_browse), onBrowse)
-            ReadingTitle(
-                surah = title,
-                detail = detail,
-                action = titleAction,
-                onClick = onTitle,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 4.dp),
-            )
-            IconButton(Icon.Search, stringResource(R.string.action_search), onSearch)
-            IconButton(Icon.Settings, stringResource(R.string.action_settings), onSettings)
-        }
-    }
-}
-
-/** Everything that can sit at the foot of the page, stacked in one place. */
-@Composable
-private fun BottomStack(
-    viewModel: ReaderViewModel,
-    playback: PlaybackUiState,
-    saved: List<SavedAyah>,
-    selected: Ayah?,
-    onPlay: (Ayah) -> Unit,
-    onDeselect: () -> Unit,
-    onNote: (Ayah) -> Unit,
-    onRemoveSaved: (Ayah) -> Unit,
-    onMore: (Ayah) -> Unit,
-    onShare: (Ayah) -> Unit,
-    onTouch: () -> Unit,
-    onReciter: (String) -> Unit,
-    reciterId: String,
-    reciterName: String,
-    reciterOptions: List<ListenOption>,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .windowInsetsPadding(WindowInsets.navigationBars)
-            .padding(bottom = 10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        viewModel.packSetup?.let { setup ->
-            Row(
-                modifier = Modifier
-                    .floatingLift(Radii.Pill)
-                    .clip(Radii.Pill)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                    .padding(start = 18.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(Modifier.padding(end = 12.dp)) {
-                    Text(
-                        text = setup.pack.name,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                    Text(
-                        text = when {
-                            setup.failed -> stringResource(R.string.pack_download_failed)
-                            setup.progress == null -> stringResource(R.string.reader_pack_preparing)
-                            else -> stringResource(
-                                R.string.reader_pack_downloading,
-                                (setup.progress * 100).toInt(),
-                                formatBytes(setup.pack.bytes),
-                            )
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                if (setup.failed) {
-                    TextButton(
-                        label = stringResource(R.string.action_retry),
-                        onClick = { viewModel.installPack(setup.pack.id) },
-                    )
-                }
-                TextButton(
-                    label = stringResource(
-                        if (setup.failed) R.string.action_close else R.string.action_cancel,
-                    ),
-                    onClick = { viewModel.cancelPackSetup() },
-                    modifier = Modifier.padding(start = 6.dp),
-                    quiet = true,
-                )
-            }
-        }
-        selected?.let { ayah ->
-            val row = saved.firstOrNull { it.ayahNumber == ayah.number }
-            AyahActions(
-                // The two marks are the reader's own two hands: the note they
-                // wrote, and the bookmark they pressed. A note keeps its ayah
-                // in Saved, but it never lights the bookmark, so one tap of a
-                // note does not claim to be a save (owner report).
-                isSaved = row?.marked == true,
-                hasNote = !row?.note.isNullOrBlank(),
-                // The deeper door opens tafsir and nothing else, so a reader
-                // who hid tafsir has nothing behind it and the action goes
-                // with the door.
-                showTafsir = viewModel.settings.showTafsir,
-                onSave = {
-                    // A save of the reader's own, carrying a note, asks
-                    // before it goes, so the reader's own words are never
-                    // removed by one tap. An ayah that only a note kept has
-                    // no save to remove, and one tap of Save makes it.
-                    if (row?.marked == true && !row.note.isNullOrBlank()) {
-                        onRemoveSaved(ayah)
-                    } else {
-                        viewModel.toggleSaved(ayah)
-                    }
-                    onTouch()
-                },
-                onPlay = {
-                    onPlay(ayah)
-                    onDeselect()
-                },
-                onNote = { onNote(ayah) },
-                onMore = { onMore(ayah) },
-                onShare = { onShare(ayah) },
-            )
-        }
-
-        val offer = viewModel.listenOffer
-        if (playback.isAnything() || offer != null) {
-            val pendingSurahName = playback.pendingDownloadSurah?.let { surah ->
-                viewModel.surahs.firstOrNull { it.number == surah }?.nameSimple
-                    ?: stringResource(R.string.surah_fallback_name, surah)
-            }
-            PlaybackBar(
-                state = playback,
-                offer = offer,
-                offerTitle = offer?.let { pending ->
-                    stringResource(R.string.playback_offer, pending.surahName, formatBytes(pending.bytes))
-                }.orEmpty(),
-                onOfferConfirm = { viewModel.confirmListen() },
-                onOfferCancel = { viewModel.cancelListen() },
-                onOfferReciter = { viewModel.chooseListenReciter(it) },
-                reciterName = reciterName,
-                reciterId = reciterId,
-                reciterOptions = reciterOptions,
-                reference = playback.reference,
-                // The button says Continue; the words name the surah and its
-                // size, so the offer does not say the verb twice (owner
-                // decision). The continuation and the plain offer read the
-                // same way here, which is the point.
-                pendingLabel = pendingSurahName?.let { name ->
-                    stringResource(R.string.playback_offer, name, formatBytes(playback.pendingDownloadBytes))
-                },
-                pendingAudio = pendingSurahName?.let { name ->
-                    stringResource(R.string.playback_offer, name, formatBytes(playback.pendingDownloadBytes))
-                },
-                onToggle = { viewModel.togglePlayback() },
-                onNext = { viewModel.nextAyah() },
-                onPrevious = { viewModel.previousAyah() },
-                onReciter = onReciter,
-                onDownload = {
-                    // A failed player and a pending package share the pill's
-                    // one Retry; the view model knows which the tap means.
-                    if (playback.error) viewModel.retryPlayback() else viewModel.confirmDownload()
-                },
-                onClose = {
-                    if (playback.pendingDownloadSurah != null || playback.downloadFailed) {
-                        viewModel.cancelDownload()
-                    } else {
-                        viewModel.stopPlayback()
-                    }
-                },
-                speed = viewModel.settings.playbackSpeed,
-                end = viewModel.settings.endOfAudio,
-                onSpeed = { viewModel.setPlaybackSpeed(it) },
-                onEndOfAudio = { viewModel.setEndOfAudio(it) },
-            )
-        }
-    }
-}
-
-/** How anything playing or pending shows at the foot of the page. */
-internal fun PlaybackUiState.isAnything(): Boolean =
-    ayahNumber != null || unavailable || pendingDownloadSurah != null || downloadFailed || error
-
-@Composable
 private fun surahName(viewModel: ReaderViewModel, ayah: Int): String =
     viewModel.surahOf(ayah)?.nameSimple ?: stringResource(R.string.reader_fallback_title)
-
-/**
- * What one of the pill's marks says about itself, in the app's own words. The
- * mark a reader cannot see is a mark they were never told about, and the
- * glyph's colour is not a sentence.
- */
-@Composable
-private fun markState(on: Boolean): String =
-    stringResource(if (on) R.string.action_state_on else R.string.action_state_off)
-
-/**
- * The ayah's own actions, on the pill an ayah raises when the reader taps it:
- * hear it, understand it, keep it, write on it, and send it out.
- *
- * The order is the reader's intent, not the control's kind (owner decision,
- * this session). The two reasons to open an ayah's actions lead: hear it (Play) and
- * understand it (Tafsir), the deep door this reading is built around. Then the
- * two that keep the ayah, Save before Note, because the keep is the lighter
- * tap and the note is the writing: Save lands where it stands, and Note opens
- * a sheet and a keyboard. A note keeps its ayah in Saved and never lights the
- * bookmark (below), so the keep is the fact and the note is what is written on
- * it, and a parent before its child reads in the order the eye lands (owner
- * decision, forty-sixth session). Share stands last: it is the only action
- * that leaves the app, the least common, and the one a stray tap is most costed
- * by, so it takes the far edge, away from where the thumb rests.
- *
- * Tafsir sits in the second slot when the reader shows tafsir and is absent
- * otherwise; Play is always first, Save is always before Note, and Share is
- * always last, so the three fixed actions never move and only the deep door
- * comes and goes with the reader's own choice.
- *
- * Each action carries its own mark, and a mark says the tap that made it: the
- * note glyph is lit by a note and the bookmark by a Save, never the one by the
- * other. The two marked actions also say their state out loud, because a lit
- * glyph is a color and color is not something a reader who cannot see it is
- * told (owner report).
- */
-@Composable
-private fun AyahActions(
-    isSaved: Boolean,
-    hasNote: Boolean,
-    showTafsir: Boolean,
-    onSave: () -> Unit,
-    onPlay: () -> Unit,
-    onNote: () -> Unit,
-    onMore: () -> Unit,
-    onShare: () -> Unit,
-) {
-    val shape = Radii.Pill
-    Row(
-        modifier = Modifier
-            .floatingLift(shape)
-            .clip(shape)
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            .padding(horizontal = 6.dp, vertical = 5.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        TextAction(stringResource(R.string.action_play), Icon.Play, onPlay)
-        if (showTafsir) {
-            TextAction(
-                label = stringResource(R.string.action_tafsir),
-                icon = Icon.Tafsir,
-                onClick = onMore,
-            )
-        }
-        // The two marked actions say their state; the three that only answer a
-        // tap say nothing, so nothing on the pill reads as a switch it is not.
-        TextAction(
-            label = stringResource(R.string.action_save),
-            icon = if (isSaved) Icon.BookmarkFilled else Icon.Bookmark,
-            onClick = onSave,
-            active = isSaved,
-            state = markState(isSaved),
-        )
-        TextAction(
-            label = stringResource(R.string.action_note),
-            icon = Icon.Note,
-            onClick = onNote,
-            active = hasNote,
-            state = markState(hasNote),
-        )
-        TextAction(stringResource(R.string.action_share), Icon.Share, onShare)
-    }
-}
-

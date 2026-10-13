@@ -25,7 +25,13 @@ class PackVerifier(private val context: Context) {
             packs.filter { it.installed && !it.shipped }.filter { !intact(it) }
         }
 
-    private fun intact(pack: ContentPack): Boolean {
+    /**
+     * Whether one pack's bytes match the catalog: its length when the
+     * catalog carries one, and its whole SHA-256. It is the honest check and
+     * it is the expensive one, so [PackUpdater.dailyIntegrityRefresh] asks
+     * it only when the file has changed since the last verified read.
+     */
+    fun intact(pack: ContentPack): Boolean {
         val file = PackStore(context).fileFor(pack.id)
         if (!file.isFile) return false
         if (pack.sha256.isEmpty()) return true

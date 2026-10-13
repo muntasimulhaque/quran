@@ -154,9 +154,11 @@ internal fun TransportButton(kind: Transport, description: String, onClick: () -
     val tint = MaterialTheme.colorScheme.onSurfaceVariant
     Box(
         modifier = Modifier
+            // The click owns the 48 dp node; the glyph inside it stays 20 dp
+            // (owner decision, the accessibility test).
+            .clickable(onClick = onClick)
             .minimumInteractiveComponentSize()
             .clip(Radii.Pill)
-            .clickable(onClick = onClick)
             .semantics {
                 contentDescription = description
                 role = Role.Button

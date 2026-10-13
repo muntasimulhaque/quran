@@ -23,9 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.DownloadedSurah
@@ -35,6 +33,7 @@ import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
+import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
 import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
@@ -49,9 +48,6 @@ data class SettingsActions(
     val onTypeSize: (TypeRole, Float) -> Unit = { _, _ -> },
     val onKeepAwake: (Boolean) -> Unit = {},
     val onFollowReciter: (Boolean) -> Unit = {},
-    val onPlaybackSpeed: (Float) -> Unit = {},
-    /** What happens at the end of the audio: one answer, three switches. */
-    val onEndOfAudio: (EndOfAudio) -> Unit = {},
     val onShowTranslation: (Boolean) -> Unit = {},
     val onShowTafsir: (Boolean) -> Unit = {},
     val onWordByWord: (Boolean) -> Unit = {},
@@ -61,7 +57,6 @@ data class SettingsActions(
     /** The phone's own screen for the exact alarm, when it is still withheld. */
     val onAskExactAlarm: () -> Unit = {},
     val onSelectRecitation: (String) -> Unit = {},
-    val onTranslationPack: (String) -> Unit = {},
     val onToggleTafsir: (String) -> Unit = {},
     val onToggleTranslation: (String) -> Unit = {},
     val onInstallPack: (String) -> Unit = {},
@@ -115,6 +110,7 @@ fun SettingsSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
+        dragHandle = { SheetHandle() },
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
         // Back steps out of a page before it closes the sheet, the way a

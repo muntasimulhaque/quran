@@ -354,9 +354,11 @@ fun TextAction(
 ) {
     Column(
         modifier = Modifier
+            // The click owns the 48 dp node; the mark and its word sit inside
+            // it (owner decision, the accessibility test).
+            .clickable(onClick = onClick)
             .minimumInteractiveComponentSize()
             .clip(Radii.Card)
-            .clickable(onClick = onClick)
             .padding(horizontal = 6.dp, vertical = 4.dp)
             .semantics {
                 contentDescription = label
@@ -468,13 +470,16 @@ fun ReadingTitle(
             ?.takeIf { name.width + gap + it.width <= constraints.maxWidth }
         // The name and its part are one unit, so they are centered as one;
         // when the label cannot fit beside the whole name, the name alone
-        // takes the center.
+        // takes the center. The unit is also a control when it answers a
+        // tap, and a control owes the finger 48 dp: the type is shorter
+        // than that, so the box is grown and the lines are centered in it
+        // (owner report, the accessibility test).
         val contentWidth = name.width + (label?.let { gap + it.width } ?: 0)
         val start = ((constraints.maxWidth - contentWidth) / 2).coerceAtLeast(0)
-        val height = maxOf(name.height, label?.height ?: 0)
+        val height = maxOf(name.height, label?.height ?: 0, 48.dp.roundToPx())
         layout(constraints.maxWidth, height) {
-            name.place(start, height - name.height)
-            label?.place(start + name.width + gap, height - label.height)
+            name.place(start, (height - name.height) / 2)
+            label?.place(start + name.width + gap, (height - label.height) / 2)
         }
     }
 }

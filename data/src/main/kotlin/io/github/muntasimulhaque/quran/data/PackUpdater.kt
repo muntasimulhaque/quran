@@ -78,8 +78,12 @@ class PackUpdater(private val context: Context) {
 
     /**
      * A quiet integrity pass, at most once a day, that reads every installed
-     * pack back and compares it with the catalog's hash, repairing what a
-     * storage problem or an interrupted copy has damaged. [refresh] only
+     * pack whose bytes have changed since the last pass and compares it with
+     * the catalog's hash, repairing what a storage problem or an interrupted
+     * copy has damaged. A pack whose size and moment are unchanged since it
+     * was verified is not read again: the hash is the honest check, and this
+     * keeps it off a reader's battery when nothing has moved (owner
+     * decision, this session). [refresh] only
      * re-examines the catalog when its fingerprints change, which is an app
      * update; this is the second look that runs on the reader's behalf,
      * without a tap, so a reader never has to know the word for it (owner
@@ -105,8 +109,19 @@ class PackUpdater(private val context: Context) {
             // read is the cost, and it is paid once a day rather than held open
             // until something is actually wrong.
             preferences.edit().putInt(KEY_INTEGRITY_DAY, today).apply()
-            val stale = runCatching { PackVerifier(context).needsRefresh(catalog.all()) }
-                .getOrNull() ?: return@withLock emptyList()
+            // The verifier reads a pack only when its bytes have changed
+            // since the last pass that verified them. The hash is the honest
+            // check, but it reads the whole pack, and the tafsir is tens of
+            // megabytes: a file whose size and moment are unchanged is the
+            // file that was verified, so the read is skipped and the answer
+            // is the same (owner decision, this session).
+            val verifier = PackVerifier(context)
+            val store = PackStore(context)
+            val stale = runCatching {
+                catalog.all()
+                    .filter { it.installed && !it.shipped }
+                    .filter { pack -> !rememberedIntact(pack, verifier, store) }
+            }.getOrNull() ?: return@withLock emptyList()
             if (stale.isEmpty()) return@withLock emptyList()
             val downloader = PackDownloader(context)
             val replaced = ArrayList<String>(stale.size)
@@ -116,6 +131,31 @@ class PackUpdater(private val context: Context) {
             }
             replaced
         }
+
+    /**
+     * Whether one pack is intact, hashing it only when the file's size or
+     * moment has changed since the last pass that read it. The remembered
+     * stamp is the proof of a read that already happened, not a promise
+     * about bytes the app has never seen.
+     */
+    private fun rememberedIntact(
+        pack: ContentPack,
+        verifier: PackVerifier,
+        store: PackStore,
+    ): Boolean {
+        val file = store.fileFor(pack.id)
+        if (!file.isFile) return false
+        if (pack.bytes > 0 && file.length() != pack.bytes) return false
+        val stamp = "${file.length()}:${file.lastModified()}"
+        if (pack.sha256.isEmpty()) return true
+        if (preferences.getString(verifiedKey(pack.id), null) == stamp) return true
+        if (!verifier.intact(pack)) return false
+        preferences.edit().putString(verifiedKey(pack.id), stamp).apply()
+        return true
+    }
+
+    /** The key one pack's last verified stamp is remembered under. */
+    private fun verifiedKey(id: String): String = "verified_$id"
 
     /** True only on a connected, unmetered network. */
     private fun unmetered(): Boolean {

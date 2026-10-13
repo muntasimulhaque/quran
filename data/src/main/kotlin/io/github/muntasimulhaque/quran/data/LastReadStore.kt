@@ -43,7 +43,6 @@ class LastReadStore(context: Context) {
                 null,
                 ContentValues().apply {
                     put(COLUMN_AYAH, ayahNumber)
-                    put(COLUMN_MODE, MODE_SINGLE)
                     put(COLUMN_READ_AT, at)
                 },
                 SQLiteDatabase.CONFLICT_REPLACE,
@@ -92,24 +91,41 @@ class LastReadStore(context: Context) {
             db.execSQL(
                 "CREATE TABLE $TABLE (" +
                     "$COLUMN_AYAH INTEGER PRIMARY KEY, " +
-                    "$COLUMN_MODE TEXT NOT NULL, " +
                     "$COLUMN_READ_AT INTEGER NOT NULL)",
             )
         }
 
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            // Version 1 is the first schema; later versions write their steps here.
+            // Version 1 carried a mode column that every row wrote as
+            // "single" and no screen ever read: the list has only ever been
+            // places, one ayah each. The table is rebuilt without it, with
+            // the reader's places and moments carried across whole (owner
+            // decision, this session).
+            if (oldVersion < 2) {
+                db.execSQL(
+                    "CREATE TABLE $TABLE_REBUILD (" +
+                        "$COLUMN_AYAH INTEGER PRIMARY KEY, " +
+                        "$COLUMN_READ_AT INTEGER NOT NULL)",
+                )
+                db.execSQL(
+                    "INSERT INTO $TABLE_REBUILD ($COLUMN_AYAH, $COLUMN_READ_AT) " +
+                        "SELECT $COLUMN_AYAH, $COLUMN_READ_AT FROM $TABLE",
+                )
+                db.execSQL("DROP TABLE $TABLE")
+                db.execSQL("ALTER TABLE $TABLE_REBUILD RENAME TO $TABLE")
+            }
         }
     }
 
     private companion object {
         const val DATABASE_NAME = "last-read.db"
-        const val DATABASE_VERSION = 1
+        const val DATABASE_VERSION = 2
         const val TABLE = "last_read"
+
+        /** The name the version 1 table is rebuilt under, before the rename. */
+        const val TABLE_REBUILD = "last_read_rebuild"
         const val COLUMN_AYAH = "ayah_number"
-        const val COLUMN_MODE = "mode"
         const val COLUMN_READ_AT = "read_at"
-        const val MODE_SINGLE = "single"
 
         /**
          * How many places are kept: twenty. One sitting is a handful of them,

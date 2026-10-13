@@ -69,6 +69,34 @@ class ReadingBenchmark {
         startupMode = StartupMode.WARM,
         setupBlock = {
             onboard()
+            setWordByWord(false)
+            openAyah()
+        },
+    ) {
+        repeat(4) {
+            device.swipe(500, 1500, 500, 500, 30)
+            device.waitForIdle()
+        }
+    }
+
+    /**
+     * The same scroll with the word by word aid on, which is the heaviest
+     * reading the app draws: every word is a pair of text nodes under the
+     * Arabic, and the frame timing of this reading is the one the smooth
+     * scroll promise is really about. The plain leg above turns the aid back
+     * off in its own setup, so neither leg can silently measure the other's
+     * reading (owner decision, this session).
+     */
+    @Test
+    fun readingScrollWordByWord() = rule.measureRepeated(
+        packageName = PACKAGE,
+        metrics = listOf(FrameTimingMetric()),
+        compilationMode = CompilationMode.Partial(),
+        iterations = 5,
+        startupMode = StartupMode.WARM,
+        setupBlock = {
+            onboard()
+            setWordByWord(true)
             openAyah()
         },
     ) {
@@ -104,6 +132,31 @@ class ReadingBenchmark {
             },
         )
         device.wait(Until.hasObject(By.desc("Reading")), 10_000)
+    }
+
+    /**
+     * Turns the reading's word meanings on or off through the app's own
+     * settings, so each leg measures the reading it names. The word list is
+     * in the debug build's own assets, so no network is involved, and the
+     * switch is read back before it is left: a leg that failed to set its
+     * state fails here rather than reporting a number under the wrong name.
+     */
+    private fun MacrobenchmarkScope.setWordByWord(enabled: Boolean) {
+        startActivityAndWait()
+        // The reading's quiet margin brings the chrome; its centre may hold
+        // an ayah under the finger.
+        device.click(6, device.displayHeight / 2)
+        val settings = device.wait(Until.findObject(By.desc("Settings")), 10_000)
+            ?: error("the chrome did not come up to open Settings")
+        settings.click()
+        val label = device.wait(Until.findObject(By.text("Show word meanings")), 10_000)
+            ?: error("the word meanings row was not found")
+        // The label is the row's own text; the toggleable node is its parent,
+        // and that is where the state is read.
+        val on = runCatching { label.parent?.isChecked }.getOrNull() == true
+        if (on != enabled) label.click()
+        device.pressBack()
+        device.waitForIdle()
     }
 
     private companion object {

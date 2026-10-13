@@ -55,6 +55,17 @@ class AyahActionsTest {
                 SettingsStore(context).apply {
                     setUiLanguage("en")
                     setAyah(1)
+                    // The reading this test drives is the short one: no
+                    // translation column, so the reference line at the foot
+                    // of the first ayah is on screen. The tests share one
+                    // install, and inheriting a taller reading from the test
+                    // before this one pushed the line off the fold and the
+                    // wait timed out (owner report, this session).
+                    setTranslationPacks(emptySet())
+                    setTafsirPacks(emptySet())
+                    setShowTranslation(true)
+                    setShowTafsir(true)
+                    setWordByWord(false)
                 }
                 // The note the marks are read against, on the ayah the press
                 // below raises the pill over.

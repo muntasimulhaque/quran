@@ -55,18 +55,16 @@ internal fun tafsirSummary(settings: AppSettings, packs: List<ContentPack>): Str
 }
 
 /**
- * The word list the reading speaks: the one that matches the first chosen
- * translation, and English when that language has no list. The translation
- * counts as chosen even before it is installed, so a Bangla reader is never
- * offered the English word list because the Bangla translation is still on
- * its way. The pack is the one the switch adds when it is missing.
+ * The word list the reading speaks: the one that matches the reader's own
+ * language, and no other. There is no fallback to English: a Bangla reader
+ * whose list has not landed yet is asked to add the Bangla list, never
+ * handed the English one (owner decision, this session). Null when the
+ * catalog carries no list for the language, so the row can say nothing
+ * rather than promise a list that does not exist.
  */
 internal fun wantedWordsPack(settings: AppSettings, packs: List<ContentPack>): ContentPack? {
-    val language = packs.firstOrNull { it.id in settings.translationPacks }?.language
-        ?: UiLanguage.English.tag
-    val preferred = ContentDatabase.wordsPackId(language)
-    return packs.firstOrNull { it.id == preferred }
-        ?: packs.firstOrNull { it.id == ContentDatabase.WORDS_PACK }
+    val language = UiLanguage.of(settings.uiLanguage)?.tag ?: UiLanguage.English.tag
+    return packs.firstOrNull { it.id == ContentDatabase.wordsPackId(language) }
 }
 
 /**

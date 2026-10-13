@@ -18,6 +18,7 @@ import io.github.muntasimulhaque.quran.data.Footnote
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
 
 /**
  * A footnote the reader opened, with the ayah it belongs to and the size of
@@ -61,6 +62,7 @@ internal fun FootnoteSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
+        dragHandle = { SheetHandle() },
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
         Column(

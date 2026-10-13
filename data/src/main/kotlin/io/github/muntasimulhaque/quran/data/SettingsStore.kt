@@ -68,6 +68,15 @@ fun AppTheme.resolved(systemDark: Boolean): AppTheme = when (this) {
  */
 data class AppSettings(
     val ayah: Int = 1,
+    /**
+     * How far into [ayah] the reader was, in pixels from its top. A long
+     * ayah, Al-Baqarah 2:255 or 2:282 with the word meanings on, takes more
+     * than a screen, and a place that kept only the ayah put the reader back
+     * at the top of the block. The depth is written with the ayah and
+     * cleared by every jump, which lands on the ayah's own top (owner
+     * decision, this session).
+     */
+    val ayahOffset: Int = 0,
     val theme: AppTheme = AppTheme.Light,
     /**
      * The language the interface is written in, and the content it reads.
@@ -217,6 +226,7 @@ class SettingsStore(private val context: Context) {
         val legacy = sizeOf(choices, TEXT_SIZE)
         AppSettings(
             ayah = ayah.coerceIn(1, 6236),
+            ayahOffset = (preferences[AYAH_OFFSET] ?: 0).coerceAtLeast(0),
             theme = storedTheme(preferences),
             uiLanguage = preferences[UI_LANGUAGE],
             arabicSize = sizeOf(choices, ARABIC_SIZE, legacy),
@@ -238,8 +248,18 @@ class SettingsStore(private val context: Context) {
         )
     }
 
-    suspend fun setAyah(ayah: Int) {
-        context.settingsStore.edit { it[AYAH] = ayah.coerceIn(1, 6236) }
+    /**
+     * Writes the reader's place: the ayah, and how far into it they were. A
+     * jump that means the top of an ayah writes zero, so a landing never
+     * keeps a depth that belonged to another ayah.
+     */
+    suspend fun setAyah(ayah: Int, offset: Int = 0) {
+        val safeAyah = ayah.coerceIn(1, 6236)
+        val safeOffset = offset.coerceAtLeast(0)
+        context.settingsStore.edit {
+            it[AYAH] = safeAyah
+            it[AYAH_OFFSET] = safeOffset
+        }
     }
 
     suspend fun setTheme(theme: AppTheme) {
@@ -464,6 +484,7 @@ class SettingsStore(private val context: Context) {
         const val MAX_SPEED = 1.5f
 
         val AYAH = intPreferencesKey("ayah")
+        val AYAH_OFFSET = intPreferencesKey("ayah_offset")
         val THEME = stringPreferencesKey("theme")
         /**
          * The automatic switch the third theme value replaced. Written by no

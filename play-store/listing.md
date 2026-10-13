@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 6.5 (versionCode 67)
+Version: 6.6 (versionCode 68)
 
 ## Listing
 
@@ -134,8 +134,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (6.5, 491 characters)
-Tap any ayah to play it, open its tafsir, save it, write a note, or share it. Pinch the page to change the text size. Search is faster and now stays in the language you chose, for translations, tafsirs, and word meanings alike. An Arabic-only reading closes each verse with the Quran's own end-of-ayah sign and number. Long-press the app icon for shortcuts: Continue reading, Search, and Daily ayah. Playback failures now say what happened and offer a retry. No ads, no trackers, no account.
+## Release notes (6.6, 495 characters)
+Your reading place is now kept exactly, down to the line inside a long ayah. Downloads can be cancelled while they run. A very broad search says plainly that it shows the first 200 results, and your typed search survives if Android restarts the app in the background. The reading and search follow the language you chose, with the surah introduction in English until a Bangla one exists. Touch targets are larger, the sheet handle speaks, and the daily content check runs lighter on the battery.
 
 ## Before each release
 

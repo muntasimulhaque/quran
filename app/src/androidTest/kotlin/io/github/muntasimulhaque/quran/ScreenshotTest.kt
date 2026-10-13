@@ -9,10 +9,12 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
@@ -58,18 +60,23 @@ import java.io.File
 class ScreenshotTest {
 
     /**
-     * The count a search frame waits for: the digits and the word.
+     * The line a search frame waits for: a count with its digits, or the
+     * capped line that says how many are shown when the count would be a
+     * floor.
      *
      * A wait on any text holding "match" is satisfied by the sheet's own "No
-     * matches.", which is what a query that has not run yet says, so the
-     * store's search frame was a sheet that had found nothing. A count
-     * with its digits is only ever drawn by a search that came back, and
-     * Compose's own matchers match a string or a substring, so this is the one
-     * that asks for the number.
+     * matches." line, which is what a query that has not run yet says, so the
+     * store's search frame was a sheet that had found nothing. A count with
+     * its digits, or the capped line, is only ever drawn by a search that
+     * came back, and Compose's own matchers match a string or a substring,
+     * so this is the one that asks for it.
      */
-    private val matchCount = SemanticsMatcher("a match count with its digits") { node ->
+    private val matchCount = SemanticsMatcher("a finished search's status") { node ->
         node.config.getOrElseNullable(SemanticsProperties.Text) { null }
-            ?.any { part -> Regex("""\d+\s+matches""").containsMatchIn(part.text) } == true
+            ?.any { part ->
+                Regex("""\d+\s+matches""").containsMatchIn(part.text) ||
+                    Regex("""the first \d+ shown""").containsMatchIn(part.text)
+            } == true
     }
 
     @get:Rule
@@ -463,9 +470,15 @@ class ScreenshotTest {
                 .fetchSemanticsNodes().isEmpty()
         }
 
-        // 5. The surah opening, which is the top of the reading list.
+        // 5. The surah opening, which is the top of the reading list. The
+        // tour scrolls by the list's own anchor rather than by a swipe: one
+        // swipe from 2:255 photographs a mid-surah frame under a name that
+        // promised the opening, because Al-Baqarah is 286 ayahs. The opening
+        // carries its own tag, so the frame is kept only once the opening is
+        // really on screen (owner report, this session).
         rule.onNodeWithContentDescription("Reading")
-            .performTouchInput { swipeDown(startY = height * 0.25f, endY = height * 0.85f, durationMillis = 200) }
+            .performScrollToNode(hasTestTag("surah-opening"))
+        waitForTag("surah-opening")
         Thread.sleep(800)
         capture("03-surah-opening")
 

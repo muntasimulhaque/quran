@@ -13,6 +13,10 @@ media3 = "1.11.1"
 testExtJunit = "1.2.1"
 testRunner = "1.6.2"
 espressoCore = "3.7.0"
+# Test only: the Google Accessibility Test Framework, which the app's own
+# instrumented accessibility test runs over the main surfaces. It never
+# ships and nothing in the bundle depends on it.
+accessibilityTestFramework = "4.1.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -34,6 +38,7 @@ androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version
 androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version = "1.4.1" }
 androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "testRunner" }
 androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+accessibility-test-framework = { group = "com.google.android.apps.common.testing.accessibility.framework", name = "accessibility-test-framework", version.ref = "accessibilityTestFramework" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 

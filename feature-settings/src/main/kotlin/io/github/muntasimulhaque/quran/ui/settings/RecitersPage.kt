@@ -168,8 +168,10 @@ private fun ReciterDownloadsDoor(open: Boolean, count: Int, onClick: () -> Unit)
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .minimumInteractiveComponentSize()
+            // The click owns the 48 dp node, not a wrapper outside it (owner
+            // decision, the accessibility test).
             .clickable(onClick = onClick)
+            .minimumInteractiveComponentSize()
             .padding(start = 50.dp, end = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

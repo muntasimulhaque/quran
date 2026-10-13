@@ -111,7 +111,6 @@ private val DarkPage = PagePalette(
 )
 
 val LocalPagePalette = staticCompositionLocalOf { LightPage }
-val LocalPageThemeName = staticCompositionLocalOf { "light" }
 
 /**
  * The theme is the whole app: the two grounds, and the voice everything
@@ -143,17 +142,12 @@ fun QuranTheme(
         AppTheme.Dark -> DarkPage
         else -> LightPage
     }
-    val name = when (shown) {
-        AppTheme.Dark -> "dark"
-        else -> "light"
-    }
     val switches = when (shown) {
         AppTheme.Dark -> DarkSwitch
         else -> LightSwitch
     }
     CompositionLocalProvider(
         LocalPagePalette provides palette,
-        LocalPageThemeName provides name,
         LocalSwitchPalette provides switches,
         LocalReadingVoice provides when (language) {
             UiLanguage.Bangla -> ReadingVoice(BengaliReading, 1.706f, { NotoSerifBengali }, 0.425f)

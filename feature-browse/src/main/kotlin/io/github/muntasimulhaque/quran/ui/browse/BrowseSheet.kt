@@ -51,6 +51,7 @@ import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
+import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
 import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -205,6 +206,7 @@ fun BrowseSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
+        dragHandle = { SheetHandle() },
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
         // The grid is one level inside the sheet, so the phone's back returns
@@ -334,15 +336,18 @@ private fun BrowseTabChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // The chip's own shape stays as small as it reads; the finger gets the
-    // app's 48 dp target around it, because a tab is a control and a control
-    // that cannot be hit is not drawn at all to the reader who missed it.
+    // The chip's own shape stays as small as it reads; the click and the
+    // accessibility node carry the app's 48 dp target, because a tab is a
+    // control and a control that cannot be hit is not drawn at all to the
+    // reader who missed it.
     Box(
-        modifier = modifier.minimumInteractiveComponentSize(),
+        modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
         Box(
             modifier = Modifier
+                .clickable(role = Role.RadioButton, onClick = onClick)
+                .minimumInteractiveComponentSize()
                 .clip(Radii.Pill)
                 .background(
                     if (active) {
@@ -351,7 +356,6 @@ private fun BrowseTabChip(
                         MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
                     },
                 )
-                .clickable(role = Role.RadioButton, onClick = onClick)
                 .padding(horizontal = 14.dp, vertical = 8.dp),
         ) {
             Text(

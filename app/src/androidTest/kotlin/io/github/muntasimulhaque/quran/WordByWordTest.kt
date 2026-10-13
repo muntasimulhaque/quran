@@ -18,9 +18,14 @@ import org.junit.rules.RuleChain
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 /**
- * The word by word reading aid, end to end: a translation and its word list
- * are installed, the switch is turned on, and the reading is checked to
- * show a meaning under a word, in the language of the chosen translation.
+ * The word by word reading aid, end to end: the reader's language is set,
+ * its word list is installed, the switch is turned on, and the reading is
+ * checked to show a meaning under a word, in the reader's own language.
+ *
+ * The language of the meanings is the reader's language and never the
+ * translation's: a reader who chose Bangla meets Bangla meanings even while
+ * an English column is on, and never meets English meanings because the
+ * Bangla list has not landed (owner decision, this session).
  *
  * The library is assembled before the reader screen starts, which is the
  * order a real reader creates it in, and development builds carry every pack,
@@ -44,7 +49,7 @@ class WordByWordTest {
             store.install("words-bn")
             val settings = SettingsStore(context)
             runBlocking {
-                settings.setUiLanguage("en")
+                settings.setUiLanguage("bn")
                 settings.setTranslationPacks(setOf("translation-taisirul-quran-bn"))
                 settings.setWordByWord(true)
                 // The reader's own place, set here rather than inherited.
@@ -64,7 +69,7 @@ class WordByWordTest {
     val rule: TestRule = RuleChain.outerRule(library).around(compose)
 
     @Test
-    fun wordMeaningsFollowTheTranslationLanguage() {
+    fun wordMeaningsFollowTheReadersLanguage() {
         // The first Bangla meaning of Al-Fatihah 1:1, from the word list. The
         // wait is generous on purpose: a software-rendered emulator takes its
         // time opening the content library, and a slow machine is not a

@@ -7,11 +7,11 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -268,17 +268,27 @@ fun PlaybackBar(
                 )
             }
             if (downloading) {
-                LinearProgressIndicator(
-                    progress = { state.downloadProgress ?: 0f },
+                // The progress is drawn by hand, like every other shape in
+                // the app: a 2 dp hairline in the theme's accent, filling
+                // from the start edge as the bytes land. The pill wore
+                // Material's own progress line, the one borrowed shape left
+                // on the page (owner decision, this session).
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .padding(bottom = 8.dp)
                         .height(2.dp)
-                        .clip(Radii.Pill),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = Wash.Control),
-                )
+                        .clip(Radii.Pill)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = Wash.Control)),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(state.downloadProgress ?: 0f)
+                            .fillMaxHeight()
+                            .background(MaterialTheme.colorScheme.primary),
+                    )
+                }
             }
         }
     }

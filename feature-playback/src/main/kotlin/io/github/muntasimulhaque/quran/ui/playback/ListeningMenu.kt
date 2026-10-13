@@ -91,6 +91,9 @@ internal fun ColumnScope.ListeningMenu(
             )
             Box(
                 modifier = Modifier
+                    // The choice owns the 48 dp node; the pill inside it keeps
+                    // its own shape (owner decision, the accessibility test).
+                    .selectable(selected = active, role = Role.RadioButton) { onSpeed(step) }
                     .minimumInteractiveComponentSize()
                     .clip(Radii.Pill)
                     .background(
@@ -100,7 +103,6 @@ internal fun ColumnScope.ListeningMenu(
                             Color.Transparent
                         },
                     )
-                    .selectable(selected = active, role = Role.RadioButton) { onSpeed(step) }
                     .semantics { contentDescription = description },
                 contentAlignment = Alignment.Center,
             ) {

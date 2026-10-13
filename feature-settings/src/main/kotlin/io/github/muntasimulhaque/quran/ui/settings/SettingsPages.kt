@@ -34,7 +34,6 @@ import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.rich.ArabicFonts
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.theme.Space
-import androidx.compose.ui.platform.LocalContext
 import io.github.muntasimulhaque.quran.core.RichText
 
 /**
@@ -193,6 +192,7 @@ fun TranslationsPage(
                 onActivate = { actions.onToggleTranslation(pack.id) },
                 onInstall = { actions.onInstallPack(pack.id) },
                 onRemove = { actions.onRemovePack(pack.id) },
+                onCancel = actions.onPackSetupCancel,
             )
         }
         Spacer(Modifier.height(Space.Section))
@@ -233,6 +233,7 @@ fun TafsirsPage(
                 onActivate = { actions.onToggleTafsir(pack.id) },
                 onInstall = { actions.onInstallPack(pack.id) },
                 onRemove = { actions.onRemovePack(pack.id) },
+                onCancel = actions.onPackSetupCancel,
             )
         }
         Spacer(Modifier.height(Space.Section))

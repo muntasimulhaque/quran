@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     The sheet's handle, named for a screen reader. The bar is a picture of
+     the drag the sheet itself answers, and Material names its own handle the
+     same way, so the pattern a TalkBack reader has already met elsewhere is
+     the pattern here.
+-->
+<resources>
+    <string name="sheet_handle">Sheet handle</string>
+</resources>

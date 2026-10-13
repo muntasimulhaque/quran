@@ -1,8 +1,12 @@
 package io.github.muntasimulhaque.quran.ui.settings
 
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -35,6 +39,13 @@ fun PackChoiceRow(
     onActivate: () -> Unit,
     onInstall: () -> Unit,
     onRemove: () -> Unit,
+    /**
+     * The reader's way out of a download they no longer want. A pack on its
+     * way in used to have no answer but to wait it out (owner report, this
+     * session): the reader is the one who asked for it, and the reader is
+     * the one who can call it off.
+     */
+    onCancel: () -> Unit,
     /** The room under the row; a row with a block beneath it keeps less. */
     bottomPadding: Dp = 12.dp,
 ) {
@@ -49,7 +60,7 @@ fun PackChoiceRow(
         // while it is on its way in.
         onClick = if (pack.installed && !busy) onActivate else onInstall,
         bottomPadding = bottomPadding,
-        trailing = { PackTrailing(pack, setup, onInstall, onRemove) },
+        trailing = { PackTrailing(pack, setup, onInstall, onRemove, onCancel) },
     )
 }
 
@@ -65,6 +76,7 @@ private fun PackTrailing(
     setup: PackSetupState?,
     onInstall: () -> Unit,
     onRemove: () -> Unit,
+    onCancel: () -> Unit,
 ) {
     when {
         setup?.packId == pack.id && setup.failed ->
@@ -73,15 +85,27 @@ private fun PackTrailing(
                 onClick = onInstall,
             )
 
-        setup?.packId == pack.id -> Text(
-            text = if (setup.progress == null) {
-                stringResource(R.string.settings_pack_preparing)
-            } else {
-                stringResource(R.string.settings_pack_downloading, (setup.progress * 100).toInt())
-            },
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        // The row on its way in carries its progress and the one word that
+        // ends it. A reader who tapped Add can change their mind while the
+        // bytes are still moving, the same way the pill's own progress row
+        // lets them (owner report, this session).
+        setup?.packId == pack.id -> Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = if (setup.progress == null) {
+                    stringResource(R.string.settings_pack_preparing)
+                } else {
+                    stringResource(R.string.settings_pack_downloading, (setup.progress * 100).toInt())
+                },
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            TextButton(
+                label = stringResource(R.string.settings_cancel),
+                onClick = onCancel,
+                modifier = Modifier.padding(start = 8.dp),
+                quiet = true,
+            )
+        }
 
         !pack.installed -> TextButton(
             label = stringResource(R.string.pack_action_add),

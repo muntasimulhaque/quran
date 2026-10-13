@@ -76,8 +76,9 @@ dead letter.
    (owner decision). Library-merged permissions are documented, not fought. A
    new permission needs the owner's sign-off written here first.
 3. **No ads, no trackers, no analytics, no accounts.** AndroidX, Kotlin,
-   Media3, Room, DataStore, and Glance only. Every new dependency is
-   proposed here first.
+   Media3, Room, DataStore, and Glance only; the accessibility test's own
+   framework is a test-only dependency and never ships. Every new dependency
+   is proposed here first.
 4. **The sacred text is untouchable.** Not one byte of Quran text,
    translation, or tafsir is edited by hand. Content changes only through
    `tools/`, and every dataset carries its source, version, checksum, and
@@ -109,8 +110,9 @@ dead letter.
     before the text. If a feature adds friction, it is cut. Every added
     choice must earn its place against the reading.
 11. **Fast to the point of invisible.** Cold start lands on readable text
-    with no spinner. A page turn is a pre-rendered swipe, not a render.
-    Nothing blocks the main thread, ever.
+    with no spinner. The reading is one scroll through rows already
+    measured, never a render, and a turned surah lands on text that is
+    already there. Nothing blocks the main thread, ever.
 12. **Daily reading, not engagement.** A daily ayah, a quiet reminder,
     and nothing that counts. No streaks, no badges, no social, no guilt.
 13. **No AI attribution anywhere.** No `Co-Authored-By` trailers, no
@@ -335,7 +337,7 @@ at every step:
 | `data/` | read-only content access, the saved-ayah and last-read user databases, preferences |
 | `app/` | the shell: activity, view model, the screen that composes the features, the shell's strings |
 | `feature-*/` | one reading surface each (reading, search, browse, playback, settings), each owning its own strings and icons |
-| `ui-kit/` | the shared look: theme and palettes, the hand-drawn icons, the rich text views, the app's choice row, the one floating lift, the small formatters |
+| `ui-kit/` | the shared look: theme and palettes, the hand-drawn icons, the rich text views, the app's choice row, the text button and the sheet handle, the one floating lift, the small formatters |
 | `content-assets/` | the shipped assets the app reads: the Arabic text face, the reading and UI faces, the core pack, and the pack catalog |
 | `tools/` | the offline pipeline: fetch, verify, audit, build, fonts, packs, audio, icons |
 | `content/` | `quran.db` (built by `tools/`, gitignored, fetched or rebuilt from its hash), `packs/`, `manifest.json`, `recitation-manifest.json`, `audit-report.md`; `raw/` is local and gitignored |

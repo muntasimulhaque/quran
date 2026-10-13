@@ -18,8 +18,7 @@ import java.util.concurrent.locks.ReentrantLock
 /**
  * The read-only content database.
  *
- * The main file is the core pack: the Quran text, its words, and its page
- * layout. Every other pack (a translation, a tafsir, a word list, a reciter's
+ * The main file is the core pack: the Quran text and its words. Every other pack (a translation, a tafsir, a word list, a reciter's
  * timings) is attached beside it as its own schema, so a reader's library is
  * exactly the packs on the device and nothing else. A pack that is not
  * installed is not attached, and a query for it never runs.
@@ -118,8 +117,6 @@ class ContentDatabase private constructor(
 
     fun installedPack(id: String): Boolean = id == PackCatalog.CORE_ID || has(id)
 
-    fun catalog(): PackCatalog = catalog
-
     // ----------------------------------------------------------------- packs
 
     fun packs(): List<ContentPack> = catalog.all()
@@ -159,18 +156,27 @@ class ContentDatabase private constructor(
         bismillahPre = cursor.getInt(6) == 1,
     )
 
-    /** The English introduction to a surah, when the content carries one. */
-    fun surahInfo(surah: Int): String? {
-        if (!installedPack(SURAH_INFO)) return null
+    /**
+     * The introduction to a surah, in the reader's own language when the
+     * content carries one for it, and in English when it does not. The
+     * introduction is the one deliberate exception to the one-language rule:
+     * there is no Bangla introduction yet, and a Bangla reader is owed the
+     * introduction in the one language it exists in rather than a door that
+     * opens nothing (owner decision, this session). The translation, the
+     * tafsir, and the word meanings keep the strict rule and never fall back.
+     */
+    fun surahInfo(surah: Int, language: String = "en"): String? {
+        val preferred = wordsPack(language)
+        val pack = when {
+            hasTable(preferred, "surah_info") -> preferred
+            preferred != WORDS_PACK && hasTable(WORDS_PACK, "surah_info") -> WORDS_PACK
+            else -> return null
+        }
         return query(
-            "SELECT text FROM ${schema(SURAH_INFO)}.surah_info WHERE surah = ?",
+            "SELECT text FROM ${schema(pack)}.surah_info WHERE surah = ?",
             arrayOf(surah.toString()),
         ).use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
     }
-
-    fun juzOfAyah(number: Int): Int =
-        query("SELECT juz FROM ayah WHERE number = ?", arrayOf(number.toString()))
-            .use { cursor -> if (cursor.moveToFirst()) cursor.getInt(0) else 1 }
 
     private fun wordOf(cursor: android.database.Cursor, offset: Int) = Word(
         id = cursor.getInt(offset + 0),
@@ -184,6 +190,18 @@ class ContentDatabase private constructor(
             "SELECT number, surah, ayah, verse_key, text FROM ayah WHERE number = ?",
             arrayOf(number.toString()),
         ).use { cursor -> if (cursor.moveToFirst()) ayahOf(cursor) else null }
+
+    /**
+     * The basmalah that opens a surah: Al-Fatiha's own first ayah, read from
+     * the content the rest of the reading is read from. It used to be a
+     * literal in the reading's own source, and it was one mark away from the
+     * audited text: the reader met a basmalah the audit never verified. The
+     * one text is read here and drawn everywhere, so no Quran text lives in
+     * Kotlin (owner decision, this session).
+     */
+    fun basmalah(): String? = basmalahText
+
+    private val basmalahText: String? by lazy { ayah(1)?.text }
 
     private fun ayahOf(cursor: android.database.Cursor) = Ayah(
         number = cursor.getInt(0),
@@ -300,14 +318,16 @@ class ContentDatabase private constructor(
     }
 
     /**
-     * The installed word list that speaks a language, falling back to English
-     * when that language has none, so meanings are never silently absent.
+     * The installed word list that speaks a language, and nothing else. There
+     * is no fallback: a Bangla reader never meets English meanings under the
+     * Arabic because the Bangla list has not landed yet, exactly as search
+     * never falls back (owner decision, this session). A language with no
+     * list installed answers null, and the reading draws the words without
+     * meanings rather than the wrong language's meanings.
      */
     fun meaningPack(language: String): String? {
-        val preferred = wordsPack(language)
-        if (installedPack(preferred)) return preferred
-        if (preferred != WORDS_PACK && installedPack(WORDS_PACK)) return WORDS_PACK
-        return null
+        val wanted = wordsPack(language)
+        return if (installedPack(wanted)) wanted else null
     }
 
     /** The words of a set of ayahs, in order, markers excluded. */
@@ -364,7 +384,7 @@ class ContentDatabase private constructor(
             // A pack that carries its own index does not need the in-memory
             // copy, and loading it would spend the memory the index just
             // saved (owner decision, this session).
-            val withoutIndex = tafsirPacks.filterNot { hasFts(it, "tafsir_passage_fts") }.toSet()
+            val withoutIndex = tafsirPacks.filterNot { hasTable(it, "tafsir_passage_fts") }.toSet()
             if (withoutIndex.isNotEmpty()) {
                 synchronized(tafsirIndex) { tafsirIndex.ensure(withoutIndex) }
             }
@@ -598,7 +618,7 @@ class ContentDatabase private constructor(
         // Only the packs without an index of their own are folded into
         // memory; a pack that carries one answers from its own file.
         synchronized(tafsirIndex) {
-            val withoutIndex = tafsirPacks.filterNot { hasFts(it, "tafsir_passage_fts") }.toSet()
+            val withoutIndex = tafsirPacks.filterNot { hasTable(it, "tafsir_passage_fts") }.toSet()
             if (withoutIndex.isNotEmpty()) tafsirIndex.ensure(withoutIndex)
         }
         val passageAyahs = LinkedHashMap<String, Int>()
@@ -728,20 +748,28 @@ class ContentDatabase private constructor(
     }
 
     /**
-     * Whether one installed pack carries the full text index for [table], or
-     * the core pack when [id] is null. The packs built after the search index
-     * shipped carry it; a pack installed by an earlier build does not, and
+     * Whether one installed pack carries [table], or the core pack when [id]
+     * is null. The packs built after the search index shipped carry their
+     * own index tables; a pack installed by an earlier build does not, and
      * every query falls back to the scan it always did, so an old install
-     * keeps working and gets faster when its pack is refreshed.
+     * keeps working and gets faster when its pack is refreshed. The check is
+     * the same one the introductions use, because a table is a table: what
+     * is asked here is whether the pack carries it at all.
      */
-    private fun hasFts(id: String?, table: String): Boolean =
-        ftsTables.computeIfAbsent("${id ?: ""}.$table") {
+    private fun hasTable(id: String?, table: String): Boolean {
+        // A pack that is not attached has no schema to ask: the honest answer
+        // is that it carries no such table, not an exception. A reader with
+        // no word list opens a surah and asks for its introduction, and the
+        // question must be answered rather than take the process down.
+        if (id != null && !has(id)) return false
+        return tables.computeIfAbsent("${id ?: ""}.$table") {
             val master = if (id == null) "sqlite_master" else "${schema(id)}.sqlite_master"
             query("SELECT 1 FROM $master WHERE type = 'table' AND name = ?", arrayOf(table))
                 .use { cursor -> cursor.moveToFirst() }
         }
+    }
 
-    private val ftsTables = java.util.concurrent.ConcurrentHashMap<String, Boolean>()
+    private val tables = java.util.concurrent.ConcurrentHashMap<String, Boolean>()
 
     /**
      * The reader's library, read through the pack's own full text index when
@@ -753,7 +781,7 @@ class ContentDatabase private constructor(
     private fun indexedMatch(terms: List<String>): String? = Search.matchExpression(terms)
 
     private fun arabicMatches(query: SearchQuery, limit: Int): List<Int> {
-        if (hasFts(null, "ayah_fts")) {
+        if (hasTable(null, "ayah_fts")) {
             indexedMatch(query.terms)?.let { match ->
                 return query(
                     "SELECT number FROM ayah WHERE rowid IN " +
@@ -809,7 +837,7 @@ class ContentDatabase private constructor(
         wordsPack: String,
     ): Map<Int, WordMatch> {
         if (query.arabic || !installedPack(wordsPack)) return emptyMap()
-        val rows = if (hasFts(wordsPack, "word_meaning_fts")) {
+        val rows = if (hasTable(wordsPack, "word_meaning_fts")) {
             indexedMatch(query.terms)?.let { match ->
                 val pack = schema(wordsPack)
                 query(
@@ -903,7 +931,7 @@ class ContentDatabase private constructor(
     /** Matches inside one installed pack's own schema. */
     private fun packMatches(schemaId: String, terms: List<String>, limit: Int): List<Int> {
         if (!installedPack(schemaId)) return emptyList()
-        if (hasFts(schemaId, "translation_fts")) {
+        if (hasTable(schemaId, "translation_fts")) {
             indexedMatch(terms)?.let { match ->
                 val pack = schema(schemaId)
                 return query(
@@ -1052,7 +1080,7 @@ class ContentDatabase private constructor(
      * for a read of prose and nothing else.
      */
     suspend fun warmTafsir(packs: Collection<String>) = withContext(Dispatchers.IO) {
-        val withoutIndex = packs.filterNot { hasFts(it, "tafsir_passage_fts") }.toSet()
+        val withoutIndex = packs.filterNot { hasTable(it, "tafsir_passage_fts") }.toSet()
         if (withoutIndex.isNotEmpty()) {
             synchronized(tafsirIndex) { tafsirIndex.ensure(withoutIndex) }
         }
@@ -1079,7 +1107,7 @@ class ContentDatabase private constructor(
     }
 
     private fun tafsirMatches(pack: String, query: SearchQuery, limit: Int): List<PassageRow> {
-        val mine = if (hasFts(pack, "tafsir_passage_fts")) {
+        val mine = if (hasTable(pack, "tafsir_passage_fts")) {
             ftsTafsirMatches(pack, query.terms, limit)
         } else {
             synchronized(tafsirIndex) { tafsirIndex.matches(pack, query.terms, limit) }
@@ -1221,7 +1249,6 @@ class ContentDatabase private constructor(
         private const val TAG = "ContentDatabase"
 
         const val WORDS_PACK = "words-en"
-        const val SURAH_INFO = "words-en"
         const val RECITER_PREFIX = "reciter-"
 
         fun reciterPack(recitation: String): String = RECITER_PREFIX + recitation

@@ -36,10 +36,13 @@ fun AddDoor(
     Row(
         modifier = modifier
             .fillMaxWidth()
+            // The door's click is the whole 48 dp, and the shape the eye
+            // reads is drawn inside it, so the accessibility node and the
+            // touch target are the same box (owner decision, this session).
+            .clickable(onClick = onClick)
             .minimumInteractiveComponentSize()
             .clip(Radii.Card)
             .background(MaterialTheme.colorScheme.primary.copy(alpha = Wash.Door))
-            .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
