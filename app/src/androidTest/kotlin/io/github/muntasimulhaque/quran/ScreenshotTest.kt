@@ -459,17 +459,20 @@ class ScreenshotTest {
         }
         rule.onNodeWithContentDescription("Tafsir").performClick()
         waitForTag("ayah-card", timeout = 30_000)
-        // A single enabled tafsir opens itself with the card. The door's own
-        // frame wants it folded, so it is folded once when it opened itself;
-        // with more than one tafsir the doors already stand folded and the
-        // same tap below opens the one the frame is about.
-        val panelIsUp = {
+        // A single enabled tafsir opens itself with the card, and its passage
+        // is read and parsed as the card opens. The wait is on the panel
+        // itself, before anything is folded: on the ten inch leg the parse
+        // was still on its way when the door's frame was reached, and the
+        // door's own open state read as folded, so the next tap closed what
+        // it meant to open (the kept frame said "Opening Ibn Kathir...",
+        // owner report, this session).
+        waitForTag("tafsir-panel", timeout = 30_000)
+        // The door's own frame wants the tafsir folded, so it is folded once
+        // here and unfolded for the tafsir frame below.
+        rule.onNodeWithText("Ibn Kathir").performClick()
+        rule.waitUntil(timeoutMillis = 10_000) {
             rule.onAllNodesWithTag("tafsir-panel", useUnmergedTree = true)
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-        if (panelIsUp()) {
-            rule.onNodeWithText("Ibn Kathir").performClick()
-            rule.waitUntil(timeoutMillis = 10_000) { !panelIsUp() }
+                .fetchSemanticsNodes().isEmpty()
         }
         Thread.sleep(600)
         captureScreen("07-ayah-card")
@@ -479,7 +482,7 @@ class ScreenshotTest {
         // parse happen as the card opens, so the fold is all that is left
         // (owner report, this session).
         rule.onNodeWithText("Ibn Kathir").performClick()
-        waitForTag("tafsir-panel")
+        waitForTag("tafsir-panel", timeout = 30_000)
         captureScreen("08-tafsir")
         back()
         rule.waitUntil(timeoutMillis = 10_000) {
