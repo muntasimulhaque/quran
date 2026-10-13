@@ -414,6 +414,11 @@ class ScreenshotTest {
             settings.setShowTranslation(true)
             settings.setShowTafsir(true)
             settings.setWordByWord(true)
+            // The store set is the steady reading, not the first minute: the
+            // one-time long-press note has been read in this install, so no
+            // frame catches it floating over the opening (owner report, this
+            // session: the note belongs to the first run, not the listing).
+            settings.setLongPressHintShown()
             for (role in TypeRole.entries) settings.setTypeSize(role, TextSize.DEFAULT)
         }
         Thread.sleep(500)
