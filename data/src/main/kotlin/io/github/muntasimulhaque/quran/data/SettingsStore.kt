@@ -137,6 +137,13 @@ data class AppSettings(
      * the minute and the picker has nothing to reconcile.
      */
     val dailyAyahMinute: Int = DEFAULT_DAILY_MINUTE,
+    /**
+     * Whether the one-time long-press note has been shown. The ayah's own
+     * actions are the richest gesture in the app and the least visible, so
+     * they are said once, quietly, and then never again (owner decision,
+     * this session: the one-tap ayah of 6.5 was reverted to the long press).
+     */
+    val longPressHintShown: Boolean = false,
 ) {
     val arabicSp: Float get() = TextSize.sp(TypeRole.Arabic, arabicSize)
     val arabicLineSp: Float get() = TextSize.lineSp(TypeRole.Arabic, arabicSize)
@@ -245,6 +252,7 @@ class SettingsStore(private val context: Context) {
             wordByWord = preferences[WORD_BY_WORD] ?: false,
             dailyAyah = preferences[DAILY_AYAH] ?: true,
             dailyAyahMinute = storedDailyMinute(preferences),
+            longPressHintShown = preferences[HINT_SHOWN] ?: false,
         )
     }
 
@@ -355,6 +363,16 @@ class SettingsStore(private val context: Context) {
     /** The moment the daily reminder arrives: minutes from midnight. */
     suspend fun setDailyAyahTime(minuteOfDay: Int) {
         context.settingsStore.edit { it[DAILY_AYAH_MINUTE] = minuteOfDay.coerceIn(0, LAST_MINUTE_OF_DAY) }
+    }
+
+    /**
+     * The one-time long-press note is remembered across launches. It is
+     * written when the note leaves the screen, not when it appears: a
+     * process that dies with the note up says it again rather than losing
+     * it forever.
+     */
+    suspend fun setLongPressHintShown() {
+        context.settingsStore.edit { it[HINT_SHOWN] = true }
     }
 
     suspend fun setTranslationPacks(packs: Set<String>) {
@@ -526,6 +544,7 @@ class SettingsStore(private val context: Context) {
         /** Written by builds before the picker took minutes; read, never written. */
         val DAILY_AYAH_HOUR = intPreferencesKey("daily_ayah_hour")
         val DAILY_AYAH_MINUTE = intPreferencesKey("daily_ayah_minute")
+        val HINT_SHOWN = booleanPreferencesKey("hint_shown")
     }
 }
 

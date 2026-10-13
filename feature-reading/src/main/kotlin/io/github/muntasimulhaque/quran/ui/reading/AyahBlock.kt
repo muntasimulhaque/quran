@@ -2,8 +2,9 @@ package io.github.muntasimulhaque.quran.ui.reading
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,6 +28,8 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
@@ -56,6 +59,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
 import kotlin.math.max
 import kotlin.math.min
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun AyahBlock(
     row: ReadingRow,
@@ -97,19 +101,29 @@ internal fun AyahBlock(
             .fillMaxWidth()
             .padding(vertical = 12.dp),
     ) {
+        val haptics = LocalHapticFeedback.current
         val press = remember { MutableInteractionSource() }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(Radii.Card)
                 .background(wash)
-                // One tap, one meaning: an ayah answers with its own actions.
-                // The wash and the pill that appear are the answer, so the
-                // tap carries no ripple over the Quran's own letters.
-                .clickable(
+                // A tap belongs to the page: it brings or puts away the
+                // chrome, and it is how a raised pill is dismissed. An
+                // ayah's own actions are one long press, answered by a
+                // haptic so the gesture says it landed; the tap carries no
+                // ripple over the Quran's own letters (owner decision, this
+                // session: the one-tap ayah of 6.5 was reverted, because a
+                // stray touch raised the pill and the reading around an ayah
+                // gave the reader almost nothing to tap it away with).
+                .combinedClickable(
                     interactionSource = press,
                     indication = null,
-                    onClick = { onAyah(row.ayah) },
+                    onClick = onBackgroundTap,
+                    onLongClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onAyah(row.ayah)
+                    },
                 )
                 // Every ayah gives a screen reader the same two doors a finger
                 // has: the ayah's actions, which is the one gesture the

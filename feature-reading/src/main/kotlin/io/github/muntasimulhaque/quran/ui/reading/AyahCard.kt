@@ -43,6 +43,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.RichText
+import io.github.muntasimulhaque.quran.core.TextBlock
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
@@ -73,6 +74,13 @@ private data class TafsirView(
     val title: String,
     val range: String,
     val passage: TafsirPassage,
+    /**
+     * The passage already parsed into its blocks. The parse is the one heavy
+     * step in showing a tafsir, and it is pure work: doing it here, on the
+     * read's own worker, leaves the frame that unfolds the panel with only
+     * the layout to do (owner report, this session).
+     */
+    val blocks: List<TextBlock>,
 )
 
 /**
@@ -95,26 +103,42 @@ fun AyahCard(
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var door by remember(ayah.number) { mutableStateOf<Door?>(null) }
+    // One tafsir on, and the card opens it: the reader tapped Tafsir on the
+    // pill, so the second tap the door list asks for is a question whose
+    // answer is already in the tap. With more than one, the doors stand and
+    // the reader chooses (owner decision, this session).
+    val firstPack = tafsirPacks.singleOrNull()
+    var door by remember(ayah.number) { mutableStateOf(firstPack?.let { Door.Tafsir(it) }) }
     var footnote by remember(ayah.number) { mutableStateOf<OpenFootnote?>(null) }
 
-    val tafsir by produceState<TafsirView?>(initialValue = null, content, ayah.number, door) {
-        val pack = (door as? Door.Tafsir)?.pack
-        value = if (pack == null) {
-            null
-        } else {
-            withContext(Dispatchers.IO) {
-                val passage = content.tafsir(ayah.number, pack.id)
-                passage?.let {
-                    val name = content.surah(it.surah)?.nameSimple ?: "Surah ${it.surah}"
-                    val span = if (it.fromAyah == it.toAyah) {
-                        "${it.surah}:${it.fromAyah}"
-                    } else {
-                        "${it.surah}:${it.fromAyah}-${it.toAyah}"
-                    }
-                    TafsirView(title = it.source, range = "$name $span", passage = it)
+    // Every enabled tafsir is read as the card opens, not when its door is
+    // tapped: the read is one indexed query of a millisecond or two, and
+    // paying for it here puts the text in hand before the sheet has finished
+    // moving, so the panel opens on prose instead of on "Opening…" (owner
+    // report, this session: the wait was the tap-to-read, not the query).
+    val passages by produceState<Map<String, TafsirView>>(
+        initialValue = emptyMap(),
+        content,
+        ayah.number,
+        tafsirPacks,
+    ) {
+        value = withContext(Dispatchers.IO) {
+            tafsirPacks.mapNotNull { pack ->
+                val passage = content.tafsir(ayah.number, pack.id) ?: return@mapNotNull null
+                val name = content.surah(passage.surah)?.nameSimple
+                    ?: "Surah ${passage.surah}"
+                val span = if (passage.fromAyah == passage.toAyah) {
+                    "${passage.surah}:${passage.fromAyah}"
+                } else {
+                    "${passage.surah}:${passage.fromAyah}-${passage.toAyah}"
                 }
-            }
+                pack.id to TafsirView(
+                    title = passage.source,
+                    range = "$name $span",
+                    passage = passage,
+                    blocks = RichText.parseHtml(passage.text),
+                )
+            }.toMap()
         }
     }
 
@@ -187,7 +211,7 @@ fun AyahCard(
                     )
                     if (open) {
                         Box(Modifier.padding(horizontal = 22.dp, vertical = Space.Line)) {
-                            val view = tafsir
+                            val view = passages[pack.id]
                             if (view == null) {
                                 Text(
                                     text = stringResource(R.string.card_opening_pack, pack.name),
@@ -279,10 +303,11 @@ private fun TafsirPanel(view: TafsirView, settings: AppSettings) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .testTag("tafsir-panel")
             .padding(top = 4.dp),
     ) {
         RichBlocks(
-            blocks = remember(view.passage.text) { RichText.parseHtml(view.passage.text) },
+            blocks = view.blocks,
             sizeSp = settings.tafsirSp,
             lineSp = settings.tafsirLineSp,
             arabicSp = settings.tafsirArabicSp,

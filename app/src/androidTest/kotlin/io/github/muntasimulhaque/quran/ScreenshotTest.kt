@@ -5,6 +5,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasContentDescription
@@ -435,7 +436,8 @@ class ScreenshotTest {
         // 3. An ayah's actions, and the card they open. The card carries
         // the tafsir doors, which is the deeper surface a reader meets off
         // the reading. This runs before any scrolling, while 2:255 is still
-        // the verse on screen.
+        // the verse on screen. The actions are a long press on the ayah,
+        // the one gesture the reading keeps.
         val pillIsUp = {
             rule.onAllNodesWithContentDescription("Tafsir").fetchSemanticsNodes().isNotEmpty()
         }
@@ -444,7 +446,7 @@ class ScreenshotTest {
             if (pillRaised) return@repeat
             runCatching {
                 rule.onAllNodesWithText("2:255", substring = true).onFirst()
-                    .performTouchInput { click() }
+                    .performTouchInput { longClick() }
             }
             pillRaised = runCatching {
                 rule.waitUntil(timeoutMillis = 20_000) { pillIsUp() }
@@ -457,12 +459,27 @@ class ScreenshotTest {
         }
         rule.onNodeWithContentDescription("Tafsir").performClick()
         waitForTag("ayah-card", timeout = 30_000)
+        // A single enabled tafsir opens itself with the card. The door's own
+        // frame wants it folded, so it is folded once when it opened itself;
+        // with more than one tafsir the doors already stand folded and the
+        // same tap below opens the one the frame is about.
+        val panelIsUp = {
+            rule.onAllNodesWithTag("tafsir-panel", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        if (panelIsUp()) {
+            rule.onNodeWithText("Ibn Kathir").performClick()
+            rule.waitUntil(timeoutMillis = 10_000) { !panelIsUp() }
+        }
         Thread.sleep(600)
         captureScreen("07-ayah-card")
 
-        // 4. The tafsir open on the card: Ibn Kathir for 2:255.
+        // 4. The tafsir open on the card: Ibn Kathir for 2:255. The wait is
+        // on the panel's own tag, never a blind sleep: the read and the
+        // parse happen as the card opens, so the fold is all that is left
+        // (owner report, this session).
         rule.onNodeWithText("Ibn Kathir").performClick()
-        Thread.sleep(1_200)
+        waitForTag("tafsir-panel")
         captureScreen("08-tafsir")
         back()
         rule.waitUntil(timeoutMillis = 10_000) {

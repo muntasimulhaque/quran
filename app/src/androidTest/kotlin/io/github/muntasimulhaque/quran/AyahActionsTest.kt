@@ -1,7 +1,7 @@
 package io.github.muntasimulhaque.quran
 
 import androidx.compose.ui.test.hasContentDescription
-import androidx.compose.ui.test.click
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -40,7 +40,8 @@ import org.junit.runner.RunWith
  * before it takes the mark and the note with it (owner report).
  *
  * The library is prepared before the activity starts, the order a reader
- * creates it in, and a tap on the ayah is the only thing the test touches.
+ * creates it in, and a long press on the ayah is the only thing the test
+ * touches.
  */
 @RunWith(AndroidJUnit4::class)
 class AyahActionsTest {
@@ -159,8 +160,9 @@ class AyahActionsTest {
     }
 
     /**
-     * The chrome comes up on a tap on the paper, and an ayah's own actions on
-     * a tap on the ayah itself, which is the one gesture the reading keeps.
+     * The chrome comes up on a tap on the ayah or the paper around it, and
+     * the ayah's own actions on a long press of the ayah itself, the one
+     * gesture the reading keeps.
      */
     private fun openReadingAyah() {
         val readingPage = compose.activity.getString(ReadingR.string.reading_page_description)
@@ -174,7 +176,7 @@ class AyahActionsTest {
             compose.onAllNodesWithText("1:1", substring = true).fetchSemanticsNodes().isNotEmpty()
         }
         compose.onAllNodesWithText("1:1", substring = true).onFirst()
-            .performTouchInput { click() }
+            .performTouchInput { longClick() }
         compose.waitUntil(timeoutMillis = 60_000) {
             compose.onAllNodesWithContentDescription("Tafsir").fetchSemanticsNodes().isNotEmpty()
         }

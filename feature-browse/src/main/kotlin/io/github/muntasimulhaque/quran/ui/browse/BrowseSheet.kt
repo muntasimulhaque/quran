@@ -3,6 +3,8 @@ package io.github.muntasimulhaque.quran.ui.browse
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.ripple
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -339,15 +342,29 @@ private fun BrowseTabChip(
     // The chip's own shape stays as small as it reads; the click and the
     // accessibility node carry the app's 48 dp target, because a tab is a
     // control and a control that cannot be hit is not drawn at all to the
-    // reader who missed it.
+    // reader who missed it. The ripple is drawn on the pill inside, not on
+    // the slab: the click node sits outside the clip, so an indication left
+    // on it would flash a rectangle over the target instead of the shape
+    // the reader is looking at (the same rule TextButton wears).
+    val press = remember { MutableInteractionSource() }
+    val ink = if (active) {
+        MaterialTheme.colorScheme.onPrimary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
     Box(
-        modifier = modifier,
+        modifier = modifier
+            .clickable(
+                interactionSource = press,
+                indication = null,
+                role = Role.RadioButton,
+                onClick = onClick,
+            )
+            .minimumInteractiveComponentSize(),
         contentAlignment = Alignment.Center,
     ) {
         Box(
             modifier = Modifier
-                .clickable(role = Role.RadioButton, onClick = onClick)
-                .minimumInteractiveComponentSize()
                 .clip(Radii.Pill)
                 .background(
                     if (active) {
@@ -356,16 +373,13 @@ private fun BrowseTabChip(
                         MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
                     },
                 )
+                .indication(press, ripple(color = ink))
                 .padding(horizontal = 14.dp, vertical = 8.dp),
         ) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium,
-                color = if (active) {
-                    MaterialTheme.colorScheme.onPrimary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
+                color = ink,
             )
         }
     }

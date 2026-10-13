@@ -50,6 +50,11 @@
     <string name="action_close">Close</string>
     <string name="action_cancel">Cancel</string>
 
+    <!-- The one-time note over the reading: an ayah's own actions are a long
+         press, the richest gesture in the app and the least visible, so they
+         are said once, quietly, and then never again. -->
+    <string name="hint_long_press_ayah">Press and hold any ayah for its actions</string>
+
     <!-- What an ayah's own two marks say about themselves, so a lit glyph is
          not the only way a reader learns that an ayah is noted or saved. -->
     <string name="action_state_on">on</string>

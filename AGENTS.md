@@ -381,6 +381,22 @@ implement it and update this list.
 - One reading with no mode name. The reader's doors are Browse, Search, and
   Settings; there is no bottom bar and no mode switch (owner decision, this
   session: the printed page is removed because it could not match the print).
+- The reading answers a tap with the page and a long press with the ayah's own
+  actions (Play, Tafsir, Save, Note, More). A tap brings or puts away the
+  chrome and dismisses a raised pill; the one-time note that teaches the long
+  press is shown once per install, and TalkBack reaches the same actions
+  through each ayah's own custom actions. The one-tap ayah of 6.5 is reverted:
+  a stray touch raised the pill, and the full-width ayah blocks left almost no
+  paper to tap it away on (owner decision, this session).
+- The surah introduction is drawn only when the reader opens About this surah.
+  Closed, the door is the only thing under the basmalah; the three-line teaser
+  of 6.6, a side effect of loading the introduction as the surah opens so the
+  door knows it has content, is removed (owner decision, this session).
+- A single enabled tafsir opens itself with the ayah card, and every enabled
+  tafsir is read and parsed as the card opens, on a worker: the reader's
+  Tafsir tap is the ask, and the second tap of a one-item door list is
+  friction. With more than one tafsir the doors stand and the reader chooses
+  (owner decision, this session).
 - Last Read is the fourth Browse tab beside Surahs, Juz, and Saved, and a
   note lives inside Saved with the ayah it was written on.
 - A surah row in Browse opens its own ayah grid; there is no separate Go to

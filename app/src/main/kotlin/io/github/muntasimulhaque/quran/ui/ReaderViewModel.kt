@@ -727,6 +727,16 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         if (chosen.wordByWord) library.installIfMissing(wantedWordsPack())
     }
 
+    /**
+     * The one-time long-press note has been read, so it is never shown again.
+     * The reader may dismiss it early; either way the word is written down.
+     */
+    fun markLongPressHintShown() {
+        if (settings.longPressHintShown) return
+        settings = settings.copy(longPressHintShown = true)
+        viewModelScope.launch { settingsStore.setLongPressHintShown() }
+    }
+
     fun setTranslationPacks(packs: Set<String>) {
         settings = settings.copy(translationPacks = packs)
         clearRowCache()

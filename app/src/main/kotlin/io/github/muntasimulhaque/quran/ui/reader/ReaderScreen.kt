@@ -8,9 +8,14 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
@@ -20,6 +25,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -32,6 +38,7 @@ import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.readingMetrics
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.browse.BrowseSheet
+import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.kit.shortReciterName
 import io.github.muntasimulhaque.quran.ui.search.SearchSheet
@@ -41,6 +48,7 @@ import io.github.muntasimulhaque.quran.ui.settings.SettingsSheet
 import io.github.muntasimulhaque.quran.ui.reading.AyahCard
 import io.github.muntasimulhaque.quran.ui.reading.AyahNoteSheet
 import io.github.muntasimulhaque.quran.ui.reading.ReadingList
+import io.github.muntasimulhaque.quran.ui.theme.Radii
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -255,9 +263,59 @@ fun ReaderScreen(
             modifier = Modifier.align(Alignment.TopCenter),
         )
 
-        // The long press hint is gone: an ayah's actions are raised by a
-        // tap, which needs no teaching, and a floating note that explains a
-        // hidden gesture is one more thing over the page (owner decision).
+        // The long press is the richest gesture in the app and the least
+        // visible, so it is said once, quietly, and then never again. The
+        // note floats over the reading and leaves on its own; a tap puts it
+        // away early, and either way the day is written down (owner
+        // decision, this session: restored with the long press).
+        if (!settings.longPressHintShown) {
+            var hintVisible by remember { mutableStateOf(false) }
+            LaunchedEffect(Unit) {
+                delay(1400)
+                hintVisible = true
+                delay(8000)
+                hintVisible = false
+                viewModel.markLongPressHintShown()
+            }
+            AnimatedVisibility(
+                visible = hintVisible,
+                enter = if (reducedMotion) fadeIn() else fadeIn() + slideInVertically { it / 3 },
+                exit = fadeOut(),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 96.dp),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp)
+                        .floatingLift(Radii.Sheet)
+                        .clip(Radii.Sheet)
+                        // A control that floats over the reading wears the
+                        // floating tone and a soft lift, not the sheet's own
+                        // surface: the page runs around it, and it has to read
+                        // as above the page rather than printed into it.
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                        .clickable {
+                            hintVisible = false
+                            viewModel.markLongPressHintShown()
+                        }
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    IconGlyph(
+                        icon = Icon.More,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Text(
+                        text = stringResource(R.string.hint_long_press_ayah),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(start = 12.dp),
+                    )
+                }
+            }
+        }
 
         val bottomItems = selected != null || playback.isAnything() || viewModel.listenOffer != null
         AnimatedVisibility(

@@ -27,7 +27,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.Arabic
@@ -147,7 +146,14 @@ internal fun SurahOpening(
                     .padding(top = Space.Section),
             )
         }
-        if (info != null) {
+        // The introduction is drawn only once the reader opens it: closed,
+        // the door is the whole of what stands under the basmalah, so the
+        // surah's own first ayah keeps the page. The about is prose the
+        // reader asked for, not a preview to scroll past (owner decision,
+        // this session: the three-line teaser of 6.6, a side effect of the
+        // introduction loading as the surah opens so the door knows whether
+        // it has anything behind it, is removed).
+        if (expanded && info != null) {
             // Opened, the introduction wears the wash a chosen ayah wears:
             // the reader asked for it, and while it is up it reads as the
             // chosen thing on the page, in the same lapis at the same weight
@@ -174,12 +180,8 @@ internal fun SurahOpening(
                     fontFamily = LocalReadingVoice.current.atSize(metrics.translationSp),
                 ),
                 color = ink.copy(alpha = 0.78f),
-                // Opened, the whole introduction is the reader's; it was
-                // asked for with a press, and a cap on it would cut the
-                // paragraphs the app only shows on request. Closed, the first
-                // lines are a preview, and the ellipsis says so.
-                maxLines = if (expanded) Int.MAX_VALUE else 3,
-                overflow = TextOverflow.Ellipsis,
+                // No cap on the introduction: it was asked for with a press,
+                // and it is the reader's to read while the door stays open.
                 // The door is the paragraph itself: the reading around it is
                 // the paper, and only the part that opens is its own target,
                 // so a press shows the boundary of the about and not of the

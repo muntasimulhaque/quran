@@ -3,6 +3,12 @@ package io.github.muntasimulhaque.quran.core
 import java.text.Normalizer
 
 /**
+ * How many display forms the parser remembers. Content carries a few hundred
+ * distinct codepoints; the cap only guards against a pathological document.
+ */
+private const val MAX_DISPLAY_FORMS = 4096
+
+/**
  * Turns text into styled runs the reader can render with the right font.
  *
  * Two inputs matter here. The translation carries footnote markers inside its
@@ -304,6 +310,28 @@ object RichText {
     }
 
     /**
+     * The display form of one codepoint, remembered from the first time it
+     * was read.
+     *
+     * NFKC does not depend on where a character stands, so the answer for a
+     * codepoint is the same in every passage; a tafsir alone repeats the same
+     * few hundred characters across tens of thousands of positions, and
+     * running the normalizer again for every one of them was the cost the
+     * reader felt as the tafsir opened (owner report, this session). The
+     * cache is small and bounded: content has a few thousand distinct
+     * codepoints at most, and beyond [MAX_DISPLAY_FORMS] the work is simply
+     * done again rather than remembered.
+     */
+    private fun display(codepoint: Int): String {
+        displayForms[codepoint]?.let { return it }
+        val form = displayUncached(codepoint)
+        if (displayForms.size < MAX_DISPLAY_FORMS) displayForms[codepoint] = form
+        return form
+    }
+
+    private val displayForms = java.util.concurrent.ConcurrentHashMap<Int, String>()
+
+    /**
      * The display form of one codepoint. Arabic presentation forms are pre-shaped
      * glyphs, not letters; the tafsir source carries a few of them. NFKC unfolds
      * them back to real letters that shape correctly in any Arabic font. Two
@@ -311,7 +339,7 @@ object RichText {
      * glyph it is, and the space that isolated forms decompose to is dropped when
      * it would sit before a combining mark.
      */
-    private fun display(codepoint: Int): String {
+    private fun displayUncached(codepoint: Int): String {
         if (codepoint == 0xFDFA) return String(Character.toChars(codepoint))
         val single = String(Character.toChars(codepoint))
         val normalized = Normalizer.normalize(single, Normalizer.Form.NFKC)

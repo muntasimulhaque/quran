@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 6.6 (versionCode 68)
+Version: 6.7 (versionCode 69)
 
 ## Listing
 
@@ -114,7 +114,7 @@ caption keeps air above the frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is refreshed for 6.6 from capture run 38417485404: all three legs green with eight frames each, and every frame compared with its artifact by `cmp`. The surah-opening frames on all three legs are the release's own change: they now show the opening itself, the Arabic name, the surah's own introduction preview, and the About this surah door, where the old frames photographed the reading mid-surah under that name. The search frames on all three legs read the capped status line as the first 200 shown alone, and the settings frames that show the About row read Version 6.6. The chrome frames' title sits centered inside its own 48 dp target, a shift of a few pixels. Every other changed frame differs only in the emulator's clock, the soft keyboard's caret, and a pixel of the scrim behind the ayah card, so the set is installed whole.
+The set is refreshed for 6.6 from capture run 38417485404: all three legs green with eight frames each, and every frame compared with its artifact by `cmp`. The surah-opening frames on all three legs are the release's own change: they now show the opening itself, the Arabic name, and the About this surah door, where the old frames photographed the reading mid-surah under that name; the introduction itself is drawn only once the door is opened (owner decision, this session). The search frames on all three legs read the capped status line as the first 200 shown alone, and the settings frames that show the About row read Version 6.6. The chrome frames' title sits centered inside its own 48 dp target, a shift of a few pixels. Every other changed frame differs only in the emulator's clock, the soft keyboard's caret, and a pixel of the scrim behind the ayah card, so the set is installed whole.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
@@ -134,8 +134,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (6.6, 495 characters)
-Your reading place is now kept exactly, down to the line inside a long ayah. Downloads can be cancelled while they run. A very broad search says plainly that it shows the first 200 results, and your typed search survives if Android restarts the app in the background. The reading and search follow the language you chose, with the surah introduction in English until a Bangla one exists. Touch targets are larger, the sheet handle speaks, and the daily content check runs lighter on the battery.
+## Release notes (6.7, 395 characters)
+Press and hold any ayah to open its actions: Play, Tafsir, Save, Note, and More. A tap now belongs to the page, so it brings or hides the reading controls and puts the actions away. About this surah stays folded behind its door until you open it. Tafsir opens at once: with one tafsir installed it opens with the ayah card, already read and ready. The Browse tabs press as their own shape again.
 
 ## Before each release
 

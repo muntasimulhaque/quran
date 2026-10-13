@@ -35,6 +35,11 @@
     <string name="action_close">বন্ধ</string>
     <string name="action_cancel">বাতিল</string>
 
+    <!-- The one-time note over the reading: an ayah's own actions are a long
+         press, the richest gesture in the app and the least visible, so they
+         are said once, quietly, and then never again. -->
+    <string name="hint_long_press_ayah">যেকোনো আয়াতে চাপ দিয়ে ধরে রাখলে তার কাজগুলো দেখা যাবে</string>
+
     <!-- What an ayah's own two marks say about themselves, so a lit glyph is
          not the only way a reader learns that an ayah is noted or saved. -->
     <string name="action_state_on">চালু</string>
