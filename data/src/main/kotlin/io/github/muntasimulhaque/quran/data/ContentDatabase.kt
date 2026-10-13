@@ -361,10 +361,21 @@ class ContentDatabase private constructor(
      */
     fun prewarmSearch(tafsirPacks: List<String>) {
         try {
-            synchronized(tafsirIndex) { tafsirIndex.ensure(tafsirPacks.toSet()) }
-        } catch (failure: IllegalStateException) {
-            if (!closed) throw failure
-            Log.i(TAG, "the tafsir index stopped early: the library closed", failure)
+            // A pack that carries its own index does not need the in-memory
+            // copy, and loading it would spend the memory the index just
+            // saved (owner decision, this session).
+            val withoutIndex = tafsirPacks.filterNot { hasFts(it, "tafsir_passage_fts") }.toSet()
+            if (withoutIndex.isNotEmpty()) {
+                synchronized(tafsirIndex) { tafsirIndex.ensure(withoutIndex) }
+            }
+        } catch (failure: Throwable) {
+            // The build is speculative, so a pack that will not read costs
+            // the reader tafsir hits until it is repaired, never a crash.
+            if (closed) {
+                Log.i(TAG, "the tafsir index stopped early: the library closed", failure)
+            } else {
+                Log.e(TAG, "the tafsir index could not be built", failure)
+            }
         }
     }
 
@@ -578,12 +589,18 @@ class ContentDatabase private constructor(
         }
         coroutineContext.ensureActive()
 
-        // Tafsir: each passage that matched, shown with its own range. The
-        // index holds the enabled packs, folded, so this stays a memory scan,
-        // and the passages and their ayahs are read in two batched queries.
+        // Tafsir: each passage that matched, shown with its own range. A pack
+        // that carries the search index answers from it, and one built before
+        // the index answers from the folded copy held in memory; either way
+        // the passages and their ayahs are read in two batched queries.
         val tafsirHits = ArrayList<SearchHit.TafsirHitResult>()
         val tafsirPacks = if (sources.tafsirs) request.tafsirPacks else emptyList()
-        synchronized(tafsirIndex) { tafsirIndex.ensure(tafsirPacks.toSet()) }
+        // Only the packs without an index of their own are folded into
+        // memory; a pack that carries one answers from its own file.
+        synchronized(tafsirIndex) {
+            val withoutIndex = tafsirPacks.filterNot { hasFts(it, "tafsir_passage_fts") }.toSet()
+            if (withoutIndex.isNotEmpty()) tafsirIndex.ensure(withoutIndex)
+        }
         val passageAyahs = LinkedHashMap<String, Int>()
         val matchedPassages = ArrayList<Pair<String, PassageRow>>()
         for (pack in tafsirPacks) {
@@ -710,7 +727,46 @@ class ContentDatabase private constructor(
         return first + ayah - 1
     }
 
+    /**
+     * Whether one installed pack carries the full text index for [table], or
+     * the core pack when [id] is null. The packs built after the search index
+     * shipped carry it; a pack installed by an earlier build does not, and
+     * every query falls back to the scan it always did, so an old install
+     * keeps working and gets faster when its pack is refreshed.
+     */
+    private fun hasFts(id: String?, table: String): Boolean =
+        ftsTables.computeIfAbsent("${id ?: ""}.$table") {
+            val master = if (id == null) "sqlite_master" else "${schema(id)}.sqlite_master"
+            query("SELECT 1 FROM $master WHERE type = 'table' AND name = ?", arrayOf(table))
+                .use { cursor -> cursor.moveToFirst() }
+        }
+
+    private val ftsTables = java.util.concurrent.ConcurrentHashMap<String, Boolean>()
+
+    /**
+     * The reader's library, read through the pack's own full text index when
+     * it has one, and through the scan it always had when it does not.
+     * [Search.matchExpression] turns the reader's terms into the index's own
+     * language; the fallback keeps the exact substring behavior of an install
+     * whose packs predate the index.
+     */
+    private fun indexedMatch(terms: List<String>): String? = Search.matchExpression(terms)
+
     private fun arabicMatches(query: SearchQuery, limit: Int): List<Int> {
+        if (hasFts(null, "ayah_fts")) {
+            indexedMatch(query.terms)?.let { match ->
+                return query(
+                    "SELECT number FROM ayah WHERE rowid IN " +
+                        "(SELECT docid FROM ayah_fts WHERE ayah_fts MATCH ?) " +
+                        "ORDER BY number LIMIT ?",
+                    arrayOf(match, limit.toString()),
+                ).use { cursor ->
+                    buildList(cursor.count) {
+                        while (cursor.moveToNext()) add(cursor.getInt(0))
+                    }
+                }
+            }
+        }
         val condition = query.terms.joinToString(" AND ") { "text_search LIKE ? ESCAPE '\\'" }
         return query(
             "SELECT number FROM ayah WHERE $condition ORDER BY number LIMIT ?",
@@ -753,14 +809,28 @@ class ContentDatabase private constructor(
         wordsPack: String,
     ): Map<Int, WordMatch> {
         if (query.arabic || !installedPack(wordsPack)) return emptyMap()
-        val condition = query.terms.joinToString(" AND ") { "meaning_search LIKE ? ESCAPE '\\'" }
+        val rows = if (hasFts(wordsPack, "word_meaning_fts")) {
+            indexedMatch(query.terms)?.let { match ->
+                val pack = schema(wordsPack)
+                query(
+                    "SELECT m.ayah_number, m.position, m.meaning FROM $pack.word_meaning m " +
+                        "WHERE m.rowid IN (SELECT docid FROM $pack.word_meaning_fts " +
+                        "WHERE word_meaning_fts MATCH ?) ORDER BY m.ayah_number LIMIT ?",
+                    arrayOf(match, (limit * 4).toString()),
+                )
+            }
+        } else {
+            null
+        } ?: run {
+            val condition = query.terms.joinToString(" AND ") { "meaning_search LIKE ? ESCAPE '\\'" }
+            query(
+                "SELECT ayah_number, position, meaning FROM ${schema(wordsPack)}.word_meaning WHERE $condition " +
+                    "ORDER BY ayah_number LIMIT ?",
+                (query.terms.map { Search.pattern(it) } + (limit * 4).toString()).toTypedArray(),
+            )
+        }
         val meanings = LinkedHashMap<Int, String>()
         val positions = LinkedHashMap<Int, MutableSet<Int>>()
-        val rows = query(
-            "SELECT ayah_number, position, meaning FROM ${schema(wordsPack)}.word_meaning WHERE $condition " +
-                "ORDER BY ayah_number LIMIT ?",
-            (query.terms.map { Search.pattern(it) } + (limit * 4).toString()).toTypedArray(),
-        )
         rows.use { cursor ->
             while (cursor.moveToNext()) {
                 val number = cursor.getInt(0)
@@ -833,6 +903,21 @@ class ContentDatabase private constructor(
     /** Matches inside one installed pack's own schema. */
     private fun packMatches(schemaId: String, terms: List<String>, limit: Int): List<Int> {
         if (!installedPack(schemaId)) return emptyList()
+        if (hasFts(schemaId, "translation_fts")) {
+            indexedMatch(terms)?.let { match ->
+                val pack = schema(schemaId)
+                return query(
+                    "SELECT ayah_number FROM $pack.translation WHERE rowid IN " +
+                        "(SELECT docid FROM $pack.translation_fts WHERE translation_fts MATCH ?) " +
+                        "ORDER BY ayah_number LIMIT ?",
+                    arrayOf(match, limit.toString()),
+                ).use { cursor ->
+                    buildList(cursor.count) {
+                        while (cursor.moveToNext()) add(cursor.getInt(0))
+                    }
+                }
+            }
+        }
         val condition = terms.joinToString(" AND ") { "text_search LIKE ? ESCAPE '\\'" }
         return query(
             "SELECT ayah_number FROM ${schema(schemaId)}.translation WHERE $condition " +
@@ -967,7 +1052,10 @@ class ContentDatabase private constructor(
      * for a read of prose and nothing else.
      */
     suspend fun warmTafsir(packs: Collection<String>) = withContext(Dispatchers.IO) {
-        synchronized(tafsirIndex) { tafsirIndex.ensure(packs.toSet()) }
+        val withoutIndex = packs.filterNot { hasFts(it, "tafsir_passage_fts") }.toSet()
+        if (withoutIndex.isNotEmpty()) {
+            synchronized(tafsirIndex) { tafsirIndex.ensure(withoutIndex) }
+        }
     }
 
     private val tafsirIndex = TafsirIndex()
@@ -991,7 +1079,11 @@ class ContentDatabase private constructor(
     }
 
     private fun tafsirMatches(pack: String, query: SearchQuery, limit: Int): List<PassageRow> {
-        val mine = synchronized(tafsirIndex) { tafsirIndex.matches(pack, query.terms, limit) }
+        val mine = if (hasFts(pack, "tafsir_passage_fts")) {
+            ftsTafsirMatches(pack, query.terms, limit)
+        } else {
+            synchronized(tafsirIndex) { tafsirIndex.matches(pack, query.terms, limit) }
+        }
         if (mine.isEmpty()) return emptyList()
         val texts = passageTexts(pack, mine.map { it.sourceId })
         return mine.mapNotNull { entry ->
@@ -1003,6 +1095,39 @@ class ContentDatabase private constructor(
                 toAyah = entry.toAyah,
                 text = text,
             )
+        }
+    }
+
+    /**
+     * The passages of one pack that carry every term, read from the pack's own
+     * full text index: one indexed read answers what the in-memory scan
+     * answered only after loading tens of megabytes per pack. The set is the
+     * first passages in the Book's own order, and their texts are read exactly
+     * as before.
+     */
+    private fun ftsTafsirMatches(pack: String, terms: List<String>, limit: Int): List<TafsirEntry> {
+        val match = indexedMatch(terms) ?: return emptyList()
+        val schema = schema(pack)
+        return query(
+            "SELECT p.source_id, p.surah, p.from_ayah, p.to_ayah FROM $schema.tafsir_passage p " +
+                "WHERE p.rowid IN (SELECT docid FROM $schema.tafsir_passage_fts " +
+                "WHERE tafsir_passage_fts MATCH ?) ORDER BY p.surah, p.from_ayah LIMIT ?",
+            arrayOf(match, limit.toString()),
+        ).use { cursor ->
+            buildList(cursor.count) {
+                while (cursor.moveToNext()) {
+                    add(
+                        TafsirEntry(
+                            pack = pack,
+                            sourceId = cursor.getInt(0),
+                            surah = cursor.getInt(1),
+                            fromAyah = cursor.getInt(2),
+                            toAyah = cursor.getInt(3),
+                            folded = "",
+                        ),
+                    )
+                }
+            }
         }
     }
 

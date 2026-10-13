@@ -37,8 +37,6 @@
     <string name="welcome_reminder_turn_on">Turn it on</string>
     <string name="welcome_reminder_not_now">Not now</string>
 
-    <string name="hint_long_press_ayah">Press and hold any ayah for its actions</string>
-
     <string name="action_browse">Browse the Quran</string>
     <string name="action_search">Search</string>
     <string name="action_settings">Settings</string>
@@ -86,4 +84,12 @@
     <string name="daily_notification_title">%1$s %2$d:%3$d</string>
     <string name="notification_settings_unavailable">This phone has no notification settings to open.</string>
     <string name="exact_alarm_settings_unavailable">This phone has no screen to allow the exact time.</string>
+
+    <!-- The three home-screen shortcuts: the same doors the app already has. -->
+    <string name="shortcut_continue_short">Continue reading</string>
+    <string name="shortcut_continue_long">Continue where you left off</string>
+    <string name="shortcut_search_short">Search</string>
+    <string name="shortcut_search_long">Search the Quran</string>
+    <string name="shortcut_daily_short">Daily ayah</string>
+    <string name="shortcut_daily_long">Read today\'s ayah</string>
 </resources>

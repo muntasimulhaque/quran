@@ -30,20 +30,17 @@ object Reading {
     /** The widest a line of reading may be. */
     private const val MAX_CHARACTERS = 65
 
-    /** The gutter a sheet keeps beside its reading column, on each side. */
-    val Gutter: Dp = 22.dp
-
     /** The default prose measure, for a surface with no size of its own. */
     val MaxMeasure: Dp = measureFor(17f, LITERATA_ADVANCE)
 
     /** The cap for a sheet's own content: the measure plus its two gutters. */
-    val SheetMeasure: Dp = MaxMeasure + Gutter * 2
+    val SheetMeasure: Dp = MaxMeasure + Space.Gutter * 2
 
     /**
      * The search results' cap. Their snippets are drawn in the interface
      * face at 14 sp, so that is the advance the number comes from.
      */
-    val SearchMeasure: Dp = measureFor(14f, INTERFACE_ADVANCE) + Gutter * 2
+    val SearchMeasure: Dp = measureFor(14f, INTERFACE_ADVANCE) + Space.Gutter * 2
 
     /**
      * The width a column of prose drawn at [sizeSp] may have in a voice whose

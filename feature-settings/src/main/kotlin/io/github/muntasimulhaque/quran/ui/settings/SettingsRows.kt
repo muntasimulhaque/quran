@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -30,6 +29,7 @@ import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.appSwitchColors
 
 /**
@@ -50,8 +50,8 @@ fun Group(title: String) {
             // heading since 9.1; the app marked nothing at all.
             .semantics { heading() }
             .padding(
-                start = 22.dp,
-                end = 22.dp,
+                start = Space.Gutter,
+                end = Space.Gutter,
                 top = Space.Block + Space.Tight,
                 bottom = Space.Line,
             ),
@@ -106,7 +106,7 @@ private fun ChevronSlot(
             .then(
                 if (onOpen != null) {
                     Modifier
-                        .clip(RoundedCornerShape(50))
+                        .clip(Radii.Pill)
                         .clickable(onClick = onOpen)
                         .semantics {
                             if (!label.isNullOrBlank()) contentDescription = label
@@ -145,13 +145,13 @@ fun PageHeader(title: String, onBack: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 6.dp, end = 22.dp, top = 2.dp, bottom = 10.dp),
+            .padding(start = 6.dp, end = Space.Gutter, top = 2.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
                 .size(48.dp)
-                .clip(RoundedCornerShape(50))
+                .clip(Radii.Pill)
                 .clickable(onClick = onBack)
                 .semantics {
                     contentDescription = back
@@ -294,7 +294,7 @@ fun ToggleRow(
                     Modifier.toggleable(value = checked, role = Role.Switch, onValueChange = onChange)
                 },
             )
-            .padding(start = 22.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
+            .padding(start = Space.Gutter, end = 12.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // The name and its value keep a clear gap from the switch, the way the
@@ -349,7 +349,7 @@ fun ValueRow(title: String, value: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 22.dp, end = 22.dp, top = 12.dp, bottom = 12.dp),
+            .padding(start = Space.Gutter, end = Space.Gutter, top = 12.dp, bottom = 12.dp),
     ) {
         RowName(title = title, value = value)
     }

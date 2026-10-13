@@ -67,8 +67,8 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * Hearing one word on its own was in this app and is out of it: the word was
  * reached by a tap that could not be offered without a mark, a way out, and
  * a reciter ready, and the reader has the whole verse in front of them
- * either way. The ayah is heard from the ayah, where Play already is, a
- * long press away (owner decision).
+ * either way. The ayah is heard from the ayah, where Play already is, a tap
+ * away (owner decision).
  *
  * Arabic reads right to left, so the pairs wrap that way too.
  */

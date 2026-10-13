@@ -80,3 +80,12 @@ fun AppSettings.withLanguage(language: UiLanguage): AppSettings {
     )
 }
 
+/**
+ * The packs that speak [language]: what search reads when the reader's chosen
+ * language decides. A reader who reads in Bangla searches Bangla, even when a
+ * pack of another language was added by hand, because one field over two
+ * languages answers in two voices (owner decision, this session).
+ */
+fun List<ContentPack>.forLanguage(language: String): List<ContentPack> =
+    filter { it.language == language }
+

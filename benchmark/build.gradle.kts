@@ -14,6 +14,12 @@ android {
         minSdk = 24
         targetSdk = 37
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // The benchmarks run on this project's own emulator, which the
+        // library treats as an accuracy error. The house reads the numbers
+        // against the previous run rather than against a device's absolute
+        // figures, so the suppression is the development machine's own
+        // choice and the module never ships (owner decision, this session).
+        testInstrumentationRunnerArguments["androidx.benchmark.suppressErrors"] = "EMULATOR"
     }
 
     compileOptions {

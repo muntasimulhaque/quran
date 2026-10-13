@@ -25,12 +25,20 @@ class RecitationDownloader(private val context: Context) {
     ): Result<Unit> = withContext(Dispatchers.IO) {
         val temporary = File(context.cacheDir, "recitation-${packageToFetch.recitation}-${packageToFetch.surah}.part")
         try {
+            // The one recitation host is HTTPS, and a redirect that leaves it
+            // is refused: this is the app's only other network use.
+            if (!packageToFetch.url.startsWith("https://")) {
+                return@withContext Result.failure(IllegalStateException("the recitation URL is not https"))
+            }
             val connection = java.net.URL(packageToFetch.url).openConnection() as java.net.HttpURLConnection
             connection.instanceFollowRedirects = true
             connection.connectTimeout = 20_000
             connection.readTimeout = 30_000
             connection.setRequestProperty("Accept", "application/octet-stream")
             connection.connect()
+            if (connection.url.protocol != "https") {
+                return@withContext Result.failure(IllegalStateException("the recitation redirect left https"))
+            }
             if (connection.responseCode !in 200..299) {
                 return@withContext Result.failure(IllegalStateException("HTTP ${connection.responseCode}"))
             }

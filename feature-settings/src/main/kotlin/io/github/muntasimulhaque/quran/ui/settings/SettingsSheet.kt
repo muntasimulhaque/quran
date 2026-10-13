@@ -36,6 +36,7 @@ import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.theme.Reading
+import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
  * What the settings sheet can ask the app to do. The sheet itself owns no
@@ -148,7 +149,7 @@ fun SettingsSheet(
                         // the sheet's own name, and its one heading
                         modifier = Modifier
                             .semantics { heading() }
-                            .padding(start = 22.dp, end = 22.dp, bottom = 10.dp),
+                            .padding(start = Space.Gutter, end = Space.Gutter, bottom = 10.dp),
                     )
                     SettingsHub(
                         settings = settings,

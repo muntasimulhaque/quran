@@ -250,6 +250,12 @@ class Packs(private val root: File) {
                         // library the tools read.
                         statement.execute("CREATE INDEX word_ayah ON word(ayah_number, position)")
                         statement.execute("CREATE INDEX ayah_surah ON ayah(surah, ayah)")
+                        // A table made by SELECT loses its primary key, so the
+                        // running number needs an index of its own: an ayah
+                        // card, a playback read, and the FTS join all look a
+                        // row up by it.
+                        statement.execute("CREATE INDEX ayah_number ON ayah(number)")
+                        createFts(statement, "ayah_fts", "text_search", "ayah")
                     }
                     "translation" -> {
                         statement.execute(
@@ -257,6 +263,7 @@ class Packs(private val root: File) {
                                 "FROM src.translation WHERE pack = '${pack.id}'",
                         )
                         statement.execute("CREATE INDEX translation_ayah ON translation(ayah_number)")
+                        createFts(statement, "translation_fts", "text_search", "translation")
                     }
                     "tafsir" -> {
                         statement.execute(
@@ -269,6 +276,14 @@ class Packs(private val root: File) {
                         )
                         statement.execute("CREATE INDEX tafsir_ayah_ayah ON tafsir_ayah(ayah_number)")
                         statement.execute("CREATE INDEX tafsir_ayah_passage ON tafsir_ayah(passage_id)")
+                        // A matched passage's text is read back by its own id,
+                        // and the table is tens of megabytes of prose: without
+                        // this index the read is a whole scan of the pack,
+                        // which is what made a warm tafsir search slow even
+                        // after the search itself became an index read (owner
+                        // report, this session).
+                        statement.execute("CREATE INDEX tafsir_passage_source ON tafsir_passage(source_id)")
+                        createFts(statement, "tafsir_passage_fts", "text_search", "tafsir_passage")
                     }
                     "words" -> {
                         statement.execute(
@@ -276,6 +291,7 @@ class Packs(private val root: File) {
                                 "meaning_search FROM src.word_meaning WHERE language = '${pack.language}'",
                         )
                         statement.execute("CREATE INDEX word_meaning_ayah ON word_meaning(ayah_number, position)")
+                        createFts(statement, "word_meaning_fts", "meaning_search", "word_meaning")
                         // The surah introductions travel with the English list,
                         // so a second language does not carry them twice.
                         if (pack.language == "en") {
@@ -300,6 +316,33 @@ class Packs(private val root: File) {
             target.autoCommit = true
         }
     }
+    /**
+     * The full text index over one pack's searchable column, so a search
+     * reads an index instead of scanning every row of the pack. The tafsir
+     * alone is tens of megabytes of prose, and scanning it on every settled
+     * keystroke was the one search a reader could feel (owner decision, this
+     * session).
+     *
+     * The table is external content: the tokens are indexed, the text stays in
+     * the content table, and a query reads the passages it matched rather
+     * than a second copy of the pack. The index is built here, from the pack's
+     * own audited column, so the content build stays the only place text is
+     * assembled.
+     */
+    private fun createFts(
+        statement: java.sql.Statement,
+        table: String,
+        column: String,
+        content: String,
+    ) {
+        statement.execute(
+            "CREATE VIRTUAL TABLE $table USING fts4($column, content='$content')",
+        )
+        statement.execute(
+            "INSERT INTO $table(docid, $column) SELECT rowid, $column FROM $content",
+        )
+    }
+
     private fun catalogEntry(pack: Pack, file: File, license: String): JsonObject {
         val hash = sha256(file)
         val tag = "pack-${pack.id}-${hash.substring(0, 8)}"

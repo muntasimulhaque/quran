@@ -67,6 +67,12 @@ class PackDownloader(private val context: Context) {
     ): Result<Unit> {
         var connection: java.net.HttpURLConnection? = null
         return try {
+            // The app's one network use is HTTPS to the project's own release
+            // page: a URL of another shape, or a redirect that lands on one,
+            // is refused rather than fetched in the clear.
+            if (!url.startsWith("https://")) {
+                return Result.failure(IllegalStateException("the pack URL is not https"))
+            }
             connection = java.net.URL(url).openConnection() as java.net.HttpURLConnection
             connection.instanceFollowRedirects = true
             connection.connectTimeout = 20_000
@@ -74,6 +80,9 @@ class PackDownloader(private val context: Context) {
             connection.setRequestProperty("Accept", "application/octet-stream")
             if (startAt > 0) connection.setRequestProperty("Range", "bytes=$startAt-")
             connection.connect()
+            if (connection.url.protocol != "https") {
+                return Result.failure(IllegalStateException("the pack redirect left https"))
+            }
             val resumed =
                 startAt > 0 && connection.responseCode == java.net.HttpURLConnection.HTTP_PARTIAL
             if (!resumed && connection.responseCode !in 200..299) {

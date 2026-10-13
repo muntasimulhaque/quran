@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -23,6 +22,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
+import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /**
  * A popup the pill opens, in the pill's own cloth and hung from the capsule's
@@ -77,8 +77,8 @@ internal fun PillPopup(
             modifier = Modifier
                 .width(PillMenuMeasure)
                 .heightIn(max = room)
-                .floatingLift(RoundedCornerShape(20.dp))
-                .clip(RoundedCornerShape(20.dp))
+                .floatingLift(Radii.Popup)
+                .clip(Radii.Popup)
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                 .testTag("pill-popup")
                 .verticalScroll(rememberScrollState()),

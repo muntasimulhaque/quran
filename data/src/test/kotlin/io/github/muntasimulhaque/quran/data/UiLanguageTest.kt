@@ -43,6 +43,41 @@ class UiLanguageTest {
     }
 
     @Test
+    fun searchReadsOnlyTheChosenLanguagesPacks() {
+        // The reader's own on switches can hold a pack of another language
+        // (one they added by hand); search must still answer in the language
+        // they chose, or one field would speak in two voices.
+        val packs = listOf(
+            pack("translation-saheeh-en", "en"),
+            pack("translation-taisirul-quran-bn", "bn"),
+            pack("tafsir-ibn-kathir-en", "en"),
+            pack("tafsir-ibn-kathir-bn", "bn"),
+        )
+        assertEquals(
+            listOf("translation-saheeh-en", "tafsir-ibn-kathir-en"),
+            packs.forLanguage("en").map { it.id },
+        )
+        assertEquals(
+            listOf("translation-taisirul-quran-bn", "tafsir-ibn-kathir-bn"),
+            packs.forLanguage("bn").map { it.id },
+        )
+        assertTrue(packs.forLanguage("ar").isEmpty())
+    }
+
+    private fun pack(id: String, language: String) = ContentPack(
+        id = id,
+        type = if (id.startsWith("tafsir")) PackType.Tafsir else PackType.Translation,
+        name = id,
+        language = language,
+        credit = "test",
+        license = "test",
+        version = "1",
+        shipped = false,
+        ayahs = 6236,
+        bytes = 1,
+    )
+
+    @Test
     fun theSystemLanguageIsSuggestedWhenOffered() {
         assertEquals(UiLanguage.Bangla, UiLanguage.suggested("bn"))
         assertEquals(UiLanguage.English, UiLanguage.suggested("en"))

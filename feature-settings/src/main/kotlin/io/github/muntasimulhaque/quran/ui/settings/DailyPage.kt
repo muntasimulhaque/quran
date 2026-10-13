@@ -112,7 +112,7 @@ fun DailyPage(
                 text = stringResource(R.string.settings_daily_off),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
+                modifier = Modifier.padding(start = Space.Gutter, end = Space.Gutter, bottom = Space.Line),
             )
         }
         PageRow(
@@ -132,7 +132,7 @@ fun DailyPage(
                 text = stringResource(R.string.settings_daily_blocked),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Line),
+                modifier = Modifier.padding(start = Space.Gutter, end = Space.Gutter, top = Space.Line),
             )
             Box(Modifier.padding(start = 16.dp, top = Space.Line)) {
                 TextButton(
@@ -151,7 +151,7 @@ fun DailyPage(
                 text = stringResource(R.string.settings_daily_exact_blocked),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Line),
+                modifier = Modifier.padding(start = Space.Gutter, end = Space.Gutter, top = Space.Line),
             )
             Box(Modifier.padding(start = 16.dp, top = Space.Line)) {
                 TextButton(

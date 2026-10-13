@@ -25,4 +25,7 @@ object Space {
 
     /** Two blocks: one ayah and the next, a page and its heading. */
     val Section = 24.dp
+
+    /** The gutter a sheet keeps beside its content, on each side. */
+    val Gutter = 22.dp
 }

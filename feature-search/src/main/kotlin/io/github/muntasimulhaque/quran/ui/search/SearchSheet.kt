@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,6 +30,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -76,6 +76,7 @@ import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.rich.HighlightedText
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
+import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
@@ -372,37 +373,45 @@ private fun FilterRow(
  */
 @Composable
 private fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit) {
-    Row(
-        modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .background(
-                if (on) {
-                    MaterialTheme.colorScheme.primary
+    // A chip is a small word around a small mark; the finger still gets the
+    // app's 48 dp target, so the source a reader cannot hit is not a source
+    // they can turn off.
+    Box(
+        modifier = Modifier.minimumInteractiveComponentSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Row(
+            modifier = Modifier
+                .clip(Radii.Pill)
+                .background(
+                    if (on) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
+                    },
+                )
+                .toggleable(value = on, role = Role.Checkbox, onValueChange = onChange)
+                .padding(horizontal = 12.dp, vertical = 9.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            if (on) {
+                IconGlyph(
+                    icon = Icon.Check,
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(13.dp),
+                )
+            }
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = if (on) {
+                    MaterialTheme.colorScheme.onPrimary
                 } else {
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
+                    MaterialTheme.colorScheme.onSurfaceVariant
                 },
             )
-            .toggleable(value = on, role = Role.Checkbox, onValueChange = onChange)
-            .padding(horizontal = 12.dp, vertical = 9.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
-    ) {
-        if (on) {
-            IconGlyph(
-                icon = Icon.Check,
-                tint = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.size(13.dp),
-            )
         }
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = if (on) {
-                MaterialTheme.colorScheme.onPrimary
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            },
-        )
     }
 }
 
@@ -422,7 +431,7 @@ private fun SearchField(
         Row(
             modifier = Modifier
                 .weight(1f)
-                .clip(RoundedCornerShape(50))
+                .clip(Radii.Pill)
                 .background(MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door))
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,

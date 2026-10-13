@@ -9,6 +9,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -19,9 +20,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
@@ -43,18 +41,15 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -62,9 +57,11 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.muntasimulhaque.quran.core.Arabic
 import io.github.muntasimulhaque.quran.core.AyahList
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.data.Ayah
@@ -73,14 +70,16 @@ import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.ReadingRow
 import io.github.muntasimulhaque.quran.feature.reading.R
+import io.github.muntasimulhaque.quran.ui.kit.AddDoor
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
-import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
+import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
+import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
@@ -97,8 +96,8 @@ import kotlin.math.min
  *
  * A surah is the unit the Quran itself gives, and readers read it as one:
  * this view ends where the surah ends, instead of sliding into the next one
- * without a word. Tapping the paper brings the chrome; a long press asks
- * about the ayah under the finger.
+ * without a word. Tapping an ayah raises its actions; tapping the paper
+ * around it brings the chrome, and a two-finger pinch steps the text size.
  */
 @Composable
 fun ReadingList(
@@ -127,6 +126,8 @@ fun ReadingList(
     onScrolled: () -> Unit,
     onNextSurah: (Int) -> Unit,
     onAddContent: () -> Unit,
+    /** One step of the reader's own text sizes, from a pinch on the page. */
+    onSizeStep: (Int) -> Unit,
     onPlaceChanged: (Int) -> Unit,
     /** True when the reader opened this surah at its top; answered once. */
     startAtOpening: Boolean,
@@ -199,6 +200,7 @@ fun ReadingList(
         onScrolled = onScrolled,
         onNextSurah = onNextSurah,
         onAddContent = onAddContent,
+        onSizeStep = onSizeStep,
         onPlaceChanged = onPlaceChanged,
         startAtOpening = startAtOpening,
         onOpeningReached = onOpeningReached,
@@ -231,6 +233,7 @@ private fun ReadingRows(
     onScrolled: () -> Unit,
     onNextSurah: (Int) -> Unit,
     onAddContent: () -> Unit,
+    onSizeStep: (Int) -> Unit,
     onPlaceChanged: (Int) -> Unit,
     startAtOpening: Boolean,
     onOpeningReached: () -> Unit,
@@ -320,83 +323,92 @@ private fun ReadingRows(
     // eye can follow back to its margin on its own. The list itself stays
     // full width, so the paper around the column still answers a tap with the
     // chrome and a drag with the scroll.
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val measure = minOf(
         Reading.proseMeasure(LocalReadingVoice.current, metrics.translationSp),
         Reading.quranMeasure(metrics.arabicSp),
     )
-    val side = maxOf(20.dp, (screenWidth - measure) / 2)
-    LazyColumn(
-        state = listState,
-        modifier = modifier
-            .fillMaxSize()
-            .semantics { contentDescription = pageDescription }
-            .pointerInput(Unit) {
-                // The paper around the text brings the chrome; the text itself
-                // belongs to its ayah, and every ayah consumes its own taps.
-                detectTapGestures(onTap = { dismissAbout() })
-            },
-        contentPadding = PaddingValues(
-            start = side,
-            end = side,
-            top = contentPaddingTop,
-            bottom = contentPaddingBottom,
-        ),
-    ) {
-        item(key = "surah-${surah.number}") {
-            SurahOpening(
-                surah = surah,
-                content = content,
-                expanded = aboutOpen,
-                onExpandedChange = { aboutOpen = it },
-                onPaperTap = { if (!aboutOpen) onBackgroundTap() },
-                metrics = metrics,
-            )
-            // The door asks for a translation only while translations are
-            // something the reading draws at all: a reader who hid them in
-            // Settings is not looking for one here.
-            if (metrics.showTranslation && !hasTranslation) {
-                AddContent(
-                    text = stringResource(R.string.reading_add_translation),
-                    onClick = onAddContent,
+    // The column's own width is what centers it, not the window's: a
+    // landscape split, a fold, and a display cutout all move the width the
+    // reading actually has, and the measure follows the glass it is drawn on
+    // (owner decision, this session).
+    BoxWithConstraints(modifier.fillMaxSize()) {
+        val side = maxOf(20.dp, (maxWidth - measure) / 2)
+        LazyColumn(
+            state = listState,
+            modifier = Modifier
+                .fillMaxSize()
+                .semantics { contentDescription = pageDescription }
+                .pointerInput(Unit) {
+                    // The paper around the text brings the chrome; the text
+                    // itself belongs to its ayah, and every ayah answers its
+                    // own tap.
+                    detectTapGestures(onTap = { dismissAbout() })
+                }
+                .readingZoom(onSizeStep),
+            contentPadding = PaddingValues(
+                start = side,
+                end = side,
+                top = contentPaddingTop,
+                bottom = contentPaddingBottom,
+            ),
+        ) {
+            item(key = "surah-${surah.number}") {
+                SurahOpening(
+                    surah = surah,
+                    content = content,
+                    expanded = aboutOpen,
+                    onExpandedChange = { aboutOpen = it },
+                    onPaperTap = { if (!aboutOpen) onBackgroundTap() },
+                    metrics = metrics,
+                )
+                // The door asks for a translation only while translations are
+                // something the reading draws at all: a reader who hid them in
+                // Settings is not looking for one here.
+                if (metrics.showTranslation && !hasTranslation) {
+                    AddDoor(
+                        text = stringResource(R.string.reading_add_translation),
+                        action = stringResource(R.string.reading_action_add),
+                        onClick = onAddContent,
+                        modifier = Modifier.padding(horizontal = Space.Gutter, vertical = 4.dp),
+                    )
+                }
+            }
+            items(rows.size, key = { "ayah-${rows[it].ayah.number}" }) { index ->
+                val row = rows[index]
+                AyahBlock(
+                    row = row,
+                    hafs = hafs,
+                    metrics = metrics,
+                    isSelected = selectedAyah == row.ayah.number,
+                    playingAyah = playingAyah,
+                    playingWord = playingWord,
+                    onAyah = onAyah,
+                    onBackgroundTap = dismissAbout,
+                    onFootnote = { number ->
+                        val note = row.translations.asSequence()
+                            .flatMap { it.text.footnotes.asSequence() }
+                            .firstOrNull { it.number == number }
+                        if (note != null) {
+                            onFootnote(
+                                OpenFootnote(
+                                    note = note,
+                                    reference = "${row.ayah.surah}:${row.ayah.ayah}",
+                                    sizeSp = metrics.translationSp,
+                                    lineSp = metrics.translationLineSp,
+                                ),
+                            )
+                        }
+                    },
                 )
             }
-        }
-        items(rows.size, key = { "ayah-${rows[it].ayah.number}" }) { index ->
-            val row = rows[index]
-            AyahBlock(
-                row = row,
-                hafs = hafs,
-                metrics = metrics,
-                isSelected = selectedAyah == row.ayah.number,
-                playingAyah = playingAyah,
-                playingWord = playingWord,
-                onAyah = onAyah,
-                onBackgroundTap = dismissAbout,
-                onFootnote = { number ->
-                    val note = row.translations.asSequence()
-                        .flatMap { it.text.footnotes.asSequence() }
-                        .firstOrNull { it.number == number }
-                    if (note != null) {
-                        onFootnote(
-                            OpenFootnote(
-                                note = note,
-                                reference = "${row.ayah.surah}:${row.ayah.ayah}",
-                                sizeSp = metrics.translationSp,
-                                lineSp = metrics.translationLineSp,
-                            ),
-                        )
-                    }
-                },
-            )
-        }
-        item(key = "end-${surah.number}") {
-            SurahEnd(
-                surah = surah,
-                nextSurahName = nextSurahName,
-                onNextSurah = onNextSurah,
-                onBackgroundTap = dismissAbout,
-            )
+            item(key = "end-${surah.number}") {
+                SurahEnd(
+                    surah = surah,
+                    nextSurahName = nextSurahName,
+                    onNextSurah = onNextSurah,
+                    onBackgroundTap = dismissAbout,
+                )
+            }
         }
     }
 
@@ -413,31 +425,6 @@ private fun ReadingRows(
 }
 
 /** A quiet door to the packs the reader does not have yet. */
-@Composable
-private fun AddContent(text: String, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 22.dp, vertical = 4.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = Wash.Door))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
-            modifier = Modifier.weight(1f),
-        )
-        Text(
-            text = stringResource(R.string.reading_action_add),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
-        )
-    }
-}
 
 @Composable
 private fun SurahOpening(
@@ -523,7 +510,7 @@ private fun SurahOpening(
             // Opened, the introduction wears the wash a chosen ayah wears:
             // the reader asked for it, and while it is up it reads as the
             // chosen thing on the page, in the same lapis at the same weight
-            // the long press leaves behind. A press on it answers in the same
+            // a chosen ayah leaves behind. A press on it answers in the same
             // lapis rather than the gray an unstyled ripple would flash.
             val wash = if (expanded) {
                 MaterialTheme.colorScheme.primary.copy(alpha = Wash.Selected)
@@ -562,7 +549,7 @@ private fun SurahOpening(
                 // touching the edge it is standing on.
                 modifier = Modifier
                     .padding(top = Space.Block)
-                    .clip(RoundedCornerShape(14.dp))
+                    .clip(Radii.Card)
                     .background(wash)
                     .clickable(
                         interactionSource = press,
@@ -623,7 +610,7 @@ private fun SurahEnd(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = Space.Block)
-                    .clip(RoundedCornerShape(14.dp))
+                    .clip(Radii.Card)
                     .background(MaterialTheme.colorScheme.primary.copy(alpha = Wash.Door))
                     .clickable { onNextSurah(next) }
                     .padding(horizontal = 16.dp, vertical = 12.dp),
@@ -661,7 +648,6 @@ private fun SurahEnd(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun AyahBlock(
     row: ReadingRow,
@@ -674,11 +660,22 @@ private fun AyahBlock(
     onBackgroundTap: () -> Unit,
     onFootnote: (Int) -> Unit,
 ) {
-    val haptics = LocalHapticFeedback.current
     val palette = LocalPagePalette.current
     val playing = row.ayah.number == playingAyah
     val ayahActions = stringResource(R.string.reading_ayah_actions)
     val paperActions = stringResource(R.string.reading_paper_actions)
+    // The end of an ayah in an Arabic-only reading: the number in the app's
+    // own hand, in the ornament gold, closing the verse it belongs to. The
+    // reference line under the block is not drawn then, so the screen holds
+    // the Quran and nothing else (owner decision, this session).
+    val arabicOnly = !metrics.showTranslation && !metrics.wordByWord
+    val ornamentStyle = remember(metrics.arabicSp, palette.ornament) {
+        SpanStyle(
+            fontFamily = Amiri,
+            fontSize = (metrics.arabicSp * 0.72f).sp,
+            color = palette.ornament,
+        )
+    }
     val wash = when {
         isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = Wash.Selected)
         playing -> palette.highlight.copy(alpha = palette.highlight.alpha * 0.55f)
@@ -692,29 +689,24 @@ private fun AyahBlock(
             .fillMaxWidth()
             .padding(vertical = 12.dp),
     ) {
+        val press = remember { MutableInteractionSource() }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
+                .clip(Radii.Card)
                 .background(wash)
-                .combinedClickable(
-                    onClick = onBackgroundTap,
-                    onLongClick = {
-                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onAyah(row.ayah)
-                    },
+                // One tap, one meaning: an ayah answers with its own actions.
+                // The wash and the pill that appear are the answer, so the
+                // tap carries no ripple over the Quran's own letters.
+                .clickable(
+                    interactionSource = press,
+                    indication = null,
+                    onClick = { onAyah(row.ayah) },
                 )
-                // Every ayah has a node whose action raises the
-                // pill, and the reading block now gives a screen reader the
-                // same two doors a finger has: the ayah's actions, which is
-                // the one gesture the reading is built around, and the
-                // paper's own tap.
+                // Every ayah gives a screen reader the same two doors a finger
+                // has: the ayah's actions, which is the one gesture the
+                // reading is built around, and the paper's own tap.
                 .semantics {
-                    // Every ayah has a node whose action raises
-                    // the pill, and the reading block gives a screen reader the
-                    // same two doors a finger has: the ayah's actions, which
-                    // is the one gesture the reading is built around, and
-                    // the paper's own tap.
                     customActions = listOf(
                         CustomAccessibilityAction(ayahActions) {
                             onAyah(row.ayah)
@@ -728,7 +720,9 @@ private fun AyahBlock(
                 }
                 .padding(horizontal = 8.dp, vertical = 10.dp),
         ) {
-            val arabicLine = arabic(row, playing, playingWord)
+            val arabicLine = remember(row.ayah.number, playing, playingWord, arabicOnly) {
+                arabic(row, playing, playingWord, arabicOnly, ornamentStyle)
+            }
             var textLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
             Text(
                 text = arabicLine.text,
@@ -795,18 +789,23 @@ private fun AyahBlock(
             // numbers its verses: after the reader has read the ayah, not as
             // a heading before it. It takes the theme's secondary tone
             // rather than a quiet alpha, because an alpha that whispers on
-            // paper sinks under 4.5:1.
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = Space.Line),
-                horizontalArrangement = Arrangement.Start,
-            ) {
-                Text(
-                    text = "${row.ayah.surah}:${row.ayah.ayah}",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            // paper sinks under 4.5:1. In an Arabic-only reading the number
+            // has already closed the verse itself, and a second line under
+            // the Quran would be the one thing on a page that had asked for
+            // nothing but the Quran.
+            if (!arabicOnly) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = Space.Line),
+                    horizontalArrangement = Arrangement.Start,
+                ) {
+                    Text(
+                        text = "${row.ayah.surah}:${row.ayah.ayah}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
     }
@@ -820,14 +819,31 @@ private data class ArabicLine(val text: AnnotatedString, val washRange: IntRange
  * style span, so the surface above can wash it in a rounded shape: a style
  * boundary inside an Arabic word breaks its letter joining, and a span is
  * always a bare rectangle behind the glyphs.
+ *
+ * In an Arabic-only reading the verse closes with its own number, drawn in
+ * the ornament's hand: [ornament] appends the Quran's end-of-ayah sign and
+ * the reader's digits to the same line, where a printed page puts them, so
+ * the reference under the block is not needed (owner decision, this
+ * session).
  */
 private fun arabic(
     row: ReadingRow,
     playing: Boolean,
     playingWord: Int?,
+    ornament: Boolean,
+    ornamentStyle: SpanStyle,
 ): ArabicLine {
     val words = row.words
-    if (words.isEmpty()) return ArabicLine(AnnotatedString(row.ayah.text), null)
+    if (words.isEmpty()) {
+        val text = if (ornament) {
+            buildAnnotatedString {
+                withStyle(ornamentStyle) { append(Arabic.endOfAyah(row.ayah.ayah)) }
+            }
+        } else {
+            AnnotatedString(row.ayah.text)
+        }
+        return ArabicLine(text, null)
+    }
     var washRange: IntRange? = null
     val text = buildAnnotatedString {
         words.forEachIndexed { index, word ->
@@ -835,6 +851,10 @@ private fun arabic(
             val start = length
             append(word.text)
             if (playing && word.position == playingWord) washRange = start until length
+        }
+        if (ornament) {
+            append(' ')
+            withStyle(ornamentStyle) { append(Arabic.endOfAyah(row.ayah.ayah)) }
         }
     }
     return ArabicLine(text, washRange)

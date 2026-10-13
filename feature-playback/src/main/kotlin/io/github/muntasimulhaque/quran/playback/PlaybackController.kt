@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.os.Bundle
 import androidx.core.content.ContextCompat
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
@@ -138,23 +139,42 @@ class PlaybackController(
             )
             return
         }
-        val player = connect()
+        val player = runCatching { connect() }.getOrElse { failure ->
+            // A service the phone will not bind, or a session the controller
+            // refuses, is the pill's own failed state with a Retry, never an
+            // exception on its way out of the view model.
+            android.util.Log.w(TAG, "the player could not be connected", failure)
+            _state.value = _state.value.copy(
+                connected = false,
+                isPlaying = false,
+                error = true,
+            )
+            return
+        }
         // The offset this ayah was last heard at, under this reciter. A
         // process that died mid-ayah is answered by the rest of it. A
         // different ayah, a different reciter, and a surah whose audio has
         // just been fetched all start at the beginning, because none of them
         // is the place the reader left.
         val startAt = if (resume) resumeOffset(recitation, ayahNumber) else 0L
-        withContext(Dispatchers.Main) {
-            player.setMediaItems(items, index, startAt)
-            player.prepare()
-            player.play()
+        val started = runCatching {
+            withContext(Dispatchers.Main) {
+                player.setMediaItems(items, index, startAt)
+                player.prepare()
+                player.play()
+            }
+        }
+        if (started.isFailure) {
+            android.util.Log.w(TAG, "the recitation could not start", started.exceptionOrNull())
+            _state.value = _state.value.copy(isPlaying = false, error = true)
+            return
         }
         startTicker()
         loadedThroughSurah = ayah.surah
         _state.value = _state.value.copy(
             recitation = recitation,
             unavailable = false,
+            error = false,
             pendingDownloadSurah = null,
             downloadProgress = null,
             downloadFailed = false,
@@ -225,6 +245,18 @@ class PlaybackController(
         }
     }
 
+    /**
+     * The reader's Retry after a failed playback. The same ayah goes through
+     * the same door Play uses, so a file that is missing is offered or
+     * fetched again rather than reported as a failure that cannot be
+     * answered.
+     */
+    fun retryPlayback() {
+        val ayah = requestedAyah ?: return
+        val recitation = recitationId ?: return
+        scope.launch { play(recitation, ayah) }
+    }
+
     fun cancelDownload() {
         downloadJob?.cancel()
         downloadJob = null
@@ -255,16 +287,22 @@ class PlaybackController(
         val next = surah + 1
         if (next > 114) return
         val packageToFetch = manifest.packageFor(recitation, next) ?: return
-        val first = content?.ayahsOfSurah(next)?.firstOrNull()?.number ?: return
-        requestedAyah = first
-        _state.value = _state.value.copy(
-            pendingDownloadSurah = next,
-            pendingDownloadBytes = packageToFetch.bytes,
-            pendingIsContinuation = true,
-            downloadProgress = null,
-            downloadFailed = false,
-        )
-        if (end == EndOfAudio.CONTINUE_SURAH) confirmDownload()
+        // The first ayah of the next surah is a query, and the end of a surah
+        // is not a place for the main thread to wait on the disk for it.
+        scope.launch {
+            val first = withContext(Dispatchers.IO) {
+                content?.ayahsOfSurah(next)?.firstOrNull()?.number
+            } ?: return@launch
+            requestedAyah = first
+            _state.value = _state.value.copy(
+                pendingDownloadSurah = next,
+                pendingDownloadBytes = packageToFetch.bytes,
+                pendingIsContinuation = true,
+                downloadProgress = null,
+                downloadFailed = false,
+            )
+            if (end == EndOfAudio.CONTINUE_SURAH) confirmDownload()
+        }
     }
 
     /**
@@ -443,6 +481,15 @@ class PlaybackController(
             maybeAppendNextSurah()
         }
 
+        override fun onPlayerError(error: PlaybackException) {
+            // One file that will not play is not a reason to take the reading
+            // down: the pill says so and offers the one action that can help.
+            android.util.Log.w(TAG, "the recitation could not be played", error)
+            _state.value = _state.value.copy(isPlaying = false, error = true)
+            heardAyah = null
+            syncTicker()
+        }
+
         override fun onPlaybackStateChanged(playbackState: Int) {
             if (playbackState != Player.STATE_ENDED) return
             val player = controller
@@ -579,6 +626,9 @@ class PlaybackController(
     }
 
     private companion object {
+        /** The one name a failure is logged under. */
+        const val TAG = "PlaybackController"
+
         /** The pace the reader may choose, and its bounds. */
         const val MIN_SPEED = 0.5f
         const val MAX_SPEED = 1.5f

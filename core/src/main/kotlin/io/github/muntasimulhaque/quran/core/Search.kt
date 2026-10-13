@@ -165,6 +165,12 @@ object Search {
         val folded = StringBuilder(text.length)
         val starts = ArrayList<Int>(text.length)
         var index = 0
+        // Folding one code point at a time is what keeps the highlight on the
+        // letters the reader can see, and an excerpt can be a page of prose:
+        // the folded shape of a code point is remembered for the length of the
+        // call, so the normalizer runs once per distinct character instead of
+        // once per character (owner report, this session).
+        val latinFolds = if (arabic) null else HashMap<Int, String>()
         while (index < text.length) {
             val codePoint = text.codePointAt(index)
             val start = index
@@ -176,14 +182,18 @@ object Search {
                 }
                 continue
             }
-            val piece = if (arabic) {
-                Arabic.normalizeForSearch(String(Character.toChars(codePoint)))
-            } else {
-                normalizeEnglish(String(Character.toChars(codePoint)))
-            }
-            for (character in piece) {
-                folded.append(character)
+            if (arabic) {
+                if (Arabic.isMark(codePoint)) continue
+                folded.appendCodePoint(Arabic.foldForSearch(codePoint))
                 starts.add(start)
+            } else {
+                val piece = latinFolds!!.getOrPut(codePoint) {
+                    normalizeEnglish(String(Character.toChars(codePoint)))
+                }
+                for (character in piece) {
+                    folded.append(character)
+                    starts.add(start)
+                }
             }
         }
         if (folded.isEmpty()) return emptyList()
@@ -302,4 +312,33 @@ object Search {
             .replace("_", "\\_")
         return "%$escaped%"
     }
+
+    /**
+     * The same terms as an expression the content's own full text index
+     * understands: each term as a token prefix, every term required, joined
+     * with AND. A term that carries punctuation (God's, al-kahf) is matched as
+     * the phrase of its own fragments, because the index tokenizes on letters
+     * and digits and a quote would otherwise split it.
+     *
+     * The index folds nothing itself; the content build writes the same
+     * normalized shape [normalizeForIndex] gives a query into the indexed
+     * column, so the two sides meet. The expression is built here, beside
+     * [parse], so the app's matching and the index's matching cannot drift
+     * (owner decision, this session).
+     */
+    fun matchExpression(terms: List<String>): String? {
+        val parts = terms.mapNotNull { term ->
+            val fragments = term.split(SEPARATORS).filter { it.isNotEmpty() }
+            when {
+                fragments.isEmpty() -> null
+                fragments.size == 1 -> fragments[0] + "*"
+                else -> "\"" + fragments.joinToString(" ") + "\""
+            }
+        }
+        if (parts.isEmpty()) return null
+        return parts.joinToString(" AND ")
+    }
+
+    /** What the index's tokenizer treats as a break: everything but letters and digits. */
+    private val SEPARATORS = Regex("[^\\p{L}\\p{N}]+")
 }

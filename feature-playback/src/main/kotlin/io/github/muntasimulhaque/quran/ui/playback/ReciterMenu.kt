@@ -1,7 +1,6 @@
 package io.github.muntasimulhaque.quran.ui.playback
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -11,6 +10,7 @@ import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
+import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /**
  * The reciters, as the list both the playing pill and the download offer
@@ -53,7 +53,7 @@ internal fun ReciterChoices(
             // clips into the popup's rounded shape.
             modifier = Modifier
                 .padding(horizontal = 6.dp)
-                .clip(RoundedCornerShape(14.dp)),
+                .clip(Radii.Card),
         )
     }
 }

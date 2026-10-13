@@ -45,6 +45,10 @@ fun QuranApp(
     viewModel: ReaderViewModel = viewModel(),
     /** The ayah a reminder's tap asked for, before the reading is on screen. */
     initialAyah: Int? = null,
+    /** One verse a shortcut or a deep link asked for, by surah and ayah. */
+    initialReference: Pair<Int, Int>? = null,
+    /** A shortcut or a deep link that asks for the search field once. */
+    openSearch: Boolean = false,
     onPlaybackPermission: () -> Unit = {},
     /**
      * What the two acts that set the reminder ask for: the notification,
@@ -81,6 +85,13 @@ fun QuranApp(
     LaunchedEffect(initialAyah, viewModel.ready) {
         if (initialAyah == null || !viewModel.ready) return@LaunchedEffect
         viewModel.jumpToAyahInReading(initialAyah)
+    }
+    // And the same for a link's own verse: it opens once, after the library
+    // is ready, and the reference it names is remembered as the place.
+    LaunchedEffect(initialReference, viewModel.ready) {
+        val (surah, ayah) = initialReference ?: return@LaunchedEffect
+        if (!viewModel.ready) return@LaunchedEffect
+        viewModel.jumpToReference(surah, ayah)
     }
     val settings = viewModel.settings
     val theme = settings.theme.resolved(systemDark = isSystemInDarkTheme())
@@ -164,6 +175,7 @@ fun QuranApp(
                     exactGrantWithheld,
                     onOpenNotificationSettings,
                     onAskExactAlarm,
+                    openSearch = openSearch,
                 )
             }
         }

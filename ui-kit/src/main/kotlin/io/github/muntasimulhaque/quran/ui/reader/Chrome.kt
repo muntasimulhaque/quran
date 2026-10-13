@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
@@ -35,6 +34,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /** Every glyph the interface needs, drawn by hand so nothing is borrowed. */
 enum class Icon {
@@ -319,7 +319,7 @@ fun IconButton(
     Box(
         modifier = Modifier
             .size(48.dp)
-            .clip(RoundedCornerShape(50))
+            .clip(Radii.Pill)
             .clickable(onClick = onClick)
             .semantics {
                 contentDescription = description
@@ -355,7 +355,7 @@ fun TextAction(
     Column(
         modifier = Modifier
             .minimumInteractiveComponentSize()
-            .clip(RoundedCornerShape(14.dp))
+            .clip(Radii.Card)
             .clickable(onClick = onClick)
             .padding(horizontal = 6.dp, vertical = 4.dp)
             .semantics {
@@ -438,7 +438,7 @@ fun ReadingTitle(
         modifier = modifier.then(
             if (onClick != null) {
                 Modifier
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(Radii.Title)
                     .clickable(role = Role.Button, onClick = onClick)
                     // The surah's own name and its juz are the node's text and
                     // stay what a screen reader reads first; the tap is said

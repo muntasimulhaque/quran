@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -32,6 +31,7 @@ import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Wash
+import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /**
  * One request, named in full: which reciter, which surah, how much, and the
@@ -55,8 +55,8 @@ internal fun ListenOfferBar(
     val progress = offer.progress
     Column(
         modifier = modifier
-            .floatingLift(RoundedCornerShape(50))
-            .clip(RoundedCornerShape(50))
+            .floatingLift(Radii.Pill)
+            .clip(Radii.Pill)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh),
     ) {
         // The chooser hangs from the bar's own centre with its ground above,
@@ -87,7 +87,7 @@ internal fun ListenOfferBar(
             Column(
                 modifier = Modifier
                     .weight(1f, fill = false)
-                    .clip(RoundedCornerShape(50))
+                    .clip(Radii.Pill)
                     .clickable(enabled = progress == null, role = Role.Button) { chooser = true }
                     .padding(horizontal = 4.dp, vertical = 2.dp),
             ) {
@@ -163,7 +163,7 @@ internal fun ListenOfferBar(
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 8.dp)
                     .height(2.dp)
-                    .clip(RoundedCornerShape(50)),
+                    .clip(Radii.Pill),
                 color = MaterialTheme.colorScheme.primary,
                 trackColor = MaterialTheme.colorScheme.primary.copy(alpha = Wash.Control),
             )

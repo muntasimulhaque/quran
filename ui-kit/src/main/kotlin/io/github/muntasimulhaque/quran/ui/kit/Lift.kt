@@ -10,8 +10,8 @@ import io.github.muntasimulhaque.quran.ui.theme.FloatingShadow
 
 /**
  * The one lift a control wears when it floats over the reading: the playback
- * capsule, the offer bar, the popup they open, the ayah's own actions, the
- * pack's progress, and the long-press hint.
+ * capsule, the offer bar, the popup they open, the ayah's own actions, and
+ * the pack's progress.
  *
  * The shadow is chosen here rather than taken from the platform, and it is
  * deliberately a whisper. The platform draws its own from a light model: a

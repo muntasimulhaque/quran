@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -35,6 +34,7 @@ import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 import io.github.muntasimulhaque.quran.ui.theme.Wash
+import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /**
  * The playback pill. It speaks in four voices: asking to download a surah,
@@ -104,13 +104,15 @@ fun PlaybackBar(
     }
     val downloading = state.downloadProgress != null
     val needsDownload = state.pendingDownloadSurah != null && !downloading
-    val playing = !downloading && !needsDownload && !state.downloadFailed && !state.unavailable
+    val playing = !downloading && !needsDownload && !state.downloadFailed && !state.error &&
+        !state.unavailable
     // The words are what give when the line is long, never the gutter and
     // never the controls: the reciter's name is one line and the state under
     // it one more, and each ellipsizes rather than push the controls off the
     // row. What a row cannot hold at all is [oneRowFloor]'s question, and
     // the second branch below is its answer.
     val status = when {
+        state.error -> stringResource(R.string.playback_failed)
         state.downloadFailed -> stringResource(R.string.playback_download_failed)
         downloading -> {
             val percent = ((state.downloadProgress ?: 0f) * 100).toInt()
@@ -149,6 +151,7 @@ fun PlaybackBar(
     // open while the reader is using it (owner report: a menu stayed over the
     // continuation pill that had replaced the one it belonged to).
     val voice = when {
+        state.error -> PillVoice.Failed
         state.downloadFailed -> PillVoice.Failed
         downloading -> PillVoice.Downloading
         needsDownload -> PillVoice.Offer
@@ -171,8 +174,8 @@ fun PlaybackBar(
     BoxWithConstraints(
         modifier = modifier
             .padding(horizontal = BarGutter)
-            .floatingLift(RoundedCornerShape(50))
-            .clip(RoundedCornerShape(50))
+            .floatingLift(Radii.Pill)
+            .clip(Radii.Pill)
             // The playback bar floats over the reading, so it wears the
             // floating tone and a soft lift: the page is visible around it
             // and under it, and it has to read as above the page.
@@ -272,7 +275,7 @@ fun PlaybackBar(
                         .padding(horizontal = 16.dp)
                         .padding(bottom = 8.dp)
                         .height(2.dp)
-                        .clip(RoundedCornerShape(50)),
+                        .clip(Radii.Pill),
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.primary.copy(alpha = Wash.Control),
                 )

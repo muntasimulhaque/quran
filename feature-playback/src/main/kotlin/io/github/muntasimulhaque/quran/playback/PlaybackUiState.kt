@@ -20,4 +20,6 @@ data class PlaybackUiState(
     /** 0..1 while downloading, null when idle. */
     val downloadProgress: Float? = null,
     val downloadFailed: Boolean = false,
+    /** True when the player itself could not play: a missing file, a dead service. */
+    val error: Boolean = false,
 )

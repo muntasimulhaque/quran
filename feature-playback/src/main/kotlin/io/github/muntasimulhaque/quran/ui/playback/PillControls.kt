@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
@@ -26,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /**
  * One control in the pill's own row: a glyph the app drew by hand, or a word
@@ -80,6 +80,13 @@ internal fun pillControls(
     onDownload: () -> Unit,
     onClose: () -> Unit,
 ): List<PillControl> = when {
+    // A player that could not play and a download that could not land are two
+    // failures of the same shape: one sentence and the one action that can
+    // help. The reader is never left with a silent pill.
+    state.error -> listOf(
+        WordControl(stringResource(R.string.playback_retry), onDownload),
+        GlyphControl(Transport.Close, stringResource(R.string.playback_close), onClose),
+    )
     state.downloadFailed -> listOf(
         WordControl(stringResource(R.string.playback_retry), onDownload),
     )
@@ -148,7 +155,7 @@ internal fun TransportButton(kind: Transport, description: String, onClick: () -
     Box(
         modifier = Modifier
             .minimumInteractiveComponentSize()
-            .clip(RoundedCornerShape(50))
+            .clip(Radii.Pill)
             .clickable(onClick = onClick)
             .semantics {
                 contentDescription = description

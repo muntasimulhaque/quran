@@ -85,6 +85,21 @@ class SearchTest {
     }
 
     @Test
+    fun `terms become the index's own token prefixes`() {
+        assertEquals("mercy*", Search.matchExpression(listOf("mercy")))
+        assertEquals(
+            "mercy* AND lord*",
+            Search.matchExpression(listOf("mercy", "lord")),
+        )
+        // A term with punctuation is the phrase of its own fragments, because
+        // the index tokenizes on letters and digits and a quote would split
+        // it: God's indexes as god and s, in that order.
+        assertEquals("\"god s\"", Search.matchExpression(listOf("god's")))
+        assertEquals("\"al kahf\"", Search.matchExpression(listOf("al-kahf")))
+        assertNull(Search.matchExpression(emptyList()))
+    }
+
+    @Test
     fun `references are read from every form a reader types`() {
         assertEquals(Search.Reference(2, 255), Search.reference("2:255"))
         assertEquals(Search.Reference(2, 255), Search.reference("2.255"))

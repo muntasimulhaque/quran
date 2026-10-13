@@ -124,7 +124,7 @@ private fun SizeSample(row: ReadingRow, settings: AppSettings) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 22.dp, end = 22.dp, top = 12.dp, bottom = 4.dp),
+            .padding(start = Space.Gutter, end = Space.Gutter, top = 12.dp, bottom = 4.dp),
     ) {
         Text(
             text = row.ayah.text,
@@ -177,7 +177,7 @@ fun TranslationsPage(
                 text = stringResource(R.string.settings_translation_hidden),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
+                modifier = Modifier.padding(start = Space.Gutter, end = Space.Gutter, bottom = Space.Line),
             )
         }
         LanguageGroups(
@@ -217,7 +217,7 @@ fun TafsirsPage(
                 text = stringResource(R.string.settings_tafsir_hidden),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 22.dp, end = 22.dp, bottom = Space.Line),
+                modifier = Modifier.padding(start = Space.Gutter, end = Space.Gutter, bottom = Space.Line),
             )
         }
         LanguageGroups(
@@ -270,7 +270,11 @@ fun AboutPage(
         ValueRow(stringResource(R.string.settings_license_label), stringResource(R.string.about_license))
 
         Group(stringResource(R.string.about_group_content))
-        packs.forEach { pack ->
+        // What is on the device is what the page names: every license is
+        // honored where the reader already meets the content it covers, and
+        // a catalog of packs nobody installed is a list of other people's
+        // books (owner decision, this session).
+        packs.filter { it.shipped || it.installed }.forEach { pack ->
             AboutCredit(
                 title = stringResource(
                     R.string.about_pack_title,
@@ -351,7 +355,7 @@ fun AboutPage(
 /** One credit: its name, and the lines that say who made it and what for. */
 @Composable
 private fun AboutCredit(title: String, lines: List<String>) {
-    Column(Modifier.padding(start = 22.dp, end = 22.dp, bottom = 10.dp)) {
+    Column(Modifier.padding(start = Space.Gutter, end = Space.Gutter, bottom = 10.dp)) {
         Text(
             text = title,
             style = MaterialTheme.typography.bodyMedium,

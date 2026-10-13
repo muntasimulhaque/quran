@@ -39,3 +39,11 @@ dependencies {
     implementation(libs.androidx.foundation)
     implementation(libs.androidx.material3)
 }
+
+composeCompiler {
+    // The model classes come from modules without the Compose compiler, so
+    // they are declared stable here: a row, an ayah, or a settings value
+    // is immutable, and without this every visible ayah re-measured its
+    // Arabic whenever the reader's place moved.
+    stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("stability-config.txt"))
+}

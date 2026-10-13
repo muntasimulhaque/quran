@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -50,6 +49,7 @@ import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.TafsirPassage
 import io.github.muntasimulhaque.quran.feature.reading.R
+import io.github.muntasimulhaque.quran.ui.kit.AddDoor
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
@@ -124,7 +124,7 @@ fun AyahCard(
     // effect and a tafsir line ran to about 150 characters on a tablet
     // (owner report, the audio and type audit session).
     val sheetWidth = Reading.proseMeasure(LocalReadingVoice.current, settings.tafsirSp) +
-        Reading.Gutter * 2
+        Space.Gutter * 2
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -156,8 +156,9 @@ fun AyahCard(
                     // The card is only the tafsir doors, so a reader with none
                     // open gets the door to add one rather than a sheet with
                     // nothing in it.
-                    AddTranslation(
+                    AddDoor(
                         text = stringResource(R.string.card_add_tafsir),
+                        action = stringResource(R.string.reading_action_add),
                         onClick = onAddContent,
                         modifier = Modifier.padding(horizontal = 22.dp),
                     )
@@ -211,30 +212,6 @@ fun AyahCard(
             sizeSp = open.sizeSp,
             lineSp = open.lineSp,
             onDismiss = { footnote = null },
-        )
-    }
-}
-
-@Composable
-private fun AddTranslation(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = Wash.Door))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f),
-        )
-        Text(
-            text = stringResource(R.string.reading_action_add),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
         )
     }
 }

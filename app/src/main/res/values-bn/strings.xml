@@ -19,8 +19,6 @@
     <string name="welcome_reminder_turn_on">চালু করুন</string>
     <string name="welcome_reminder_not_now">এখন নয়</string>
 
-    <string name="hint_long_press_ayah">যেকোনো আয়াতে চাপ দিয়ে ধরে রাখলে তার কাজগুলো দেখা যাবে</string>
-
     <string name="action_browse">কুরআন ব্রাউজ করুন</string>
     <string name="action_search">অনুসন্ধান</string>
     <string name="action_settings">সেটিংস</string>
@@ -66,4 +64,11 @@
     <string name="daily_notification_title">%1$s %2$d:%3$d</string>
     <string name="notification_settings_unavailable">এই ফোনে নোটিফিকেশন সেটিংস নেই।</string>
     <string name="exact_alarm_settings_unavailable">এই ফোনে সঠিক সময়ের অনুমতি নেওয়ার কোনো পর্দা নেই।</string>
+
+    <string name="shortcut_continue_short">পড়া চালিয়ে যান</string>
+    <string name="shortcut_continue_long">যেখানে ছেড়েছিলেন সেখানে ফিরুন</string>
+    <string name="shortcut_search_short">অনুসন্ধান</string>
+    <string name="shortcut_search_long">কুরআন অনুসন্ধান করুন</string>
+    <string name="shortcut_daily_short">প্রতিদিনের আয়াত</string>
+    <string name="shortcut_daily_long">আজকের আয়াত পড়ুন</string>
 </resources>

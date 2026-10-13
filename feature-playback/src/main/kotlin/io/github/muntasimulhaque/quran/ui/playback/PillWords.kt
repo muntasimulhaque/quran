@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +22,7 @@ import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import kotlin.math.abs
+import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /**
  * The pill's words on one line, which is the shape the two-row pill wears:
@@ -109,7 +109,7 @@ private fun ReciterDoor(
 ) {
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(50))
+            .clip(Radii.Pill)
             .then(
                 if (onOpen == null) {
                     Modifier
@@ -170,7 +170,7 @@ private fun PlaybackStatusLine(
     }
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(50))
+            .clip(Radii.Pill)
             .clickable(role = Role.Button, onClick = onOpen)
             .padding(end = 2.dp)
             .testTag("playback-listening")

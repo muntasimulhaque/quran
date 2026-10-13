@@ -135,7 +135,7 @@ private fun ReciterDownloads(
             text = stringResource(R.string.settings_downloaded_empty),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 50.dp, end = 22.dp, bottom = Space.Block),
+            modifier = Modifier.padding(start = 50.dp, end = Space.Gutter, bottom = Space.Block),
         )
         return
     }

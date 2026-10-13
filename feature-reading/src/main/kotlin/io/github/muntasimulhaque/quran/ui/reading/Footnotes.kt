@@ -67,7 +67,7 @@ internal fun FootnoteSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .imePadding()
-                .padding(start = 22.dp, end = 22.dp, bottom = 34.dp),
+                .padding(start = Space.Gutter, end = Space.Gutter, bottom = 34.dp),
         ) {
             Text(
                 text = stringResource(R.string.reading_footnote_title, footnote.number, surahName, reference),

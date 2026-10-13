@@ -24,12 +24,12 @@ import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.core.DailyReminder
 import io.github.muntasimulhaque.quran.data.LAST_MINUTE_OF_DAY
 import io.github.muntasimulhaque.quran.data.SettingsStore
+import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.util.Calendar
 import java.util.TimeZone
 
 /**
@@ -150,10 +150,14 @@ object DailyAyahScheduler {
         if (!enabled) {
             // Every alarm this app ever arms belongs to today or to tomorrow,
             // because an arm always asks for the next occurrence of the
-            // reader's own minute. Those two slots are the whole of what a
-            // switch being turned off has to clear.
-            alarm.cancel(pendingIntent(context, localDay(now)))
-            alarm.cancel(pendingIntent(context, localDay(tomorrowFrom(now))))
+            // reader's own minute. The day behind is cleared too: a timezone
+            // change can leave an armed alarm whose slot is no longer today
+            // or tomorrow on the reader's own clock, and a reminder that was
+            // turned off must not speak (owner decision, this session).
+            val today = localDay(now)
+            alarm.cancel(pendingIntent(context, today - 1))
+            alarm.cancel(pendingIntent(context, today))
+            alarm.cancel(pendingIntent(context, today + 1))
             return
         }
         val plan = DailyReminder.plan(
@@ -257,17 +261,6 @@ object DailyAyahScheduler {
         ).toInt()
 
     /**
-     * Tomorrow by the reader's own calendar rather than by 86,400,000
-     * milliseconds, so the day number a cleared alarm is looked up under is
-     * the right one on a morning the clocks change.
-     */
-    private fun tomorrowFrom(now: Long): Long =
-        Calendar.getInstance().apply {
-            timeInMillis = now
-            add(Calendar.DAY_OF_YEAR, 1)
-        }.timeInMillis
-
-    /**
      * The next moment the reminder should come, in the reader's own local
      * time. The hour and the minute are theirs, read off the one number the
      * picker writes, and the arithmetic lives in `core` so the JVM suite can
@@ -347,7 +340,9 @@ object DailyAyahScheduler {
                             // and an outline would both be thrown away, and at
                             // the status bar's size the outline drawing's lines
                             // would turn to dust (owner decision, this session).
-                            .setSmallIcon(R.drawable.ic_daily)
+                            // The mark lives in ui-kit so the recitation's own
+                            // notification wears it too.
+                            .setSmallIcon(UiKitR.drawable.ic_daily)
                             .setContentTitle(
                                 application.getString(
                                     R.string.daily_notification_title,

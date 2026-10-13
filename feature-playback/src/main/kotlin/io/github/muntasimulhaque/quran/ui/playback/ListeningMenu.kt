@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
@@ -29,6 +28,7 @@ import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.SpeedSteps
 import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.theme.Wash
+import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /**
  * The pace, and what happens at the end of the audio, as the list the pill
@@ -76,7 +76,7 @@ internal fun ColumnScope.ListeningMenu(
         modifier = Modifier
             .align(Alignment.CenterHorizontally)
             .padding(horizontal = 10.dp)
-            .clip(RoundedCornerShape(50))
+            .clip(Radii.Pill)
             .background(MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door))
             .testTag("playback-speed")
             .padding(3.dp),
@@ -92,7 +92,7 @@ internal fun ColumnScope.ListeningMenu(
             Box(
                 modifier = Modifier
                     .minimumInteractiveComponentSize()
-                    .clip(RoundedCornerShape(50))
+                    .clip(Radii.Pill)
                     .background(
                         if (active) {
                             MaterialTheme.colorScheme.primary.copy(alpha = Wash.Control)
@@ -184,6 +184,6 @@ private fun EndChoice(
         // so the ripple cannot draw a square corner over the menu's curve.
         modifier = Modifier
             .padding(horizontal = 6.dp)
-            .clip(RoundedCornerShape(14.dp)),
+            .clip(Radii.Card),
     )
 }

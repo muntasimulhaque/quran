@@ -50,7 +50,7 @@ fun RemoveSavedSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .imePadding()
-                .padding(horizontal = 22.dp, vertical = 10.dp)
+                .padding(horizontal = Space.Gutter, vertical = 10.dp)
                 .padding(bottom = 28.dp),
         ) {
             Text(

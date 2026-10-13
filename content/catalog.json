@@ -12,10 +12,10 @@
             "version": "1",
             "shipped": true,
             "ayahs": 6236,
-            "bytes": 7495680,
-            "sha256": "c1ffdd52e27fc745d425935767211589ff4670d2e8c12ed3c729a6cfcc654625",
-            "tag": "pack-core-c1ffdd52",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-c1ffdd52/core.db"
+            "bytes": 8065024,
+            "sha256": "4b79d4d8fdb523f559b45db2fe299bb680c2290b740e277e4f390adb6f6bb999",
+            "tag": "pack-core-4b79d4d8",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-4b79d4d8/core.db"
         },
         {
             "id": "translation-saheeh-en",
@@ -27,10 +27,10 @@
             "version": "1.1.2",
             "shipped": false,
             "ayahs": 6236,
-            "bytes": 2269184,
-            "sha256": "4ed8d99e22ea80e15837d55a3f2a0ac91c8d78ecd61e779f9c28831b187914e9",
-            "tag": "pack-translation-saheeh-en-4ed8d99e",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-translation-saheeh-en-4ed8d99e/translation-saheeh-en.db"
+            "bytes": 2924544,
+            "sha256": "5dd4585e978cc09997c36d1b193a23cc4de988b39ef33d4dd9768ce205b1a51c",
+            "tag": "pack-translation-saheeh-en-5dd4585e",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-translation-saheeh-en-5dd4585e/translation-saheeh-en.db"
         },
         {
             "id": "tafsir-ibn-kathir-en",
@@ -42,10 +42,10 @@
             "version": "QUL",
             "shipped": false,
             "ayahs": 6236,
-            "bytes": 23945216,
-            "sha256": "cd36142c0263235446ac8d679a26260b0c610231fdc37ceb4362e4488dc7c8c4",
-            "tag": "pack-tafsir-ibn-kathir-en-cd36142c",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-tafsir-ibn-kathir-en-cd36142c/tafsir-ibn-kathir-en.db"
+            "bytes": 29523968,
+            "sha256": "4984bb399b78d68898130486c45bb93456bcfdfe47fe9ffa605c27a64fcf6648",
+            "tag": "pack-tafsir-ibn-kathir-en-4984bb39",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-tafsir-ibn-kathir-en-4984bb39/tafsir-ibn-kathir-en.db"
         },
         {
             "id": "translation-taisirul-quran-bn",
@@ -57,10 +57,10 @@
             "version": "QUL",
             "shipped": false,
             "ayahs": 6236,
-            "bytes": 5226496,
-            "sha256": "729c83aa09012e3a59a5afe1aa1f2e48fba4b1ca84e273b83e5d1352f21ff9c4",
-            "tag": "pack-translation-taisirul-quran-bn-729c83aa",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-translation-taisirul-quran-bn-729c83aa/translation-taisirul-quran-bn.db"
+            "bytes": 5939200,
+            "sha256": "0a70f8ef46db636b52c04885566c9ee09fc97b0150214fddb6b3a7233150ed15",
+            "tag": "pack-translation-taisirul-quran-bn-0a70f8ef",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-translation-taisirul-quran-bn-0a70f8ef/translation-taisirul-quran-bn.db"
         },
         {
             "id": "tafsir-ibn-kathir-bn",
@@ -72,10 +72,10 @@
             "version": "QUL",
             "shipped": false,
             "ayahs": 6236,
-            "bytes": 49381376,
-            "sha256": "cffe559d86eddf6b5a9f4d87c494dffa8fff2c37fff0c8bfde8f9835f7ae0593",
-            "tag": "pack-tafsir-ibn-kathir-bn-cffe559d",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-tafsir-ibn-kathir-bn-cffe559d/tafsir-ibn-kathir-bn.db"
+            "bytes": 55984128,
+            "sha256": "1a866d0c67ddd1cc6fa1474c502aecaa030cb9645b0b508e1fa6748e147bfdf4",
+            "tag": "pack-tafsir-ibn-kathir-bn-1a866d0c",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-tafsir-ibn-kathir-bn-1a866d0c/tafsir-ibn-kathir-bn.db"
         },
         {
             "id": "reciter-minshawi",
@@ -117,10 +117,10 @@
             "version": "QUL",
             "shipped": false,
             "ayahs": 6236,
-            "bytes": 4874240,
-            "sha256": "6cebd465493683ccc00de0f8a490d7b7f962a8ec2f0ff0f510d87035c433190e",
-            "tag": "pack-words-en-6cebd465",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-words-en-6cebd465/words-en.db"
+            "bytes": 6303744,
+            "sha256": "9688344b3bbd93e7bccd270468ba97c7784567aa8655eeae6223dbc2e93caf58",
+            "tag": "pack-words-en-9688344b",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-words-en-9688344b/words-en.db"
         },
         {
             "id": "words-bn",
@@ -132,10 +132,10 @@
             "version": "QUL",
             "shipped": false,
             "ayahs": 6236,
-            "bytes": 6819840,
-            "sha256": "657797a6acb644953ff117cf5d1da33c79e8bd2f0394f412fd490f2d8062833b",
-            "tag": "pack-words-bn-657797a6",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-words-bn-657797a6/words-bn.db"
+            "bytes": 8359936,
+            "sha256": "246c032ada1b90e93c3368cc493bc1949be3a4c3c1886340246ec3b315884949",
+            "tag": "pack-words-bn-246c032a",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-words-bn-246c032a/words-bn.db"
         }
     ]
 }

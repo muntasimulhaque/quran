@@ -108,6 +108,16 @@ object Arabic {
     }
 
     /**
+     * One code point in the shape the search index holds: marks and tatweel
+     * folded away, letter forms folded, Arabic-Indic digits made ASCII. A
+     * single code point needs no normalization pass of its own, because NFC
+     * cannot compose a code point with itself; this exists so a caller that
+     * walks a whole page of prose can fold one character at a time without
+     * the normalizer on the hot path (owner decision, this session).
+     */
+    fun foldForSearch(codePoint: Int): Int = toAsciiDigit(fold(codePoint))
+
+    /**
      * Letters only: marks stripped, forms folded, every non-letter removed.
      * This is the audit comparator, not a search index.
      */
@@ -127,5 +137,18 @@ object Arabic {
             if (isLetter) out.appendCodePoint(folded)
         }
         return out.toString()
+    }
+
+    /**
+     * The print's own end-of-ayah sign and the number in Arabic-Indic digits,
+     * "\u06DD\u0661" for the first verse. It is the one place the app closes
+     * a verse in the Arabic-only reading, and it is a pure value so its shape
+     * is pinned without a device (owner decision, this session).
+     */
+    fun endOfAyah(number: Int): String = buildString {
+        append('\u06DD')
+        for (digit in number.toString()) {
+            append('\u0660' + (digit - '0'))
+        }
     }
 }

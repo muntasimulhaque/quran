@@ -19,6 +19,7 @@ import io.github.muntasimulhaque.quran.daily.DailyAyahScheduler
 import io.github.muntasimulhaque.quran.daily.rememberExactGrantWithheld
 import io.github.muntasimulhaque.quran.daily.rememberNotificationsBlocked
 import io.github.muntasimulhaque.quran.daily.reminderChannelHidden
+import io.github.muntasimulhaque.quran.core.DailyAyah
 import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.ui.QuranApp
@@ -113,6 +114,14 @@ class MainActivity : ComponentActivity() {
             )
         }
         setContent {
+            // What this launch was asked for, read once: the reminder's ayah,
+            // a daily-ayah shortcut, a search shortcut, or a link to one
+            // verse. A plain launch asks for none of them and leaves the
+            // reader where they were.
+            val launch = intent
+            val open = launch?.getStringExtra(EXTRA_OPEN)
+            val sharedAyah = launch?.getIntExtra(EXTRA_AYAH, 0)?.takeIf { it > 0 }
+            val reference = referenceOf(launch?.data)
             // Whether the phone will show this app's notifications is the one
             // thing about the daily reminder the app does not own, so it is
             // read from the phone and refreshed every time the app comes back
@@ -124,12 +133,19 @@ class MainActivity : ComponentActivity() {
             // back, and the answer changes in the phone's own screen, not here.
             val exactGrantWithheld = rememberExactGrantWithheld()
             QuranApp(
-                initialAyah = intent?.let { incoming ->
-                    // No extra, no jump. 0 is the sentinel, and it must never
-                    // become ayah 1: a plain launch has to leave the reader
-                    // where they were, which is the app's whole promise.
-                    incoming.getIntExtra(EXTRA_AYAH, 0).takeIf { it > 0 }
-                },
+                initialAyah = sharedAyah
+                    ?: if (open == OPEN_DAILY) {
+                        // The shortcut asks for the same verse the reminder
+                        // would have shown, dealt from the same deck.
+                        DailyAyah.numberFor(System.currentTimeMillis())
+                    } else {
+                        // No extra, no jump. 0 is the sentinel, and it must
+                        // never become ayah 1: a plain launch has to leave the
+                        // reader where they were, which is the app's promise.
+                        null
+                    },
+                initialReference = reference,
+                openSearch = open == OPEN_SEARCH,
                 onPlaybackPermission = ::ensureNotificationPermission,
                 onReminderPermission = ::ensureReminderPermissions,
                 afterFirstScreen = { recreate() },
@@ -240,6 +256,40 @@ class MainActivity : ComponentActivity() {
             ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
             PackageManager.PERMISSION_GRANTED
 
+    /**
+     * A second launch while the reading is already up, from a shortcut or a
+     * link: the new intent replaces the one the window was built from, and
+     * the window is rebuilt so the composition reads it. The view model
+     * survives the recreation, so the reader's place and playback are kept.
+     */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        recreate()
+    }
+
+    /**
+     * The verse a `quran://ayah/2:255` link names, or null when the link is
+     * not one. Both the colon form and the two-segment form are accepted,
+     * because a link typed by hand may take either, and a link that names
+     * nothing is ignored rather than guessed at.
+     */
+    private fun referenceOf(link: android.net.Uri?): Pair<Int, Int>? {
+        if (link == null || link.scheme != "quran" || link.host != "ayah") return null
+        val segments = link.pathSegments.filter { !it.isNullOrBlank() }
+        val pair = when {
+            segments.size >= 2 -> segments[0].toIntOrNull() to segments[1].toIntOrNull()
+            segments.size == 1 -> segments[0].split(':')
+                .takeIf { it.size == 2 }
+                ?.let { it[0].toIntOrNull() to it[1].toIntOrNull() }
+            else -> null
+        } ?: return null
+        val surah = pair.first ?: return null
+        val ayah = pair.second ?: return null
+        if (surah !in 1..114 || ayah < 1) return null
+        return surah to ayah
+    }
+
     companion object {
         /**
          * The ayah a reminder's tap opens. An extra on a cold start's own
@@ -247,6 +297,11 @@ class MainActivity : ComponentActivity() {
          * clears the task so what it asked for is always what is shown.
          */
         const val EXTRA_AYAH = "io.github.muntasimulhaque.quran.extra.AYAH"
+
+        /** What a shortcut asks to be opened, beside the reading it lands on. */
+        const val EXTRA_OPEN = "io.github.muntasimulhaque.quran.extra.OPEN"
+        const val OPEN_SEARCH = "search"
+        const val OPEN_DAILY = "daily"
     }
 }
 

@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 6.4 (versionCode 66)
+Version: 6.5 (versionCode 67)
 
 ## Listing
 
@@ -67,11 +67,12 @@ are in the app and in the repository.
 - Data security: no account, no identifiers, nothing stored off the
   device.
 - The app declares `INTERNET` for content from the project's own GitHub
-  Releases: a translation, tafsir, word list, or recitation pack the
-  reader asks for after seeing its size, and a quiet refresh of an
-  installed pack when the app carries a newer version, on an unmetered
-  connection only. Nothing is sent beyond the request. No analytics, no
-  crash reporting, no advertising.
+  Releases: the reading of the language the reader chose (its translation,
+  and its tafsir on an unmetered connection), a word list when word by word
+  is turned on, a recitation package the reader asks for after seeing its
+  size, and a quiet refresh of an installed pack when the app carries a
+  newer version, on an unmetered connection only. Nothing is sent beyond the
+  request. No analytics, no crash reporting, no advertising.
 - Privacy policy URL:
   https://muntasimulhaque.github.io/quran/privacy.html
 
@@ -133,8 +134,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (6.4, 386 characters)
-Reading is quicker and smoother. A surah opens without a wait, and turning to the next surah now lands on its text instead of a blank frame. Tap the surah's name to go back to its top. A recitation you were listening to picks up where it stopped, even if the app was closed. The reading, recitations, search, Browse, and the daily ayah are as they were. No ads, no trackers, no account.
+## Release notes (6.5, 491 characters)
+Tap any ayah to play it, open its tafsir, save it, write a note, or share it. Pinch the page to change the text size. Search is faster and now stays in the language you chose, for translations, tafsirs, and word meanings alike. An Arabic-only reading closes each verse with the Quran's own end-of-ayah sign and number. Long-press the app icon for shortcuts: Continue reading, Search, and Daily ayah. Playback failures now say what happened and offer a retry. No ads, no trackers, no account.
 
 ## Before each release
 

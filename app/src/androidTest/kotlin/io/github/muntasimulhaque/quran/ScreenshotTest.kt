@@ -10,7 +10,6 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.isRoot
-import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
@@ -438,7 +437,7 @@ class ScreenshotTest {
             if (pillRaised) return@repeat
             runCatching {
                 rule.onAllNodesWithText("2:255", substring = true).onFirst()
-                    .performTouchInput { longClick() }
+                    .performTouchInput { click() }
             }
             pillRaised = runCatching {
                 rule.waitUntil(timeoutMillis = 20_000) { pillIsUp() }
@@ -446,8 +445,8 @@ class ScreenshotTest {
             if (!pillRaised) back()
         }
         if (!pillRaised) {
-            runCatching { capture("09-long-press-failed") }
-            throw AssertionError("the ayah's long press did not raise the actions bar")
+            runCatching { capture("09-ayah-tap-failed") }
+            throw AssertionError("the ayah's tap did not raise the actions bar")
         }
         rule.onNodeWithContentDescription("Tafsir").performClick()
         waitForTag("ayah-card", timeout = 30_000)

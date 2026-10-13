@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -68,6 +67,9 @@ import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
+import io.github.muntasimulhaque.quran.ui.theme.Amiri
+import io.github.muntasimulhaque.quran.ui.theme.Radii
+import io.github.muntasimulhaque.quran.ui.theme.Gold
 import io.github.muntasimulhaque.quran.ui.theme.Lapis
 import io.github.muntasimulhaque.quran.ui.theme.PaperBackground
 import io.github.muntasimulhaque.quran.ui.theme.PaperHairline
@@ -105,6 +107,8 @@ internal data class ShareCard(
     val translation: List<TextRun>,
     val reference: String,
     val text: String,
+    /** The surah's own name, drawn in the ornament's hand when it is here. */
+    val surahArabic: String? = null,
 )
 
 /**
@@ -130,6 +134,7 @@ internal suspend fun loadShareCard(
             translation = runs.orEmpty(),
             reference = "$name ${ayah.surah}:${ayah.ayah}",
             text = viewModel.ayahShareText(ayah),
+            surahArabic = surah?.nameArabic,
         ),
     )
 }
@@ -168,20 +173,35 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
             modifier = modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.background)
-                .padding(start = 26.dp, end = 26.dp, top = 30.dp, bottom = 22.dp),
+                .padding(start = 26.dp, end = 26.dp, top = 30.dp, bottom = Space.Gutter),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             // The card is one plaque, and everything on it is centered: the
-            // reference that names the ayah, the ayah, its translation, and
-            // the app's own foot. Before this, four different alignments met
-            // on one narrow card (owner report): the Arabic right,
-            // the translation left, the reference right, the name left.
+            // surah's own name in the ornament's hand, the reference that
+            // names the ayah, the ayah, its translation, and the app's own
+            // foot. Before this, four different alignments met on one narrow
+            // card (owner report): the Arabic right, the translation left,
+            // the reference right, the name left.
+            card.surahArabic?.takeIf { it.isNotBlank() }?.let { arabicName ->
+                Text(
+                    text = arabicName,
+                    style = TextStyle(
+                        fontFamily = Amiri,
+                        fontSize = 22.sp,
+                        color = Gold,
+                    ),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
             Text(
                 text = card.reference,
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = if (card.surahArabic.isNullOrBlank()) 0.dp else 6.dp),
             )
             Text(
                 text = card.arabic,
@@ -498,7 +518,7 @@ internal fun AyahShareSheet(
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 22.dp, end = 22.dp, bottom = Space.Block),
+                    .padding(start = Space.Gutter, end = Space.Gutter, bottom = Space.Block),
             )
             // The preview keeps the card's own measure and corners, so the
             // reader looks at the artifact rather than at a description of
@@ -507,7 +527,7 @@ internal fun AyahShareSheet(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 22.dp, end = 22.dp, top = Space.Section),
+                    .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Section),
                 horizontalArrangement = Arrangement.spacedBy(Space.Line),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -533,7 +553,7 @@ internal fun ShareCardPreview(card: ShareCard) {
     Box(
         modifier = Modifier
             .width(CardWidth)
-            .clip(RoundedCornerShape(18.dp)),
+            .clip(Radii.Sheet),
     ) {
         AyahShareCardContent(card)
     }
@@ -554,8 +574,8 @@ internal fun ShareCardPreview(card: ShareCard) {
 internal fun ShareCardPreviewBox(card: ShareCard) {
     Box(
         modifier = Modifier
-            .padding(horizontal = 22.dp)
-            .clip(RoundedCornerShape(18.dp))
+            .padding(horizontal = Space.Gutter)
+            .clip(Radii.Sheet)
             .heightIn(max = 340.dp)
             .verticalScroll(rememberScrollState()),
     ) {

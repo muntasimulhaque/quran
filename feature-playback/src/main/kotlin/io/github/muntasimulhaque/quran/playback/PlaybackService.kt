@@ -5,12 +5,14 @@ import android.os.Bundle
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionResult
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
+import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 
 /**
  * Keeps recitation playing with the screen off. Media3 owns the notification
@@ -29,6 +31,16 @@ class PlaybackService : MediaSessionService() {
 
     override fun onCreate() {
         super.onCreate()
+        // The notification wears the app's own mark in the status bar, the
+        // same silhouette the daily reminder wears, instead of the library's
+        // generic one (owner decision, this session). The channel is left as
+        // the library names it: a new channel id would leave every reader who
+        // already has the old one with two entries in the phone's settings.
+        setMediaNotificationProvider(
+            DefaultMediaNotificationProvider.Builder(this)
+                .build()
+                .apply { setSmallIcon(UiKitR.drawable.ic_daily) },
+        )
         val player = ExoPlayer.Builder(this)
             .setAudioAttributes(
                 AudioAttributes.Builder()

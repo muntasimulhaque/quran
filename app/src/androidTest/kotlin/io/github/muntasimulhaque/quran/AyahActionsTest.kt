@@ -1,8 +1,8 @@
 package io.github.muntasimulhaque.quran
 
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -40,7 +40,7 @@ import org.junit.runner.RunWith
  * before it takes the mark and the note with it (owner report).
  *
  * The library is prepared before the activity starts, the order a reader
- * creates it in, and the long presses are the only thing the test touches.
+ * creates it in, and a tap on the ayah is the only thing the test touches.
  */
 @RunWith(AndroidJUnit4::class)
 class AyahActionsTest {
@@ -83,7 +83,7 @@ class AyahActionsTest {
         waitForReading()
 
         // The card behind the door is only the tafsirs.
-        longPressReadingAyah()
+        openReadingAyah()
         compose.onNodeWithContentDescription("Tafsir").assertExists()
     }
 
@@ -94,7 +94,7 @@ class AyahActionsTest {
         val on = compose.activity.getString(R.string.action_state_on)
         val off = compose.activity.getString(R.string.action_state_off)
         waitForReading()
-        longPressReadingAyah()
+        openReadingAyah()
 
         // The note is the reader's own writing and the Save is their own tap,
         // so a note alone lights one and not the other.
@@ -148,14 +148,14 @@ class AyahActionsTest {
     }
 
     /**
-     * The chrome comes up on a tap on the paper, and the pill on a long press
-     * of the ayah's own reference line, which the block owns.
+     * The chrome comes up on a tap on the paper, and an ayah's own actions on
+     * a tap on the ayah itself, which is the one gesture the reading keeps.
      */
-    private fun longPressReadingAyah() {
+    private fun openReadingAyah() {
         val readingPage = compose.activity.getString(ReadingR.string.reading_page_description)
         compose.onAllNodesWithContentDescription(readingPage).onFirst()
             .tapThePaper()
-        // Minutes, not seconds: a slow emulator is not a failing reading
+        // Seconds, not fractions: a slow emulator is not a failing reading
         // aid, and the house rule for a wait that watches text is the one
         // [waitForReading] already follows. Fifteen seconds timed out on a
         // cold first run before the block had drawn, twice.
@@ -163,7 +163,7 @@ class AyahActionsTest {
             compose.onAllNodesWithText("1:1", substring = true).fetchSemanticsNodes().isNotEmpty()
         }
         compose.onAllNodesWithText("1:1", substring = true).onFirst()
-            .performTouchInput { longClick() }
+            .performTouchInput { click() }
         compose.waitUntil(timeoutMillis = 60_000) {
             compose.onAllNodesWithContentDescription("Tafsir").fetchSemanticsNodes().isNotEmpty()
         }

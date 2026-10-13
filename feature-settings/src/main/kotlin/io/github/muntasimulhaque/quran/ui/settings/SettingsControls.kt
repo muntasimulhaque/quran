@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
@@ -32,6 +31,7 @@ import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.theme.NightBackground
+import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.NightText
 import io.github.muntasimulhaque.quran.ui.theme.PaperBackground
 import io.github.muntasimulhaque.quran.ui.theme.PaperInk
@@ -61,7 +61,7 @@ fun ThemeRow(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .minimumInteractiveComponentSize()
-                    .clip(RoundedCornerShape(14.dp))
+                    .clip(Radii.Card)
                     .selectable(selected = theme == selected, role = Role.RadioButton) {
                         onSelect(theme)
                     }
@@ -236,7 +236,7 @@ private fun SegmentedRow(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 22.dp, end = 22.dp, top = Space.Tight, bottom = Space.Tight),
+            .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Tight, bottom = Space.Tight),
     ) {
         Text(
             text = label,
@@ -247,7 +247,7 @@ private fun SegmentedRow(
             modifier = Modifier
                 .padding(top = Space.Line)
                 .align(Alignment.CenterHorizontally)
-                .clip(RoundedCornerShape(50))
+                .clip(Radii.Pill)
                 .background(MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door))
                 .padding(3.dp),
             horizontalArrangement = Arrangement.spacedBy(1.dp),
@@ -261,7 +261,7 @@ private fun SegmentedRow(
                         // shape of its own: the mark inside is smaller, and the
                         // target a finger gets is not.
                         .size(48.dp)
-                        .clip(RoundedCornerShape(50))
+                        .clip(Radii.Pill)
                         .background(
                             if (active) {
                                 MaterialTheme.colorScheme.primary.copy(alpha = Wash.Control)

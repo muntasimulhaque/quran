@@ -128,7 +128,6 @@ data class AppSettings(
      * the minute and the picker has nothing to reconcile.
      */
     val dailyAyahMinute: Int = DEFAULT_DAILY_MINUTE,
-    val longPressHintShown: Boolean = false,
 ) {
     val arabicSp: Float get() = TextSize.sp(TypeRole.Arabic, arabicSize)
     val arabicLineSp: Float get() = TextSize.lineSp(TypeRole.Arabic, arabicSize)
@@ -236,7 +235,6 @@ class SettingsStore(private val context: Context) {
             wordByWord = preferences[WORD_BY_WORD] ?: false,
             dailyAyah = preferences[DAILY_AYAH] ?: true,
             dailyAyahMinute = storedDailyMinute(preferences),
-            longPressHintShown = preferences[HINT_SHOWN] ?: false,
         )
     }
 
@@ -337,10 +335,6 @@ class SettingsStore(private val context: Context) {
     /** The moment the daily reminder arrives: minutes from midnight. */
     suspend fun setDailyAyahTime(minuteOfDay: Int) {
         context.settingsStore.edit { it[DAILY_AYAH_MINUTE] = minuteOfDay.coerceIn(0, LAST_MINUTE_OF_DAY) }
-    }
-
-    suspend fun setLongPressHintShown() {
-        context.settingsStore.edit { it[HINT_SHOWN] = true }
     }
 
     suspend fun setTranslationPacks(packs: Set<String>) {
@@ -511,7 +505,6 @@ class SettingsStore(private val context: Context) {
         /** Written by builds before the picker took minutes; read, never written. */
         val DAILY_AYAH_HOUR = intPreferencesKey("daily_ayah_hour")
         val DAILY_AYAH_MINUTE = intPreferencesKey("daily_ayah_minute")
-        val HINT_SHOWN = booleanPreferencesKey("hint_shown")
     }
 }
 

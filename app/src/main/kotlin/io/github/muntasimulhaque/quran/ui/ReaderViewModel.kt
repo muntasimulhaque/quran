@@ -41,6 +41,7 @@ import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TranslationLine
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.UiLanguage
+import io.github.muntasimulhaque.quran.data.forLanguage
 import io.github.muntasimulhaque.quran.data.withLanguage
 import io.github.muntasimulhaque.quran.daily.DailyAyahScheduler
 import io.github.muntasimulhaque.quran.playback.PlaybackController
@@ -158,6 +159,29 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      */
     val wordLanguage: String
         get() = translationPacks.firstOrNull { it.id in settings.translationPacks }?.language ?: "en"
+
+    /**
+     * The language the reader chose, which is the language search reads. An
+     * install that has not chosen yet answers English, the same answer the
+     * shell gives before the first screen, and the reader never reaches the
+     * search field before that choice is made.
+     */
+    val readingLanguage: String
+        get() = UiLanguage.of(settings.uiLanguage)?.tag ?: "en"
+
+    /**
+     * The translations search reads: the reader's own on switches, narrowed to
+     * the language they chose. A reader who reads in Bangla searches Bangla
+     * only, even when they added an English column by hand, because one search
+     * field over two languages answers in two voices and the reader asked for
+     * one (owner decision, this session).
+     */
+    val searchTranslationPacks: List<ContentPack>
+        get() = enabledTranslationPacks.forLanguage(readingLanguage)
+
+    /** The tafsirs search reads, narrowed to the reader's own language. */
+    val searchTafsirPacks: List<ContentPack>
+        get() = enabledTafsirPacks.forLanguage(readingLanguage)
 
     /** A pack the reader asked for, while it downloads. */
     data class PackSetup(
@@ -315,13 +339,23 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch {
             failure = false
             val application = getApplication<Application>()
-            installed = store.installed()
-            // The catalog is marked with what this device has, so a pack that
-            // is present is never offered as missing and a language switch
-            // never re-fetches what is already here.
-            catalog = PackCatalog.load(application).withInstalled(installed)
-            val opened = runCatching { ContentDatabase.open(application, catalog, installed) }
-            val database = opened.getOrElse {
+            // Everything that touches the disk stays off the main thread:
+            // listing the packs, reading the catalog, and opening the library
+            // itself are all work the reader's first frame must not wait on.
+            val opened = withContext(Dispatchers.IO) {
+                val installedNow = store.installed()
+                // The catalog is marked with what this device has, so a pack
+                // that is present is never offered as missing and a language
+                // switch never re-fetches what is already here.
+                val catalogNow = PackCatalog.load(application).withInstalled(installedNow)
+                val opened = runCatching {
+                    ContentDatabase.open(application, catalogNow, installedNow)
+                }
+                Triple(installedNow, catalogNow, opened)
+            }
+            installed = opened.first
+            catalog = opened.second
+            val database = opened.third.getOrElse {
                 android.util.Log.e(TAG, "the content library could not be opened", it)
                 failure = true
                 return@launch
@@ -337,9 +371,15 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             // must be told before the first ayah.
             playback.setSpeed(stored.playbackSpeed)
             playback.setEndOfAudio(stored.endOfAudio)
-            surahs = database.surahs()
+            // The reader's index of the Book, read on a worker: 114 surahs
+            // and the thirty juz boundaries, and the launch frame is not
+            // where a query belongs.
+            val index = withContext(Dispatchers.IO) {
+                database.surahs() to database.juzStarts().map { it.ayah }
+            }
+            surahs = index.first
             indexSurahs()
-            indexJuz(database)
+            juzAt = JuzIndex.of(index.second, TOTAL_AYAHS)
             packs = database.packs()
             recitations = database.recitations()
             lastReadStore.record(stored.ayah)
@@ -393,15 +433,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
     private var surahAt: IntArray = IntArray(0)
     private var firstAyahOf: IntArray = IntArray(0)
-
-    /**
-     * The juz of every ayah, built where the surah index is built: one
-     * query for the content's thirty boundaries, then a lookup the label
-     * can consult on every move without touching the disk.
-     */
-    private fun indexJuz(database: ContentDatabase) {
-        juzAt = JuzIndex.of(database.juzStarts().map { it.ayah }, TOTAL_AYAHS)
-    }
 
     /**
      * The surah of an ayah, from the index already in memory. One array read,
@@ -490,6 +521,20 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
+     * Opens one ayah named as a reference, from a link or a shortcut. The
+     * reference speaks the reader's own numbers; the running number the
+     * reading uses is the surah's first ayah plus the one inside it.
+     */
+    fun jumpToReference(surah: Int, ayah: Int) {
+        if (surah !in 1..TOTAL_SURAHS || ayah < 1) return
+        val first = firstAyahOf.getOrNull(surah)?.takeIf { it > 0 } ?: return
+        jumpToAyah(first + ayah - 1)
+    }
+
+    /** The reader's Retry after a failed playback, on the same ayah. */
+    fun retryPlayback() = playback.retryPlayback()
+
+    /**
      * A download offer belongs to the surah it was asked for. Moving to
      * another surah takes it away: a request for one surah's audio must never
      * sit over a different surah, waiting for a tap that no longer means what
@@ -568,6 +613,21 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             TypeRole.Words -> settings.copy(wordsSize = value)
         }
         viewModelScope.launch { settingsStore.setTypeSize(role, value) }
+    }
+
+    /**
+     * One step of the reader's own five text sizes, from a pinch on the
+     * reading. The list is the same list the settings page draws, so the
+     * gesture and the page can never disagree about where a size stands.
+     */
+    fun stepArabicSize(delta: Int) {
+        val steps = TextSize.STEPS
+        val current = steps.indexOf(settings.arabicSize)
+            .takeIf { it >= 0 }
+            ?: steps.indexOf(TextSize.DEFAULT)
+        val next = (current + delta).coerceIn(0, steps.lastIndex)
+        if (next == current) return
+        setTypeSize(TypeRole.Arabic, steps[next])
     }
 
     fun setKeepAwake(keep: Boolean) {
@@ -737,12 +797,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         installPack(pack.id)
     }
 
-    fun markLongPressHintShown() {
-        if (settings.longPressHintShown) return
-        settings = settings.copy(longPressHintShown = true)
-        viewModelScope.launch { settingsStore.setLongPressHintShown() }
-    }
-
     fun setTranslationPacks(packs: Set<String>) {
         settings = settings.copy(translationPacks = packs)
         clearRowCache()
@@ -800,7 +854,13 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         // because the second attempt is the retry.
         if (packSetup?.let { it.pack.id == id && !it.failed } == true) return false
         packSetup = PackSetup(pack, progress = 0f)
-        if (store.install(id)) {
+        // The build's own assets are copied on a worker: a development build
+        // carries every pack, and a copy is file work the reader's tap must
+        // never wait on the main thread for.
+        val fromAssets = runCatching {
+            withContext(Dispatchers.IO) { store.install(id) }
+        }.getOrDefault(false)
+        if (fromAssets) {
             finishInstall(pack)
             return true
         }
@@ -953,7 +1013,15 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         val application = getApplication<Application>()
         installed = withContext(Dispatchers.IO) { store.installed() }
         catalog = catalog.withInstalled(installed)
-        val fresh = withContext(Dispatchers.IO) { ContentDatabase.open(application, catalog, installed) }
+        val fresh = runCatching {
+            withContext(Dispatchers.IO) { ContentDatabase.open(application, catalog, installed) }
+        }.getOrElse { failure ->
+            // A library that cannot be reopened leaves the reader on the one
+            // they already have rather than taking the process down: the pack
+            // is on the device, and the next open picks it up.
+            android.util.Log.e(TAG, "the content library could not be reopened", failure)
+            return
+        }
         // The new library is published before the old one is retired, so no
         // screen can pick up a database whose turn has passed. The retire is
         // not a close: it waits for the last query still reading the old
@@ -1003,25 +1071,33 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      */
     suspend fun readingRows(surah: Int, wordByWord: Boolean): List<ReadingRow> =
         withContext(Dispatchers.IO) {
-            cachedRows(surah)?.let { return@withContext it }
-            val database = contentDatabase ?: return@withContext emptyList()
-            val ayahs = database.ayahsOfSurah(surah)
-            if (ayahs.isEmpty()) return@withContext emptyList()
-            val numbers = ayahs.map { it.number }
-            val words = database.wordsForAyahs(numbers)
-            val lines = translationLines(database, numbers)
-            val meanings = if (wordByWord) {
-                database.wordMeanings(numbers, wordLanguage)
-            } else {
-                emptyMap()
-            }
-            ayahs.map { ayah ->
-                ReadingRow(
-                    ayah = ayah,
-                    words = words[ayah.number].orEmpty(),
-                    translations = lines[ayah.number].orEmpty(),
-                    meanings = meanings[ayah.number].orEmpty(),
-                )
+            runCatching {
+                cachedRows(surah)?.let { return@runCatching it }
+                val database = contentDatabase ?: return@runCatching emptyList()
+                val ayahs = database.ayahsOfSurah(surah)
+                if (ayahs.isEmpty()) return@runCatching emptyList()
+                val numbers = ayahs.map { it.number }
+                val words = database.wordsForAyahs(numbers)
+                val lines = translationLines(database, numbers)
+                val meanings = if (wordByWord) {
+                    database.wordMeanings(numbers, wordLanguage)
+                } else {
+                    emptyMap()
+                }
+                ayahs.map { ayah ->
+                    ReadingRow(
+                        ayah = ayah,
+                        words = words[ayah.number].orEmpty(),
+                        translations = lines[ayah.number].orEmpty(),
+                        meanings = meanings[ayah.number].orEmpty(),
+                    )
+                }
+            }.getOrElse { failure ->
+                // One unreadable pack must not take the reading down with it:
+                // the page stays paper until the library can answer, and the
+                // daily integrity read replaces the pack behind the scenes.
+                android.util.Log.e(TAG, "the rows of surah $surah could not be read", failure)
+                emptyList()
             }
         }
 
@@ -1285,7 +1361,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         pack: ContentPack,
         onProgress: (Float) -> Unit,
     ): Boolean {
-        if (store.install(pack.id)) return true
+        val fromAssets = runCatching {
+            withContext(Dispatchers.IO) { store.install(pack.id) }
+        }.getOrDefault(false)
+        if (fromAssets) return true
         val result = downloader.download(pack) { read, total ->
             onProgress(if (total > 0) (read.toFloat() / total).coerceIn(0f, 1f) else 0f)
         }

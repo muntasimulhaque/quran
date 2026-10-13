@@ -15,11 +15,13 @@ nothing.
 Three reads touch the network, all verified against a SHA-256 recorded at
 build time:
 
-- A content pack the reader asks for (a translation, a tafsir, or a word
-  list), after they have seen its size and tapped Add.
+- The reading of the language the reader chose: the translation arrives as
+  part of that choice, and the tafsir follows on the same choice, waiting for
+  an unmetered connection when the phone is on cellular. A word list arrives
+  when the reader turns word by word on, where the row names its size first.
 - A recitation package for one surah, after the reader taps Play, sees the
   surah's name and size, and taps Download; or after they have turned on
-  Continue to the next surah in Settings or on the player itself. That
+  Continue to the next surah in the player's own listening menu. That
   switch is their word, given once, for the packages that follow the surah
   being heard, and the player still shows each package's name and size while
   it downloads, with a cancel.
@@ -50,13 +52,14 @@ connection at all.
   the daily ayah reminder.
 - `FOREGROUND_SERVICE` and `FOREGROUND_SERVICE_MEDIA_PLAYBACK`: keeping
   recitation playing with the screen off.
-- `SCHEDULE_EXACT_ALARM`: the daily ayah reminder, and nothing else. On
-  Android 12 and later the phone does not give this at install: it is the
-  reader's own switch in the phone's settings, and the app asks for it in one
-  place, on the reminder's own page, where it also says what the reminder does
-  without it (it still comes, inside the minute you chose). Before Android 12
-  exact alarms were never gated, so on those releases the app uses them and
-  there is nothing for the reader to grant. Nothing about this permission
+- `SCHEDULE_EXACT_ALARM`: the daily ayah reminder, and nothing else. Before
+  Android 12 exact alarms were never gated, so on those releases the app uses
+  them and there is nothing for the reader to grant. From Android 12 the
+  phone's special access decides: on many phones, and from Android 14 on most
+  new installs, it starts out withheld, and the app asks for it in the
+  phone's own screen at the two moments the reader sets the reminder
+  (turning it on, or moving its time). The Daily page then says where it
+  stands, with the one door the phone offers. Nothing about this permission
   leaves the phone: it is a switch for when this app's own reminder is due, and
   no other app's alarms are touched.
 

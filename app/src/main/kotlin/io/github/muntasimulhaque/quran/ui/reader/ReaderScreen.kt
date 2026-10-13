@@ -8,7 +8,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,7 +30,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.layout.size
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ImageBitmap
@@ -54,6 +51,7 @@ import io.github.muntasimulhaque.quran.ui.playback.PlaybackBar
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
+import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.kit.shortReciterName
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
@@ -65,6 +63,8 @@ import io.github.muntasimulhaque.quran.ui.reading.AyahCard
 import io.github.muntasimulhaque.quran.ui.reading.AyahNoteSheet
 import io.github.muntasimulhaque.quran.ui.reading.ReadingList
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
+import io.github.muntasimulhaque.quran.ui.theme.Radii
+import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -96,8 +96,11 @@ fun ReaderScreen(
     exactGrantWithheld: () -> Boolean,
     onOpenNotificationSettings: () -> Unit,
     onAskExactAlarm: () -> Unit,
+    /** A shortcut or a deep link that asks for the search field once. */
+    openSearch: Boolean = false,
 ) {
     val settings = viewModel.settings
+    val reducedMotion by rememberReducedMotion()
     val playback by viewModel.playbackState.collectAsStateWithLifecycle()
     val saved by viewModel.saved.collectAsStateWithLifecycle()
     val lastRead by viewModel.lastRead.collectAsStateWithLifecycle()
@@ -129,15 +132,15 @@ fun ReaderScreen(
     // second tap can never leave a stray sheet behind the capture.
     var sharing by remember { mutableStateOf<ShareRequest?>(null) }
 
-    // The wash under an ayah: the one the long press chose, or the one whose
+    // The wash under an ayah: the one the tap chose, or the one whose
     // note is open over it. A note opened from Browse has no pill behind it,
     // but the reader is still looking at the ayah the note belongs to, so it
     // wears the same mark while the sheet is up.
     val washedAyah = selected?.number ?: cardNote
 
     // The phone's back button dismisses the ayah pill first, and only closes
-    // the app when nothing is raised. A reader who long-pressed an ayah means
-    // the pill, and back is the gesture they already use to put a thing away.
+    // the app when nothing is raised. A reader who tapped an ayah means the
+    // pill, and back is the gesture they already use to put a thing away.
     // The sheets (the ayah card, the note, Browse, Search, Settings) are their
     // own windows and take back through their own handlers; this one is for
     // the pill, which is not a window.
@@ -161,6 +164,12 @@ fun ReaderScreen(
     // here where stringResource is valid; the share itself runs in a plain
     // lambda where a composable call would not be.
     val shareUnavailable = stringResource(R.string.share_unavailable)
+
+    // A shortcut or a link that asked for the search field opens it once,
+    // over the reading it landed on.
+    LaunchedEffect(openSearch) {
+        if (openSearch) sheet = ReaderSheet.Search
+    }
 
     /**
      * The words alone, wherever a door sends them. The card and the words
@@ -242,6 +251,9 @@ fun ReaderScreen(
                     },
                     onNextSurah = { number -> viewModel.jumpToSurah(number) },
                     onAddContent = { sheet = ReaderSheet.Settings },
+                    // The reader's own pinch steps the Quran's size, on the
+                    // same five steps the settings page shows.
+                    onSizeStep = { delta -> viewModel.stepArabicSize(delta) },
                     onPlaceChanged = { ayah -> viewModel.onReadingSettled(ayah) },
                     startAtOpening = viewModel.startAtSurahOpening == surah.number,
                     onOpeningReached = { viewModel.consumeSurahOpening(surah.number) },
@@ -255,6 +267,7 @@ fun ReaderScreen(
             title = surahName(viewModel, settings.ayah),
             detail = stringResource(R.string.juz_label, viewModel.juz),
             visible = chrome,
+            reducedMotion = reducedMotion,
             // A tap on the surah's name is the way back to its top, the way
             // a reader flips to the beginning of a surah in a printed copy.
             titleAction = stringResource(R.string.action_surah_top),
@@ -265,62 +278,18 @@ fun ReaderScreen(
             modifier = Modifier.align(Alignment.TopCenter),
         )
 
-        // The long press is the richest gesture in the app and the least
-        // visible, so it is said once, quietly, and then never again.
-        if (!settings.longPressHintShown) {
-            var hintVisible by remember { mutableStateOf(false) }
-            LaunchedEffect(Unit) {
-                delay(1400)
-                hintVisible = true
-                delay(8000)
-                hintVisible = false
-                viewModel.markLongPressHintShown()
-            }
-            AnimatedVisibility(
-                visible = hintVisible,
-                enter = fadeIn() + slideInVertically { it / 3 },
-                exit = fadeOut(),
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 96.dp),
-            ) {
-                Row(
-                    modifier = Modifier
-                        .padding(horizontal = 24.dp)
-                        .floatingLift(RoundedCornerShape(18.dp))
-                        .clip(RoundedCornerShape(18.dp))
-                        // A control that floats over the reading wears the
-                        // floating tone and a soft lift, not the sheet's own
-                        // surface: the page runs around it, and it has to read
-                        // as above the page rather than printed into it.
-                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                        .clickable {
-                            hintVisible = false
-                            viewModel.markLongPressHintShown()
-                        }
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    IconGlyph(
-                        icon = Icon.More,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(18.dp),
-                    )
-                    Text(
-                        text = stringResource(R.string.hint_long_press_ayah),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(start = 12.dp),
-                    )
-                }
-            }
-        }
+        // The long press hint is gone: an ayah's actions are raised by a
+        // tap, which needs no teaching, and a floating note that explains a
+        // hidden gesture is one more thing over the page (owner decision).
 
         val bottomItems = selected != null || playback.isAnything() || viewModel.listenOffer != null
         AnimatedVisibility(
             visible = bottomItems,
-            enter = fadeIn() + slideInVertically { it / 3 },
-            exit = fadeOut() + slideOutVertically { it / 3 },
+            // A reader who asked the phone to reduce motion gets the appearance
+            // and the disappearance without the slide; everyone else keeps the
+            // lift that says the control comes from the foot of the page.
+            enter = if (reducedMotion) fadeIn() else fadeIn() + slideInVertically { it / 3 },
+            exit = if (reducedMotion) fadeOut() else fadeOut() + slideOutVertically { it / 3 },
             modifier = Modifier.align(Alignment.BottomCenter),
         ) {
             BottomStack(
@@ -425,11 +394,24 @@ fun ReaderScreen(
         )
         ReaderSheet.Search -> SearchSheet(
             content = content,
-            translationPacks = viewModel.enabledTranslationPacks.map { it.id },
-            tafsirPacks = viewModel.enabledTafsirPacks.map { it.id },
-            packNames = viewModel.packs.associate { it.id to it.name },
-            packLanguages = viewModel.packs.associate { it.id to it.language },
-            wordsPack = content.meaningPack(viewModel.wordLanguage) ?: ContentDatabase.WORDS_PACK,
+            // Search reads the language the reader chose and no other: a
+            // Bangla reader searches Bangla translations and tafsirs even
+            // when an English column was added by hand (owner decision, this
+            // session).
+            translationPacks = remember(viewModel.searchTranslationPacks) {
+                viewModel.searchTranslationPacks.map { it.id }
+            },
+            tafsirPacks = remember(viewModel.searchTafsirPacks) {
+                viewModel.searchTafsirPacks.map { it.id }
+            },
+            packNames = remember(viewModel.packs) { viewModel.packs.associate { it.id to it.name } },
+            packLanguages = remember(viewModel.packs) {
+                viewModel.packs.associate { it.id to it.language }
+            },
+            // The word list follows the same one language, and never falls
+            // back to another: a reader who chose Bangla must not meet
+            // English meanings in the results.
+            wordsPack = ContentDatabase.wordsPackId(viewModel.readingLanguage),
             onDismiss = { sheet = ReaderSheet.None },
             onAyah = { ayah ->
                 sheet = ReaderSheet.None
@@ -553,6 +535,7 @@ private fun ReaderTopBar(
     title: String,
     detail: String?,
     visible: Boolean,
+    reducedMotion: Boolean,
     /** What a tap on the title does, said out loud; null when it does nothing. */
     titleAction: String?,
     onTitle: () -> Unit,
@@ -563,8 +546,8 @@ private fun ReaderTopBar(
 ) {
     AnimatedVisibility(
         visible = visible,
-        enter = fadeIn() + slideInVertically { -it / 3 },
-        exit = fadeOut() + slideOutVertically { -it / 3 },
+        enter = if (reducedMotion) fadeIn() else fadeIn() + slideInVertically { -it / 3 },
+        exit = if (reducedMotion) fadeOut() else fadeOut() + slideOutVertically { -it / 3 },
         modifier = modifier,
     ) {
         Row(
@@ -587,7 +570,7 @@ private fun ReaderTopBar(
                     ),
                 )
                 .windowInsetsPadding(WindowInsets.statusBars)
-                .padding(start = BarStart, end = BarEnd, top = 8.dp, bottom = 22.dp),
+                .padding(start = BarStart, end = BarEnd, top = 8.dp, bottom = Space.Gutter),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             // The bar is one row: Browse leads, the surah
@@ -639,8 +622,8 @@ private fun BottomStack(
         viewModel.packSetup?.let { setup ->
             Row(
                 modifier = Modifier
-                    .floatingLift(RoundedCornerShape(50))
-                    .clip(RoundedCornerShape(50))
+                    .floatingLift(Radii.Pill)
+                    .clip(Radii.Pill)
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                     .padding(start = 18.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -749,7 +732,11 @@ private fun BottomStack(
                 onNext = { viewModel.nextAyah() },
                 onPrevious = { viewModel.previousAyah() },
                 onReciter = onReciter,
-                onDownload = { viewModel.confirmDownload() },
+                onDownload = {
+                    // A failed player and a pending package share the pill's
+                    // one Retry; the view model knows which the tap means.
+                    if (playback.error) viewModel.retryPlayback() else viewModel.confirmDownload()
+                },
                 onClose = {
                     if (playback.pendingDownloadSurah != null || playback.downloadFailed) {
                         viewModel.cancelDownload()
@@ -768,7 +755,7 @@ private fun BottomStack(
 
 /** How anything playing or pending shows at the foot of the page. */
 internal fun PlaybackUiState.isAnything(): Boolean =
-    ayahNumber != null || unavailable || pendingDownloadSurah != null || downloadFailed
+    ayahNumber != null || unavailable || pendingDownloadSurah != null || downloadFailed || error
 
 @Composable
 private fun surahName(viewModel: ReaderViewModel, ayah: Int): String =
@@ -784,11 +771,11 @@ private fun markState(on: Boolean): String =
     stringResource(if (on) R.string.action_state_on else R.string.action_state_off)
 
 /**
- * The ayah's own actions, on the pill a long press raises: hear it, understand
- * it, keep it, write on it, and send it out.
+ * The ayah's own actions, on the pill an ayah raises when the reader taps it:
+ * hear it, understand it, keep it, write on it, and send it out.
  *
  * The order is the reader's intent, not the control's kind (owner decision,
- * this session). The two reasons to long-press lead: hear the ayah (Play) and
+ * this session). The two reasons to open an ayah's actions lead: hear it (Play) and
  * understand it (Tafsir), the deep door this reading is built around. Then the
  * two that keep the ayah, Save before Note, because the keep is the lighter
  * tap and the note is the writing: Save lands where it stands, and Note opens
@@ -821,7 +808,7 @@ private fun AyahActions(
     onMore: () -> Unit,
     onShare: () -> Unit,
 ) {
-    val shape = RoundedCornerShape(50)
+    val shape = Radii.Pill
     Row(
         modifier = Modifier
             .floatingLift(shape)

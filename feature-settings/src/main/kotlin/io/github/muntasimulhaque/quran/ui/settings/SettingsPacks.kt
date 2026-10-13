@@ -106,7 +106,7 @@ internal fun LanguageGroups(
                 text = names[language] ?: language,
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Block, bottom = Space.Tight),
+                modifier = Modifier.padding(start = Space.Gutter, end = Space.Gutter, top = Space.Block, bottom = Space.Tight),
             )
             group.sortedBy { it.name.lowercase() }.forEach { pack -> row(pack) }
         }

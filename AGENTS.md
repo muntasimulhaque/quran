@@ -111,8 +111,8 @@ dead letter.
 11. **Fast to the point of invisible.** Cold start lands on readable text
     with no spinner. A page turn is a pre-rendered swipe, not a render.
     Nothing blocks the main thread, ever.
-12. **Daily reading, not engagement.** A daily portion, a quiet reminder,
-    and a widget. No streaks, no badges, no social, no guilt.
+12. **Daily reading, not engagement.** A daily ayah, a quiet reminder,
+    and nothing that counts. No streaks, no badges, no social, no guilt.
 13. **No AI attribution anywhere.** No `Co-Authored-By` trailers, no
     "generated with" footers, no name in contributors, commits, or code.
 14. **Owner's law.** The build waits for the owner's word; one build
@@ -340,7 +340,7 @@ at every step:
 | `tools/` | the offline pipeline: fetch, verify, audit, build, fonts, packs, audio, icons |
 | `content/` | `quran.db` (built by `tools/`, gitignored, fetched or rebuilt from its hash), `packs/`, `manifest.json`, `recitation-manifest.json`, `audit-report.md`; `raw/` is local and gitignored |
 | `play-store/` | listing, screenshots per form factor, the hand-off AAB |
-| `benchmark/` | the startup profile's generator, development only, never in the bundle |
+| `benchmark/` | the startup profile's generator and the reading benchmarks, development only, never in the bundle |
 | `.github/workflows/` | `build.yml` (gates, data tests, signed bundle), `screenshots.yml` (the store set) |
 | `docs/` | the Pages site: the landing page and the privacy policy Play links to |
 
@@ -353,7 +353,6 @@ at every step:
 - **the reading**: the ayah-by-ayah reader with translation, word-by-word,
   and tafsir. There is one reading and it has no mode name.
 - **the reference**: an ayah key in `surah:ayah` form, for example 2:255.
-- **the portion**: the reader's chosen daily amount. Never called a streak.
 - **the deck**: the day's ayah is one card of a shuffled 6,236, dealt by the
   day number and reshuffled every pass, so nothing about it is stored.
 - **the ayah card**: the sheet one ayah opens: the Ibn Kathir panel. The ayah,

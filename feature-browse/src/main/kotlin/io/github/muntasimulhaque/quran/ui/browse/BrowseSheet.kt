@@ -20,12 +20,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,6 +52,7 @@ import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.theme.Reading
+import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
 import kotlinx.coroutines.Dispatchers
@@ -333,36 +334,42 @@ private fun BrowseTabChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // The chip's own shape stays as small as it reads; the finger gets the
+    // app's 48 dp target around it, because a tab is a control and a control
+    // that cannot be hit is not drawn at all to the reader who missed it.
     Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(50))
-            .background(
-                if (active) {
-                    MaterialTheme.colorScheme.primary
+        modifier = modifier.minimumInteractiveComponentSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            modifier = Modifier
+                .clip(Radii.Pill)
+                .background(
+                    if (active) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
+                    },
+                )
+                .clickable(role = Role.RadioButton, onClick = onClick)
+                .padding(horizontal = 14.dp, vertical = 8.dp),
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = if (active) {
+                    MaterialTheme.colorScheme.onPrimary
                 } else {
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
+                    MaterialTheme.colorScheme.onSurfaceVariant
                 },
             )
-            .clickable(role = Role.RadioButton, onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 8.dp),
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = if (active) {
-                MaterialTheme.colorScheme.onPrimary
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            },
-        )
+        }
     }
 }
 
 /** The surah one ayah falls in, from the Quran's sequential numbering. */
 private fun surahOfAyah(surahs: List<Surah>, starts: Map<Int, Int>, ayah: Int): Int? =
-    surahs.sortedBy { it.number }
-        .lastOrNull { (starts[it.number] ?: Int.MAX_VALUE) <= ayah }
-        ?.number
+    surahs.lastOrNull { (starts[it.number] ?: Int.MAX_VALUE) <= ayah }?.number
 
 /**
  * Puts one row in the middle of its list, as far as the Book's ends allow.

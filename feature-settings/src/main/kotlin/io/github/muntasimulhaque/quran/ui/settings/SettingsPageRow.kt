@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
  * One category in the settings hub: what it is called, where it stands right
@@ -40,7 +41,7 @@ fun PageRow(
             .fillMaxWidth()
             .minimumInteractiveComponentSize()
             .clickable(onClick = onClick)
-            .padding(start = 22.dp, end = 12.dp, top = 12.dp, bottom = 12.dp),
+            .padding(start = Space.Gutter, end = 12.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // The name and its value keep the same clear gap from the marks as the
