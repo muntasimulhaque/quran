@@ -157,9 +157,9 @@ internal suspend fun loadShareCard(
 @Composable
 internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier) {
     val hafs = rememberHafs()
-    // The app's mark, sized for a foot: the launcher's own drawing, the book
-    // in the theme's ink with the stand in the ornament gold, set
-    // on the card's own paper (owner decision, this session).
+    // The app's mark, sized for a foot: the launcher's own drawing, in the
+    // theme's ink on the card's own paper (owner decision, this session: at
+    // a foot's size one ink reads where the thin ornament gold did not).
     val mark = painterResource(R.drawable.ic_share_mark)
     val paper = lightColorScheme(
         primary = Lapis,
@@ -260,12 +260,11 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
 }
 
 /**
- * The app's mark at a foot's size: the launcher's own drawing, the book in
- * the theme's ink with the stand in the ornament gold, carried by
- * the drawable in its own colors on the card's own paper, so the foot is the
- * same drawing the home screen shows, never a tint of it. The same shape
- * fills the reminder's small icon, where the shade paints it in the
- * notification color, because a small icon is read as an alpha mask.
+ * The app's mark at a foot's size: the launcher's own drawing, the whole mark
+ * in the theme's ink, carried by the drawable on the card's own paper, so the
+ * foot is the same drawing the home screen shows, never a tint of it. The
+ * same shape fills the reminder's small icon, where the shade paints it in
+ * the notification color, because a small icon is read as an alpha mask.
  */
 @Composable
 private fun AppMark(mark: Painter, modifier: Modifier = Modifier) {

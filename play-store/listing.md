@@ -94,17 +94,17 @@ uniform line art on the reference's own reading: the pages are sail arcs
 diving into a spine that ends at the V where the two pages meet, each plank
 folds onto the page's outer edge, runs down beside the book, crosses below
 it, and its leg and the closing arc meet at one shared tip, so each foot is
-one clean tapered face. The book is in the
-theme's ink `#2A241B` on the theme's paper
-`#F1E9DA`, the stand in the ornament gold `#7B5A10`. These are the
-colors the reader already sees inside the app; the cover's burgundy belongs to
-the cover. The launcher carries the mark at five densities and in its adaptive
+one clean tapered face. The whole drawing is in the theme's ink `#2A241B` on
+the theme's paper `#F1E9DA`, one line weight on every icon surface, the
+color the reader already sees inside the app; the cover's burgundy belongs
+to the cover and the ornament gold stays the feature graphic's. The launcher
+carries the mark at five densities and in its adaptive
 layers, the background the paper alone and the monochrome layer the book's
 silhouette, sturdier than the mark so a themed home screen keeps the shape, and
 `icon-512.png` is the same drawing at 512. The reminder's small icon carries
 the silhouette with no ground, because the shade reads only its alpha channel
 and paints the shape in the notification color. The share card carries the
-drawing in its own colors beside the name, on the card's own paper, so the
+drawing in the card's own ink beside the name, on the card's own paper, so the
 card's foot and the home screen show one drawing. The feature graphic is the
 book's own title page: the paper field, a double gold hairline (a fine line at
 the margin, the page's own frame inside it), the mark centered on the axis as

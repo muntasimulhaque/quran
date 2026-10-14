@@ -473,18 +473,20 @@ implement it and update this list.
   own reading: the pages are sail arcs diving into a spine that ends at the V
   where the two pages meet, each plank folds onto the page's outer edge, runs
   down beside the book, crosses below it, and its leg and the closing arc
-  meet at one shared tip, so each foot is one clean tapered face; the book in
-  the theme's ink on the theme's paper, `#2A241B` on `#F1E9DA`, the stand in
-  the ornament gold `#7B5A10`, with the pages filled in the paper so the book
-  occludes the stand behind it and a paper margin keeps the stand's lines
-  clear of the book's edge (owner decision, this session: the mark wears the
-  app's own theme tones, the drawing follows the reference's own reading,
-  and the foot closes at the leg's own tip so no sliver of mouth knots the
+  meet at one shared tip, so each foot is one clean tapered face; the whole
+  drawing in the theme's ink on the theme's paper, `#2A241B` on `#F1E9DA`,
+  at one line weight on every icon surface, with the pages filled in the
+  paper so the book occludes the stand behind it and a paper margin keeps the
+  stand's lines clear of the book's edge (owner decision, this session: the
+  stand's ornament gold was a 5.3:1 line the small sizes lost first, so the
+  icon keeps one ink at 12.7:1 and the gold keeps the feature graphic and the
+  app's own ornament; the drawing follows the reference's own reading, and
+  the foot closes at the leg's own tip so no sliver of mouth knots the
   home-screen sizes). The launcher, its monochrome layer (the book's silhouette on each
   plank, sturdier than the mark), the store icon, the reminder's small icon
   (the silhouette alone, no ground, since the shade reads only its alpha and
-  paints it in the notification color), the share card (the drawing in its
-  own colors on the card's own paper), and the feature graphic all carry it.
+  paints it in the notification color), the share card (the drawing in the
+  card's own ink on its paper), and the feature graphic all carry it.
   The drawing is sized so the whole mark sits inside the launcher's 66 dp
   circle, about half the canvas wide, so a mask leaves air around it instead
   of the mark filling the tile.

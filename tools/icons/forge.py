@@ -32,6 +32,18 @@ AX_X, AX_Y = 85.5, 98.5
 S_FG   = 0.415
 STROKE = 1.5
 HALO   = 1.5
+# The icon's own line, in trace units: one weight and one ink for the
+# launcher's layers, the legacy tiles, and the store icon. The launcher
+# vector had been taking STROKE as canvas units, 2.4 times heavier than the
+# rasters' STROKE * S_FG, and the gold stand at 5.3:1 against the paper was
+# the first thing lost from the small sizes; the drawing keeps its geometry
+# and the icon keeps one ink at 12.7:1, while the feature graphic keeps the
+# ornament gold it draws well at its own size (owner decision, this
+# session).
+STROKE_ICON = 2.6
+HALO_ICON   = 1.9
+STROKE_CANVAS = STROKE_ICON * S_FG
+HALO_CANVAS   = (STROKE_ICON + 2 * HALO_ICON) * S_FG
 
 PAGE_N   = (85.5, 63.2)
 PAGE_P   = (56.5, 52.15)
@@ -411,7 +423,7 @@ def mono_pathdata():
 def fg_xml(note):
     scale, cx, cy = S_FG, 54.0, 54.0
     p = fg_pieces()
-    halo_w = STROKE + 2 * HALO
+    halo_w = HALO_CANVAS
     parts = []
     def P(fill, stroke, sw, data):
         attrs = []
@@ -422,13 +434,13 @@ def fg_xml(note):
         attrs.append('android:pathData="%s"' % data)
         return '    <path\n        ' + '\n        '.join(attrs) + ' />'
     for k in ('pl', 'pm', 'wa', 'wb'):
-        parts.append(P(None, '@color/icon_gold', STROKE, svg_segs(p[k], scale, cx, cy)))
+        parts.append(P(None, '@color/icon_ink', STROKE_CANVAS, svg_segs(p[k], scale, cx, cy)))
     for k in ('pc', 'pcM'):
         parts.append(P('@color/paper', '@color/paper', halo_w, svg_segs(p[k], scale, cx, cy)))
     for k in ('pc', 'pcM'):
-        parts.append(P('@color/paper', '@color/icon_ink', STROKE, svg_segs(p[k], scale, cx, cy)))
+        parts.append(P('@color/paper', '@color/icon_ink', STROKE_CANVAS, svg_segs(p[k], scale, cx, cy)))
     for k in ('ca', 'cb'):
-        parts.append(P(None, '@color/icon_gold', STROKE, svg_segs(p[k], scale, cx, cy)))
+        parts.append(P(None, '@color/icon_ink', STROKE_CANVAS, svg_segs(p[k], scale, cx, cy)))
     body = '\n'.join(parts)
     return ('<?xml version="1.0" encoding="utf-8"?>\n'
             '<!--\n  ' + note + '\n-->\n'
@@ -469,22 +481,26 @@ def fill_pts(draw, pts, color):
 def raster_canvas(size, ss=SS):
     return Image.new('RGBA', (size*ss, size*ss), (0, 0, 0, 0))
 
-def draw_fg(im, scale, cx, cy, ss=SS, dy=0.0):
-    """draw the full fg layer set on any canvas."""
+def draw_fg(im, scale, cx, cy, ss=SS, dy=0.0, stroke=None, halo=None, stand=None):
+    """draw the full fg layer set on any canvas; the icon's surfaces pass the
+    icon's one weight and ink, the banner keeps the defaults."""
+    stroke = STROKE if stroke is None else stroke
+    halo = HALO if halo is None else halo
+    stand = GOLD if stand is None else stand
     p = fg_pieces()
     dr = ImageDraw.Draw(im)
-    halo_w = STROKE + 2 * HALO
+    halo_w = stroke + 2 * halo
     def m(raw, off=0.0):
         return [(cx + (q[0]-AX_X)*scale*ss, cy + (q[1]-AX_Y+off)*scale*ss) for q in as_pts(raw, 60)]
-    lw = STROKE * scale * ss
+    lw = stroke * scale * ss
     for k in ('pl', 'pm', 'wa', 'wb'):
-        stroke_pts(dr, m(p[k]), GOLD, max(1, round(lw)))
+        stroke_pts(dr, m(p[k]), stand, max(1, round(lw)))
     for k in ('pc', 'pcM'):
         pts = m(p[k]); fill_pts(dr, pts, PAPER); stroke_pts(dr, pts, PAPER, max(1, round(halo_w*scale*ss)))
     for k in ('pc', 'pcM'):
         pts = m(p[k]); fill_pts(dr, pts, PAPER); stroke_pts(dr, pts, INK, max(1, round(lw)))
     for k in ('ca', 'cb'):
-        stroke_pts(dr, m(p[k]), GOLD, max(1, round(lw)))
+        stroke_pts(dr, m(p[k]), stand, max(1, round(lw)))
     return im
 
 def draw_mono(im, scale, cx, cy, ycen, ss=SS, color=WHITE):
@@ -533,9 +549,10 @@ def render_store(size=512, out=None, ss=4):
     im = raster_canvas(size, ss)
     p = fg_pieces()
     ids = [p[k] for k in ('pl', 'pm', 'wa', 'wb', 'pc', 'pcM')]
-    scale, xc, yc = fit_for(ids, None, span_w=size*0.498)
+    scale, xc, yc = fit_for(ids, None, span_w=size*0.53)
     paper_bg(im)
-    draw_fg(im, scale, size/2*ss - (xc-AX_X)*scale*ss, size/2*ss + (AX_Y - yc)*scale*ss, ss)
+    draw_fg(im, scale, size/2*ss - (xc-AX_X)*scale*ss, size/2*ss + (AX_Y - yc)*scale*ss, ss,
+            stroke=STROKE_ICON, halo=HALO_ICON, stand=INK)
     if out:
         im.convert('RGB').resize((size, size), Image.LANCZOS).save(out)
     return im
@@ -549,9 +566,10 @@ def legacy_png(size, out=None):
     im = raster_canvas(size, 4)
     p = fg_pieces()
     ids = [p[k] for k in ('pl', 'pm', 'wa', 'wb', 'pc', 'pcM')]
-    scale, xc, yc = fit_for(ids, None, span_w=size*0.495)
+    scale, xc, yc = fit_for(ids, None, span_w=size*0.53)
     paper_bg(im)
-    draw_fg(im, scale, size/2*4 - (xc-AX_X)*scale*4, size/2*4 + (AX_Y-yc)*scale*4, 4)
+    draw_fg(im, scale, size/2*4 - (xc-AX_X)*scale*4, size/2*4 + (AX_Y-yc)*scale*4, 4,
+            stroke=STROKE_ICON, halo=HALO_ICON, stand=INK)
     im.convert('RGB').resize((size, size), Image.LANCZOS).save(out)
 
 def share_png(size, out=None):
@@ -572,7 +590,7 @@ def share_png(size, out=None):
     for k in ('pc', 'pcM'):
         pts = m(p[k]); fill_pts(dr, pts, WHITE); stroke_pts(dr, pts, WHITE, max(2, round(halo_w*4)))
     for k in ('pl', 'pm', 'wa', 'wb', 'ca', 'cb'):
-        stroke_pts(dr, m(p[k]), GOLD, max(1, round(lw)))
+        stroke_pts(dr, m(p[k]), INK, max(1, round(lw)))
     for k in ('pc', 'pcM'):
         pts = m(p[k]); fill_pts(dr, pts, PAPER); stroke_pts(dr, pts, INK, max(1, round(lw)))
     im2 = im.resize((size, size), Image.LANCZOS)
@@ -699,10 +717,11 @@ def preview():
         ref = Image.open(overlays).convert('RGB')
         ref = ref.crop((0, 40, ref.width // 3, 196)).resize((512, 394), Image.LANCZOS)
         panels.append(ref)
-    scale, xc, yc = fit_for(ids, None, span_w=512*0.495)
+    scale, xc, yc = fit_for(ids, None, span_w=512*0.53)
     im = raster_canvas(512, 4)
     paper_bg(im)
-    draw_fg(im, scale, 1024 - (xc-AX_X)*scale*4, 1024 + (AX_Y-yc)*scale*4, 4)
+    draw_fg(im, scale, 1024 - (xc-AX_X)*scale*4, 1024 + (AX_Y-yc)*scale*4, 4,
+            stroke=STROKE_ICON, halo=HALO_ICON, stand=INK)
     panels.append(im.convert('RGB').resize((512, 512), Image.LANCZOS))
     sheet = Image.new('RGB', (512*len(panels) + 16*(len(panels)+1), 536), (230, 230, 235))
     x = 16
@@ -713,9 +732,10 @@ def preview():
     tiles = []
     for size in (192, 96, 48, 24):
         small = raster_canvas(size, 8)
-        s2, xc2, yc2 = fit_for(ids, None, span_w=size*0.495)
+        s2, xc2, yc2 = fit_for(ids, None, span_w=size*0.53)
         paper_bg(small)
-        draw_fg(small, s2, size/2*8 - (xc2-AX_X)*s2*8, size/2*8 + (AX_Y-yc2)*s2*8, 8)
+        draw_fg(small, s2, size/2*8 - (xc2-AX_X)*s2*8, size/2*8 + (AX_Y-yc2)*s2*8, 8,
+                stroke=STROKE_ICON, halo=HALO_ICON, stand=INK)
         tiles.append(small.resize((size, size), Image.LANCZOS).convert('RGB'))
     cols = Image.new('RGB', (sum(t.size[0] for t in tiles) + 30, 200), (230, 230, 235))
     x = 10
@@ -738,9 +758,10 @@ def emit():
                '  owner\'s reference as uniform line art: the pages are sail arcs\n'
                '  diving into a spine that hangs a short tail; each plank folds\n'
                '  onto the page\'s edge, runs down beside the book, and its lower\n'
-               '  end fans into a closed wedge foot. The book is in the theme\'s\n'
-               '  ink on the theme\'s paper, the stand in the ornament gold; the\n'
-               '  paper strokes keep air between the stand and the book\'s edges.')
+               '  end fans into a closed wedge foot. The whole drawing is one ink\n'
+               '  on the theme\'s paper at one line weight on every icon surface,\n'
+               '  and the paper strokes keep air between the stand and the book\'s\n'
+               '  edges.')
     mono_note = ('The themed launcher layer: the same book on its stand as a solid\n'
                  '  silhouette, one band per plank, each lower end closed as a wedge,\n'
                  '  with the margin around the book cut out of the bands so the shape\n'
@@ -750,7 +771,7 @@ def emit():
     for name, size, _ in DENS:
         legacy_png(size, os.path.join(root, f'app/src/main/res/mipmap-{name}/ic_launcher.png'))
         share_png(size // 2, os.path.join(root, f'app/src/main/res/drawable-{name}/ic_share_mark.png'))
-        daily_png(size // 2, os.path.join(root, f'app/src/main/res/drawable-{name}/ic_daily.png'))
+        daily_png(size // 2, os.path.join(root, f'ui-kit/src/main/res/drawable-{name}/ic_daily.png'))
     render_store(512, os.path.join(root, 'play-store/icon-512.png'))
     banner_png(out=os.path.join(root, 'play-store/feature-graphic-1024x500.png'), ss=2)
     print('emitted')
