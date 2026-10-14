@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -32,8 +31,8 @@ import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.ListenOffer
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
+import io.github.muntasimulhaque.quran.ui.kit.DownloadLine
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
-import io.github.muntasimulhaque.quran.ui.theme.Wash
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /**
@@ -115,7 +114,7 @@ fun PlaybackBar(
         state.error -> stringResource(R.string.playback_failed)
         state.downloadFailed -> stringResource(R.string.playback_download_failed)
         downloading -> {
-            val percent = ((state.downloadProgress ?: 0f) * 100).toInt()
+            val percent = (state.downloadProgress * 100).toInt()
             if (state.pendingIsContinuation && !pendingAudio.isNullOrBlank()) {
                 stringResource(R.string.playback_downloading_named, pendingAudio, percent)
             } else {
@@ -224,7 +223,7 @@ fun PlaybackBar(
                     ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    PlaybackWords(
+                    PlaybackWordsLine(
                         reciterName = reciterName,
                         onOpenReciters = openReciters,
                         status = status,
@@ -249,7 +248,10 @@ fun PlaybackBar(
                 //
                 // The inset is the capsule's own: the corner of a pill this
                 // tall reaches further in than the corner of a 55 dp one, so
-                // the lines keep clear of the curve at the top and the foot.
+                // the line keeps clear of the curve at the top and the foot.
+                // No vertical inset is kept over it: the doors' own 48 dp
+                // targets give the line its height (owner decision, this
+                // session).
                 PlaybackWordsLine(
                     reciterName = reciterName,
                     onOpenReciters = openReciters,
@@ -257,7 +259,7 @@ fun PlaybackBar(
                     onOpenListening = openListening,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 10.dp),
+                        .padding(horizontal = 20.dp),
                 )
                 PillControls(
                     controls = controls,
@@ -268,27 +270,18 @@ fun PlaybackBar(
                 )
             }
             if (downloading) {
-                // The progress is drawn by hand, like every other shape in
-                // the app: a 2 dp hairline in the theme's accent, filling
-                // from the start edge as the bytes land. The pill wore
-                // Material's own progress line, the one borrowed shape left
-                // on the page (owner decision, this session).
-                Box(
+                // The progress is the app's one download line, drawn by hand
+                // like every other shape on the page and shared with the
+                // offer bar, so one download reads the same whichever pill
+                // asked for it (owner decision, this session).
+                DownloadLine(
+                    progress = state.downloadProgress,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .padding(bottom = 8.dp)
-                        .height(2.dp)
-                        .clip(Radii.Pill)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = Wash.Control)),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(state.downloadProgress ?: 0f)
-                            .fillMaxHeight()
-                            .background(MaterialTheme.colorScheme.primary),
-                    )
-                }
+                        .height(2.dp),
+                )
             }
         }
     }

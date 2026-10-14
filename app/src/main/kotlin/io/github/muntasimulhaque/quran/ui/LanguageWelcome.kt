@@ -34,6 +34,7 @@ import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.clockText
 import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
+import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
@@ -164,7 +165,7 @@ private fun LanguageCard(
             icon = Icon.Chevron,
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier
-                .size(20.dp)
+                .size(GlyphSize.ChevronRow)
                 .rotate(-90f),
         )
     }

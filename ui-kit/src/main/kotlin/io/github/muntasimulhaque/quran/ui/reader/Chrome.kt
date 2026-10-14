@@ -64,6 +64,33 @@ enum class Icon {
     Keyboard,
 }
 
+/**
+ * The sizes the app's marks are drawn at, named once: a chevron beside a word
+ * inside a compact control, a chevron that ends a row or opens a door, a
+ * chevron that is a way back, and the check a chosen chip or a choice's ring
+ * carries.
+ *
+ * The chevron had grown six sizes, 12 through 22, and most of them were
+ * drift: the same mark ending two rows read two sizes, and the number beside
+ * each call site was chosen by the hand that last touched it. The sizes here
+ * are the jobs the mark does, so a row's tail is a row's tail on every
+ * surface (owner decision, this session).
+ */
+object GlyphSize {
+
+    /** A chevron beside a word inside a compact control, like the pill's doors. */
+    val ChevronInline = 14.dp
+
+    /** A chevron that ends a row or says a door opens. */
+    val ChevronRow = 18.dp
+
+    /** A chevron that is a way back or out, the size of the icon buttons beside it. */
+    val ChevronNav = 22.dp
+
+    /** The check inside a chip or a choice's ring. */
+    val Check = 14.dp
+}
+
 @Composable
 fun IconGlyph(
     icon: Icon,

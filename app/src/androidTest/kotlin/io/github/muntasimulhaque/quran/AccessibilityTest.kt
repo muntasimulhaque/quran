@@ -3,15 +3,20 @@ package io.github.muntasimulhaque.quran
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ComposeAccessibilityValidator
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertHeightIsAtLeast
+import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.click
+import androidx.compose.ui.unit.dp
 import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -158,16 +163,24 @@ class AccessibilityTest {
         }
 
         // Search, which is the sheet with the field and the folded filters.
-        // The test stops at the field: what the surfaces need is that the
-        // sheet's own controls are labelled and big enough, and typing would
-        // leave the soft keyboard up for the tests that follow in the same
-        // process (owner report, this session).
+        // The field is where typing would begin, so the test does not type;
+        // it does open the source door, because the chips inside it are
+        // controls a reader turns off and every one has to be a named,
+        // full-size target (owner decision, this session: the chip's fill had
+        // grown to the whole target and was put back to the app's chip
+        // height).
         revealChrome()
         compose.onNodeWithContentDescription("Search").performClick()
         compose.waitUntil(10_000) {
             compose.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty()
         }
         compose.onNode(hasSetTextAction()).assertExists()
+        compose.onNodeWithText("Search in").performClick()
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText("Quran text").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText("Quran text").assertHeightIsAtLeast(48.dp)
+        compose.onNodeWithText("Quran text").assertWidthIsAtLeast(48.dp)
         Espresso.pressBack()
     }
 

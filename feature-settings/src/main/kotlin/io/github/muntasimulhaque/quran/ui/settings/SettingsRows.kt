@@ -26,6 +26,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.feature.settings.R
+import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -128,7 +129,7 @@ private fun ChevronSlot(
                 icon = Icon.Chevron,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
-                    .size(18.dp)
+                    .size(GlyphSize.ChevronRow)
                     // The mark says where a tap goes: the chevron points the
                     // way the page slides in, to the right.
                     .graphicsLayer(rotationZ = -90f)
@@ -163,7 +164,7 @@ fun PageHeader(title: String, onBack: () -> Unit) {
                 icon = Icon.Chevron,
                 tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
-                    .size(22.dp)
+                    .size(GlyphSize.ChevronNav)
                     // The chevron opens a page pointing down, so going back
                     // is the same mark turned to point the way it came.
                     .graphicsLayer(rotationZ = 90f),

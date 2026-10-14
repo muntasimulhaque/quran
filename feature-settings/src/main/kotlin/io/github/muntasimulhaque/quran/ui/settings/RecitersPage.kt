@@ -11,12 +11,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +36,7 @@ import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
+import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -139,19 +138,19 @@ private fun ReciterDownloads(
         )
         return
     }
-    // The rows of this one block are read as one list of names, so their
-    // Remove actions keep a compact target instead of the 48 dp a standalone
-    // row carries: the whole block tightens, and the door above it still
-    // gives a finger the full target.
-    CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 40.dp) {
-        rows.forEach { row ->
-            DownloadedSurahRow(row) {
-                scope.launch {
-                    actions.onRemoveDownloads(recitation, row.surah)
-                    // Whatever the removal did, the list is read from the device
-                    // again: the row goes when its files are gone.
-                    downloaded = downloadedSurahs(recitation).sortedBy { it.surah }
-                }
+    // Every Remove action wears the app's own button, and the button already
+    // carries its 48 dp target, so the rows need no extra height of their
+    // own: the names sit close together and the block reads as one list
+    // (owner decision, this session: a 40 dp provider wrapped these rows and
+    // never applied, because the button holds its own floor and reads no
+    // provider).
+    rows.forEach { row ->
+        DownloadedSurahRow(row) {
+            scope.launch {
+                actions.onRemoveDownloads(recitation, row.surah)
+                // Whatever the removal did, the list is read from the device
+                // again: the row goes when its files are gone.
+                downloaded = downloadedSurahs(recitation).sortedBy { it.surah }
             }
         }
     }
@@ -187,7 +186,7 @@ private fun ReciterDownloadsDoor(open: Boolean, count: Int, onClick: () -> Unit)
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier
                 .padding(start = 6.dp)
-                .size(18.dp)
+                .size(GlyphSize.ChevronRow)
                 .rotate(if (open) 180f else 0f),
         )
     }

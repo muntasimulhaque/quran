@@ -1,37 +1,23 @@
 package io.github.muntasimulhaque.quran.ui.playback
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.indication
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.minimumInteractiveComponentSize
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.SpeedSteps
+import io.github.muntasimulhaque.quran.ui.kit.StepRow
 import io.github.muntasimulhaque.quran.ui.kit.speedText
-import io.github.muntasimulhaque.quran.ui.theme.Wash
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /**
@@ -40,9 +26,12 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * and rounded shape the reciter chooser wears, so it reads as the pill opening
  * rather than a foreign sheet laid over it.
  *
- * The pace keeps the settings page's own shape: the label is a bare line at
- * the menu's left inset and the five paces stand centred under it, as they
- * stand on the Listening page (owner decision, forty-seventh session).
+ * The pace keeps the app's own step row: the label is a bare line at the
+ * menu's left inset and the five paces stand centred under it, as the text
+ * sizes do on their own page (owner decision, forty-seventh session). The
+ * row itself is [StepRow], the app's one step row, so one control is learned
+ * once (owner decision, this session: the menu had carried a second copy and
+ * the two had drifted).
  *
  * The answers are one value and one list (owner decision, 4.5): the five
  * answers are rows of the app's own [ChoiceRow], one radio mark leading each
@@ -50,7 +39,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * reader has to learn, and the stop has its own row rather than living at the
  * off end of another. The order is the reader's own: what happens when the
  * ayah ends, then what happens when the surah ends. The five keep one gap and
- * the same leading mark the Listening page draws, so the same answer wears one
+ * the same leading mark the settings lists draw, so the same answer wears one
  * shape whichever door opened its list (owner decision, forty-eighth session).
  */
 @Composable
@@ -71,73 +60,41 @@ internal fun ColumnScope.ListeningMenu(
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 6.dp),
     )
-    // One row, five paces, the chosen one filled: the same shape the
-    // Listening page draws, so one control is learned once. It stands
+    // One row, five paces, the chosen one filled: the app's own step row, the
+    // same the text sizes wear, so one control is learned once. It stands
     // centred on the menu rather than against its left edge, where it left
     // 10 dp of ground on one side and 28 on the other and read as a row that
-    // had slipped (owner decision, forty-seventh session).
-    Row(
-        modifier = Modifier
-            .align(Alignment.CenterHorizontally)
-            .padding(horizontal = 10.dp)
-            .clip(Radii.Pill)
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door))
-            .testTag("playback-speed")
-            .padding(3.dp),
-        horizontalArrangement = Arrangement.spacedBy(1.dp),
-    ) {
-        SpeedSteps.forEach { step ->
-            val active = kotlin.math.abs(step - speed) < 0.01f
-            val description = stringResource(
+    // had slipped (owner decision, forty-seventh session). The row itself
+    // came from the settings page's old copy and the two had drifted, one
+    // filling its whole cell and this one hugging its text (owner decision,
+    // this session: one StepRow, one shape).
+    StepRow(
+        steps = SpeedSteps,
+        value = speed,
+        onSelect = onSpeed,
+        cell = { index, active ->
+            Text(
+                text = speedText(SpeedSteps[index]),
+                style = MaterialTheme.typography.labelLarge.copy(fontSize = 12.sp),
+                color = if (active) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+            )
+        },
+        description = { step ->
+            stringResource(
                 R.string.playback_speed_option,
                 speedText(step),
                 stringResource(R.string.playback_speed_label),
             )
-            val press = remember { MutableInteractionSource() }
-            val ink = if (active) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            }
-            Box(
-                modifier = Modifier
-                    // The choice owns the 48 dp node; the pill inside it keeps
-                    // its own shape (owner decision, the accessibility test).
-                    // The ripple is drawn on the pill inside the click node,
-                    // not on the node itself: an indication left on the click
-                    // would flash a rectangle over the shape the reader is
-                    // looking at (the same rule TextButton wears).
-                    .selectable(
-                        selected = active,
-                        role = Role.RadioButton,
-                        interactionSource = press,
-                        indication = null,
-                    ) { onSpeed(step) }
-                    .minimumInteractiveComponentSize()
-                    .clip(Radii.Pill)
-                    .background(
-                        if (active) {
-                            MaterialTheme.colorScheme.primary.copy(alpha = Wash.Control)
-                        } else {
-                            Color.Transparent
-                        },
-                    )
-                    .indication(press, ripple(color = ink))
-                    .semantics { contentDescription = description },
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = speedText(step),
-                    style = MaterialTheme.typography.labelLarge.copy(fontSize = 12.sp),
-                    color = if (active) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-                )
-            }
-        }
-    }
+        },
+        modifier = Modifier
+            .align(Alignment.CenterHorizontally)
+            .padding(horizontal = 10.dp)
+            .testTag("playback-speed"),
+    )
     Text(
         text = stringResource(R.string.playback_end_label),
         style = MaterialTheme.typography.labelMedium,
@@ -183,8 +140,8 @@ internal fun ColumnScope.ListeningMenu(
 }
 
 /**
- * One answer in the pill's one list: the same row the Listening page draws,
- * so the pill and the page keep one shape, one leading mark, and one gap. A
+ * One answer in the pill's one list: the same row the settings lists draw,
+ * so the pill and the pages keep one shape, one leading mark, and one gap. A
  * radio row rather than a switch, because one answer is kept at a time; the
  * stop has its own row so the reader never learns it as the off position of
  * another.

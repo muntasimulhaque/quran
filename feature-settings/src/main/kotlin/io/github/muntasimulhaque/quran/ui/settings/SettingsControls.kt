@@ -1,9 +1,7 @@
 package io.github.muntasimulhaque.quran.ui.settings
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,24 +17,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.feature.settings.R
+import io.github.muntasimulhaque.quran.ui.kit.StepRow
 import io.github.muntasimulhaque.quran.ui.theme.NightBackground
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.NightText
 import io.github.muntasimulhaque.quran.ui.theme.PaperBackground
 import io.github.muntasimulhaque.quran.ui.theme.PaperInk
 import io.github.muntasimulhaque.quran.ui.theme.Space
-import io.github.muntasimulhaque.quran.ui.theme.Wash
 
 /**
  * The three grounds, as swatches: Light, Dark, and System, which follows the
@@ -243,40 +238,16 @@ private fun SegmentedRow(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Row(
+        StepRow(
+            steps = steps,
+            value = value,
+            onSelect = onSelect,
+            cell = cell,
+            description = description,
             modifier = Modifier
                 .padding(top = Space.Line)
-                .align(Alignment.CenterHorizontally)
-                .clip(Radii.Pill)
-                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door))
-                .padding(3.dp),
-            horizontalArrangement = Arrangement.spacedBy(1.dp),
-        ) {
-            steps.forEachIndexed { index, step ->
-                val active = kotlin.math.abs(step - value) < 0.01f
-                val said = description(step)
-                Box(
-                    modifier = Modifier
-                        // The 48 dp is the whole reason this control has a
-                        // shape of its own: the mark inside is smaller, and the
-                        // target a finger gets is not.
-                        .size(48.dp)
-                        .clip(Radii.Pill)
-                        .background(
-                            if (active) {
-                                MaterialTheme.colorScheme.primary.copy(alpha = Wash.Control)
-                            } else {
-                                Color.Transparent
-                            },
-                        )
-                        .selectable(selected = active, role = Role.RadioButton) { onSelect(step) }
-                        .semantics { contentDescription = said },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    cell(index, active)
-                }
-            }
-        }
+                .align(Alignment.CenterHorizontally),
+        )
     }
 }
 

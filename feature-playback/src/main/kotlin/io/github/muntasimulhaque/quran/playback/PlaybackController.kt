@@ -353,8 +353,8 @@ class PlaybackController(
     /**
      * What happens as the reading moves on: the next ayah, the stop, the ayah
      * again, the surah again, or the surah after this one. One value, and the
-     * four switches that show it in the pill and on the Listening page are
-     * four views of it (owner decision).
+     * answer rows that show it in the pill's own menu are views of it (owner
+     * decision).
      *
      * The ayah repeat is the player's own, so the item itself loops and the
      * surah-end offer never appears while the reader is repeating. The surah

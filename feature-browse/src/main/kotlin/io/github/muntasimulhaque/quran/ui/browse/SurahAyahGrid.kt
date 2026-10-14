@@ -37,6 +37,7 @@ import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
+import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -150,7 +151,7 @@ private fun SurahGridHeader(surah: Surah, onBack: () -> Unit) {
                 icon = Icon.Chevron,
                 tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
-                    .size(22.dp)
+                    .size(GlyphSize.ChevronNav)
                     // The chevron opens downward, so going back is the same
                     // mark turned to point the way it came.
                     .rotate(90f),

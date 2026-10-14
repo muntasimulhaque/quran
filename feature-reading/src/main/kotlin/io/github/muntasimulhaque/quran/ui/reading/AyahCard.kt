@@ -55,6 +55,7 @@ import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
+import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.rich.RichBlocks
@@ -292,7 +293,7 @@ private fun DoorRow(
                 MaterialTheme.colorScheme.onSurfaceVariant
             },
             modifier = Modifier
-                .size(20.dp)
+                .size(GlyphSize.ChevronRow)
                 .rotate(if (open == true) 180f else 0f),
         )
     }

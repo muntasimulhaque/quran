@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -306,6 +307,11 @@ fun ReaderScreen(
                             hintVisible = false
                             viewModel.markLongPressHintShown()
                         }
+                        // The card is a control and owes the finger the app's
+                        // 48 dp: the min grows the shape to the floor, so the
+                        // whole card is one target (owner decision, this
+                        // session).
+                        .minimumInteractiveComponentSize()
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {

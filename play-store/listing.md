@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 7.0 (versionCode 72)
+Version: 7.1 (versionCode 73)
 
 ## Listing
 
@@ -134,8 +134,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (7.0, 369 characters)
-A theme made for long reading. The day page is a soft parchment rather than bright white, kinder to the eyes across a long sitting, and the night page is a warm charcoal lifted off pure black, so the words no longer glow on an OLED screen. The ornament gold and the night accent are retuned to keep their contrast, and the app mark and store artwork wear the new tones.
+## Release notes (7.1, 456 characters)
+Smaller, calmer controls. The search filters are chips again instead of blocks, so opening them no longer covers the results. Controls across the app now share one size and one comfortable touch target: the reciter's name and the playing status, the playback pace, the text size steps, and every settings row read as one hand. Tapping anywhere in the search field focuses it, and a download's progress line is the same on the offer and on the playing pill.
 
 ## Before each release
 

@@ -49,9 +49,8 @@ import org.junit.runner.RunWith
  * 1. It keeps a gutter from the glass whatever the label says, so a long
  *    offer cannot grow into the screen's edge (owner report).
  * 2. The status line is the door to the pace and to what happens at the end
- *    of the audio, and all of them call the same setter the Listening page
- *    calls, so there is one value with two doors rather than two values to
- *    keep in step.
+ *    of the audio, and all of them call the pace's one setter, so there is one
+ *    value with two doors rather than two values to keep in step.
  * 3. The automatic download says what it is fetching: the name and the size
  *    are on the pill even when no offer preceded it (owner decision).
  * 4. The words keep a measure or they take a line of their own: a phone in
@@ -74,7 +73,7 @@ import org.junit.runner.RunWith
  *    reciter chooser at one end of the pill and the listening menu at the
  *    other: two popups in two places on one control (owner report).
  * 9. Both menus wear the app's own choice row: one leading mark, one 24 dp
- *    gap, and one 48 dp target, the same the Listening page draws, so an
+ *    gap, and one 48 dp target, the same the settings lists draw, so an
  *    answer cannot change its shape from one door to the other (owner
  *    decision, forty-eighth session).
  */
@@ -491,6 +490,19 @@ class PlaybackPillTest {
         // this leg had been red for nobody.
         val line = "Al-Baqarah \u00b7 177 MB \u00b7 50% \u00b7 50%"
         compose.onNodeWithText(line).assertIsDisplayed()
+    }
+
+    /**
+     * The pill's two word doors owe the finger the app's 48 dp: the name is
+     * the chooser and the status line is the listening menu, and a reader
+     * tapping the thin strip of type must land on the control behind it, not
+     * on the letter under their fingertip (owner decision, this session).
+     */
+    @Test
+    fun theWordDoorsAreFullTargets() {
+        showPill(pillWidth = Modifier.width(393.dp))
+        compose.onNodeWithContentDescription("Husary").assertHeightIsAtLeast(48.dp)
+        compose.onNodeWithContentDescription("Al-Baqarah 2:255").assertHeightIsAtLeast(48.dp)
     }
 
     @Test

@@ -2,12 +2,12 @@ package io.github.muntasimulhaque.quran.ui.playback
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,15 +19,20 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.ui.kit.speedText
+import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import kotlin.math.abs
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /**
- * The pill's words on one line, which is the shape the two-row pill wears:
- * who is reading, and where the reader is, side by side, with the whole line
- * centred on the pill and the controls centred under it (owner report).
+ * The pill's words, on one line in both shapes: who is reading, and where the
+ * reader is. On a phone they stand centred over the controls; on a wide glass
+ * they stand beside them, centred in their own half. The line is one shape
+ * rather than two because its two words are the pill's two doors, and a door
+ * owes the finger the app's 48 dp target: stacked, the two strips of 20 dp
+ * text left two targets 19 dp apart, and a hand could not tell which one it
+ * was on (owner decision, this session: the wide pill's column is gone).
  *
  * The reciter's name is the door to the reciter chooser and the line beside it
  * is the door to the listening menu, which wears a chevron so it can be found
@@ -63,31 +68,6 @@ internal fun PlaybackWordsLine(
 }
 
 /**
- * The pill's words on two lines, which is the shape the one-row pill wears: a
- * tablet or a landscape phone has the measure for both lines beside four
- * controls, and this is how they read there.
- *
- * The reciter's name is the door to the reciter chooser and the line under
- * it is the door to the listening menu, which wears a chevron so it can be
- * found without a guess. Two doors on two lines, and the column around them
- * is not a door of its own. The menus themselves hang from the capsule's own
- * centre, as they do on the phone's one line.
- */
-@Composable
-internal fun PlaybackWords(
-    reciterName: String,
-    onOpenReciters: (() -> Unit)?,
-    status: String,
-    onOpenListening: (() -> Unit)?,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier = modifier.testTag("playback-words")) {
-        ReciterDoor(name = reciterName, onOpen = onOpenReciters)
-        PlaybackStatusLine(text = status, onOpen = onOpenListening)
-    }
-}
-
-/**
  * The reciter's name, and the door it is to: the other reciters, with what
  * each of them would still need for the surah the reader is hearing, and a
  * check on the one in use.
@@ -98,6 +78,10 @@ internal fun PlaybackWords(
  * are listed. The settings page is where the voices are managed, with the
  * surahs each one has on the device, not where one is picked for the ayah
  * being heard (owner report).
+ *
+ * The door carries the app's 48 dp target around its own line, so the thin
+ * strip of type and its chevron are not the whole of what a finger has to
+ * hit (owner decision, this session).
  *
  * Null where the choice cannot be made now, which is while a package is on
  * its way: the chevron is gone rather than a door that does nothing.
@@ -114,7 +98,9 @@ private fun ReciterDoor(
                 if (onOpen == null) {
                     Modifier
                 } else {
-                    Modifier.clickable(role = Role.Button, onClick = onOpen)
+                    Modifier
+                        .clickable(role = Role.Button, onClick = onOpen)
+                        .minimumInteractiveComponentSize()
                 },
             )
             .padding(horizontal = 4.dp, vertical = 2.dp)
@@ -136,7 +122,7 @@ private fun ReciterDoor(
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .padding(start = 4.dp)
-                    .size(12.dp),
+                    .size(GlyphSize.ChevronInline),
             )
         }
     }
@@ -172,6 +158,7 @@ private fun PlaybackStatusLine(
         modifier = Modifier
             .clip(Radii.Pill)
             .clickable(role = Role.Button, onClick = onOpen)
+            .minimumInteractiveComponentSize()
             .padding(end = 2.dp)
             .testTag("playback-listening")
             .semantics { contentDescription = text },
@@ -190,7 +177,7 @@ private fun PlaybackStatusLine(
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
                 .padding(start = 4.dp)
-                .size(12.dp),
+                .size(GlyphSize.ChevronInline),
         )
     }
 }

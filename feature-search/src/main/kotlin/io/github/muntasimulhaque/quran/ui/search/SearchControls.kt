@@ -5,6 +5,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -32,6 +33,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -45,6 +47,7 @@ import io.github.muntasimulhaque.quran.data.SearchResults
 import io.github.muntasimulhaque.quran.data.SearchSources
 import io.github.muntasimulhaque.quran.feature.search.R
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Radii
@@ -122,7 +125,7 @@ internal fun FilterRow(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
                     .padding(start = 6.dp)
-                    .size(16.dp)
+                    .size(GlyphSize.ChevronRow)
                     .rotate(if (open) 180f else 0f),
             )
         }
@@ -171,18 +174,21 @@ internal fun FilterRow(
  */
 @Composable
 internal fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit) {
-    // A chip is a small word around a small mark; the click and the node a
-    // screen reader focuses carry the app's 48 dp target, so the source a
-    // reader cannot hit is not a source they can turn off (owner decision,
-    // the accessibility test). The pill fills that target rather than sitting
-    // small inside it, the way the ayah-number cell and the icon buttons do:
-    // at the label's 16 dp line, 16 dp above and below makes the shape 48 dp
-    // tall, so the gap the flow leaves between two chips is the gap the eye
-    // reads and no part of it is an invisible target (owner decision, this
-    // session). The ripple is drawn on the pill inside the click node, not on
-    // the node itself: an indication left on the click would flash a
-    // rectangle over the shape the reader is looking at (the same rule
-    // TextButton and BrowseTabChip wear).
+    // A chip is a small word around a small mark, and it is the same chip the
+    // app draws everywhere: the pill is the label's own 16 dp line with 8 dp
+    // above and below, so it reads as a chip and not as a slab, and it follows
+    // the system font scale because it is the type plus padding and not a
+    // fixed box (owner decision, this session: the pill had grown to 48 dp,
+    // the size of the whole touch target, and a chip is not a target's size).
+    // The click and the node a screen reader focuses still carry the app's
+    // 48 dp target, so the source a reader cannot hit is not a source they can
+    // turn off (owner decision, the accessibility test): the minimum wraps
+    // the pill, the finger gets 48 dp, and the eye gets the chip. The gap the
+    // flow leaves between two chips is the flow's own gap plus the room each
+    // target keeps around its pill, the same rule TextButton and BrowseTabChip
+    // wear. The ripple is drawn on the pill inside the click node, not on the
+    // node itself: an indication left on the click would flash a rectangle
+    // over the shape the reader is looking at.
     val press = remember { MutableInteractionSource() }
     val ink = if (on) {
         MaterialTheme.colorScheme.onPrimary
@@ -208,7 +214,7 @@ internal fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit)
                 },
             )
             .indication(press, ripple(color = ink))
-            .padding(horizontal = 12.dp, vertical = 16.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(5.dp),
     ) {
@@ -216,7 +222,7 @@ internal fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit)
             IconGlyph(
                 icon = Icon.Check,
                 tint = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.size(13.dp),
+                modifier = Modifier.size(GlyphSize.Check),
             )
         }
         Text(
@@ -245,6 +251,14 @@ internal fun SearchField(
                 .weight(1f)
                 .clip(Radii.Pill)
                 .background(MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door))
+                // The pill is the field's own shape, so a tap anywhere inside
+                // it reaches the field: the words, and the quiet ground around
+                // them. The text field's own target is the line of text it
+                // draws, and the padding around that line used to answer
+                // nothing (owner decision, this session).
+                .pointerInput(focus) {
+                    detectTapGestures(onTap = { focus.requestFocus() })
+                }
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {

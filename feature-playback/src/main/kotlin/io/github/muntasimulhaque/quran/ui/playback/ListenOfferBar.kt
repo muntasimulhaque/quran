@@ -9,9 +9,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,11 +26,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.ListenOffer
+import io.github.muntasimulhaque.quran.ui.kit.DownloadLine
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
+import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
-import io.github.muntasimulhaque.quran.ui.theme.Wash
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /**
@@ -89,6 +90,12 @@ internal fun ListenOfferBar(
                     .weight(1f, fill = false)
                     .clip(Radii.Pill)
                     .clickable(enabled = progress == null, role = Role.Button) { chooser = true }
+                    // The name and the size are the door to the other
+                    // reciters, and a door owes the finger the app's 48 dp:
+                    // the row around them is already tall enough that the
+                    // target grows into room that was there (owner decision,
+                    // this session).
+                    .minimumInteractiveComponentSize()
                     .padding(horizontal = 4.dp, vertical = 2.dp),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -109,7 +116,7 @@ internal fun ListenOfferBar(
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
                                 .padding(start = 4.dp)
-                                .size(14.dp),
+                                .size(GlyphSize.ChevronInline),
                         )
                     }
                 }
@@ -156,16 +163,16 @@ internal fun ListenOfferBar(
             }
         }
         if (progress != null) {
-            LinearProgressIndicator(
-                progress = { progress },
+            // The same drawn line the playing pill wears, so a download is
+            // one shape whatever pill carries it (owner decision, this
+            // session).
+            DownloadLine(
+                progress = progress,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 8.dp)
-                    .height(2.dp)
-                    .clip(Radii.Pill),
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.primary.copy(alpha = Wash.Control),
+                    .height(2.dp),
             )
         }
     }

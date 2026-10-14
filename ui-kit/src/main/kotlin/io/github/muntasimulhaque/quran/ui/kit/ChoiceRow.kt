@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 
@@ -142,7 +143,7 @@ private fun ChoiceMark(selected: Boolean, radio: Boolean) {
             IconGlyph(
                 icon = Icon.Check,
                 tint = accent,
-                modifier = Modifier.size(14.dp),
+                modifier = Modifier.size(GlyphSize.Check),
             )
         }
     }

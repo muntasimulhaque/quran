@@ -36,6 +36,7 @@ import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
@@ -280,7 +281,7 @@ internal fun SurahEnd(
                     icon = Icon.Chevron,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
-                        .size(20.dp)
+                        .size(GlyphSize.ChevronRow)
                         .rotate(-90f),
                 )
             }
