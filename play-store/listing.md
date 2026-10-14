@@ -114,7 +114,7 @@ caption keeps air above the frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is refreshed for 6.7 from capture run 38446275338: all three legs green with eight frames each, and every frame compared with its artifact by `cmp`. The surah-opening frames on all three legs carry neither the introduction preview nor the one-time long-press note: the opening is the surah's own name and basmalah with the About this surah door, and the door is the whole of what stands there until it is opened (owner decision, this session). The settings frames that show the About row read Version 6.7. Every other changed frame differs only in the emulator's clock, the battery, the soft keyboard's caret, and a pixel of the scrim behind the ayah card, so the set is installed whole.
+The set is refreshed for 6.8 from capture run 38517633567: all three legs green with eight frames each, and every frame compared with its artifact by `cmp`. The settings frames on all three legs no longer carry the Keep the screen awake row, and their About row reads Version 6.8; every other frame differs only in the emulator's clock, the search field's caret, and a handful of antialiasing pixels at the surah title, so the set is installed whole.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
