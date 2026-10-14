@@ -634,7 +634,8 @@ def banner_png(out=None, ss=1):
     paper_bg(im)
     dr = ImageDraw.Draw(im)
     # the mark as a seal over the name, ink width 196, centered on the axis
-    # at the banner's optical center (512, 176)
+    # at the banner's optical center (512, 176); the mark is the icon's own
+    # one ink, and the gold lives in the frame and the rule below the name
     p = fg_pieces()
     ids = [p[k] for k in ('pl', 'pm', 'wa', 'wb', 'pc', 'pcM')]
     scale, xc, yc = fit_for(ids, None, span_w=196.0)
@@ -644,14 +645,14 @@ def banner_png(out=None, ss=1):
     def m(raw, step=60):
         return [(cx + (q[0]-AX_X)*scale*s, cy + (q[1]-AX_Y)*scale*s) for q in as_pts(raw, step)]
     for k in ('pl', 'pm', 'wa', 'wb'):
-        stroke_pts(dr, m(p[k]), GOLD, max(1, round(lw*s)))
+        stroke_pts(dr, m(p[k]), INK, max(1, round(lw*s)))
     halo_w = (STROKE + 2*HALO)*scale
     for k in ('pc', 'pcM'):
         pts = m(p[k]); fill_pts(dr, pts, PAPER); stroke_pts(dr, pts, PAPER, max(1, round(halo_w*s)))
     for k in ('pc', 'pcM'):
         pts = m(p[k]); fill_pts(dr, pts, PAPER); stroke_pts(dr, pts, INK, max(1, round(lw*s)))
     for k in ('ca', 'cb'):
-        stroke_pts(dr, m(p[k]), GOLD, max(1, round(lw*s)))
+        stroke_pts(dr, m(p[k]), INK, max(1, round(lw*s)))
     # the bookmaker's double rule: a fine line at the margin, the page's own
     # frame inside it
     dr.rectangle([58*ss, 54*ss, 966*ss, 446*ss], outline=HAIR, width=max(1, round(1.4*ss)))

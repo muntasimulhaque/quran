@@ -479,8 +479,9 @@ implement it and update this list.
   paper so the book occludes the stand behind it and a paper margin keeps the
   stand's lines clear of the book's edge (owner decision, this session: the
   stand's ornament gold was a 5.3:1 line the small sizes lost first, so the
-  icon keeps one ink at 12.7:1 and the gold keeps the feature graphic and the
-  app's own ornament; the drawing follows the reference's own reading, and
+  icon keeps one ink at 12.7:1 and the gold keeps the feature graphic's
+  frame and rule and the app's own ornament; the drawing follows the
+  reference's own reading, and
   the foot closes at the leg's own tip so no sliver of mouth knots the
   home-screen sizes). The launcher, its monochrome layer (the book's silhouette on each
   plank, sturdier than the mark), the store icon, the reminder's small icon

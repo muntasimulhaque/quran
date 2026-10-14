@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 7.1 (versionCode 73)
+Version: 7.2 (versionCode 74)
 
 ## Listing
 
@@ -97,7 +97,8 @@ it, and its leg and the closing arc meet at one shared tip, so each foot is
 one clean tapered face. The whole drawing is in the theme's ink `#2A241B` on
 the theme's paper `#F1E9DA`, one line weight on every icon surface, the
 color the reader already sees inside the app; the cover's burgundy belongs
-to the cover and the ornament gold stays the feature graphic's. The launcher
+to the cover and the ornament gold stays the feature graphic's frame and
+rule. The launcher
 carries the mark at five densities and in its adaptive
 layers, the background the paper alone and the monochrome layer the book's
 silhouette, sturdier than the mark so a themed home screen keeps the shape, and
@@ -108,7 +109,8 @@ drawing in the card's own ink beside the name, on the card's own paper, so the
 card's foot and the home screen show one drawing. The feature graphic is the
 book's own title page: the paper field, a double gold hairline (a fine line at
 the margin, the page's own frame inside it), the mark centered on the axis as
-a seal, and beneath it Quran in Literata, a short gold rule, and The Noble
+a seal, in the icon's own ink, and beneath it Quran in Literata, a short gold
+rule, and The Noble
 Book in tracked small caps in Inter, the gaps between them held tight so the
 caption keeps air above the frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
@@ -134,8 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (7.1, 456 characters)
-Smaller, calmer controls. The search filters are chips again instead of blocks, so opening them no longer covers the results. Controls across the app now share one size and one comfortable touch target: the reciter's name and the playing status, the playback pace, the text size steps, and every settings row read as one hand. Tapping anywhere in the search field focuses it, and a download's progress line is the same on the offer and on the playing pill.
+## Release notes (7.2, 298 characters)
+Quran has a new face. The icon is now drawn in one ink, on the same paper the reading opens on, so the book on its rehal reads clearly at every size instead of losing its thin golden stand. The share card and the store page carry the same drawing, and the gold stays where it belongs: the ornament.
 
 ## Before each release
 
