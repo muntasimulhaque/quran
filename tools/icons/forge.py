@@ -20,10 +20,10 @@
 import math, os, sys
 from PIL import Image, ImageDraw, ImageFont
 
-INK   = (28, 27, 24)      # #1C1B18
-GOLD  = (133, 100, 17)    # #856411
-PAPER = (248, 245, 239)   # #F8F5EF
-MUTED = (95, 91, 83)
+INK   = (42, 36, 27)      # #2A241B
+GOLD  = (123, 90, 16)    # #7B5A10
+PAPER = (241, 233, 218)   # #F1E9DA
+MUTED = (107, 99, 85)
 WHITE = (255, 255, 255)
 HAIR  = GOLD              # the banner's gold hairline
 

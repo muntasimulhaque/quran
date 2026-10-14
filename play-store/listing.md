@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 6.9 (versionCode 71)
+Version: 7.0 (versionCode 72)
 
 ## Listing
 
@@ -95,8 +95,8 @@ diving into a spine that ends at the V where the two pages meet, each plank
 folds onto the page's outer edge, runs down beside the book, crosses below
 it, and its leg and the closing arc meet at one shared tip, so each foot is
 one clean tapered face. The book is in the
-theme's ink `#1C1B18` on the theme's paper
-`#F8F5EF`, the stand in the ornament gold `#856411`. These are the
+theme's ink `#2A241B` on the theme's paper
+`#F1E9DA`, the stand in the ornament gold `#7B5A10`. These are the
 colors the reader already sees inside the app; the cover's burgundy belongs to
 the cover. The launcher carries the mark at five densities and in its adaptive
 layers, the background the paper alone and the monochrome layer the book's
@@ -134,8 +134,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (6.9, 340 characters)
-The surah name and juz in the top bar no longer touch their capsule: the shape keeps a clean gap around the words. In Search, the Search in control shows an arrow that turns as the filters open and close, so you can see it is a door, and the filter chips sit with even, tighter gaps between them. In Settings, Reciters is now named Reciter.
+## Release notes (7.0, 369 characters)
+A theme made for long reading. The day page is a soft parchment rather than bright white, kinder to the eyes across a long sitting, and the night page is a warm charcoal lifted off pure black, so the words no longer glow on an OLED screen. The ornament gold and the night accent are retuned to keep their contrast, and the app mark and store artwork wear the new tones.
 
 ## Before each release
 

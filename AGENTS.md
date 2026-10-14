@@ -411,8 +411,11 @@ implement it and update this list.
   of the one state a reader could not explain (a Night choice shown as the day
   page). The ring stands on the stored choice on every phone: with System
   chosen the ring is on System and never on Light or Dark, and the hub row
-  names the stored choice too (owner decision). The warm paper and lamplight pigments are unchanged; only the names
-  and the control moved.
+  names the stored choice too (owner decision). The warm paper and lamplight pigments were retuned for the long read
+  (owner decision, this session): the day page is a deeper parchment and the
+  night page a warm charcoal, less brown than the first night page and lifted
+  off pure black, with the ornament gold and the night accent moved to keep
+  their measured margins.
 - Saheeh International is the only translation.
 - Ibn Kathir is the tafsir.
 - Minshawi and Husary are the only reciters, and Husary is the reciter of
@@ -471,8 +474,8 @@ implement it and update this list.
   where the two pages meet, each plank folds onto the page's outer edge, runs
   down beside the book, crosses below it, and its leg and the closing arc
   meet at one shared tip, so each foot is one clean tapered face; the book in
-  the theme's ink on the theme's paper, `#1C1B18` on `#F8F5EF`, the stand in
-  the ornament gold `#856411`, with the pages filled in the paper so the book
+  the theme's ink on the theme's paper, `#2A241B` on `#F1E9DA`, the stand in
+  the ornament gold `#7B5A10`, with the pages filled in the paper so the book
   occludes the stand behind it and a paper margin keeps the stand's lines
   clear of the book's edge (owner decision, this session: the mark wears the
   app's own theme tones, the drawing follows the reference's own reading,
