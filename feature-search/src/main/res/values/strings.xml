@@ -25,6 +25,8 @@
     <string name="search_filter_tafsirs">Tafsirs</string>
     <string name="search_filter_all">Everything</string>
     <string name="search_filter_some">%1$d of %2$d</string>
+    <string name="search_filter_state_expanded">Expanded</string>
+    <string name="search_filter_state_collapsed">Collapsed</string>
 
     <plurals name="search_matches">
         <item quantity="one">1 match</item>

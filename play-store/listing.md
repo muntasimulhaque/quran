@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 6.8 (versionCode 70)
+Version: 6.9 (versionCode 71)
 
 ## Listing
 
@@ -134,8 +134,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (6.8, 447 characters)
-The screen stays awake while you read now, so the page never goes dark, and the Keep the screen awake switch is gone from Settings. Every button and chip answers a touch inside its own shape, so the search filters, the ayah actions, the reading controls, and the playback pill no longer flash a rectangle. The footnote and every other sheet stay still when you flick up, and the surah name and juz in the top bar are a capsule that hugs the words.
+## Release notes (6.9, 340 characters)
+The surah name and juz in the top bar no longer touch their capsule: the shape keeps a clean gap around the words. In Search, the Search in control shows an arrow that turns as the filters open and close, so you can see it is a door, and the filter chips sit with even, tighter gaps between them. In Settings, Reciters is now named Reciter.
 
 ## Before each release
 

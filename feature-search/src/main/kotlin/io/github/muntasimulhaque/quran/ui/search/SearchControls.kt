@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -27,12 +28,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.core.Search
@@ -70,26 +74,56 @@ internal fun FilterRow(
         if (hasTafsirs) add(sources.tafsirs)
     }
     val chosen = offered.count { it }
+    val state = if (chosen == offered.size) {
+        stringResource(R.string.search_filter_all)
+    } else {
+        stringResource(R.string.search_filter_some, chosen, offered.size)
+    }
+    val expanded = stringResource(R.string.search_filter_state_expanded)
+    val collapsed = stringResource(R.string.search_filter_state_collapsed)
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 22.dp, end = 22.dp, top = Space.Line, bottom = Space.Tight),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            TextButton(
-                label = stringResource(R.string.search_filter),
-                onClick = { open = !open },
-                quiet = true,
+        // The header is a door, drawn the way the app draws every status line
+        // that opens something: the words, the state, and a chevron that
+        // turns to say which way the list will move, with no fill, so it is
+        // read as a door and never as a chip that happens to be off. The
+        // whole row is the target, and its own gap keeps the words off the
+        // ripple (owner decision, this session).
+        Row(
+            modifier = Modifier
+                .clip(Radii.Pill)
+                .clickable(role = Role.Button, onClick = { open = !open })
+                .minimumInteractiveComponentSize()
+                .semantics {
+                    stateDescription = if (open) expanded else collapsed
+                }
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(R.string.search_filter),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
-                text = if (chosen == offered.size) {
-                    stringResource(R.string.search_filter_all)
-                } else {
-                    stringResource(R.string.search_filter_some, chosen, offered.size)
-                },
+                text = state,
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 10.dp),
+                modifier = Modifier.padding(start = 8.dp),
+            )
+            // The arrow sits with the words it belongs to, and turns to say
+            // which way the list will move: down while it is hidden, up once
+            // it is open.
+            IconGlyph(
+                icon = Icon.Chevron,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .padding(start = 6.dp)
+                    .size(16.dp)
+                    .rotate(if (open) 180f else 0f),
             )
         }
         AnimatedVisibility(visible = open) {
@@ -140,10 +174,15 @@ internal fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit)
     // A chip is a small word around a small mark; the click and the node a
     // screen reader focuses carry the app's 48 dp target, so the source a
     // reader cannot hit is not a source they can turn off (owner decision,
-    // the accessibility test). The ripple is drawn on the pill inside the
-    // click node, not on the node itself: an indication left on the click
-    // would flash a rectangle over the shape the reader is looking at (the
-    // same rule TextButton and BrowseTabChip wear).
+    // the accessibility test). The pill fills that target rather than sitting
+    // small inside it, the way the ayah-number cell and the icon buttons do:
+    // at the label's 16 dp line, 16 dp above and below makes the shape 48 dp
+    // tall, so the gap the flow leaves between two chips is the gap the eye
+    // reads and no part of it is an invisible target (owner decision, this
+    // session). The ripple is drawn on the pill inside the click node, not on
+    // the node itself: an indication left on the click would flash a
+    // rectangle over the shape the reader is looking at (the same rule
+    // TextButton and BrowseTabChip wear).
     val press = remember { MutableInteractionSource() }
     val ink = if (on) {
         MaterialTheme.colorScheme.onPrimary
@@ -169,7 +208,7 @@ internal fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit)
                 },
             )
             .indication(press, ripple(color = ink))
-            .padding(horizontal = 12.dp, vertical = 9.dp),
+            .padding(horizontal = 12.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(5.dp),
     ) {

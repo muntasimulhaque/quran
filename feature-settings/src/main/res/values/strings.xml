@@ -89,7 +89,7 @@
 
     <string name="settings_title_appearance">Theme</string>
     <string name="settings_title_text">Font size</string>
-    <string name="settings_title_reciters">Reciters</string>
+    <string name="settings_title_reciters">Reciter</string>
     <string name="settings_title_translations">Translations</string>
     <string name="settings_title_tafsirs">Tafsirs</string>
     <string name="settings_title_about">About</string>
@@ -103,7 +103,7 @@
     <string name="settings_size_translation">Translation</string>
     <string name="settings_size_tafsir">Tafsir</string>
     <string name="settings_size_words">Word meanings</string>
-    <string name="settings_group_reciters">Reciters</string>
+    <string name="settings_group_reciters">Reciter</string>
     <string name="settings_group_translations">Translations</string>
     <string name="settings_translation_hidden">Translation is hidden in the reading</string>
     <string name="settings_group_tafsirs">Tafsirs</string>

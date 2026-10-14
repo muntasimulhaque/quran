@@ -414,6 +414,9 @@ fun TextAction(
     }
 }
 
+/** The gap a control keeps between its words and the shape around them. */
+private val TitlePad = 14.dp
+
 /**
  * The surah and its part, as one quiet line of type, centered under the
  * controls. The juz label is drawn only when it truly fits beside the whole
@@ -426,8 +429,12 @@ fun TextAction(
  * rather than filling the bar's centre: the shape the eye reads and the
  * node a finger gets are the same size, so a reader who taps the title sees
  * the boundary of what they tapped (owner decision, this session). The
- * capsule carries no fill, so the surah's name still reads as a label at
- * rest, and the shape is only the press.
+ * words keep a [TitlePad] gap from the capsule's edge, the same gap the
+ * app's text button keeps between its label and its shape, so the capsule
+ * never touches the type it names; the gap is measured into the shape, so
+ * the shape and the node stay the same size. The capsule carries no fill,
+ * so the surah's name still reads as a label at rest, and the shape is only
+ * the press.
  */
 @Composable
 fun ReadingTitle(
@@ -483,27 +490,38 @@ fun ReadingTitle(
         ),
     ) { measurables, constraints ->
         val gap = 8.dp.roundToPx()
-        val name = measurables[0].measure(constraints.copy(minWidth = 0, minHeight = 0))
-        // The label is measured at its own size and placed only if the
-        // whole name plus the label fits; the name is never cut to make
-        // room for the label beside it.
+        val padX = TitlePad.roundToPx()
+        // The name is measured with the capsule's own gap on both sides, so
+        // an ellipsis it may need falls inside the shape rather than under
+        // its curve.
+        val name = measurables[0].measure(
+            constraints.copy(
+                minWidth = 0,
+                minHeight = 0,
+                maxWidth = (constraints.maxWidth - 2 * padX).coerceAtLeast(0),
+            ),
+        )
+        // The label is measured at its own size and placed only if the whole
+        // name plus the label and the capsule's gap fit; the name is never
+        // cut to make room for the label beside it.
         val label = measurables.getOrNull(1)
             ?.measure(Constraints())
-            ?.takeIf { name.width + gap + it.width <= constraints.maxWidth }
+            ?.takeIf { name.width + gap + it.width + 2 * padX <= constraints.maxWidth }
         // The name and its part are one unit, and the unit is the shape: the
-        // box reports what the words measure rather than the bar's whole
-        // centre, so the capsule the reader sees on a tap is exactly the
-        // words they tapped. The unit is a control when it answers a tap, and
-        // a control owes the finger 48 dp: the type is shorter and narrower
-        // than that, so the box is grown to the floor and the lines are
-        // centered in it (owner report, the accessibility test). The row that
-        // holds the title centres the unit, so the name stays where the eye
-        // expects it whether it is wide or narrow.
+        // box reports what the words measure plus the gap around them rather
+        // than the bar's whole centre, so the capsule the reader sees on a
+        // tap is exactly the control they tapped. The unit is a control when
+        // it answers a tap, and a control owes the finger 48 dp: the type is
+        // shorter and narrower than that, so the box is grown to the floor
+        // and the lines are centered in it (owner report, the accessibility
+        // test). The row that holds the title centres the unit, so the name
+        // stays where the eye expects it whether it is wide or narrow.
         val contentWidth = name.width + (label?.let { gap + it.width } ?: 0)
-        val width = contentWidth
+        val shapeWidth = contentWidth + 2 * padX
+        val width = shapeWidth
             .coerceAtLeast(48.dp.roundToPx())
             .coerceAtMost(constraints.maxWidth)
-        val start = ((width - contentWidth) / 2).coerceAtLeast(0)
+        val start = ((width - shapeWidth) / 2).coerceAtLeast(0) + padX
         val height = maxOf(name.height, label?.height ?: 0, 48.dp.roundToPx())
         layout(width, height) {
             name.place(start, (height - name.height) / 2)

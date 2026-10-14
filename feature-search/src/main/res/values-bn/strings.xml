@@ -25,6 +25,8 @@
     <string name="search_filter_tafsirs">তাফসীর</string>
     <string name="search_filter_all">সবকিছু</string>
     <string name="search_filter_some">%2$dটির মধ্যে %1$dটি</string>
+    <string name="search_filter_state_expanded">খোলা</string>
+    <string name="search_filter_state_collapsed">বন্ধ</string>
 
     <plurals name="search_matches">
         <item quantity="other">%1$dটি মিল</item>
