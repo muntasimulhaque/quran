@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -52,6 +54,9 @@ fun RemoveSavedSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .imePadding()
+                // The gate rides with the scroll, so an upward flick on the
+                // question never bounces the sheet on its top anchor.
+                .sheetVerticalScroll(rememberScrollState())
                 .padding(horizontal = Space.Gutter, vertical = 10.dp)
                 .padding(bottom = 28.dp),
         ) {

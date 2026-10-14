@@ -14,7 +14,6 @@
     <string name="settings_group_recitation">তিলাওয়াত</string>
     <string name="settings_group_reminder">মনে করানো</string>
 
-    <string name="settings_keep_awake_title">স্ক্রিন জাগিয়ে রাখুন</string>
     <string name="settings_daily_title">প্রতিদিনের আয়াত</string>
     <string name="settings_daily_subtitle_off">বন্ধ, সময় %1$s</string>
     <string name="settings_daily_subtitle_on">প্রতিদিন একটি আয়াত, %1$s-এ</string>

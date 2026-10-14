@@ -66,6 +66,7 @@ import io.github.muntasimulhaque.quran.core.TextRun
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
@@ -510,6 +511,10 @@ internal fun AyahShareSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                // The gate rides with the scroll, so an upward flick anywhere
+                // on the sheet never bounces it on its top anchor, while the
+                // preview keeps its own scroll for a tall card.
+                .sheetVerticalScroll(rememberScrollState())
                 .padding(bottom = 28.dp)
                 .testTag("share-sheet"),
             horizontalAlignment = Alignment.CenterHorizontally,

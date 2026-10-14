@@ -94,7 +94,6 @@ data class AppSettings(
      * second voice kept as the fallback when a reciter is removed.
      */
     val recitation: String = "husary",
-    val keepAwake: Boolean = true,
     val followReciter: Boolean = true,
     /** How fast the recitation plays: the reader's own pace, remembered. */
     val playbackSpeed: Float = 1f,
@@ -241,7 +240,6 @@ class SettingsStore(private val context: Context) {
             tafsirSize = sizeOf(choices, TAFSIR_SIZE, legacy),
             wordsSize = sizeOf(choices, WORDS_SIZE, legacy),
             recitation = preferences[RECITATION] ?: "husary",
-            keepAwake = preferences[KEEP_AWAKE] ?: true,
             followReciter = preferences[FOLLOW_RECITER] ?: true,
             playbackSpeed = (preferences[PLAYBACK_SPEED] ?: 1f).coerceIn(MIN_SPEED, MAX_SPEED),
             endOfAudio = storedEnd(preferences),
@@ -311,10 +309,6 @@ class SettingsStore(private val context: Context) {
 
     suspend fun setRecitation(recitation: String) {
         context.settingsStore.edit { it[RECITATION] = recitation }
-    }
-
-    suspend fun setKeepAwake(keep: Boolean) {
-        context.settingsStore.edit { it[KEEP_AWAKE] = keep }
     }
 
     suspend fun setFollowReciter(follow: Boolean) {
@@ -517,7 +511,6 @@ class SettingsStore(private val context: Context) {
         val TAFSIR_SIZE = floatPreferencesKey("tafsir_size")
         val WORDS_SIZE = floatPreferencesKey("words_size")
         val RECITATION = stringPreferencesKey("recitation")
-        val KEEP_AWAKE = booleanPreferencesKey("keep_awake")
         val FOLLOW_RECITER = booleanPreferencesKey("follow_reciter")
         val PLAYBACK_SPEED = floatPreferencesKey("playback_speed")
         /**

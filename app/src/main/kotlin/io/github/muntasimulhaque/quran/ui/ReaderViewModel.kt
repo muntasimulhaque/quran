@@ -562,11 +562,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         setTypeSize(TypeRole.Arabic, steps[next])
     }
 
-    fun setKeepAwake(keep: Boolean) {
-        settings = settings.copy(keepAwake = keep)
-        viewModelScope.launch { settingsStore.setKeepAwake(keep) }
-    }
-
     fun setFollowReciter(follow: Boolean) {
         settings = settings.copy(followReciter = follow)
         viewModelScope.launch { settingsStore.setFollowReciter(follow) }

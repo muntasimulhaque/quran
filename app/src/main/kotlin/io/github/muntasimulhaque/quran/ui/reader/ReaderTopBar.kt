@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -82,15 +83,19 @@ internal fun ReaderTopBar(
             // and its juz sit centered, and Search and
             // Settings close it.
             IconButton(Icon.Browse, stringResource(R.string.action_browse), onBrowse)
-            ReadingTitle(
-                surah = title,
-                detail = detail,
-                action = titleAction,
-                onClick = onTitle,
+            Box(
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 4.dp),
-            )
+                contentAlignment = Alignment.Center,
+            ) {
+                ReadingTitle(
+                    surah = title,
+                    detail = detail,
+                    action = titleAction,
+                    onClick = onTitle,
+                )
+            }
             IconButton(Icon.Search, stringResource(R.string.action_search), onSearch)
             IconButton(Icon.Settings, stringResource(R.string.action_settings), onSettings)
         }

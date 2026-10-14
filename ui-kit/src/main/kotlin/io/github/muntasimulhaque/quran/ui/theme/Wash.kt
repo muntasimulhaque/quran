@@ -19,6 +19,16 @@ package io.github.muntasimulhaque.quran.ui.theme
  * The one wash that is not here is the reciter's: it follows a word being
  * heard rather than a thing being chosen, and it turns over with the theme,
  * so it lives in [PagePalette.highlight], louder than [Match].
+ *
+ * A control's fill has three levels, and the app keeps them apart (owner
+ * decision, this session): the accent at full strength is a selected state
+ * (the tab you are on, a search source turned on, the ayah number you are
+ * at), the accent at [Button] is the reader's own action (Save, Add,
+ * Download, Share image), and the ink at [Door] is a quiet action or an
+ * unselected chip (Cancel, Remove, Share text). The solid level says "you
+ * are here"; the two washes say "you can do this", and the quieter one says
+ * "this is the light or the ending choice". A solid action button would take
+ * the one loud mark away from the selected tab.
  */
 object Wash {
 

@@ -4,6 +4,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +20,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -137,10 +140,25 @@ internal fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit)
     // A chip is a small word around a small mark; the click and the node a
     // screen reader focuses carry the app's 48 dp target, so the source a
     // reader cannot hit is not a source they can turn off (owner decision,
-    // the accessibility test).
+    // the accessibility test). The ripple is drawn on the pill inside the
+    // click node, not on the node itself: an indication left on the click
+    // would flash a rectangle over the shape the reader is looking at (the
+    // same rule TextButton and BrowseTabChip wear).
+    val press = remember { MutableInteractionSource() }
+    val ink = if (on) {
+        MaterialTheme.colorScheme.onPrimary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
     Row(
         modifier = Modifier
-            .toggleable(value = on, role = Role.Checkbox, onValueChange = onChange)
+            .toggleable(
+                value = on,
+                role = Role.Checkbox,
+                interactionSource = press,
+                indication = null,
+                onValueChange = onChange,
+            )
             .minimumInteractiveComponentSize()
             .clip(Radii.Pill)
             .background(
@@ -150,6 +168,7 @@ internal fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit)
                     MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
                 },
             )
+            .indication(press, ripple(color = ink))
             .padding(horizontal = 12.dp, vertical = 9.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -164,11 +183,7 @@ internal fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit)
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = if (on) {
-                MaterialTheme.colorScheme.onPrimary
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            },
+            color = ink,
         )
     }
 }

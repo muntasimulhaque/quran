@@ -1,6 +1,8 @@
 package io.github.muntasimulhaque.quran.ui.playback
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
@@ -10,7 +12,9 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -89,11 +93,26 @@ internal fun ColumnScope.ListeningMenu(
                 speedText(step),
                 stringResource(R.string.playback_speed_label),
             )
+            val press = remember { MutableInteractionSource() }
+            val ink = if (active) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            }
             Box(
                 modifier = Modifier
                     // The choice owns the 48 dp node; the pill inside it keeps
                     // its own shape (owner decision, the accessibility test).
-                    .selectable(selected = active, role = Role.RadioButton) { onSpeed(step) }
+                    // The ripple is drawn on the pill inside the click node,
+                    // not on the node itself: an indication left on the click
+                    // would flash a rectangle over the shape the reader is
+                    // looking at (the same rule TextButton wears).
+                    .selectable(
+                        selected = active,
+                        role = Role.RadioButton,
+                        interactionSource = press,
+                        indication = null,
+                    ) { onSpeed(step) }
                     .minimumInteractiveComponentSize()
                     .clip(Radii.Pill)
                     .background(
@@ -103,6 +122,7 @@ internal fun ColumnScope.ListeningMenu(
                             Color.Transparent
                         },
                     )
+                    .indication(press, ripple(color = ink))
                     .semantics { contentDescription = description },
                 contentAlignment = Alignment.Center,
             ) {

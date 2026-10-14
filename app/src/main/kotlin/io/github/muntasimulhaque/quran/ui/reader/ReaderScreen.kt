@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -132,9 +133,15 @@ fun ReaderScreen(
         touch++
     }
 
-    // Reading with the screen awake is part of reading.
+    // Reading with the screen awake is part of reading, so the app keeps the
+    // screen lit while it stands in front of the reader and gives it back the
+    // moment the reader leaves. The flag belongs to the visible window, so a
+    // recitation carried in the background still lets the screen go dark.
     val view = LocalView.current
-    LaunchedEffect(settings.keepAwake) { view.keepScreenOn = settings.keepAwake }
+    DisposableEffect(view) {
+        view.keepScreenOn = true
+        onDispose { view.keepScreenOn = false }
+    }
 
     // The chrome steps back on its own; a chosen ayah waits for the reader.
     LaunchedEffect(chrome, touch) {
@@ -495,7 +502,6 @@ fun ReaderScreen(
                 },
                 onTheme = { viewModel.setTheme(it) },
                 onTypeSize = { role, step -> viewModel.setTypeSize(role, step) },
-                onKeepAwake = { viewModel.setKeepAwake(it) },
                 onFollowReciter = { viewModel.setFollowReciter(it) },
                 onShowTranslation = { viewModel.setShowTranslation(it) },
                 onShowTafsir = { viewModel.setShowTafsir(it) },

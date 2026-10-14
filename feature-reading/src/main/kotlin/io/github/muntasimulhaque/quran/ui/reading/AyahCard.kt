@@ -351,6 +351,9 @@ fun AyahNoteSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .imePadding()
+                // The gate rides with the scroll, so an upward flick on the
+                // note never bounces the sheet on its top anchor.
+                .sheetVerticalScroll(rememberScrollState())
                 .padding(bottom = 28.dp),
         ) {
             NoteEditor(

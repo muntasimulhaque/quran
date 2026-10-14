@@ -66,7 +66,6 @@ fun SettingsHub(
     recitations: List<Recitation>,
     version: String,
     packSetup: PackSetupState?,
-    onKeepAwake: (Boolean) -> Unit,
     onShowTranslation: (Boolean) -> Unit,
     onShowTafsir: (Boolean) -> Unit,
     onWordByWord: (Boolean) -> Unit,
@@ -106,9 +105,7 @@ fun SettingsHub(
         // reading shows what it names, and the rest of the row opens the list
         // it is chosen from. The switch is the only thing that switches, so a
         // reader who came to look at the translations never changes the reading
-        // by looking (owner report, 2.3). The screen staying awake belongs
-        // here too: it is about the reading in front of the reader and not
-        // about what the app looks like (owner report).
+        // by looking (owner report, 2.3).
         Group(stringResource(R.string.settings_group_reading))
         WordByWordRow(settings, packs, packSetup, onWordByWord)
         ToggleRow(
@@ -128,17 +125,6 @@ fun SettingsHub(
             onOpen = { onOpen(SettingsPage.Tafsirs) },
             openLabel = stringResource(R.string.settings_open_tafsirs),
             switchTag = "switch-tafsir",
-        )
-        // The screen staying awake is one switch with no page behind it, and a
-        // page that held only this one row was a door to a single tap. It says
-        // nothing under its name: the switch is the whole of what it is, and a
-        // line of explanation under a control that already shows its own state
-        // is the sheet talking to itself.
-        ToggleRow(
-            title = stringResource(R.string.settings_keep_awake_title),
-            subtitle = null,
-            checked = settings.keepAwake,
-            onChange = onKeepAwake,
         )
         Group(stringResource(R.string.settings_group_recitation))
         PageRow(

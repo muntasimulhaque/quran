@@ -14,7 +14,6 @@
     <string name="settings_group_recitation">Recitation</string>
     <string name="settings_group_reminder">Reminder</string>
 
-    <string name="settings_keep_awake_title">Keep the screen awake</string>
     <string name="settings_daily_title">Daily ayah</string>
     <string name="settings_daily_subtitle_off">Off, set for %1$s</string>
     <string name="settings_daily_subtitle_on">One ayah a day, at %1$s</string>

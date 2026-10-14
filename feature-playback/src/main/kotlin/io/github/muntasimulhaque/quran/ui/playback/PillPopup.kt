@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -22,6 +21,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
+import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /**
@@ -81,7 +81,7 @@ internal fun PillPopup(
                 .clip(Radii.Popup)
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                 .testTag("pill-popup")
-                .verticalScroll(rememberScrollState()),
+                .sheetVerticalScroll(rememberScrollState()),
             content = content,
         )
     }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -19,6 +20,7 @@ import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
+import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 
 /**
  * A footnote the reader opened, with the ayah it belongs to and the size of
@@ -69,6 +71,9 @@ internal fun FootnoteSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .imePadding()
+                // The gate rides with the scroll, so an upward flick on a
+                // short footnote never bounces the sheet on its top anchor.
+                .sheetVerticalScroll(rememberScrollState())
                 .padding(start = Space.Gutter, end = Space.Gutter, bottom = 34.dp),
         ) {
             Text(

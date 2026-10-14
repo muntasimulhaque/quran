@@ -10,9 +10,10 @@ import androidx.compose.ui.unit.dp
  * height and not a dp.
  *
  * The steps are the app's one shape scale: the pill is the control, the card
- * is a block inside the page, the title is the small shape a word answers a
- * tap inside, the sheet is a page over the reading, and the popup is the one
- * surface that hangs from another control.
+ * is a block inside the page, the sheet is a page over the reading, and the
+ * popup is the one surface that hangs from another control. A title that
+ * answers a tap is a control, so it wears the pill and never a shape of its
+ * own (owner decision, this session).
  */
 object Radii {
 
@@ -21,9 +22,6 @@ object Radii {
 
     /** The reading's own blocks: an ayah, a door, an add row. */
     val Card = RoundedCornerShape(14.dp)
-
-    /** The small shape a title or a mark answers a tap inside. */
-    val Title = RoundedCornerShape(12.dp)
 
     /** A sheet's card, a welcome tile. */
     val Sheet = RoundedCornerShape(18.dp)

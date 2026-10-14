@@ -3,6 +3,8 @@ package io.github.muntasimulhaque.quran.ui.reader
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -11,7 +13,9 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -352,13 +356,27 @@ fun TextAction(
     active: Boolean = false,
     state: String? = null,
 ) {
+    // The click owns the 48 dp node; the mark and its word sit inside it
+    // (owner decision, the accessibility test). The ripple is drawn on the
+    // card inside the click node, not on the node itself: an indication left
+    // on the click would flash a rectangle over the shape the reader is
+    // looking at (the same rule TextButton wears).
+    val press = remember { MutableInteractionSource() }
+    val ink = if (active) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
     Column(
         modifier = Modifier
-            // The click owns the 48 dp node; the mark and its word sit inside
-            // it (owner decision, the accessibility test).
-            .clickable(onClick = onClick)
+            .clickable(
+                interactionSource = press,
+                indication = null,
+                onClick = onClick,
+            )
             .minimumInteractiveComponentSize()
             .clip(Radii.Card)
+            .indication(press, ripple(color = ink))
             .padding(horizontal = 6.dp, vertical = 4.dp)
             .semantics {
                 contentDescription = label
@@ -403,9 +421,13 @@ fun TextAction(
  * must shorten the label, never the name.
  *
  * When [onClick] is given the title answers a tap, which is the way back to
- * the top of a long surah without a scroll. It then wears the rounded shape
- * every other control in the bar wears, and it says what the tap does, so a
- * word that answers a touch never reads as bare type.
+ * the top of a long surah without a scroll. It then wears the app's one
+ * control shape, a capsule, and its own target hugs the words it names
+ * rather than filling the bar's centre: the shape the eye reads and the
+ * node a finger gets are the same size, so a reader who taps the title sees
+ * the boundary of what they tapped (owner decision, this session). The
+ * capsule carries no fill, so the surah's name still reads as a label at
+ * rest, and the shape is only the press.
  */
 @Composable
 fun ReadingTitle(
@@ -440,7 +462,7 @@ fun ReadingTitle(
         modifier = modifier.then(
             if (onClick != null) {
                 Modifier
-                    .clip(Radii.Title)
+                    .clip(Radii.Pill)
                     .clickable(role = Role.Button, onClick = onClick)
                     // The surah's own name and its juz are the node's text and
                     // stay what a screen reader reads first; the tap is said
@@ -468,16 +490,22 @@ fun ReadingTitle(
         val label = measurables.getOrNull(1)
             ?.measure(Constraints())
             ?.takeIf { name.width + gap + it.width <= constraints.maxWidth }
-        // The name and its part are one unit, so they are centered as one;
-        // when the label cannot fit beside the whole name, the name alone
-        // takes the center. The unit is also a control when it answers a
-        // tap, and a control owes the finger 48 dp: the type is shorter
-        // than that, so the box is grown and the lines are centered in it
-        // (owner report, the accessibility test).
+        // The name and its part are one unit, and the unit is the shape: the
+        // box reports what the words measure rather than the bar's whole
+        // centre, so the capsule the reader sees on a tap is exactly the
+        // words they tapped. The unit is a control when it answers a tap, and
+        // a control owes the finger 48 dp: the type is shorter and narrower
+        // than that, so the box is grown to the floor and the lines are
+        // centered in it (owner report, the accessibility test). The row that
+        // holds the title centres the unit, so the name stays where the eye
+        // expects it whether it is wide or narrow.
         val contentWidth = name.width + (label?.let { gap + it.width } ?: 0)
-        val start = ((constraints.maxWidth - contentWidth) / 2).coerceAtLeast(0)
+        val width = contentWidth
+            .coerceAtLeast(48.dp.roundToPx())
+            .coerceAtMost(constraints.maxWidth)
+        val start = ((width - contentWidth) / 2).coerceAtLeast(0)
         val height = maxOf(name.height, label?.height ?: 0, 48.dp.roundToPx())
-        layout(constraints.maxWidth, height) {
+        layout(width, height) {
             name.place(start, (height - name.height) / 2)
             label?.place(start + name.width + gap, (height - label.height) / 2)
         }

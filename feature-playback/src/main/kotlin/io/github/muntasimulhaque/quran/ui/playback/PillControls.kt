@@ -2,13 +2,17 @@ package io.github.muntasimulhaque.quran.ui.playback
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -152,13 +156,23 @@ internal enum class Transport { Play, Pause, Next, Previous, Close }
 @Composable
 internal fun TransportButton(kind: Transport, description: String, onClick: () -> Unit) {
     val tint = MaterialTheme.colorScheme.onSurfaceVariant
+    val press = remember { MutableInteractionSource() }
     Box(
         modifier = Modifier
             // The click owns the 48 dp node; the glyph inside it stays 20 dp
-            // (owner decision, the accessibility test).
-            .clickable(onClick = onClick)
+            // (owner decision, the accessibility test). The ripple is drawn
+            // on the pill inside the click node, not on the node itself: an
+            // indication left on the click would flash a rectangle over the
+            // shape the reader is looking at (the same rule TextButton
+            // wears).
+            .clickable(
+                interactionSource = press,
+                indication = null,
+                onClick = onClick,
+            )
             .minimumInteractiveComponentSize()
             .clip(Radii.Pill)
+            .indication(press, ripple(color = tint))
             .semantics {
                 contentDescription = description
                 role = Role.Button
