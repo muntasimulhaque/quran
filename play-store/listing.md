@@ -114,7 +114,7 @@ caption keeps air above the frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is refreshed for 6.9 from capture run 38533038454: all three legs green with eight frames each, and every frame compared with the previous set by `cmp`. The search frames carry the Search in door with its turning chevron, every settings frame reads Reciter in the singular, and the two tablet settings frames also carry the About row reading Version 6.9; every other frame differs only in the emulator's clock, the search field's caret, and a handful of antialiasing pixels at the surah title, so the set is installed whole.
+The set is refreshed for 7.1 from capture run 38581154260: all three legs green with eight frames each, and every frame compared with the previous set by `cmp`. Nine frames are byte-identical to 7.0 (the reading, the chrome, and the surah opening on every leg); the fifteen that changed carry the named chevrons on the search door, the ayah card, and the tafsir door, and the two tablet settings frames also carry the About row reading Version 7.1. Every changed frame was read, and the set is installed whole.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
