@@ -57,6 +57,17 @@ internal val ChevronRoom = 18.dp
 internal val ReciterChevronRoom = 16.dp
 
 /**
+ * The room a popup's own rows keep from its edge.
+ *
+ * The popup's corner is 20 dp, so a choice row left at its old 6 dp sat hard
+ * against the curve and the press highlight read as touching the menu it
+ * hangs in (owner report, this session). Ten dp keeps the row's highlight off
+ * the curve, and it also stands the row's leading mark on the app's own 22 dp
+ * gutter, because the row adds its own 12 dp inside.
+ */
+internal val PillMenuGutter = 10.dp
+
+/**
  * The measure of a popup the pill opens, and of the anchor it hangs from.
  *
  * Both numbers are the same on purpose: a menu takes its own left edge from

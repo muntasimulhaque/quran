@@ -45,6 +45,12 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
 internal fun BottomStack(
     viewModel: ReaderViewModel,
     playback: PlaybackUiState,
+    /**
+     * Whether the playback pill is on the page at all. A pill that is not
+     * playing can be put away by a tap on the page, and the stack is where
+     * that answers (owner decision, this session).
+     */
+    showPlayback: Boolean,
     saved: List<SavedAyah>,
     selected: Ayah?,
     onPlay: (Ayah) -> Unit,
@@ -148,7 +154,7 @@ internal fun BottomStack(
         }
 
         val offer = viewModel.listenOffer
-        if (playback.isAnything() || offer != null) {
+        if (showPlayback) {
             val pendingSurahName = playback.pendingDownloadSurah?.let { surah ->
                 viewModel.surahs.firstOrNull { it.number == surah }?.nameSimple
                     ?: stringResource(R.string.surah_fallback_name, surah)

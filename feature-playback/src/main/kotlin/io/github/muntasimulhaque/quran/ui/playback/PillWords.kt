@@ -1,6 +1,8 @@
 package io.github.muntasimulhaque.quran.ui.playback
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -8,7 +10,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -81,7 +85,9 @@ internal fun PlaybackWordsLine(
  *
  * The door carries the app's 48 dp target around its own line, so the thin
  * strip of type and its chevron are not the whole of what a finger has to
- * hit (owner decision, this session).
+ * hit, while the pill the eye sees is the line plus the app's own chip inset
+ * and never the target (owner decision, this session: with the clip outside
+ * the target, the press highlight read as a 48 dp capsule over a 16 dp word).
  *
  * Null where the choice cannot be made now, which is while a package is on
  * its way: the chevron is gone rather than a door that does nothing.
@@ -91,19 +97,35 @@ private fun ReciterDoor(
     name: String,
     onOpen: (() -> Unit)?,
 ) {
+    val press = remember { MutableInteractionSource() }
     Row(
         modifier = Modifier
-            .clip(Radii.Pill)
             .then(
                 if (onOpen == null) {
                     Modifier
                 } else {
                     Modifier
-                        .clickable(role = Role.Button, onClick = onOpen)
+                        .clickable(
+                            interactionSource = press,
+                            indication = null,
+                            role = Role.Button,
+                            onClick = onOpen,
+                        )
                         .minimumInteractiveComponentSize()
                 },
             )
-            .padding(horizontal = 4.dp, vertical = 2.dp)
+            .clip(Radii.Pill)
+            .then(
+                if (onOpen == null) {
+                    Modifier
+                } else {
+                    Modifier.indication(
+                        press,
+                        ripple(color = MaterialTheme.colorScheme.primary),
+                    )
+                },
+            )
+            .padding(horizontal = 4.dp, vertical = 8.dp)
             .testTag("playback-reciter")
             .semantics { contentDescription = name },
         verticalAlignment = Alignment.CenterVertically,
@@ -154,12 +176,19 @@ private fun PlaybackStatusLine(
         )
         return
     }
+    val press = remember { MutableInteractionSource() }
     Row(
         modifier = Modifier
-            .clip(Radii.Pill)
-            .clickable(role = Role.Button, onClick = onOpen)
+            .clickable(
+                interactionSource = press,
+                indication = null,
+                role = Role.Button,
+                onClick = onOpen,
+            )
             .minimumInteractiveComponentSize()
-            .padding(end = 2.dp)
+            .clip(Radii.Pill)
+            .indication(press, ripple(color = MaterialTheme.colorScheme.onSurfaceVariant))
+            .padding(horizontal = 4.dp, vertical = 8.dp)
             .testTag("playback-listening")
             .semantics { contentDescription = text },
         verticalAlignment = Alignment.CenterVertically,

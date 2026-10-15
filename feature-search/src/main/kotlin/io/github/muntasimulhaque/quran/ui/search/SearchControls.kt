@@ -84,6 +84,7 @@ internal fun FilterRow(
     }
     val expanded = stringResource(R.string.search_filter_state_expanded)
     val collapsed = stringResource(R.string.search_filter_state_collapsed)
+    val press = remember { MutableInteractionSource() }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -97,9 +98,21 @@ internal fun FilterRow(
         // ripple (owner decision, this session).
         Row(
             modifier = Modifier
-                .clip(Radii.Pill)
-                .clickable(role = Role.Button, onClick = { open = !open })
+                // The door is built the way every other shape in the app is:
+                // the click owns the 48 dp target, and the fill and the ripple
+                // are drawn on the pill inside it, the chip's own 8 dp around
+                // the label's 16 dp line. Left the other way round the clip
+                // wrapped the whole target, so the highlight read as a 48 dp
+                // slab over a chip-sized row (owner report, this session).
+                .clickable(
+                    interactionSource = press,
+                    indication = null,
+                    role = Role.Button,
+                    onClick = { open = !open },
+                )
                 .minimumInteractiveComponentSize()
+                .clip(Radii.Pill)
+                .indication(press, ripple(color = MaterialTheme.colorScheme.onSurfaceVariant))
                 .semantics {
                     stateDescription = if (open) expanded else collapsed
                 }
@@ -135,7 +148,13 @@ internal fun FilterRow(
                     .fillMaxWidth()
                     .padding(top = Space.Line),
                 horizontalArrangement = Arrangement.spacedBy(Space.Line),
-                verticalArrangement = Arrangement.spacedBy(Space.Line),
+                // A chip is a 32 dp pill inside a 48 dp target, so the row gap
+                // the eye reads is this spacing plus the 8 dp of target above
+                // and below each pill. The flow's own 8 dp made that gap 24 dp
+                // against the columns' 8 dp (owner report); 0 here leaves a
+                // 16 dp block break between rows while the chips keep the
+                // 32 dp size the owner chose.
+                verticalArrangement = Arrangement.spacedBy(0.dp),
             ) {
                 FilterChip(stringResource(R.string.search_filter_text), sources.text) {
                     onChange(sources.copy(text = it))

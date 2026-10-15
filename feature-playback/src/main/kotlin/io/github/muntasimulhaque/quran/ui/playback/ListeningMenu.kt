@@ -7,7 +7,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -18,7 +17,7 @@ import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.SpeedSteps
 import io.github.muntasimulhaque.quran.ui.kit.StepRow
 import io.github.muntasimulhaque.quran.ui.kit.speedText
-import io.github.muntasimulhaque.quran.ui.theme.Radii
+import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
  * The pace, and what happens at the end of the audio, as the list the pill
@@ -58,7 +57,7 @@ internal fun ColumnScope.ListeningMenu(
         text = stringResource(R.string.playback_speed_label),
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 6.dp),
+        modifier = Modifier.padding(start = Space.Gutter, top = 12.dp, end = 16.dp, bottom = 6.dp),
     )
     // One row, five paces, the chosen one filled: the app's own step row, the
     // same the text sizes wear, so one control is learned once. It stands
@@ -99,7 +98,7 @@ internal fun ColumnScope.ListeningMenu(
         text = stringResource(R.string.playback_end_label),
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(start = 16.dp, top = 14.dp, end = 16.dp, bottom = 6.dp),
+        modifier = Modifier.padding(start = Space.Gutter, top = 14.dp, end = 16.dp, bottom = 6.dp),
     )
     // When the ayah ends: the normal continuation, saying it again, and the
     // stop, in the pill the reader is already holding.
@@ -159,10 +158,8 @@ private fun EndChoice(
         selected = chosen == choice,
         radio = true,
         onClick = { onEndOfAudio(choice) },
-        // The pill's own cloth: the row clips into the popup's rounded shape,
-        // so the ripple cannot draw a square corner over the menu's curve.
-        modifier = Modifier
-            .padding(horizontal = 6.dp)
-            .clip(Radii.Card),
+        // The menu's own gutter: the row's capsule highlight keeps clear of
+        // the popup's 20 dp curve (owner report, this session).
+        modifier = Modifier.padding(horizontal = PillMenuGutter),
     )
 }

@@ -3,14 +3,11 @@ package io.github.muntasimulhaque.quran.ui.playback
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
-import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /**
  * The reciters, as the list both the playing pill and the download offer
@@ -49,11 +46,10 @@ internal fun ReciterChoices(
             selected = option.reciter == selected,
             radio = true,
             onClick = { onChoose(option.reciter) },
-            // The pill's own cloth, as the listening menu wears it: the row
-            // clips into the popup's rounded shape.
-            modifier = Modifier
-                .padding(horizontal = 6.dp)
-                .clip(Radii.Card),
+            // The pill's own cloth, and the menu's own gutter: the row's
+            // capsule highlight keeps clear of the popup's 20 dp curve
+            // (owner report, this session).
+            modifier = Modifier.padding(horizontal = PillMenuGutter),
         )
     }
 }

@@ -261,8 +261,13 @@ fun BrowseSheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 16.dp, end = 16.dp, top = Space.Block),
+                    // A tab is the same 32 dp chip inside a 48 dp target, so
+                    // the flow's own 8 dp would leave 24 dp between wrapped
+                    // rows against 8 dp between columns. 0 here keeps the two
+                    // ends of a wrap at the same rhythm the search filters
+                    // wear (owner report, this session).
                     horizontalArrangement = Arrangement.spacedBy(Space.Line, Alignment.CenterHorizontally),
-                    verticalArrangement = Arrangement.spacedBy(Space.Line),
+                    verticalArrangement = Arrangement.spacedBy(0.dp),
                 ) {
                     BrowseTab.entries.forEach { entry ->
                         BrowseTabChip(

@@ -1,6 +1,8 @@
 package io.github.muntasimulhaque.quran.ui.kit
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,9 +13,12 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
@@ -22,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
+import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /**
  * One thing a reader chooses from a list: the app's one selectable row,
@@ -47,7 +53,11 @@ import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
  * and the same list in the playback pill's menu cannot drift: a 22 dp mark,
  * 16 dp from it to the name, 12 dp above the row and 12 below it
  * ([bottomPadding] closes the foot of a row that has a block under it), and
- * the 48 dp minimum target every row owes a finger. The action slot is drawn
+ * the 48 dp minimum target every row owes a finger. The ripple is drawn on
+ * the capsule inside that target, so a row that answers a tap wears the same
+ * shape the chips and the doors wear, wherever it stands (owner decision,
+ * this session: the row's press was a rectangle while the app's other
+ * controls were capsules). The action slot is drawn
  * only where a row has an action, so a row that is only a mark and a name
  * keeps its whole width for the name. An unselected ring is a control
  * boundary, so it holds the 3:1 a control owes: 0.6 of the accent was
@@ -69,17 +79,25 @@ fun ChoiceRow(
     /** The room under the row; a row with a block beneath it keeps less. */
     bottomPadding: Dp = 12.dp,
 ) {
+    val press = remember { MutableInteractionSource() }
     Row(
         modifier = modifier
             .fillMaxWidth()
             .selectable(
                 selected = selected,
                 role = if (radio) Role.RadioButton else Role.Checkbox,
+                interactionSource = press,
+                indication = null,
                 onClick = onClick,
             )
             // Inside the selectable, so the target the finger gets is the full
             // 48 dp the minimum holds and not the text's own shorter box.
             .minimumInteractiveComponentSize()
+            // The ripple is drawn on the capsule inside the target, not on the
+            // target itself: one shape for anything that answers a tap, so a
+            // settings list and the pill's own menu cannot disagree.
+            .clip(Radii.Pill)
+            .indication(press, ripple())
             .padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = bottomPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {

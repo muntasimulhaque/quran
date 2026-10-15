@@ -116,12 +116,41 @@ fun ReaderScreen(
     // set once they asked for the picture. One holder rather than two, so a
     // second tap can never leave a stray sheet behind the capture.
     var sharing by remember { mutableStateOf<ShareRequest?>(null) }
+    // The pill the reader put away with a page tap while nothing played. It is
+    // not a stop, and the effect below brings the pill back the moment the
+    // audio speaks again (owner decision, this session).
+    var playbackHidden by rememberSaveable { mutableStateOf(false) }
 
     // The wash under an ayah: the one the tap chose, or the one whose
     // note is open over it. A note opened from Browse has no pill behind it,
     // but the reader is still looking at the ayah the note belongs to, so it
     // wears the same mark while the sheet is up.
     val washedAyah = selected?.number ?: cardNote
+
+    // The transport pill, paused or parked at an ayah's end. This is the one
+    // pill a page tap is allowed to put away: it is not playing, so it is not
+    // the only way to stop anything, and the reader's tap is the dismissal the
+    // app's raised controls already answer to. It comes back when the
+    // recitation starts, resumes, or turns into a package or a failure. While
+    // sound is coming out, a page tap never hides the only transport.
+    val pausedTransport = playback.ayahNumber != null &&
+        !playback.isPlaying &&
+        playback.pendingDownloadSurah == null &&
+        playback.downloadProgress == null &&
+        !playback.error &&
+        !playback.downloadFailed &&
+        !playback.unavailable
+    LaunchedEffect(
+        playback.isPlaying,
+        playback.ayahNumber,
+        playback.pendingDownloadSurah,
+        playback.downloadProgress,
+        playback.error,
+        playback.downloadFailed,
+        playback.unavailable,
+    ) {
+        if (!pausedTransport) playbackHidden = false
+    }
 
     // The phone's back button dismisses the ayah pill first, and only closes
     // the app when nothing is raised. A reader who tapped an ayah means the
@@ -234,6 +263,10 @@ fun ReaderScreen(
                     onBackgroundTap = {
                         chrome = !chrome
                         selected = null
+                        // A tap on the page is how a raised control is put
+                        // away. It may dismiss a pill that is not playing;
+                        // it must never silence the one that is.
+                        if (pausedTransport) playbackHidden = true
                         touch++
                     },
                     onScrolled = {
@@ -330,7 +363,10 @@ fun ReaderScreen(
             }
         }
 
-        val bottomItems = selected != null || playback.isAnything() || viewModel.listenOffer != null
+        val offer = viewModel.listenOffer
+        val showPlayback = (playback.isAnything() && !(playbackHidden && pausedTransport)) ||
+            offer != null
+        val bottomItems = selected != null || showPlayback
         AnimatedVisibility(
             visible = bottomItems,
             // A reader who asked the phone to reduce motion gets the appearance
@@ -343,6 +379,7 @@ fun ReaderScreen(
             BottomStack(
                 viewModel = viewModel,
                 playback = playback,
+                showPlayback = showPlayback,
                 saved = saved,
                 selected = selected,
                 onPlay = { ayah ->

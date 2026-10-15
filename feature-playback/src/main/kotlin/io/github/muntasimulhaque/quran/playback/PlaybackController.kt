@@ -84,6 +84,15 @@ class PlaybackController(
     private var speed = 1f
     private var end = EndOfAudio.CONTINUE_AYAH
 
+    /**
+     * True while the reader's Stop after this ayah has parked the player at
+     * the end of the item. A pause at the end is not [Player.STATE_ENDED], so
+     * the player keeps its current item and would light the last ayah again on
+     * the next event. This flag is what keeps the mark released and the pill
+     * away until the reader asks for the audio back (owner decision).
+     */
+    private var stoppedAtAyahEnd = false
+
     private val _state = MutableStateFlow(PlaybackUiState())
     val state: StateFlow<PlaybackUiState> = _state.asStateFlow()
 
@@ -96,6 +105,9 @@ class PlaybackController(
 
     suspend fun play(recitation: String, ayahNumber: Int, resume: Boolean = true) {
         val database = content ?: return
+        // A fresh play is the reader asking for the audio back, so the end
+        // that Stop after this ayah reached is behind them now.
+        stoppedAtAyahEnd = false
         val ayah = withContext(Dispatchers.IO) {
             database.ayah(ayahNumber)
         } ?: return
@@ -336,6 +348,7 @@ class PlaybackController(
 
     fun toggle() {
         val player = controller ?: return
+        stoppedAtAyahEnd = false
         if (player.isPlaying) player.pause() else player.play()
     }
 
@@ -392,10 +405,12 @@ class PlaybackController(
     }
 
     fun next() {
+        stoppedAtAyahEnd = false
         controller?.seekToNextMediaItem()
     }
 
     fun previous() {
+        stoppedAtAyahEnd = false
         controller?.seekToPreviousMediaItem()
     }
 
@@ -403,6 +418,7 @@ class PlaybackController(
         val player = controller ?: return
         player.stop()
         player.clearMediaItems()
+        stoppedAtAyahEnd = false
         _state.value = PlaybackUiState(connected = true)
         // The reader put the recitation away themselves, so where it was
         // heard is not a place to offer them again.
@@ -490,6 +506,31 @@ class PlaybackController(
             syncTicker()
         }
 
+        /**
+         * A pause at the end of the item is the reader's Stop after this ayah
+         * arriving, not a pause: the audio is over, so the recited mark is
+         * released the way it is when a surah ends, and the pill has nothing
+         * left to control. The reason is what tells the two apart; a manual
+         * pause is [Player.PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST] and
+         * keeps its place and its transport (owner decision).
+         */
+        override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+            if (playWhenReady) {
+                stoppedAtAyahEnd = false
+                return
+            }
+            if (reason != Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM) return
+            stoppedAtAyahEnd = true
+            _state.value = _state.value.copy(
+                isPlaying = false,
+                ayahNumber = null,
+                wordPosition = null,
+            )
+            heardAyah = null
+            syncTicker()
+            scope.launch { positionStore.clear() }
+        }
+
         override fun onPlaybackStateChanged(playbackState: Int) {
             if (playbackState != Player.STATE_ENDED) return
             val player = controller
@@ -551,6 +592,11 @@ class PlaybackController(
         // would light the final ayah as if it were being recited. When the
         // surah is over the state says so itself, with no ayah marked.
         if (player.playbackState == Player.STATE_ENDED) return
+        // A stop after this ayah parks the player at the end of its item
+        // rather than ending it, so the item is still current and a later
+        // event would light the ayah again. The mark stays released until the
+        // reader asks for the audio back (owner decision).
+        if (stoppedAtAyahEnd && !player.playWhenReady) return
         val id = player.currentMediaItem?.mediaId ?: return
         val ayahNumber = RecitationPlaylist.ayahOf(id) ?: return
         val surah = RecitationPlaylist.surahOf(id)
