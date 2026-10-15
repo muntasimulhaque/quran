@@ -29,6 +29,25 @@ import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 
+/** The room the capsule keeps from the row's own edge, so stacked rows read
+ * as a list and the first and last stay clear of the sheet. */
+private val CapsuleGutter = 6.dp
+
+/** The capsule's own vertical inset: the chip's own 8 dp. */
+private val CapsulePad = 8.dp
+
+/** The room from the row's edge to the capsule: 10 plus the row's own 12
+ * stands the mark on the app's 22 dp gutter. */
+private val RowGutter = 10.dp
+
+/**
+ * Where the name of a choice row begins, from the row's own edge: the gutter,
+ * the row's own inset, the mark, and the gap to the name. A block that lives
+ * under a choice row (a reciter's own surahs) starts on this line, so it
+ * reads as belonging to the name above it.
+ */
+val ChoiceRowNameInset = RowGutter + 12.dp + 22.dp + 16.dp
+
 /**
  * One thing a reader chooses from a list: the app's one selectable row,
  * wherever the choice appears.
@@ -51,13 +70,17 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  *
  * The measurements are the app's one rhythm, so a list in the settings sheet
  * and the same list in the playback pill's menu cannot drift: a 22 dp mark,
- * 16 dp from it to the name, 12 dp above the row and 12 below it
- * ([bottomPadding] closes the foot of a row that has a block under it), and
- * the 48 dp minimum target every row owes a finger. The ripple is drawn on
- * the capsule inside that target, so a row that answers a tap wears the same
- * shape the chips and the doors wear, wherever it stands (owner decision,
- * this session: the row's press was a rectangle while the app's other
- * controls were capsules). The action slot is drawn
+ * 16 dp from it to the name, an 8 dp inset for the capsule the reader
+ * presses, and the 48 dp minimum target every row owes a finger. The capsule
+ * keeps a 6 dp gutter from the row's own edge and the row's own 22 dp gutter
+ * from the sheet, so stacked rows read as a list and the first and last
+ * capsules never meet the sheet they stand on (owner report, this session:
+ * the capsule had carried the row's own room and met the popup's edge).
+ * [bottomPadding] closes the foot of a row that has a block under it. The
+ * ripple is drawn on the capsule inside that target, so a row that answers a
+ * tap wears the same shape the chips and the doors wear, wherever it stands
+ * (owner decision, this session: the row's press was a rectangle while the
+ * app's other controls were capsules). The action slot is drawn
  * only where a row has an action, so a row that is only a mark and a name
  * keeps its whole width for the name. An unselected ring is a control
  * boundary, so it holds the 3:1 a control owes: 0.6 of the accent was
@@ -93,12 +116,28 @@ fun ChoiceRow(
             // Inside the selectable, so the target the finger gets is the full
             // 48 dp the minimum holds and not the text's own shorter box.
             .minimumInteractiveComponentSize()
+            // The gutter the capsule keeps from the row's own edge: the click
+            // target still owns the whole row, and only the shape the eye
+            // sees is inset, so stacked rows read as a list and the first and
+            // last capsules stay clear of the sheet (owner report, this
+            // session).
+            .padding(
+                start = RowGutter,
+                end = RowGutter,
+                top = CapsuleGutter,
+                bottom = (bottomPadding - CapsulePad).coerceAtLeast(0.dp),
+            )
             // The ripple is drawn on the capsule inside the target, not on the
             // target itself: one shape for anything that answers a tap, so a
             // settings list and the pill's own menu cannot disagree.
             .clip(Radii.Pill)
             .indication(press, ripple())
-            .padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = bottomPadding),
+            .padding(
+                start = 12.dp,
+                end = 12.dp,
+                top = CapsulePad,
+                bottom = CapsulePad,
+            ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         ChoiceMark(selected = selected, radio = radio)

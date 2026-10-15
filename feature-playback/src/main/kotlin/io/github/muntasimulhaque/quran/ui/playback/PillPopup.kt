@@ -3,6 +3,7 @@ package io.github.muntasimulhaque.quran.ui.playback
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
@@ -47,8 +48,11 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * standing on the capsule's own edge met the capsule's curve with nothing
  * between (owner report). The popup takes no taller a measure than the
  * ground above the gap, so the ground is kept on a window too short for the
- * content, and what does not fit scrolls inside it (owner decision). A tap
- * outside puts it away, as a dropdown's does.
+ * content, and what does not fit scrolls inside it (owner decision). The
+ * content keeps [PillMenuGutter] of the popup's own room at the top and the
+ * foot, so the first and last rows' capsules stay clear of the popup's curve
+ * (owner report, this session: the first and last capsules met the edge). A
+ * tap outside puts it away, as a dropdown's does.
  */
 @Composable
 internal fun PillPopup(
@@ -80,6 +84,10 @@ internal fun PillPopup(
                 .floatingLift(Radii.Popup)
                 .clip(Radii.Popup)
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                // The first and last rows keep the popup's own gutter, so
+                // their capsules stand clear of the curve above and below
+                // them (owner report, this session).
+                .padding(vertical = PillMenuGutter)
                 .testTag("pill-popup")
                 .sheetVerticalScroll(rememberScrollState()),
             content = content,

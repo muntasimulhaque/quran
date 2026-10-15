@@ -1,7 +1,6 @@
 package io.github.muntasimulhaque.quran.ui.search
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,7 +32,9 @@ import io.github.muntasimulhaque.quran.data.SearchArabicLine
 import io.github.muntasimulhaque.quran.data.arabicLineFor
 import io.github.muntasimulhaque.quran.data.shouldShowWordMeaning
 import io.github.muntasimulhaque.quran.feature.search.R
+import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.rich.HighlightedText
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -55,8 +56,8 @@ internal fun ReferenceRow(ayah: Ayah, onAyah: (Ayah) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onAyah(ayah) }
-            .padding(horizontal = 22.dp, vertical = 16.dp),
+            .sheetRow(onClick = { onAyah(ayah) })
+            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
@@ -89,8 +90,8 @@ internal fun SurahRow(surah: Surah, onSurah: (Surah) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onSurah(surah) }
-            .padding(horizontal = 22.dp, vertical = 14.dp),
+            .sheetRow(onClick = { onSurah(surah) })
+            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
@@ -134,8 +135,8 @@ internal fun AyahRow(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onAyah(hit.ayah) }
-            .padding(horizontal = 22.dp, vertical = 14.dp),
+            .sheetRow(onClick = { onAyah(hit.ayah) })
+            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = 14.dp),
     ) {
         Text(
             text = "${hit.ayah.verseKey}",
@@ -231,8 +232,8 @@ internal fun TafsirRow(hit: SearchHit.TafsirHitResult, onAyah: (Ayah) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onAyah(hit.ayah) }
-            .padding(horizontal = 22.dp, vertical = 14.dp),
+            .sheetRow(onClick = { onAyah(hit.ayah) })
+            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = 14.dp),
     ) {
         Text(
             text = stringResource(

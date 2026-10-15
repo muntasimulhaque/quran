@@ -1,6 +1,5 @@
 package io.github.muntasimulhaque.quran.ui.browse
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,7 +26,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.browse.R
+import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
+import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
+import io.github.muntasimulhaque.quran.ui.theme.Space
 import java.util.Locale
 
 /**
@@ -159,8 +161,8 @@ internal fun SurahRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 22.dp, vertical = 11.dp)
+            .sheetRow(onClick = onClick)
+            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = 11.dp)
             .testTag("surah-row-${surah.number}"),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -191,8 +193,8 @@ internal fun JuzRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onJuz)
-            .padding(horizontal = 22.dp, vertical = 13.dp)
+            .sheetRow(onClick = onJuz)
+            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = 13.dp)
             .testTag("juz-row-$juz"),
         verticalAlignment = Alignment.CenterVertically,
     ) {

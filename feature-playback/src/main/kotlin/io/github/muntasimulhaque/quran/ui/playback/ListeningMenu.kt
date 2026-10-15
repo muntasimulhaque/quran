@@ -158,8 +158,5 @@ private fun EndChoice(
         selected = chosen == choice,
         radio = true,
         onClick = { onEndOfAudio(choice) },
-        // The menu's own gutter: the row's capsule highlight keeps clear of
-        // the popup's 20 dp curve (owner report, this session).
-        modifier = Modifier.padding(horizontal = PillMenuGutter),
     )
 }

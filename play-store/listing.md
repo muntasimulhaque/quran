@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 7.3 (versionCode 75)
+Version: 7.4 (versionCode 76)
 
 ## Listing
 
@@ -136,8 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (7.3, 319 characters)
-Listening ends more cleanly now. When you choose Stop after this ayah, the player and the ayah's mark leave once the ayah finishes, and a tap on the page also puts a paused player away. The search filters keep closer rows, and the highlights on Search in, the player's menus, and the settings lists now share one shape.
+## Release notes (7.4, 251 characters)
+The highlights are calmer now. In the reciter chooser and the When the audio ends list, the pressed row no longer runs to the edge of the menu, and the settings and other list rows wear one rounded highlight that stays clear of the sheet it stands on.
 
 ## Before each release
 

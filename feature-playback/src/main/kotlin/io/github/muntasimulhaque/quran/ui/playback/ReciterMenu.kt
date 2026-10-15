@@ -1,8 +1,6 @@
 package io.github.muntasimulhaque.quran.ui.playback
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.ListenOption
@@ -23,10 +21,10 @@ import io.github.muntasimulhaque.quran.ui.kit.formatBytes
  * the price in view rather than by trying it (owner decision, forty-eighth
  * session).
  *
- * The rows are drawn at the pill's own [PillMenuMeasure], which is also the
- * measure of the anchor the playing pill hangs them from, so the list stands
- * on the capsule's centre rather than beside the word that opened it (owner
- * report).
+ * The rows fill the popup, which is drawn at the pill's own
+ * [PillMenuMeasure], also the measure of the anchor the playing pill hangs it
+ * from, so the list stands on the capsule's centre rather than beside the
+ * word that opened it (owner report).
  */
 @Composable
 internal fun ReciterChoices(
@@ -46,10 +44,6 @@ internal fun ReciterChoices(
             selected = option.reciter == selected,
             radio = true,
             onClick = { onChoose(option.reciter) },
-            // The pill's own cloth, and the menu's own gutter: the row's
-            // capsule highlight keeps clear of the popup's 20 dp curve
-            // (owner report, this session).
-            modifier = Modifier.padding(horizontal = PillMenuGutter),
         )
     }
 }

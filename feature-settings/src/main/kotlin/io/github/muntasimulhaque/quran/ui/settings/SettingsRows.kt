@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -26,6 +25,9 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.feature.settings.R
+import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
+import io.github.muntasimulhaque.quran.ui.kit.sheetRow
+import io.github.muntasimulhaque.quran.ui.kit.sheetToggleRow
 import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
@@ -290,12 +292,17 @@ fun ToggleRow(
             .fillMaxWidth()
             .then(
                 if (onOpen != null) {
-                    Modifier.clickable(role = Role.Button, onClick = onOpen)
+                    Modifier.sheetRow(onClick = onOpen, role = Role.Button)
                 } else {
-                    Modifier.toggleable(value = checked, role = Role.Switch, onValueChange = onChange)
+                    Modifier.sheetToggleRow(value = checked, onValueChange = onChange)
                 },
             )
-            .padding(start = Space.Gutter, end = 12.dp, top = 12.dp, bottom = 12.dp),
+            .padding(
+                start = Space.Gutter - SheetRowGutter,
+                end = 12.dp - SheetRowGutter,
+                top = 12.dp,
+                bottom = 12.dp,
+            ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // The name and its value keep a clear gap from the switch, the way the

@@ -2,7 +2,6 @@ package io.github.muntasimulhaque.quran.ui.settings
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,9 +32,12 @@ import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.Recitation
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
+import io.github.muntasimulhaque.quran.ui.kit.ChoiceRowNameInset
+import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
+import io.github.muntasimulhaque.quran.ui.kit.formatBytes
+import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
-import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
@@ -134,7 +136,7 @@ private fun ReciterDownloads(
             text = stringResource(R.string.settings_downloaded_empty),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 50.dp, end = Space.Gutter, bottom = Space.Block),
+            modifier = Modifier.padding(start = ChoiceRowNameInset, end = Space.Gutter, bottom = Space.Block),
         )
         return
     }
@@ -168,10 +170,11 @@ private fun ReciterDownloadsDoor(open: Boolean, count: Int, onClick: () -> Unit)
         modifier = Modifier
             .fillMaxWidth()
             // The click owns the 48 dp node, not a wrapper outside it (owner
-            // decision, the accessibility test).
-            .clickable(onClick = onClick)
+            // decision, the accessibility test), and the press is drawn on a
+            // card inset from the sheet's edge.
+            .sheetRow(onClick = onClick)
             .minimumInteractiveComponentSize()
-            .padding(start = 50.dp, end = 12.dp),
+            .padding(start = ChoiceRowNameInset - SheetRowGutter, end = 12.dp - SheetRowGutter),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -201,7 +204,7 @@ private fun DownloadedSurahRow(row: DownloadedSurah, onRemove: () -> Unit) {
             // The row is already as tall as a finger needs, because the
             // Remove action brings its own touch target; the surah names sit
             // close together so the list reads as one block.
-            .padding(start = 50.dp, end = 12.dp),
+            .padding(start = ChoiceRowNameInset, end = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(

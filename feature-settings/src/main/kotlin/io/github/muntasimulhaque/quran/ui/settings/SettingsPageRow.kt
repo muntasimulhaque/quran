@@ -1,6 +1,5 @@
 package io.github.muntasimulhaque.quran.ui.settings
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -9,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
+import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -41,10 +42,16 @@ fun PageRow(
             .fillMaxWidth()
             // The click owns the 48 dp node, so a row without a summary is
             // still a full target to a finger and to a screen reader (owner
-            // decision, the accessibility test).
-            .clickable(onClick = onClick)
+            // decision, the accessibility test), and the press is a card
+            // inset from the sheet's edge.
+            .sheetRow(onClick = onClick)
             .minimumInteractiveComponentSize()
-            .padding(start = Space.Gutter, end = 12.dp, top = 12.dp, bottom = 12.dp),
+            .padding(
+                start = Space.Gutter - SheetRowGutter,
+                end = 12.dp - SheetRowGutter,
+                top = 12.dp,
+                bottom = 12.dp,
+            ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // The name and its value keep the same clear gap from the marks as the
