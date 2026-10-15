@@ -184,6 +184,7 @@ fun SearchSheet(
             )
             FilterRow(
                 sources = sources,
+                hasQuery = queryTerms.isNotEmpty(),
                 hasTranslations = translationPacks.isNotEmpty(),
                 hasTafsirs = tafsirPacks.isNotEmpty(),
                 hasWords = wordsInstalled,
@@ -227,18 +228,3 @@ private fun key(hit: SearchHit): String = when (hit) {
     is SearchHit.AyahHit -> "ayah-${hit.ayah.number}"
     is SearchHit.TafsirHitResult -> "tafsir-${hit.pack}-${hit.surah}-${hit.fromAyah}"
 }
-
-/**
- * The sources a query reads, folded away behind one quiet door.
- *
- * The six chips were a wall over the results on a phone, and a reader who
- * ignores them searches everything, which is what the app means by search.
- * The door says what the search reads in two words, and opens the same chips
- * for the reader who wants to narrow it; the fold is remembered for the
- * sheet's own life, so a reader who opened it once does not open it twice.
- *
- * The chips wrap instead of scrolling sideways. A row that runs off the edge
- * hides its own contents: a reader cannot turn off a source they cannot see.
- * A source the reader does not have is not offered, rather than offered and
- * empty.
- */

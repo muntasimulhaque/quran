@@ -277,9 +277,6 @@ fun ReaderScreen(
                     },
                     onNextSurah = { number -> viewModel.jumpToSurah(number) },
                     onAddContent = { sheet = ReaderSheet.Settings },
-                    // The reader's own pinch steps the Quran's size, on the
-                    // same five steps the settings page shows.
-                    onSizeStep = { delta -> viewModel.stepArabicSize(delta) },
                     onPlaceChanged = { ayah, offset -> viewModel.onReadingSettled(ayah, offset) },
                     startAtOpening = viewModel.startAtSurahOpening == surah.number,
                     onOpeningReached = { viewModel.consumeSurahOpening(surah.number) },

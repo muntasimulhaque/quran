@@ -54,7 +54,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
  * A surah is the unit the Quran itself gives, and readers read it as one:
  * this view ends where the surah ends, instead of sliding into the next one
  * without a word. Tapping an ayah raises its actions; tapping the paper
- * around it brings the chrome, and a two-finger pinch steps the text size.
+ * around it brings the chrome.
  */
 @Composable
 fun ReadingList(
@@ -87,8 +87,6 @@ fun ReadingList(
     onScrolled: () -> Unit,
     onNextSurah: (Int) -> Unit,
     onAddContent: () -> Unit,
-    /** One step of the reader's own text sizes, from a pinch on the page. */
-    onSizeStep: (Int) -> Unit,
     onPlaceChanged: (Int, Int) -> Unit,
     /** True when the reader opened this surah at its top; answered once. */
     startAtOpening: Boolean,
@@ -163,7 +161,6 @@ fun ReadingList(
         onScrolled = onScrolled,
         onNextSurah = onNextSurah,
         onAddContent = onAddContent,
-        onSizeStep = onSizeStep,
         onPlaceChanged = onPlaceChanged,
         startAtOpening = startAtOpening,
         onOpeningReached = onOpeningReached,
@@ -198,7 +195,6 @@ private fun ReadingRows(
     onScrolled: () -> Unit,
     onNextSurah: (Int) -> Unit,
     onAddContent: () -> Unit,
-    onSizeStep: (Int) -> Unit,
     onPlaceChanged: (Int, Int) -> Unit,
     startAtOpening: Boolean,
     onOpeningReached: () -> Unit,
@@ -329,8 +325,7 @@ private fun ReadingRows(
                     // itself belongs to its ayah, and every ayah answers its
                     // own tap.
                     detectTapGestures(onTap = { dismissAbout() })
-                }
-                .readingZoom(onSizeStep),
+                },
             contentPadding = PaddingValues(
                 start = side,
                 end = side,
@@ -402,7 +397,6 @@ private fun ReadingRows(
                     surah = surah,
                     nextSurahName = nextSurahName,
                     onNextSurah = onNextSurah,
-                    onBackgroundTap = dismissAbout,
                 )
             }
         }

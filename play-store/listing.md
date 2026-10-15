@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 7.4 (versionCode 76)
+Version: 7.5 (versionCode 77)
 
 ## Listing
 
@@ -136,8 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (7.4, 251 characters)
-The highlights are calmer now. In the reciter chooser and the When the audio ends list, the pressed row no longer runs to the edge of the menu, and the settings and other list rows wear one rounded highlight that stays clear of the sheet it stands on.
+## Release notes (7.5, 300 characters)
+The end of a surah no longer flashes a rectangle across the Surah complete line and the next-surah card. When a search begins, the source list folds away so the results have the room, and one tap opens it again. Pinching the page no longer changes the text size; the five text sizes live in Settings.
 
 ## Before each release
 

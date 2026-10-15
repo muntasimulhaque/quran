@@ -547,21 +547,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch { settingsStore.setTypeSize(role, value) }
     }
 
-    /**
-     * One step of the reader's own five text sizes, from a pinch on the
-     * reading. The list is the same list the settings page draws, so the
-     * gesture and the page can never disagree about where a size stands.
-     */
-    fun stepArabicSize(delta: Int) {
-        val steps = TextSize.STEPS
-        val current = steps.indexOf(settings.arabicSize)
-            .takeIf { it >= 0 }
-            ?: steps.indexOf(TextSize.DEFAULT)
-        val next = (current + delta).coerceIn(0, steps.lastIndex)
-        if (next == current) return
-        setTypeSize(TypeRole.Arabic, steps[next])
-    }
-
     fun setFollowReciter(follow: Boolean) {
         settings = settings.copy(followReciter = follow)
         viewModelScope.launch { settingsStore.setFollowReciter(follow) }

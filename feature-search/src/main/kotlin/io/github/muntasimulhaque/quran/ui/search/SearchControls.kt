@@ -54,15 +54,39 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
 
+/**
+ * The sources a query reads, folded away behind one quiet door.
+ *
+ * The six chips were a wall over the results on a phone, and a reader who
+ * ignores them searches everything, which is what the app means by search.
+ * The door says what the search reads in two words, and opens the same chips
+ * for the reader who wants to narrow it. The fold is remembered for the
+ * sheet's own life, so a reader who opened it once does not open it twice,
+ * and it folds itself away when a query begins: once the reader is
+ * searching, the results are the page, and the door is one tap away when
+ * they want to narrow.
+ *
+ * The chips wrap instead of scrolling sideways. A row that runs off the edge
+ * hides its own contents: a reader cannot turn off a source they cannot see.
+ * A source the reader does not have is not offered, rather than offered and
+ * empty.
+ */
 @Composable
 internal fun FilterRow(
     sources: SearchSources,
+    /** True while the reader's input is a real query. */
+    hasQuery: Boolean,
     hasTranslations: Boolean,
     hasTafsirs: Boolean,
     hasWords: Boolean,
     onChange: (SearchSources) -> Unit,
 ) {
-    var open by remember { mutableStateOf(false) }
+    // A query folds the source list away: once the reader is searching,
+    // the results are the page, and the door stays one tap away for the
+    // reader who wants to narrow. Keyed on the query becoming real,
+    // not on every keystroke, so a reader who deliberately opened the
+    // list while a query is live can still refine it (owner report).
+    var open by remember(hasQuery) { mutableStateOf(false) }
     // A source the reader does not have is not offered, rather than offered
     // and empty. The word meanings are their own source: the chip follows the
     // word list being on the device, never the translations being on, because

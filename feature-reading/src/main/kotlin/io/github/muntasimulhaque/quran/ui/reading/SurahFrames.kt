@@ -227,14 +227,12 @@ internal fun SurahEnd(
     surah: Surah,
     nextSurahName: String?,
     onNextSurah: (Int) -> Unit,
-    onBackgroundTap: () -> Unit,
 ) {
     val next = surah.number + 1
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 30.dp, bottom = 20.dp)
-            .clickable(onClick = onBackgroundTap),
+            .padding(top = 30.dp, bottom = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box(
