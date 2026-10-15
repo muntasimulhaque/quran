@@ -116,7 +116,7 @@ caption keeps air above the frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is refreshed for 7.3 from capture run 38692569267: all three legs green with eight frames each, and every frame compared with the previous set by `cmp`. Nine frames are byte-identical to 7.2 (the reading, the chrome, and the surah opening on every leg); of the fifteen that changed, the two tablet settings frames carry the About row reading Version 7.3, and the rest differ only in the emulator's own status bar clock, the search field's caret, and a one-pixel edge on the phone ayah card. Every changed frame was read, and the set is installed whole.
+The set is refreshed for 7.4 from capture run 38715227774: all three legs green with eight frames each, and every frame compared with the previous set by `cmp`. Nine frames are byte-identical to 7.3 (the reading, the chrome, and the surah opening on every leg); of the fifteen that changed, the tablet 7 settings frame carries the About row reading Version 7.4, the sheet rows carry the new card inset, and the emulator’s own status bar clock differs on every changed frame. Every changed frame was read, and the set is installed whole.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
