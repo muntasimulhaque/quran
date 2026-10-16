@@ -22,6 +22,7 @@ import io.github.muntasimulhaque.quran.data.RecitationPackage
 import io.github.muntasimulhaque.quran.data.RecitationStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.Surah
+import io.github.muntasimulhaque.quran.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -443,7 +444,8 @@ class ContentLibrary(
             } else {
                 DownloadedSurah(
                     surah = surah,
-                    name = byNumber[surah]?.nameSimple ?: "Surah $surah",
+                    name = byNumber[surah]?.nameSimple
+                        ?: application.getString(R.string.surah_fallback_name, surah),
                     bytes = bytes,
                 )
             }

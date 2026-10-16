@@ -55,9 +55,12 @@ internal fun ColumnScope.ListeningMenu(
     // and the label still stands nearer the paces it names than the top edge.
     Text(
         text = stringResource(R.string.playback_speed_label),
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(start = Space.Gutter, top = 12.dp, end = 16.dp, bottom = 6.dp),
+        // The same label style the settings' step row wears: a control's name
+        // is one voice wherever the control stands (owner decision, the
+        // theme and consistency session).
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.padding(start = Space.Gutter, top = Space.Row, end = Space.Gutter, bottom = Space.Tight),
     )
     // One row, five paces, the chosen one filled: the app's own step row, the
     // same the text sizes wear, so one control is learned once. It stands
@@ -74,7 +77,10 @@ internal fun ColumnScope.ListeningMenu(
         cell = { index, active ->
             Text(
                 text = speedText(SpeedSteps[index]),
-                style = MaterialTheme.typography.labelLarge.copy(fontSize = 12.sp),
+                // The theme's own small label, without a one-off 12 sp
+                // override, so a theme change reaches it (owner decision,
+                // the theme and consistency session).
+                style = MaterialTheme.typography.labelMedium,
                 color = if (active) {
                     MaterialTheme.colorScheme.primary
                 } else {
@@ -96,9 +102,9 @@ internal fun ColumnScope.ListeningMenu(
     )
     Text(
         text = stringResource(R.string.playback_end_label),
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(start = Space.Gutter, top = 14.dp, end = 16.dp, bottom = 6.dp),
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.padding(start = Space.Gutter, top = Space.Row, end = Space.Gutter, bottom = Space.Tight),
     )
     // When the ayah ends: the normal continuation, saying it again, and the
     // stop, in the pill the reader is already holding.

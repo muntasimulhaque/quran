@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -30,6 +30,7 @@ import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.kit.sheetToggleRow
 import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
+import io.github.muntasimulhaque.quran.ui.reader.IconButton
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Radii
@@ -134,7 +135,7 @@ private fun ChevronSlot(
                     .size(GlyphSize.ChevronRow)
                     // The mark says where a tap goes: the chevron points the
                     // way the page slides in, to the right.
-                    .graphicsLayer(rotationZ = -90f)
+                    .rotate(-90f)
                     .testTag("row-chevron"),
             )
         }
@@ -148,30 +149,20 @@ fun PageHeader(title: String, onBack: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 6.dp, end = Space.Gutter, top = 2.dp, bottom = 10.dp),
+            .padding(start = 6.dp, end = Space.Gutter, top = 2.dp, bottom = Space.Line),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(Radii.Pill)
-                .clickable(onClick = onBack)
-                .semantics {
-                    contentDescription = back
-                    role = Role.Button
-                },
-            contentAlignment = Alignment.Center,
-        ) {
-            IconGlyph(
-                icon = Icon.Chevron,
-                tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier
-                    .size(GlyphSize.ChevronNav)
-                    // The chevron opens a page pointing down, so going back
-                    // is the same mark turned to point the way it came.
-                    .graphicsLayer(rotationZ = 90f),
-            )
-        }
+        // One back button for every page head the app draws: the same 48 dp,
+        // the same rotated chevron, the same spoken name. It used to be a
+        // hand-rolled box here and a second copy on the surah grid (owner
+        // decision, the theme and consistency session).
+        IconButton(
+            icon = Icon.Chevron,
+            description = back,
+            onClick = onBack,
+            tint = MaterialTheme.colorScheme.onSurface,
+            rotation = 90f,
+        )
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge,
@@ -299,9 +290,9 @@ fun ToggleRow(
             )
             .padding(
                 start = Space.Gutter - SheetRowGutter,
-                end = 12.dp - SheetRowGutter,
-                top = 12.dp,
-                bottom = 12.dp,
+                end = Space.Row - SheetRowGutter,
+                top = Space.Row,
+                bottom = Space.Row,
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -357,7 +348,7 @@ fun ValueRow(title: String, value: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = Space.Gutter, end = Space.Gutter, top = 12.dp, bottom = 12.dp),
+            .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Row, bottom = Space.Row),
     ) {
         RowName(title = title, value = value)
     }

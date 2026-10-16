@@ -19,12 +19,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.Search
@@ -39,6 +37,7 @@ import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
 import io.github.muntasimulhaque.quran.ui.theme.Reading
+import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -65,6 +64,25 @@ internal const val LIMIT = 200
 private const val SETTLE_MILLIS = 120L
 
 /**
+ * The source flags as six booleans in the saved state: the chips survive the
+ * window with the query they were applied to, so a rotation cannot silently
+ * turn a source back on (owner decision, the theme and consistency session).
+ */
+private val SearchSourcesSaver: Saver<SearchSources, List<Boolean>> = Saver(
+    save = { listOf(it.text, it.surahs, it.references, it.words, it.translations, it.tafsirs) },
+    restore = { flags ->
+        SearchSources(
+            text = flags.getOrElse(0) { true },
+            surahs = flags.getOrElse(1) { true },
+            references = flags.getOrElse(2) { true },
+            words = flags.getOrElse(3) { true },
+            translations = flags.getOrElse(4) { true },
+            tafsirs = flags.getOrElse(5) { true },
+        )
+    },
+)
+
+/**
  * The search sheet: one field, no modes, everything the reader has turned on.
  * Results are computed on a worker thread from index columns, one search per
  * settled query, so the first query and the hundredth cost the same and a new
@@ -85,17 +103,20 @@ fun SearchSheet(
     onAyah: (Ayah) -> Unit,
     onSurah: (Surah) -> Unit,
 ) {
-    val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val focus = remember { FocusRequester() }
-    val hafs = remember {
-        FontFamily(Font(path = "fonts/UthmanicHafs_V22.ttf", assetManager = context.assets))
-    }
+    val hafs = rememberHafs()
 
     var text by rememberSaveable { mutableStateOf("") }
     var results by remember { mutableStateOf(SearchResults()) }
     var searching by remember { mutableStateOf(false) }
-    var sources by remember { mutableStateOf(SearchSources.ALL) }
+    // The source flags survive the window like the query does: a rotation
+    // with a chip turned off must not silently turn it back on and change
+    // the results under the reader (owner decision, the theme and
+    // consistency session).
+    var sources by rememberSaveable(stateSaver = SearchSourcesSaver) {
+        mutableStateOf(SearchSources.ALL)
+    }
     // The result list wears the same drag gate Browse does, so a scroll back
     // to the top can never turn into a pull that closes the sheet.
     val resultsList = rememberLazyListState()

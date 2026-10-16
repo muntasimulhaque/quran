@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.AppTheme
@@ -32,6 +33,7 @@ import io.github.muntasimulhaque.quran.ui.theme.NightText
 import io.github.muntasimulhaque.quran.ui.theme.PaperBackground
 import io.github.muntasimulhaque.quran.ui.theme.PaperInk
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 
 /**
  * The three grounds, as swatches: Light, Dark, and System, which follows the
@@ -183,10 +185,18 @@ fun SizeRow(role: TypeRole, step: Float, onChange: (Float) -> Unit) {
         // The letters run from the smallest step to the largest, so the row
         // reads as one scale.
         cell = { index, active ->
+            val size = (11 + index * 2).sp
             Text(
                 text = if (role == TypeRole.Arabic) "\u0627" else "A",
-                style = MaterialTheme.typography.titleMedium
-                    .copy(fontSize = (11 + index * 2).sp),
+                // The Arabic cell is drawn in the Quran's own face, the way
+                // the sample above it is. It wore the interface face, so the
+                // letter the reader was sizing was not the letter they read
+                // (owner decision, the theme and consistency session).
+                style = if (role == TypeRole.Arabic) {
+                    TextStyle(fontFamily = rememberHafs(), fontSize = size)
+                } else {
+                    MaterialTheme.typography.titleMedium.copy(fontSize = size)
+                },
                 color = if (active) {
                     MaterialTheme.colorScheme.primary
                 } else {
@@ -235,8 +245,11 @@ private fun SegmentedRow(
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            // A control's name wears the same words every other row's name
+            // wears, so the sheet reads as one voice (owner decision, the
+            // theme and consistency session).
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
         )
         StepRow(
             steps = steps,

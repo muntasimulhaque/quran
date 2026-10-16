@@ -42,6 +42,7 @@
 
     <string name="settings_downloaded_label">Downloaded surahs (%1$d)</string>
     <string name="settings_downloaded_empty">No surahs downloaded for this reciter yet. Tap Play on any ayah to add one.</string>
+    <string name="settings_downloaded_remove">Remove %1$s</string>
 
     <string name="pack_included_suffix">included</string>
     <string name="pack_action_add">Add</string>
@@ -97,16 +98,11 @@
     <string name="settings_version_short">Version %1$s</string>
     <string name="settings_none_yet">Not added yet</string>
     <string name="settings_chosen_count">%1$d chosen</string>
-    <string name="settings_group_theme">Theme</string>
-    <string name="settings_group_sizes">Font size</string>
     <string name="settings_size_arabic">Quran text</string>
     <string name="settings_size_translation">Translation</string>
     <string name="settings_size_tafsir">Tafsir</string>
     <string name="settings_size_words">Word meanings</string>
-    <string name="settings_group_reciters">Reciter</string>
-    <string name="settings_group_translations">Translations</string>
     <string name="settings_translation_hidden">Translation is hidden in the reading</string>
-    <string name="settings_group_tafsirs">Tafsirs</string>
     <string name="settings_tafsir_hidden">Tafsir is hidden in the reading</string>
     <string name="settings_group_about">App</string>
     <string name="settings_back">Back</string>

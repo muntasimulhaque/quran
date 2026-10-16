@@ -216,10 +216,10 @@ fun PlaybackBar(
             if (oneRow) {
                 Row(
                     modifier = Modifier.padding(
-                        start = 16.dp,
-                        end = 6.dp,
-                        top = 6.dp,
-                        bottom = 6.dp,
+                        start = BarGutter,
+                        end = RowInsets - BarGutter,
+                        top = RowVertical,
+                        bottom = RowVertical,
                     ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {

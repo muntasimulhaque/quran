@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -22,12 +21,13 @@ import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
+import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
- * Word by word: each Arabic word with the meaning the word list gives it.
- * The reading and the ayah card draw the same aid, so a reader who
- * learns it in one place finds it in the other.
+ * Word by word: each Arabic word with the meaning the word list gives it,
+ * drawn under the ayah of the reading, where the verse above the pairs
+ * already shows the words they gloss.
  *
  * The aid is a flow of pairs, and each pair is as wide as its own meaning.
  * That is what it was before it became a grid, and it is what the owner
@@ -46,22 +46,14 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  *
  * The word sits centered over its meaning, because the two are one unit: a
  * word hung at one edge of a longer meaning reads as belonging to its
- * neighbour. The Arabic is set at the ayah's own ratio to its translation,
- * so the aid is a small copy of the reading rather than a footnote under
- * it, and both sizes scale with the one choice the reader made for word
- * meanings.
+ * neighbour. The Arabic is set at the aid's own ratio to its meaning, so the
+ * aid is a small copy of the reading rather than a footnote under it, and
+ * both sizes scale with the one choice the reader made for word meanings.
  *
  * The meaning takes the reading's ink rather than an alpha that
  * just looks quiet or the theme's secondary tone: body copy in the
  * secondary tone tires the eye over a long reading, so the meaning
  * stays readable on paper and on night alike.
- *
- * [gloss] says what the aid is standing on. Under the reading's ayah
- * the pairs repeat words the verse above already shows, so the Arabic steps
- * one tone down and the line stays the verse. In the ayah card, opened from
- * the card, there is no line above: the aid is the only Arabic there, so
- * it keeps the reading's own ink. The step is small either way, so the word
- * always reads as the Quran's own.
  *
  * The aid is a reading and not a control, and nothing here answers a touch.
  * Hearing one word on its own was in this app and is out of it: the word was
@@ -72,6 +64,9 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  *
  * Arabic reads right to left, so the pairs wrap that way too.
  */
+/** The step the word list's Arabic takes down from the verse's own ink. */
+private const val WordGlossAlpha = 0.78f
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun WordByWord(
@@ -79,7 +74,6 @@ internal fun WordByWord(
     hafs: FontFamily,
     metrics: ReadingMetrics,
     modifier: Modifier = Modifier,
-    gloss: Boolean = true,
 ) {
     if (meanings.isEmpty()) return
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
@@ -98,7 +92,6 @@ internal fun WordByWord(
                     meaning = meaning,
                     metrics = metrics,
                     hafs = hafs,
-                    gloss = gloss,
                 )
             }
         }
@@ -118,7 +111,6 @@ private fun WordPair(
     meaning: WordMeaning,
     metrics: ReadingMetrics,
     hafs: FontFamily,
-    gloss: Boolean,
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
@@ -126,26 +118,22 @@ private fun WordPair(
             style = TextStyle(
                 fontFamily = hafs,
                 fontSize = metrics.wordsSp.sp,
-                lineHeight = (metrics.wordsSp * 1.7f).sp,
+                lineHeight = metrics.wordsLineSp.sp,
                 // The pairs are the same words the ayah above already shows,
-                // so a gloss steps the Arabic one tone down from the verse's
-                // own ink: the line stays the verse, the pairs read as its
-                // gloss. Still well above the reading contrast on every
-                // theme. Standalone, the aid is the reading.
-                color = if (gloss) {
-                    LocalPagePalette.current.ink.copy(alpha = 0.78f)
-                } else {
-                    LocalPagePalette.current.ink
-                },
+                // so the Arabic steps one tone down from the verse's own ink:
+                // the line stays the verse, the pairs read as its gloss.
+                // Still well above the reading contrast on every theme.
+                color = LocalPagePalette.current.ink.copy(alpha = WordGlossAlpha),
             ),
             textAlign = TextAlign.Center,
             maxLines = 1,
         )
         Text(
             text = meaning.meaning.orEmpty(),
-            style = MaterialTheme.typography.bodySmall.copy(
+            style = LocalReadingVoice.current.style.copy(
                 fontSize = metrics.wordsMeaningSp.sp,
-                lineHeight = (metrics.wordsMeaningSp * 1.6f).sp,
+                lineHeight = metrics.wordsMeaningLineSp.sp,
+                fontFamily = LocalReadingVoice.current.atSize(metrics.wordsMeaningSp),
             ),
             color = LocalPagePalette.current.ink,
             textAlign = TextAlign.Center,

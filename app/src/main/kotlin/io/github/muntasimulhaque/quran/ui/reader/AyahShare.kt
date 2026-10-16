@@ -71,6 +71,7 @@ import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.Radii
+import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Gold
 import io.github.muntasimulhaque.quran.ui.theme.Lapis
 import io.github.muntasimulhaque.quran.ui.theme.PaperBackground
@@ -506,6 +507,10 @@ internal fun AyahShareSheet(
         sheetState = sheetState,
         dragHandle = { SheetHandle() },
         containerColor = MaterialTheme.colorScheme.surface,
+        // The preview and its buttons keep the reading's own column: the two
+        // weighted buttons stretched the full width of a ten inch screen
+        // (owner decision, the theme and consistency session).
+        sheetMaxWidth = Reading.MaxMeasure + Space.Gutter * 2,
     ) {
         Column(
             modifier = Modifier
@@ -514,7 +519,7 @@ internal fun AyahShareSheet(
                 // on the sheet never bounces it on its top anchor, while the
                 // preview keeps its own scroll for a tall card.
                 .sheetVerticalScroll(rememberScrollState())
-                .padding(bottom = 28.dp)
+                .padding(bottom = Space.SheetFoot)
                 .testTag("share-sheet"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {

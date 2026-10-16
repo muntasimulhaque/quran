@@ -100,12 +100,11 @@ internal fun LanguageGroups(
     groups.entries
         .sortedBy { (names[it.key] ?: it.key).lowercase() }
         .forEach { (language, group) ->
-            Text(
-                text = names[language] ?: language,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = Space.Gutter, end = Space.Gutter, top = Space.Block, bottom = Space.Tight),
-            )
+            // The language header is the same heading the settings pages use:
+            // one style, one rhythm, and one TalkBack jump, whether the group
+            // is "Interface" on the hub or "English" in this list (owner
+            // decision, the theme and consistency session).
+            Group(names[language] ?: language)
             group.sortedBy { it.name.lowercase() }.forEach { pack -> row(pack) }
         }
 }

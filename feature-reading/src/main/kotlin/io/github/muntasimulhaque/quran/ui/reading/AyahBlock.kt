@@ -99,7 +99,7 @@ internal fun AyahBlock(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp),
+            .padding(vertical = Space.Row),
     ) {
         val haptics = LocalHapticFeedback.current
         val press = remember { MutableInteractionSource() }
@@ -202,7 +202,13 @@ internal fun AyahBlock(
                         Text(
                             text = line.packName,
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f),
+                            // The pack's name is read, so it keeps the theme's
+                            // own secondary tone. The 0.75 alpha it wore
+                            // measured 3.3:1, under the 4.5:1 rule the search
+                            // and the ayah card already closed this same
+                            // label with (owner decision, the theme and
+                            // consistency session).
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = Space.Block),
                         )
                     }
@@ -213,7 +219,7 @@ internal fun AyahBlock(
                         ),
                         sizeSp = metrics.translationSp,
                         lineSp = metrics.translationLineSp,
-                        arabicSp = metrics.arabicSp * 0.8f,
+                        arabicSp = metrics.arabicInlineSp,
                         onFootnote = onFootnote,
                     )
                 }
@@ -234,7 +240,7 @@ internal fun AyahBlock(
                     horizontalArrangement = Arrangement.Start,
                 ) {
                     Text(
-                        text = "${row.ayah.surah}:${row.ayah.ayah}",
+                        text = row.ayah.verseKey,
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

@@ -2,6 +2,7 @@ package io.github.muntasimulhaque.quran.ui.playback
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 
 /**
  * The pill's own geometry, in one place, because the bar that holds the
@@ -19,6 +20,9 @@ internal val BarGutter = 16.dp
 
 /** The row's own padding: 16 at the start, 6 at the end. */
 internal val RowInsets = 22.dp
+
+/** The pill's own vertical inset over the row. */
+internal val RowVertical = 6.dp
 
 /** The gap between the words and the controls, in both shapes. */
 internal val WordsGap = 12.dp
@@ -47,14 +51,16 @@ internal val WordsMeasure = 300.dp
  */
 internal val TransportSize = 48.dp
 
-/** The status line's own chevron: 12 for the mark, 4 before it, 2 after the text. */
-internal val ChevronRoom = 18.dp
+/** The status line's own chevron: the 14 dp mark and 4 dp before it. */
+internal val ChevronRoom = GlyphSize.ChevronInline + 4.dp
 
 /**
- * The reciter's chevron beside the reciter's name: the mark, the gap before
- * it, and the pill's own inset at the end of the row.
+ * The reciter's chevron beside the reciter's name: the same 14 dp mark and
+ * the same 4 dp before it. It was 16 dp, two short of the drawing it stood
+ * for, so the one-row threshold counted a row that was never there (owner
+ * decision, the theme and consistency session).
  */
-internal val ReciterChevronRoom = 16.dp
+internal val ReciterChevronRoom = GlyphSize.ChevronInline + 4.dp
 
 /**
  * The room the pill's popup keeps from its own edge at the top and the foot.

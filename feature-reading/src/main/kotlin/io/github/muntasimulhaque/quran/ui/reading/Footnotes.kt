@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.Footnote
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
+import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
@@ -66,6 +67,11 @@ internal fun FootnoteSheet(
         sheetState = sheetState,
         dragHandle = { SheetHandle() },
         containerColor = MaterialTheme.colorScheme.surface,
+        // A note is prose, and a prose line has a measure: the sheet keeps
+        // the same 65-character column every other reading surface keeps,
+        // where it used to run the full width of a ten inch screen (owner
+        // decision, the theme and consistency session).
+        sheetMaxWidth = Reading.proseMeasure(LocalReadingVoice.current, sizeSp) + Space.Gutter * 2,
     ) {
         Column(
             modifier = Modifier
@@ -74,18 +80,28 @@ internal fun FootnoteSheet(
                 // The gate rides with the scroll, so an upward flick on a
                 // short footnote never bounces the sheet on its top anchor.
                 .sheetVerticalScroll(rememberScrollState())
-                .padding(start = Space.Gutter, end = Space.Gutter, bottom = 34.dp),
+                .padding(start = Space.Gutter, end = Space.Gutter, bottom = Space.SheetFoot),
         ) {
             Text(
                 text = stringResource(R.string.reading_footnote_title, footnote.number, surahName, reference),
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
+                // The marker that opened this sheet keeps the action color;
+                // the sheet's own name is a reference line, and every other
+                // reference line on the reading wears the secondary tone
+                // (owner decision, the theme and consistency session).
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
                 text = footnote.text,
                 style = LocalReadingVoice.current.style.copy(
                     fontSize = sizeSp.sp,
                     lineHeight = lineSp.sp,
+                    // The note takes the optical cut of the size it is
+                    // drawn at, like every other prose surface; without it
+                    // the default small-text cut was stretched over the
+                    // reader's chosen size (owner decision, the theme and
+                    // consistency session).
+                    fontFamily = LocalReadingVoice.current.atSize(sizeSp),
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(top = Space.Block),

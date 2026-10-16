@@ -28,6 +28,7 @@ import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Radii
+import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /** The room the capsule keeps from the row's own edge, so stacked rows read
  * as a list and the first and last stay clear of the sheet. */
@@ -156,7 +157,7 @@ fun ChoiceRow(
                     text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 1.dp),
+                    modifier = Modifier.padding(top = Space.Tight),
                 )
             }
         }

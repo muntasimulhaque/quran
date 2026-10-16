@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -67,8 +68,8 @@ enum class Icon {
 /**
  * The sizes the app's marks are drawn at, named once: a chevron beside a word
  * inside a compact control, a chevron that ends a row or opens a door, a
- * chevron that is a way back, and the check a chosen chip or a choice's ring
- * carries.
+ * chevron that is a way back, the mark of one action in the ayah bar, and the
+ * check a chosen chip or a choice's ring carries.
  *
  * The chevron had grown six sizes, 12 through 22, and most of them were
  * drift: the same mark ending two rows read two sizes, and the number beside
@@ -86,6 +87,12 @@ object GlyphSize {
 
     /** A chevron that is a way back or out, the size of the icon buttons beside it. */
     val ChevronNav = 22.dp
+
+    /** The mark above one action in the ayah bar. */
+    val Action = 19.dp
+
+    /** A transport mark in the playback row. */
+    val Transport = 20.dp
 
     /** The check inside a chip or a choice's ring. */
     val Check = 14.dp
@@ -344,11 +351,14 @@ fun IconButton(
     icon: Icon,
     description: String,
     onClick: () -> Unit,
-    tint: Color = MaterialTheme.colorScheme.onBackground,
+    modifier: Modifier = Modifier,
+    tint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     active: Boolean = false,
+    /** A quarter turn for a mark that points a way, like the back chevron. */
+    rotation: Float = 0f,
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .size(48.dp)
             .clip(Radii.Pill)
             .clickable(onClick = onClick)
@@ -360,8 +370,10 @@ fun IconButton(
     ) {
         IconGlyph(
             icon = icon,
-            tint = if (active) MaterialTheme.colorScheme.primary else tint.copy(alpha = 0.82f),
-            modifier = Modifier.size(22.dp),
+            tint = if (active) MaterialTheme.colorScheme.primary else tint,
+            modifier = Modifier
+                .size(GlyphSize.ChevronNav)
+                .then(if (rotation != 0f) Modifier.rotate(rotation) else Modifier),
         )
     }
 }
@@ -417,9 +429,9 @@ fun TextAction(
             tint = if (active) {
                 MaterialTheme.colorScheme.primary
             } else {
-                MaterialTheme.colorScheme.onBackground.copy(alpha = 0.82f)
+                MaterialTheme.colorScheme.onSurfaceVariant
             },
-            modifier = Modifier.size(19.dp),
+            modifier = Modifier.size(GlyphSize.Action),
         )
         Text(
             text = label,

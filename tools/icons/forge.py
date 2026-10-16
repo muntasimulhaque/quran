@@ -20,10 +20,10 @@
 import math, os, sys
 from PIL import Image, ImageDraw, ImageFont
 
-INK   = (42, 36, 27)      # #2A241B
-GOLD  = (123, 90, 16)    # #7B5A10
-PAPER = (241, 233, 218)   # #F1E9DA
-MUTED = (107, 99, 85)
+INK   = (42, 38, 32)      # #2A2620
+GOLD  = (122, 90, 18)    # #7A5A12
+PAPER = (251, 249, 244)   # #FBF9F4
+MUTED = (94, 89, 79)      # #5E594F
 WHITE = (255, 255, 255)
 HAIR  = GOLD              # the banner's gold hairline
 
@@ -35,9 +35,9 @@ HALO   = 1.5
 # The icon's own line, in trace units: one weight and one ink for the
 # launcher's layers, the legacy tiles, and the store icon. The launcher
 # vector had been taking STROKE as canvas units, 2.4 times heavier than the
-# rasters' STROKE * S_FG, and the gold stand at 5.3:1 against the paper was
+# rasters' STROKE * S_FG, and the gold stand at 6.1:1 against the paper was
 # the first thing lost from the small sizes; the drawing keeps its geometry
-# and the icon keeps one ink at 12.7:1, while the feature graphic keeps the
+# and the icon keeps one ink at 14.3:1, while the feature graphic keeps the
 # ornament gold it draws well at its own size (owner decision, this
 # session).
 STROKE_ICON = 2.6

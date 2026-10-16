@@ -1,15 +1,12 @@
 package io.github.muntasimulhaque.quran.ui.settings
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,12 +22,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.feature.settings.R
@@ -38,7 +31,7 @@ import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.clockText
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.reader.Icon
-import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
+import io.github.muntasimulhaque.quran.ui.reader.IconButton
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -131,10 +124,14 @@ fun DailyPage(
             Text(
                 text = stringResource(R.string.settings_daily_blocked),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface,
+                // The same ink as the exact-time line below: both are state
+                // lines of the same shape, and the one the page calls the
+                // same shape of truth must not be the loud one (owner
+                // decision, the theme and consistency session).
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = Space.Gutter, end = Space.Gutter, top = Space.Line),
             )
-            Box(Modifier.padding(start = 16.dp, top = Space.Line)) {
+            Box(Modifier.padding(start = Space.Gutter, top = Space.Line)) {
                 TextButton(
                     label = stringResource(R.string.settings_daily_blocked_action),
                     onClick = onOpenNotificationSettings,
@@ -153,7 +150,7 @@ fun DailyPage(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = Space.Gutter, end = Space.Gutter, top = Space.Line),
             )
-            Box(Modifier.padding(start = 16.dp, top = Space.Line)) {
+            Box(Modifier.padding(start = Space.Gutter, top = Space.Line)) {
                 TextButton(
                     label = stringResource(R.string.settings_daily_exact_action),
                     onClick = onAskExactAlarm,
@@ -204,26 +201,17 @@ private fun DailyTimeDialog(
         title = {
             Text(
                 text = stringResource(R.string.settings_daily_picker_title),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(bottom = 12.dp),
             )
         },
         modeToggleButton = {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .clickable(role = Role.Button) { typing = !typing }
-                    .semantics { contentDescription = toggleLabel },
-                contentAlignment = Alignment.Center,
-            ) {
-                IconGlyph(
-                    icon = if (typing) Icon.Clock else Icon.Keyboard,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(22.dp),
-                )
-            }
+            IconButton(
+                icon = if (typing) Icon.Clock else Icon.Keyboard,
+                description = toggleLabel,
+                onClick = { typing = !typing },
+            )
         },
         dismissButton = {
             TextButton(

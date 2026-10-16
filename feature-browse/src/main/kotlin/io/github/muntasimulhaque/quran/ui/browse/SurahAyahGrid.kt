@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -39,6 +40,7 @@ import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
+import io.github.muntasimulhaque.quran.ui.reader.IconButton
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Radii
@@ -103,7 +105,7 @@ internal fun SurahAyahGrid(
                 .weight(1f)
                 .sheetDragGate(gridGate)
                 .testTag("surah-ayahs"),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 28.dp),
+            contentPadding = PaddingValues(start = Space.Gutter, end = Space.Gutter, bottom = Space.SheetFoot),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
@@ -132,36 +134,26 @@ private fun SurahGridHeader(surah: Surah, onBack: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 6.dp, end = 16.dp, top = 2.dp, bottom = Space.Line),
+            .padding(start = 6.dp, end = Space.Gutter, top = 2.dp, bottom = Space.Line),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(Radii.Pill)
-                .clickable(onClick = onBack)
-                .semantics {
-                    contentDescription = back
-                    role = Role.Button
-                }
-                .testTag("surah-ayah-back"),
-            contentAlignment = Alignment.Center,
-        ) {
-            IconGlyph(
-                icon = Icon.Chevron,
-                tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier
-                    .size(GlyphSize.ChevronNav)
-                    // The chevron opens downward, so going back is the same
-                    // mark turned to point the way it came.
-                    .rotate(90f),
-            )
-        }
+        // One back button for every page head, the same the settings pages
+        // draw; the test tag stays with the control a tour taps (owner
+        // decision, the theme and consistency session).
+        IconButton(
+            icon = Icon.Chevron,
+            description = back,
+            onClick = onBack,
+            modifier = Modifier.testTag("surah-ayah-back"),
+            tint = MaterialTheme.colorScheme.onSurface,
+            rotation = 90f,
+        )
         SurahNameBlock(
             surah = surah,
             modifier = Modifier
                 .weight(1f)
-                .padding(start = 4.dp),
+                .padding(start = 4.dp)
+                .semantics { heading() },
             nameMaxLines = 1,
         )
         SurahArabicName(surah, Modifier.padding(start = 12.dp))
@@ -194,7 +186,7 @@ private fun AyahNumberCell(number: Int, current: Boolean, onClick: () -> Unit) {
                     MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
                 },
             )
-            .clickable(onClick = onClick)
+            .clickable(role = Role.Button, onClick = onClick)
             .semantics {
                 contentDescription = label
                 if (current) stateDescription = currentState

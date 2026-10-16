@@ -64,29 +64,40 @@ object TextSize {
     /**
      * The meaning under a word in the word by word aid. This is the size the
      * meaning is read at; the Arabic word above it is derived from it, so the
-     * two can never drift apart.
+     * two can never drift apart. 16 sp (owner decision, the theme and
+     * consistency session): the gloss at 15 sat closer to a footnote than to
+     * the step under the translation it means to be, and the session lifted
+     * it one point while keeping it under the translation's 17.
      */
     fun meaningSp(step: Float): Float = MEANING_BASE * step(step)
 
     /**
-     * The Arabic word in the word by word aid, standing to its meaning as the
-     * ayah stands to its translation (32 to 17). A word list that kept the
-     * old flat 14 sp drew its Arabic smaller than its Latin meaning, which
-     * read as a footnote to itself; the proportion is the one the reading
-     * already uses, so the aid looks like a small copy of the page.
+     * The line the meaning under a word gets: the prose ratio, the same 1.6
+     * every Latin paragraph on the page wears.
      */
-    fun wordSp(step: Float): Float = meaningSp(step) * base(TypeRole.Arabic) / base(TypeRole.Translation)
+    fun meaningLineSp(step: Float): Float = meaningSp(step) * ratio(TypeRole.Translation)
 
     /**
-     * The Arabic inside a Latin tafsir. Arabic set at the Latin size reads
-     * visibly smaller, so a quoted passage disappears into the prose around
-     * it; the quotation is the Quran or the Prophet's words and must read as
-     * the reading, not as a footnote. The stand is the one the translation
-     * already gives its inline Arabic (0.8 of the 32 sp Arabic
-     * against the 17 sp translation), so the app has one answer to how much
-     * larger the Arabic is than the text beside it.
+     * The Arabic word in the word by word aid, derived from its meaning by
+     * [WORD_MEANING_RATIO] so the two can never drift apart. At the middle
+     * step the word stands at 28 sp, the 7/8 of the Quran's 32 that the
+     * session pinned as "one size under" (owner decision, the theme and
+     * consistency session); the aid reads as a small copy of the page, not
+     * as a footnote to itself.
      */
-    fun tafsirArabic(step: Float): Float = sp(TypeRole.Tafsir, step) * INLINE_ARABIC_RATIO
+    fun wordSp(step: Float): Float = meaningSp(step) * WORD_MEANING_RATIO
+
+    /**
+     * The one rule for Arabic beside prose, in the translation and in the
+     * tafsir both: 0.9 of the reader's own Quran size. It is the stand at
+     * which Amiri measures the same as the Hafs face (its alef is 0.696 em
+     * against Hafs's 0.636), so an inline quotation reads as the Quran's own
+     * text. One rule replaces the two that had drifted, 0.8 of the Arabic in
+     * the translation and 1.5 of the tafsir prose in the tafsir, which
+     * landed on the same number at the default and hid the fact that they
+     * were two (owner decision, the theme and consistency session).
+     */
+    fun inlineArabic(step: Float): Float = sp(TypeRole.Arabic, step) * INLINE_ARABIC_RATIO
 
     private fun base(role: TypeRole): Float = when (role) {
         TypeRole.Arabic -> 32f
@@ -96,9 +107,10 @@ object TextSize {
         // translation's own size and not a point under it (owner decision,
         // this session; the two sizes read as one voice now).
         TypeRole.Tafsir -> 17f
-        // The word list is derived from [meaningSp] at the ayah's own ratio;
-        // this entry is that derivation, written as the number it comes to.
-        TypeRole.Words -> MEANING_BASE * 32f / 17f
+        // The word list is derived from [meaningSp] at [WORD_MEANING_RATIO],
+        // the 28-over-16 stand the aid reads at; this entry is that
+        // derivation, written as the number it comes to.
+        TypeRole.Words -> MEANING_BASE * WORD_MEANING_RATIO
     }
 
     /** Arabic carries diacritics above and below every line, so it needs more. */
@@ -117,23 +129,27 @@ object TextSize {
     }
 
     /**
-     * The size the meaning under a word is read at, before any scaling. 15 sp
-     * rather than 14 (owner decision, the audio and type audit session): the
-     * meaning is read at length under every word, and at the smallest step
-     * the old 14 sp put it at 10.5 while the translation stood at 12.75; 15
-     * keeps the gloss a step under the translation rather than a footnote to
-     * it.
+     * The size the meaning under a word is read at, before any scaling. 16 sp
+     * (owner decision, the theme and consistency session): the meaning is
+     * read at length under every word, and 16 keeps the gloss a step under
+     * the translation's 17 while sitting closer to "two sizes under" its own
+     * Arabic than the 15 it replaced.
      */
-    private const val MEANING_BASE = 15f
+    private const val MEANING_BASE = 16f
 
     /**
-     * Arabic beside Latin, at the stand the reading already uses: the translation
-     * draws its inline Arabic at 0.8 of the 32 sp Arabic against
-     * the 17 sp translation, which is 1.5 to 1. The tafsir's quotations wear
-     * Amiri again after the return, so the stand stays at the audit's 1.5
-     * rather than the 1.4 that stood before it.
-     * whose letters are a size larger (owner decision, the audio and type
-     * audit session).
+     * The Arabic word's stand over its meaning: 28 over 16, the 7/8 of the
+     * Quran the session pinned as "one size under" (owner decision, the
+     * theme and consistency session).
      */
-    private const val INLINE_ARABIC_RATIO = 1.5f
+    private const val WORD_MEANING_RATIO = 1.75f
+
+    /**
+     * The one stand for Arabic beside prose, in the translation and the
+     * tafsir alike: 0.9 of the Quran's own size. It is the size at which
+     * Amiri's alef (0.696 em) measures the same as Hafs's (0.636 em), so an
+     * inline quotation reads as the Quran's own text (owner decision, the
+     * theme and consistency session).
+     */
+    private const val INLINE_ARABIC_RATIO = 0.9f
 }

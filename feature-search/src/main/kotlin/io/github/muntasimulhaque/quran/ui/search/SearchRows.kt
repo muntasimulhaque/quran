@@ -36,6 +36,9 @@ import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.rich.HighlightedText
+import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
+import io.github.muntasimulhaque.quran.ui.reader.Icon
+import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
@@ -57,7 +60,7 @@ internal fun ReferenceRow(ayah: Ayah, onAyah: (Ayah) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .sheetRow(onClick = { onAyah(ayah) })
-            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = 16.dp),
+            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = Space.Row),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
@@ -70,17 +73,20 @@ internal fun ReferenceRow(ayah: Ayah, onAyah: (Ayah) -> Unit) {
                 text = ayah.verseKey,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(top = 2.dp),
+                modifier = Modifier.padding(top = Space.Tight),
             )
         }
-        // The row is the door too, but a reader looking for a control
-        // finds it here: the shape says the word opens something. It keeps
-        // the same 12 dp from the reference beside it that every trailing
-        // control keeps, so the two never read as one crowded shape.
-        TextButton(
-            label = stringResource(R.string.search_action_open),
-            onClick = { onAyah(ayah) },
-            modifier = Modifier.padding(start = 12.dp),
+        // The row is the door, and it ends in the one chevron mark every
+        // other door ends in. An Open button inside a row that already
+        // opened on tap was two controls for one act, and TalkBack met a
+        // row and a nested button (owner decision, the theme and consistency
+        // session).
+        IconGlyph(
+            icon = Icon.Chevron,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .padding(start = Space.Tight)
+                .size(GlyphSize.ChevronRow),
         )
     }
 }
@@ -91,7 +97,7 @@ internal fun SurahRow(surah: Surah, onSurah: (Surah) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .sheetRow(onClick = { onSurah(surah) })
-            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = 14.dp),
+            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = Space.Row),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
@@ -104,22 +110,32 @@ internal fun SurahRow(surah: Surah, onSurah: (Surah) -> Unit) {
                 text = surah.nameSimple,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(top = 4.dp),
+                modifier = Modifier.padding(top = Space.Tight),
             )
             Text(
+                // The place first, the count second: the order Browse and
+                // the reading use, so one surah reads one way everywhere
+                // (owner decision, the theme and consistency session).
                 text = stringResource(
                     R.string.search_surah_meta,
-                    surah.versesCount,
                     placeName(surah.revelationPlace),
+                    surah.versesCount,
                 ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 2.dp),
+                modifier = Modifier.padding(top = Space.Tight),
             )
         }
         Text(
             text = surah.nameArabic,
-            style = TextStyle(fontFamily = Amiri, fontSize = 24.sp, color = MaterialTheme.colorScheme.onSurfaceVariant),
+            style = TextStyle(fontFamily = Amiri, fontSize = 23.sp, color = MaterialTheme.colorScheme.onSurfaceVariant),
+        )
+        IconGlyph(
+            icon = Icon.Chevron,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .padding(start = Space.Tight)
+                .size(GlyphSize.ChevronRow),
         )
     }
 }
@@ -136,7 +152,7 @@ internal fun AyahRow(
         modifier = Modifier
             .fillMaxWidth()
             .sheetRow(onClick = { onAyah(hit.ayah) })
-            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = 14.dp),
+            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = Space.Row),
     ) {
         Text(
             text = "${hit.ayah.verseKey}",
@@ -170,8 +186,13 @@ internal fun AyahRow(
                     text = washed(line.words.joinToString("  ")),
                     style = TextStyle(
                         fontFamily = hafs,
-                        fontSize = 24.sp,
-                        lineHeight = (24f * SearchArabicAir).sp,
+                        // The matched words keep the line's own size: an
+                        // emphasis that enlarged them re-laid the line under
+                        // the reader while they searched. 22 sp, one size
+                        // for both Arabic lines (owner decision, the theme
+                        // and consistency session).
+                        fontSize = 22.sp,
+                        lineHeight = (22f * SearchArabicAir).sp,
                         color = MaterialTheme.colorScheme.onSurface,
                     ),
                     textAlign = TextAlign.Right,
@@ -197,7 +218,7 @@ internal fun AyahRow(
                     // secondary tone; the 0.7 alpha it wore measured 3.3:1,
                     // under the theme's 4.5:1 rule.
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp),
+                    modifier = Modifier.padding(top = Space.Tight),
                 )
             }
         }
@@ -221,7 +242,7 @@ internal fun AyahRow(
                     Search.matchRanges(meaning, terms, arabic = false)
                 },
                 style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 23.sp),
-                modifier = Modifier.padding(top = 4.dp),
+                modifier = Modifier.padding(top = Space.Tight),
             )
         }
     }
@@ -233,7 +254,7 @@ internal fun TafsirRow(hit: SearchHit.TafsirHitResult, onAyah: (Ayah) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .sheetRow(onClick = { onAyah(hit.ayah) })
-            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = 14.dp),
+            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = Space.Row),
     ) {
         Text(
             text = stringResource(
@@ -247,7 +268,11 @@ internal fun TafsirRow(hit: SearchHit.TafsirHitResult, onAyah: (Ayah) -> Unit) {
                 },
             ),
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
+            // The pack's name is a name, not an action: the tafsir row's
+            // label wears the same secondary tone the translation's pack
+            // name wears, where it wore the accent (owner decision, the
+            // theme and consistency session).
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(8.dp))
         HighlightedText(
@@ -265,6 +290,12 @@ internal fun washed(text: String): AnnotatedString {
     // A match wears the same wash everywhere: the accent at [Wash.Match],
     // never the reciter's highlight, which says a word is being heard
     // (owner decision, the audio and type audit session).
+    //
+    // Arabic is washed and never weighted: `HighlightedText` adds Medium to
+    // a Latin match, and Arabic emphasis must never be synthesized on a
+    // calligraphic face (see `RichTextViews`). The two scripts share one
+    // wash rule and differ only where the script itself must (owner
+    // decision, the theme and consistency session).
     val wash = MaterialTheme.colorScheme.primary.copy(alpha = Wash.Match)
     return buildAnnotatedString { withStyle(SpanStyle(background = wash)) { append(text) } }
 }

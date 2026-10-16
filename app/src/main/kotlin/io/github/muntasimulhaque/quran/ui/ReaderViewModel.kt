@@ -32,6 +32,7 @@ import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.data.forLanguage
 import io.github.muntasimulhaque.quran.data.withLanguage
+import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.daily.DailyAyahScheduler
 import io.github.muntasimulhaque.quran.playback.PlaybackController
 import io.github.muntasimulhaque.quran.playback.ListenOffer
@@ -420,7 +421,8 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         val translation = withContext(Dispatchers.IO) {
             readingRow(ayah.number)?.translations?.firstOrNull()?.text?.text
         }
-        val surahName = library.surahs.firstOrNull { it.number == ayah.surah }?.nameSimple ?: "Surah ${ayah.surah}"
+        val surahName = library.surahs.firstOrNull { it.number == ayah.surah }?.nameSimple
+            ?: getApplication<Application>().getString(R.string.surah_fallback_name, ayah.surah)
         return ShareText.ayah(
             arabic = ayah.text,
             translation = translation
@@ -886,7 +888,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             reciterName = library.recitations.firstOrNull { it.id == recitation }?.name ?: recitation,
             surah = ayah.surah,
             surahName = library.surahs.firstOrNull { it.number == ayah.surah }?.nameSimple
-                ?: "Surah ${ayah.surah}",
+                ?: getApplication<Application>().getString(R.string.surah_fallback_name, ayah.surah),
             ayah = ayah.number,
             bytes = bytes,
             options = options,

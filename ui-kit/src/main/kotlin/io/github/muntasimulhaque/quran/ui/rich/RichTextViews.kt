@@ -225,13 +225,14 @@ fun RichBlocks(
                         markerSize = markerSp(sizeSp, 0.70f),
                         quoteColor = null,
                     ),
-                    style = MaterialTheme.typography.titleSmall.copy(
-                        // Ink with weight (owner decision, the audio and type
-                        // audit session): blue is the app's action color
-                        // everywhere else, so a heading in it reads as a
-                        // link; the heading keeps its step up in size and
-                        // weight instead.
+                    style = LocalReadingVoice.current.style.copy(
+                        // The heading is the reading's own voice, stepped up
+                        // in size and weight. It wore the interface face on a
+                        // Literata page, which put Inter inside the tafsir
+                        // (owner decision, the theme and consistency
+                        // session).
                         color = LocalPagePalette.current.ink,
+                        fontFamily = LocalReadingVoice.current.atSize(sizeSp + 1),
                         fontWeight = FontWeight.SemiBold,
                         fontSize = (sizeSp + 1).sp,
                         lineHeight = line.sp,

@@ -20,11 +20,17 @@ object Space {
     /** Two lines of one thought. */
     val Line = 8.dp
 
+    /** One row's own head and foot: the room a list row keeps around its lines. */
+    val Row = 12.dp
+
     /** Two thoughts in one block: the ayah and its word list. */
     val Block = 16.dp
 
     /** Two blocks: one ayah and the next, a page and its heading. */
     val Section = 24.dp
+
+    /** The room a sheet leaves under its last row. */
+    val SheetFoot = 28.dp
 
     /** The gutter a sheet keeps beside its content, on each side. */
     val Gutter = 22.dp

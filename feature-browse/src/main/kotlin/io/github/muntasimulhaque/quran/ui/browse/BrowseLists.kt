@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -18,13 +19,15 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.ReadPlace
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
+import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
+import io.github.muntasimulhaque.quran.ui.reader.Icon
+import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
@@ -59,7 +62,7 @@ internal fun LastReadList(
     LazyColumn(
         state = listState,
         modifier = listModifier,
-        contentPadding = PaddingValues(bottom = 28.dp),
+        contentPadding = PaddingValues(bottom = Space.SheetFoot),
     ) {
         items(places, key = { it.ayahNumber }) { place ->
             val text = texts[place.ayahNumber]
@@ -126,7 +129,7 @@ internal fun SavedList(
     LazyColumn(
         state = listState,
         modifier = listModifier,
-        contentPadding = PaddingValues(bottom = 28.dp),
+        contentPadding = PaddingValues(bottom = Space.SheetFoot),
     ) {
         items(rows, key = { it.ayahNumber }) { row ->
             val text = texts[row.ayahNumber]
@@ -168,14 +171,18 @@ private fun PlaceRow(
         modifier = Modifier
             .fillMaxWidth()
             .sheetRow(onClick = onClick)
-            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = 14.dp),
+            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = Space.Row),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text(
                     text = surah,
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
+                    // A place's name is the row's name, and every other
+                    // row's name is the theme's own ink; the accent here
+                    // read as a link or a selection the row does not have
+                    // (owner decision, the theme and consistency session).
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -184,7 +191,7 @@ private fun PlaceRow(
                         text = ayah,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 1.dp),
+                        modifier = Modifier.padding(top = Space.Tight),
                     )
                 }
             }
@@ -194,10 +201,20 @@ private fun PlaceRow(
                 TextButton(
                     label = it.first,
                     onClick = it.second,
-                    modifier = Modifier.padding(start = 10.dp),
+                    modifier = Modifier.padding(start = Space.Row),
                     quiet = true,
                 )
             }
+            // The row is the door to the place, and every door ends in the
+            // one chevron mark, after the row's own action where it has one
+            // (owner decision, the theme and consistency session).
+            IconGlyph(
+                icon = Icon.Chevron,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .padding(start = Space.Tight)
+                    .size(GlyphSize.ChevronRow),
+            )
         }
         if (!note.isNullOrBlank()) {
             // The reader's own words are the one part of the row drawn in the
@@ -209,7 +226,6 @@ private fun PlaceRow(
                 text = note,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontFamily = LocalReadingVoice.current.style.fontFamily,
-                    lineHeight = 20.sp,
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 2,
@@ -233,7 +249,7 @@ private fun EmptyNote(title: String, body: String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 30.dp, vertical = 60.dp),
+            .padding(horizontal = Space.SheetFoot, vertical = 60.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(

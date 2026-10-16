@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import io.github.muntasimulhaque.quran.uikit.R
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -21,12 +23,19 @@ fun formatBytes(bytes: Long): String = when {
     else -> String.format(Locale.US, "%.0f MB", bytes / 1048576.0)
 }
 
-/** The reciters, by the names readers use for them. */
-fun shortReciterName(id: String, fallback: String): String = when (id) {
-    "minshawi" -> "Minshawi"
-    "husary" -> "Husary"
-    "husary-muallim" -> "Husary Muallim"
-    "husary-mujawwad" -> "Husary Mujawwad"
+/**
+ * The reciters, by the names readers use for them, in the reader's own
+ * language. It is a composable because the name is a string resource: the
+ * pill, the offer, and the settings list draw the reciter, and a Bangla
+ * reader used to meet the Latin name in the pill (owner decision, the theme
+ * and consistency session).
+ */
+@Composable
+fun reciterShortName(id: String, fallback: String): String = when (id) {
+    "minshawi" -> stringResource(R.string.reciter_minshawi)
+    "husary" -> stringResource(R.string.reciter_husary)
+    "husary-muallim" -> stringResource(R.string.reciter_husary_muallim)
+    "husary-mujawwad" -> stringResource(R.string.reciter_husary_mujawwad)
     else -> fallback
 }
 

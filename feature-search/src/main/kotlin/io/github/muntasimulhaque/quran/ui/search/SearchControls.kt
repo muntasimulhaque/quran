@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -112,7 +113,7 @@ internal fun FilterRow(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 22.dp, end = 22.dp, top = Space.Line, bottom = Space.Tight),
+            .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Line, bottom = Space.Tight),
     ) {
         // The header is a door, drawn the way the app draws every status line
         // that opens something: the words, the state, and a chevron that
@@ -152,7 +153,7 @@ internal fun FilterRow(
                 text = state,
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 8.dp),
+                modifier = Modifier.padding(start = Space.Line),
             )
             // The arrow sits with the words it belongs to, and turns to say
             // which way the list will move: down while it is hidden, up once
@@ -292,6 +293,10 @@ internal fun SearchField(
         Row(
             modifier = Modifier
                 .weight(1f)
+                // The field's own pill owes a finger the 48 dp floor every
+                // other control holds; at 47 it was the one control under it
+                // (owner decision, the theme and consistency session).
+                .defaultMinSize(minHeight = 48.dp)
                 .clip(Radii.Pill)
                 .background(MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door))
                 // The pill is the field's own shape, so a tap anywhere inside
@@ -368,7 +373,7 @@ internal fun StatusLine(
         text = message,
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = 6.dp, bottom = 10.dp),
+        modifier = Modifier.padding(start = Space.Gutter, end = Space.Gutter, top = 6.dp, bottom = 10.dp),
     )
 }
 

@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="sheet_handle">শিটের হাতল</string>
+    <string name="reciter_minshawi">মিনশাবী</string>
+    <string name="reciter_husary">হুসারী</string>
+    <string name="reciter_husary_muallim">হুসারী মুয়াল্লিম</string>
+    <string name="reciter_husary_mujawwad">হুসারী মুজাওয়াদ</string>
 </resources>

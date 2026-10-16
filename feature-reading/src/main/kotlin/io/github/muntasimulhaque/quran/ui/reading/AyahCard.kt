@@ -110,7 +110,6 @@ fun AyahCard(
     // the reader chooses (owner decision, this session).
     val firstPack = tafsirPacks.singleOrNull()
     var door by remember(ayah.number) { mutableStateOf(firstPack?.let { Door.Tafsir(it) }) }
-    var footnote by remember(ayah.number) { mutableStateOf<OpenFootnote?>(null) }
 
     // Every enabled tafsir is read as the card opens, not when its door is
     // tapped: the read is one indexed query of a millisecond or two, and
@@ -127,7 +126,7 @@ fun AyahCard(
             tafsirPacks.mapNotNull { pack ->
                 val passage = content.tafsir(ayah.number, pack.id) ?: return@mapNotNull null
                 val name = content.surah(passage.surah)?.nameSimple
-                    ?: "Surah ${passage.surah}"
+                    ?: surahName
                 val span = if (passage.fromAyah == passage.toAyah) {
                     "${passage.surah}:${passage.fromAyah}"
                 } else {
@@ -187,7 +186,7 @@ fun AyahCard(
                         text = stringResource(R.string.card_add_tafsir),
                         action = stringResource(R.string.reading_action_add),
                         onClick = onAddContent,
-                        modifier = Modifier.padding(horizontal = 22.dp),
+                        modifier = Modifier.padding(horizontal = Space.Gutter),
                     )
                 }
                 // The label stands over the tafsir doors in both readings: the
@@ -227,19 +226,8 @@ fun AyahCard(
                 }
             }
 
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(Space.Line))
         }
-    }
-
-    footnote?.let { open ->
-        FootnoteSheet(
-            footnote = open.note,
-            surahName = surahName,
-            reference = open.reference,
-            sizeSp = open.sizeSp,
-            lineSp = open.lineSp,
-            onDismiss = { footnote = null },
-        )
     }
 }
 
@@ -263,22 +251,27 @@ private fun DoorRow(
             .semantics {
                 if (state != null) stateDescription = state
             }
-            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = 16.dp),
+            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = Space.Block),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f),
-        )
-        if (subtitle.isNotBlank()) {
+        // The value is under its name, the way every row in every sheet
+        // reads: it stood in a right-hand column, the one grammar the card
+        // still kept from the hub's old shape (owner decision, the theme
+        // and consistency session).
+        Column(Modifier.weight(1f)) {
             Text(
-                text = subtitle,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(end = 10.dp),
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
             )
+            if (subtitle.isNotBlank()) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = Space.Tight),
+                )
+            }
         }
         // The arrow is the door's only sign: a row whose content unfolds
         // under it has to say so, and it has to say it loudly enough to be
@@ -304,13 +297,13 @@ private fun TafsirPanel(view: TafsirView, settings: AppSettings) {
         modifier = Modifier
             .fillMaxWidth()
             .testTag("tafsir-panel")
-            .padding(top = 4.dp),
+            .padding(top = Space.Tight),
     ) {
         RichBlocks(
             blocks = view.blocks,
             sizeSp = settings.tafsirSp,
             lineSp = settings.tafsirLineSp,
-            arabicSp = settings.tafsirArabicSp,
+            arabicSp = settings.arabicInlineSp,
         )
         Text(
             text = view.range,
@@ -322,7 +315,7 @@ private fun TafsirPanel(view: TafsirView, settings: AppSettings) {
             // under the theme's own 4.5:1 rule for muted text, and this
             // is the pass that closes it.
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 12.dp),
+            modifier = Modifier.padding(top = Space.Row),
         )
     }
 }
@@ -346,6 +339,11 @@ fun AyahNoteSheet(
         sheetState = sheetState,
         dragHandle = { SheetHandle() },
         containerColor = MaterialTheme.colorScheme.surface,
+        // The note is prose: it keeps the reading's own measure, the same
+        // column the ayah card keeps (owner decision, the theme and
+        // consistency session).
+        sheetMaxWidth = Reading.proseMeasure(LocalReadingVoice.current, settings.translationSp) +
+            Space.Gutter * 2,
     ) {
         Column(
             modifier = Modifier
@@ -354,7 +352,7 @@ fun AyahNoteSheet(
                 // The gate rides with the scroll, so an upward flick on the
                 // note never bounces the sheet on its top anchor.
                 .sheetVerticalScroll(rememberScrollState())
-                .padding(bottom = 28.dp),
+                .padding(bottom = Space.SheetFoot),
         ) {
             NoteEditor(
                 initial = note,

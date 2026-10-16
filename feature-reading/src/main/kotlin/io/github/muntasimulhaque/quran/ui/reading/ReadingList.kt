@@ -23,11 +23,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -44,6 +42,7 @@ import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 /**
@@ -95,11 +94,8 @@ fun ReadingList(
     contentPaddingBottom: Dp,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
     val pageDescription = stringResource(R.string.reading_page_description)
-    val hafs = remember {
-        FontFamily(Font(path = "fonts/UthmanicHafs_V22.ttf", assetManager = context.assets))
-    }
+    val hafs = rememberHafs()
     // The whole surah arrives at once, so every item has its text before the
     // list is measured: the reader's place lands exactly, and nothing grows or
     // shifts under them while they read. Until the rows for *this* surah are
@@ -351,7 +347,7 @@ private fun ReadingRows(
                         text = stringResource(R.string.reading_add_translation),
                         action = stringResource(R.string.reading_action_add),
                         onClick = onAddContent,
-                        modifier = Modifier.padding(horizontal = Space.Gutter, vertical = 4.dp),
+                        modifier = Modifier.padding(horizontal = Space.Gutter, vertical = Space.Tight),
                     )
                 }
             }
@@ -383,7 +379,7 @@ private fun ReadingRows(
                             onFootnote(
                                 OpenFootnote(
                                     note = note,
-                                    reference = "${row.ayah.surah}:${row.ayah.ayah}",
+                                    reference = row.ayah.verseKey,
                                     sizeSp = metrics.translationSp,
                                     lineSp = metrics.translationLineSp,
                                 ),

@@ -25,6 +25,9 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -45,6 +48,7 @@ import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
+import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -85,6 +89,7 @@ internal fun SurahOpening(
     val palette = LocalPagePalette.current
     val ornament = palette.ornament
     val ink = palette.ink
+    val hafs = rememberHafs()
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -131,14 +136,21 @@ internal fun SurahOpening(
             ),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 4.dp),
+            modifier = Modifier.padding(top = Space.Tight),
         )
         basmalah?.let { line ->
+            // The basmalah is the Quran's own first ayah, so it reads in the
+            // Quran's own face and at the reader's own Arabic size, the same
+            // as every verse below it. It wore 26 sp Amiri, a fixed hand
+            // outside the reader's choice, and the opening read as two
+            // different texts stacked (owner decision, the theme and
+            // consistency session).
             Text(
                 text = line,
                 style = TextStyle(
-                    fontFamily = Amiri,
-                    fontSize = 26.sp,
+                    fontFamily = hafs,
+                    fontSize = metrics.arabicSp.sp,
+                    lineHeight = metrics.arabicLineSp.sp,
                     color = ink,
                 ),
                 textAlign = TextAlign.Center,
@@ -258,6 +270,11 @@ internal fun SurahEnd(
                     .padding(top = Space.Block)
                     .clip(Radii.Card)
                     .background(MaterialTheme.colorScheme.primary.copy(alpha = Wash.Door))
+                    // A card that opens a surah is a door, and every door says
+                    // so to TalkBack; this one answered a tap with the words
+                    // alone (owner decision, the theme and consistency
+                    // session).
+                    .semantics { role = Role.Button }
                     .clickable { onNextSurah(next) }
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -272,7 +289,7 @@ internal fun SurahEnd(
                         text = nextSurahName,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.padding(top = 1.dp),
+                        modifier = Modifier.padding(top = Space.Tight),
                     )
                 }
                 IconGlyph(

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +26,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.muntasimulhaque.quran.R
+import io.github.muntasimulhaque.quran.ui.theme.Reading
+import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.reader.ReaderScreen
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.data.UiLanguage
@@ -196,7 +199,9 @@ private fun ContentProblem(onRetry: () -> Unit) {
         contentAlignment = Alignment.Center,
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 36.dp),
+            modifier = Modifier
+                .widthIn(max = Reading.MaxMeasure)
+                .padding(horizontal = Space.Gutter),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
@@ -234,20 +239,7 @@ private fun FirstPaint() {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = stringResource(R.string.first_paint_title),
-                style = TextStyle(
-                    fontFamily = Amiri,
-                    fontSize = 52.sp,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.88f),
-                ),
-            )
-            Text(
-                text = stringResource(R.string.first_paint_subtitle),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 10.dp),
-            )
+            Masthead()
         }
     }
 }

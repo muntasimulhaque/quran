@@ -146,13 +146,19 @@ data class AppSettings(
 ) {
     val arabicSp: Float get() = TextSize.sp(TypeRole.Arabic, arabicSize)
     val arabicLineSp: Float get() = TextSize.lineSp(TypeRole.Arabic, arabicSize)
+    /**
+     * The Arabic beside prose, in the translation and in the tafsir alike:
+     * the one rule [TextSize.inlineArabic] keeps.
+     */
+    val arabicInlineSp: Float get() = TextSize.inlineArabic(arabicSize)
     val translationSp: Float get() = TextSize.sp(TypeRole.Translation, translationSize)
     val translationLineSp: Float get() = TextSize.lineSp(TypeRole.Translation, translationSize)
     val tafsirSp: Float get() = TextSize.sp(TypeRole.Tafsir, tafsirSize)
     val tafsirLineSp: Float get() = TextSize.lineSp(TypeRole.Tafsir, tafsirSize)
-    val tafsirArabicSp: Float get() = TextSize.tafsirArabic(tafsirSize)
-    val wordsSp: Float get() = TextSize.sp(TypeRole.Words, wordsSize)
+    val wordsSp: Float get() = TextSize.wordSp(wordsSize)
+    val wordsLineSp: Float get() = TextSize.lineSp(TypeRole.Words, wordsSize)
     val wordsMeaningSp: Float get() = TextSize.meaningSp(wordsSize)
+    val wordsMeaningLineSp: Float get() = TextSize.meaningLineSp(wordsSize)
 
     fun sizeOf(role: TypeRole): Float = when (role) {
         TypeRole.Arabic -> arabicSize
@@ -183,10 +189,13 @@ data class ReadingMetrics(
     val translationPacks: Set<String>,
     val arabicSp: Float,
     val arabicLineSp: Float,
+    val arabicInlineSp: Float,
     val translationSp: Float,
     val translationLineSp: Float,
     val wordsSp: Float,
+    val wordsLineSp: Float,
     val wordsMeaningSp: Float,
+    val wordsMeaningLineSp: Float,
 )
 
 /** The reading's own view of the reader's choices. */
@@ -197,10 +206,13 @@ fun AppSettings.readingMetrics(): ReadingMetrics = ReadingMetrics(
     translationPacks = translationPacks,
     arabicSp = arabicSp,
     arabicLineSp = arabicLineSp,
+    arabicInlineSp = arabicInlineSp,
     translationSp = translationSp,
     translationLineSp = translationLineSp,
     wordsSp = wordsSp,
+    wordsLineSp = wordsLineSp,
     wordsMeaningSp = wordsMeaningSp,
+    wordsMeaningLineSp = wordsMeaningLineSp,
 )
 
 /**

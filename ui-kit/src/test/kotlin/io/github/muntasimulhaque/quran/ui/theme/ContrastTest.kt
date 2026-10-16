@@ -28,7 +28,7 @@ class ContrastTest {
         assertReadable(Gold, PaperBackground)
         assertReadable(Lapis, PaperBackground)
         assertReadable(Lapis, PaperSurface)
-        assertReadable(Color(0xFFFDFBF6), Lapis)
+        assertReadable(PaperOnPrimary, Lapis)
     }
 
     @Test
@@ -46,7 +46,7 @@ class ContrastTest {
         assertReadable(NightGold, NightBackground)
         assertReadable(LapisLight, NightBackground)
         assertReadable(LapisLight, NightSurface)
-        assertReadable(Color(0xFF08243D), LapisLight)
+        assertReadable(NightOnPrimary, LapisLight)
     }
 
     /**

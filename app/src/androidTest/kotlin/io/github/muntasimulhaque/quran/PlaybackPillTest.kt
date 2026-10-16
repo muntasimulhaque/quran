@@ -72,7 +72,7 @@ import org.junit.runner.RunWith
  *    box it hangs on, and an anchor on the word the reader touched put the
  *    reciter chooser at one end of the pill and the listening menu at the
  *    other: two popups in two places on one control (owner report).
- * 9. Both menus wear the app's own choice row: one leading mark, one 24 dp
+ * 9. Both menus wear the app's own choice row: one leading mark, one 16 dp
  *    gap, and one 48 dp target, the same the settings lists draw, so an
  *    answer cannot change its shape from one door to the other (owner
  *    decision, forty-eighth session).
@@ -287,9 +287,11 @@ class PlaybackPillTest {
 
     /**
      * The listening menu wears the app's own choice row: the same leading
-     * radio mark, the same 24 dp gap, and the same 48 dp target the Listening
+     * radio mark, the same 16 dp gap, and the same 48 dp target the Listening
      * page draws, so the same answer cannot change its shape from one door to
-     * the other (owner decision, forty-eighth session).
+     * the other (owner decision, forty-eighth session; the gap is 16, the
+     * value `ChoiceRow` has always drawn, pinned here by the theme and
+     * consistency session).
      */
     @Test
     fun theListeningMenuWearsTheAppChoiceRow() {

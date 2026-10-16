@@ -76,7 +76,7 @@ class ScreenshotTest {
         node.config.getOrElseNullable(SemanticsProperties.Text) { null }
             ?.any { part ->
                 Regex("""\d+\s+matches""").containsMatchIn(part.text) ||
-                    Regex("""the first \d+ shown""").containsMatchIn(part.text)
+                    Regex("""Showing the first \d+""").containsMatchIn(part.text)
             } == true
     }
 

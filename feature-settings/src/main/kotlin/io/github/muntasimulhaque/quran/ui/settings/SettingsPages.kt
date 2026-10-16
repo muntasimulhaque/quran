@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -87,7 +86,6 @@ fun AppearancePage(
     onTheme: (AppTheme) -> Unit,
 ) {
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
-        Group(stringResource(R.string.settings_group_theme))
         ThemeRow(selected = settings.theme, onSelect = onTheme)
         Spacer(Modifier.height(Space.Section))
     }
@@ -107,7 +105,6 @@ fun TextPage(
     val row by produceState<ReadingRow?>(initialValue = null, settings.translationPacks) { value = preview() }
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         row?.let { sample -> SizeSample(row = sample, settings = settings) }
-        Group(stringResource(R.string.settings_group_sizes))
         SizeRow(TypeRole.Arabic, settings.arabicSize) { onSize(TypeRole.Arabic, it) }
         SizeRow(TypeRole.Translation, settings.translationSize) { onSize(TypeRole.Translation, it) }
         SizeRow(TypeRole.Tafsir, settings.tafsirSize) { onSize(TypeRole.Tafsir, it) }
@@ -123,7 +120,7 @@ private fun SizeSample(row: ReadingRow, settings: AppSettings) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = Space.Gutter, end = Space.Gutter, top = 12.dp, bottom = 4.dp),
+            .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Row, bottom = Space.Tight),
     ) {
         Text(
             text = row.ayah.text,
@@ -139,16 +136,12 @@ private fun SizeSample(row: ReadingRow, settings: AppSettings) {
         row.translations.firstOrNull()?.let { line ->
             TranslationBody(
                 runs = remember(line.text.text) { RichText.footnotes(line.text.text) },
-                modifier = Modifier.padding(top = 10.dp),
+                modifier = Modifier.padding(top = Space.Line),
                 sizeSp = settings.translationSp,
                 lineSp = settings.translationLineSp,
-                arabicSp = settings.arabicSp * 0.8f,
+                arabicSp = settings.arabicInlineSp,
             )
         }
-        HorizontalDivider(
-            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
-            modifier = Modifier.padding(top = 14.dp),
-        )
     }
 }
 
@@ -165,7 +158,6 @@ fun TranslationsPage(
     actions: SettingsActions,
 ) {
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
-        Group(stringResource(R.string.settings_group_translations))
         // The master switch lives on the hub row and nowhere else: this page
         // is the list of translations, and a switch at its head re-asked a
         // decision the hub already owns (owner report). The line below
@@ -208,7 +200,6 @@ fun TafsirsPage(
     actions: SettingsActions,
 ) {
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
-        Group(stringResource(R.string.settings_group_tafsirs))
         // The same rule as the translations list: the hub row owns the
         // switch, and this page owns the list (owner report). The line
         // says what the reading is doing while the switch is off.

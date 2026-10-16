@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="paper">#F1E9DA</color>
-    <color name="night">#1B1917</color>
+    <color name="paper">#FBF9F4</color>
+    <color name="night">#1C1A18</color>
     <!-- The app's mark is drawn in the theme's own colors: the paper field
          the reading opens on and the ink the page's text wears, for the
          whole drawing, book and stand alike. The value mirrors the ui-kit
          theme's PaperInk, which is a Compose tone and cannot be read from a
          drawable (owner decision, this session: at 24 to 48 dp one ink at
-         12.7:1 reads where a thin ornament gold at 5.3:1 did not). -->
+         14.3:1 reads where a thin ornament gold would not). -->
     <color name="icon_background">@color/paper</color>
-    <color name="icon_ink">#2A241B</color>
+    <color name="icon_ink">#2A2620</color>
 </resources>

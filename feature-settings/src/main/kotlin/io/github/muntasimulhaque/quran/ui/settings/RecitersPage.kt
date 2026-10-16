@@ -23,6 +23,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.ContentDatabase
@@ -35,6 +37,7 @@ import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRowNameInset
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
+import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
@@ -58,7 +61,6 @@ fun RecitersPage(
     actions: SettingsActions,
 ) {
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
-        Group(stringResource(R.string.settings_group_reciters))
         // Following the recitation is a choice about the reciter, not about
         // the page: it sits here, above the list of voices, and turns the
         // reading into one that moves with the one being heard.
@@ -74,7 +76,7 @@ fun RecitersPage(
                 val id = pack.id.removePrefix(ContentDatabase.RECITER_PREFIX)
                 val selected = pack.id == ContentDatabase.reciterPack(settings.recitation)
                 ChoiceRow(
-                    title = pack.name,
+                    title = reciterShortName(id, pack.name),
                     subtitle = null,
                     selected = selected,
                     radio = true,
@@ -82,7 +84,7 @@ fun RecitersPage(
                     // The downloads door follows the reciter it belongs to,
                     // so the reciter's own room at the foot would read as a
                     // gap between the two.
-                    bottomPadding = if (pack.installed) 0.dp else 12.dp,
+                    bottomPadding = if (pack.installed) 0.dp else Space.Row,
                     trailing = {
                         // A reciter whose timings are on the device can give
                         // the room back; a reciter nothing was heard from has
@@ -174,7 +176,7 @@ private fun ReciterDownloadsDoor(open: Boolean, count: Int, onClick: () -> Unit)
             // card inset from the sheet's edge.
             .sheetRow(onClick = onClick)
             .minimumInteractiveComponentSize()
-            .padding(start = ChoiceRowNameInset - SheetRowGutter, end = 12.dp - SheetRowGutter),
+            .padding(start = ChoiceRowNameInset - SheetRowGutter, end = Space.Row - SheetRowGutter),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -198,35 +200,43 @@ private fun ReciterDownloadsDoor(open: Boolean, count: Int, onClick: () -> Unit)
 /** One downloaded surah: its name, its size, and the one action it needs. */
 @Composable
 private fun DownloadedSurahRow(row: DownloadedSurah, onRemove: () -> Unit) {
+    val remove = stringResource(R.string.settings_downloaded_remove, row.name)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             // The row is already as tall as a finger needs, because the
             // Remove action brings its own touch target; the surah names sit
             // close together so the list reads as one block.
-            .padding(start = ChoiceRowNameInset, end = 12.dp),
+            .padding(start = ChoiceRowNameInset, end = Space.Row),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = row.name,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f),
-        )
-        Text(
-            text = formatBytes(row.bytes),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 12.dp),
-        )
-        // The size and the button are two ways to read the same row, so they
-        // keep the 12 dp the choice rows keep between their words and their
-        // trailing control: a size set flush against Remove reads as part of
-        // the button instead of as what it weighs.
+        // The size is under its name, the way every row in the sheet reads:
+        // it stood in a right-hand column, the last row in the sheet that
+        // still answered a name with a value beside it (owner decision, the
+        // theme and consistency session).
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = row.name,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = formatBytes(row.bytes),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = Space.Tight),
+            )
+        }
+        // A list of identical Remove buttons needs each one to say what it
+        // removes; the button's own word is the same on every row, so the
+        // name of the surah is said beside it (owner decision, the theme and
+        // consistency session).
         TextButton(
             label = stringResource(R.string.pack_action_remove),
             onClick = onRemove,
-            modifier = Modifier.padding(start = 12.dp),
+            modifier = Modifier
+                .padding(start = Space.Row)
+                .semantics { contentDescription = remove },
             quiet = true,
         )
     }

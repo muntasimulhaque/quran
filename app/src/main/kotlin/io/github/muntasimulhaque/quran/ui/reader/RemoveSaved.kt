@@ -25,6 +25,7 @@ import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
+import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -49,6 +50,9 @@ fun RemoveSavedSheet(
         sheetState = sheetState,
         dragHandle = { SheetHandle() },
         containerColor = MaterialTheme.colorScheme.surface,
+        // The note is reading prose, and the question keeps the reading's
+        // own column (owner decision, the theme and consistency session).
+        sheetMaxWidth = Reading.MaxMeasure + Space.Gutter * 2,
     ) {
         Column(
             modifier = Modifier
@@ -58,7 +62,7 @@ fun RemoveSavedSheet(
                 // question never bounces the sheet on its top anchor.
                 .sheetVerticalScroll(rememberScrollState())
                 .padding(horizontal = Space.Gutter, vertical = 10.dp)
-                .padding(bottom = 28.dp),
+                .padding(bottom = Space.SheetFoot),
         ) {
             Text(
                 text = stringResource(R.string.remove_saved_title),

@@ -64,9 +64,25 @@ class TextSizeTest {
 
     @Test
     fun theWordMeaningSitsAStepUnderTheTranslation() {
-        // 15 sp against the translation's 17 (owner decision, the audio and
-        // type audit session): the gloss is read at length under every word,
+        // 16 sp against the translation's 17 (owner decision, the theme and
+        // consistency session): the gloss is read at length under every word,
         // so it stays a small reading rather than a footnote.
-        assertEquals(15f, TextSize.meaningSp(1f))
+        assertEquals(16f, TextSize.meaningSp(1f))
+    }
+
+    @Test
+    fun theLadderIsPinned() {
+        // The session's ladder, one line per relationship the reader was
+        // promised: the Quran is the anchor, the word list reads one size
+        // under it at 7/8, Arabic beside prose is one rule at 0.9 from the
+        // Quran in both the translation and the tafsir, the prose stands at
+        // the reading voice's own sizes, and the meaning sits under the word
+        // it glosses (owner decision, the theme and consistency session).
+        assertEquals(32f, TextSize.sp(TypeRole.Arabic, 1f))
+        assertEquals(28f, TextSize.wordSp(1f))
+        assertEquals(28.8f, TextSize.inlineArabic(1f), 0.001f)
+        assertEquals(17f, TextSize.sp(TypeRole.Translation, 1f))
+        assertEquals(17f, TextSize.sp(TypeRole.Tafsir, 1f))
+        assertEquals(16f, TextSize.meaningSp(1f))
     }
 }

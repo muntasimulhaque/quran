@@ -42,7 +42,7 @@ import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.browse.BrowseSheet
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
-import io.github.muntasimulhaque.quran.ui.kit.shortReciterName
+import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
 import io.github.muntasimulhaque.quran.ui.search.SearchSheet
 import io.github.muntasimulhaque.quran.ui.settings.PackSetupState
 import io.github.muntasimulhaque.quran.ui.settings.SettingsActions
@@ -58,10 +58,6 @@ import kotlinx.coroutines.withContext
 
 /** How long the chrome stays after a touch before it steps back. */
 private const val CHROME_MILLIS = 7000L
-
-/** The bar's own margins; the title aligns with the reading under it. */
-private val BarStart = 20.dp
-private val BarEnd = 8.dp
 
 /** Which sheet is over the reader, if any. */
 private enum class ReaderSheet { None, Browse, Search, Settings }
@@ -326,8 +322,8 @@ fun ReaderScreen(
                 Row(
                     modifier = Modifier
                         .padding(horizontal = 24.dp)
-                        .floatingLift(Radii.Sheet)
-                        .clip(Radii.Sheet)
+                        .floatingLift(Radii.Card)
+                        .clip(Radii.Card)
                         // A control that floats over the reading wears the
                         // floating tone and a soft lift, not the sheet's own
                         // surface: the page runs around it, and it has to read
@@ -348,7 +344,7 @@ fun ReaderScreen(
                     IconGlyph(
                         icon = Icon.More,
                         tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(18.dp),
+                        modifier = Modifier.size(GlyphSize.Action),
                     )
                     Text(
                         text = stringResource(R.string.hint_long_press_ayah),
@@ -399,7 +395,7 @@ fun ReaderScreen(
                 onTouch = { touch++ },
                 onReciter = { viewModel.choosePillReciter(it) },
                 reciterId = settings.recitation,
-                reciterName = shortReciterName(
+                reciterName = reciterShortName(
                     settings.recitation,
                     viewModel.recitations.firstOrNull { it.id == settings.recitation }?.name.orEmpty(),
                 ),

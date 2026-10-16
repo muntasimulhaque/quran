@@ -1,6 +1,5 @@
 package io.github.muntasimulhaque.quran.ui.playback
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -16,19 +15,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
+import io.github.muntasimulhaque.quran.ui.reader.Icon
+import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /**
@@ -152,6 +149,22 @@ internal fun PillControls(
 /** The glyphs the transport row draws: one shape each, the app's own weight. */
 internal enum class Transport { Play, Pause, Next, Previous, Close }
 
+/**
+ * The app's one drawing for each transport mark. The pill used to carry a
+ * second hand-drawn set beside `IconGlyph`, so the same Play was two
+ * triangles and the Close was two strokes; every mark now comes from the one
+ * set the whole app draws (owner decision, the theme and consistency
+ * session).
+ */
+private val Transport.icon: Icon
+    get() = when (this) {
+        Transport.Play -> Icon.Play
+        Transport.Pause -> Icon.Pause
+        Transport.Next -> Icon.Next
+        Transport.Previous -> Icon.Previous
+        Transport.Close -> Icon.Close
+    }
+
 /** Hand-drawn transport controls, one shape each, at the app's 48 dp target. */
 @Composable
 internal fun TransportButton(kind: Transport, description: String, onClick: () -> Unit) {
@@ -179,73 +192,10 @@ internal fun TransportButton(kind: Transport, description: String, onClick: () -
             },
         contentAlignment = Alignment.Center,
     ) {
-        Canvas(Modifier.size(20.dp)) {
-            val w = size.width
-            val h = size.height
-            when (kind) {
-                Transport.Play -> drawPath(
-                    Path().apply {
-                        moveTo(w * 0.24f, h * 0.14f)
-                        lineTo(w * 0.86f, h * 0.5f)
-                        lineTo(w * 0.24f, h * 0.86f)
-                        close()
-                    },
-                    tint,
-                )
-                Transport.Pause -> {
-                    drawRoundRect(
-                        color = tint,
-                        topLeft = Offset(w * 0.24f, h * 0.14f),
-                        size = Size(w * 0.18f, h * 0.72f),
-                        cornerRadius = CornerRadius(w * 0.06f),
-                    )
-                    drawRoundRect(
-                        color = tint,
-                        topLeft = Offset(w * 0.58f, h * 0.14f),
-                        size = Size(w * 0.18f, h * 0.72f),
-                        cornerRadius = CornerRadius(w * 0.06f),
-                    )
-                }
-                Transport.Next -> {
-                    drawPath(
-                        Path().apply {
-                            moveTo(w * 0.14f, h * 0.16f)
-                            lineTo(w * 0.62f, h * 0.5f)
-                            lineTo(w * 0.14f, h * 0.84f)
-                            close()
-                        },
-                        tint,
-                    )
-                    drawRoundRect(
-                        color = tint,
-                        topLeft = Offset(w * 0.66f, h * 0.16f),
-                        size = Size(w * 0.14f, h * 0.68f),
-                        cornerRadius = CornerRadius(w * 0.05f),
-                    )
-                }
-                Transport.Previous -> {
-                    drawRoundRect(
-                        color = tint,
-                        topLeft = Offset(w * 0.20f, h * 0.16f),
-                        size = Size(w * 0.14f, h * 0.68f),
-                        cornerRadius = CornerRadius(w * 0.05f),
-                    )
-                    drawPath(
-                        Path().apply {
-                            moveTo(w * 0.86f, h * 0.16f)
-                            lineTo(w * 0.38f, h * 0.5f)
-                            lineTo(w * 0.86f, h * 0.84f)
-                            close()
-                        },
-                        tint,
-                    )
-                }
-                Transport.Close -> {
-                    val stroke = w * 0.11f
-                    drawLine(tint, Offset(w * 0.22f, h * 0.22f), Offset(w * 0.78f, h * 0.78f), stroke)
-                    drawLine(tint, Offset(w * 0.78f, h * 0.22f), Offset(w * 0.22f, h * 0.78f), stroke)
-                }
-            }
-        }
+        IconGlyph(
+            icon = kind.icon,
+            tint = tint,
+            modifier = Modifier.size(GlyphSize.Transport),
+        )
     }
 }

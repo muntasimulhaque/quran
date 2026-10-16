@@ -42,6 +42,7 @@
 
     <string name="settings_downloaded_label">ডাউনলোড করা সূরা (%1$d)</string>
     <string name="settings_downloaded_empty">এই তিলাওয়াতকারীর জন্য এখনও কোনো সূরা ডাউনলোড হয়নি। যেকোনো আয়াতে প্লে ট্যাপ করে একটি যোগ করুন।</string>
+    <string name="settings_downloaded_remove">%1$s সরান</string>
 
     <string name="pack_included_suffix">অন্তর্ভুক্ত</string>
     <string name="pack_action_add">যোগ করুন</string>
@@ -97,16 +98,11 @@
     <string name="settings_version_short">সংস্করণ %1$s</string>
     <string name="settings_none_yet">এখনও যোগ করা হয়নি</string>
     <string name="settings_chosen_count">%1$dটি বেছে নেওয়া</string>
-    <string name="settings_group_theme">থিম</string>
-    <string name="settings_group_sizes">ফন্ট সাইজ</string>
     <string name="settings_size_arabic">কুরআনের আয়াত</string>
     <string name="settings_size_translation">অনুবাদ</string>
     <string name="settings_size_tafsir">তাফসীর</string>
     <string name="settings_size_words">শব্দের অর্থ</string>
-    <string name="settings_group_reciters">তিলাওয়াতকারী</string>
-    <string name="settings_group_translations">অনুবাদ</string>
     <string name="settings_translation_hidden">পাঠে অনুবাদ দেখানো হচ্ছে না</string>
-    <string name="settings_group_tafsirs">তাফসীর</string>
     <string name="settings_tafsir_hidden">পাঠে তাফসীর দেখানো হচ্ছে না</string>
     <string name="settings_group_about">অ্যাপ</string>
     <string name="settings_back">ফিরে যান</string>

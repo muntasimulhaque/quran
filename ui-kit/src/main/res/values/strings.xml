@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     The sheet's handle, named for a screen reader. The bar is a picture of
-     the drag the sheet itself answers, and Material names its own handle the
-     same way, so the pattern a TalkBack reader has already met elsewhere is
-     the pattern here.
+     The sheet's handle, named for a screen reader, and the reciters, named
+     the way a reader says them. The names live here because the pill, the
+     offer, and the settings list all draw them, and a Bangla reader must not
+     meet a Latin name in one place and a Bengali one in another.
 -->
 <resources>
     <string name="sheet_handle">Sheet handle</string>
+    <string name="reciter_minshawi">Minshawi</string>
+    <string name="reciter_husary">Husary</string>
+    <string name="reciter_husary_muallim">Husary Muallim</string>
+    <string name="reciter_husary_mujawwad">Husary Mujawwad</string>
 </resources>

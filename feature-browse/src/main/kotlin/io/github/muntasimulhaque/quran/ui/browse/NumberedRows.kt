@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -12,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -28,6 +30,9 @@ import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
+import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
+import io.github.muntasimulhaque.quran.ui.reader.Icon
+import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import java.util.Locale
@@ -127,7 +132,7 @@ internal fun SurahNameBlock(
             ),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 2.dp),
+            modifier = Modifier.padding(top = Space.Tight),
         )
     }
 }
@@ -162,7 +167,7 @@ internal fun SurahRow(
         modifier = Modifier
             .fillMaxWidth()
             .sheetRow(onClick = onClick)
-            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = 11.dp)
+            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = Space.Row)
             .testTag("surah-row-${surah.number}"),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -178,6 +183,17 @@ internal fun SurahRow(
         )
         SurahNameBlock(surah, Modifier.weight(1f))
         SurahArabicName(surah)
+        // A row that opens its surah is a door, and every door in the app
+        // ends in the one chevron mark (owner decision, the theme and
+        // consistency session).
+        IconGlyph(
+            icon = Icon.Chevron,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .padding(start = Space.Tight)
+                .size(GlyphSize.ChevronRow)
+                .rotate(-90f),
+        )
     }
 }
 
@@ -194,7 +210,7 @@ internal fun JuzRow(
         modifier = Modifier
             .fillMaxWidth()
             .sheetRow(onClick = onJuz)
-            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = 13.dp)
+            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = Space.Row)
             .testTag("juz-row-$juz"),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -210,16 +226,25 @@ internal fun JuzRow(
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            Text(
-                text = if (reference.isEmpty()) {
-                    ""
-                } else {
-                    stringResource(R.string.juz_starts_at, surahName, reference)
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 2.dp),
-            )
+            // A juz with no place to name draws no line: an empty Text was
+            // one more line of the row's own rhythm with nothing in it
+            // (owner decision, the theme and consistency session).
+            if (reference.isNotEmpty()) {
+                Text(
+                    text = stringResource(R.string.juz_starts_at, surahName, reference),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = Space.Tight),
+                )
+            }
         }
+        IconGlyph(
+            icon = Icon.Chevron,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .padding(start = Space.Tight)
+                .size(GlyphSize.ChevronRow)
+                .rotate(-90f),
+        )
     }
 }

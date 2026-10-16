@@ -36,6 +36,6 @@
     <string name="notes_detail">নোট লেখা %1$s</string>
     <string name="saved_detail">সংরক্ষণ করা %1$s</string>
     <string name="saved_reference_fallback">আয়াত %1$d</string>
-    <string name="action_remove">মুছুন</string>
+    <string name="action_remove">সরান</string>
     <string name="action_forget">মুছুন</string>
 </resources>

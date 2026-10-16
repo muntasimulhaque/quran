@@ -14,6 +14,7 @@ import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
  * One pack in a list of choices: a mark for its state, its name, and the one
@@ -96,13 +97,17 @@ private fun PackTrailing(
                 } else {
                     stringResource(R.string.settings_pack_downloading, (setup.progress * 100).toInt())
                 },
-                style = MaterialTheme.typography.labelMedium,
+                // The same value style every row's status wears: the hub
+                // draws this download as bodySmall under its name, and the
+                // same fact must not change size between the two doors
+                // (owner decision, the theme and consistency session).
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             TextButton(
                 label = stringResource(R.string.settings_cancel),
                 onClick = onCancel,
-                modifier = Modifier.padding(start = 8.dp),
+                modifier = Modifier.padding(start = Space.Row),
                 quiet = true,
             )
         }

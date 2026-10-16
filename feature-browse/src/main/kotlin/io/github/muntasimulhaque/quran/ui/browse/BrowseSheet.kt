@@ -17,11 +17,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -211,6 +211,12 @@ fun BrowseSheet(
         sheetState = sheetState,
         dragHandle = { SheetHandle() },
         containerColor = MaterialTheme.colorScheme.surface,
+        // Browse is a reading list, not a full-bleed grid: it keeps the same
+        // 65-character column Settings, Search, and the ayah card keep, so a
+        // ten inch screen centers a readable page instead of running every
+        // surah row and every grid cell edge to edge (owner decision, the
+        // theme and consistency session).
+        sheetMaxWidth = Reading.SheetMeasure,
     ) {
         // The grid is one level inside the sheet, so the phone's back returns
         // to the surah list before it leaves the sheet: the same two-level
@@ -260,12 +266,11 @@ fun BrowseSheet(
                 FlowRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 16.dp, end = 16.dp, top = Space.Block),
-                    // A tab is the same 32 dp chip inside a 48 dp target, so
-                    // the flow's own 8 dp would leave 24 dp between wrapped
-                    // rows against 8 dp between columns. 0 here keeps the two
-                    // ends of a wrap at the same rhythm the search filters
-                    // wear (owner report, this session).
+                        .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Block),
+                    // The tabs are centered where the search filters start at
+                    // the left: tabs are the sheet's own navigation, and
+                    // filters apply to a list below them (owner decision,
+                    // the theme and consistency session).
                     horizontalArrangement = Arrangement.spacedBy(Space.Line, Alignment.CenterHorizontally),
                     verticalArrangement = Arrangement.spacedBy(0.dp),
                 ) {
@@ -277,14 +282,14 @@ fun BrowseSheet(
                         )
                     }
                 }
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Space.Line))
                 when (tab) {
                     BrowseTab.Surahs -> LazyColumn(
                         state = surahsList,
                         modifier = Modifier
                             .sheetDragGate(surahsGate)
                             .testTag("browse-surahs"),
-                        contentPadding = PaddingValues(bottom = 28.dp),
+                        contentPadding = PaddingValues(bottom = Space.SheetFoot),
                     ) {
                         items(surahs, key = { it.number }) { surah ->
                             SurahRow(surah, surahNumberWidth) { gridSurah = surah.number }
@@ -295,7 +300,7 @@ fun BrowseSheet(
                         modifier = Modifier
                             .sheetDragGate(juzGate)
                             .testTag("browse-juz"),
-                        contentPadding = PaddingValues(bottom = 28.dp),
+                        contentPadding = PaddingValues(bottom = Space.SheetFoot),
                     ) {
                         itemsIndexedCompat(juzStarts) { index, start ->
                             val surah = surahs.firstOrNull { it.number == start.surah }
@@ -359,7 +364,11 @@ private fun BrowseTabChip(
     }
     Box(
         modifier = modifier
-            .clickable(
+            // selectable, not clickable: a chosen tab must say it is chosen
+            // to TalkBack the way the app's other single choices do (owner
+            // decision, the theme and consistency session).
+            .selectable(
+                selected = active,
                 interactionSource = press,
                 indication = null,
                 role = Role.RadioButton,
@@ -379,7 +388,7 @@ private fun BrowseTabChip(
                     },
                 )
                 .indication(press, ripple(color = ink))
-                .padding(horizontal = 14.dp, vertical = 8.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp),
         ) {
             Text(
                 text = label,

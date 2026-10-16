@@ -81,20 +81,7 @@ fun LanguageWelcome(
                 .padding(horizontal = 28.dp, vertical = 36.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = stringResource(R.string.first_paint_title),
-                style = TextStyle(
-                    fontFamily = Amiri,
-                    fontSize = 54.sp,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.9f),
-                ),
-            )
-            Text(
-                text = stringResource(R.string.first_paint_subtitle),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 8.dp),
-            )
+            Masthead()
             Text(
                 text = stringResource(R.string.welcome_title),
                 style = MaterialTheme.typography.titleLarge,
@@ -209,20 +196,7 @@ fun WelcomeReminder(
                 .padding(horizontal = 28.dp, vertical = 36.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = stringResource(R.string.first_paint_title),
-                style = TextStyle(
-                    fontFamily = Amiri,
-                    fontSize = 54.sp,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.9f),
-                ),
-            )
-            Text(
-                text = stringResource(R.string.first_paint_subtitle),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 8.dp),
-            )
+            Masthead()
             Text(
                 text = stringResource(R.string.welcome_reminder_title),
                 style = MaterialTheme.typography.titleLarge,

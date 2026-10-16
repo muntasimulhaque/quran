@@ -2,6 +2,8 @@ package io.github.muntasimulhaque.quran.ui.playback
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.ListenOffer
 import io.github.muntasimulhaque.quran.ui.kit.DownloadLine
+import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
@@ -54,6 +58,7 @@ internal fun ListenOfferBar(
 ) {
     var chooser by remember { mutableStateOf(false) }
     val progress = offer.progress
+    val press = remember { MutableInteractionSource() }
     Column(
         modifier = modifier
             .floatingLift(Radii.Pill)
@@ -88,19 +93,26 @@ internal fun ListenOfferBar(
             Column(
                 modifier = Modifier
                     .weight(1f, fill = false)
-                    .clip(Radii.Pill)
-                    .clickable(enabled = progress == null, role = Role.Button) { chooser = true }
-                    // The name and the size are the door to the other
-                    // reciters, and a door owes the finger the app's 48 dp:
-                    // the row around them is already tall enough that the
-                    // target grows into room that was there (owner decision,
-                    // this session).
+                    // The click owns the 48 dp node, the ripple draws on the
+                    // capsule inside it, and the mark keeps its gap from its
+                    // word: the same order the playing pill's reciter door is
+                    // built in, so one tap flashes one shape in the two homes
+                    // of one chooser (owner decision, the theme and
+                    // consistency session).
+                    .clickable(
+                        enabled = progress == null,
+                        role = Role.Button,
+                        interactionSource = press,
+                        indication = null,
+                    ) { chooser = true }
                     .minimumInteractiveComponentSize()
+                    .clip(Radii.Pill)
+                    .indication(press, ripple(color = MaterialTheme.colorScheme.primary))
                     .padding(horizontal = 4.dp, vertical = 2.dp),
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = offer.reciterName,
+                        text = reciterShortName(offer.reciter, offer.reciterName),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
                         maxLines = 1,

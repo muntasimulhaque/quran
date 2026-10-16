@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 7.5 (versionCode 77)
+Version: 7.6 (versionCode 78)
 
 ## Listing
 
@@ -94,8 +94,8 @@ uniform line art on the reference's own reading: the pages are sail arcs
 diving into a spine that ends at the V where the two pages meet, each plank
 folds onto the page's outer edge, runs down beside the book, crosses below
 it, and its leg and the closing arc meet at one shared tip, so each foot is
-one clean tapered face. The whole drawing is in the theme's ink `#2A241B` on
-the theme's paper `#F1E9DA`, one line weight on every icon surface, the
+one clean tapered face. The whole drawing is in the theme's ink `#2A2620` on
+the theme's paper `#FBF9F4`, one line weight on every icon surface, the
 color the reader already sees inside the app; the cover's burgundy belongs
 to the cover and the ornament gold stays the feature graphic's frame and
 rule. The launcher
@@ -136,8 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (7.5, 300 characters)
-The end of a surah no longer flashes a rectangle across the Surah complete line and the next-surah card. When a search begins, the source list folds away so the results have the room, and one tap opens it again. Pinching the page no longer changes the text size; the five text sizes live in Settings.
+## Release notes (7.6, 430 characters)
+A new page for long reading: a warm white day theme and a warm charcoal night theme, softer and easier on the eyes. The reading's Arabic is one size system now, so quotations in the translation and tafsir read at the Quran's own size, and word meanings and tafsir headings share the reading face. Lists and sheets received a consistency pass: one column on tablets, one chevron for every row that opens, and one rhythm throughout.
 
 ## Before each release
 

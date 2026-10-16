@@ -128,7 +128,7 @@ fun SettingsSheet(
                 .widthIn(max = Reading.SheetMeasure)
                 .fillMaxWidth()
                 .imePadding()
-                .padding(bottom = 30.dp),
+                .padding(bottom = Space.SheetFoot),
         ) {
             val open = page
             if (open == null) {

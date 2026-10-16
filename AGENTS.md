@@ -411,11 +411,13 @@ implement it and update this list.
   of the one state a reader could not explain (a Night choice shown as the day
   page). The ring stands on the stored choice on every phone: with System
   chosen the ring is on System and never on Light or Dark, and the hub row
-  names the stored choice too (owner decision). The warm paper and lamplight pigments were retuned for the long read
-  (owner decision, this session): the day page is a deeper parchment and the
-  night page a warm charcoal, less brown than the first night page and lifted
-  off pure black, with the ornament gold and the night accent moved to keep
-  their measured margins.
+  names the stored choice too (owner decision). The warm paper and lamplight pigments were retuned once more in the theme and consistency session
+  (owner decision, this session): the day page is a warm white (`#FBF9F4`,
+  sheet `#FFFFFF`) and the night page a warm charcoal (`#1C1A18`, sheet
+  `#242220`), because the deeper parchment read as sepia across every
+  surface; the manuscript's warmth now lives in the ink, the gold, and the
+  hairlines, and the night gold and quiet voice were lifted to clear their
+  measured margins.
 - Saheeh International is the only translation.
 - Ibn Kathir is the tafsir.
 - Minshawi and Husary are the only reciters, and Husary is the reciter of
@@ -450,7 +452,7 @@ implement it and update this list.
 - Continue to the next surah is off by default and is the reader's one-time
   word for the packages that follow the surah being heard.
 - What happens at the end of the audio is one answer, drawn as one list
-  with one leading radio mark and one 24 dp gap, in the pill's own listening
+  with one leading radio mark and one 16 dp gap, in the pill's own listening
   menu (owner decision, 4.5; the mark and the gap are the app's one choice
   row, owner decision, forty-eighth session; it lives in the pill alone, the
   Listening settings page removed as a duplicate of it, owner decision, this
@@ -474,12 +476,12 @@ implement it and update this list.
   where the two pages meet, each plank folds onto the page's outer edge, runs
   down beside the book, crosses below it, and its leg and the closing arc
   meet at one shared tip, so each foot is one clean tapered face; the whole
-  drawing in the theme's ink on the theme's paper, `#2A241B` on `#F1E9DA`,
+  drawing in the theme's ink on the theme's paper, `#2A2620` on `#FBF9F4`,
   at one line weight on every icon surface, with the pages filled in the
   paper so the book occludes the stand behind it and a paper margin keeps the
   stand's lines clear of the book's edge (owner decision, this session: the
   stand's ornament gold was a 5.3:1 line the small sizes lost first, so the
-  icon keeps one ink at 12.7:1 and the gold keeps the feature graphic's
+  icon keeps one ink at 14.3:1 on the warm white page and the gold keeps the feature graphic's
   frame and rule and the app's own ornament; the drawing follows the
   reference's own reading, and
   the foot closes at the leg's own tip so no sliver of mouth knots the
