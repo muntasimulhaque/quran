@@ -116,7 +116,7 @@ caption keeps air above the frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is refreshed for 7.7 from capture run 38904617624: all three legs green with eight frames each, and every frame compared with the previous set by `cmp`. Fifteen frames changed: the five sheet frames on the 7 inch tablet, where Search, Browse, Settings, the ayah card, and the tafsir now fill the screen edge to edge, and Search and Settings on the 10 inch tablet, now centered on the app's one page. The remaining differences are the status bar clock and the search field's caret; the phone's sheets are pixel for pixel unchanged. Every changed frame was read, and the set is installed whole.
+The set is refreshed for 7.8 from capture run 38933504506: all three legs green with eight frames each, and every frame compared with the previous set by `cmp`. Fifteen frames differ, and the app's own change is in four of them: the three Browse frames, where the chevron is gone from every row, and the 7 inch settings frame, where the About row names 7.8. The remaining difference is the status bar clock on every changed frame and the search field's caret on the two smaller forms. Every changed frame was read, and the set is installed whole.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
