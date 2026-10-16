@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -21,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
@@ -36,6 +38,7 @@ import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
+import io.github.muntasimulhaque.quran.ui.kit.rememberSheetWidth
 import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 import kotlinx.coroutines.Dispatchers
@@ -183,15 +186,17 @@ fun SearchSheet(
         sheetState = sheetState,
         dragHandle = { SheetHandle() },
         containerColor = MaterialTheme.colorScheme.surface,
-        // The snippets are the one prose the sheet draws, and they take the
-        // same character measure as the reading: about 65 characters at the
-        // 14 sp they are set in, rather than the 85 the default 640 dp sheet
-        // gave them on a tablet (owner report, the audio and type audit
-        // session).
-        sheetMaxWidth = Reading.SearchMeasure,
+        // The sheet is the app's one page, and the results are the one prose
+        // it draws: they keep their own 65-character column at the 14 sp they
+        // are set in, centered on the page the way the reading's text stands
+        // on its paper (owner report, the audio and type audit session; owner
+        // decision, this session).
+        sheetMaxWidth = rememberSheetWidth(),
     ) {
         Column(
             modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .widthIn(max = Reading.SearchMeasure)
                 .fillMaxSize()
                 .imePadding(),
         ) {

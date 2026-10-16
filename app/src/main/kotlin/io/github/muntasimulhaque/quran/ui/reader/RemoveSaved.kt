@@ -24,8 +24,8 @@ import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
+import io.github.muntasimulhaque.quran.ui.kit.rememberSheetWidth
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
-import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -50,9 +50,9 @@ fun RemoveSavedSheet(
         sheetState = sheetState,
         dragHandle = { SheetHandle() },
         containerColor = MaterialTheme.colorScheme.surface,
-        // The note is reading prose, and the question keeps the reading's
-        // own column (owner decision, the theme and consistency session).
-        sheetMaxWidth = Reading.MaxMeasure + Space.Gutter * 2,
+        // The question stands on the app's one page (owner decision, this
+        // session).
+        sheetMaxWidth = rememberSheetWidth(),
     ) {
         Column(
             modifier = Modifier

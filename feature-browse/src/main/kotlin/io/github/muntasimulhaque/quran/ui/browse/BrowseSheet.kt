@@ -55,7 +55,7 @@ import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
-import io.github.muntasimulhaque.quran.ui.theme.Reading
+import io.github.muntasimulhaque.quran.ui.kit.rememberSheetWidth
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
@@ -211,12 +211,12 @@ fun BrowseSheet(
         sheetState = sheetState,
         dragHandle = { SheetHandle() },
         containerColor = MaterialTheme.colorScheme.surface,
-        // Browse is a reading list, not a full-bleed grid: it keeps the same
-        // 65-character column Settings, Search, and the ayah card keep, so a
-        // ten inch screen centers a readable page instead of running every
-        // surah row and every grid cell edge to edge (owner decision, the
-        // theme and consistency session).
-        sheetMaxWidth = Reading.SheetMeasure,
+        // Browse is a reading list, not a full-bleed grid: it stands on the
+        // app's one page, so a ten inch screen centers a readable page
+        // instead of running every surah row and every grid cell edge to
+        // edge, and the seven inch tablet fills its window (owner decision,
+        // this session).
+        sheetMaxWidth = rememberSheetWidth(),
     ) {
         // The grid is one level inside the sheet, so the phone's back returns
         // to the surah list before it leaves the sheet: the same two-level

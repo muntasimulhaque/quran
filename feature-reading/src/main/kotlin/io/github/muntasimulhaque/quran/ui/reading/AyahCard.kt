@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -55,6 +56,7 @@ import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
+import io.github.muntasimulhaque.quran.ui.kit.rememberSheetWidth
 import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
@@ -142,20 +144,18 @@ fun AyahCard(
         }
     }
 
-    // The card is a page: the tafsir takes the reader's own measure, plus the
-    // gutter each side, so a ten inch screen centers a readable column instead
-    // of stretching one line across the glass. The old widthIn sat behind
-    // fillMaxWidth, which forced the full width first, so the cap never took
-    // effect and a tafsir line ran to about 150 characters on a tablet
-    // (owner report, the audio and type audit session).
-    val sheetWidth = Reading.proseMeasure(LocalReadingVoice.current, settings.tafsirSp) +
-        Space.Gutter * 2
+    // The card is the app's one page. The tafsir inside it keeps the reader's
+    // own measure, centered on the page, so a ten inch screen centers a
+    // readable column instead of stretching one line across the glass, and a
+    // reader who changes the tafsir size gets more lines, never a longer line
+    // (owner report, the audio and type audit session; owner decision, this
+    // session).
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         dragHandle = { SheetHandle() },
         containerColor = MaterialTheme.colorScheme.surface,
-        sheetMaxWidth = sheetWidth,
+        sheetMaxWidth = rememberSheetWidth(),
     ) {
         Column(
             modifier = Modifier
@@ -210,7 +210,12 @@ fun AyahCard(
                         onClick = { door = if (open) null else Door.Tafsir(pack) },
                     )
                     if (open) {
-                        Box(Modifier.padding(horizontal = 22.dp, vertical = Space.Line)) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 22.dp, vertical = Space.Line),
+                            contentAlignment = Alignment.Center,
+                        ) {
                             val view = passages[pack.id]
                             if (view == null) {
                                 Text(
@@ -295,6 +300,7 @@ private fun DoorRow(
 private fun TafsirPanel(view: TafsirView, settings: AppSettings) {
     Column(
         modifier = Modifier
+            .widthIn(max = Reading.proseMeasure(LocalReadingVoice.current, settings.tafsirSp))
             .fillMaxWidth()
             .testTag("tafsir-panel")
             .padding(top = Space.Tight),
@@ -339,11 +345,10 @@ fun AyahNoteSheet(
         sheetState = sheetState,
         dragHandle = { SheetHandle() },
         containerColor = MaterialTheme.colorScheme.surface,
-        // The note is prose: it keeps the reading's own measure, the same
-        // column the ayah card keeps (owner decision, the theme and
-        // consistency session).
-        sheetMaxWidth = Reading.proseMeasure(LocalReadingVoice.current, settings.translationSp) +
-            Space.Gutter * 2,
+        // The note is prose: it keeps its own measure, centered on the app's
+        // one page, so a reader who changes the size gets more lines and
+        // never a longer one (owner decision, this session).
+        sheetMaxWidth = rememberSheetWidth(),
     ) {
         Column(
             modifier = Modifier
@@ -353,6 +358,7 @@ fun AyahNoteSheet(
                 // note never bounces the sheet on its top anchor.
                 .sheetVerticalScroll(rememberScrollState())
                 .padding(bottom = Space.SheetFoot),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             NoteEditor(
                 initial = note,
@@ -380,6 +386,7 @@ private fun NoteEditor(
     }
     Column(
         modifier = Modifier
+            .widthIn(max = Reading.proseMeasure(LocalReadingVoice.current, settings.translationSp))
             .fillMaxWidth()
             .padding(horizontal = 22.dp, vertical = 10.dp),
     ) {

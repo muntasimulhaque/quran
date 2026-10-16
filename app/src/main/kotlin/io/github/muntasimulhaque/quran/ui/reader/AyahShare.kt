@@ -68,10 +68,10 @@ import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
+import io.github.muntasimulhaque.quran.ui.kit.rememberSheetWidth
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.Radii
-import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Gold
 import io.github.muntasimulhaque.quran.ui.theme.Lapis
 import io.github.muntasimulhaque.quran.ui.theme.PaperBackground
@@ -507,10 +507,10 @@ internal fun AyahShareSheet(
         sheetState = sheetState,
         dragHandle = { SheetHandle() },
         containerColor = MaterialTheme.colorScheme.surface,
-        // The preview and its buttons keep the reading's own column: the two
+        // The preview and its buttons stand on the app's one page: the two
         // weighted buttons stretched the full width of a ten inch screen
-        // (owner decision, the theme and consistency session).
-        sheetMaxWidth = Reading.MaxMeasure + Space.Gutter * 2,
+        // (owner decision, the theme and consistency session; this session).
+        sheetMaxWidth = rememberSheetWidth(),
     ) {
         Column(
             modifier = Modifier

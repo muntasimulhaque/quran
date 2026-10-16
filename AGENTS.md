@@ -432,6 +432,13 @@ implement it and update this list.
 - The design direction is the manuscript language: the page is the
   interface, chrome is summoned and never resident, one accent, hairlines
   over boxes.
+- Every sheet is the app's one page, `Reading.SheetMeasure`: Search, Browse,
+  Settings, the ayah card, the note, the footnote, the share, and the remove
+  question all stand on it, and Search's results keep their own 65-character
+  column centered inside it. A window whose margin around the page would be
+  under `Space.Section` a side takes the whole window instead, so the seven
+  inch tablet fills edge to edge and the ten inch screen centers on the
+  reading's own page (owner decision, this session).
 - Content is sourced from QUL and QuranEnc, with every license
   honored on the About page itself. The credits stand there, always visible,
   not behind a door (owner decision, this session): every license is honored

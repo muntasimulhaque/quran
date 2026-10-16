@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 7.6 (versionCode 78)
+Version: 7.7 (versionCode 79)
 
 ## Listing
 
@@ -136,8 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (7.6, 430 characters)
-A new page for long reading: a warm white day theme and a warm charcoal night theme, softer and easier on the eyes. The reading's Arabic is one size system now, so quotations in the translation and tafsir read at the Quran's own size, and word meanings and tafsir headings share the reading face. Lists and sheets received a consistency pass: one column on tablets, one chevron for every row that opens, and one rhythm throughout.
+## Release notes (7.7, 362 characters)
+One page for every sheet. Search, Browse, Settings, the ayah card, notes, footnotes, and share now take one width: a 7 inch tablet fills the screen edge to edge, and a 10 inch screen centers the page the way the reading centers its column, so the width no longer changes from one surface to the next. Search keeps a comfortable line length, centered on the page.
 
 ## Before each release
 

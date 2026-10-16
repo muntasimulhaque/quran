@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -11,6 +12,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -22,6 +24,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
+import io.github.muntasimulhaque.quran.ui.kit.rememberSheetWidth
 
 /**
  * A footnote the reader opened, with the ayah it belongs to and the size of
@@ -62,16 +65,17 @@ internal fun FootnoteSheet(
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // A note is prose, and a prose line has a measure: the footnote keeps its
+    // own 65-character column, centered on the app's one page, so a reader
+    // who changes the size gets more lines and never a longer one (owner
+    // decision, the theme and consistency session; this session).
+    val prose = Reading.proseMeasure(LocalReadingVoice.current, sizeSp)
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         dragHandle = { SheetHandle() },
         containerColor = MaterialTheme.colorScheme.surface,
-        // A note is prose, and a prose line has a measure: the sheet keeps
-        // the same 65-character column every other reading surface keeps,
-        // where it used to run the full width of a ten inch screen (owner
-        // decision, the theme and consistency session).
-        sheetMaxWidth = Reading.proseMeasure(LocalReadingVoice.current, sizeSp) + Space.Gutter * 2,
+        sheetMaxWidth = rememberSheetWidth(),
     ) {
         Column(
             modifier = Modifier
@@ -81,6 +85,7 @@ internal fun FootnoteSheet(
                 // short footnote never bounces the sheet on its top anchor.
                 .sheetVerticalScroll(rememberScrollState())
                 .padding(start = Space.Gutter, end = Space.Gutter, bottom = Space.SheetFoot),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
                 text = stringResource(R.string.reading_footnote_title, footnote.number, surahName, reference),
@@ -90,6 +95,9 @@ internal fun FootnoteSheet(
                 // reference line on the reading wears the secondary tone
                 // (owner decision, the theme and consistency session).
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .widthIn(max = prose)
+                    .fillMaxWidth(),
             )
             Text(
                 text = footnote.text,
@@ -104,7 +112,10 @@ internal fun FootnoteSheet(
                     fontFamily = LocalReadingVoice.current.atSize(sizeSp),
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(top = Space.Block),
+                modifier = Modifier
+                    .widthIn(max = prose)
+                    .fillMaxWidth()
+                    .padding(top = Space.Block),
             )
         }
     }
