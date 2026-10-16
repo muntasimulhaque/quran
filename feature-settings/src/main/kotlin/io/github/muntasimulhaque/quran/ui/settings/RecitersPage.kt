@@ -117,6 +117,13 @@ fun RecitersPage(
  * disclosure arrow, so the surahs read as belonging to the reciter above them
  * rather than to the list at large. The label is a door: it opens and closes,
  * and it says so with the arrow the rest of the app uses for a door.
+ *
+ * The door is drawn from the first frame, before the count lands, at the
+ * height the page will keep: the files are counted on a worker, and a door
+ * that appeared when the count arrived would grow the sheet under the reader
+ * and shift every row above it (owner decision, this session). While the
+ * count is on its way the label carries no number, so the count appears in
+ * place as a text change that moves nothing.
  */
 @Composable
 private fun ReciterDownloads(
@@ -130,8 +137,8 @@ private fun ReciterDownloads(
     LaunchedEffect(recitation) {
         downloaded = downloadedSurahs(recitation).sortedBy { it.surah }
     }
+    ReciterDownloadsDoor(open = open, count = downloaded?.size) { open = !open }
     val rows = downloaded ?: return
-    ReciterDownloadsDoor(open = open, count = rows.size) { open = !open }
     if (!open) return
     if (rows.isEmpty()) {
         Text(
@@ -162,12 +169,14 @@ private fun ReciterDownloads(
 }
 
 /**
- * The door to one reciter's downloaded surahs. Its name never changes; the
- * arrow beside it turns to say whether the list is open, so the door says
- * what it opens rather than what a tap will do.
+ * The door to one reciter's downloaded surahs. The arrow beside it turns to
+ * say whether the list is open, so the door says what it opens rather than
+ * what a tap will do. The count is null while the files are being counted,
+ * and the label then says the one thing it can honestly say (owner decision,
+ * this session).
  */
 @Composable
-private fun ReciterDownloadsDoor(open: Boolean, count: Int, onClick: () -> Unit) {
+private fun ReciterDownloadsDoor(open: Boolean, count: Int?, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -180,7 +189,11 @@ private fun ReciterDownloadsDoor(open: Boolean, count: Int, onClick: () -> Unit)
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = stringResource(R.string.settings_downloaded_label, count),
+            text = if (count == null) {
+                stringResource(R.string.settings_downloaded_label_counting)
+            } else {
+                stringResource(R.string.settings_downloaded_label, count)
+            },
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary,
         )

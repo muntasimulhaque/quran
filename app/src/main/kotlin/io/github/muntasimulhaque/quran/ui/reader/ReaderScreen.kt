@@ -492,6 +492,9 @@ fun ReaderScreen(
             // English meanings in the results.
             wordsPack = wordsPack,
             wordsInstalled = content.installedPack(wordsPack),
+            // The reader's own Arabic step, so a reader who enlarged the
+            // Quran's text reads the results at the same preference.
+            arabicStep = settings.arabicSize,
             onDismiss = { sheet = ReaderSheet.None },
             onAyah = { ayah ->
                 sheet = ReaderSheet.None

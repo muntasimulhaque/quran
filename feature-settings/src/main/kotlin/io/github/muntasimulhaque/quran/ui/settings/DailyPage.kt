@@ -218,7 +218,6 @@ private fun DailyTimeDialog(
                 label = stringResource(R.string.settings_cancel),
                 onClick = onDismiss,
                 quiet = true,
-                modifier = Modifier.padding(end = 8.dp),
             )
         },
         confirmButton = {

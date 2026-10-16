@@ -375,8 +375,12 @@ implement it and update this list.
 
 - The name and the three strings are frozen.
 - A settings row's value is under its name, on every row in the sheet, and
-  never in a column at the right; a row that opens something ends in a
-  chevron, whatever page it is on.
+  never in a column at the right; a settings row that opens something ends in
+  a chevron, whatever page it is on. The four Browse lists are the one
+  exception (owner decision, this session): the items in Surahs, Juz, Last
+  Read, and Saved draw no chevron, because a list of names is read by its
+  names and the mark on every line was noise. The back mark on the surah
+  grid stays, since it answers a tap rather than describing a door.
 - Reader-first, no tab bar.
 - One reading with no mode name. The reader's doors are Browse, Search, and
   Settings; there is no bottom bar and no mode switch (owner decision, this
@@ -399,9 +403,24 @@ implement it and update this list.
   (owner decision, this session).
 - Last Read is the fourth Browse tab beside Surahs, Juz, and Saved, and a
   note lives inside Saved with the ayah it was written on.
+- Last Read is one row per reading, not one per ayah (owner decision, this
+  session): reading on moves the row the reader is in, a deliberate jump
+  joins a reading it lands inside or right beside, and a jump anywhere else
+  starts a new row, even in the same surah. The row shows the latest ayah
+  alone. The old per-ayah table is rebuilt empty on update, because the app
+  has not shipped and the old rows cannot be rebuilt into readings they never
+  recorded.
 - A surah row in Browse opens its own ayah grid; there is no separate Go to
   Ayah tab.
-- Text sizes are 0.75, 0.85, 1, 1.1, 1.2, with 1 the middle step.
+- Text sizes are 0.75, 0.85, 1, 1.1, 1.2, with 1 the middle step. The
+  search results' Arabic follows the reader's Arabic step over its own 22 sp
+  base, while the reading's surfaces carry the sizes directly (owner
+  decision, this session).
+- Two buttons side by side stand 8 dp apart between their pills, on every
+  surface: the share card's two doors, the dialog's Set and Cancel, the
+  search and Browse chips, and the remove question all read one gap. The 8 dp
+  is measured between the shapes the reader sees, not between the invisible
+  48 dp targets (owner decision, this session).
 - The theme is one choice of three: Light, Dark, and System, drawn as one
   swatch row with no switch beside it (owner decision, this session). The
   two grounds keep their names, Light and Dark, the words every phone already

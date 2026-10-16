@@ -228,11 +228,12 @@ internal fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit)
     // 48 dp target, so the source a reader cannot hit is not a source they can
     // turn off (owner decision, the accessibility test): the minimum wraps
     // the pill, the finger gets 48 dp, and the eye gets the chip. The gap the
-    // flow leaves between two chips is the flow's own gap plus the room each
-    // target keeps around its pill, the same rule TextButton and BrowseTabChip
-    // wear. The ripple is drawn on the pill inside the click node, not on the
-    // node itself: an indication left on the click would flash a rectangle
-    // over the shape the reader is looking at.
+    // flow leaves between two chips is the gap the eye reads: a chip's target
+    // is the pill's own width across, so the flow's own Space.Line is what
+    // stands between two chips, the app's one side-by-side rule (owner
+    // decision, this session). The ripple is drawn on the pill inside the
+    // click node, not on the node itself: an indication left on the click
+    // would flash a rectangle over the shape the reader is looking at.
     val press = remember { MutableInteractionSource() }
     val ink = if (on) {
         MaterialTheme.colorScheme.onPrimary

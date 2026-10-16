@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 7.7 (versionCode 79)
+Version: 7.8 (versionCode 80)
 
 ## Listing
 
@@ -136,8 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (7.7, 362 characters)
-One page for every sheet. Search, Browse, Settings, the ayah card, notes, footnotes, and share now take one width: a 7 inch tablet fills the screen edge to edge, and a 10 inch screen centers the page the way the reading centers its column, so the width no longer changes from one surface to the next. Search keeps a comfortable line length, centered on the page.
+## Release notes (7.8, 364 characters)
+Browse's four lists drop the chevron from every row. Last Read now keeps one row per reading instead of one per ayah, so the stretch you are reading stays a single place that follows you, and a jump to another place keeps its own row. Search results' Arabic follows your text size. The reciter page opens without a jump, and side-by-side buttons keep one even gap.
 
 ## Before each release
 

@@ -59,7 +59,7 @@ object TextSize {
     fun sp(role: TypeRole, step: Float): Float = base(role) * step(step)
 
     /** The line height that lets the largest glyph of that text breathe. */
-    fun lineSp(role: TypeRole, step: Float): Float = sp(role, step) * ratio(role)
+    fun lineSp(role: TypeRole, step: Float): Float = sp(role, step) * lineRatio(role)
 
     /**
      * The meaning under a word in the word by word aid. This is the size the
@@ -75,7 +75,7 @@ object TextSize {
      * The line the meaning under a word gets: the prose ratio, the same 1.6
      * every Latin paragraph on the page wears.
      */
-    fun meaningLineSp(step: Float): Float = meaningSp(step) * ratio(TypeRole.Translation)
+    fun meaningLineSp(step: Float): Float = meaningSp(step) * lineRatio(TypeRole.Translation)
 
     /**
      * The Arabic word in the word by word aid, derived from its meaning by
@@ -113,8 +113,14 @@ object TextSize {
         TypeRole.Words -> MEANING_BASE * WORD_MEANING_RATIO
     }
 
-    /** Arabic carries diacritics above and below every line, so it needs more. */
-    private fun ratio(role: TypeRole): Float = when (role) {
+    /**
+     * Arabic carries diacritics above and below every line, so it needs more.
+     * The ratio is public because the search results draw the Quran's own
+     * line outside the reading's sizes and must breathe at the reading's own
+     * ratio, one rule on both surfaces rather than two copies that can drift
+     * (owner decision, this session).
+     */
+    fun lineRatio(role: TypeRole): Float = when (role) {
         // 1.9, decided by the audio and type audit (owner decision, this
         // session): the Hafs face's own line box is 1.758 em (2400 over 1200,
         // at 2048 upm), and at 1.85 the frame of Al-Baqarah 2:254, the ayah

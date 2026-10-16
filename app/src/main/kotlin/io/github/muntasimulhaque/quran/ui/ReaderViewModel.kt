@@ -117,7 +117,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     val content: ContentDatabase? get() = library.database
     val saved: StateFlow<List<SavedAyah>> = savedStore.saved
 
-    /** Where the reader has been reading, newest first. */
+    /** Where the reader has been reading, one row per reading, newest first. */
     val lastRead: StateFlow<List<ReadPlace>> = lastReadStore.places
     val playbackState: StateFlow<PlaybackUiState> = playback.state
 
@@ -288,7 +288,8 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         playback.setEndOfAudio(opening.settings.endOfAudio)
         indexSurahs(opening.surahs)
         juzAt = JuzIndex.of(opening.juzStarts, TOTAL_AYAHS)
-        lastReadStore.record(opening.settings.ayah)
+        val openingAyah = opening.settings.ayah
+        activePlaceId = lastReadStore.record(openingAyah, surahOf(openingAyah)?.number ?: 1)
     }
 
     /** The library turned over: the player attaches to the new one. */
@@ -397,18 +398,23 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
     /**
      * Notes that the reader rested on this ayah. A scroll writes many of
-     * these in a row, so only the last one inside a short window is kept:
-     * the list is places the reader stopped at, not a log of every ayah their
-     * finger crossed. One place per sitting is the intent, and this is what
-     * makes it true when the reader is scrolling.
+     * these in a row, so only the last one inside a short window is kept: the
+     * list is readings the reader moved through, not a log of every ayah
+     * their finger crossed. The reading stays one row: the ayah joins the
+     * reading the reader is in and moves it, wherever the scroll carried
+     * them, even a fling across the surah.
      */
     private fun notePlace(ayah: Int) {
         placeJob?.cancel()
         placeJob = viewModelScope.launch {
             delay(PLACE_SETTLE_MS)
-            lastReadStore.record(ayah)
+            val surah = surahOf(ayah)?.number ?: return@launch
+            activePlaceId = lastReadStore.extend(ayah, surah, activePlaceId)
         }
     }
+
+    /** The reading the reader is in, for the next settle to extend. */
+    private var activePlaceId: Long? = null
 
     private var placeJob: Job? = null
 
@@ -435,13 +441,17 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     fun jumpToAyah(ayah: Int) {
         if (library.database == null) return
         val clamped = ayah.coerceIn(1, 6236)
-        leaveSurah(surahOf(clamped)?.number)
+        val surah = surahOf(clamped)?.number
+        // A settle still in its window belongs to the reading before the
+        // jump; it must not land on the reading this jump is about to select.
+        placeJob?.cancel()
+        leaveSurah(surah)
         // A jump lands on the ayah's own top, so the depth the reader had
         // inside another ayah never follows them here.
         settings = settings.copy(ayah = clamped, ayahOffset = 0)
         viewModelScope.launch {
             settingsStore.setAyah(clamped, 0)
-            lastReadStore.record(clamped)
+            if (surah != null) activePlaceId = lastReadStore.record(clamped, surah)
         }
     }
 
@@ -697,7 +707,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             settingsStore.setLanguage(language, next.translationPacks, next.tafsirPacks)
             if (firstRun) {
                 settingsStore.setAyah(1, 0)
-                lastReadStore.record(1)
+                activePlaceId = lastReadStore.record(1, 1)
             }
             settingsStore.addPendingPacks(
                 setOf(language.content.translation, language.content.tafsir),
@@ -827,9 +837,13 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch { savedStore.toggle(ayah.number) }
     }
 
-    /** A place the reader is done with, dropped from Last Read. */
+    /** A reading the reader is done with, dropped from Last Read. */
     fun forgetPlace(ayahNumber: Int) {
-        viewModelScope.launch { lastReadStore.remove(ayahNumber) }
+        viewModelScope.launch {
+            val removed = lastRead.value.firstOrNull { it.ayahNumber == ayahNumber }
+            lastReadStore.remove(ayahNumber)
+            if (removed?.id == activePlaceId) activePlaceId = null
+        }
     }
 
     /** Writes the reader's note on one ayah. It is keyed by number because

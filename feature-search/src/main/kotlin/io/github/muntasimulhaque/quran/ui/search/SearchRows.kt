@@ -29,6 +29,8 @@ import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.SearchHit
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.SearchArabicLine
+import io.github.muntasimulhaque.quran.data.TextSize
+import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.arabicLineFor
 import io.github.muntasimulhaque.quran.data.shouldShowWordMeaning
 import io.github.muntasimulhaque.quran.feature.search.R
@@ -44,14 +46,17 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
 
 /**
- * The air a line of Arabic in a result gives its diacritics, as a share of
- * its size. Both Arabic lines a result can draw (the whole ayah, and the
- * matched words alone) breathe at this one ratio, the one the reading
- * itself sets its Arabic at: a verse in a result reads like the verse on
- * the page, and the two line kinds cannot drift apart at the hand of
- * whoever edits one of them next.
+ * The size a line of Arabic in a result is drawn at before the reader's own
+ * step: 22 sp, the size both Arabic lines of a result share, the whole ayah
+ * and the matched words alone. The base is a step under the page, so a list
+ * of results stays a list, and the reader's own Arabic step moves it with the
+ * reading: a reader who enlarged the Quran's text for their eyes finds the
+ * same preference in the results (owner decision, the theme and consistency
+ * session; the step reaches search, this session). The line ratio is the
+ * reading's own, from `TextSize.lineRatio`, so the two surfaces cannot drift
+ * apart at the hand of whoever edits one of them next.
  */
-private const val SearchArabicAir = 1.9f
+private const val SearchArabicSp = 22f
 
 
 @Composable
@@ -146,8 +151,15 @@ internal fun AyahRow(
     hafs: FontFamily,
     terms: List<String>,
     showSource: Boolean,
+    /** The reader's own Arabic step, so the results follow the reading. */
+    arabicStep: Float,
     onAyah: (Ayah) -> Unit,
 ) {
+    // The reader's own Arabic step moves the result's Arabic, so a reader who
+    // needs a larger Quran reads a larger result too; the snippets stay on
+    // the interface ladder, because a result list is for scanning.
+    val arabicSize = SearchArabicSp * TextSize.step(arabicStep)
+    val arabicLine = arabicSize * TextSize.lineRatio(TypeRole.Arabic)
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -170,8 +182,8 @@ internal fun AyahRow(
                     text = arabic(hit, hafs, terms),
                     style = TextStyle(
                         fontFamily = hafs,
-                        fontSize = 22.sp,
-                        lineHeight = (22f * SearchArabicAir).sp,
+                        fontSize = arabicSize.sp,
+                        lineHeight = arabicLine.sp,
                         color = MaterialTheme.colorScheme.onSurface,
                     ),
                     textAlign = TextAlign.Right,
@@ -188,11 +200,12 @@ internal fun AyahRow(
                         fontFamily = hafs,
                         // The matched words keep the line's own size: an
                         // emphasis that enlarged them re-laid the line under
-                        // the reader while they searched. 22 sp, one size
-                        // for both Arabic lines (owner decision, the theme
-                        // and consistency session).
-                        fontSize = 22.sp,
-                        lineHeight = (22f * SearchArabicAir).sp,
+                        // the reader while they searched. One size for both
+                        // Arabic lines, moved by the reader's own Arabic
+                        // step (owner decision, the theme and consistency
+                        // session; this session).
+                        fontSize = arabicSize.sp,
+                        lineHeight = arabicLine.sp,
                         color = MaterialTheme.colorScheme.onSurface,
                     ),
                     textAlign = TextAlign.Right,

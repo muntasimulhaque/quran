@@ -41,6 +41,13 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * modifier outside the click: the accessibility test measures the node the
  * platform exposes, and that node has to be the whole target, not a wrapper
  * around it (owner decision, this session).
+ *
+ * Two text buttons side by side stand `Space.Line` (8 dp) apart between
+ * their pills: the 48 dp target each one keeps is invisible, and the row's
+ * gap belongs between the shapes the reader sees. The share card's two
+ * doors, the dialog's Set and Cancel, and the remove question all read that
+ * one gap, so the app has one side-by-side rule rather than three
+ * (owner decision, this session).
  */
 @Composable
 fun TextButton(

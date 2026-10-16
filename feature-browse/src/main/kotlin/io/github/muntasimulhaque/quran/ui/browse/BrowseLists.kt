@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -25,16 +24,14 @@ import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
-import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
-import io.github.muntasimulhaque.quran.ui.reader.Icon
-import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
- * Where the reader has been reading, newest first. Each row names the place
- * the way a reader says it: the surah's own name on the first line, the ayah
- * under it ("Al-Fatihah" then "Ayah 1"), and the moment as the
+ * Where the reader has been reading, one row per reading, newest first. Each
+ * row names the place the way a reader says it: the surah's own name on the
+ * first line, the ayah under it ("Al-Fatihah" then "Ayah 1"), and the
+ * moment as the
  * quiet third line, so a place is recognised by its name first and by when it
  * was left second.
  *
@@ -64,7 +61,7 @@ internal fun LastReadList(
         modifier = listModifier,
         contentPadding = PaddingValues(bottom = Space.SheetFoot),
     ) {
-        items(places, key = { it.ayahNumber }) { place ->
+        items(places, key = { it.id }) { place ->
             val text = texts[place.ayahNumber]
             PlaceRow(
                 surah = text?.surahName
@@ -205,16 +202,6 @@ private fun PlaceRow(
                     quiet = true,
                 )
             }
-            // The row is the door to the place, and every door ends in the
-            // one chevron mark, after the row's own action where it has one
-            // (owner decision, the theme and consistency session).
-            IconGlyph(
-                icon = Icon.Chevron,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .padding(start = Space.Tight)
-                    .size(GlyphSize.ChevronRow),
-            )
         }
         if (!note.isNullOrBlank()) {
             // The reader's own words are the one part of the row drawn in the

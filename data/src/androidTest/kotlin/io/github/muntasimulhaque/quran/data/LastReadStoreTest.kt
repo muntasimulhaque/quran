@@ -13,10 +13,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Last Read is the history around the reader's place, so its behavior is
- * pinned: one row per ayah, newest first, a return moves a place to the top
- * rather than adding a copy, and the list stays a list of places rather than a
- * log that grows without end.
+ * Last Read is the history around the reader's place, one row per reading
+ * rather than one row per ayah, so its behavior is pinned: reading on moves
+ * the reading the reader is in, a deliberate jump joins a reading it lands in
+ * or beside and starts one anywhere else, the row shows the latest ayah
+ * alone, and the list stays a short list of readings rather than a log that
+ * grows without end.
  */
 @RunWith(AndroidJUnit4::class)
 class LastReadStoreTest {
@@ -38,88 +40,126 @@ class LastReadStoreTest {
     }
 
     @Test
-    fun newestPlaceComesFirst() = runBlocking {
+    fun readingOnKeepsOneReadingAndMovesIt() = runBlocking {
         store.load()
-        store.record(262, at = 1_000)
-        store.record(1, at = 2_000)
-        assertEquals(listOf(1, 262), store.places.value.map { it.ayahNumber })
+        val id = store.extend(34, surah = 2, activeId = null, at = 1_000)
+        store.extend(35, surah = 2, activeId = id, at = 2_000)
+        store.extend(120, surah = 2, activeId = id, at = 3_000)
+        val place = store.places.value.single()
+        assertEquals(120, place.ayahNumber)
+        assertEquals(34, place.lowAyah)
+        assertEquals(120, place.highAyah)
     }
 
     @Test
-    fun returningToAPlaceMovesItUpInsteadOfAddingACopy() = runBlocking {
-        store.record(262, at = 1_000)
-        store.record(1, at = 2_000)
-        store.record(262, at = 3_000)
-        assertEquals(listOf(262, 1), store.places.value.map { it.ayahNumber })
+    fun aJumpInsideAReadingKeepsItOneRow() = runBlocking {
+        val id = store.extend(34, surah = 2, activeId = null, at = 1_000)
+        store.extend(120, surah = 2, activeId = id, at = 2_000)
+        store.record(100, surah = 2, at = 3_000)
+        assertEquals(1, store.places.value.size)
+        assertEquals(100, store.places.value.single().ayahNumber)
+        assertEquals(34, store.places.value.single().lowAyah)
+        assertEquals(120, store.places.value.single().highAyah)
+        assertEquals(id, store.places.value.single().id)
     }
 
     @Test
-    fun theListIsCappedAtTwentyPlaces() = runBlocking {
-        repeat(30) { index -> store.record(index + 1, at = (index + 1) * 1_000L) }
+    fun aJumpToTheReadingContinuationEdgeContinuesIt() = runBlocking {
+        val id = store.extend(34, surah = 2, activeId = null, at = 1_000)
+        store.extend(120, surah = 2, activeId = id, at = 2_000)
+        store.record(121, surah = 2, at = 3_000)
+        val place = store.places.value.single()
+        assertEquals(121, place.ayahNumber)
+        assertEquals(34, place.lowAyah)
+        assertEquals(121, place.highAyah)
+    }
+
+    @Test
+    fun aJumpAwayStartsASecondReading() = runBlocking {
+        val id = store.extend(34, surah = 2, activeId = null, at = 1_000)
+        store.extend(120, surah = 2, activeId = id, at = 2_000)
+        store.record(255, surah = 2, at = 3_000)
+        assertEquals(listOf(255, 120), store.places.value.map { it.ayahNumber })
+    }
+
+    @Test
+    fun readingsInDifferentSurahsStandOnTheirOwnRows() = runBlocking {
+        val first = store.extend(120, surah = 2, activeId = null, at = 1_000)
+        store.extend(34, surah = 3, activeId = first, at = 2_000)
+        assertEquals(listOf(34, 120), store.places.value.map { it.ayahNumber })
+    }
+
+    @Test
+    fun theListIsCappedAtTwentyReadings() = runBlocking {
+        repeat(30) { index ->
+            store.record(ayahNumber = index + 1, surah = index + 1, at = (index + 1) * 1_000L)
+        }
         assertEquals(20, store.places.value.size)
-        // The twenty most recent, so ayah 30 is first and ayah 11 is last.
-        assertEquals(30, store.places.value.first().ayahNumber)
-        assertEquals(11, store.places.value.last().ayahNumber)
+        // The twenty most recent readings, so the last one is first and the
+        // eleventh is last.
+        assertEquals(30, store.places.value.first().surah)
+        assertEquals(11, store.places.value.last().surah)
     }
 
     @Test
     fun anAyahOutsideTheQuranIsIgnored() = runBlocking {
-        store.record(0)
-        store.record(9999)
+        store.record(0, surah = 1)
+        store.record(9999, surah = 1)
         assertTrue(store.places.value.isEmpty())
     }
 
     @Test
-    fun aPlaceCanBeForgotten() = runBlocking {
-        store.record(262)
-        store.remove(262)
-        assertTrue(store.places.value.isEmpty())
+    fun aReadingCanBeForgottenAndAnotherStays() = runBlocking {
+        store.record(262, surah = 2, at = 1_000)
+        store.record(255, surah = 2, at = 2_000)
+        store.remove(255)
+        assertEquals(listOf(262), store.places.value.map { it.ayahNumber })
     }
 
     @Test
-    fun placesSurviveReopening() = runBlocking {
-        store.record(262, at = 5_000)
+    fun readingsSurviveReopening() = runBlocking {
+        store.record(262, surah = 2, at = 5_000)
         store.close()
         val reopened = LastReadStore(context)
         reopened.load()
         val place = reopened.places.value.single()
         assertEquals(262, place.ayahNumber)
+        assertEquals(2, place.surah)
         assertEquals(5_000, place.readAt)
         reopened.close()
     }
 
     /**
-     * The version 1 table carried a mode column nothing read. The upgrade
-     * rebuilds the table without it, and the reader's places and moments
-     * come across whole: a place abandoned before the update is still a
-     * place after it (owner decision, this session).
+     * The list used to be one row per ayah, and the app has not shipped, so
+     * the old table is made new on the upgrade rather than carried across
+     * (owner decision, this session). The upgrade must still open cleanly:
+     * a reader who had the old rows meets an empty history, not a crash.
      */
     @Test
-    fun aPlaceFromBeforeTheRebuildKeepsItsAyahAndMoment() = runBlocking {
+    fun upgradingFromTheOldPerAyahShapeOpensEmpty() = runBlocking {
         store.close()
-        writeVersionOneDatabase()
+        writeVersionTwoDatabase()
         store = LastReadStore(context)
         store.load()
-        val place = store.places.value.single()
-        assertEquals(262, place.ayahNumber)
-        assertEquals(5_000L, place.readAt)
+        assertTrue(store.places.value.isEmpty())
+        store.record(262, surah = 2)
+        assertEquals(262, store.places.value.single().ayahNumber)
     }
 
-    /** A version 1 database, written by hand, with one place in it. */
-    private fun writeVersionOneDatabase() {
+    /** A version 2 database, written by hand, with one place in it. */
+    private fun writeVersionTwoDatabase() {
         val path = context.getDatabasePath("last-read.db")
         path.parentFile?.mkdirs()
         val legacy = SQLiteDatabase.openOrCreateDatabase(path, null)
         legacy.execSQL(
             "CREATE TABLE last_read (" +
                 "ayah_number INTEGER PRIMARY KEY, " +
-                "mode TEXT NOT NULL, " +
                 "read_at INTEGER NOT NULL)",
         )
         legacy.execSQL(
-            "INSERT INTO last_read (ayah_number, mode, read_at) VALUES (262, 'single', 5000)",
+            "INSERT INTO last_read (ayah_number, read_at) VALUES (262, 5000)",
         )
-        legacy.version = 1
+        legacy.version = 2
         legacy.close()
     }
 }

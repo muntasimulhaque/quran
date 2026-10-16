@@ -62,7 +62,7 @@ class SurahAyahsScrollTest {
                     setAyah(place)
                 }
                 LastReadStore(context).apply {
-                    record(historyPlace)
+                    record(historyPlace, surah = 1)
                     close()
                 }
             }

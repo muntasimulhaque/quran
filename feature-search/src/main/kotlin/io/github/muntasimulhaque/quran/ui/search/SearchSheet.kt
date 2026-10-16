@@ -102,6 +102,8 @@ fun SearchSheet(
     wordsPack: String,
     /** Whether the reader's own word list is on the device. */
     wordsInstalled: Boolean,
+    /** The reader's own Arabic step, so the results follow the reading. */
+    arabicStep: Float,
     onDismiss: () -> Unit,
     onAyah: (Ayah) -> Unit,
     onSurah: (Surah) -> Unit,
@@ -238,6 +240,7 @@ fun SearchSheet(
                             hafs = hafs,
                             terms = queryTerms,
                             showSource = translationPacks.size > 1,
+                            arabicStep = arabicStep,
                             onAyah = onAyah,
                         )
                         is SearchHit.TafsirHitResult -> TafsirRow(hit, onAyah)

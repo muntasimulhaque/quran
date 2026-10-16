@@ -507,9 +507,11 @@ internal fun AyahShareSheet(
         sheetState = sheetState,
         dragHandle = { SheetHandle() },
         containerColor = MaterialTheme.colorScheme.surface,
-        // The preview and its buttons stand on the app's one page: the two
-        // weighted buttons stretched the full width of a ten inch screen
-        // (owner decision, the theme and consistency session; this session).
+        // The preview and its buttons stand on the app's one page, and the
+        // two doors are a centered pair a Space.Line apart: the page's own
+        // measure keeps them together instead of stretching them across a
+        // ten inch screen (owner decision, the theme and consistency session;
+        // the pair, this session).
         sheetMaxWidth = rememberSheetWidth(),
     ) {
         Column(
@@ -539,19 +541,22 @@ internal fun AyahShareSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Section),
-                horizontalArrangement = Arrangement.spacedBy(Space.Line),
+                // The two doors are a centered pair a Space.Line apart: the
+                // gap the eye reads is the gap between the two pills, the
+                // app's one side-by-side rule. Weighted buttons made that
+                // gap a side effect of the stretch, wide on the phone and
+                // wider on a ten inch screen (owner decision, this session).
+                horizontalArrangement = Arrangement.spacedBy(Space.Line, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 TextButton(
                     label = stringResource(R.string.share_image),
                     onClick = onShareImage,
-                    modifier = Modifier.weight(1f),
                 )
                 TextButton(
                     label = stringResource(R.string.share_text),
                     onClick = onShareText,
                     quiet = true,
-                    modifier = Modifier.weight(1f),
                 )
             }
         }

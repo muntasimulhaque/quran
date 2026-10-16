@@ -41,6 +41,7 @@
     <string name="settings_text_size_option">%3$s · আকার %1$d/%2$d</string>
 
     <string name="settings_downloaded_label">ডাউনলোড করা সূরা (%1$d)</string>
+    <string name="settings_downloaded_label_counting">ডাউনলোড করা সূরা</string>
     <string name="settings_downloaded_empty">এই তিলাওয়াতকারীর জন্য এখনও কোনো সূরা ডাউনলোড হয়নি। যেকোনো আয়াতে প্লে ট্যাপ করে একটি যোগ করুন।</string>
     <string name="settings_downloaded_remove">%1$s সরান</string>
 
