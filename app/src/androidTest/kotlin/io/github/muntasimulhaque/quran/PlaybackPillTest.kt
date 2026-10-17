@@ -11,8 +11,10 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHeightIsAtLeast
+import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
@@ -505,6 +507,25 @@ class PlaybackPillTest {
         showPill(pillWidth = Modifier.width(393.dp))
         compose.onNodeWithContentDescription("Husary").assertHeightIsAtLeast(48.dp)
         compose.onNodeWithContentDescription("Al-Baqarah 2:255").assertHeightIsAtLeast(48.dp)
+    }
+
+    /**
+     * The transport's press is the whole target, not the 20 dp glyph. An
+     * indication left on the glyph flashed a dot inside the 48 dp node the
+     * finger actually hit, which read as too small (owner report, this
+     * session).
+     */
+    @Test
+    fun theTransportPressFillsItsOwnTarget() {
+        showPill()
+        // The shape is a child of the clickable, which merges its
+        // descendants, so the tag is read from the unmerged tree.
+        val shapes = compose.onAllNodesWithTag("transport-shape", useUnmergedTree = true)
+        shapes.assertCountEquals(4)
+        repeat(4) { index ->
+            shapes[index].assertWidthIsEqualTo(48.dp)
+            shapes[index].assertHeightIsEqualTo(48.dp)
+        }
     }
 
     @Test

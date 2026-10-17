@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 7.9 (versionCode 81)
+Version: 8.0 (versionCode 82)
 
 ## Listing
 
@@ -136,8 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (7.9, 277 characters)
-Browse's Juz list now says where each juz begins in words, the surah and the ayah, like Starts at Al-Kahf, ayah 75, instead of a numbered reference. Side-by-side buttons now keep a clearer gap, so the reminder's time picker and the share card no longer crowd their two actions.
+## Release notes (8.0, 290 characters)
+Tapping the reading while a recitation is paused now stops it and clears the ayah's highlight together, instead of leaving the mark over the page with no player left to clear it. The buttons in the player and in an ayah's actions now press in the same rounded shape the app uses everywhere.
 
 ## Before each release
 

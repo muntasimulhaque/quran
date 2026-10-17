@@ -397,9 +397,12 @@ fun TextAction(
 ) {
     // The click owns the 48 dp node; the mark and its word sit inside it
     // (owner decision, the accessibility test). The ripple is drawn on the
-    // card inside the click node, not on the node itself: an indication left
+    // pill inside the click node, not on the node itself: an indication left
     // on the click would flash a rectangle over the shape the reader is
-    // looking at (the same rule TextButton wears).
+    // looking at (the same rule TextButton wears). The pill is the app's one
+    // control shape, so an action inside the ayah capsule presses in a
+    // smaller capsule rather than in a card, which belongs to a surface
+    // (owner report, this session).
     val press = remember { MutableInteractionSource() }
     val ink = if (active) {
         MaterialTheme.colorScheme.primary
@@ -414,7 +417,7 @@ fun TextAction(
                 onClick = onClick,
             )
             .minimumInteractiveComponentSize()
-            .clip(Radii.Card)
+            .clip(Radii.Pill)
             .indication(press, ripple(color = ink))
             .padding(horizontal = 6.dp, vertical = 4.dp)
             .semantics {

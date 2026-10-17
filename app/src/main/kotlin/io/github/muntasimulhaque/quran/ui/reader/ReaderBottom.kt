@@ -48,8 +48,10 @@ internal fun BottomStack(
     playback: PlaybackUiState,
     /**
      * Whether the playback pill is on the page at all. A pill that is not
-     * playing can be put away by a tap on the page, and the stack is where
-     * that answers (owner decision, this session).
+     * playing can be put away by a tap on the page, and that tap is a stop:
+     * the paused ayah's mark comes from the playback state, so the state is
+     * cleared with the capsule rather than only hidden (owner report, this
+     * session).
      */
     showPlayback: Boolean,
     saved: List<SavedAyah>,

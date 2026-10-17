@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -174,28 +175,37 @@ internal fun TransportButton(kind: Transport, description: String, onClick: () -
         modifier = Modifier
             // The click owns the 48 dp node; the glyph inside it stays 20 dp
             // (owner decision, the accessibility test). The ripple is drawn
-            // on the pill inside the click node, not on the node itself: an
-            // indication left on the click would flash a rectangle over the
-            // shape the reader is looking at (the same rule TextButton
-            // wears).
+            // on a shape of the node's own size, not on the 20 dp glyph: an
+            // indication left on the glyph flashed a dot inside the target
+            // the finger actually hit, which read as too small (owner
+            // report, this session). The shape is the app's one control
+            // capsule, which on this square target is the circle an icon
+            // button wears, and it fills the target the way the node does.
             .clickable(
                 interactionSource = press,
                 indication = null,
                 onClick = onClick,
             )
             .minimumInteractiveComponentSize()
-            .clip(Radii.Pill)
-            .indication(press, ripple(color = tint))
             .semantics {
                 contentDescription = description
                 role = Role.Button
             },
         contentAlignment = Alignment.Center,
     ) {
-        IconGlyph(
-            icon = kind.icon,
-            tint = tint,
-            modifier = Modifier.size(GlyphSize.Transport),
-        )
+        Box(
+            modifier = Modifier
+                .size(TransportSize)
+                .clip(Radii.Pill)
+                .indication(press, ripple(color = tint))
+                .testTag("transport-shape"),
+            contentAlignment = Alignment.Center,
+        ) {
+            IconGlyph(
+                icon = kind.icon,
+                tint = tint,
+                modifier = Modifier.size(GlyphSize.Transport),
+            )
+        }
     }
 }
