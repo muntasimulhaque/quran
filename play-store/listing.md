@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 8.1 (versionCode 83)
+Version: 8.2 (versionCode 84)
 
 ## Listing
 
@@ -18,8 +18,9 @@ you to learn its interface first.
 The reading gives each ayah its Saheeh International translation with the
 original footnotes, word by word meanings, and Ibn Kathir in English,
 with the Quran quotations set apart. Bangla
-readers get the Taisirul Quran translation, Ibn Kathir in Bangla, and Bangla
-word meanings, and the whole interface can be read in English or Bangla.
+readers get the Taisirul Quran translation, Ibn Kathir in Bangla, Bangla
+word meanings, and the surah names in Bengali script, and the whole interface
+can be read in English or Bangla.
 
 Search reads Arabic without diacritics and English without accents, so
 typing allah finds Allah and isa finds Isa. Save any ayah, add your own
@@ -135,8 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (8.1, 321 characters)
-The reading now opens a step smaller, with its five text sizes evenly spaced, so the step down from the default matches every other step. In an Arabic-only reading, each verse now closes with the printed mushaf medallion the Quran font draws itself, in place of the old rosette. The store graphic carries one clean frame.
+## Release notes (8.2, 402 characters)
+The surah names now appear in Bengali script for Bangla readers, across Browse, the reading, search, the daily reminder, and the shared card. The ayah's actions press in five identical capsules, the reminder's clock speaks Bangla digits, and an Arabic-only reading can never lose a verse. Removing a saved ayah and forgetting a place now use one word, and the saved-ayah message teaches the long press.
 
 ## Before each release
 
