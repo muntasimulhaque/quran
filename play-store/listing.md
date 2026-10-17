@@ -116,7 +116,7 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is refreshed for 8.1 from capture run 39022081864: all three legs green with eight frames each, and every frame compared with the previous set by `cmp`. All twenty-four frames differ, because the reading default moved. The app's own change is the smaller reading and tafsir text in the five reading frames, and `Arabic 28, translation 15` with the About row naming 8.1 in the settings frame; the search and Browse frames differ by the status bar clock alone. Every changed frame was read, and the set is installed whole.
+The set is refreshed for 8.2 from capture run 39056442959: all three legs green with eight frames each, and every frame compared with the previous set by `cmp`. Frames 1 through 3 on every leg are unchanged, and the five whole-display frames on every leg differ by the status bar clock alone. The 7 inch settings frame also carries Version 8.2 in its About row. Every changed frame was read, and the set is installed whole.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
