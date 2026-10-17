@@ -51,7 +51,6 @@ import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.ReadingRow
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
-import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -76,15 +75,23 @@ internal fun AyahBlock(
     val playing = row.ayah.number == playingAyah
     val ayahActions = stringResource(R.string.reading_ayah_actions)
     val paperActions = stringResource(R.string.reading_paper_actions)
-    // The end of an ayah in an Arabic-only reading: the number in the app's
-    // own hand, in the ornament gold, closing the verse it belongs to. The
-    // reference line under the block is not drawn then, so the screen holds
-    // the Quran and nothing else (owner decision, this session).
+    // The end of an ayah in an Arabic-only reading: the KFGQPC face's own
+    // printed medallion, in the ornament gold, closing the verse it belongs
+    // to. The face draws the print's medallion around a run of Arabic-Indic
+    // digits, so the reading appends the number alone and the medallion comes
+    // with the face (owner decision, this session). The reference line under
+    // the block is not drawn then, so the screen holds the Quran and nothing
+    // else.
     val arabicOnly = !metrics.showTranslation && !metrics.wordByWord
-    val ornamentStyle = remember(metrics.arabicSp, palette.ornament) {
+    val ornamentStyle = remember(hafs, metrics.arabicSp, palette.ornament) {
         SpanStyle(
-            fontFamily = Amiri,
-            fontSize = (metrics.arabicSp * 0.72f).sp,
+            fontFamily = hafs,
+            // 0.9 of the ayah: the medallion's own ink is about 0.89 em tall,
+            // so this lands it on the line the way the printed page does and
+            // keeps the digits inside it legible (owner decision, this
+            // session). It replaces the 0.72 the Amiri rosette wore, whose
+            // oval openwork read as a bracket and whose digits were tiny.
+            fontSize = (metrics.arabicSp * 0.9f).sp,
             color = palette.ornament,
         )
     }
@@ -260,10 +267,10 @@ private data class ArabicLine(val text: AnnotatedString, val washRange: IntRange
  * always a bare rectangle behind the glyphs.
  *
  * In an Arabic-only reading the verse closes with its own number, drawn in
- * the ornament's hand: [ornament] appends the Quran's end-of-ayah sign and
- * the reader's digits to the same line, where a printed page puts them, so
- * the reference under the block is not needed (owner decision, this
- * session).
+ * the face's own printed medallion: [ornament] appends the number to the same
+ * line, where a printed page puts it, and the KFGQPC face wraps it in the
+ * medallion, so the reference under the block is not needed (owner decision,
+ * this session).
  */
 private fun arabic(
     row: ReadingRow,
@@ -276,7 +283,7 @@ private fun arabic(
     if (words.isEmpty()) {
         val text = if (ornament) {
             buildAnnotatedString {
-                withStyle(ornamentStyle) { append(Arabic.endOfAyah(row.ayah.ayah)) }
+                withStyle(ornamentStyle) { append(Arabic.ayahNumber(row.ayah.ayah)) }
             }
         } else {
             AnnotatedString(row.ayah.text)
@@ -293,7 +300,7 @@ private fun arabic(
         }
         if (ornament) {
             append(' ')
-            withStyle(ornamentStyle) { append(Arabic.endOfAyah(row.ayah.ayah)) }
+            withStyle(ornamentStyle) { append(Arabic.ayahNumber(row.ayah.ayah)) }
         }
     }
     return ArabicLine(text, washRange)

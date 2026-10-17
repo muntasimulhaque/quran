@@ -140,13 +140,14 @@ object Arabic {
     }
 
     /**
-     * The print's own end-of-ayah sign and the number in Arabic-Indic digits,
-     * "\u06DD\u0661" for the first verse. It is the one place the app closes
-     * a verse in the Arabic-only reading, and it is a pure value so its shape
-     * is pinned without a device (owner decision, this session).
+     * The ayah's own number in Arabic-Indic digits, "\u0661" for the first
+     * verse. It is what the reading appends to close a verse: the KFGQPC Hafs
+     * face draws the print's own medallion around a run of these digits, so
+     * the number and the sign are one glyph and the app never types the sign
+     * itself (owner decision, this session). A pure value, so its shape is
+     * pinned without a device.
      */
-    fun endOfAyah(number: Int): String = buildString {
-        append('\u06DD')
+    fun ayahNumber(number: Int): String = buildString {
         for (digit in number.toString()) {
             append('\u0660' + (digit - '0'))
         }

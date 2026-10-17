@@ -42,12 +42,14 @@ class ArabicTest {
     }
 
     @Test
-    fun `the end of an ayah is the sign and the Arabic-Indic number`() {
-        // The print closes a verse with its own sign and the number in
-        // Arabic-Indic digits, and the number is the reader's own: 1, 255,
-        // and 6236 are the shortest, the famous middle, and the last.
-        assertEquals("\u06DD\u0661", Arabic.endOfAyah(1))
-        assertEquals("\u06DD\u0662\u0665\u0665", Arabic.endOfAyah(255))
-        assertEquals("\u06DD\u0666\u0662\u0663\u0666", Arabic.endOfAyah(6236))
+    fun `the ayah number is written in Arabic-Indic digits`() {
+        // The reading closes a verse with its own number, and the KFGQPC Hafs
+        // face draws the print's medallion around a run of these digits, so
+        // the number and the sign are one glyph. The number is the reader's
+        // own: 1, 255, and 6236 are the shortest, the famous middle, and the
+        // last.
+        assertEquals("\u0661", Arabic.ayahNumber(1))
+        assertEquals("\u0662\u0665\u0665", Arabic.ayahNumber(255))
+        assertEquals("\u0666\u0662\u0663\u0666", Arabic.ayahNumber(6236))
     }
 }

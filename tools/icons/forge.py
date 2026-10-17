@@ -653,9 +653,9 @@ def banner_png(out=None, ss=1):
         pts = m(p[k]); fill_pts(dr, pts, PAPER); stroke_pts(dr, pts, INK, max(1, round(lw*s)))
     for k in ('ca', 'cb'):
         stroke_pts(dr, m(p[k]), INK, max(1, round(lw*s)))
-    # the bookmaker's double rule: a fine line at the margin, the page's own
-    # frame inside it
-    dr.rectangle([58*ss, 54*ss, 966*ss, 446*ss], outline=HAIR, width=max(1, round(1.4*ss)))
+    # the page's own frame: one gold hairline, inside the page margin
+    # (owner decision, this session: the double rule at the margin and inside
+    # it read as two borders, so the banner keeps the frame alone)
     fr = [80*ss, 76*ss, 944*ss, 424*ss]
     dr.rectangle(fr, outline=HAIR, width=max(1, round(2.2*ss)))
     # texts

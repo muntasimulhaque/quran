@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 8.0 (versionCode 82)
+Version: 8.1 (versionCode 83)
 
 ## Listing
 
@@ -107,12 +107,11 @@ the silhouette with no ground, because the shade reads only its alpha channel
 and paints the shape in the notification color. The share card carries the
 drawing in the card's own ink beside the name, on the card's own paper, so the
 card's foot and the home screen show one drawing. The feature graphic is the
-book's own title page: the paper field, a double gold hairline (a fine line at
-the margin, the page's own frame inside it), the mark centered on the axis as
-a seal, in the icon's own ink, and beneath it Quran in Literata, a short gold
-rule, and The Noble
-Book in tracked small caps in Inter, the gaps between them held tight so the
-caption keeps air above the frame's foot. Every element stands inside the
+book's own title page: the paper field, one gold hairline frame, the mark
+centered on the axis as a seal, in the icon's own ink, and beneath it Quran in
+Literata, a short gold rule, and The Noble Book in tracked small caps in
+Inter, the gaps between them held tight so the caption keeps air above the
+frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
@@ -136,8 +135,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (8.0, 290 characters)
-Tapping the reading while a recitation is paused now stops it and clears the ayah's highlight together, instead of leaving the mark over the page with no player left to clear it. The buttons in the player and in an ayah's actions now press in the same rounded shape the app uses everywhere.
+## Release notes (8.1, 321 characters)
+The reading now opens a step smaller, with its five text sizes evenly spaced, so the step down from the default matches every other step. In an Arabic-only reading, each verse now closes with the printed mushaf medallion the Quran font draws itself, in place of the old rosette. The store graphic carries one clean frame.
 
 ## Before each release
 

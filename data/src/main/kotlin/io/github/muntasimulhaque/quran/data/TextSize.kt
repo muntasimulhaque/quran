@@ -15,29 +15,39 @@ enum class TypeRole { Arabic, Translation, Tafsir, Words }
  * The five scales every sized text is drawn at, as a multiplier over the base
  * the text was designed for.
  *
+ * The steps are evenly spaced, 0.8 through 1.2 with 0.1 between them, and the
+ * default is 1, the middle step (owner decision, this session). The ladder
+ * before this was 0.75, 0.85, 1, 1.1, 1.2, whose gap under the default was
+ * 0.15 while every other gap was 0.1: the one step down from the shipped
+ * default read heavier than the rest, and an even ladder also makes "one step
+ * smaller" the same number as the step itself, which is why the base below is
+ * 0.9 of what it was and not 0.85.
+ *
+ * The shipped default is one step smaller than it was because the text read a
+ * little large on a phone (owner decision, this session): every base is 0.9
+ * of its old self, the default keeps the middle of the five, and the reader
+ * can still go two steps either way, smaller or larger, from where every text
+ * now stands.
+ *
  * Arabic is set well above the Latin sizes on purpose: its letter bodies are
  * small next to the space the diacritics need, so at the same nominal size it
- * reads visibly smaller than Latin text. The base is 32 sp rather than 30
- * (owner decision, this session): the KFGQPC face reads small for its em,
- * the ayah is the one text every reader reads most, and the room the larger
- * base takes is paid for in the scroll, which costs a reader nothing.
+ * reads visibly smaller than Latin text. The base is 28.8 sp rather than 32
+ * (owner decision, this session): the KFGQPC face reads small for its em, the
+ * ayah is the one text every reader reads most, and the room the larger base
+ * takes is paid for in the scroll, which costs a reader nothing.
  *
  * The largest step stops at 1.2. Past that the reading turns into a page of
- * headings. The default step is 1, the middle of the five (owner decision):
- * a reader who opens the text page can go two steps either way, smaller or
- * larger, from where every text already stands. The smallest was 0.65 and is
- * 0.75 (owner decision, the audio and
- * type audit session): at 0.65 a translation stood at 11 sp and a word
- * meaning at 9 sp, under every platform floor for text read at length, while
- * 0.75 keeps the compact choice and puts the translation at 12.75 sp. A
- * reader who once chose 1.4 keeps the largest step, which is now 1.2, so no
- * choice ever loses its meaning.
+ * headings. The smallest is 0.8, the compact choice, at 12.24 sp of
+ * translation and 11.52 sp of meaning (owner decision, this session). The
+ * earlier session pinned 0.75 against the larger base as the readability
+ * floor; the two sit within a hair of each other at the default, and the
+ * floor stands.
  */
 object TextSize {
 
-    val STEPS = listOf(0.75f, 0.85f, 1f, 1.1f, 1.2f)
+    val STEPS = listOf(0.8f, 0.9f, 1f, 1.1f, 1.2f)
 
-    /** The middle step: comfortable for most readers, on most screens. */
+    /** The middle step: the shipped default, one step under where it was. */
     const val DEFAULT = 1f
 
     /**
@@ -51,9 +61,24 @@ object TextSize {
     /**
      * The step nearest a stored value. A choice made under an older list of
      * scales keeps its meaning: 1.6 becomes 1.2, the largest step now, not
-     * whatever index it was.
+     * whatever index it was. A tie goes to the larger step, so the retired
+     * 0.85 lands on 0.9, the place it held under the new ladder, and never on
+     * 0.8 (owner decision, this session).
      */
-    fun step(value: Float): Float = STEPS.minByOrNull { abs(it - value) } ?: DEFAULT
+    fun step(value: Float): Float {
+        var nearest = DEFAULT
+        var distance = Float.MAX_VALUE
+        for (candidate in STEPS) {
+            val gap = abs(candidate - value)
+            // `<=` so the larger step wins a tie: the retired 0.85 sits
+            // exactly between 0.8 and 0.9 and belongs on the step it held.
+            if (gap <= distance) {
+                nearest = candidate
+                distance = gap
+            }
+        }
+        return nearest
+    }
 
     /** The size of one piece of text, in scale independent pixels. */
     fun sp(role: TypeRole, step: Float): Float = base(role) * step(step)
@@ -64,10 +89,10 @@ object TextSize {
     /**
      * The meaning under a word in the word by word aid. This is the size the
      * meaning is read at; the Arabic word above it is derived from it, so the
-     * two can never drift apart. 16 sp (owner decision, the theme and
-     * consistency session): the gloss at 15 sat closer to a footnote than to
-     * the step under the translation it means to be, and the session lifted
-     * it one point while keeping it under the translation's 17.
+     * two can never drift apart. 14.4 sp (owner decision, this session): the
+     * gloss holds the same stand under the translation's 15.3 that 16 held
+     * under 17, one point under the translation it means to be, so it reads
+     * as a small gloss and not as a footnote.
      */
     fun meaningSp(step: Float): Float = MEANING_BASE * step(step)
 
@@ -80,7 +105,7 @@ object TextSize {
     /**
      * The Arabic word in the word by word aid, derived from its meaning by
      * [WORD_MEANING_RATIO] so the two can never drift apart. At the middle
-     * step the word stands at 28 sp, the 7/8 of the Quran's 32 that the
+     * step the word stands at 25.2 sp, the 7/8 of the Quran's 28.8 that the
      * session pinned as "one size under" (owner decision, the theme and
      * consistency session); the aid reads as a small copy of the page, not
      * as a footnote to itself.
@@ -100,15 +125,15 @@ object TextSize {
     fun inlineArabic(step: Float): Float = sp(TypeRole.Arabic, step) * INLINE_ARABIC_RATIO
 
     private fun base(role: TypeRole): Float = when (role) {
-        TypeRole.Arabic -> 32f
-        TypeRole.Translation -> 17f
+        TypeRole.Arabic -> 28.8f
+        TypeRole.Translation -> 15.3f
         // The tafsir is the longest prose the app draws, read in the same
         // sitting as the translation it opens from, so it stands at the
         // translation's own size and not a point under it (owner decision,
         // this session; the two sizes read as one voice now).
-        TypeRole.Tafsir -> 17f
+        TypeRole.Tafsir -> 15.3f
         // The word list is derived from [meaningSp] at [WORD_MEANING_RATIO],
-        // the 28-over-16 stand the aid reads at; this entry is that
+        // the 25.2-over-14.4 stand the aid reads at; this entry is that
         // derivation, written as the number it comes to.
         TypeRole.Words -> MEANING_BASE * WORD_MEANING_RATIO
     }
@@ -135,17 +160,16 @@ object TextSize {
     }
 
     /**
-     * The size the meaning under a word is read at, before any scaling. 16 sp
-     * (owner decision, the theme and consistency session): the meaning is
-     * read at length under every word, and 16 keeps the gloss a step under
-     * the translation's 17 while sitting closer to "two sizes under" its own
-     * Arabic than the 15 it replaced.
+     * The size the meaning under a word is read at, before any scaling. 14.4
+     * sp (owner decision, this session): the meaning is read at length under
+     * every word, and it keeps the same stand under the translation's 15.3
+     * that 16 held under 17, a small reading rather than a footnote.
      */
-    private const val MEANING_BASE = 16f
+    private const val MEANING_BASE = 14.4f
 
     /**
-     * The Arabic word's stand over its meaning: 28 over 16, the 7/8 of the
-     * Quran the session pinned as "one size under" (owner decision, the
+     * The Arabic word's stand over its meaning: 25.2 over 14.4, the 7/8 of
+     * the Quran the session pinned as "one size under" (owner decision, the
      * theme and consistency session).
      */
     private const val WORD_MEANING_RATIO = 1.75f
