@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,6 +39,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 
@@ -386,6 +388,13 @@ fun IconButton(
  * draws the pill, so a reader who cannot see the lit glyph is told which of
  * the ayah's marks are theirs. It is null on an action that carries no mark,
  * because an answer to a tap is not a switch and must not read as one.
+ *
+ * [minWidth] is the width the caller wants every action of a group to share:
+ * the ayah bar measures its widest word and hands the same number to all
+ * five, so five labels of five lengths press in five identical capsules
+ * rather than in five ovals of the words' own making (owner decision, this
+ * session). The clip sits outside the 48 dp floor, so the shape the reader
+ * sees is the shape their finger gets.
  */
 @Composable
 fun TextAction(
@@ -394,15 +403,15 @@ fun TextAction(
     onClick: () -> Unit,
     active: Boolean = false,
     state: String? = null,
+    minWidth: Dp = 0.dp,
 ) {
-    // The click owns the 48 dp node; the mark and its word sit inside it
-    // (owner decision, the accessibility test). The ripple is drawn on the
-    // pill inside the click node, not on the node itself: an indication left
-    // on the click would flash a rectangle over the shape the reader is
-    // looking at (the same rule TextButton wears). The pill is the app's one
-    // control shape, so an action inside the ayah capsule presses in a
-    // smaller capsule rather than in a card, which belongs to a surface
-    // (owner report, this session).
+    // The click owns the node; the mark and its word sit inside it. The
+    // ripple is drawn on the pill inside the click node, not on the node
+    // itself: an indication left on the click would flash a rectangle over
+    // the shape the reader is looking at (the same rule TextButton wears).
+    // The pill is the app's one control shape, so an action inside the ayah
+    // capsule presses in a smaller capsule rather than in a card, which
+    // belongs to a surface (owner report, this session).
     val press = remember { MutableInteractionSource() }
     val ink = if (active) {
         MaterialTheme.colorScheme.primary
@@ -416,8 +425,9 @@ fun TextAction(
                 indication = null,
                 onClick = onClick,
             )
-            .minimumInteractiveComponentSize()
             .clip(Radii.Pill)
+            .widthIn(min = minWidth)
+            .minimumInteractiveComponentSize()
             .indication(press, ripple(color = ink))
             .padding(horizontal = 6.dp, vertical = 4.dp)
             .semantics {

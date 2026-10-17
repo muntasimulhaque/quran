@@ -27,6 +27,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /**
@@ -118,6 +120,14 @@ class ContentLibrary(
     private var draining = false
 
     /**
+     * The one gate on opening and reopening the library. A language choice
+     * can land while the first open is still reading, and both runs replace
+     * the same [database] and [surahs] state; one at a time, so the last
+     * writer is always the newest truth (owner decision, this session).
+     */
+    private val openMutex = Mutex()
+
+    /**
      * A language's tafsir waits for Wi-Fi when the phone is on cellular; the
      * moment an unmetered network arrives while the app is open, the queue
      * drains. Nothing is listened for when nothing is pending.
@@ -147,73 +157,84 @@ class ContentLibrary(
      */
     fun open() {
         scope.launch {
-            failure = false
-            // Everything that touches the disk stays off the main thread:
-            // listing the packs, reading the catalog, and opening the library
-            // itself are all work the reader's first frame must not wait on.
-            val opened = withContext(Dispatchers.IO) {
-                val installedNow = store.installed()
-                // The catalog is marked with what this device has, so a pack
-                // that is present is never offered as missing and a language
-                // switch never re-fetches what is already here.
-                val catalogNow = PackCatalog.load(application).withInstalled(installedNow)
-                val opened = runCatching {
-                    ContentDatabase.open(application, catalogNow, installedNow)
-                }
-                Triple(installedNow, catalogNow, opened)
+            openMutex.withLock {
+                openLibrary()
             }
-            installed = opened.first
-            catalog = opened.second
-            val fresh = opened.third.getOrElse {
-                android.util.Log.e(TAG, "the content library could not be opened", it)
-                failure = true
-                return@launch
+        }
+    }
+
+    private suspend fun openLibrary() {
+        failure = false
+        // Everything that touches the disk stays off the main thread:
+        // listing the packs, reading the catalog, and opening the library
+        // itself are all work the reader's first frame must not wait on.
+        val opened = withContext(Dispatchers.IO) {
+            val installedNow = store.installed()
+            // The catalog is marked with what this device has, so a pack
+            // that is present is never offered as missing and a language
+            // switch never re-fetches what is already here.
+            val catalogNow = PackCatalog.load(application).withInstalled(installedNow)
+            val opened = runCatching {
+                ContentDatabase.open(application, catalogNow, installedNow)
             }
-            database = fresh
-            // The reader's settings are read once, and everything that follows
-            // uses that same value: the store is not read twice for one launch.
-            val stored = settingsStore.settings.first()
-            // The reader's index of the Book, read on a worker: 114 surahs
-            // and the thirty juz boundaries, and the launch frame is not
-            // where a query belongs.
-            val index = withContext(Dispatchers.IO) {
-                fresh.surahs() to fresh.juzStarts().map { it.ayah }
-            }
-            surahs = index.first
-            packs = fresh.packs()
-            recitations = fresh.recitations()
-            onOpened(
-                Opening(
-                    database = fresh,
-                    settings = stored,
-                    surahs = index.first,
-                    juzStarts = index.second,
-                ),
-            )
-            ready = true
-            // A language choice from this launch or an earlier one: whatever
-            // is still missing arrives now, without another question.
-            scope.launch { drainPendingPacks() }
-            // The tafsir index is the one thing a first search would wait for,
-            // so it is built now, on a worker, while the reader is reading.
-            withContext(Dispatchers.IO) { fresh.prewarmSearch(stored.tafsirPacks.toList()) }
-            // A pack the app has updated since this install is replaced
-            // quietly, on an unmetered connection, and the library is
-            // reopened over it. The reading never waits: this runs after the
-            // first page is ready.
-            scope.launch {
-                if (packUpdater.refresh(catalog).isNotEmpty()) refresh()
-            }
-            // The same library is read back against the catalog's hashes once
-            // a day, on the reader's behalf, so a pack a storage problem or an
-            // interrupted copy has damaged is repaired without anyone asking.
-            // There is no row for it and nothing is shown: a reader should
-            // never meet the word for it (owner decision, this session). It is
-            // unmetered, once a day, and after the first page is readable, all
-            // of which PackUpdater keeps.
-            scope.launch {
-                if (packUpdater.dailyIntegrityRefresh(catalog).isNotEmpty()) refresh()
-            }
+            Triple(installedNow, catalogNow, opened)
+        }
+        installed = opened.first
+        catalog = opened.second
+        val fresh = opened.third.getOrElse {
+            android.util.Log.e(TAG, "the content library could not be opened", it)
+            failure = true
+            return
+        }
+        database = fresh
+        // The reader's settings are read once, and everything that follows
+        // uses that same value: the store is not read twice for one launch.
+        val stored = settingsStore.settings.first()
+        // The names the reader reads are the names their language says:
+        // the Book's index is read with the language set, so Browse, the
+        // reading, search, the reminder, and the share card all draw the
+        // same name (owner decision, this session).
+        fresh.useLanguage(stored.uiLanguage ?: "en")
+        // The reader's index of the Book, read on a worker: 114 surahs
+        // and the thirty juz boundaries, and the launch frame is not
+        // where a query belongs.
+        val index = withContext(Dispatchers.IO) {
+            fresh.surahs() to fresh.juzStarts().map { it.ayah }
+        }
+        surahs = index.first
+        packs = fresh.packs()
+        recitations = fresh.recitations()
+        onOpened(
+            Opening(
+                database = fresh,
+                settings = stored,
+                surahs = index.first,
+                juzStarts = index.second,
+            ),
+        )
+        ready = true
+        // A language choice from this launch or an earlier one: whatever
+        // is still missing arrives now, without another question.
+        scope.launch { drainPendingPacks() }
+        // The tafsir index is the one thing a first search would wait for,
+        // so it is built now, on a worker, while the reader is reading.
+        withContext(Dispatchers.IO) { fresh.prewarmSearch(stored.tafsirPacks.toList()) }
+        // A pack the app has updated since this install is replaced
+        // quietly, on an unmetered connection, and the library is
+        // reopened over it. The reading never waits: this runs after the
+        // first page is ready.
+        scope.launch {
+            if (packUpdater.refresh(catalog).isNotEmpty()) refresh()
+        }
+        // The same library is read back against the catalog's hashes once
+        // a day, on the reader's behalf, so a pack a storage problem or an
+        // interrupted copy has damaged is repaired without anyone asking.
+        // There is no row for it and nothing is shown: a reader should
+        // never meet the word for it (owner decision, this session). It is
+        // unmetered, once a day, and after the first page is readable, all
+        // of which PackUpdater keeps.
+        scope.launch {
+            if (packUpdater.dailyIntegrityRefresh(catalog).isNotEmpty()) refresh()
         }
     }
 
@@ -230,7 +251,11 @@ class ContentLibrary(
      * published: a pack that was just copied or downloaded is attached by
      * this call.
      */
-    suspend fun refresh() {
+    suspend fun refresh() = openMutex.withLock {
+        refreshLibrary()
+    }
+
+    private suspend fun refreshLibrary() {
         installed = withContext(Dispatchers.IO) { store.installed() }
         catalog = catalog.withInstalled(installed)
         val fresh = runCatching {
@@ -249,6 +274,11 @@ class ContentLibrary(
         // reading load is never killed under the reader.
         val old = database
         database = fresh
+        // The language may have changed since the last open; the names are
+        // read again so a reader who just chose Bangla reads Bangla names
+        // without a restart (owner decision, this session).
+        fresh.useLanguage(settings().uiLanguage ?: "en")
+        surahs = withContext(Dispatchers.IO) { fresh.surahs() }
         packs = fresh.packs()
         onReopened(fresh)
         // The old library is retired on a worker, because retiring it waits

@@ -45,6 +45,12 @@ class MainActivity : ComponentActivity() {
             super.attachBaseContext(newBase)
             return
         }
+        // The platform controls that take a locale of their own (the daily
+        // reminder's Material clock is the one that showed Latin digits in a
+        // Bangla interface) read Locale.getDefault(), not this Activity's
+        // resources, so the reader's one language choice is written there
+        // too (owner decision, this session).
+        Locale.setDefault(locale)
         val configuration = Configuration(newBase.resources.configuration).apply {
             setLocale(locale)
             setLayoutDirection(locale)

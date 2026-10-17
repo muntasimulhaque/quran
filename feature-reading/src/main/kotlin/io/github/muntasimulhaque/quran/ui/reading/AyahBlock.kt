@@ -281,12 +281,16 @@ private fun arabic(
 ): ArabicLine {
     val words = row.words
     if (words.isEmpty()) {
-        val text = if (ornament) {
-            buildAnnotatedString {
+        // The ayah is always drawn, whatever else is on the line: the
+        // Arabic-only branch appends the number, it never replaces the
+        // verse with it. The shipped word table answers every ayah, so this
+        // path is a floor rather than a road (owner decision, this session).
+        val text = buildAnnotatedString {
+            append(row.ayah.text)
+            if (ornament) {
+                append(' ')
                 withStyle(ornamentStyle) { append(Arabic.ayahNumber(row.ayah.ayah)) }
             }
-        } else {
-            AnnotatedString(row.ayah.text)
         }
         return ArabicLine(text, null)
     }

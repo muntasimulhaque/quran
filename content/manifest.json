@@ -124,6 +124,21 @@
       "assetUrl": null
     },
     {
+      "id": "surah-names-bn",
+      "name": "Surah names in Bangla",
+      "source": "The surah index of Quranul Karim (Bangla translation and short tafsir) by Dr. Abu Bakr Muhammad Zakaria, quranulkarim.com",
+      "url": "https://www.quranulkarim.com/",
+      "resourceId": "surah-names-bn",
+      "format": "json",
+      "license": "Names compiled and reviewed for this app from the published Bangla index; no verse text is copied",
+      "credit": "Surah names after Dr. Abu Bakr Muhammad Zakaria's Quranul Karim, reviewed for this app",
+      "usedFor": "Surah names in the Bangla interface",
+      "path": "content/surah-names-bn.json",
+      "bytes": 3924,
+      "sha256": "bfe3c96dbb84f43e04cc577306345caeec67a19bd584904429a0772fead4280c",
+      "assetUrl": null
+    },
+    {
       "id": "metadata-ayah",
       "name": "Ayah metadata",
       "source": "Quranic Universal Library (QUL) by Tarteel",

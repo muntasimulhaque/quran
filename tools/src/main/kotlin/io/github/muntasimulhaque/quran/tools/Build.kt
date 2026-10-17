@@ -198,6 +198,7 @@ class Build(private val root: File) {
         val nameArabic: String,
         val nameSimple: String,
         val nameLatin: String,
+        val nameBangla: String,
         val revelationPlace: String,
         val revelationOrder: Int,
         val versesCount: Int,
@@ -208,6 +209,13 @@ class Build(private val root: File) {
         val json = Json.parseToJsonElement(
             sourceDir("metadata-surah-names").firstWithExtension(".json")!!.readText(),
         ).jsonObject
+        // The Bangla names are a dataset of their own, compiled and reviewed
+        // for this app. Every surah must carry one: the Bangla interface
+        // reads its names from here and never falls back to the Latin line
+        // (owner decision, this session).
+        val bangla = Json.parseToJsonElement(
+            sourceDir("surah-names-bn").firstWithExtension(".json")!!.readText(),
+        ).jsonObject
         val out = ArrayList<Surah>(114)
         for (number in 1..114) {
             val o = json[number.toString()]?.jsonObject ?: continue
@@ -216,6 +224,7 @@ class Build(private val root: File) {
                 nameArabic = o["name_arabic"]?.jsonPrimitive?.contentOrNull ?: "",
                 nameSimple = o["name_simple"]?.jsonPrimitive?.contentOrNull ?: "",
                 nameLatin = o["name"]?.jsonPrimitive?.contentOrNull ?: "",
+                nameBangla = bangla[number.toString()]?.jsonPrimitive?.contentOrNull.orEmpty(),
                 revelationPlace = o["revelation_place"]?.jsonPrimitive?.contentOrNull ?: "",
                 revelationOrder = o["revelation_order"]?.jsonPrimitive?.intOrNull ?: 0,
                 versesCount = o["verses_count"]?.jsonPrimitive?.intOrNull ?: 0,
@@ -223,6 +232,9 @@ class Build(private val root: File) {
             )
         }
         if (out.size != 114) fail("expected 114 surahs, found ${out.size}")
+        for (surah in out) {
+            if (surah.nameBangla.isBlank()) fail("surah ${surah.number} has no Bangla name")
+        }
         return out
     }
 
@@ -289,7 +301,8 @@ class Build(private val root: File) {
             statement.execute("CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
             statement.execute(
                 "CREATE TABLE surah (number INTEGER PRIMARY KEY, name_arabic TEXT NOT NULL, " +
-                    "name_simple TEXT NOT NULL, name_latin TEXT NOT NULL, revelation_place TEXT NOT NULL, " +
+                    "name_simple TEXT NOT NULL, name_latin TEXT NOT NULL, name_bangla TEXT NOT NULL, " +
+                    "revelation_place TEXT NOT NULL, " +
                     "revelation_order INTEGER NOT NULL, verses_count INTEGER NOT NULL, bismillah_pre INTEGER NOT NULL)",
             )
             statement.execute(
@@ -452,18 +465,19 @@ class Build(private val root: File) {
 
     private fun insertSurahs(connection: Connection, surahs: List<Surah>) {
         connection.prepareStatement(
-            "INSERT INTO surah(number, name_arabic, name_simple, name_latin, revelation_place, " +
-                "revelation_order, verses_count, bismillah_pre) VALUES(?,?,?,?,?,?,?,?)",
+            "INSERT INTO surah(number, name_arabic, name_simple, name_latin, name_bangla, revelation_place, " +
+                "revelation_order, verses_count, bismillah_pre) VALUES(?,?,?,?,?,?,?,?,?)",
         ).use { statement ->
             for (surah in surahs) {
                 statement.setInt(1, surah.number)
                 statement.setString(2, surah.nameArabic)
                 statement.setString(3, surah.nameSimple)
                 statement.setString(4, surah.nameLatin)
-                statement.setString(5, surah.revelationPlace)
-                statement.setInt(6, surah.revelationOrder)
-                statement.setInt(7, surah.versesCount)
-                statement.setInt(8, if (surah.bismillahPre) 1 else 0)
+                statement.setString(5, surah.nameBangla)
+                statement.setString(6, surah.revelationPlace)
+                statement.setInt(7, surah.revelationOrder)
+                statement.setInt(8, surah.versesCount)
+                statement.setInt(9, if (surah.bismillahPre) 1 else 0)
                 statement.addBatch()
             }
             statement.executeBatch()

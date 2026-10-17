@@ -10,6 +10,13 @@ data class Surah(
     val revelationPlace: String,
     val versesCount: Int,
     val bismillahPre: Boolean = false,
+    /**
+     * The name in Bangla script, the way a Bangla reader says it. The content
+     * carries one for every surah; the reading replaces [nameSimple] with it
+     * when the reader's language is Bangla, and search matches it in any
+     * language (owner decision, this session).
+     */
+    val nameBangla: String = "",
 )
 
 data class Word(

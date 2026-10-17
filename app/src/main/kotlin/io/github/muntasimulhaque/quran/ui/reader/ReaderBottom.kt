@@ -12,10 +12,14 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.data.Ayah
@@ -264,6 +268,18 @@ private fun AyahActions(
     onMore: () -> Unit,
     onShare: () -> Unit,
 ) {
+    val play = stringResource(R.string.action_play)
+    val tafsir = stringResource(R.string.action_tafsir)
+    val save = stringResource(R.string.action_save)
+    val note = stringResource(R.string.action_note)
+    val share = stringResource(R.string.action_share)
+    // One width for all five actions: the widest word of the five plus the
+    // pill's own side padding. Five labels of five lengths then press in five
+    // identical capsules instead of five ovals of the words' own making
+    // (owner decision, this session).
+    val actionWidth = rememberActionWidth(
+        listOfNotNull(play, if (showTafsir) tafsir else null, save, note, share),
+    )
     val shape = Radii.Pill
     Row(
         modifier = Modifier
@@ -273,30 +289,55 @@ private fun AyahActions(
             .padding(horizontal = 6.dp, vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        TextAction(stringResource(R.string.action_play), Icon.Play, onPlay)
+        TextAction(play, Icon.Play, onPlay, minWidth = actionWidth)
         if (showTafsir) {
             TextAction(
-                label = stringResource(R.string.action_tafsir),
+                label = tafsir,
                 icon = Icon.Tafsir,
                 onClick = onMore,
+                minWidth = actionWidth,
             )
         }
         // The two marked actions say their state; the three that only answer a
         // tap say nothing, so nothing on the pill reads as a switch it is not.
         TextAction(
-            label = stringResource(R.string.action_save),
+            label = save,
             icon = if (isSaved) Icon.BookmarkFilled else Icon.Bookmark,
             onClick = onSave,
             active = isSaved,
             state = markState(isSaved),
+            minWidth = actionWidth,
         )
         TextAction(
-            label = stringResource(R.string.action_note),
+            label = note,
             icon = Icon.Note,
             onClick = onNote,
             active = hasNote,
             state = markState(hasNote),
+            minWidth = actionWidth,
         )
-        TextAction(stringResource(R.string.action_share), Icon.Share, onShare)
+        TextAction(share, Icon.Share, onShare, minWidth = actionWidth)
+    }
+}
+
+/**
+ * The one width every action of the ayah bar shares: the widest of its words
+ * measured in the bar's own label style, plus the pill's horizontal padding,
+ * never under the 48 dp floor the action keeps inside its clip. The
+ * measurement follows the interface language and the reader's font scale, so
+ * a Bangla bar measures Bangla words and a large system text measures large
+ * ones (owner decision, this session).
+ */
+@Composable
+private fun rememberActionWidth(labels: List<String>): Dp {
+    val measurer = rememberTextMeasurer()
+    val style = MaterialTheme.typography.labelMedium
+    val density = LocalDensity.current
+    return remember(measurer, style, labels, density) {
+        val widest = labels.maxOfOrNull { measurer.measure(it, style).size.width } ?: 0
+        with(density) {
+            val icon = GlyphSize.Action.roundToPx()
+            maxOf(widest, icon).toDp() + 12.dp
+        }.coerceAtLeast(48.dp)
     }
 }

@@ -295,6 +295,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     /** The library turned over: the player attaches to the new one. */
     private fun onLibraryReopened(database: ContentDatabase) {
         playback.attach(database)
+        // The surah names may have changed with the interface language, so
+        // the by-number index is rebuilt from the fresh list on its next
+        // read (owner decision, this session).
+        surahIndexByNumber = null
         clearRowCache()
     }
 
@@ -705,6 +709,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         languagePreference.set(language.tag)
         viewModelScope.launch {
             settingsStore.setLanguage(language, next.translationPacks, next.tafsirPacks)
+            // The surah names are content, and the content now answers in the
+            // new language: the library is read again so the names change
+            // with the words around them (owner decision, this session).
+            library.refresh()
             if (firstRun) {
                 settingsStore.setAyah(1, 0)
                 activePlaceId = lastReadStore.record(1, 1)

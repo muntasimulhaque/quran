@@ -12,10 +12,10 @@
             "version": "1",
             "shipped": true,
             "ayahs": 6236,
-            "bytes": 8065024,
-            "sha256": "4b79d4d8fdb523f559b45db2fe299bb680c2290b740e277e4f390adb6f6bb999",
-            "tag": "pack-core-4b79d4d8",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-4b79d4d8/core.db"
+            "bytes": 8069120,
+            "sha256": "74266d14f374fdd0ee076e9b7984c754ffe0ebff41c2d26a234f81993dacce18",
+            "tag": "pack-core-74266d14",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-74266d14/core.db"
         },
         {
             "id": "translation-saheeh-en",

@@ -3,6 +3,7 @@ package io.github.muntasimulhaque.quran.tools
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -76,6 +77,7 @@ class Verify(private val root: File) {
             "recitation-husary-mujawwad" -> checkRecitation(dataset.id, dir)
             "topics" -> checkSimpleCount(dataset.id, dir, "topics", 2512)
             "metadata-surah-names" -> checkJsonKeys(dataset.id, dir, 114)
+            "surah-names-bn" -> checkSurahNamesBn(dataset.id, dir)
             "metadata-ayah" -> checkJsonKeys(dataset.id, dir, 6236)
             "metadata-sajda" -> checkJsonKeys(dataset.id, dir, 15)
             "metadata-juz" -> checkJsonKeys(dataset.id, dir, 30)
@@ -230,6 +232,22 @@ class Verify(private val root: File) {
         val element = Json.parseToJsonElement(jsonFile(dir).readText())
         val size = (element as? JsonObject)?.size ?: (element as? JsonArray)?.size ?: -1
         if (size < minimum) fail(id, "expected at least $minimum entries, found $size")
+    }
+
+    /**
+     * The reviewed Bangla names: one per surah, none blank, and no name for a
+     * number the Book does not have. The build reads this file word for word,
+     * so a hole here is a hole the reader would meet in Bangla (owner
+     * decision, this session).
+     */
+    private fun checkSurahNamesBn(id: String, dir: File) {
+        val element = Json.parseToJsonElement(jsonFile(dir).readText())
+        val names = element as? JsonObject ?: return fail(id, "expected a JSON object of surah names")
+        if (names.size != 114) fail(id, "expected 114 surah names, found ${names.size}")
+        for ((number, value) in names) {
+            if (number.toIntOrNull() !in 1..114) fail(id, "bad surah number: $number")
+            if (value.jsonPrimitive.contentOrNull.isNullOrBlank()) fail(id, "surah $number has no name")
+        }
     }
 
     private fun checkTanzil(id: String, dir: File) {

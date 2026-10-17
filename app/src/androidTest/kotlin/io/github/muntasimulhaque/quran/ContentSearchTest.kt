@@ -108,6 +108,23 @@ class ContentSearchTest {
     }
 
     @Test
+    fun banglaSurahNamesAreSearchableAndFollowTheLanguage() = runBlocking {
+        // The name the reader says and the name the interface draws both come
+        // from the content: search finds a surah by its Bangla name whatever
+        // the interface language, and the drawn name follows the reader's own
+        // choice (owner decision, this session).
+        val bangla = content.search(request("ফুসসিলাত"))
+        val hit = bangla.hits.filterIsInstance<SearchHit.SurahHit>().firstOrNull()
+        assertEquals(41, hit?.surah?.number)
+
+        content.useLanguage("bn")
+        assertEquals("আল-ফাতিহা", content.surah(1)?.nameSimple)
+        assertEquals("আল-মাসাদ", content.surah(111)?.nameSimple)
+        content.useLanguage("en")
+        assertEquals("Al-Fatihah", content.surah(1)?.nameSimple)
+    }
+
+    @Test
     fun referencesJumpToTheAyah() = runBlocking {
         val results = content.search(request("2:255"))
         val reference = results.hits.filterIsInstance<SearchHit.ReferenceHit>().firstOrNull()

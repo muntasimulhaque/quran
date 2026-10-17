@@ -29,6 +29,23 @@ class ContentDatabase private constructor(
     val installedPacks: Set<String>,
 ) {
 
+    /**
+     * The language the surah names are read in: the app sets it once when the
+     * library opens, from the reader's own choice, and every query that names
+     * a surah answers in that language from then on. The reading, Browse, the
+     * search results, the ayah card, the daily reminder, and the share card
+     * all draw one name without each surface choosing a column (owner
+     * decision, this session).
+     */
+    @Volatile
+    private var displayLanguage: String = "en"
+
+    /** Points every following surah name at [language]. */
+    fun useLanguage(language: String) {
+        displayLanguage = language
+        surahCacheValue = null
+    }
+
     /** The schema of one installed pack, quoted for SQL. */
     private fun schema(id: String): String = "\"" + id.replace("\"", "") + "\""
 
@@ -125,7 +142,7 @@ class ContentDatabase private constructor(
 
     fun surahs(): List<Surah> =
         query(
-            "SELECT number, name_arabic, name_simple, name_latin, revelation_place, verses_count, " +
+            "SELECT number, name_arabic, name_simple, name_latin, name_bangla, revelation_place, verses_count, " +
                 "bismillah_pre FROM surah ORDER BY number",
             null,
         ).use { cursor ->
@@ -138,7 +155,7 @@ class ContentDatabase private constructor(
 
     fun surah(number: Int): Surah? =
         query(
-            "SELECT number, name_arabic, name_simple, name_latin, revelation_place, verses_count, " +
+            "SELECT number, name_arabic, name_simple, name_latin, name_bangla, revelation_place, verses_count, " +
                 "bismillah_pre FROM surah WHERE number = ?",
             arrayOf(number.toString()),
         ).use { cursor ->
@@ -146,15 +163,24 @@ class ContentDatabase private constructor(
             surahOf(cursor)
         }
 
-    private fun surahOf(cursor: android.database.Cursor) = Surah(
-        number = cursor.getInt(0),
-        nameArabic = cursor.getString(1),
-        nameSimple = cursor.getString(2),
-        nameLatin = cursor.getString(3),
-        revelationPlace = cursor.getString(4),
-        versesCount = cursor.getInt(5),
-        bismillahPre = cursor.getInt(6) == 1,
-    )
+    /**
+     * One surah, with its name in the reader's own language. The Latin and
+     * Arabic names are always kept, because search reads them in every
+     * language; [Surah.nameSimple] carries the name the interface draws.
+     */
+    private fun surahOf(cursor: android.database.Cursor): Surah {
+        val bangla = cursor.getString(4)
+        return Surah(
+            number = cursor.getInt(0),
+            nameArabic = cursor.getString(1),
+            nameSimple = if (displayLanguage.startsWith("bn") && bangla.isNotBlank()) bangla else cursor.getString(2),
+            nameLatin = cursor.getString(3),
+            nameBangla = bangla,
+            revelationPlace = cursor.getString(5),
+            versesCount = cursor.getInt(6),
+            bismillahPre = cursor.getInt(7) == 1,
+        )
+    }
 
     /**
      * The introduction to a surah, in the reader's own language when the
@@ -1090,7 +1116,12 @@ class ContentDatabase private constructor(
     private val tafsirIndex = TafsirIndex()
 
     /** The 114 surahs, read once: search resolves passages against them. */
-    private val surahCache: Map<Int, Surah> by lazy { surahs().associateBy { it.number } }
+    private var surahCacheValue: Map<Int, Surah>? = null
+
+    private val surahCache: Map<Int, Surah>
+        get() = surahCacheValue ?: synchronized(this) {
+            surahCacheValue ?: surahs().associateBy { it.number }.also { surahCacheValue = it }
+        }
 
     /** Every key each surah's name may be typed by, built once with the names. */
     private val surahNameKeys: Map<Int, Set<String>> by lazy {
@@ -1099,6 +1130,7 @@ class ContentDatabase private constructor(
                 addAll(Search.surahNameForms(surah.nameSimple))
                 addAll(Search.surahNameForms(surah.nameLatin))
                 addAll(Search.surahNameForms(surah.nameArabic))
+                addAll(Search.surahNameForms(surah.nameBangla))
             }
         }
     }
@@ -1182,9 +1214,11 @@ class ContentDatabase private constructor(
                 val simple = Search.normalizeForIndex(surah.nameSimple)
                 val latin = Search.normalizeForIndex(surah.nameLatin)
                 val arabicName = Search.normalizeForIndex(surah.nameArabic)
+                val bangla = Search.normalizeForIndex(surah.nameBangla)
                 val numberMatch = query.terms.size == 1 && query.terms.first() == surah.number.toString()
                 numberMatch || query.terms.all { term ->
-                    simple.contains(term) || latin.contains(term) || arabicName.contains(term)
+                    simple.contains(term) || latin.contains(term) || arabicName.contains(term) ||
+                        bangla.contains(term)
                 }
             }
             .take(8)

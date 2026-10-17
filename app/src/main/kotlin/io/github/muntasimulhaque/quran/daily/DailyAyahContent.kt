@@ -67,6 +67,7 @@ internal data class DailyAyahContent(
             val database = runCatching {
                 ContentDatabase.open(application, catalog.withInstalled(installed), installed)
             }.getOrNull() ?: return null
+            database.useLanguage(settings.uiLanguage ?: "en")
             return try {
                 val ayah = database.ayah(wanted) ?: return null
                 val surah = database.surah(ayah.surah)
