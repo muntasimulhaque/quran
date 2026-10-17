@@ -307,8 +307,8 @@ fun BrowseSheet(
                             JuzRow(
                                 juz = start.juz,
                                 numberWidth = juzNumberWidth,
-                                reference = start.verseKey,
-                                surahName = surah?.nameSimple ?: "",
+                                surahName = surah?.nameSimple,
+                                surahAyah = start.surahAyah,
                                 // A juz begins at one ayah; a tap opens exactly
                                 // that ayah, which is what the row's own line says.
                                 onJuz = { onAyah(start.ayah) },

@@ -420,6 +420,7 @@ class ContentDatabase private constructor(
                             juz = cursor.getInt(0),
                             ayah = cursor.getInt(1),
                             surah = cursor.getInt(2),
+                            surahAyah = cursor.getInt(3),
                             verseKey = cursor.getString(4),
                         ),
                     )

@@ -186,8 +186,8 @@ internal fun SurahRow(
 internal fun JuzRow(
     juz: Int,
     numberWidth: Dp,
-    reference: String,
-    surahName: String,
+    surahName: String?,
+    surahAyah: Int,
     onJuz: () -> Unit,
 ) {
     Row(
@@ -210,12 +210,15 @@ internal fun JuzRow(
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            // A juz with no place to name draws no line: an empty Text was
+            // A juz with no surah to name draws no line: an empty Text was
             // one more line of the row's own rhythm with nothing in it
-            // (owner decision, the theme and consistency session).
-            if (reference.isNotEmpty()) {
+            // (owner decision, the theme and consistency session). The line
+            // names the place the way a reader says it, the surah and the
+            // ayah inside it, rather than repeating the surah's number in a
+            // reference (owner decision, this session).
+            if (surahName != null) {
                 Text(
-                    text = stringResource(R.string.juz_starts_at, surahName, reference),
+                    text = stringResource(R.string.juz_starts_at, surahName, surahAyah),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = Space.Tight),

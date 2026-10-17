@@ -28,6 +28,7 @@ import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.playback.PlaybackBar
 import io.github.muntasimulhaque.quran.ui.theme.Radii
+import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
  * Everything that can sit at the foot of the page: the pack on its way in,
@@ -113,7 +114,10 @@ internal fun BottomStack(
                         if (setup.failed) R.string.action_close else R.string.action_cancel,
                     ),
                     onClick = { viewModel.cancelPackSetup() },
-                    modifier = Modifier.padding(start = 6.dp),
+                    // Retry and Close are two standalone actions, so they
+                    // stand the action gap apart (owner decision, this
+                    // session).
+                    modifier = Modifier.padding(start = Space.Row),
                     quiet = true,
                 )
             }

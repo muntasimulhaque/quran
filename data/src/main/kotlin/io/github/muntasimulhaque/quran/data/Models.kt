@@ -216,11 +216,15 @@ data class ContentPack(
     val installed: Boolean = false,
 )
 
-/** The first ayah of one juz, with the reference it lands on. */
+/**
+ * The first ayah of one juz: the whole Book's ayah it lands on, the surah it
+ * opens, the ayah within that surah, and the reference it lands on.
+ */
 data class JuzStart(
     val juz: Int,
     val ayah: Int,
     val surah: Int,
+    val surahAyah: Int,
     val verseKey: String,
 )
 

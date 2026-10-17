@@ -217,6 +217,11 @@ private fun DailyTimeDialog(
             TextButton(
                 label = stringResource(R.string.settings_cancel),
                 onClick = onDismiss,
+                // The platform's clock dialog lays its two buttons edge to
+                // edge with no spacing of its own, so the action gap is drawn
+                // here; without it Cancel and Set abut (owner decision, this
+                // session).
+                modifier = Modifier.padding(end = Space.Row),
                 quiet = true,
             )
         },

@@ -508,10 +508,10 @@ internal fun AyahShareSheet(
         dragHandle = { SheetHandle() },
         containerColor = MaterialTheme.colorScheme.surface,
         // The preview and its buttons stand on the app's one page, and the
-        // two doors are a centered pair a Space.Line apart: the page's own
+        // two doors are a centered pair a Space.Row apart: the page's own
         // measure keeps them together instead of stretching them across a
         // ten inch screen (owner decision, the theme and consistency session;
-        // the pair, this session).
+        // the action gap, this session).
         sheetMaxWidth = rememberSheetWidth(),
     ) {
         Column(
@@ -541,12 +541,12 @@ internal fun AyahShareSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Section),
-                // The two doors are a centered pair a Space.Line apart: the
-                // gap the eye reads is the gap between the two pills, the
-                // app's one side-by-side rule. Weighted buttons made that
-                // gap a side effect of the stretch, wide on the phone and
-                // wider on a ten inch screen (owner decision, this session).
-                horizontalArrangement = Arrangement.spacedBy(Space.Line, Alignment.CenterHorizontally),
+                // The two doors are a centered pair a Space.Row apart: they
+                // are two standalone actions, not one group, so they wear the
+                // action gap. Weighted buttons made the gap a side effect of
+                // the stretch, wide on the phone and wider on a ten inch
+                // screen (owner decision, this session).
+                horizontalArrangement = Arrangement.spacedBy(Space.Row, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 TextButton(

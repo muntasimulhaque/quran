@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 7.8 (versionCode 80)
+Version: 7.9 (versionCode 81)
 
 ## Listing
 
@@ -136,8 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (7.8, 364 characters)
-Browse's four lists drop the chevron from every row. Last Read now keeps one row per reading instead of one per ayah, so the stretch you are reading stays a single place that follows you, and a jump to another place keeps its own row. Search results' Arabic follows your text size. The reciter page opens without a jump, and side-by-side buttons keep one even gap.
+## Release notes (7.9, 277 characters)
+Browse's Juz list now says where each juz begins in words, the surah and the ayah, like Starts at Al-Kahf, ayah 75, instead of a numbered reference. Side-by-side buttons now keep a clearer gap, so the reminder's time picker and the share card no longer crowd their two actions.
 
 ## Before each release
 

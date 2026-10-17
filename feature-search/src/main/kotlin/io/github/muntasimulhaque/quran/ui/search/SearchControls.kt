@@ -230,10 +230,11 @@ internal fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit)
     // the pill, the finger gets 48 dp, and the eye gets the chip. The gap the
     // flow leaves between two chips is the gap the eye reads: a chip's target
     // is the pill's own width across, so the flow's own Space.Line is what
-    // stands between two chips, the app's one side-by-side rule (owner
-    // decision, this session). The ripple is drawn on the pill inside the
-    // click node, not on the node itself: an indication left on the click
-    // would flash a rectangle over the shape the reader is looking at.
+    // stands between two chips, the app's cluster gap, which the standalone
+    // action pairs do not share (owner decision, this session). The ripple is
+    // drawn on the pill inside the click node, not on the node itself: an
+    // indication left on the click would flash a rectangle over the shape the
+    // reader is looking at.
     val press = remember { MutableInteractionSource() }
     val ink = if (on) {
         MaterialTheme.colorScheme.onPrimary

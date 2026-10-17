@@ -11,7 +11,7 @@
     <string name="place_madinah">Madinah</string>
     <string name="surah_meta_place_ayahs">%1$s  ·  %2$d ayahs</string>
     <string name="juz_title">Juz %1$d</string>
-    <string name="juz_starts_at">%1$s  ·  starts at %2$s</string>
+    <string name="juz_starts_at">Starts at %1$s, ayah %2$d</string>
 
     <string name="last_read_empty_title">No reading places yet</string>
     <string name="last_read_empty_body">The ayahs you read are kept here, newest first, so you can come back to a place you left.</string>

@@ -408,14 +408,16 @@ private fun NoteEditor(
                 TextButton(
                     label = stringResource(R.string.action_clear),
                     onClick = onClear,
-                    modifier = Modifier.padding(start = 12.dp),
+                    modifier = Modifier.padding(start = Space.Row),
                     quiet = true,
                 )
             }
             TextButton(
                 label = stringResource(R.string.reading_note_save),
                 onClick = { onSave(draft.trim().takeIf { it.isNotEmpty() }) },
-                modifier = Modifier.padding(start = Space.Line),
+                // Save and Clear are two standalone actions, so they stand
+                // the action gap apart (owner decision, this session).
+                modifier = Modifier.padding(start = Space.Row),
             )
         }
         BasicTextField(
