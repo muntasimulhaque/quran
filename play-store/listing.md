@@ -116,7 +116,7 @@ caption keeps air above the frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is refreshed for 7.9 from capture run 39011238995: all three legs green with eight frames each, and every frame compared with the previous set by `cmp`. Fifteen frames differ. The app's own change is in the 7 inch settings frame, where the About row names 7.9. The rest is the status bar clock on every changed frame, and the 7 inch search frame's soft keyboard, which redrew between the two capture runs. Every changed frame was read, and the set is installed whole.
+The set is refreshed for 8.0 from capture run 39016071471: all three legs green with eight frames each, and every frame compared with the previous set by `cmp`. Fifteen frames differ. The app's own change is in the 7 inch settings frame, where the About row names 8.0. The rest is the status bar clock on every changed frame, the 7 inch search frame's soft keyboard, which redrew between the two capture runs, and the 10 inch search frame's caret, which fell on the other half of its blink. Every changed frame was read, and the set is installed whole.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
