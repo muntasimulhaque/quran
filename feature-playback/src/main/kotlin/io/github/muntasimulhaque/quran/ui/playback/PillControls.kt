@@ -54,6 +54,15 @@ internal class WordControl(
 ) : PillControl
 
 /**
+ * The one close a state carries, wherever it stands in the state's own list.
+ * The bar lays it out at the capsule's trailing edge in every state and both
+ * shapes, so the dismiss keeps one place on the glass and never reads as
+ * another transport control (owner decision, this session).
+ */
+internal fun List<PillControl>.closeControl(): GlyphControl? =
+    filterIsInstance<GlyphControl>().lastOrNull { it.kind == Transport.Close }
+
+/**
  * The two popups the pill's own words open, named so the capsule can say
  * which one is standing: the reciter's name opens the chooser, and the place
  * under it opens the pace and the end of the audio.
@@ -126,7 +135,13 @@ internal fun pillControls(
     )
 }
 
-/** The pill's controls, in the order a reader's hand expects them. */
+/**
+ * The pill's controls, in the order a reader's hand expects them. The close
+ * is not drawn here: the bar takes it out of the state's list with
+ * [closeControl] and stands it at the capsule's trailing edge, so this row is
+ * the state's own answers and the close is the pill's one way out (owner
+ * decision, this session).
+ */
 @Composable
 internal fun PillControls(
     controls: List<PillControl>,

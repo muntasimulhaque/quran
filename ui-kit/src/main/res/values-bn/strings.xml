@@ -9,4 +9,6 @@
     <string name="pack_name_taisirul_quran">তাইসিরুল কুরআন</string>
     <string name="pack_name_ibn_kathir">ইবনে কাসীর</string>
     <string name="pack_name_word_by_word">শব্দে শব্দে</string>
+    <string name="unit_kb">কেবি</string>
+    <string name="unit_mb">এমবি</string>
 </resources>

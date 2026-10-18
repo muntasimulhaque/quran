@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.data.AppTheme
+import io.github.muntasimulhaque.quran.playback.ListenOffer
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.playback.PlaybackBar
@@ -60,9 +61,11 @@ import java.util.Locale
  *    portrait cannot print the reference, the pace, and the repeat beside
  *    four 48 dp controls, and a name cut with an ellipsis is the defect
  *    the wide pill exists to end. A wide pill can, and stays one row.
- * 5. On that phone the two lines are centred, and the words are one line: the
- *    reciter's name and the place beside each other, not the reciter's name
- *    with the place under it against the pill's left edge (owner report).
+ * 5. On that phone the words and the transport are centred, and the words are
+ *    one line: the reciter's name and the place beside each other, not the
+ *    reciter's name with the place under it against the pill's left edge
+ *    (owner report). The close is the pill's exception: it holds the
+ *    trailing edge in every state (owner decision, this session).
  * 6. The reciter's name is the chooser and not a hop to the settings, and
  *    the chooser carries every reciter with what it would still cost for
  *    the surah at hand, so the choice is made with the number in view
@@ -79,6 +82,11 @@ import java.util.Locale
  *    gap, and one 48 dp target, the same the settings lists draw, so an
  *    answer cannot change its shape from one door to the other (owner
  *    decision, forty-eighth session).
+ * 10. The pill uses the width it has: the words lead and the state's own
+ *     answers hold the capsule's trailing rail, the close outermost, in the
+ *     offer, in the phone's two lines, and in the wide pill's one row. The
+ *     close keeps the capsule's own inner end inset, so the drawn mark stays
+ *     clear of the curve (owner decision, this session).
  */
 @RunWith(AndroidJUnit4::class)
 class PlaybackPillTest {
@@ -101,14 +109,19 @@ class PlaybackPillTest {
         measureWidth: Dp? = null,
         speed: Float = 1f,
         end: EndOfAudio = EndOfAudio.CONTINUE_AYAH,
+        /** The offer state, when the leg is about the offer bar. */
+        offer: ListenOffer? = null,
     ) {
         compose.setContent {
             QuranTheme(theme = AppTheme.Light) {
                 val pill: @Composable () -> Unit = {
                     PlaybackBar(
                         state = state,
-                        offer = null,
-                        offerTitle = "",
+                        offer = offer,
+                        offerTitle = offer?.let { pending ->
+                            "${pending.surahName} \u00b7 " +
+                                formatBytes(pending.bytes, Locale.US, "KB", "MB")
+                        }.orEmpty(),
                         reciterName = "Husary",
                         reciterId = "husary",
                         reciterOptions = listOf(
@@ -363,15 +376,18 @@ class PlaybackPillTest {
         // the tablet's. The class is not among the six the capture runs, which
         // is how that survived.
         showPill(measureWidth = 840.dp)
+        val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
         val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
         val play = compose.onNodeWithContentDescription("Play or pause").getUnclippedBoundsInRoot()
-        // "Share the row" is overlap and company, not an order: both are
-        // centered in the row, and the shorter one starts lower, so asking
-        // for the transport to start above the words was asking for a shape
-        // no centered row has. What distinguishes the one row from the two is
-        // that the transport stands beside the words and overlaps them
-        // vertically (the phone's own test pins the other half of the rule:
-        // there the transport is under the words).
+        val next = compose.onNodeWithContentDescription("Next ayah").getUnclippedBoundsInRoot()
+        val close = compose.onNodeWithContentDescription("Stop").getUnclippedBoundsInRoot()
+        // "Share the row" is overlap and company, not an order: what
+        // distinguishes the one row from the two is that the transport stands
+        // beside the words and overlaps them vertically (the phone's own test
+        // pins the other half of the rule: there the transport is under the
+        // words). The words lead and the transport and the close hold the
+        // trailing rail, so the capsule's far end is used and not empty
+        // (owner decision, this session).
         assertTrue(
             "the transport must stand beside the words: play $play, words $words",
             play.left.value > words.left.value,
@@ -379,6 +395,16 @@ class PlaybackPillTest {
         assertTrue(
             "the transport must share the words' row: play $play, words $words",
             play.top.value < words.bottom.value && play.bottom.value > words.top.value,
+        )
+        assertTrue(
+            "the close must hold the wide pill's trailing rail: close $close, next $next",
+            close.left.value >= next.right.value - 0.5f,
+        )
+        assertEquals(
+            "the wide pill's close keeps the capsule's own inner end inset",
+            6f,
+            (bar.right - close.right).value,
+            1.5f,
         )
     }
 
@@ -415,17 +441,99 @@ class PlaybackPillTest {
         )
     }
 
+    /**
+     * The phone pill's own line: the words and the transport stand on the
+     * capsule's centre, and the close is the pill's exception, on the trailing
+     * edge (owner decision, this session).
+     */
     @Test
-    fun thePhonePillCentresItsControls() {
+    fun thePhonePillCentresItsTransportAndTrailsItsClose() {
         showPill(pillWidth = Modifier.width(393.dp))
         val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
         val first = compose.onNodeWithContentDescription("Previous ayah").getUnclippedBoundsInRoot()
-        val last = compose.onNodeWithContentDescription("Stop").getUnclippedBoundsInRoot()
+        val next = compose.onNodeWithContentDescription("Next ayah").getUnclippedBoundsInRoot()
+        val close = compose.onNodeWithContentDescription("Stop").getUnclippedBoundsInRoot()
         assertEquals(
-            "the controls stand centred under the words, not against one end",
+            "the transport stands centred under the words, not against one end",
             (first.left - bar.left).value,
-            (bar.right - last.right).value,
+            (bar.right - next.right).value,
             1f,
+        )
+        assertTrue(
+            "the close must trail the transport: close $close, next $next",
+            close.left.value >= next.right.value - 0.5f,
+        )
+        assertEquals(
+            "the close keeps the capsule's own inner end inset",
+            6f,
+            (bar.right - close.right).value,
+            1.5f,
+        )
+    }
+
+    /**
+     * The offer uses the capsule's own width: the name and the size lead, the
+     * Download and the close hold the trailing rail, and the close is the
+     * outermost thing on the capsule (owner decision, this session). It is
+     * the same rail the playing pill's one row wears.
+     */
+    @Test
+    fun theOfferHoldsItsActionsOnTheTrailingRail() {
+        showPill(
+            offer = ListenOffer(
+                reciter = "husary",
+                reciterName = "Husary",
+                surah = 19,
+                surahName = "Maryam",
+                ayah = 1,
+                bytes = 22L * 1024 * 1024,
+                options = listOf(ListenOption("husary", "Husary", 0L)),
+            ),
+        )
+        val bar = compose.onNodeWithTag("listen-offer-bar").getUnclippedBoundsInRoot()
+        val title = compose.onNodeWithText("Maryam \u00b7 22 MB").getUnclippedBoundsInRoot()
+        val download = compose.onNodeWithText("Download").getUnclippedBoundsInRoot()
+        val close = compose.onNodeWithContentDescription("Not now").getUnclippedBoundsInRoot()
+        assertTrue(
+            "the words must lead and the actions trail: title $title, download $download",
+            title.left.value < download.left.value,
+        )
+        assertTrue(
+            "the close must be the capsule's outermost action: download $download, close $close",
+            close.left.value > download.right.value - 0.5f,
+        )
+        assertEquals(
+            "the close keeps the capsule's own inner end inset",
+            6f,
+            (bar.right - close.right).value,
+            1.5f,
+        )
+    }
+
+    /**
+     * A state whose only answer is the close keeps the close on the trailing
+     * edge too: the rail is the pill's own rule, not the playing state's own
+     * (owner decision, this session).
+     */
+    @Test
+    fun theLoneCloseStandsOnTheTrailingEdgeToo() {
+        showPill(
+            state = PlaybackUiState(
+                pendingDownloadSurah = 19,
+                pendingDownloadBytes = 22L * 1024 * 1024,
+                downloadProgress = 0.5f,
+            ),
+            reference = null,
+        )
+        val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
+        val close = compose
+            .onNodeWithContentDescription("Cancel download")
+            .getUnclippedBoundsInRoot()
+        assertEquals(
+            "a lone close holds the capsule's own inner end inset",
+            6f,
+            (bar.right - close.right).value,
+            1.5f,
         )
     }
 
@@ -540,7 +648,8 @@ class PlaybackPillTest {
         // two were written as if they were the same figure, which is why this
         // leg had been red for nobody (owner report).
         compose.onNodeWithText("Minshawi").assertIsDisplayed()
-        compose.onNodeWithText(formatBytes(177_000_000L, Locale.US)).assertIsDisplayed()
+        compose.onNodeWithText(formatBytes(177_000_000L, Locale.US, "KB", "MB"))
+            .assertIsDisplayed()
         compose.onNodeWithText("Ready to play").assertIsDisplayed()
         compose.onNodeWithText("Minshawi").performClick()
         assertEquals("minshawi", chosen)

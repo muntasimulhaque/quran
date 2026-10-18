@@ -40,6 +40,11 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * reporting progress, reporting a failure, and playing. Downloading only ever
  * starts from the reader's own tap on Download, and only for one surah.
  *
+ * The pill uses its width: the words lead and the state's own answers hold
+ * the capsule's trailing rail, the close outermost, so the far end of the
+ * capsule is not left empty and the dismiss never reads as another transport
+ * control (owner decision, this session).
+ *
  * The pill is also where its two popups hang. A menu takes the shape of the
  * anchor it is given, and an anchor on the word the reader touched stood the
  * reciter chooser at one end of the capsule and the listening menu at the other
@@ -135,6 +140,13 @@ fun PlaybackBar(
         onDownload = onDownload,
         onClose = onClose,
     )
+    // The close is the pill's trailing mark, not a member of the state's own
+    // group: the bar lays it out at the capsule's own trailing edge in every
+    // state and both shapes, so a dismiss keeps one place on the glass and
+    // never reads as another transport control (owner decision, this
+    // session).
+    val close = controls.closeControl()
+    val leadingControls = controls.filterNot { it is GlyphControl && it.kind == Transport.Close }
     // The reciter is a choice, not a hop: while a package is on its way there
     // is nothing to choose between, and a list with nothing in it is not a
     // door, so the door is closed rather than open and inert.
@@ -215,25 +227,35 @@ fun PlaybackBar(
             }
             if (oneRow) {
                 Row(
-                    modifier = Modifier.padding(
-                        start = BarGutter,
-                        end = RowInsets - BarGutter,
-                        top = RowVertical,
-                        bottom = RowVertical,
-                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = BarGutter,
+                            end = RowInsets - BarGutter,
+                            top = RowVertical,
+                            bottom = RowVertical,
+                        ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    PlaybackWordsLine(
-                        reciterName = reciterName,
-                        onOpenReciters = openReciters,
-                        status = status,
-                        onOpenListening = openListening,
-                        modifier = Modifier
-                            .weight(1f, fill = false)
-                            .padding(horizontal = 4.dp, vertical = 2.dp),
-                    )
+                    // The words take the leading side and give way with an
+                    // ellipsis; the state's own answers and the close hold
+                    // the trailing rail, the close outermost (owner decision,
+                    // this session: the wide pill used to hug its leading
+                    // corner and leave the capsule's far end empty).
+                    Box(modifier = Modifier.weight(1f)) {
+                        PlaybackWordsLine(
+                            reciterName = reciterName,
+                            onOpenReciters = openReciters,
+                            status = status,
+                            onOpenListening = openListening,
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                        )
+                    }
                     Spacer(Modifier.width(WordsGap))
-                    PillControls(controls)
+                    PillControls(leadingControls)
+                    close?.let { mark ->
+                        PillControls(listOf(mark))
+                    }
                 }
             } else {
                 // The words keep the whole width of the pill and the controls
@@ -261,13 +283,29 @@ fun PlaybackBar(
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp),
                 )
-                PillControls(
-                    controls = controls,
+                // The transport stays centred under the words; the close
+                // stands at the far end of the same line, the pill's own
+                // trailing mark rather than the fourth transport (owner
+                // decision, this session).
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 6.dp),
-                    arrangement = Arrangement.Center,
-                )
+                ) {
+                    PillControls(
+                        controls = leadingControls,
+                        modifier = Modifier.align(Alignment.Center),
+                        arrangement = Arrangement.Center,
+                    )
+                    close?.let { mark ->
+                        PillControls(
+                            controls = listOf(mark),
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd)
+                                .padding(end = RowInsets - BarGutter),
+                        )
+                    }
+                }
             }
             if (downloading) {
                 // The progress is the app's one download line, drawn by hand

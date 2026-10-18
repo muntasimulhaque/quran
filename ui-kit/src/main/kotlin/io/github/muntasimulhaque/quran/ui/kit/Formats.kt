@@ -13,9 +13,10 @@ import java.util.Locale
 
 /**
  * A string with its ASCII digits written in the interface's own digits, read
- * where it is drawn: a reference ("56:59"), a size ("2.8 MB"), and a pace
- * ("0.75x") all pass through here, so one language's digits reach every
- * number the reader meets and no surface can forget one (owner decision,
+ * where it is drawn: a reference ("56:59") and a pace ("0.75x") pass through
+ * here, and a size's digits take the same road inside [formatBytes], which
+ * formats with the interface's own locale. One language's digits reach every
+ * number the reader meets, and no surface can forget one (owner decision,
  * this session). The pure rule and its own test live in `core`.
  */
 @Composable
@@ -25,28 +26,32 @@ fun localizedDigits(text: String): String {
 }
 
 /**
- * Human sizes for a download the reader is about to approve. The digits and
- * the decimal mark follow the interface's own language, so a Bangla reading
- * reads ২.৮ MB while an English one reads 2.8 MB. The unit's letters do not
- * change: KB and MB are the same unit in every language, and a translated
- * unit would be a second name for one fact.
+ * Human sizes for a download the reader is about to approve. The digits, the
+ * decimal mark, and the unit's own name follow the interface's language, so a
+ * Bangla reading reads ২.৮ এমবি while an English one reads 2.8 MB (owner
+ * decision, this session: the unit used to stay KB and MB in every language,
+ * and a reader reading Bengali meets Bengali).
  *
- * The locale is a parameter rather than the process default because a size is
- * also drawn outside an Activity, where the reader's own language has not been
- * written onto the default locale (owner decision, this session).
+ * The unit words come from the interface's own strings, and the locale is a
+ * parameter rather than the process default because a size is drawn in the
+ * language the surface is drawn in, which is not always the process default.
+ * The composable below is the app's one caller; a test can pin the rule
+ * without a window.
  */
-fun formatBytes(bytes: Long, locale: Locale): String = when {
+fun formatBytes(bytes: Long, locale: Locale, kb: String, mb: String): String = when {
     bytes <= 0 -> ""
-    bytes < 1024 * 1024 -> String.format(locale, "%d KB", (bytes + 512) / 1024)
-    bytes < 10 * 1024 * 1024 -> String.format(locale, "%.1f MB", bytes / 1048576.0)
-    else -> String.format(locale, "%.0f MB", bytes / 1048576.0)
+    bytes < 1024 * 1024 -> String.format(locale, "%d %s", (bytes + 512) / 1024, kb)
+    bytes < 10 * 1024 * 1024 -> String.format(locale, "%.1f %s", bytes / 1048576.0, mb)
+    else -> String.format(locale, "%.0f %s", bytes / 1048576.0, mb)
 }
 
-/** [formatBytes] in the interface's own digits, read where it is drawn. */
+/** [formatBytes] in the interface's own digits and words, read where it is drawn. */
 @Composable
 fun formatBytes(bytes: Long): String {
     val locale = LocalConfiguration.current.locales[0]
-    return remember(bytes, locale) { formatBytes(bytes, locale) }
+    val kb = stringResource(R.string.unit_kb)
+    val mb = stringResource(R.string.unit_mb)
+    return remember(bytes, locale, kb, mb) { formatBytes(bytes, locale, kb, mb) }
 }
 
 /**

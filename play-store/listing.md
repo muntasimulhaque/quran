@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 8.6 (versionCode 88)
+Version: 8.7 (versionCode 89)
 
 ## Listing
 
@@ -136,8 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (8.6, 235 characters)
-A search that matches a surah's name no longer closes the app. A short query like ib finds Surah Ibrahim, and the surah's row is now drawn with its place and its ayah count, in English or Bangla. Nothing else about the reading changed.
+## Release notes (8.7, 403 characters)
+Listening is clearer. The offer that asks before a surah's audio is downloaded now keeps the surah and its size on the left and the Download and close buttons on the right edge of the capsule, and the close sits at the far right while a recitation plays. Sizes are written in the reader's own language, so Bangla readers see কেবি and এমবি beside Bengali numerals. Nothing else about the reading changed.
 
 ## Before each release
 

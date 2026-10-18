@@ -4,9 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
@@ -46,6 +47,11 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * The offer keeps its own single row whatever the width, and that is not an
  * oversight: it carries two controls, never four, and the one line it prints
  * is a name and a size.
+ *
+ * The name and the size lead and the state's answers hold the capsule's
+ * trailing rail, the close outermost: the offer is as wide as the page's own
+ * measure, and that width is used rather than hugged (owner report, this
+ * session).
  */
 @Composable
 internal fun ListenOfferBar(
@@ -63,7 +69,8 @@ internal fun ListenOfferBar(
         modifier = modifier
             .floatingLift(Radii.Pill)
             .clip(Radii.Pill)
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .testTag("listen-offer-bar"),
     ) {
         // The chooser hangs from the bar's own centre with its ground above,
         // exactly as the chooser on the playing pill does: one list opens the
@@ -87,7 +94,10 @@ internal fun ListenOfferBar(
             }
         }
         Row(
-            modifier = Modifier.padding(start = 16.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(
@@ -147,30 +157,40 @@ internal fun ListenOfferBar(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            Spacer(Modifier.padding(horizontal = 6.dp))
-            when {
-                progress != null -> TransportButton(
-                    Transport.Close,
-                    stringResource(R.string.playback_cancel_download),
-                    onCancel,
-                )
-                offer.failed -> TextButton(
-                    label = stringResource(R.string.playback_retry),
-                    onClick = onConfirm,
-                )
-                else -> {
-                    TextButton(
-                        label = stringResource(R.string.playback_download),
-                        onClick = onConfirm,
-                    )
-                    // An offer the reader does not want is not a trap: the
-                    // same close that cancels a download takes the offer
-                    // away, so nothing sits over the reading unasked.
-                    TransportButton(
+            // The state's answers hold the capsule's trailing rail, the close
+            // outermost, and the words give way to them with an ellipsis; the
+            // 12 dp lead keeps the two apart when the name is long. The offer
+            // used to hug its leading corner and leave the far end of the
+            // capsule empty (owner report, this session).
+            Row(
+                modifier = Modifier.padding(start = WordsGap),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                when {
+                    progress != null -> TransportButton(
                         Transport.Close,
-                        stringResource(R.string.playback_close_offer),
+                        stringResource(R.string.playback_cancel_download),
                         onCancel,
                     )
+                    offer.failed -> TextButton(
+                        label = stringResource(R.string.playback_retry),
+                        onClick = onConfirm,
+                    )
+                    else -> {
+                        TextButton(
+                            label = stringResource(R.string.playback_download),
+                            onClick = onConfirm,
+                        )
+                        // An offer the reader does not want is not a trap:
+                        // the same close that cancels a download takes the
+                        // offer away, so nothing sits over the reading
+                        // unasked.
+                        TransportButton(
+                            Transport.Close,
+                            stringResource(R.string.playback_close_offer),
+                            onCancel,
+                        )
+                    }
                 }
             }
         }
