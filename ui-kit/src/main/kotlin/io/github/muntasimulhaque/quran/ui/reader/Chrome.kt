@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -393,8 +394,16 @@ fun IconButton(
  * the ayah bar measures its widest word and hands the same number to all
  * five, so five labels of five lengths press in five identical capsules
  * rather than in five ovals of the words' own making (owner decision, this
- * session). The clip sits outside the 48 dp floor, so the shape the reader
- * sees is the shape their finger gets.
+ * session).
+ *
+ * The indication sits directly inside the clip, above the width and the 48 dp
+ * floor, so the shape the press draws is the shape the reader sees and the
+ * finger gets: the action's own capsule, and the circle a square action is.
+ * The floor enlarges the node it sits on but not the child under it, so an
+ * indication left below the floor drew a 44 dp shape inside a 48 dp clip, and
+ * its circle was cut flat at the top and the bottom (owner report, this
+ * session). The ripple is unbounded for the same reason: a bounded one is
+ * sliced by the node's shorter side, where the clip is what shapes it.
  */
 @Composable
 fun TextAction(
@@ -426,10 +435,11 @@ fun TextAction(
                 onClick = onClick,
             )
             .clip(Radii.Pill)
+            .indication(press, ripple(color = ink, bounded = false))
             .widthIn(min = minWidth)
             .minimumInteractiveComponentSize()
-            .indication(press, ripple(color = ink))
             .padding(horizontal = 6.dp, vertical = 4.dp)
+            .testTag("ayah-action-shape")
             .semantics {
                 contentDescription = label
                 if (state != null) stateDescription = state

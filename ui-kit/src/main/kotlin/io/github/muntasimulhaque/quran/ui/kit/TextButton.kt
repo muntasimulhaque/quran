@@ -40,7 +40,9 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * the shape the reader is looking at. The touch target is the slab, not a
  * modifier outside the click: the accessibility test measures the node the
  * platform exposes, and that node has to be the whole target, not a wrapper
- * around it (owner decision, this session).
+ * around it (owner decision, this session). The ripple is unbounded, so its
+ * circle is never sliced by the pill's shorter side: the pill's own clip is
+ * what shapes the press (owner decision, this session).
  *
  * Two text buttons side by side stand `Space.Row` (12 dp) apart between
  * their pills: each is a standalone action, so the pair reads as two answers
@@ -85,7 +87,7 @@ fun TextButton(
             modifier = Modifier
                 .clip(Radii.Pill)
                 .background(fill)
-                .indication(press, ripple(color = ink))
+                .indication(press, ripple(color = ink, bounded = false))
                 .padding(horizontal = 14.dp, vertical = 7.dp),
         ) {
             Text(

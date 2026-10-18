@@ -1,5 +1,8 @@
 package io.github.muntasimulhaque.quran
 
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertHeightIsEqualTo
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -10,6 +13,7 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -143,6 +147,36 @@ class AyahActionsTest {
             compose.onAllNodesWithTag("remove-saved-confirm", useUnmergedTree = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
+    }
+
+    /**
+     * The press fills the action's own capsule, not the 44 dp box the mark
+     * and its word make: the state layer and the ripple draw on the clipped
+     * control, so the shape the reader sees is the shape their finger gets,
+     * and no circle is cut flat by a shorter node inside it (owner report,
+     * this session).
+     */
+    @Test
+    fun thePressFillsTheActionItsOwnCapsule() {
+        waitForReading()
+        openReadingAyah()
+        // The shape is a child of the clickable, which merges its
+        // descendants, so the tag is read from the unmerged tree.
+        val shapes = compose.onAllNodesWithTag("ayah-action-shape", useUnmergedTree = true)
+        // Play, Tafsir, Save, Note, Share.
+        shapes.assertCountEquals(5)
+        repeat(5) { index ->
+            shapes[index].assertHeightIsEqualTo(48.dp)
+        }
+        // The bar hands its one measured width to all five, so the five
+        // press shapes match rather than five ovals of the words' own making.
+        val first = shapes[0].getUnclippedBoundsInRoot()
+        val last = shapes[4].getUnclippedBoundsInRoot()
+        assertEquals(
+            "the five actions press in one width",
+            first.right - first.left,
+            last.right - last.left,
+        )
     }
 
     /** What the pill's action says about its own mark, in the app's words. */

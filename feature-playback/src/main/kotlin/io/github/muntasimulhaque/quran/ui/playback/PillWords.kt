@@ -131,7 +131,7 @@ private fun ReciterDoor(
                 } else {
                     Modifier.indication(
                         press,
-                        ripple(color = MaterialTheme.colorScheme.primary),
+                        ripple(color = MaterialTheme.colorScheme.primary, bounded = false),
                     )
                 },
             )
@@ -199,7 +199,10 @@ private fun PlaybackStatusLine(
             )
             .minimumInteractiveComponentSize()
             .clip(Radii.Pill)
-            .indication(press, ripple(color = MaterialTheme.colorScheme.onSurfaceVariant))
+            .indication(
+                press,
+                ripple(color = MaterialTheme.colorScheme.onSurfaceVariant, bounded = false),
+            )
             .padding(horizontal = 4.dp, vertical = 8.dp)
             .testTag("playback-listening")
             .semantics { contentDescription = text },
