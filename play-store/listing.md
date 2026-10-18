@@ -116,7 +116,7 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is refreshed for 8.4 from capture run 39115049154: all three legs green with eight frames each, and every frame compared with the previous set by `cmp`. Frames 1 through 3 on every leg are unchanged. Of the five whole-display frames, the status bar clock differs on every leg, the phone search frame carries the emulator keyboard's own suggestion strip, the 7 inch search frame catches the search caret in a different blink, the 10 inch frames carry the taskbar clock, and the 7 inch settings frame also carries Version 8.4 in its About row. Every changed frame was read, and the set is installed whole.
+The set is refreshed for 8.5 from capture run 39117628421: all three legs green with eight frames each, and every frame compared with the previous set by `cmp`. Frames 1 and 3 are unchanged on every leg, and frame 2 is unchanged on the phone and 7 inch legs. The status bar or taskbar clock differs in the changed frames, the phone search frame carries the emulator keyboard's own suggestion strip, and the 7 inch settings frame names Version 8.5 in its About row. Every changed frame was read, and the set is installed whole.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
