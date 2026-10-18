@@ -38,6 +38,7 @@ import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Radii
+import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
  * One request, named in full: which reciter, which surah, how much, and the
@@ -51,7 +52,11 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * The name and the size lead and the state's answers hold the capsule's
  * trailing rail, the close outermost: the offer is as wide as the page's own
  * measure, and that width is used rather than hugged (owner report, this
- * session).
+ * session). The two answers on that rail stand `Space.Row` apart, because
+ * the Download's own pill fills its 48 dp target and the close's highlight is
+ * drawn on the target: with nothing between them the two shapes met edge to
+ * edge, and the press read as one control touching another (owner report,
+ * this session).
  */
 @Composable
 internal fun ListenOfferBar(
@@ -159,11 +164,16 @@ internal fun ListenOfferBar(
             }
             // The state's answers hold the capsule's trailing rail, the close
             // outermost, and the words give way to them with an ellipsis; the
-            // 12 dp lead keeps the two apart when the name is long. The offer
-            // used to hug its leading corner and leave the far end of the
-            // capsule empty (owner report, this session).
+            // 12 dp lead keeps the two apart when the name is long. The
+            // answers stand `Space.Row` apart between their own shapes, the
+            // app's gap for two standalone answers: the Download's pill fills
+            // its 48 dp target, so without it the close's highlight met the
+            // pill's edge (owner report, this session). The offer used to hug
+            // its leading corner and leave the far end of the capsule empty
+            // (owner report, this session).
             Row(
                 modifier = Modifier.padding(start = WordsGap),
+                horizontalArrangement = Arrangement.spacedBy(Space.Row),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 when {

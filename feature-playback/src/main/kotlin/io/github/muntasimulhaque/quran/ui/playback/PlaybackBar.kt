@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -43,7 +44,9 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * The pill uses its width: the words lead and the state's own answers hold
  * the capsule's trailing rail, the close outermost, so the far end of the
  * capsule is not left empty and the dismiss never reads as another transport
- * control (owner decision, this session).
+ * control (owner decision, this session). On the phone's two rows the close
+ * stands on the capsule's own middle, the place it wears in the offer and in
+ * the wide pill's one row (owner report, this session).
  *
  * The pill is also where its two popups hang. A menu takes the shape of the
  * anchor it is given, and an anchor on the word the reader touched stood the
@@ -274,29 +277,39 @@ fun PlaybackBar(
                 // No vertical inset is kept over it: the doors' own 48 dp
                 // targets give the line its height (owner decision, this
                 // session).
-                PlaybackWordsLine(
-                    reciterName = reciterName,
-                    onOpenReciters = openReciters,
-                    status = status,
-                    onOpenListening = openListening,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
-                )
-                // The transport stays centred under the words; the close
-                // stands at the far end of the same line, the pill's own
-                // trailing mark rather than the fourth transport (owner
-                // decision, this session).
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 6.dp),
-                ) {
-                    PillControls(
-                        controls = leadingControls,
-                        modifier = Modifier.align(Alignment.Center),
-                        arrangement = Arrangement.Center,
-                    )
+                //
+                // The close is the capsule's own trailing mark on its own
+                // middle, the place it wears in the offer and in the wide
+                // pill's one row: it belongs to the capsule, not to the
+                // transport line, so it is drawn over the two rows rather
+                // than sitting at the foot of the lower one. The lower row
+                // keeps its own measure even where the state has no answer
+                // to stand in it, so the pill is one shape in every voice
+                // and the close one place (owner report, this session).
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    Column {
+                        PlaybackWordsLine(
+                            reciterName = reciterName,
+                            onOpenReciters = openReciters,
+                            status = status,
+                            onOpenListening = openListening,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp),
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .defaultMinSize(minHeight = TransportSize + 6.dp)
+                                .padding(bottom = 6.dp),
+                        ) {
+                            PillControls(
+                                controls = leadingControls,
+                                modifier = Modifier.align(Alignment.Center),
+                                arrangement = Arrangement.Center,
+                            )
+                        }
+                    }
                     close?.let { mark ->
                         PillControls(
                             controls = listOf(mark),

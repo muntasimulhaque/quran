@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertHeightIsEqualTo
@@ -28,18 +29,21 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.data.AppTheme
+import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.playback.ListenOffer
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.playback.PlaybackBar
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.theme.QuranTheme
+import io.github.muntasimulhaque.quran.ui.theme.Space
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -64,8 +68,9 @@ import java.util.Locale
  * 5. On that phone the words and the transport are centred, and the words are
  *    one line: the reciter's name and the place beside each other, not the
  *    reciter's name with the place under it against the pill's left edge
- *    (owner report). The close is the pill's exception: it holds the
- *    trailing edge in every state (owner decision, this session).
+ *    (owner report). The close holds the trailing edge in every state and the
+ *    capsule's own middle, the place the offer gives it (owner report, this
+ *    session).
  * 6. The reciter's name is the chooser and not a hop to the settings, and
  *    the chooser carries every reciter with what it would still cost for
  *    the surah at hand, so the choice is made with the number in view
@@ -87,6 +92,9 @@ import java.util.Locale
  *     offer, in the phone's two lines, and in the wide pill's one row. The
  *     close keeps the capsule's own inner end inset, so the drawn mark stays
  *     clear of the curve (owner decision, this session).
+ * 11. The offer prints the surah's own name whole in the line it shares with
+ *     the size, in either language: the size may give way at the end of the
+ *     line, the name never does (owner decision, this session).
  */
 @RunWith(AndroidJUnit4::class)
 class PlaybackPillTest {
@@ -111,14 +119,22 @@ class PlaybackPillTest {
         end: EndOfAudio = EndOfAudio.CONTINUE_AYAH,
         /** The offer state, when the leg is about the offer bar. */
         offer: ListenOffer? = null,
+        /**
+         * The offer's own title, where a leg needs the real words in the
+         * reader's language: the harness builds an English one by default,
+         * and the test process's own strings are always English.
+         */
+        offerTitle: String? = null,
+        /** The reader's language, which is the voice and the digits. */
+        language: UiLanguage = UiLanguage.English,
     ) {
         compose.setContent {
-            QuranTheme(theme = AppTheme.Light) {
+            QuranTheme(theme = AppTheme.Light, language = language) {
                 val pill: @Composable () -> Unit = {
                     PlaybackBar(
                         state = state,
                         offer = offer,
-                        offerTitle = offer?.let { pending ->
+                        offerTitle = offerTitle ?: offer?.let { pending ->
                             "${pending.surahName} \u00b7 " +
                                 formatBytes(pending.bytes, Locale.US, "KB", "MB")
                         }.orEmpty(),
@@ -443,8 +459,9 @@ class PlaybackPillTest {
 
     /**
      * The phone pill's own line: the words and the transport stand on the
-     * capsule's centre, and the close is the pill's exception, on the trailing
-     * edge (owner decision, this session).
+     * capsule's centre, and the close stands on that same centre at the
+     * trailing end, the place the offer gives it (owner report, this
+     * session).
      */
     @Test
     fun thePhonePillCentresItsTransportAndTrailsItsClose() {
@@ -469,13 +486,20 @@ class PlaybackPillTest {
             (bar.right - close.right).value,
             1.5f,
         )
+        assertEquals(
+            "the close stands on the capsule's own middle, not at the foot of the lower row",
+            (bar.top + bar.bottom).value / 2f,
+            (close.top + close.bottom).value / 2f,
+            1f,
+        )
     }
 
     /**
      * The offer uses the capsule's own width: the name and the size lead, the
-     * Download and the close hold the trailing rail, and the close is the
-     * outermost thing on the capsule (owner decision, this session). It is
-     * the same rail the playing pill's one row wears.
+     * Download and the close hold the trailing rail, the close outermost, and
+     * the two answers stand the app's own `Space.Row` apart between the
+     * shapes the reader sees (owner report, this session). It is the same
+     * rail the playing pill's one row wears.
      */
     @Test
     fun theOfferHoldsItsActionsOnTheTrailingRail() {
@@ -503,10 +527,71 @@ class PlaybackPillTest {
             close.left.value > download.right.value - 0.5f,
         )
         assertEquals(
+            "the Download and the close stand `Space.Row` apart: " +
+                "download $download, close $close",
+            Space.Row.value,
+            (close.left - download.right).value,
+            1.5f,
+        )
+        assertEquals(
             "the close keeps the capsule's own inner end inset",
             6f,
             (bar.right - close.right).value,
             1.5f,
+        )
+    }
+
+    /**
+     * The offer prints the surah's own name whole in the line it shares with
+     * the size, in the reader's own language: the name is what the reader
+     * reads, so it is the promise, and the size is what gives way when the
+     * line is at its longest (owner decision, this session).
+     *
+     * The two names are the content's own longest in each language, and the
+     * sizes are the packages' real bytes: `Al-Mumtahanah` at 9.0 MB, and
+     * `আল-মুতাফফিফীন` at ৫.৮ এমবি. The pill is measured at the 360 dp
+     * phone's own width, the tightest glass the app draws an offer on.
+     */
+    @Test
+    fun theOfferPrintsTheLongestEnglishNameWhole() {
+        showPill(
+            pillWidth = Modifier.width(360.dp),
+            offer = ListenOffer(
+                reciter = "husary",
+                reciterName = "Husary",
+                surah = 60,
+                surahName = "Al-Mumtahanah",
+                ayah = 1,
+                bytes = 9_395_684L,
+                options = listOf(ListenOption("husary", "Husary", 0L)),
+            ),
+            offerTitle = "Al-Mumtahanah \u00b7 9.0 MB",
+        )
+        assertTheOfferPrintsTheNameWhole(
+            title = "Al-Mumtahanah \u00b7 9.0 MB",
+            name = "Al-Mumtahanah",
+        )
+    }
+
+    @Test
+    fun theOfferPrintsTheLongestBanglaNameWhole() {
+        showPill(
+            pillWidth = Modifier.width(360.dp),
+            language = UiLanguage.Bangla,
+            offer = ListenOffer(
+                reciter = "husary",
+                reciterName = "Husary",
+                surah = 83,
+                surahName = "আল-মুতাফফিফীন",
+                ayah = 1,
+                bytes = 6_077_998L,
+                options = listOf(ListenOption("husary", "Husary", 0L)),
+            ),
+            offerTitle = "আল-মুতাফফিফীন \u00b7 ৫.৮ এমবি",
+        )
+        assertTheOfferPrintsTheNameWhole(
+            title = "আল-মুতাফফিফীন \u00b7 ৫.৮ এমবি",
+            name = "আল-মুতাফফিফীন",
         )
     }
 
@@ -722,6 +807,34 @@ class PlaybackPillTest {
             // (owner report, forty-seventh session). The promise is one
             // centre, not one integer.
             1f,
+        )
+    }
+
+    /**
+     * The offer must show the whole name in the line it shares with the size.
+     * The text's own layout is read back through the semantics action Compose
+     * gives every `Text`: `getLineEnd(0, visibleEnd = true)` is where the
+     * visible line stops, so an offset at least the name's own length means
+     * the ellipsis, if it came, fell on the size alone (owner decision, this
+     * session).
+     */
+    private fun assertTheOfferPrintsTheNameWhole(title: String, name: String) {
+        val text = compose.onNodeWithText(title, useUnmergedTree = true).fetchSemanticsNode()
+        val layouts = mutableListOf<TextLayoutResult>()
+        assertTrue(
+            "the offer must report the title's own layout: $title",
+            text.config.contains(SemanticsActions.GetTextLayoutResult),
+        )
+        val reported = text.config[SemanticsActions.GetTextLayoutResult].action?.invoke(layouts)
+        assertTrue(
+            "the title must hand its own layout to the test: $title",
+            reported == true && layouts.isNotEmpty(),
+        )
+        val visibleEnd = layouts.first().getLineEnd(0, visibleEnd = true)
+        assertTrue(
+            "the offer must print the name whole: $name at offset ${name.length} " +
+                "of $title, which stops at $visibleEnd",
+            visibleEnd >= name.length,
         )
     }
 }

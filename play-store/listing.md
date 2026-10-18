@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 8.8 (versionCode 90)
+Version: 8.9 (versionCode 91)
 
 ## Listing
 
@@ -136,8 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (8.8, 370 characters)
-Bangla now reaches the whole app. The About page names the Quran text and each reciter in Bangla, and reads every credit and license in Bangla, with Bengali numerals in the version. The lock screen and the media notification speak the reader's language too, naming the surah, the ayah, and the reciter as the app does. The lists you choose from follow the names you see.
+## Release notes (8.9, 378 characters)
+The pill at the foot of the reading is tidier. Its close mark now stands in the middle of the capsule in every voice, in the download offer and while a recitation plays, instead of hanging at the lower corner. The Download and close answers in the offer stand a clear gap apart, and every surah name still prints whole, in English and in Bangla. The reading itself is unchanged.
 
 ## Before each release
 
