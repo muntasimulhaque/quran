@@ -36,6 +36,8 @@ import io.github.muntasimulhaque.quran.data.shouldShowWordMeaning
 import io.github.muntasimulhaque.quran.feature.search.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.kit.contentPackName
+import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.rich.HighlightedText
 import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
@@ -75,7 +77,7 @@ internal fun ReferenceRow(ayah: Ayah, onAyah: (Ayah) -> Unit) {
                 color = MaterialTheme.colorScheme.primary,
             )
             Text(
-                text = ayah.verseKey,
+                text = localizedDigits(ayah.verseKey),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(top = Space.Tight),
@@ -167,7 +169,7 @@ internal fun AyahRow(
             .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = Space.Row),
     ) {
         Text(
-            text = "${hit.ayah.verseKey}",
+            text = localizedDigits(hit.ayah.verseKey),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary,
         )
@@ -225,7 +227,7 @@ internal fun AyahRow(
             )
             if (showSource) {
                 Text(
-                    text = translation.packName,
+                    text = contentPackName(translation.pack, translation.packName),
                     style = MaterialTheme.typography.labelMedium,
                     // A pack's name is read, so it keeps the theme's own
                     // secondary tone; the 0.7 alpha it wore measured 3.3:1,
@@ -269,16 +271,17 @@ internal fun TafsirRow(hit: SearchHit.TafsirHitResult, onAyah: (Ayah) -> Unit) {
             .sheetRow(onClick = { onAyah(hit.ayah) })
             .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = Space.Row),
     ) {
+        val span = if (hit.fromAyah == hit.toAyah) {
+            "${hit.surah}:${hit.fromAyah}"
+        } else {
+            "${hit.surah}:${hit.fromAyah}-${hit.toAyah}"
+        }
         Text(
             text = stringResource(
                 R.string.search_tafsir_range,
-                hit.packName,
+                contentPackName(hit.pack, hit.packName),
                 hit.surahName,
-                if (hit.fromAyah == hit.toAyah) {
-                    "${hit.surah}:${hit.fromAyah}"
-                } else {
-                    "${hit.surah}:${hit.fromAyah}-${hit.toAyah}"
-                },
+                localizedDigits(span),
             ),
             style = MaterialTheme.typography.labelMedium,
             // The pack's name is a name, not an action: the tafsir row's

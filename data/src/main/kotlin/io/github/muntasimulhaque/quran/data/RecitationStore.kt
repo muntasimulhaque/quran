@@ -3,6 +3,7 @@ package io.github.muntasimulhaque.quran.data
 import android.content.Context
 import android.net.Uri
 import java.io.File
+import java.util.Locale
 
 /**
  * Finds the audio for one ayah without ever touching the network.
@@ -31,7 +32,13 @@ class RecitationStore(private val context: Context) {
     /** The ayah files of one surah for one reciter folder, for sizes and removal. */
     fun filesForSurah(folder: String, surah: Int): List<File> {
         val directory = File(imported, folder)
-        val prefix = "%03d".format(surah)
+        // The prefix is a file name, never a number the reader reads, so it
+        // is written with the root locale: the process default follows the
+        // reader's language, and a Bangla default wrote the prefix in Bangla
+        // digits (০০১), which matched none of the ASCII names the packages
+        // hold. A reader who downloaded a surah in one language then met a
+        // download offer for it in the other (owner report, this session).
+        val prefix = String.format(Locale.ROOT, "%03d", surah)
         return directory.listFiles { file ->
             file.isFile && file.name.startsWith(prefix) && file.name.endsWith(".mp3")
         }?.toList().orEmpty()

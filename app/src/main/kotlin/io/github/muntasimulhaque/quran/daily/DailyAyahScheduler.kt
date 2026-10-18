@@ -9,6 +9,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
@@ -30,6 +31,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.util.Locale
 import java.util.TimeZone
 
 /**
@@ -331,6 +333,7 @@ object DailyAyahScheduler {
                     if (!settings.dailyAyah) return@launch
                     val content = runCatching { DailyAyahContent.load(application) }.getOrNull()
                         ?: return@launch
+                    val title = notificationTitle(application, settings.uiLanguage, content)
                     val notification = runCatching {
                         NotificationCompat.Builder(application, CHANNEL_ID)
                             // The reminder wears the app's mark, the book on
@@ -343,14 +346,7 @@ object DailyAyahScheduler {
                             // The mark lives in ui-kit so the recitation's own
                             // notification wears it too.
                             .setSmallIcon(UiKitR.drawable.ic_daily)
-                            .setContentTitle(
-                                application.getString(
-                                    R.string.daily_notification_title,
-                                    content.surahName,
-                                    content.surah,
-                                    content.ayah,
-                                ),
-                            )
+                            .setContentTitle(title)
                             .setContentText(centered(content.arabic))
                             .setStyle(
                                 NotificationCompat.BigTextStyle().bigText(
@@ -404,6 +400,32 @@ object DailyAyahScheduler {
     }
 
     private const val DAY_MILLIS = 86_400_000L
+}
+
+/**
+ * The reminder's title in the reader's own language: the surah's name, the
+ * word for an ayah, and the ayah's own number inside its surah, in the
+ * reader's own digits. The reminder is built on the Application's context,
+ * which wears the phone's language rather than the reader's, so a context is
+ * derived for this one string: the chosen language's word and the chosen
+ * language's digits both come from it (owner decision, this session).
+ */
+internal fun notificationTitle(
+    context: Context,
+    language: String?,
+    content: DailyAyahContent,
+): String {
+    val locale = Locale.forLanguageTag(language ?: "en")
+    val configuration = Configuration(context.resources.configuration).apply {
+        setLocale(locale)
+        setLayoutDirection(locale)
+    }
+    val localized = context.createConfigurationContext(configuration)
+    return localized.getString(
+        R.string.daily_notification_title,
+        content.surahName,
+        content.ayahInSurah,
+    )
 }
 
 /**

@@ -23,6 +23,7 @@ import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
+import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.rememberSheetWidth
 
@@ -88,7 +89,12 @@ internal fun FootnoteSheet(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = stringResource(R.string.reading_footnote_title, footnote.number, surahName, reference),
+                text = stringResource(
+                    R.string.reading_footnote_title,
+                    footnote.number,
+                    surahName,
+                    localizedDigits(reference),
+                ),
                 style = MaterialTheme.typography.labelMedium,
                 // The marker that opened this sheet keeps the action color;
                 // the sheet's own name is a reference line, and every other

@@ -41,6 +41,7 @@ import io.github.muntasimulhaque.quran.data.readingMetrics
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.browse.BrowseSheet
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
+import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
 import io.github.muntasimulhaque.quran.ui.search.SearchSheet
@@ -500,7 +501,7 @@ fun ReaderScreen(
             packSetup = viewModel.packSetup?.let { setup ->
                 PackSetupState(
                     packId = setup.pack.id,
-                    name = setup.pack.name,
+                    name = contentPackName(setup.pack.id, setup.pack.name),
                     bytes = setup.pack.bytes,
                     progress = setup.progress,
                     failed = setup.failed,

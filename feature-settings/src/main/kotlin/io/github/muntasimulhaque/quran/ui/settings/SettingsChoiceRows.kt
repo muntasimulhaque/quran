@@ -14,6 +14,7 @@ import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -52,7 +53,7 @@ fun PackChoiceRow(
 ) {
     val busy = setup?.packId == pack.id && setup.failed.not()
     ChoiceRow(
-        title = pack.name,
+        title = contentPackName(pack.id, pack.name),
         subtitle = subtitle,
         selected = selected,
         radio = radio,

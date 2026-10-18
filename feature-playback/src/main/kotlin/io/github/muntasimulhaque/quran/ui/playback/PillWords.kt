@@ -22,6 +22,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
@@ -67,7 +68,16 @@ internal fun PlaybackWordsLine(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         ReciterDoor(name = reciterName, onOpen = onOpenReciters)
-        PlaybackStatusLine(text = status, onOpen = onOpenListening)
+        // The reciter's name is measured first and keeps its whole width; the
+        // place is the weighted line, so a long reference or pace gives way
+        // to the name rather than squeezing it into an ellipsis. The name is
+        // the pill's door to its own chooser, and a door half-said is a door
+        // the reader cannot read (owner report, this session).
+        PlaybackStatusLine(
+            text = status,
+            onOpen = onOpenListening,
+            modifier = Modifier.weight(1f, fill = false),
+        )
     }
 }
 
@@ -165,6 +175,7 @@ private fun ReciterDoor(
 private fun PlaybackStatusLine(
     text: String,
     onOpen: (() -> Unit)?,
+    modifier: Modifier = Modifier,
 ) {
     if (onOpen == null) {
         Text(
@@ -173,12 +184,13 @@ private fun PlaybackStatusLine(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
+            modifier = modifier,
         )
         return
     }
     val press = remember { MutableInteractionSource() }
     Row(
-        modifier = Modifier
+        modifier = modifier
             .clickable(
                 interactionSource = press,
                 indication = null,
@@ -233,5 +245,9 @@ internal fun playbackStatus(
     val extras = buildList {
         if (abs(speed - 1f) > 0.01f) add(speedText(speed))
     }
-    return (listOf(reference) + extras).filter { it.isNotBlank() }.joinToString(" \u00b7 ")
+    // The reference and the pace are numbers the reader reads, so both follow
+    // the interface's own digits; the separator is the app's one middot.
+    return (listOf(localizedDigits(reference)) + extras)
+        .filter { it.isNotBlank() }
+        .joinToString(" \u00b7 ")
 }

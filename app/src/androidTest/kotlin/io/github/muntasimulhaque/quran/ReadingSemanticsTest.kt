@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.AppTheme
+import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
@@ -42,6 +43,7 @@ class ReadingSemanticsTest {
 
     private val library = object : ExternalResource() {
         override fun before() {
+            LanguagePreference(context).set("en")
             runBlocking {
                 SettingsStore(context).apply {
                     setUiLanguage("en")
@@ -101,4 +103,31 @@ class ReadingSemanticsTest {
             node.config.getOrNull(SemanticsActions.CustomActions)
                 ?.any { action: CustomAccessibilityAction -> action.label == label } == true
         }
+
+    /**
+     * The reference under an ayah is a number the reader reads, so it is
+     * written in the reader's own digits: a Bangla reader meets ১:১ where an
+     * English one meets 1:1. The language choice recreates the Activity
+     * exactly as the app does, and the reference follows it (owner report,
+     * this session).
+     */
+    @Test
+    fun theReferenceWearsTheLanguagesDigits() {
+        LanguagePreference(context).set("bn")
+        runBlocking { SettingsStore(context).setUiLanguage("bn") }
+        compose.activityRule.scenario.recreate()
+        val page = compose.activity.getString(ReadingR.string.reading_page_description)
+        compose.waitUntil(timeoutMillis = 180_000) {
+            compose.onAllNodesWithContentDescription(page).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.waitUntil(timeoutMillis = 60_000) {
+            compose.onAllNodesWithText("\u09E7:\u09E7", substring = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        assertTrue(
+            "the reference must wear the Bangla digits",
+            compose.onAllNodesWithText("\u09E7:\u09E7", substring = true)
+                .fetchSemanticsNodes().isNotEmpty(),
+        )
+    }
 }

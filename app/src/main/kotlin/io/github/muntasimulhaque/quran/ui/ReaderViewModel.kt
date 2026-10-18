@@ -11,6 +11,7 @@ import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.core.JuzIndex
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.core.ShareText
+import io.github.muntasimulhaque.quran.core.localizedDigits
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.ContentDatabase
@@ -47,6 +48,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale
 
 /** One row of the reading: a surah's opening, or an ayah. */
 /**
@@ -438,7 +440,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             translation = translation
                 ?.takeIf { it.isNotBlank() }
                 ?.let { RichText.plain(it) },
-            reference = "$surahName ${ayah.surah}:${ayah.ayah}",
+            reference = localizedDigits(
+                "$surahName ${ayah.surah}:${ayah.ayah}",
+                Locale.forLanguageTag(readingLanguage),
+            ),
         )
     }
 

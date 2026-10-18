@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     The sheet's handle, named for a screen reader, and the reciters, named
-     the way a reader says them. The names live here because the pill, the
-     offer, and the settings list all draw them, and a Bangla reader must not
-     meet a Latin name in one place and a Bengali one in another.
+     The sheet's handle, named for a screen reader, the reciters, named the
+     way a reader says them, and the app's own packs. The names live here
+     because the pill, the offer, the settings lists, the ayah card, and the
+     search results all draw them, and a Bangla reader must not meet a Latin
+     name in one place and a Bengali one in another.
 -->
 <resources>
     <string name="sheet_handle">Sheet handle</string>
@@ -11,4 +12,8 @@
     <string name="reciter_husary">Husary</string>
     <string name="reciter_husary_muallim">Husary Muallim</string>
     <string name="reciter_husary_mujawwad">Husary Mujawwad</string>
+    <string name="pack_name_saheeh_international">Saheeh International</string>
+    <string name="pack_name_taisirul_quran">Taisirul Quran</string>
+    <string name="pack_name_ibn_kathir">Ibn Kathir</string>
+    <string name="pack_name_word_by_word">Word by word</string>
 </resources>

@@ -26,7 +26,10 @@ import kotlinx.coroutines.flow.first
  * own voice and only one translation ever appears (owner decision, 30).
  */
 internal data class DailyAyahContent(
+    /** The running number (1..6236), the key the tap and the reading share. */
     val ayah: Int,
+    /** The ayah's own number inside its surah, which is what the title says. */
+    val ayahInSurah: Int,
     val surah: Int,
     val surahName: String,
     val arabic: String,
@@ -75,6 +78,7 @@ internal data class DailyAyahContent(
                     ?: context.getString(R.string.surah_fallback_name, ayah.surah)
                 DailyAyahContent(
                     ayah = wanted,
+                    ayahInSurah = ayah.ayah,
                     surah = ayah.surah,
                     surahName = name,
                     arabic = ayah.text,

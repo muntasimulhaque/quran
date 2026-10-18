@@ -27,6 +27,7 @@ import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
+import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
 import io.github.muntasimulhaque.quran.ui.kit.languageName
@@ -270,7 +271,7 @@ fun AboutPage(
             AboutCredit(
                 title = stringResource(
                     R.string.about_pack_title,
-                    pack.name,
+                    contentPackName(pack.id, pack.name),
                     languageName(pack.language),
                 ),
                 lines = listOf(pack.credit) +

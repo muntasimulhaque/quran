@@ -13,6 +13,7 @@ import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.feature.settings.R
+import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -38,7 +39,7 @@ internal fun translationName(settings: AppSettings, packs: List<ContentPack>): S
     val chosen = packs.filter { it.id in settings.translationPacks && it.installed }
     return when {
         chosen.isEmpty() -> stringResource(R.string.settings_none_yet)
-        chosen.size == 1 -> chosen.first().name
+        chosen.size == 1 -> contentPackName(chosen.first().id, chosen.first().name)
         else -> stringResource(R.string.settings_chosen_count, chosen.size)
     }
 }
@@ -49,7 +50,7 @@ internal fun tafsirSummary(settings: AppSettings, packs: List<ContentPack>): Str
     val chosen = packs.filter { it.type == PackType.Tafsir && it.installed && it.id in settings.tafsirPacks }
     return when {
         chosen.isEmpty() -> stringResource(R.string.settings_none_yet)
-        chosen.size == 1 -> chosen.first().name
+        chosen.size == 1 -> contentPackName(chosen.first().id, chosen.first().name)
         else -> stringResource(R.string.settings_chosen_count, chosen.size)
     }
 }

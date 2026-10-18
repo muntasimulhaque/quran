@@ -17,6 +17,7 @@ import io.github.muntasimulhaque.quran.ui.kit.clockText
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
 import io.github.muntasimulhaque.quran.ui.kit.languageName
+import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /** The pages the settings hub opens, one at a time. */
@@ -154,10 +155,17 @@ fun SettingsHub(
     }
 }
 
+/**
+ * The reader's reciter, in the reader's own language: the hub row used to
+ * draw the catalog's English name beside a Bangla interface (owner decision,
+ * this session).
+ */
 @Composable
-private fun reciterName(settings: AppSettings, recitations: List<Recitation>): String =
-    recitations.firstOrNull { it.id == settings.recitation }?.name
+private fun reciterName(settings: AppSettings, recitations: List<Recitation>): String {
+    val chosen = recitations.firstOrNull { it.id == settings.recitation }
+    return chosen?.let { reciterShortName(it.id, it.name) }
         ?: stringResource(R.string.settings_none_yet)
+}
 
 /**
  * Where the reminder stands, in one line: whether it will come, and when. The

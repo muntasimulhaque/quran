@@ -50,6 +50,8 @@ import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.ReadingRow
 import io.github.muntasimulhaque.quran.feature.reading.R
+import io.github.muntasimulhaque.quran.ui.kit.contentPackName
+import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
@@ -207,7 +209,7 @@ internal fun AyahBlock(
                 row.translations.forEach { line ->
                     if (row.translations.size > 1) {
                         Text(
-                            text = line.packName,
+                            text = contentPackName(line.pack, line.packName),
                             style = MaterialTheme.typography.labelMedium,
                             // The pack's name is read, so it keeps the theme's
                             // own secondary tone. The 0.75 alpha it wore
@@ -247,7 +249,7 @@ internal fun AyahBlock(
                     horizontalArrangement = Arrangement.Start,
                 ) {
                     Text(
-                        text = row.ayah.verseKey,
+                        text = localizedDigits(row.ayah.verseKey),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

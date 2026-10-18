@@ -44,6 +44,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.Locale
 
 /**
  * The pill's own promises, pinned without a device reading behind it:
@@ -539,7 +540,7 @@ class PlaybackPillTest {
         // two were written as if they were the same figure, which is why this
         // leg had been red for nobody (owner report).
         compose.onNodeWithText("Minshawi").assertIsDisplayed()
-        compose.onNodeWithText(formatBytes(177_000_000L)).assertIsDisplayed()
+        compose.onNodeWithText(formatBytes(177_000_000L, Locale.US)).assertIsDisplayed()
         compose.onNodeWithText("Ready to play").assertIsDisplayed()
         compose.onNodeWithText("Minshawi").performClick()
         assertEquals("minshawi", chosen)

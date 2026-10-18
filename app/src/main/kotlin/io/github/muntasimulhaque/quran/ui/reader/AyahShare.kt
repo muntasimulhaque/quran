@@ -63,6 +63,7 @@ import androidx.core.content.FileProvider
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.core.TextRun
+import io.github.muntasimulhaque.quran.core.localizedDigits
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
@@ -131,11 +132,12 @@ internal suspend fun loadShareCard(
     val surah = viewModel.surahOf(ayah.number)
     val name = surah?.nameSimple
         ?: context.getString(R.string.surah_fallback_name, ayah.surah)
+    val locale = java.util.Locale.forLanguageTag(viewModel.readingLanguage)
     ShareRequest(
         ShareCard(
             arabic = ayah.text,
             translation = runs.orEmpty(),
-            reference = "$name ${ayah.surah}:${ayah.ayah}",
+            reference = localizedDigits("$name ${ayah.surah}:${ayah.ayah}", locale),
             text = viewModel.ayahShareText(ayah),
             surahArabic = surah?.nameArabic,
         ),

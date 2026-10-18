@@ -5,4 +5,8 @@
     <string name="reciter_husary">হুসারি</string>
     <string name="reciter_husary_muallim">হুসারি মুয়াল্লিম</string>
     <string name="reciter_husary_mujawwad">হুসারি মুজাওয়াদ</string>
+    <string name="pack_name_saheeh_international">সহীহ ইন্টারন্যাশনাল</string>
+    <string name="pack_name_taisirul_quran">তাইসিরুল কুরআন</string>
+    <string name="pack_name_ibn_kathir">ইবনে কাসীর</string>
+    <string name="pack_name_word_by_word">শব্দে শব্দে</string>
 </resources>

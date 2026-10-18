@@ -28,6 +28,7 @@ import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.playback.PlaybackBar
@@ -91,7 +92,7 @@ internal fun BottomStack(
             ) {
                 Column(Modifier.padding(end = 12.dp)) {
                     Text(
-                        text = setup.pack.name,
+                        text = contentPackName(setup.pack.id, setup.pack.name),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
                     )

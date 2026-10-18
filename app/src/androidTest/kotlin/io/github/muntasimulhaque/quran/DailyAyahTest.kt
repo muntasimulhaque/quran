@@ -5,6 +5,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.core.DailyAyah
 import io.github.muntasimulhaque.quran.daily.DailyAyahContent
 import io.github.muntasimulhaque.quran.daily.DailyAyahScheduler
+import io.github.muntasimulhaque.quran.daily.notificationTitle
 import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
@@ -15,6 +16,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.text.Normalizer
 import java.util.Calendar
 
 /**
@@ -56,6 +58,59 @@ class DailyAyahTest {
         assertTrue("the ayah must carry its Arabic", today.arabic.isNotBlank())
         assertTrue("the place must carry its name", today.surahName.isNotBlank())
         assertTrue("the ayah must belong to its surah", today.ayah in 1..DailyAyah.TOTAL_AYAHS)
+        // The title says the ayah's own number in its surah, never the
+        // running number the reading navigates with: the two differ from
+        // Al-Baqarah on, and the reminder once printed the second as if it
+        // were the first (owner report, this session).
+        val database = openLibrary()
+        try {
+            val stored = database.ayah(today.ayah)
+            assertNotNull("the reminder's ayah must exist in the content", stored)
+            assertEquals(
+                "the title's number is the ayah's own number in its surah",
+                stored!!.ayah,
+                today.ayahInSurah,
+            )
+            assertEquals(
+                "and it belongs to the surah the title names",
+                stored.surah,
+                today.surah,
+            )
+        } finally {
+            database.close()
+        }
+    }
+
+    @Test
+    fun theTitleNamesTheAyahAndWearsTheReadersDigits() {
+        // The running number and the ayah's own number differ from the second
+        // surah on, and the reminder must say the second: the title once
+        // printed the running number's last digits as if they were the ayah's
+        // (owner report, this session). One format in both languages, the
+        // language's own word and the language's own digits.
+        val content = DailyAyahContent(
+            ayah = 5037,
+            ayahInSurah = 58,
+            surah = 56,
+            surahName = "Al-Waqi'ah",
+            arabic = "",
+            translation = null,
+        )
+        assertEquals("Al-Waqi'ah, Ayah 58", notificationTitle(context, "en", content))
+        // Bengali ya carries a nukta that may be written joined or apart, so
+        // the two sides are compared in one form: the format is the fact, not
+        // which of the two spellings the editor of the file used.
+        assertEquals(
+            Normalizer.normalize("\u0986\u09B2-\u0993\u09DF\u09BE\u0995\u09BF\u09DF\u09BE, \u0986\u09DF\u09BE\u09A4 \u09EB\u09EE", Normalizer.Form.NFC),
+            Normalizer.normalize(
+                notificationTitle(
+                    context,
+                    "bn",
+                    content.copy(surahName = "\u0986\u09B2-\u0993\u09DF\u09BE\u0995\u09BF\u09DF\u09BE"),
+                ),
+                Normalizer.Form.NFC,
+            ),
+        )
     }
 
     @Test

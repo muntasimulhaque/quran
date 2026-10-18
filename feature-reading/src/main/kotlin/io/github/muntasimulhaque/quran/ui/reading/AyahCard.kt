@@ -53,6 +53,8 @@ import io.github.muntasimulhaque.quran.ui.kit.AddDoor
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.languageName
+import io.github.muntasimulhaque.quran.ui.kit.contentPackName
+import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
@@ -204,7 +206,7 @@ fun AyahCard(
                 tafsirPacks.sortedBy { it.language }.forEach { pack ->
                     val open = (door as? Door.Tafsir)?.pack?.id == pack.id
                     DoorRow(
-                        title = pack.name,
+                        title = contentPackName(pack.id, pack.name),
                         subtitle = languageName(pack.language),
                         open = open,
                         onClick = { door = if (open) null else Door.Tafsir(pack) },
@@ -219,7 +221,7 @@ fun AyahCard(
                             val view = passages[pack.id]
                             if (view == null) {
                                 Text(
-                                    text = stringResource(R.string.card_opening_pack, pack.name),
+                                    text = stringResource(R.string.card_opening_pack, contentPackName(pack.id, pack.name)),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
@@ -312,7 +314,7 @@ private fun TafsirPanel(view: TafsirView, settings: AppSettings) {
             arabicSp = settings.arabicInlineSp,
         )
         Text(
-            text = view.range,
+            text = localizedDigits(view.range),
             style = MaterialTheme.typography.labelMedium,
             // The range is read, not decoration: it is where this tafsir
             // passage begins and ends. It takes the theme's own secondary
