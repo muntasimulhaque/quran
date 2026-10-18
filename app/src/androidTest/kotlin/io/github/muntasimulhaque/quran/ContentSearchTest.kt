@@ -42,6 +42,7 @@ class ContentSearchTest {
             "translation-saheeh-en",
             "tafsir-ibn-kathir-en",
             "words-en",
+            "translation-taisirul-quran-bn",
         )) {
             store.install(id)
         }
@@ -105,6 +106,24 @@ class ContentSearchTest {
         val results = content.search(request("kahf"))
         val surah = results.hits.filterIsInstance<SearchHit.SurahHit>().firstOrNull()
         assertEquals(18, surah?.surah?.number)
+    }
+
+    @Test
+    fun banglaTranslationSearchKeepsItsVowelSigns() = runBlocking {
+        // A Bengali vowel sign is a combining mark, and the index keeps it in
+        // its token. The query used to split on it and ask for the phrase
+        // "পরত ফল", which matched nothing (owner report, this session).
+        // "প্রতিফল" is in Al-Fatiha 1:4, so the row must come back with the
+        // Bangla translation and its highlight.
+        val results = content.search(request("প্রতিফল", limit = 50))
+        val hit = results.hits.filterIsInstance<SearchHit.AyahHit>()
+            .firstOrNull { it.ayah.number == 4 }
+        assertNotNull("1:4 must be found for প্রতিফল", hit)
+        assertEquals("translation-taisirul-quran-bn", hit!!.translation?.pack)
+        assertTrue(
+            "the Bangla word must be highlighted in the translation",
+            !hit.translation!!.ranges.isNullOrEmpty(),
+        )
     }
 
     @Test

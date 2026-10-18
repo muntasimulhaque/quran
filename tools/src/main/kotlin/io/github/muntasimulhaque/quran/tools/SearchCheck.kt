@@ -73,6 +73,7 @@ class SearchCheck(private val root: File) {
         auditNonAscii(nonAscii)
         auditArabicColumn()
         auditScriptRoundTrip("content/quran.db", "bn")
+        auditPackIndex()
         auditPlainWords(translations)
         auditReadableText()
 
@@ -171,6 +172,59 @@ class SearchCheck(private val root: File) {
             println("search: $checked $language round trips passed")
         }
     }
+
+    /**
+     * The packs carry the full text index the app actually queries, so the
+     * round trip is proved there and not only through LIKE. A word taken from
+     * a pack's own translation goes through `Search.parse` and
+     * `Search.matchExpression`, the same two calls the app makes, and the
+     * pack's index must find the ayah that holds it. This is the gate that
+     * would have caught the Bengali term that split on its vowel sign into a
+     * phrase no token could match (owner report, this session).
+     */
+    private fun auditPackIndex() {
+        val packs = File(root, "content/packs")
+        if (!packs.isDirectory) return
+        val files = packs.listFiles { file ->
+            file.isFile && file.name.startsWith("translation-") && file.name.endsWith(".db")
+        }?.sortedBy { it.name } ?: return
+        for (file in files) {
+            openSqlite(file).use { connection ->
+                if (!hasTable(connection, "translation_fts")) {
+                    println("search: ${file.name} carries no index; fts round trip skipped")
+                    return@use
+                }
+                var checked = 0
+                connection.each(
+                    "SELECT ayah_number, text FROM translation WHERE ayah_number % 97 = 1 ORDER BY ayah_number",
+                ) { rs ->
+                    val number = rs.getInt(1)
+                    val term = longestWord(rs.getString(2) ?: "", minimum = 3) ?: return@each
+                    val query = Search.parse(term) ?: return@each
+                    val expression = Search.matchExpression(query.terms) ?: return@each
+                    checked++
+                    if (!exists(
+                            connection,
+                            "SELECT 1 FROM translation WHERE ayah_number = ? AND rowid IN " +
+                                "(SELECT docid FROM translation_fts WHERE translation_fts MATCH ?)",
+                            listOf(number.toString(), expression),
+                        )
+                    ) {
+                        problems += "${file.name} fts missed ayah $number for its own word $term"
+                    }
+                }
+                println("search: $checked ${file.name} fts round trips passed")
+            }
+        }
+    }
+
+    private fun hasTable(connection: Connection, name: String): Boolean =
+        connection.prepareStatement(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?",
+        ).use { statement ->
+            statement.setString(1, name)
+            statement.executeQuery().use { rs -> rs.next() }
+        }
 
     /**
      * Every excerpt the reader can be shown, and every surah introduction,
@@ -292,7 +346,7 @@ class SearchCheck(private val root: File) {
 
     private fun longestWord(text: String, minimum: Int): String? =
         text.split(Regex("\\s+"))
-            .map { it.replace(Regex("^[^\\p{L}\\p{N}]+|[^\\p{L}\\p{N}]+$"), "") }
+            .map { it.replace(Regex("^[^\\p{L}\\p{N}\\p{M}]+|[^\\p{L}\\p{N}\\p{M}]+$"), "") }
             .filter { it.length >= minimum }
             .maxByOrNull { it.length }
 

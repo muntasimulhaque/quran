@@ -99,6 +99,21 @@ class SearchTest {
         assertNull(Search.matchExpression(emptyList()))
     }
 
+    /**
+     * A Bengali vowel sign is a combining mark, not a letter, and the index
+     * keeps it inside its token. The query must meet it there: splitting on
+     * the mark turned "প্রতিফল" into the phrase "পরত ফল", which could never
+     * match the single token the index holds (owner report, this session). A
+     * mark at a word's end must survive the edge trim too, or "কি" would be
+     * cut to one letter and refused by [Search.MIN_TERM_LENGTH].
+     */
+    @Test
+    fun `a combining mark stays inside its word`() {
+        assertEquals(listOf("পরতিফল"), Search.parse("প্রতিফল")!!.terms)
+        assertEquals("পরতিফল*", Search.matchExpression(listOf("পরতিফল")))
+        assertEquals(listOf("কি"), Search.parse("কি")!!.terms)
+    }
+
     @Test
     fun `references are read from every form a reader types`() {
         assertEquals(Search.Reference(2, 255), Search.reference("2:255"))

@@ -27,8 +27,13 @@ object Search {
 
     private val whitespace = Regex("\\s+")
 
-    /** Punctuation around a term goes; punctuation inside it (God's) stays. */
-    private val edges = Regex("^[^\\p{L}\\p{N}]+|[^\\p{L}\\p{N}]+$")
+    /**
+     * Punctuation around a term goes; punctuation inside it (God's) stays. A
+     * combining mark is part of its word and is never trimmed: a Bengali word
+     * may end in a vowel sign (কি), and trimming it would leave a term shorter
+     * than [MIN_TERM_LENGTH] and drop the whole query.
+     */
+    private val edges = Regex("^[^\\p{L}\\p{N}\\p{M}]+|[^\\p{L}\\p{N}\\p{M}]+$")
 
     /**
      * English is matched without its diacritics: a reader typing "allah"
@@ -317,8 +322,9 @@ object Search {
      * The same terms as an expression the content's own full text index
      * understands: each term as a token prefix, every term required, joined
      * with AND. A term that carries punctuation (God's, al-kahf) is matched as
-     * the phrase of its own fragments, because the index tokenizes on letters
-     * and digits and a quote would otherwise split it.
+     * the phrase of its own fragments, because the index breaks an ASCII
+     * non-alphanumeric into a token boundary: the fragments are adjacent
+     * tokens in the index, in that order.
      *
      * The index folds nothing itself; the content build writes the same
      * normalized shape [normalizeForIndex] gives a query into the indexed
@@ -339,6 +345,13 @@ object Search {
         return parts.joinToString(" AND ")
     }
 
-    /** What the index's tokenizer treats as a break: everything but letters and digits. */
-    private val SEPARATORS = Regex("[^\\p{L}\\p{N}]+")
+    /**
+     * What the index's tokenizer treats as a break: an ASCII character that is
+     * not a letter or a digit. SQLite's simple tokenizer keeps every non-ASCII
+     * code point, a combining mark included, inside its token, and the app must
+     * meet it there. Splitting on marks turned a Bengali term into the phrase
+     * of its letter fragments, which could never match the single token the
+     * index holds (owner report, this session).
+     */
+    private val SEPARATORS = Regex("[\\x00-\\x7F&&[^A-Za-z0-9]]+")
 }
