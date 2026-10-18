@@ -71,12 +71,18 @@ fun RecitersPage(
             onChange = actions.onFollowReciter,
         )
         packs.filter { it.type == PackType.Recitation }
-            .sortedBy { it.name.lowercase() }
-            .forEach { pack ->
+            // The list is read by the name each row draws, so it is ordered
+            // by the reader's own alphabet and not the catalog's English one
+            // (owner decision, this session).
+            .map { pack ->
+                pack to reciterShortName(pack.id.removePrefix(ContentDatabase.RECITER_PREFIX), pack.name)
+            }
+            .sortedBy { (_, name) -> name.lowercase() }
+            .forEach { (pack, name) ->
                 val id = pack.id.removePrefix(ContentDatabase.RECITER_PREFIX)
                 val selected = pack.id == ContentDatabase.reciterPack(settings.recitation)
                 ChoiceRow(
-                    title = reciterShortName(id, pack.name),
+                    title = name,
                     subtitle = null,
                     selected = selected,
                     radio = true,

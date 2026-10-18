@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -28,6 +29,7 @@ import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
+import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
 import io.github.muntasimulhaque.quran.ui.kit.languageName
@@ -259,7 +261,9 @@ fun AboutPage(
 ) {
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_about))
-        ValueRow(stringResource(R.string.settings_version), version)
+        // The version's digits follow the interface's own language, like every
+        // other number a reader meets (owner decision, this session).
+        ValueRow(stringResource(R.string.settings_version), localizedDigits(version))
         ValueRow(stringResource(R.string.settings_license_label), stringResource(R.string.about_license))
 
         Group(stringResource(R.string.about_group_content))
@@ -267,15 +271,21 @@ fun AboutPage(
         // honored where the reader already meets the content it covers, and
         // a catalog of packs nobody installed is a list of other people's
         // books (owner decision, this session).
-        packs.filter { it.shipped || it.installed }.forEach { pack ->
+        //
+        // The reciters are the one kind left to their own group below, where
+        // they are named and credited in the reader's own language: naming
+        // them here as well printed the same two voices twice, once as raw
+        // catalog rows and once as the app's own credits (owner decision,
+        // this session).
+        packs.filter { (it.shipped || it.installed) && it.type != PackType.Recitation }.forEach { pack ->
             AboutCredit(
                 title = stringResource(
                     R.string.about_pack_title,
                     contentPackName(pack.id, pack.name),
                     languageName(pack.language),
                 ),
-                lines = listOf(pack.credit) +
-                    pack.license.split(LICENSE_SEPARATOR)
+                lines = listOf(packLine(pack.credit, pack.creditBn)) +
+                    packLine(pack.license, pack.licenseBn).split(LICENSE_SEPARATOR)
                         .map { it.trim() }
                         .filter { it.isNotBlank() },
             )
@@ -342,6 +352,20 @@ fun AboutPage(
         )
 
         Spacer(Modifier.height(Space.Section))
+    }
+}
+
+/**
+ * A pack's own line in the reader's language: the catalog's Bangla line when
+ * the interface is Bangla and the catalog carries one, and the English line
+ * otherwise, so no pack is ever credited in a language nobody wrote for it
+ * (owner decision, this session).
+ */
+@Composable
+private fun packLine(english: String, bangla: String): String {
+    val language = LocalConfiguration.current.locales[0].language
+    return remember(english, bangla, language) {
+        if (language.startsWith("bn") && bangla.isNotBlank()) bangla else english
     }
 }
 

@@ -1,6 +1,7 @@
 package io.github.muntasimulhaque.quran.data
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -47,5 +48,35 @@ class PackCatalogTest {
     fun theCorePackIsAlwaysCarried() {
         val marked = PackCatalog.parse(json).withInstalled(emptySet())
         assertTrue(marked.get(PackCatalog.CORE_ID) != null)
+    }
+
+    /**
+     * A pack's Bangla credit and license, when the catalog carries them, are
+     * read beside the English pair: the About page shows them in a Bangla
+     * interface, and an older catalog with no Bangla line leaves them empty so
+     * the page falls back to English rather than to nothing (owner decision,
+     * this session).
+     */
+    @Test
+    fun aPacksBanglaCreditAndLicenseAreRead() {
+        val parsed = PackCatalog.parse(
+            """
+            {"packs":[{"id":"core","type":"script","name":"Quran text","language":"ar",
+              "credit":"English credit","license":"English license",
+              "creditBn":"\u09ac\u09be\u0982\u09b2\u09be \u0995\u09c3\u09a4\u09bf\u09a4\u09cd\u09ac",
+              "licenseBn":"\u09ac\u09be\u0982\u09b2\u09be \u09b2\u09be\u0987\u09b8\u09c7\u09a8\u09cd\u09b8"}]}
+            """.trimIndent(),
+        )
+        val core = parsed.get(PackCatalog.CORE_ID)!!
+        assertEquals("English credit", core.credit)
+        assertEquals("\u09ac\u09be\u0982\u09b2\u09be \u0995\u09c3\u09a4\u09bf\u09a4\u09cd\u09ac", core.creditBn)
+        assertEquals("\u09ac\u09be\u0982\u09b2\u09be \u09b2\u09be\u0987\u09b8\u09c7\u09a8\u09cd\u09b8", core.licenseBn)
+    }
+
+    @Test
+    fun aCatalogWithoutBanglaLinesLeavesThemEmpty() {
+        val core = PackCatalog.parse(json).get(PackCatalog.CORE_ID)!!
+        assertEquals("", core.creditBn)
+        assertEquals("", core.licenseBn)
     }
 }

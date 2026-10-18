@@ -106,6 +106,12 @@ internal fun LanguageGroups(
             // is "Interface" on the hub or "English" in this list (owner
             // decision, the theme and consistency session).
             Group(names[language] ?: language)
-            group.sortedBy { it.name.lowercase() }.forEach { pack -> row(pack) }
+            // The names inside a group are read by the name the row draws, so
+            // the order is the reader's own alphabet and not the catalog's
+            // English one (owner decision, this session).
+            group
+                .map { pack -> pack to contentPackName(pack.id, pack.name) }
+                .sortedBy { (_, name) -> name.lowercase() }
+                .forEach { (pack, _) -> row(pack) }
         }
 }

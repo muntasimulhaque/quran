@@ -221,6 +221,15 @@ data class ContentPack(
     val sha256: String = "",
     val url: String? = null,
     val installed: Boolean = false,
+    /**
+     * The credit and the license in Bangla, read by the About page when the
+     * reader's interface is Bangla and the catalog carries them. Empty when
+     * it does not, and the About page then reads the English pair, so a pack
+     * added later is never credited in a language nobody wrote for it (owner
+     * decision, this session).
+     */
+    val creditBn: String = "",
+    val licenseBn: String = "",
 )
 
 /**

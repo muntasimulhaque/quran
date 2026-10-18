@@ -1,6 +1,8 @@
 package io.github.muntasimulhaque.quran.playback
 
+import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
@@ -12,7 +14,9 @@ import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionResult
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
+import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.uikit.R as UiKitR
+import java.util.Locale
 
 /**
  * Keeps recitation playing with the screen off. Media3 owns the notification
@@ -28,6 +32,26 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 class PlaybackService : MediaSessionService() {
 
     private var session: MediaSession? = null
+
+    /**
+     * The service's own words follow the reader's language too. The media
+     * library names the notification's channel and its transport controls,
+     * and those strings resolve against the context the service carries; it
+     * carries the reader's own locale, the same way the activity does, so a
+     * Bangla reading gets a Bangla notification even on a phone whose system
+     * language is English (owner decision, this session).
+     */
+    override fun attachBaseContext(newBase: Context) {
+        val tag = LanguagePreference(newBase).tag()
+            ?: return super.attachBaseContext(newBase)
+        val locale = Locale.forLanguageTag(tag)
+        Locale.setDefault(locale)
+        val configuration = Configuration(newBase.resources.configuration).apply {
+            setLocale(locale)
+            setLayoutDirection(locale)
+        }
+        super.attachBaseContext(newBase.createConfigurationContext(configuration))
+    }
 
     override fun onCreate() {
         super.onCreate()

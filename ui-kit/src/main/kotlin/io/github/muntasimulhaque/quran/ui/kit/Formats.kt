@@ -1,5 +1,6 @@
 package io.github.muntasimulhaque.quran.ui.kit
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
@@ -60,30 +61,48 @@ fun formatBytes(bytes: Long): String {
  * pill, the offer, and the settings list draw the reciter, and a Bangla
  * reader used to meet the Latin name in the pill (owner decision, the theme
  * and consistency session).
+ *
+ * [reciterName] is the same rule for the one caller with no composition, the
+ * playback service's own notification, which takes a context wearing the
+ * reader's locale (owner decision, this session).
  */
-@Composable
-fun reciterShortName(id: String, fallback: String): String = when (id) {
-    "minshawi" -> stringResource(R.string.reciter_minshawi)
-    "husary" -> stringResource(R.string.reciter_husary)
-    "husary-muallim" -> stringResource(R.string.reciter_husary_muallim)
-    "husary-mujawwad" -> stringResource(R.string.reciter_husary_mujawwad)
+fun reciterName(context: Context, id: String, fallback: String): String = when (id) {
+    "minshawi" -> context.getString(R.string.reciter_minshawi)
+    "husary" -> context.getString(R.string.reciter_husary)
+    "husary-muallim" -> context.getString(R.string.reciter_husary_muallim)
+    "husary-mujawwad" -> context.getString(R.string.reciter_husary_mujawwad)
     else -> fallback
+}
+
+/** [reciterName] in the composition's own language, read where it is drawn. */
+@Composable
+fun reciterShortName(id: String, fallback: String): String {
+    val context = LocalContext.current
+    return remember(id, fallback, context) { reciterName(context, id, fallback) }
 }
 
 /**
  * The names readers use for the app's own packs, in the reader's own language.
  * The catalog is content, and its names are English; the display name is the
  * interface's, so a Bangla reader meets "সহীহ ইন্টারন্যাশনাল", "তাইসিরুল
- * কুরআন", and "ইবনে কাসীর" where an English one meets the Latin names. A pack
- * the app does not know keeps its own catalog name, so a pack added later is
- * never nameless (owner decision, this session).
+ * কুরআন", and "ইবনে কাসীর" where an English one meets the Latin names. The
+ * core text and the reciters are named here too, because the About page
+ * credits them from the same catalog and a Bangla reader should not meet
+ * "Quran text" or "Husary" on it (owner decision, this session). A pack the
+ * app does not know keeps its own catalog name, so a pack added later is
+ * never nameless.
  */
 @Composable
 fun contentPackName(id: String, fallback: String): String = when (id) {
+    "core" -> stringResource(R.string.pack_name_quran_text)
     "translation-saheeh-en" -> stringResource(R.string.pack_name_saheeh_international)
     "translation-taisirul-quran-bn" -> stringResource(R.string.pack_name_taisirul_quran)
     "tafsir-ibn-kathir-en", "tafsir-ibn-kathir-bn" -> stringResource(R.string.pack_name_ibn_kathir)
     "words-en", "words-bn" -> stringResource(R.string.pack_name_word_by_word)
+    "reciter-minshawi" -> stringResource(R.string.reciter_minshawi)
+    "reciter-husary" -> stringResource(R.string.reciter_husary)
+    "reciter-husary-muallim" -> stringResource(R.string.reciter_husary_muallim)
+    "reciter-husary-mujawwad" -> stringResource(R.string.reciter_husary_mujawwad)
     else -> fallback
 }
 

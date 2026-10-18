@@ -56,6 +56,8 @@ class PackCatalog private constructor(private val packs: Map<String, ContentPack
                     language = pack.optString("language"),
                     credit = pack.optString("credit"),
                     license = pack.optString("license"),
+                    creditBn = pack.optString("creditBn"),
+                    licenseBn = pack.optString("licenseBn"),
                     version = pack.optString("version"),
                     shipped = pack.optBoolean("shipped", false),
                     ayahs = pack.optInt("ayahs", 6236),

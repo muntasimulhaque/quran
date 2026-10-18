@@ -2,6 +2,7 @@ package io.github.muntasimulhaque.quran.playback
 
 import android.content.ComponentName
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.core.content.ContextCompat
 import androidx.media3.common.PlaybackException
@@ -14,12 +15,15 @@ import androidx.media3.session.SessionToken
 import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.core.RecitationPlaylist
 import io.github.muntasimulhaque.quran.data.ContentDatabase
+import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.PlaybackPosition
 import io.github.muntasimulhaque.quran.data.PlaybackPositionStore
 import io.github.muntasimulhaque.quran.data.RecitationAyah
 import io.github.muntasimulhaque.quran.data.RecitationDownloader
 import io.github.muntasimulhaque.quran.data.RecitationManifest
 import io.github.muntasimulhaque.quran.data.RecitationStore
+import io.github.muntasimulhaque.quran.feature.playback.R
+import io.github.muntasimulhaque.quran.ui.kit.reciterName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -30,6 +34,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -457,8 +462,13 @@ class PlaybackController(
 
     private fun itemsFor(recitation: String, surah: Int): List<MediaItem> {
         val database = content ?: return emptyList()
+        val spoken = spokenContext()
         val surahName = database.surah(surah)?.nameSimple.orEmpty()
-        val reciterName = database.recitations().firstOrNull { it.id == recitation }?.name.orEmpty()
+        val artist = reciterName(
+            spoken,
+            recitation,
+            database.recitations().firstOrNull { it.id == recitation }?.name.orEmpty(),
+        )
         return database.ayahsOfSurah(surah).mapNotNull { ayah ->
             val audio = database.recitationAyah(recitation, ayah.number) ?: return@mapNotNull null
             val uri = store.uri(audio.audioPath) ?: return@mapNotNull null
@@ -467,12 +477,36 @@ class PlaybackController(
                 .setUri(uri)
                 .setMediaMetadata(
                     MediaMetadata.Builder()
-                        .setTitle("$surahName ${ayah.verseKey}")
-                        .setArtist(reciterName)
+                        .setTitle(
+                            spoken.getString(
+                                R.string.playback_now_playing,
+                                surahName,
+                                ayah.ayah,
+                            ),
+                        )
+                        .setArtist(artist)
                         .build(),
                 )
                 .build()
         }
+    }
+
+    /**
+     * A context wearing the reader's own language, for the one surface that
+     * has no composition at all: the media notification the phone draws from
+     * this playlist. The locale is read from the synchronous mirror the
+     * language choice writes, and the reciter's name and the ayah's own
+     * number come from it, so the lock screen says the place in the language
+     * the reader is reading in, whatever the phone's own language is (owner
+     * decision, this session).
+     */
+    private fun spokenContext(): Context {
+        val locale = Locale.forLanguageTag(LanguagePreference(context).tag() ?: "en")
+        val configuration = Configuration(context.resources.configuration).apply {
+            setLocale(locale)
+            setLayoutDirection(locale)
+        }
+        return context.createConfigurationContext(configuration)
     }
 
     private val listener = object : Player.Listener {

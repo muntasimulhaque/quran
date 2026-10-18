@@ -37,6 +37,8 @@ class Packs(private val root: File) {
         val name: String,
         val language: String,
         val credit: String,
+        /** The pack's credit in Bangla, read beside the English one by a Bangla interface. */
+        val creditBn: String,
         val version: String,
         val shipped: Boolean,
         val ayahs: Int,
@@ -46,6 +48,10 @@ class Packs(private val root: File) {
     private fun licenseOf(manifest: Manifest, id: String): String =
         PackSources.licenses(manifest, id).joinToString(SEPARATOR).ifEmpty { NO_LICENSE }
 
+    /** The same licenses in Bangla, for the catalog's second line. */
+    private fun licenseOfBn(manifest: Manifest, id: String): String =
+        PackSources.licenses(manifest, id, bangla = true).joinToString(SEPARATOR).ifEmpty { NO_LICENSE }
+
     private val packs = listOf(
         Pack(
             id = "core",
@@ -53,6 +59,7 @@ class Packs(private val root: File) {
             name = "Quran text",
             language = "ar",
             credit = "KFGQPC Hafs word by word, audited against Tanzil Uthmani",
+            creditBn = "KFGQPC \u09b9\u09be\u09ab\u09b8, \u09b6\u09ac\u09cd\u09a6\u09c7 \u09b6\u09ac\u09cd\u09a6\u09c7; Tanzil Uthmani-\u098f\u09b0 \u09b8\u0999\u09cd\u0997\u09c7 \u09af\u09be\u099a\u09be\u0987\u0995\u09c3\u09a4",
             version = "1",
             shipped = true,
             ayahs = 6236,
@@ -63,6 +70,7 @@ class Packs(private val root: File) {
             name = "Saheeh International",
             language = "en",
             credit = "Noor International Center, via QuranEnc",
+            creditBn = "Noor International Center, QuranEnc-\u098f\u09b0 \u09ae\u09be\u09a7\u09cd\u09af\u09ae\u09c7",
             version = "1.1.2",
             shipped = false,
             ayahs = 6236,
@@ -73,6 +81,7 @@ class Packs(private val root: File) {
             name = "Ibn Kathir",
             language = "en",
             credit = "Tafsir Ibn Kathir, via the Quranic Universal Library",
+            creditBn = "\u09a4\u09be\u09ab\u09b8\u09c0\u09b0 \u0987\u09ac\u09a8\u09c7 \u0995\u09be\u09b8\u09c0\u09b0, \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
             version = "QUL",
             shipped = false,
             ayahs = 6236,
@@ -83,6 +92,7 @@ class Packs(private val root: File) {
             name = "Taisirul Quran",
             language = "bn",
             credit = "Professor Muhammad Mozammel Haque, via the Quranic Universal Library",
+            creditBn = "\u09aa\u09cd\u09b0\u09ab\u09c7\u09b8\u09b0 \u09ae\u09c1\u09b9\u09be\u09ae\u09cd\u09ae\u09a6 \u09ae\u09cb\u099c\u09be\u09ae\u09cd\u09ae\u09c7\u09b2 \u09b9\u0995, \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
             version = "QUL",
             shipped = false,
             ayahs = 6236,
@@ -93,6 +103,7 @@ class Packs(private val root: File) {
             name = "Ibn Kathir",
             language = "bn",
             credit = "Tafsir Ibn Kathir (Bangla), via the Quranic Universal Library",
+            creditBn = "\u09a4\u09be\u09ab\u09b8\u09c0\u09b0 \u0987\u09ac\u09a8\u09c7 \u0995\u09be\u09b8\u09c0\u09b0 (\u09ac\u09be\u0982\u09b2\u09be), \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
             version = "QUL",
             shipped = false,
             ayahs = 6236,
@@ -103,6 +114,7 @@ class Packs(private val root: File) {
             name = "Minshawi",
             language = "ar",
             credit = "Muhammad Siddiq Al-Minshawi, via the Quranic Universal Library",
+            creditBn = "\u09ae\u09c1\u09b9\u09be\u09ae\u09cd\u09ae\u09a6 \u09b8\u09bf\u09a6\u09cd\u09a6\u09bf\u0995 \u0986\u09b2-\u09ae\u09bf\u09a8\u09b6\u09be\u09ac\u09bf, \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
             version = "QUL",
             shipped = false,
             ayahs = 6236,
@@ -113,6 +125,7 @@ class Packs(private val root: File) {
             name = "Husary",
             language = "ar",
             credit = "Mahmoud Khalil Al-Husary, via the Quranic Universal Library",
+            creditBn = "\u09ae\u09be\u09b9\u09ae\u09c1\u09a6 \u0996\u09b2\u09bf\u09b2 \u0986\u09b2-\u09b9\u09c1\u09b8\u09be\u09b0\u09bf, \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
             version = "QUL",
             shipped = false,
             ayahs = 6236,
@@ -123,6 +136,7 @@ class Packs(private val root: File) {
             name = "Word by word",
             language = "en",
             credit = "Quran.com word by word, via the Quranic Universal Library",
+            creditBn = "Quran.com \u09b6\u09ac\u09cd\u09a6\u09c7 \u09b6\u09ac\u09cd\u09a6\u09c7, \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
             version = "QUL",
             shipped = false,
             ayahs = 6236,
@@ -133,6 +147,7 @@ class Packs(private val root: File) {
             name = "Word by word",
             language = "bn",
             credit = "Bangla word by word, via the Quranic Universal Library",
+            creditBn = "\u09ac\u09be\u0982\u09b2\u09be \u09b6\u09ac\u09cd\u09a6\u09c7 \u09b6\u09ac\u09cd\u09a6\u09c7, \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
             version = "QUL",
             shipped = false,
             ayahs = 6236,
@@ -152,7 +167,12 @@ class Packs(private val root: File) {
                 val file = File(directory, "${pack.id}.db")
                 if (file.exists()) file.delete()
                 buildPack(source, file, pack)
-                entries += catalogEntry(pack, file, licenseOf(manifest, pack.id))
+                entries += catalogEntry(
+                    pack,
+                    file,
+                    licenseOf(manifest, pack.id),
+                    licenseOfBn(manifest, pack.id),
+                )
                 println(
                     "packs: ${pack.id} ${file.length() / 1024} KB sha256 ${sha256(file).substring(0, 12)}" +
                         if (pack.shipped) " (shipped)" else "",
@@ -343,7 +363,7 @@ class Packs(private val root: File) {
         )
     }
 
-    private fun catalogEntry(pack: Pack, file: File, license: String): JsonObject {
+    private fun catalogEntry(pack: Pack, file: File, license: String, licenseBn: String): JsonObject {
         val hash = sha256(file)
         val tag = "pack-${pack.id}-${hash.substring(0, 8)}"
         return buildJsonObject {
@@ -352,7 +372,9 @@ class Packs(private val root: File) {
             put("name", pack.name)
             put("language", pack.language)
             put("credit", pack.credit)
+            if (pack.creditBn.isNotBlank()) put("creditBn", pack.creditBn)
             put("license", license)
+            if (licenseBn.isNotBlank()) put("licenseBn", licenseBn)
             put("version", pack.version)
             put("shipped", pack.shipped)
             put("ayahs", pack.ayahs)

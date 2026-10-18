@@ -35,9 +35,22 @@ object PackSources {
 
     fun datasets(packId: String): List<String> = sources[packId].orEmpty()
 
-    /** The licenses of a pack's datasets, each once, in the order they are listed. */
-    fun licenses(manifest: Manifest, packId: String): List<String> =
-        datasets(packId).mapNotNull { id -> manifest.datasets.firstOrNull { it.id == id }?.license }
+    /**
+     * The licenses of a pack's datasets, each once, in the order they are
+     * listed. With [bangla], each dataset's own Bangla line is read when the
+     * manifest carries one, and its English line when it does not, so a pack
+     * can never lose a license by not being translated (owner decision, this
+     * session).
+     */
+    fun licenses(manifest: Manifest, packId: String, bangla: Boolean = false): List<String> =
+        datasets(packId).mapNotNull { id ->
+            val dataset = manifest.datasets.firstOrNull { it.id == id } ?: return@mapNotNull null
+            if (bangla) {
+                dataset.licenseBn?.takeIf { it.isNotBlank() } ?: dataset.license
+            } else {
+                dataset.license
+            }
+        }
             .filter { it.isNotBlank() }
             .distinct()
 }

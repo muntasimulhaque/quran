@@ -20,6 +20,13 @@ data class Dataset(
     val resourceId: String,
     val format: String,
     val license: String,
+    /**
+     * The license in Bangla, for the About page a Bangla reader reads. Null
+     * when the dataset has no Bangla line, and the app then shows the English
+     * one, so a pack can never lose its license by not being translated
+     * (owner decision, this session).
+     */
+    val licenseBn: String? = null,
     val credit: String,
     @SerialName("usedFor") val usedFor: String,
     val path: String,

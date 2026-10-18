@@ -17,6 +17,7 @@ import io.github.muntasimulhaque.quran.ui.kit.clockText
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
 import io.github.muntasimulhaque.quran.ui.kit.languageName
+import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
@@ -150,7 +151,7 @@ fun SettingsHub(
         Spacer(Modifier.height(Space.Section))
         PageRow(
             title = stringResource(R.string.settings_title_about),
-            summary = stringResource(R.string.settings_version_short, version),
+            summary = stringResource(R.string.settings_version_short, localizedDigits(version)),
         ) { onOpen(SettingsPage.About) }
     }
 }
