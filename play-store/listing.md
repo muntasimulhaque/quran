@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 8.2 (versionCode 84)
+Version: 8.3 (versionCode 85)
 
 ## Listing
 
@@ -136,8 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (8.2, 402 characters)
-The surah names now appear in Bengali script for Bangla readers, across Browse, the reading, search, the daily reminder, and the shared card. The ayah's actions press in five identical capsules, the reminder's clock speaks Bangla digits, and an Arabic-only reading can never lose a verse. Removing a saved ayah and forgetting a place now use one word, and the saved-ayah message teaches the long press.
+## Release notes (8.3, 422 characters)
+Numbers now speak your language: the ayah reference under a reading, search results, the shared card, download sizes, and the listening pace all read in Bangla digits when Bangla is chosen. The daily reminder names the surah and the ayah's own number. A recitation downloaded in one language is found in the other, the reciter and the pack names read in your language, and the reciting pill keeps the reciter's name whole.
 
 ## Before each release
 
