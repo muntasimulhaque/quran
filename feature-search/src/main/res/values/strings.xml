@@ -9,7 +9,7 @@
     <string name="search_status_capped">Showing the first %1$d.</string>
     <string name="search_label_go_to">Go to</string>
     <string name="search_label_surah">Surah</string>
-    <string name="search_surah_meta">%2$s  ·  %1$d ayahs</string>
+    <string name="search_surah_meta">%1$s  ·  %2$d ayahs</string>
     <string name="search_word_meaning_label">Word meaning</string>
     <string name="search_tafsir_range">%1$s  ·  %2$s %3$s</string>
     <string name="search_place_makkah">Makkah</string>

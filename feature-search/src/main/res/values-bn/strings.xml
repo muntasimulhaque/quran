@@ -9,7 +9,7 @@
     <string name="search_status_capped">প্রথম %1$dটি দেখানো হচ্ছে।</string>
     <string name="search_label_go_to">যান</string>
     <string name="search_label_surah">সূরা</string>
-    <string name="search_surah_meta">%2$s  ·  %1$d আয়াত</string>
+    <string name="search_surah_meta">%1$s  ·  %2$d আয়াত</string>
     <string name="search_word_meaning_label">শব্দের অর্থ</string>
     <string name="search_tafsir_range">%1$s  ·  %2$s %3$s</string>
     <string name="search_place_makkah">মক্কা</string>

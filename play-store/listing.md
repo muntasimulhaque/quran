@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 8.5 (versionCode 87)
+Version: 8.6 (versionCode 88)
 
 ## Listing
 
@@ -136,8 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (8.5, 323 characters)
-Bangla search now finds the words it should. A word with a vowel sign, like প্রতিফল in Al-Fatihah, used to come back empty because the app asked the index for the wrong shape. Those words are matched whole now, so Bangla translation, tafsir, and word meaning results arrive as they should. The rest of the app is unchanged.
+## Release notes (8.6, 235 characters)
+A search that matches a surah's name no longer closes the app. A short query like ib finds Surah Ibrahim, and the surah's row is now drawn with its place and its ayah count, in English or Bangla. Nothing else about the reading changed.
 
 ## Before each release
 
