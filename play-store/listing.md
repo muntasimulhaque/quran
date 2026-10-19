@@ -116,7 +116,7 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is refreshed for 9.2 from capture run 39255713386: all three legs green with eight frames each, and every frame compared with the previous set by `cmp`. The reading, chrome, and surah opening frames are unchanged on the phone and the 7 inch tablet. The five sheet frames change on all three legs because Material3 1.5 keeps the status bar's air above a short sheet, which adds 24 dp of room above the handle, and the settings frame names Version 9.2; the search caret and the clocks differ as they always do, and the 10 inch chrome frame differs by a handful of pixels and reads the same. Every changed frame was read, and the set is installed whole.
+The set is refreshed for 9.3 from capture run 39291927151: all three legs green with eight frames each, and every frame compared with the previous set by `cmp`. The settings frame changes on all three legs because the sheet reads as one rhythm, the switch rows are shorter, and About with Version 9.3 stands in the frame. On the other four sheet frames only the status bar differs, with the search caret where the last run left it, and the reading, chrome, and surah opening frames are unchanged on all three legs. The set is installed whole.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
