@@ -116,7 +116,7 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is refreshed for 8.9 from capture run 39157768429: all three legs green with eight frames each, and every frame compared with the previous set by `cmp`. Frames 1, 2, and 3 are unchanged on every leg. The changed frames differ only in the status bar or taskbar clock, except the tablet10 search frame's own cursor blink and the 7 inch settings frame, which names Version 8.9 in its About row; the phone search frame carries the emulator keyboard's own suggestion strip, as the set always has. Every changed frame was read, and the set is installed whole.
+The set is refreshed for 9.0 from capture run 39201690781: all three legs green with eight frames each, and every frame compared with the previous set by `cmp`. Frames 1, 2, and 3 are unchanged on every leg. The changed frames differ only in the status bar or taskbar clock, except the search frames, which now carry the field's own clear mark, and the 7 inch settings frame, which names Version 9.0 in its About row; the phone search frame carries the emulator keyboard's own suggestion strip, as the set always has. Every changed frame was read, and the set is installed whole.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
