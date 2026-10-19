@@ -418,7 +418,7 @@ class PlaybackPillTest {
         )
         assertEquals(
             "the wide pill's close keeps the capsule's own inner end inset",
-            6f,
+            Space.Row.value,
             (bar.right - close.right).value,
             1.5f,
         )
@@ -432,9 +432,13 @@ class PlaybackPillTest {
         // own left edge, so the pill's first line began in a corner.
         showPill(pillWidth = Modifier.width(393.dp))
         val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
+        val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
+        val reciter = compose.onNodeWithTag("playback-reciter").getUnclippedBoundsInRoot()
+        val listening = compose.onNodeWithTag("playback-listening").getUnclippedBoundsInRoot()
         val name = compose.onNodeWithText("Husary").getUnclippedBoundsInRoot()
         val place = compose.onNodeWithText("Al-Baqarah 2:255").getUnclippedBoundsInRoot()
-        val inset = 20.dp
+        val lead = 20f
+        val rail = Space.Row.value + 48f + Space.Line.value
         // the two share a line when they stand over one another: the overlap
         // of their heights is most of the taller one, which a stacked pair
         // (the name above the place) could never be
@@ -445,15 +449,27 @@ class PlaybackPillTest {
                 "$name and $place",
             overlap > (name.bottom - name.top).value / 2f,
         )
+        // The words centre in the room left of the close's own rail, not on
+        // the whole pill: the close at the capsule's middle used to share a
+        // sliver of glass with the words' line, and the two highlights met on
+        // the longest reference the pill prints (owner report, this session).
         assertEquals(
-            "the words' line is centred on the pill, so both ends stand off it equally",
-            (name.left - bar.left).value,
-            (bar.right - place.right).value,
-            1f,
+            "the words keep the pill's own lead from its leading curve",
+            lead,
+            (words.left - bar.left).value,
+            1.5f,
         )
-        assertTrue(
-            "the words' line keeps the pill's own inset from its curve",
-            name.left - bar.left >= inset - 1.dp,
+        assertEquals(
+            "the words keep the close's own rail at the trailing end",
+            rail,
+            (bar.right - words.right).value,
+            1.5f,
+        )
+        assertEquals(
+            "the words centre in the room left of the close, so their two doors stand off its ends equally",
+            (reciter.left - words.left).value,
+            (words.right - listening.right).value,
+            1f,
         )
     }
 
@@ -482,7 +498,7 @@ class PlaybackPillTest {
         )
         assertEquals(
             "the close keeps the capsule's own inner end inset",
-            6f,
+            Space.Row.value,
             (bar.right - close.right).value,
             1.5f,
         )
@@ -535,7 +551,7 @@ class PlaybackPillTest {
         )
         assertEquals(
             "the close keeps the capsule's own inner end inset",
-            6f,
+            Space.Row.value,
             (bar.right - close.right).value,
             1.5f,
         )
@@ -616,7 +632,7 @@ class PlaybackPillTest {
             .getUnclippedBoundsInRoot()
         assertEquals(
             "a lone close holds the capsule's own inner end inset",
-            6f,
+            Space.Row.value,
             (bar.right - close.right).value,
             1.5f,
         )

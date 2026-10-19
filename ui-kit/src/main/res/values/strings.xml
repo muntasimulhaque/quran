@@ -17,7 +17,7 @@
     <string name="pack_name_saheeh_international">Saheeh International</string>
     <string name="pack_name_taisirul_quran">Taisirul Quran</string>
     <string name="pack_name_ibn_kathir">Ibn Kathir</string>
-    <string name="pack_name_word_by_word">Word by word</string>
+    <string name="pack_name_word_by_word">Word meanings</string>
     <!-- The size units a reader meets beside a download or a pack. The digits
          beside them already follow the interface's own language, and the unit
          is a word of that language too (owner decision, this session). -->

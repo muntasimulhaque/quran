@@ -1,6 +1,5 @@
 package io.github.muntasimulhaque.quran.ui.settings
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,14 +13,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.feature.settings.R
@@ -33,7 +30,6 @@ import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconButton
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Space
-import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.appSwitchColors
 
 /**
@@ -63,10 +59,10 @@ fun Group(title: String) {
 }
 
 /**
- * The chevron at the end of a settings row: 48 dp wide, drawn when the row
- * has a page behind it and taking no width at all when it does not, so every
- * switch in the sheet stands at one place whatever the row carries and no
- * label is shortened for a mark the row does not draw.
+ * The chevron at the end of a settings row: a decorative mark, 48 dp wide,
+ * drawn when the row has a page behind it and taking no width at all when it
+ * does not, so every switch in the sheet stands at one place whatever the row
+ * carries and no label is shortened for a mark the row does not draw.
  *
  * The column used to be reserved on every row, drawn or not, so a row with
  * no door carried 48 dp of empty sheet in front of its switch and its name
@@ -77,13 +73,17 @@ fun Group(title: String) {
  * convenience for whoever edits this file next and not a thing a reader can
  * see (owner decision, forty-sixth session).
  *
- * The slot owns a 48 dp square only when the chevron is a control of its
- * own. On a row where the whole row is the door it is a width, not a height:
- * a square tail is taller than the line of text beside it, and a Row takes
- * the height of its tallest child, so an empty square stretched every plain
- * row from 51 dp to 76 dp and turned the hub into a ladder (owner report).
- * Where the chevron does carry its own tap it keeps the square, which costs
- * the row nothing, because the switch beside it already holds 48 dp.
+ * The slot is a width, not a height: a square tail is taller than the line of
+ * text beside it, and a Row takes the height of its tallest child, so a
+ * square stretched every plain row from 51 dp to 76 dp and turned the hub
+ * into a ladder (owner report). The row's own 48 dp target comes from the
+ * switch beside it or from the row itself, so the mark costs the target
+ * nothing.
+ *
+ * The chevron used to be a control of its own, with a spoken open label, so a
+ * row with a switch and a door was three TalkBack stops. The whole row is the
+ * door now and the chevron is a picture of where a tap goes, so the row is
+ * one door and the switch is one control (owner decision, this session).
  *
  * [contentAlignment] is where the mark stands inside its slot. A row that
  * also has a switch centres it, because the switch's own column is beside it
@@ -95,50 +95,29 @@ fun Group(title: String) {
 @Composable
 private fun ChevronSlot(
     visible: Boolean,
-    onOpen: (() -> Unit)? = null,
-    label: String? = null,
     contentAlignment: Alignment = Alignment.Center,
 ) {
-    // No mark to draw and no tap of its own to answer: the row keeps no width
-    // for the arrow. A row that opens something always draws one, so the two
-    // conditions are one in practice, and both are asked here so that a day
-    // when they are not, a tap is never the thing that goes missing.
-    if (!visible && onOpen == null) return
-    val tail = if (onOpen != null) Modifier.size(48.dp) else Modifier.width(48.dp)
+    if (!visible) return
     Box(
-        modifier = tail
-            .then(
-                if (onOpen != null) {
-                    Modifier
-                        .clip(Radii.Pill)
-                        .clickable(onClick = onOpen)
-                        .semantics {
-                            if (!label.isNullOrBlank()) contentDescription = label
-                            role = Role.Button
-                        }
-                } else {
-                    Modifier
-                },
-            )
+        modifier = Modifier
+            .width(48.dp)
             // The slot, not the mark: a mark is centred in its slot, so the
             // slot's edges are what a row's alignment is about. The tag is
             // on a row that draws a chevron only, so a count of them is a
             // count of the rows that have a door (owner report).
-            .then(if (visible) Modifier.testTag("chevron-slot") else Modifier),
+            .testTag("chevron-slot"),
         contentAlignment = contentAlignment,
     ) {
-        if (visible) {
-            IconGlyph(
-                icon = Icon.Chevron,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .size(GlyphSize.ChevronRow)
-                    // The mark says where a tap goes: the chevron points the
-                    // way the page slides in, to the right.
-                    .rotate(-90f)
-                    .testTag("row-chevron"),
-            )
-        }
+        IconGlyph(
+            icon = Icon.Chevron,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .size(GlyphSize.ChevronRow)
+                // The mark says where a tap goes: the chevron points the
+                // way the page slides in, to the right.
+                .rotate(-90f)
+                .testTag("row-chevron"),
+        )
     }
 }
 
@@ -208,15 +187,11 @@ val SwitchSlot = 52.dp
 @Composable
 internal fun RowTail(
     chevron: Boolean,
-    onOpen: (() -> Unit)? = null,
-    chevronLabel: String? = null,
     switch: (@Composable () -> Unit)? = null,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         ChevronSlot(
             visible = chevron,
-            onOpen = onOpen,
-            label = chevronLabel,
             // The row's last mark is the one nearest the reader's margin: a
             // row with a switch reads its chevron against the switch's own
             // column, and a row without one has nothing after it but the
@@ -261,9 +236,14 @@ internal fun RowTail(
  * nowhere to go owes a finger. The switch is the row's last mark, at the
  * row's own margin, and the chevron sits one column before it whether the
  * row has a door or not, so every switch in the sheet ends at one line
- * (owner report). The chevron keeps its own touch target and its own
- * spoken name beside the door, so TalkBack reads a switch and a door rather
- * than one crowded control.
+ * (owner report).
+ *
+ * The chevron is only a picture of where a tap goes. It used to be a control
+ * of its own, with [openLabel] as its spoken name, so a row with a switch and
+ * a door was three TalkBack stops: the row's door, the chevron's second door,
+ * and the switch. The whole row is the door now, [openLabel] is its spoken
+ * name, and the chevron is a decorative mark inside it, so the row is one
+ * door and the switch is one control (owner decision, this session).
  */
 @Composable
 fun ToggleRow(
@@ -283,7 +263,19 @@ fun ToggleRow(
             .fillMaxWidth()
             .then(
                 if (onOpen != null) {
-                    Modifier.sheetRow(onClick = onOpen, role = Role.Button)
+                    Modifier
+                        .sheetRow(onClick = onOpen, role = Role.Button)
+                        // The whole row is the door, so the open label is the
+                        // row's own spoken name; the chevron beside the switch
+                        // is only a picture of where a tap goes (owner
+                        // decision, this session).
+                        .then(
+                            if (!openLabel.isNullOrBlank()) {
+                                Modifier.semantics { contentDescription = openLabel }
+                            } else {
+                                Modifier
+                            },
+                        )
                 } else {
                     Modifier.sheetToggleRow(value = checked, onValueChange = onChange)
                 },
@@ -317,11 +309,7 @@ fun ToggleRow(
         val switchModifier = Modifier
             .then(if (opens) Modifier.semantics { contentDescription = title } else Modifier)
             .then(if (switchTag != null) Modifier.testTag(switchTag) else Modifier)
-        RowTail(
-            chevron = onOpen != null,
-            onOpen = onOpen,
-            chevronLabel = openLabel,
-        ) {
+        RowTail(chevron = opens) {
             Switch(
                 checked = checked,
                 onCheckedChange = if (opens) onChange else null,

@@ -183,6 +183,19 @@ class ContentSearchTest {
     }
 
     @Test
+    fun banglaNamedReferencesJumpToTheAyahToo() = runBlocking {
+        // The Bangla interface's own name and digits: a reader types the surah
+        // the way the reading draws it and the ayah in their own digits, and
+        // the reference row must still open 2:7. The short name resolves
+        // through the Bengali article and the digit through Character.digit
+        // (owner report, this session).
+        val results = content.search(request("বাকারা ৭"))
+        val hit = results.hits.filterIsInstance<SearchHit.ReferenceHit>().firstOrNull()
+        assertEquals(2, hit?.ayah?.surah)
+        assertEquals(7, hit?.ayah?.ayah)
+    }
+
+    @Test
     fun wordMeaningsAreSearchable() = runBlocking {
         val results = content.search(request("mercy", translations = false, tafsir = false))
         assertTrue("a word meaning must match", results.counts.words > 0)

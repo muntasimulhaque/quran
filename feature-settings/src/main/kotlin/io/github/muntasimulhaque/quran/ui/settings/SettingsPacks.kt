@@ -56,6 +56,18 @@ internal fun tafsirSummary(settings: AppSettings, packs: List<ContentPack>): Str
 }
 
 /**
+ * Whether the reading has a translation it can draw. The switch reads on only
+ * when this is true, so a row that says "Not added yet" never reads on above
+ * its own words (owner decision, this session).
+ */
+internal fun hasInstalledTranslation(settings: AppSettings, packs: List<ContentPack>): Boolean =
+    packs.any { it.id in settings.translationPacks && it.installed }
+
+/** [hasInstalledTranslation] for the tafsir's own switch, the same rule. */
+internal fun hasInstalledTafsir(settings: AppSettings, packs: List<ContentPack>): Boolean =
+    packs.any { it.type == PackType.Tafsir && it.installed && it.id in settings.tafsirPacks }
+
+/**
  * The word list the reading speaks: the one that matches the reader's own
  * language, and no other. There is no fallback to English: a Bangla reader
  * whose list has not landed yet is asked to add the Bangla list, never
@@ -103,7 +115,7 @@ internal fun LanguageGroups(
         .forEach { (language, group) ->
             // The language header is the same heading the settings pages use:
             // one style, one rhythm, and one TalkBack jump, whether the group
-            // is "Interface" on the hub or "English" in this list (owner
+            // is a language list here or the head of a settings page (owner
             // decision, the theme and consistency session).
             Group(names[language] ?: language)
             // The names inside a group are read by the name the row draws, so

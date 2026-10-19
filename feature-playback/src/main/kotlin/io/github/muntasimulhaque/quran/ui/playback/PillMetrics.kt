@@ -3,6 +3,7 @@ package io.github.muntasimulhaque.quran.ui.playback
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
+import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
  * The pill's own geometry, in one place, because the bar that holds the
@@ -20,6 +21,20 @@ internal val BarGutter = 16.dp
 
 /** The row's own padding: 16 at the start, 6 at the end. */
 internal val RowInsets = 22.dp
+
+/**
+ * The close's own inset from the capsule's trailing end.
+ *
+ * It used to be `RowInsets - BarGutter` (6 dp), which set the 48 dp target on
+ * the capsule's curve and left the words' own highlight one pixel inside it
+ * on the longest reference the pill can print (owner report, this session).
+ * One `Space.Row` (12 dp) lifts the mark off the curve and gives the words
+ * their own rail.
+ */
+internal val CloseInset = Space.Row
+
+/** The words' own lead from the capsule, so their line keeps the pill's inset. */
+internal val WordsInset = 20.dp
 
 /** The pill's own vertical inset over the row. */
 internal val RowVertical = 6.dp
@@ -50,6 +65,14 @@ internal val WordsMeasure = 300.dp
  * against a row that no longer exists.
  */
 internal val TransportSize = 48.dp
+
+/**
+ * The room the capsule's trailing rail takes: the close's 48 dp target, its
+ * [CloseInset], and one line of ground. The phone pill's words keep this
+ * clear on their trailing side, so the words' highlight and the close's never
+ * meet (owner decision, this session).
+ */
+internal val CloseRail = CloseInset + TransportSize + Space.Line
 
 /** The status line's own chevron: the 14 dp mark and 4 dp before it. */
 internal val ChevronRoom = GlyphSize.ChevronInline + 4.dp

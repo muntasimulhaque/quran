@@ -14,6 +14,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.unit.Velocity
 import io.github.muntasimulhaque.quran.core.SheetDragPolicy
 
@@ -112,3 +113,43 @@ fun Modifier.sheetDragGate(gate: SheetDragGate): Modifier =
 @Composable
 fun Modifier.sheetVerticalScroll(state: ScrollState): Modifier =
     sheetDragGate(remember(state) { SheetDragGate(state) }).verticalScroll(state)
+
+/**
+ * The guard a sheet's drag handle wears.
+ *
+ * A sheet opens fully expanded, so an upward drag on the handle has nowhere
+ * to go: Material's own settle answers it with a pull past the top anchor
+ * and a spring back, and the surface draws that overshoot as a stretch that
+ * reads as a shake. The handle is the one place on a sheet the scroll gate
+ * cannot reach, because Material draws it above the content rather than
+ * inside it, so it wears its own guard here: an upward move is consumed
+ * before Material's draggable can see it, and a tap is consumed so a short
+ * flick is never read as a tap that takes the sheet away. Downward is left
+ * alone, so the pull down to close still closes.
+ */
+fun Modifier.sheetHandleGuard(): Modifier = pointerInput(Unit) {
+    awaitPointerEventScope {
+        while (true) {
+            val pressed = awaitPointerEvent(PointerEventPass.Initial)
+            if (pressed.type != PointerEventType.Press) continue
+            // Material's handle is wrapped in a clickable that dismisses the
+            // sheet when it is tapped. Consuming the press stops that click
+            // while the sheet's own draggable, which asks for the press
+            // without requiring it to be unconsumed, still starts its drag.
+            pressed.changes.forEach { it.consume() }
+            while (true) {
+                val event = awaitPointerEvent(PointerEventPass.Initial)
+                when (event.type) {
+                    PointerEventType.Move -> {
+                        val dy = event.changes.fold(0f) { sum, change ->
+                            sum + change.positionChange().y
+                        }
+                        if (dy < 0f) event.changes.forEach { it.consume() }
+                    }
+                    PointerEventType.Release -> break
+                    else -> Unit
+                }
+            }
+        }
+    }
+}

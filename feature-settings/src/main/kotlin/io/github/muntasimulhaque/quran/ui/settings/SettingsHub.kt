@@ -48,18 +48,16 @@ fun SettingsPage.title(): String = stringResource(
 private fun themeSummary(settings: AppSettings): String = settings.theme.name()
 
 /**
- * The hub: one row per category, each carrying where it stands, so a reader
+ * The hub: one row per setting, each carrying where it stands, so a reader
  * can see their own setup at a glance and open only what they came to change.
  *
- * The rows are in four quiet groups, because a flat list of eleven rows is
- * read one at a time and a list with a name over each part of it is read at a
- * glance. The groups are the three things a reader does with the app and the
- * one thing it does for them: the app itself, the reading, the recitation,
- * and the reminder. The interface comes first because it is the app's own
- * words, its page, and its type, and a reader who has come to change one of
- * those is not looking for the reading (owner report). About stands at the
- * foot on its own, which is where an app names itself (owner report, 37th
- * session).
+ * The nine rows read as one list, the app's own surfaces first because they
+ * are the words the reader reads everything else in, then the reading's own
+ * choices, then the reciter, then the daily ayah. The four group headings
+ * that used to stand over them named parts of one list, and a reader who has
+ * opened the settings already knows which part they are in (owner decision,
+ * this session). About stands at the foot on its own, after a section's gap,
+ * which is where an app names itself (owner report, 37th session).
  */
 @Composable
 fun SettingsHub(
@@ -67,6 +65,8 @@ fun SettingsHub(
     packs: List<ContentPack>,
     recitations: List<Recitation>,
     version: String,
+    notificationsBlocked: Boolean,
+    exactGrantWithheld: Boolean,
     packSetup: PackSetupState?,
     onShowTranslation: (Boolean) -> Unit,
     onShowTafsir: (Boolean) -> Unit,
@@ -76,15 +76,11 @@ fun SettingsHub(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier.fillMaxWidth().testTag("settings-hub")) {
-        // What the app itself is: the words it speaks, the page it draws, and
-        // the size of its type. The three were one row and a group above it,
-        // with the language alone over the top on its own, and a reader
-        // looking for the theme had to read past a group name to find the
-        // first of the three (owner report). The language is the group's own
-        // first row: it changes the words of every row below it, so a reader
-        // who changes it reads the whole sheet again in the new language, and
-        // it is said here rather than only behind its own page.
-        Group(stringResource(R.string.settings_group_interface))
+        // The app's own surfaces first: the words it speaks, the page it
+        // draws, and the size of its type. The language changes the words of
+        // every row below it, so a reader who changes it reads the whole sheet
+        // again in the new language, and it is said here rather than only
+        // behind its own page.
         PageRow(
             title = stringResource(R.string.settings_title_language),
             summary = languageChoiceName(settings.uiLanguage ?: UiLanguage.English.tag),
@@ -99,6 +95,8 @@ fun SettingsHub(
                 R.string.settings_summary_text,
                 settings.arabicSp.toInt(),
                 settings.translationSp.toInt(),
+                settings.tafsirSp.toInt(),
+                settings.wordsSp.toInt(),
             ),
         ) { onOpen(SettingsPage.FontSize) }
         // What the reading draws, in the order the reader puts it together: the
@@ -108,12 +106,11 @@ fun SettingsHub(
         // it is chosen from. The switch is the only thing that switches, so a
         // reader who came to look at the translations never changes the reading
         // by looking (owner report, 2.3).
-        Group(stringResource(R.string.settings_group_reading))
         WordByWordRow(settings, packs, packSetup, onWordByWord)
         ToggleRow(
             title = stringResource(R.string.settings_show_translation_title),
             subtitle = translationName(settings, packs),
-            checked = settings.showTranslation,
+            checked = settings.showTranslation && hasInstalledTranslation(settings, packs),
             onChange = onShowTranslation,
             onOpen = { onOpen(SettingsPage.Translations) },
             openLabel = stringResource(R.string.settings_open_translations),
@@ -122,26 +119,23 @@ fun SettingsHub(
         ToggleRow(
             title = stringResource(R.string.settings_show_tafsir_title),
             subtitle = tafsirSummary(settings, packs),
-            checked = settings.showTafsir,
+            checked = settings.showTafsir && hasInstalledTafsir(settings, packs),
             onChange = onShowTafsir,
             onOpen = { onOpen(SettingsPage.Tafsirs) },
             openLabel = stringResource(R.string.settings_open_tafsirs),
             switchTag = "switch-tafsir",
         )
-        Group(stringResource(R.string.settings_group_recitation))
         PageRow(
             title = stringResource(R.string.settings_title_reciters),
             summary = reciterName(settings, recitations),
         ) { onOpen(SettingsPage.Reciters) }
-        // The daily reminder: one ayah a day, at the reader's own moment. It
-        // comes on with the app, and this row is the door to the page that
-        // turns it off or moves its time, so the switch and the clock are read
-        // together in one place rather than as a strip of hours under a
-        // switch in the hub (owner report, 2.3).
-        Group(stringResource(R.string.settings_group_reminder))
+        // The daily ayah: one ayah a day, at the reader's own moment. The
+        // switch turns it on or off, and the row is the door to the page that
+        // moves its time, so the switch and the clock are read together in one
+        // place (owner report, 2.3).
         ToggleRow(
             title = stringResource(R.string.settings_daily_title),
-            subtitle = dailySubtitle(settings),
+            subtitle = dailySubtitle(settings, notificationsBlocked, exactGrantWithheld),
             checked = settings.dailyAyah,
             onChange = onDailyAyah,
             onOpen = { onOpen(SettingsPage.Daily) },
@@ -169,21 +163,33 @@ private fun reciterName(settings: AppSettings, recitations: List<Recitation>): S
 }
 
 /**
- * Where the reminder stands, in one line: whether it will come, and when. The
- * moment is read from the same value the alarm is armed with, so the row never
- * promises a time the reminder does not keep, and it says the moment whether
- * the reminder is on or off, because the page stays live while it is off and a
- * reader who has set a time is owed to see it.
+ * Where the daily ayah stands, in one line: whether it will come, and when.
+ * The moment is read from the same value the alarm is armed with, so the row
+ * never promises a time the daily ayah does not keep, and it says the moment
+ * whether the daily ayah is on or off, because the page stays live while it is
+ * off and a reader who has set a time is owed to see it.
+ *
+ * While the phone withholds notifications or the exact alarm, the row does not
+ * promise the time at all: the daily ayah cannot arrive, or can arrive late,
+ * and saying which is the honest line (owner decision, this session).
  */
 @Composable
-private fun dailySubtitle(settings: AppSettings): String = stringResource(
-    if (settings.dailyAyah) {
-        R.string.settings_daily_subtitle_on
-    } else {
-        R.string.settings_daily_subtitle_off
-    },
-    clockText(settings.dailyAyahMinute),
-)
+private fun dailySubtitle(
+    settings: AppSettings,
+    notificationsBlocked: Boolean,
+    exactGrantWithheld: Boolean,
+): String = when {
+    !settings.dailyAyah -> stringResource(
+        R.string.settings_daily_subtitle_off,
+        clockText(settings.dailyAyahMinute),
+    )
+    notificationsBlocked -> stringResource(R.string.settings_daily_subtitle_blocked)
+    exactGrantWithheld -> stringResource(R.string.settings_daily_subtitle_late)
+    else -> stringResource(
+        R.string.settings_daily_subtitle_on,
+        clockText(settings.dailyAyahMinute),
+    )
+}
 
 /**
  * The word by word switch, and the state of the list behind it. The row is

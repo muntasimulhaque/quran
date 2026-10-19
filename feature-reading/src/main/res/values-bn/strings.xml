@@ -13,6 +13,7 @@
     <string name="reading_end_of_quran">এটি কুরআনের শেষ</string>
     <string name="reading_ayah_actions">আয়াতের কাজগুলো</string>
     <string name="reading_paper_actions">উপরের বার দেখান বা লুকান</string>
+    <string name="reading_ayah_reference">আয়াত %1$s</string>
 
     <string name="card_tafsir_label">তাফসীর</string>
     <string name="card_add_tafsir">আয়াতটি ভালোভাবে বোঝার জন্য একটি তাফসীর যোগ করুন</string>

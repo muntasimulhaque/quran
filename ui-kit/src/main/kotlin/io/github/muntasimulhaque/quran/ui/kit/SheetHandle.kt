@@ -25,12 +25,17 @@ import io.github.muntasimulhaque.quran.uikit.R
  * handle keeps the name, because a bar a reader can touch without hearing
  * what it is is worse than no bar, and widens the target to the rule, which
  * is what the accessibility test asked for (owner decision, this session).
+ * It wears [sheetHandleGuard], so an upward flick is swallowed and a tap on
+ * the bar does not take the sheet away: the handle is a drag affordance, and
+ * the scrim tap and the pull down are the ways out (owner decision, this
+ * session).
  */
 @Composable
 fun SheetHandle(modifier: Modifier = Modifier) {
     val description = stringResource(R.string.sheet_handle)
     Box(
         modifier = modifier
+            .sheetHandleGuard()
             .width(48.dp)
             .height(48.dp)
             .semantics { contentDescription = description },

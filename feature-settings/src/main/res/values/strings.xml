@@ -3,27 +3,23 @@
     <string name="settings_title">Settings</string>
 
     <string name="settings_title_language">Language</string>
-    <string name="settings_group_language">App language</string>
 
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_theme_system">System</string>
 
-    <string name="settings_group_interface">Interface</string>
-    <string name="settings_group_reading">Reading</string>
-    <string name="settings_group_recitation">Recitation</string>
-    <string name="settings_group_reminder">Reminder</string>
-
     <string name="settings_daily_title">Daily ayah</string>
-    <string name="settings_daily_subtitle_off">Off, set for %1$s</string>
+    <string name="settings_daily_subtitle_off">Off, next at %1$s</string>
     <string name="settings_daily_subtitle_on">One ayah a day, at %1$s</string>
-    <string name="settings_open_daily">Daily ayah settings</string>
+    <string name="settings_daily_subtitle_blocked">Notifications are off, so the daily ayah cannot arrive</string>
+    <string name="settings_daily_subtitle_late">Exact alarms are off, so the ayah can arrive late</string>
+    <string name="settings_open_daily">Choose the daily time</string>
     <string name="settings_daily_time_title">Time</string>
-    <string name="settings_daily_off">The reminder is off</string>
-    <string name="settings_daily_blocked">Your phone is not showing this reminder, so it cannot arrive.</string>
+    <string name="settings_daily_off">The daily ayah is off</string>
+    <string name="settings_daily_blocked">Your phone is not showing notifications for this app, so the daily ayah cannot arrive.</string>
     <string name="settings_daily_blocked_action">Notification settings</string>
-    <string name="settings_daily_exact_blocked">Your phone is holding the exact time back, so the ayah can arrive late.</string>
-    <string name="settings_daily_exact_action">Allow the exact time</string>
+    <string name="settings_daily_exact_blocked">Your phone has exact alarms off, so the ayah can arrive late.</string>
+    <string name="settings_daily_exact_action">Allow exact alarms</string>
     <string name="settings_daily_picker_title">When the daily ayah arrives</string>
     <string name="settings_daily_picker_keyboard">Type the time instead</string>
     <string name="settings_daily_picker_clock">Turn the clock instead</string>
@@ -35,7 +31,7 @@
     <string name="settings_open_translations">Choose translations</string>
     <string name="settings_open_tafsirs">Choose tafsirs</string>
     <string name="settings_words_title">Show word meanings</string>
-    <string name="settings_words_add">Adds the %1$s word list · %2$s</string>
+    <string name="settings_words_add">Adds the %1$s word meanings · %2$s</string>
     <string name="settings_words_failed">Could not download. Tap to try again.</string>
 
     <string name="settings_text_size_option">%3$s size %1$d of %2$d</string>
@@ -53,7 +49,6 @@
     <string name="settings_pack_preparing">Preparing…</string>
     <string name="settings_pack_downloading">Downloading %1$d%%</string>
     <string name="pack_installed">%1$s · %2$s</string>
-
 
     <string name="settings_version">Version</string>
     <string name="settings_license_label">License</string>
@@ -95,7 +90,7 @@
     <string name="settings_title_translations">Translations</string>
     <string name="settings_title_tafsirs">Tafsirs</string>
     <string name="settings_title_about">About</string>
-    <string name="settings_summary_text">Arabic %1$d, translation %2$d</string>
+    <string name="settings_summary_text">Quran text %1$d, translation %2$d, tafsir %3$d, word meanings %4$d</string>
     <string name="settings_version_short">Version %1$s</string>
     <string name="settings_none_yet">Not added yet</string>
     <string name="settings_chosen_count">%1$d chosen</string>

@@ -50,7 +50,6 @@ fun LanguagePage(
     onLanguage: (String) -> Unit,
 ) {
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
-        Group(stringResource(R.string.settings_group_language))
         // A list of choices is read, not searched: the languages are sorted by
         // the name the interface itself shows them under, so Bangla sits above
         // English in an English interface and each language's own alphabet is
@@ -58,12 +57,18 @@ fun LanguagePage(
         // own script first, which the reader must recognise before they can
         // read anything else here, with the English name beside it so the two
         // names are never a guess.
+        //
+        // The page title already names this list, so it carries no heading of
+        // its own (owner decision, this session). The ring stands on the
+        // default, English, when nothing is stored yet, the same default the
+        // hub row names (owner decision, this session).
+        val chosen = settings.uiLanguage ?: UiLanguage.English.tag
         val entries = UiLanguage.entries.map { it to languageName(it.tag) }
         entries.sortedBy { it.second.lowercase() }.forEach { (language, _) ->
             ChoiceRow(
                 title = languageChoiceName(language.tag),
                 subtitle = null,
-                selected = settings.uiLanguage == language.tag,
+                selected = chosen == language.tag,
                 radio = true,
                 onClick = { onLanguage(language.tag) },
             )

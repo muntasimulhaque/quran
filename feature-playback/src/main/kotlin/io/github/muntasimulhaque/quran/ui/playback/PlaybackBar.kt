@@ -234,7 +234,7 @@ fun PlaybackBar(
                         .fillMaxWidth()
                         .padding(
                             start = BarGutter,
-                            end = RowInsets - BarGutter,
+                            end = CloseInset,
                             top = RowVertical,
                             bottom = RowVertical,
                         ),
@@ -286,6 +286,14 @@ fun PlaybackBar(
                 // keeps its own measure even where the state has no answer
                 // to stand in it, so the pill is one shape in every voice
                 // and the close one place (owner report, this session).
+                //
+                // The words centre in the room left of the close's rail, not
+                // on the whole pill: with the close at the capsule's middle
+                // the words' line and the close shared a sliver of glass, and
+                // the two highlights met on the longest reference the pill
+                // prints (owner report, this session). `CloseRail` keeps the
+                // words' line, and so both of its 48 dp doors, clear of the
+                // close.
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Column {
                         PlaybackWordsLine(
@@ -295,7 +303,7 @@ fun PlaybackBar(
                             onOpenListening = openListening,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 20.dp),
+                                .padding(start = WordsInset, end = CloseRail),
                         )
                         Box(
                             modifier = Modifier
@@ -315,7 +323,7 @@ fun PlaybackBar(
                             controls = listOf(mark),
                             modifier = Modifier
                                 .align(Alignment.CenterEnd)
-                                .padding(end = RowInsets - BarGutter),
+                                .padding(end = CloseInset),
                         )
                     }
                 }

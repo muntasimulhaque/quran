@@ -6,7 +6,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,6 +31,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
@@ -81,10 +81,16 @@ internal fun AyahBlock(
     // printed medallion, in the ornament gold, closing the verse it belongs
     // to. The face draws the print's medallion around a run of Arabic-Indic
     // digits, so the reading appends the number alone and the medallion comes
-    // with the face (owner decision, this session). The reference line under
-    // the block is not drawn then, so the screen holds the Quran and nothing
-    // else.
+    // with the face (owner decision, this session). The reference line at
+    // the head of the block is not drawn then, so the screen holds the Quran
+    // and nothing else.
     val arabicOnly = !metrics.showTranslation && !metrics.wordByWord
+    // The reader's digits, and a spoken name for them: the reference is a
+    // number the reader reads, so it follows the interface's digits, and a
+    // screen reader hears it named rather than as a bare key (owner decision,
+    // this session).
+    val reference = localizedDigits(row.ayah.verseKey)
+    val referenceLabel = stringResource(R.string.reading_ayah_reference, reference)
     val ornamentStyle = remember(hafs, metrics.arabicSp, palette.ornament) {
         SpanStyle(
             fontFamily = hafs,
@@ -151,6 +157,29 @@ internal fun AyahBlock(
                 }
                 .padding(horizontal = 8.dp, vertical = 10.dp),
         ) {
+            // The ayah's reference stands at the head of its block, in the
+            // reader's own digits, so the reader meets it as the block arrives
+            // rather than after the translation's last line: a reader moving
+            // through the surah always knows which ayah is on the glass, and
+            // the numbers still form one rail down the page (owner decision,
+            // this session: it was drawn at the block's foot, which read as a
+            // closing note and was off the glass while the ayah itself was
+            // read). In an Arabic-only reading the number closes the verse
+            // itself, in the face's own printed medallion, so no separate line
+            // is drawn.
+            if (!arabicOnly) {
+                Text(
+                    text = reference,
+                    style = MaterialTheme.typography.labelMedium,
+                    // The theme's secondary tone clears 4.5:1; a quiet alpha
+                    // did not (owner decision, the theme and consistency
+                    // session).
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .padding(bottom = Space.Tight)
+                        .semantics { contentDescription = referenceLabel },
+                )
+            }
             // The roundel's own span is a key as well as the words: the
             // reader's size change and a change of ground both reach the
             // line only through it, and a remembered line that missed it
@@ -233,28 +262,6 @@ internal fun AyahBlock(
                     )
                 }
             }
-            // The reference closes the block the way a printed copy
-            // numbers its verses: after the reader has read the ayah, not as
-            // a heading before it. It takes the theme's secondary tone
-            // rather than a quiet alpha, because an alpha that whispers on
-            // paper sinks under 4.5:1. In an Arabic-only reading the number
-            // has already closed the verse itself, and a second line under
-            // the Quran would be the one thing on a page that had asked for
-            // nothing but the Quran.
-            if (!arabicOnly) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = Space.Line),
-                    horizontalArrangement = Arrangement.Start,
-                ) {
-                    Text(
-                        text = localizedDigits(row.ayah.verseKey),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
         }
     }
 }
@@ -271,7 +278,7 @@ private data class ArabicLine(val text: AnnotatedString, val washRange: IntRange
  * In an Arabic-only reading the verse closes with its own number, drawn in
  * the face's own printed medallion: [ornament] appends the number to the same
  * line, where a printed page puts it, and the KFGQPC face wraps it in the
- * medallion, so the reference under the block is not needed (owner decision,
+ * medallion, so the reference at the head of the block is not drawn (owner decision,
  * this session).
  */
 private fun arabic(

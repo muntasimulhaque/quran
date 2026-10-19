@@ -101,7 +101,7 @@ internal fun ListenOfferBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 6.dp, top = 6.dp, bottom = 6.dp),
+                .padding(start = 16.dp, end = CloseInset, top = 6.dp, bottom = 6.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {

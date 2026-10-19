@@ -72,7 +72,7 @@ data class PackSetupState(
 )
 
 /**
- * Settings: a hub of one row per category, each carrying where it stands, and
+ * Settings: a hub of one row per setting, each carrying where it stands, and
  * a page behind every row. Nothing is more than one tap from the hub, and a
  * reader who only came to change one thing never scrolls past the rest.
  *
@@ -148,6 +148,8 @@ fun SettingsSheet(
                         packs = packs,
                         recitations = recitations,
                         version = version,
+                        notificationsBlocked = notificationsBlocked(),
+                        exactGrantWithheld = exactGrantWithheld(),
                         packSetup = packSetup,
                         onShowTranslation = actions.onShowTranslation,
                         onShowTafsir = actions.onShowTafsir,
@@ -180,6 +182,7 @@ fun SettingsSheet(
                         settings = settings,
                         notificationsBlocked = notificationsBlocked(),
                         exactGrantWithheld = exactGrantWithheld(),
+                        onDailyAyah = actions.onDailyAyah,
                         onDailyAyahTime = actions.onDailyAyahTime,
                         onOpenNotificationSettings = actions.onOpenNotificationSettings,
                         onAskExactAlarm = actions.onAskExactAlarm,

@@ -71,15 +71,15 @@ object Search {
     /** A surah number, with an ayah when the reader gave one. */
     data class Reference(val surah: Int, val ayah: Int?)
 
-    private val referencePrefixes = listOf("surah ", "sura ", "surat ", "s ")
+    private val referencePrefixes = listOf("surah ", "sura ", "surat ", "s ", "সূরা ")
     private val referencePattern = Regex("^(\\d{1,3})(?:[:.]\\s*(\\d{1,3})|\\s+(\\d{1,3}))?$")
 
     /**
-     * Reads "2:255", "2.255", "2 255", "surah 2", and their Arabic digit
-     * forms. A bare number up to 114 is a surah. Anything else is text.
+     * Reads "2:255", "2.255", "2 255", "surah 2", and their Arabic and Bengali
+     * digit forms. A bare number up to 114 is a surah. Anything else is text.
      */
     fun reference(input: String): Reference? {
-        var normalized = Arabic.normalizeForSearch(input.trim()).lowercase(Locale.ROOT)
+        var normalized = Arabic.normalizeForSearch(asciiDigits(input.trim())).lowercase(Locale.ROOT)
         for (prefix in referencePrefixes) {
             if (normalized.startsWith(prefix)) {
                 normalized = normalized.removePrefix(prefix).trim()
@@ -119,7 +119,7 @@ object Search {
         }
         val words = rest.split(whitespace)
         if (words.size < 2) return null
-        val number = Arabic.normalizeForSearch(words.last())
+        val number = Arabic.normalizeForSearch(asciiDigits(words.last()))
         if (number.isEmpty() || number.any { !it.isDigit() }) return null
         val ayah = number.toIntOrNull() ?: return null
         if (ayah < 1) return null
@@ -128,9 +128,20 @@ object Search {
         return NameReference(name, ayah)
     }
 
-    /** Articles a reader drops from a surah's name: "kahf" finds Al-Kahf. */
+    /**
+     * Articles a reader drops from a surah's name: "kahf" finds Al-Kahf and
+     * "বাকারা" finds আল-বাকারা. The list is script-aware, holding the Latin
+     * transliteration, its assimilated forms, the same article in Bengali,
+     * and the Arabic article itself. Each entry is reduced through [nameKey]
+     * first, so a Bengali vowel sign drops the way it does from the stored
+     * key (owner decision, this session).
+     */
     private val nameArticles =
-        listOf("ash", "ath", "adh", "al", "an", "as", "at", "ar", "az", "ad")
+        listOf(
+            "ash", "ath", "adh", "al", "an", "as", "at", "ar", "az", "ad",
+            "আল", "আলে", "আন", "আর", "আস", "আত", "আশ", "আয", "আদ",
+            "ال",
+        ).map { nameKey(it) }.filter { it.isNotEmpty() }.distinct()
 
     /**
      * The one shape a typed surah name and a stored one meet in: letters and

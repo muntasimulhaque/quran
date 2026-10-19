@@ -124,6 +124,8 @@ class SearchTest {
         assertEquals(Search.Reference(36, null), Search.reference("36"))
         assertEquals(Search.Reference(36, null), Search.reference("surah 36"))
         assertEquals(Search.Reference(1, 1), Search.reference("\u0661:\u0661"))
+        assertEquals(Search.Reference(2, 7), Search.reference("২:৭"))
+        assertEquals(Search.Reference(2, 7), Search.reference("সূরা ২:৭"))
         assertNull(Search.reference("115"))
         assertNull(Search.reference("mercy"))
         assertNull(Search.reference("255"))
@@ -139,6 +141,10 @@ class SearchTest {
             Search.NameReference("\u0627\u0644\u0646\u0648\u0631", 24),
             Search.nameReference("\u0627\u0644\u0646\u0648\u0631 \u0662\u0664"),
         )
+        // The Bangla name and its own digits, and an Arabic short name.
+        assertEquals(Search.NameReference("বাকারা", 7), Search.nameReference("বাকারা ৭"))
+        assertEquals(Search.NameReference("বাকারা", 7), Search.nameReference("বাকারা 7"))
+        assertEquals(Search.NameReference("بقرة", 7), Search.nameReference("بقرة 7"))
         assertNull(Search.nameReference("2 255"))
         assertNull(Search.nameReference("255"))
         assertNull(Search.nameReference("kahf"))
@@ -157,6 +163,9 @@ class SearchTest {
         assertTrue(Search.surahNameForms("Ar-Rahman").contains("rahman"))
         assertTrue(Search.surahNameForms("Ya-Sin").contains("yasin"))
         assertTrue(Search.surahNameForms("Al-'Alaq").contains("alaq"))
+        // nameKey keeps letters and digits only, so the Bengali vowel signs
+        // drop and the short form of আল-বাকারা is বকর.
+        assertTrue(Search.surahNameForms("আল-বাকারা").contains("বকর"))
     }
 
     @Test
