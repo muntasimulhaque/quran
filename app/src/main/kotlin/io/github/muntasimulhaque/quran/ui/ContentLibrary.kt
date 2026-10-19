@@ -23,13 +23,17 @@ import io.github.muntasimulhaque.quran.data.RecitationStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.R
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.coroutineContext
 
 /**
  * The reader's library: the open content database, the packs on the device,
@@ -118,6 +122,15 @@ class ContentLibrary(
     private var catalog: PackCatalog = PackCatalog.parse("{}")
     private var installed: Set<String> = emptySet()
     private var draining = false
+
+    /**
+     * The coroutine carrying the pack that is on its way, so the reader's
+     * Cancel can end the transfer itself and not only its line (owner
+     * decision, this session). Every install runs in a launched child of the
+     * library's or the reader's scope, never in the scope itself, so
+     * cancelling it stops one install and nothing else.
+     */
+    private var packJob: Job? = null
 
     /**
      * The one gate on opening and reopening the library. A language choice
@@ -328,26 +341,38 @@ class ContentLibrary(
         // A pack already on its way is not asked for twice; a failed one is,
         // because the second attempt is the retry.
         if (packSetup?.let { it.pack.id == id && !it.failed } == true) return false
+        val job = coroutineContext.job
+        packJob = job
         packSetup = PackSetup(pack, progress = 0f)
         // The build's own assets are copied on a worker: a development build
         // carries every pack, and a copy is file work the reader's tap must
-        // never wait on the main thread for.
+        // never wait on the main thread for. `runCatching` catches the
+        // cancellation too, and a cancel is not "the pack is not here".
         val fromAssets = runCatching {
             withContext(Dispatchers.IO) { store.install(id) }
-        }.getOrDefault(false)
+        }.getOrElse { failure ->
+            if (failure is CancellationException) throw failure
+            false
+        }
         if (fromAssets) return true
         val result = downloader.download(pack) { read, total ->
-            packSetup = PackSetup(
-                pack,
-                progress = if (total > 0) (read.toFloat() / total).coerceIn(0f, 1f) else null,
-            )
+            // A chunk that lands after the reader's Cancel must not put the
+            // line back. The job is cancelled before the line is cleared, so
+            // the line only ever follows a transfer that is still on.
+            if (job.isActive) {
+                packSetup = PackSetup(
+                    pack,
+                    progress = if (total > 0) (read.toFloat() / total).coerceIn(0f, 1f) else null,
+                )
+            }
         }
         if (result.isSuccess) return true
-        packSetup = PackSetup(pack, progress = null, failed = true)
+        if (job.isActive) packSetup = PackSetup(pack, progress = null, failed = true)
         return false
     }
 
     private suspend fun finishInstall(pack: ContentPack) {
+        packJob = null
         packSetup = null
         // The pack becomes the reader's choice before the library reopens,
         // so the search index that warms behind the reopen knows about it.
@@ -385,7 +410,15 @@ class ContentLibrary(
         }
     }
 
+    /**
+     * The reader's Cancel on a pack's line. It ends the transfer where it is,
+     * not only the line above it: the job goes first, so a chunk that lands
+     * while the line is being cleared finds it gone and leaves the line alone
+     * (owner decision, this session).
+     */
     fun cancelPackSetup() {
+        packJob?.cancel()
+        packJob = null
         packSetup = null
     }
 
@@ -445,7 +478,10 @@ class ContentLibrary(
     ): Boolean {
         val fromAssets = runCatching {
             withContext(Dispatchers.IO) { store.install(pack.id) }
-        }.getOrDefault(false)
+        }.getOrElse { failure ->
+            if (failure is CancellationException) throw failure
+            false
+        }
         if (fromAssets) return true
         val result = downloader.download(pack) { read, total ->
             onProgress(if (total > 0) (read.toFloat() / total).coerceIn(0f, 1f) else 0f)

@@ -46,7 +46,10 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * capsule is not left empty and the dismiss never reads as another transport
  * control (owner decision, this session). On the phone's two rows the close
  * stands on the capsule's own middle, the place it wears in the offer and in
- * the wide pill's one row (owner report, this session).
+ * the wide pill's one row (owner report, this session). The phone's words
+ * stand on that same middle: the close's rail is kept on both sides of them,
+ * so the line is centred on the capsule the reader sees rather than in the
+ * room left over beside the close (owner report, this session).
  *
  * The pill is also where its two popups hang. A menu takes the shape of the
  * anchor it is given, and an anchor on the word the reader touched stood the
@@ -74,9 +77,10 @@ fun PlaybackBar(
     pendingLabel: String?,
     /**
      * The pending surah's name and size, said while its package downloads
-     * on its own: the auto-continue path had no offer, so this is where the
-     * reader sees what is arriving (owner decision). The offer states
-     * do not need it; they carried the name and the size before the tap.
+     * on its own, whichever door asked for it: a download always names the
+     * surah that is arriving. A reader who cannot tell what is being fetched
+     * cannot tell whether it is the surah they wanted (owner report, this
+     * session).
      */
     pendingAudio: String? = null,
     /** The reader's pace, shown only when it is not the ordinary one. */
@@ -123,7 +127,12 @@ fun PlaybackBar(
         state.downloadFailed -> stringResource(R.string.playback_download_failed)
         downloading -> {
             val percent = (state.downloadProgress * 100).toInt()
-            if (state.pendingIsContinuation && !pendingAudio.isNullOrBlank()) {
+            // The surah is always named while its package is on its way, not
+            // only on the auto-continue path: a download the reader cannot
+            // name is a download they cannot judge (owner report, this
+            // session). The bare line is the fallback for a state that
+            // carries no name to give.
+            if (!pendingAudio.isNullOrBlank()) {
                 stringResource(R.string.playback_downloading_named, pendingAudio, percent)
             } else {
                 stringResource(R.string.playback_downloading, percent)
@@ -287,13 +296,17 @@ fun PlaybackBar(
                 // to stand in it, so the pill is one shape in every voice
                 // and the close one place (owner report, this session).
                 //
-                // The words centre in the room left of the close's rail, not
-                // on the whole pill: with the close at the capsule's middle
-                // the words' line and the close shared a sliver of glass, and
-                // the two highlights met on the longest reference the pill
-                // prints (owner report, this session). `CloseRail` keeps the
-                // words' line, and so both of its 48 dp doors, clear of the
-                // close.
+                // The words stand on the capsule's own middle, the axis the
+                // transport under them stands on, and the close's rail is
+                // kept on both sides of the line. The rail is what keeps the
+                // words' two 48 dp doors, and the highlights they draw, clear
+                // of the close: with the close at the capsule's middle and no
+                // rail on the leading side, the line was centred in the room
+                // left over beside the close, which put it 24 dp off the axis
+                // the reader reads it against (owner report, this session).
+                // The rail is one measure on the two sides, so the line is
+                // centred on the capsule and the close keeps its ground on
+                // the longest reference the pill prints.
                 Box(modifier = Modifier.fillMaxWidth()) {
                     Column {
                         PlaybackWordsLine(
@@ -303,7 +316,7 @@ fun PlaybackBar(
                             onOpenListening = openListening,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(start = WordsInset, end = CloseRail),
+                                .padding(horizontal = CloseRail),
                         )
                         Box(
                             modifier = Modifier

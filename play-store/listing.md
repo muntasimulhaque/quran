@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 9.2 (versionCode 94)
+Version: 9.3 (versionCode 95)
 
 ## Listing
 
@@ -136,8 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (9.2, 267 characters)
-For 9.2, the pages that rise over the reading hold still. A pull, a flick, or a change of direction on a footnote, an ayah card, a note, Search, Browse, or Settings no longer makes the page shake or bounce, wherever the finger starts. The reading itself is unchanged.
+## Release notes (9.3, 395 characters)
+For 9.3, the download you cancel now stops where you cancel it. A canceled surah is no longer installed behind your back, and a download names the surah it is fetching. In the player, the reciter and the place now stand on the same center line as the controls. Settings reads as one list, with one gap between every row: About no longer stands apart, and a switch no longer makes its row taller.
 
 ## Before each release
 

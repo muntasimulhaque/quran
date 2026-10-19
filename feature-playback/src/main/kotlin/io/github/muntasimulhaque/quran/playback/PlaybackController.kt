@@ -31,6 +31,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -108,7 +109,31 @@ class PlaybackController(
         syncTicker()
     }
 
+    /**
+     * The reader's Play, from any of its doors. A fresh play is the reader
+     * asking for something else, so a package still on its way goes with it
+     * rather than surfacing later as a surah that starts playing on its own.
+     * The download's own continuation enters at [startPlayback]: it is not a
+     * new request, and its job is the one this door would cancel.
+     */
     suspend fun play(recitation: String, ayahNumber: Int, resume: Boolean = true) {
+        downloadJob?.cancel()
+        downloadJob = null
+        // The pill's download voice goes at once, not at the end of the
+        // connect: the progress writes are gated on the pending surah, so
+        // clearing it here is what keeps a chunk from painting over the ayah
+        // the reader has just asked for.
+        _state.value = _state.value.copy(
+            pendingDownloadSurah = null,
+            pendingIsContinuation = false,
+            downloadProgress = null,
+            downloadFailed = false,
+        )
+        startPlayback(recitation, ayahNumber, resume)
+    }
+
+    /** Where Play lands once the reader's own request is the only one left. */
+    private suspend fun startPlayback(recitation: String, ayahNumber: Int, resume: Boolean) {
         val database = content ?: return
         // A fresh play is the reader asking for the audio back, so the end
         // that Stop after this ayah reached is behind them now.
@@ -232,7 +257,16 @@ class PlaybackController(
         return result.isSuccess
     }
 
-    /** Downloads the pending surah, verifies it, and starts playing where the reader asked. */
+    /**
+     * Downloads the pending surah, verifies it, and starts playing where the
+     * reader asked.
+     *
+     * The progress belongs to the request the reader still holds. Cancel
+     * clears the pending surah, and every write below is gated on it, so a
+     * chunk that lands while the cancel is being answered cannot paint the
+     * pill again with a transfer that is no longer anyone's (owner report,
+     * this session).
+     */
     fun confirmDownload() {
         val recitation = _state.value.recitation ?: recitationId ?: return
         val surah = _state.value.pendingDownloadSurah ?: return
@@ -240,24 +274,54 @@ class PlaybackController(
         val packageToFetch = manifest.packageFor(recitation, surah) ?: return
         downloadJob?.cancel()
         downloadJob = scope.launch {
-            _state.value = _state.value.copy(downloadProgress = 0f, downloadFailed = false)
+            _state.update { current ->
+                if (current.pendingDownloadSurah == surah) {
+                    current.copy(downloadProgress = 0f, downloadFailed = false)
+                } else {
+                    current
+                }
+            }
             val folder = withContext(Dispatchers.IO) { folderFor(recitation, surah) }
             if (folder == null) {
-                _state.value = _state.value.copy(downloadProgress = null, downloadFailed = true)
+                failDownload(surah)
                 return@launch
             }
             val result = downloader.download(packageToFetch, folder) { read, total ->
-                _state.value = _state.value.copy(
-                    downloadProgress = if (total > 0) (read.toFloat() / total).coerceIn(0f, 1f) else null,
-                )
+                val progress = if (total > 0) (read.toFloat() / total).coerceIn(0f, 1f) else null
+                _state.update { current ->
+                    if (current.pendingDownloadSurah == surah) {
+                        current.copy(downloadProgress = progress)
+                    } else {
+                        current
+                    }
+                }
             }
             if (result.isSuccess) {
-                _state.value = _state.value.copy(pendingDownloadSurah = null, downloadProgress = null)
+                // The reader's Cancel cancels this coroutine and the
+                // downloader passes that on, so this branch is only reached
+                // while the request is still the one on screen. The check is
+                // belt and braces for the one frame between a cancel and the
+                // job noticing it.
+                if (_state.value.pendingDownloadSurah != surah) return@launch
+                _state.update {
+                    it.copy(pendingDownloadSurah = null, downloadProgress = null)
+                }
                 // The audio has just been fetched, so the reader hears it from
                 // its beginning and not from wherever they were last heard.
-                play(recitation, ayah, resume = false)
+                startPlayback(recitation, ayah, resume = false)
             } else {
-                _state.value = _state.value.copy(downloadProgress = null, downloadFailed = true)
+                failDownload(surah)
+            }
+        }
+    }
+
+    /** The failure line, for the request that is still on screen. */
+    private fun failDownload(surah: Int) {
+        _state.update { current ->
+            if (current.pendingDownloadSurah == surah) {
+                current.copy(downloadProgress = null, downloadFailed = true)
+            } else {
+                current
             }
         }
     }
@@ -274,15 +338,23 @@ class PlaybackController(
         scope.launch { play(recitation, ayah) }
     }
 
+    /**
+     * The reader's Cancel. The job goes first, so the downloader's next chunk
+     * sees the cancellation and the transfer stops; the state is cleared after
+     * it, and every progress write is gated on the pending surah, so a chunk
+     * already in flight cannot put the pill back (owner report, this session).
+     */
     fun cancelDownload() {
         downloadJob?.cancel()
         downloadJob = null
-        _state.value = _state.value.copy(
-            pendingDownloadSurah = null,
-            pendingIsContinuation = false,
-            downloadProgress = null,
-            downloadFailed = false,
-        )
+        _state.update { current ->
+            current.copy(
+                pendingDownloadSurah = null,
+                pendingIsContinuation = false,
+                downloadProgress = null,
+                downloadFailed = false,
+            )
+        }
     }
 
     /**
@@ -420,6 +492,11 @@ class PlaybackController(
     }
 
     fun stop() {
+        // A package on its way is part of the pill's own control: a stop puts
+        // the whole of it away, so the transfer goes with it instead of
+        // surfacing later as a surah that starts playing on its own.
+        downloadJob?.cancel()
+        downloadJob = null
         val player = controller ?: return
         player.stop()
         player.clearMediaItems()

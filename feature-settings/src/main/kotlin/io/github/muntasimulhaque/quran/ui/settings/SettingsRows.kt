@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -169,6 +171,15 @@ fun PageHeader(title: String, onBack: () -> Unit) {
 val SwitchSlot = 52.dp
 
 /**
+ * The 48 dp a control owes a finger, and the height the switch's own target
+ * keeps even though it no longer sets its row's height (owner decision, this
+ * session). Material's switch draws this itself; the number is here because
+ * the row now measures the target and reports its words, so a release that
+ * shrank the target would quietly shrink the finger's room with it.
+ */
+private val SwitchTarget = 48.dp
+
+/**
  * The marks a settings row ends with, in the order a row's own hands read
  * them: the chevron's column, then the switch's.
  *
@@ -204,7 +215,30 @@ internal fun RowTail(
         )
         if (switch != null) {
             Box(
-                modifier = Modifier.width(SwitchSlot),
+                modifier = Modifier
+                    .width(SwitchSlot)
+                    // The switch owes the finger its 48 dp target, and it does
+                    // not owe the row its height. A row that carries a switch
+                    // used to stand 48 dp tall inside its padding, 13 dp more
+                    // than a row whose tallest part is its own two lines, and
+                    // the hub read as two rhythms alternating down the sheet
+                    // (owner report, this session). The target is laid out on
+                    // the row's own middle and takes no height of its own: the
+                    // 6.6 dp it reaches past the words on each side stand in
+                    // the row's 12 dp padding, where there is room for them,
+                    // and the row's height is its words'. The target itself is
+                    // unchanged, and the accessibility test still measures it.
+                    .layout { measurable, constraints ->
+                        val target = SwitchTarget.roundToPx().coerceAtMost(constraints.maxHeight)
+                        val placeable = measurable.measure(
+                            constraints.copy(
+                                minHeight = maxOf(constraints.minHeight, target),
+                            ),
+                        )
+                        layout(placeable.width, 0) {
+                            placeable.place(0, -placeable.height / 2)
+                        }
+                    },
                 contentAlignment = Alignment.CenterEnd,
             ) {
                 switch()
@@ -280,6 +314,11 @@ fun ToggleRow(
                     Modifier.sheetToggleRow(value = checked, onValueChange = onChange)
                 },
             )
+            // The row is the door, so the row owes the finger the 48 dp, the
+            // same way a page row does: the switch's own target no longer
+            // sets the row's height, and a row whose words are one line must
+            // not fall short of it (owner decision, this session).
+            .minimumInteractiveComponentSize()
             .padding(
                 start = Space.Gutter - SheetRowGutter,
                 end = Space.Row - SheetRowGutter,

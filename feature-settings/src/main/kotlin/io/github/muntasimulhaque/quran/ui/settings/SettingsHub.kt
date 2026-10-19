@@ -1,9 +1,7 @@
 package io.github.muntasimulhaque.quran.ui.settings
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -19,7 +17,6 @@ import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
 import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
-import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /** The pages the settings hub opens, one at a time. */
 enum class SettingsPage { Language, Theme, FontSize, Reciters, Daily, Translations, Tafsirs, About }
@@ -56,8 +53,11 @@ private fun themeSummary(settings: AppSettings): String = settings.theme.name()
  * choices, then the reciter, then the daily ayah. The four group headings
  * that used to stand over them named parts of one list, and a reader who has
  * opened the settings already knows which part they are in (owner decision,
- * this session). About stands at the foot on its own, after a section's gap,
- * which is where an app names itself (owner report, 37th session).
+ * this session). About is the list's last row like any other: it used to
+ * stand after a section's gap, which was the one place the sheet broke its
+ * own rhythm, and the reader counted the gap (owner report, this session).
+ * Every row keeps the same room above and below it, so the list no longer
+ * has one gap that reads as a section break.
  */
 @Composable
 fun SettingsHub(
@@ -142,7 +142,6 @@ fun SettingsHub(
             openLabel = stringResource(R.string.settings_open_daily),
             switchTag = "switch-daily",
         )
-        Spacer(Modifier.height(Space.Section))
         PageRow(
             title = stringResource(R.string.settings_title_about),
             summary = stringResource(R.string.settings_version_short, localizedDigits(version)),

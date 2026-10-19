@@ -1,8 +1,11 @@
 package io.github.muntasimulhaque.quran.data
 
 import android.content.Context
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.coroutineContext
 import java.io.File
 import java.io.FileOutputStream
 import java.security.MessageDigest
@@ -25,6 +28,13 @@ import java.security.MessageDigest
  *
  * This is the app's only network use, and it happens for a pack the reader
  * asked for, by a language choice or a tap.
+ *
+ * A cancel has to stop the transfer itself. The read loop is blocking, and a
+ * blocking read is not a suspension point, so the job's own state is read
+ * with every chunk; otherwise the pack was still fetched after the reader
+ * closed its line, and the next progress chunk put the line back (owner
+ * report, this session). The part on disk is kept: a pack that resumes is
+ * data the reader does not pay for twice.
  */
 class PackDownloader(private val context: Context) {
 
@@ -42,6 +52,7 @@ class PackDownloader(private val context: Context) {
         // the only reason to make one is a part that is not this pack.
         var startAt = temporary.length()
         while (true) {
+            coroutineContext.ensureActive()
             val fetched = fetch(url, temporary, startAt, pack.bytes, onProgress)
             fetched.exceptionOrNull()?.let { return@withContext Result.failure(it) }
             if (pack.sha256.isEmpty() || matches(temporary, pack.sha256)) {
@@ -58,7 +69,7 @@ class PackDownloader(private val context: Context) {
     }
 
     /** One HTTP pass, appending to [temporary] from [startAt]. */
-    private fun fetch(
+    private suspend fun fetch(
         url: String,
         temporary: File,
         startAt: Long,
@@ -97,6 +108,9 @@ class PackDownloader(private val context: Context) {
                 FileOutputStream(temporary, resumed).buffered().use { output ->
                     val buffer = ByteArray(1 shl 16)
                     while (true) {
+                        // The reader's Cancel, read between chunks, so the
+                        // transfer stops within one read of it.
+                        coroutineContext.ensureActive()
                         val count = input.read(buffer)
                         if (count < 0) break
                         output.write(buffer, 0, count)
@@ -106,6 +120,9 @@ class PackDownloader(private val context: Context) {
                 }
             }
             Result.success(Unit)
+        } catch (cancelled: CancellationException) {
+            // A cancel is the reader's word, not a failure to report.
+            throw cancelled
         } catch (error: Exception) {
             Result.failure(error)
         } finally {
@@ -113,12 +130,13 @@ class PackDownloader(private val context: Context) {
         }
     }
 
-    private fun matches(file: File, expected: String): Boolean {
+    private suspend fun matches(file: File, expected: String): Boolean {
         if (!file.exists()) return false
         val digest = MessageDigest.getInstance("SHA-256")
         file.inputStream().buffered().use { input ->
             val buffer = ByteArray(1 shl 16)
             while (true) {
+                coroutineContext.ensureActive()
                 val count = input.read(buffer)
                 if (count < 0) break
                 digest.update(buffer, 0, count)

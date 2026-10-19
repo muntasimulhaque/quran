@@ -33,9 +33,6 @@ internal val RowInsets = 22.dp
  */
 internal val CloseInset = Space.Row
 
-/** The words' own lead from the capsule, so their line keeps the pill's inset. */
-internal val WordsInset = 20.dp
-
 /** The pill's own vertical inset over the row. */
 internal val RowVertical = 6.dp
 
@@ -67,10 +64,17 @@ internal val WordsMeasure = 300.dp
 internal val TransportSize = 48.dp
 
 /**
- * The room the capsule's trailing rail takes: the close's 48 dp target, its
- * [CloseInset], and one line of ground. The phone pill's words keep this
- * clear on their trailing side, so the words' highlight and the close's never
- * meet (owner decision, this session).
+ * The room the capsule's close takes, measured from either end of the pill:
+ * the close's 48 dp target, its [CloseInset], and one line of ground.
+ *
+ * The phone pill's words keep this clear on both sides of their line, so the
+ * line stands on the capsule's own axis, the axis the transport under it
+ * stands on, and both of its 48 dp doors stay clear of the close (owner
+ * report, this session). Before this the rail was kept only on the trailing
+ * side, which centred the line in the room left over beside the close and put
+ * it 24 dp left of the axis. The ground on the trailing side is what the
+ * close's own highlight needs; the leading side is the same measure, so the
+ * two ends of the line are one shape rather than two.
  */
 internal val CloseRail = CloseInset + TransportSize + Space.Line
 

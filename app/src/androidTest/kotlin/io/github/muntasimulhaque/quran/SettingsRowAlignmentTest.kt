@@ -3,11 +3,14 @@ package io.github.muntasimulhaque.quran
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertWidthIsAtLeast
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -15,6 +18,7 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.TypeRole
@@ -191,6 +195,66 @@ class SettingsRowAlignmentTest {
             "a row with no value must stay a line and its padding, not a 48 dp slot taller",
             bare.bottom - bare.top <= 56.dp,
         )
+    }
+
+    /**
+     * A row that carries a switch is as tall as a row that does not: the
+     * switch owes the finger its target, and it does not owe the row its
+     * height. The hub read as two rhythms alternating down the sheet until
+     * this, because every switch row stood 48 dp tall inside its padding and
+     * every page row stood its own two lines (owner report, this session).
+     * The target itself is unshaken: its outer edge still answers the finger,
+     * and the row's door does not take it.
+     */
+    @Test
+    fun aSwitchRowKeepsTheListsHeightAndTheSwitchesTarget() {
+        var checked = true
+        var opened = false
+        compose.setContent {
+            QuranTheme(theme = AppTheme.Light) {
+                Column {
+                    PageRow(
+                        title = "Language",
+                        summary = "English",
+                        onClick = {},
+                        modifier = Modifier.testTag("page-row"),
+                    )
+                    ToggleRow(
+                        title = "Show translation",
+                        subtitle = "Saheeh International",
+                        checked = checked,
+                        onChange = { checked = it },
+                        onOpen = { opened = true },
+                        openLabel = "Open translations",
+                        switchTag = "switch-door",
+                    )
+                }
+            }
+        }
+        val page = compose.onNodeWithTag("page-row").getUnclippedBoundsInRoot()
+        val switchRow = compose
+            .onNode(hasText("Show translation") and hasClickAction())
+            .getUnclippedBoundsInRoot()
+        assertEquals(
+            "a switch row must keep the list's own height, not the switch's 48 dp",
+            (page.bottom - page.top).value,
+            (switchRow.bottom - switchRow.top).value,
+            1f,
+        )
+        // The target the switch owes the finger is 48 dp around its own 32 dp
+        // track, so its top edge stands 8 dp above the track. A finger two dp
+        // inside that edge is on the switch, not on the row's door.
+        val track = compose.onNodeWithTag("switch-door", useUnmergedTree = true)
+        track.performTouchInput {
+            click(Offset(center.x, center.y - 22.dp.toPx()))
+        }
+        compose.runOnIdle {
+            assertTrue(
+                "the switch's own target must answer at its edge, not only at its middle",
+                !checked,
+            )
+            assertTrue("the door must not take the switch's own target", !opened)
+        }
     }
 
     /**

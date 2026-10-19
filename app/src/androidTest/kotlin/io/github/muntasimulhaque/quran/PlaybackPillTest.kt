@@ -435,9 +435,9 @@ class PlaybackPillTest {
         val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
         val reciter = compose.onNodeWithTag("playback-reciter").getUnclippedBoundsInRoot()
         val listening = compose.onNodeWithTag("playback-listening").getUnclippedBoundsInRoot()
+        val close = compose.onNodeWithContentDescription("Stop").getUnclippedBoundsInRoot()
         val name = compose.onNodeWithText("Husary").getUnclippedBoundsInRoot()
         val place = compose.onNodeWithText("Al-Baqarah 2:255").getUnclippedBoundsInRoot()
-        val lead = 20f
         val rail = Space.Row.value + 48f + Space.Line.value
         // the two share a line when they stand over one another: the overlap
         // of their heights is most of the taller one, which a stacked pair
@@ -449,24 +449,29 @@ class PlaybackPillTest {
                 "$name and $place",
             overlap > (name.bottom - name.top).value / 2f,
         )
-        // The words centre in the room left of the close's own rail, not on
-        // the whole pill: the close at the capsule's middle used to share a
-        // sliver of glass with the words' line, and the two highlights met on
-        // the longest reference the pill prints (owner report, this session).
+        // The close's rail is kept on both sides of the line, so the words
+        // stand on the capsule's own axis, the axis the transport under them
+        // stands on (owner report, this session: the rail on the trailing side
+        // alone centred the line in the room beside the close, 24 dp left of
+        // the axis the reader reads it against).
         assertEquals(
-            "the words keep the pill's own lead from its leading curve",
-            lead,
+            "the words keep the close's rail on the leading side",
+            rail,
             (words.left - bar.left).value,
             1.5f,
         )
         assertEquals(
-            "the words keep the close's own rail at the trailing end",
+            "the words keep the close's rail on the trailing side",
             rail,
             (bar.right - words.right).value,
             1.5f,
         )
+        assertTrue(
+            "the close keeps its ground from the words' line: close $close, words $words",
+            close.left.value - words.right.value >= Space.Line.value - 0.5f,
+        )
         assertEquals(
-            "the words centre in the room left of the close, so their two doors stand off its ends equally",
+            "the words centre on their own line, so their two doors stand off its ends equally",
             (reciter.left - words.left).value,
             (words.right - listening.right).value,
             1f,
@@ -685,7 +690,7 @@ class PlaybackPillTest {
     }
 
     @Test
-    fun theAutomaticDownloadSaysWhatItIsFetching() {
+    fun theDownloadSaysWhatItIsFetching() {
         showPill(
             state = PlaybackUiState(
                 pendingDownloadSurah = 2,
@@ -696,12 +701,15 @@ class PlaybackPillTest {
             reference = null,
             pendingAudio = "Al-Baqarah \u00b7 177 MB \u00b7 50%",
         )
-        // The auto-continue path has no offer, so the name and the size must
-        // be on the pill while the package downloads (owner decision).
-        // The status line names the pending package and the percent, and the
-        // string adds the percent to what it is given, so the line reads the
-        // name once and the percent twice over. It read as one number once, and
-        // this leg had been red for nobody.
+        // Every download names the surah it is fetching, whichever door asked
+        // for it: the auto-continue path has no offer to carry the name, and a
+        // reader's own download has no offer left by the time the progress
+        // line stands (owner report, this session: a progress line with no
+        // name does not say what the reader is paying for). The status line
+        // names the pending package and the percent, and the string adds the
+        // percent to what it is given, so the line reads the name once and the
+        // percent twice over. It read as one number once, and this leg had
+        // been red for nobody.
         val line = "Al-Baqarah \u00b7 177 MB \u00b7 50% \u00b7 50%"
         compose.onNodeWithText(line).assertIsDisplayed()
     }

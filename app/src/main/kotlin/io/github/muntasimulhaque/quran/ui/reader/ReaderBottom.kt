@@ -203,7 +203,15 @@ internal fun BottomStack(
                     if (playback.error) viewModel.retryPlayback() else viewModel.confirmDownload()
                 },
                 onClose = {
-                    if (playback.pendingDownloadSurah != null || playback.downloadFailed) {
+                    // A line that says Cancel download answers as one, in
+                    // every state that can draw it (owner report, this
+                    // session: a stale progress with no pending surah sent
+                    // this close to the transport and stopped the ayah the
+                    // reader was hearing).
+                    if (playback.pendingDownloadSurah != null ||
+                        playback.downloadProgress != null ||
+                        playback.downloadFailed
+                    ) {
                         viewModel.cancelDownload()
                     } else {
                         viewModel.stopPlayback()
