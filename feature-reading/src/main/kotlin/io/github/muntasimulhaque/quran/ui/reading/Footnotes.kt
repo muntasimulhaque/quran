@@ -8,12 +8,11 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,10 +21,10 @@ import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
-import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
+import io.github.muntasimulhaque.quran.ui.kit.AppSheet
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
+import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
-import io.github.muntasimulhaque.quran.ui.kit.rememberSheetWidth
 
 /**
  * A footnote the reader opened, with the ayah it belongs to and the size of
@@ -65,18 +64,15 @@ internal fun FootnoteSheet(
     lineSp: Float,
     onDismiss: () -> Unit,
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberExpandedSheetState()
     // A note is prose, and a prose line has a measure: the footnote keeps its
     // own 65-character column, centered on the app's one page, so a reader
     // who changes the size gets more lines and never a longer one (owner
     // decision, the theme and consistency session; this session).
     val prose = Reading.proseMeasure(LocalReadingVoice.current, sizeSp)
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
+    AppSheet(
+        onDismiss = onDismiss,
         sheetState = sheetState,
-        dragHandle = { SheetHandle() },
-        containerColor = MaterialTheme.colorScheme.surface,
-        sheetMaxWidth = rememberSheetWidth(),
     ) {
         Column(
             modifier = Modifier
@@ -85,7 +81,8 @@ internal fun FootnoteSheet(
                 // The gate rides with the scroll, so an upward flick on a
                 // short footnote never bounces the sheet on its top anchor.
                 .sheetVerticalScroll(rememberScrollState())
-                .padding(start = Space.Gutter, end = Space.Gutter, bottom = Space.SheetFoot),
+                .padding(start = Space.Gutter, end = Space.Gutter, bottom = Space.SheetFoot)
+                .testTag("footnote-sheet"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(

@@ -22,7 +22,12 @@ package io.github.muntasimulhaque.quran.core
  * Upward is always kept, whatever the list's place: every sheet in the app
  * opens fully expanded, so an upward pull has no sheet left to expand and
  * only ever bounced the sheet on its top anchor (owner report). Downward
- * keeps the gesture's own rule, so pulling down to close still works.
+ * keeps the gesture's own rule, so pulling down to close still works. The
+ * bounce itself was the library's, and the pinned Material3 1.5 physics now
+ * clamps every settle step between the anchors, so the energy dies rather
+ * than bouncing; the rule stays anyway, because a sheet that is already
+ * whole has nothing to expand into and the gesture should belong to the
+ * list before it belongs to the sheet.
  */
 class SheetDragPolicy {
 

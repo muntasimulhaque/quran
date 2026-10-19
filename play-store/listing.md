@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 9.1 (versionCode 93)
+Version: 9.2 (versionCode 94)
 
 ## Listing
 
@@ -136,8 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (9.1, 465 characters)
-For 9.1, the reading and the app around it are tidier. The ayah number now stands at the head of each ayah, so you always know where you are, and a sheet no longer shakes or shuts when you flick its handle upward. The player's close mark sits clear of the capsule's edge. Searching a surah by its name and number now works in Bangla as it always did in English. Settings reads as one plain list with plainer names, and the Daily ayah page can turn the reminder on.
+## Release notes (9.2, 267 characters)
+For 9.2, the pages that rise over the reading hold still. A pull, a flick, or a change of direction on a footnote, an ayah card, a note, Search, Browse, or Settings no longer makes the page shake or bounce, wherever the finger starts. The reading itself is unchanged.
 
 ## Before each release
 

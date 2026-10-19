@@ -6,7 +6,16 @@ serializationJson = "1.11.0"
 sqliteJdbc = "3.49.1.0"
 coreKtx = "1.19.0"
 activityCompose = "1.13.0"
-composeBom = "2026.06.01"
+composeBom = "2026.09.00"
+# The sheet's own physics: Material3 1.4.0, which the September BOM still
+# carries, settles a dragged sheet with an underdamped spring that is allowed
+# to pass its anchor, and an update to the content's height mid-settle restarts
+# it with the finger's velocity, so a sheet can bounce at the top instead of
+# resting. 1.5.0-alpha16 fixed the root: the settle bounds the fling velocity
+# and clamps every step between the anchors. The fix ships in the beta line,
+# so the app pins the newest beta beside the stable BOM; follow the 1.5.0
+# stable as soon as the BOM carries it, and then this pin can go.
+material3 = "1.5.0-beta01"
 lifecycle = "2.11.0"
 datastore = "1.2.1"
 media3 = "1.11.1"
@@ -28,7 +37,7 @@ androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", versi
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-foundation = { group = "androidx.compose.foundation", name = "foundation" }
-androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }

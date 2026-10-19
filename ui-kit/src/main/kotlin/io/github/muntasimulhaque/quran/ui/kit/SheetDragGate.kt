@@ -118,14 +118,16 @@ fun Modifier.sheetVerticalScroll(state: ScrollState): Modifier =
  * The guard a sheet's drag handle wears.
  *
  * A sheet opens fully expanded, so an upward drag on the handle has nowhere
- * to go: Material's own settle answers it with a pull past the top anchor
- * and a spring back, and the surface draws that overshoot as a stretch that
- * reads as a shake. The handle is the one place on a sheet the scroll gate
- * cannot reach, because Material draws it above the content rather than
- * inside it, so it wears its own guard here: an upward move is consumed
- * before Material's draggable can see it, and a tap is consumed so a short
- * flick is never read as a tap that takes the sheet away. Downward is left
- * alone, so the pull down to close still closes.
+ * to go: Material's own settle used to answer it with a pull past the top
+ * anchor and a spring back, and the surface draws that overshoot as a stretch
+ * that reads as a shake. The pinned Material3 1.5 physics clamps every settle
+ * step between the anchors, so the overshoot itself is gone; this guard keeps
+ * the gesture's own rule anyway. The handle is the one place on a sheet the
+ * scroll gate cannot reach, because it is drawn above the content rather than
+ * inside it, so it wears its own guard here: an upward move is
+ * consumed before Material's draggable can see it, and a tap is consumed so a
+ * short flick is never read as a tap that takes the sheet away. Downward is
+ * left alone, so the pull down to close still closes.
  */
 fun Modifier.sheetHandleGuard(): Modifier = pointerInput(Unit) {
     awaitPointerEventScope {

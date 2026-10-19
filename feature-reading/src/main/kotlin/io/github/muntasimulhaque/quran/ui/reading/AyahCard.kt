@@ -18,9 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -50,6 +48,7 @@ import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.TafsirPassage
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.AddDoor
+import io.github.muntasimulhaque.quran.ui.kit.AppSheet
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.languageName
@@ -57,8 +56,7 @@ import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
-import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
-import io.github.muntasimulhaque.quran.ui.kit.rememberSheetWidth
+import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
 import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
@@ -107,7 +105,7 @@ fun AyahCard(
     onAddContent: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberExpandedSheetState()
     // One tafsir on, and the card opens it: the reader tapped Tafsir on the
     // pill, so the second tap the door list asks for is a question whose
     // answer is already in the tap. With more than one, the doors stand and
@@ -152,12 +150,9 @@ fun AyahCard(
     // reader who changes the tafsir size gets more lines, never a longer line
     // (owner report, the audio and type audit session; owner decision, this
     // session).
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
+    AppSheet(
+        onDismiss = onDismiss,
         sheetState = sheetState,
-        dragHandle = { SheetHandle() },
-        containerColor = MaterialTheme.colorScheme.surface,
-        sheetMaxWidth = rememberSheetWidth(),
     ) {
         Column(
             modifier = Modifier
@@ -341,16 +336,10 @@ fun AyahNoteSheet(
     onSave: (String?) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
+    val sheetState = rememberExpandedSheetState()
+    AppSheet(
+        onDismiss = onDismiss,
         sheetState = sheetState,
-        dragHandle = { SheetHandle() },
-        containerColor = MaterialTheme.colorScheme.surface,
-        // The note is prose: it keeps its own measure, centered on the app's
-        // one page, so a reader who changes the size gets more lines and
-        // never a longer one (owner decision, this session).
-        sheetMaxWidth = rememberSheetWidth(),
     ) {
         Column(
             modifier = Modifier

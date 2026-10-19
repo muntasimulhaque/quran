@@ -22,10 +22,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.lightColorScheme
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -66,10 +64,10 @@ import io.github.muntasimulhaque.quran.core.TextRun
 import io.github.muntasimulhaque.quran.core.localizedDigits
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
+import io.github.muntasimulhaque.quran.ui.kit.AppSheet
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
-import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
-import io.github.muntasimulhaque.quran.ui.kit.rememberSheetWidth
+import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.Radii
@@ -503,18 +501,10 @@ internal fun AyahShareSheet(
     onShareText: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
+    val sheetState = rememberExpandedSheetState()
+    AppSheet(
+        onDismiss = onDismiss,
         sheetState = sheetState,
-        dragHandle = { SheetHandle() },
-        containerColor = MaterialTheme.colorScheme.surface,
-        // The preview and its buttons stand on the app's one page, and the
-        // two doors are a centered pair a Space.Row apart: the page's own
-        // measure keeps them together instead of stretching them across a
-        // ten inch screen (owner decision, the theme and consistency session;
-        // the action gap, this session).
-        sheetMaxWidth = rememberSheetWidth(),
     ) {
         Column(
             modifier = Modifier

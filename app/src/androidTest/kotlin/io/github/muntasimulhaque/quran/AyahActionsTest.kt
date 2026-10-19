@@ -172,10 +172,16 @@ class AyahActionsTest {
         // press shapes match rather than five ovals of the words' own making.
         val first = shapes[0].getUnclippedBoundsInRoot()
         val last = shapes[4].getUnclippedBoundsInRoot()
+        // The widths are read back through the density, and two nodes placed
+        // on the same pixel edge can come back a hair apart in dp (48.0
+        // against 47.999992 with Compose 1.12's rounding). A hundredth of a
+        // dp is under any drawn difference and keeps the assertion about the
+        // one measured width instead of about float noise.
         assertEquals(
             "the five actions press in one width",
-            first.right - first.left,
-            last.right - last.left,
+            (first.right - first.left).value,
+            (last.right - last.left).value,
+            0.01f,
         )
     }
 

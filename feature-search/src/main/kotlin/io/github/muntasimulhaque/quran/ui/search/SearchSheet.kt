@@ -13,9 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -35,10 +33,10 @@ import io.github.muntasimulhaque.quran.data.SearchRequest
 import io.github.muntasimulhaque.quran.data.SearchResults
 import io.github.muntasimulhaque.quran.data.SearchSources
 import io.github.muntasimulhaque.quran.data.Surah
+import io.github.muntasimulhaque.quran.ui.kit.AppSheet
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
-import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
-import io.github.muntasimulhaque.quran.ui.kit.rememberSheetWidth
+import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
 import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 import kotlinx.coroutines.Dispatchers
@@ -108,7 +106,7 @@ fun SearchSheet(
     onAyah: (Ayah) -> Unit,
     onSurah: (Surah) -> Unit,
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberExpandedSheetState()
     val focus = remember { FocusRequester() }
     val hafs = rememberHafs()
 
@@ -183,17 +181,9 @@ fun SearchSheet(
         content.warmTafsir(tafsirPacks)
     }
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
+    AppSheet(
+        onDismiss = onDismiss,
         sheetState = sheetState,
-        dragHandle = { SheetHandle() },
-        containerColor = MaterialTheme.colorScheme.surface,
-        // The sheet is the app's one page, and the results are the one prose
-        // it draws: they keep their own 65-character column at the 14 sp they
-        // are set in, centered on the page the way the reading's text stands
-        // on its paper (owner report, the audio and type audit session; owner
-        // decision, this session).
-        sheetMaxWidth = rememberSheetWidth(),
     ) {
         Column(
             modifier = Modifier

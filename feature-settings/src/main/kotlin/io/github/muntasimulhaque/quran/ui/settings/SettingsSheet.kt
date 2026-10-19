@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,9 +28,9 @@ import io.github.muntasimulhaque.quran.data.ReadingRow
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.feature.settings.R
+import io.github.muntasimulhaque.quran.ui.kit.AppSheet
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
-import io.github.muntasimulhaque.quran.ui.kit.SheetHandle
-import io.github.muntasimulhaque.quran.ui.kit.rememberSheetWidth
+import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -94,7 +92,7 @@ fun SettingsSheet(
     actions: SettingsActions,
     onDismiss: () -> Unit,
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberExpandedSheetState()
     // The page survives the window, not only the composition. A change of
     // language recreates the Activity, and a page kept in plain `remember`
     // went with the old window: the reader chose a language on the Language
@@ -104,16 +102,9 @@ fun SettingsSheet(
     var page by rememberSaveable { mutableStateOf<SettingsPage?>(null) }
     val hubScroll = rememberScrollState()
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
+    AppSheet(
+        onDismiss = onDismiss,
         sheetState = sheetState,
-        dragHandle = { SheetHandle() },
-        containerColor = MaterialTheme.colorScheme.surface,
-        // The sheet is the app's one page, so a settings row stops where
-        // every other sheet stops: a ten inch screen centers the page, and
-        // the seven inch tablet fills its window (owner decision, this
-        // session).
-        sheetMaxWidth = rememberSheetWidth(),
     ) {
         // Back steps out of a page before it closes the sheet, the way a
         // stack of pages is expected to behave. It lives inside the sheet's
