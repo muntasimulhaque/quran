@@ -205,9 +205,11 @@ fun SearchSheet(
             SearchField(
                 value = text,
                 onChange = { text = it },
-                onClose = {
-                    if (text.isEmpty()) onDismiss() else text = ""
-                },
+                // Close ends the search; the field's own clear mark empties
+                // it. One shape does one job, so a reader with a query in the
+                // field is not made to tap twice to leave (owner decision,
+                // this session).
+                onClose = onDismiss,
                 focus = focus,
             )
             FilterRow(

@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 8.9 (versionCode 91)
+Version: 9.0 (versionCode 92)
 
 ## Listing
 
@@ -136,8 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (8.9, 378 characters)
-The pill at the foot of the reading is tidier. Its close mark now stands in the middle of the capsule in every voice, in the download offer and while a recitation plays, instead of hanging at the lower corner. The Download and close answers in the offer stand a clear gap apart, and every surah name still prints whole, in English and in Bangla. The reading itself is unchanged.
+## Release notes (9.0, 489 characters)
+Search is quicker to change. The field now carries its own clear mark: one tap empties the query and leaves the cursor ready for the next word, instead of reaching back through the line. It appears only when there is something to clear, and Close beside the field now always closes the search. A download offer at the foot of the reading also goes away with a tap on the page, as every other raised control does; a package already downloading keeps its own close. The reading is unchanged.
 
 ## Before each release
 

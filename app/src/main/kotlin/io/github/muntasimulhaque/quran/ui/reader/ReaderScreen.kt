@@ -254,6 +254,13 @@ fun ReaderScreen(
                         // pill left to clear it. It must never silence the
                         // transport that is playing.
                         if (pausedTransport) viewModel.stopPlayback()
+                        // The download offer is a raised control too, so a
+                        // page tap puts it away exactly as it puts away the
+                        // paused pill. A package already on its way is not
+                        // put away by a stray tap: its own close is the
+                        // deliberate cancel (owner decision, this session).
+                        val offer = viewModel.listenOffer
+                        if (offer != null && offer.progress == null) viewModel.cancelListen()
                         touch++
                     },
                     onScrolled = {
