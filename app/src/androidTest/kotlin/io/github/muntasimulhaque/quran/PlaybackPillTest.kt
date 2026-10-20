@@ -68,9 +68,7 @@ import java.util.Locale
  * 5. On that phone the words and the transport are centred, and the words are
  *    one line: the reciter's name and the place beside each other, not the
  *    reciter's name with the place under it against the pill's left edge
- *    (owner report). The close holds the trailing edge in every state and the
- *    capsule's own middle, the place the offer gives it (owner report, this
- *    session).
+ *    (owner report).
  * 6. The reciter's name is the chooser and not a hop to the settings, and
  *    the chooser carries every reciter with what it would still cost for
  *    the surah at hand, so the choice is made with the number in view
@@ -87,14 +85,25 @@ import java.util.Locale
  *    gap, and one 48 dp target, the same the settings lists draw, so an
  *    answer cannot change its shape from one door to the other (owner
  *    decision, forty-eighth session).
- * 10. The pill uses the width it has: the words lead and the state's own
- *     answers hold the capsule's trailing rail, the close outermost, in the
- *     offer, in the phone's two lines, and in the wide pill's one row. The
- *     close keeps the capsule's own inner end inset, so the drawn mark stays
- *     clear of the curve (owner decision, this session).
+ * 10. The capsule hugs its words (owner decision, this session). It carries
+ *     no close on the playing pill, the offer, a failure, or an unavailable
+ *     answer, so it is the wider of its words' line and its transport plus
+ *     the app's air, and never the page's width for no reason. Its width is
+ *     the words' own, which is also what stops the place being cut with an
+ *     ellipsis on the phone the owner read.
  * 11. The offer prints the surah's own name whole in the line it shares with
  *     the size, in either language: the size may give way at the end of the
  *     line, the name never does (owner decision, this session).
+ * 12. No press shape touches another or the capsule: the app's `Space.Line`
+ *     stands between the transport's three 48 dp circles, between the two
+ *     rows, and between any shape and the capsule's edge (owner decision,
+ *     this session).
+ * 13. The recitation's stop has no shape on the glass and is still reachable:
+ *     it is the action TalkBack offers on Play or pause, so the close's own
+ *     act is not lost with the close's mark (owner decision, this session).
+ * 14. The one X the app keeps is the transfer's own abort, and it is the last
+ *     thing in the row: a package on its way is the one thing a stray tap on
+ *     the page must never end (owner decision, this session).
  */
 @RunWith(AndroidJUnit4::class)
 class PlaybackPillTest {
@@ -106,6 +115,9 @@ class PlaybackPillTest {
         onSpeed: (Float) -> Unit = {},
         onEndOfAudio: (EndOfAudio) -> Unit = {},
         onReciter: (String) -> Unit = {},
+        /** The close's own act, which has no shape any more. */
+        onStop: () -> Unit = {},
+        onCancelDownload: () -> Unit = {},
         state: PlaybackUiState = PlaybackUiState(),
         reference: String? = "Al-Baqarah 2:255",
         pendingAudio: String? = null,
@@ -154,7 +166,8 @@ class PlaybackPillTest {
                         onPrevious = {},
                         onReciter = onReciter,
                         onDownload = {},
-                        onClose = {},
+                        onStop = onStop,
+                        onCancelDownload = onCancelDownload,
                         onSpeed = onSpeed,
                         onEndOfAudio = onEndOfAudio,
                         modifier = pillWidth,
@@ -201,7 +214,8 @@ class PlaybackPillTest {
                         onPrevious = {},
                         onReciter = {},
                         onDownload = {},
-                        onClose = {},
+                        onStop = {},
+                        onCancelDownload = {},
                     )
                 }
             }
@@ -396,14 +410,11 @@ class PlaybackPillTest {
         val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
         val play = compose.onNodeWithContentDescription("Play or pause").getUnclippedBoundsInRoot()
         val next = compose.onNodeWithContentDescription("Next ayah").getUnclippedBoundsInRoot()
-        val close = compose.onNodeWithContentDescription("Stop").getUnclippedBoundsInRoot()
         // "Share the row" is overlap and company, not an order: what
         // distinguishes the one row from the two is that the transport stands
         // beside the words and overlaps them vertically (the phone's own test
         // pins the other half of the rule: there the transport is under the
-        // words). The words lead and the transport and the close hold the
-        // trailing rail, so the capsule's far end is used and not empty
-        // (owner decision, this session).
+        // words).
         assertTrue(
             "the transport must stand beside the words: play $play, words $words",
             play.left.value > words.left.value,
@@ -412,14 +423,23 @@ class PlaybackPillTest {
             "the transport must share the words' row: play $play, words $words",
             play.top.value < words.bottom.value && play.bottom.value > words.top.value,
         )
+        // The wide pill hugs too: the glass may be 840 wide, and the capsule
+        // is the words, the gap, and the transport, with the app's air around
+        // them (owner decision, this session).
         assertTrue(
-            "the close must hold the wide pill's trailing rail: close $close, next $next",
-            close.left.value >= next.right.value - 0.5f,
+            "the wide pill must hug its row, not fill the glass: bar $bar",
+            (bar.right - bar.left).value < 840f - 2 * 16f,
         )
         assertEquals(
-            "the wide pill's close keeps the capsule's own inner end inset",
-            Space.Row.value,
-            (bar.right - close.right).value,
+            "the words keep the capsule's air at the leading end",
+            Space.Line.value,
+            (words.left - bar.left).value,
+            1.5f,
+        )
+        assertEquals(
+            "the transport keeps the capsule's air at the trailing end",
+            Space.Line.value,
+            (bar.right - next.right).value,
             1.5f,
         )
     }
@@ -435,10 +455,8 @@ class PlaybackPillTest {
         val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
         val reciter = compose.onNodeWithTag("playback-reciter").getUnclippedBoundsInRoot()
         val listening = compose.onNodeWithTag("playback-listening").getUnclippedBoundsInRoot()
-        val close = compose.onNodeWithContentDescription("Stop").getUnclippedBoundsInRoot()
         val name = compose.onNodeWithText("Husary").getUnclippedBoundsInRoot()
         val place = compose.onNodeWithText("Al-Baqarah 2:255").getUnclippedBoundsInRoot()
-        val rail = Space.Row.value + 48f + Space.Line.value
         // the two share a line when they stand over one another: the overlap
         // of their heights is most of the taller one, which a stacked pair
         // (the name above the place) could never be
@@ -449,81 +467,194 @@ class PlaybackPillTest {
                 "$name and $place",
             overlap > (name.bottom - name.top).value / 2f,
         )
-        // The close's rail is kept on both sides of the line, so the words
-        // stand on the capsule's own axis, the axis the transport under them
-        // stands on (owner report, this session: the rail on the trailing side
-        // alone centred the line in the room beside the close, 24 dp left of
-        // the axis the reader reads it against).
+        // The words carry no close's rail any more, so the line stands on the
+        // capsule's own axis, the axis the transport under it stands on (owner
+        // decision, this session: the rail was there to keep the close's flash
+        // clear of the two doors, and with the close gone it was empty ground
+        // inside a shape that could be the words' own size).
         assertEquals(
-            "the words keep the close's rail on the leading side",
-            rail,
-            (words.left - bar.left).value,
-            1.5f,
+            "the words stand on the capsule's own axis",
+            (bar.left + bar.right).value / 2f,
+            (words.left + words.right).value / 2f,
+            1f,
         )
         assertEquals(
-            "the words keep the close's rail on the trailing side",
-            rail,
-            (bar.right - words.right).value,
-            1.5f,
-        )
-        assertTrue(
-            "the close keeps its ground from the words' line: close $close, words $words",
-            close.left.value - words.right.value >= Space.Line.value - 0.5f,
+            "the two doors stand the app's air apart, so neither flash meets the other",
+            Space.Row.value,
+            (listening.left - reciter.right).value,
+            1f,
         )
         assertEquals(
-            "the words centre on their own line, so their two doors stand off its ends equally",
-            (reciter.left - words.left).value,
-            (words.right - listening.right).value,
+            "the words' flash keeps the capsule's air above it",
+            Space.Line.value,
+            (reciter.top - bar.top).value,
             1f,
         )
     }
 
     /**
      * The phone pill's own line: the words and the transport stand on the
-     * capsule's centre, and the close stands on that same centre at the
-     * trailing end, the place the offer gives it (owner report, this
-     * session).
+     * capsule's centre, and the transport carries no close at all (owner
+     * decision, this session). The stop the close used to carry is offered to
+     * a screen reader on Play or pause, which the leg below pins.
      */
     @Test
-    fun thePhonePillCentresItsTransportAndTrailsItsClose() {
+    fun thePhonePillCentresItsTransport() {
         showPill(pillWidth = Modifier.width(393.dp))
         val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
         val first = compose.onNodeWithContentDescription("Previous ayah").getUnclippedBoundsInRoot()
         val next = compose.onNodeWithContentDescription("Next ayah").getUnclippedBoundsInRoot()
-        val close = compose.onNodeWithContentDescription("Stop").getUnclippedBoundsInRoot()
         assertEquals(
             "the transport stands centred under the words, not against one end",
             (first.left - bar.left).value,
             (bar.right - next.right).value,
             1f,
         )
+        compose.onNodeWithContentDescription("Stop").assertDoesNotExist()
+    }
+
+    /**
+     * The stop the close carried has no shape any more, and it is not lost
+     * with it: a screen reader finds it on Play or pause, under the same word
+     * the close was announced with (owner decision, this session).
+     */
+    @Test
+    fun theStopIsOfferedToAScreenReaderWhereTheCloseUsedToStand() {
+        var stopped = false
+        showPill(onStop = { stopped = true })
+        val actions = compose.onNodeWithContentDescription("Play or pause")
+            .fetchSemanticsNode().config[SemanticsActions.CustomActions]
+        assertEquals(
+            "the stop keeps the word TalkBack heard from the close",
+            "Stop",
+            actions.single().label,
+        )
+        compose.runOnUiThread { actions.single().action() }
+        assertTrue("the stop's action must reach the pill's own stop", stopped)
+    }
+
+    /**
+     * The capsule hugs the words it prints (owner decision, this session). A
+     * phone's page is no longer spent on empty ground: the capsule is the
+     * words' own measure, and the transport's row can never be squeezed
+     * inside it.
+     */
+    @Test
+    fun theCapsuleHugsItsWords() {
+        showPill()
+        val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
+        val root = compose.onRoot().getUnclippedBoundsInRoot()
         assertTrue(
-            "the close must trail the transport: close $close, next $next",
-            close.left.value >= next.right.value - 0.5f,
+            "the capsule must not fill the page: bar $bar, root $root",
+            (bar.right - bar.left).value < (root.right - root.left).value - 2 * 16f - 1f,
+        )
+        // Three 48 dp controls, the app's air between them, and the capsule's
+        // own air around them is the narrowest the shape can be.
+        assertTrue(
+            "the capsule must hold its transport whole: bar $bar",
+            (bar.right - bar.left).value >= 160f + 16f + 2 * 16f,
         )
         assertEquals(
-            "the close keeps the capsule's own inner end inset",
-            Space.Row.value,
-            (bar.right - close.right).value,
-            1.5f,
-        )
-        assertEquals(
-            "the close stands on the capsule's own middle, not at the foot of the lower row",
-            (bar.top + bar.bottom).value / 2f,
-            (close.top + close.bottom).value / 2f,
+            "the capsule stands on the glass's own middle",
+            (root.left + root.right).value / 2f,
+            (bar.left + bar.right).value / 2f,
             1f,
         )
     }
 
     /**
-     * The offer uses the capsule's own width: the name and the size lead, the
-     * Download and the close hold the trailing rail, the close outermost, and
-     * the two answers stand the app's own `Space.Row` apart between the
-     * shapes the reader sees (owner report, this session). It is the same
-     * rail the playing pill's one row wears.
+     * One air, everywhere: the transport's three circles stand `Space.Line`
+     * apart, the two rows' flashes stand it apart, and no flash meets the
+     * capsule (owner decision, this session: they used to meet point to point,
+     * and the words' flash used to meet the capsule's own top edge).
      */
     @Test
-    fun theOfferHoldsItsActionsOnTheTrailingRail() {
+    fun theTouchedShapesKeepTheCapsulesAir() {
+        showPill(pillWidth = Modifier.width(393.dp))
+        val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
+        val reciter = compose.onNodeWithTag("playback-reciter").getUnclippedBoundsInRoot()
+        val play = compose.onNodeWithContentDescription("Play or pause").getUnclippedBoundsInRoot()
+        val first = compose.onNodeWithContentDescription("Previous ayah").getUnclippedBoundsInRoot()
+        val next = compose.onNodeWithContentDescription("Next ayah").getUnclippedBoundsInRoot()
+        assertEquals(
+            "the two rows' flashes stand the app's air apart",
+            Space.Line.value,
+            (play.top - reciter.bottom).value,
+            2f,
+        )
+        assertEquals(
+            "the transport's flash keeps the capsule's air below it",
+            Space.Line.value,
+            (bar.bottom - play.bottom).value,
+            2f,
+        )
+        assertEquals(
+            "the transport's first two circles stand the app's air apart",
+            Space.Line.value,
+            (play.left - first.right).value,
+            1f,
+        )
+        assertEquals(
+            "the transport's last two circles stand the app's air apart",
+            Space.Line.value,
+            (next.left - play.right).value,
+            1f,
+        )
+    }
+
+    /**
+     * The one X the app keeps stands under the words on the capsule's own
+     * axis, alone in its row, and the playing pill's stop draws nothing here
+     * (owner decision, this session).
+     */
+    @Test
+    fun theTransfersOwnAbortIsTheOnlyMarkInItsRow() {
+        showPill(
+            state = PlaybackUiState(
+                pendingDownloadSurah = 19,
+                pendingDownloadBytes = 22L * 1024 * 1024,
+                downloadProgress = 0.5f,
+            ),
+            reference = null,
+        )
+        val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
+        val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
+        val cancel = compose
+            .onNodeWithContentDescription("Cancel download")
+            .getUnclippedBoundsInRoot()
+        val line = compose.onNodeWithTag("download-line").getUnclippedBoundsInRoot()
+        // One answer shares the words' line: the capsule is one row tall plus
+        // the line's own room, where the two-row shape stood 130 dp to hold a
+        // single mark under its words (owner decision, this session).
+        assertTrue(
+            "the transfer's abort trails the words on their own line: " +
+                "words $words, cancel $cancel",
+            cancel.left.value >= words.right.value - 0.5f,
+        )
+        assertEquals(
+            "the transfer's abort keeps the capsule's air at the trailing end",
+            Space.Line.value,
+            (bar.right - cancel.right).value,
+            1.5f,
+        )
+        // The line takes the room the capsule keeps under its row, so the row
+        // above it is never crossed and the two never touch.
+        assertTrue(
+            "the transfer's abort keeps the app's air above the progress line: " +
+                "cancel $cancel, line $line",
+            (line.top - cancel.bottom).value >= Space.Line.value - 0.5f,
+        )
+        compose.onNodeWithContentDescription("Stop").assertDoesNotExist()
+    }
+
+    /**
+     * The offer carries one answer and no close: the name and the size lead,
+     * the Download follows them, and the capsule keeps the app's air at both
+     * ends. Its old X answered "not now" exactly as a tap on the page does,
+     * so it had nothing of its own to say (owner decision, this session).
+     */
+    @Test
+    fun theOfferCarriesOneAnswerAndNoClose() {
         showPill(
             offer = ListenOffer(
                 reciter = "husary",
@@ -536,29 +667,23 @@ class PlaybackPillTest {
             ),
         )
         val bar = compose.onNodeWithTag("listen-offer-bar").getUnclippedBoundsInRoot()
+        val root = compose.onRoot().getUnclippedBoundsInRoot()
         val title = compose.onNodeWithText("Maryam \u00b7 22 MB").getUnclippedBoundsInRoot()
         val download = compose.onNodeWithText("Download").getUnclippedBoundsInRoot()
-        val close = compose.onNodeWithContentDescription("Not now").getUnclippedBoundsInRoot()
         assertTrue(
-            "the words must lead and the actions trail: title $title, download $download",
+            "the words must lead and the answer trail: title $title, download $download",
             title.left.value < download.left.value,
         )
+        compose.onNodeWithContentDescription("Not now").assertDoesNotExist()
+        assertEquals(
+            "the offer's answer keeps the capsule's air at the trailing end",
+            Space.Line.value,
+            (bar.right - download.right).value,
+            1.5f,
+        )
         assertTrue(
-            "the close must be the capsule's outermost action: download $download, close $close",
-            close.left.value > download.right.value - 0.5f,
-        )
-        assertEquals(
-            "the Download and the close stand `Space.Row` apart: " +
-                "download $download, close $close",
-            Space.Row.value,
-            (close.left - download.right).value,
-            1.5f,
-        )
-        assertEquals(
-            "the close keeps the capsule's own inner end inset",
-            Space.Row.value,
-            (bar.right - close.right).value,
-            1.5f,
+            "the offer hugs its words rather than filling the page: bar $bar, root $root",
+            (bar.right - bar.left).value < (root.right - root.left).value - 2 * 16f - 1f,
         )
     }
 
@@ -613,33 +738,6 @@ class PlaybackPillTest {
         assertTheOfferPrintsTheNameWhole(
             title = "আল-মুতাফফিফীন \u00b7 ৫.৮ এমবি",
             name = "আল-মুতাফফিফীন",
-        )
-    }
-
-    /**
-     * A state whose only answer is the close keeps the close on the trailing
-     * edge too: the rail is the pill's own rule, not the playing state's own
-     * (owner decision, this session).
-     */
-    @Test
-    fun theLoneCloseStandsOnTheTrailingEdgeToo() {
-        showPill(
-            state = PlaybackUiState(
-                pendingDownloadSurah = 19,
-                pendingDownloadBytes = 22L * 1024 * 1024,
-                downloadProgress = 0.5f,
-            ),
-            reference = null,
-        )
-        val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
-        val close = compose
-            .onNodeWithContentDescription("Cancel download")
-            .getUnclippedBoundsInRoot()
-        assertEquals(
-            "a lone close holds the capsule's own inner end inset",
-            Space.Row.value,
-            (bar.right - close.right).value,
-            1.5f,
         )
     }
 
@@ -731,7 +829,9 @@ class PlaybackPillTest {
      * The transport's press is the whole target, not the 20 dp glyph. An
      * indication left on the glyph flashed a dot inside the 48 dp node the
      * finger actually hit, which read as too small (owner report, this
-     * session).
+     * session). Three shapes, because the transport is the three marks it
+     * always had: the close that was the fourth has left the glass (owner
+     * decision, this session).
      */
     @Test
     fun theTransportPressFillsItsOwnTarget() {
@@ -739,8 +839,8 @@ class PlaybackPillTest {
         // The shape is a child of the clickable, which merges its
         // descendants, so the tag is read from the unmerged tree.
         val shapes = compose.onAllNodesWithTag("transport-shape", useUnmergedTree = true)
-        shapes.assertCountEquals(4)
-        repeat(4) { index ->
+        shapes.assertCountEquals(3)
+        repeat(3) { index ->
             shapes[index].assertWidthIsEqualTo(48.dp)
             shapes[index].assertHeightIsEqualTo(48.dp)
         }

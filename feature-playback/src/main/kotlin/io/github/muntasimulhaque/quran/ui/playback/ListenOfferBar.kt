@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,7 +39,6 @@ import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Radii
-import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
  * One request, named in full: which reciter, which surah, how much, and the
@@ -46,176 +46,179 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * timings and the audio together, under one progress bar, and then it plays.
  *
  * The offer keeps its own single row whatever the width, and that is not an
- * oversight: it carries two controls, never four, and the one line it prints
- * is a name and a size.
+ * oversight: its words are a name and a size, and its answer is one word.
  *
- * The name and the size lead and the state's answers hold the capsule's
- * trailing rail, the close outermost: the offer is as wide as the page's own
- * measure, and that width is used rather than hugged (owner report, this
- * session). The two answers on that rail stand `Space.Row` apart, because
- * the Download's own pill fills its 48 dp target and the close's highlight is
- * drawn on the target: with nothing between them the two shapes met edge to
- * edge, and the press read as one control touching another (owner report,
- * this session).
+ * **An offer has no close** (owner decision, this session). Its X answered
+ * "not now" with exactly what a tap on the page answers, and the same X then
+ * turned into the transfer's cancel one tap later, so one mark in one place
+ * said two different things. A page tap puts the offer away, and Back answers
+ * it with the same "not now"; the only X the bar draws is the cancel of a
+ * package already on its way, which is the one thing a stray tap must not do
+ * (owner decision, this session).
+ *
+ * The bar hugs its words for the same reason the pill does: the download is
+ * a name, a size, and one answer, and a full-width shape spent the reader's
+ * page on ground nothing stood on. Its row keeps [PillAir] at the ends, so
+ * the Download's own press shape never meets the capsule's edge, and the
+ * progress line stands in the room the bar keeps under its row, so it never
+ * crosses a control's shape.
  */
 @Composable
 internal fun ListenOfferBar(
     offer: ListenOffer,
     title: String,
     onConfirm: () -> Unit,
-    onCancel: () -> Unit,
+    /** The one X the app keeps: abort a package on its way. */
+    onCancelDownload: () -> Unit,
     onReciter: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var chooser by remember { mutableStateOf(false) }
     val progress = offer.progress
     val press = remember { MutableInteractionSource() }
-    Column(
+    Box(
         modifier = modifier
             .floatingLift(Radii.Pill)
             .clip(Radii.Pill)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .testTag("listen-offer-bar"),
+        // The bar hugs its words, and its content stands on its own middle
+        // whatever measure it is given.
+        contentAlignment = Alignment.Center,
     ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(bottom = if (progress != null) ProgressRoom else 0.dp),
+        ) {
+            Row(
+                modifier = Modifier.padding(PillAir),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        // The click owns the 48 dp node, the ripple draws on
+                        // the capsule inside it, and the mark keeps its gap
+                        // from its word: the same order the playing pill's
+                        // reciter door is built in, so one tap flashes one
+                        // shape in the two homes of one chooser (owner
+                        // decision, the theme and consistency session).
+                        .clickable(
+                            enabled = progress == null,
+                            role = Role.Button,
+                            interactionSource = press,
+                            indication = null,
+                        ) { chooser = true }
+                        .minimumInteractiveComponentSize()
+                        .clip(Radii.Pill)
+                        .indication(press, ripple(color = MaterialTheme.colorScheme.primary))
+                        .padding(horizontal = 4.dp, vertical = 2.dp),
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = reciterShortName(offer.reciter, offer.reciterName),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                        // The name is the door to the other reciters; the
+                        // mark says so, so the choice is found without a
+                        // guess, and it goes away once the download starts.
+                        if (progress == null) {
+                            IconGlyph(
+                                icon = Icon.Chevron,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .padding(start = 4.dp)
+                                    .size(GlyphSize.ChevronInline),
+                            )
+                        }
+                    }
+                    Text(
+                        text = when {
+                            offer.failed -> stringResource(R.string.playback_download_failed)
+                            progress != null -> stringResource(
+                                R.string.playback_downloading,
+                                (progress * 100).toInt(),
+                            )
+                            else -> title
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                // The state's one answer, and the words give way to it with an
+                // ellipsis: the 12 dp lead keeps the name and the button apart
+                // when the name is long. A request and a failure answer with a
+                // word; a package on its way answers with the app's one X,
+                // because a stray tap must never throw the transfer away.
+                Row(
+                    modifier = Modifier.padding(start = WordsGap),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    when {
+                        progress != null -> TransportButton(
+                            Transport.Close,
+                            stringResource(R.string.playback_cancel_download),
+                            onCancelDownload,
+                        )
+                        offer.failed -> TextButton(
+                            label = stringResource(R.string.playback_retry),
+                            onClick = onConfirm,
+                        )
+                        else -> TextButton(
+                            label = stringResource(R.string.playback_download),
+                            onClick = onConfirm,
+                        )
+                    }
+                }
+            }
+        }
+        // The same drawn line the playing pill wears, so a download is one
+        // shape whatever pill carries it (owner decision, this session). It
+        // stands in the room kept under the row, on the bar's own measure,
+        // which the words decide and the percent never does.
+        if (progress != null) {
+            Box(Modifier.matchParentSize()) {
+                DownloadLine(
+                    progress = progress,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(bottom = 8.dp)
+                        .height(2.dp)
+                        .testTag("download-line"),
+                )
+            }
+        }
         // The chooser hangs from the bar's own centre with its ground above,
         // exactly as the chooser on the playing pill does: one list opens the
         // same way in both of its homes, instead of the framework's menu,
         // which stood on the bar's own edge and met its shoulder (owner
         // decision).
-        PillMenuAnchor { anchor ->
-            PillPopup(
-                open = chooser,
-                anchor = anchor,
-                onDismiss = { chooser = false },
-            ) {
-                ReciterChoices(
-                    options = offer.options,
-                    selected = offer.reciter,
-                    onChoose = {
-                        chooser = false
-                        onReciter(it)
-                    },
-                )
-            }
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = CloseInset, top = 6.dp, bottom = 6.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f, fill = false)
-                    // The click owns the 48 dp node, the ripple draws on the
-                    // capsule inside it, and the mark keeps its gap from its
-                    // word: the same order the playing pill's reciter door is
-                    // built in, so one tap flashes one shape in the two homes
-                    // of one chooser (owner decision, the theme and
-                    // consistency session).
-                    .clickable(
-                        enabled = progress == null,
-                        role = Role.Button,
-                        interactionSource = press,
-                        indication = null,
-                    ) { chooser = true }
-                    .minimumInteractiveComponentSize()
-                    .clip(Radii.Pill)
-                    .indication(press, ripple(color = MaterialTheme.colorScheme.primary))
-                    .padding(horizontal = 4.dp, vertical = 2.dp),
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = reciterShortName(offer.reciter, offer.reciterName),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false),
+        Box(Modifier.matchParentSize()) {
+            PillMenuAnchor { anchor ->
+                PillPopup(
+                    open = chooser,
+                    anchor = anchor,
+                    onDismiss = { chooser = false },
+                ) {
+                    ReciterChoices(
+                        options = offer.options,
+                        selected = offer.reciter,
+                        onChoose = {
+                            chooser = false
+                            onReciter(it)
+                        },
                     )
-                    // The name is the door to the other reciters; the
-                    // mark says so, so the choice is found without a
-                    // guess, and it goes away once the download starts.
-                    if (progress == null) {
-                        IconGlyph(
-                            icon = Icon.Chevron,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .padding(start = 4.dp)
-                                .size(GlyphSize.ChevronInline),
-                        )
-                    }
-                }
-                Text(
-                    text = when {
-                        offer.failed -> stringResource(R.string.playback_download_failed)
-                        progress != null -> stringResource(
-                            R.string.playback_downloading,
-                            (progress * 100).toInt(),
-                        )
-                        else -> title
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            // The state's answers hold the capsule's trailing rail, the close
-            // outermost, and the words give way to them with an ellipsis; the
-            // 12 dp lead keeps the two apart when the name is long. The
-            // answers stand `Space.Row` apart between their own shapes, the
-            // app's gap for two standalone answers: the Download's pill fills
-            // its 48 dp target, so without it the close's highlight met the
-            // pill's edge (owner report, this session). The offer used to hug
-            // its leading corner and leave the far end of the capsule empty
-            // (owner report, this session).
-            Row(
-                modifier = Modifier.padding(start = WordsGap),
-                horizontalArrangement = Arrangement.spacedBy(Space.Row),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                when {
-                    progress != null -> TransportButton(
-                        Transport.Close,
-                        stringResource(R.string.playback_cancel_download),
-                        onCancel,
-                    )
-                    offer.failed -> TextButton(
-                        label = stringResource(R.string.playback_retry),
-                        onClick = onConfirm,
-                    )
-                    else -> {
-                        TextButton(
-                            label = stringResource(R.string.playback_download),
-                            onClick = onConfirm,
-                        )
-                        // An offer the reader does not want is not a trap:
-                        // the same close that cancels a download takes the
-                        // offer away, so nothing sits over the reading
-                        // unasked.
-                        TransportButton(
-                            Transport.Close,
-                            stringResource(R.string.playback_close_offer),
-                            onCancel,
-                        )
-                    }
                 }
             }
-        }
-        if (progress != null) {
-            // The same drawn line the playing pill wears, so a download is
-            // one shape whatever pill carries it (owner decision, this
-            // session).
-            DownloadLine(
-                progress = progress,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 8.dp)
-                    .height(2.dp),
-            )
         }
     }
 }

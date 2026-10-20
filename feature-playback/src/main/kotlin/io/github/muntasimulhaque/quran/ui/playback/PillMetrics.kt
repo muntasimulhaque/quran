@@ -19,35 +19,34 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  */
 internal val BarGutter = 16.dp
 
-/** The row's own padding: 16 at the start, 6 at the end. */
-internal val RowInsets = 22.dp
-
 /**
- * The close's own inset from the capsule's trailing end.
+ * The air the capsule keeps around a press shape: between two controls, and
+ * between a control and the capsule's own edge.
  *
- * It used to be `RowInsets - BarGutter` (6 dp), which set the 48 dp target on
- * the capsule's curve and left the words' own highlight one pixel inside it
- * on the longest reference the pill can print (owner report, this session).
- * One `Space.Row` (12 dp) lifts the mark off the curve and gives the words
- * their own rail.
+ * The pill carries no close any more, so its shape is free to shrink to its
+ * words, and this is the one number that shape is measured against (owner
+ * decision, this session). A control's target and the shape its press draws
+ * are the same 48 dp here, so the air is what keeps one flash from touching
+ * the next and the end of a row from touching the capsule: at nothing, the
+ * three transport circles met point to point, the words' two doors' flashes
+ * met the capsule's own top edge, and the words' flash and the transport's
+ * met on one line. It is the app's `Space.Line`, the gap a cluster of
+ * same-kind small controls keeps, because that is what the transport row is.
  */
-internal val CloseInset = Space.Row
+internal val PillAir = Space.Line
 
-/** The pill's own vertical inset over the row. */
-internal val RowVertical = 6.dp
-
-/** The gap between the words and the controls, in both shapes. */
+/** The gap between the pill's two word doors, which are a cluster of two. */
 internal val WordsGap = 12.dp
 
 /**
  * The measure the pill's words keep, or the words take a line of their own.
  *
  * 300 dp is the whole line the pill can print at its longest: the longest
- * surah name and its ayah, and the slowest pace. Below that the words share
- * the row with four 48 dp controls and get about ninety dp, which is
- * fourteen characters at the size the status line is set: a surah name and
- * its ayah break across lines, the pace is cut with an ellipsis, and the
- * reader is left with a name they cannot read (owner report).
+ * surah name and its ayah, and the slowest pace. Below that the words get
+ * the room left over beside three 48 dp controls, which is fourteen
+ * characters at the size the status line is set: a surah name and its ayah
+ * break across lines, the pace is cut with an ellipsis, and the reader is
+ * left with a name they cannot read (owner report).
  *
  * So the pill is two rows wherever the words cannot keep that measure, and
  * one row where they can: a tablet, a landscape phone, and nowhere else. A
@@ -63,21 +62,6 @@ internal val WordsMeasure = 300.dp
  */
 internal val TransportSize = 48.dp
 
-/**
- * The room the capsule's close takes, measured from either end of the pill:
- * the close's 48 dp target, its [CloseInset], and one line of ground.
- *
- * The phone pill's words keep this clear on both sides of their line, so the
- * line stands on the capsule's own axis, the axis the transport under it
- * stands on, and both of its 48 dp doors stay clear of the close (owner
- * report, this session). Before this the rail was kept only on the trailing
- * side, which centred the line in the room left over beside the close and put
- * it 24 dp left of the axis. The ground on the trailing side is what the
- * close's own highlight needs; the leading side is the same measure, so the
- * two ends of the line are one shape rather than two.
- */
-internal val CloseRail = CloseInset + TransportSize + Space.Line
-
 /** The status line's own chevron: the 14 dp mark and 4 dp before it. */
 internal val ChevronRoom = GlyphSize.ChevronInline + 4.dp
 
@@ -88,6 +72,16 @@ internal val ChevronRoom = GlyphSize.ChevronInline + 4.dp
  * decision, the theme and consistency session).
  */
 internal val ReciterChevronRoom = GlyphSize.ChevronInline + 4.dp
+
+/**
+ * The room a download's line and the foot under it take beneath the pill's
+ * own row: the 2 dp line and the 8 dp of ground below it.
+ *
+ * It is added to the capsule rather than drawn over the row, so the line
+ * never shares a pixel with a control's press shape (owner decision, this
+ * session).
+ */
+internal val ProgressRoom = 10.dp
 
 /**
  * The room the pill's popup keeps from its own edge at the top and the foot.
@@ -111,7 +105,10 @@ internal val PillMenuGutter = 10.dp
  *
  * It is the reciter menu's old maximum and the listening menu's own need: the
  * five paces at their 48 dp target with the padding around them, which is the
- * measure the listener has to get, and the widest the two ever were.
+ * measure the listener has to get, and the widest the two ever were. The
+ * capsule itself may stand narrower than this, since it hugs its words: the
+ * anchor keeps its place on the capsule's middle and the menu hangs from
+ * there, wider than the control it answers to.
  */
 internal val PillMenuMeasure = 288.dp
 
@@ -142,14 +139,22 @@ internal val AnchorLine = 1.dp
 internal val PopupGap = 10.dp
 
 /**
+ * A row of [controls] at their own target, the app's air between them and
+ * none at the ends: what the state's own answers take before the capsule's
+ * own [PillAir] is counted.
+ */
+internal fun transportRun(controls: Int): Dp =
+    if (controls <= 0) 0.dp else TransportSize * controls + PillAir * (controls - 1)
+
+/**
  * What the pill's own row spends before the words get a pixel of it: the
- * row's padding, the gap, the controls, and the two chevrons the words
- * wear. Four controls, the playing state, is 560 dp, which is a tablet and
- * a landscape phone and no phone in portrait.
+ * capsule's air at both ends, the gap, the controls, and the two chevrons the
+ * words wear. Three controls, the playing state, is 464 dp, which is a tablet
+ * and a landscape phone and no phone in portrait.
  */
 internal fun oneRowFloor(controls: Int): Dp =
-    RowInsets + WordsGap + (TransportSize * controls) + ChevronRoom +
-        ReciterChevronRoom + WordsMeasure
+    PillAir + WordsGap + transportRun(controls) + ChevronRoom +
+        ReciterChevronRoom + WordsMeasure + PillAir
 
 /**
  * The room a popup the pill opens may take, in pixels: the ground between

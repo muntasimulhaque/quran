@@ -53,10 +53,10 @@ internal fun BottomStack(
     playback: PlaybackUiState,
     /**
      * Whether the playback pill is on the page at all. A pill that is not
-     * playing can be put away by a tap on the page, and that tap is a stop:
-     * the paused ayah's mark comes from the playback state, so the state is
-     * cleared with the capsule rather than only hidden (owner report, this
-     * session).
+     * playing sound can be put away by a tap on the page or by Back, and that
+     * is a stop: the paused ayah's mark comes from the playback state, so the
+     * state is cleared with the capsule rather than only hidden. The rule
+     * itself is [raisedAnswer], beside the screen.
      */
     showPlayback: Boolean,
     saved: List<SavedAyah>,
@@ -177,7 +177,6 @@ internal fun BottomStack(
                     stringResource(R.string.playback_offer, pending.surahName, formatBytes(pending.bytes))
                 }.orEmpty(),
                 onOfferConfirm = { viewModel.confirmListen() },
-                onOfferCancel = { viewModel.cancelListen() },
                 onOfferReciter = { viewModel.chooseListenReciter(it) },
                 reciterName = reciterName,
                 reciterId = reciterId,
@@ -202,21 +201,14 @@ internal fun BottomStack(
                     // one Retry; the view model knows which the tap means.
                     if (playback.error) viewModel.retryPlayback() else viewModel.confirmDownload()
                 },
-                onClose = {
-                    // A line that says Cancel download answers as one, in
-                    // every state that can draw it (owner report, this
-                    // session: a stale progress with no pending surah sent
-                    // this close to the transport and stopped the ayah the
-                    // reader was hearing).
-                    if (playback.pendingDownloadSurah != null ||
-                        playback.downloadProgress != null ||
-                        playback.downloadFailed
-                    ) {
-                        viewModel.cancelDownload()
-                    } else {
-                        viewModel.stopPlayback()
-                    }
-                },
+                // The recitation's own stop has no shape on the glass: it is
+                // the action TalkBack offers on Play or pause, and the page
+                // and Back put a non-playing pill away (owner decision, this
+                // session). The transfer keeps the app's one X, because a
+                // stray tap must never throw a package away.
+                onStop = { viewModel.stopPlayback() },
+                onCancelDownload = { viewModel.cancelDownload() },
+                onOfferCancelDownload = { viewModel.cancelListen() },
                 speed = viewModel.settings.playbackSpeed,
                 end = viewModel.settings.endOfAudio,
                 onSpeed = { viewModel.setPlaybackSpeed(it) },

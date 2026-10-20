@@ -388,6 +388,33 @@ implement it and update this list.
 - One reading with no mode name. The reader's doors are Browse, Search, and
   Settings; there is no bottom bar and no mode switch (owner decision, this
   session: the printed page is removed because it could not match the print).
+- **The pill wears no close, and an X in this app means one thing: abort what
+  is in flight.** The playing pill, a failed player, a failed download, an
+  unavailable answer, and the download offer draw no X; the transfer's own
+  cancel keeps the only one, beside its progress line, because a stray tap
+  must never throw a package away (owner decision, this session). A page tap
+  and the phone's own Back put each of the others away with its state, and the
+  rule is `raisedAnswer`, one pure function beside the screen: it never
+  silences a recitation that is playing, and it never aborts a package on its
+  way. The failed download had no dismissal at all before, and the failed
+  player's close answered nothing, because a player that never connected had
+  no transport to stop. The recitation's
+  stop has no shape any more and is not lost with it: it is the action
+  TalkBack offers on Play or pause, under the same word the close was
+  announced with, while a sighted reader pauses and taps the page. The
+  capsule hugs its words, since the close's rail was what made it the page's
+  width: about 230 dp on a 360 dp phone instead of 328, and the place is no
+  longer cut with an ellipsis. Only the playing voice takes a second row on a
+  phone, because the transport is the one thing that needs one; an offer, a
+  failure, and a transfer's abort each share the words' line, so the
+  transfer's capsule is one row tall plus the room its line keeps. One air,
+  `Space.Line` (8 dp), stands between
+  every press shape and its neighbour and between any shape and the capsule's
+  edge, which makes the phone's two rows 120 dp tall where they were 102: the
+  shape got smaller in width and paid for its air in height (owner decision,
+  this session). The width is measured by the layout and never reserved, and
+  the download's line keeps its own room under the row so a percent never
+  resizes the capsule; the size snaps and never animates.
 - The reading answers a tap with the page and a long press with the ayah's own
   actions (Play, Tafsir, Save, Note, More). A tap brings or puts away the
   chrome and dismisses a raised pill; the one-time note that teaches the long

@@ -18,6 +18,7 @@ import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.feature.reading.R as ReadingR
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertFalse
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExternalResource
@@ -26,14 +27,17 @@ import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 
 /**
- * A page tap puts the download offer away.
+ * An offer with no answer is put away by the page and by Back.
  *
  * The app's raised controls answer a tap on the page: the chrome goes, the
- * ayah pill goes, and a paused transport pill stops. The download offer was
- * the one exception, so a reader who changed their mind had to find its own
- * close. It now answers the page tap the same way, while a package already
- * on its way keeps its own close as the deliberate cancel (owner decision,
- * this session).
+ * ayah pill goes, and a paused transport pill stops. The download offer's own
+ * X answered "not now" with exactly that, so it has been taken off the bar
+ * (owner decision, this session), and Back answers the same "not now": a
+ * question that is raised and not wanted must never be a trap, and a tap on
+ * the page is not a path a screen reader can take.
+ *
+ * The transfer's own cancel is the app's only remaining X, because a stray
+ * tap must never throw away a package the reader asked for.
  */
 @RunWith(AndroidJUnit4::class)
 class ListenOfferDismissTest {
@@ -83,8 +87,8 @@ class ListenOfferDismissTest {
     @get:Rule
     val rule: TestRule = RuleChain.outerRule(library).around(compose)
 
-    @Test
-    fun aPageTapPutsTheDownloadOfferAway() {
+    /** The offer, raised by the reader's own Play on the first ayah. */
+    private fun raiseTheOffer() {
         val readingPage = compose.activity.getString(ReadingR.string.reading_page_description)
         compose.waitUntil(timeoutMillis = 90_000) {
             compose.onAllNodesWithContentDescription(readingPage).fetchSemanticsNodes().isNotEmpty()
@@ -101,12 +105,36 @@ class ListenOfferDismissTest {
             compose.onAllNodesWithTag("listen-offer-bar", useUnmergedTree = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
-        // The tap on the page is the dismissal every raised control answers
-        // to, and the offer must not be the exception anymore.
-        compose.onAllNodesWithContentDescription(readingPage).onFirst().tapThePaper()
+        // The bar draws no close: its answer is the page, the phone's own
+        // Back, or the Download (owner decision, this session).
+        compose.onNodeWithContentDescription("Not now").assertDoesNotExist()
+    }
+
+    private fun waitForTheOfferToGo() {
         compose.waitUntil(timeoutMillis = 30_000) {
             compose.onAllNodesWithTag("listen-offer-bar", useUnmergedTree = true)
                 .fetchSemanticsNodes().isEmpty()
         }
+    }
+
+    @Test
+    fun aPageTapPutsTheDownloadOfferAway() {
+        raiseTheOffer()
+        val readingPage = compose.activity.getString(ReadingR.string.reading_page_description)
+        // The tap on the page is the dismissal every raised control answers
+        // to, and the offer must not be the exception anymore.
+        compose.onAllNodesWithContentDescription(readingPage).onFirst().tapThePaper()
+        waitForTheOfferToGo()
+    }
+
+    @Test
+    fun backAnswersTheOfferWithNotNow() {
+        raiseTheOffer()
+        compose.runOnUiThread { compose.activity.onBackPressedDispatcher.onBackPressed() }
+        waitForTheOfferToGo()
+        assertFalse(
+            "Back answers the offer; it does not take the reader out of the app",
+            compose.activity.isFinishing,
+        )
     }
 }

@@ -497,9 +497,14 @@ class PlaybackController(
         // surfacing later as a surah that starts playing on its own.
         downloadJob?.cancel()
         downloadJob = null
-        val player = controller ?: return
-        player.stop()
-        player.clearMediaItems()
+        // A player that never connected is a pill with no transport to stop,
+        // and the pill still has to go: the state is cleared whatever the
+        // player is, because a failed connect is otherwise a line the reader
+        // cannot put away at all (owner report, this session: the close on a
+        // failed player was a mark that answered nothing).
+        val player = controller
+        player?.stop()
+        player?.clearMediaItems()
         stoppedAtAyahEnd = false
         _state.value = PlaybackUiState(connected = true)
         // The reader put the recitation away themselves, so where it was

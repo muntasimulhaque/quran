@@ -120,29 +120,44 @@ fun ReaderScreen(
     // wears the same mark while the sheet is up.
     val washedAyah = selected?.number ?: cardNote
 
-    // The transport pill, paused or parked at an ayah's end. A page tap is
-    // the dismissal the app's raised controls already answer to, and for this
-    // pill it is a real stop: the paused ayah's own mark comes from the
-    // playback state, so hiding the capsule alone would strand the wash over
-    // the reading with no control left to clear it (owner report). The page
-    // tap therefore clears the state exactly as the close button does. While
-    // sound is coming out, a page tap never silences the only transport.
-    val pausedTransport = playback.ayahNumber != null &&
-        !playback.isPlaying &&
-        playback.pendingDownloadSurah == null &&
-        playback.downloadProgress == null &&
-        !playback.error &&
-        !playback.downloadFailed &&
-        !playback.unavailable
+    // What a tap on the page, and the phone's own Back, answer at the foot of
+    // the reading. The pill wears no close any more, so this is the one way a
+    // raised control is put away (owner decision, this session): a paused or
+    // failed recitation goes with its state, a package in flight is left to
+    // its own X, and a download offer is answered "not now". The rule lives
+    // in [raisedAnswer] so it can be pinned without a screen.
+    val raised = raisedAnswer(playback, viewModel.listenOffer)
+    // The answer is read at the moment of the tap and never captured: the
+    // reading's paper keeps the first tap handler it was built with, so a
+    // value captured here would be the foot's answer from the first
+    // composition and the tap would answer nothing (found by the offer's own
+    // page-tap leg).
+    val putAwayRaised: () -> Unit = {
+        when (raisedAnswer(viewModel.playbackState.value, viewModel.listenOffer)) {
+            RaisedAnswer.Nothing -> Unit
+            RaisedAnswer.StopRecitation -> viewModel.stopPlayback()
+            RaisedAnswer.CancelDownload -> viewModel.cancelDownload()
+            RaisedAnswer.CancelOffer -> viewModel.cancelListen()
+        }
+    }
 
-    // The phone's back button dismisses the ayah pill first, and only closes
-    // the app when nothing is raised. A reader who tapped an ayah means the
-    // pill, and back is the gesture they already use to put a thing away.
-    // The sheets (the ayah card, the note, Browse, Search, Settings) are their
-    // own windows and take back through their own handlers; this one is for
-    // the pill, which is not a window.
+    // The phone's back button dismisses the ayah pill first, then whatever the
+    // foot of the page has raised, and only closes the app when nothing is
+    // raised. A reader who tapped an ayah means the pill, and back is the
+    // gesture they already use to put a thing away. The sheets (the ayah card,
+    // the note, Browse, Search, Settings) are their own windows and take back
+    // through their own handlers; this one is for the reading's own foot.
+    //
+    // Back answers the page's own rule and nothing more: it never silences a
+    // recitation that is playing, and it never aborts a package on its way.
     androidx.activity.compose.BackHandler(enabled = selected != null) {
         selected = null
+        touch++
+    }
+    androidx.activity.compose.BackHandler(
+        enabled = selected == null && raised != RaisedAnswer.Nothing,
+    ) {
+        putAwayRaised()
         touch++
     }
 
@@ -247,20 +262,11 @@ fun ReaderScreen(
                         chrome = !chrome
                         selected = null
                         // A tap on the page is how a raised control is put
-                        // away. It may put away a pill that is not playing,
-                        // and putting that one away is a stop: the paused
-                        // ayah carries the playback state's own mark, so the
-                        // wash would otherwise stay over the reading with no
-                        // pill left to clear it. It must never silence the
-                        // transport that is playing.
-                        if (pausedTransport) viewModel.stopPlayback()
-                        // The download offer is a raised control too, so a
-                        // page tap puts it away exactly as it puts away the
-                        // paused pill. A package already on its way is not
-                        // put away by a stray tap: its own close is the
-                        // deliberate cancel (owner decision, this session).
-                        val offer = viewModel.listenOffer
-                        if (offer != null && offer.progress == null) viewModel.cancelListen()
+                        // away: the paused recitation, a failure, the offer.
+                        // It never silences a playing recitation, and never
+                        // aborts a package on its way (owner decision, this
+                        // session).
+                        putAwayRaised()
                         touch++
                     },
                     onScrolled = {
