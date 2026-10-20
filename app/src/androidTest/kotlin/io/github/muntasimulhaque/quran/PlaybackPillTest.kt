@@ -432,7 +432,7 @@ class PlaybackPillTest {
         )
         assertEquals(
             "the words keep the capsule's air at the leading end",
-            Space.Line.value,
+            Space.Block.value + Space.Tight.value,
             (words.left - bar.left).value,
             1.5f,
         )
@@ -484,10 +484,15 @@ class PlaybackPillTest {
             (listening.left - reciter.right).value,
             1f,
         )
+        // The words' visible flash is 32 dp inside its 48 dp target: 4 dp of
+        // inert crown and 8 dp of the target's own rim stand above it, so the
+        // flash keeps the capsule's air while the two targets meet.
+        val flash = compose.onAllNodesWithTag("words-flash", useUnmergedTree = true).onFirst()
+            .getUnclippedBoundsInRoot()
         assertEquals(
-            "the words' flash keeps the capsule's air above it",
-            Space.Line.value,
-            (reciter.top - bar.top).value,
+            "the words' flash keeps the crown and the target's rim above it",
+            Space.Tight.value + 8f,
+            (flash.top - bar.top).value,
             1f,
         )
     }
@@ -560,6 +565,72 @@ class PlaybackPillTest {
             (bar.left + bar.right).value / 2f,
             1f,
         )
+        // The words' end keeps the shoulder's air: the capsule's end is a
+        // sphere, and at the words' own line, a few dp above its middle, the
+        // app's 8 dp read as a name touching the border (owner decision, this
+        // session).
+        val reciter = compose.onNodeWithTag("playback-reciter").getUnclippedBoundsInRoot()
+        val listening = compose.onNodeWithTag("playback-listening").getUnclippedBoundsInRoot()
+        assertEquals(
+            "the words' end keeps the shoulder's air from the capsule",
+            Space.Block.value + Space.Tight.value,
+            (reciter.left - bar.left).value,
+            1f,
+        )
+        assertEquals(
+            "the other end keeps it too, because the line is centred",
+            Space.Block.value + Space.Tight.value,
+            (bar.right - listening.right).value,
+            1f,
+        )
+    }
+
+    /**
+     * The phone pill's tight shape (owner decision, this session): the words'
+     * press pill is 32 dp tall inside its 48 dp target, so the two rows'
+     * targets may stand against one another while the seam the reader sees
+     * keeps the app's air. The capsule stands 108 dp where it stood 120, and
+     * the visible airs above the flash, between it and the transport, and
+     * under the transport are 12, 8, and 8.
+     */
+    @Test
+    fun thePhonePillWearsTheTightCapsule() {
+        showPill(pillWidth = Modifier.width(393.dp))
+        val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
+        val flashes = compose.onAllNodesWithTag("words-flash", useUnmergedTree = true)
+        val flash = flashes.onFirst().getUnclippedBoundsInRoot()
+        val play = compose.onNodeWithContentDescription("Play or pause").getUnclippedBoundsInRoot()
+        assertEquals(
+            "the phone's two rows stand 108 dp tall",
+            108f,
+            (bar.bottom - bar.top).value,
+            1f,
+        )
+        flashes.assertCountEquals(2)
+        assertEquals(
+            "both doors wear the words' 32 dp flash",
+            32f,
+            (flash.bottom - flash.top).value,
+            1f,
+        )
+        assertEquals(
+            "the flash keeps the crown and the target's rim above it",
+            Space.Tight.value + 8f,
+            (flash.top - bar.top).value,
+            1f,
+        )
+        assertEquals(
+            "the flash and the transport's circles stand the app's air apart",
+            Space.Line.value,
+            (play.top - flash.bottom).value,
+            1f,
+        )
+        assertEquals(
+            "the transport's circles keep the app's air above the foot",
+            Space.Line.value,
+            (bar.bottom - play.bottom).value,
+            1f,
+        )
     }
 
     /**
@@ -572,15 +643,16 @@ class PlaybackPillTest {
     fun theTouchedShapesKeepTheCapsulesAir() {
         showPill(pillWidth = Modifier.width(393.dp))
         val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
-        val reciter = compose.onNodeWithTag("playback-reciter").getUnclippedBoundsInRoot()
+        val flash = compose.onAllNodesWithTag("words-flash", useUnmergedTree = true).onFirst()
+            .getUnclippedBoundsInRoot()
         val play = compose.onNodeWithContentDescription("Play or pause").getUnclippedBoundsInRoot()
         val first = compose.onNodeWithContentDescription("Previous ayah").getUnclippedBoundsInRoot()
         val next = compose.onNodeWithContentDescription("Next ayah").getUnclippedBoundsInRoot()
         assertEquals(
             "the two rows' flashes stand the app's air apart",
             Space.Line.value,
-            (play.top - reciter.bottom).value,
-            2f,
+            (play.top - flash.bottom).value,
+            1f,
         )
         assertEquals(
             "the transport's flash keeps the capsule's air below it",
@@ -632,6 +704,12 @@ class PlaybackPillTest {
             cancel.left.value >= words.right.value - 0.5f,
         )
         assertEquals(
+            "the transfer's words keep the shoulder's air at the capsule's end",
+            Space.Block.value + Space.Tight.value,
+            (words.left - bar.left).value,
+            1f,
+        )
+        assertEquals(
             "the transfer's abort keeps the capsule's air at the trailing end",
             Space.Line.value,
             (bar.right - cancel.right).value,
@@ -648,10 +726,40 @@ class PlaybackPillTest {
     }
 
     /**
+     * The offer's words keep the shoulder's air at the capsule's end, where a
+     * capsule's sphere has curved in a few dp by the name's line (owner
+     * decision, this session). Without it the Bangla name, whose matra reaches
+     * the top of its line, read as cut: the ink sat 5 dp inside the border.
+     */
+    @Test
+    fun theOfferLeadsWithTheWordsAir() {
+        showPill(
+            offer = ListenOffer(
+                reciter = "husary",
+                reciterName = "Husary",
+                surah = 19,
+                surahName = "Maryam",
+                ayah = 1,
+                bytes = 22L * 1024 * 1024,
+                options = listOf(ListenOption("husary", "Husary", 0L)),
+            ),
+        )
+        val bar = compose.onNodeWithTag("listen-offer-bar").getUnclippedBoundsInRoot()
+        val words = compose.onNodeWithTag("offer-words").getUnclippedBoundsInRoot()
+        assertEquals(
+            "the offer's words keep the shoulder's air at the capsule's end",
+            Space.Block.value + Space.Tight.value,
+            (words.left - bar.left).value,
+            1f,
+        )
+    }
+
+    /**
      * The offer carries one answer and no close: the name and the size lead,
-     * the Download follows them, and the capsule keeps the app's air at both
-     * ends. Its old X answered "not now" exactly as a tap on the page does,
-     * so it had nothing of its own to say (owner decision, this session).
+     * the Download follows them, and the capsule keeps the words' own air at
+     * the leading end and the app's air at the answer's. Its old X answered
+     * "not now" exactly as a tap on the page does, so it had nothing of its
+     * own to say (owner decision, this session).
      */
     @Test
     fun theOfferCarriesOneAnswerAndNoClose() {

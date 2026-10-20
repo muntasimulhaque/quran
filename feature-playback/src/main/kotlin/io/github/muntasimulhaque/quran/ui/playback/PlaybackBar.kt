@@ -43,12 +43,13 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * take the page's whole width, because a close's rail ran along both ends of
  * its words' line; with the close gone, that rail was empty ground inside a
  * shape that had no reason to be that wide. So the capsule is the wider of
- * its words' line and its transport, plus [PillAir] at the ends, and it
- * never takes a pixel the reader is not reading. On a 360 dp phone that is
- * about 230 dp instead of 328, which is also why the place is no longer cut
- * with an ellipsis: the words' line has the capsule's whole measure to
- * itself, and the capsule grows with the words up to the page's own edge
- * when the reader's font scale or the language asks for more room.
+ * its words' line and its transport, plus [PillEndAir] at the words' end and
+ * [PillAir] at the transport's, and it never takes a pixel the reader is not
+ * reading. On a 360 dp phone that is about 252 dp instead of 328, which is
+ * also why the place is no longer cut with an ellipsis: the words' line has
+ * the capsule's whole measure to itself, and the capsule grows with the words
+ * up to the page's own edge when the reader's font scale or the language asks
+ * for more room.
  *
  * The shape is measured by the layout and never by a number reserved for it:
  * a surah name, an ayah, and a pace are what the line is, and a capsule
@@ -68,9 +69,14 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * X under its words, where the offer bar beside it held the same shape in
  * 64).
  *
- * One air, [PillAir], is kept between every press shape and its neighbour and
- * between any shape and the capsule's edge, so no flash touches another or
- * the shape it stands in (owner decision, this session).
+ * One air, [PillAir], is kept between the shapes the reader sees, and the
+ * phone's two rows stand 108 dp tall (owner decision, this session): the
+ * words' press pill is [WordsFlash] inside its 48 dp target, so the seam
+ * between the flash and the transport is that target's own lower rim while
+ * the two targets stand against one another. The words' end keeps
+ * [PillEndAir], because a capsule's end is a sphere and the words' line sits
+ * in its shoulder, where [PillAir] read as a name touching the border, and
+ * [WordsCrown] keeps the capsule's crown from being a control.
  *
  * The pill is also where its two popups hang. A menu takes the shape of the
  * anchor it is given, and an anchor on the word the reader touched stood the
@@ -248,7 +254,18 @@ fun PlaybackBar(
             ) {
                 if (oneRow) {
                     Row(
-                        modifier = Modifier.padding(PillAir),
+                        // The words lead with [PillEndAir]: the capsule's end
+                        // is a sphere, and at the words' line, a few dp above
+                        // the middle, [PillAir] measured from the widest point
+                        // reads as nothing. The transport keeps [PillAir] at
+                        // its end, where it stands at the capsule's widest
+                        // height and wears its own circles.
+                        modifier = Modifier.padding(
+                            start = PillEndAir,
+                            end = PillAir,
+                            top = PillAir,
+                            bottom = PillAir,
+                        ),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         // The words take their own measure and the transport
@@ -265,20 +282,25 @@ fun PlaybackBar(
                     }
                 } else {
                     // The words keep the whole measure of the capsule and the
-                    // controls stand under them, both centred. The air above
-                    // the line and between it and the transport is what
-                    // keeps the two rows' press shapes apart (owner decision,
-                    // this session: they used to meet on one line, and the
-                    // words' flash met the capsule's own top edge).
+                    // controls stand under them, both centred. The words' flash
+                    // is [WordsFlash] tall inside its 48 dp target, so the two
+                    // targets stand against one another while the seam the
+                    // reader sees still keeps [PillAir]: the air that used to
+                    // sit between two 48 dp nodes now lives in the words'
+                    // target's own rim, and the phone's rows stand 108 dp where
+                    // they were 120 (owner decision, this session). The words'
+                    // end keeps [PillEndAir] for the same shoulder the one-row
+                    // pill answers to, and [WordsCrown] leaves the capsule's
+                    // top edge inert.
                     PlaybackWordsLine(
                         reciterName = reciterName,
                         onOpenReciters = openReciters,
                         status = status,
                         onOpenListening = openListening,
                         modifier = Modifier.padding(
-                            start = PillAir,
-                            end = PillAir,
-                            top = PillAir,
+                            start = PillEndAir,
+                            end = PillEndAir,
+                            top = WordsCrown,
                             bottom = if (controls.isEmpty()) PillAir else 0.dp,
                         ),
                     )
@@ -288,7 +310,11 @@ fun PlaybackBar(
                     if (controls.isNotEmpty()) {
                         PillControls(
                             controls = controls,
-                            modifier = Modifier.padding(PillAir),
+                            modifier = Modifier.padding(
+                                start = PillAir,
+                                end = PillAir,
+                                bottom = PillAir,
+                            ),
                         )
                     }
                 }

@@ -58,10 +58,14 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  *
  * The bar hugs its words for the same reason the pill does: the download is
  * a name, a size, and one answer, and a full-width shape spent the reader's
- * page on ground nothing stood on. Its row keeps [PillAir] at the ends, so
- * the Download's own press shape never meets the capsule's edge, and the
- * progress line stands in the room the bar keeps under its row, so it never
- * crosses a control's shape.
+ * page on ground nothing stood on. Its row keeps [PillEndAir] at the words'
+ * end, because a capsule's end is a sphere and at the name's line an [PillAir]
+ * measured from its widest point reads as five dp: in Bangla the name looked
+ * cut, where its matra reaches the top of its line (owner report, this
+ * session). The answer's end keeps [PillAir], so the Download's own press
+ * shape never meets the capsule's edge and the transfer's X keeps the air it
+ * has always had, while the progress line stands in the room the bar keeps
+ * under its row and never crosses a control's shape.
  */
 @Composable
 internal fun ListenOfferBar(
@@ -91,7 +95,12 @@ internal fun ListenOfferBar(
             modifier = Modifier.padding(bottom = if (progress != null) ProgressRoom else 0.dp),
         ) {
             Row(
-                modifier = Modifier.padding(PillAir),
+                modifier = Modifier.padding(
+                    start = PillEndAir,
+                    end = PillAir,
+                    top = PillAir,
+                    bottom = PillAir,
+                ),
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -111,6 +120,7 @@ internal fun ListenOfferBar(
                             indication = null,
                         ) { chooser = true }
                         .minimumInteractiveComponentSize()
+                        .testTag("offer-words")
                         .clip(Radii.Pill)
                         .indication(press, ripple(color = MaterialTheme.colorScheme.primary))
                         .padding(horizontal = 4.dp, vertical = 2.dp),

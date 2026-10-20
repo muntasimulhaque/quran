@@ -403,16 +403,22 @@ implement it and update this list.
   TalkBack offers on Play or pause, under the same word the close was
   announced with, while a sighted reader pauses and taps the page. The
   capsule hugs its words, since the close's rail was what made it the page's
-  width: about 230 dp on a 360 dp phone instead of 328, and the place is no
+  width: about 252 dp on a 360 dp phone instead of 328, and the place is no
   longer cut with an ellipsis. Only the playing voice takes a second row on a
   phone, because the transport is the one thing that needs one; an offer, a
   failure, and a transfer's abort each share the words' line, so the
   transfer's capsule is one row tall plus the room its line keeps. One air,
-  `Space.Line` (8 dp), stands between
-  every press shape and its neighbour and between any shape and the capsule's
-  edge, which makes the phone's two rows 120 dp tall where they were 102: the
-  shape got smaller in width and paid for its air in height (owner decision,
-  this session). The width is measured by the layout and never reserved, and
+  `Space.Line` (8 dp), stands between the press shapes the reader sees and
+  between a shape and the capsule's edge, and the words' own press pill is 32
+  dp inside its 48 dp target, so the two rows' targets may stand against one
+  another: the phone's two rows are 108 dp where they were 120. The words'
+  end keeps `Space.Block + Space.Tight` (20 dp) from the capsule on every
+  pill, because a capsule's end is a sphere and the words' line sits in its
+  shoulder, where an 8 dp air measured from the widest point read as a name
+  touching the border (owner decision, this session: the Bangla matra reaches
+  the top of its line, so the offer's name looked cut). The transport, the
+  offer's Download, and the transfer's X keep 8. The width is measured by the
+  layout and never reserved, and
   the download's line keeps its own room under the row so a percent never
   resizes the capsule; the size snaps and never animates.
 - The reading answers a tap with the page and a long press with the ayah's own

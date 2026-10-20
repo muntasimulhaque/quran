@@ -5,6 +5,8 @@ import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -16,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -82,6 +85,47 @@ internal fun PlaybackWordsLine(
 }
 
 /**
+ * The words' own press shape: the pill a tap on a door draws, [WordsFlash]
+ * tall, worn inside the door's 48 dp target the way `TextButton` wears its
+ * pill inside its slab.
+ *
+ * The target stays 48 dp, so a finger still lands on the whole word and a
+ * screen reader still reports the whole target; the flash is only what the
+ * eye sees. That is what lets the phone's two rows stand 108 dp: the words'
+ * target's lower rim is the [PillAir] the transport's circles keep, so the two
+ * targets may stand against one another while the flashes never meet.
+ *
+ * [rippleColor] is the ink the press washes with, the accent for the reciter's
+ * name and the quiet voice for the place. It is null where there is no door to
+ * press, and then no shape is drawn at all: the words are bare type, which is
+ * what a notice is.
+ */
+@Composable
+private fun WordFlash(
+    rippleColor: Color?,
+    press: MutableInteractionSource,
+    content: @Composable RowScope.() -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .height(WordsFlash)
+            .clip(Radii.Pill)
+            .then(
+                if (rippleColor == null) {
+                    Modifier
+                } else {
+                    Modifier
+                        .indication(press, ripple(color = rippleColor, bounded = false))
+                        .testTag("words-flash")
+                },
+            )
+            .padding(horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        content = content,
+    )
+}
+
+/**
  * The reciter's name, and the door it is to: the other reciters, with what
  * each of them would still need for the surah the reader is hearing, and a
  * check on the one in use.
@@ -95,12 +139,15 @@ internal fun PlaybackWordsLine(
  *
  * The door carries the app's 48 dp target around its own line, so the thin
  * strip of type and its chevron are not the whole of what a finger has to
- * hit, while the pill the eye sees is the line plus the app's own chip inset
- * and never the target (owner decision, this session: with the clip outside
- * the target, the press highlight read as a 48 dp capsule over a 16 dp word).
+ * hit, while the shape the eye sees, and the shape the press draws, is the
+ * words' own flash: [WordsFlash] tall inside that target, the way `TextButton`
+ * draws its pill inside its slab (owner decision, this session). The target's
+ * rim is what carries the seam in the phone's two rows, which is why the
+ * capsule can stand 108 dp tall instead of 120.
  *
  * Null where the choice cannot be made now, which is while a package is on
- * its way: the chevron is gone rather than a door that does nothing.
+ * its way: the chevron is gone rather than a door that does nothing, and no
+ * flash is drawn because there is nothing to press.
  */
 @Composable
 private fun ReciterDoor(
@@ -124,38 +171,30 @@ private fun ReciterDoor(
                         .minimumInteractiveComponentSize()
                 },
             )
-            .clip(Radii.Pill)
-            .then(
-                if (onOpen == null) {
-                    Modifier
-                } else {
-                    Modifier.indication(
-                        press,
-                        ripple(color = MaterialTheme.colorScheme.primary, bounded = false),
-                    )
-                },
-            )
-            .padding(horizontal = 4.dp, vertical = 8.dp)
             .testTag("playback-reciter")
             .semantics { contentDescription = name },
-        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = name,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, fill = false),
-        )
-        if (onOpen != null) {
-            IconGlyph(
-                icon = Icon.Chevron,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .padding(start = 4.dp)
-                    .size(GlyphSize.ChevronInline),
+        WordFlash(
+            rippleColor = if (onOpen == null) null else MaterialTheme.colorScheme.primary,
+            press = press,
+        ) {
+            Text(
+                text = name,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false),
             )
+            if (onOpen != null) {
+                IconGlyph(
+                    icon = Icon.Chevron,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .padding(start = 4.dp)
+                        .size(GlyphSize.ChevronInline),
+                )
+            }
         }
     }
 }
@@ -169,7 +208,8 @@ private fun ReciterDoor(
  * It is the second line of the wide pill's pair of words and the second half
  * of the phone pill's one line, and it is the same composable in both: one
  * place says what the status is, and the capsule says which menu that line
- * opened.
+ * opened. Its flash is the words' own, [WordsFlash] tall inside the 48 dp
+ * target, so the two doors wear one shape whatever length their words are.
  */
 @Composable
 private fun PlaybackStatusLine(
@@ -198,31 +238,29 @@ private fun PlaybackStatusLine(
                 onClick = onOpen,
             )
             .minimumInteractiveComponentSize()
-            .clip(Radii.Pill)
-            .indication(
-                press,
-                ripple(color = MaterialTheme.colorScheme.onSurfaceVariant, bounded = false),
-            )
-            .padding(horizontal = 4.dp, vertical = 8.dp)
             .testTag("playback-listening")
             .semantics { contentDescription = text },
-        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, fill = false),
-        )
-        IconGlyph(
-            icon = Icon.Chevron,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-                .padding(start = 4.dp)
-                .size(GlyphSize.ChevronInline),
-        )
+        WordFlash(
+            rippleColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            press = press,
+        ) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false),
+            )
+            IconGlyph(
+                icon = Icon.Chevron,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .padding(start = 4.dp)
+                    .size(GlyphSize.ChevronInline),
+            )
+        }
     }
 }
 

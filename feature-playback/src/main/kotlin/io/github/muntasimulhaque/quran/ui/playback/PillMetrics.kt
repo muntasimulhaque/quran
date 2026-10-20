@@ -20,23 +20,70 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 internal val BarGutter = 16.dp
 
 /**
- * The air the capsule keeps around a press shape: between two controls, and
+ * The air between the shapes the reader sees: between two controls, and
  * between a control and the capsule's own edge.
  *
- * The pill carries no close any more, so its shape is free to shrink to its
+ * The transport's circles fill their 48 dp targets, so on that row this is
+ * the air between the targets. The words' doors draw a smaller flash inside
+ * their 48 dp targets (see [WordsFlash]), and the seam is carried by the
+ * target's own rim, so what the reader sees still stands this far apart. The
+ * pill carries no close any more, so its shape is free to shrink to its
  * words, and this is the one number that shape is measured against (owner
- * decision, this session). A control's target and the shape its press draws
- * are the same 48 dp here, so the air is what keeps one flash from touching
- * the next and the end of a row from touching the capsule: at nothing, the
- * three transport circles met point to point, the words' two doors' flashes
- * met the capsule's own top edge, and the words' flash and the transport's
- * met on one line. It is the app's `Space.Line`, the gap a cluster of
+ * decision, this session). It is the app's `Space.Line`, the gap a cluster of
  * same-kind small controls keeps, because that is what the transport row is.
  */
 internal val PillAir = Space.Line
 
+/**
+ * The air the words' own end keeps from the capsule on every pill the app
+ * draws: the offer, the transfer, and the playing capsule alike.
+ *
+ * The capsule's end is a sphere, half its height, and the words' line does
+ * not stand on the capsule's middle: it sits above it, 12 to 16 dp up on a
+ * 64 dp pill and 34 dp on the 108 dp one. There the edge has already curved
+ * in 4.5 dp on the short pill and 12 dp on the tall one, so an [PillAir]
+ * measured from the capsule's widest point reads as almost nothing at the
+ * words' own height: on the phone the reciter's name sat 5 to 8 dp inside the
+ * border, and its press shape met the curve. `Space.Block + Space.Tight` is
+ * the app's 8 dp air plus that shoulder, which is what makes the name read as
+ * held rather than crowded (owner decision, this session: the name looked cut
+ * in Bangla, whose matra reaches the top of its line).
+ *
+ * It is the words' side only. The transport, the offer's Download, and the
+ * transfer's X keep [PillAir] at their end: they stand at the capsule's widest
+ * height or wear a shape of their own, where the air reads true.
+ */
+internal val PillEndAir = Space.Block + Space.Tight
+
 /** The gap between the pill's two word doors, which are a cluster of two. */
 internal val WordsGap = 12.dp
+
+/**
+ * The words' own press pill: the shape a tap on the reciter's name or on the
+ * place draws.
+ *
+ * It is drawn inside the doors' 48 dp targets instead of filling them, the
+ * way `TextButton` draws its pill inside its slab, and that is what buys the
+ * phone pill its height (owner decision, this session). A 32 dp flash with 8
+ * dp of rim above and below means the two rows' targets can stand against one
+ * another and the seam still reads as [PillAir]: the air that used to sit
+ * between two 48 dp nodes now lives inside the words' node itself. The ink is
+ * untouched, still centred in the flash, so the line the reader reads does not
+ * move with the shape around it.
+ */
+internal val WordsFlash = 32.dp
+
+/**
+ * The inert sliver above the words' target on the two-row pill: four dp of the
+ * capsule's crown that answer nothing.
+ *
+ * It keeps the capsule's very top edge from being a control while the words'
+ * flash still holds its air below it. The visible airs above the flash, between
+ * the flash and the transport, and under the transport are then 12, 8, and 8:
+ * the crown's own breath, then the app's one air (owner decision, this
+ * session).
+ */
+internal val WordsCrown = Space.Tight
 
 /**
  * The measure the pill's words keep, or the words take a line of their own.
@@ -148,12 +195,13 @@ internal fun transportRun(controls: Int): Dp =
 
 /**
  * What the pill's own row spends before the words get a pixel of it: the
- * capsule's air at both ends, the gap, the controls, and the two chevrons the
- * words wear. Three controls, the playing state, is 464 dp, which is a tablet
- * and a landscape phone and no phone in portrait.
+ * capsule's air at the words' end and at the transport's, the gap, the
+ * controls, and the two chevrons the words wear. Three controls, the playing
+ * state, is 536 dp, which is a tablet and a landscape phone and no phone in
+ * portrait.
  */
 internal fun oneRowFloor(controls: Int): Dp =
-    PillAir + WordsGap + transportRun(controls) + ChevronRoom +
+    PillEndAir + WordsGap + transportRun(controls) + ChevronRoom +
         ReciterChevronRoom + WordsMeasure + PillAir
 
 /**
