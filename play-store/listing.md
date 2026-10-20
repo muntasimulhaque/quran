@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 9.6 (versionCode 98)
+Version: 9.7 (versionCode 99)
 
 ## Listing
 
@@ -136,8 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (9.6, 494 characters)
-For 9.6, the player's three buttons stand closer together, so the surah and ayah have more room and are cut short far less often. The speed shows beside the reciter's name when it is not 1x, never off the end of the place. In the panel those words open, Reciter, Playback speed, and When the audio ends read as three quiet headings over their choices, and a screen reader can jump between them. Every round button lights a smaller circle inside its touch target, so two side by side never meet.
+## Release notes (9.7, 389 characters)
+For 9.7, the player is one width. The download offer, the download in progress, and a playing ayah now stand in the same capsule, so it no longer changes size as the download moves or as the reader moves from one ayah to the next, and its progress line keeps its length. Choosing a reciter, a speed, or what happens when the audio ends now closes the panel that asked, back to the reading.
 ## Before each release
 
 1. Raise `versionCode` by 1 and `versionName` by 0.1 in
