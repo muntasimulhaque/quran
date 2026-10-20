@@ -2,7 +2,6 @@ package io.github.muntasimulhaque.quran.ui.playback
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -35,57 +34,63 @@ import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /**
- * The playback pill. It speaks in four voices: asking to download a surah,
- * reporting progress, reporting a failure, and playing. Downloading only ever
- * starts from the reader's own tap on Download, and only for one surah.
+ * The playback pill. It speaks in five voices: asking to download a surah,
+ * reporting progress, reporting a failure, playing, and answering that the
+ * recitation is not there. Downloading only ever starts from the reader's own
+ * tap on Download, and only for one surah.
  *
- * **The capsule hugs its words** (owner decision, this session). It used to
- * take the page's whole width, because a close's rail ran along both ends of
- * its words' line; with the close gone, that rail was empty ground inside a
- * shape that had no reason to be that wide. So the capsule is the wider of
- * its words' line and its transport, plus [PillEndAir] at the words' end and
- * [PillAir] at the transport's, and it never takes a pixel the reader is not
- * reading. On a 360 dp phone that is about 252 dp instead of 328, which is
- * also why the place is no longer cut with an ellipsis: the words' line has
- * the capsule's whole measure to itself, and the capsule grows with the words
- * up to the page's own edge when the reader's font scale or the language asks
- * for more room.
+ * **The pill is one row, the offer's shape, in every voice** (owner decision,
+ * this session). The words are a line of type over a line: the reciter's name
+ * over the place while playing, and over the state's own sentence when there
+ * is no recitation. The answer stands at the trailing end, one shape: the
+ * transport while playing, Retry on a failure, the app's one X on a transfer,
+ * the Download word on a request, and nothing at all on an answer the app
+ * cannot give. The capsule is 64 dp tall, or 74 with a download's line under
+ * it. Before this the playing pill stacked a words row over a transport row
+ * and paid 120 dp for a line of words that fits beside the controls, and the
+ * offer carried a second, shorter block, so one control wore two shapes.
  *
- * The shape is measured by the layout and never by a number reserved for it:
- * a surah name, an ayah, and a pace are what the line is, and a capsule
- * fixed to the longest of them would be wider than the reader's own line for
- * almost every ayah. The one thing that would make it breathe pointlessly is
- * a download's percent, so the progress line's own room is added under the
- * row and the words keep their measure. The capsule snaps to a new width and
- * never animates it: a width that slid would turn a one dp change between
- * two ayahs into a performance over the page.
+ * **The playing words are one block, and one door.** Its two lines are one
+ * question, who and where, and the panel it opens is one panel: the voices,
+ * the pace, and what happens at the end of the audio. The voices that are not
+ * a recitation keep one line, the name beside the state's sentence, and their
+ * name opens the voice list alone, because the pace and the end answer a
+ * recitation that is not there (owner decision, this session). The offer makes
+ * the same choice for the same reason.
  *
- * The window's own measure still decides the playing shape: where the words
- * cannot keep [WordsMeasure] beside the transport, they take a line of their
- * own and the transport stands centred under them, on the capsule's own axis.
- * No other voice takes a second row: an offer, a failure, and a transfer's own
- * abort are one answer each, and one answer shares the words' line (owner
- * decision, this session: a transfer's capsule stood 130 dp tall to hold one
- * X under its words, where the offer bar beside it held the same shape in
- * 64).
+ * **The capsule hugs its words** (owner decision, an earlier session). It
+ * used to take the page's whole width, because a close's rail ran along both
+ * ends of its words' line; with the close gone, that rail was empty ground
+ * inside a shape that had no reason to be that wide. So the capsule is the
+ * wider of its words and its answer, plus [PillEndAir] at the words' end and
+ * [PillAir] at the answer's, and it never takes a pixel the reader is not
+ * reading. On a 360 dp phone the playing capsule is about 305 to 325 dp, and
+ * the offer about 250. The shape is measured by the layout and never by a
+ * number reserved for it; the capsule snaps to a new width and never animates
+ * it, because a width that slid would turn a one dp change between two ayahs
+ * into a performance over the page.
  *
- * One air, [PillAir], is kept between the shapes the reader sees, and the
- * phone's two rows stand 108 dp tall (owner decision, this session): the
- * words' press pill is [WordsFlash] inside its 48 dp target, so the seam
- * between the flash and the transport is that target's own lower rim while
- * the two targets stand against one another. The words' end keeps
- * [PillEndAir], because a capsule's end is a sphere and the words' line sits
- * in its shoulder, where [PillAir] read as a name touching the border, and
- * [WordsCrown] keeps the capsule's crown from being a control.
+ * The place is one line and gives way with an ellipsis before the name does.
+ * The one-row shape gives it about 120 dp on a 360 dp phone, which holds
+ * Al-Fatihah and Al-Mumtahanah and ends the longest Bangla name short (owner
+ * decision, this session: the shape was chosen with that cost in view).
  *
- * The pill is also where its two popups hang. A menu takes the shape of the
- * anchor it is given, and an anchor on the word the reader touched stood the
- * reciter chooser at one end of the capsule and the listening menu at the other
- * (owner report): two popups in two places on one control. So the capsule
- * holds both, from one anchor on its own centre, and the words only say which
- * of the two was asked for. The anchor stands on the capsule's whole measure
- * without ever deciding it, so a menu may be wider than the pill it answers
- * to and still hang from the pill's own middle.
+ * **Nothing touches.** The words keep [PillEndAir] at their own end, because a
+ * capsule's end is a sphere and an [PillAir] measured from its widest point
+ * read as a name touching the border; the answer keeps [PillAir] at its end,
+ * where it stands at the capsule's widest height or wears a round shape of its
+ * own; and [WordsGap] stands between the two. On the unavailable pill, which
+ * is words alone, both ends keep [PillEndAir], so the sentence is held as the
+ * name is (owner decision, this session).
+ *
+ * The pill is also where its popup hangs. A menu takes the shape of the anchor
+ * it is given, and an anchor on the word the reader touched stood the reciter
+ * chooser at one end of the capsule and the listening menu at the other (owner
+ * report): two popups in two places on one control. So the capsule holds the
+ * menu, from one anchor on its own centre. The merged panel is taller than the
+ * two menus were apart, so the popup caps itself to the ground above the
+ * capsule and scrolls what does not fit, and the anchor stands on the
+ * capsule's whole measure without ever deciding it.
  */
 @Composable
 fun PlaybackBar(
@@ -98,8 +103,7 @@ fun PlaybackBar(
     /**
      * The reciters the chooser offers, with what each would still need for
      * the ayah the pill is about. Empty where there are none to offer, and
-     * [onReciter] null where the choice cannot be made now, which is while a
-     * package is on its way.
+     * the voice list is then not a door.
      */
     reciterOptions: List<ListenOption> = emptyList(),
     reference: String?,
@@ -108,13 +112,12 @@ fun PlaybackBar(
      * The pending surah's name and size, said while its package downloads
      * on its own, whichever door asked for it: a download always names the
      * surah that is arriving. A reader who cannot tell what is being fetched
-     * cannot tell whether it is the surah they wanted (owner report, this
-     * session).
+     * cannot tell whether it is the surah they wanted (owner report).
      */
     pendingAudio: String? = null,
     /** The reader's pace, shown only when it is not the ordinary one. */
     speed: Float = 1f,
-    /** What happens as the reading moves on, set from the pill's own menu. */
+    /** What happens as the reading moves on, set from the panel's own list. */
     end: EndOfAudio = EndOfAudio.CONTINUE_AYAH,
     onToggle: () -> Unit,
     onNext: () -> Unit,
@@ -124,7 +127,7 @@ fun PlaybackBar(
     /**
      * The reader's own way out of a recitation. It has no shape on the glass:
      * it is the action TalkBack offers on Play or pause, where the close used
-     * to stand (owner decision, this session).
+     * to stand (owner decision, an earlier session).
      */
     onStop: () -> Unit,
     /** The one X the app keeps: abort a package on its way. */
@@ -132,7 +135,7 @@ fun PlaybackBar(
     onOfferConfirm: () -> Unit = {},
     onOfferCancelDownload: () -> Unit = {},
     onOfferReciter: (String) -> Unit = {},
-    /** The pace, and the end of the audio, set from the pill exactly as from
+    /** The pace, and the end of the audio, set from the panel exactly as from
      * settings. */
     onSpeed: (Float) -> Unit = {},
     onEndOfAudio: (EndOfAudio) -> Unit = {},
@@ -154,11 +157,9 @@ fun PlaybackBar(
     val needsDownload = state.pendingDownloadSurah != null && !downloading
     val playing = !downloading && !needsDownload && !state.downloadFailed && !state.error &&
         !state.unavailable
-    // The words are what give when the line is long, never the gutter and
-    // never the controls: the reciter's name is one line and the state under
-    // it one more, and each ellipsizes rather than push the controls off the
-    // row. What a row cannot hold at all is [oneRowFloor]'s question, and
-    // the second branch below is its answer.
+    // The words are what give when the line is long, never the gutters and
+    // never the answer: the name is one line, the place or the sentence is one
+    // more, and each ellipsizes rather than push the answer off the row.
     val status = when {
         state.error -> stringResource(R.string.playback_failed)
         state.downloadFailed -> stringResource(R.string.playback_download_failed)
@@ -190,14 +191,11 @@ fun PlaybackBar(
         onStop = onStop,
         onCancelDownload = onCancelDownload,
     )
-    // The reciter is a choice, not a hop: while a package is on its way there
-    // is nothing to choose between, and a list with nothing in it is not a
-    // door, so the door is closed rather than open and inert.
-    val chooseReciter = if (downloading || reciterOptions.isEmpty()) null else onReciter
-    // The capsule holds the two menus, so the words answer a tap with the
-    // name of one rather than each raising a sheet of its own.
-    //
-    // The menu belongs to the pill that opened it, so it closes when the pill
+    // The voice list is a choice, not a hop: while a package is on its way
+    // there is nothing to choose between, and a list with nothing in it is not
+    // a door, so the door is closed rather than open and inert.
+    val canChooseReciter = !downloading && reciterOptions.isNotEmpty()
+    // The panel belongs to the pill that opened it, so it closes when the pill
     // becomes a different pill: when its voice changes from playing to an
     // offer or a download, and when the reading moves to another ayah or
     // another surah. Keying the remember on those is what closes it, and
@@ -215,17 +213,12 @@ fun PlaybackBar(
     var openMenu by remember(voice, state.ayahNumber, state.surah) {
         mutableStateOf<PillMenu?>(null)
     }
-    val openReciters: (() -> Unit)? = if (chooseReciter == null) {
-        null
-    } else {
+    val openReciters: (() -> Unit)? = if (canChooseReciter) {
         { openMenu = PillMenu.Reciters }
-    }
-    val openListening: (() -> Unit)? = if (playing) {
-        { openMenu = PillMenu.Listening }
     } else {
         null
     }
-    BoxWithConstraints(
+    Box(
         modifier = modifier
             .padding(horizontal = BarGutter)
             .floatingLift(Radii.Pill)
@@ -237,95 +230,69 @@ fun PlaybackBar(
             .testTag("playback-bar"),
         // The capsule's own content stands on the capsule's middle. A hugged
         // capsule is its content exactly, and one held to a measure of its own
-        // (a test's, or the page's cap at a large font scale) still centres
-        // the row it holds rather than hanging it from the leading edge.
+        // still centres the row it holds rather than hanging it from the
+        // leading edge.
         contentAlignment = Alignment.Center,
     ) {
-        val oneRow = !playing || maxWidth >= oneRowFloor(controls.size)
         Box {
             Column(
-                // The capsule is the wider of its two rows, and neither row
-                // touches the other's edges: the words' line and the
-                // transport are each centred on the capsule's own axis.
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(
                     bottom = if (progress != null) ProgressRoom else 0.dp,
                 ),
             ) {
-                if (oneRow) {
-                    Row(
-                        // The words lead with [PillEndAir]: the capsule's end
-                        // is a sphere, and at the words' line, a few dp above
-                        // the middle, [PillAir] measured from the widest point
-                        // reads as nothing. The transport keeps [PillAir] at
-                        // its end, where it stands at the capsule's widest
-                        // height and wears its own circles.
-                        modifier = Modifier.padding(
-                            start = PillEndAir,
-                            end = PillAir,
-                            top = PillAir,
-                            bottom = PillAir,
-                        ),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        // The words take their own measure and the transport
-                        // follows them; a weighted word box would spend the
-                        // page's width on a capsule that no longer fills it.
+                Row(
+                    // The words lead with [PillEndAir]: the capsule's end is a
+                    // sphere, and at the name's line [PillAir] measured from
+                    // the widest point reads as nothing. The words' other end
+                    // keeps it too when the words are all there is; once an
+                    // answer follows, the answer's own shape keeps [PillAir]
+                    // at the capsule's widest height.
+                    modifier = Modifier.padding(
+                        start = PillEndAir,
+                        end = if (controls.isEmpty()) PillEndAir else PillAir,
+                        top = PillAir,
+                        bottom = PillAir,
+                    ),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (playing) {
+                        // The recitation exists, so its words are the offer's
+                        // block, and its door is the whole listening panel.
+                        WordsBlock(
+                            name = reciterName,
+                            title = status,
+                            onOpen = { openMenu = PillMenu.Listening },
+                            modifier = Modifier
+                                .weight(1f, fill = false)
+                                .testTag("playback-words"),
+                        )
+                    } else {
+                        // No recitation, so one line, and its name opens the
+                        // voice list alone: the pace and the end answer a
+                        // recitation that is not there.
                         PlaybackWordsLine(
                             reciterName = reciterName,
                             onOpenReciters = openReciters,
                             status = status,
-                            onOpenListening = openListening,
+                            modifier = Modifier
+                                .weight(1f, fill = false)
+                                .testTag("playback-words"),
                         )
+                    }
+                    if (controls.isNotEmpty()) {
                         Spacer(Modifier.width(WordsGap))
                         PillControls(controls)
-                    }
-                } else {
-                    // The words keep the whole measure of the capsule and the
-                    // controls stand under them, both centred. The words' flash
-                    // is [WordsFlash] tall inside its 48 dp target, so the two
-                    // targets stand against one another while the seam the
-                    // reader sees still keeps [PillAir]: the air that used to
-                    // sit between two 48 dp nodes now lives in the words'
-                    // target's own rim, and the phone's rows stand 108 dp where
-                    // they were 120 (owner decision, this session). The words'
-                    // end keeps [PillEndAir] for the same shoulder the one-row
-                    // pill answers to, and [WordsCrown] leaves the capsule's
-                    // top edge inert.
-                    PlaybackWordsLine(
-                        reciterName = reciterName,
-                        onOpenReciters = openReciters,
-                        status = status,
-                        onOpenListening = openListening,
-                        modifier = Modifier.padding(
-                            start = PillEndAir,
-                            end = PillEndAir,
-                            top = WordsCrown,
-                            bottom = if (controls.isEmpty()) PillAir else 0.dp,
-                        ),
-                    )
-                    // A voice with no answer of its own keeps no empty band:
-                    // the notice is the words alone, and its capsule is one
-                    // row tall (owner decision, this session).
-                    if (controls.isNotEmpty()) {
-                        PillControls(
-                            controls = controls,
-                            modifier = Modifier.padding(
-                                start = PillAir,
-                                end = PillAir,
-                                bottom = PillAir,
-                            ),
-                        )
                     }
                 }
             }
             // The progress is the app's one download line, drawn by hand
             // like every other shape on the page and shared with the offer
             // bar, so one download reads the same whichever pill asked for it
-            // (owner decision, this session). It stands in the room the
-            // capsule keeps under its row, so it never crosses a control's
-            // press shape, and its measure is the capsule's, which the words
-            // and not the percent decide.
+            // (owner decision). It stands in the room the capsule keeps under
+            // its row, so it never crosses a control's press shape, and its
+            // measure is the capsule's, which the words and not the percent
+            // decide.
             if (progress != null) {
                 Box(Modifier.matchParentSize()) {
                     DownloadLine(
@@ -344,9 +311,9 @@ fun PlaybackBar(
                     )
                 }
             }
-            // The two popups' anchor stands on the capsule's measure without
-            // ever deciding it: a menu wider than the pill still hangs from
-            // the pill's own middle (owner report).
+            // The popup's anchor stands on the capsule's measure without ever
+            // deciding it: a menu wider than the pill still hangs from the
+            // pill's own middle (owner report).
             Box(Modifier.matchParentSize()) {
                 PillMenuAnchor { anchor ->
                     PillPopup(
@@ -355,6 +322,22 @@ fun PlaybackBar(
                         onDismiss = { openMenu = null },
                     ) {
                         when (openMenu) {
+                            // The whole of the listening, for a recitation
+                            // that exists.
+                            PillMenu.Listening -> ListeningPanel(
+                                options = reciterOptions,
+                                selected = reciterId,
+                                onChoose = {
+                                    openMenu = null
+                                    onReciter(it)
+                                },
+                                speed = speed,
+                                end = end,
+                                onSpeed = onSpeed,
+                                onEndOfAudio = onEndOfAudio,
+                            )
+                            // The voices alone, for a voice that has no
+                            // recitation to set a pace for.
                             PillMenu.Reciters -> ReciterChoices(
                                 options = reciterOptions,
                                 selected = reciterId,
@@ -362,12 +345,6 @@ fun PlaybackBar(
                                     openMenu = null
                                     onReciter(it)
                                 },
-                            )
-                            PillMenu.Listening -> ListeningMenu(
-                                speed = speed,
-                                end = end,
-                                onSpeed = onSpeed,
-                                onEndOfAudio = onEndOfAudio,
                             )
                             null -> Unit
                         }
@@ -387,7 +364,7 @@ fun PlaybackBar(
 private enum class PillVoice { Playing, Offer, Downloading, Failed, Unavailable }
 
 /**
- * The anchor the pill's own popups hang from, on both of the bars it wears:
+ * The anchor the pill's own popup hangs from, on both of the bars it wears:
  * the capsule's own width, with the popup's measure centred on it and its top
  * edge as the line they drop from.
  *
@@ -397,8 +374,8 @@ private enum class PillVoice { Playing, Offer, Downloading, Failed, Unavailable 
  * bounds of (owner report). It draws nothing and takes one hairline of room,
  * because a box with no height has no bounds to read: a zero-height anchor
  * stands every popup at the window's own edge instead of the capsule's centre.
- * The playing capsule and the offer bar both stand it, so the one chooser
- * opens from the same place wherever it is asked.
+ * The playing capsule and the offer bar both stand it, so the menu opens from
+ * the same place wherever it is asked.
  */
 @Composable
 internal fun PillMenuAnchor(content: @Composable (anchor: IntRect) -> Unit) {

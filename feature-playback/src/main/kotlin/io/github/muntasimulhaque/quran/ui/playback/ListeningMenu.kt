@@ -13,11 +13,80 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.feature.playback.R
+import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.SpeedSteps
 import io.github.muntasimulhaque.quran.ui.kit.StepRow
 import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.theme.Space
+
+/**
+ * The whole of what a reader can change about the recitation, in one panel:
+ * who is reading, how fast, and what happens when the audio ends.
+ *
+ * The voices lead, because the block that opens the panel leads with the
+ * reciter's name; the pace and the answers follow, in the order the listening
+ * menu has always kept. One panel rather than two menus (owner decision, this
+ * session: the block is one door, and the three questions are one subject).
+ * The panel is only opened by a recitation that exists: an offer, a failure,
+ * and an unavailable answer show the voice list alone, because the pace and
+ * the end are answers to a recitation, and theirs has not begun (owner
+ * decision, this session).
+ *
+ * It may stand taller than the two menus did apart, so the popup caps it to
+ * the ground above the capsule and what does not fit scrolls, as every popup
+ * of the pill's already does. The voices keep the app's choice row, with the
+ * leading mark and what that voice would still need for the surah at hand, so
+ * a reciter is chosen with its price in view.
+ */
+@Composable
+internal fun ColumnScope.ListeningPanel(
+    options: List<ListenOption>,
+    /** The reciter in use, by id; null where none of them is. */
+    selected: String?,
+    onChoose: (String) -> Unit,
+    speed: Float,
+    end: EndOfAudio,
+    onSpeed: (Float) -> Unit,
+    onEndOfAudio: (EndOfAudio) -> Unit,
+) {
+    if (options.isNotEmpty()) {
+        MenuLabel(stringResource(R.string.playback_reciter_label))
+        ReciterChoices(options = options, selected = selected, onChoose = onChoose)
+    }
+    ListeningMenu(speed = speed, end = end, onSpeed = onSpeed, onEndOfAudio = onEndOfAudio)
+}
+
+/**
+ * One section's name inside a pill popup: the panel's first line, the label
+ * over the pace, and the label over the answers.
+ *
+ * One voice, one inset, and one air wherever a section begins, so the merged
+ * panel reads as one list with three heads rather than three menus stacked.
+ * The first label is the popup's first line, so it keeps the top inset the
+ * reciter chooser's first row already opens with: with no room over the
+ * leading the label sat against the popup's own top edge at a small fraction
+ * of that inset (owner report, the listening menu). The room sits over the
+ * leading, and the label still stands nearer the control it names than the
+ * top edge.
+ */
+@Composable
+private fun MenuLabel(text: String) {
+    Text(
+        text = text,
+        // The same label style the settings' step row wears: a control's name
+        // is one voice wherever the control stands (owner decision, the
+        // theme and consistency session).
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.padding(
+            start = Space.Gutter,
+            top = Space.Row,
+            end = Space.Gutter,
+            bottom = Space.Tight,
+        ),
+    )
+}
 
 /**
  * The pace, and what happens at the end of the audio, as the list the pill
@@ -49,19 +118,10 @@ internal fun ColumnScope.ListeningMenu(
     onEndOfAudio: (EndOfAudio) -> Unit,
 ) {
     // The label is the popup's first line, so it keeps the top inset the
-    // reciter chooser's first row already opens with: with no room over the
-    // leading the label sat against the popup's own top edge at a small
-    // fraction of that inset (owner report). The room sits over the leading,
-    // and the label still stands nearer the paces it names than the top edge.
-    Text(
-        text = stringResource(R.string.playback_speed_label),
-        // The same label style the settings' step row wears: a control's name
-        // is one voice wherever the control stands (owner decision, the
-        // theme and consistency session).
-        style = MaterialTheme.typography.bodyLarge,
-        color = MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier.padding(start = Space.Gutter, top = Space.Row, end = Space.Gutter, bottom = Space.Tight),
-    )
+    // reciter chooser's first row already opens with. The room sits over the
+    // leading, and the label still stands nearer the paces it names than the
+    // top edge.
+    MenuLabel(stringResource(R.string.playback_speed_label))
     // One row, five paces, the chosen one filled: the app's own step row, the
     // same the text sizes wear, so one control is learned once. It stands
     // centred on the menu rather than against its left edge, where it left
@@ -100,12 +160,7 @@ internal fun ColumnScope.ListeningMenu(
             .padding(horizontal = 10.dp)
             .testTag("playback-speed"),
     )
-    Text(
-        text = stringResource(R.string.playback_end_label),
-        style = MaterialTheme.typography.bodyLarge,
-        color = MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier.padding(start = Space.Gutter, top = Space.Row, end = Space.Gutter, bottom = Space.Tight),
-    )
+    MenuLabel(stringResource(R.string.playback_end_label))
     // When the ayah ends: the normal continuation, saying it again, and the
     // stop, in the pill the reader is already holding.
     EndChoice(

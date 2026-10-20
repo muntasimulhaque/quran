@@ -56,48 +56,51 @@ import java.util.Locale
  *
  * 1. It keeps a gutter from the glass whatever the label says, so a long
  *    offer cannot grow into the screen's edge (owner report).
- * 2. The status line is the door to the pace and to what happens at the end
- *    of the audio, and all of them call the pace's one setter, so there is one
- *    value with two doors rather than two values to keep in step.
+ * 2. The playing words are one block and one door, and the door opens the
+ *    whole listening panel: the voices, the pace, and what happens at the end
+ *    of the audio, and all of them call the pill's one setter, so there is one
+ *    value with one door (owner decision, this session).
  * 3. The automatic download says what it is fetching: the name and the size
  *    are on the pill even when no offer preceded it (owner decision).
- * 4. The words keep a measure or they take a line of their own: a phone in
- *    portrait cannot print the reference, the pace, and the repeat beside
- *    four 48 dp controls, and a name cut with an ellipsis is the defect
- *    the wide pill exists to end. A wide pill can, and stays one row.
- * 5. On that phone the words and the transport are centred, and the words are
- *    one line: the reciter's name and the place beside each other, not the
- *    reciter's name with the place under it against the pill's left edge
- *    (owner report).
- * 6. The reciter's name is the chooser and not a hop to the settings, and
- *    the chooser carries every reciter with what it would still cost for
- *    the surah at hand, so the choice is made with the number in view
- *    (owner report).
+ * 4. The playing pill is one row in every voice, the offer's shape: the words
+ *    block at the leading end and one answer at the trailing end, 64 dp tall.
+ *    The block gives way with an ellipsis before the answer does; a voice that
+ *    is not a recitation keeps one line and the voice list alone, because the
+ *    pace and the end answer a recitation that is not there (owner decision,
+ *    this session).
+ * 5. The block's two lines are the reciter's name over the place while
+ *    playing, and the name over the state's sentence when there is no
+ *    recitation. Nothing in the pill touches a neighbour or the capsule: the
+ *    block keeps the app's air above and below, the answer keeps it at its
+ *    end, and the words' own end keeps the shoulder's air, where an 8 dp pad
+ *    read as a name touching the border (owner decision, this session).
+ * 6. The reciter is chosen on the pill and not in the settings, and the
+ *    chooser carries every voice with what it would still cost for the surah
+ *    at hand, so the choice is made with the number in view (owner report).
  * 7. The pill says where the reader is and, when it is not the ordinary
  *    one, the pace. It does not say what happens at the end of the audio:
  *    the sentence does not fit the line, and the switch that carries the
  *    answer says its own state where the reader turned it (owner report).
- * 8. Both popups stand on the capsule's own centre. A menu is placed from the
- *    box it hangs on, and an anchor on the word the reader touched put the
- *    reciter chooser at one end of the pill and the listening menu at the
- *    other: two popups in two places on one control (owner report).
- * 9. Both menus wear the app's own choice row: one leading mark, one 16 dp
- *    gap, and one 48 dp target, the same the settings lists draw, so an
+ * 8. The popup stands on the capsule's own centre, on the phone and on the
+ *    wide glass alike. A menu is placed from the box it hangs on, and an
+ *    anchor on the word the reader touched put the reciter chooser at one
+ *    end of the pill and the listening menu at the other (owner report).
+ * 9. The panel's rows wear the app's own choice row: one leading mark, one
+ *    16 dp gap, and one 48 dp target, the same the settings lists draw, so an
  *    answer cannot change its shape from one door to the other (owner
  *    decision, forty-eighth session).
- * 10. The capsule hugs its words (owner decision, this session). It carries
- *     no close on the playing pill, the offer, a failure, or an unavailable
- *     answer, so it is the wider of its words' line and its transport plus
- *     the app's air, and never the page's width for no reason. Its width is
- *     the words' own, which is also what stops the place being cut with an
- *     ellipsis on the phone the owner read.
+ * 10. The capsule hugs its words (owner decision). It carries no close on the
+ *     playing pill, the offer, a failure, or an unavailable answer, so it is
+ *     the wider of its words and its answer plus the words' air at one end and
+ *     the answer's at the other, and never the page's width for no reason.
+ *     The place is one line and may end in an ellipsis at the longest names;
+ *     the shape was chosen with that cost in view (owner decision, this
+ *     session).
  * 11. The offer prints the surah's own name whole in the line it shares with
  *     the size, in either language: the size may give way at the end of the
  *     line, the name never does (owner decision, this session).
- * 12. No press shape touches another or the capsule: the app's `Space.Line`
- *     stands between the transport's three 48 dp circles, between the two
- *     rows, and between any shape and the capsule's edge (owner decision,
- *     this session).
+ * 12. The transfer's X keeps the capsule's air at its end, and the block and
+ *     the transport stand the app's row air apart (owner decision).
  * 13. The recitation's stop has no shape on the glass and is still reachable:
  *     it is the action TalkBack offers on Play or pause, so the close's own
  *     act is not lost with the close's mark (owner decision, this session).
@@ -123,8 +126,8 @@ class PlaybackPillTest {
         pendingAudio: String? = null,
         pillWidth: Modifier = Modifier,
         /**
-         * The measure to offer the pill instead of the screen's, for the shape
-         * a wider glass wears. See [WideBox]: a modifier cannot do this.
+         * The measure to offer the pill instead of the screen's, for a wide
+         * glass. See [WideBox]: a modifier cannot do this.
          */
         measureWidth: Dp? = null,
         speed: Float = 1f,
@@ -225,14 +228,10 @@ class PlaybackPillTest {
     /**
      * A composable measured at a width the screen does not have.
      *
-     * The wide pill (a tablet, or a phone in landscape, keeps the words
-     * beside the controls) cannot be asked for with a modifier. `requiredWidth`
-     * sets a child's minimum and the root still caps the constraint the child
-     * is measured with, so the pill's own `maxWidth` was the phone's 393 dp
-     * and the pill took the phone's two rows: the test measured the phone's
-     * shape and called it the tablet's. This was not seen for a long time
-     * because the class is not among the six the capture runs, and it
-     * is why a measure a test needs is given by a layout that offers it.
+     * The root caps the constraint a child is measured with, so a modifier
+     * cannot offer the pill a tablet's width: the pill's own constraints were
+     * the phone's. This box offers the width as a measurement, so a wide glass
+     * is measured as one.
      */
     @Composable
     private fun WideBox(width: Dp, content: @Composable () -> Unit) {
@@ -267,12 +266,20 @@ class PlaybackPillTest {
         )
     }
 
+    /**
+     * The playing words are one door, and it opens the whole listening panel:
+     * the voices, the pace, and the end of the audio, in one popup (owner
+     * decision, this session: the block is one door, and the three questions
+     * are one subject). The pace is reached from the panel's own row.
+     */
     @Test
-    fun theStatusLineCarriesTheListeningDoor() {
+    fun theWordsBlockCarriesTheListeningPanel() {
         var speed: Float? = null
         showPill(onSpeed = { speed = it })
-        // The line is the door; the menu it opens offers the five paces.
-        compose.onNodeWithTag("playback-listening").performClick()
+        compose.onNodeWithTag("playback-words").performClick()
+        compose.onNodeWithText("Reciter").assertExists()
+        compose.onNodeWithText("Playback speed").assertExists()
+        compose.onNodeWithText("When the audio ends").assertExists()
         compose.onAllNodesWithText("0.5x").onFirst().performClick()
         assertEquals(0.5f, speed)
     }
@@ -286,7 +293,7 @@ class PlaybackPillTest {
     @Test
     fun thePaceStandsCentredInTheListeningMenu() {
         showPill()
-        compose.onNodeWithTag("playback-listening").performClick()
+        compose.onNodeWithTag("playback-words").performClick()
         compose.onNodeWithText("Playback speed").assertExists()
         val menu = compose.onNodeWithTag("pill-popup").fetchSemanticsNode().boundsInWindow
         val pace = compose.onNodeWithTag("playback-speed").fetchSemanticsNode().boundsInWindow
@@ -302,7 +309,7 @@ class PlaybackPillTest {
     fun theListeningMenuCarriesTheSurahRepeat() {
         var end: EndOfAudio? = null
         showPill(onEndOfAudio = { end = it })
-        compose.onNodeWithTag("playback-listening").performClick()
+        compose.onNodeWithTag("playback-words").performClick()
         compose.onNodeWithText("Repeat the surah").performClick()
         assertEquals(
             "the surah repeat reports its own answer and nothing else",
@@ -315,7 +322,7 @@ class PlaybackPillTest {
     fun theListeningMenuCarriesTheContinuation() {
         var end: EndOfAudio? = null
         showPill(onEndOfAudio = { end = it })
-        compose.onNodeWithTag("playback-listening").performClick()
+        compose.onNodeWithTag("playback-words").performClick()
         compose.onNodeWithText("Continue to the next surah").performClick()
         assertEquals(EndOfAudio.CONTINUE_SURAH, end)
     }
@@ -324,7 +331,7 @@ class PlaybackPillTest {
     fun theListeningMenuCarriesTheStopAsItsOwnRow() {
         var end: EndOfAudio? = null
         showPill(onEndOfAudio = { end = it })
-        compose.onNodeWithTag("playback-listening").performClick()
+        compose.onNodeWithTag("playback-words").performClick()
         // The stop is a row of its own now: the reader finds it by its name,
         // not at the off end of the default switch.
         compose.onNodeWithText("Stop after this ayah").performClick()
@@ -332,18 +339,18 @@ class PlaybackPillTest {
     }
 
     /**
-     * The listening menu wears the app's own choice row: the same leading
-     * radio mark, the same 16 dp gap, and the same 48 dp target the Listening
-     * page draws, so the same answer cannot change its shape from one door to
-     * the other (owner decision, forty-eighth session; the gap is 16, the
-     * value `ChoiceRow` has always drawn, pinned here by the theme and
-     * consistency session).
+     * The panel wears the app's own choice row: the two voices and the five
+     * answers, seven rows, each with the same leading radio mark, the same
+     * 16 dp gap, and the same 48 dp target the settings lists draw, so the same
+     * answer cannot change its shape from one door to the other (owner
+     * decision, forty-eighth session; the gap is 16, the value `ChoiceRow` has
+     * always drawn, pinned here by the theme and consistency session).
      */
     @Test
     fun theListeningMenuWearsTheAppChoiceRow() {
         showPill()
-        compose.onNodeWithTag("playback-listening").performClick()
-        compose.onAllNodesWithTag("choice-mark", useUnmergedTree = true).assertCountEquals(5)
+        compose.onNodeWithTag("playback-words").performClick()
+        compose.onAllNodesWithTag("choice-mark", useUnmergedTree = true).assertCountEquals(7)
         val mark = compose.onAllNodesWithTag("choice-mark", useUnmergedTree = true).onFirst()
             .getUnclippedBoundsInRoot()
         val name = compose.onNodeWithText("Continue to the next ayah", useUnmergedTree = true)
@@ -359,12 +366,13 @@ class PlaybackPillTest {
      * The reciter chooser is a choice, not a button: the chosen reciter wears
      * the app's leading mark and its row is the one a screen reader reports as
      * selected, where the check beside a Role.Button said neither (owner
-     * decision, forty-eighth session).
+     * decision, forty-eighth session). It leads the merged panel, the block's
+     * first section.
      */
     @Test
     fun theReciterChooserWearsTheAppChoiceRow() {
         showPill()
-        compose.onNodeWithTag("playback-reciter").performClick()
+        compose.onNodeWithTag("playback-words").performClick()
         val chosen = compose.onNode(
             hasText("Husary") and hasAnyAncestor(hasTestTag("pill-popup")),
         )
@@ -381,140 +389,80 @@ class PlaybackPillTest {
         )
     }
 
+    /**
+     * The playing pill is one row (owner decision, this session): the words
+     * block at the leading end and the transport at the trailing end, on one
+     * line, in the offer's shape. It used to take two rows on a phone, with
+     * the words on a line of their own above the transport.
+     */
     @Test
-    fun theWordsTakeTheirOwnLineOnAPhone() {
-        // A phone in portrait: four controls and the words cannot share the
-        // row at the measure the pill prints at.
-        showPill(pillWidth = Modifier.width(393.dp))
-        val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
-        val play = compose.onNodeWithContentDescription("Play or pause").getUnclippedBoundsInRoot()
-        assertTrue(
-            "the transport must sit under the words, not beside them: ${play.top} of ${words.bottom}",
-            play.top.value >= words.bottom.value - 0.5f,
-        )
-    }
-
-    @Test
-    fun theWordsShareTheRowOnAWidePill() {
-        // A tablet, or a phone in landscape: the words keep their measure, so
-        // the pill is the one row it has always been.
-        //
-        // The measure is offered by a layout rather than asked for with
-        // `requiredWidth`: the root still caps the constraint a child is
-        // measured with, so the pill read the phone's own width and took the
-        // phone's two rows, and this measured the phone's shape and called it
-        // the tablet's. The class is not among the six the capture runs, which
-        // is how that survived.
-        showPill(measureWidth = 840.dp)
+    fun thePlayingPillIsOneRow() {
+        showPill()
         val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
         val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
         val play = compose.onNodeWithContentDescription("Play or pause").getUnclippedBoundsInRoot()
-        val next = compose.onNodeWithContentDescription("Next ayah").getUnclippedBoundsInRoot()
-        // "Share the row" is overlap and company, not an order: what
-        // distinguishes the one row from the two is that the transport stands
-        // beside the words and overlaps them vertically (the phone's own test
-        // pins the other half of the rule: there the transport is under the
-        // words).
         assertTrue(
             "the transport must stand beside the words: play $play, words $words",
-            play.left.value > words.left.value,
+            play.left.value > words.right.value,
         )
         assertTrue(
             "the transport must share the words' row: play $play, words $words",
             play.top.value < words.bottom.value && play.bottom.value > words.top.value,
         )
-        // The wide pill hugs too: the glass may be 840 wide, and the capsule
-        // is the words, the gap, and the transport, with the app's air around
-        // them (owner decision, this session).
-        assertTrue(
-            "the wide pill must hug its row, not fill the glass: bar $bar",
-            (bar.right - bar.left).value < 840f - 2 * 16f,
-        )
         assertEquals(
-            "the words keep the capsule's air at the leading end",
-            Space.Block.value + Space.Tight.value,
-            (words.left - bar.left).value,
-            1.5f,
-        )
-        assertEquals(
-            "the transport keeps the capsule's air at the trailing end",
-            Space.Line.value,
-            (bar.right - next.right).value,
-            1.5f,
-        )
-    }
-
-    @Test
-    fun thePhonePillSaysBothOnOneCentredLine() {
-        // The two-row pill the owner read on their own phone: the reciter's
-        // name and the place on one line, centred, with the controls centred
-        // under them. Before this the words were two lines against the pill's
-        // own left edge, so the pill's first line began in a corner.
-        showPill(pillWidth = Modifier.width(393.dp))
-        val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
-        val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
-        val reciter = compose.onNodeWithTag("playback-reciter").getUnclippedBoundsInRoot()
-        val listening = compose.onNodeWithTag("playback-listening").getUnclippedBoundsInRoot()
-        val name = compose.onNodeWithText("Husary").getUnclippedBoundsInRoot()
-        val place = compose.onNodeWithText("Al-Baqarah 2:255").getUnclippedBoundsInRoot()
-        // the two share a line when they stand over one another: the overlap
-        // of their heights is most of the taller one, which a stacked pair
-        // (the name above the place) could never be
-        val overlap = kotlin.math.min(name.bottom.value, place.bottom.value) -
-            kotlin.math.max(name.top.value, place.top.value)
-        assertTrue(
-            "the reciter and the place must share one line, not one above the other: " +
-                "$name and $place",
-            overlap > (name.bottom - name.top).value / 2f,
-        )
-        // The words carry no close's rail any more, so the line stands on the
-        // capsule's own axis, the axis the transport under it stands on (owner
-        // decision, this session: the rail was there to keep the close's flash
-        // clear of the two doors, and with the close gone it was empty ground
-        // inside a shape that could be the words' own size).
-        assertEquals(
-            "the words stand on the capsule's own axis",
-            (bar.left + bar.right).value / 2f,
-            (words.left + words.right).value / 2f,
-            1f,
-        )
-        assertEquals(
-            "the two doors stand the app's air apart, so neither flash meets the other",
-            Space.Row.value,
-            (listening.left - reciter.right).value,
-            1f,
-        )
-        // The words' visible flash is 32 dp inside its 48 dp target: 4 dp of
-        // inert crown and 8 dp of the target's own rim stand above it, so the
-        // flash keeps the capsule's air while the two targets meet.
-        val flash = compose.onAllNodesWithTag("words-flash", useUnmergedTree = true).onFirst()
-            .getUnclippedBoundsInRoot()
-        assertEquals(
-            "the words' flash keeps the crown and the target's rim above it",
-            Space.Tight.value + 8f,
-            (flash.top - bar.top).value,
+            "the phone's row stands 64 dp tall",
+            64f,
+            (bar.bottom - bar.top).value,
             1f,
         )
     }
 
     /**
-     * The phone pill's own line: the words and the transport stand on the
-     * capsule's centre, and the transport carries no close at all (owner
-     * decision, this session). The stop the close used to carry is offered to
-     * a screen reader on Play or pause, which the leg below pins.
+     * The block's two lines: the reciter's name over the place, both inside
+     * one door, and the block's own shape keeps the capsule's air above and
+     * below it, and the words' own air at its end.
      */
     @Test
-    fun thePhonePillCentresItsTransport() {
-        showPill(pillWidth = Modifier.width(393.dp))
+    fun thePlayingPillStacksTheNameOverThePlace() {
+        showPill()
         val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
-        val first = compose.onNodeWithContentDescription("Previous ayah").getUnclippedBoundsInRoot()
-        val next = compose.onNodeWithContentDescription("Next ayah").getUnclippedBoundsInRoot()
+        val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
+        val name = compose.onNodeWithText("Husary", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
+        val place = compose.onNodeWithText("Al-Baqarah 2:255", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
+        assertTrue(
+            "the reciter's name must stand above the place: $name and $place",
+            name.bottom.value <= place.top.value + 0.5f,
+        )
         assertEquals(
-            "the transport stands centred under the words, not against one end",
-            (first.left - bar.left).value,
-            (bar.right - next.right).value,
+            "the block keeps the app's air above it",
+            Space.Line.value,
+            (words.top - bar.top).value,
             1f,
         )
+        assertEquals(
+            "the block keeps the app's air under it",
+            Space.Line.value,
+            (bar.bottom - words.bottom).value,
+            1f,
+        )
+        assertEquals(
+            "the block's end keeps the shoulder's air",
+            Space.Block.value + Space.Tight.value,
+            (words.left - bar.left).value,
+            1f,
+        )
+    }
+
+    /**
+     * The phone pill carries no close at all (owner decision, an earlier
+     * session). The stop it used to carry is the action TalkBack offers on
+     * Play or pause, and the pill draws no Stop mark anywhere.
+     */
+    @Test
+    fun thePlayingPillCarriesNoClose() {
+        showPill()
         compose.onNodeWithContentDescription("Stop").assertDoesNotExist()
     }
 
@@ -539,10 +487,10 @@ class PlaybackPillTest {
     }
 
     /**
-     * The capsule hugs the words it prints (owner decision, this session). A
-     * phone's page is no longer spent on empty ground: the capsule is the
-     * words' own measure, and the transport's row can never be squeezed
-     * inside it.
+     * The capsule hugs the words it prints (owner decision, an earlier
+     * session). A phone's page is not spent on empty ground: the capsule is
+     * the words' and the transport's own measure, with the words' air at one
+     * end and the transport's at the other.
      */
     @Test
     fun theCapsuleHugsItsWords() {
@@ -559,106 +507,123 @@ class PlaybackPillTest {
             "the capsule must hold its transport whole: bar $bar",
             (bar.right - bar.left).value >= 160f + 16f + 2 * 16f,
         )
+        val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
+        val next = compose.onNodeWithContentDescription("Next ayah").getUnclippedBoundsInRoot()
         assertEquals(
             "the capsule stands on the glass's own middle",
             (root.left + root.right).value / 2f,
             (bar.left + bar.right).value / 2f,
             1f,
         )
-        // The words' end keeps the shoulder's air: the capsule's end is a
-        // sphere, and at the words' own line, a few dp above its middle, the
-        // app's 8 dp read as a name touching the border (owner decision, this
-        // session).
-        val reciter = compose.onNodeWithTag("playback-reciter").getUnclippedBoundsInRoot()
-        val listening = compose.onNodeWithTag("playback-listening").getUnclippedBoundsInRoot()
         assertEquals(
             "the words' end keeps the shoulder's air from the capsule",
             Space.Block.value + Space.Tight.value,
-            (reciter.left - bar.left).value,
+            (words.left - bar.left).value,
             1f,
         )
         assertEquals(
-            "the other end keeps it too, because the line is centred",
-            Space.Block.value + Space.Tight.value,
-            (bar.right - listening.right).value,
+            "the transport keeps the app's air at its end",
+            Space.Line.value,
+            (bar.right - next.right).value,
             1f,
         )
     }
 
     /**
-     * The phone pill's tight shape (owner decision, this session): the words'
-     * press pill is 32 dp tall inside its 48 dp target, so the two rows'
-     * targets may stand against one another while the seam the reader sees
-     * keeps the app's air. The capsule stands 108 dp where it stood 120, and
-     * the visible airs above the flash, between it and the transport, and
-     * under the transport are 12, 8, and 8.
+     * The playing pill wears the offer's shape (owner decision, this
+     * session): one 64 dp capsule whose words block is 48 dp tall, whose
+     * transport circles are 48 dp, and whose airs are the app's own above,
+     * below, between, and at the end. Nothing in it touches a neighbour or
+     * the capsule's edge.
      */
     @Test
-    fun thePhonePillWearsTheTightCapsule() {
-        showPill(pillWidth = Modifier.width(393.dp))
+    fun thePlayingPillWearsTheOfferShape() {
+        showPill()
         val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
-        val flashes = compose.onAllNodesWithTag("words-flash", useUnmergedTree = true)
-        val flash = flashes.onFirst().getUnclippedBoundsInRoot()
-        val play = compose.onNodeWithContentDescription("Play or pause").getUnclippedBoundsInRoot()
+        val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
+        val first = compose.onNodeWithContentDescription("Previous ayah").getUnclippedBoundsInRoot()
+        val next = compose.onNodeWithContentDescription("Next ayah").getUnclippedBoundsInRoot()
         assertEquals(
-            "the phone's two rows stand 108 dp tall",
-            108f,
+            "the playing capsule stands 64 dp tall",
+            64f,
             (bar.bottom - bar.top).value,
             1f,
         )
-        flashes.assertCountEquals(2)
         assertEquals(
-            "both doors wear the words' 32 dp flash",
-            32f,
-            (flash.bottom - flash.top).value,
+            "the words' block stands 48 dp tall",
+            48f,
+            (words.bottom - words.top).value,
             1f,
         )
         assertEquals(
-            "the flash keeps the crown and the target's rim above it",
-            Space.Tight.value + 8f,
-            (flash.top - bar.top).value,
-            1f,
-        )
-        assertEquals(
-            "the flash and the transport's circles stand the app's air apart",
+            "the block keeps the app's air above it",
             Space.Line.value,
-            (play.top - flash.bottom).value,
+            (words.top - bar.top).value,
             1f,
         )
         assertEquals(
-            "the transport's circles keep the app's air above the foot",
+            "the block keeps the app's air under it",
             Space.Line.value,
-            (bar.bottom - play.bottom).value,
+            (bar.bottom - words.bottom).value,
+            1f,
+        )
+        assertEquals(
+            "the block's end keeps the shoulder's air",
+            Space.Block.value + Space.Tight.value,
+            (words.left - bar.left).value,
+            1f,
+        )
+        assertEquals(
+            "the block and the transport stand the app's row air apart",
+            Space.Row.value,
+            (first.left - words.right).value,
+            1f,
+        )
+        assertEquals(
+            "the transport keeps the app's air at its end",
+            Space.Line.value,
+            (bar.right - next.right).value,
             1f,
         )
     }
 
     /**
-     * One air, everywhere: the transport's three circles stand `Space.Line`
-     * apart, the two rows' flashes stand it apart, and no flash meets the
-     * capsule (owner decision, this session: they used to meet point to point,
-     * and the words' flash used to meet the capsule's own top edge).
+     * Nothing in the pill touches: the block keeps the capsule's air above and
+     * below it, the block and the transport stand the app's row air apart, the
+     * three circles stand the app's air apart, and the last circle keeps the
+     * capsule's air at its end (owner decision, this session).
      */
     @Test
     fun theTouchedShapesKeepTheCapsulesAir() {
-        showPill(pillWidth = Modifier.width(393.dp))
+        showPill()
         val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
-        val flash = compose.onAllNodesWithTag("words-flash", useUnmergedTree = true).onFirst()
-            .getUnclippedBoundsInRoot()
+        val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
         val play = compose.onNodeWithContentDescription("Play or pause").getUnclippedBoundsInRoot()
         val first = compose.onNodeWithContentDescription("Previous ayah").getUnclippedBoundsInRoot()
         val next = compose.onNodeWithContentDescription("Next ayah").getUnclippedBoundsInRoot()
         assertEquals(
-            "the two rows' flashes stand the app's air apart",
+            "the block keeps the app's air above it",
             Space.Line.value,
-            (play.top - flash.bottom).value,
+            (words.top - bar.top).value,
             1f,
         )
         assertEquals(
-            "the transport's flash keeps the capsule's air below it",
+            "the block keeps the app's air under it",
             Space.Line.value,
-            (bar.bottom - play.bottom).value,
-            2f,
+            (bar.bottom - words.bottom).value,
+            1f,
+        )
+        assertEquals(
+            "the block and the transport stand the app's row air apart",
+            Space.Row.value,
+            (first.left - words.right).value,
+            1f,
+        )
+        assertEquals(
+            "the transport's last circle keeps the capsule's air at its end",
+            Space.Line.value,
+            (bar.right - next.right).value,
+            1f,
         )
         assertEquals(
             "the transport's first two circles stand the app's air apart",
@@ -675,9 +640,9 @@ class PlaybackPillTest {
     }
 
     /**
-     * The one X the app keeps stands under the words on the capsule's own
-     * axis, alone in its row, and the playing pill's stop draws nothing here
-     * (owner decision, this session).
+     * The one X the app keeps trails the words on the capsule's own line,
+     * alone in its row, and it is the last shape in the pill (owner decision,
+     * this session).
      */
     @Test
     fun theTransfersOwnAbortIsTheOnlyMarkInItsRow() {
@@ -698,10 +663,11 @@ class PlaybackPillTest {
         // One answer shares the words' line: the capsule is one row tall plus
         // the line's own room, where the two-row shape stood 130 dp to hold a
         // single mark under its words (owner decision, this session).
-        assertTrue(
-            "the transfer's abort trails the words on their own line: " +
-                "words $words, cancel $cancel",
-            cancel.left.value >= words.right.value - 0.5f,
+        assertEquals(
+            "the transfer's abort stands the app's row air from the words",
+            Space.Row.value,
+            (cancel.left - words.right).value,
+            1f,
         )
         assertEquals(
             "the transfer's words keep the shoulder's air at the capsule's end",
@@ -860,7 +826,7 @@ class PlaybackPillTest {
             ),
         )
         showMutablePill(state)
-        compose.onNodeWithTag("playback-listening").performClick()
+        compose.onNodeWithTag("playback-words").performClick()
         compose.onNodeWithText("Continue to the next surah").assertExists()
         // The surah ended and the next package is offered: the pill underneath
         // is another pill, so the menu it belonged to goes with the old one.
@@ -887,7 +853,7 @@ class PlaybackPillTest {
             ),
         )
         showMutablePill(state)
-        compose.onNodeWithTag("playback-listening").performClick()
+        compose.onNodeWithTag("playback-words").performClick()
         compose.onNodeWithText("Continue to the next surah").assertExists()
         compose.runOnUiThread {
             state.value = state.value.copy(ayahNumber = 3, reference = "Al-Fatihah 1:3")
@@ -921,16 +887,26 @@ class PlaybackPillTest {
     }
 
     /**
-     * The pill's two word doors owe the finger the app's 48 dp: the name is
-     * the chooser and the status line is the listening menu, and a reader
-     * tapping the thin strip of type must land on the control behind it, not
-     * on the letter under their fingertip (owner decision, this session).
+     * The words owe the finger the app's 48 dp: the playing block is one door,
+     * and a reader tapping the thin strips of type must land on the control
+     * behind them, not on the letter under their fingertip (owner decision,
+     * this session).
      */
     @Test
     fun theWordDoorsAreFullTargets() {
-        showPill(pillWidth = Modifier.width(393.dp))
+        showPill()
+        compose.onNodeWithTag("playback-words").assertHeightIsAtLeast(48.dp)
+    }
+
+    /**
+     * The voice's own door, on the line a voice that is not a recitation
+     * wears: the name is still a full 48 dp target, and the sentence beside it
+     * is a notice (owner decision, this session).
+     */
+    @Test
+    fun theVoiceNameIsAFullTarget() {
+        showPill(state = PlaybackUiState(error = true))
         compose.onNodeWithContentDescription("Husary").assertHeightIsAtLeast(48.dp)
-        compose.onNodeWithContentDescription("Al-Baqarah 2:255").assertHeightIsAtLeast(48.dp)
     }
 
     /**
@@ -954,11 +930,16 @@ class PlaybackPillTest {
         }
     }
 
+    /**
+     * The reciter is chosen on the pill and not in the settings, and the panel
+     * that chooses carries every voice with what it would still cost for the
+     * surah at hand (owner report).
+     */
     @Test
-    fun theReciterNameIsTheChooserAndNotTheSettings() {
+    fun thePillChoosesTheReciterAndNotTheSettings() {
         var chosen: String? = null
         showPill(onReciter = { chosen = it })
-        compose.onNodeWithTag("playback-reciter").performClick()
+        compose.onNodeWithTag("playback-words").performClick()
         // Every reciter, and what it would still cost for this surah, so the
         // choice is made with the number in view. The number is 177,000,000
         // bytes, which is the megabyte the app's own formatter prints, and the
@@ -998,8 +979,8 @@ class PlaybackPillTest {
     /**
      * Both of the pill's popups hang from the capsule's own centre, and this
      * pins the capsule's half of that: the anchor they share is the pill's
-     * measure wide and stands on the pill's middle, on the phone's two rows
-     * and the wide pill's one row alike.
+     * measure wide and stands on the pill's middle, on the phone and on the
+     * wide glass alike.
      *
      * The popup's own place on the glass is not measured here, because it
      * cannot be: a popup draws in a window of its own, and every node inside
@@ -1010,7 +991,7 @@ class PlaybackPillTest {
      */
     @Test
     fun thePopupsHangFromThePillsOwnCentre() {
-        showPill(pillWidth = Modifier.width(393.dp))
+        showPill()
         assertTheAnchorStandsOnThePillCentre()
     }
 

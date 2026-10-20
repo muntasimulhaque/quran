@@ -403,22 +403,28 @@ implement it and update this list.
   TalkBack offers on Play or pause, under the same word the close was
   announced with, while a sighted reader pauses and taps the page. The
   capsule hugs its words, since the close's rail was what made it the page's
-  width: about 252 dp on a 360 dp phone instead of 328, and the place is no
-  longer cut with an ellipsis. Only the playing voice takes a second row on a
-  phone, because the transport is the one thing that needs one; an offer, a
-  failure, and a transfer's abort each share the words' line, so the
-  transfer's capsule is one row tall plus the room its line keeps. One air,
-  `Space.Line` (8 dp), stands between the press shapes the reader sees and
-  between a shape and the capsule's edge, and the words' own press pill is 32
-  dp inside its 48 dp target, so the two rows' targets may stand against one
-  another: the phone's two rows are 108 dp where they were 120. The words'
-  end keeps `Space.Block + Space.Tight` (20 dp) from the capsule on every
-  pill, because a capsule's end is a sphere and the words' line sits in its
+  width: about 305 to 325 dp on a 360 dp phone instead of 328. The pill is one
+  row in every voice, the offer's shape: a words block at the leading end, the
+  reciter's name over the place while playing and over the state's sentence
+  when there is no recitation, and one answer at the trailing end, so the
+  playing capsule is 64 dp tall where it stood 120, and a download's line
+  keeps the one extra row of room under it. The playing words are one block
+  and one door, and the door opens the whole listening panel: the voices, the
+  pace, and the end of the audio. A voice that is not a recitation keeps one
+  line and the voice list alone, because the pace and the end answer a
+  recitation that is not there (owner decision, this session: an offer shows
+  the reciter chooser, and only a playing pill shows the merged panel). The
+  block's place is one line and may end in an ellipsis at the longest names;
+  the shape was chosen with that cost in view. One air, `Space.Line` (8 dp),
+  stands between the shapes the reader sees: the transport's circles, and the
+  answer at its end. The words' own end keeps `Space.Block + Space.Tight`
+  (20 dp), because a capsule's end is a sphere and the words' line sits in its
   shoulder, where an 8 dp air measured from the widest point read as a name
-  touching the border (owner decision, this session: the Bangla matra reaches
-  the top of its line, so the offer's name looked cut). The transport, the
-  offer's Download, and the transfer's X keep 8. The width is measured by the
-  layout and never reserved, and
+  touching the border (owner decision: the Bangla matra reaches the top of its
+  line, so the offer's name looked cut); the same 20 holds the sentence on the
+  unavailable pill, which is words alone. The transport, the offer's Download,
+  and the transfer's X keep 8. The width is measured by the layout and never
+  reserved, and
   the download's line keeps its own room under the row so a percent never
   resizes the capsule; the size snaps and never animates.
 - The reading answers a tap with the page and a long press with the ayah's own

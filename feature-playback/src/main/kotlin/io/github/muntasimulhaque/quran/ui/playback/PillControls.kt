@@ -66,9 +66,13 @@ internal class WordControl(
 ) : PillControl
 
 /**
- * The two popups the pill's own words open, named so the capsule can say
- * which one is standing: the reciter's name opens the chooser, and the place
- * under it opens the pace and the end of the audio.
+ * The two popups the pill opens, named so the capsule can say which one is
+ * standing. A recitation opens the whole listening panel, the voices, the
+ * pace, and the end of the audio, because a recitation exists to answer all
+ * three. A voice that is not a recitation opens the voices alone: a failure,
+ * an unavailable answer, and a download request ask one question, which voice
+ * is chosen, and a pace and an ending over a recitation that is not there are
+ * answers before the question (owner decision, this session).
  *
  * The capsule draws both, from one anchor on its own centre, so the reader's
  * eye is sent to one place on the control rather than to two (owner report).
@@ -98,9 +102,10 @@ internal enum class PillMenu { Reciters, Listening }
  * use the page tap pauses, then taps the page, which is the app's one
  * dismissal for everything it raises.
  *
- * The words' two doors and the transfer's one X stand in their row with the
- * app's air between them, so no press shape touches another or the capsule
- * (owner decision, this session).
+ * The words and the answer stand in their row with the app's air between
+ * them, and the words' own end keeps the larger air the shoulder asks for, so
+ * no press shape touches another or the capsule (owner decision, this
+ * session).
  */
 @Composable
 internal fun pillControls(

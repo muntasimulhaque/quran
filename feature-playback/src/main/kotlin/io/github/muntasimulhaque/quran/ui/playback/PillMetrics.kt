@@ -2,7 +2,6 @@ package io.github.muntasimulhaque.quran.ui.playback
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -20,17 +19,16 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 internal val BarGutter = 16.dp
 
 /**
- * The air between the shapes the reader sees: between two controls, and
- * between a control and the capsule's own edge.
+ * The air between the shapes the reader sees: between two controls, the
+ * words' block and the transport, and the transfer's X and the words.
  *
- * The transport's circles fill their 48 dp targets, so on that row this is
- * the air between the targets. The words' doors draw a smaller flash inside
- * their 48 dp targets (see [WordsFlash]), and the seam is carried by the
- * target's own rim, so what the reader sees still stands this far apart. The
- * pill carries no close any more, so its shape is free to shrink to its
- * words, and this is the one number that shape is measured against (owner
- * decision, this session). It is the app's `Space.Line`, the gap a cluster of
- * same-kind small controls keeps, because that is what the transport row is.
+ * Every shape in the pill fills its target: the words' block, the transport's
+ * circles, the Download, and the X. So this is the air between the targets
+ * and to the capsule's edge, and there is no second number to learn. The pill
+ * carries no close any more, so its shape is free to shrink to its words, and
+ * this is the one number that shape is measured against (owner decision). It
+ * is the app's `Space.Line`, the gap a cluster of same-kind small controls
+ * keeps, and the transport is that cluster.
  */
 internal val PillAir = Space.Line
 
@@ -38,95 +36,47 @@ internal val PillAir = Space.Line
  * The air the words' own end keeps from the capsule on every pill the app
  * draws: the offer, the transfer, and the playing capsule alike.
  *
- * The capsule's end is a sphere, half its height, and the words' line does
- * not stand on the capsule's middle: it sits above it, 12 to 16 dp up on a
- * 64 dp pill and 34 dp on the 108 dp one. There the edge has already curved
- * in 4.5 dp on the short pill and 12 dp on the tall one, so an [PillAir]
- * measured from the capsule's widest point reads as almost nothing at the
- * words' own height: on the phone the reciter's name sat 5 to 8 dp inside the
- * border, and its press shape met the curve. `Space.Block + Space.Tight` is
- * the app's 8 dp air plus that shoulder, which is what makes the name read as
- * held rather than crowded (owner decision, this session: the name looked cut
- * in Bangla, whose matra reaches the top of its line).
+ * The capsule's end is a sphere, half its height, and the words do not stand
+ * on the capsule's middle: the name's line starts about 15 dp below the
+ * capsule's top, where the edge has already curved in 4.5 dp. An [PillAir]
+ * measured from the capsule's widest point therefore reads as almost nothing
+ * at the words' own height, and on the phone the reciter's name sat 5 to 8 dp
+ * inside the border, with its press shape meeting the curve. `Space.Block + Space.Tight` is the app's 8 dp air plus that shoulder,
+ * which is what makes the name read as held rather than crowded (owner
+ * decision: the name looked cut in Bangla, whose matra reaches the top of its
+ * line).
  *
- * It is the words' side only. The transport, the offer's Download, and the
- * transfer's X keep [PillAir] at their end: they stand at the capsule's widest
- * height or wear a shape of their own, where the air reads true.
+ * It is the words' side only, and it is worn at whichever end the words stand
+ * alone at: their leading end when an answer follows, and both their ends on
+ * the unavailable pill, which is words alone. The transport, the Download,
+ * and the X keep [PillAir] at their end, because they stand at the capsule's
+ * widest height or wear a round shape of their own, where the air reads true.
  */
 internal val PillEndAir = Space.Block + Space.Tight
 
-/** The gap between the pill's two word doors, which are a cluster of two. */
+/**
+ * The gap between the words and what answers them: the transport, the
+ * Download, the Retry, or the X.
+ *
+ * They are two standalone shapes rather than one cluster, so this is the
+ * app's `Space.Row` (owner decision, the theme and consistency session).
+ */
 internal val WordsGap = 12.dp
-
-/**
- * The words' own press pill: the shape a tap on the reciter's name or on the
- * place draws.
- *
- * It is drawn inside the doors' 48 dp targets instead of filling them, the
- * way `TextButton` draws its pill inside its slab, and that is what buys the
- * phone pill its height (owner decision, this session). A 32 dp flash with 8
- * dp of rim above and below means the two rows' targets can stand against one
- * another and the seam still reads as [PillAir]: the air that used to sit
- * between two 48 dp nodes now lives inside the words' node itself. The ink is
- * untouched, still centred in the flash, so the line the reader reads does not
- * move with the shape around it.
- */
-internal val WordsFlash = 32.dp
-
-/**
- * The inert sliver above the words' target on the two-row pill: four dp of the
- * capsule's crown that answer nothing.
- *
- * It keeps the capsule's very top edge from being a control while the words'
- * flash still holds its air below it. The visible airs above the flash, between
- * the flash and the transport, and under the transport are then 12, 8, and 8:
- * the crown's own breath, then the app's one air (owner decision, this
- * session).
- */
-internal val WordsCrown = Space.Tight
-
-/**
- * The measure the pill's words keep, or the words take a line of their own.
- *
- * 300 dp is the whole line the pill can print at its longest: the longest
- * surah name and its ayah, and the slowest pace. Below that the words get
- * the room left over beside three 48 dp controls, which is fourteen
- * characters at the size the status line is set: a surah name and its ayah
- * break across lines, the pace is cut with an ellipsis, and the reader is
- * left with a name they cannot read (owner report).
- *
- * So the pill is two rows wherever the words cannot keep that measure, and
- * one row where they can: a tablet, a landscape phone, and nowhere else. A
- * phone in portrait always takes the two rows, and pays for it in height.
- */
-internal val WordsMeasure = 300.dp
 
 /**
  * One control's own target, which is the app's floor and what
  * `minimumInteractiveComponentSize` gives it. A Material release that widens
- * it has to widen this number with it, or the one-row shape is measured
- * against a row that no longer exists.
+ * it has to widen this number with it, or the row is measured against a
+ * control that no longer exists.
  */
 internal val TransportSize = 48.dp
-
-/** The status line's own chevron: the 14 dp mark and 4 dp before it. */
-internal val ChevronRoom = GlyphSize.ChevronInline + 4.dp
-
-/**
- * The reciter's chevron beside the reciter's name: the same 14 dp mark and
- * the same 4 dp before it. It was 16 dp, two short of the drawing it stood
- * for, so the one-row threshold counted a row that was never there (owner
- * decision, the theme and consistency session).
- */
-internal val ReciterChevronRoom = GlyphSize.ChevronInline + 4.dp
 
 /**
  * The room a download's line and the foot under it take beneath the pill's
  * own row: the 2 dp line and the 8 dp of ground below it.
  *
  * It is added to the capsule rather than drawn over the row, so the line
- * never shares a pixel with a control's press shape (owner decision, this
- * session).
+ * never shares a pixel with a control's press shape (owner decision).
  */
 internal val ProgressRoom = 10.dp
 
@@ -135,9 +85,8 @@ internal val ProgressRoom = 10.dp
  *
  * The popup's corner is 20 dp, so content left at its edge sat hard against
  * the curve and the first and last highlights read as touching the menu they
- * hang in (owner report, this session). Ten dp keeps the first and last rows
- * off the curve above and below them; the rows keep their own 22 dp gutter
- * at the sides.
+ * hang in (owner report). Ten dp keeps the first and last rows off the curve
+ * above and below them; the rows keep their own 22 dp gutter at the sides.
  */
 internal val PillMenuGutter = 10.dp
 
@@ -192,17 +141,6 @@ internal val PopupGap = 10.dp
  */
 internal fun transportRun(controls: Int): Dp =
     if (controls <= 0) 0.dp else TransportSize * controls + PillAir * (controls - 1)
-
-/**
- * What the pill's own row spends before the words get a pixel of it: the
- * capsule's air at the words' end and at the transport's, the gap, the
- * controls, and the two chevrons the words wear. Three controls, the playing
- * state, is 536 dp, which is a tablet and a landscape phone and no phone in
- * portrait.
- */
-internal fun oneRowFloor(controls: Int): Dp =
-    PillEndAir + WordsGap + transportRun(controls) + ChevronRoom +
-        ReciterChevronRoom + WordsMeasure + PillAir
 
 /**
  * The room a popup the pill opens may take, in pixels: the ground between

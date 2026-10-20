@@ -4,9 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -18,7 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -30,105 +28,174 @@ import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
-import kotlin.math.abs
 import io.github.muntasimulhaque.quran.ui.theme.Radii
+import kotlin.math.abs
 
 /**
- * The pill's words, on one line in both shapes: who is reading, and where the
- * reader is. On a phone they stand centred over the controls; on a wide glass
- * they stand beside them, centred in their own half. The line is one shape
- * rather than two because its two words are the pill's two doors, and a door
- * owes the finger the app's 48 dp target: stacked, the two strips of 20 dp
- * text left two targets 19 dp apart, and a hand could not tell which one it
- * was on (owner decision, this session: the wide pill's column is gone).
+ * The pill's words over its answer, on two lines and as one door: who is
+ * reading, and where the reader is, or the size the offer names.
  *
- * The reciter's name is the door to the reciter chooser and the line beside it
- * is the door to the listening menu, which wears a chevron so it can be found
- * without a guess. Neither door is the line around it: the row is a container
- * for two controls, and a container that answered taps would take both.
+ * **The two pills that carry words over an answer wear this block**: the
+ * playing capsule, which answers with the transport, and the offer, which
+ * answers with Download. The block is the offer's own shape, and the pill
+ * joined it (owner decision, this session): one line of type over one answer,
+ * 64 dp tall, where the playing pill used to stack a words row over a
+ * transport row and pay 120 dp for a line of words that fits beside the
+ * controls. The voices that are not a recitation keep the one line beside
+ * their answer instead: a failure, a transfer, and an answer the app cannot
+ * give each say a sentence rather than a place, and a sentence beside the
+ * name is shorter than a block (owner decision, this session).
  *
- * Nothing else is written here, because the pill is a control over the page,
- * and a control that has to say a sentence stops being one (owner report).
+ * The block is one door. Its two lines are one question, who and where, and
+ * the panel behind it is one panel: the voices, the pace, and what happens at
+ * the end, the whole of what a reader can change about what they are hearing.
+ * The offer's block opens the reciter chooser alone, because before there is
+ * anything to hear the one question is which voice to fetch, and the pace and
+ * the end are answers to a recitation that does not exist yet (owner decision,
+ * this session).
  *
- * The two words carry no menu of their own. A menu takes its shape from the
- * anchor it hangs on, and the anchor the reader wants is the pill's own
- * centre, not the edge of the word they touched (owner report), so the
- * capsule holds the menu and these two only say which one was asked for.
+ * The block carries the app's 48 dp target, so the two lines and the chevron
+ * are not the whole of what a finger has to hit, while the shape the eye sees
+ * is the block itself. Its 4 dp inset keeps the type off its own press shape,
+ * and the caller gives its end [PillEndAir]: a capsule's end is a sphere, and
+ * at the name's line an 8 dp air measured from the widest point read as a name
+ * touching the border, which the Bangla matra made plain (owner report, this
+ * session).
+ *
+ * The second line gives way before the first: the name is short and names the
+ * door, and a place, a size, or a percent may end in an ellipsis on the glass
+ * narrow for it. Neither line wraps: a control that grows a third line stops
+ * being a control over the page.
+ */
+@Composable
+internal fun WordsBlock(
+    /** The reciter's name, or whatever names the thing the block is about. */
+    name: String,
+    /** The place, the size, the percent, or the state's sentence. */
+    title: String,
+    /**
+     * The door the block is, or null where there is nothing to open: while a
+     * package is on its way, the transfer's X is the one thing to press, and
+     * a chevron over words that answer nothing is a door that lies.
+     */
+    onOpen: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+) {
+    val press = remember { MutableInteractionSource() }
+    Column(
+        modifier = modifier
+            .then(
+                if (onOpen == null) {
+                    Modifier
+                } else {
+                    Modifier
+                        .clickable(
+                            interactionSource = press,
+                            indication = null,
+                            role = Role.Button,
+                            onClick = onOpen,
+                        )
+                        .minimumInteractiveComponentSize()
+                },
+            )
+            .clip(Radii.Pill)
+            .then(
+                if (onOpen == null) {
+                    Modifier
+                } else {
+                    Modifier.indication(press, ripple(color = MaterialTheme.colorScheme.primary))
+                },
+            )
+            .padding(horizontal = 4.dp, vertical = 2.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = name,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                // The name is measured first and keeps its whole width; the
+                // chevron needs its own room after it, never over it.
+                modifier = Modifier.weight(1f, fill = false),
+            )
+            if (onOpen != null) {
+                IconGlyph(
+                    icon = Icon.Chevron,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .padding(start = 4.dp)
+                        .size(GlyphSize.ChevronInline),
+                )
+            }
+        }
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+/**
+ * The pill's words on one line, for the voices that are not a recitation: who
+ * is reading, and the state's own sentence beside it.
+ *
+ * The reciter's name is the door to the chosen voice, and the sentence is a
+ * notice: the pace and the end belong to a recitation, and these voices have
+ * none, so the sentence does not open the listening panel (owner decision,
+ * this session: the offer showed only the reciter chooser before there was
+ * anything to hear, and a failure and an unavailable answer are the same
+ * moment). A state whose name cannot be chosen, which is a package on its way,
+ * draws the name as a notice too and no chevron.
+ *
+ * One line rather than the block, because the sentence and the name are one
+ * thought wide: a failure beside the name is shorter than the name above it,
+ * and a taller capsule for a sentence would be the 120 dp row again (owner
+ * decision, this session: the block while playing, this line elsewhere).
+ *
+ * The name's flash is the door's whole 48 dp target, so the thin strip of type
+ * and its chevron are not the whole of what a finger has to hit, and the
+ * highlight the reader sees is the shape the finger hits. The sentence is bare
+ * type, and it gives way before the name: a long status is cut with an ellipsis
+ * before the name is.
  */
 @Composable
 internal fun PlaybackWordsLine(
     reciterName: String,
-    /** The door to the chooser, or null where there is no choice to make. */
+    /** The door to the voice, or null where the voice cannot be chosen now. */
     onOpenReciters: (() -> Unit)?,
+    /** The state's own sentence, which is not a door. */
     status: String,
-    /** The door to the pace and the end of the audio, or null where there is nothing to hear. */
-    onOpenListening: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier.testTag("playback-words"),
+        modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(WordsGap, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         ReciterDoor(name = reciterName, onOpen = onOpenReciters)
         // The reciter's name is measured first and keeps its whole width; the
-        // place is the weighted line, so a long reference or pace gives way
+        // status is the weighted line, so a long reference or percent gives way
         // to the name rather than squeezing it into an ellipsis. The name is
         // the pill's door to its own chooser, and a door half-said is a door
-        // the reader cannot read (owner report, this session).
-        PlaybackStatusLine(
+        // the reader cannot read (owner report).
+        Text(
             text = status,
-            onOpen = onOpenListening,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f, fill = false),
         )
     }
 }
 
 /**
- * The words' own press shape: the pill a tap on a door draws, [WordsFlash]
- * tall, worn inside the door's 48 dp target the way `TextButton` wears its
- * pill inside its slab.
- *
- * The target stays 48 dp, so a finger still lands on the whole word and a
- * screen reader still reports the whole target; the flash is only what the
- * eye sees. That is what lets the phone's two rows stand 108 dp: the words'
- * target's lower rim is the [PillAir] the transport's circles keep, so the two
- * targets may stand against one another while the flashes never meet.
- *
- * [rippleColor] is the ink the press washes with, the accent for the reciter's
- * name and the quiet voice for the place. It is null where there is no door to
- * press, and then no shape is drawn at all: the words are bare type, which is
- * what a notice is.
- */
-@Composable
-private fun WordFlash(
-    rippleColor: Color?,
-    press: MutableInteractionSource,
-    content: @Composable RowScope.() -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .height(WordsFlash)
-            .clip(Radii.Pill)
-            .then(
-                if (rippleColor == null) {
-                    Modifier
-                } else {
-                    Modifier
-                        .indication(press, ripple(color = rippleColor, bounded = false))
-                        .testTag("words-flash")
-                },
-            )
-            .padding(horizontal = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        content = content,
-    )
-}
-
-/**
- * The reciter's name, and the door it is to: the other reciters, with what
- * each of them would still need for the surah the reader is hearing, and a
- * check on the one in use.
+ * The reciter's name, and the door it is to: the voice the recitation will be
+ * heard in, with what each one would still need for the surah at hand.
  *
  * The name wears a chevron the way every other door in the app does, so the
  * choice is found without a guess. It is a chooser and not a hop to the
@@ -139,15 +206,15 @@ private fun WordFlash(
  *
  * The door carries the app's 48 dp target around its own line, so the thin
  * strip of type and its chevron are not the whole of what a finger has to
- * hit, while the shape the eye sees, and the shape the press draws, is the
- * words' own flash: [WordsFlash] tall inside that target, the way `TextButton`
- * draws its pill inside its slab (owner decision, this session). The target's
- * rim is what carries the seam in the phone's two rows, which is why the
- * capsule can stand 108 dp tall instead of 120.
+ * hit, while the pill the eye sees is the line plus the app's own chip inset
+ * and never the target (owner decision, the theme and consistency session:
+ * with the clip outside the target, the press highlight read as a 48 dp
+ * capsule over a 16 dp word). The transport is what carries a second row, so
+ * there is no seam here for a smaller flash to carry, and the flash is the
+ * shape the finger hits.
  *
- * Null where the choice cannot be made now, which is while a package is on
- * its way: the chevron is gone rather than a door that does nothing, and no
- * flash is drawn because there is nothing to press.
+ * Null where the voice cannot be chosen now, which is while a package is on
+ * its way: the chevron is gone rather than a door that does nothing.
  */
 @Composable
 private fun ReciterDoor(
@@ -171,91 +238,34 @@ private fun ReciterDoor(
                         .minimumInteractiveComponentSize()
                 },
             )
+            .clip(Radii.Pill)
+            .then(
+                if (onOpen == null) {
+                    Modifier
+                } else {
+                    Modifier.indication(
+                        press,
+                        ripple(color = MaterialTheme.colorScheme.primary, bounded = false),
+                    )
+                },
+            )
+            .padding(horizontal = 4.dp, vertical = 8.dp)
             .testTag("playback-reciter")
             .semantics { contentDescription = name },
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        WordFlash(
-            rippleColor = if (onOpen == null) null else MaterialTheme.colorScheme.primary,
-            press = press,
-        ) {
-            Text(
-                text = name,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f, fill = false),
-            )
-            if (onOpen != null) {
-                IconGlyph(
-                    icon = Icon.Chevron,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .padding(start = 4.dp)
-                        .size(GlyphSize.ChevronInline),
-                )
-            }
-        }
-    }
-}
-
-/**
- * Where the reader is, and, while a recitation plays, the door to the pace
- * and to what happens at the end of the audio. The door is the line itself
- * and it wears a chevron so it can be found without a guess; the chevron is
- * gone when there is nothing behind it.
- *
- * It is the second line of the wide pill's pair of words and the second half
- * of the phone pill's one line, and it is the same composable in both: one
- * place says what the status is, and the capsule says which menu that line
- * opened. Its flash is the words' own, [WordsFlash] tall inside the 48 dp
- * target, so the two doors wear one shape whatever length their words are.
- */
-@Composable
-private fun PlaybackStatusLine(
-    text: String,
-    onOpen: (() -> Unit)?,
-    modifier: Modifier = Modifier,
-) {
-    if (onOpen == null) {
         Text(
-            text = text,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            text = name,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = modifier,
+            modifier = Modifier.weight(1f, fill = false),
         )
-        return
-    }
-    val press = remember { MutableInteractionSource() }
-    Row(
-        modifier = modifier
-            .clickable(
-                interactionSource = press,
-                indication = null,
-                role = Role.Button,
-                onClick = onOpen,
-            )
-            .minimumInteractiveComponentSize()
-            .testTag("playback-listening")
-            .semantics { contentDescription = text },
-    ) {
-        WordFlash(
-            rippleColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            press = press,
-        ) {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f, fill = false),
-            )
+        if (onOpen != null) {
             IconGlyph(
                 icon = Icon.Chevron,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .padding(start = 4.dp)
                     .size(GlyphSize.ChevronInline),
@@ -269,10 +279,10 @@ private fun PlaybackStatusLine(
  * reader is, and, only when it is not the ordinary one, the pace.
  *
  * What happens at the end of the audio is not said here. The sentence it
- * takes does not fit the line the pill has, a name and a place sharing one
- * line, and the switch that carries the answer says its own state where the
- * reader turns it: a repeat is evident from the switch that is on, and the
- * pill is not a third place the answer is written down (owner report).
+ * takes does not fit the line the block has, and the switch that carries the
+ * answer says its own state where the reader turns it: a repeat is evident
+ * from the switch that is on, and the pill is not a third place the answer is
+ * written down (owner report).
  *
  * The pace stays, because it is a mark and not a sentence, and because a
  * recitation at 0.75x is the one thing about the audio a reader notices

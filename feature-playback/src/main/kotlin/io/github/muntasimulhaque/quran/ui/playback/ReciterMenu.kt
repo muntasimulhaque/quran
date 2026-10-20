@@ -13,9 +13,9 @@ import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
  * carry.
  *
  * One list, in one shape, wherever the choice is offered: the playing pill
- * carries it beside the reciter it is hearing, and the offer carries it above
- * the size it is asking for, and a reader who learned one has learned both.
- * A reciter who is already chosen wears the app's one leading radio mark, so
+ * carries it at the head of its listening panel, and the offer carries it
+ * above the size it is asking for, and a reader who learned one has learned
+ * both. A reciter who is already chosen wears the app's one leading radio mark, so
  * the pill and the Reciters page draw the same control and a screen reader
  * hears the chosen row as the chosen one; every other row says what that
  * reciter would still need for the surah at hand, so the choice is made with

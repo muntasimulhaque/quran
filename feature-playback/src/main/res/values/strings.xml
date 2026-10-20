@@ -14,6 +14,10 @@
     <string name="playback_play_pause">Play or pause</string>
     <string name="playback_next_ayah">Next ayah</string>
     <string name="playback_reciter_ready">Ready to play</string>
+    <!-- The merged panel's first section: the voices a reader may hear. It
+         leads the panel because the block that opens it leads with the
+         reciter's name. -->
+    <string name="playback_reciter_label">Reciter</string>
     <!-- What the media notification and the lock screen call the ayah being
          heard. The reciter's own name is its artist line. One row, the same
          shape the daily reminder uses, so the two voices the app has say a
