@@ -14,6 +14,7 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
@@ -282,6 +283,23 @@ class PlaybackPillTest {
         compose.onNodeWithText("When the audio ends").assertExists()
         compose.onAllNodesWithText("0.5x").onFirst().performClick()
         assertEquals(0.5f, speed)
+    }
+
+    /**
+     * The panel opens quiet: a focusable popup hands the focus to its first
+     * focusable child, and Material draws that focus as a state layer over the
+     * first voice, which read as the chosen one even when another was (owner
+     * report, this session). The panel clears its focus once it has settled;
+     * the rows keep their focus for Tab and for a screen reader, which reaches
+     * them through the semantics rather than through this focus.
+     */
+    @Test
+    fun theListeningPanelOpensWithNoRowFocused() {
+        showPill()
+        compose.onNodeWithTag("playback-words").performClick()
+        compose.onNode(
+            hasText("Husary") and hasAnyAncestor(hasTestTag("pill-popup")),
+        ).assertIsNotFocused()
     }
 
     /**

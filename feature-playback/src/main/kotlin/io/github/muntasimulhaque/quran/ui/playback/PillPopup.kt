@@ -2,17 +2,23 @@ package io.github.muntasimulhaque.quran.ui.playback
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -77,6 +83,18 @@ internal fun PillPopup(
         properties = PopupProperties(focusable = true),
         popupPositionProvider = PillMenuPosition(anchor, gap),
     ) {
+        // The popup's window hands the focus to its first focusable child, and
+        // Material draws that focus as a state layer over the first row: the
+        // panel opened with the first voice looking chosen before the reader
+        // had touched it (owner report, this session). The panel itself is the
+        // first focus target and takes the focus once it has settled, so it
+        // opens quiet; the rows keep their focus, reached with Tab, and the
+        // panel's target draws nothing and carries no semantics.
+        val openingFocus = remember { FocusRequester() }
+        LaunchedEffect(Unit) {
+            repeat(3) { withFrameNanos { } }
+            openingFocus.requestFocus()
+        }
         Column(
             modifier = Modifier
                 .width(PillMenuMeasure)
@@ -89,6 +107,8 @@ internal fun PillPopup(
                 // them (owner report, this session).
                 .padding(vertical = PillMenuGutter)
                 .testTag("pill-popup")
+                .focusRequester(openingFocus)
+                .focusTarget()
                 .sheetVerticalScroll(rememberScrollState()),
             content = content,
         )
