@@ -24,6 +24,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.feature.settings.R
+import io.github.muntasimulhaque.quran.ui.kit.SectionHead
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.kit.sheetToggleRow
@@ -38,25 +39,22 @@ import io.github.muntasimulhaque.quran.ui.theme.appSwitchColors
  * A quiet heading over a group of rows. It opens the group with more room
  * than the rows keep between themselves, so the heading reads as the name of
  * what follows rather than as another row.
+ *
+ * It wears the app's one head over a list, [SectionHead], so a group in the
+ * settings sheet and a group in the pill's listening panel are one voice. The
+ * air is this page's own: the hub opens a group with a block's room and closes
+ * it with a line's.
  */
 @Composable
 fun Group(title: String) {
-    Text(
+    SectionHead(
         text = title,
-        style = MaterialTheme.typography.labelMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier
-            // A heading is a heading to a screen reader too, and this is the
-            // only way a reader who cannot see the sheet can jump from one
-            // group of settings to the next. TalkBack has navigated by
-            // heading since 9.1; the app marked nothing at all.
-            .semantics { heading() }
-            .padding(
-                start = Space.Gutter,
-                end = Space.Gutter,
-                top = Space.Block + Space.Tight,
-                bottom = Space.Line,
-            ),
+        modifier = Modifier.padding(
+            start = Space.Gutter,
+            end = Space.Gutter,
+            top = Space.Block + Space.Tight,
+            bottom = Space.Line,
+        ),
     )
 }
 

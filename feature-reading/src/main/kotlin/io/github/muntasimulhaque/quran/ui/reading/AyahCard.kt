@@ -49,6 +49,7 @@ import io.github.muntasimulhaque.quran.data.TafsirPassage
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.AddDoor
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
+import io.github.muntasimulhaque.quran.ui.kit.SectionHead
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.languageName
@@ -189,12 +190,13 @@ fun AyahCard(
                 // The label stands over the tafsir doors in both readings: the
                 // doors themselves name the pack, never the kind of text, so
                 // without a name over them "Ibn Kathir" could be read as the word
-                // by word list.
+                // by word list. It wears the app's one head over a list, the
+                // same the settings' groups wear, so a label over a group of
+                // choices is one voice wherever the reader meets it (owner
+                // decision, this session).
                 if (tafsirPacks.isNotEmpty()) {
-                    Text(
+                    SectionHead(
                         text = stringResource(R.string.card_tafsir_label),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Block),
                     )
                 }

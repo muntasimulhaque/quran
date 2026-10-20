@@ -1,35 +1,21 @@
 package io.github.muntasimulhaque.quran.ui.playback
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.indication
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.minimumInteractiveComponentSize
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.customActions
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
+import io.github.muntasimulhaque.quran.ui.kit.GlyphButton
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
-import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /**
  * One control in the pill's own row: a glyph the app drew by hand, or a word
@@ -177,16 +163,20 @@ internal fun pillControls(
 }
 
 /**
- * The pill's controls, in the order a reader's hand expects them, with the
- * app's air between the shapes it draws: the transport is a cluster of
- * same-kind small controls, so it stands `Space.Line` apart (owner decision,
- * this session).
+ * The pill's controls, in the order a reader's hand expects them.
+ *
+ * The transport is a cluster of same-kind small controls, so the circles it
+ * draws stand the app's [PillAir] apart. The targets stand `[TransportAir]`
+ * apart, which is no air at all, because each circle is [TransportInset]
+ * inside its own target: the air belongs between the shapes the reader sees,
+ * and a finger that slides from one control to the next finds no dead pixel
+ * between them (owner decision, this session).
  */
 @Composable
 internal fun PillControls(
     controls: List<PillControl>,
     modifier: Modifier = Modifier,
-    arrangement: Arrangement.Horizontal = Arrangement.spacedBy(PillAir),
+    arrangement: Arrangement.Horizontal = Arrangement.spacedBy(TransportAir),
 ) {
     Row(
         modifier = modifier,
@@ -226,7 +216,7 @@ private val Transport.icon: Icon
         Transport.Close -> Icon.Close
     }
 
-/** Hand-drawn transport controls, one shape each, at the app's 48 dp target. */
+/** Hand-drawn transport controls, one shape each, on the app's one round control. */
 @Composable
 internal fun TransportButton(
     kind: Transport,
@@ -236,43 +226,23 @@ internal fun TransportButton(
     actions: List<CustomAccessibilityAction> = emptyList(),
 ) {
     val tint = MaterialTheme.colorScheme.onSurfaceVariant
-    val press = remember { MutableInteractionSource() }
-    Box(
-        modifier = Modifier
-            // The click owns the 48 dp node; the glyph inside it stays 20 dp
-            // (owner decision, the accessibility test). The ripple is drawn
-            // on a shape of the node's own size, not on the 20 dp glyph: an
-            // indication left on the glyph flashed a dot inside the target
-            // the finger actually hit, which read as too small (owner
-            // report, this session). The shape is the app's one control
-            // capsule, which on this square target is the circle an icon
-            // button wears, and it fills the target the way the node does.
-            .clickable(
-                interactionSource = press,
-                indication = null,
-                onClick = onClick,
-            )
-            .minimumInteractiveComponentSize()
-            .semantics {
-                contentDescription = description
-                role = Role.Button
-                if (actions.isNotEmpty()) customActions = actions
-            },
-        contentAlignment = Alignment.Center,
+    // The app's one round control: [GlyphTarget] of touch, [GlyphPress] of
+    // press, and the glyph inside it at the size a transport mark wears. The
+    // press is a circle the size of the app's icon button rather than the
+    // whole target, so three of them stand edge to edge with the app's air
+    // between the circles (owner decision, this session). The 20 dp mark stays
+    // 20 dp: the press must not flash a dot inside the target the finger hit
+    // (owner report, an earlier session).
+    GlyphButton(
+        description = description,
+        onClick = onClick,
+        tint = tint,
+        actions = actions,
     ) {
-        Box(
-            modifier = Modifier
-                .size(TransportSize)
-                .clip(Radii.Pill)
-                .indication(press, ripple(color = tint))
-                .testTag("transport-shape"),
-            contentAlignment = Alignment.Center,
-        ) {
-            IconGlyph(
-                icon = kind.icon,
-                tint = tint,
-                modifier = Modifier.size(GlyphSize.Transport),
-            )
-        }
+        IconGlyph(
+            icon = kind.icon,
+            tint = tint,
+            modifier = Modifier.size(GlyphSize.Transport),
+        )
     }
 }

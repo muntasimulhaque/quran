@@ -42,6 +42,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.ui.kit.GlyphButton
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /** Every glyph the interface needs, drawn by hand so nothing is borrowed. */
@@ -346,8 +347,14 @@ private fun playPath(w: Float, h: Float, offset: Offset = Offset.Zero, flip: Boo
     }
 
 /**
- * An icon button: 48 dp of touch, 22 dp of ink, one spoken label. The touch
- * target is the smallest the guidelines allow, never the size of the icon.
+ * An icon button: a full target of touch, 22 dp of ink, one spoken label.
+ *
+ * The target is the smallest the guidelines allow, never the size of the icon,
+ * and the press is the app's own round control: the circle inside the target,
+ * not the target itself, so a mark that stands beside another mark keeps its
+ * air (owner decision, this session). [GlyphButton] is the whole of the
+ * geometry, which the top bar's marks and the playback pill's transport read
+ * as one rule.
  */
 @Composable
 fun IconButton(
@@ -360,20 +367,16 @@ fun IconButton(
     /** A quarter turn for a mark that points a way, like the back chevron. */
     rotation: Float = 0f,
 ) {
-    Box(
-        modifier = modifier
-            .size(48.dp)
-            .clip(Radii.Pill)
-            .clickable(onClick = onClick)
-            .semantics {
-                contentDescription = description
-                role = Role.Button
-            },
-        contentAlignment = Alignment.Center,
+    val ink = if (active) MaterialTheme.colorScheme.primary else tint
+    GlyphButton(
+        description = description,
+        onClick = onClick,
+        tint = ink,
+        modifier = modifier,
     ) {
         IconGlyph(
             icon = icon,
-            tint = if (active) MaterialTheme.colorScheme.primary else tint,
+            tint = ink,
             modifier = Modifier
                 .size(GlyphSize.ChevronNav)
                 .then(if (rotation != 0f) Modifier.rotate(rotation) else Modifier),

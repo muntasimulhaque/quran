@@ -31,7 +31,9 @@ import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.kit.DownloadLine
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
+import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.theme.Radii
+import kotlin.math.abs
 
 /**
  * The playback pill. It speaks in five voices: asking to download a surah,
@@ -64,16 +66,25 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * inside a shape that had no reason to be that wide. So the capsule is the
  * wider of its words and its answer, plus [PillEndAir] at the words' end and
  * [PillAir] at the answer's, and it never takes a pixel the reader is not
- * reading. On a 360 dp phone the playing capsule is about 305 to 325 dp, and
- * the offer about 250. The shape is measured by the layout and never by a
+ * reading. On a 360 dp phone it runs from about 285 dp at the shortest places
+ * to the page's own 328 at the longest, and the offer is about 250. The shape
+ * is measured by the layout and never by a
  * number reserved for it; the capsule snaps to a new width and never animates
  * it, because a width that slid would turn a one dp change between two ayahs
  * into a performance over the page.
  *
  * The place is one line and gives way with an ellipsis before the name does.
- * The one-row shape gives it about 120 dp on a 360 dp phone, which holds
- * Al-Fatihah and Al-Mumtahanah and ends the longest Bangla name short (owner
- * decision, this session: the shape was chosen with that cost in view).
+ * On a 360 dp phone the line holds about 140 dp, which carries 108 of the 114
+ * surahs' longest places whole in English and 102 in Bangla, and ends the
+ * rest short: the reader keeps the word Ayah on the line (owner decision,
+ * this session), and that word alone costs about 32 dp.
+ *
+ * **The pace is a mark beside the voice, not a tail on the place** (owner
+ * decision, this session). It used to be appended to the place, where it was
+ * the first thing an ellipsis cut: at the longest names the place is longer
+ * than its own line, so a pace at the end of it was never read at all. Who is
+ * reading and how fast are one fact about the voice, so the pace stands beside
+ * the reciter's name, where the name leaves 90 dp of the line empty.
  *
  * **Nothing touches.** The words keep [PillEndAir] at their own end, because a
  * capsule's end is a sphere and an [PillAir] measured from its widest point
@@ -81,7 +92,11 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * where it stands at the capsule's widest height or wears a round shape of its
  * own; and [WordsGap] stands between the two. On the unavailable pill, which
  * is words alone, both ends keep [PillEndAir], so the sentence is held as the
- * name is (owner decision, this session).
+ * name is (owner decision, this session). The transport is the one answer
+ * whose air is measured between circles rather than between targets: its three
+ * circles stand [PillAir] apart, and the targets under them stand
+ * [TransportAir] apart, which is no air at all (owner decision, this
+ * session).
  *
  * The pill is also where its popup hangs. A menu takes the shape of the anchor
  * it is given, and an anchor on the word the reader touched stood the reciter
@@ -178,8 +193,12 @@ fun PlaybackBar(
         }
         needsDownload -> pendingLabel.orEmpty()
         state.unavailable -> stringResource(R.string.playback_unavailable)
-        else -> playbackStatus(reference.orEmpty(), speed)
+        else -> playbackPlace(reference.orEmpty())
     }
+    // The pace, said only when it is not the ordinary one: at 1x there is
+    // nothing to say, and an extra mark on the line the place is read on would
+    // be the one thing on the pill the reader did not ask for (owner report).
+    val pace = if (abs(speed - 1f) > 0.01f) speedText(speed) else null
     val controls = pillControls(
         state = state,
         downloading = downloading,
@@ -262,6 +281,7 @@ fun PlaybackBar(
                         WordsBlock(
                             name = reciterName,
                             title = status,
+                            pace = pace,
                             onOpen = { openMenu = PillMenu.Listening },
                             modifier = Modifier
                                 .weight(1f, fill = false)
@@ -281,7 +301,17 @@ fun PlaybackBar(
                         )
                     }
                     if (controls.isNotEmpty()) {
-                        Spacer(Modifier.width(WordsGap))
+                        // The answer's own shape keeps the app's air. A glyph
+                        // answer draws its circle [TransportInset] inside its
+                        // target, so its lead gives the inset back and the
+                        // reader sees [WordsGap] either way; a word answer ends
+                        // at its own edge and takes the gap whole (owner
+                        // decision, this session).
+                        Spacer(
+                            Modifier.width(
+                                if (controls.first() is GlyphControl) GlyphLead else WordsGap,
+                            ),
+                        )
                         PillControls(controls)
                     }
                 }

@@ -403,7 +403,8 @@ implement it and update this list.
   TalkBack offers on Play or pause, under the same word the close was
   announced with, while a sighted reader pauses and taps the page. The
   capsule hugs its words, since the close's rail was what made it the page's
-  width: about 305 to 325 dp on a 360 dp phone instead of 328. The pill is one
+  width: on a 360 dp phone it runs from about 285 dp to the page's own 328,
+  and its place line holds about 140 dp where it held 120. The pill is one
   row in every voice, the offer's shape: a words block at the leading end, the
   reciter's name over the place while playing and over the state's sentence
   when there is no recitation, and one answer at the trailing end, so the
@@ -415,7 +416,12 @@ implement it and update this list.
   recitation that is not there (owner decision, this session: an offer shows
   the reciter chooser, and only a playing pill shows the merged panel). The
   block's place is one line and may end in an ellipsis at the longest names;
-  the shape was chosen with that cost in view. One air, `Space.Line` (8 dp),
+  it holds about 140 dp on a 360 dp phone, which carries 108 of the 114
+  surahs' places whole in English, and the word Ayah stays on it
+  (owner decision, this session). The pace stands on the reciter's name's
+  line, never at the tail of the place, where the line's ellipsis ate it and
+  where at the longest names the place alone is wider than the line (owner
+  decision, this session). One air, `Space.Line` (8 dp),
   stands between the shapes the reader sees: the transport's circles, and the
   answer at its end. The words' own end keeps `Space.Block + Space.Tight`
   (20 dp), because a capsule's end is a sphere and the words' line sits in its
@@ -427,6 +433,15 @@ implement it and update this list.
   reserved, and
   the download's line keeps its own room under the row so a percent never
   resizes the capsule; the size snaps and never animates.
+- **A round control's press is a 40 dp circle inside its 48 dp target.** One
+  rule for every round mark that answers a tap: the chrome's Browse, Search,
+  and Settings, a page's back, and the pill's transport. It is Material's own
+  icon button, and it is what lets two targets stand edge to edge while the
+  circles they light keep `Space.Line` (8 dp) between them. The transport is
+  the tightest case: its three targets abut, so a finger finds no dead pixel
+  between them, its circles stand 8 dp apart, and the place gained 20 dp of
+  the capsule's width, where three circles the size of their targets kept the
+  transport at 160 (owner decision, this session).
 - The reading answers a tap with the page and a long press with the ayah's own
   actions (Play, Tafsir, Save, Note, More). A tap brings or puts away the
   chrome and dismisses a raised pill; the one-time note that teaches the long
@@ -467,6 +482,12 @@ implement it and update this list.
   dialog's Set and Cancel, the remove question, and a note's Clear and Save,
   stand `Space.Row` (12 dp) apart, because each is its own answer (owner
   decision, this session).
+- **A label over a list wears one voice:** `ui-kit`'s `SectionHead`, the small
+  label size in the accent at a weight above the rows it opens, and a heading
+  to a screen reader. The settings hub's groups, the ayah card's tafsir doors,
+  and the pill's listening panel all draw it; none draws its head at the size
+  of the rows under it, which read as one undifferentiated block with no
+  rhythm to lean the air between them on (owner decision, this session).
 - The theme is one choice of three: Light, Dark, and System, drawn as one
   swatch row with no switch beside it (owner decision, this session). The
   two grounds keep their names, Light and Dark, the words every phone already

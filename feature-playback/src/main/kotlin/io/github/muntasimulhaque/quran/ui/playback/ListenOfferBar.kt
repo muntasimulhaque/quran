@@ -125,13 +125,17 @@ internal fun ListenOfferBar(
                         .testTag("offer-words"),
                 )
                 // The state's one answer, and the words give way to it with an
-                // ellipsis: the 12 dp lead keeps the block and the button apart
-                // when the name and the size are long. A request and a failure
+                // ellipsis: the lead keeps the block and the answer apart when
+                // the name and the size are long. A request and a failure
                 // answer with a word; a package on its way answers with the
                 // app's one X, because a stray tap must never throw the
-                // transfer away.
+                // transfer away. The X's circle is inset into its own target,
+                // so its target takes the smaller lead and the reader sees the
+                // app's air either way (owner decision, this session).
                 Row(
-                    modifier = Modifier.padding(start = WordsGap),
+                    modifier = Modifier.padding(
+                        start = if (progress != null) GlyphLead else WordsGap,
+                    ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     when {

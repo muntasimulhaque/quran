@@ -15,6 +15,7 @@ import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
+import io.github.muntasimulhaque.quran.ui.kit.SectionHead
 import io.github.muntasimulhaque.quran.ui.kit.SpeedSteps
 import io.github.muntasimulhaque.quran.ui.kit.StepRow
 import io.github.muntasimulhaque.quran.ui.kit.speedText
@@ -61,24 +62,22 @@ internal fun ColumnScope.ListeningPanel(
  * One section's name inside a pill popup: the panel's first line, the label
  * over the pace, and the label over the answers.
  *
- * One voice, one inset, and one air wherever a section begins, so the merged
- * panel reads as one list with three heads rather than three menus stacked.
- * The first label is the popup's first line, so it keeps the top inset the
- * reciter chooser's first row already opens with: with no room over the
- * leading the label sat against the popup's own top edge at a small fraction
- * of that inset (owner report, the listening menu). The room sits over the
- * leading, and the label still stands nearer the control it names than the
- * top edge.
+ * It wears the app's one head over a list, [SectionHead], so the panel's
+ * sections read as groups of choices rather than as rows of their own: a label
+ * at the size of the rows under it made the merged panel twelve lines of one
+ * voice, with no hierarchy to lean the air between them on (owner report, this
+ * session). It is a heading to a screen reader as well, so a reader who cannot
+ * see the panel can jump from the voices to the pace to the ending.
+ *
+ * The air is this popup's own, not the settings sheet's: the panel keeps the
+ * popup's 22 dp gutters and a line's room above it, where the hub opens a
+ * group with a block's. The head still stands nearer the control it names than
+ * the space above it.
  */
 @Composable
 private fun MenuLabel(text: String) {
-    Text(
+    SectionHead(
         text = text,
-        // The same label style the settings' step row wears: a control's name
-        // is one voice wherever the control stands (owner decision, the
-        // theme and consistency session).
-        style = MaterialTheme.typography.bodyLarge,
-        color = MaterialTheme.colorScheme.onSurface,
         modifier = Modifier.padding(
             start = Space.Gutter,
             top = Space.Row,

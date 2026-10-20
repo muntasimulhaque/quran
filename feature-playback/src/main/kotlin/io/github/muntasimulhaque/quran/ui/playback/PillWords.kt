@@ -24,12 +24,11 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
-import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Radii
-import kotlin.math.abs
+import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
  * The pill's words over its answer, on two lines and as one door: who is
@@ -66,6 +65,14 @@ import kotlin.math.abs
  * door, and a place, a size, or a percent may end in an ellipsis on the glass
  * narrow for it. Neither line wraps: a control that grows a third line stops
  * being a control over the page.
+ *
+ * The name's line also carries the pace, when the reader has chosen one that
+ * is not the ordinary: who is hearing and how fast are one fact about the
+ * voice, and the place's own line has no room to give it (owner decision, this
+ * session). It stands after the name in the quiet voice, with the chevron last,
+ * so the door's own words still end in the mark that says a door (owner
+ * decision: a door's chevron ends its line). The pace is not a second door and
+ * is not spoken as one: the block is one target with one spoken name.
  */
 @Composable
 internal fun WordsBlock(
@@ -73,6 +80,11 @@ internal fun WordsBlock(
     name: String,
     /** The place, the size, the percent, or the state's sentence. */
     title: String,
+    /**
+     * The pace, when it is not the ordinary one: a mark on the voice's own
+     * line. Null at 1x, where there is nothing to say.
+     */
+    pace: String? = null,
     /**
      * The door the block is, or null where there is nothing to open: while a
      * package is on its way, the transfer's X is the one thing to press, and
@@ -116,9 +128,22 @@ internal fun WordsBlock(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 // The name is measured first and keeps its whole width; the
-                // chevron needs its own room after it, never over it.
+                // pace and the chevron need their own room after it, never
+                // over it.
                 modifier = Modifier.weight(1f, fill = false),
             )
+            if (!pace.isNullOrBlank()) {
+                Text(
+                    text = pace,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    // The app's air between two things, not the chevron's 4:
+                    // the pace is a fact beside the name rather than the
+                    // door's own tail.
+                    modifier = Modifier.padding(start = Space.Line),
+                )
+            }
             if (onOpen != null) {
                 IconGlyph(
                     icon = Icon.Chevron,
@@ -275,30 +300,22 @@ private fun ReciterDoor(
 }
 
 /**
- * What the pill says under the reciter's name while an ayah plays: where the
- * reader is, and, only when it is not the ordinary one, the pace.
+ * What the pill says under the reciter's name while an ayah plays: the place,
+ * in the reader's own digits.
  *
- * What happens at the end of the audio is not said here. The sentence it
+ * The pace does not stand here any more (owner decision, this session). It was
+ * appended after the app's middot, which made it the first thing the line's
+ * ellipsis cut: at the longest names the place alone is wider than the line,
+ * so a pace trailing it was never read at all, and at the shorter ones it would
+ * be read half cut ("1.2..."), which says the wrong thing. It stands beside the
+ * reciter's name now, where it is a fact about the voice and where the line has
+ * room to spare.
+ *
+ * What happens at the end of the audio is not said here either. The sentence it
  * takes does not fit the line the block has, and the switch that carries the
  * answer says its own state where the reader turns it: a repeat is evident
  * from the switch that is on, and the pill is not a third place the answer is
  * written down (owner report).
- *
- * The pace stays, because it is a mark and not a sentence, and because a
- * recitation at 0.75x is the one thing about the audio a reader notices
- * without being told.
  */
 @Composable
-internal fun playbackStatus(
-    reference: String,
-    speed: Float,
-): String {
-    val extras = buildList {
-        if (abs(speed - 1f) > 0.01f) add(speedText(speed))
-    }
-    // The reference and the pace are numbers the reader reads, so both follow
-    // the interface's own digits; the separator is the app's one middot.
-    return (listOf(localizedDigits(reference)) + extras)
-        .filter { it.isNotBlank() }
-        .joinToString(" \u00b7 ")
-}
+internal fun playbackPlace(reference: String): String = localizedDigits(reference)
