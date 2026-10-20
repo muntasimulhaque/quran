@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -53,9 +54,10 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * it with the same "not now"; the only X the bar draws is the cancel of a
  * package already on its way, which is the one thing a stray tap must not do.
  *
- * The bar hugs its words for the same reason the pill does: the download is a
- * name, a size, and one answer, and a full-width shape spent the reader's page
- * on ground nothing stood on. Its row keeps [PillEndAir] at the words' end,
+ * The bar stands at the pill's own [PillMeasure], in every state of the
+ * request (owner decision, this session). It used to hug its words, which made
+ * an offer and the transfer that followed it two different widths for one
+ * download. Its row keeps [PillEndAir] at the words' end,
  * because a capsule's end is a sphere and at the name's line an [PillAir]
  * measured from its widest point reads as five dp: in Bangla the name looked
  * cut, where its matra reaches the top of its line (owner report, this
@@ -78,12 +80,20 @@ internal fun ListenOfferBar(
     val progress = offer.progress
     Box(
         modifier = modifier
+            // The caller's gutters come first, then the pill's one measure:
+            // the offer is the same capsule as the playing pill and takes the
+            // same width before its shape is drawn (owner decision, this
+            // session).
+            .widthIn(max = PillMeasure)
+            .fillMaxWidth()
             .floatingLift(Radii.Pill)
             .clip(Radii.Pill)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .testTag("listen-offer-bar"),
-        // The bar hugs its words, and its content stands on its own middle
-        // whatever measure it is given.
+        // The bar stands at the pill's one measure, and its content stands on
+        // its own middle whatever measure it is given. The measure is taken
+        // before the shape so a narrower glass narrows the capsule and never
+        // its words alone (owner decision, this session).
         contentAlignment = Alignment.Center,
     ) {
         Column(
@@ -91,12 +101,14 @@ internal fun ListenOfferBar(
             modifier = Modifier.padding(bottom = if (progress != null) ProgressRoom else 0.dp),
         ) {
             Row(
-                modifier = Modifier.padding(
-                    start = PillEndAir,
-                    end = PillAir,
-                    top = PillAir,
-                    bottom = PillAir,
-                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = PillEndAir,
+                        end = PillAir,
+                        top = PillAir,
+                        bottom = PillAir,
+                    ),
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -121,7 +133,7 @@ internal fun ListenOfferBar(
                         null
                     },
                     modifier = Modifier
-                        .weight(1f, fill = false)
+                        .weight(1f, fill = true)
                         .testTag("offer-words"),
                 )
                 // The state's one answer, and the words give way to it with an

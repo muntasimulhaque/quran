@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -60,18 +61,17 @@ import kotlin.math.abs
  * recitation that is not there (owner decision, this session). The offer makes
  * the same choice for the same reason.
  *
- * **The capsule hugs its words** (owner decision, an earlier session). It
- * used to take the page's whole width, because a close's rail ran along both
- * ends of its words' line; with the close gone, that rail was empty ground
- * inside a shape that had no reason to be that wide. So the capsule is the
- * wider of its words and its answer, plus [PillEndAir] at the words' end and
- * [PillAir] at the answer's, and it never takes a pixel the reader is not
- * reading. On a 360 dp phone it runs from about 285 dp at the shortest places
- * to the page's own 328 at the longest, and the offer is about 250. The shape
- * is measured by the layout and never by a
- * number reserved for it; the capsule snaps to a new width and never animates
- * it, because a width that slid would turn a one dp change between two ayahs
- * into a performance over the page.
+ * **The capsule is one measure, and it never changes it** (owner decision,
+ * this session). Its width used to follow its words: about 285 dp at the
+ * shortest places, the page's own 328 at the longest, about 230 for an offer,
+ * and about 210 for a transfer that widened again as the percent did. A
+ * control that widens as a download moves throws its own edge around under
+ * the reader's eye, and the progress line at its foot changes length with
+ * it. So every voice, the playing capsule, the offer, the transfer, the
+ * failure, and the unavailable answer, now stands at [PillMeasure], clamped
+ * by the glass, and the words and the answer keep their own ends while the
+ * ground between them takes what the words do not need. The capsule has one
+ * width to be at, so it snaps to nothing and animates nothing.
  *
  * The place is one line and gives way with an ellipsis before the name does.
  * On a 360 dp phone the line holds about 140 dp, which carries 108 of the 114
@@ -218,9 +218,10 @@ fun PlaybackBar(
     // becomes a different pill: when its voice changes from playing to an
     // offer or a download, and when the reading moves to another ayah or
     // another surah. Keying the remember on those is what closes it, and
-    // leaving pause, speed, and the switches out of the keys is what keeps it
-    // open while the reader is using it (owner report: a menu stayed over the
-    // continuation pill that had replaced the one it belonged to).
+    // leaving pause, speed, and the switches out of the keys means the panel
+    // is not put away by the very state it just changed. The answer itself
+    // closes it below, so one tap both changes the thing and returns the
+    // reader to the reading (owner decision, this session).
     val voice = when {
         state.error -> PillVoice.Failed
         state.downloadFailed -> PillVoice.Failed
@@ -240,6 +241,12 @@ fun PlaybackBar(
     Box(
         modifier = modifier
             .padding(horizontal = BarGutter)
+            // One measure in every voice, never the words' (owner decision,
+            // this session). The capsule stands at the page's own 328 on the
+            // app's reference phone and clamps to a narrower glass, so a
+            // download's percent and an offer's size can never move its edge.
+            .widthIn(max = PillMeasure)
+            .fillMaxWidth()
             .floatingLift(Radii.Pill)
             .clip(Radii.Pill)
             // The playback bar floats over the reading, so it wears the
@@ -247,10 +254,9 @@ fun PlaybackBar(
             // and under it, and it has to read as above the page.
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .testTag("playback-bar"),
-        // The capsule's own content stands on the capsule's middle. A hugged
-        // capsule is its content exactly, and one held to a measure of its own
-        // still centres the row it holds rather than hanging it from the
-        // leading edge.
+        // The capsule's own content stands on the capsule's middle. One
+        // measure is held whatever the voice, and the row it holds is
+        // centered on that measure rather than hanging from its leading edge.
         contentAlignment = Alignment.Center,
     ) {
         Box {
@@ -261,18 +267,19 @@ fun PlaybackBar(
                 ),
             ) {
                 Row(
-                    // The words lead with [PillEndAir]: the capsule's end is a
-                    // sphere, and at the name's line [PillAir] measured from
-                    // the widest point reads as nothing. The words' other end
-                    // keeps it too when the words are all there is; once an
-                    // answer follows, the answer's own shape keeps [PillAir]
-                    // at the capsule's widest height.
-                    modifier = Modifier.padding(
-                        start = PillEndAir,
-                        end = if (controls.isEmpty()) PillEndAir else PillAir,
-                        top = PillAir,
-                        bottom = PillAir,
-                    ),
+                    // The whole measure belongs to the row, so the words lead
+                    // with [PillEndAir] at one end, the answer keeps [PillAir]
+                    // at the other, and the ground the words do not need stands
+                    // between them rather than past the answer (owner decision,
+                    // this session).
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            start = PillEndAir,
+                            end = if (controls.isEmpty()) PillEndAir else PillAir,
+                            top = PillAir,
+                            bottom = PillAir,
+                        ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (playing) {
@@ -284,7 +291,7 @@ fun PlaybackBar(
                             pace = pace,
                             onOpen = { openMenu = PillMenu.Listening },
                             modifier = Modifier
-                                .weight(1f, fill = false)
+                                .weight(1f, fill = true)
                                 .testTag("playback-words"),
                         )
                     } else {
@@ -296,7 +303,7 @@ fun PlaybackBar(
                             onOpenReciters = openReciters,
                             status = status,
                             modifier = Modifier
-                                .weight(1f, fill = false)
+                                .weight(1f, fill = true)
                                 .testTag("playback-words"),
                         )
                     }
@@ -357,14 +364,27 @@ fun PlaybackBar(
                             PillMenu.Listening -> ListeningPanel(
                                 options = reciterOptions,
                                 selected = reciterId,
+                                // Every answer puts the panel away: one
+                                // question was asked, and the tap answered it
+                                // (owner decision, this session). The voice
+                                // list has always closed on its choice, and
+                                // the pace and the end of the audio follow it
+                                // now, so the reader is back on the reading
+                                // rather than in a panel they have to dismiss.
                                 onChoose = {
                                     openMenu = null
                                     onReciter(it)
                                 },
                                 speed = speed,
                                 end = end,
-                                onSpeed = onSpeed,
-                                onEndOfAudio = onEndOfAudio,
+                                onSpeed = {
+                                    openMenu = null
+                                    onSpeed(it)
+                                },
+                                onEndOfAudio = {
+                                    openMenu = null
+                                    onEndOfAudio(it)
+                                },
                             )
                             // The voices alone, for a voice that has no
                             // recitation to set a pace for.

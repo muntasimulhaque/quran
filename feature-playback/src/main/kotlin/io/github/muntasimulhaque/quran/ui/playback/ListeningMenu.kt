@@ -39,6 +39,15 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * of the pill's already does. The voices keep the app's choice row, with the
  * leading mark and what that voice would still need for the surah at hand, so
  * a reciter is chosen with its price in view.
+ *
+ * **Every answer puts the panel away** (owner decision, this session). The
+ * voice list has always closed on its choice, and the pace and the ending
+ * follow it. One panel asked one question, and the tap answered it, so the
+ * reader is back on the reading rather than in a panel they have to dismiss.
+ * The cost is that a reader changing two things opens the door twice, and
+ * that the ending has no read-back on the pill, which by a settled rule does
+ * not write the ending down; the row's own mark was on screen when the tap
+ * landed.
  */
 @Composable
 internal fun ColumnScope.ListeningPanel(

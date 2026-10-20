@@ -64,7 +64,10 @@ import java.util.Locale
  * 2. The playing words are one block and one door, and the door opens the
  *    whole listening panel: the voices, the pace, and what happens at the end
  *    of the audio, and all of them call the pill's one setter, so there is one
- *    value with one door (owner decision, this session).
+ *    value with one door. Every answer in that panel puts it away: the voice
+ *    list has always closed on its choice, and the pace and the ending follow
+ *    it, so one question is answered by one tap (owner decision, this
+ *    session).
  * 3. The automatic download says what it is fetching: the name and the size
  *    are on the pill even when no offer preceded it (owner decision).
  * 4. The playing pill is one row in every voice, the offer's shape: the words
@@ -100,13 +103,14 @@ import java.util.Locale
  *    reader: a head at the size of the rows under it made the panel twelve
  *    lines of one voice, with no hierarchy for the air between them to lean on
  *    (owner decision, this session).
- * 10. The capsule hugs its words (owner decision). It carries no close on the
- *     playing pill, the offer, a failure, or an unavailable answer, so it is
- *     the wider of its words and its answer plus the words' air at one end and
- *     the answer's at the other, and never the page's width for no reason.
- *     The place is one line and may end in an ellipsis at the longest names;
- *     the shape was chosen with that cost in view (owner decision, this
- *     session).
+ * 10. The capsule is one measure in every voice (owner decision, this
+ *     session). It used to follow its words: about 285 dp at the shortest
+ *     places, the page's own 328 at the longest, about 230 for an offer, and
+ *     about 210 for a transfer that widened again as its percent did. The
+ *     playing capsule, the offer, and the transfer now stand at 328 dp on a
+ *     360 dp glass, and the words and the answer keep its two ends while the
+ *     ground between them takes what the words do not need. The place is one
+ *     line and may end in an ellipsis at the longest names.
  * 11. The offer prints the surah's own name whole in the line it shares with
  *     the size, in either language: the size may give way at the end of the
  *     line, the name never does (owner decision, this session).
@@ -213,7 +217,10 @@ class PlaybackPillTest {
      * The same pill, with a state the test can change under it, so a menu can
      * be watched as the pill becomes another pill.
      */
-    private fun showMutablePill(state: MutableState<PlaybackUiState>) {
+    private fun showMutablePill(
+        state: MutableState<PlaybackUiState>,
+        pillWidth: Modifier = Modifier,
+    ) {
         compose.setContent {
             QuranTheme(theme = AppTheme.Light) {
                 Box(
@@ -236,6 +243,7 @@ class PlaybackPillTest {
                         onDownload = {},
                         onStop = {},
                         onCancelDownload = {},
+                        modifier = pillWidth,
                     )
                 }
             }
@@ -521,31 +529,27 @@ class PlaybackPillTest {
     }
 
     /**
-     * The capsule hugs the words it prints (owner decision, an earlier
-     * session). A phone's page is not spent on empty ground: the capsule is
-     * the words' and the transport's own measure, with the words' air at one
-     * end and the transport's at the other.
+     * The capsule is one measure in every voice (owner decision, this
+     * session). It used to follow its words, from about 285 dp at the shortest
+     * places to the page's own 328 at the longest while playing, and a share
+     * of that while an offer or a transfer stood: one download was two widths,
+     * and the transfer's edge moved as its percent did. Now the playing
+     * capsule, the offer, and the transfer stand at the page's own 328 on a
+     * 360 dp glass, and the words and the answer keep its two ends.
      */
     @Test
-    fun theCapsuleHugsItsWords() {
-        showPill()
+    fun theCapsuleIsOneMeasure() {
+        showPill(pillWidth = Modifier.width(360.dp))
         val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
         val root = compose.onRoot().getUnclippedBoundsInRoot()
-        assertTrue(
-            "the capsule must not fill the page: bar $bar, root $root",
-            (bar.right - bar.left).value < (root.right - root.left).value - 2 * 16f - 1f,
-        )
-        // Three 48 dp targets that stand edge to edge, the lead a glyph
-        // answer's target takes, and the capsule's own air at both ends: the
-        // narrowest the shape can be.
-        val narrowest = GlyphTarget.value * 3 + Space.Line.value +
-            (Space.Block.value + Space.Tight.value) + Space.Line.value
-        assertTrue(
-            "the capsule must hold its transport whole: bar $bar, narrowest $narrowest",
-            (bar.right - bar.left).value >= narrowest,
-        )
         val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
         val next = compose.onNodeWithContentDescription("Next ayah").getUnclippedBoundsInRoot()
+        assertEquals(
+            "the capsule stands at the page's own 328",
+            328f,
+            (bar.right - bar.left).value,
+            1f,
+        )
         assertEquals(
             "the capsule stands on the glass's own middle",
             (root.left + root.right).value / 2f,
@@ -564,6 +568,88 @@ class PlaybackPillTest {
             (bar.right - next.right).value,
             1f,
         )
+    }
+
+    /**
+     * A percent never moves the capsule's edge (owner report, this session):
+     * the transfer used to widen again as the status's digits grew, so its
+     * shape reported the download rather than the reading. One measure and one
+     * line, from the first percent to the last.
+     */
+    @Test
+    fun theTransferKeepsOneWidthAsItsPercentGrows() {
+        val state = mutableStateOf(
+            PlaybackUiState(
+                pendingDownloadSurah = 19,
+                pendingDownloadBytes = 22L * 1024 * 1024,
+                downloadProgress = 0.01f,
+            ),
+        )
+        showMutablePill(state, pillWidth = Modifier.width(360.dp))
+        val start = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
+        compose.runOnUiThread { state.value = state.value.copy(downloadProgress = 1f) }
+        val end = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
+        assertEquals(
+            "the transfer stands at the pill's one measure",
+            328f,
+            (start.right - start.left).value,
+            1f,
+        )
+        assertEquals(
+            "a percent must never move the capsule's leading edge",
+            start.left.value,
+            end.left.value,
+            0.5f,
+        )
+        assertEquals(
+            "a percent must never move the capsule's trailing edge",
+            start.right.value,
+            end.right.value,
+            0.5f,
+        )
+        val line = compose.onNodeWithTag("download-line").getUnclippedBoundsInRoot()
+        assertEquals(
+            "the line keeps the capsule's own measure less its gutters",
+            328f - 2 * 16f,
+            (line.right - line.left).value,
+            1f,
+        )
+    }
+
+    /**
+     * Every answer puts the panel away (owner decision, this session): the
+     * voice list has always closed on its choice, and the pace and the ending
+     * follow it. One panel asked one question, and the tap answered it, so the
+     * reader is back on the reading rather than in a panel to dismiss.
+     */
+    @Test
+    fun everyAnswerPutsThePanelAway() {
+        var speed: Float? = null
+        var end: EndOfAudio? = null
+        var reciter: String? = null
+        showPill(
+            onSpeed = { speed = it },
+            onEndOfAudio = { end = it },
+            onReciter = { reciter = it },
+        )
+        fun openThePanel() {
+            compose.onNodeWithTag("playback-words").performClick()
+            compose.onNodeWithTag("pill-popup").assertExists()
+        }
+        openThePanel()
+        compose.onAllNodesWithText("0.5x").onFirst().performClick()
+        assertEquals("the pace must reach the pill's setter", 0.5f, speed)
+        compose.onNodeWithTag("pill-popup").assertDoesNotExist()
+
+        openThePanel()
+        compose.onNodeWithText("Repeat the surah").performClick()
+        assertEquals("the ending must reach the pill's setter", EndOfAudio.REPEAT_SURAH, end)
+        compose.onNodeWithTag("pill-popup").assertDoesNotExist()
+
+        openThePanel()
+        compose.onNodeWithText("Minshawi").performClick()
+        assertEquals("the voice must reach the pill's setter", "minshawi", reciter)
+        compose.onNodeWithTag("pill-popup").assertDoesNotExist()
     }
 
     /**
@@ -812,7 +898,6 @@ class PlaybackPillTest {
             ),
         )
         val bar = compose.onNodeWithTag("listen-offer-bar").getUnclippedBoundsInRoot()
-        val root = compose.onRoot().getUnclippedBoundsInRoot()
         val title = compose.onNodeWithText("Maryam \u00b7 22 MB").getUnclippedBoundsInRoot()
         val download = compose.onNodeWithText("Download").getUnclippedBoundsInRoot()
         assertTrue(
@@ -826,9 +911,11 @@ class PlaybackPillTest {
             (bar.right - download.right).value,
             1.5f,
         )
-        assertTrue(
-            "the offer hugs its words rather than filling the page: bar $bar, root $root",
-            (bar.right - bar.left).value < (root.right - root.left).value - 2 * 16f - 1f,
+        assertEquals(
+            "the offer stands at the pill's one measure",
+            328f,
+            (bar.right - bar.left).value,
+            1f,
         )
     }
 

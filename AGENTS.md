@@ -402,16 +402,23 @@ implement it and update this list.
   stop has no shape any more and is not lost with it: it is the action
   TalkBack offers on Play or pause, under the same word the close was
   announced with, while a sighted reader pauses and taps the page. The
-  capsule hugs its words, since the close's rail was what made it the page's
-  width: on a 360 dp phone it runs from about 285 dp to the page's own 328,
-  and its place line holds about 140 dp where it held 120. The pill is one
+  capsule is one measure in every voice, 328 dp, the page's own width on the
+  360 dp phone and the widest it ever stood while hugging, clamped to the
+  glass less its 16 dp gutters: the words and the answer keep its two ends,
+  and an offer, a transfer, and a playing pill are one shape, where the
+  capsule used to run from about 210 dp for a transfer to the page's own 328
+  while playing, and to widen as a percent did (owner decision, this
+  session). The pill is one
   row in every voice, the offer's shape: a words block at the leading end, the
   reciter's name over the place while playing and over the state's sentence
   when there is no recitation, and one answer at the trailing end, so the
   playing capsule is 64 dp tall where it stood 120, and a download's line
   keeps the one extra row of room under it. The playing words are one block
   and one door, and the door opens the whole listening panel: the voices, the
-  pace, and the end of the audio. A voice that is not a recitation keeps one
+  pace, and the end of the audio. Every answer in that panel puts it away,
+  the voice, the pace, and the ending alike, because one question was asked
+  and the tap answered it (owner decision, this session). A voice that is not
+  a recitation keeps one
   line and the voice list alone, because the pace and the end answer a
   recitation that is not there (owner decision, this session: an offer shows
   the reciter chooser, and only a playing pill shows the merged panel). The
@@ -429,10 +436,9 @@ implement it and update this list.
   touching the border (owner decision: the Bangla matra reaches the top of its
   line, so the offer's name looked cut); the same 20 holds the sentence on the
   unavailable pill, which is words alone. The transport, the offer's Download,
-  and the transfer's X keep 8. The width is measured by the layout and never
-  reserved, and
-  the download's line keeps its own room under the row so a percent never
-  resizes the capsule; the size snaps and never animates.
+  and the transfer's X keep 8. The width is one number and never measured
+  from the content, and the download's line keeps its own room under the row,
+  so a percent can never resize the capsule; the size never animates.
 - **A round control's press is a 40 dp circle inside its 48 dp target.** One
   rule for every round mark that answers a tap: the chrome's Browse, Search,
   and Settings, a page's back, and the pill's transport. It is Material's own

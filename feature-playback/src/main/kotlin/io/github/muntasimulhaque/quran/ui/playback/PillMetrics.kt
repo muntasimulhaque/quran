@@ -13,11 +13,47 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  */
 
 /**
- * The gutter a floating control keeps from the glass. A pill that reaches
- * the screen's own edge stops reading as a control over the page and starts
- * reading as a sheet the app forgot to inset (owner report).
+ * The gutter a floating control keeps from the glass in the least: a pill
+ * that reaches the screen's own edge stops reading as a control over the
+ * page and starts reading as a sheet the app forgot to inset (owner report).
+ *
+ * It is the floor, not the measure. [PillMeasure] is the width the pill and
+ * the offer stand at, and a glass narrower than that takes this much on each
+ * side and no more, while a glass wider than it keeps the capsule on the
+ * page's own middle with the page's ground beside it.
  */
 internal val BarGutter = 16.dp
+
+/**
+ * The width the pill stands at in every voice, and the width of the offer bar
+ * that asks before it: one measure, chosen once, never a function of the words
+ * it holds.
+ *
+ * The capsule used to hug its content, so it was about 285 dp at the shortest
+ * places, the page's own 328 at the longest, about 230 for an offer, and about
+ * 210 for a transfer that widened again as the percent did. A control whose
+ * edge moves while a download advances is a shape the reader watches instead
+ * of the reading, and the progress line at its foot changed length with it
+ * (owner report, this session: the transfer was narrower at its first percent
+ * than at its last, and an offer and the transfer that followed it were two
+ * widths for one download).
+ *
+ * 328 is the page's own width on the app's reference 360 dp phone, 360 less
+ * the two [BarGutter]s, which is the widest the capsule ever stood while
+ * hugging. So nothing that fits stops fitting: the words' block keeps 148 dp,
+ * and the place line its 140, where 108 of the 114 surahs' longest places fit
+ * whole in English and 102 in Bangla. The transfer's status gets that room at
+ * every percent instead of the room its digits happen to need, and the offer's
+ * name and size get it before the download starts.
+ *
+ * The pill's other numbers are fixed rather than derived from the glass (64 dp
+ * tall, the 48 dp targets, the 40 dp press, the 288 dp menu), so its width is
+ * too: a tablet does not get a taller pill, and it does not get a wider one.
+ * The same control stands at the same measure on all three store profiles. A
+ * glass narrower than the measure takes the glass less the gutters instead,
+ * where the 288 dp menu still stands on the capsule's middle.
+ */
+internal val PillMeasure = 328.dp
 
 /**
  * The air between the shapes the reader sees: between two controls, the
@@ -156,9 +192,10 @@ internal val PillMenuGutter = 10.dp
  * It is the reciter menu's old maximum and the listening menu's own need: the
  * five paces at their 48 dp target with the padding around them, which is the
  * measure the listener has to get, and the widest the two ever were. The
- * capsule itself may stand narrower than this, since it hugs its words: the
- * anchor keeps its place on the capsule's middle and the menu hangs from
- * there, wider than the control it answers to.
+ * capsule stands at [PillMeasure] and is therefore wider than this on every
+ * glass the app draws, and equal to it on a 320 dp one: the anchor keeps its
+ * place on the capsule's middle and the menu hangs from there, inside the
+ * control it answers to.
  */
 internal val PillMenuMeasure = 288.dp
 
