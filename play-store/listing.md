@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 9.4 (versionCode 96)
+Version: 9.5 (versionCode 97)
 
 ## Listing
 
@@ -136,8 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (9.4, 408 characters)
-For 9.4, the player is smaller and quieter. Its close mark is gone: a paused player goes with a tap on the page, and an X now means one thing, canceling a download that is running. The download offer no longer carries one, and Back answers it with not now. The capsule shrinks to the words it holds, so the surah and ayah are no longer cut short, and a failed download or a failed player can be put away too.
+## Release notes (9.5, 435 characters)
+For 9.5, the player is one line. The reciter's name sits over the surah and ayah beside the transport, in the download offer's own shape, so it is shorter and the words no longer crowd the capsule's edge. A tap on those words opens one panel with the reciters, the pace, and what happens when the audio ends; before anything is downloaded, the same words open the reciter list alone, since there is no recitation yet to set a pace for.
 ## Before each release
 
 1. Raise `versionCode` by 1 and `versionName` by 0.1 in
