@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 9.3 (versionCode 95)
+Version: 9.4 (versionCode 96)
 
 ## Listing
 
@@ -136,9 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (9.3, 395 characters)
-For 9.3, the download you cancel now stops where you cancel it. A canceled surah is no longer installed behind your back, and a download names the surah it is fetching. In the player, the reciter and the place now stand on the same center line as the controls. Settings reads as one list, with one gap between every row: About no longer stands apart, and a switch no longer makes its row taller.
-
+## Release notes (9.4, 408 characters)
+For 9.4, the player is smaller and quieter. Its close mark is gone: a paused player goes with a tap on the page, and an X now means one thing, canceling a download that is running. The download offer no longer carries one, and Back answers it with not now. The capsule shrinks to the words it holds, so the surah and ayah are no longer cut short, and a failed download or a failed player can be put away too.
 ## Before each release
 
 1. Raise `versionCode` by 1 and `versionName` by 0.1 in
