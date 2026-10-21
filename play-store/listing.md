@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 9.7 (versionCode 99)
+Version: 9.8 (versionCode 100)
 
 ## Listing
 
@@ -136,8 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (9.7, 389 characters)
-For 9.7, the player is one width. The download offer, the download in progress, and a playing ayah now stand in the same capsule, so it no longer changes size as the download moves or as the reader moves from one ayah to the next, and its progress line keeps its length. Choosing a reciter, a speed, or what happens when the audio ends now closes the panel that asked, back to the reading.
+## Release notes (9.8, 288 characters)
+For 9.8, the recitation follows the words on the page. The highlight moves with the reciter from the first word to the last, stays on the word through a pause, and no longer drifts one word ahead on the ayahs that open with a vocative. The corrected word timings arrive with this version.
 ## Before each release
 
 1. Raise `versionCode` by 1 and `versionName` by 0.1 in
