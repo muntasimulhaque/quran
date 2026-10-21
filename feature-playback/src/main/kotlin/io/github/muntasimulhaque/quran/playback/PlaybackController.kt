@@ -76,8 +76,16 @@ class PlaybackController(
     private var segments: List<io.github.muntasimulhaque.quran.data.WordSegment> = emptyList()
     private var segmentedAyah: Int? = null
     private var ticker: Job? = null
+    private var checkpoint: Job? = null
     private var downloadJob: Job? = null
     private var requestedAyah: Int? = null
+
+    /**
+     * Whether the reading that draws the recited word is on the glass. The
+     * tick exists for that wash, and a wash nobody can see is a loop that
+     * wakes the processor for nothing (owner decision, this session).
+     */
+    private var tracking = false
 
     /**
      * The ayah the last written position belonged to, and when it was
@@ -107,6 +115,26 @@ class PlaybackController(
         this.content = content
         // The tick is for the word being recited, and it runs only while
         // something is being recited.
+        syncTicker()
+    }
+
+    /**
+     * Tells the player whether the reading is on the glass.
+     *
+     * The wash moves ten times a second for the reader's eyes. When the eyes
+     * are not there, the wash is not there either, so the tick stops and the
+     * place is written on a ten-second checkpoint instead. That checkpoint is
+     * what keeps a process that dies mid-ayah answered by the rest of the ayah
+     * rather than by its top (owner decision, this session).
+     */
+    fun setWordTracking(visible: Boolean) {
+        if (tracking == visible) return
+        tracking = visible
+        if (visible) {
+            controller?.let { publish(it) }
+        } else {
+            checkpointPlace()
+        }
         syncTicker()
     }
 
@@ -523,10 +551,33 @@ class PlaybackController(
     }
 
     private suspend fun connect(): MediaController {
-        controller?.let { return it }
+        controller?.takeIf { it.isConnected }?.let { return it }
+        controller = null
         return suspendCancellableCoroutine { continuation ->
             val token = SessionToken(context, ComponentName(context, PlaybackService::class.java))
-            val future = MediaController.Builder(context, token).buildAsync()
+            val future = MediaController.Builder(context, token)
+                .setListener(
+                    object : MediaController.Listener {
+                        override fun onDisconnected(disconnected: MediaController) {
+                            // The service put a paused player away after its
+                            // timeout. The reading keeps its place, and the
+                            // pill goes with the player rather than staying
+                            // as a control that answers nothing (owner
+                            // decision, this session).
+                            if (controller !== disconnected) return
+                            // A package that was in flight belongs to the
+                            // player that has just gone; it must not surface
+                            // later as a surah that starts on its own (owner
+                            // decision, this session).
+                            downloadJob?.cancel()
+                            downloadJob = null
+                            controller = null
+                            _state.value = PlaybackUiState()
+                            syncTicker()
+                        }
+                    },
+                )
+                .buildAsync()
             future.addListener(
                 {
                     try {
@@ -690,14 +741,15 @@ class PlaybackController(
 
     /**
      * The tick that keeps the recited word marked. It publishes ten times a
-     * second while something is being heard and does not run at all while
-     * nothing is: a word cannot move inside a paused player, and a loop that
-     * wakes four cores to learn nothing is the last thing a reading app
-     * should spend its battery on. Ten times a second keeps the wash within a
-     * tenth of a region boundary, where five left it visibly behind a fast
-     * recitation (owner report, this session).
+     * second while something is being heard and the reading is on the glass,
+     * and does not run at all otherwise: a word cannot move inside a paused
+     * player, and a wash nobody can see is a loop that wakes four cores to
+     * learn nothing. Ten times a second keeps the wash within a tenth of a
+     * region boundary, where five left it visibly behind a fast recitation
+     * (owner report, this session).
      */
     private fun startTicker() {
+        if (!tracking) return
         if (ticker?.isActive == true) return
         ticker = scope.launch {
             while (isActive) {
@@ -712,9 +764,52 @@ class PlaybackController(
         ticker = null
     }
 
-    /** Starts the tick when something is being heard, and stops it when it is not. */
+    /**
+     * The place written while the reading is hidden. The tick is off, so
+     * nothing moves the wash; this is only the memory of where the recitation
+     * had reached, at a pace that costs the disk almost nothing and still
+     * answers a process that died mid-ayah (owner decision, this session).
+     */
+    private fun startCheckpoint() {
+        if (tracking) return
+        if (checkpoint?.isActive == true) return
+        checkpoint = scope.launch {
+            while (isActive) {
+                delay(POSITION_WRITE_MS)
+                checkpointPlace()
+            }
+        }
+    }
+
+    private fun stopCheckpoint() {
+        checkpoint?.cancel()
+        checkpoint = null
+    }
+
+    /** The place, written once at the pace the hidden reading needs and no faster. */
+    private fun checkpointPlace() {
+        val player = controller ?: return
+        if (player.playbackState == Player.STATE_ENDED) return
+        if (stoppedAtAyahEnd && !player.playWhenReady) return
+        val id = player.currentMediaItem?.mediaId ?: return
+        val ayahNumber = RecitationPlaylist.ayahOf(id) ?: return
+        rememberHeard(
+            recitationId,
+            ayahNumber,
+            player.currentPosition.coerceAtLeast(0),
+            playing = false,
+        )
+    }
+
+    /**
+     * The one cadence the player needs: the wash while the reading is on the
+     * glass, the place while it is not, and neither while the player is
+     * paused (owner decision, this session).
+     */
     private fun syncTicker() {
-        if (_state.value.isPlaying) startTicker() else stopTicker()
+        val cadence = playbackCadence(_state.value.isPlaying, tracking)
+        if (cadence.tick) startTicker() else stopTicker()
+        if (cadence.checkpoint) startCheckpoint() else stopCheckpoint()
     }
 
     private fun publish(player: Player?) {
@@ -813,8 +908,10 @@ class PlaybackController(
          * How far apart two writes of the heard offset may be. The ayah it
          * belongs to is written the moment it changes; this is the offset
          * inside it, which moves constantly and costs a disk write to keep
-         * exact.
+         * exact. Ten seconds is also the hidden reading's checkpoint, and a
+         * resume a few seconds out is one nobody can hear (owner decision,
+         * this session).
          */
-        const val POSITION_WRITE_MS = 3_000L
+        const val POSITION_WRITE_MS = 10_000L
     }
 }

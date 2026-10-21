@@ -4,8 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
+import androidx.media3.common.Player
+import androidx.media3.common.TrackSelectionParameters
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaSession
@@ -32,6 +36,34 @@ import java.util.Locale
 class PlaybackService : MediaSessionService() {
 
     private var session: MediaSession? = null
+
+    /** The service's player, held so the pause timeout can look at it. */
+    private var player: ExoPlayer? = null
+
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    /**
+     * The reader paused and stepped away. The notification and the service are
+     * kept for [PAUSE_TIMEOUT_MS], so a quick return finds the same controls,
+     * and then they are put away: the place is already written, and a paused
+     * player that stays in the shade forever is a small cost the reader never
+     * asked for (owner decision, this session).
+     */
+    private val pauseTimeout = Runnable {
+        val player = player ?: return@Runnable
+        if (!player.playWhenReady && player.playbackState != Player.STATE_ENDED) {
+            // Releasing the session first is what lets the app's controller
+            // let go. A stopSelf alone leaves the service alive while that
+            // controller is bound, and a notification that never leaves is
+            // the thing this timeout exists to put away (owner decision, this
+            // session).
+            session?.release()
+            session = null
+            player.release()
+            this.player = null
+            stopSelf()
+        }
+    }
 
     /**
      * The service's own words follow the reader's language too. The media
@@ -74,7 +106,58 @@ class PlaybackService : MediaSessionService() {
                 /* handleAudioFocus = */ true,
             )
             .setHandleAudioBecomingNoisy(true)
+            // Media3 defaults the wake mode to LOCAL when its stuck-playback
+            // detection is on, and that lock is held for the whole recitation.
+            // Every file here is already on the device, and the audio system's
+            // own AudioMix lock keeps the output alive with the screen off, so
+            // the player asks for no lock of its own. The lock it would
+            // otherwise take is the one that keeps the processor awake while
+            // the DSP is playing, which is the whole of what audio offload is
+            // for (owner decision, this session).
+            .setWakeMode(C.WAKE_MODE_NONE)
             .build()
+        // The recitation is speech, and the phone has a decoder for it. Offload
+        // hands the compressed frames to the audio DSP when the device can
+        // play them, so the application processor can sleep through a surah
+        // instead of decoding every frame itself. Gapless and the reader's own
+        // pace stay required: a device or a speed that cannot honor them keeps
+        // the software path, and the reading sounds exactly as it did (owner
+        // decision, this session).
+        player.trackSelectionParameters = player.trackSelectionParameters
+            .buildUpon()
+            .setAudioOffloadPreferences(
+                TrackSelectionParameters.AudioOffloadPreferences.Builder()
+                    .setAudioOffloadMode(
+                        TrackSelectionParameters.AudioOffloadPreferences
+                            .AUDIO_OFFLOAD_MODE_ENABLED,
+                    )
+                    .setIsGaplessSupportRequired(true)
+                    .setIsSpeedChangeSupportRequired(true)
+                    .build(),
+            )
+            .build()
+        this.player = player
+        player.addListener(
+            object : Player.Listener {
+                override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+                    if (playWhenReady) {
+                        mainHandler.removeCallbacks(pauseTimeout)
+                    } else if (player.playbackState == Player.STATE_READY) {
+                        mainHandler.removeCallbacks(pauseTimeout)
+                        mainHandler.postDelayed(pauseTimeout, PAUSE_TIMEOUT_MS)
+                    }
+                }
+
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    if (playbackState == Player.STATE_READY && !player.playWhenReady) {
+                        mainHandler.removeCallbacks(pauseTimeout)
+                        mainHandler.postDelayed(pauseTimeout, PAUSE_TIMEOUT_MS)
+                    } else if (playbackState == Player.STATE_ENDED) {
+                        mainHandler.removeCallbacks(pauseTimeout)
+                    }
+                }
+            },
+        )
         val callback = object : MediaSession.Callback {
             override fun onConnect(
                 session: MediaSession,
@@ -117,10 +200,12 @@ class PlaybackService : MediaSessionService() {
     }
 
     override fun onDestroy() {
+        mainHandler.removeCallbacks(pauseTimeout)
         session?.run {
             player.release()
             release()
         }
+        player = null
         session = null
         super.onDestroy()
     }
@@ -131,5 +216,13 @@ class PlaybackService : MediaSessionService() {
 
         /** The command's one argument: true to stop at the end of each ayah. */
         const val ARG_PAUSE_AT_END = "pause_at_end"
+
+        /**
+         * How long a paused recitation keeps its notification and its service.
+         * Five minutes is long enough for a step away and short enough that a
+         * player left in the shade is not a permanent one (owner decision,
+         * this session).
+         */
+        const val PAUSE_TIMEOUT_MS = 5 * 60 * 1000L
     }
 }

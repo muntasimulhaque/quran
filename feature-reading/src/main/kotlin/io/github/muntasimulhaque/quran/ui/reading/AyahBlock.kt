@@ -185,14 +185,15 @@ internal fun AyahBlock(
             // line only through it, and a remembered line that missed it
             // kept the old size and the old gold (owner report, this
             // session).
+            val recitedWord = playingWord.takeIf { playing }
             val arabicLine = remember(
                 row.ayah.number,
                 playing,
-                playingWord,
+                recitedWord,
                 arabicOnly,
                 ornamentStyle,
             ) {
-                arabic(row, playing, playingWord, arabicOnly, ornamentStyle)
+                arabic(row, playing, recitedWord, arabicOnly, ornamentStyle)
             }
             var textLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
             Text(

@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 10.1 (versionCode 103)
+Version: 10.2 (versionCode 104)
 
 ## Listing
 
@@ -136,8 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (10.1, 239 characters)
-No visible change. The reading, search, Browse, settings, recitation, and sharing work exactly as they did in 10.0. This release is housekeeping: the project's own notes and store listing were brought up to date, and no screen was touched.
+## Release notes (10.2, 458 characters)
+Listening now lets the screen go dark. After a minute without a touch, the recitation keeps playing and the phone can sleep; a touch brings the highlighted word back. A paused recitation puts itself away after five minutes, and Play resumes it. Reading still keeps the screen awake, and now lets it go after ten quiet minutes. Recitation uses less battery: audio offload where the phone supports it, no player wake lock, and no word tick above a dark screen.
 
 ## Before each release
 

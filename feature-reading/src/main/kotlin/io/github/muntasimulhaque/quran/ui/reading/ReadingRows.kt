@@ -243,7 +243,11 @@ internal fun ReadingRows(
                     metrics = metrics,
                     isSelected = selectedAyah == row.ayah.number,
                     playingAyah = playingAyah,
-                    playingWord = playingWord,
+                    // Only the ayah being recited carries the moving word.
+                    // Every other block keeps a stable null, so a word change
+                    // does not rebuild its AnnotatedString or recompose it
+                    // (owner decision, this session).
+                    playingWord = playingWord.takeIf { playingAyah == row.ayah.number },
                     onAyah = onAyah,
                     onBackgroundTap = dismissAbout,
                     onFootnote = { number ->

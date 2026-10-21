@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,9 +25,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.data.Ayah
@@ -45,6 +51,23 @@ import kotlinx.coroutines.withContext
 
 /** How long the chrome stays after a touch before it steps back. */
 private const val CHROME_MILLIS = 7000L
+
+/**
+ * How long the screen stays awake after the last touch while only the
+ * recitation is heard. A minute gives the reader time to settle and to notice
+ * the wash, and then the phone's own screen timeout is allowed to do its work.
+ * The recitation keeps playing in the foreground service, so the page can go
+ * dark without ending the listening (owner decision, this session).
+ */
+private const val LISTENING_AWAKE_MILLIS = 60_000L
+
+/**
+ * How long the screen stays awake after the last touch while the page is being
+ * read. Reading needs the page, and a long ayah can hold the eye for a while
+ * without a touch, so this window is generous; a reader who is actually
+ * reading scrolls far more often than this (owner decision, this session).
+ */
+private const val READING_AWAKE_MILLIS = 10 * 60_000L
 
 /** Which sheet is over the reader, if any. */
 internal enum class ReaderSheet { None, Browse, Search, Settings }
@@ -92,6 +115,9 @@ fun ReaderScreen(
     // where it was made (owner decision, 21).
     var sheet by rememberSaveable { mutableStateOf(ReaderSheet.None) }
     var touch by remember { mutableIntStateOf(0) }
+    // The screen is kept awake while the reader is here, but not forever. The
+    // window timer releases the flag; a touch takes it back.
+    var keepAwake by remember { mutableStateOf(true) }
     val context = androidx.compose.ui.platform.LocalContext.current
     val scope = rememberCoroutineScope()
     // What a Share is doing: null when nothing, a card waiting for the
@@ -99,6 +125,13 @@ fun ReaderScreen(
     // set once they asked for the picture. One holder rather than two, so a
     // second tap can never leave a stray sheet behind the capture.
     var sharing by remember { mutableStateOf<ShareRequest?>(null) }
+
+    // A sheet, an ayah's actions, a note, or a share is the reader using the
+    // app, not listening to it from across the room. Those keep the screen
+    // awake; the plain reading and the plain listening are the two that give
+    // it back after their own window (owner decision, this session).
+    val usingControls = sheet != ReaderSheet.None || selected != null ||
+        cardAyah != null || cardNote != null || pendingRemove != null || sharing != null
 
     // The wash under an ayah: the one the tap chose, or the one whose
     // note is open over it. A note opened from Browse has no pill behind it,
@@ -147,14 +180,51 @@ fun ReaderScreen(
         touch++
     }
 
-    // Reading with the screen awake is part of reading, so the app keeps the
-    // screen lit while it stands in front of the reader and gives it back the
-    // moment the reader leaves. The flag belongs to the visible window, so a
-    // recitation carried in the background still lets the screen go dark.
+    // Reading with the screen awake is part of reading, and listening with
+    // the screen off is part of listening: the link between the two is the
+    // reader's own touch. The window timer below releases the flag, and the
+    // phone's normal screen timeout takes it from there. The recitation is a
+    // foreground service, so it keeps playing when the screen goes dark (owner
+    // decision, this session).
     val view = LocalView.current
     DisposableEffect(view) {
-        view.keepScreenOn = true
         onDispose { view.keepScreenOn = false }
+    }
+    SideEffect { view.keepScreenOn = keepAwake }
+
+    LaunchedEffect(touch, playback.isPlaying, usingControls, keepAwake) {
+        if (!keepAwake || usingControls) return@LaunchedEffect
+        delay(if (playback.isPlaying) LISTENING_AWAKE_MILLIS else READING_AWAKE_MILLIS)
+        keepAwake = false
+    }
+
+    // The recited word is drawn for the reader's eyes, so the ten-times-a-
+    // second tick belongs to the reading being on the glass. A screen that has
+    // gone dark, a backgrounded app, and a phone in someone else's hand keep
+    // the place instead, at a ten-second checkpoint, and the processor is left
+    // to sleep (owner decision, this session).
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(lifecycle) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_START -> {
+                    viewModel.setWordTracking(true)
+                    keepAwake = true
+                    touch++
+                }
+                Lifecycle.Event.ON_STOP -> {
+                    viewModel.setWordTracking(false)
+                    keepAwake = false
+                }
+                else -> Unit
+            }
+        }
+        lifecycle.addObserver(observer)
+        viewModel.setWordTracking(lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))
+        onDispose {
+            lifecycle.removeObserver(observer)
+            viewModel.setWordTracking(false)
+        }
     }
 
     // The chrome steps back on its own; a chosen ayah waits for the reader.
@@ -209,7 +279,22 @@ fun ReaderScreen(
     Box(
         Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(MaterialTheme.colorScheme.background)
+            // Every touch is the reader still being here, including a scroll
+            // that lands on an ayah's own handler. The initial pass sees it
+            // without taking it from the child that owns the gesture (owner
+            // decision, this session).
+            .pointerInput(Unit) {
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent(PointerEventPass.Initial)
+                        if (event.changes.any { it.pressed && !it.previousPressed }) {
+                            touch++
+                            keepAwake = true
+                        }
+                    }
+                }
+            },
     ) {
         run {
             val surah = viewModel.surahOf(settings.ayah)
@@ -256,10 +341,10 @@ fun ReaderScreen(
                         touch++
                     },
                     onScrolled = {
-                        if (chrome) {
-                            chrome = false
-                            touch++
-                        }
+                        if (chrome) chrome = false
+                        // A scroll is the reader still being here, even when
+                        // the chrome is already away and no tap was needed.
+                        touch++
                     },
                     onNextSurah = { number -> viewModel.jumpToSurah(number) },
                     onAddContent = { sheet = ReaderSheet.Settings },

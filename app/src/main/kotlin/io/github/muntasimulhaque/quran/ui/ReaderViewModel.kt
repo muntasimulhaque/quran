@@ -123,6 +123,13 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     val lastRead: StateFlow<List<ReadPlace>> = lastReadStore.places
     val playbackState: StateFlow<PlaybackUiState> = playback.state
 
+    /**
+     * Tells the player whether the reading that draws the wash is on the
+     * glass. The shell knows when the window is visible; the player owns the
+     * tick and its checkpoint (owner decision, this session).
+     */
+    fun setWordTracking(visible: Boolean) = playback.setWordTracking(visible)
+
     val translationPacks: List<ContentPack> get() = packs.filter { it.type == PackType.Translation }
     val tafsirPacks: List<ContentPack> get() = packs.filter { it.type == PackType.Tafsir }
 
