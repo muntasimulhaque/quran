@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 10.0 (versionCode 102)
+Version: 10.1 (versionCode 103)
 
 ## Listing
 
@@ -136,8 +136,9 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (9.9, 235 characters)
-For 9.9, Repeat the surah now plays the surah through and begins again, instead of repeating its first ayah. The next surah is added once, so it no longer plays twice, and a surah already on the phone is not offered for download again.
+## Release notes (10.1, 239 characters)
+No visible change. The reading, search, Browse, settings, recitation, and sharing work exactly as they did in 10.0. This release is housekeeping: the project's own notes and store listing were brought up to date, and no screen was touched.
+
 ## Before each release
 
 1. Raise `versionCode` by 1 and `versionName` by 0.1 in

@@ -1,651 +1,216 @@
 # Quran: working rules
 
-**The first task of every session, before reading this file and before any
-other command: `git fetch`, then `git pull origin main`.**
+**The first task of every session, before reading this file: `git fetch`, then
+`git pull origin main`.** The owner works from more than one machine, and a
+session that has not pulled has not started.
 
-A free, offline Android Quran reader. One reading with Saheeh International, word-by-word, and
-Tafsir Ibn Kathir, with recitation by Al-Minshawi and
-Al-Husary. No ads, no trackers, no accounts, no network. Code is MIT; each
-content dataset keeps its own source, version, and license.
+A free, offline Android Quran reader. One reading with Saheeh International,
+word-by-word, and Tafsir Ibn Kathir, with recitation by Al-Minshawi and
+Al-Husary. No ads, no trackers, no accounts, and no network beyond the project's
+own Releases. Code is MIT; each content dataset keeps its own source, version,
+and license.
 
 Store title: `Quran: The Noble Book`. App title and launcher name: `Quran`.
 Package: `io.github.muntasimulhaque.quran`, permanent.
 
-**The code is the source of truth.** Why a thing is the way it is lives in
-the KDoc beside that thing, and a settled choice is tagged
-`owner decision`, so `git grep "owner decision"` finds them. This file is
-the only rulebook: the law, the commands, the map, the vocabulary.
+## Why this file is short
 
-If this file and the code disagree, the code wins and this file is fixed in
-the same change. Do not grow this into a second codebase written in prose.
+The code is the source of truth. Every settled decision lives in the KDoc beside
+the thing it decided, tagged `owner decision`, so `git grep "owner decision"` is
+the record of why the app is the way it is: the pill's one measure, the five text
+sizes, the chevron rule, the ring on the theme swatch, the pace on the reciter's
+line. The code that draws a decision and the test that measures it keep it
+honest, and a decision that moves is edited where it lives.
 
-## This file is not the final word
+Prose that restates the code is a second story that drifts. Once it disagrees
+with the code, an agent has two answers and no way to pick.
 
-The rules are the current best understanding, not the ceiling. If a change
-you believe in contradicts one, do not drop it silently and do not
-implement against the rule either: name the conflict, make the case, and
-let the owner decide. An overridden rule is updated here, never left as a
-dead letter.
+So this file holds only what no file of code can say: the boundaries the owner
+keeps, the vocabulary, and a map thin enough to make navigation faster. It is not
+the final word. If a change you believe in contradicts a rule, do not drop it
+silently and do not build against the rule either: name the conflict, make the
+case, and let the owner decide. An overridden rule is edited here in the same
+change, never left as a dead letter.
 
 ## Every session
 
-1. **Pull first**, before anything else, including reading this file: `git
-   fetch`, then `git pull origin main`, in that order. Never in the same
-   block as a read of this file, which races the copy you are about to
-   update. The owner works from more than one machine, and a session that
-   has not pulled has not started.
-2. Do the work, then ask one question: anything else? The build waits for
-   the owner's word, and no `versionCode` moves until the session is done
-   and the owner says so.
-3. Session end: bring the README status and the release notes current,
-   update the Map against `settings.gradle.kts`, and leave the tree clean.
+1. Pull first, as above. Never in the same block as a read of this file, which
+   races the copy you are about to update.
+2. Do the work, then ask one question: anything else? The build waits for the
+   owner's word, and no `versionCode` moves until the session is done.
+3. Session end: the README status and the release notes current, the map checked
+   against `settings.gradle.kts`, the tree clean. What may go: `build/`
+   directories, `content/work/`, the hand-off AAB. What must stay: `content/raw/`
+   (the owner's manual exports, the provenance of every pack), `content/quran.db`,
+   `content/packs/`, and `play-store/screenshots/`.
 
-## The law (non-negotiable)
+## The law
 
-1. **Offline except one thing.** `INTERNET` serves exactly one purpose:
-   content from the project's own GitHub Releases. The reads are the language the reader chose, fetched without another
-   question: the chosen language's translation arrives at once, and its
-   tafsir follows on the same choice, waiting for an unmetered connection
-   when the phone is on cellular (owner decision, 4.5); the word list is off
-   by default, and the reading toggle that turns it on is the ask for that
-   language's list. The reads are also a recitation package for one surah
-   after the reader taps Play and approves the shown size (or after they
-   have turned on Continue to the next surah, which is their word, given
-   once), and a quiet refresh of a pack they already have, only when the app
-   carries a newer version, only unmetered, only after the first page is
-   readable. Nothing is fetched before the reader's word, no other host is
-   ever contacted, and there is no
-   analytics or telemetry of any kind. Everything else works with no
-   connection. No WebView.
-2. **Permissions: media, notifications, the reminder's exact time and its
-   survival of a reboot, and that one network use.** Exactly `INTERNET`,
-   `POST_NOTIFICATIONS`, `FOREGROUND_SERVICE`,
-   `FOREGROUND_SERVICE_MEDIA_PLAYBACK`, `SCHEDULE_EXACT_ALARM` (the daily
-   reminder's exact time), and `RECEIVE_BOOT_COMPLETED` (re-arming the
-   reminder after a reboot). `USE_EXACT_ALARM` is never declared: Play
-   accepts it for an alarm clock or a calendar only, and rejected the 3.9
-   build over it. The app asks for `POST_NOTIFICATIONS` and for the phone's
-   own exact-alarm screen, and nothing else: the notification once at the
-   reminder card that ends the one screen before the reading, the exact
-   alarm once there too when the reader turns the reminder on, and again at
-   each of the two acts that set the reminder, and only on the phones that
-   withhold it; the exact alarm is not asked where the notification was
-   refused, because an exact alarm with nothing to show is a promise the
-   phone cannot keep. The exact
-   alarm is no row in the settings hub, and the reminder wears no alarm icon
-   (owner decision). Library-merged permissions are documented, not fought. A
-   new permission needs the owner's sign-off written here first.
-3. **No ads, no trackers, no analytics, no accounts.** AndroidX, Kotlin,
-   Media3, Room, DataStore, and Glance only; the accessibility test's own
-   framework is a test-only dependency and never ships. Every new dependency
-   is proposed here first.
-4. **The sacred text is untouchable.** Not one byte of Quran text,
-   translation, or tafsir is edited by hand. Content changes only through
-   `tools/`, and every dataset carries its source, version, checksum, and
-   license in `content/manifest.json`.
+1. **Offline except one thing.** `INTERNET` serves exactly one purpose: content
+   from this project's own GitHub Releases, and only on the reader's word. The
+   chosen language's translation arrives at once and its tafsir after it
+   (unmetered only when the phone is on cellular); the word list arrives with
+   the reading toggle that turns it on; a recitation package arrives for one
+   surah after Play and the shown size (or after a standing Continue to the next
+   surah); and a held pack refreshes quietly only when the app is newer, only
+   unmetered, only after the first page is readable. No other host is ever
+   contacted, and there is no analytics or telemetry. No WebView.
+2. **Permissions: exactly `INTERNET`, `POST_NOTIFICATIONS`, `FOREGROUND_SERVICE`,
+   `FOREGROUND_SERVICE_MEDIA_PLAYBACK`, `SCHEDULE_EXACT_ALARM`,
+   `RECEIVE_BOOT_COMPLETED`.** `USE_EXACT_ALARM` is never declared: Play accepts
+   it for an alarm clock or a calendar only, and rejected 3.9 over it. The app
+   asks for the notification once, at the reminder card on the first screen, and
+   for the exact time at the two acts that set the reminder, on the phones that
+   withhold it, never where the notification was refused. Library-merged
+   permissions are documented, not fought. A new permission needs the owner's
+   sign-off written here first.
+3. **No ads, trackers, analytics, or accounts.** AndroidX, Kotlin, Media3, Room,
+   DataStore, and Glance only; the accessibility test's framework is test-only
+   and never ships. A new dependency is proposed here first.
+4. **The sacred text is untouchable.** Not one byte of Quran text, translation,
+   or tafsir is edited by hand. Content changes only through `tools/`, and every
+   dataset carries its source, version, checksum, and license in
+   `content/manifest.json`.
 5. **The app must not crash.** No `!!`, no unchecked casts, no swallowed
    exceptions. State survives rotation, backgrounding, and process death. A
-   Play vitals crash is a stop-the-line event.
-6. **Nothing may feel like AI slop.** No placeholder copy, dead buttons,
-   lorem text, stock iconography, generic Material defaults. Every string is
-   a real sentence, every color is chosen, every icon is drawn for this app.
-7. **Accessibility is a rule, not a feature.** TalkBack works end to end.
-   The reading honors the system font scale at the reader's own five steps;
-   the phone's own magnification covers anything beyond them.
-   Contrast targets live in the theme and are measured.
+   crash is a stop-the-line event.
+6. **Nothing may feel like AI slop.** No placeholder copy, dead buttons, lorem
+   text, stock iconography, or generic Material defaults. Every string is a real
+   sentence, every color is chosen, every icon is drawn for this app.
+7. **Accessibility is a rule, not a feature.** TalkBack works end to end, the
+   reading honors the system font scale at its own five steps, and contrast
+   targets live in the theme and are measured by a test.
 8. **Two UI languages, one content language each.** English and Bangla ship
-   together, the interface strings in each module's `values-bn`, and the
-   reader's choice sets the translation, the tafsir, and the word meanings
-   too. Arabic is data, not a locale; RTL support stays on. A new
-   language needs a real translation pass, a `values-xx` folder, and the
-   same review the Arabic content gets. The frozen names (`app_name`,
-   `first_paint_title`, `first_paint_subtitle`, the store title) are never
-   translated.
-9. **Reader first.** The app opens where the reader left off. There is no
-   home screen, no dashboard, and no permanent tab bar; index, search,
-   library, and settings are sheets raised from a slim bar.
-10. **Simple to the bone.** Any age, any device. No account, no wizard
-    beyond one optional first screen and the one notification permission asked
-    from it, no other dialog before reading, no feature that asks a choice
-    before the text. If a feature adds friction, it is cut. Every added
-    choice must earn its place against the reading.
-11. **Fast to the point of invisible.** Cold start lands on readable text
-    with no spinner. The reading is one scroll through rows already
-    measured, never a render, and a turned surah lands on text that is
-    already there. Nothing blocks the main thread, ever.
-12. **Daily reading, not engagement.** A daily ayah, a quiet reminder,
-    and nothing that counts. No streaks, no badges, no social, no guilt.
-13. **No AI attribution anywhere.** No `Co-Authored-By` trailers, no
-    "generated with" footers, no name in contributors, commits, or code.
-14. **Owner's law.** The build waits for the owner's word; one build
-    carries the whole session.
+   together, the strings in each module's `values-bn`; the reader's choice sets
+   the translation, the tafsir, and the word meanings too. Arabic is data, not a
+   locale, so RTL stays on. A new language needs a real translation pass and a
+   `values-xx` folder. The frozen names (`app_name`, `first_paint_title`,
+   `first_paint_subtitle`, the store title) are never translated.
+9. **Reader first.** The app opens where the reader left off. There is no home
+   screen, no dashboard, and no permanent tab bar; index, search, library, and
+   settings are sheets raised from a slim bar.
+10. **Simple to the bone, fast to the point of invisible, quiet.** No wizard
+    beyond the optional first screen, no dialog before the text, no feature that
+    asks a choice before the reading. Cold start lands on readable text with no
+    spinner, the reading is a scroll through rows already measured, and nothing
+    blocks the main thread. No streaks, badges, social, or guilt.
+11. **No AI attribution anywhere.** No `Co-Authored-By` trailers, no "generated
+    with" footers, no name in contributors, commits, or code.
+12. **The owner's law.** The build waits for the owner's word, and one build
+    carries the whole session. `versionCode` by 1; `versionName` up one tenth
+    within the major line, 0.9 then 1.0 (never 0.10, never two digits).
 
 ## Style
 
-- **No em-dashes.** Not in chat, release notes, commit messages, code
-  comments, or this file. Use commas, colons, parentheses, or a sentence
-  break. `NoEmDashTest` scans the repo and fails the build.
+- **No em dashes**, anywhere. `NoEmDashTest` scans the repo and fails the build.
 - **US English**, everywhere: color, gray, center, license, behavior.
-- **Store text is plain prose.** Play Console mangles quotes, markdown, and
-  dashes. Release notes fit the 500-character field, counted before
-  hand-off, and are handed over as a bare paragraph: no blockquote, no code
-  fence, no quotes, no label on the same line.
-- **The release note in the hand-over message is bare text.** The note is
-  given once, in the message itself, standing on its own as plain
-  paragraphs with nothing around it: no blockquote, no quotation marks, no
-  heading or label of its own, no horizontal rule, no vertical bar, and no
-  copy inside a table. The owner copies it from the message straight into
-  the console's box, and anything wrapped around it has to be unwrapped
-  before it can be pasted.
-- **Small pieces, no numbers.** Keep modules small and the codebase
-  modular: for code, the codebase is all you need, so memory and docs
-  stay out of it, and at most a little maintained map says where what
-  is. Split early; a name that says the idea beats a name that says
-  the screen.
-- **User-facing strings** live in a `strings.xml` in the module that draws
-  them, nowhere in Kotlin: `app` for the shell, each feature for its own
-  surface, `ui-kit` for the two mode names. Arabic content stays data.
-  Colors live in the theme, nowhere else.
-- **Small edits** are `node -e` replacements, and a CRLF file needs `\r?\n`
-  in the pattern or the replace silently no-ops. Grep afterwards to confirm
-  the change landed.
-
-## This machine
-
-Environment facts the harness does not tell you, each one worth a failed
-command to rediscover.
-
-- Every Gradle call begins with
-  `export JAVA_HOME="/c/Program Files/Android/Android Studio/jbr"`. The
-  Android Studio JBR is the only JDK on this machine and the build is shaped
-  so that is enough: no module pins `jvmToolchain`, every module targets
-  Java 17 bytecode and lets the running JDK compile it (owner decision).
-  `local.properties` reads `sdk.dir=C:/Users/zn/AppData/Local/Android/Sdk`
-  and is gitignored.
-- The Android SDK here has the command-line tools, the Android 35
-  `google_apis` image, and three display-on AVDs, the three store profiles:
-  `quran_phone` (Pixel 2), `quran_tablet7` (Nexus 7), and `quran_tablet10`
-  (Pixel C). The old ATD AVDs (`pixel35`, `pixelc`) and their image were
-  removed because their display was off and no frame could be read from it
-  (owner decision). **The emulator runs here**: `emulator-check accel` reports
-  `WHPX(10.0.26300) is installed and usable`, and the instrumented suites are
-  not CI's only home. Start one headless with `-no-window -no-audio -no-boot-anim
-  -gpu host` and wait for `sys.boot_completed` to report `1`: this machine has
-  a dedicated GPU (an AMD Radeon), so the host renderer is both faster and
-  closer to a real device than `swiftshader_indirect`. A full `:app:connectedDebugAndroidTest`
-  takes about six minutes here and is green on `quran_phone`, the two legs the
-  ATD image could not draw included. `gh` is on the PATH and authenticated, so
-  the content Releases can be published from here.
-- On the other machine (`Dev Pro`) the JBR is the JDK, `adb` and the
-  emulator are under `C:/Users/Dev Pro/AppData/Local/Android/Sdk`, and the
-  AVDs are `Pixel_4_35`, `Nexus_7_35`, `Pixel_C_35`, and `api27`. Start one
-  headless with `-no-window -gpu swiftshader_indirect` and wait for
-  `sys.boot_completed` to report `1`.
-- That machine runs Gradle on the Android Studio JBR
-  (`/c/Program Files/Android/Android Studio/jbr`), which is the only runtime
-  installed on it: the Temurin JDK was removed and every Gradle call there
-  begins with that `JAVA_HOME` (owner decision). The emulator there dies of
-  the tour's load on a full debug build, so the tour runs against the lean
-  `-Pquran.devPacks=screenshot` APK, and both the emulator and its AVD are
-  kept current: the installed 37.1.11 build on an aged AVD stalled the
-  guest's SystemUI under that load and the emulator process could vanish with
-  no crash report, while 37.2.12 with a cold `-wipe-data` boot carries the
-  whole lean suite to the end. AGP uninstalls
-  the app when `connectedDebugAndroidTest` returns, so a frame is only
-  readable this way: install both APKs, `am instrument -w -e class
-  io.github.muntasimulhaque.quran.ScreenshotTest -e additionalTestOutputDir
-  /data/user/0/io.github.muntasimulhaque.quran/files/shots` with MSYS path
-  conversion off, then `adb exec-out run-as io.github.muntasimulhaque.quran
-  cat files/shots/<name>.png`. The output directory has to be inside the
-  app's own storage: `/sdcard` root is EPERM for the app, and a directory
-  under `Android/data/<package>/files` does not exist until something calls
-  `getExternalFilesDir`. The same two commands work here, and a whole
-  capture can be kept without it.
-- Two facts worth a failed command of your own to learn: the `google_apis`
-  AVDs draw a real display headless, so `Screenshot.capture()`,
-  `adb exec-out screencap -p`, and a popup's own `captureToImage()` all
-  return pixels, and a menu's shadow can be read on the glass (the old ATD
-  image returned a black frame for the first and a blank window for the
-  last); and AGP uninstalls the app when `connectedDebugAndroidTest` returns,
-  so anything it wrote under the app's own storage is gone by the time you go
-  to read it (the `am instrument` command and the `run-as` read above are how
-  it is read anyway).
-- MSYS rewrites `/sdcard/...` arguments, so prefix `adb shell`, `adb push`,
-  and `adb pull` with `MSYS_NO_PATHCONV=1`, and the same for `gh api` (with
-  its leading slash dropped). The same rewrite bites `gh run view --json ...
-  -q`: a `/` inside a jq string becomes `C:/Program Files/Git/`, so a
-  completed run never equals `completed/success` and a green run reads as
-  still running for as long as the wait is allowed to last. Prefix `gh run
-  view` with `MSYS_NO_PATHCONV=1`, or watch with `MSYS_NO_PATHCONV=1 gh run
-  watch <id> --exit-status`. adb is a Windows binary: `/tmp/x` is
-  `C:\tmp\x` to it and to the read tool alike.
-- Two tool calls in one block run in parallel. Never edit a file and read
-  it in the same block, and never two reads whose order matters.
-- `python3` and `python` are both intercepted by the Store alias: an
-  interpreter exists at
-  `C:/Users/zn/AppData/Local/hermes/tools/python-3.14.7+20260901-win32-x64/`
-  (Pillow, fontTools, arabic-reshaper, and python-bidi were installed by hand
-  into it), and there is no py launcher, no python.org install, and no Store
-  package anywhere else on PATH. Those hand-installed packages have been
-  reset once mid-session, leaving pip alone; the one-command recovery is
-  `uv venv` against that interpreter, with the harness `uv` at
-  `C:/Users/zn/AppData/Local/hermes/tools/uv-0.12.3-win32-x64/uv.exe`, then
-  `uv pip install` the packages back. Nothing in the build depends on any of
-  it, so a missing Python only ever costs a scratch tool of its own.
-
-## Build, test, verify
-
-```bash
-./gradlew :core:test :tools:test :data:testDebugUnitTest :ui-kit:testDebugUnitTest :feature-playback:testDebugUnitTest :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
-./gradlew :data:connectedDebugAndroidTest   # saved store, last read, recitation manifest
-./gradlew :app:connectedDebugAndroidTest    # the app surfaces and the screenshot tour
-```
-
-The content pipeline, from the repository root. Every one of these is green
-at every step:
-
-```bash
-./gradlew :tools:run --args="fetch"           # the font pack onto a new machine, hash-checked
-./gradlew :tools:run --args="verify"          # checksums and structure of every source
-./gradlew :tools:run --args="audit"           # letter-level audit against Tanzil
-./gradlew :tools:run --args="search"          # Arabic round trips and English folding
-./gradlew :tools:run --args="build"           # content/quran.db and the packs, deterministic
-./gradlew :tools:run --args="fonts"           # font coverage for every codepoint
-./gradlew :tools:run --args="checkdb"         # the committed database and its report
-./gradlew :tools:run --args="audio sample"    # the development sample (debug only)
-./gradlew :tools:run --args="audio packs"     # one ZIP per reciter per surah, plus the manifest
-./gradlew :tools:run --args="audio publish"   # uploads those packages to their Releases
-./gradlew :tools:run --args="packs"           # the pack files and the catalog
-./gradlew :tools:run --args="packs publish"   # the content packs, content addressed
-```
-
-- `fetch` runs once on a machine that lacks the Arabic text font (about a
-  minute) and is offline after that. The `qpc-v2-fonts` Release stands
-  unreferenced since the printed page became a text page: its SHA-256 is no longer
-  pinned, and the font is no longer part of the app.
-- `verify`, `audit`, and `fonts` read only `content/raw` and
-  `content/work/verify`, so they run on the owner's machine only. `ls
-  content/raw` before a release starts: if the manual QUL and QuranEnc
-  exports are gone, say so before the release begins rather than at gate
-  time.
-- `content/quran.db` is the shipped content, built by `tools/` and fetched
-  from its hash-addressed release on a fresh machine. A local rebuild must
-  reproduce its SHA-256 exactly; if it does not, stop and find out why
-  before committing anything.
-- **Verify by process exit code**, never by grepping piped output.
-- CI runs the JVM suite, the content gates it can run, the data instrumented
-  tests, and the signed bundle in `build.yml`, which filters pushes by path
-  so a doc-only commit triggers nothing. The app instrumented tests run in
-  `screenshots.yml` on the three store form factors, and that workflow names
-  five classes: `ScreenshotTest`, `WordByWordTest`,
-  `TafsirDirectionTest`, `SavedNotesTest`, `SettingsVisibilityTest`. Every
-  other app test runs on a session's own emulator, which this machine has, so
-  a session that changes the settings sheet, and every release session, runs
-  the whole app suite rather than only the five. On `quran_phone` the whole
-  suite is green, 84 of 84 on a session's own emulator,
-  including the share card's hardware read-back and
-  the phone's own night mode, which the removed ATD image refused. On a cold
-  google_apis run `SurahAyahsTest` can time out in `openBrowse` once, the
-  ninety-second wait meeting a loaded boot, and it passes on a retry.
-- Do not hand-drive the app to verify UI. After an emulator crash the
-  injected input in the screen's top band can go dead while the rest keeps
-  working, captures return older frames, and the clock jumps. The loop is:
-  JVM suite and lint locally, push, then read the tour's frames from the
-  capture run. Every UI claim in a hand-over is backed by a CI frame or a
-  compose-test run, never by hand-taps.
-- Bytecode target: Java 17; current AGP, Kotlin, Gradle, and the SDK levels
-  in the build files. Versions live in `gradle/libs.versions.toml`, never
-  here. The Gradle wrapper is committed.
-
-## Release
-
-1. **The owner's word first.** One build carries the whole session, and the
-   bundle, the store note, and the screenshots are one delivery: collected,
-   checked, and handed over together, before the owner submits anything. The
-   note is always in the hand-over message itself, beside the bundle's own
-   facts, never only in `play-store/listing.md`: the owner copies it into the
-   console from the message, and a note that has to be fetched from a file is
-   a note that can be pasted from the wrong release (owner decision). A set
-   refreshed after the submission has nothing left to be used for.
-2. **Version convention.** `versionCode` by 1; `versionName` up one tenth
-   within the major line, 0.1 through 0.9, then 1.0, then 1.1 through 1.9,
-   then 2.0. There is no 0.10 and never a two-digit minor. The version line
-   goes to `play-store/listing.md` with the notes beside it, and older notes are not kept.
-3. **Screenshots before the hand-off, whenever visible UI changed.** The
-   push starts the capture on its own, and the set is collected whole from
-   one run: all three form factors, eight frames each, every frame
-   `cmp`'d against its artifact, every changed frame read. A leg short of
-   eight is not installed, and when nothing visible changed the hand-over
-   says so and the capture is not run. The eight are the ones
-   `play-store/listing.md` numbers and `ScreenshotTest` captures; they are
-   kept in step, never hand-captured.
-4. **The bundle comes from the newest green `build` run on `main`**, not the
-   first one after the version bump: everything committed after the bump is
-   in the later run and in nothing else. The run's artifact carries
-   the bundle and its SHA-256, and GitHub deletes it after two weeks, so a
-   signed build is never sitting in public. Delete the hand-off copy in
-   `play-store/aab/` once Play has it.
-5. **Signing is proved by its words.** `jarsigner -verify` exits 0 on an
-   unsigned file, so the check reads "jar verified" and prints the
-   certificate's SHA-256 (`53:7D:09:D2:...:0D:9D:E5:21`). The
-   `signed-bundle` job fails when the four secrets are absent rather than
-   producing an unsigned artifact, because "it built" must not be mistaken
-   for "it is signed".
+- **User-facing strings** live in the `strings.xml` of the module that draws
+  them, nowhere in Kotlin. **Colors** live in the theme, nowhere else.
+- **Small pieces, plain names.** Split early, and a name that says the idea beats
+  a name that says the screen.
+- **Small edits** are `node -e` replacements, and a CRLF file needs `\r?\n` in the
+  pattern or the replace silently no-ops. Grep afterwards to confirm.
 
 ## Map
 
 | Path | What is there |
 | --- | --- |
-| `core/` | pure JVM Kotlin, zero `android.*` imports: references, search normalization, rich text parsing, models |
-| `data/` | read-only content access, the saved-ayah and last-read user databases, preferences |
-| `app/` | the shell: activity, view model, the screen that composes the features, the shell's strings |
-| `feature-*/` | one reading surface each (reading, search, browse, playback, settings), each owning its own strings and icons |
-| `ui-kit/` | the shared look: theme and palettes, the hand-drawn icons and their named sizes, the rich text views, the app's choice row, step row, and sheet row, the text button and the sheet handle, the download line, the one floating lift, the small formatters |
-| `content-assets/` | the shipped assets the app reads: the Arabic text face, the reading and UI faces, the core pack, and the pack catalog |
-| `tools/` | the offline pipeline: fetch, verify, audit, build, fonts, packs, audio, icons |
-| `content/` | `quran.db` (built by `tools/`, gitignored, fetched or rebuilt from its hash), `packs/`, `manifest.json`, `recitation-manifest.json`, `audit-report.md`; `raw/` is local and gitignored |
-| `play-store/` | listing, screenshots per form factor, the hand-off AAB |
-| `benchmark/` | the startup profile's generator and the reading benchmarks, development only, never in the bundle |
+| `core/` | pure JVM Kotlin, no `android.*`: references, search normalization, rich text, models |
+| `data/` | read-only content access, the saved-ayah and last-read databases, preferences |
+| `app/` | the shell: activity, view model, the screen that composes the features |
+| `feature-reading/` | the reading surface |
+| `feature-search/` | the search sheet |
+| `feature-browse/` | Surahs, Juz, Last Read, Saved |
+| `feature-playback/` | the pill, the listening menu, the player |
+| `feature-settings/` | the settings hub and its pages |
+| `ui-kit/` | the theme and palettes, the hand-drawn icons, the shared rows and shapes, the small formatters |
+| `content-assets/` | the faces and the core pack the app ships |
+| `tools/` | the offline pipeline (`--args="help"` lists it); `tools/icons/forge.py` draws every icon and the feature graphic |
+| `content/` | `quran.db`, `packs/`, `manifest.json`, `recitation-manifest.json`; `raw/` is local and gitignored |
+| `play-store/` | the listing, the screenshots per form factor, the hand-off AAB |
+| `benchmark/` | the startup profile's generator, development only, never in the bundle |
+| `docs/` | the Pages site and the privacy policy Play links to |
 | `.github/workflows/` | `build.yml` (gates, data tests, signed bundle), `screenshots.yml` (the store set) |
-| `docs/` | the Pages site: the landing page and the privacy policy Play links to |
+
+## Where the rest lives
+
+| Thing | Home |
+| --- | --- |
+| Status, version, release notes | `README.md` |
+| Store copy, the version line, the eight frames | `play-store/listing.md` |
+| Every dataset's source, version, checksum, license | `content/manifest.json` |
+| Every settled design decision and the road not taken | the KDoc tagged `owner decision` |
+| A decision since overridden, and the reasoning that led here | `git log` |
 
 ## Glossary
 
-- **the content database**: the read-only SQLite built by `tools/` from the
-  manifest, shipped as an asset, replaced wholesale on update.
-- **the manifest**: `content/manifest.json`, the one place a dataset's
-  source, version, license, and checksum are recorded.
-- **the reading**: the ayah-by-ayah reader with translation, word-by-word,
-  and tafsir. There is one reading and it has no mode name.
+- **the reading**: the ayah-by-ayah reader with translation, word-by-word, and
+  tafsir. There is one reading and it has no mode name.
 - **the reference**: an ayah key in `surah:ayah` form, for example 2:255.
-- **the deck**: the day's ayah is one card of a shuffled 6,236, dealt by the
-  day number and reshuffled every pass, so nothing about it is stored.
-- **the ayah card**: the sheet one ayah opens: the Ibn Kathir panel. The ayah,
-  its translation, and its meanings are already on the reading, so the card
-  does not repeat them.
-- **the text button**: `ui-kit/TextButton`, the one shape a word that acts
-  wears. A heading, a name, or a label is bare type; anything that answers a
-  touch is a rounded shape.
-- **the search sheet**: one field over the Arabic text, the translation, and
-  the surah names; results stay in Quran order.
-- **the pack**: one downloadable set of content or recitation, addressed by
-  its own hash. The app reads a pack and never hotlinks one.
-
-## Frozen choices (do not reopen without approval)
-
-Appealable: bring a genuinely better idea to the owner and, if approved,
-implement it and update this list.
-
-- The name and the three strings are frozen.
-- A settings row's value is under its name, on every row in the sheet, and
-  never in a column at the right; a settings row that opens something ends in
-  a chevron, whatever page it is on. The four Browse lists are the one
-  exception (owner decision, this session): the items in Surahs, Juz, Last
-  Read, and Saved draw no chevron, because a list of names is read by its
-  names and the mark on every line was noise. The back mark on the surah
-  grid stays, since it answers a tap rather than describing a door.
-- Reader-first, no tab bar.
-- One reading with no mode name. The reader's doors are Browse, Search, and
-  Settings; there is no bottom bar and no mode switch (owner decision, this
-  session: the printed page is removed because it could not match the print).
-- **The pill wears no close, and an X in this app means one thing: abort what
-  is in flight.** The playing pill, a failed player, a failed download, an
-  unavailable answer, and the download offer draw no X; the transfer's own
-  cancel keeps the only one, beside its progress line, because a stray tap
-  must never throw a package away (owner decision, this session). A page tap
-  and the phone's own Back put each of the others away with its state, and the
-  rule is `raisedAnswer`, one pure function beside the screen: it never
-  silences a recitation that is playing, and it never aborts a package on its
-  way. The failed download had no dismissal at all before, and the failed
-  player's close answered nothing, because a player that never connected had
-  no transport to stop. The recitation's
-  stop has no shape any more and is not lost with it: it is the action
-  TalkBack offers on Play or pause, under the same word the close was
-  announced with, while a sighted reader pauses and taps the page. The
-  capsule is one measure in every voice, 328 dp, the page's own width on the
-  360 dp phone and the widest it ever stood while hugging, clamped to the
-  glass less its 16 dp gutters: the words and the answer keep its two ends,
-  and an offer, a transfer, and a playing pill are one shape, where the
-  capsule used to run from about 210 dp for a transfer to the page's own 328
-  while playing, and to widen as a percent did (owner decision, this
-  session). The pill is one
-  row in every voice, the offer's shape: a words block at the leading end, the
-  reciter's name over the place while playing and over the state's sentence
-  when there is no recitation, and one answer at the trailing end, so the
-  playing capsule is 64 dp tall where it stood 120, and a download's line
-  keeps the one extra row of room under it. The playing words are one block
-  and one door, and the door opens the whole listening panel: the voices, the
-  pace, and the end of the audio. Every answer in that panel puts it away,
-  the voice, the pace, and the ending alike, because one question was asked
-  and the tap answered it (owner decision, this session). A voice that is not
-  a recitation keeps one
-  line and the voice list alone, because the pace and the end answer a
-  recitation that is not there (owner decision, this session: an offer shows
-  the reciter chooser, and only a playing pill shows the merged panel). The
-  block's place is one line and may end in an ellipsis at the longest names;
-  it holds about 140 dp on a 360 dp phone, which carries 108 of the 114
-  surahs' places whole in English, and the word Ayah stays on it
-  (owner decision, this session). The pace stands on the reciter's name's
-  line, never at the tail of the place, where the line's ellipsis ate it and
-  where at the longest names the place alone is wider than the line (owner
-  decision, this session). One air, `Space.Line` (8 dp),
-  stands between the shapes the reader sees: the transport's circles, and the
-  answer at its end. The words' own end keeps `Space.Block + Space.Tight`
-  (20 dp), because a capsule's end is a sphere and the words' line sits in its
-  shoulder, where an 8 dp air measured from the widest point read as a name
-  touching the border (owner decision: the Bangla matra reaches the top of its
-  line, so the offer's name looked cut); the same 20 holds the sentence on the
-  unavailable pill, which is words alone. The transport, the offer's Download,
-  and the transfer's X keep 8. The width is one number and never measured
-  from the content, and the download's line keeps its own room under the row,
-  so a percent can never resize the capsule; the size never animates.
-- **A round control's press is a 40 dp circle inside its 48 dp target.** One
-  rule for every round mark that answers a tap: the chrome's Browse, Search,
-  and Settings, a page's back, and the pill's transport. It is Material's own
-  icon button, and it is what lets two targets stand edge to edge while the
-  circles they light keep `Space.Line` (8 dp) between them. The transport is
-  the tightest case: its three targets abut, so a finger finds no dead pixel
-  between them, its circles stand 8 dp apart, and the place gained 20 dp of
-  the capsule's width, where three circles the size of their targets kept the
-  transport at 160 (owner decision, this session).
-- The reading answers a tap with the page and a long press with the ayah's own
-  actions (Play, Tafsir, Save, Note, More). A tap brings or puts away the
-  chrome and dismisses a raised pill; the one-time note that teaches the long
-  press is shown once per install, and TalkBack reaches the same actions
-  through each ayah's own custom actions. The one-tap ayah of 6.5 is reverted:
-  a stray touch raised the pill, and the full-width ayah blocks left almost no
-  paper to tap it away on (owner decision, this session).
-- The surah introduction is drawn only when the reader opens About this surah.
-  Closed, the door is the only thing under the basmalah; the three-line teaser
-  of 6.6, a side effect of loading the introduction as the surah opens so the
-  door knows it has content, is removed (owner decision, this session).
-- A single enabled tafsir opens itself with the ayah card, and every enabled
-  tafsir is read and parsed as the card opens, on a worker: the reader's
-  Tafsir tap is the ask, and the second tap of a one-item door list is
-  friction. With more than one tafsir the doors stand and the reader chooses
-  (owner decision, this session).
-- Last Read is the fourth Browse tab beside Surahs, Juz, and Saved, and a
-  note lives inside Saved with the ayah it was written on.
-- Last Read is one row per reading, not one per ayah (owner decision, this
-  session): reading on moves the row the reader is in, a deliberate jump
-  joins a reading it lands inside or right beside, and a jump anywhere else
-  starts a new row, even in the same surah. The row shows the latest ayah
-  alone. The old per-ayah table is rebuilt empty on update, because the app
-  has not shipped and the old rows cannot be rebuilt into readings they never
-  recorded.
-- A surah row in Browse opens its own ayah grid; there is no separate Go to
-  Ayah tab.
-- Text sizes are 0.8, 0.9, 1, 1.1, 1.2, evenly spaced with 1 the middle
-  step, and the shipped default is one even step smaller than it was at
-  launch (owner decision, this session). The
-  search results' Arabic follows the reader's Arabic step over its own 22 sp
-  base, while the reading's surfaces carry the sizes directly.
-- Side by side, the app keeps two gaps, both measured between the shapes the
-  reader sees rather than between the invisible 48 dp targets. A cluster of
-  same-kind small controls, the search and Browse chips, stands `Space.Line`
-  (8 dp) apart, because the eye reads it as one group. Two standalone actions
-  that each answer the task, the share card's two doors, the reminder
-  dialog's Set and Cancel, the remove question, and a note's Clear and Save,
-  stand `Space.Row` (12 dp) apart, because each is its own answer (owner
-  decision, this session).
-- **A label over a list wears one voice:** `ui-kit`'s `SectionHead`, the small
-  label size in the accent at a weight above the rows it opens, and a heading
-  to a screen reader. The settings hub's groups, the ayah card's tafsir doors,
-  and the pill's listening panel all draw it; none draws its head at the size
-  of the rows under it, which read as one undifferentiated block with no
-  rhythm to lean the air between them on (owner decision, this session).
-- The theme is one choice of three: Light, Dark, and System, drawn as one
-  swatch row with no switch beside it (owner decision, this session). The
-  two grounds keep their names, Light and Dark, the words every phone already
-  uses, so a reader never has to work out whether a ground is a color or a
-  mode; System follows the phone's own day and night and replaces the
-  follow-system toggle the two-swatch page used to carry, which was the source
-  of the one state a reader could not explain (a Night choice shown as the day
-  page). The ring stands on the stored choice on every phone: with System
-  chosen the ring is on System and never on Light or Dark, and the hub row
-  names the stored choice too (owner decision). The warm paper and lamplight pigments were retuned once more in the theme and consistency session
-  (owner decision, this session): the day page is a warm white (`#FBF9F4`,
-  sheet `#FFFFFF`) and the night page a warm charcoal (`#1C1A18`, sheet
-  `#242220`), because the deeper parchment read as sepia across every
-  surface; the manuscript's warmth now lives in the ink, the gold, and the
-  hairlines, and the night gold and quiet voice were lifted to clear their
-  measured margins.
-- Saheeh International is the only translation.
-- Ibn Kathir is the tafsir.
-- Minshawi and Husary are the only reciters, and Husary is the reciter of
-  a new install; a reader's own choice is never moved (owner decision, 4.5).
-- The first screen is two steps on one screen: the language, then the daily
-  reminder card that asks for the notification and the exact time. The
-  chosen language's translation and tafsir arrive with the choice; the word
-  list arrives with the toggle that turns it on. The first choice lands in
-  Al-Fatiha 1:1, and every launch after that opens
-  where the reader left off (owner decision, 4.5).
-- No streaks, no gamification.
-- The design direction is the manuscript language: the page is the
-  interface, chrome is summoned and never resident, one accent, hairlines
-  over boxes.
-- Every sheet is the app's one page, `Reading.SheetMeasure`: Search, Browse,
-  Settings, the ayah card, the note, the footnote, the share, and the remove
-  question all stand on it, and Search's results keep their own 65-character
-  column centered inside it. A window whose margin around the page would be
-  under `Space.Section` a side takes the whole window instead, so the seven
-  inch tablet fills edge to edge and the ten inch screen centers on the
-  reading's own page (owner decision, this session).
-- Content is sourced from QUL and QuranEnc, with every license
-  honored on the About page itself. The credits stand there, always visible,
-  not behind a door (owner decision, this session): every license is honored
-  by being read where a reader already is. The page is facts only and opens
-  nothing; corrections and rights requests travel through the store listing's
-  contact and the project repository (owner decision).
-- The Listening settings page is gone (owner decision, this session): the
-  pace and the end-of-audio answer live in the pill's own listening menu,
-  where a reader already is while hearing, and a second door to the same two
-  settings was friction. Speed is reached by playing an ayah and tapping the
-  status line.
-- The content is checked on the reader's behalf, once a day, without a row or
-  a word for it (owner decision, this session): "Check installed content" is
-  gone from About, and the integrity read-back runs quietly on launch, only
-  unmetered, only after the first page is readable, repairing what it finds
-  and saying nothing. A reader should never meet a word they would not
-  understand.
-- Continue to the next surah is off by default and is the reader's one-time
-  word for the packages that follow the surah being heard.
-- What happens at the end of the audio is one answer, drawn as one list
-  with one leading radio mark and one 16 dp gap, in the pill's own listening
-  menu (owner decision, 4.5; the mark and the gap are the app's one choice
-  row, owner decision, forty-eighth session; it lives in the pill alone, the
-  Listening settings page removed as a duplicate of it, owner decision, this
-  session): continue to
-  the next ayah (the default), repeat the ayah, stop after this ayah,
-  continue to the next surah, or repeat the surah, in that order.
-- **The app asks for the exact alarm only at the two acts that set the
-  reminder, only while the phone is withholding it, and the reminder wears no
-  alarm icon.** `SCHEDULE_EXACT_ALARM` is granted at install before Android
-  14 and is asked for once after it, in the phone's own screen; the Daily
-  page names it again only as state, with the one door that screen offers,
-  and the hub has no row for it. `USE_EXACT_ALARM` is never declared: Play
-  accepts it for an alarm clock or a calendar only, and a Quran reader is
-  neither (owner decision).
-- The day's ayah is dealt from a shuffled deck rather than walked in the
-  Book's order: a different ayah every morning, every ayah once before the
-  deck is filled again, and nothing stored (owner decision).
-- The app's mark is an open book on its rehal: the owner's own reference
-  drawing, redrawn clean for this app as uniform line art on the reference's
-  own reading: the pages are sail arcs diving into a spine that ends at the V
-  where the two pages meet, each plank folds onto the page's outer edge, runs
-  down beside the book, crosses below it, and its leg and the closing arc
-  meet at one shared tip, so each foot is one clean tapered face; the whole
-  drawing in the theme's ink on the theme's paper, `#2A2620` on `#FBF9F4`,
-  at one line weight on every icon surface, with the pages filled in the
-  paper so the book occludes the stand behind it and a paper margin keeps the
-  stand's lines clear of the book's edge (owner decision, this session: the
-  stand's ornament gold was a 5.3:1 line the small sizes lost first, so the
-  icon keeps one ink at 14.3:1 on the warm white page and the gold keeps the feature graphic's
-  frame and rule and the app's own ornament; the drawing follows the
-  reference's own reading, and
-  the foot closes at the leg's own tip so no sliver of mouth knots the
-  home-screen sizes). The launcher, its monochrome layer (the book's silhouette on each
-  plank, sturdier than the mark), the store icon, the reminder's small icon
-  (the silhouette alone, no ground, since the shade reads only its alpha and
-  paints it in the notification color), the share card (the drawing in the
-  card's own ink on its paper), and the feature graphic all carry it.
-  The drawing is sized so the whole mark sits inside the launcher's 66 dp
-  circle, about half the canvas wide, so a mask leaves air around it instead
-  of the mark filling the tile.
-- The feature graphic is the book's own title page: the paper field with one
-  gold hairline frame, the mark centered on the axis as a seal, and beneath it
-  the name Quran in Literata, a short gold rule, and The Noble Book in
-  tracked small caps in Inter, the gaps between them held tight so the
-  caption keeps air above the frame's foot. Every element stands inside the
-  safe area, well clear of the edges Play may crop or overlay, and the file is
-  24-bit PNG with no alpha (owner decision, this session: the banner is the
-  frontispiece, drawn by the mark's generator).
+- **the deck**: the day's ayah is one card of a shuffled 6,236, dealt by the day
+  number and reshuffled every pass, so nothing about it is stored.
+- **the ayah card**: the sheet one ayah opens. The ayah, its translation, and its
+  meanings are already on the reading, so the card does not repeat them.
+- **the text button**: `ui-kit`'s one shape for a word that acts. A heading, a
+  name, or a label is bare type; anything that answers a touch is a rounded
+  shape.
+- **the pack**: one downloadable set of content or recitation, addressed by its
+  own hash. The app reads a pack and never hotlinks one.
+- **the content database**: the read-only SQLite built by `tools/`, shipped as an
+  asset, replaced wholesale on update.
+- **the manifest**: `content/manifest.json`, the one place a dataset's source,
+  version, license, and checksum are recorded.
 
 ## Traps
 
-The classes that cost a session to find live here, one entry each. Five of
-them are worth reading before any run:
+- **A popup's place on the glass cannot be read by a compose test.** Every node
+  in a popup reports coordinates from that window's own corner. Pin the rule
+  that places it as arithmetic in a JVM test, and the anchor in the compose test.
+- **A gate that reads content by table name is reading a contract, not a
+  schema.** Change the build's shape and run every `:tools` gate.
+- **A red leg is a fact to baseline, not a verdict.** `git worktree add` the
+  parent commit and run the class there before believing a change of yours did
+  it. A retry is worth one when it names the failure; a re-wait is worth
+  nothing.
+- **Verify by exit code**, never by grepping piped output. **Do not hand-drive
+  the app to verify UI**: JVM suite and lint, push, then read the capture run's
+  frames. Every UI claim is backed by a frame or a compose run.
 
-- **Read the frames a red leg kept before touching anything.** The log says
-  which assertion failed; the frame says what the reader was looking at.
-  Three wrong diagnoses in a row were solved by one kept frame.
-- **A red leg on this machine is a fact to baseline, not a verdict.** Four of
-  the app's own legs were red here for nobody to see, and every one of them was
-  red on `main` too: `git worktree add` a copy of the parent commit and run the
-  class there before believing that a change of yours did it.
-- **A popup's place on the glass cannot be read by a compose test.** A popup
-  draws in a window of its own, and every node inside it reports coordinates
-  measured from that window's own corner, so a test can see how big a popup is
-  and never where it hangs. Pin the rule that places it instead, as arithmetic
-  in a JVM test, and pin the anchor it is placed from in the compose test that
-  can see that.
-- **A retry is not a diagnosis.** It is worth one when it names the failure
-  the way the 10 inch tour step does, and worth nothing when it only
-  re-waits.
-- **Never install a set from a run with a leg short of eight frames.**
-- **A gate that reads the content by table name is reading a contract, not
-  a schema.** Change the build's shape and run every `:tools` gate, not
-  only the ones CI runs.
-- **One fact, one command, read once.** A failure is never guessed at
-  twice: the second guess costs a capture run.
-- **A removed screen takes its test nodes with it.** The tour pressed a
-  removed screen's node on a reading that no longer draws one, and the pill never
-  rose: after deleting a surface, grep its content descriptions before
-  running anything.
+## Verify
 
-## Housekeeping
+```bash
+./gradlew :core:test :tools:test :data:testDebugUnitTest :ui-kit:testDebugUnitTest :feature-playback:testDebugUnitTest :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
+./gradlew :data:connectedDebugAndroidTest   # content, storage, recitation manifest
+./gradlew :app:connectedDebugAndroidTest    # the app surfaces and the screenshot tour
+./gradlew :tools:run --args="help"          # the content pipeline, every step
+```
 
-At the end of a session the hand-off copy, the build directories, and the
-content working area are what may go, and each is one command to bring
-back. Keep `content/raw/` (the owner's manual exports, the provenance of
-every pack), `content/quran.db` and `content/packs/` (the shipped assets
-the catalog pins), and `play-store/screenshots/` (the store set).
+A local `content/quran.db` rebuild must reproduce its committed SHA-256 exactly;
+if it does not, stop and find out why before committing. Gates that read
+`content/raw` run on the owner's machine only, so `ls content/raw` before a
+release starts.
 
-| Removed | Bring it back with |
-| --- | --- |
-| `play-store/aab/*.aab` | the `signed-bundle` artifact from the newest green `build` run |
-| every `build/` directory | any `./gradlew` build |
-| `content/work/verify` | `./gradlew :tools:run --args="verify"` |
-| `content/work/fonts-hafs` | `./gradlew :tools:run --args="fetch"` |
-| `content/work/db`, `json`, `qpc-v2.db` | `./gradlew :tools:run --args="build"` |
-| `content/work/audio-dev` | `./gradlew :tools:run --args="audio sample"` |
+## Release
+
+The bundle, the store note, and the screenshots are one delivery, handed over
+together before the owner submits anything. The note stands in the hand-over
+message itself as bare paragraphs under 500 characters, never only in a file. The
+bundle comes from the newest green `build` run on `main`, not the first one after
+the version bump, and signing is proved by `jarsigner`'s words and its certificate
+SHA-256, never by exit code alone. Screenshots are collected whole from one run
+whenever visible UI changed, all three form factors, eight frames each, every
+frame read; without a visible change the hand-over says so and nothing is
+captured. Delete the hand-off copy in `play-store/aab/` once Play has it.
+
+## This machine
+
+- Every Gradle call begins with
+  `export JAVA_HOME="/c/Program Files/Android/Android Studio/jbr"`. It is the
+  only JDK here. `local.properties` holds `sdk.dir` and is gitignored.
+- The emulator runs here, headless, on three display-on AVDs (`quran_phone`,
+  `quran_tablet7`, `quran_tablet10`), so the instrumented suites have a home that
+  is not CI. `gh` is authenticated.
+- `python3` and `python` are the Store alias; the real interpreter is under
+  `C:/Users/zn/AppData/Local/hermes/tools/`. Nothing in the build needs it.
+- Two tool calls in one block run in parallel. Never edit a file and read it in
+  the same block.
