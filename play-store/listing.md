@@ -116,7 +116,7 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is refreshed for 9.8 from capture run 39538241037: all three legs green with eight frames each, and every frame compared with the previous set. The reading, chrome, and surah opening frames are pixel-identical on all three legs. The search frame changes in the status bar and in the caret; the settings frame in the status bar and the Version 9.8 line; and the Browse, ayah card, and tafsir frames only in the status bar. The fifteen frames that differ by any pixel are installed, byte for byte from the run's artifacts.
+The set is refreshed for 9.9 from capture run 39551396694: all three legs green with eight frames each, and every frame compared with the previous set. The reading, chrome, and surah opening frames are pixel-identical on all three legs. The search, Browse, ayah card, and tafsir frames change in the status bar, and the settings frame also in the Version 9.9 line. The fifteen frames that differ by any pixel are installed, byte for byte from the run's artifacts.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
