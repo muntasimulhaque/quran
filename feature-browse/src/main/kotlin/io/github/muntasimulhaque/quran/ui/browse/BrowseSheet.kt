@@ -1,12 +1,7 @@
 package io.github.muntasimulhaque.quran.ui.browse
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.indication
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -21,12 +16,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.ripple
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,13 +27,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.JuzStart
@@ -54,18 +41,10 @@ import io.github.muntasimulhaque.quran.ui.kit.AppSheet
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
-import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
-import io.github.muntasimulhaque.quran.ui.theme.Wash
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-private enum class BrowseTab(val labelRes: Int) {
-    Surahs(R.string.browse_tab_surahs),
-    Juz(R.string.browse_tab_juz),
-    LastRead(R.string.browse_tab_last_read),
-    Saved(R.string.browse_tab_saved),
-}
 
 /**
  * The browse sheet: the surahs, the thirty juz, where the reader has been
@@ -325,95 +304,4 @@ fun BrowseSheet(
             }
         }
     }
-}
-
-/**
- * One tab as a chip: the reader taps a chip, so the tab row is the same kind
- * of control as the search filters, and one choice among four is read the same
- * way wherever the app asks for it.
- */
-@Composable
-private fun BrowseTabChip(
-    label: String,
-    active: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    // The chip's own shape stays as small as it reads; the click and the
-    // accessibility node carry the app's 48 dp target, because a tab is a
-    // control and a control that cannot be hit is not drawn at all to the
-    // reader who missed it. The ripple is drawn on the pill inside, not on
-    // the slab: the click node sits outside the clip, so an indication left
-    // on it would flash a rectangle over the target instead of the shape
-    // the reader is looking at (the same rule TextButton wears).
-    val press = remember { MutableInteractionSource() }
-    val ink = if (active) {
-        MaterialTheme.colorScheme.onPrimary
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    }
-    Box(
-        modifier = modifier
-            // selectable, not clickable: a chosen tab must say it is chosen
-            // to TalkBack the way the app's other single choices do (owner
-            // decision, the theme and consistency session).
-            .selectable(
-                selected = active,
-                interactionSource = press,
-                indication = null,
-                role = Role.RadioButton,
-                onClick = onClick,
-            )
-            .minimumInteractiveComponentSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Box(
-            modifier = Modifier
-                .clip(Radii.Pill)
-                .background(
-                    if (active) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
-                    },
-                )
-                .indication(press, ripple(color = ink))
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = ink,
-            )
-        }
-    }
-}
-
-/** The surah one ayah falls in, from the Quran's sequential numbering. */
-private fun surahOfAyah(surahs: List<Surah>, starts: Map<Int, Int>, ayah: Int): Int? =
-    surahs.lastOrNull { (starts[it.number] ?: Int.MAX_VALUE) <= ayah }?.number
-
-/**
- * Puts one row in the middle of its list, as far as the Book's ends allow.
- * The row is scrolled to the top first so its height can be measured, then
- * scrolled again by the offset that centers it: a row's own height is not
- * known before it is measured, and the reader's place is the one row that
- * has to be found without a hunt. It is the rule the ayah grid already
- * follows, drawn on a list instead of a grid.
- */
-private suspend fun centerListItem(state: LazyListState, index: Int) {
-    state.scrollToItem(index)
-    val viewport = state.layoutInfo.viewportSize.height
-    val row = state.layoutInfo.visibleItemsInfo.firstOrNull { it.index == index }?.size ?: 0
-    if (viewport > row && row > 0) {
-        state.scrollToItem(index, scrollOffset = -((viewport - row) / 2))
-    }
-}
-
-// A tiny helper so the juz list can use its index as the juz number.
-private fun <T> androidx.compose.foundation.lazy.LazyListScope.itemsIndexedCompat(
-    items: List<T>,
-    row: @Composable (Int, T) -> Unit,
-) {
-    items(items.size) { index -> row(index, items[index]) }
 }

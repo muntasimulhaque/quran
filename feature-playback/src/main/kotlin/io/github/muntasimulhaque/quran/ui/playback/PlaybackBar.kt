@@ -19,11 +19,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.boundsInWindow
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.feature.playback.R
@@ -358,46 +355,17 @@ fun PlaybackBar(
                         anchor = anchor,
                         onDismiss = { openMenu = null },
                     ) {
-                        when (openMenu) {
-                            // The whole of the listening, for a recitation
-                            // that exists.
-                            PillMenu.Listening -> ListeningPanel(
-                                options = reciterOptions,
-                                selected = reciterId,
-                                // Every answer puts the panel away: one
-                                // question was asked, and the tap answered it
-                                // (owner decision, this session). The voice
-                                // list has always closed on its choice, and
-                                // the pace and the end of the audio follow it
-                                // now, so the reader is back on the reading
-                                // rather than in a panel they have to dismiss.
-                                onChoose = {
-                                    openMenu = null
-                                    onReciter(it)
-                                },
-                                speed = speed,
-                                end = end,
-                                onSpeed = {
-                                    openMenu = null
-                                    onSpeed(it)
-                                },
-                                onEndOfAudio = {
-                                    openMenu = null
-                                    onEndOfAudio(it)
-                                },
-                            )
-                            // The voices alone, for a voice that has no
-                            // recitation to set a pace for.
-                            PillMenu.Reciters -> ReciterChoices(
-                                options = reciterOptions,
-                                selected = reciterId,
-                                onChoose = {
-                                    openMenu = null
-                                    onReciter(it)
-                                },
-                            )
-                            null -> Unit
-                        }
+                        PillMenuBody(
+                            openMenu = openMenu,
+                            options = reciterOptions,
+                            selected = reciterId,
+                            speed = speed,
+                            end = end,
+                            onDismiss = { openMenu = null },
+                            onReciter = onReciter,
+                            onSpeed = onSpeed,
+                            onEndOfAudio = onEndOfAudio,
+                        )
                     }
                 }
             }
@@ -412,34 +380,3 @@ fun PlaybackBar(
  * its own controls.
  */
 private enum class PillVoice { Playing, Offer, Downloading, Failed, Unavailable }
-
-/**
- * The anchor the pill's own popup hangs from, on both of the bars it wears:
- * the capsule's own width, with the popup's measure centred on it and its top
- * edge as the line they drop from.
- *
- * The anchor and the popup are one measure on purpose, and the anchor is read
- * back to the caller so the popup is placed from the anchor's own place and
- * not from whatever the library would take from a box it cannot see the
- * bounds of (owner report). It draws nothing and takes one hairline of room,
- * because a box with no height has no bounds to read: a zero-height anchor
- * stands every popup at the window's own edge instead of the capsule's centre.
- * The playing capsule and the offer bar both stand it, so the menu opens from
- * the same place wherever it is asked.
- */
-@Composable
-internal fun PillMenuAnchor(content: @Composable (anchor: IntRect) -> Unit) {
-    var anchor by remember { mutableStateOf(IntRect.Zero) }
-    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-        Box(
-            Modifier
-                .width(PillMenuMeasure)
-                .height(AnchorLine)
-                .testTag("pill-menu-anchor")
-                .onGloballyPositioned {
-                    val box = it.boundsInWindow()
-                    anchor = IntRect(box.left.toInt(), box.top.toInt(), box.right.toInt(), box.bottom.toInt())
-                },
-        ) { content(anchor) }
-    }
-}

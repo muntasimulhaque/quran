@@ -8,15 +8,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -27,31 +23,21 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.muntasimulhaque.quran.BuildConfig
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.readingMetrics
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
-import io.github.muntasimulhaque.quran.ui.browse.BrowseSheet
-import io.github.muntasimulhaque.quran.ui.kit.floatingLift
-import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
-import io.github.muntasimulhaque.quran.ui.search.SearchSheet
-import io.github.muntasimulhaque.quran.ui.settings.PackSetupState
-import io.github.muntasimulhaque.quran.ui.settings.SettingsActions
-import io.github.muntasimulhaque.quran.ui.settings.SettingsSheet
 import io.github.muntasimulhaque.quran.ui.reading.AyahCard
 import io.github.muntasimulhaque.quran.ui.reading.AyahNoteSheet
 import io.github.muntasimulhaque.quran.ui.reading.ReadingList
-import io.github.muntasimulhaque.quran.ui.theme.Radii
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -61,7 +47,7 @@ import kotlinx.coroutines.withContext
 private const val CHROME_MILLIS = 7000L
 
 /** Which sheet is over the reader, if any. */
-private enum class ReaderSheet { None, Browse, Search, Settings }
+internal enum class ReaderSheet { None, Browse, Search, Settings }
 
 /**
  * The reading screen: one reading, and chrome that only appears
@@ -302,62 +288,12 @@ fun ReaderScreen(
         )
 
         // The long press is the richest gesture in the app and the least
-        // visible, so it is said once, quietly, and then never again. The
-        // note floats over the reading and leaves on its own; a tap puts it
-        // away early, and either way the day is written down (owner
-        // decision, this session: restored with the long press).
+        // visible, so it is said once, quietly, and then never again.
         if (!settings.longPressHintShown) {
-            var hintVisible by remember { mutableStateOf(false) }
-            LaunchedEffect(Unit) {
-                delay(1400)
-                hintVisible = true
-                delay(8000)
-                hintVisible = false
-                viewModel.markLongPressHintShown()
-            }
-            AnimatedVisibility(
-                visible = hintVisible,
-                enter = if (reducedMotion) fadeIn() else fadeIn() + slideInVertically { it / 3 },
-                exit = fadeOut(),
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 96.dp),
-            ) {
-                Row(
-                    modifier = Modifier
-                        .padding(horizontal = 24.dp)
-                        .floatingLift(Radii.Card)
-                        .clip(Radii.Card)
-                        // A control that floats over the reading wears the
-                        // floating tone and a soft lift, not the sheet's own
-                        // surface: the page runs around it, and it has to read
-                        // as above the page rather than printed into it.
-                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                        .clickable {
-                            hintVisible = false
-                            viewModel.markLongPressHintShown()
-                        }
-                        // The card is a control and owes the finger the app's
-                        // 48 dp: the min grows the shape to the floor, so the
-                        // whole card is one target (owner decision, this
-                        // session).
-                        .minimumInteractiveComponentSize()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    IconGlyph(
-                        icon = Icon.More,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(GlyphSize.Action),
-                    )
-                    Text(
-                        text = stringResource(R.string.hint_long_press_ayah),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(start = 12.dp),
-                    )
-                }
-            }
+            LongPressHint(
+                reducedMotion = reducedMotion,
+                onSeen = { viewModel.markLongPressHintShown() },
+            )
         }
 
         val offer = viewModel.listenOffer
@@ -440,137 +376,21 @@ fun ReaderScreen(
         )
     }
 
-    val wordsPack = ContentDatabase.wordsPackId(viewModel.readingLanguage)
-    when (sheet) {
-        ReaderSheet.None -> Unit
-        ReaderSheet.Browse -> BrowseSheet(
-            content = content,
-            surahs = viewModel.surahs,
-            saved = saved,
-            lastRead = lastRead,
-            currentAyah = settings.ayah,
-            onDismiss = { sheet = ReaderSheet.None },
-            onAyah = { ayahNumber ->
-                sheet = ReaderSheet.None
-                viewModel.jumpToAyah(ayahNumber)
-            },
-            onSurah = { number ->
-                sheet = ReaderSheet.None
-                // From Browse, a surah opens where the reader left it, or at
-                // its top when they have never been there.
-                viewModel.openSurah(number)
-            },
-            onRemoveSaved = { ayahNumber ->
-                // A save that carries a note asks before it goes, so the
-                // reader's own words are never removed by one tap. The
-                // question opens over the sheet the reader is still standing
-                // in.
-                val note = saved.firstOrNull { it.ayahNumber == ayahNumber }?.note
-                if (note.isNullOrBlank()) {
-                    viewModel.removeSaved(ayahNumber)
-                } else {
-                    pendingRemove = ayahNumber
-                }
-            },
-            onForget = { viewModel.forgetPlace(it) },
-        )
-        ReaderSheet.Search -> SearchSheet(
-            content = content,
-            // Search reads the language the reader chose and no other: a
-            // Bangla reader searches Bangla translations and tafsirs even
-            // when an English column was added by hand (owner decision, this
-            // session).
-            translationPacks = remember(viewModel.searchTranslationPacks) {
-                viewModel.searchTranslationPacks.map { it.id }
-            },
-            tafsirPacks = remember(viewModel.searchTafsirPacks) {
-                viewModel.searchTafsirPacks.map { it.id }
-            },
-            packNames = remember(viewModel.packs) { viewModel.packs.associate { it.id to it.name } },
-            packLanguages = remember(viewModel.packs) {
-                viewModel.packs.associate { it.id to it.language }
-            },
-            // The word list follows the same one language, and never falls
-            // back to another: a reader who chose Bangla must not meet
-            // English meanings in the results.
-            wordsPack = wordsPack,
-            wordsInstalled = content.installedPack(wordsPack),
-            // The reader's own Arabic step, so a reader who enlarged the
-            // Quran's text reads the results at the same preference.
-            arabicStep = settings.arabicSize,
-            onDismiss = { sheet = ReaderSheet.None },
-            onAyah = { ayah ->
-                sheet = ReaderSheet.None
-                viewModel.jumpToAyah(ayah.number)
-            },
-            onSurah = { surah ->
-                sheet = ReaderSheet.None
-                viewModel.jumpToSurah(surah.number)
-            },
-        )
-        ReaderSheet.Settings -> SettingsSheet(
-            settings = settings,
-            packs = viewModel.packs,
-            packSetup = viewModel.packSetup?.let { setup ->
-                PackSetupState(
-                    packId = setup.pack.id,
-                    name = contentPackName(setup.pack.id, setup.pack.name),
-                    bytes = setup.pack.bytes,
-                    progress = setup.progress,
-                    failed = setup.failed,
-                )
-            },
-            recitations = viewModel.recitations,
-            version = BuildConfig.VERSION_NAME,
-            preview = { viewModel.sizePreviewRow() },
-            downloadedSurahs = { recitation -> viewModel.downloadedSurahs(recitation) },
-            // Read where it is drawn, so the Daily page tells the truth about
-            // the phone's own switch even when the reader comes back from the
-            // system settings without the app restarting.
-            notificationsBlocked = notificationsBlocked,
-            exactGrantWithheld = exactGrantWithheld,
-            actions = SettingsActions(
-                onLanguage = { tag ->
-                    io.github.muntasimulhaque.quran.data.UiLanguage.of(tag)?.let { language ->
-                        // The language already chosen is not chosen again: a
-                        // second recreation for the same answer would close
-                        // the page for nothing.
-                        if (language.tag == settings.uiLanguage) return@let
-                        viewModel.chooseLanguage(language)
-                        // The locale belongs to the Activity's own resources;
-                        // the recreation brings every window up speaking it.
-                        (context as? android.app.Activity)?.recreate()
-                    }
-                },
-                onTheme = { viewModel.setTheme(it) },
-                onTypeSize = { role, step -> viewModel.setTypeSize(role, step) },
-                onFollowReciter = { viewModel.setFollowReciter(it) },
-                onShowTranslation = { viewModel.setShowTranslation(it) },
-                onShowTafsir = { viewModel.setShowTafsir(it) },
-                onWordByWord = { viewModel.setWordByWord(it) },
-                onDailyAyah = { enabled ->
-                    viewModel.setDailyAyah(enabled, onReminderPermission)
-                },
-                onDailyAyahTime = { minute ->
-                    // Moving the moment is as clear a yes as turning the
-                    // switch, so it asks for the same permission.
-                    viewModel.setDailyAyahTime(minute, onReminderPermission)
-                },
-                onOpenNotificationSettings = onOpenNotificationSettings,
-                onAskExactAlarm = onAskExactAlarm,
-                onSelectRecitation = { viewModel.selectRecitation(it) },
-                onToggleTranslation = { viewModel.toggleTranslationPack(it) },
-                onToggleTafsir = { viewModel.toggleTafsirPack(it) },
-                onInstallPack = { viewModel.installPack(it) },
-                onRemovePack = { viewModel.removePack(it) },
-                onPackSetupCancel = { viewModel.cancelPackSetup() },
-                onRemoveDownloads = { recitation, surah ->
-                    viewModel.removeDownloads(recitation, surah)
-                },
-            ),
-            onDismiss = { sheet = ReaderSheet.None },
-        )
-    }
+    ReaderSheets(
+        sheet = sheet,
+        content = content,
+        viewModel = viewModel,
+        settings = settings,
+        saved = saved,
+        lastRead = lastRead,
+        notificationsBlocked = notificationsBlocked,
+        exactGrantWithheld = exactGrantWithheld,
+        onOpenNotificationSettings = onOpenNotificationSettings,
+        onAskExactAlarm = onAskExactAlarm,
+        onReminderPermission = onReminderPermission,
+        onDismiss = { sheet = ReaderSheet.None },
+        onPendingRemove = { pendingRemove = it },
+    )
 
     cardAyah?.let { ayah ->
         AyahCard(

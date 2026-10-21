@@ -12,7 +12,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -27,7 +26,6 @@ import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.Search
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.SearchHit
-import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.SearchArabicLine
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
@@ -35,15 +33,10 @@ import io.github.muntasimulhaque.quran.data.arabicLineFor
 import io.github.muntasimulhaque.quran.data.shouldShowWordMeaning
 import io.github.muntasimulhaque.quran.feature.search.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
-import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.rich.HighlightedText
-import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
-import io.github.muntasimulhaque.quran.ui.reader.Icon
-import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
-import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
 
@@ -60,92 +53,6 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
  */
 private const val SearchArabicSp = 22f
 
-
-@Composable
-internal fun ReferenceRow(ayah: Ayah, onAyah: (Ayah) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .sheetRow(onClick = { onAyah(ayah) })
-            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = Space.Row),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(Modifier.weight(1f)) {
-            Text(
-                text = stringResource(R.string.search_label_go_to),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Text(
-                text = localizedDigits(ayah.verseKey),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(top = Space.Tight),
-            )
-        }
-        // The row is the door, and it ends in the one chevron mark every
-        // other door ends in. An Open button inside a row that already
-        // opened on tap was two controls for one act, and TalkBack met a
-        // row and a nested button (owner decision, the theme and consistency
-        // session).
-        IconGlyph(
-            icon = Icon.Chevron,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-                .padding(start = Space.Tight)
-                .size(GlyphSize.ChevronRow),
-        )
-    }
-}
-
-@Composable
-internal fun SurahRow(surah: Surah, onSurah: (Surah) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .sheetRow(onClick = { onSurah(surah) })
-            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = Space.Row),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(Modifier.weight(1f)) {
-            Text(
-                text = stringResource(R.string.search_label_surah),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Text(
-                text = surah.nameSimple,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(top = Space.Tight),
-            )
-            Text(
-                // The place first, the count second: the order Browse and
-                // the reading use, so one surah reads one way everywhere
-                // (owner decision, the theme and consistency session).
-                text = stringResource(
-                    R.string.search_surah_meta,
-                    placeName(surah.revelationPlace),
-                    surah.versesCount,
-                ),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = Space.Tight),
-            )
-        }
-        Text(
-            text = surah.nameArabic,
-            style = TextStyle(fontFamily = Amiri, fontSize = 23.sp, color = MaterialTheme.colorScheme.onSurfaceVariant),
-        )
-        IconGlyph(
-            icon = Icon.Chevron,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-                .padding(start = Space.Tight)
-                .size(GlyphSize.ChevronRow),
-        )
-    }
-}
 
 @Composable
 internal fun AyahRow(
@@ -340,11 +247,3 @@ internal fun arabic(hit: SearchHit.AyahHit, hafs: FontFamily, terms: List<String
         if (index < text.length) append(text.substring(index))
     }
 }
-
-@Composable
-internal fun placeName(place: String): String =
-    if (place.equals("makkah", true)) {
-        stringResource(R.string.search_place_makkah)
-    } else {
-        stringResource(R.string.search_place_madinah)
-    }
