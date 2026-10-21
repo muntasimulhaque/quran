@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 9.8 (versionCode 100)
+Version: 9.9 (versionCode 101)
 
 ## Listing
 
@@ -136,8 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (9.8, 288 characters)
-For 9.8, the recitation follows the words on the page. The highlight moves with the reciter from the first word to the last, stays on the word through a pause, and no longer drifts one word ahead on the ayahs that open with a vocative. The corrected word timings arrive with this version.
+## Release notes (9.9, 235 characters)
+For 9.9, Repeat the surah now plays the surah through and begins again, instead of repeating its first ayah. The next surah is added once, so it no longer plays twice, and a surah already on the phone is not offered for download again.
 ## Before each release
 
 1. Raise `versionCode` by 1 and `versionName` by 0.1 in
