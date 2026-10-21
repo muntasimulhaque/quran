@@ -116,7 +116,7 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is unchanged from 9.9, from capture run 39551396694: all three legs green with eight frames each. Version 10.0 changes no pixel, as the refactor was verified against the 9.9 build on the same emulator, so no capture was run for it.
+The set is from capture run 39616776270 on 10.1: all three legs green with eight frames each, every frame compared with the one it replaces. The app draws the same pixels it drew in 10.0; the frames differ only in the status bar's clock, the About row's version label, and the tablet 7 search frame's on-screen keyboard, which the emulator lays out a little differently between runs.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
