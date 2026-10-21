@@ -29,6 +29,14 @@ class Build(private val root: File) {
     private val output = File(root, "content")
     private val problems = mutableListOf<String>()
 
+    /**
+     * How many recitation rows the build moved back one word, and how many
+     * regions it folded onto the last drawn word. They are reported with the
+     * database hash so a release can say exactly what changed.
+     */
+    private var recitationSegmentsShifted = 0
+    private var recitationSegmentsClamped = 0
+
     private data class Word(
         val id: Int,
         val surah: Int,
@@ -46,6 +54,12 @@ class Build(private val root: File) {
 
         val words = readWords()
         val ayahNumbers = indexAyahs(words)
+        // The number of words the reading draws for each ayah, the ayah number
+        // excluded. The segments are normalized against it, so a region can
+        // never name a word the page does not have.
+        val wordCounts = words.filter { !it.marker }
+            .groupingBy { ayahNumbers["${it.surah}:${it.ayah}"] ?: 0 }
+            .eachCount()
         val translation = readTranslation()
         val wordLists = buildMap {
             put("en", readWordList("word-by-word-english"))
@@ -78,7 +92,7 @@ class Build(private val root: File) {
                 datasetId = "tafsir-ibn-kathir-bn",
                 packId = "tafsir-ibn-kathir-bn",
             )
-            insertRecitations(connection, manifest, ayahNumbers)
+            insertRecitations(connection, manifest, ayahNumbers, wordCounts)
             insertSurahInfo(connection)
             insertPacks(connection, manifest)
             insertMeta(connection, manifest, inserted)
@@ -683,6 +697,7 @@ class Build(private val root: File) {
         connection: Connection,
         manifest: Manifest,
         ayahNumbers: Map<String, Int>,
+        wordCounts: Map<Int, Int>,
     ) {
         val recitations = manifest.datasets.filter { it.id.startsWith("recitation-") }
         connection.prepareStatement(
@@ -722,7 +737,17 @@ class Build(private val root: File) {
                             insertAyah.setString(1, dataset.id.removePrefix("recitation-"))
                             insertAyah.setInt(2, number)
                             insertAyah.setString(3, path)
-                            insertAyah.setString(4, rs.getString(4) ?: "[]")
+                            val raw = rs.getString(4) ?: "[]"
+                            val regions = RecitationSegments.parse(raw)
+                            if (regions == null) {
+                                fail("recitation ${dataset.id}: $surah:$ayah segments are not a readable word list")
+                                insertAyah.setString(4, raw)
+                            } else {
+                                val correction = RecitationSegments.correct(raw, regions, wordCounts[number] ?: 0)
+                                if (correction.shifted) recitationSegmentsShifted += 1
+                                recitationSegmentsClamped += correction.clamped
+                                insertAyah.setString(4, correction.json)
+                            }
                             insertAyah.addBatch()
                             inserted += 1
                         }
@@ -816,6 +841,8 @@ class Build(private val root: File) {
             appendLine("  \"words\": ${words.size - markers},")
             appendLine("  \"markers\": $markers,")
             appendLine("  \"translations\": $translations,")
+            appendLine("  \"recitationSegmentsShifted\": $recitationSegmentsShifted,")
+            appendLine("  \"recitationSegmentsClamped\": $recitationSegmentsClamped,")
             appendLine("  \"problems\": ${problems.size},")
             appendLine("  \"databaseBytes\": ${database.length()},")
             appendLine("  \"databaseSha256\": \"${sha256(database)}\"")

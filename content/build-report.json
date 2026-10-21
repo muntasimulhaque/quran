@@ -4,7 +4,9 @@
   "words": 77432,
   "markers": 6236,
   "translations": 6236,
+  "recitationSegmentsShifted": 938,
+  "recitationSegmentsClamped": 1453,
   "problems": 0,
   "databaseBytes": 109809664,
-  "databaseSha256": "684077aef62688de774da7dfd37928ac0485ae8e8834719362cc8b317c48cb85"
+  "databaseSha256": "8e9dcbd8f09f1a02e291b732003b77613ece614d241d5d118d37e9291f75f6d6"
 }

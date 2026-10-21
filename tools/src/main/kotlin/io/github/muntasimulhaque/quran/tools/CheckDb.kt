@@ -39,6 +39,21 @@ class CheckDb(private val root: File) {
             return 2
         }
         var failures = 0
+        val catalogFile = File(root, "content/catalog.json")
+        val entries = if (catalogFile.exists()) {
+            Json.parseToJsonElement(catalogFile.readText()).jsonObject["packs"]
+                ?.jsonArray ?: JsonArray(emptyList())
+        } else {
+            JsonArray(emptyList())
+        }
+        // The segment gate follows the reciter packs the catalog actually
+        // ships. The database carries the other exports the manifest lists,
+        // and a source gap in one the app never installs is not a ship stop.
+        val catalogReciters = entries
+            .map { it.jsonObject }
+            .filter { it["type"]?.jsonPrimitive?.content == "recitation" }
+            .mapNotNull { it["id"]?.jsonPrimitive?.content?.removePrefix("reciter-") }
+            .toSet()
         val expectedBytes = report["databaseBytes"]?.jsonPrimitive?.longOrNull
         val expectedHash = report["databaseSha256"]?.jsonPrimitive?.content
         if (expectedBytes != null && database.length() != expectedBytes) {
@@ -58,6 +73,7 @@ class CheckDb(private val root: File) {
                     failures++
                 }
             }
+            failures += checkRecitationSegments(connection, catalogReciters)
             // Every pack must cover every ayah, or the reader would meet a
             // silent hole when that pack is chosen. The number of packs is not
             // pinned: a pack is content, not structure, and the catalog below
@@ -78,10 +94,7 @@ class CheckDb(private val root: File) {
 
             // The catalog the app reads must describe exactly these packs, and
             // the pack files it points at must be the ones on this machine.
-            val catalogFile = File(root, "content/catalog.json")
             if (catalogFile.exists()) {
-                val entries = Json.parseToJsonElement(catalogFile.readText()).jsonObject["packs"]
-                    ?.jsonArray ?: JsonArray(emptyList())
                 // The database carries the text packs (translations and tafsirs);
                 // the catalog also names the core, the word lists, and reciters.
                 val catalogIds = entries
@@ -119,5 +132,75 @@ class CheckDb(private val root: File) {
         }
         println("checkdb: content/quran.db verified, ${database.length()} bytes, $actualHash")
         return 0
+    }
+
+    /**
+     * Every region the app reads must name a word the reading draws, and every
+     * drawn word must have at least one region. The build folds QUL's leading
+     * fragment and its ayah number into that range; this gate is what proves it
+     * did, on the database alone and without the raw sources.
+     */
+    private fun checkRecitationSegments(connection: java.sql.Connection, reciters: Set<String>): Int {
+        if (reciters.isEmpty()) {
+            println("checkdb: no recitation packs in the catalog; segments not checked")
+            return 0
+        }
+        var failures = 0
+        var rows = 0
+        val seen = HashMap<String, Int>(reciters.size)
+        val placeholders = reciters.joinToString(",") { "?" }
+        val sql = "SELECT ra.recitation, ra.ayah_number, ra.segments, " +
+            "(SELECT COUNT(*) FROM word w WHERE w.ayah_number = ra.ayah_number AND w.marker = 0) " +
+            "FROM recitation_ayah ra WHERE ra.recitation IN ($placeholders) " +
+            "ORDER BY ra.recitation, ra.ayah_number"
+        connection.prepareStatement(sql).use { statement ->
+            reciters.forEachIndexed { index, reciter -> statement.setString(index + 1, reciter) }
+            statement.executeQuery().use { rs ->
+                while (rs.next()) {
+                    rows++
+                    val recitation = rs.getString(1)
+                    seen[recitation] = (seen[recitation] ?: 0) + 1
+                    val ayah = rs.getInt(2)
+                    val regions = RecitationSegments.parse(rs.getString(3) ?: "")
+                    val words = rs.getInt(4)
+                    if (regions == null) {
+                        println("checkdb: $recitation $ayah has unreadable segments")
+                        failures++
+                        continue
+                    }
+                    if (words <= 0) {
+                        println("checkdb: $recitation $ayah has no drawn words")
+                        failures++
+                        continue
+                    }
+                    val covered = HashSet<Int>(words)
+                    var outside = false
+                    for (region in regions) {
+                        if (region.wordTo !in 1..words) {
+                            println("checkdb: $recitation $ayah has word ${region.wordTo} outside 1..$words")
+                            failures++
+                            outside = true
+                            break
+                        }
+                        covered += region.wordTo
+                    }
+                    if (outside) continue
+                    val missing = (1..words).filterNot { it in covered }
+                    if (missing.isNotEmpty()) {
+                        println("checkdb: $recitation $ayah has no region for word(s) ${missing.take(5)}")
+                        failures++
+                    }
+                }
+            }
+        }
+        for (reciter in reciters) {
+            val count = seen[reciter] ?: 0
+            if (count != 6236) {
+                println("checkdb: $reciter has $count recitation rows, expected 6236")
+                failures++
+            }
+        }
+        if (failures == 0) println("checkdb: $rows recitation rows, every word in range and covered")
+        return failures
     }
 }

@@ -236,7 +236,7 @@ command to rediscover.
 ## Build, test, verify
 
 ```bash
-./gradlew :core:test :data:testDebugUnitTest :ui-kit:testDebugUnitTest :feature-playback:testDebugUnitTest :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
+./gradlew :core:test :tools:test :data:testDebugUnitTest :ui-kit:testDebugUnitTest :feature-playback:testDebugUnitTest :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
 ./gradlew :data:connectedDebugAndroidTest   # saved store, last read, recitation manifest
 ./gradlew :app:connectedDebugAndroidTest    # the app surfaces and the screenshot tour
 ```

@@ -102,7 +102,7 @@ jobs:
       # The whole JVM suite, not only :core: a unit test that no run
       # executes is a rule nobody hears break.
       - name: Unit tests
-        run: ./gradlew :core:test :data:testDebugUnitTest :ui-kit:testDebugUnitTest :app:testDebugUnitTest --console=plain
+        run: ./gradlew :core:test :tools:test :data:testDebugUnitTest :ui-kit:testDebugUnitTest :feature-playback:testDebugUnitTest :app:testDebugUnitTest --console=plain
 
       - name: Fetch content
         run: ./gradlew :tools:run --args="fetch" --console=plain

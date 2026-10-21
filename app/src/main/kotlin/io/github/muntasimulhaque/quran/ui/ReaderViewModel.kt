@@ -266,7 +266,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         // The pill's chooser names every reciter with that reciter's price for
         // the surah under the reader's finger, so the list is read again
         // when the surah or the reciter changes and never on a tick: the
-        // state publishes five times a second, and a directory listing that
+        // state publishes ten times a second, and a directory listing that
         // often would be a directory listing the reader never asked for.
         viewModelScope.launch {
             playback.state

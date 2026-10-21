@@ -676,11 +676,13 @@ class PlaybackController(
     }
 
     /**
-     * The tick that keeps the recited word marked. It publishes five times a
+     * The tick that keeps the recited word marked. It publishes ten times a
      * second while something is being heard and does not run at all while
      * nothing is: a word cannot move inside a paused player, and a loop that
      * wakes four cores to learn nothing is the last thing a reading app
-     * should spend its battery on.
+     * should spend its battery on. Ten times a second keeps the wash within a
+     * tenth of a region boundary, where five left it visibly behind a fast
+     * recitation (owner report, this session).
      */
     private fun startTicker() {
         if (ticker?.isActive == true) return
@@ -736,7 +738,7 @@ class PlaybackController(
      * mid-ayah is answered by the same ayah at the same offset rather than by
      * the top of it.
      *
-     * The offset is written on a throttle: it moves five times a second and
+     * The offset is written on a throttle: it moves ten times a second and
      * the disk does not need to, and a resume a few seconds out is one nobody
      * can tell from the real one. A change of ayah and a pause are each
      * written at once, because the ayah is the part nothing else can put back
@@ -767,10 +769,7 @@ class PlaybackController(
         }
     }
 
-    private fun wordAt(positionMs: Long): Int? {
-        val segment = segments.firstOrNull { positionMs in it.startMs until it.endMs } ?: return null
-        return segment.wordFrom + 1
-    }
+    private fun wordAt(positionMs: Long): Int? = recitedWordAt(segments, positionMs)
 
     private fun maybeAppendNextSurah() {        val player = controller ?: return
         val id = player.currentMediaItem?.mediaId ?: return
@@ -796,7 +795,7 @@ class PlaybackController(
         const val MAX_SPEED = 1.5f
 
         /** How often the recited word is published while something is heard. */
-        const val TICK_MILLIS = 200L
+        const val TICK_MILLIS = 100L
 
         /**
          * How far apart two writes of the heard offset may be. The ayah it
