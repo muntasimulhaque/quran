@@ -33,4 +33,26 @@ object RecitationPlaylist {
      */
     fun startOf(mediaIds: List<String>, surah: Int): Int =
         mediaIds.indexOfFirst { surahOf(it) == surah }
+
+    /**
+     * The surah an automatic item advance is ending, or null when the advance
+     * is not the end [answer] repeats.
+     *
+     * The playlist is one media item per ayah, so the player reports an
+     * automatic advance at every ayah boundary. The one advance that ends a
+     * surah is the one that arrives in another surah: reading the advance
+     * alone made every ayah's end look like the surah's end, which restarted
+     * the surah at ayah 1 and then looped that ayah forever (owner report,
+     * this session). Only the surah repeat asks this question; every other
+     * answer is left alone.
+     */
+    fun endedSurah(
+        answer: EndOfAudio,
+        playing: Int?,
+        arrivingMediaId: String?,
+    ): Int? {
+        if (answer != EndOfAudio.REPEAT_SURAH) return null
+        val arrived = surahOf(arrivingMediaId ?: return null) ?: return null
+        return playing?.takeIf { it != arrived }
+    }
 }

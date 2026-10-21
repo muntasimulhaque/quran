@@ -14,6 +14,7 @@ import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionToken
 import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.core.RecitationPlaylist
+import io.github.muntasimulhaque.quran.core.RecitationQueue
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.PlaybackPosition
@@ -70,7 +71,7 @@ class PlaybackController(
     private val downloader = RecitationDownloader(context)
     private var content: ContentDatabase? = null
     private var controller: MediaController? = null
-    private var loadedThroughSurah = 0
+    private val queue = RecitationQueue()
     private var recitationId: String? = null
     private var segments: List<io.github.muntasimulhaque.quran.data.WordSegment> = emptyList()
     private var segmentedAyah: Int? = null
@@ -193,6 +194,14 @@ class PlaybackController(
             )
             return
         }
+        // The surah the playlist is loaded through is recorded before the
+        // player is handed the playlist: a new playlist is reported to its
+        // listeners before setMediaItems returns, and that report appends the
+        // next surah from this value. Recording it after the call measured
+        // the report from the old surah, which missed the next surah at a
+        // start on a surah's last ayah and appended it twice at a start
+        // inside the surah (owner report, this session).
+        queue.load(ayah.surah)
         // The offset this ayah was last heard at, under this reciter. A
         // process that died mid-ayah is answered by the rest of it. A
         // different ayah, a different reciter, and a surah whose audio has
@@ -212,7 +221,6 @@ class PlaybackController(
             return
         }
         startTicker()
-        loadedThroughSurah = ayah.surah
         _state.value = _state.value.copy(
             recitation = recitation,
             unavailable = false,
@@ -597,17 +605,21 @@ class PlaybackController(
         }
 
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-            // The surah that was being heard, read before the state moves on:
-            // the surah that has just ended is the one the state last
-            // published, and it is the one the repeat belongs to.
-            val ended = _state.value.surah
+            // A surah's end is the one automatic advance that arrives in
+            // another surah, and the surah it ends is the one the state last
+            // published. A deliberate step is a seek and is never read here,
+            // so Next and Previous still carry the reader out of the surah.
             val player = controller
-            if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO &&
-                end == EndOfAudio.REPEAT_SURAH &&
-                player != null && ended != null && restartSurah(player, ended)
-            ) {
-                publish(player)
-                return
+            if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO && player != null) {
+                val ended = RecitationPlaylist.endedSurah(
+                    end,
+                    _state.value.surah,
+                    mediaItem?.mediaId,
+                )
+                if (ended != null && restartSurah(player, ended)) {
+                    publish(player)
+                    return
+                }
             }
             publish(controller)
             maybeAppendNextSurah()
@@ -670,6 +682,7 @@ class PlaybackController(
             // The surah is over, so the offset inside its last ayah is not a
             // place to come back to.
             heardAyah = null
+            syncTicker()
             scope.launch { positionStore.clear() }
             offerNextSurah()
         }
@@ -771,13 +784,12 @@ class PlaybackController(
 
     private fun wordAt(positionMs: Long): Int? = recitedWordAt(segments, positionMs)
 
-    private fun maybeAppendNextSurah() {        val player = controller ?: return
+    private fun maybeAppendNextSurah() {
+        val player = controller ?: return
         val id = player.currentMediaItem?.mediaId ?: return
         val surah = RecitationPlaylist.surahOf(id) ?: return
-        if (surah >= 114 || loadedThroughSurah != surah) return
-        val next = surah + 1
-        loadedThroughSurah = next
         val recitation = recitationId ?: return
+        val next = queue.appendAt(surah) ?: return
         scope.launch {
             val items = withContext(Dispatchers.IO) { itemsFor(recitation, next) }
             if (items.isNotEmpty()) {
