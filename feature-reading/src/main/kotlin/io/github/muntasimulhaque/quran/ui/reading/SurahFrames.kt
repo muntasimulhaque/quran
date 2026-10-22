@@ -36,6 +36,7 @@ import io.github.muntasimulhaque.quran.core.Arabic
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.Surah
+import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
@@ -45,6 +46,8 @@ import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
+import androidx.compose.ui.text.SpanStyle
+import io.github.muntasimulhaque.quran.core.TajweedCodec
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
@@ -79,7 +82,7 @@ internal fun SurahOpening(
     // are the words the audit verified. It is asked for only where it is
     // drawn: every surah but Al-Fatiha, whose first ayah it already is, and
     // At-Tawbah, which opens without it.
-    val basmalah by produceState<String?>(initialValue = null, surah.number, content) {
+    val basmalah by produceState<Ayah?>(initialValue = null, surah.number, content) {
         value = if (surah.number != 1 && surah.bismillahPre) {
             withContext(Dispatchers.IO) { content?.basmalah() }
         } else {
@@ -146,7 +149,14 @@ internal fun SurahOpening(
             // different texts stacked (owner decision, the theme and
             // consistency session).
             Text(
-                text = line,
+                text = androidx.compose.ui.text.buildAnnotatedString {
+                    append(line.text)
+                    if (line.tajweed.length == line.text.length) {
+                        for (span in TajweedCodec.spans(line.tajweed)) {
+                            addStyle(SpanStyle(color = palette.tajweed.of(span.rule)), span.start, span.end)
+                        }
+                    }
+                },
                 style = TextStyle(
                     fontFamily = hafs,
                     fontSize = metrics.arabicSp.sp,

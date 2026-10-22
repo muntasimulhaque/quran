@@ -2,6 +2,7 @@ package io.github.muntasimulhaque.quran.tools
 
 import io.github.muntasimulhaque.quran.core.Arabic
 import io.github.muntasimulhaque.quran.core.Search
+import io.github.muntasimulhaque.quran.core.TajweedCodec
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -44,6 +45,7 @@ class Build(private val root: File) {
         val position: Int,
         val text: String,
         val marker: Boolean,
+        val code: String,
     )
 
     fun run(): Int {
@@ -127,24 +129,81 @@ class Build(private val root: File) {
             ?: error("no database for $id; run verify first")
 
     private fun readWords(): List<Word> {
-        // The Book's own text, word by word, straight from the source script:
-        // the reading is drawn from these words and from nothing else.
-        val script = openSqlite(sourceDb("quran-script-kfgqpc"))
+        // The Book's own text, word by word, straight from the QPC Hafs
+        // source: the reading is drawn from these words and from nothing
+        // else. The source carries the tajweed annotation on the same words,
+        // so the code is read beside the text and never inferred from it.
+        val script = openSqlite(sourceDb("quran-script-qpc-hafs"))
         val words = ArrayList<Word>(83_668)
         script.use { connection ->
             connection.each("SELECT id, surah, ayah, word, text FROM words ORDER BY id") { rs ->
+                val tagged = rs.getString(5) ?: ""
+                val parsed = runCatching { TajweedCodec.parse(tagged) }.getOrElse { failure ->
+                    fail("${rs.getInt(2)}:${rs.getInt(3)} word ${rs.getInt(4)}: ${failure.message}")
+                    return@each
+                }
                 words += Word(
                     id = rs.getInt(1),
                     surah = rs.getInt(2),
                     ayah = rs.getInt(3),
                     position = rs.getInt(4),
-                    text = rs.getString(5) ?: "",
-                    marker = Arabic.skeleton(rs.getString(5) ?: "").isEmpty(),
+                    text = parsed.text,
+                    marker = Arabic.skeleton(parsed.text).isEmpty(),
+                    code = parsed.code,
                 )
             }
         }
-        if (words.size != 83_668) fail("expected 83668 words, found ${words.size}")
-        return words
+        val merged = mergeQpcWords(words)
+        if (merged.size != 83_665) fail("expected 83665 words, found ${merged.size}")
+        return merged
+    }
+
+    /**
+     * The three places where QUL's word-by-word export splits a pair that the
+     * QUL word list and the recitation keep as one word. The pair is joined
+     * so the reading, the word meanings, and the recitation continue to share
+     * one word number. The joined word's code keeps a zero for the space, so
+     * its code and text lengths still agree.
+     */
+    private data class QpcMerge(val surah: Int, val ayah: Int, val position: Int)
+
+    private val qpcMerges = listOf(
+        QpcMerge(2, 181, 3),
+        QpcMerge(8, 6, 4),
+        QpcMerge(13, 37, 8),
+    )
+
+    private fun mergeQpcWords(words: List<Word>): List<Word> {
+        val out = words.toMutableList()
+        for (merge in qpcMerges) {
+            val index = out.indexOfFirst {
+                it.surah == merge.surah && it.ayah == merge.ayah && it.position == merge.position
+            }
+            if (index < 0) {
+                fail("QPC merge ${merge.surah}:${merge.ayah}:${merge.position} was not found")
+                continue
+            }
+            val first = out[index]
+            val second = out.getOrNull(index + 1)
+            if (second == null || second.surah != first.surah || second.ayah != first.ayah ||
+                second.position != first.position + 1
+            ) {
+                fail("QPC merge ${merge.surah}:${merge.ayah}:${merge.position} has no pair")
+                continue
+            }
+            out[index] = first.copy(
+                text = first.text + " " + second.text,
+                code = first.code + "0" + second.code,
+            )
+            out.removeAt(index + 1)
+            var position = first.position + 1
+            for (j in index + 1 until out.size) {
+                val word = out[j]
+                if (word.surah != first.surah || word.ayah != first.ayah) break
+                out[j] = word.copy(position = position++)
+            }
+        }
+        return out
     }
 
     private fun indexAyahs(words: List<Word>): LinkedHashMap<String, Int> {
@@ -323,7 +382,8 @@ class Build(private val root: File) {
                 "CREATE TABLE ayah (number INTEGER PRIMARY KEY, surah INTEGER NOT NULL, ayah INTEGER NOT NULL, " +
                     "verse_key TEXT NOT NULL, words_count INTEGER NOT NULL, juz INTEGER NOT NULL, " +
                     "hizb INTEGER NOT NULL, rub INTEGER NOT NULL, manzil INTEGER NOT NULL, ruku INTEGER NOT NULL, " +
-                    "sajdah INTEGER NOT NULL, sajdah_type TEXT, text TEXT NOT NULL, text_search TEXT NOT NULL)",
+                    "sajdah INTEGER NOT NULL, sajdah_type TEXT, text TEXT NOT NULL, text_search TEXT NOT NULL, " +
+                    "tajweed TEXT NOT NULL)",
             )
             statement.execute("CREATE INDEX ayah_surah ON ayah(surah, ayah)")
             statement.execute(
@@ -395,7 +455,7 @@ class Build(private val root: File) {
             put("content_version", manifest.contentVersion)
             put("words", words.toString())
             put("ayahs", "6236")
-            put("text_source", "KFGQPC Hafs word by word, audited against Tanzil Uthmani 1.1")
+            put("text_source", "QPC Hafs word by word, distributed via QUL, audited against the QUL QPC text")
             put("translation_source", "Saheeh International, Noor International Center, QuranEnc version 1.1.2")
             put("tafsir_english", "Tafsir Ibn Kathir, via the Quranic Universal Library")
             put("reciters", "Muhammad Siddiq Al-Minshawi, Mahmoud Khalil Al-Husary")
@@ -510,12 +570,13 @@ class Build(private val root: File) {
 
         connection.prepareStatement(
             "INSERT INTO ayah(number, surah, ayah, verse_key, words_count, juz, hizb, rub, manzil, ruku, " +
-                "sajdah, sajdah_type, text, text_search) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                "sajdah, sajdah_type, text, text_search, tajweed) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         ).use { statement ->
             for ((key, group) in grouped) {
                 val number = ayahNumbers[key] ?: continue
                 val textWords = group.filterNot { it.marker }
                 val text = textWords.joinToString(" ") { it.text }
+                val tajweed = textWords.joinToString("0") { it.code }
                 statement.setInt(1, number)
                 statement.setInt(2, group.first().surah)
                 statement.setInt(3, group.first().ayah)
@@ -530,6 +591,7 @@ class Build(private val root: File) {
                 statement.setString(12, nav.sajdahType[number])
                 statement.setString(13, text)
                 statement.setString(14, Search.normalizeForIndex(text))
+                statement.setString(15, tajweed)
                 statement.addBatch()
             }
             statement.executeBatch()
@@ -836,7 +898,7 @@ class Build(private val root: File) {
         val markers = words.count { it.marker }
         return buildString {
             appendLine("{")
-            appendLine("  \"contentVersion\": \"1.0.0\",")
+            appendLine("  \"contentVersion\": \"1.1.0\",")
             appendLine("  \"ayahs\": ${ayahs.size},")
             appendLine("  \"words\": ${words.size - markers},")
             appendLine("  \"markers\": $markers,")

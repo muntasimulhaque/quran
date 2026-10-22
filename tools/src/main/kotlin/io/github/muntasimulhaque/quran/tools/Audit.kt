@@ -1,99 +1,78 @@
 package io.github.muntasimulhaque.quran.tools
 
 import io.github.muntasimulhaque.quran.core.Arabic
+import io.github.muntasimulhaque.quran.core.TajweedCodec
 import java.io.File
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.XMLStreamConstants
 
 /**
- * Compares the canonical KFGQPC word text with the Tanzil Uthmani reference
- * at letter level, ayah by ayah. Diacritics, Quranic signs, tatweel and the
- * alef, waw, yeh and heh forms are folded away by [Arabic.skeleton], so what
- * remains is the letter body of the text. Any difference is a real difference
- * and is written to `content/audit-report.md` for review.
+ * Audits the QPC Hafs text the app reads against two references.
+ *
+ * QUL's own ayah export (resource 87) is the same QPC text the word-by-word
+ * export (resource 58) carries, and it is the one that must agree exactly:
+ * a difference there is a build error. Tanzil Uthmani 1.1 is the independent
+ * edition; the QPC print spells a number of words in its own attested way
+ * (U+066E as the alef maksura base, `مِيكَٰلَ` without Tanzil's extra `ى`),
+ * so the Tanzil differences are reported as print variants and do not fail
+ * the build. The reader is owed the QPC print, and the report says so.
  */
 class Audit(private val root: File) {
 
     private data class Difference(
         val reference: String,
-        val kfgqpcWords: List<String>,
+        val qpcWords: List<String>,
         val tanzilWords: List<String>,
-        val kfgqpcSkeleton: String,
+        val qpcSkeleton: String,
         val tanzilSkeleton: String,
     )
 
-    /**
-     * Differences that are not errors: both editions are correct Uthmani
-     * orthography, they simply spell the same word with different codepoints.
-     * Each entry names the reason in full. This list is deliberately short and
-     * must stay short; anything else that appears is a real difference.
-     */
-    private val acceptedVariants = mapOf(
-        "2:72" to "Hamza in the word fa-iddarra'tum is a standalone letter in the KFGQPC " +
-            "edition and a combining mark in the Tanzil edition; both are attested Uthmani " +
-            "forms of the same word and the letter bodies are otherwise identical.",
-    )
-
     fun run(): Int {
+        val qul = readQul(find(File(root, "content/work/verify/quran-script-qpc-hafs-ayah"), ".db"))
+        val qpc = readQpc(File(root, "content/quran.db"))
         val tanzil = readTanzil(find(File(root, "content/work/verify/tanzil-uthmani"), ".xml"))
-        val kfgqpc = readKfgqpc(find(File(root, "content/work/verify/quran-script-kfgqpc"), ".db"))
 
-        if (tanzil.size != 6236) {
-            println("audit: expected 6236 Tanzil ayahs, found ${tanzil.size}")
-            return 2
+        val qulProblems = mutableListOf<String>()
+        for ((reference, words) in qpc) {
+            val expected = qul[reference] ?: run {
+                qulProblems += "$reference is missing from the QUL reference"
+                continue
+            }
+            if (Arabic.skeleton(words.joinToString(" ")) != Arabic.skeleton(expected)) {
+                qulProblems += reference
+            }
         }
-        if (kfgqpc.size != 6236) {
-            println("audit: expected 6236 KFGQPC ayahs, found ${kfgqpc.size}")
-            return 2
-        }
+        if (qul.size != 6236) qulProblems += "QUL reference has ${qul.size} ayahs, expected 6236"
+        if (qpc.size != 6236) qulProblems += "the app has ${qpc.size} ayahs, expected 6236"
 
         val differences = mutableListOf<Difference>()
         val segmentation = mutableListOf<String>()
-        var kfgqpcWordCount = 0
-        var tanzilWordCount = 0
-
-        for ((reference, words) in kfgqpc) {
-            val tanzilText = tanzil[reference]
-            if (tanzilText == null) {
-                differences += Difference(reference, words, emptyList(), "", "")
-                continue
-            }
-            kfgqpcWordCount += words.size
+        var qpcWordCount = 0
+        for ((reference, words) in qpc) {
+            val tanzilText = tanzil[reference] ?: continue
+            qpcWordCount += words.size
             val tanzilWords = tanzilText.split(Regex("\\s+"))
                 .filter { Arabic.skeleton(it).isNotEmpty() }
-            tanzilWordCount += tanzilWords.size
             if (words.size != tanzilWords.size) {
-                segmentation += "$reference (KFGQPC ${words.size}, Tanzil ${tanzilWords.size})"
+                segmentation += "$reference (QPC ${words.size}, Tanzil ${tanzilWords.size})"
             }
-
-            val kfgqpcSkeleton = Arabic.skeleton(words.joinToString(" "))
+            val qpcSkeleton = Arabic.skeleton(words.joinToString(" "))
             val tanzilSkeleton = Arabic.skeleton(tanzilText)
-            if (kfgqpcSkeleton != tanzilSkeleton) {
-                differences += Difference(
-                    reference = reference,
-                    kfgqpcWords = words,
-                    tanzilWords = tanzilWords,
-                    kfgqpcSkeleton = kfgqpcSkeleton,
-                    tanzilSkeleton = tanzilSkeleton,
-                )
+            if (qpcSkeleton != tanzilSkeleton) {
+                differences += Difference(reference, words, tanzilWords, qpcSkeleton, tanzilSkeleton)
             }
         }
 
-        val accepted = differences.filter { acceptedVariants.containsKey(it.reference) }
-        val unexplained = differences.filterNot { acceptedVariants.containsKey(it.reference) }
-
-        writeReport(unexplained, accepted, segmentation, kfgqpcWordCount, tanzilWordCount)
-        println("audit: ${tanzil.size} ayahs compared")
-        println("audit: KFGQPC words (markers excluded): $kfgqpcWordCount")
-        println("audit: Tanzil words (pause tokens excluded): $tanzilWordCount")
-        println("audit: letter-identical ayahs: ${tanzil.size - differences.size}")
-        println("audit: accepted orthographic variants: ${accepted.size}")
-        println("audit: unexplained differences: ${unexplained.size}")
-        println("audit: segmentation notes: ${segmentation.size}")
-        if (unexplained.isNotEmpty()) {
-            println("audit: report written to content/audit-report.md")
+        writeReport(qulProblems, differences, segmentation, qpcWordCount)
+        println("audit: ${qpc.size} ayahs compared")
+        println("audit: QPC vs QUL 87: ${if (qulProblems.isEmpty()) "6236 letter-identical" else "${qulProblems.size} differences"}")
+        println("audit: QPC vs Tanzil: ${differences.size} print variants, ${segmentation.size} segmentation notes")
+        if (qulProblems.isNotEmpty()) {
+            println("audit: FAILED against QUL")
+            qulProblems.take(10).forEach { println("  - $it") }
             return 1
         }
+        println("audit: the QPC text agrees with QUL in every ayah")
         return 0
     }
 
@@ -121,25 +100,36 @@ class Audit(private val root: File) {
         return ayahs
     }
 
-    private fun readKfgqpc(database: File): LinkedHashMap<String, List<String>> {
+    private fun readQul(database: File): LinkedHashMap<String, String> {
+        val ayahs = LinkedHashMap<String, String>(7000)
+        openSqlite(database).use { connection ->
+            connection.each("SELECT verse_key, text FROM verses ORDER BY id") { rs ->
+                val parsed = TajweedCodec.parse(rs.getString(2) ?: "")
+                val plain = parsed.text.replace(Regex("\\s*[\\u0660-\\u0669]+\\s*$"), "").trim()
+                ayahs[rs.getString(1)] = plain
+            }
+        }
+        return ayahs
+    }
+
+    private fun readQpc(database: File): LinkedHashMap<String, List<String>> {
         val ayahs = LinkedHashMap<String, MutableList<String>>(7000)
         openSqlite(database).use { connection ->
-            connection.each("SELECT surah, ayah, text FROM words ORDER BY surah, ayah, word") { rs ->
+            connection.each(
+                "SELECT surah, ayah, text FROM word WHERE marker = 0 ORDER BY ayah_number, position",
+            ) { rs ->
                 val text = rs.getString(3) ?: return@each
-                if (Arabic.skeleton(text).isEmpty()) return@each // ayah number marker
-                val key = "${rs.getInt(1)}:${rs.getInt(2)}"
-                ayahs.getOrPut(key) { mutableListOf() }.add(text)
+                ayahs.getOrPut("${rs.getInt(1)}:${rs.getInt(2)}") { mutableListOf() }.add(text)
             }
         }
         return LinkedHashMap<String, List<String>>().apply { ayahs.forEach { (k, v) -> put(k, v) } }
     }
 
     private fun writeReport(
-        unexplained: List<Difference>,
-        accepted: List<Difference>,
+        qulProblems: List<String>,
+        differences: List<Difference>,
         segmentation: List<String>,
-        kfgqpcWordCount: Int,
-        tanzilWordCount: Int,
+        qpcWordCount: Int,
     ) {
         val report = StringBuilder()
         report.appendLine("# Content audit report")
@@ -147,55 +137,57 @@ class Audit(private val root: File) {
         report.appendLine("Generated by `./gradlew :tools:run --args=audit`. Do not edit.")
         report.appendLine()
         report.appendLine("- Ayahs compared: 6236")
-        report.appendLine("- KFGQPC words (ayah number markers excluded): $kfgqpcWordCount")
-        report.appendLine("- Tanzil words (pause tokens excluded): $tanzilWordCount")
-        report.appendLine("- Letter-identical ayahs: ${6236 - unexplained.size - accepted.size}")
-        report.appendLine("- Accepted orthographic variants: ${accepted.size}")
-        report.appendLine("- Unexplained differences: ${unexplained.size}")
-        report.appendLine("- Segmentation notes (same letters, different word breaks): ${segmentation.size}")
+        report.appendLine("- QPC words (ayah number markers excluded): $qpcWordCount")
+        report.appendLine("- QPC vs QUL 87: ${if (qulProblems.isEmpty()) "6236 letter-identical" else "${qulProblems.size} differences"}")
+        report.appendLine("- QPC vs Tanzil: ${differences.size} print variants")
+        report.appendLine("- Segmentation notes against Tanzil: ${segmentation.size}")
         report.appendLine()
-        if (accepted.isNotEmpty()) {
-            report.appendLine("## Accepted orthographic variants")
+        report.appendLine("The QPC text is the QUL QPC Hafs print. Tanzil is an independent Uthmani")
+        report.appendLine("edition; where the QPC print spells a word its own attested way, the")
+        report.appendLine("difference is listed below as a print variant, not an error.")
+        report.appendLine()
+        if (qulProblems.isNotEmpty()) {
+            report.appendLine("## QUL differences (build errors)")
             report.appendLine()
-            report.appendLine("| Ayah | KFGQPC | Tanzil | Why it is accepted |")
-            report.appendLine("| --- | --- | --- | --- |")
-            for (d in accepted) {
-                report.appendLine("| ${d.reference} | ${d.kfgqpcSkeleton} | ${d.tanzilSkeleton} | ${acceptedVariants[d.reference]?.replace("|", "/")} |")
-            }
+            qulProblems.forEach { report.appendLine("- $it") }
             report.appendLine()
         }
         if (segmentation.isNotEmpty()) {
-            report.appendLine("## Segmentation notes")
+            report.appendLine("## Tanzil segmentation notes")
             report.appendLine()
             report.appendLine("The letters agree; the two editions break these ayahs into words differently.")
             report.appendLine()
             segmentation.forEach { report.appendLine("- $it") }
             report.appendLine()
         }
-        if (unexplained.isNotEmpty()) {
-            report.appendLine("## Unexplained differences")
+        if (differences.isNotEmpty()) {
+            report.appendLine("## QPC print variants from Tanzil")
             report.appendLine()
-            report.appendLine("| Ayah | KFGQPC letters | Tanzil letters | Detail |")
+            report.appendLine("| Ayah | QPC letters | Tanzil letters | Detail |")
             report.appendLine("| --- | --- | --- | --- |")
-            for (d in unexplained) {
-                report.appendLine("| ${d.reference} | ${d.kfgqpcSkeleton} | ${d.tanzilSkeleton} | ${describe(d)} |")
+            for (d in differences.take(40)) {
+                report.appendLine("| ${d.reference} | ${d.qpcSkeleton} | ${d.tanzilSkeleton} | ${describe(d)} |")
+            }
+            if (differences.size > 40) {
+                report.appendLine()
+                report.appendLine("The table shows the first 40 of ${differences.size} variants.")
             }
         } else {
-            report.appendLine("The two independent editions agree in every ayah: 6235 letter-identical, one accepted orthographic variant.")
+            report.appendLine("The QPC print and Tanzil agree in every ayah.")
         }
         File(root, "content/audit-report.md").writeText(report.toString())
     }
 
     private fun describe(d: Difference): String {
-        if (d.tanzilWords.isEmpty() || d.kfgqpcWords.isEmpty()) return "missing side"
-        if (d.kfgqpcWords.size == d.tanzilWords.size) {
-            val pairs = d.kfgqpcWords.zip(d.tanzilWords)
+        if (d.tanzilWords.isEmpty() || d.qpcWords.isEmpty()) return "missing side"
+        if (d.qpcWords.size == d.tanzilWords.size) {
+            val pairs = d.qpcWords.zip(d.tanzilWords)
                 .filter { (a, b) -> Arabic.skeleton(a) != Arabic.skeleton(b) }
-                .take(3)
+                .take(2)
                 .joinToString("; ") { (a, b) -> "$a != $b" }
             if (pairs.isNotEmpty()) return pairs.replace("|", "/")
         }
-        return "letter count ${d.kfgqpcSkeleton.length} vs ${d.tanzilSkeleton.length}"
+        return "letter count ${d.qpcSkeleton.length} vs ${d.tanzilSkeleton.length}"
     }
 
     private fun find(dir: File, extension: String): File =

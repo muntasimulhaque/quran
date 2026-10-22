@@ -147,6 +147,7 @@ internal fun ReaderSheets(
                 onShowTranslation = { viewModel.setShowTranslation(it) },
                 onShowTafsir = { viewModel.setShowTafsir(it) },
                 onWordByWord = { viewModel.setWordByWord(it) },
+                onTajweed = { viewModel.setTajweed(it) },
                 onDailyAyah = { enabled ->
                     viewModel.setDailyAyah(enabled, onReminderPermission)
                 },

@@ -15,14 +15,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.RichText
+import io.github.muntasimulhaque.quran.core.TajweedCodec
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.ReadingRow
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
+import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
 import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
@@ -122,13 +125,21 @@ private fun SizeSample(row: ReadingRow, settings: AppSettings) {
             .fillMaxWidth()
             .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Row, bottom = Space.Tight),
     ) {
+        val palette = LocalPagePalette.current
         Text(
-            text = row.ayah.text,
+            text = androidx.compose.ui.text.buildAnnotatedString {
+                append(row.ayah.text)
+                if (row.ayah.tajweed.length == row.ayah.text.length) {
+                    for (span in TajweedCodec.spans(row.ayah.tajweed)) {
+                        addStyle(SpanStyle(color = palette.tajweed.of(span.rule)), span.start, span.end)
+                    }
+                }
+            },
             style = androidx.compose.ui.text.TextStyle(
                 fontFamily = hafs,
                 fontSize = settings.arabicSp.sp,
                 lineHeight = settings.arabicLineSp.sp,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = palette.ink,
             ),
             textAlign = TextAlign.Right,
             modifier = Modifier.fillMaxWidth(),

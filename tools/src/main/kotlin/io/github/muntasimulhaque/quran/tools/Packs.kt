@@ -58,9 +58,12 @@ class Packs(private val root: File) {
             type = "script",
             name = "Quran text",
             language = "ar",
-            credit = "KFGQPC Hafs word by word, audited against Tanzil Uthmani",
-            creditBn = "KFGQPC \u09b9\u09be\u09ab\u09b8, \u09b6\u09ac\u09cd\u09a6\u09c7 \u09b6\u09ac\u09cd\u09a6\u09c7; Tanzil Uthmani-\u098f\u09b0 \u09b8\u0999\u09cd\u0997\u09c7 \u09af\u09be\u099a\u09be\u0987\u0995\u09c3\u09a4",
-            version = "1",
+            credit = "QPC Hafs, word by word, with tajweed; audited against the QUL QPC text",
+            creditBn = "QPC \u09b9\u09be\u09ab\u09b8, \u09b6\u09ac\u09cd\u09a6\u09c7 \u09b6\u09ac\u09cd\u09a6\u09c7, \u09a4\u09be\u099c\u09ac\u09c0\u09a6\u09b8\u09b9; QUL-\u098f\u09b0 QPC \u09b2\u09c7\u0996\u09be\u09b0 \u09b8\u09be\u09a5\u09c7 \u09af\u09be\u099a\u09be\u0987\u0995\u09c3\u09a4",
+            // The QPC switch replaced the core's content; the version moves
+            // so a held core is replaced rather than kept (owner decision, this
+            // session).
+            version = "2",
             shipped = true,
             ayahs = 6236,
         ),

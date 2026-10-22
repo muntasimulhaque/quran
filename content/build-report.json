@@ -1,12 +1,12 @@
 {
-  "contentVersion": "1.0.0",
+  "contentVersion": "1.1.0",
   "ayahs": 6236,
-  "words": 77432,
-  "markers": 6236,
+  "words": 77430,
+  "markers": 6235,
   "translations": 6236,
   "recitationSegmentsShifted": 938,
-  "recitationSegmentsClamped": 1453,
+  "recitationSegmentsClamped": 1461,
   "problems": 0,
-  "databaseBytes": 109809664,
-  "databaseSha256": "8e9dcbd8f09f1a02e291b732003b77613ece614d241d5d118d37e9291f75f6d6"
+  "databaseBytes": 110718976,
+  "databaseSha256": "965aa509bcb094404cdb60024324a776127ffbe2a48be6e546e9ea2ca4ce2f78"
 }

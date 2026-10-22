@@ -32,6 +32,8 @@ data class Ayah(
     val ayah: Int,
     val verseKey: String,
     val text: String,
+    /** One QPC rule code per character of [text], '0' for no rule. */
+    val tajweed: String = "",
 )
 
 data class Footnote(val number: Int, val text: String)
@@ -50,7 +52,12 @@ data class TranslationLine(
     val text: TranslationText,
 )
 
-data class WordMeaning(val word: String, val meaning: String?)
+data class WordMeaning(
+    val word: String,
+    val meaning: String?,
+    /** The ayah's tajweed code, cut to this word's own characters. */
+    val tajweed: String = "",
+)
 
 data class TafsirPassage(
     val source: String,

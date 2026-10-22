@@ -31,6 +31,8 @@
     <string name="settings_open_translations">Choose translations</string>
     <string name="settings_open_tafsirs">Choose tafsirs</string>
     <string name="settings_words_title">Show word meanings</string>
+    <string name="settings_tajweed_title">Tajweed colors</string>
+    <string name="settings_tajweed_summary">The rules of recitation, in the printed mushaf\'s colors</string>
     <string name="settings_words_add">Adds the %1$s word meanings · %2$s</string>
     <string name="settings_words_failed">Could not download. Tap to try again.</string>
 
@@ -102,4 +104,34 @@
     <string name="settings_tafsir_hidden">Tafsir is hidden in the reading</string>
     <string name="settings_group_about">App</string>
     <string name="settings_back">Back</string>
+
+    <string name="settings_title_tajweed">Tajweed rules</string>
+    <string name="settings_open_tajweed">The rules</string>
+    <string name="settings_tajweed_intro">The printed mushaf marks the rules of recitation in color. These seven groups are the colors this reading draws; every rule keeps its own name.</string>
+    <string name="settings_tajweed_family_silent">Silent letters</string>
+    <string name="settings_tajweed_family_ghunnah">Ghunnah</string>
+    <string name="settings_tajweed_family_qalaqah">Qalqalah</string>
+    <string name="settings_tajweed_family_ikhafa">Ikhfa</string>
+    <string name="settings_tajweed_family_iqlab">Iqlab</string>
+    <string name="settings_tajweed_family_idgham">Idgham</string>
+    <string name="settings_tajweed_family_madda">Madda</string>
+    <string name="settings_tajweed_rule_ham_wasl">Hamzat ul Wasl</string>
+    <string name="settings_tajweed_rule_laam_shamsiyah">Lam Shamsiyyah</string>
+    <string name="settings_tajweed_rule_slnt">Silent</string>
+    <string name="settings_tajweed_rule_ghunnah">Ghunnah</string>
+    <string name="settings_tajweed_rule_qalaqah">Qalqalah</string>
+    <string name="settings_tajweed_rule_ikhafa">Ikhfa</string>
+    <string name="settings_tajweed_rule_ikhafa_shafawi">Ikhfa Shafawi</string>
+    <string name="settings_tajweed_rule_iqlab">Iqlab</string>
+    <string name="settings_tajweed_rule_idgham_ghunnah">Idgham with Ghunnah</string>
+    <string name="settings_tajweed_rule_idgham_wo_ghunnah">Idgham without Ghunnah</string>
+    <string name="settings_tajweed_rule_idgham_shafawi">Idgham Shafawi</string>
+    <string name="settings_tajweed_rule_idgham_mutajanisayn">Idgham Mutajanisayn</string>
+    <string name="settings_tajweed_rule_idgham_mutaqaribayn">Idgham Mutaqaribayn</string>
+    <string name="settings_tajweed_rule_madda_normal">Madd Normal</string>
+    <string name="settings_tajweed_rule_madda_permissible">Madd Permissible</string>
+    <string name="settings_tajweed_rule_madda_obligatory_monfasel">Madd Munfasil</string>
+    <string name="settings_tajweed_rule_madda_obligatory_mottasel">Madd Muttasil</string>
+    <string name="settings_tajweed_rule_madda_necessary">Madd Necessary</string>
+
 </resources>

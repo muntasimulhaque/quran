@@ -213,7 +213,7 @@ class ContentDatabase private constructor(
 
     fun ayah(number: Int): Ayah? =
         query(
-            "SELECT number, surah, ayah, verse_key, text FROM ayah WHERE number = ?",
+            "SELECT number, surah, ayah, verse_key, text, tajweed FROM ayah WHERE number = ?",
             arrayOf(number.toString()),
         ).use { cursor -> if (cursor.moveToFirst()) ayahOf(cursor) else null }
 
@@ -225,9 +225,9 @@ class ContentDatabase private constructor(
      * one text is read here and drawn everywhere, so no Quran text lives in
      * Kotlin (owner decision, this session).
      */
-    fun basmalah(): String? = basmalahText
+    fun basmalah(): Ayah? = basmalahAyah
 
-    private val basmalahText: String? by lazy { ayah(1)?.text }
+    private val basmalahAyah: Ayah? by lazy { ayah(1) }
 
     private fun ayahOf(cursor: android.database.Cursor) = Ayah(
         number = cursor.getInt(0),
@@ -235,6 +235,7 @@ class ContentDatabase private constructor(
         ayah = cursor.getInt(2),
         verseKey = cursor.getString(3),
         text = cursor.getString(4),
+        tajweed = cursor.getString(5),
     )
 
     fun translations(ayahNumbers: List<Int>, pack: String): Map<Int, TranslationText> {
@@ -298,16 +299,24 @@ class ContentDatabase private constructor(
             emptyMap()
         }
         return query(
-            "SELECT ayah_number, text, position FROM word " +
-                "WHERE ayah_number IN ($inClause) AND marker = 0 ORDER BY ayah_number, position",
+            "SELECT w.ayah_number, w.text, w.position, a.tajweed FROM word w " +
+                "JOIN ayah a ON a.number = w.ayah_number " +
+                "WHERE w.ayah_number IN ($inClause) AND w.marker = 0 ORDER BY w.ayah_number, w.position",
             null,
         ).use { cursor ->
             val out = HashMap<Int, MutableList<WordMeaning>>(ayahNumbers.size)
+            val starts = HashMap<Int, Int>(ayahNumbers.size)
             while (cursor.moveToNext()) {
                 val ayah = cursor.getInt(0)
                 val text = cursor.getString(1)
-                val meaning = meanings[ayah]?.get(cursor.getInt(2))?.trim()?.takeIf { it.isNotEmpty() }
-                out.getOrPut(ayah) { mutableListOf() }.add(WordMeaning(text, meaning))
+                val position = cursor.getInt(2)
+                val code = cursor.getString(3) ?: ""
+                val start = starts[ayah] ?: 0
+                val end = start + text.length
+                val slice = if (end <= code.length) code.substring(start, end) else ""
+                val meaning = meanings[ayah]?.get(position)?.trim()?.takeIf { it.isNotEmpty() }
+                out.getOrPut(ayah) { mutableListOf() }.add(WordMeaning(text, meaning, slice))
+                starts[ayah] = end + 1
             }
             out
         }
@@ -330,14 +339,21 @@ class ContentDatabase private constructor(
             emptyMap()
         }
         return query(
-            "SELECT text, position FROM word WHERE ayah_number = ? AND marker = 0 ORDER BY position",
+            "SELECT w.text, w.position, a.tajweed FROM word w " +
+                "JOIN ayah a ON a.number = w.ayah_number " +
+                "WHERE w.ayah_number = ? AND w.marker = 0 ORDER BY w.position",
             arrayOf(ayahNumber.toString()),
         ).use { cursor ->
+            var start = 0
             buildList(cursor.count) {
                 while (cursor.moveToNext()) {
                     val text = cursor.getString(0)
                     val position = cursor.getInt(1)
-                    add(WordMeaning(text, meanings[position]?.trim()?.takeIf { it.isNotEmpty() }))
+                    val code = cursor.getString(2) ?: ""
+                    val end = start + text.length
+                    val slice = if (end <= code.length) code.substring(start, end) else ""
+                    add(WordMeaning(text, meanings[position]?.trim()?.takeIf { it.isNotEmpty() }, slice))
+                    start = end + 1
                 }
             }
         }
@@ -458,7 +474,7 @@ class ContentDatabase private constructor(
         if (numbers.isEmpty()) return emptyList()
         val inClause = numbers.joinToString(",")
         return query(
-            "SELECT number, surah, ayah, verse_key, text FROM ayah " +
+            "SELECT number, surah, ayah, verse_key, text, tajweed FROM ayah " +
                 "WHERE number IN ($inClause) ORDER BY number",
             null,
         ).use { cursor ->
@@ -472,7 +488,7 @@ class ContentDatabase private constructor(
 
     fun ayahsOfSurah(surah: Int): List<Ayah> =
         query(
-            "SELECT number, surah, ayah, verse_key, text FROM ayah WHERE surah = ? ORDER BY ayah",
+            "SELECT number, surah, ayah, verse_key, text, tajweed FROM ayah WHERE surah = ? ORDER BY ayah",
             arrayOf(surah.toString()),
         ).use { cursor ->
             buildList(cursor.count) {
@@ -991,7 +1007,7 @@ class ContentDatabase private constructor(
         for (chunk in numbers.toList().chunked(400)) {
             val placeholders = chunk.joinToString(",") { "?" }
             query(
-                "SELECT number, surah, ayah, verse_key, text FROM ayah " +
+                "SELECT number, surah, ayah, verse_key, text, tajweed FROM ayah " +
                     "WHERE number IN ($placeholders) ORDER BY number",
                 chunk.map { it.toString() }.toTypedArray(),
             ).use { cursor ->

@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.Arabic
 import io.github.muntasimulhaque.quran.core.RichText
+import io.github.muntasimulhaque.quran.core.TajweedCodec
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.ReadingRow
@@ -56,6 +57,7 @@ import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.theme.TajweedColors
 import io.github.muntasimulhaque.quran.ui.theme.Wash
 import kotlin.math.max
 import kotlin.math.min
@@ -186,14 +188,18 @@ internal fun AyahBlock(
             // kept the old size and the old gold (owner report, this
             // session).
             val recitedWord = playingWord.takeIf { playing }
+            val tajweed = if (metrics.tajweed) row.ayah.tajweed else ""
             val arabicLine = remember(
                 row.ayah.number,
+                row.ayah.tajweed,
+                metrics.tajweed,
                 playing,
                 recitedWord,
                 arabicOnly,
                 ornamentStyle,
+                palette.tajweed,
             ) {
-                arabic(row, playing, recitedWord, arabicOnly, ornamentStyle)
+                arabic(row, playing, recitedWord, arabicOnly, ornamentStyle, tajweed, palette.tajweed)
             }
             var textLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
             Text(
@@ -288,36 +294,42 @@ private fun arabic(
     playingWord: Int?,
     ornament: Boolean,
     ornamentStyle: SpanStyle,
+    tajweed: String,
+    palette: TajweedColors,
 ): ArabicLine {
     val words = row.words
-    if (words.isEmpty()) {
-        // The ayah is always drawn, whatever else is on the line: the
-        // Arabic-only branch appends the number, it never replaces the
-        // verse with it. The shipped word table answers every ayah, so this
-        // path is a floor rather than a road (owner decision, this session).
-        val text = buildAnnotatedString {
+    val line = if (words.isEmpty()) {
+        buildAnnotatedString {
             append(row.ayah.text)
             if (ornament) {
                 append(' ')
                 withStyle(ornamentStyle) { append(Arabic.ayahNumber(row.ayah.ayah)) }
             }
-        }
-        return ArabicLine(text, null)
+        } to null
+    } else {
+        var washRange: IntRange? = null
+        buildAnnotatedString {
+            words.forEachIndexed { index, word ->
+                if (index > 0) append(' ')
+                val start = length
+                append(word.text)
+                if (playing && word.position == playingWord) washRange = start until length
+            }
+            if (ornament) {
+                append(' ')
+                withStyle(ornamentStyle) { append(Arabic.ayahNumber(row.ayah.ayah)) }
+            }
+        } to washRange
     }
-    var washRange: IntRange? = null
-    val text = buildAnnotatedString {
-        words.forEachIndexed { index, word ->
-            if (index > 0) append(' ')
-            val start = length
-            append(word.text)
-            if (playing && word.position == playingWord) washRange = start until length
+    val text = line.first
+    if (tajweed.length == row.ayah.text.length) {
+        val styled = AnnotatedString.Builder(text)
+        for (span in TajweedCodec.spans(tajweed)) {
+            styled.addStyle(SpanStyle(color = palette.of(span.rule)), span.start, span.end)
         }
-        if (ornament) {
-            append(' ')
-            withStyle(ornamentStyle) { append(Arabic.ayahNumber(row.ayah.ayah)) }
-        }
+        return ArabicLine(styled.toAnnotatedString(), line.second)
     }
-    return ArabicLine(text, washRange)
+    return ArabicLine(text, line.second)
 }
 
 

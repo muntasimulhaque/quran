@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
+import androidx.compose.ui.text.SpanStyle
+import io.github.muntasimulhaque.quran.core.TajweedCodec
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
@@ -113,8 +115,16 @@ private fun WordPair(
     hafs: FontFamily,
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        val palette = LocalPagePalette.current
         Text(
-            text = meaning.word,
+            text = androidx.compose.ui.text.buildAnnotatedString {
+                append(meaning.word)
+                if (meaning.tajweed.length == meaning.word.length) {
+                    for (span in TajweedCodec.spans(meaning.tajweed)) {
+                        addStyle(SpanStyle(color = palette.tajweed.of(span.rule)), span.start, span.end)
+                    }
+                }
+            },
             style = TextStyle(
                 fontFamily = hafs,
                 fontSize = metrics.wordsSp.sp,
@@ -123,7 +133,7 @@ private fun WordPair(
                 // so the Arabic steps one tone down from the verse's own ink:
                 // the line stays the verse, the pairs read as its gloss.
                 // Still well above the reading contrast on every theme.
-                color = LocalPagePalette.current.ink.copy(alpha = WordGlossAlpha),
+                color = palette.ink.copy(alpha = WordGlossAlpha),
             ),
             textAlign = TextAlign.Center,
             maxLines = 1,

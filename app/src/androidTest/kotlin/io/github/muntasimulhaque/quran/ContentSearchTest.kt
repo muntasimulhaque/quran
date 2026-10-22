@@ -257,6 +257,10 @@ class ContentSearchTest {
         // emulator is shared with the whole suite, and one loaded run is a
         // fact about the machine, not about the search; a search that really
         // regressed is slow three times running (owner report, this session).
+        // The same content measured 1.86 s on an idle host and 4.2 s on a
+        // loaded one, so the line is five seconds: it still catches a search
+        // that has really regressed without failing on a shared machine
+        // (owner decision, this session).
         content.search(request("mercy", tafsir = true))
         val times = (1..3).map {
             val t0 = android.os.SystemClock.uptimeMillis()
@@ -265,7 +269,7 @@ class ContentSearchTest {
         }
         val best = times.min()
         println("SEARCH_TIMING warm=" + times.joinToString(",") + " best=" + best)
-        assertTrue("a warm search must stay under three seconds on an emulator", best < 3000)
+        assertTrue("a warm search must stay under five seconds on an emulator", best < 5000)
     }
 
     @Test

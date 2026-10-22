@@ -22,12 +22,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.core.RichText
+import io.github.muntasimulhaque.quran.core.TajweedCodec
 import io.github.muntasimulhaque.quran.core.TextRun
+import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.core.localizedDigits
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
@@ -67,6 +70,7 @@ internal data class ShareRequest(val card: ShareCard, val capture: Boolean = fal
 
 internal data class ShareCard(
     val arabic: String,
+    val tajweed: String = "",
     val translation: List<TextRun>,
     val reference: String,
     val text: String,
@@ -95,6 +99,7 @@ internal suspend fun loadShareCard(
     ShareRequest(
         ShareCard(
             arabic = ayah.text,
+            tajweed = ayah.tajweed,
             translation = runs.orEmpty(),
             reference = localizedDigits("$name ${ayah.surah}:${ayah.ayah}", locale),
             text = viewModel.ayahShareText(ayah),
@@ -167,8 +172,16 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = if (card.surahArabic.isNullOrBlank()) 0.dp else 6.dp),
             )
+            val tajweedPalette = LocalPagePalette.current.tajweed
             Text(
-                text = card.arabic,
+                text = androidx.compose.ui.text.buildAnnotatedString {
+                    append(card.arabic)
+                    if (card.tajweed.length == card.arabic.length) {
+                        for (span in TajweedCodec.spans(card.tajweed)) {
+                            addStyle(SpanStyle(color = tajweedPalette.of(span.rule)), span.start, span.end)
+                        }
+                    }
+                },
                 style = TextStyle(
                     fontFamily = hafs,
                     fontSize = 26.sp,

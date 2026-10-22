@@ -4,11 +4,11 @@
 `git pull origin main`.** The owner works from more than one machine, and a
 session that has not pulled has not started.
 
-A free, offline Android Quran reader. One reading with Saheeh International,
-word-by-word, and Tafsir Ibn Kathir, with recitation by Al-Minshawi and
-Al-Husary. No ads, no trackers, no accounts, and no network beyond the project's
-own Releases. Code is MIT; each content dataset keeps its own source, version,
-and license.
+A free, offline Android Quran reader. One reading with the QPC Hafs text,
+color-coded tajweed, Saheeh International, word-by-word, and Tafsir Ibn Kathir,
+with recitation by Al-Minshawi and Al-Husary. No ads, no trackers, no accounts,
+and no network beyond the project's own Releases. Code is MIT; each content
+dataset keeps its own source, version, and license.
 
 Store title: `Quran: The Noble Book`. App title and launcher name: `Quran`.
 Package: `io.github.muntasimulhaque.quran`, permanent.

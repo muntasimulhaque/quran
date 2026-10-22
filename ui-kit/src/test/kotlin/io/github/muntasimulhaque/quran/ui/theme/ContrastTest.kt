@@ -29,6 +29,13 @@ class ContrastTest {
         assertReadable(Lapis, PaperBackground)
         assertReadable(Lapis, PaperSurface)
         assertReadable(PaperOnPrimary, Lapis)
+        assertReadable(PaperTajweed.silent, PaperBackground)
+        assertReadable(PaperTajweed.ghunnah, PaperBackground)
+        assertReadable(PaperTajweed.qalaqah, PaperBackground)
+        assertReadable(PaperTajweed.ikhafa, PaperBackground)
+        assertReadable(PaperTajweed.iqlab, PaperBackground)
+        assertReadable(PaperTajweed.idgham, PaperBackground)
+        assertReadable(PaperTajweed.madda, PaperBackground)
     }
 
     @Test
@@ -47,6 +54,13 @@ class ContrastTest {
         assertReadable(LapisLight, NightBackground)
         assertReadable(LapisLight, NightSurface)
         assertReadable(NightOnPrimary, LapisLight)
+        assertReadable(NightTajweed.silent, NightBackground)
+        assertReadable(NightTajweed.ghunnah, NightBackground)
+        assertReadable(NightTajweed.qalaqah, NightBackground)
+        assertReadable(NightTajweed.ikhafa, NightBackground)
+        assertReadable(NightTajweed.iqlab, NightBackground)
+        assertReadable(NightTajweed.idgham, NightBackground)
+        assertReadable(NightTajweed.madda, NightBackground)
     }
 
     /**

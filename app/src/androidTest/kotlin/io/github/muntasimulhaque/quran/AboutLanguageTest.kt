@@ -1,6 +1,6 @@
 package io.github.muntasimulhaque.quran
 
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
@@ -76,7 +76,7 @@ class AboutLanguageTest {
         )
         assertTrue(
             "the core pack's credit must be in Bangla",
-            compose.onAllNodesWithText("KFGQPC \u09b9\u09be\u09ab\u09b8, \u09b6\u09ac\u09cd\u09a6\u09c7 \u09b6\u09ac\u09cd\u09a6\u09c7", substring = true)
+            compose.onAllNodesWithText("QPC \u09b9\u09be\u09ab\u09b8, \u09b6\u09ac\u09cd\u09a6\u09c7 \u09b6\u09ac\u09cd\u09a6\u09c7", substring = true)
                 .fetchSemanticsNodes().isNotEmpty(),
         )
         assertTrue(
@@ -86,7 +86,7 @@ class AboutLanguageTest {
         )
         assertTrue(
             "the catalog's English credit must not stand beside the Bangla one",
-            compose.onAllNodesWithText("KFGQPC Hafs word by word", substring = true)
+            compose.onAllNodesWithText("QPC Hafs", substring = true)
                 .fetchSemanticsNodes().isEmpty(),
         )
     }

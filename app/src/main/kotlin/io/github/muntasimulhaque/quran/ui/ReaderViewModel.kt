@@ -610,6 +610,12 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch { settingsStore.setShowTranslation(show) }
     }
 
+    /** The reading draws the QPC tajweed colors until the reader says otherwise. */
+    fun setTajweed(tajweed: Boolean) {
+        settings = settings.copy(tajweed = tajweed)
+        viewModelScope.launch { settingsStore.setTajweed(tajweed) }
+    }
+
     /** The reading keeps the reader's chosen tafsirs; this only shows or hides them. */
     fun setShowTafsir(show: Boolean) {
         settings = settings.copy(showTafsir = show)

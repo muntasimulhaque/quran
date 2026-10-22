@@ -19,4 +19,5 @@ data class PagePalette(
     val ink: Color,
     val ornament: Color,
     val highlight: Color,
+    val tajweed: TajweedColors,
 )

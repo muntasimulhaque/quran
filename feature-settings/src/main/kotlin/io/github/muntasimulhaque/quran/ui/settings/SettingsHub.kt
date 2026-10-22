@@ -19,7 +19,7 @@ import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
 
 /** The pages the settings hub opens, one at a time. */
-enum class SettingsPage { Language, Theme, FontSize, Reciters, Daily, Translations, Tafsirs, About }
+enum class SettingsPage { Language, Theme, FontSize, Reciters, Daily, Translations, Tafsirs, Tajweed, About }
 
 @Composable
 fun SettingsPage.title(): String = stringResource(
@@ -31,6 +31,7 @@ fun SettingsPage.title(): String = stringResource(
         SettingsPage.Daily -> R.string.settings_daily_title
         SettingsPage.Translations -> R.string.settings_title_translations
         SettingsPage.Tafsirs -> R.string.settings_title_tafsirs
+        SettingsPage.Tajweed -> R.string.settings_title_tajweed
         SettingsPage.About -> R.string.settings_title_about
     },
 )
@@ -71,6 +72,7 @@ fun SettingsHub(
     onShowTranslation: (Boolean) -> Unit,
     onShowTafsir: (Boolean) -> Unit,
     onWordByWord: (Boolean) -> Unit,
+    onTajweed: (Boolean) -> Unit,
     onDailyAyah: (Boolean) -> Unit,
     onOpen: (SettingsPage) -> Unit,
     modifier: Modifier = Modifier,
@@ -107,6 +109,15 @@ fun SettingsHub(
         // reader who came to look at the translations never changes the reading
         // by looking (owner report, 2.3).
         WordByWordRow(settings, packs, packSetup, onWordByWord)
+        ToggleRow(
+            title = stringResource(R.string.settings_tajweed_title),
+            subtitle = stringResource(R.string.settings_tajweed_summary),
+            checked = settings.tajweed,
+            onChange = onTajweed,
+            onOpen = { onOpen(SettingsPage.Tajweed) },
+            openLabel = stringResource(R.string.settings_open_tajweed),
+            switchTag = "switch-tajweed",
+        )
         ToggleRow(
             title = stringResource(R.string.settings_show_translation_title),
             subtitle = translationName(settings, packs),

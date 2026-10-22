@@ -6,6 +6,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
+import io.github.muntasimulhaque.quran.core.TajweedCodec
 import java.io.File
 
 /**
@@ -21,7 +22,7 @@ class CheckDb(private val root: File) {
     private val expectations = listOf(
         Expectation("surah", 114),
         Expectation("ayah", 6236),
-        Expectation("word", 83_668),
+        Expectation("word", 83_665),
         Expectation("recitation_ayah", 24_944),
         Expectation("surah_info", 114),
     )
@@ -73,6 +74,21 @@ class CheckDb(private val root: File) {
                     failures++
                 }
             }
+            var badTajweed = 0
+            connection.each("SELECT number, text, tajweed FROM ayah") { rs ->
+                val number = rs.getInt(1)
+                val text = rs.getString(2) ?: ""
+                val code = rs.getString(3) ?: ""
+                if (code.length != text.length) {
+                    println("checkdb: ayah $number has ${code.length} tajweed codes for ${text.length} characters")
+                    badTajweed++
+                } else if (!TajweedCodec.isWellFormed(code)) {
+                    println("checkdb: ayah $number has an unknown tajweed code")
+                    badTajweed++
+                }
+            }
+            failures += badTajweed
+            if (badTajweed == 0) println("checkdb: every ayah's tajweed code matches its text")
             failures += checkRecitationSegments(connection, catalogReciters)
             // Every pack must cover every ayah, or the reader would meet a
             // silent hole when that pack is chosen. The number of packs is not

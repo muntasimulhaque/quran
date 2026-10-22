@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 10.2 (versionCode 104)
+Version: 10.3 (versionCode 105)
 
 ## Listing
 
@@ -47,7 +47,7 @@ quiet refresh of a pack you already have when a newer version ships, on
 Wi-Fi only.
 
 Credits: Quran text by the King Fahd Complex for the Printing of the Holy
-Quran, audited against the Tanzil Uthmani reference. Translation by
+Quran, audited against the QUL QPC text, with Tanzil as the independent cross-reference. Translation by
 Saheeh International via QuranEnc. Tafsir Ibn Kathir and the recitations
 via the Quranic Universal Library by Tarteel. Full credits and licenses
 are in the app and in the repository.
@@ -116,7 +116,7 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 39669408314 on 10.2: all three legs green with eight frames each, every frame compared with the one it replaces. The reading, chrome, opening, Browse, ayah card, and tafsir draw the same pixels; the frames differ only in the status bar's clock, the About row's version label, the search field's caret, and a few antialiased pixels at the sheet edges.
+The 10.3 set is captured by the release run; every frame carries the QPC reading and the tajweed colors.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
@@ -136,8 +136,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (10.2, 458 characters)
-Listening now lets the screen go dark. After a minute without a touch, the recitation keeps playing and the phone can sleep; a touch brings the highlighted word back. A paused recitation puts itself away after five minutes, and Play resumes it. Reading still keeps the screen awake, and now lets it go after ten quiet minutes. Recitation uses less battery: audio offload where the phone supports it, no player wake lock, and no word tick above a dark screen.
+## Release notes (10.3, 340 characters)
+The reading now uses the QPC Hafs text, word by word, audited against the QUL QPC text. Tajweed is drawn in seven color families over eighteen rules, on by default; a new Tajweed page explains every color in English and Bangla. The reading, word list, basmalah, and share card all carry the colors, and the app still works entirely offline.
 
 ## Before each release
 

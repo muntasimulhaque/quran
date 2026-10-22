@@ -122,6 +122,12 @@ data class AppSettings(
     val showTafsir: Boolean = true,
     val wordByWord: Boolean = false,
     /**
+     * Whether the reading draws the QPC tajweed colors. On from the first
+     * launch: the rules are the print's own annotation, and the reader can
+     * turn them off in one switch (owner decision, this session).
+     */
+    val tajweed: Boolean = true,
+    /**
      * The daily reminder: one ayah, once a day, at the reader's own time.
      * On from the first launch (owner decision, 2.3): the reminder is the
      * quietest thing the app can do, a silent line in the shade with no sound
@@ -183,6 +189,7 @@ data class AppSettings(
 data class ReadingMetrics(
     val showTranslation: Boolean,
     val wordByWord: Boolean,
+    val tajweed: Boolean,
     /** Whether the reading follows the reciter as it moves from ayah to ayah. */
     val followReciter: Boolean,
     /** The packs the reading draws, which shape every row it loads. */
@@ -202,6 +209,7 @@ data class ReadingMetrics(
 fun AppSettings.readingMetrics(): ReadingMetrics = ReadingMetrics(
     showTranslation = showTranslation,
     wordByWord = wordByWord,
+    tajweed = tajweed,
     followReciter = followReciter,
     translationPacks = translationPacks,
     arabicSp = arabicSp,
@@ -260,6 +268,7 @@ class SettingsStore(private val context: Context) {
             showTranslation = preferences[SHOW_TRANSLATION] ?: true,
             showTafsir = preferences[SHOW_TAFSIR] ?: true,
             wordByWord = preferences[WORD_BY_WORD] ?: false,
+            tajweed = preferences[TAJWEED] ?: true,
             dailyAyah = preferences[DAILY_AYAH] ?: true,
             dailyAyahMinute = storedDailyMinute(preferences),
             longPressHintShown = preferences[HINT_SHOWN] ?: false,
@@ -352,6 +361,10 @@ class SettingsStore(private val context: Context) {
 
     suspend fun setShowTranslation(show: Boolean) {
         context.settingsStore.edit { it[SHOW_TRANSLATION] = show }
+    }
+
+    suspend fun setTajweed(tajweed: Boolean) {
+        context.settingsStore.edit { it[TAJWEED] = tajweed }
     }
 
     suspend fun setShowTafsir(show: Boolean) {
@@ -544,6 +557,7 @@ class SettingsStore(private val context: Context) {
         val SHOW_TRANSLATION = booleanPreferencesKey("show_translation")
         val SHOW_TAFSIR = booleanPreferencesKey("show_tafsir")
         val WORD_BY_WORD = booleanPreferencesKey("word_by_word")
+        val TAJWEED = booleanPreferencesKey("tajweed")
         val DAILY_AYAH = booleanPreferencesKey("daily_ayah")
 
         /** Written by builds before the picker took minutes; read, never written. */

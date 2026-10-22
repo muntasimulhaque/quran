@@ -17,7 +17,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.swipeDown
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -137,7 +137,7 @@ class ScreenshotTest {
                 }
             } else {
                 val bitmap = androidx.test.runner.screenshot.Screenshot.capture().bitmap
-                val settled = prior != null && prior!!.sameAs(bitmap)
+                val settled = prior != null && prior.sameAs(bitmap)
                 prior?.recycle()
                 prior = bitmap
                 if (settled) {

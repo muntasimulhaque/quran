@@ -46,6 +46,7 @@ data class SettingsActions(
     val onShowTranslation: (Boolean) -> Unit = {},
     val onShowTafsir: (Boolean) -> Unit = {},
     val onWordByWord: (Boolean) -> Unit = {},
+    val onTajweed: (Boolean) -> Unit = {},
     val onDailyAyah: (Boolean) -> Unit = {},
     val onDailyAyahTime: (Int) -> Unit = {},
     val onOpenNotificationSettings: () -> Unit = {},
@@ -145,6 +146,7 @@ fun SettingsSheet(
                         onShowTranslation = actions.onShowTranslation,
                         onShowTafsir = actions.onShowTafsir,
                         onWordByWord = actions.onWordByWord,
+                        onTajweed = actions.onTajweed,
                         onDailyAyah = actions.onDailyAyah,
                         onOpen = { page = it },
                     )
@@ -190,6 +192,7 @@ fun SettingsSheet(
                         packSetup = packSetup,
                         actions = actions,
                     )
+                    SettingsPage.Tajweed -> TajweedPage()
                     SettingsPage.About -> AboutPage(
                         packs = packs,
                         version = version,
