@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -46,7 +47,7 @@ import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
-import io.github.muntasimulhaque.quran.ui.rich.tajweedText
+import io.github.muntasimulhaque.quran.ui.rich.TajweedText
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
@@ -147,8 +148,11 @@ internal fun SurahOpening(
             // outside the reader's choice, and the opening read as two
             // different texts stacked (owner decision, the theme and
             // consistency session).
-            Text(
-                text = tajweedText(line.text, line.tajweed, palette.tajweed, metrics.tajweed),
+            TajweedText(
+                text = AnnotatedString(line.text),
+                code = line.tajweed,
+                colors = palette.tajweed,
+                enabled = metrics.tajweed,
                 style = TextStyle(
                     fontFamily = hafs,
                     fontSize = metrics.arabicSp.sp,

@@ -14,6 +14,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.RichText
@@ -29,7 +30,7 @@ import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.rich.ArabicFonts
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
-import io.github.muntasimulhaque.quran.ui.rich.tajweedText
+import io.github.muntasimulhaque.quran.ui.rich.TajweedText
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -125,8 +126,11 @@ private fun SizeSample(row: ReadingRow, settings: AppSettings) {
             .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Row, bottom = Space.Tight),
     ) {
         val palette = LocalPagePalette.current
-        Text(
-            text = tajweedText(row.ayah.text, row.ayah.tajweed, palette.tajweed, settings.tajweed),
+        TajweedText(
+            text = AnnotatedString(row.ayah.text),
+            code = row.ayah.tajweed,
+            colors = palette.tajweed,
+            enabled = settings.tajweed,
             style = androidx.compose.ui.text.TextStyle(
                 fontFamily = hafs,
                 fontSize = settings.arabicSp.sp,

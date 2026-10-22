@@ -9,15 +9,19 @@ import javax.xml.stream.XMLStreamConstants
 /**
  * Audits the QPC Hafs text the app reads against two references.
  *
- * QUL's own ayah export (resource 87) is the same QPC text the word-by-word
- * export (resource 58) carries, and it is the one that must agree exactly:
- * a difference there is a build error. Tanzil Uthmani 1.1 is the independent
- * edition; the QPC print spells a number of words in its own attested way
- * (U+066E as the alef maksura base, `مِيكَٰلَ` without Tanzil's extra `ى`),
- * so the Tanzil differences are reported as print variants and do not fail
- * the build. The reader is owed the QPC print, and the report says so.
+ * QUL's own ayah export (resource 87) is the same QPC text and tajweed
+ * annotation the word-by-word export (resource 58) carries, and it is the one
+ * that must agree exactly: every letter, every mark, every waqf sign, and
+ * every tajweed code character. A difference there is a build error. Tanzil
+ * Uthmani 1.1 is the independent edition; the QPC print spells a number of
+ * words in its own attested way (U+066E as the alef maksura base,
+ * `مِيكَٰلَ` without Tanzil's extra `ى`), so the Tanzil differences are
+ * reported as print variants and do not fail the build. The reader is owed
+ * the QPC print, and the report says so.
  */
 class Audit(private val root: File) {
+
+    private data class AyahLine(val text: String, val code: String)
 
     private data class Difference(
         val reference: String,
@@ -29,17 +33,25 @@ class Audit(private val root: File) {
 
     fun run(): Int {
         val qul = readQul(find(File(root, "content/work/verify/quran-script-qpc-hafs-ayah"), ".db"))
-        val qpc = readQpc(File(root, "content/quran.db"))
+        val qpc = readQpcAyahs(File(root, "content/quran.db"))
+        val qpcWords = readQpcWords(File(root, "content/quran.db"))
         val tanzil = readTanzil(find(File(root, "content/work/verify/tanzil-uthmani"), ".xml"))
 
         val qulProblems = mutableListOf<String>()
-        for ((reference, words) in qpc) {
+        var textDifferences = 0
+        var codeDifferences = 0
+        for ((reference, line) in qpc) {
             val expected = qul[reference] ?: run {
                 qulProblems += "$reference is missing from the QUL reference"
                 continue
             }
-            if (Arabic.skeleton(words.joinToString(" ")) != Arabic.skeleton(expected)) {
-                qulProblems += reference
+            if (line.text != expected.text) {
+                textDifferences++
+                qulProblems += "$reference text: ${firstDifference(line.text, expected.text)}"
+            }
+            if (line.code != expected.code) {
+                codeDifferences++
+                qulProblems += "$reference tajweed: ${firstDifference(line.code, expected.code)}"
             }
         }
         if (qul.size != 6236) qulProblems += "QUL reference has ${qul.size} ayahs, expected 6236"
@@ -48,7 +60,7 @@ class Audit(private val root: File) {
         val differences = mutableListOf<Difference>()
         val segmentation = mutableListOf<String>()
         var qpcWordCount = 0
-        for ((reference, words) in qpc) {
+        for ((reference, words) in qpcWords) {
             val tanzilText = tanzil[reference] ?: continue
             qpcWordCount += words.size
             val tanzilWords = tanzilText.split(Regex("\\s+"))
@@ -63,16 +75,16 @@ class Audit(private val root: File) {
             }
         }
 
-        writeReport(qulProblems, differences, segmentation, qpcWordCount)
+        writeReport(qulProblems, differences, segmentation, qpcWordCount, textDifferences, codeDifferences)
         println("audit: ${qpc.size} ayahs compared")
-        println("audit: QPC vs QUL 87: ${if (qulProblems.isEmpty()) "6236 letter-identical" else "${qulProblems.size} differences"}")
+        println("audit: QPC vs QUL 87: ${if (qulProblems.isEmpty()) "6236 character-identical, marks and tajweed code included" else "${qulProblems.size} differences"}")
         println("audit: QPC vs Tanzil: ${differences.size} print variants, ${segmentation.size} segmentation notes")
         if (qulProblems.isNotEmpty()) {
             println("audit: FAILED against QUL")
             qulProblems.take(10).forEach { println("  - $it") }
             return 1
         }
-        println("audit: the QPC text agrees with QUL in every ayah")
+        println("audit: the QPC text and its tajweed code agree with QUL in every ayah")
         return 0
     }
 
@@ -100,19 +112,31 @@ class Audit(private val root: File) {
         return ayahs
     }
 
-    private fun readQul(database: File): LinkedHashMap<String, String> {
-        val ayahs = LinkedHashMap<String, String>(7000)
+    private fun readQul(database: File): LinkedHashMap<String, AyahLine> {
+        val ayahs = LinkedHashMap<String, AyahLine>(7000)
         openSqlite(database).use { connection ->
             connection.each("SELECT verse_key, text FROM verses ORDER BY id") { rs ->
                 val parsed = TajweedCodec.parse(rs.getString(2) ?: "")
-                val plain = parsed.text.replace(Regex("\\s*[\\u0660-\\u0669]+\\s*$"), "").trim()
-                ayahs[rs.getString(1)] = plain
+                ayahs[rs.getString(1)] = withoutNumber(parsed.text, parsed.code)
             }
         }
         return ayahs
     }
 
-    private fun readQpc(database: File): LinkedHashMap<String, List<String>> {
+    private fun readQpcAyahs(database: File): LinkedHashMap<String, AyahLine> {
+        val ayahs = LinkedHashMap<String, AyahLine>(7000)
+        openSqlite(database).use { connection ->
+            connection.each("SELECT verse_key, text, tajweed FROM ayah ORDER BY number") { rs ->
+                ayahs[rs.getString(1)] = AyahLine(
+                    text = rs.getString(2) ?: "",
+                    code = rs.getString(3) ?: "",
+                )
+            }
+        }
+        return ayahs
+    }
+
+    private fun readQpcWords(database: File): LinkedHashMap<String, List<String>> {
         val ayahs = LinkedHashMap<String, MutableList<String>>(7000)
         openSqlite(database).use { connection ->
             connection.each(
@@ -125,11 +149,36 @@ class Audit(private val root: File) {
         return LinkedHashMap<String, List<String>>().apply { ayahs.forEach { (k, v) -> put(k, v) } }
     }
 
+    /**
+     * The QUL ayah export carries the ayah number as its last word. The app
+     * draws the number itself, so the reference's number and its zero code are
+     * removed before the exact comparison.
+     */
+    private fun withoutNumber(text: String, code: String): AyahLine {
+        val match = Regex("[\\u0660-\\u0669]+\\s*$").find(text) ?: return AyahLine(text, code)
+        val end = match.range.first
+        val trimmed = text.substring(0, end).trimEnd()
+        return AyahLine(trimmed, code.substring(0, minOf(code.length, trimmed.length)))
+    }
+
+    private fun firstDifference(actual: String, expected: String): String {
+        val limit = minOf(actual.length, expected.length)
+        for (index in 0 until limit) {
+            if (actual[index] != expected[index]) {
+                return "offset $index U+${actual[index].code.toString(16).uppercase()} != " +
+                    "U+${expected[index].code.toString(16).uppercase()}"
+            }
+        }
+        return "length ${actual.length} != ${expected.length}"
+    }
+
     private fun writeReport(
         qulProblems: List<String>,
         differences: List<Difference>,
         segmentation: List<String>,
         qpcWordCount: Int,
+        textDifferences: Int,
+        codeDifferences: Int,
     ) {
         val report = StringBuilder()
         report.appendLine("# Content audit report")
@@ -138,13 +187,20 @@ class Audit(private val root: File) {
         report.appendLine()
         report.appendLine("- Ayahs compared: 6236")
         report.appendLine("- QPC words (ayah number markers excluded): $qpcWordCount")
-        report.appendLine("- QPC vs QUL 87: ${if (qulProblems.isEmpty()) "6236 letter-identical" else "${qulProblems.size} differences"}")
+        report.appendLine(
+            if (qulProblems.isEmpty()) {
+                "- QPC vs QUL 87: 6236 character-identical, marks and tajweed code included"
+            } else {
+                "- QPC vs QUL 87: ${qulProblems.size} differences ($textDifferences text, $codeDifferences tajweed)"
+            },
+        )
         report.appendLine("- QPC vs Tanzil: ${differences.size} print variants")
         report.appendLine("- Segmentation notes against Tanzil: ${segmentation.size}")
         report.appendLine()
-        report.appendLine("The QPC text is the QUL QPC Hafs print. Tanzil is an independent Uthmani")
-        report.appendLine("edition; where the QPC print spells a word its own attested way, the")
-        report.appendLine("difference is listed below as a print variant, not an error.")
+        report.appendLine("The QPC text and its tajweed code are the QUL QPC Hafs print, compared")
+        report.appendLine("character for character. Tanzil is an independent Uthmani edition; where")
+        report.appendLine("the QPC print spells a word its own attested way, the difference is listed")
+        report.appendLine("below as a print variant, not an error.")
         report.appendLine()
         if (qulProblems.isNotEmpty()) {
             report.appendLine("## QUL differences (build errors)")

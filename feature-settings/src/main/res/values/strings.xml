@@ -61,9 +61,9 @@
     <string name="about_license">MIT</string>
     <string name="about_pack_title">%1$s · %2$s</string>
 
-    <string name="credit_page_fonts">QPC Hafs font</string>
+    <string name="credit_page_fonts">KFGQPC Hafs Uthmanic Script</string>
     <string name="credit_page_fonts_by">King Fahd Glorious Quran Printing Complex, unmodified</string>
-    <string name="credit_page_fonts_use">Arabic text</string>
+    <string name="credit_page_fonts_use">The QPC Hafs Unicode text</string>
     <string name="credit_amiri">Amiri Quran</string>
     <string name="credit_amiri_by">Khaled Hosny, SIL Open Font License 1.1</string>
     <string name="credit_amiri_use">Ornaments and Arabic</string>

@@ -15,12 +15,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.Search
@@ -37,6 +34,7 @@ import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.rich.HighlightedText
+import io.github.muntasimulhaque.quran.ui.rich.TajweedText
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
 
@@ -84,11 +82,20 @@ internal fun AyahRow(
         // nothing else to say; otherwise the row opens with the evidence
         // instead of with a page of text that never matched (owner report,
         // 2.3, and the rule is pure, in `data`, with its own tests).
+        //
+        // The wash is geometry from the shaped line, not a background span:
+        // a span re-shapes the matched run and can move the letters under the
+        // reader as they type (owner decision, the QPC rendering audit).
+        val arabicText = hit.ayah.text
+        val matches = remember(arabicText, terms) {
+            Search.matchRanges(arabicText, terms, arabic = true)
+        }
+        val wash = MaterialTheme.colorScheme.primary.copy(alpha = Wash.Match)
         when (val line = arabicLineFor(hit)) {
             SearchArabicLine.Ayah -> {
                 Spacer(Modifier.height(8.dp))
-                Text(
-                    text = arabic(hit, hafs, terms),
+                TajweedText(
+                    text = AnnotatedString(arabicText),
                     style = TextStyle(
                         fontFamily = hafs,
                         fontSize = arabicSize.sp,
@@ -98,13 +105,16 @@ internal fun AyahRow(
                     textAlign = TextAlign.Right,
                     maxLines = 4,
                     modifier = Modifier.fillMaxWidth(),
+                    wash = matches,
+                    washColor = wash,
                 )
             }
 
             is SearchArabicLine.Words -> {
                 Spacer(Modifier.height(8.dp))
-                Text(
-                    text = washed(line.words.joinToString("  ")),
+                val joined = line.words.joinToString("  ")
+                TajweedText(
+                    text = AnnotatedString(joined),
                     style = TextStyle(
                         fontFamily = hafs,
                         // The matched words keep the line's own size: an
@@ -120,6 +130,8 @@ internal fun AyahRow(
                     textAlign = TextAlign.Right,
                     maxLines = 3,
                     modifier = Modifier.fillMaxWidth(),
+                    wash = listOf(joined.indices),
+                    washColor = wash,
                 )
             }
 
@@ -204,46 +216,5 @@ internal fun TafsirRow(hit: SearchHit.TafsirHitResult, onAyah: (Ayah) -> Unit) {
             style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 23.sp),
             maxLines = 5,
         )
-    }
-}
-
-/** Words in a wash, which is how the ayah's own match is drawn above. */
-@Composable
-internal fun washed(text: String): AnnotatedString {
-    // A match wears the same wash everywhere: the accent at [Wash.Match],
-    // never the reciter's highlight, which says a word is being heard
-    // (owner decision, the audio and type audit session).
-    //
-    // Arabic is washed and never weighted: `HighlightedText` adds Medium to
-    // a Latin match, and Arabic emphasis must never be synthesized on a
-    // calligraphic face (see `RichTextViews`). The two scripts share one
-    // wash rule and differ only where the script itself must (owner
-    // decision, the theme and consistency session).
-    val wash = MaterialTheme.colorScheme.primary.copy(alpha = Wash.Match)
-    return buildAnnotatedString { withStyle(SpanStyle(background = wash)) { append(text) } }
-}
-
-/** The ayah with the matched words washed; the ranges are exact. */
-@Composable
-internal fun arabic(hit: SearchHit.AyahHit, hafs: FontFamily, terms: List<String>): AnnotatedString {
-    val text = hit.ayah.text
-    val ranges = remember(text, terms) { Search.matchRanges(text, terms, arabic = true) }
-    if (ranges.isEmpty()) return AnnotatedString(text)
-    // A match wears the same wash everywhere: the accent at [Wash.Match],
-    // never the reciter's highlight, which says a word is being heard
-    // (owner decision, the audio and type audit session).
-    val wash = MaterialTheme.colorScheme.primary.copy(alpha = Wash.Match)
-    return buildAnnotatedString {
-        var index = 0
-        for (range in ranges) {
-            val from = range.first.coerceIn(index, text.length)
-            val to = (range.last + 1).coerceIn(from, text.length)
-            if (from > index) append(text.substring(index, from))
-            if (to > from) {
-                withStyle(SpanStyle(background = wash)) { append(text.substring(from, to)) }
-            }
-            index = to
-        }
-        if (index < text.length) append(text.substring(index))
     }
 }

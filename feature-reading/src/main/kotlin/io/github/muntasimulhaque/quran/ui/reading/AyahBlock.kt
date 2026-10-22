@@ -53,11 +53,10 @@ import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
-import io.github.muntasimulhaque.quran.ui.rich.tajweed
+import io.github.muntasimulhaque.quran.ui.rich.drawTajweedColors
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.Space
-import io.github.muntasimulhaque.quran.ui.theme.TajweedColors
 import io.github.muntasimulhaque.quran.ui.theme.Wash
 import kotlin.math.max
 import kotlin.math.min
@@ -188,18 +187,19 @@ internal fun AyahBlock(
             // kept the old size and the old gold (owner report, this
             // session).
             val recitedWord = playingWord.takeIf { playing }
+            // The code is read by the painter, not by the layout: the line's
+            // letters are the same whether the switch is on or off, so the
+            // reader's place never moves when the colors do (owner decision,
+            // the QPC rendering audit).
             val tajweed = row.ayah.tajweed
             val arabicLine = remember(
                 row.ayah.number,
-                row.ayah.tajweed,
-                metrics.tajweed,
                 playing,
                 recitedWord,
                 arabicOnly,
                 ornamentStyle,
-                palette.tajweed,
             ) {
-                arabic(row, playing, recitedWord, arabicOnly, ornamentStyle, tajweed, palette.tajweed, metrics.tajweed)
+                arabic(row, playing, recitedWord, arabicOnly, ornamentStyle)
             }
             var textLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
             Text(
@@ -217,10 +217,13 @@ internal fun AyahBlock(
                     .drawWithContent {
                         val range = arabicLine.washRange
                         val layout = textLayout
-                        if (layout != null && range != null) {
-                            drawPlayingWordWash(layout, range, palette.highlight)
+                        if (layout == null) {
+                            drawContent()
+                            return@drawWithContent
                         }
+                        if (range != null) drawPlayingWordWash(layout, range, palette.highlight)
                         drawContent()
+                        drawTajweedColors(layout, tajweed, palette.tajweed, metrics.tajweed)
                     },
             )
             if (metrics.wordByWord && row.meanings.any { it.meaning != null }) {
@@ -282,6 +285,11 @@ private data class ArabicLine(val text: AnnotatedString, val washRange: IntRange
  * boundary inside an Arabic word breaks its letter joining, and a span is
  * always a bare rectangle behind the glyphs.
  *
+ * The tajweed colors are not spans either. The line is shaped once and
+ * [drawTajweedColors] paints over that one layout, because a color span would
+ * re-shape the run and put a mark at the bottom of its letter (owner decision,
+ * the QPC rendering audit).
+ *
  * In an Arabic-only reading the verse closes with its own number, drawn in
  * the face's own printed medallion: [ornament] appends the number to the same
  * line, where a printed page puts it, and the KFGQPC face wraps it in the
@@ -294,9 +302,6 @@ private fun arabic(
     playingWord: Int?,
     ornament: Boolean,
     ornamentStyle: SpanStyle,
-    tajweed: String,
-    palette: TajweedColors,
-    enabled: Boolean,
 ): ArabicLine {
     val words = row.words
     val line = if (words.isEmpty()) {
@@ -322,10 +327,7 @@ private fun arabic(
             }
         } to washRange
     }
-    val text = line.first
-    val styled = AnnotatedString.Builder(text)
-    styled.tajweed(tajweed, row.ayah.text.length, palette, enabled)
-    return ArabicLine(styled.toAnnotatedString(), line.second)
+    return ArabicLine(line.first, line.second)
 }
 
 

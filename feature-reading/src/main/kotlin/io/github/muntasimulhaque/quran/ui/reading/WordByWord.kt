@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
@@ -21,7 +22,7 @@ import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
-import io.github.muntasimulhaque.quran.ui.rich.tajweedText
+import io.github.muntasimulhaque.quran.ui.rich.TajweedText
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
@@ -115,8 +116,11 @@ private fun WordPair(
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         val palette = LocalPagePalette.current
-        Text(
-            text = tajweedText(meaning.word, meaning.tajweed, palette.tajweed, metrics.tajweed),
+        TajweedText(
+            text = AnnotatedString(meaning.word),
+            code = meaning.tajweed,
+            colors = palette.tajweed,
+            enabled = metrics.tajweed,
             style = TextStyle(
                 fontFamily = hafs,
                 fontSize = metrics.wordsSp.sp,

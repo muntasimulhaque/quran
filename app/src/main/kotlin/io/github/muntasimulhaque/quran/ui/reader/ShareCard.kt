@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -32,7 +33,7 @@ import io.github.muntasimulhaque.quran.core.localizedDigits
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
-import io.github.muntasimulhaque.quran.ui.rich.tajweedText
+import io.github.muntasimulhaque.quran.ui.rich.TajweedText
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.PaperTajweed
 import io.github.muntasimulhaque.quran.ui.theme.Gold
@@ -171,11 +172,14 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = if (card.surahArabic.isNullOrBlank()) 0.dp else 6.dp),
             )
-            Text(
+            TajweedText(
                 // The card is paper whatever the reader's page. The theme's
                 // own palette would put the night tones on this white ground
                 // (owner report, the QPC rebuild audit).
-                text = tajweedText(card.arabic, card.tajweed, PaperTajweed),
+                text = AnnotatedString(card.arabic),
+                code = card.tajweed,
+                colors = PaperTajweed,
+                enabled = true,
                 style = TextStyle(
                     fontFamily = hafs,
                     fontSize = 26.sp,

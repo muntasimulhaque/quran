@@ -36,7 +36,7 @@
     },
     {
       "id": "quran-font-hafs",
-      "name": "QPC Hafs font",
+      "name": "KFGQPC Hafs Uthmanic Script (the QPC Hafs Unicode font)",
       "source": "Quranic Universal Library (QUL) by Tarteel",
       "url": "https://qul.tarteel.ai/resources/font/245",
       "resourceId": "245",
@@ -44,7 +44,7 @@
       "license": "KFGQPC fonts: use, copy and distribute unmodified",
       "licenseBn": "KFGQPC ফন্ট: অপরিবর্তিত অবস্থায় ব্যবহার, কপি ও বিতরণ",
       "credit": "King Fahd Glorious Quran Printing Complex (KFGQPC), via QUL",
-      "usedFor": "Arabic text font: the reading",
+      "usedFor": "Arabic text font: the reading, the Unicode font for the QPC Hafs text",
       "path": "content/raw/qul/qpc-hafs-font.zip",
       "bytes": 147220,
       "sha256": "f1e3d78acbf8a6db4a1ec1cf3ef10031a7e3914106c472ee23c49708caf04670",

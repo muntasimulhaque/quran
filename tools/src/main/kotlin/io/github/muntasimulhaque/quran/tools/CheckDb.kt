@@ -179,14 +179,20 @@ class CheckDb(private val root: File) {
                 failures++
             }
         }
+        // The meaning list is read once into a set. The correlated NOT EXISTS
+        // this replaced scanned the whole meaning table for every word row, so
+        // a green gate took a quarter of an hour; the set is the same check in
+        // one pass (owner report, the QPC rendering audit).
+        val meanings = HashSet<String>(200_000)
+        connection.each("SELECT ayah_number, position, language FROM word_meaning") { rs ->
+            meanings += "${rs.getInt(1)}:${rs.getInt(2)}:${rs.getString(3)}"
+        }
         for (language in listOf("en", "bn")) {
-            val missing = connection.scalarLong(
-                "SELECT COUNT(*) FROM word w WHERE w.marker = 0 AND NOT EXISTS " +
-                    "(SELECT 1 FROM word_meaning m WHERE m.ayah_number = w.ayah_number " +
-                    "AND m.position = w.position AND m.language = ?)",
-                language,
-            )
-            if (missing != 0L) {
+            var missing = 0
+            connection.each("SELECT ayah_number, position FROM word WHERE marker = 0") { rs ->
+                if ("${rs.getInt(1)}:${rs.getInt(2)}:$language" !in meanings) missing++
+            }
+            if (missing != 0) {
                 println("checkdb: $missing drawn word(s) have no $language meaning")
                 failures++
             }
