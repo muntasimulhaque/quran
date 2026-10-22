@@ -26,6 +26,26 @@ class ArabicTest {
     }
 
     @Test
+    fun `the QPC print's letters fold to the reader's spelling for search`() {
+        // The QPC print writes the alef maksura base as U+066E, and its small
+        // waw and yeh as U+06E5 and U+06E6. A reader types the ordinary
+        // letters; the search must find the print's spelling.
+        assertEquals("هديكم", Arabic.normalizeForSearch("هَدَٮٰكُمۡ"))
+        assertEquals("التوريه", Arabic.normalizeForSearch("ٱلتَّوۡرَٮٰةَ"))
+        assertEquals("ادريك", Arabic.normalizeForSearch("أَدۡرَٮٰكَ"))
+        assertEquals("داود", Arabic.normalizeForSearch("دَاوُۥدَ"))
+        assertEquals("به", Arabic.normalizeForSearch("بِهِۦ"))
+    }
+
+    @Test
+    fun `the audit skeleton keeps the QPC print's own letters`() {
+        // The audit reports the print's spelling against Tanzil, so the
+        // skeleton must not hide the letters the print chose.
+        assertEquals("هدٮكم", Arabic.skeleton("هَدَٮٰكُمۡ"))
+        assertEquals("داوۥد", Arabic.skeleton("دَاوُۥدَ"))
+    }
+
+    @Test
     fun `tatweel and Quranic signs are removed`() {
         assertEquals("بسمالله", Arabic.skeleton("بِسْـــمِ ٱللَّهِ ۖ"))
     }

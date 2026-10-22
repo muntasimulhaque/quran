@@ -9,15 +9,15 @@
             "language": "ar",
             "credit": "QPC Hafs, word by word, with tajweed; audited against the QUL QPC text",
             "creditBn": "QPC হাফস, শব্দে শব্দে, তাজবীদসহ; QUL-এর QPC লেখার সাথে যাচাইকৃত",
-            "license": "QPC Hafs text and tajweed annotation, distributed via QUL · KFGQPC fonts: use, copy and distribute unmodified · Distributed via QUL · Creative Commons Attribution 3.0, no changes, credit and link tanzil.net",
-            "licenseBn": "QPC হাফস লেখা ও তাজবীদ নির্দেশনা, QUL-এর মাধ্যমে বিতরণ · KFGQPC ফন্ট: অপরিবর্তিত অবস্থায় ব্যবহার, কপি ও বিতরণ · QUL-এর মাধ্যমে বিতরণ · Creative Commons Attribution 3.0, কোনো পরিবর্তন নয়, কৃতিত্ব ও tanzil.net-এর লিঙ্ক দিন",
-            "version": "2",
+            "license": "QPC Hafs text and tajweed annotation, distributed via QUL; free for Islamic use · KFGQPC fonts: use, copy and distribute unmodified · Distributed via QUL · Creative Commons Attribution 3.0, no changes, credit and link tanzil.net",
+            "licenseBn": "QPC হাফস লেখা ও তাজবীদ নির্দেশনা, QUL-এর মাধ্যমে বিতরণ; ইসলামী ব্যবহারের জন্য অবাধ · KFGQPC ফন্ট: অপরিবর্তিত অবস্থায় ব্যবহার, কপি ও বিতরণ · QUL-এর মাধ্যমে বিতরণ · Creative Commons Attribution 3.0, কোনো পরিবর্তন নয়, কৃতিত্ব ও tanzil.net-এর লিঙ্ক দিন",
+            "version": "3",
             "shipped": true,
             "ayahs": 6236,
-            "bytes": 8978432,
-            "sha256": "6981b481e6f8293c1d052e11ef4c56d7431afc94c0328d3707dea278472ad625",
-            "tag": "pack-core-6981b481",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-6981b481/core.db"
+            "bytes": 8970240,
+            "sha256": "3c9f7733c16cc03738fab7012447ec2c3bb3abda97dd328b08d7883d462f04b2",
+            "tag": "pack-core-3c9f7733",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-3c9f7733/core.db"
         },
         {
             "id": "translation-saheeh-en",
@@ -49,9 +49,9 @@
             "shipped": false,
             "ayahs": 6236,
             "bytes": 29523968,
-            "sha256": "4984bb399b78d68898130486c45bb93456bcfdfe47fe9ffa605c27a64fcf6648",
-            "tag": "pack-tafsir-ibn-kathir-en-4984bb39",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-tafsir-ibn-kathir-en-4984bb39/tafsir-ibn-kathir-en.db"
+            "sha256": "954e7737854969b07d96ea9aa0b3885b371b0f8cdb13e9825216b12557c729f6",
+            "tag": "pack-tafsir-ibn-kathir-en-954e7737",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-tafsir-ibn-kathir-en-954e7737/tafsir-ibn-kathir-en.db"
         },
         {
             "id": "translation-taisirul-quran-bn",
@@ -100,9 +100,9 @@
             "shipped": false,
             "ayahs": 6236,
             "bytes": 1769472,
-            "sha256": "ba2ef59f9f60bab0e6d45822ffc26810225d4d30796b4f01f99e4cf995a48f9a",
-            "tag": "pack-reciter-minshawi-ba2ef59f",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-reciter-minshawi-ba2ef59f/reciter-minshawi.db"
+            "sha256": "af264024b1b4a933c38ef64072ae6be93f5045765819159ed12bb6bcebc616f8",
+            "tag": "pack-reciter-minshawi-af264024",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-reciter-minshawi-af264024/reciter-minshawi.db"
         },
         {
             "id": "reciter-husary",
@@ -117,9 +117,9 @@
             "shipped": false,
             "ayahs": 6236,
             "bytes": 1728512,
-            "sha256": "b7b7f08b363b079fcb1b254923f9ac8315295baee00c678f4f8a9acc3711bb7b",
-            "tag": "pack-reciter-husary-b7b7f08b",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-reciter-husary-b7b7f08b/reciter-husary.db"
+            "sha256": "9b09e6cb1b1656e488b8446aa9ce3d79425ddae663a45f7cc73e3ec128b73b84",
+            "tag": "pack-reciter-husary-9b09e6cb",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-reciter-husary-9b09e6cb/reciter-husary.db"
         },
         {
             "id": "words-en",
@@ -134,9 +134,9 @@
             "shipped": false,
             "ayahs": 6236,
             "bytes": 6303744,
-            "sha256": "0ba3b0fec3df1faa5b2a04459d26c5ec6142213ef13d81ce73d1319b358f2b5c",
-            "tag": "pack-words-en-0ba3b0fe",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-words-en-0ba3b0fe/words-en.db"
+            "sha256": "157f78ca092f483680050328071dd62fb680c18cf87a3e56304f5d4930ad104c",
+            "tag": "pack-words-en-157f78ca",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-words-en-157f78ca/words-en.db"
         },
         {
             "id": "words-bn",
@@ -150,10 +150,10 @@
             "version": "QUL",
             "shipped": false,
             "ayahs": 6236,
-            "bytes": 8355840,
-            "sha256": "d2d281640740d5bb7da6be9ee1394fb968e05210a435e5ce8b6a5e6efcaf5e91",
-            "tag": "pack-words-bn-d2d28164",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-words-bn-d2d28164/words-bn.db"
+            "bytes": 8359936,
+            "sha256": "087fb8f31030dc967cf7ffb91745a05f007ea58b4492d4120564c7c4e4aa5d41",
+            "tag": "pack-words-bn-087fb8f3",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-words-bn-087fb8f3/words-bn.db"
         }
     ]
 }

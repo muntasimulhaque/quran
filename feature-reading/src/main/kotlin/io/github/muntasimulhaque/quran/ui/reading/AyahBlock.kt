@@ -46,7 +46,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.Arabic
 import io.github.muntasimulhaque.quran.core.RichText
-import io.github.muntasimulhaque.quran.core.TajweedCodec
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.ReadingRow
@@ -54,6 +53,7 @@ import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
+import io.github.muntasimulhaque.quran.ui.rich.tajweed
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -188,7 +188,7 @@ internal fun AyahBlock(
             // kept the old size and the old gold (owner report, this
             // session).
             val recitedWord = playingWord.takeIf { playing }
-            val tajweed = if (metrics.tajweed) row.ayah.tajweed else ""
+            val tajweed = row.ayah.tajweed
             val arabicLine = remember(
                 row.ayah.number,
                 row.ayah.tajweed,
@@ -199,7 +199,7 @@ internal fun AyahBlock(
                 ornamentStyle,
                 palette.tajweed,
             ) {
-                arabic(row, playing, recitedWord, arabicOnly, ornamentStyle, tajweed, palette.tajweed)
+                arabic(row, playing, recitedWord, arabicOnly, ornamentStyle, tajweed, palette.tajweed, metrics.tajweed)
             }
             var textLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
             Text(
@@ -296,6 +296,7 @@ private fun arabic(
     ornamentStyle: SpanStyle,
     tajweed: String,
     palette: TajweedColors,
+    enabled: Boolean,
 ): ArabicLine {
     val words = row.words
     val line = if (words.isEmpty()) {
@@ -322,14 +323,9 @@ private fun arabic(
         } to washRange
     }
     val text = line.first
-    if (tajweed.length == row.ayah.text.length) {
-        val styled = AnnotatedString.Builder(text)
-        for (span in TajweedCodec.spans(tajweed)) {
-            styled.addStyle(SpanStyle(color = palette.of(span.rule)), span.start, span.end)
-        }
-        return ArabicLine(styled.toAnnotatedString(), line.second)
-    }
-    return ArabicLine(text, line.second)
+    val styled = AnnotatedString.Builder(text)
+    styled.tajweed(tajweed, row.ayah.text.length, palette, enabled)
+    return ArabicLine(styled.toAnnotatedString(), line.second)
 }
 
 

@@ -43,6 +43,8 @@ object RecitationSegments {
         val json: String,
         val shifted: Boolean,
         val clamped: Int,
+        /** Regions whose source word number moved through the QPC merge. */
+        val mapped: Int = 0,
     )
 
     /**
@@ -85,22 +87,41 @@ object RecitationSegments {
      * The normalized JSON for one ayah. The original string is returned when
      * nothing needs to move, so an ayah the export wrote correctly keeps its
      * exact bytes.
+     *
+     * [remap] carries the QPC word merges into the recitation. The export's
+     * word numbers are the words of the word list the recitation was timed
+     * against; when two of those words are joined in the printed text, both
+     * of their regions must name the joined word, and the words after the
+     * join move down by one. Without the map the wash is one word ahead from
+     * the join to the end of the ayah (owner report, the QPC rebuild audit).
      */
-    fun correct(json: String, regions: List<Region>, wordCount: Int): Correction {
+    fun correct(
+        json: String,
+        regions: List<Region>,
+        wordCount: Int,
+        remap: (Int) -> Int = { it },
+    ): Correction {
         if (wordCount <= 0 || regions.isEmpty()) return Correction(json, shifted = false, clamped = 0)
         val first = regions.first()
         val maxWord = regions.maxOf { it.wordTo }
         val shifted = first.endMs >= first.startMs &&
             first.endMs - first.startMs <= LEADING_FRAGMENT_MS &&
             maxWord > wordCount
-        val rewrite = shifted || maxWord > wordCount || regions.any { it.legacy || it.wordFrom != it.wordTo - 1 }
+        var mapped = 0
+        for (region in regions) {
+            val raw = region.wordTo - if (shifted) 1 else 0
+            if (remap(raw) != raw) mapped++
+        }
+        val rewrite = shifted || maxWord > wordCount || mapped > 0 ||
+            regions.any { it.legacy || it.wordFrom != it.wordTo - 1 }
         if (!rewrite) return Correction(json, shifted = false, clamped = 0)
         var clamped = 0
         val normalized = buildJsonArray {
             for (region in regions) {
                 val raw = region.wordTo - if (shifted) 1 else 0
-                val word = raw.coerceIn(1, wordCount)
-                if (word != raw) clamped++
+                val target = remap(raw)
+                val word = target.coerceIn(1, wordCount)
+                if (word != target) clamped++
                 add(
                     buildJsonArray {
                         add(JsonPrimitive(word - 1))
@@ -111,6 +132,6 @@ object RecitationSegments {
                 )
             }
         }
-        return Correction(normalized.toString(), shifted, clamped)
+        return Correction(normalized.toString(), shifted, clamped, mapped)
     }
 }

@@ -21,8 +21,7 @@ import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
-import androidx.compose.ui.text.SpanStyle
-import io.github.muntasimulhaque.quran.core.TajweedCodec
+import io.github.muntasimulhaque.quran.ui.rich.tajweedText
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
@@ -117,22 +116,18 @@ private fun WordPair(
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         val palette = LocalPagePalette.current
         Text(
-            text = androidx.compose.ui.text.buildAnnotatedString {
-                append(meaning.word)
-                if (meaning.tajweed.length == meaning.word.length) {
-                    for (span in TajweedCodec.spans(meaning.tajweed)) {
-                        addStyle(SpanStyle(color = palette.tajweed.of(span.rule)), span.start, span.end)
-                    }
-                }
-            },
+            text = tajweedText(meaning.word, meaning.tajweed, palette.tajweed, metrics.tajweed),
             style = TextStyle(
                 fontFamily = hafs,
                 fontSize = metrics.wordsSp.sp,
                 lineHeight = metrics.wordsLineSp.sp,
-                // The pairs are the same words the ayah above already shows,
-                // so the Arabic steps one tone down from the verse's own ink:
-                // the line stays the verse, the pairs read as its gloss.
-                // Still well above the reading contrast on every theme.
+                // The pairs are the same words the ayah above already shows.
+                // The uncolored letters step one tone down from the verse's
+                // own ink; the rule-colored letters keep the palette's full
+                // color, because a hue at the gloss alpha would fall under
+                // the contrast floor. The aid stays a gloss by its size and
+                // its meanings, not by dimming the rules (owner report, the
+                // QPC rebuild audit).
                 color = palette.ink.copy(alpha = WordGlossAlpha),
             ),
             textAlign = TextAlign.Center,

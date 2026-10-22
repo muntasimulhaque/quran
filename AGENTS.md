@@ -207,9 +207,11 @@ captured. Delete the hand-off copy in `play-store/aab/` once Play has it.
 - Every Gradle call begins with
   `export JAVA_HOME="/c/Program Files/Android/Android Studio/jbr"`. It is the
   only JDK here. `local.properties` holds `sdk.dir` and is gitignored.
-- The emulator runs here, headless, on three display-on AVDs (`quran_phone`,
-  `quran_tablet7`, `quran_tablet10`), so the instrumented suites have a home that
-  is not CI. `gh` is authenticated.
+- The emulator runs here on three display-on AVDs (`quran_phone`,
+  `quran_tablet7`, `quran_tablet10`) with the host GPU (`-gpu host`) and its
+  window, so the instrumented suites have a home that is not CI and leave the
+  CPU to the suite. A software renderer is never used here; the CI runners keep
+  their own flags. `gh` is authenticated.
 - `python3` and `python` are the Store alias; the real interpreter is under
   `C:/Users/zn/AppData/Local/hermes/tools/`. Nothing in the build needs it.
 - Two tool calls in one block run in parallel. Never edit a file and read it in

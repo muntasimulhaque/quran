@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 10.3 (versionCode 105)
+Version: 10.4 (versionCode 106)
 
 ## Listing
 
@@ -15,15 +15,19 @@ Full description (plain prose; Play strips markdown):
 A Quran app built to be read. It opens where you left off and never asks
 you to learn its interface first.
 
-The reading gives each ayah its Saheeh International translation with the
-original footnotes, word by word meanings, and Ibn Kathir in English,
-with the Quran quotations set apart. Bangla
+The Arabic is the QPC Hafs print, word by word, with the rules of recitation
+drawn in the printed mushaf's seven color families and a Tajweed page that
+explains every color in English and Bangla. The reading gives each ayah its
+Saheeh International translation with the original footnotes, word by word
+meanings, and Ibn Kathir in English, with the Quran quotations set apart. Bangla
 readers get the Taisirul Quran translation, Ibn Kathir in Bangla, Bangla
 word meanings, and the surah names in Bengali script, and the whole interface
 can be read in English or Bangla.
 
-Search reads Arabic without diacritics and English without accents, so
-typing allah finds Allah and isa finds Isa. Save any ayah, add your own
+Search reads Arabic without diacritics, and in the letters a reader types
+even where the print writes its small waw, small yeh, or dotless alef-maksura
+base. English is read without accents, so typing allah finds Allah and isa
+finds Isa. Save any ayah, add your own
 note to it, and find everything again under Browse: one list of the ayahs
 you kept, with your note under the ayah it was written on, and a Last read
 list that keeps the places you have been reading so you can return to one
@@ -116,7 +120,7 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 39772922053 on 10.3: all three legs green with eight frames each, every frame read. The reading, chrome, opening, Browse, ayah card, and tafsir carry the QPC text and the tajweed colors; the settings frame adds the Tajweed colors row.
+The 10.3 set is installed from capture run 39772922053. The 10.4 set is captured from the 10.4 build before the hand-off, on the same three legs and eight frames; the silent color is the visible change and the settings frame carries the new version line.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
@@ -136,8 +140,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (10.3, 340 characters)
-The reading now uses the QPC Hafs text, word by word, audited against the QUL QPC text. Tajweed is drawn in seven color families over eighteen rules, on by default; a new Tajweed page explains every color in English and Bangla. The reading, word list, basmalah, and share card all carry the colors, and the app still works entirely offline.
+## Release notes (10.4, 334 characters)
+Search now finds the QPC print's words in the spelling you type, including the small letters the print writes. The word-by-word meanings and the reciter's highlighted word stay on the right word through the four joined words. Tajweed colors turn off everywhere, the share card keeps paper colors, and the content builds cleanly again.
 
 ## Before each release
 
@@ -145,8 +149,10 @@ The reading now uses the QPC Hafs text, word by word, audited against the QUL QP
    `app/build.gradle.kts` and update the version line at the top of this
    file, in the same commit that ends the session.
 2. Run the owner-machine gates: `./gradlew :tools:run --args="verify"`,
-   `audit`, `fonts`, `checkdb`, `search`, and the instrumented tests on an
-   emulator.
+   `build`, `checkdb`, `audit`, `search`, `fonts`, and `packs`, then the
+   instrumented tests on an emulator. They all run from a clean
+   `content/work`, and the content tags are published before the app build
+   downloads them.
 3. Commit and push. The `build` workflow's `signed-bundle` job signs on every
    push to `main`, checks the content, and leaves the bundle in the run's own
    artifacts. Pull it down into `play-store/aab/`:

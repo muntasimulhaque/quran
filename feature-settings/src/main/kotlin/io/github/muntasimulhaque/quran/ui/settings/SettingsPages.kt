@@ -15,10 +15,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.RichText
-import io.github.muntasimulhaque.quran.core.TajweedCodec
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.ReadingRow
@@ -31,6 +29,7 @@ import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.rich.ArabicFonts
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
+import io.github.muntasimulhaque.quran.ui.rich.tajweedText
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -127,14 +126,7 @@ private fun SizeSample(row: ReadingRow, settings: AppSettings) {
     ) {
         val palette = LocalPagePalette.current
         Text(
-            text = androidx.compose.ui.text.buildAnnotatedString {
-                append(row.ayah.text)
-                if (row.ayah.tajweed.length == row.ayah.text.length) {
-                    for (span in TajweedCodec.spans(row.ayah.tajweed)) {
-                        addStyle(SpanStyle(color = palette.tajweed.of(span.rule)), span.start, span.end)
-                    }
-                }
-            },
+            text = tajweedText(row.ayah.text, row.ayah.tajweed, palette.tajweed, settings.tajweed),
             style = androidx.compose.ui.text.TextStyle(
                 fontFamily = hafs,
                 fontSize = settings.arabicSp.sp,

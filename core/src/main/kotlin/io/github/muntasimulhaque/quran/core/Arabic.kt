@@ -11,6 +11,15 @@ import java.text.Normalizer
  *   is indexed with and what a query is normalized with.
  * - [skeleton] removes everything but letters, and is the audit's comparator:
  *   two editions of the text agree when their letter skeletons agree.
+ *
+ * The two shapes differ in one place: the QPC print writes the alef maksura
+ * base as a dotless beh (U+066E), and its small waw and small yeh (U+06E5,
+ * U+06E6) stand for a pronoun or a silent letter. The search folds the
+ * dotless beh to the yeh a reader types and skips the small letters a reader
+ * does not write, while the skeleton keeps the printed letters so the audit
+ * can report the print's own spelling as a print variant. A reader who types
+ * "هدى" must find "هَدَٮٰكُم", and "داود" must find "دَاوُۥدَ"
+ * (owner report, the QPC rebuild audit).
  */
 object Arabic {
 
@@ -72,7 +81,29 @@ object Arabic {
      */
     fun isMark(codePoint: Int): Boolean = isStripped(codePoint)
 
+    /**
+     * The print's letter bodies that a search query still spells the ordinary
+     * way. They are not in [FOLDED_CODEPOINTS] because [skeleton] must keep
+     * the printed letter for the audit.
+     */
+    private val SEARCH_FOLDED_CODEPOINTS = mapOf(
+        0x066E to YEH, // QPC print's alef-maksura base
+    )
+
+    /**
+     * The QPC print's small waw and small yeh (U+06E5, U+06E6) are letters
+     * the print uses for a pronoun or a silent letter; a reader's query
+     * spells the word without them. They are skipped in the search shape,
+     * not folded to another letter, so "داود" finds "دَاوُۥدَ" and "به"
+     * finds "بِهِۦ". The skeleton keeps them, because the audit compares
+     * the print's own letters.
+     */
+    fun isSearchIgnored(codePoint: Int): Boolean = codePoint == 0x06E5 || codePoint == 0x06E6
+
     private fun fold(codePoint: Int): Int = FOLDED_CODEPOINTS[codePoint] ?: codePoint
+
+    private fun searchFold(codePoint: Int): Int =
+        SEARCH_FOLDED_CODEPOINTS[codePoint] ?: fold(codePoint)
 
     private fun toAsciiDigit(codePoint: Int): Int = when (codePoint) {
         in 0x0660..0x0669 -> codePoint - 0x0660 + '0'.code // Arabic-Indic
@@ -93,7 +124,7 @@ object Arabic {
         while (i < nfc.length) {
             val cp = nfc.codePointAt(i)
             i += Character.charCount(cp)
-            if (isStripped(cp)) continue
+            if (isStripped(cp) || isSearchIgnored(cp)) continue
             if (Character.isWhitespace(cp)) {
                 pendingSpace = out.isNotEmpty()
                 continue
@@ -102,7 +133,7 @@ object Arabic {
                 out.append(' ')
                 pendingSpace = false
             }
-            out.appendCodePoint(toAsciiDigit(fold(cp)))
+            out.appendCodePoint(toAsciiDigit(searchFold(cp)))
         }
         return out.toString().trim()
     }
@@ -115,7 +146,7 @@ object Arabic {
      * walks a whole page of prose can fold one character at a time without
      * the normalizer on the hot path (owner decision, this session).
      */
-    fun foldForSearch(codePoint: Int): Int = toAsciiDigit(fold(codePoint))
+    fun foldForSearch(codePoint: Int): Int = toAsciiDigit(searchFold(codePoint))
 
     /**
      * Letters only: marks stripped, forms folded, every non-letter removed.
@@ -133,7 +164,11 @@ object Arabic {
             val type = Character.getType(folded)
             val isLetter = type == Character.OTHER_LETTER.toInt() ||
                 type == Character.UPPERCASE_LETTER.toInt() ||
-                type == Character.LOWERCASE_LETTER.toInt()
+                type == Character.LOWERCASE_LETTER.toInt() ||
+                // The QPC print's small waw and small yeh are modifier
+                // letters; the skeleton is the audit's letter comparator,
+                // so it must keep them (owner report, the QPC rebuild audit).
+                type == Character.MODIFIER_LETTER.toInt()
             if (isLetter) out.appendCodePoint(folded)
         }
         return out.toString()

@@ -98,14 +98,14 @@ internal val DarkScheme = darkColorScheme(
 )
 
 /** The reading colors, which turn over with the theme. */
-private val LightPage = PagePalette(
+internal val LightPage = PagePalette(
     ink = PaperInk,
     ornament = Gold,
     highlight = Color(0x381B4D7A),
     tajweed = PaperTajweed,
 )
 
-private val DarkPage = PagePalette(
+internal val DarkPage = PagePalette(
     ink = NightInk,
     ornament = NightGold,
     highlight = Color(0x4795C0EA),

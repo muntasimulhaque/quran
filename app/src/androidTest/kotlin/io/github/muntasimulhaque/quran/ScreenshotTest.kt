@@ -414,6 +414,9 @@ class ScreenshotTest {
             settings.setShowTranslation(true)
             settings.setShowTafsir(true)
             settings.setWordByWord(true)
+            // The colors are the 10.3 change; a test that left the switch off
+            // would silently strip them from every store frame.
+            settings.setTajweed(true)
             // The store set is the steady reading, not the first minute: the
             // one-time long-press note has been read in this install, so no
             // frame catches it floating over the opening (owner report, this

@@ -70,6 +70,7 @@ class SearchCheck(private val root: File) {
             }
         }
 
+        openSqlite(database).use { connection -> auditStandardSpellings(connection) }
         auditNonAscii(nonAscii)
         auditArabicColumn()
         auditScriptRoundTrip("content/quran.db", "bn")
@@ -88,6 +89,40 @@ class SearchCheck(private val root: File) {
         println("SEARCH FAILURES (${problems.size})")
         problems.forEach { println("  - $it") }
         return 1
+    }
+
+    /**
+     * The QPC print's own letter bodies must not make a word unsearchable.
+     *
+     * A reader types the ordinary Uthmani spelling: "هدى" for
+     * "هَدَٮٰكُمۡ", "التورية" for "ٱلتَّوۡرَٮٰةَ", "داود" for
+     * "دَاوُۥدَ". The Arabic normalizer folds the print's base letters
+     * for the index; this gate is what proves each of those queries reaches
+     * the ayah that carries the word. A future print letter that the
+     * normalizer forgets fails here, not on a reader's screen.
+     */
+    private fun auditStandardSpellings(connection: Connection) {
+        // Each probe names the ayah by its reference, not by a global index.
+        val references = listOf(
+            Triple(2, 185, "هدى"),
+            Triple(2, 29, "فسويهن"),
+            Triple(3, 3, "التورية"),
+            Triple(69, 3, "أدرى"),
+            Triple(34, 13, "داود"),
+        )
+        var checked = 0
+        for ((surah, ayah, typed) in references) {
+            val query = Search.parse(typed) ?: continue
+            val condition = query.terms.joinToString(" AND ") { "text_search LIKE ? ESCAPE '\\'" }
+            val found = exists(
+                connection,
+                "SELECT 1 FROM ayah WHERE surah = ? AND ayah = ? AND $condition",
+                listOf(surah.toString(), ayah.toString()) + query.terms.map { Search.pattern(it) },
+            )
+            checked++
+            if (!found) problems += "standard spelling $typed missed $surah:$ayah"
+        }
+        println("search: $checked standard spellings passed")
     }
 
     /** Nothing in the translation may fold away or stay non-ASCII and unsupported. */

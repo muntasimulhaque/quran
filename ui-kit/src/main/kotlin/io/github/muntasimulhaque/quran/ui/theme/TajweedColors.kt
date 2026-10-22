@@ -52,7 +52,11 @@ data class TajweedColors(
 }
 
 val PaperTajweed = TajweedColors(
-    silent = Color(0xFF6F6B64),
+    // Darkened from #6F6B64 after the reading's selected and reciter washes
+    // dropped it to 4.14:1 on paper. It now holds 4.74:1 on the reciter's
+    // wash and 5.06:1 on the selected one (owner report, the QPC rebuild
+    // audit).
+    silent = Color(0xFF66625B),
     ghunnah = Color(0xFF7A5A12),
     qalaqah = Color(0xFFA32020),
     ikhafa = Color(0xFF6B2A86),

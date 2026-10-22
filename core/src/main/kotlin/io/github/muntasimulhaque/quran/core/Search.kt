@@ -199,7 +199,7 @@ object Search {
                 continue
             }
             if (arabic) {
-                if (Arabic.isMark(codePoint)) continue
+                if (Arabic.isMark(codePoint) || Arabic.isSearchIgnored(codePoint)) continue
                 folded.appendCodePoint(Arabic.foldForSearch(codePoint))
                 starts.add(start)
             } else {

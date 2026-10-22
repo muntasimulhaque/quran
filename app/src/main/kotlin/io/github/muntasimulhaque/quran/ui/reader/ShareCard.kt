@@ -22,20 +22,19 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.core.RichText
-import io.github.muntasimulhaque.quran.core.TajweedCodec
 import io.github.muntasimulhaque.quran.core.TextRun
-import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.core.localizedDigits
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
+import io.github.muntasimulhaque.quran.ui.rich.tajweedText
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
+import io.github.muntasimulhaque.quran.ui.theme.PaperTajweed
 import io.github.muntasimulhaque.quran.ui.theme.Gold
 import io.github.muntasimulhaque.quran.ui.theme.Lapis
 import io.github.muntasimulhaque.quran.ui.theme.PaperBackground
@@ -172,16 +171,11 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = if (card.surahArabic.isNullOrBlank()) 0.dp else 6.dp),
             )
-            val tajweedPalette = LocalPagePalette.current.tajweed
             Text(
-                text = androidx.compose.ui.text.buildAnnotatedString {
-                    append(card.arabic)
-                    if (card.tajweed.length == card.arabic.length) {
-                        for (span in TajweedCodec.spans(card.tajweed)) {
-                            addStyle(SpanStyle(color = tajweedPalette.of(span.rule)), span.start, span.end)
-                        }
-                    }
-                },
+                // The card is paper whatever the reader's page. The theme's
+                // own palette would put the night tones on this white ground
+                // (owner report, the QPC rebuild audit).
+                text = tajweedText(card.arabic, card.tajweed, PaperTajweed),
                 style = TextStyle(
                     fontFamily = hafs,
                     fontSize = 26.sp,

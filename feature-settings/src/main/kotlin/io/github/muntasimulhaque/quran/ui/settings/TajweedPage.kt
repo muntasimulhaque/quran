@@ -27,7 +27,8 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.TajweedColors
 
 /**
- * The eighteen rules, in the seven families the reading draws. Each row is a
+ * The eighteen rules, in the seven families the reading draws when its
+ * switch is on. Each row is a
  * swatch and the rule's own name, so a reader who wants to know what the
  * color on the page means finds the answer without leaving the app. The
  * swatch is the theme's color for the current ground; the name is the

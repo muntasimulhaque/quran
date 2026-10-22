@@ -7,6 +7,7 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import io.github.muntasimulhaque.quran.core.TajweedCodec
 import java.io.File
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.XMLStreamConstants
@@ -68,11 +69,13 @@ class Verify(private val root: File) {
 
     private fun check(dataset: Dataset, dir: File) {
         when (dataset.id) {
-            "quran-script-kfgqpc" -> checkKfgqpcScript(dataset.id, dir)
+            "quran-script-qpc-hafs" -> checkQpcScript(dataset.id, dir)
+            "quran-script-qpc-hafs-ayah" -> checkQulAyah(dataset.id, dir)
             "translation-saheeh" -> checkSaheeh(dataset.id, dir)
             "saheeh-qul-crosscheck" -> checkSimpleCount(dataset.id, dir, "translation", 6236)
-            "tafsir-ibn-kathir-en" -> checkTafsirQul(dataset.id, dir)
-            "word-by-word-english" -> checkWordTranslation(dataset.id, dir)
+            "translation-taisirul-quran-bn" -> checkSimpleCount(dataset.id, dir, "translation", 6236)
+            "tafsir-ibn-kathir-en", "tafsir-ibn-kathir-bn" -> checkTafsirQul(dataset.id, dir)
+            "word-by-word-english", "word-by-word-bengali" -> checkWordTranslation(dataset.id, dir)
             "recitation-minshawi", "recitation-husary", "recitation-husary-muallim",
             "recitation-husary-mujawwad" -> checkRecitation(dataset.id, dir)
             "topics" -> checkSimpleCount(dataset.id, dir, "topics", 2512)
@@ -95,7 +98,13 @@ class Verify(private val root: File) {
     private fun db(dir: File): File =
         dir.firstWithExtension(".db", ".sqlite") ?: error("no sqlite database in ${dir.absolutePath}")
 
-    private fun checkKfgqpcScript(id: String, dir: File) {
+    /**
+     * The QPC Hafs word export: 83,668 rows, 114 surahs, 6,236 ayahs, and a
+     * tag on every word whose class the app knows. The one HTML entity in the
+     * source is the escaped `&gt;` in 32:3, an export artifact the codec
+     * strips; anything else is a lost letter and a failure.
+     */
+    private fun checkQpcScript(id: String, dir: File) {
         openSqlite(db(dir)).use { connection ->
             val rows = connection.count("words")
             if (rows != 83_668L) fail(id, "expected 83668 words, found $rows")
@@ -104,16 +113,52 @@ class Verify(private val root: File) {
             val ayahs = connection.scalarLong("SELECT COUNT(*) FROM (SELECT DISTINCT surah, ayah FROM words)")
             if (ayahs != 6236L) fail(id, "expected 6236 ayahs, found $ayahs")
             val markers = connection.scalarLong("SELECT COUNT(*) FROM words WHERE text GLOB '*[٠-٩]*'")
-            if (markers != 6236L) fail(id, "expected 6236 ayah-number markers, found $markers")
+            if (markers != 6_235L) fail(id, "expected 6235 ayah-number markers, found $markers")
             connection.each("SELECT location, text FROM words") { rs ->
                 val location = rs.getString(1)
                 if (!location.matches(Regex("^\\d+:\\d+:\\d+$"))) fail(id, "bad location: $location")
                 val text = rs.getString(2) ?: ""
                 if (text.isBlank()) fail(id, "blank text at $location")
                 if (text.contains('\u25CC')) fail(id, "dotted circle artifact at $location")
+                checkTajweed(id, location, text)
             }
         }
     }
+
+    /** The ayah-level QUL reference: 6,236 verses, every one tagged and clean. */
+    private fun checkQulAyah(id: String, dir: File) {
+        openSqlite(db(dir)).use { connection ->
+            val rows = connection.count("verses")
+            if (rows != 6236L) fail(id, "expected 6236 verses, found $rows")
+            val surahs = connection.scalarLong("SELECT COUNT(DISTINCT surah) FROM verses")
+            if (surahs != 114L) fail(id, "expected 114 surahs, found $surahs")
+            connection.each("SELECT verse_key, surah, ayah, text FROM verses") { rs ->
+                val key = rs.getString(1) ?: ""
+                val surah = rs.getInt(2)
+                val ayah = rs.getInt(3)
+                if (key != "$surah:$ayah") fail(id, "verse key $key does not match $surah:$ayah")
+                val text = rs.getString(4) ?: ""
+                if (text.isBlank()) fail(id, "blank verse $key")
+                checkTajweed(id, key, text)
+            }
+        }
+    }
+
+    private fun checkTajweed(id: String, where: String, tagged: String) {
+        for (match in entity.findAll(tagged)) {
+            if (match.value != "&gt;") fail(id, "unknown entity ${match.value} in $where")
+        }
+        val parsed = runCatching { TajweedCodec.parse(tagged) }.getOrElse { failure ->
+            fail(id, "unreadable tajweed at $where: ${failure.message}")
+            return
+        }
+        if (parsed.code.length != parsed.text.length) {
+            fail(id, "tajweed code ${parsed.code.length} characters for ${parsed.text.length} at $where")
+        }
+        if (!TajweedCodec.isWellFormed(parsed.code)) fail(id, "unknown tajweed code at $where")
+    }
+
+    private val entity = Regex("&(?:[a-zA-Z]+|#[0-9]+|#x[0-9A-Fa-f]+);")
 
     private fun checkSaheeh(id: String, dir: File) {
         openSqlite(db(dir)).use { connection ->
@@ -147,8 +192,8 @@ class Verify(private val root: File) {
 
     private fun surahVerseCounts(): IntArray {
         val counts = IntArray(115)
-        val script = File(work, "quran-script-kfgqpc").firstWithExtension(".db")
-            ?: error("script database not extracted yet")
+        val script = File(work, "quran-script-qpc-hafs").firstWithExtension(".db")
+            ?: error("QPC script database not extracted yet")
         openSqlite(script).use { connection ->
             connection.each("SELECT surah, MAX(ayah) FROM words GROUP BY surah") { rs ->
                 counts[rs.getInt(1)] = rs.getInt(2)

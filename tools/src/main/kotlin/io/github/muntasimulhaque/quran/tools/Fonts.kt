@@ -1,6 +1,7 @@
 package io.github.muntasimulhaque.quran.tools
 
 import io.github.muntasimulhaque.quran.core.RichText
+import io.github.muntasimulhaque.quran.core.TajweedCodec
 import io.github.muntasimulhaque.quran.core.TextBlockKind
 import io.github.muntasimulhaque.quran.core.TextRun
 import java.awt.Font
@@ -82,9 +83,10 @@ class Fonts(private val root: File) {
         val uncovered = TreeMap<Int, Int>()
         var codepoints = 0
         var digits = 0
-        openSqlite(sourceDb("quran-script-kfgqpc")).use { connection ->
+        openSqlite(sourceDb("quran-script-qpc-hafs")).use { connection ->
             connection.each("SELECT text FROM words") { rs ->
-                for (cp in (rs.getString(1) ?: "").codePoints()) {
+                val parsed = TajweedCodec.parse(rs.getString(1) ?: "")
+                for (cp in parsed.text.codePoints()) {
                     if (Character.isDigit(cp)) {
                         digits++
                         continue
@@ -104,36 +106,39 @@ class Fonts(private val root: File) {
     }
 
     /**
-     * The page's furniture, drawn here rather than carried in a font: the
-     * ornament face draws every ayah's roundel number and the page's own
-     * number, the juz, and each surah's band. A digit or a name the ornament
-     * cannot draw would be a hole in the printed page's furniture.
+     * The page's furniture, drawn here rather than carried in a font: the Hafs
+     * face draws every ayah's printed roundel number, and the Amiri face draws
+     * the juz and each surah's band. A digit or a name either face cannot draw
+     * would be a hole in the printed page's furniture.
      */
     private fun checkPageFurniture() {
         val amiri = loadFontFile(File(root, "content-assets/src/main/res/font/amiri_quran.ttf"))
+        val hafs = loadFont(File(verify, "quran-font-hafs"))
         val uncovered = mutableSetOf<Int>()
-        fun probe(text: String, what: String) {
+        fun probe(font: Font, text: String, what: String) {
             for (codepoint in text.codePoints()) {
                 if (codepoint <= 32) continue
-                if (!amiri.canDisplay(codepoint)) {
+                if (!font.canDisplay(codepoint)) {
                     uncovered += codepoint
                     problems += "page furniture ($what) cannot draw U+" +
                         codepoint.toString(16).uppercase()
                 }
             }
         }
-        // Arabic-Indic digits: every ayah's number, the page number, the juz.
-        for (ch in "٠١٢٣٤٥٦٧٨٩") probe(
-            ch.toString(),
-            "ayah number",
-        )
+        fun probeAmiri(text: String, what: String) = probe(amiri, text, what)
+        // Arabic-Indic digits: every ayah's number, drawn in the Hafs face,
+        // and the page and juz labels, drawn in the ornament face.
+        for (ch in "٠١٢٣٤٥٦٧٨٩") {
+            probe(hafs, ch.toString(), "ayah number")
+            probeAmiri(ch.toString(), "page or juz number")
+        }
         // The juz's own label and the surahs' names, drawn in the band.
-        probe("الجزء", "juz")
+        probeAmiri("الجزء", "juz")
         val packs = File(root, "content/packs")
         if (packs.isDirectory) {
             openSqlite(File(packs, "core.db")).use { connection ->
                 connection.each("SELECT name_arabic FROM surah") { rs ->
-                    probe(rs.getString(1) ?: "", "surah band")
+                    probeAmiri(rs.getString(1) ?: "", "surah band")
                 }
             }
         }

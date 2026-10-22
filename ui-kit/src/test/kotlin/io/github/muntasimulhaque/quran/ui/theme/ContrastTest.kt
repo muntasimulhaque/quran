@@ -36,6 +36,17 @@ class ContrastTest {
         assertReadable(PaperTajweed.iqlab, PaperBackground)
         assertReadable(PaperTajweed.idgham, PaperBackground)
         assertReadable(PaperTajweed.madda, PaperBackground)
+        // The rules page draws its swatches on the sheet, and the reading
+        // draws the words on the selected and reciter washes as well as on
+        // the plain page.
+        assertTajweedOn(PaperTajweed, PaperSurface)
+        assertTajweedOnWash(PaperTajweed, PaperBackground, LightScheme.primary, Wash.Selected)
+        assertTajweedOnWash(
+            PaperTajweed,
+            PaperBackground,
+            LightPage.highlight,
+            LightPage.highlight.alpha * 0.55f,
+        )
     }
 
     @Test
@@ -61,6 +72,14 @@ class ContrastTest {
         assertReadable(NightTajweed.iqlab, NightBackground)
         assertReadable(NightTajweed.idgham, NightBackground)
         assertReadable(NightTajweed.madda, NightBackground)
+        assertTajweedOn(NightTajweed, NightSurface)
+        assertTajweedOnWash(NightTajweed, NightBackground, DarkScheme.primary, Wash.Selected)
+        assertTajweedOnWash(
+            NightTajweed,
+            NightBackground,
+            DarkPage.highlight,
+            DarkPage.highlight.alpha * 0.55f,
+        )
     }
 
     /**
@@ -77,6 +96,32 @@ class ContrastTest {
         assertReadable(quiet, scheme.surfaceContainerHigh)
         assertReadable(quiet, scheme.surfaceContainerHighest)
     }
+
+    private fun assertTajweedOn(colors: TajweedColors, ground: Color) {
+        listOf(
+            colors.silent,
+            colors.ghunnah,
+            colors.qalaqah,
+            colors.ikhafa,
+            colors.iqlab,
+            colors.idgham,
+            colors.madda,
+        ).forEach { assertReadable(it, ground) }
+    }
+
+    private fun assertTajweedOnWash(
+        colors: TajweedColors,
+        ground: Color,
+        tint: Color,
+        alpha: Float,
+    ) = assertTajweedOn(colors, blend(tint, ground, alpha))
+
+    private fun blend(tint: Color, ground: Color, alpha: Float): Color = Color(
+        red = tint.red * alpha + ground.red * (1f - alpha),
+        green = tint.green * alpha + ground.green * (1f - alpha),
+        blue = tint.blue * alpha + ground.blue * (1f - alpha),
+        alpha = 1f,
+    )
 
     private fun assertReadable(ink: Color, ground: Color) {
         val ratio = contrast(ink, ground)

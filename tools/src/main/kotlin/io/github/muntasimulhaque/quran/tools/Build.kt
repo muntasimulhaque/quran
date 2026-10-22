@@ -37,12 +37,16 @@ class Build(private val root: File) {
      */
     private var recitationSegmentsShifted = 0
     private var recitationSegmentsClamped = 0
+    private var recitationSegmentsMapped = 0
 
     private data class Word(
         val id: Int,
         val surah: Int,
         val ayah: Int,
+        /** The position the reading draws, after the QPC merges. */
         val position: Int,
+        /** The position the source and the word lists use, before the merges. */
+        val sourcePosition: Int,
         val text: String,
         val marker: Boolean,
         val code: String,
@@ -147,6 +151,7 @@ class Build(private val root: File) {
                     surah = rs.getInt(2),
                     ayah = rs.getInt(3),
                     position = rs.getInt(4),
+                    sourcePosition = rs.getInt(4),
                     text = parsed.text,
                     marker = Arabic.skeleton(parsed.text).isEmpty(),
                     code = parsed.code,
@@ -154,16 +159,21 @@ class Build(private val root: File) {
             }
         }
         val merged = mergeQpcWords(words)
-        if (merged.size != 83_665) fail("expected 83665 words, found ${merged.size}")
+        if (merged.size != 83_664) fail("expected 83664 words, found ${merged.size}")
         return merged
     }
 
     /**
-     * The three places where QUL's word-by-word export splits a pair that the
+     * The four places where QUL's word-by-word export splits a pair that the
      * QUL word list and the recitation keep as one word. The pair is joined
      * so the reading, the word meanings, and the recitation continue to share
      * one word number. The joined word's code keeps a zero for the space, so
      * its code and text lengths still agree.
+     *
+     * The list is derived from the word list, not from Tanzil: 37:130 has four
+     * words in both the QPC print and Tanzil, but the word list and the
+     * recitation keep "إِلۡ يَاسِين" as one word. The old text merged that
+     * name; the QPC export split it (owner report, the QPC rebuild audit).
      */
     private data class QpcMerge(val surah: Int, val ayah: Int, val position: Int)
 
@@ -171,6 +181,7 @@ class Build(private val root: File) {
         QpcMerge(2, 181, 3),
         QpcMerge(8, 6, 4),
         QpcMerge(13, 37, 8),
+        QpcMerge(37, 130, 3),
     )
 
     private fun mergeQpcWords(words: List<Word>): List<Word> {
@@ -204,6 +215,23 @@ class Build(private val root: File) {
             }
         }
         return out
+    }
+
+    /**
+     * The source word number a recitation segment names, moved through the
+     * same merge the reading word went through. The second half of a joined
+     * pair names the joined word; every word after it moves down by one. The
+     * recitation export was timed against the word list, so its numbers are
+     * the source positions, not the reading's renumbered ones.
+     */
+    private fun recitationPosition(surah: Int, ayah: Int, source: Int): Int {
+        var position = source
+        for (merge in qpcMerges) {
+            if (merge.surah != surah || merge.ayah != ayah) continue
+            if (source == merge.position + 1) return merge.position
+            if (source > merge.position + 1) position -= 1
+        }
+        return position
     }
 
     private fun indexAyahs(words: List<Word>): LinkedHashMap<String, Int> {
@@ -251,6 +279,13 @@ class Build(private val root: File) {
         }
         return out
     }
+
+    /** The ayah-number rows in the QUL word lists, in either numeral set. */
+    private val markerMeaning = Regex("^\\((?:(?:\\d+)|[\u0660-\u0669]+)\\)$")
+
+    /** The word list's meaning for a source word, before the QPC renumbering. */
+    private fun meaningAt(list: Map<String, String>, word: Word): String =
+        list["${word.surah}:${word.ayah}:${word.sourcePosition}"].orEmpty()
 
     private fun readWordList(datasetId: String): Map<String, String> {
         if (sourceDb(datasetId) == null) {
@@ -605,8 +640,12 @@ class Build(private val root: File) {
             ).use { meanings ->
                 for (word in words) {
                     if (word.marker) continue
-                    val meaning = list["${word.surah}:${word.ayah}:${word.position}"] ?: continue
+                    // The lists include the ayah number as a row of their own.
+                    // The reading draws that number itself; a marker text must
+                    // never become a word's gloss (owner report, 37:130).
+                    val meaning = meaningAt(list, word)
                     if (meaning.isBlank()) continue
+                    if (markerMeaning.matches(meaning.trim())) continue
                     meanings.setInt(1, word.id)
                     meanings.setInt(2, ayahNumbers["${word.surah}:${word.ayah}"] ?: 0)
                     meanings.setInt(3, word.position)
@@ -805,9 +844,14 @@ class Build(private val root: File) {
                                 fail("recitation ${dataset.id}: $surah:$ayah segments are not a readable word list")
                                 insertAyah.setString(4, raw)
                             } else {
-                                val correction = RecitationSegments.correct(raw, regions, wordCounts[number] ?: 0)
+                                val correction = RecitationSegments.correct(
+                                    raw,
+                                    regions,
+                                    wordCounts[number] ?: 0,
+                                ) { source -> recitationPosition(surah, ayah, source) }
                                 if (correction.shifted) recitationSegmentsShifted += 1
                                 recitationSegmentsClamped += correction.clamped
+                                recitationSegmentsMapped += correction.mapped
                                 insertAyah.setString(4, correction.json)
                             }
                             insertAyah.addBatch()
@@ -898,12 +942,13 @@ class Build(private val root: File) {
         val markers = words.count { it.marker }
         return buildString {
             appendLine("{")
-            appendLine("  \"contentVersion\": \"1.1.0\",")
+            appendLine("  \"contentVersion\": \"1.2.0\",")
             appendLine("  \"ayahs\": ${ayahs.size},")
             appendLine("  \"words\": ${words.size - markers},")
             appendLine("  \"markers\": $markers,")
             appendLine("  \"translations\": $translations,")
             appendLine("  \"recitationSegmentsShifted\": $recitationSegmentsShifted,")
+            appendLine("  \"recitationSegmentsMapped\": $recitationSegmentsMapped,")
             appendLine("  \"recitationSegmentsClamped\": $recitationSegmentsClamped,")
             appendLine("  \"problems\": ${problems.size},")
             appendLine("  \"databaseBytes\": ${database.length()},")

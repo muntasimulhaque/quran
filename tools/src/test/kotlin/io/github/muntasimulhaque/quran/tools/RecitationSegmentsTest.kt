@@ -43,6 +43,22 @@ class RecitationSegmentsTest {
     }
 
     @Test
+    fun `a QPC merge folds the second half and shifts the rest`() {
+        val json = "[[0,1,0,1000],[1,2,1000,2000],[2,3,2000,3000],[3,4,3000,4000],[4,5,4000,5000]]"
+        val regions = requireNotNull(RecitationSegments.parse(json))
+        val correction = RecitationSegments.correct(json, regions, wordCount = 4) {
+            when {
+                it == 4 -> 3
+                it > 4 -> it - 1
+                else -> it
+            }
+        }
+        assertEquals(listOf(1, 2, 3, 3, 4), wordPositions(correction.json))
+        assertEquals(2, correction.mapped)
+        assertEquals(0, correction.clamped)
+    }
+
+    @Test
     fun `a three number region is read as the older QUL shape`() {
         val correction = correct("[[1,0,1000],[2,1000,2000]]", words = 2)
         assertEquals(listOf(1, 2), wordPositions(correction.json))

@@ -46,8 +46,7 @@ import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
-import androidx.compose.ui.text.SpanStyle
-import io.github.muntasimulhaque.quran.core.TajweedCodec
+import io.github.muntasimulhaque.quran.ui.rich.tajweedText
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
@@ -149,14 +148,7 @@ internal fun SurahOpening(
             // different texts stacked (owner decision, the theme and
             // consistency session).
             Text(
-                text = androidx.compose.ui.text.buildAnnotatedString {
-                    append(line.text)
-                    if (line.tajweed.length == line.text.length) {
-                        for (span in TajweedCodec.spans(line.tajweed)) {
-                            addStyle(SpanStyle(color = palette.tajweed.of(span.rule)), span.start, span.end)
-                        }
-                    }
-                },
+                text = tajweedText(line.text, line.tajweed, palette.tajweed, metrics.tajweed),
                 style = TextStyle(
                     fontFamily = hafs,
                     fontSize = metrics.arabicSp.sp,

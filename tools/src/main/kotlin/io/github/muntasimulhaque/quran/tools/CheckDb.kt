@@ -22,7 +22,7 @@ class CheckDb(private val root: File) {
     private val expectations = listOf(
         Expectation("surah", 114),
         Expectation("ayah", 6236),
-        Expectation("word", 83_665),
+        Expectation("word", 83_664),
         Expectation("recitation_ayah", 24_944),
         Expectation("surah_info", 114),
     )
@@ -89,6 +89,7 @@ class CheckDb(private val root: File) {
             }
             failures += badTajweed
             if (badTajweed == 0) println("checkdb: every ayah's tajweed code matches its text")
+            failures += checkWordsAndMeanings(connection)
             failures += checkRecitationSegments(connection, catalogReciters)
             // Every pack must cover every ayah, or the reader would meet a
             // silent hole when that pack is chosen. The number of packs is not
@@ -148,6 +149,61 @@ class CheckDb(private val root: File) {
         }
         println("checkdb: content/quran.db verified, ${database.length()} bytes, $actualHash")
         return 0
+    }
+
+    /** The ayah-number rows in the QUL word lists, in either numeral set. */
+    private val markerMeaning = Regex("^\\((?:(?:\\d+)|[\u0660-\u0669]+)\\)$")
+
+    /**
+     * The reading's two halves must meet: the ayah's text is its drawn words
+     * joined by single spaces, and every drawn word has a meaning in both word
+     * lists. The merge that joins two source words must carry its source
+     * position into the meaning lookup, and no ayah-number row may become a
+     * gloss (owner report, the QPC rebuild audit).
+     */
+    private fun checkWordsAndMeanings(connection: java.sql.Connection): Int {
+        var failures = 0
+        val joined = HashMap<Int, StringBuilder>()
+        connection.each("SELECT ayah_number, text FROM word WHERE marker = 0 ORDER BY ayah_number, position") { rs ->
+            val ayah = rs.getInt(1)
+            val word = rs.getString(2) ?: ""
+            val line = joined.getOrPut(ayah) { StringBuilder() }
+            if (line.isNotEmpty()) line.append(' ')
+            line.append(word)
+        }
+        connection.each("SELECT number, text FROM ayah ORDER BY number") { rs ->
+            val number = rs.getInt(1)
+            val text = rs.getString(2) ?: ""
+            if (joined[number]?.toString() != text) {
+                println("checkdb: ayah $number text does not join its word rows")
+                failures++
+            }
+        }
+        for (language in listOf("en", "bn")) {
+            val missing = connection.scalarLong(
+                "SELECT COUNT(*) FROM word w WHERE w.marker = 0 AND NOT EXISTS " +
+                    "(SELECT 1 FROM word_meaning m WHERE m.ayah_number = w.ayah_number " +
+                    "AND m.position = w.position AND m.language = ?)",
+                language,
+            )
+            if (missing != 0L) {
+                println("checkdb: $missing drawn word(s) have no $language meaning")
+                failures++
+            }
+        }
+        var markersAsMeanings = 0
+        connection.each("SELECT language, meaning FROM word_meaning") { rs ->
+            val meaning = rs.getString(2)?.trim() ?: ""
+            if (markerMeaning.matches(meaning)) {
+                if (markersAsMeanings < 5) {
+                    println("checkdb: ${rs.getString(1)} meaning is an ayah number: $meaning")
+                }
+                markersAsMeanings++
+            }
+        }
+        if (markersAsMeanings != 0) failures += markersAsMeanings
+        if (failures == 0) println("checkdb: every word joins its ayah and has a meaning in both lists")
+        return failures
     }
 
     /**
