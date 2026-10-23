@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 10.7 (versionCode 109)
+Version: 10.8 (versionCode 110)
 
 ## Listing
 

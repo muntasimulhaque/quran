@@ -18,11 +18,13 @@ import kotlin.math.sqrt
  * because four families sat within 0.1 of each other in OKLab and all seven
  * lived in a 0.09 lightness band (owner report, the palette session).
  *
- * A pair at 0.085 is the floor this app accepts. The paper palette's closest
- * pair is the quiet gray and the teal at 0.089; the night palette's closest
- * is 0.111. Every family is at least 0.10 from the ink, which on the night
- * page is the lightest tone and therefore the closest one to the colors by
- * construction.
+ * A pair at 0.095 is the floor this app accepts (owner decision, the palette
+ * session; it was 0.085 while the palette spent its lightness on a ladder).
+ * The paper palette's closest pair is the quiet gray and the teal at 0.101;
+ * the night palette's closest is the warm pair, ghunnah and qalaqah, at
+ * 0.116. Every family is at least 0.14 from the ink: the reading's ink is the
+ * lightest tone on the night page, so it is the tone closest to the families
+ * by construction, and the quiet gray sits 0.145 from it there.
  *
  * OKLab is used rather than a hue difference because it is the space where a
  * unit of distance is roughly a just-noticeable difference, so the numbers
@@ -52,7 +54,7 @@ class TajweedPaletteTest {
                 val delta = distance(entries[index].second, entries[other].second)
                 assertTrue(
                     "${entries[index].first} and ${entries[other].first} are " +
-                        "${"%.3f".format(delta)} apart, under the 0.085 floor",
+                        "${"%.3f".format(delta)} apart, under the 0.095 floor",
                     delta >= PAIR_FLOOR,
                 )
             }
@@ -93,7 +95,7 @@ class TajweedPaletteTest {
 
     private companion object {
         /** The smallest OKLab distance two families may sit at. */
-        const val PAIR_FLOOR = 0.085
+        const val PAIR_FLOOR = 0.095
 
         /** The smallest distance a family may sit from the reading's own ink. */
         const val INK_FLOOR = 0.10
