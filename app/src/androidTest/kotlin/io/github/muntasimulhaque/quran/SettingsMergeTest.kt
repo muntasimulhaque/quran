@@ -66,10 +66,12 @@ class SettingsMergeTest {
         val title = compose.activity.getString(SettingsR.string.settings_show_translation_title)
         compose.onNodeWithText(title).assertIsDisplayed()
 
-        // The door beside the switch is named for what it opens.
+        // The door beside the switch is named for what it opens, and the
+        // row's spoken name now also carries the title and the subtitle so a
+        // screen reader does not lose the state under the switch.
         val door = compose.activity.getString(SettingsR.string.settings_open_translations)
-        compose.onNodeWithContentDescription(door).assertIsDisplayed()
-        compose.onNodeWithContentDescription(door).performClick()
+        compose.onNodeWithContentDescription(door, substring = true).assertIsDisplayed()
+        compose.onNodeWithContentDescription(door, substring = true).performClick()
 
         // And it lands on the translations themselves, not on another hub.
         compose.waitUntil(timeoutMillis = 15_000) {
