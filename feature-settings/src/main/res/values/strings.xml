@@ -107,7 +107,7 @@
 
     <string name="settings_title_tajweed">Tajweed rules</string>
     <string name="settings_open_tajweed">The rules</string>
-    <string name="settings_tajweed_intro">The printed mushaf marks the rules of recitation in color. These seven groups are the colors the reading draws when Tajweed colors are on; every rule keeps its own name.</string>
+    <string name="settings_tajweed_intro">The printed mushaf marks the rules of recitation in color. These seven groups are the colors the reading draws when Tajweed colors are on: each shows a word from the reading in its color, and every rule keeps its own name.</string>
     <string name="settings_tajweed_family_silent">Silent letters</string>
     <string name="settings_tajweed_family_ghunnah">Ghunnah</string>
     <string name="settings_tajweed_family_qalaqah">Qalqalah</string>

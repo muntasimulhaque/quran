@@ -1,6 +1,7 @@
 package io.github.muntasimulhaque.quran.ui.theme
 
 import androidx.compose.ui.graphics.Color
+import io.github.muntasimulhaque.quran.core.TajweedFamily
 import io.github.muntasimulhaque.quran.core.TajweedRule
 
 /**
@@ -73,30 +74,18 @@ data class TajweedColors(
     val idgham: Color,
     val madda: Color,
 ) {
-    fun of(rule: TajweedRule): Color = when (rule) {
-        TajweedRule.HAM_WASL,
-        TajweedRule.LAAM_SHAMSIYAH,
-        TajweedRule.SLNT,
-        -> silent
-        TajweedRule.GHUNNAH -> ghunnah
-        TajweedRule.QALAQAH -> qalaqah
-        TajweedRule.IKHAFA,
-        TajweedRule.IKHAFA_SHAFAWI,
-        -> ikhafa
-        TajweedRule.IQLAB -> iqlab
-        TajweedRule.IDGHAM_GHUNNAH,
-        TajweedRule.IDGHAM_WO_GHUNNAH,
-        TajweedRule.IDGHAM_SHAFAWI,
-        TajweedRule.IDGHAM_MUTAJANISAYN,
-        TajweedRule.IDGHAM_MUTAQARIBAYN,
-        -> idgham
-        TajweedRule.MADDA_NORMAL,
-        TajweedRule.MADDA_PERMISSIBLE,
-        TajweedRule.MADDA_OBLIGATORY_MONFASEL,
-        TajweedRule.MADDA_OBLIGATORY_MOTTASEL,
-        TajweedRule.MADDA_NECESSARY,
-        -> madda
+    /** The family a rule is drawn in. */
+    fun of(family: TajweedFamily): Color = when (family) {
+        TajweedFamily.SILENT -> silent
+        TajweedFamily.GHUNNAH -> ghunnah
+        TajweedFamily.QALAQAH -> qalaqah
+        TajweedFamily.IKHAFA -> ikhafa
+        TajweedFamily.IQLAB -> iqlab
+        TajweedFamily.IDGHAM -> idgham
+        TajweedFamily.MADDA -> madda
     }
+
+    fun of(rule: TajweedRule): Color = of(TajweedFamily.of(rule))
 }
 
 val PaperTajweed = TajweedColors(

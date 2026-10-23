@@ -21,6 +21,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.AppSettings
+import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.DownloadedSurah
 import io.github.muntasimulhaque.quran.data.Recitation
@@ -87,6 +88,7 @@ fun SettingsSheet(
     recitations: List<Recitation>,
     version: String,
     preview: suspend () -> ReadingRow?,
+    tajweedSample: suspend () -> Ayah?,
     downloadedSurahs: suspend (String) -> List<DownloadedSurah>,
     notificationsBlocked: () -> Boolean,
     exactGrantWithheld: () -> Boolean,
@@ -192,7 +194,10 @@ fun SettingsSheet(
                         packSetup = packSetup,
                         actions = actions,
                     )
-                    SettingsPage.Tajweed -> TajweedPage()
+                    SettingsPage.Tajweed -> TajweedPage(
+                        settings = settings,
+                        sample = tajweedSample,
+                    )
                     SettingsPage.About -> AboutPage(
                         packs = packs,
                         version = version,

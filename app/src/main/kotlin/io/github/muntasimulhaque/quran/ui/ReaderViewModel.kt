@@ -841,6 +841,20 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         withContext(Dispatchers.IO) { readingRow(SIZE_PREVIEW_AYAH) }
 
     /**
+     * The ayah the Tajweed legend samples, An-Nisa 4:11: its words carry
+     * all seven families, so the legend shows a real word for each of them.
+     *
+     * The reader never sees the ayah as a page, only seven of its words in
+     * the settings, each in its family color. It is read from the same
+     * content the reading draws, so the sample is audited text and audited
+     * code, and a word typed into the app can never stand in for it (owner
+     * decision, the legend session).
+     */
+    suspend fun tajweedSampleAyah(): Ayah? = withContext(Dispatchers.IO) {
+        library.database?.ayah(TAJWEED_SAMPLE_AYAH)
+    }
+
+    /**
      * The read-ahead copy of one surah's rows, when the library has not
      * turned over since they were read.
      *
@@ -1104,6 +1118,9 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
         /** Al-Ikhlas 112:1, the short ayah the size page previews. */
         const val SIZE_PREVIEW_AYAH = 6222
+
+        /** An-Nisa 4:11, the ayah whose words carry all seven families. */
+        const val TAJWEED_SAMPLE_AYAH = 504
 
         /**
          * How long a place waits before it is written down. A reader who is

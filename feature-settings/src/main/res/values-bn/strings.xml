@@ -107,7 +107,7 @@
 
     <string name="settings_title_tajweed">তাজবীদ নিয়ম</string>
     <string name="settings_open_tajweed">নিয়মগুলো</string>
-    <string name="settings_tajweed_intro">ছাপা মুসহাফে তিলাওয়াতের নিয়মগুলো রঙে চিহ্নিত থাকে। নিচের সাতটি দল এই পাঠে তাজবীদ রঙ চালু থাকলে যে রঙে আঁকা হয়; প্রতিটি নিয়মের নিজের নাম আছে।</string>
+    <string name="settings_tajweed_intro">ছাপা মুসহাফে তিলাওয়াতের নিয়মগুলো রঙে চিহ্নিত থাকে। নিচের সাতটি দল এই পাঠে তাজবীদ রঙ চালু থাকলে যে রঙে আঁকা হয়; প্রতিটি দলে পাঠের একটি শব্দ সেই রঙে দেখানো হয়েছে, আর প্রতিটি নিয়মের নিজের নাম আছে।</string>
     <string name="settings_tajweed_family_silent">নিরব হরফ</string>
     <string name="settings_tajweed_family_ghunnah">গুন্নাহ</string>
     <string name="settings_tajweed_family_qalaqah">কলকলাহ</string>

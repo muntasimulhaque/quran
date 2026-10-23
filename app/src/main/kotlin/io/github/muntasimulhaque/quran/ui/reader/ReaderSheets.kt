@@ -122,6 +122,7 @@ internal fun ReaderSheets(
             recitations = viewModel.recitations,
             version = BuildConfig.VERSION_NAME,
             preview = { viewModel.sizePreviewRow() },
+            tajweedSample = { viewModel.tajweedSampleAyah() },
             downloadedSurahs = { recitation -> viewModel.downloadedSurahs(recitation) },
             // Read where it is drawn, so the Daily page tells the truth about
             // the phone's own switch even when the reader comes back from the
