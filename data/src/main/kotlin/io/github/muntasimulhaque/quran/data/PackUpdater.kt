@@ -138,10 +138,11 @@ class PackUpdater(private val context: Context) {
         }
 
     /**
-     * Whether one pack is intact, hashing it only when the file's size or
-     * moment has changed since the last pass that read it. The remembered
-     * stamp is the proof of a read that already happened, not a promise
-     * about bytes the app has never seen.
+     * Whether one pack is intact, by its whole SHA-256. The old fast path
+     * trusted a file whose size and modification time were unchanged; a bit
+     * that flips without touching either would be trusted forever. The pass
+     * now hashes every installed pack once a day on a worker, which is the
+     * cost of the answer being true.
      */
     private fun rememberedIntact(
         pack: ContentPack,
@@ -151,16 +152,9 @@ class PackUpdater(private val context: Context) {
         val file = store.fileFor(pack.id)
         if (!file.isFile) return false
         if (pack.bytes > 0 && file.length() != pack.bytes) return false
-        val stamp = "${file.length()}:${file.lastModified()}"
         if (pack.sha256.isEmpty()) return true
-        if (preferences.getString(verifiedKey(pack.id), null) == stamp) return true
-        if (!verifier.intact(pack)) return false
-        preferences.edit().putString(verifiedKey(pack.id), stamp).apply()
-        return true
+        return verifier.intact(pack)
     }
-
-    /** The key one pack's last verified stamp is remembered under. */
-    private fun verifiedKey(id: String): String = "verified_$id"
 
     /** True only on a connected, unmetered network. */
     private fun unmetered(): Boolean {

@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 10.9 (versionCode 111)
+Version: 11.0 (versionCode 112)
 
 ## Listing
 
@@ -58,7 +58,8 @@ Quran, audited against the QUL QPC text, with Tanzil as the independent
 cross-reference. Translation by Saheeh International via QuranEnc. Tafsir
 Ibn Kathir and the recitations via the Quranic Universal Library by Tarteel.
 The app's About page names each source; the content manifest in the
-repository records each dataset's license. The source code is MIT.
+repository records each dataset's license, and the full font license text
+is in `licenses/OFL-1.1.txt`. The source code is MIT.
 
 ## Classification
 
@@ -96,7 +97,7 @@ for.
 - App icon: `icon-512.png`
 - Feature graphic: `feature-graphic-1024x500.png`
 - Phone screenshots: `screenshots/phone/` (1080 x 1920), eight of them
-- 7 inch tablet screenshots: `screenshots/tablet7/` (800 x 1280), eight of them
+- 7 inch tablet screenshots: `screenshots/tablet7/` (1200 x 1920), eight of them
 - 10 inch tablet screenshots: `screenshots/tablet10/` (2560 x 1800), eight of them
 
 The icon and the feature graphic are the app's own mark: an open book on its
@@ -126,7 +127,7 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 39983889267 on 10.9: all three legs green with eight frames each, every frame read. The reading, chrome, opening, Browse, ayah card, and tafsir carry the QPC text; the settings frames carry the 10.9 version line. The Tajweed page is not in the set, so its word samples are not among the frames.
+The set is being recaptured for 11.0; the final capture run and the version line will be recorded here from the green run. The reading, chrome, opening, Browse, ayah card, and tafsir carry the QPC text; the settings frames carry the 11.0 version line. The Tajweed page is not in the set, so its word samples are not among the frames.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
@@ -146,8 +147,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (10.9, 429 characters)
-10.9 makes the reading steadier. The reciter's wash stays on the last word, Arabic search finds words written with a hamza seat, surah introductions arrive with the core text, and a damaged or interrupted download recovers instead of sticking. The daily reminder wakes the phone, a double tap on Save no longer races, and TalkBack reads the translation and word meanings. The privacy policy and the store notes now match the app.
+## Release notes (11.0, 425 characters)
+11.0 makes the reading steadier. Back no longer cancels a download, a double tap cannot start two installs, and the player releases its connection when the reading closes. Arabic search finds the Prophet's blessing, Bangla tafsir headings no longer weld to the next word, and the daily check hashes every installed pack. The store pictures are recaptured, the font license text is included, and the 10.9 reading fixes remain.
 
 ## Before each release
 
@@ -187,7 +188,7 @@ something Play would reject.
 | `icon-512.png` | 512 x 512 | store icon |
 | `feature-graphic-1024x500.png` | 1024 x 500 | feature graphic |
 | `screenshots/phone/*.png` | 1080 x 1920 | phone screenshots (8) |
-| `screenshots/tablet7/*.png` | 800 x 1280 | 7 inch tablet screenshots (8) |
+| `screenshots/tablet7/*.png` | 1200 x 1920 | 7 inch tablet screenshots (8) |
 | `screenshots/tablet10/*.png` | 2560 x 1800 | 10 inch tablet screenshots (8) |
 
 

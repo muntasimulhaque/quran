@@ -179,6 +179,17 @@ fun ReaderScreen(
         putAwayRaised()
         touch++
     }
+    // A package that is still arriving is left to its own X. Back used to
+    // finish the Activity, which cancelled the ViewModel's download; the
+    // reader who pressed Back to leave the pill also threw away the transfer
+    // they had asked for. The handler consumes Back while a content pack or
+    // a recitation package is in flight, and does nothing else.
+    androidx.activity.compose.BackHandler(
+        enabled = selected == null && raised == RaisedAnswer.Nothing &&
+            (viewModel.packSetup != null || playback.downloadProgress != null),
+    ) {
+        touch++
+    }
 
     // Reading with the screen awake is part of reading, and listening with
     // the screen off is part of listening: the link between the two is the

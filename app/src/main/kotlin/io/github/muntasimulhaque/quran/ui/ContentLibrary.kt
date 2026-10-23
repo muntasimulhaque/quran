@@ -132,6 +132,9 @@ class ContentLibrary(
      */
     private var packJob: Job? = null
 
+    /** One install at a time: two taps must not fill one progress line. */
+    private val installGate = Mutex()
+
     /**
      * The one gate on opening and reopening the library. A language choice
      * can land while the first open is still reading, and both runs replace
@@ -335,12 +338,12 @@ class ContentLibrary(
      * it is here now. It asks nothing of the reader: the tap or the language
      * choice was the ask, and progress is shown while it runs.
      */
-    private suspend fun installNow(id: String): Boolean {
-        val pack = catalog.get(id) ?: return false
-        if (pack.installed) return true
+    private suspend fun installNow(id: String): Boolean = installGate.withLock {
+        val pack = catalog.get(id) ?: return@withLock false
+        if (pack.installed) return@withLock true
         // A pack already on its way is not asked for twice; a failed one is,
         // because the second attempt is the retry.
-        if (packSetup?.let { it.pack.id == id && !it.failed } == true) return false
+        if (packSetup?.let { it.pack.id == id && !it.failed } == true) return@withLock false
         val job = coroutineContext.job
         packJob = job
         packSetup = PackSetup(pack, progress = 0f)
@@ -354,7 +357,7 @@ class ContentLibrary(
             if (failure is CancellationException) throw failure
             false
         }
-        if (fromAssets) return true
+        if (fromAssets) return@withLock true
         val result = downloader.download(pack) { read, total ->
             // A chunk that lands after the reader's Cancel must not put the
             // line back. The job is cancelled before the line is cleared, so
@@ -366,9 +369,9 @@ class ContentLibrary(
                 )
             }
         }
-        if (result.isSuccess) return true
+        if (result.isSuccess) return@withLock true
         if (job.isActive) packSetup = PackSetup(pack, progress = null, failed = true)
-        return false
+        false
     }
 
     private suspend fun finishInstall(pack: ContentPack) {

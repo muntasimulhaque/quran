@@ -2,7 +2,9 @@ package io.github.muntasimulhaque.quran.data
 
 import android.content.Context
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
@@ -10,7 +12,10 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
 
-private val Context.playbackPositionStore: DataStore<Preferences> by preferencesDataStore("recitation")
+private val Context.playbackPositionStore: DataStore<Preferences> by preferencesDataStore(
+    name = "recitation",
+    corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
+)
 
 /** Where the recitation was when it stopped: who was reciting, which ayah, and how far into it. */
 data class PlaybackPosition(

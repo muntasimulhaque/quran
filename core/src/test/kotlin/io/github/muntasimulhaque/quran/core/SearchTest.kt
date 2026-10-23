@@ -176,6 +176,7 @@ class SearchTest {
         assertTrue(Search.expandedTerms(listOf("شيا")).contains("شييا"))
         assertTrue(Search.expandedTerms(listOf("مسولا")).contains("مسوولا"))
         assertTrue(Search.expandedTerms(listOf("انبوني")).contains("انبيوني"))
+        assertTrue(Search.expandedTerms(listOf("صلي")).contains("ﷺ"))
         val expression = requireNotNull(Search.matchExpression(listOf("شيا")))
         assertTrue(expression.contains("شيا*"))
         assertTrue(expression.contains("شييا*"))

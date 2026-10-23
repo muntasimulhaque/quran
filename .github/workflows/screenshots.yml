@@ -61,7 +61,7 @@ jobs:
           - name: phone
             profile: pixel_2        # 1080x1920
           - name: tablet7
-            profile: Nexus 7        # 1200x1920, 7 inch
+            profile: Nexus 7 2013   # 1200x1920, 7 inch
           - name: tablet10
             profile: pixel_c        # 2560x1800, 10 inch
     env:
@@ -244,6 +244,9 @@ jobs:
             # collide. (Single line: the runner feeds this to sh, which chokes
             # on multi-line compound commands.)
             for f in store-shots/*.png; do [ -e "$f" ] && mv "$f" "store-shots/${{ matrix.name }}_$(basename "$f")"; done ; true
+            # Play asks for 24-bit PNGs; the capture writes RGBA. ImageMagick
+            # is on the runner, and a missing binary leaves the frames alone.
+            if command -v mogrify >/dev/null 2>&1; then mogrify -alpha off -format png store-shots/*.png; fi
             echo "Collected:"
             ls -la store-shots
             # A frame must be the app's own surface, never a dialog over it: a

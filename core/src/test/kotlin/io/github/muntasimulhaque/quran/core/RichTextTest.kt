@@ -29,6 +29,14 @@ class RichTextTest {
     }
 
     @Test
+    fun `a closing heading and the next word do not weld`() {
+        val heading = RichText.parseHtml("<p><b>heading</b>text</p>").single().runs
+        assertEquals("heading text", heading.joinToString("") { it.text })
+        val hyphen = RichText.parseHtml("<p><b>Al</b>-Fatihah</p>").single().runs
+        assertEquals("Al-Fatihah", hyphen.joinToString("") { it.text })
+    }
+
+    @Test
     fun `a missing closing bold does not bleed into the next block`() {
         val blocks = RichText.parseHtml("<p><b>bold</p><p>plain</p>")
         assertTrue(blocks[0].runs.all { it.bold })

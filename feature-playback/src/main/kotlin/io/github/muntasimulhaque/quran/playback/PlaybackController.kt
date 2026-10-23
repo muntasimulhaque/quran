@@ -550,6 +550,18 @@ class PlaybackController(
         scope.launch { positionStore.clear() }
     }
 
+    /** The reading window is gone: let the controller go, not only its state. */
+    fun release() {
+        downloadJob?.cancel()
+        downloadJob = null
+        ticker?.cancel()
+        ticker = null
+        checkpoint?.cancel()
+        checkpoint = null
+        controller?.release()
+        controller = null
+    }
+
     private suspend fun connect(): MediaController {
         controller?.takeIf { it.isConnected }?.let { return it }
         controller = null

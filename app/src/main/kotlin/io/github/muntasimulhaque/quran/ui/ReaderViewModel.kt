@@ -1106,6 +1106,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         library.removeDownloads(recitation, surah)
 
     override fun onCleared() {
+        // The controller is a live connection to the playback service, and a
+        // finished reading has no more use for it. The service keeps playing
+        // if the reader left it playing; only this window's bind is released.
+        playback.release()
         // The reader's own databases are left to the process: a close here
         // can land while a save or a note is still being written on a worker
         // (cancelling the scope does not interrupt a blocking SQLite call),

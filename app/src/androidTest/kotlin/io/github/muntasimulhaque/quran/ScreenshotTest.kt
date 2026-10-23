@@ -1,5 +1,6 @@
 package io.github.muntasimulhaque.quran
 
+import android.Manifest
 import android.graphics.Bitmap
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asAndroidBitmap
@@ -33,6 +34,7 @@ import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import android.os.Build
 import androidx.test.core.app.ActivityScenario
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.PackStore
@@ -396,6 +398,22 @@ class ScreenshotTest {
      */
     private fun prepareTheLibrary() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        // The store frame should show a working daily reminder, not the
+        // phone's refusal. These grants are test setup, not app behavior.
+        if (Build.VERSION.SDK_INT >= 33) {
+            runCatching {
+                instrumentation.uiAutomation.grantRuntimePermission(
+                    context.packageName,
+                    Manifest.permission.POST_NOTIFICATIONS,
+                )
+            }
+        }
+        runCatching {
+            instrumentation.uiAutomation
+                .executeShellCommand("appops set ${context.packageName} SCHEDULE_EXACT_ALARM allow")
+                .close()
+        }
         val store = PackStore(context)
         store.install("translation-saheeh-en")
         store.install("words-en")
@@ -520,6 +538,9 @@ class ScreenshotTest {
         rule.waitUntil(timeoutMillis = 180_000) {
             rule.onAllNodes(matchCount).fetchSemanticsNodes().isNotEmpty()
         }
+        // Close the keyboard before the frame: its contact-suggestion strip
+        // is not the app, and the store should not show it.
+        back()
         captureScreen("04-search")
         back()
 

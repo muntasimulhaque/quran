@@ -2,7 +2,9 @@ package io.github.muntasimulhaque.quran.data
 
 import android.content.Context
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
@@ -16,7 +18,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
-private val Context.settingsStore: DataStore<Preferences> by preferencesDataStore("reading")
+private val Context.settingsStore: DataStore<Preferences> by preferencesDataStore(
+    name = "reading",
+    corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
+)
 
 /**
  * The pages the reader can read on. Light and Dark: one warm ground for

@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -65,10 +66,21 @@ class SavedStore(context: Context) {
 
     private val helper = Helper(context.applicationContext)
     private val writeMutex = Mutex()
+
+    /** A full disk or a damaged database is a message, never a crash. */
+    private suspend fun guarded(where: String, block: suspend () -> Unit) {
+        try {
+            block()
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: Exception) {
+            android.util.Log.e("SavedStore", where, error)
+        }
+    }
     private val _saved = MutableStateFlow<List<SavedAyah>>(emptyList())
     val saved: StateFlow<List<SavedAyah>> = _saved.asStateFlow()
 
-    suspend fun load() = withContext(Dispatchers.IO) { refresh() }
+    suspend fun load() = withContext(Dispatchers.IO) { guarded("load") { refresh() } }
 
     /**
      * The reader's own Save: the mark is made on an unmarked ayah, and taken
@@ -78,6 +90,7 @@ class SavedStore(context: Context) {
      * is a mark of their own to remove (owner report).
      */
     suspend fun toggle(ayahNumber: Int) = withContext(Dispatchers.IO) {
+        guarded("toggle") {
         writeMutex.withLock {
             val row = row(ayahNumber)
             when {
@@ -100,6 +113,7 @@ class SavedStore(context: Context) {
             }
             refresh()
         }
+        }
     }
 
     /**
@@ -115,6 +129,7 @@ class SavedStore(context: Context) {
      * does everything they wrote about it.
      */
     suspend fun setNote(ayahNumber: Int, note: String?) = withContext(Dispatchers.IO) {
+        guarded("setNote") {
         writeMutex.withLock {
         val clean = note?.trim()?.takeIf { it.isNotEmpty() }
         val row = row(ayahNumber)
@@ -158,6 +173,7 @@ class SavedStore(context: Context) {
         }
         refresh()
         }
+        }
     }
 
     /**
@@ -165,9 +181,11 @@ class SavedStore(context: Context) {
      * screen asks before this when a note exists.
      */
     suspend fun unsave(ayahNumber: Int) = withContext(Dispatchers.IO) {
-        writeMutex.withLock {
-            delete(ayahNumber)
-            refresh()
+        guarded("unsave") {
+            writeMutex.withLock {
+                delete(ayahNumber)
+                refresh()
+            }
         }
     }
 

@@ -359,6 +359,10 @@ object Search {
         val out = LinkedHashSet<String>()
         for (term in terms) {
             out += term
+            // The Prophet's blessing is one ligature in the tafsir and
+            // three words in a reader's query. The old index keeps the
+            // ligature; a query for صلى must still reach it.
+            if (term == "صلي") out += "ﷺ"
             if (term.any { it == 'ي' || it == 'و' }) {
                 for (index in 0..term.length) {
                     out += term.substring(0, index) + 'ي' + term.substring(index)

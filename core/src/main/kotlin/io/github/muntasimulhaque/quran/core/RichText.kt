@@ -136,9 +136,24 @@ object RichText {
         var bold = 0
         var italic = 0
         var quote = false
+        // A closing emphasis that lands against the next word without a
+        // space in the source is a heading welded to its sentence in the
+        // Bangla tafsir. The flag inserts the missing space only when the
+        // next character is a letter or digit, so Al-Fatihah keeps its
+        // hyphen and a closing parenthesis keeps its place.
+        var pendingSpace = false
 
         fun append(raw: String) {
             for (character in raw) {
+                if (pendingSpace) {
+                    val joinsPrevious = runs.isNotEmpty() || text.isNotEmpty()
+                    if (character.isLetterOrDigit() && joinsPrevious &&
+                        (text.isEmpty() || (text.last() != ' ' && text.last() != '\n'))
+                    ) {
+                        text.append(' ')
+                    }
+                    pendingSpace = false
+                }
                 when (character) {
                     ' ', '\t', '\r', '\n' -> {
                         if (!started) continue
@@ -203,6 +218,7 @@ object RichText {
                 tag == "/strong" || tag == "/b" -> {
                     flushText()
                     if (bold > 0) bold--
+                    pendingSpace = true
                 }
                 tag == "em" || tag == "i" -> {
                     flushText()
@@ -211,6 +227,7 @@ object RichText {
                 tag == "/em" || tag == "/i" -> {
                     flushText()
                     if (italic > 0) italic--
+                    pendingSpace = true
                 }
                 tag == "q" -> {
                     flushText()
@@ -219,6 +236,7 @@ object RichText {
                 tag == "/q" -> {
                     flushText()
                     quote = false
+                    pendingSpace = true
                 }
                 else -> Unit
             }
