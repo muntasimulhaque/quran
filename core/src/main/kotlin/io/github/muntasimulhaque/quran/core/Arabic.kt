@@ -175,6 +175,74 @@ object Arabic {
     }
 
     /**
+     * The ayah as portable text: the print's own words, folded to the letters
+     * and marks a reader's ordinary Arabic font can draw, for the surfaces
+     * that cannot use the Hafs face.
+     *
+     * The reading draws the QPC print exactly, in the face the print was set
+     * in. The share text and the daily reminder leave the app for another
+     * font, and a screen reader hands the reading to a speech engine. Neither
+     * can be assumed to draw the print's encoding as the print meant:
+     *
+     * - `U+066E`, the print's dotless alef-maksura base, becomes `U+0649`,
+     *   so a text-to-speech engine reads the long vowel and not a beh.
+     * - `U+06E5` and `U+06E6`, the small waw and small yeh, are dropped; a
+     *   reader spells the word without them, and the search already does.
+     * - `U+0640`, the print's madda kashida, and `U+200C`, its separator
+     *   before a pause mark, are dropped.
+     * - the page's signs are dropped: the rub el hizb (`U+06DE`), the waqf
+     *   signs (`U+06D6` to `U+06DC`), the sajdah (`U+06E9`), and the empty
+     *   centre stops; they are furniture of the printed page, not the
+     *   verse's words, and another font draws several as a floating mark.
+     * - the print's tajweed marks (`U+06D9`, `U+06E2`, `U+06E7`, `U+06E8`,
+     *   `U+06E3`, and `U+06ED`) are dropped; they name a rule the receiving
+     *   app does not know.
+     * - the print's sukun (`U+06E1`) becomes the standard sukun (`U+0652`),
+     *   which every Arabic font draws and every speech engine reads.
+     *
+     * Everything else stays, above all the harakat, the shadda, the tanween,
+     * the madda, the superscript alef, and the hamzas, because those are the
+     * pronunciation. This is not an edit of the text: the reading's bytes
+     * are untouched, and every drop is a format or annotation character,
+     * never a letter or a vowel (owner decision, the palette session).
+     */
+    fun portableText(input: String): String {
+        val nfc = Normalizer.normalize(input, Normalizer.Form.NFC)
+        val out = StringBuilder(nfc.length)
+        var pendingSpace = false
+        var i = 0
+        while (i < nfc.length) {
+            val cp = nfc.codePointAt(i)
+            i += Character.charCount(cp)
+            if (Character.isWhitespace(cp)) {
+                pendingSpace = out.isNotEmpty()
+                continue
+            }
+            if (cp == TATWEEL || cp == 0x200C || cp == 0x06E5 || cp == 0x06E6) continue
+            if (isPortableDropped(cp)) continue
+            if (pendingSpace) {
+                out.append(' ')
+                pendingSpace = false
+            }
+            val mapped = when (cp) {
+                0x066E -> 0x0649 // the print's dotless alef-maksura base
+                0x06E1 -> 0x0652 // the print's sukun, as the standard one
+                else -> cp
+            }
+            out.appendCodePoint(mapped)
+        }
+        return out.toString().trim()
+    }
+
+    /** The print's page and annotation signs, which the export does not carry. */
+    private fun isPortableDropped(codePoint: Int): Boolean = when (codePoint) {
+        in 0x06D6..0x06E0 -> true // waqf signs, ayah end, rub el hizb, zeros
+        0x06E2, 0x06E3 -> true // small high meem and small low seen
+        in 0x06E7..0x06ED -> true // small high yeh and noon, sajdah, stops
+        else -> false
+    }
+
+    /**
      * The ayah's own number in Arabic-Indic digits, "\u0661" for the first
      * verse. It is what the reading appends to close a verse: the KFGQPC Hafs
      * face draws the print's own medallion around a run of these digits, so

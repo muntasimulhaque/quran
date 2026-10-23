@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import io.github.muntasimulhaque.quran.core.Arabic
 import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.core.JuzIndex
 import io.github.muntasimulhaque.quran.core.RichText
@@ -432,9 +433,12 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     private var placeJob: Job? = null
 
     /**
-     * The ayah, its translation, and its reference, for copy and share. The
+     * The ayah, its translation, and its reference, for the share text. The
      * shape and the direction mark are `core/ShareText`, where the reason for
-     * the mark lives and its test pins it.
+     * the mark lives and its test pins it. The Arabic is the portable form:
+     * the message leaves the app for another font, which cannot be assumed to
+     * draw the print's encoding (owner decision, the palette session). The
+     * share card's image still draws the print itself.
      */
     suspend fun ayahShareText(ayah: Ayah): String {
         val translation = withContext(Dispatchers.IO) {
@@ -443,7 +447,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         val surahName = library.surahs.firstOrNull { it.number == ayah.surah }?.nameSimple
             ?: getApplication<Application>().getString(R.string.surah_fallback_name, ayah.surah)
         return ShareText.ayah(
-            arabic = ayah.text,
+            arabic = Arabic.portableText(ayah.text),
             translation = translation
                 ?.takeIf { it.isNotBlank() }
                 ?.let { RichText.plain(it) },

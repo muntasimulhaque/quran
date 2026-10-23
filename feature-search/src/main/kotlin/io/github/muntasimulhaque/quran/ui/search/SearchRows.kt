@@ -91,6 +91,10 @@ internal fun AyahRow(
             Search.matchRanges(arabicText, terms, arabic = true)
         }
         val wash = MaterialTheme.colorScheme.primary.copy(alpha = Wash.Match)
+        // The rule colors stay on the reading: a result list is a scan
+        // surface, and the matched line's wash is not a reading ground. The
+        // result line is ink, on purpose (owner decision, the palette
+        // session).
         when (val line = arabicLineFor(hit)) {
             SearchArabicLine.Ayah -> {
                 Spacer(Modifier.height(8.dp))

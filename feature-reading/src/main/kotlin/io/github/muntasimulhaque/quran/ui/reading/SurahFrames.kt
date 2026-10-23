@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
@@ -162,7 +163,8 @@ internal fun SurahOpening(
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = Space.Section),
+                    .padding(top = Space.Section)
+                    .semantics { contentDescription = Arabic.portableText(line.text) },
             )
         }
         // The introduction is drawn only once the reader opens it: closed,

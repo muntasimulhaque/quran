@@ -1,6 +1,8 @@
 package io.github.muntasimulhaque.quran.core
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ArabicTest {
@@ -59,6 +61,48 @@ class ArabicTest {
     @Test
     fun `dotted circle is an artifact and never survives`() {
         assertEquals("ياكلوا", Arabic.skeleton("يَأْكُلُواْ \u25CC"))
+    }
+
+    @Test
+    fun `the portable form folds the print to a plain Arabic face`() {
+        // U+066E becomes alef maksura, the small waw and yeh are dropped, the
+        // kashida and the print's separator are dropped, and the print's sukun
+        // becomes the standard one. Everything a reader hears stays.
+        assertEquals("فَسَوَّىٰهُنَّ", Arabic.portableText("فَسَوَّٮٰهُنَّ"))
+        assertEquals("بِهِ", Arabic.portableText("بِهِۦ"))
+        assertEquals("دَاوُدَ", Arabic.portableText("دَاوُۥدَ"))
+        assertEquals("ٱلرَّحْمَٰنِ", Arabic.portableText("ٱلرَّحۡمَـٰنِ"))
+        assertEquals("بِسْمِ", Arabic.portableText("بِسۡمِ"))
+        assertEquals("يَسْجُدُونَ", Arabic.portableText("يَسۡجُدُونَ ۩"))
+        assertEquals("يَسْجُدُونَ وَمَن", Arabic.portableText("يَسۡجُدُونَ ۩ وَمَن"))
+    }
+
+    @Test
+    fun `the portable form drops the print's page and annotation signs`() {
+        val source = "۞إِنَّ ٱللَّهَ لَا يَسۡتَحۡىِۦٓ أَن يَضۡرِبَ مَثَلاً مَّا بَعُوضَةً\u200cۚ " +
+            "فَسَوَّٮٰهُنَّ سَبۡعَ سَمَـٰوٰتٍ دَاوُۥدَ ٱلرَّحۡمَـٰنِ يَسۡجُدُونَ ۩"
+        val portable = Arabic.portableText(source)
+        for (codePoint in listOf(
+            0x0640, // the print's kashida
+            0x066E, // the print's dotless alef-maksura base
+            0x06D6, // a waqf sign
+            0x06D9, // a tajweed ligature
+            0x06DA, // the small high jeem pause sign
+            0x06DE, // the rub el hizb
+            0x06E2, // a tajweed meem
+            0x06E5, // the small waw
+            0x06E6, // the small yeh
+            0x06E9, // the sajdah
+            0x06ED, // the small low meem
+            0x200C, // the print's separator
+        )) {
+            assertFalse(
+                "U+${codePoint.toString(16).uppercase()} survived the portable form",
+                portable.indexOf(codePoint.toChar()) >= 0,
+            )
+        }
+        assertTrue("the harakat must stay", portable.indexOf('\u064E') >= 0)
+        assertTrue("the sukun must stay as the standard one", portable.indexOf('\u0652') >= 0)
     }
 
     @Test

@@ -15,6 +15,12 @@ import org.junit.Test
  * because the quiet words of a label travel with the surfaces they sit on.
  * A palette edit that sinks a pair fails here, on the machine, rather than
  * on a reader's eyes.
+ *
+ * The search result's matched line is the one ground the families are not
+ * measured on: that line is drawn in the reading's ink and not in the rule
+ * colors, because a result list is a scan surface and the match wash is not
+ * a reading ground (owner decision, the palette session). The ink's own
+ * pair on that wash is measured here, so the decision stays written.
  */
 class ContrastTest {
 
@@ -47,6 +53,10 @@ class ContrastTest {
             LightPage.highlight,
             LightPage.highlight.alpha * 0.55f,
         )
+        // The search result's match wash: the result line is ink, not a
+        // family, for the reason the class notes. The sheet is the ground
+        // the wash is laid over.
+        assertReadable(PaperInk, blend(LightScheme.primary, PaperSurface, Wash.Match))
     }
 
     @Test
@@ -80,6 +90,7 @@ class ContrastTest {
             DarkPage.highlight,
             DarkPage.highlight.alpha * 0.55f,
         )
+        assertReadable(NightInk, blend(DarkScheme.primary, NightSurface, Wash.Match))
     }
 
     /**

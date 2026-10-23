@@ -13,12 +13,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
+import io.github.muntasimulhaque.quran.core.Arabic
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
@@ -136,6 +139,12 @@ private fun WordPair(
             ),
             textAlign = TextAlign.Center,
             maxLines = 1,
+            // The gloss is heard in the portable form, the same words a
+            // speech engine can pronounce (owner decision, the palette
+            // session).
+            modifier = Modifier.semantics {
+                contentDescription = Arabic.portableText(meaning.word)
+            },
         )
         Text(
             text = meaning.meaning.orEmpty(),

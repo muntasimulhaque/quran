@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import io.github.muntasimulhaque.quran.MainActivity
 import io.github.muntasimulhaque.quran.R
+import io.github.muntasimulhaque.quran.core.Arabic
 import io.github.muntasimulhaque.quran.core.DailyAyah
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.data.ContentDatabase
@@ -81,7 +82,12 @@ internal data class DailyAyahContent(
                     ayahInSurah = ayah.ayah,
                     surah = ayah.surah,
                     surahName = name,
-                    arabic = ayah.text,
+                    // The reminder is drawn by the system's notification font,
+                    // never the Hafs face, so it takes the portable form: the
+                    // print's kashida and small letters would be drawn by a
+                    // face that was not set for them (owner decision, the
+                    // palette session).
+                    arabic = Arabic.portableText(ayah.text),
                     translation = firstTranslation(database, settings.translationPacks, wanted),
                 )
             } finally {

@@ -63,10 +63,10 @@
 
     <string name="credit_page_fonts">KFGQPC হাফস উসমানি লিপি</string>
     <string name="credit_page_fonts_by">বাদশাহ ফাহদ গ্লোরিয়াস কুরআন প্রিন্টিং কমপ্লেক্স, অপরিবর্তিত</string>
-    <string name="credit_page_fonts_use">QPC হাফস ইউনিকোড লেখা</string>
+    <string name="credit_page_fonts_use">কুরআনের লেখা, বিসমিল্লাহ, শব্দে শব্দে সহায়িকা এবং আয়াতের মেডেলিয়ন</string>
     <string name="credit_amiri">আমিরি কুরআন</string>
     <string name="credit_amiri_by">খালেদ হোসনী, SIL ওপেন ফন্ট লাইসেন্স 1.1</string>
-    <string name="credit_amiri_use">অলংকরণ ও আরবি</string>
+    <string name="credit_amiri_use">অ্যাপের নাম, সূরার নাম এবং তাফসীরের আরবি</string>
     <string name="credit_literata">লিটারাটা</string>
     <string name="credit_literata_by">টাইপটুগেদার, SIL ওপেন ফন্ট লাইসেন্স 1.1</string>
     <string name="credit_literata_use">অনুবাদ ও তাফসীর</string>

@@ -192,6 +192,11 @@ internal fun AyahBlock(
             // reader's place never moves when the colors do (owner decision,
             // the QPC rendering audit).
             val tajweed = row.ayah.tajweed
+            // A screen reader hears the portable form, not the print's
+            // encoding: the same words, with the dotless base and the small
+            // letters folded to what a speech engine can pronounce (owner
+            // decision, the palette session). The visible line is untouched.
+            val spokenAyah = remember(row.ayah.text) { Arabic.portableText(row.ayah.text) }
             val arabicLine = remember(
                 row.ayah.number,
                 playing,
@@ -214,6 +219,7 @@ internal fun AyahBlock(
                 onTextLayout = { textLayout = it },
                 modifier = Modifier
                     .fillMaxWidth()
+                    .semantics { contentDescription = spokenAyah }
                     .drawWithContent {
                         val range = arabicLine.washRange
                         val layout = textLayout

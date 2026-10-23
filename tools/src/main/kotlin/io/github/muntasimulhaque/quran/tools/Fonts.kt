@@ -15,10 +15,9 @@ import java.util.TreeMap
  * - every non-digit codepoint of the canonical Unicode text is drawable by
  *   the KFGQPC Uthmanic Hafs font, which draws the reading's own words, so
  *   the reading can never show tofu or a missing word;
- * - the reading's own furniture (ayah numbers, the page number, the juz, and
- *   each surah's name) is drawable by the face that draws it,
- *   which is the ornament, because that furniture is drawn here rather than
- *   carried in a font;
+ * - the reading's own furniture is drawable by the face that draws it: the
+ *   Hafs digits behind every ayah's roundel, and the Amiri surah names,
+ *   because that furniture is drawn here rather than carried in a font;
  * - every run of reading text is drawable by the font the app draws it with,
  *   with a script the app hands to the platform allowed only by name here.
  *
@@ -107,9 +106,10 @@ class Fonts(private val root: File) {
 
     /**
      * The page's furniture, drawn here rather than carried in a font: the Hafs
-     * face draws every ayah's printed roundel number, and the Amiri face draws
-     * the juz and each surah's band. A digit or a name either face cannot draw
-     * would be a hole in the printed page's furniture.
+     * face draws every ayah's number from its Arabic-Indic digits (the font's
+     * required ligature turns the run into the printed roundel), and the Amiri
+     * face draws each surah's name in the band. A digit or a name either face
+     * cannot draw would be a hole in the printed page's furniture.
      */
     private fun checkPageFurniture() {
         val amiri = loadFontFile(File(root, "content-assets/src/main/res/font/amiri_quran.ttf"))
@@ -126,14 +126,13 @@ class Fonts(private val root: File) {
             }
         }
         fun probeAmiri(text: String, what: String) = probe(amiri, text, what)
-        // Arabic-Indic digits: every ayah's number, drawn in the Hafs face,
-        // and the page and juz labels, drawn in the ornament face.
+        // Arabic-Indic digits: every ayah's number, drawn in the Hafs face.
+        // The page and juz labels are interface words in the reader's
+        // language, so they are not a font's furniture; the medallion is.
         for (ch in "٠١٢٣٤٥٦٧٨٩") {
             probe(hafs, ch.toString(), "ayah number")
-            probeAmiri(ch.toString(), "page or juz number")
         }
-        // The juz's own label and the surahs' names, drawn in the band.
-        probeAmiri("الجزء", "juz")
+        // The surahs' names, drawn in the band.
         val packs = File(root, "content/packs")
         if (packs.isDirectory) {
             openSqlite(File(packs, "core.db")).use { connection ->
@@ -143,7 +142,7 @@ class Fonts(private val root: File) {
             }
         }
         if (uncovered.isEmpty()) {
-            println("fonts: page furniture checked: digits, juz, surah bands")
+            println("fonts: page furniture checked: digits, surah bands")
         }
     }
 

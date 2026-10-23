@@ -18,13 +18,14 @@ import io.github.muntasimulhaque.quran.content.R
 
 /**
  * The voices of the app. Arabic is the Book's own: the KFGQPC Hafs face draws
- * the canonical text in the reading, with Amiri for Arabic prose and
- * ornaments. Everything else follows the reader's one language choice: the
- * interface speaks Inter in English and Noto Sans Bengali in Bangla, and the
- * reading (translation, tafsir, word meanings, notes) is Literata in English
- * and Noto Serif Bengali in Bangla. A Bangla sentence never falls through to
- * the phone's default Bengali font, because the whole voice is swapped, not
- * one glyph at a time.
+ * the canonical text in the reading, the basmalah, the word-by-word aid, and
+ * the ayah's own medallion; Amiri draws the masthead, the surah names, and the
+ * Arabic of the tafsir. Everything else follows the reader's one language
+ * choice: the interface speaks Inter in English and Noto Sans Bengali in
+ * Bangla, and the reading (translation, tafsir, word meanings, notes) is
+ * Literata in English and Noto Serif Bengali in Bangla. A Bangla sentence
+ * never falls through to the phone's default Bengali font, because the whole
+ * voice is swapped, not one glyph at a time.
  */
 
 /** The interface voice: quiet, exact, never decorative. */
@@ -71,14 +72,15 @@ val NotoSerifBengali = FontFamily(
     Font(R.font.noto_serif_bengali, FontWeight.SemiBold),
 )
 
-/** The display voice of the ornaments. */
+/** The display voice: the masthead, the surah names, and the tafsir's Arabic. */
 val Amiri = FontFamily(Font(R.font.amiri_quran))
 
 /**
  * The reading voice of the Quran's own text: the KFGQPC Hafs face, the same
- * one the reading and the word by word aid are drawn in. It is a font
- * file rather than a resource, so it is loaded from the assets; use
- * [rememberHafs] to get the family on a surface that shows an ayah.
+ * one the reading, the basmalah, the word by word aid, and the ayah's own
+ * medallion are drawn in. It is a font file rather than a resource, so it is
+ * loaded from the assets; use [rememberHafs] to get the family on a surface
+ * that shows an ayah.
  */
 @Composable
 fun rememberHafs(): FontFamily {
