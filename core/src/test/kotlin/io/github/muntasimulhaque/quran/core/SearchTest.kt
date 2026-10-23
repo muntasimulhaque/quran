@@ -177,6 +177,23 @@ class SearchTest {
     }
 
     @Test
+    fun `the index shape drops the page's signs`() {
+        assertEquals("قل", Search.normalizeForIndex("\u06DEقُلۡ"))
+        assertEquals("يسجدون", Search.normalizeForIndex("يَسۡجُدُونَ ۩"))
+    }
+
+    @Test
+    fun `an arabic match steps over the page's signs`() {
+        // The rub el hizb is glued to the word, so the highlight must begin
+        // on the word's own alef and not on the sign.
+        val text = "\u06DEقُلۡ أَعُوذُ"
+        val ranges = Search.matchRanges(text, listOf("قل"), arabic = true)
+        assertEquals(1, ranges.size)
+        assertEquals(1, ranges.first().first)
+        assertEquals("قُلۡ", text.substring(ranges.first().first, ranges.first().last + 1))
+    }
+
+    @Test
     fun `english matches ignore transliteration marks`() {
         val text = "In the name of All\u0101h, the Entirely Merciful"
         val ranges = Search.matchRanges(text, listOf("allah"), arabic = false)

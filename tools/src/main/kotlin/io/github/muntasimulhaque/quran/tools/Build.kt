@@ -107,7 +107,7 @@ class Build(private val root: File) {
             connection.createStatement().use { it.execute("VACUUM") }
         }
 
-        val report = report(database, words, ayahNumbers, translation.size)
+        val report = report(database, manifest.contentVersion, words, ayahNumbers, translation.size)
         File(root, "content/build-report.json").writeText(report)
         if (problems.isEmpty()) {
             println("build: ${words.size} words, ${ayahNumbers.size} ayahs, ${translation.size} translations")
@@ -935,6 +935,7 @@ class Build(private val root: File) {
 
     private fun report(
         database: File,
+        contentVersion: String,
         words: List<Word>,
         ayahs: Map<String, Int>,
         translations: Int,
@@ -942,7 +943,7 @@ class Build(private val root: File) {
         val markers = words.count { it.marker }
         return buildString {
             appendLine("{")
-            appendLine("  \"contentVersion\": \"1.2.0\",")
+            appendLine("  \"contentVersion\": \"$contentVersion\",")
             appendLine("  \"ayahs\": ${ayahs.size},")
             appendLine("  \"words\": ${words.size - markers},")
             appendLine("  \"markers\": $markers,")

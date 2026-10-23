@@ -63,8 +63,10 @@ class Packs(private val root: File) {
             // The QPC switch replaced the core's content; the version moves
             // so a held core is replaced rather than kept (owner decision, this
             // session). Version 3 carries the four word merges and the works-
-            // with-the-word-list positions.
-            version = "3",
+            // with-the-word-list positions. Version 4 drops the print's page
+            // signs from the search index, so the first word under the rub el
+            // hizb is found by a reader typing it (owner report, this session).
+            version = "4",
             shipped = true,
             ayahs = 6236,
         ),

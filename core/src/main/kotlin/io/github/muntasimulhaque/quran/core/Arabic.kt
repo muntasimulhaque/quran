@@ -100,6 +100,28 @@ object Arabic {
      */
     fun isSearchIgnored(codePoint: Int): Boolean = codePoint == 0x06E5 || codePoint == 0x06E6
 
+    /**
+     * The print's page signs: the end of the ayah (`U+06DD`), the rub el hizb
+     * (`U+06DE`), and the sajdah (`U+06E9`). They stand beside a word and are
+     * not part of it. The print glues the rub el hizb to the first word of
+     * its ayah, so an index that keeps it makes that word unreachable through
+     * the full text index, whose tokenizer keeps every non-ASCII code point
+     * inside its token: a reader typing "قل" does not find "۞قُلۡ"
+     * (owner report, this session). They are not in [STRIPPED_RANGES],
+     * because [isMark] means a part of a word, and these stand beside one.
+     */
+    fun isPageSign(codePoint: Int): Boolean =
+        codePoint == 0x06DD || codePoint == 0x06DE || codePoint == 0x06E9
+
+    /**
+     * True when the search shape does not carry [codePoint] at all: a mark, a
+     * format character, one of the print's small letters, or a page sign.
+     * [normalizeForSearch] and `Search.matchRanges` both read this one rule,
+     * so a row and the highlight drawn from it cannot disagree.
+     */
+    fun isSkippedForSearch(codePoint: Int): Boolean =
+        isStripped(codePoint) || isSearchIgnored(codePoint) || isPageSign(codePoint)
+
     private fun fold(codePoint: Int): Int = FOLDED_CODEPOINTS[codePoint] ?: codePoint
 
     private fun searchFold(codePoint: Int): Int =
@@ -112,9 +134,9 @@ object Arabic {
     }
 
     /**
-     * NFC, marks removed, letter forms folded, Arabic-Indic digits made ASCII,
-     * whitespace collapsed to single spaces and trimmed. Suitable for indexing
-     * and for normalizing a query.
+     * NFC, marks and the print's page signs removed, letter forms folded,
+     * Arabic-Indic digits made ASCII, whitespace collapsed to single spaces
+     * and trimmed. Suitable for indexing and for normalizing a query.
      */
     fun normalizeForSearch(input: String): String {
         val nfc = Normalizer.normalize(input, Normalizer.Form.NFC)
@@ -124,7 +146,7 @@ object Arabic {
         while (i < nfc.length) {
             val cp = nfc.codePointAt(i)
             i += Character.charCount(cp)
-            if (isStripped(cp) || isSearchIgnored(cp)) continue
+            if (isSkippedForSearch(cp)) continue
             if (Character.isWhitespace(cp)) {
                 pendingSpace = out.isNotEmpty()
                 continue

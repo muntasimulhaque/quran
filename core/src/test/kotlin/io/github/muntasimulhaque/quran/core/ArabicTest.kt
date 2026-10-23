@@ -40,6 +40,16 @@ class ArabicTest {
     }
 
     @Test
+    fun `the page's signs are furniture, not words`() {
+        // The print glues the rub el hizb to the first word of its ayah, and
+        // sets the sajdah beside the last one. A reader types neither, so the
+        // search shape drops both without turning the glue into a space.
+        assertEquals("قل", Arabic.normalizeForSearch("\u06DEقُلۡ"))
+        assertEquals("يسجدون", Arabic.normalizeForSearch("يَسۡجُدُونَ ۩"))
+        assertEquals("يسجدون ومن", Arabic.normalizeForSearch("يَسۡجُدُونَ ۩ وَمَن"))
+    }
+
+    @Test
     fun `the audit skeleton keeps the QPC print's own letters`() {
         // The audit reports the print's spelling against Tanzil, so the
         // skeleton must not hide the letters the print chose.

@@ -11,13 +11,13 @@
             "creditBn": "QPC হাফস, শব্দে শব্দে, তাজবীদসহ; QUL-এর QPC লেখার সাথে যাচাইকৃত",
             "license": "QPC Hafs text and tajweed annotation, distributed via QUL; free for Islamic use · KFGQPC fonts: use, copy and distribute unmodified · Distributed via QUL · Creative Commons Attribution 3.0, no changes, credit and link tanzil.net",
             "licenseBn": "QPC হাফস লেখা ও তাজবীদ নির্দেশনা, QUL-এর মাধ্যমে বিতরণ; ইসলামী ব্যবহারের জন্য অবাধ · KFGQPC ফন্ট: অপরিবর্তিত অবস্থায় ব্যবহার, কপি ও বিতরণ · QUL-এর মাধ্যমে বিতরণ · Creative Commons Attribution 3.0, কোনো পরিবর্তন নয়, কৃতিত্ব ও tanzil.net-এর লিঙ্ক দিন",
-            "version": "3",
+            "version": "4",
             "shipped": true,
             "ayahs": 6236,
-            "bytes": 8970240,
-            "sha256": "3c9f7733c16cc03738fab7012447ec2c3bb3abda97dd328b08d7883d462f04b2",
-            "tag": "pack-core-3c9f7733",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-3c9f7733/core.db"
+            "bytes": 8994816,
+            "sha256": "907c8b5368dc2ba30e4a175c4dc7e4c707c6c227d26667404b242624159bc5d0",
+            "tag": "pack-core-907c8b53",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-907c8b53/core.db"
         },
         {
             "id": "translation-saheeh-en",
@@ -49,9 +49,9 @@
             "shipped": false,
             "ayahs": 6236,
             "bytes": 29523968,
-            "sha256": "954e7737854969b07d96ea9aa0b3885b371b0f8cdb13e9825216b12557c729f6",
-            "tag": "pack-tafsir-ibn-kathir-en-954e7737",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-tafsir-ibn-kathir-en-954e7737/tafsir-ibn-kathir-en.db"
+            "sha256": "927ae1e6d46eae743bda8aba74c97b34c4b70fe992cb370a7ce75fe0ef497a34",
+            "tag": "pack-tafsir-ibn-kathir-en-927ae1e6",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-tafsir-ibn-kathir-en-927ae1e6/tafsir-ibn-kathir-en.db"
         },
         {
             "id": "translation-taisirul-quran-bn",

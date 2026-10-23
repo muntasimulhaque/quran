@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 10.6 (versionCode 108)
+Version: 10.7 (versionCode 109)
 
 ## Listing
 
@@ -24,9 +24,10 @@ readers get the Taisirul Quran translation, Ibn Kathir in Bangla, Bangla
 word meanings, and the surah names in Bengali script, and the whole interface
 can be read in English or Bangla.
 
-Search reads Arabic without diacritics, and in the letters a reader types
+Search reads Arabic without diacritics, in the letters a reader types
 even where the print writes its small waw, small yeh, or dotless alef-maksura
-base. English is read without accents, so typing allah finds Allah and isa
+base, and past the page signs the print glues to a word. English is read
+without accents, so typing allah finds Allah and isa
 finds Isa. Save any ayah, add your own
 note to it, and find everything again under Browse: one list of the ayahs
 you kept, with your note under the ayah it was written on, and a Last read

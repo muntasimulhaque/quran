@@ -71,8 +71,10 @@ class SearchCheck(private val root: File) {
         }
 
         openSqlite(database).use { connection -> auditStandardSpellings(connection) }
+        auditCoreIndex()
         auditNonAscii(nonAscii)
-        auditArabicColumn()
+        auditArabicColumns()
+        auditPageSigns()
         auditScriptRoundTrip("content/quran.db", "bn")
         auditPackIndex()
         auditPlainWords(translations)
@@ -81,7 +83,7 @@ class SearchCheck(private val root: File) {
         if (problems.isEmpty()) {
             println("search: $arabicChecked arabic round trips passed")
             println("search: ${nonAscii.size} distinct non-ASCII translation codepoints fold cleanly")
-            println("search: the Quran's indexed text holds Arabic only")
+            println("search: the Quran's indexed text is words only")
             println("search: plain english words match")
             println("search: ${readableChecked} readable excerpts carry no markup")
             return 0
@@ -125,6 +127,51 @@ class SearchCheck(private val root: File) {
         println("search: $checked standard spellings passed")
     }
 
+    /**
+     * The ayah index must find an ayah by the word a reader types, even when
+     * the print stands a page sign beside that word. The rub el hizb is glued
+     * to the first word of 199 ayahs; the first four probes are those words.
+     * The sajdah probes prove the sign at the end of an ayah disturbs nothing.
+     * A probe goes through [Search.parse] and [Search.matchExpression], the
+     * same two calls the app makes, and asks the core pack's own index.
+     */
+    private fun auditCoreIndex() {
+        val file = File(root, "content/packs/core.db")
+        if (!file.isFile) {
+            println("search: content/packs/core.db is missing; the ayah index probes are skipped")
+            return
+        }
+        openSqlite(file).use { connection ->
+            val references = listOf(
+                Triple(3, 15, "قل"),
+                Triple(2, 177, "ليس"),
+                Triple(36, 60, "الم"),
+                Triple(2, 106, "ما"),
+                Triple(32, 15, "يستكبرون"),
+                Triple(53, 62, "فاسجدوا"),
+            )
+            var checked = 0
+            var passed = 0
+            for ((surah, ayah, typed) in references) {
+                val query = Search.parse(typed) ?: continue
+                val expression = Search.matchExpression(query.terms) ?: continue
+                checked++
+                val found = exists(
+                    connection,
+                    "SELECT 1 FROM ayah WHERE surah = ? AND ayah = ? AND rowid IN " +
+                        "(SELECT docid FROM ayah_fts WHERE ayah_fts MATCH ?)",
+                    listOf(surah.toString(), ayah.toString(), expression),
+                )
+                if (found) {
+                    passed++
+                } else {
+                    problems += "the ayah index missed $surah:$ayah for \"$typed\""
+                }
+            }
+            println("search: $passed of $checked ayah index probes passed")
+        }
+    }
+
     /** Nothing in the translation may fold away or stay non-ASCII and unsupported. */
     private fun auditNonAscii(nonAscii: TreeMap<Int, Int>) {
         for ((codepoint, count) in nonAscii) {
@@ -145,7 +192,8 @@ class SearchCheck(private val root: File) {
     }
 
     /**
-     * The Quran's own indexed column holds nothing but Arabic.
+     * The Quran's own indexed columns hold nothing but Arabic, and that
+     * Arabic is already in the search shape.
      *
      * A query that is not Arabic is made of Latin letters and digits alone
      * (`Search.parse`), so a Latin query cannot match a row of a column that
@@ -153,17 +201,64 @@ class SearchCheck(private val root: File) {
      * keystroke (owner report). This gate is where that fact about the
      * content is held rather than assumed: a Latin letter or a digit in this
      * column would make the app's own short cut quietly wrong, and the only
-     * place it can be caught is before the content is committed.
+     * place it can be caught is before the content is committed. The same
+     * pass proves the column is already folded, so a mark, a page sign, or a
+     * letter form the query would fold cannot hide inside a token.
      */
-    private fun auditArabicColumn() {
+    private fun auditArabicColumns() {
         openSqlite(File(root, "content/quran.db")).use { connection ->
-            connection.each("SELECT number, text_search FROM ayah ORDER BY number") { rs ->
-                val number = rs.getInt(1)
-                for (codepoint in (rs.getString(2) ?: "").codePoints()) {
-                    if (RichText.isArabic(codepoint) || Character.isWhitespace(codepoint)) continue
-                    problems += "ayah $number indexes U+${hex(codepoint)}, which a Latin query could match"
+            for ((table, key) in listOf("ayah" to "number", "word" to "id")) {
+                connection.each("SELECT $key, text_search FROM $table WHERE text_search <> '' ORDER BY $key") { rs ->
+                    val id = rs.getInt(1)
+                    for (codepoint in (rs.getString(2) ?: "").codePoints()) {
+                        if (Character.isWhitespace(codepoint)) continue
+                        if (!RichText.isArabic(codepoint)) {
+                            problems += "$table $id indexes U+${hex(codepoint)}, which a Latin query could match"
+                            continue
+                        }
+                        if (Arabic.isSkippedForSearch(codepoint) || Arabic.foldForSearch(codepoint) != codepoint) {
+                            problems += "$table $id indexes U+${hex(codepoint)}, which is not the search shape"
+                        }
+                    }
                 }
             }
+        }
+    }
+
+    /**
+     * The print's page signs are furniture, not words, and the search shape
+     * drops them. An index that keeps one makes the word beside it unreachable
+     * through the full text index, whose tokenizer keeps every non-ASCII code
+     * point inside its token: "۞قُلۡ" indexed as it stands is never found by a
+     * reader typing "قل". This is the gate that would have caught it before a
+     * reader did, and it names the table rather than the query.
+     */
+    private fun auditPageSigns() {
+        val targets = listOf(
+            Triple("ayah", "number", "text_search"),
+            Triple("word", "id", "text_search"),
+            Triple("translation", "rowid", "text_search"),
+            Triple("tafsir_passage", "rowid", "text_search"),
+            Triple("word_meaning", "rowid", "meaning_search"),
+        )
+        openSqlite(File(root, "content/quran.db")).use { connection ->
+            var found = 0
+            for ((table, key, column) in targets) {
+                for (sign in listOf(0x06DD, 0x06DE, 0x06E9)) {
+                    connection.prepareStatement(
+                        "SELECT $key FROM $table WHERE instr($column, ?) > 0 LIMIT 5",
+                    ).use { statement ->
+                        statement.setString(1, String(Character.toChars(sign)))
+                        statement.executeQuery().use { rs ->
+                            while (rs.next()) {
+                                found++
+                                problems += "$table ${rs.getInt(1)} indexes U+${hex(sign)}, a page sign, not a word"
+                            }
+                        }
+                    }
+                }
+            }
+            if (found == 0) println("search: the indexed columns carry no page sign")
         }
     }
 

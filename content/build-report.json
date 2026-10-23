@@ -1,5 +1,5 @@
 {
-  "contentVersion": "1.2.0",
+  "contentVersion": "1.3.0",
   "ayahs": 6236,
   "words": 77429,
   "markers": 6235,
@@ -8,6 +8,6 @@
   "recitationSegmentsMapped": 128,
   "recitationSegmentsClamped": 1449,
   "problems": 0,
-  "databaseBytes": 110698496,
-  "databaseSha256": "52880d0d75545a13882722eb08172fd7a0bab7b207ab65f5d6dbe06f4ce6d14b"
+  "databaseBytes": 110694400,
+  "databaseSha256": "ce4fefef40c035c95bcff56bbfded3ba11839b39c188d0ec99e0ed2b5cc1cc37"
 }
