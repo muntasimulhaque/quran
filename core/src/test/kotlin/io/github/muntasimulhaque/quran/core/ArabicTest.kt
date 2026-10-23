@@ -40,6 +40,17 @@ class ArabicTest {
     }
 
     @Test
+    fun `a hamza seat meets the print's bare letter`() {
+        // The print writes the hamza as a mark on the bare seat; a reader
+        // types the precomposed seat. Dropping the seat in the query is what
+        // lets the two meet.
+        assertEquals("شيا", Arabic.normalizeForSearch("شَيۡــًٔا"))
+        assertEquals("شيا", Arabic.normalizeForSearch("شيئا"))
+        assertEquals("مسولا", Arabic.normalizeForSearch("مسؤولا"))
+        assertEquals("انبوني", Arabic.normalizeForSearch("أنبئوني"))
+    }
+
+    @Test
     fun `the page's signs are furniture, not words`() {
         // The print glues the rub el hizb to the first word of its ayah, and
         // sets the sajdah beside the last one. A reader types neither, so the

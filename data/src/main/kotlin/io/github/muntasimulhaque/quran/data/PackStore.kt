@@ -4,6 +4,7 @@ import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.security.MessageDigest
 
 /**
  * What content exists, and what is on this device.
@@ -83,12 +84,21 @@ class PackStore(private val context: Context) {
         val name = "core-${expectation.sha256.take(8)}.db"
         val directory = File(context.filesDir, "content").apply { mkdirs() }
         val target = File(directory, name)
-        if (target.exists() && target.length() == expectation.bytes) {
+        if (target.exists() && target.length() == expectation.bytes &&
+            (expectation.sha256.isEmpty() || sha256(target).equals(expectation.sha256, ignoreCase = true))
+        ) {
             return target
         }
         val temporary = File(directory, "$name.part")
         context.assets.open("content/core.db").use { input ->
             temporary.outputStream().buffered().use { output -> input.copyTo(output) }
+        }
+        if (temporary.length() != expectation.bytes ||
+            (expectation.sha256.isNotEmpty() &&
+                !sha256(temporary).equals(expectation.sha256, ignoreCase = true))
+        ) {
+            temporary.delete()
+            throw IllegalStateException("the shipped Quran text does not match the catalog")
         }
         if (!temporary.renameTo(target)) {
             temporary.copyTo(target, overwrite = true)
@@ -96,6 +106,19 @@ class PackStore(private val context: Context) {
         }
         directory.listFiles { file -> file.name != target.name }?.forEach { it.delete() }
         return target
+    }
+
+    private fun sha256(file: File): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        file.inputStream().buffered().use { input ->
+            val buffer = ByteArray(1 shl 16)
+            while (true) {
+                val read = input.read(buffer)
+                if (read < 0) break
+                digest.update(buffer, 0, read)
+            }
+        }
+        return digest.digest().joinToString("") { "%02x".format(it) }
     }
 
     /** Forgets the copied core pack, so the next open copies it from the app again. */

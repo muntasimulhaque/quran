@@ -102,7 +102,7 @@ fun ReaderScreen(
     // The note sheet is keyed by the ayah's number, not by the ayah itself:
     // the pill opens it, and the number is all it needs to write the note and
     // keep the ayah with it.
-    var cardNote by remember { mutableStateOf<Int?>(null) }
+    var cardNote by rememberSaveable { mutableStateOf<Int?>(null) }
     // The saved ayah the reader asked to remove while a note is still on it:
     // the confirmation is up until they answer, and the ayah stays saved
     // until they do. Null when nothing is being asked about.
@@ -241,8 +241,15 @@ fun ReaderScreen(
 
     // A shortcut or a link that asked for the search field opens it once,
     // over the reading it landed on.
+    // A shortcut asks for the search field once. The flag is saved with the
+    // window so a theme or language recreation does not reopen a sheet the
+    // reader has already closed.
+    var searchOpened by rememberSaveable(openSearch) { mutableStateOf(false) }
     LaunchedEffect(openSearch) {
-        if (openSearch) sheet = ReaderSheet.Search
+        if (openSearch && !searchOpened) {
+            searchOpened = true
+            sheet = ReaderSheet.Search
+        }
     }
 
     /**

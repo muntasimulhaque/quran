@@ -28,6 +28,11 @@ on:
       - "ui-kit/src/main/**"
       - "feature-*/src/main/**"
       - "content-assets/src/main/**"
+      - "content/**"
+      - "stability-config.txt"
+      - "gradle/libs.versions.toml"
+      - "gradle/wrapper/**"
+      - "*.gradle.kts"
       # `data` and `core` put no pixels on the screen themselves, but they
       # decide what the pixels say: a search rule (`arabicLineFor`), a display
       # model, or a formatter changes a frame without touching a UI module. A
@@ -91,7 +96,13 @@ jobs:
             content/work
             content/quran.db
             content/packs
-          key: content-work-${{ hashFiles('content/manifest.json', 'content/build-report.json') }}
+          key: content-work-${{ hashFiles('content/manifest.json', 'content/build-report.json', 'content/catalog.json') }}
+
+      # A cache miss must still have the packs the capture build reads. The
+      # key now includes the catalog, so a core pack change invalidates the
+      # old pack cache; the fetch is what fills it again.
+      - name: Fetch content
+        run: ./gradlew :tools:run --args="fetch" --console=plain
 
       # The project-local Gradle state: the configuration cache and the task
       # execution history live here, not in ~/.gradle, so the Gradle setup

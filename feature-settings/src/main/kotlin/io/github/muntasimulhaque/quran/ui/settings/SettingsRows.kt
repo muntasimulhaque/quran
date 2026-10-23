@@ -90,6 +90,13 @@ fun ToggleRow(
     switchTag: String? = null,
 ) {
     val opens = onOpen != null
+    // The whole row is the door, so its spoken name must carry the title and
+    // the state under it. Naming only the open label made a screen reader
+    // miss "Notifications are off, so the daily ayah cannot arrive" and the
+    // other subtitles that explain why a switch is where it is.
+    val spoken = listOfNotNull(openLabel, title, subtitle)
+        .filter { it.isNotBlank() }
+        .joinToString(". ")
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -102,8 +109,8 @@ fun ToggleRow(
                         // is only a picture of where a tap goes (owner
                         // decision, this session).
                         .then(
-                            if (!openLabel.isNullOrBlank()) {
-                                Modifier.semantics { contentDescription = openLabel }
+                            if (spoken.isNotEmpty()) {
+                                Modifier.semantics { contentDescription = spoken }
                             } else {
                                 Modifier
                             },

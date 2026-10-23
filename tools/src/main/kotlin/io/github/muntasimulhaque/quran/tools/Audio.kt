@@ -138,7 +138,9 @@ class Audio(private val root: File) {
             val paths = rows.filter { it.first == reciter && it.second == surah }.map { it.third }
             val zip = File(output, "$reciter/surah-%03d.zip".format(surah))
             val known = existing[reciter]?.get(surah)
-            if (zip.isFile && known != null && zip.length() == known.first) {
+            if (zip.isFile && known != null && zip.length() == known.first &&
+                sha256(zip).equals(known.second, ignoreCase = true)
+            ) {
                 skipped++
                 continue
             }
@@ -153,7 +155,7 @@ class Audio(private val root: File) {
         }
         if (jobs > 0) println()
 
-        val manifest = buildManifest(output, existing)
+        val manifest = buildManifest(output)
         manifestFile.writeText(manifest)
         println("audio: packs built $built, reused $skipped, manifest at ${manifestFile.relativeTo(root)}")
         if (failures.isEmpty()) return 0
@@ -194,7 +196,12 @@ class Audio(private val root: File) {
         zip.parentFile?.mkdirs()
         ZipOutputStream(zip.outputStream().buffered()).use { out ->
             for (name in names) {
-                out.putNextEntry(ZipEntry(name))
+                val entry = ZipEntry(name)
+                // A fixed timestamp keeps a rebuild byte-identical. Without
+                // it the same MP3s produced a different ZIP and the manifest
+                // kept the old hash by length, which the app then rejected.
+                entry.time = 315_532_800_000L // 1980-01-01, the ZIP epoch
+                out.putNextEntry(entry)
                 File(raw, name).inputStream().use { it.copyTo(out) }
                 out.closeEntry()
             }
@@ -213,13 +220,11 @@ class Audio(private val root: File) {
     }
 
     /**
-     * The manifest always describes what is on disk, whatever filter built it,
-     * and reuses recorded hashes so a resumed run does not re-hash gigabytes.
+     * The manifest always describes what is on disk, whatever filter built it.
+     * Every ZIP is hashed again: a same-length rebuild is exactly the case a
+     * reused hash would get wrong, and the app would reject the package.
      */
-    private fun buildManifest(
-        output: File,
-        previous: Map<String, Map<Int, Pair<Long, String>>>,
-    ): String {
+    private fun buildManifest(output: File): String {
         val json = buildJsonObject {
             put("baseUrl", githubBase)
             put(
@@ -240,9 +245,7 @@ class Audio(private val root: File) {
                                     buildJsonArray {
                                         for (zip in zips) {
                                             val surah = zip.name.removePrefix("surah-").removeSuffix(".zip").toIntOrNull() ?: continue
-                                            val known = previous[reciter]?.get(surah)
-                                            val sha = known?.takeIf { it.first == zip.length() }?.second
-                                                ?: sha256(zip)
+                                            val sha = sha256(zip)
                                             add(
                                                 buildJsonObject {
                                                     put("surah", surah)

@@ -95,10 +95,19 @@ object Arabic {
      * the print uses for a pronoun or a silent letter; a reader's query
      * spells the word without them. They are skipped in the search shape,
      * not folded to another letter, so "داود" finds "دَاوُۥدَ" and "به"
-     * finds "بِهِۦ". The skeleton keeps them, because the audit compares
-     * the print's own letters.
+     * finds "بِهِۦ".
+     *
+     * The precomposed waw and yeh with hamza (U+0624, U+0626) are skipped for
+     * the same reason. The print writes the hamza as a combining mark on the
+     * bare seat, so its index holds one letter; a reader typing the ordinary
+     * form writes a second letter that the print does not have. Dropping the
+     * seat lets "شيئا" meet "شَيۡــًٔا" and "مسؤولا" meet "مَسۡـُٔولًا". The
+     * skeleton keeps the folded seat, because the audit compares the print's
+     * own letters.
      */
-    fun isSearchIgnored(codePoint: Int): Boolean = codePoint == 0x06E5 || codePoint == 0x06E6
+    fun isSearchIgnored(codePoint: Int): Boolean =
+        codePoint == 0x06E5 || codePoint == 0x06E6 ||
+            codePoint == 0x0624 || codePoint == 0x0626
 
     /**
      * The print's page signs: the end of the ayah (`U+06DD`), the rub el hizb

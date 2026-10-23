@@ -133,8 +133,7 @@ object Search {
      * "বাকারা" finds আল-বাকারা. The list is script-aware, holding the Latin
      * transliteration, its assimilated forms, the same article in Bengali,
      * and the Arabic article itself. Each entry is reduced through [nameKey]
-     * first, so a Bengali vowel sign drops the way it does from the stored
-     * key (owner decision, this session).
+     * first, so the article and the stored name meet in the same shape.
      */
     private val nameArticles =
         listOf(
@@ -144,12 +143,18 @@ object Search {
         ).map { nameKey(it) }.filter { it.isNotEmpty() }.distinct()
 
     /**
-     * The one shape a typed surah name and a stored one meet in: letters and
-     * digits only, so case, hyphens, apostrophes, and the space between two
-     * words never block a match ("an nas" and "An-Nas" are one key).
+     * The one shape a typed surah name and a stored one meet in: letters,
+     * digits, and the marks a script uses inside a word, so case, hyphens,
+     * apostrophes, and the space between two words never block a match ("an
+     * nas" and "An-Nas" are one key). Bengali vowel signs are spacing marks,
+     * not letters: dropping them made আন-নিসা and আন-নাস the same key, and a
+     * reference to one opened the other.
      */
-    fun nameKey(input: String): String =
-        normalizeForIndex(input).filter { it.isLetterOrDigit() }
+    fun nameKey(input: String): String = normalizeForIndex(input).filter {
+        it.isLetterOrDigit() ||
+            Character.getType(it) == Character.NON_SPACING_MARK.toInt() ||
+            Character.getType(it) == Character.COMBINING_SPACING_MARK.toInt()
+    }
 
     /**
      * Every key a surah's name may be typed by: the whole key, and the same
@@ -203,9 +208,9 @@ object Search {
                 folded.appendCodePoint(Arabic.foldForSearch(codePoint))
                 starts.add(start)
             } else {
-                val piece = latinFolds!!.getOrPut(codePoint) {
+                val piece = latinFolds?.getOrPut(codePoint) {
                     normalizeEnglish(String(Character.toChars(codePoint)))
-                }
+                } ?: normalizeEnglish(String(Character.toChars(codePoint)))
                 for (character in piece) {
                     folded.append(character)
                     starts.add(start)
@@ -343,13 +348,41 @@ object Search {
      * [parse], so the app's matching and the index's matching cannot drift
      * (owner decision, this session).
      */
+    /**
+     * The query terms plus the spellings an older index may hold for a hamza
+     * seat. The Quran index was rebuilt with the bare seat; the tafsir index
+     * still carries the precomposed seat folded to a second waw or yeh. A
+     * query for شيا must find both, or the Quran fix would hide the tafsir
+     * passages that used the other spelling.
+     */
+    fun expandedTerms(terms: List<String>): List<String> {
+        val out = LinkedHashSet<String>()
+        for (term in terms) {
+            out += term
+            if (term.any { it == 'ي' || it == 'و' }) {
+                for (index in 0..term.length) {
+                    out += term.substring(0, index) + 'ي' + term.substring(index)
+                    out += term.substring(0, index) + 'و' + term.substring(index)
+                }
+            }
+        }
+        return out.toList()
+    }
+
     fun matchExpression(terms: List<String>): String? {
         val parts = terms.mapNotNull { term ->
-            val fragments = term.split(SEPARATORS).filter { it.isNotEmpty() }
-            when {
-                fragments.isEmpty() -> null
-                fragments.size == 1 -> fragments[0] + "*"
-                else -> "\"" + fragments.joinToString(" ") + "\""
+            val alternatives = expandedTerms(listOf(term)).mapNotNull { variant ->
+                val fragments = variant.split(SEPARATORS).filter { it.isNotEmpty() }
+                when {
+                    fragments.isEmpty() -> null
+                    fragments.size == 1 -> fragments[0] + "*"
+                    else -> "\"" + fragments.joinToString(" ") + "\""
+                }
+            }
+            when (alternatives.size) {
+                0 -> null
+                1 -> alternatives[0]
+                else -> "(" + alternatives.joinToString(" OR ") + ")"
             }
         }
         if (parts.isEmpty()) return null

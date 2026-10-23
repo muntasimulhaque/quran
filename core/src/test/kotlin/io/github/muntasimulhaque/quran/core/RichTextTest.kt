@@ -29,6 +29,13 @@ class RichTextTest {
     }
 
     @Test
+    fun `a missing closing bold does not bleed into the next block`() {
+        val blocks = RichText.parseHtml("<p><b>bold</p><p>plain</p>")
+        assertTrue(blocks[0].runs.all { it.bold })
+        assertFalse(blocks[1].runs.any { it.bold })
+    }
+
+    @Test
     fun `line breaks survive and other whitespace collapses`() {
         val runs = RichText.parseHtml("<p>one   two<br>three\n\nfour</p>").single().runs
         assertEquals("one two\nthree four", runs.joinToString("") { it.text })

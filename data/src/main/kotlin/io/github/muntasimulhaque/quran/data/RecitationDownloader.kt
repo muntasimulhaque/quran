@@ -57,8 +57,12 @@ class RecitationDownloader(private val context: Context) {
         try {
             // The one recitation host is HTTPS, and a redirect that leaves it
             // is refused: this is the app's only other network use.
-            if (!packageToFetch.url.startsWith("https://")) {
-                return@withContext Result.failure(IllegalStateException("the recitation URL is not https"))
+            if (!packageToFetch.url.startsWith("https://") ||
+                !ReleaseHosts.isAllowed(packageToFetch.url)
+            ) {
+                return@withContext Result.failure(
+                    IllegalStateException("the recitation URL is not the project's release host"),
+                )
             }
             connection = java.net.URL(packageToFetch.url).openConnection() as java.net.HttpURLConnection
             connection.instanceFollowRedirects = true
@@ -66,8 +70,12 @@ class RecitationDownloader(private val context: Context) {
             connection.readTimeout = 30_000
             connection.setRequestProperty("Accept", "application/octet-stream")
             connection.connect()
-            if (connection.url.protocol != "https") {
-                return@withContext Result.failure(IllegalStateException("the recitation redirect left https"))
+            if (connection.url.protocol != "https" ||
+                !ReleaseHosts.isAllowed(connection.url.toString())
+            ) {
+                return@withContext Result.failure(
+                    IllegalStateException("the recitation redirect left the project's release host"),
+                )
             }
             if (connection.responseCode !in 200..299) {
                 return@withContext Result.failure(IllegalStateException("HTTP ${connection.responseCode}"))
@@ -149,19 +157,33 @@ class RecitationDownloader(private val context: Context) {
             }
         }
         coroutineContext.ensureActive()
-        target.mkdirs()
-        // The move is the commit: it is a rename on one filesystem, so it is
-        // short, and it is not interrupted halfway. A surah is whole on the
-        // disk or it is not there (owner report, this session).
-        val staged = unpacking.listFiles().orEmpty()
-        if (staged.isEmpty()) throw IllegalStateException("the package held no ayah files")
-        staged.forEach { stagedFile ->
-            val landed = File(target, stagedFile.name)
-            if (!stagedFile.renameTo(landed)) {
-                stagedFile.copyTo(landed, overwrite = true)
-                stagedFile.delete()
+        if (unpacking.listFiles().orEmpty().isEmpty()) {
+            throw IllegalStateException("the package held no ayah files")
+        }
+        // The folder rename is the commit. Moving the files one by one left
+        // a surah that the app counted as downloaded after a process death
+        // halfway through the list. A directory rename is one filesystem
+        // operation, and the old folder is kept until the new one is in
+        // place, so a failed commit restores the previous surah.
+        val landing = File(imported, "$folder-$surah.new")
+        val backup = File(imported, "$folder-$surah.old")
+        if (landing.exists()) landing.deleteRecursively()
+        if (!target.exists() && backup.exists()) backup.renameTo(target)
+        if (!unpacking.renameTo(landing)) {
+            throw IllegalStateException("the surah folder could not be completed")
+        }
+        if (target.exists()) {
+            if (backup.exists()) backup.deleteRecursively()
+            if (!target.renameTo(backup)) {
+                landing.renameTo(unpacking)
+                throw IllegalStateException("the previous surah folder could not be moved aside")
             }
         }
+        if (!landing.renameTo(target)) {
+            if (backup.exists()) backup.renameTo(target)
+            throw IllegalStateException("the surah folder could not be committed")
+        }
+        backup.deleteRecursively()
         unpacking.deleteRecursively()
         staging.delete()
         Unit

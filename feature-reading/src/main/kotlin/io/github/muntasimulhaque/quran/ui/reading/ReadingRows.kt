@@ -137,6 +137,14 @@ internal fun ReadingRows(
     // anything less leaves the place behind.
     LaunchedEffect(place, placeOffset, surah.number, ayahs) {
         val target = AyahList.indexOf(ayahs, place)
+        // A drag that settles on the surah opening writes the first ayah as
+        // the place, at depth 0. The opening is list index 0 and the first
+        // ayah is index 1, so the round trip would scroll one item down and
+        // hide the opening and the basmalah under the reader's own gesture.
+        // The opening is already the truthful place for that first ayah.
+        if (target == 1 && placeOffset == 0 && listState.firstVisibleItemIndex == 0) {
+            return@LaunchedEffect
+        }
         if (target != listState.firstVisibleItemIndex ||
             placeOffset != listState.firstVisibleItemScrollOffset
         ) {

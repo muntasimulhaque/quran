@@ -18,6 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -84,7 +85,10 @@ private fun NoteEditor(
     onSave: (String?) -> Unit,
     onClear: () -> Unit,
 ) {
-    var draft by remember(initial) { mutableStateOf(initial.orEmpty()) }
+    // The draft survives a theme change, a language change, and the window
+    // being rebuilt while the reader is still writing. `remember` alone
+    // threw the words away with the old composition.
+    var draft by rememberSaveable(initial) { mutableStateOf(initial.orEmpty()) }
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) {
         delay(160)

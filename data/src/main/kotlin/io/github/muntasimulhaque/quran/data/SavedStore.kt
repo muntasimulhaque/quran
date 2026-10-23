@@ -9,6 +9,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 data class SavedAyah(
@@ -62,6 +64,7 @@ data class SavedAyah(
 class SavedStore(context: Context) {
 
     private val helper = Helper(context.applicationContext)
+    private val writeMutex = Mutex()
     private val _saved = MutableStateFlow<List<SavedAyah>>(emptyList())
     val saved: StateFlow<List<SavedAyah>> = _saved.asStateFlow()
 
@@ -75,26 +78,28 @@ class SavedStore(context: Context) {
      * is a mark of their own to remove (owner report).
      */
     suspend fun toggle(ayahNumber: Int) = withContext(Dispatchers.IO) {
-        val row = row(ayahNumber)
-        when {
-            row == null -> {
-                val now = System.currentTimeMillis()
-                write(
-                    ayahNumber = ayahNumber,
-                    note = null,
-                    createdAt = now,
-                    savedAt = now,
-                    saved = true,
-                    marked = true,
-                )
+        writeMutex.withLock {
+            val row = row(ayahNumber)
+            when {
+                row == null -> {
+                    val now = System.currentTimeMillis()
+                    write(
+                        ayahNumber = ayahNumber,
+                        note = null,
+                        createdAt = now,
+                        savedAt = now,
+                        saved = true,
+                        marked = true,
+                    )
+                }
+                !row.marked -> setMark(ayahNumber, at = System.currentTimeMillis())
+                // Removing the save removes the row, and the note written on
+                // it with it. The screen asks before this when a note exists,
+                // so the reader's own words are never lost to one tap.
+                else -> delete(ayahNumber)
             }
-            !row.marked -> setMark(ayahNumber, at = System.currentTimeMillis())
-            // Removing the save removes the row, and the note written on it
-            // with it. The screen asks before this when a note exists, so
-            // the reader's own words are never lost to one tap.
-            else -> delete(ayahNumber)
+            refresh()
         }
-        refresh()
     }
 
     /**
@@ -110,6 +115,7 @@ class SavedStore(context: Context) {
      * does everything they wrote about it.
      */
     suspend fun setNote(ayahNumber: Int, note: String?) = withContext(Dispatchers.IO) {
+        writeMutex.withLock {
         val clean = note?.trim()?.takeIf { it.isNotEmpty() }
         val row = row(ayahNumber)
         if (row == null) {
@@ -151,6 +157,7 @@ class SavedStore(context: Context) {
             if (clean == null && !row.marked) delete(ayahNumber)
         }
         refresh()
+        }
     }
 
     /**
@@ -158,8 +165,10 @@ class SavedStore(context: Context) {
      * screen asks before this when a note exists.
      */
     suspend fun unsave(ayahNumber: Int) = withContext(Dispatchers.IO) {
-        delete(ayahNumber)
-        refresh()
+        writeMutex.withLock {
+            delete(ayahNumber)
+            refresh()
+        }
     }
 
     fun close() = helper.close()

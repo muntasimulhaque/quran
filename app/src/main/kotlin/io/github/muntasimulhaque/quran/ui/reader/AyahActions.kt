@@ -1,8 +1,10 @@
 package io.github.muntasimulhaque.quran.ui.reader
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -83,6 +85,10 @@ internal fun AyahActions(
             .floatingLift(shape)
             .clip(shape)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            // Five measured capsules can be wider than a small phone or a
+            // large system font. A horizontal scroll keeps the last action
+            // reachable instead of clipping it off the glass.
+            .horizontalScroll(rememberScrollState())
             .padding(horizontal = 6.dp, vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

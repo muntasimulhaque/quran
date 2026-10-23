@@ -2,6 +2,8 @@
 
 Version: 10.8 (versionCode 110)
 
+> The audit fixes in the working tree are not in the 10.8 bundle. Do not submit the 10.8 AAB; the next version will update this kit.
+
 ## Listing
 
 Title (21 characters):
@@ -18,11 +20,12 @@ you to learn its interface first.
 The Arabic is the QPC Hafs print, word by word, with the rules of recitation
 drawn in the printed mushaf's seven color families and a Tajweed page that
 explains every color in English and Bangla. The reading gives each ayah its
-Saheeh International translation with the original footnotes, word by word
-meanings, and Ibn Kathir in English, with the Quran quotations set apart. Bangla
-readers get the Taisirul Quran translation, Ibn Kathir in Bangla, Bangla
-word meanings, and the surah names in Bengali script, and the whole interface
-can be read in English or Bangla.
+Saheeh International translation with the original footnotes; when word by
+word is turned on, each word carries its meaning; and the ayah card opens
+Ibn Kathir in English, with the Quran quotations set apart. Bangla readers
+get the Taisirul Quran translation, Ibn Kathir in Bangla, Bangla word
+meanings, and the surah names in Bengali script, and the whole interface can
+be read in English or Bangla.
 
 Search reads Arabic without diacritics, in the letters a reader types
 even where the print writes its small waw, small yeh, or dotless alef-maksura
@@ -41,9 +44,10 @@ each one draws in its own place under the ayah.
 Recitation plays Minshawi or Husary, with the page following the reciter
 and the word being recited marked. Audio is not bundled and not streamed:
 when you tap Play on a surah, the app tells you its size and downloads
-that one surah from the project's own release page. Surahs you have not
-asked for are never downloaded. Everything you do download works offline
-forever after.
+that one surah from the project's own release page. If you turn on Continue
+to the next surah in the player's listening menu, the following surahs
+download as the recitation reaches them, each with its own name and size on
+the player. Everything you download works offline forever after.
 
 There are no ads, no trackers, no analytics, and no account. The app is
 free and its source code is public. It reaches the project's own release
@@ -52,10 +56,11 @@ quiet refresh of a pack you already have when a newer version ships, on
 Wi-Fi only.
 
 Credits: Quran text by the King Fahd Complex for the Printing of the Holy
-Quran, audited against the QUL QPC text, with Tanzil as the independent cross-reference. Translation by
-Saheeh International via QuranEnc. Tafsir Ibn Kathir and the recitations
-via the Quranic Universal Library by Tarteel. Full credits and licenses
-are in the app and in the repository.
+Quran, audited against the QUL QPC text, with Tanzil as the independent
+cross-reference. Translation by Saheeh International via QuranEnc. Tafsir
+Ibn Kathir and the recitations via the Quranic Universal Library by Tarteel.
+The app's About page names each source; the content manifest in the
+repository records each dataset's license. The source code is MIT.
 
 ## Classification
 
@@ -76,9 +81,11 @@ are in the app and in the repository.
   Releases: the reading of the language the reader chose (its translation,
   and its tafsir on an unmetered connection), a word list when word by word
   is turned on, a recitation package the reader asks for after seeing its
-  size, and a quiet refresh of an installed pack when the app carries a
-  newer version, on an unmetered connection only. Nothing is sent beyond the
-  request. No analytics, no crash reporting, no advertising.
+  size (or the next surah after Continue is turned on), a quiet refresh of
+  an installed pack when the app carries a newer version, and a daily
+  integrity check that downloads a repair only when a local pack is damaged.
+  The refresh and the repair run on an unmetered connection only. Nothing is
+  sent beyond the request. No analytics, no crash reporting, no advertising.
 - Privacy policy URL:
   https://muntasimulhaque.github.io/quran/privacy.html
 
@@ -141,8 +148,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (10.4, 334 characters)
-Search now finds the QPC print's words in the spelling you type, including the small letters the print writes. The word-by-word meanings and the reciter's highlighted word stay on the right word through the four joined words. Tajweed colors turn off everywhere, the share card keeps paper colors, and the content builds cleanly again.
+## Release notes (10.8, 282 characters)
+The Tajweed colors are chosen for identity instead of a quiet page, and every family still clears 4.5:1 on the reading, the sheet, and the reciter's wash. The Tajweed page in Settings now shows a real word from the reading in each family's color. The reading is unchanged otherwise.
 
 ## Before each release
 
@@ -189,18 +196,19 @@ something Play would reject.
 
 ## What the app carries, and what a reader adds
 
-The app ships the Quran text only: about eight
+The app ships the Quran text only: about ten
 megabytes, a complete offline reading that needs no network and no account. Everything
 else is added by the reader, from the project's own GitHub Releases, with the
-size shown before a byte moves and a SHA-256 check before it is used:
+size named before a tap or on the player while a Continue package downloads,
+and a SHA-256 check before it is used:
 
 | Language | Translation | Tafsir | Word by word |
 |---|---|---|---|
-| English | Saheeh International (2.2 MB) | Ibn Kathir (23 MB) | 4.6 MB |
-| Bangla | Taisirul Quran (5.1 MB) | Ibn Kathir (47 MB) | 6.5 MB |
+| English | Saheeh International (2.9 MB) | Ibn Kathir (29.5 MB) | 6.3 MB |
+| Bangla | Taisirul Quran (5.9 MB) | Ibn Kathir (56.0 MB) | 8.4 MB |
 
-Recitations: Minshawi and Husary, one surah at a time (0.2 to 122 MB each),
-plus 1.7 MB of timing data per reciter.
+Recitations: Minshawi and Husary, one surah at a time (about 0.2 to 185 MB
+each), plus 1.7 MB of timing data per reciter.
 
 Content updates arrive on their own: when a pack you already have is
 superseded, the app replaces it quietly on Wi-Fi, so the tafsir and
@@ -212,7 +220,9 @@ translation stay current without a tap.
 * **Does it show ads?** No, and it has no analytics and no accounts.
 * **Why does it need the internet permission?** To download a content pack
   or a surah's recitation the reader asks for, from the project's own
-  releases, and to quietly refresh an installed content pack when the app
-  carries a newer version, on Wi-Fi only. No other host is ever contacted.
+  releases, to quietly refresh an installed content pack when the app
+  carries a newer version, and to repair a damaged local pack, on Wi-Fi
+  only. The app asks no other host; GitHub's download service may redirect
+  the request to its own release storage.
 * **Data safety**: no data collected, no data shared, nothing stored off the
   device. Notes and bookmarks stay in the app's private storage.

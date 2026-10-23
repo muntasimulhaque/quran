@@ -84,16 +84,23 @@ fun QuranApp(
     // A tap on the reminder opens that ayah in the reading, which is
     // what a reminder is for: the reader meets the words, not the app. The
     // jump runs once, after the library has opened, and the same ayah is
-    // written down as the place, so closing the app leaves it there.
+    // written down as the place, so closing the app leaves it there. The
+    // flag is saved with the window: a dark-mode flip or a language change
+    // rebuilds the composition, and the old intent must not pull the reader
+    // back to the ayah they opened hours ago.
+    var handledAyah by rememberSaveable(initialAyah) { mutableStateOf(false) }
     LaunchedEffect(initialAyah, viewModel.ready) {
-        if (initialAyah == null || !viewModel.ready) return@LaunchedEffect
+        if (handledAyah || initialAyah == null || !viewModel.ready) return@LaunchedEffect
+        handledAyah = true
         viewModel.jumpToAyahInReading(initialAyah)
     }
     // And the same for a link's own verse: it opens once, after the library
     // is ready, and the reference it names is remembered as the place.
+    var handledReference by rememberSaveable(initialReference) { mutableStateOf(false) }
     LaunchedEffect(initialReference, viewModel.ready) {
         val (surah, ayah) = initialReference ?: return@LaunchedEffect
-        if (!viewModel.ready) return@LaunchedEffect
+        if (handledReference || !viewModel.ready) return@LaunchedEffect
+        handledReference = true
         viewModel.jumpToReference(surah, ayah)
     }
     val settings = viewModel.settings

@@ -491,6 +491,8 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      */
     fun jumpToReference(surah: Int, ayah: Int) {
         if (surah !in 1..TOTAL_SURAHS || ayah < 1) return
+        val count = surahByNumber[surah]?.versesCount ?: return
+        if (ayah > count) return
         val first = firstAyahOf.getOrNull(surah)?.takeIf { it > 0 } ?: return
         jumpToAyah(first + ayah - 1)
     }
@@ -514,7 +516,12 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun jumpToSurah(surah: Int) {
-        jumpToAyah(library.database?.firstAyahOfSurah(surah) ?: return)
+        val first = library.database?.firstAyahOfSurah(surah) ?: return
+        // Moving to a surah by its name or by the end-of-surah door lands on
+        // its opening, not on the first ayah with the basmalah hidden above
+        // the fold. The place written is still the first ayah.
+        startAtSurahOpening = surah
+        jumpToAyah(first)
     }
 
     /**

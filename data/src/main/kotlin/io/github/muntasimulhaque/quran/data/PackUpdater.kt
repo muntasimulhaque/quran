@@ -3,8 +3,10 @@ package io.github.muntasimulhaque.quran.data
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import java.security.MessageDigest
 import java.util.TimeZone
 
@@ -99,37 +101,40 @@ class PackUpdater(private val context: Context) {
      * library over them; a failure is left for the next day rather than shown.
      */
     suspend fun dailyIntegrityRefresh(catalog: PackCatalog): List<String> =
-        mutex.withLock {
-            if (!unmetered()) return@withLock emptyList()
-            val today = localDay(System.currentTimeMillis())
-            if (preferences.getInt(KEY_INTEGRITY_DAY, -1) == today) {
-                return@withLock emptyList()
+        withContext(Dispatchers.IO) {
+            mutex.withLock {
+                if (!unmetered()) return@withLock emptyList()
+                val today = localDay(System.currentTimeMillis())
+                if (preferences.getInt(KEY_INTEGRITY_DAY, -1) == today) {
+                    return@withLock emptyList()
+                }
+                // The day is remembered whether or not work was found: the
+                // SHA-256 read is the cost, and it is paid once a day rather
+                // than held open until something is actually wrong.
+                preferences.edit().putInt(KEY_INTEGRITY_DAY, today).apply()
+                // The verifier reads a pack only when its bytes have changed
+                // since the last pass that verified them. The hash is the
+                // honest check, but it reads the whole pack, and the tafsir
+                // is tens of megabytes: a file whose size and moment are
+                // unchanged is the file that was verified, so the read is
+                // skipped and the answer is the same (owner decision, this
+                // session).
+                val verifier = PackVerifier(context)
+                val store = PackStore(context)
+                val stale = runCatching {
+                    catalog.all()
+                        .filter { it.installed && !it.shipped }
+                        .filter { pack -> !rememberedIntact(pack, verifier, store) }
+                }.getOrNull() ?: return@withLock emptyList()
+                if (stale.isEmpty()) return@withLock emptyList()
+                val downloader = PackDownloader(context)
+                val replaced = ArrayList<String>(stale.size)
+                for (pack in stale) {
+                    val result = runCatching { downloader.download(pack) { _, _ -> } }.getOrNull()
+                    if (result?.isSuccess == true) replaced += pack.id
+                }
+                replaced
             }
-            // The day is remembered whether or not work was found: the SHA-256
-            // read is the cost, and it is paid once a day rather than held open
-            // until something is actually wrong.
-            preferences.edit().putInt(KEY_INTEGRITY_DAY, today).apply()
-            // The verifier reads a pack only when its bytes have changed
-            // since the last pass that verified them. The hash is the honest
-            // check, but it reads the whole pack, and the tafsir is tens of
-            // megabytes: a file whose size and moment are unchanged is the
-            // file that was verified, so the read is skipped and the answer
-            // is the same (owner decision, this session).
-            val verifier = PackVerifier(context)
-            val store = PackStore(context)
-            val stale = runCatching {
-                catalog.all()
-                    .filter { it.installed && !it.shipped }
-                    .filter { pack -> !rememberedIntact(pack, verifier, store) }
-            }.getOrNull() ?: return@withLock emptyList()
-            if (stale.isEmpty()) return@withLock emptyList()
-            val downloader = PackDownloader(context)
-            val replaced = ArrayList<String>(stale.size)
-            for (pack in stale) {
-                val result = runCatching { downloader.download(pack) { _, _ -> } }.getOrNull()
-                if (result?.isSuccess == true) replaced += pack.id
-            }
-            replaced
         }
 
     /**

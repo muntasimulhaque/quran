@@ -145,7 +145,7 @@ fun DailyPage(
         // and what is left here is state, so a reader who said no, or who
         // answered on a phone that could not ask, knows the ayah can be late
         // and has the one door the phone offers.
-        if (settings.dailyAyah && exactGrantWithheld) {
+        if (settings.dailyAyah && exactGrantWithheld && !notificationsBlocked) {
             Text(
                 text = stringResource(R.string.settings_daily_exact_blocked),
                 style = MaterialTheme.typography.bodySmall,

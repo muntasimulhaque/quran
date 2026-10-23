@@ -66,7 +66,9 @@ class Packs(private val root: File) {
             // with-the-word-list positions. Version 4 drops the print's page
             // signs from the search index, so the first word under the rub el
             // hizb is found by a reader typing it (owner report, this session).
-            version = "4",
+            // Version 5 carries the surah introductions, so every reader has
+            // them without a word list.
+            version = "5",
             shipped = true,
             ayahs = 6236,
         ),
@@ -281,6 +283,12 @@ class Packs(private val root: File) {
                         // card, a playback read, and the FTS join all look a
                         // row up by it.
                         statement.execute("CREATE INDEX ayah_number ON ayah(number)")
+                        // The introductions are core content: every reader
+                        // meets them, whether or not a word list is on the
+                        // device. They used to travel only with words-en, so
+                        // a fresh install and a Bangla word list had no door
+                        // to them at all.
+                        statement.execute("CREATE TABLE surah_info AS SELECT * FROM src.surah_info")
                         createFts(statement, "ayah_fts", "text_search", "ayah")
                     }
                     "translation" -> {

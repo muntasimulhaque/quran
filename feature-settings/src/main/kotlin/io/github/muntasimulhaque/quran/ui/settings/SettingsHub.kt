@@ -118,11 +118,20 @@ fun SettingsHub(
             openLabel = stringResource(R.string.settings_open_tajweed),
             switchTag = "switch-tajweed",
         )
+        val hasTranslation = hasInstalledTranslation(settings, packs)
+        val hasTafsir = hasInstalledTafsir(settings, packs)
         ToggleRow(
             title = stringResource(R.string.settings_show_translation_title),
             subtitle = translationName(settings, packs),
-            checked = settings.showTranslation && hasInstalledTranslation(settings, packs),
-            onChange = onShowTranslation,
+            checked = settings.showTranslation && hasTranslation,
+            // With no translation on the device the switch has nothing to
+            // show. It used to write a setting that the checked expression
+            // immediately hid, so the switch sprang back and nothing said
+            // why. The tap now opens the list where the reader can install
+            // one.
+            onChange = { show ->
+                if (hasTranslation) onShowTranslation(show) else onOpen(SettingsPage.Translations)
+            },
             onOpen = { onOpen(SettingsPage.Translations) },
             openLabel = stringResource(R.string.settings_open_translations),
             switchTag = "switch-translation",
@@ -130,8 +139,10 @@ fun SettingsHub(
         ToggleRow(
             title = stringResource(R.string.settings_show_tafsir_title),
             subtitle = tafsirSummary(settings, packs),
-            checked = settings.showTafsir && hasInstalledTafsir(settings, packs),
-            onChange = onShowTafsir,
+            checked = settings.showTafsir && hasTafsir,
+            onChange = { show ->
+                if (hasTafsir) onShowTafsir(show) else onOpen(SettingsPage.Tafsirs)
+            },
             onOpen = { onOpen(SettingsPage.Tafsirs) },
             openLabel = stringResource(R.string.settings_open_tafsirs),
             switchTag = "switch-tafsir",
@@ -189,10 +200,7 @@ private fun dailySubtitle(
     notificationsBlocked: Boolean,
     exactGrantWithheld: Boolean,
 ): String = when {
-    !settings.dailyAyah -> stringResource(
-        R.string.settings_daily_subtitle_off,
-        clockText(settings.dailyAyahMinute),
-    )
+    !settings.dailyAyah -> stringResource(R.string.settings_daily_subtitle_off)
     notificationsBlocked -> stringResource(R.string.settings_daily_subtitle_blocked)
     exactGrantWithheld -> stringResource(R.string.settings_daily_subtitle_late)
     else -> stringResource(

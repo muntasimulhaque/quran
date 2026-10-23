@@ -165,6 +165,13 @@ object RichText {
             runs.clear()
             kind = TextBlockKind.PARAGRAPH
             started = false
+            // A block boundary closes every emphasis that was open in the
+            // block before it. Without this reset, a missing </b> in one
+            // Bangla passage bolded everything after it, sometimes to the
+            // end of the tafsir.
+            bold = 0
+            italic = 0
+            quote = false
         }
 
         var index = 0

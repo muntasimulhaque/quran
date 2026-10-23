@@ -9,7 +9,7 @@
     <string name="settings_theme_system">System</string>
 
     <string name="settings_daily_title">Daily ayah</string>
-    <string name="settings_daily_subtitle_off">Off, next at %1$s</string>
+    <string name="settings_daily_subtitle_off">Off</string>
     <string name="settings_daily_subtitle_on">One ayah a day, at %1$s</string>
     <string name="settings_daily_subtitle_blocked">Notifications are off, so the daily ayah cannot arrive</string>
     <string name="settings_daily_subtitle_late">Exact alarms are off, so the ayah can arrive late</string>

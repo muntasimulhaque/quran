@@ -2,6 +2,7 @@ package io.github.muntasimulhaque.quran.core
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -163,9 +164,21 @@ class SearchTest {
         assertTrue(Search.surahNameForms("Ar-Rahman").contains("rahman"))
         assertTrue(Search.surahNameForms("Ya-Sin").contains("yasin"))
         assertTrue(Search.surahNameForms("Al-'Alaq").contains("alaq"))
-        // nameKey keeps letters and digits only, so the Bengali vowel signs
-        // drop and the short form of আল-বাকারা is বকর.
-        assertTrue(Search.surahNameForms("আল-বাকারা").contains("বকর"))
+        // The Bengali vowel signs stay in the key: they are what tells
+        // আন-নিসা from আন-নাস and আল-ফাতিহা from আল-ফাতহ.
+        assertTrue(Search.surahNameForms("আল-বাকারা").contains("বাকারা"))
+        assertNotEquals(Search.nameKey("আন-নিসা"), Search.nameKey("আন-নাস"))
+        assertNotEquals(Search.nameKey("আল-ফাতিহা"), Search.nameKey("আল-ফাতহ"))
+    }
+
+    @Test
+    fun `a query also searches the older folded hamza seat`() {
+        assertTrue(Search.expandedTerms(listOf("شيا")).contains("شييا"))
+        assertTrue(Search.expandedTerms(listOf("مسولا")).contains("مسوولا"))
+        assertTrue(Search.expandedTerms(listOf("انبوني")).contains("انبيوني"))
+        val expression = requireNotNull(Search.matchExpression(listOf("شيا")))
+        assertTrue(expression.contains("شيا*"))
+        assertTrue(expression.contains("شييا*"))
     }
 
     @Test

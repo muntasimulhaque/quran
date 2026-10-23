@@ -68,16 +68,21 @@ fun AboutPage(
         // catalog rows and once as the app's own credits (owner decision,
         // this session).
         packs.filter { (it.shipped || it.installed) && it.type != PackType.Recitation }.forEach { pack ->
+            val versionLine = pack.version
+                .takeIf { it.isNotBlank() && it != "QUL" }
+                ?.let { stringResource(R.string.settings_version) + " " + it }
             AboutCredit(
                 title = stringResource(
                     R.string.about_pack_title,
                     contentPackName(pack.id, pack.name),
                     languageName(pack.language),
                 ),
-                lines = listOf(packLine(pack.credit, pack.creditBn)) +
-                    packLine(pack.license, pack.licenseBn).split(LICENSE_SEPARATOR)
-                        .map { it.trim() }
-                        .filter { it.isNotBlank() },
+                lines = listOfNotNull(
+                    packLine(pack.credit, pack.creditBn),
+                    versionLine,
+                ) + packLine(pack.license, pack.licenseBn).split(LICENSE_SEPARATOR)
+                    .map { it.trim() }
+                    .filter { it.isNotBlank() },
             )
         }
 

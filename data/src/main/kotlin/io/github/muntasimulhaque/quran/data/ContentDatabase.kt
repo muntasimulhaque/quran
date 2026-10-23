@@ -192,14 +192,19 @@ class ContentDatabase private constructor(
      * tafsir, and the word meanings keep the strict rule and never fall back.
      */
     fun surahInfo(surah: Int, language: String = "en"): String? {
+        // The core pack carries the introductions now, so a fresh install and
+        // a Bangla word list both have the door. A held core from before the
+        // move still falls back to the English word list.
         val preferred = wordsPack(language)
         val pack = when {
+            hasTable(null, "surah_info") -> null
             hasTable(preferred, "surah_info") -> preferred
             preferred != WORDS_PACK && hasTable(WORDS_PACK, "surah_info") -> WORDS_PACK
             else -> return null
         }
+        val table = if (pack == null) "surah_info" else "${schema(pack)}.surah_info"
         return query(
-            "SELECT text FROM ${schema(pack)}.surah_info WHERE surah = ?",
+            "SELECT text FROM $table WHERE surah = ?",
             arrayOf(surah.toString()),
         ).use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
     }
@@ -525,7 +530,7 @@ class ContentDatabase private constructor(
     private fun segments(json: String?): List<WordSegment> {
         if (json.isNullOrBlank() || json == "[]") return emptyList()
         val array = runCatching { JSONArray(json) }.getOrNull() ?: return emptyList()
-        return buildList(array.length()) {
+        return RecitationTiming.normalize(buildList(array.length()) {
             for (index in 0 until array.length()) {
                 val entry = array.optJSONArray(index) ?: continue
                 if (entry.length() < 4) continue
@@ -538,7 +543,7 @@ class ContentDatabase private constructor(
                     ),
                 )
             }
-        }
+        })
     }
 
     // --------------------------------------------------------------- search
@@ -681,11 +686,14 @@ class ContentDatabase private constructor(
         for ((pack, passage) in matchedPassages) {
             val number = passageAyahs[passage.key] ?: continue
             val row = passageRows[number] ?: continue
-            val language = request.packLanguages[pack]
+            // The query's script decides the highlighter, not the pack's
+            // language: an Arabic query into an English tafsir still has to
+            // find and wash the Arabic quotation, and an English query into
+            // an Arabic tafsir still has to find the English words.
             val (excerpt, ranges) = Search.excerpt(
                 passage.text,
-                query.terms,
-                arabic = language == "ar",
+                Search.expandedTerms(query.terms),
+                arabic = query.arabic,
                 window = 200,
             )
             tafsirHits += SearchHit.TafsirHitResult(
@@ -1332,17 +1340,26 @@ class ContentDatabase private constructor(
                     openCore(store, core)
                 }
                 ?: throw ContentUnavailableException("the Quran text could not be opened")
+            val attached = LinkedHashSet<String>()
+            attached += PackCatalog.CORE_ID
             for (id in installed) {
                 if (id == PackCatalog.CORE_ID) continue
                 val file = store.fileFor(id)
                 if (!file.exists()) continue
                 runCatching {
                     database.execSQL("ATTACH DATABASE ? AS \"" + id.replace("\"", "") + "\"", arrayOf(file.path))
+                }.onSuccess {
+                    attached += id
                 }.onFailure {
                     android.util.Log.w("ContentDatabase", "pack $id could not be attached", it)
                 }
             }
-            ContentDatabase(database, catalog.withInstalled(installed), installed)
+            // A pack whose attach failed is not in the library: a query for
+            // its schema would throw, and every surface that reads it would
+            // have to catch the same failure. The catalog keeps the raw
+            // installed set, so the daily integrity pass can still see the
+            // broken file and repair it; only the query gate uses [attached].
+            ContentDatabase(database, catalog.withInstalled(installed), attached)
         }
 
         private fun openCore(store: PackStore, core: ContentPack): SQLiteDatabase? = runCatching {

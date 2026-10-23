@@ -24,6 +24,10 @@ on:
       # The catalog, the manifest, the build report, and the recitation
       # manifest: the content the gates read and the assets the build copies.
       - "content/*.json"
+      - "content/quran.db"
+      - "content/packs/**"
+      - "stability-config.txt"
+      - "benchmark/**"
       - "*.gradle.kts"
       - "gradle.properties"
       - "gradle/**"
@@ -97,7 +101,7 @@ jobs:
           path: |
             content/work
             content/quran.db
-          key: content-work-${{ hashFiles('content/manifest.json', 'content/build-report.json') }}
+          key: content-work-${{ hashFiles('content/manifest.json', 'content/build-report.json', 'content/catalog.json') }}
 
       # The whole JVM suite, not only :core: a unit test that no run
       # executes is a rule nobody hears break.
@@ -140,7 +144,6 @@ jobs:
   data-tests:
     name: Data instrumented tests
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
@@ -165,7 +168,7 @@ jobs:
           path: |
             content/work
             content/quran.db
-          key: content-work-${{ hashFiles('content/manifest.json', 'content/build-report.json') }}
+          key: content-work-${{ hashFiles('content/manifest.json', 'content/build-report.json', 'content/catalog.json') }}
 
       - name: Enable KVM
         run: |
@@ -175,7 +178,7 @@ jobs:
           sudo udevadm trigger --name-match=kvm
 
       - name: Data instrumented tests
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: reactivecircus/android-emulator-runner@c9c93e6ba9c4194322e114c40970d5983d9a07cc # v2.38.0
         with:
           api-level: 35
           arch: x86_64
@@ -185,6 +188,66 @@ jobs:
           script: |
             for i in $(seq 1 60); do adb -s emulator-5554 shell ls /sdcard/Android >/dev/null 2>&1 && break; sleep 2; done
             ./gradlew :data:connectedDebugAndroidTest --console=plain
+
+  # The app's own instrumented tests, including accessibility, the reading
+  # semantics, playback, and the daily reminder. The screenshot tour runs in
+  # the capture workflow on the three store form factors; this job is the
+  # gate that says the app's surfaces still answer before a bundle is signed.
+  app-tests:
+    name: App instrumented tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@48b5f213c81028ace310571dc5ec0fbbca0b2947 # v4.4.3
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Accept SDK licenses
+        run: yes | sdkmanager --licenses > /dev/null 2>&1 || true
+
+      - name: Cache content work
+        uses: actions/cache@v4
+        with:
+          path: |
+            content/work
+            content/quran.db
+            content/packs
+          key: content-work-${{ hashFiles('content/manifest.json', 'content/build-report.json', 'content/catalog.json') }}
+
+      # The app's tests read the core pack and the dev packs from the app's
+      # assets. A fresh runner has no content/packs, so the fetch is what
+      # puts the same files the gates job reads on this machine.
+      - name: Fetch content
+        run: ./gradlew :tools:run --args="fetch" --console=plain
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: App instrumented tests
+        uses: reactivecircus/android-emulator-runner@c9c93e6ba9c4194322e114c40970d5983d9a07cc # v2.38.0
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: |
+            for i in $(seq 1 60); do adb -s emulator-5554 shell ls /sdcard/Android >/dev/null 2>&1 && break; sleep 2; done
+            ./gradlew :app:connectedDebugAndroidTest --console=plain
 
   # The signed bundle, built here once and handed over to Play from the run's
   # own artifacts. It runs only on a push to main, never on a pull request:
@@ -204,7 +267,10 @@ jobs:
     name: Signed bundle
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    needs: [gates, data-tests, app-tests]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       # Pinned by commit, not by tag: this job holds the upload key, and a
       # moved tag on any action here would be a way to reach it.
@@ -236,7 +302,7 @@ jobs:
           path: |
             content/work
             content/quran.db
-          key: content-work-${{ hashFiles('content/manifest.json', 'content/build-report.json') }}
+          key: content-work-${{ hashFiles('content/manifest.json', 'content/build-report.json', 'content/catalog.json') }}
 
       # The bundle is only as good as the content inside it, so the content is
       # fetched before it is built. The unit tests and the two content gates

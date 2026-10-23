@@ -14,26 +14,52 @@
 </head>
 <body>
 <h1>Privacy Policy: Quran: The Noble Book</h1>
-<p class="updated">Last updated: September 18, 2026</p>
+<p class="updated">Last updated: October 23, 2026</p>
 
 <p>Quran: The Noble Book is a reader for the Quran. It collects nothing. There
 are no accounts, no ads, no trackers, no analytics, and no crash reporting. It
 is free and open source.</p>
 
 <h2>What leaves the device</h2>
-<p>Almost nothing. The app has one network use, and it happens only when the
-reader asks for it: downloading a content pack (a translation, a tafsir, a word
-list, a reciter's timings) or a recitation package for one surah, from the
-project's own GitHub Releases at <code>github.com/muntasimulhaque/quran</code>.
-That request carries nothing but the request itself: no account, no identifier,
-and no usage data. GitHub, like every web server, sees the connecting IP
-address; the app sends nothing else, and the project stores nothing.</p>
+<p>Almost nothing, and only to the project's own GitHub Releases page
+(<code>github.com/muntasimulhaque/quran</code>). The app asks no other host;
+GitHub's own download service may redirect the request to its release
+storage. Every request carries nothing but the request itself: there is no
+account, no identifier, and no usage data. GitHub, like every web server, sees
+the connecting IP address; the app sends nothing else, and the project stores
+nothing.</p>
 
-<p>Nothing is downloaded at launch. Nothing is downloaded automatically. A
-download starts only after the reader sees the item's name and size and taps
-to accept it. Every pack and every recitation package is verified against a
-SHA-256 recorded at build time, and anything that fails the check is
-discarded.</p>
+<p>The app reads the network only for content from the project's own Releases,
+and every download is verified against a SHA-256 recorded at build time:</p>
+<ul>
+  <li>The reading of the language the reader chose: the translation arrives
+      as part of that choice, and the tafsir follows on the same choice,
+      waiting for an unmetered connection when the phone is on cellular. A
+      word list arrives when the reader turns word by word on, where the row
+      names its size first.</li>
+  <li>A content pack the reader asks for in Settings, after the row names its
+      size.</li>
+  <li>A recitation package for one surah, after the reader taps Play, sees the
+      surah's name and size, and taps Download; or after they have turned on
+      Continue to the next surah in the player's own listening menu. That
+      switch is their word, given once, for the packages that follow the
+      surah being heard, and the player still shows each package's name and
+      size while it downloads, with a cancel.</li>
+  <li>A quiet refresh of a pack the reader already has, when the app itself
+      has carried a newer version of it (a corrected tafsir, say). The refresh
+      runs only on an unmetered connection and only for installed packs, so a
+      reader on cellular data never pays for it; it waits until the first page
+      is readable and never blocks the reading. A pack that fails its checksum
+      is discarded and retried later.</li>
+  <li>A daily integrity check of an installed pack whose size or modification
+      time has changed since its last verified read. It reads the local file,
+      compares it with the catalog's SHA-256, and downloads a replacement only
+      when the file is damaged. It runs on an unmetered connection, at most
+      once a day, and after the first page is readable.</li>
+</ul>
+
+<p>Nothing else is fetched at launch, and the app works fully offline with no
+connection at all.</p>
 
 <h2>What stays on the device</h2>
 <ul>
@@ -42,21 +68,42 @@ discarded.</p>
       storage and never leave it.</li>
   <li>Downloaded packs and recitation packages live in the app's private
       storage. Removing a pack, or a surah, deletes its files.</li>
-  <li>The app works fully offline: the Quran text and its page layout ship
-      inside the app, and so do search, bookmarks, and notes. Anything the
-      reader has already added works with no connection.</li>
+  <li>The app can be used fully offline: text, translation, tafsir, search,
+      bookmarks, notes, and any surah already downloaded all work with no
+      connection.</li>
 </ul>
 
 <h2>Permissions</h2>
 <ul>
-  <li><code>INTERNET</code>: the one use described above.</li>
-  <li><code>POST_NOTIFICATIONS</code>: the media notification while a
-      recitation plays.</li>
+  <li><code>INTERNET</code>: content from the project's own Releases, as
+      described above.</li>
+  <li><code>POST_NOTIFICATIONS</code>: the media notification while recitation
+      plays, and the daily ayah reminder.</li>
   <li><code>FOREGROUND_SERVICE</code> and
-      <code>FOREGROUND_SERVICE_MEDIA_PLAYBACK</code>: keeping a recitation
+      <code>FOREGROUND_SERVICE_MEDIA_PLAYBACK</code>: keeping recitation
       playing with the screen off.</li>
+  <li><code>SCHEDULE_EXACT_ALARM</code>: the daily ayah reminder, and nothing
+      else. Before Android 12 exact alarms were never gated, so on those
+      releases the app uses them and there is nothing for the reader to grant.
+      From Android 12 the phone's special access decides: on many phones, and
+      from Android 14 on most new installs, it starts out withheld, and the
+      app asks for it in the phone's own screen at the two moments the reader
+      sets the reminder (turning it on, or moving its time). The Daily page
+      then says where it stands, with the one door the phone offers. Nothing
+      about this permission leaves the phone: it is a switch for when this
+      app's own reminder is due, and no other app's alarms are touched.</li>
+  <li><code>RECEIVE_BOOT_COMPLETED</code>: putting the daily reminder back
+      after a restart, an app update, or a change of the phone's clock or time
+      zone. It is used only to re-arm the reminder the reader already set.</li>
 </ul>
-<p>Nothing else is declared.</p>
+
+<p>The app declares those six permissions. The player's library also merges in
+<code>ACCESS_NETWORK_STATE</code>, <code>WAKE_LOCK</code>, and
+<code>DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION</code>, which the app does not
+declare. <code>ACCESS_NETWORK_STATE</code> is what the quiet refresh reads to
+stay off metered connections; <code>WAKE_LOCK</code> keeps the recitation
+alive with the screen off; the receiver permission is the AndroidX library's
+own internal guard. None of them collects anything.</p>
 
 <h2>Children's privacy</h2>
 <p>The app is suitable for all ages. It has no user accounts, no user to user

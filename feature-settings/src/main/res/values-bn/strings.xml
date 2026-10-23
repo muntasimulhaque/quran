@@ -9,7 +9,7 @@
     <string name="settings_theme_system">সিস্টেম</string>
 
     <string name="settings_daily_title">প্রতিদিনের আয়াত</string>
-    <string name="settings_daily_subtitle_off">বন্ধ, পরেরটি %1$s</string>
+    <string name="settings_daily_subtitle_off">বন্ধ</string>
     <string name="settings_daily_subtitle_on">প্রতিদিন একটি আয়াত, সময় %1$s</string>
     <string name="settings_daily_subtitle_blocked">নোটিফিকেশন বন্ধ, তাই প্রতিদিনের আয়াত আসবে না</string>
     <string name="settings_daily_subtitle_late">সঠিক অ্যালার্ম বন্ধ, তাই আয়াত দেরিতে আসতে পারে</string>

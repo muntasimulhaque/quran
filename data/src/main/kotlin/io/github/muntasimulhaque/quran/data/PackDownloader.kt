@@ -54,7 +54,20 @@ class PackDownloader(private val context: Context) {
         while (true) {
             coroutineContext.ensureActive()
             val fetched = fetch(url, temporary, startAt, pack.bytes, onProgress)
-            fetched.exceptionOrNull()?.let { return@withContext Result.failure(it) }
+            val failure = fetched.exceptionOrNull()
+            if (failure != null) {
+                // A part that already holds the whole file is a completed
+                // transfer whose rename never happened. The server answers
+                // the Range request with 416, and retrying the same range
+                // would stay stuck forever. Throw the part away and start
+                // once from the beginning; the hash check then proves it.
+                if (startAt > 0 && failure.message == "HTTP 416") {
+                    temporary.delete()
+                    startAt = 0L
+                    continue
+                }
+                return@withContext Result.failure(failure)
+            }
             if (pack.sha256.isEmpty() || matches(temporary, pack.sha256)) {
                 return@withContext move(temporary, directory, pack.id)
             }
@@ -81,8 +94,8 @@ class PackDownloader(private val context: Context) {
             // The app's one network use is HTTPS to the project's own release
             // page: a URL of another shape, or a redirect that lands on one,
             // is refused rather than fetched in the clear.
-            if (!url.startsWith("https://")) {
-                return Result.failure(IllegalStateException("the pack URL is not https"))
+            if (!url.startsWith("https://") || !ReleaseHosts.isAllowed(url)) {
+                return Result.failure(IllegalStateException("the pack URL is not the project's release host"))
             }
             connection = java.net.URL(url).openConnection() as java.net.HttpURLConnection
             connection.instanceFollowRedirects = true
@@ -91,8 +104,12 @@ class PackDownloader(private val context: Context) {
             connection.setRequestProperty("Accept", "application/octet-stream")
             if (startAt > 0) connection.setRequestProperty("Range", "bytes=$startAt-")
             connection.connect()
-            if (connection.url.protocol != "https") {
-                return Result.failure(IllegalStateException("the pack redirect left https"))
+            if (connection.url.protocol != "https" ||
+                !ReleaseHosts.isAllowed(connection.url.toString())
+            ) {
+                return Result.failure(
+                    IllegalStateException("the pack redirect left the project's release host"),
+                )
             }
             val resumed =
                 startAt > 0 && connection.responseCode == java.net.HttpURLConnection.HTTP_PARTIAL

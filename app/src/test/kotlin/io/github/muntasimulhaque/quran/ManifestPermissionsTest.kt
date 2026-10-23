@@ -1,6 +1,7 @@
 package io.github.muntasimulhaque.quran
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
 
@@ -32,6 +33,35 @@ class ManifestPermissionsTest {
                 "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
                 "android.permission.SCHEDULE_EXACT_ALARM",
                 "android.permission.RECEIVE_BOOT_COMPLETED",
+            ),
+            declared,
+        )
+    }
+
+    @Test
+    fun theMergedManifestAddsOnlyTheDocumentedLibraryPermissions() {
+        val merged = File(
+            "build/intermediates/merged_manifests/debug/processDebugManifest/AndroidManifest.xml",
+        )
+        assertTrue("the merged manifest was not built before this test", merged.isFile)
+        val declared = Regex("""<uses-permission\s+android:name="([^"]+)""")
+            .findAll(merged.readText())
+            .map { it.groupValues[1] }
+            .toSet()
+        assertEquals(
+            setOf(
+                "android.permission.INTERNET",
+                "android.permission.POST_NOTIFICATIONS",
+                "android.permission.FOREGROUND_SERVICE",
+                "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+                "android.permission.SCHEDULE_EXACT_ALARM",
+                "android.permission.RECEIVE_BOOT_COMPLETED",
+                // Media3 and AndroidX merge these in; the privacy policy
+                // names them. A new one is a change the law requires the
+                // owner to sign off, so it must fail here first.
+                "android.permission.ACCESS_NETWORK_STATE",
+                "android.permission.WAKE_LOCK",
+                "io.github.muntasimulhaque.quran.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION",
             ),
             declared,
         )

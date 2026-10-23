@@ -157,6 +157,10 @@ class DailyReminderTest {
                     "so it arrives on a locked, idle phone (owner decision): $record",
                 record.contains("window=0"),
             )
+            assertTrue(
+                "the reminder must wake a sleeping phone, not wait for the next touch: $record",
+                record.contains("RTC_WAKEUP"),
+            )
         } finally {
             // The alarm goes before the grant would: taking the grant back while this
             // process is alive makes the system kill it to drop its exact alarms,

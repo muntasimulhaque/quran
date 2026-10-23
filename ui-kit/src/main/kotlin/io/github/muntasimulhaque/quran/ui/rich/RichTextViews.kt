@@ -58,6 +58,8 @@ fun TranslationBody(
     lineSp: Float? = null,
     arabicSp: Float = sizeSp ?: 18f,
     onFootnote: ((Int) -> Unit)? = null,
+    /** The notes this text actually carries; null means every marker is a door. */
+    footnoteNumbers: Set<Int>? = null,
     /** True on a surface that centers its lines, such as the share card. */
     centered: Boolean = false,
     /**
@@ -91,6 +93,7 @@ fun TranslationBody(
             markerSize = markerSp(body, 0.70f),
             quoteColor = color,
             onFootnote = onFootnote,
+            footnoteNumbers = footnoteNumbers,
         ),
         style = base,
         color = color,
@@ -280,6 +283,7 @@ private fun annotated(
     markerSize: TextUnit,
     quoteColor: Color?,
     onFootnote: ((Int) -> Unit)? = null,
+    footnoteNumbers: Set<Int>? = null,
 ): AnnotatedString {
     // The marker is a door to the note, so it wears the theme's one action
     // color, the same ink the reciter's name, the chevrons, and the note's
@@ -332,8 +336,14 @@ private fun annotated(
                     // shapes a footnote number must not be.
                     fontFeatureSettings = "lnum",
                 )
-                if (onFootnote == null) {
-                    withStyle(style) { append(marker.toString()) }
+                val linkable = onFootnote != null &&
+                    (footnoteNumbers == null || marker in footnoteNumbers)
+                if (!linkable) {
+                    // A marker with no note in the source is not a door. It
+                    // stays a superscript, in the sentence's own ink, so a
+                    // tap does not open an empty sheet and the reader is not
+                    // told the note is somewhere it is not.
+                    withStyle(style.copy(color = quoteFallback)) { append(marker.toString()) }
                 } else {
                     // The marker is a door: tapping it opens the translator's
                     // note without moving the reader out of the sentence.

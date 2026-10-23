@@ -92,6 +92,39 @@ internal fun AyahBlock(
     // this session).
     val reference = localizedDigits(row.ayah.verseKey)
     val referenceLabel = stringResource(R.string.reading_ayah_reference, reference)
+    // The one spoken shape of the whole ayah. The reference and the Arabic
+    // used to carry their own descriptions inside a merged clickable block,
+    // and TalkBack preferred those descriptions to the translation and the
+    // word meanings, which had no description of their own. The block now
+    // says the whole ayah once, in the reader's language.
+    val spokenAyah = remember(row.ayah.text) { Arabic.portableText(row.ayah.text) }
+    val spokenContent = remember(
+        referenceLabel,
+        spokenAyah,
+        row.translations,
+        row.meanings,
+        metrics.showTranslation,
+        metrics.wordByWord,
+    ) {
+        buildString {
+            append(referenceLabel)
+            append(". ")
+            append(spokenAyah)
+            if (metrics.showTranslation) {
+                row.translations.forEach { line ->
+                    append(". ")
+                    append(RichText.plain(line.text.text))
+                }
+            }
+            if (metrics.wordByWord) {
+                val glosses = row.meanings.mapNotNull { it.meaning }
+                if (glosses.isNotEmpty()) {
+                    append(". ")
+                    append(glosses.joinToString(", "))
+                }
+            }
+        }
+    }
     val ornamentStyle = remember(hafs, metrics.arabicSp, palette.ornament) {
         SpanStyle(
             fontFamily = hafs,
@@ -145,6 +178,7 @@ internal fun AyahBlock(
                 // has: the ayah's actions, which is the one gesture the
                 // reading is built around, and the paper's own tap.
                 .semantics {
+                    contentDescription = spokenContent
                     customActions = listOf(
                         CustomAccessibilityAction(ayahActions) {
                             onAyah(row.ayah)
@@ -176,9 +210,7 @@ internal fun AyahBlock(
                     // did not (owner decision, the theme and consistency
                     // session).
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .padding(bottom = Space.Tight)
-                        .semantics { contentDescription = referenceLabel },
+                    modifier = Modifier.padding(bottom = Space.Tight),
                 )
             }
             // The roundel's own span is a key as well as the words: the
@@ -196,7 +228,6 @@ internal fun AyahBlock(
             // encoding: the same words, with the dotless base and the small
             // letters folded to what a speech engine can pronounce (owner
             // decision, the palette session). The visible line is untouched.
-            val spokenAyah = remember(row.ayah.text) { Arabic.portableText(row.ayah.text) }
             val arabicLine = remember(
                 row.ayah.number,
                 playing,
@@ -219,7 +250,6 @@ internal fun AyahBlock(
                 onTextLayout = { textLayout = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .semantics { contentDescription = spokenAyah }
                     .drawWithContent {
                         val range = arabicLine.washRange
                         val layout = textLayout
@@ -275,6 +305,12 @@ internal fun AyahBlock(
                         lineSp = metrics.translationLineSp,
                         arabicSp = metrics.arabicInlineSp,
                         onFootnote = onFootnote,
+                        footnoteNumbers = remember(row.translations) {
+                            row.translations
+                                .flatMap { it.text.footnotes }
+                                .map { it.number }
+                                .toSet()
+                        },
                     )
                 }
             }

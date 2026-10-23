@@ -169,18 +169,30 @@ object DailyAyahScheduler {
             lastMinuteOfDay = LAST_MINUTE_OF_DAY,
         )
         val pending = pendingIntent(context, localDay(plan.triggerAtMillis))
-        when (plan.kind) {
-            DailyReminder.Kind.Exact ->
-                alarm.setExactAndAllowWhileIdle(AlarmManager.RTC, plan.triggerAtMillis, pending)
-            // The batched fallback is the one that can reach a sleeping
-            // phone, late. The exact path is the default on every phone now,
-            // so this branch is left for a reader who has turned the phone's
-            // own special access off. A windowed alarm is never used: the
-            // platform gives it a floor of ten minutes on Android 15 and
-            // never delivers it from Doze, so a window was measured and
-            // dropped.
-            DailyReminder.Kind.Batched ->
-                alarm.setAndAllowWhileIdle(AlarmManager.RTC, plan.triggerAtMillis, pending)
+        // RTC_WAKEUP, not RTC: an exact alarm that does not wake the phone
+        // can be held until the reader next touches it, which is the one
+        // thing a morning reminder must not do. The exact grant changes when
+        // the alarm is delivered, not whether it wakes the device.
+        //
+        // The set can throw if the reader takes the exact grant back between
+        // the check above and this line. A reminder that cannot be armed is
+        // left for the next launch; it must never take the process down.
+        runCatching {
+            when (plan.kind) {
+                DailyReminder.Kind.Exact ->
+                    alarm.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, plan.triggerAtMillis, pending)
+                // The batched fallback is the one that can reach a sleeping
+                // phone, late. The exact path is the default on every phone now,
+                // so this branch is left for a reader who has turned the phone's
+                // own special access off. A windowed alarm is never used: the
+                // platform gives it a floor of ten minutes on Android 15 and
+                // never delivers it from Doze, so a window was measured and
+                // dropped.
+                DailyReminder.Kind.Batched ->
+                    alarm.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, plan.triggerAtMillis, pending)
+            }
+        }.onFailure {
+            android.util.Log.w("DailyAyahScheduler", "the reminder could not be armed", it)
         }
     }
 
