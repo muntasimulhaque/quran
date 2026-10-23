@@ -1,8 +1,6 @@
 # Store kit
 
-Version: 10.8 (versionCode 110)
-
-> The audit fixes in the working tree are not in the 10.8 bundle. Do not submit the 10.8 AAB; the next version will update this kit.
+Version: 10.9 (versionCode 111)
 
 ## Listing
 
@@ -128,7 +126,7 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 39948879759 on 10.8: all three legs green with eight frames each, every frame read. The reading, chrome, opening, Browse, ayah card, and tafsir carry the QPC text and the new tajweed palette; the tablet settings frames carry the 10.8 version line. The Tajweed page is not in the set, so its word samples are not among the frames.
+The set is being recaptured for 10.9; the final capture run and the version line will be recorded here from the green run. The reading, chrome, opening, Browse, ayah card, and tafsir carry the QPC text; the settings frames carry the 10.9 version line. The Tajweed page is not in the set, so its word samples are not among the frames.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
@@ -148,8 +146,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (10.8, 282 characters)
-The Tajweed colors are chosen for identity instead of a quiet page, and every family still clears 4.5:1 on the reading, the sheet, and the reciter's wash. The Tajweed page in Settings now shows a real word from the reading in each family's color. The reading is unchanged otherwise.
+## Release notes (10.9, 429 characters)
+10.9 makes the reading steadier. The reciter's wash stays on the last word, Arabic search finds words written with a hamza seat, surah introductions arrive with the core text, and a damaged or interrupted download recovers instead of sticking. The daily reminder wakes the phone, a double tap on Save no longer races, and TalkBack reads the translation and word meanings. The privacy policy and the store notes now match the app.
 
 ## Before each release
 
