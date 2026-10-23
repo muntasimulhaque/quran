@@ -121,7 +121,7 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 39801959239 on 10.4: all three legs green with eight frames each, every frame read. The reading, chrome, opening, Browse, ayah card, and tafsir carry the QPC text and the tajweed colors; the tablet settings frames add the Tajweed colors row and the 10.4 version line.
+The set is from capture run 39927127875 on 10.7: all three legs green with eight frames each, every frame read. The reading, chrome, opening, Browse, ayah card, and tafsir carry the QPC text and the tajweed colors; the tablet settings frames add the Tajweed colors row and the 10.7 version line.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
