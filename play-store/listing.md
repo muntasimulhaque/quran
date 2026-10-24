@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 11.1 (versionCode 113)
+Version: 11.2 (versionCode 114)
 
 ## Listing
 
@@ -21,7 +21,7 @@ explains every color in English and Bangla. The reading gives each ayah its
 Saheeh International translation with the original footnotes; when word by
 word is turned on, each word carries its meaning; and the ayah card opens
 Ibn Kathir in English, with the Quran quotations set apart. Bangla readers
-get the Taisirul Quran translation, Ibn Kathir in Bangla, Bangla word
+get the Al-Bayan Simple Translation, Ibn Kathir in Bangla, Bangla word
 meanings, and the surah names in Bengali script, and the whole interface can
 be read in English or Bangla.
 
@@ -155,8 +155,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (11.1, 313 characters)
-11.1 finishes the audit. The media notification now uses the app's own transport drawings, a full last-read storage no longer crashes the reading, the font license is readable inside the app, and the tablet screenshots are checked against Play's current size rule. The reading and content are unchanged from 11.0.
+## Release notes (11.2, 320 characters)
+11.2 replaces the Bangla translation with আল-বায়ান সরল অর্থানুবাদ (Al-Bayan Simple Translation). Its 182 translator notes open in the footnote sheet, like Saheeh International's. A star with no note, and extra stars QUL left unfilled, are gone. The old Bangla translation is removed. The reading is otherwise unchanged.
 
 ## Before each release
 
@@ -212,7 +212,7 @@ and a SHA-256 check before it is used:
 | Language | Translation | Tafsir | Word by word |
 |---|---|---|---|
 | English | Saheeh International (2.9 MB) | Ibn Kathir (29.5 MB) | 6.3 MB |
-| Bangla | Taisirul Quran (5.9 MB) | Ibn Kathir (56.0 MB) | 8.4 MB |
+| Bangla | Al-Bayan Simple Translation (5.6 MB) | Ibn Kathir (56.0 MB) | 8.4 MB |
 
 Recitations: Minshawi and Husary, one surah at a time (about 0.2 to 185 MB
 each), plus 1.7 MB of timing data per reciter.

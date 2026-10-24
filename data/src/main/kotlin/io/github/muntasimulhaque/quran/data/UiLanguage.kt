@@ -41,8 +41,8 @@ enum class UiLanguage(val tag: String) {
         /** The id of the Saheeh International translation pack. */
         const val TRANSLATION_EN = "translation-saheeh-en"
 
-        /** The id of the Taisirul Quran translation pack. */
-        const val TRANSLATION_BN = "translation-taisirul-quran-bn"
+        /** The id of the Al-Bayan Simple Translation pack. */
+        const val TRANSLATION_BN = "translation-al-bayan-bn"
 
         /** The id of the English Ibn Kathir pack. */
         const val TAFSIR_EN = "tafsir-ibn-kathir-en"
@@ -78,6 +78,29 @@ fun AppSettings.withLanguage(language: UiLanguage): AppSettings {
             .minus(previous?.content?.tafsir.orEmpty())
             .plus(content.tafsir),
     )
+}
+
+/**
+ * The translations a reader keeps after a pack leaves the build.
+ *
+ * A pack removed from the catalog is still named in the reader's stored set.
+ * The unknown ids are dropped. If any of them was a translation the reader
+ * had chosen, the language's own default takes its place, so a Bangla reader
+ * who had the retired Bangla pack keeps a Bangla translation instead of a
+ * silent gap. A reader who removed that default themselves has no unknown id
+ * and is left alone.
+ */
+fun translationSelectionAfterRemoval(
+    language: String?,
+    selected: Set<String>,
+    offered: Set<String>,
+): Set<String> {
+    val kept = selected.filterTo(LinkedHashSet()) { it in offered }
+    val removed = selected.any { it !in offered }
+    if (!removed) return kept
+    val fallback = UiLanguage.of(language)?.content?.translation
+    if (fallback != null && fallback in offered) kept += fallback
+    return kept
 }
 
 /**

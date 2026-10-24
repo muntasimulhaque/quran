@@ -45,12 +45,12 @@ class WordByWordTest {
         override fun before() {
             val context = InstrumentationRegistry.getInstrumentation().targetContext
             val store = PackStore(context)
-            store.install("translation-taisirul-quran-bn")
+            store.install("translation-al-bayan-bn")
             store.install("words-bn")
             val settings = SettingsStore(context)
             runBlocking {
                 settings.setUiLanguage("bn")
-                settings.setTranslationPacks(setOf("translation-taisirul-quran-bn"))
+                settings.setTranslationPacks(setOf("translation-al-bayan-bn"))
                 settings.setWordByWord(true)
                 // The reader's own place, set here rather than inherited.
                 // These tests share one install and one process, so whatever

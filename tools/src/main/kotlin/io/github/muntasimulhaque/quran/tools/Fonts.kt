@@ -42,7 +42,7 @@ class Fonts(private val root: File) {
      * megabytes. Each entry is a Unicode block the platform owns, named once.
      */
     private val platformScripts = mapOf(
-        // Bangla: the Taisirul Quran translation and the Bangla Ibn Kathir.
+        // Bangla: the Al-Bayan Simple Translation and the Bangla Ibn Kathir.
         // Android ships Noto Sans Bengali on every device since API 21,
         // which is what draws them.
         0x0980..0x09FF to "Bangla",

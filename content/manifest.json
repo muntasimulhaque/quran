@@ -1,5 +1,5 @@
 {
-  "contentVersion": "1.3.0",
+  "contentVersion": "1.4.0",
   "note": "Machine-readable source of truth for bundled content.",
   "datasets": [
     {
@@ -387,19 +387,19 @@
       "assetUrl": null
     },
     {
-      "id": "translation-taisirul-quran-bn",
-      "name": "Taisirul Quran (Bangla)",
+      "id": "translation-al-bayan-bn",
+      "name": "Al-Bayan Simple Translation (Rawai Al-bayan), QUL 185",
       "source": "Quranic Universal Library (QUL) by Tarteel",
-      "url": "https://qul.tarteel.ai/resources/translation/184",
-      "resourceId": "184",
-      "format": "sqlite",
-      "license": "Distributed via QUL",
-      "licenseBn": "QUL-এর মাধ্যমে বিতরণ",
-      "credit": "Professor Muhammad Mozammel Haque, via QUL",
-      "usedFor": "Bangla translation pack",
-      "path": "content/raw/qul/bengali-taisirul-quran.sqlite.zip",
-      "bytes": 547196,
-      "sha256": "6d87d89b3ba55027d2b368eb9130ee57f20c13fe3c1192c4d80f2a02592e1e2f",
+      "url": "https://qul.tarteel.ai/resources/translation/185",
+      "resourceId": "185",
+      "format": "json",
+      "license": "Al-Bayan Foundation Bangladesh: free to copy and distribute, electronic or paper, unchanged and never for sale. The publisher's grant is printed in the book; IslamHouse publishes an electronic edition with permission.",
+      "licenseBn": "আল-বায়ান ফাউন্ডেশন বাংলাদেশ: পরিবর্তন ছাড়া বিনামূল্যে ইলেকট্রনিক বা কাগজে বিতরণ করা যাবে, বিক্রয় নিষিদ্ধ। প্রকাশকের অনুমতিটি বইয়ে মুদ্রিত; ইসলামহাউস অনুমতিসহ একটি ইলেকট্রনিক সংস্করণ প্রকাশ করে।",
+      "credit": "Al-Bayan Foundation Bangladesh, via the Quranic Universal Library",
+      "usedFor": "Bangla translation pack (QUL resource 185, content 162); the export's lost-glyph U+00AC sign is removed",
+      "path": "content/raw/qul/bengali-al-bayan.json",
+      "bytes": 3485007,
+      "sha256": "27290b9647b6d39f3ab4fde988e8522268752e02595f6e4df7291e8fd0555932",
       "assetUrl": null
     },
     {

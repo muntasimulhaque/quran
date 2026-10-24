@@ -83,14 +83,14 @@ class Build(private val root: File) {
             val inserted = insertAyahsAndWords(connection, words, ayahNumbers, wordLists, navigation)
             insertTranslation(connection, translation)
             insertTafsirIbnKathir(connection, ayahNumbers)
-            // The Bangla library, built only when its sources are present, so
-            // a fresh clone without them still produces a complete English app.
-            if (sourceDb("translation-taisirul-quran-bn") != null) {
-                val bangla = readQulTranslation("translation-taisirul-quran-bn", ayahNumbers)
-                insertTranslation(connection, bangla, packId = "translation-taisirul-quran-bn")
-                println("build: Taisirul Quran (Bangla): ${bangla.size} ayahs")
+            // The Bangla translation, built when its source is present, so a
+            // fresh clone without it still produces a complete English app.
+            if (sourceDir("translation-al-bayan-bn").firstWithExtension(".json") != null) {
+                val bangla = readAlBayanTranslation("translation-al-bayan-bn", ayahNumbers)
+                insertTranslation(connection, bangla, packId = "translation-al-bayan-bn")
+                println("build: Al-Bayan Simple Translation (Bangla): ${bangla.size} ayahs, ${bangla.values.count { it.footnotes.isNotEmpty() }} notes")
             } else {
-                println("build: skipping translation-taisirul-quran-bn (source not present)")
+                println("build: skipping translation-al-bayan-bn (source not present)")
             }
             insertTafsirIbnKathir(
                 connection,
@@ -259,23 +259,31 @@ class Build(private val root: File) {
     }
 
     /**
-     * The QUL translation shape: one row per ayah with its key and its text.
-     * It is the same exporter that produced the tafsir files, so a second
-     * translation is another file, not another parser.
+     * The QUL JSON shape: one object per ayah with its verse key and its
+     * text. The first star in the sentence becomes the reader's footnote
+     * marker, the body after the blank line becomes the note, and every
+     * other star is a reference QUL did not fill. [bayanAyah] holds that
+     * rule and its tests.
      */
-    private fun readQulTranslation(datasetId: String, ayahNumbers: Map<String, Int>): Map<Int, Translation> {
+    private fun readAlBayanTranslation(datasetId: String, ayahNumbers: Map<String, Int>): Map<Int, Translation> {
+        val file = sourceDir(datasetId).firstWithExtension(".json")
+            ?: error("no JSON for $datasetId; run verify first")
+        val root = runCatching { Json.parseToJsonElement(file.readText()).jsonObject }
+            .getOrElse { failure -> error("cannot read $datasetId: ${failure.message}") }
+        val rows = root["translations"]?.jsonArray
+            ?: error("$datasetId has no translations array")
         val out = HashMap<Int, Translation>(7000)
-        openSqlite(sourceDb(datasetId)).use { connection ->
-            connection.each("SELECT ayah_key, text FROM translation ORDER BY ayah_key") { rs ->
-                val key = rs.getString(1) ?: return@each
-                val text = sanitize(rs.getString(2) ?: "")
-                if (text.isBlank()) return@each
-                val surah = key.substringBefore(':').toIntOrNull() ?: return@each
-                val ayah = key.substringAfter(':').toIntOrNull() ?: return@each
-                val first = ayahNumbers["$surah:1"] ?: return@each
-                val number = first + ayah - 1
-                out[number] = Translation(number, text, "")
-            }
+        for (row in rows) {
+            val entry = row.jsonObject
+            val key = entry["verse_key"]?.jsonPrimitive?.contentOrNull ?: continue
+            val parsed = bayanAyah(sanitize(entry["text"]?.jsonPrimitive?.contentOrNull ?: ""))
+            if (parsed.text.isBlank()) continue
+            val surah = key.substringBefore(':').toIntOrNull() ?: continue
+            val ayah = key.substringAfter(':').toIntOrNull() ?: continue
+            val first = ayahNumbers["$surah:1"] ?: continue
+            val number = first + ayah - 1
+            val note = parsed.note?.let { "[1]- $it" }.orEmpty()
+            out[number] = Translation(number, parsed.text, note)
         }
         return out
     }
@@ -532,7 +540,7 @@ class Build(private val root: File) {
         val packs = listOf(
             Pack("translation-saheeh-en", "translation", "Saheeh International", "en", "1.1.2"),
             Pack("tafsir-ibn-kathir-en", "tafsir", "Ibn Kathir", "en", "QUL"),
-            Pack("translation-taisirul-quran-bn", "translation", "Taisirul Quran", "bn", "QUL"),
+            Pack("translation-al-bayan-bn", "translation", "Al-Bayan Simple Translation", "bn", "QUL"),
             Pack("tafsir-ibn-kathir-bn", "tafsir", "Ibn Kathir", "bn", "QUL"),
         )
         connection.prepareStatement(

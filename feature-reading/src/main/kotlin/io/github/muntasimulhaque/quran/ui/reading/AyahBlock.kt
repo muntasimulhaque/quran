@@ -49,6 +49,7 @@ import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.ReadingRow
+import io.github.muntasimulhaque.quran.data.TranslationLine
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
@@ -72,7 +73,7 @@ internal fun AyahBlock(
     playingWord: Int?,
     onAyah: (Ayah) -> Unit,
     onBackgroundTap: () -> Unit,
-    onFootnote: (Int) -> Unit,
+    onFootnote: (TranslationLine, Int) -> Unit,
 ) {
     val palette = LocalPagePalette.current
     val playing = row.ayah.number == playingAyah
@@ -304,12 +305,9 @@ internal fun AyahBlock(
                         sizeSp = metrics.translationSp,
                         lineSp = metrics.translationLineSp,
                         arabicSp = metrics.arabicInlineSp,
-                        onFootnote = onFootnote,
-                        footnoteNumbers = remember(row.translations) {
-                            row.translations
-                                .flatMap { it.text.footnotes }
-                                .map { it.number }
-                                .toSet()
+                        onFootnote = { number -> onFootnote(line, number) },
+                        footnoteNumbers = remember(line.text.footnotes) {
+                            line.text.footnotes.map { it.number }.toSet()
                         },
                     )
                 }

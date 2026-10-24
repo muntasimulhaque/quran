@@ -14,10 +14,10 @@
             "version": "5",
             "shipped": true,
             "ayahs": 6236,
-            "bytes": 9977856,
-            "sha256": "9bfa94ae1288041c70c190c7e0c2eb7eca55597b81a3eaf2fde88349fb1561e1",
-            "tag": "pack-core-9bfa94ae",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-9bfa94ae/core.db"
+            "bytes": 9957376,
+            "sha256": "1c2edec53a663bb11271f476e40c9c649cb748012a47fd571bed0fab32bb71cd",
+            "tag": "pack-core-1c2edec5",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-1c2edec5/core.db"
         },
         {
             "id": "translation-saheeh-en",
@@ -48,27 +48,27 @@
             "version": "QUL",
             "shipped": false,
             "ayahs": 6236,
-            "bytes": 29523968,
-            "sha256": "927ae1e6d46eae743bda8aba74c97b34c4b70fe992cb370a7ce75fe0ef497a34",
-            "tag": "pack-tafsir-ibn-kathir-en-927ae1e6",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-tafsir-ibn-kathir-en-927ae1e6/tafsir-ibn-kathir-en.db"
+            "bytes": 29470720,
+            "sha256": "78d8986f0ace546fdd4339ab2e8cdf05ae616c1e9eadc465ef59fc0fa86dc608",
+            "tag": "pack-tafsir-ibn-kathir-en-78d8986f",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-tafsir-ibn-kathir-en-78d8986f/tafsir-ibn-kathir-en.db"
         },
         {
-            "id": "translation-taisirul-quran-bn",
+            "id": "translation-al-bayan-bn",
             "type": "translation",
-            "name": "Taisirul Quran",
+            "name": "Al-Bayan Simple Translation",
             "language": "bn",
-            "credit": "Professor Muhammad Mozammel Haque, via the Quranic Universal Library",
-            "creditBn": "প্রফেসর মুহাম্মদ মোজাম্মেল হক, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে",
-            "license": "Distributed via QUL",
-            "licenseBn": "QUL-এর মাধ্যমে বিতরণ",
+            "credit": "Al-Bayan Foundation Bangladesh, via the Quranic Universal Library",
+            "creditBn": "আল-বায়ান ফাউন্ডেশন বাংলাদেশ, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে",
+            "license": "Al-Bayan Foundation Bangladesh: free to copy and distribute, electronic or paper, unchanged and never for sale. The publisher's grant is printed in the book; IslamHouse publishes an electronic edition with permission.",
+            "licenseBn": "আল-বায়ান ফাউন্ডেশন বাংলাদেশ: পরিবর্তন ছাড়া বিনামূল্যে ইলেকট্রনিক বা কাগজে বিতরণ করা যাবে, বিক্রয় নিষিদ্ধ। প্রকাশকের অনুমতিটি বইয়ে মুদ্রিত; ইসলামহাউস অনুমতিসহ একটি ইলেকট্রনিক সংস্করণ প্রকাশ করে।",
             "version": "QUL",
             "shipped": false,
             "ayahs": 6236,
-            "bytes": 5939200,
-            "sha256": "0a70f8ef46db636b52c04885566c9ee09fc97b0150214fddb6b3a7233150ed15",
-            "tag": "pack-translation-taisirul-quran-bn-0a70f8ef",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-translation-taisirul-quran-bn-0a70f8ef/translation-taisirul-quran-bn.db"
+            "bytes": 5648384,
+            "sha256": "a04da33a501f8ca3c749ce931bb6c3b892099d4ec9d7c3b418911b6665cead7a",
+            "tag": "pack-translation-al-bayan-bn-a04da33a",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-translation-al-bayan-bn-a04da33a/translation-al-bayan-bn.db"
         },
         {
             "id": "tafsir-ibn-kathir-bn",

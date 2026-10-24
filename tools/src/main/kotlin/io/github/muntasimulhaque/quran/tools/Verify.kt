@@ -73,7 +73,7 @@ class Verify(private val root: File) {
             "quran-script-qpc-hafs-ayah" -> checkQulAyah(dataset.id, dir)
             "translation-saheeh" -> checkSaheeh(dataset.id, dir)
             "saheeh-qul-crosscheck" -> checkSimpleCount(dataset.id, dir, "translation", 6236)
-            "translation-taisirul-quran-bn" -> checkSimpleCount(dataset.id, dir, "translation", 6236)
+            "translation-al-bayan-bn" -> checkAlBayanJson(dataset.id, dir)
             "tafsir-ibn-kathir-en", "tafsir-ibn-kathir-bn" -> checkTafsirQul(dataset.id, dir)
             "word-by-word-english", "word-by-word-bengali" -> checkWordTranslation(dataset.id, dir)
             "recitation-minshawi", "recitation-husary", "recitation-husary-muallim",
@@ -266,6 +266,38 @@ class Verify(private val root: File) {
     private fun jsonFile(dir: File): File =
         dir.walkTopDown().firstOrNull { it.isFile && it.name.endsWith(".json") }
             ?: error("no json file in ${dir.absolutePath}")
+
+    /**
+     * The QUL translation JSON: one row per ayah, keyed 1:1 to 114:6, with
+     * no blank text. The build keeps the source text whole, footnote mark
+     * included; whether that footnote stays in the reading is a content
+     * choice made when the pack is built.
+     */
+    private fun checkAlBayanJson(id: String, dir: File) {
+        val root = runCatching { Json.parseToJsonElement(jsonFile(dir).readText()).jsonObject }
+            .getOrElse { failure ->
+                fail(id, "cannot read JSON: ${failure.message}")
+                return
+            }
+        val rows = root["translations"]?.jsonArray
+        if (rows == null) {
+            fail(id, "no translations array")
+            return
+        }
+        if (rows.size != 6236) fail(id, "expected 6236 ayahs, found ${rows.size}")
+        val keys = HashSet<String>(7000)
+        for (row in rows) {
+            val entry = row.jsonObject
+            val key = entry["verse_key"]?.jsonPrimitive?.contentOrNull
+            val text = entry["text"]?.jsonPrimitive?.contentOrNull
+            if (key.isNullOrBlank() || text.isNullOrBlank()) {
+                fail(id, "an ayah has no key or no text")
+                continue
+            }
+            keys += key
+        }
+        if (keys.size != 6236) fail(id, "expected 6236 distinct ayah keys, found ${keys.size}")
+    }
 
     private fun checkJsonKeys(id: String, dir: File, expected: Int) {
         val element = Json.parseToJsonElement(jsonFile(dir).readText())

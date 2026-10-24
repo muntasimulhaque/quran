@@ -26,7 +26,7 @@ class UiLanguageTest {
         )
         assertEquals(
             LanguageContent(
-                translation = "translation-taisirul-quran-bn",
+                translation = "translation-al-bayan-bn",
                 tafsir = "tafsir-ibn-kathir-bn",
                 words = "words-bn",
             ),
@@ -49,7 +49,7 @@ class UiLanguageTest {
         // they chose, or one field would speak in two voices.
         val packs = listOf(
             pack("translation-saheeh-en", "en"),
-            pack("translation-taisirul-quran-bn", "bn"),
+            pack("translation-al-bayan-bn", "bn"),
             pack("tafsir-ibn-kathir-en", "en"),
             pack("tafsir-ibn-kathir-bn", "bn"),
         )
@@ -58,7 +58,7 @@ class UiLanguageTest {
             packs.forLanguage("en").map { it.id },
         )
         assertEquals(
-            listOf("translation-taisirul-quran-bn", "tafsir-ibn-kathir-bn"),
+            listOf("translation-al-bayan-bn", "tafsir-ibn-kathir-bn"),
             packs.forLanguage("bn").map { it.id },
         )
         assertTrue(packs.forLanguage("ar").isEmpty())
@@ -89,7 +89,7 @@ class UiLanguageTest {
     fun aFreshChoiceSelectsTheLanguagesOwnPacks() {
         val chosen = AppSettings().withLanguage(UiLanguage.Bangla)
         assertEquals("bn", chosen.uiLanguage)
-        assertEquals(setOf("translation-taisirul-quran-bn"), chosen.translationPacks)
+        assertEquals(setOf("translation-al-bayan-bn"), chosen.translationPacks)
         assertEquals(setOf("tafsir-ibn-kathir-bn"), chosen.tafsirPacks)
     }
 
@@ -97,8 +97,38 @@ class UiLanguageTest {
     fun movingLanguageSwapsTheDefaults() {
         val english = AppSettings().withLanguage(UiLanguage.English)
         val bangla = english.withLanguage(UiLanguage.Bangla)
-        assertEquals(setOf("translation-taisirul-quran-bn"), bangla.translationPacks)
+        assertEquals(setOf("translation-al-bayan-bn"), bangla.translationPacks)
         assertEquals(setOf("tafsir-ibn-kathir-bn"), bangla.tafsirPacks)
+    }
+
+    @Test
+    fun aRetiredTranslationIsReplacedByTheLanguagesOwn() {
+        val kept = translationSelectionAfterRemoval(
+            language = "bn",
+            selected = setOf("translation-retired-bn"),
+            offered = setOf("translation-al-bayan-bn", "translation-saheeh-en"),
+        )
+        assertEquals(setOf("translation-al-bayan-bn"), kept)
+    }
+
+    @Test
+    fun aReaderWhoKeptAnotherTranslationKeepsItAndGetsTheDefaultBack() {
+        val kept = translationSelectionAfterRemoval(
+            language = "bn",
+            selected = setOf("translation-retired-bn", "translation-saheeh-en"),
+            offered = setOf("translation-al-bayan-bn", "translation-saheeh-en"),
+        )
+        assertEquals(setOf("translation-saheeh-en", "translation-al-bayan-bn"), kept)
+    }
+
+    @Test
+    fun aReaderWhoRemovedTheDefaultThemselvesIsNotGivenItBack() {
+        val kept = translationSelectionAfterRemoval(
+            language = "bn",
+            selected = setOf("translation-saheeh-en"),
+            offered = setOf("translation-al-bayan-bn", "translation-saheeh-en"),
+        )
+        assertEquals(setOf("translation-saheeh-en"), kept)
     }
 
     @Test
@@ -117,6 +147,6 @@ class UiLanguageTest {
         assertTrue("the added tafsir must stay", "tafsir-added-by-hand" in after.tafsirPacks)
         assertTrue("the Bangla tafsir joins it", "tafsir-ibn-kathir-bn" in after.tafsirPacks)
         assertTrue("the English default steps aside", "tafsir-ibn-kathir-en" !in after.tafsirPacks)
-        assertEquals(setOf("translation-taisirul-quran-bn"), after.translationPacks)
+        assertEquals(setOf("translation-al-bayan-bn"), after.translationPacks)
     }
 }

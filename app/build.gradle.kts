@@ -85,7 +85,7 @@ val screenshotPacks = setOf(
     "translation-saheeh-en.db",
     "words-en.db",
     "tafsir-ibn-kathir-en.db",
-    "translation-taisirul-quran-bn.db",
+    "translation-al-bayan-bn.db",
     "words-bn.db",
 )
 
@@ -197,8 +197,8 @@ android {
         applicationId = "io.github.muntasimulhaque.quran"
         minSdk = 24
         targetSdk = 37
-        versionCode = 113
-        versionName = "11.1"
+        versionCode = 114
+        versionName = "11.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

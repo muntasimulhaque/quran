@@ -12,6 +12,7 @@ import io.github.muntasimulhaque.quran.data.SearchRequest
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -42,7 +43,7 @@ class ContentSearchTest {
             "translation-saheeh-en",
             "tafsir-ibn-kathir-en",
             "words-en",
-            "translation-taisirul-quran-bn",
+            "translation-al-bayan-bn",
         )) {
             store.install(id)
         }
@@ -111,19 +112,45 @@ class ContentSearchTest {
     @Test
     fun banglaTranslationSearchKeepsItsVowelSigns() = runBlocking {
         // A Bengali vowel sign is a combining mark, and the index keeps it in
-        // its token. The query used to split on it and ask for the phrase
-        // "পরত ফল", which matched nothing (owner report, this session).
-        // "প্রতিফল" is in Al-Fatiha 1:4, so the row must come back with the
-        // Bangla translation and its highlight.
-        val results = content.search(request("প্রতিফল", limit = 50))
+        // its token. "সৃষ্টিকুল" carries the vowel sign "ৃ" and is in Al-Fatiha
+        // 1:2, so the row must come back with the Bangla translation and its
+        // highlight.
+        val results = content.search(request("সৃষ্টিকুল", limit = 50))
         val hit = results.hits.filterIsInstance<SearchHit.AyahHit>()
-            .firstOrNull { it.ayah.number == 4 }
-        assertNotNull("1:4 must be found for প্রতিফল", hit)
-        assertEquals("translation-taisirul-quran-bn", hit!!.translation?.pack)
+            .firstOrNull { it.ayah.number == 2 }
+        assertNotNull("1:2 must be found for সৃষ্টিকুল", hit)
+        assertEquals("translation-al-bayan-bn", hit!!.translation?.pack)
         assertTrue(
             "the Bangla word must be highlighted in the translation",
             !hit.translation!!.ranges.isNullOrEmpty(),
         )
+    }
+
+    @Test
+    fun aBanglaFootnoteCarriesItsQulNote() {
+        // 2:1 carries the first QUL note in the pack. The reading needs the
+        // marker and the note under the same number, or the marker opens
+        // nothing.
+        assertEquals("2:1", content.ayah(8)?.verseKey)
+        val line = content.translations(listOf(8), "translation-al-bayan-bn")[8]
+        assertNotNull("2:1 must carry the Bangla translation", line)
+        assertTrue("2:1 must carry its marker", line?.text.orEmpty().contains("[1]"))
+        assertEquals(listOf(1), line?.footnotes?.map { it.number })
+        assertTrue(
+            "the note must be the QUL note",
+            line?.footnotes?.firstOrNull()?.text.orEmpty().contains("এ অক্ষরগুলো কুরআনের"),
+        )
+    }
+
+    @Test
+    fun aStarWithNoNoteLeavesNoFootnote() {
+        // 34:2 has a star and no note body in the QUL export.
+        assertEquals("34:2", content.ayah(3608)?.verseKey)
+        val line = content.translations(listOf(3608), "translation-al-bayan-bn")[3608]
+        assertNotNull("34:2 must carry the Bangla translation", line)
+        assertFalse("34:2 must carry no marker", line?.text.orEmpty().contains("[1]"))
+        assertFalse("34:2 must carry no note", line?.text.orEmpty().contains("*"))
+        assertTrue("34:2 must have an empty note list", line?.footnotes.orEmpty().isEmpty())
     }
 
     @Test

@@ -22,6 +22,7 @@ import io.github.muntasimulhaque.quran.data.RecitationPackage
 import io.github.muntasimulhaque.quran.data.RecitationStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.Surah
+import io.github.muntasimulhaque.quran.data.translationSelectionAfterRemoval
 import io.github.muntasimulhaque.quran.R
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -179,33 +180,48 @@ class ContentLibrary(
         }
     }
 
+    /** What the first open read before the library was built. */
+    private data class OpenedLibrary(
+        val installed: Set<String>,
+        val catalog: PackCatalog,
+        val database: Result<ContentDatabase>,
+        val settings: AppSettings,
+    )
+
     private suspend fun openLibrary() {
         failure = false
         // Everything that touches the disk stays off the main thread:
         // listing the packs, reading the catalog, and opening the library
         // itself are all work the reader's first frame must not wait on.
         val opened = withContext(Dispatchers.IO) {
+            // The reader's settings are read once, and everything that
+            // follows uses that same value: the store is not read twice for
+            // one launch.
+            val storedNow = settingsStore.settings.first()
             val installedNow = store.installed()
             // The catalog is marked with what this device has, so a pack
             // that is present is never offered as missing and a language
             // switch never re-fetches what is already here.
             val catalogNow = PackCatalog.load(application).withInstalled(installedNow)
+            // A pack this build no longer offers leaves the reader's choices
+            // and the device before the library is opened over them.
+            val repaired = repairTranslations(storedNow, catalogNow)
+            val installedAfter = store.installed()
+            val catalogAfter = catalogNow.withInstalled(installedAfter)
             val opened = runCatching {
-                ContentDatabase.open(application, catalogNow, installedNow)
+                ContentDatabase.open(application, catalogAfter, installedAfter)
             }
-            Triple(installedNow, catalogNow, opened)
+            OpenedLibrary(installedAfter, catalogAfter, opened, repaired)
         }
-        installed = opened.first
-        catalog = opened.second
-        val fresh = opened.third.getOrElse {
+        installed = opened.installed
+        catalog = opened.catalog
+        val fresh = opened.database.getOrElse {
             android.util.Log.e(TAG, "the content library could not be opened", it)
             failure = true
             return
         }
         database = fresh
-        // The reader's settings are read once, and everything that follows
-        // uses that same value: the store is not read twice for one launch.
-        val stored = settingsStore.settings.first()
+        val stored = opened.settings
         // The names the reader reads are the names their language says:
         // the Book's index is read with the language set, so Browse, the
         // reading, search, the reminder, and the share card all draw the
@@ -252,6 +268,44 @@ class ContentLibrary(
         scope.launch {
             if (packUpdater.dailyIntegrityRefresh(catalog).isNotEmpty()) refresh()
         }
+    }
+
+    /**
+     * Makes the reader's translation choices match the packs this build
+     * offers. A pack removed from the catalog leaves an id in the stored set
+     * and bytes in the private folder; both are cleared here. When the lost
+     * pack was a translation the reader had chosen, their language's own
+     * default takes its place, so a Bangla reader keeps a Bangla reading. A
+     * selected translation that is not on the device joins the pending queue,
+     * which fetches it on any connection.
+     */
+    private suspend fun repairTranslations(
+        stored: AppSettings,
+        catalog: PackCatalog,
+    ): AppSettings {
+        val offered = catalog.ofType(PackType.Translation).map { it.id }.toSet()
+        val repaired = translationSelectionAfterRemoval(
+            language = stored.uiLanguage,
+            selected = stored.translationPacks,
+            offered = offered,
+        )
+        // Every pack folder the catalog does not name is a pack this build
+        // no longer offers. Removing it is the one place a retired pack's
+        // bytes leave the device.
+        val known = catalog.all().map { it.id }.toSet()
+        for (id in store.installed() - known) store.remove(id)
+        val dropped = stored.translationPacks - offered
+        settingsStore.removePendingPacks(dropped)
+        if (repaired != stored.translationPacks) {
+            settingsStore.setTranslationPacks(repaired)
+        }
+        // A selected translation that is not on the device is fetched on the
+        // reader's behalf, exactly as a fresh language choice is. The queue
+        // brings it on any connection; the reading never waits on it.
+        settingsStore.addPendingPacks(
+            repaired.filter { id -> catalog.get(id)?.installed == false }.toSet(),
+        )
+        return stored.copy(translationPacks = repaired)
     }
 
     /** After the content could not be opened, this tries again from the start. */

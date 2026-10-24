@@ -258,10 +258,8 @@ internal fun ReadingRows(
                     playingWord = playingWord.takeIf { playingAyah == row.ayah.number },
                     onAyah = onAyah,
                     onBackgroundTap = dismissAbout,
-                    onFootnote = { number ->
-                        val note = row.translations.asSequence()
-                            .flatMap { it.text.footnotes.asSequence() }
-                            .firstOrNull { it.number == number }
+                    onFootnote = { line, number ->
+                        val note = line.text.footnotes.firstOrNull { it.number == number }
                         if (note != null) {
                             onFootnote(
                                 OpenFootnote(

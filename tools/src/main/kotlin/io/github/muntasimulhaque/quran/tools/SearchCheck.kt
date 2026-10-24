@@ -375,7 +375,7 @@ class SearchCheck(private val root: File) {
             "tafsir-ibn-kathir-en" to "tafsir_passage",
             "tafsir-ibn-kathir-bn" to "tafsir_passage",
             "translation-saheeh-en" to "translation",
-            "translation-taisirul-quran-bn" to "translation",
+            "translation-al-bayan-bn" to "translation",
         )
         for ((id, table) in probes) {
             val file = File(packs, "$id.db")

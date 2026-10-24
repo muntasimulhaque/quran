@@ -84,8 +84,8 @@ fun reciterShortName(id: String, fallback: String): String {
 /**
  * The names readers use for the app's own packs, in the reader's own language.
  * The catalog is content, and its names are English; the display name is the
- * interface's, so a Bangla reader meets "সহীহ ইন্টারন্যাশনাল", "তাইসিরুল
- * কুরআন", and "ইবনে কাসীর" where an English one meets the Latin names. The
+ * interface's, so a Bangla reader meets "সহীহ ইন্টারন্যাশনাল", "আল-বায়ান
+ * সরল অর্থানুবাদ", and "ইবনে কাসীর" where an English one meets the Latin names. The
  * core text and the reciters are named here too, because the About page
  * credits them from the same catalog and a Bangla reader should not meet
  * "Quran text" or "Husary" on it (owner decision, this session). A pack the
@@ -96,7 +96,7 @@ fun reciterShortName(id: String, fallback: String): String {
 fun contentPackName(id: String, fallback: String): String = when (id) {
     "core" -> stringResource(R.string.pack_name_quran_text)
     "translation-saheeh-en" -> stringResource(R.string.pack_name_saheeh_international)
-    "translation-taisirul-quran-bn" -> stringResource(R.string.pack_name_taisirul_quran)
+    "translation-al-bayan-bn" -> stringResource(R.string.pack_name_al_bayan)
     "tafsir-ibn-kathir-en", "tafsir-ibn-kathir-bn" -> stringResource(R.string.pack_name_ibn_kathir)
     "words-en", "words-bn" -> stringResource(R.string.pack_name_word_by_word)
     "reciter-minshawi" -> stringResource(R.string.reciter_minshawi)
