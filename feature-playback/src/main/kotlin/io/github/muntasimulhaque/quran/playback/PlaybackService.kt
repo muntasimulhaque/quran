@@ -11,7 +11,6 @@ import androidx.media3.common.C
 import androidx.media3.common.Player
 import androidx.media3.common.TrackSelectionParameters
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import androidx.media3.session.SessionCommand
@@ -19,7 +18,6 @@ import androidx.media3.session.SessionResult
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import io.github.muntasimulhaque.quran.data.LanguagePreference
-import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 import java.util.Locale
 
 /**
@@ -88,15 +86,12 @@ class PlaybackService : MediaSessionService() {
     override fun onCreate() {
         super.onCreate()
         // The notification wears the app's own mark in the status bar, the
-        // same silhouette the daily reminder wears, instead of the library's
-        // generic one (owner decision, this session). The channel is left as
-        // the library names it: a new channel id would leave every reader who
-        // already has the old one with two entries in the phone's settings.
-        setMediaNotificationProvider(
-            DefaultMediaNotificationProvider.Builder(this)
-                .build()
-                .apply { setSmallIcon(UiKitR.drawable.ic_daily) },
-        )
+        // same silhouette the daily reminder wears, and its transport actions
+        // are the app's own drawings too, never the library's stock marks
+        // (owner decision, 11.1). The channel is left as the library names
+        // it: a new channel id would leave every reader who already has the
+        // old one with two entries in the phone's settings.
+        setMediaNotificationProvider(AppMediaNotificationProvider(this))
         val player = ExoPlayer.Builder(this)
             .setAudioAttributes(
                 AudioAttributes.Builder()

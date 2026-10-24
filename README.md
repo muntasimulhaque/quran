@@ -4,7 +4,9 @@ A free, open source Quran reader for Android. It opens where you left off
 and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 11.0 (versionCode 112) was submitted for Play review on October 23, 2026. The submitted bundle was `quran-11.0-vc112.aab` (12,870,138 bytes, SHA-256 `a2cdf3a9f16c19766192c68049d7d2119dbe717b146afbbf795602c9e47e31c7`, `jar verified`, signed with the shared upload key, certificate `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`), built by CI run 39990440634 on main from 1cca668b and taken from that run's `quran-signed-aab` artifact, whose sha256 file names the same hash. The build run was green in all four jobs: the JVM suite and debug build, the data instrumented tests, the app instrumented tests, and the signed bundle. The content is core pack 5 (database 1.3.0, `content-db-ce4fefef`). The store capture ran as CI run 39990440551: all three legs green with eight frames each, every frame read, and the 11.0 set is installed. Play has the bundle; the local hand-off copy was deleted.
+**Status:** 11.1 (versionCode 113) is being built by CI from this session. The media notification wears the app's own transport marks, a full last-read database is logged instead of stopping the reading, and the full SIL Open Font License is readable in Settings under About, each with a test. The signed bundle and the new store set are recorded here from the newest green `build` run and the capture run before the hand-over.
+
+**In 11.1.** The audit is finished. The media notification's play, pause, next, and previous marks are the app's own drawings, a full disk in the last-read database is logged instead of stopping the reading, and the full SIL Open Font License is readable in Settings under About. The store's tablet frames are checked against Play's current size rule, and the 7:143 source note that does not exist is written down rather than invented. The reading and content are unchanged from 11.0.
 
 **In 11.0.** The remaining audit fixes are in the release: Back no longer closes the app over an in-flight download, a second install waits instead of filling the first one's line, the playback controller is released with the reading, the daily integrity pass hashes every installed pack, Arabic search reaches the Prophet's ﷺ ligature, Bangla tafsir headings no longer weld to the next word, the screenshots grant notifications and close the keyboard before the frame, the 7-inch set is captured at 1200 x 1920, the store icon is 32-bit and the frames are normalized to 24-bit, and the full OFL text is in `licenses/OFL-1.1.txt`. The 10.9 reading fixes remain.
 
@@ -45,3 +47,11 @@ trackers, no accounts, nothing collected, ever.
 **In 9.2.** The pages that rise over the reading hold still. A pull, a flick, or a change of direction on a footnote, an ayah card, a note, Search, Browse, or Settings no longer makes the page shake or bounce, wherever the finger starts. The sheet physics that caused it were fixed at the source, and every sheet now shares one page, so the next one cannot miss the handle or the ground. The reading itself is unchanged.
 
 **In 9.1.** The reading and the app around it are tidier. The ayah number now stands at the head of each ayah, so you always know where you are, and a sheet no longer shakes or shuts when you flick its handle upward. The player's close mark sits clear of the capsule's edge. Searching a surah by its name and number now works in Bangla as it always did in English. Settings reads as one plain list with plainer names, and the Daily ayah page can turn the reminder on.
+
+## Content notes
+
+Saheeh International's note 403 is missing from the source of 7:143: both
+QuranEnc and the QUL copy carry markers 401 and 402 and no 403. The app
+draws 403 as a plain superscript that opens nothing, and no note was
+invented for it. A verified note from a Saheeh source would travel through
+`tools/` like every other content change.

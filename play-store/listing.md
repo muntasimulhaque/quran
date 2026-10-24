@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 11.0 (versionCode 112)
+Version: 11.1 (versionCode 113)
 
 ## Listing
 
@@ -57,9 +57,9 @@ Credits: Quran text by the King Fahd Complex for the Printing of the Holy
 Quran, audited against the QUL QPC text, with Tanzil as the independent
 cross-reference. Translation by Saheeh International via QuranEnc. Tafsir
 Ibn Kathir and the recitations via the Quranic Universal Library by Tarteel.
-The app's About page names each source; the content manifest in the
-repository records each dataset's license, and the full font license text
-is in `licenses/OFL-1.1.txt`. The source code is MIT.
+The app's About page names each source, records each dataset's license
+from the content manifest, and opens the fonts' full SIL Open Font License
+inside the app. The source code is MIT.
 
 ## Classification
 
@@ -100,6 +100,14 @@ for.
 - 7 inch tablet screenshots: `screenshots/tablet7/` (1200 x 1920), eight of them
 - 10 inch tablet screenshots: `screenshots/tablet10/` (2560 x 1800), eight of them
 
+Play's current rule for preview assets is a JPEG or 24-bit PNG, 320 to 3840
+pixels on each side, and a long side no more than twice the short side. Both
+tablet sets stand inside it: the 7 inch set is 1200 x 1920, the 16:10 shape
+turned upright, and the 10 inch set is 2560 x 1800, 1.42:1. The 16:9 and 9:16
+shapes are Play's recommendation for large-screen placements, not a
+submission requirement, so the tablet sets keep the shapes their real screens
+give them.
+
 The icon and the feature graphic are the app's own mark: an open book on its
 rehal, the owner's own reference drawing, redrawn clean for this app as
 uniform line art on the reference's own reading: the pages are sail arcs
@@ -127,7 +135,7 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 39990440551 on 11.0: all three legs green with eight frames each, every frame read. The reading, chrome, opening, Browse, ayah card, and tafsir carry the QPC text; the settings frames carry the 11.0 version line. The Tajweed page is not in the set, so its word samples are not among the frames.
+The installed set is from capture run 39990440551 on 11.0: all three legs green with eight frames each, every frame read. The reading, chrome, opening, Browse, ayah card, and tafsir carry the QPC text; the settings frames carry the 11.0 version line. The 11.1 set is captured before the hand-over, and this line is replaced with that run's number once its frames are read. The Tajweed page is not in the set, so its word samples are not among the frames.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
@@ -147,8 +155,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (11.0, 425 characters)
-11.0 makes the reading steadier. Back no longer cancels a download, a double tap cannot start two installs, and the player releases its connection when the reading closes. Arabic search finds the Prophet's blessing, Bangla tafsir headings no longer weld to the next word, and the daily check hashes every installed pack. The store pictures are recaptured, the font license text is included, and the 10.9 reading fixes remain.
+## Release notes (11.1, 313 characters)
+11.1 finishes the audit. The media notification now uses the app's own transport drawings, a full last-read storage no longer crashes the reading, the font license is readable inside the app, and the tablet screenshots are checked against Play's current size rule. The reading and content are unchanged from 11.0.
 
 ## Before each release
 

@@ -197,8 +197,8 @@ android {
         applicationId = "io.github.muntasimulhaque.quran"
         minSdk = 24
         targetSdk = 37
-        versionCode = 112
-        versionName = "11.0"
+        versionCode = 113
+        versionName = "11.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -238,6 +238,10 @@ android {
         }
     }
     sourceSets.getByName("main").assets.directories.add(contentAssets.get().asFile.absolutePath)
+    // The font license is packaged from the repository's own copy, so the
+    // text a reader opens in the app and the file a reviewer reads in the
+    // tree are one file, never two that drift (owner decision, 11.1).
+    sourceSets.getByName("main").assets.directories.add(rootProject.file("licenses").absolutePath)
     // The packs that exist only for development, on the debug variant alone.
     sourceSets.getByName("debug").assets.directories.add(devPackAssets.get().asFile.absolutePath)
     // The development audio sample ships in debug builds only, so the player

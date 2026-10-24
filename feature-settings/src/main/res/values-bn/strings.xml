@@ -60,6 +60,11 @@
     <string name="about_group_recitations">তিলাওয়াত</string>
     <string name="about_license">MIT</string>
     <string name="about_pack_title">%1$s · %2$s</string>
+    <string name="settings_title_licenses">লাইসেন্স</string>
+    <string name="about_open_licenses">ফন্ট লাইসেন্স</string>
+    <string name="about_licenses_summary">SIL ওপেন ফন্ট লাইসেন্স 1.1</string>
+    <string name="licenses_opening">অ্যাপটি KFGQPC হাফস, আমিরি কুরআন, লিটারাটা, নোটো স্যান্স বাংলা, নোটো সেরিফ বাংলা ও ইন্টার ফন্ট SIL ওপেন ফন্ট লাইসেন্স 1.1-এর অধীনে বিতরণ করে। লাইসেন্সের পূর্ণ লেখা নিচে দেওয়া হলো।</string>
+    <string name="licenses_unavailable">এই ফোনে লাইসেন্সের লেখা পড়া যায়নি।</string>
 
     <string name="credit_page_fonts">KFGQPC হাফস উসমানি লিপি</string>
     <string name="credit_page_fonts_by">বাদশাহ ফাহদ গ্লোরিয়াস কুরআন প্রিন্টিং কমপ্লেক্স, অপরিবর্তিত</string>

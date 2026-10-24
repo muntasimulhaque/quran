@@ -60,6 +60,11 @@
     <string name="about_group_recitations">Recitations</string>
     <string name="about_license">MIT</string>
     <string name="about_pack_title">%1$s · %2$s</string>
+    <string name="settings_title_licenses">Licenses</string>
+    <string name="about_open_licenses">Font licenses</string>
+    <string name="about_licenses_summary">SIL Open Font License 1.1</string>
+    <string name="licenses_opening">The app bundles the KFGQPC Hafs, Amiri Quran, Literata, Noto Sans Bengali, Noto Serif Bengali, and Inter fonts under the SIL Open Font License 1.1. The full license text follows.</string>
+    <string name="licenses_unavailable">The license text could not be read on this phone.</string>
 
     <string name="credit_page_fonts">KFGQPC Hafs Uthmanic Script</string>
     <string name="credit_page_fonts_by">King Fahd Glorious Quran Printing Complex, unmodified</string>

@@ -411,29 +411,33 @@ class SettingsRowAlignmentTest {
     }
 
     /**
-     * Nothing on the About page opens.
+     * The About page has one door, and it is the font license.
      *
-     * The page is facts only: version, license, and credits, each read where
-     * the reader already is (owner decision). Corrections and rights requests
-     * travel through the store listing's contact and the project repository
-     * rather than through the app, so the page holds no door and draws no
-     * chevron anywhere.
+     * The page used to be facts only, with no door and no chevron (owner
+     * decision, earlier session). The fonts' full license is now readable in
+     * the app, so the Fonts group ends in the one row that opens it, and the
+     * rest of the page stays what it was: version, licenses, and credits,
+     * each read where the reader already is. Corrections and rights requests
+     * still travel through the store listing's contact and the project
+     * repository rather than through the app (owner decision, 11.1).
      */
     @Test
-    fun nothingOnTheAboutPageOpens() {
+    fun theAboutPageOpensTheFontLicenseAndNothingElse() {
         compose.setContent {
             MaterialTheme {
                 AboutPage(
                     packs = emptyList(),
                     version = "3.3 (34)",
+                    onOpenLicenses = {},
                 )
             }
         }
 
         val doors = compose.onAllNodes(hasClickAction(), useUnmergedTree = true)
-        assertEquals("the page holds no door", 0, doors.fetchSemanticsNodes().size)
+        assertEquals("the page holds one door", 1, doors.fetchSemanticsNodes().size)
         val slots = compose.onAllNodesWithTag("chevron-slot", useUnmergedTree = true)
-        assertEquals("and draws no chevron", 0, slots.fetchSemanticsNodes().size)
+        assertEquals("and draws one chevron", 1, slots.fetchSemanticsNodes().size)
+        compose.onNodeWithText("Font licenses").assertExists()
     }
 
     /**

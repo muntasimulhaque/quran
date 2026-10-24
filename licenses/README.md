@@ -8,7 +8,8 @@ The app bundles these fonts under the SIL Open Font License 1.1:
 - **Noto Sans Bengali** and **Noto Serif Bengali**: Google.
 - **Inter**: Rasmus Andersson.
 
-The full license text is in [OFL-1.1.txt](OFL-1.1.txt). The font files keep
-their own copyright and license metadata. The app's About page names each
-face and its designer; the content manifest records the content datasets'
-licenses separately.
+The full license text is in [OFL-1.1.txt](OFL-1.1.txt), and the app opens it
+from Settings > About > Font licenses. The font files keep their own
+copyright and license metadata. The app's About page names each face and its
+designer; the content manifest records the content datasets' licenses
+separately.

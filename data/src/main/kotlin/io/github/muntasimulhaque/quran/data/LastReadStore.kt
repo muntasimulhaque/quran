@@ -4,6 +4,8 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.util.Log
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -59,17 +61,38 @@ data class ReadPlace(
  * The list is capped, so a reader who moves around the Book keeps the recent
  * readings and not a log that grows without end.
  */
-class LastReadStore(context: Context) {
+class LastReadStore internal constructor(
+    private val helper: SQLiteOpenHelper,
+) {
 
-    private val helper = Helper(context.applicationContext)
+    constructor(context: Context) : this(Helper(context.applicationContext))
+
     private val _places = MutableStateFlow<List<ReadPlace>>(emptyList())
     val places: StateFlow<List<ReadPlace>> = _places.asStateFlow()
 
     /** One writer at a time: a settle and a jump can land together. */
     private val writes = Mutex()
 
-    suspend fun load() = withContext(Dispatchers.IO) {
-        writes.withLock { refresh() }
+    /**
+     * A full disk or a damaged database is a message, never a crash. The
+     * reader's place is written by the reading itself, on a settle and on a
+     * jump, and a database that cannot take the row must not take the page
+     * with it. Cancellation is the one exception: a cancelled write is the
+     * caller's own decision and travels as itself (owner decision, 11.1).
+     */
+    private suspend fun <T> guarded(where: String, block: suspend () -> T): T? = try {
+        block()
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (error: Exception) {
+        Log.e("LastReadStore", where, error)
+        null
+    }
+
+    suspend fun load() {
+        withContext(Dispatchers.IO) {
+            guarded("load") { writes.withLock { refresh() } }
+        }
     }
 
     /**
@@ -85,16 +108,18 @@ class LastReadStore(context: Context) {
         activeId: Long?,
         at: Long = System.currentTimeMillis(),
     ): Long? = withContext(Dispatchers.IO) {
-        writes.withLock {
-            if (ayahNumber !in AYAH_RANGE) return@withLock null
-            val rows = readRows()
-            val active = rows.firstOrNull { it.id == activeId && it.surah == surah }
-            val place = active ?: foldTarget(rows, surah, ayahNumber)
-            if (place == null) {
-                insert(surah, ayahNumber, at)
-            } else {
-                update(place, ayahNumber, at)
-                place.id
+        guarded("extend") {
+            writes.withLock {
+                if (ayahNumber !in AYAH_RANGE) return@withLock null
+                val rows = readRows()
+                val active = rows.firstOrNull { it.id == activeId && it.surah == surah }
+                val place = active ?: foldTarget(rows, surah, ayahNumber)
+                if (place == null) {
+                    insert(surah, ayahNumber, at)
+                } else {
+                    update(place, ayahNumber, at)
+                    place.id
+                }
             }
         }
     }
@@ -109,23 +134,29 @@ class LastReadStore(context: Context) {
         surah: Int,
         at: Long = System.currentTimeMillis(),
     ): Long? = withContext(Dispatchers.IO) {
-        writes.withLock {
-            if (ayahNumber !in AYAH_RANGE) return@withLock null
-            val rows = readRows()
-            val place = foldTarget(rows, surah, ayahNumber)
-            if (place == null) {
-                insert(surah, ayahNumber, at)
-            } else {
-                update(place, ayahNumber, at)
-                place.id
+        guarded("record") {
+            writes.withLock {
+                if (ayahNumber !in AYAH_RANGE) return@withLock null
+                val rows = readRows()
+                val place = foldTarget(rows, surah, ayahNumber)
+                if (place == null) {
+                    insert(surah, ayahNumber, at)
+                } else {
+                    update(place, ayahNumber, at)
+                    place.id
+                }
             }
         }
     }
 
-    suspend fun remove(ayahNumber: Int) = withContext(Dispatchers.IO) {
-        writes.withLock {
-            database().delete(TABLE, "$COLUMN_AYAH = ?", arrayOf(ayahNumber.toString()))
-            refresh()
+    suspend fun remove(ayahNumber: Int) {
+        withContext(Dispatchers.IO) {
+            guarded("remove") {
+                writes.withLock {
+                    database().delete(TABLE, "$COLUMN_AYAH = ?", arrayOf(ayahNumber.toString()))
+                    refresh()
+                }
+            }
         }
     }
 

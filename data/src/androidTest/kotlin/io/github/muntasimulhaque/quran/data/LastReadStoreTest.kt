@@ -2,11 +2,14 @@ package io.github.muntasimulhaque.quran.data
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteFullException
+import android.database.sqlite.SQLiteOpenHelper
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -144,6 +147,39 @@ class LastReadStoreTest {
         assertTrue(store.places.value.isEmpty())
         store.record(262, surah = 2)
         assertEquals(262, store.places.value.single().ayahNumber)
+    }
+
+    /**
+     * A disk with no room left is a message, not a crash. A last-read write
+     * lands while the reader is moving through the page, so a database that
+     * cannot take the row must leave the reading standing and say so in the
+     * log, and cancellation is the one thing that still travels as itself
+     * (owner decision, 11.1).
+     */
+    @Test
+    fun aFullDiskIsLoggedInsteadOfCrashing() = runBlocking {
+        val full = LastReadStore(FullDiskHelper(context))
+        full.load()
+        assertNull(
+            "a reading that cannot be written returns nothing",
+            full.extend(1, surah = 1, activeId = null),
+        )
+        assertNull(
+            "a place that cannot be written returns nothing",
+            full.record(1, surah = 1),
+        )
+        full.remove(1)
+        assertTrue(full.places.value.isEmpty())
+        full.close()
+    }
+
+    /** A helper whose database will not open, as a phone with no room left. */
+    private class FullDiskHelper(context: Context) :
+        SQLiteOpenHelper(context, "full-disk.db", null, 1) {
+        override fun onCreate(db: SQLiteDatabase) = Unit
+        override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) = Unit
+        override fun getWritableDatabase(): SQLiteDatabase =
+            throw SQLiteFullException("the disk is full")
     }
 
     /** A version 2 database, written by hand, with one place in it. */

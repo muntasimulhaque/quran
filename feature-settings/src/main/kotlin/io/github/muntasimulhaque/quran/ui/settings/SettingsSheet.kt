@@ -114,7 +114,11 @@ fun SettingsSheet(
         // own window: the sheet registers its own back handling there, and a
         // handler in the activity's window never sees the event while the
         // sheet is up.
-        BackHandler(enabled = page != null) { page = null }
+        BackHandler(enabled = page != null) {
+            // The license page has one door, and it is on About, so its back
+            // is About rather than the hub (owner decision, 11.1).
+            page = if (page == SettingsPage.Licenses) SettingsPage.About else null
+        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -154,7 +158,12 @@ fun SettingsSheet(
                     )
                 }
             } else {
-                PageHeader(title = open.title(), onBack = { page = null })
+                PageHeader(
+                    title = open.title(),
+                    onBack = {
+                        page = if (open == SettingsPage.Licenses) SettingsPage.About else null
+                    },
+                )
                 when (open) {
                     SettingsPage.Language -> LanguagePage(
                         settings = settings,
@@ -201,7 +210,9 @@ fun SettingsSheet(
                     SettingsPage.About -> AboutPage(
                         packs = packs,
                         version = version,
+                        onOpenLicenses = { page = SettingsPage.Licenses },
                     )
+                    SettingsPage.Licenses -> LicensesPage()
                 }
             }
         }

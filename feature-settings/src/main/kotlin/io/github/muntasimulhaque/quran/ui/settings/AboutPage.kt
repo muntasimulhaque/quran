@@ -31,23 +31,29 @@ private const val LICENSE_SEPARATOR = " · "
  * The app itself: its version, who made what it carries and under what terms.
  *
  * The credits stand here, on the page, rather than behind a row that opens
- * them (owner decision, this session): every license is honored by being read
- * where a reader already is, not by a door they have to think to open, and a
- * reader who wonders who made the text meets the answer the moment they open
- * About.
+ * them (owner decision, earlier session): every pack's license is honored
+ * by being read where a reader already is, not by a door they have to think
+ * to open, and a reader who wonders who made the text meets the answer the
+ * moment they open About.
  *
- * The page is facts only: every row is read and nothing opens (owner
- * decision). Corrections and rights requests travel through the store
- * listing's contact and the project repository rather than through the app.
+ * The fonts' license is the page's one door. The names and the copyright
+ * lines stand here as before; the full text of the SIL Open Font License
+ * that every bundled face travels under is one tap away, in the app, because
+ * a license bundled only beside the source tree is not a license the reader
+ * on a phone can read (owner decision, 11.1).
+ *
+ * Corrections and rights requests travel through the store listing's contact
+ * and the project repository rather than through the app.
  *
  * The content is checked on the reader's behalf, once a day, without being
  * asked; there is no row for it here, because a reader should never have to
- * know the word for it (owner decision, this session).
+ * know the word for it (owner decision, earlier session).
  */
 @Composable
 fun AboutPage(
     packs: List<ContentPack>,
     version: String,
+    onOpenLicenses: () -> Unit,
 ) {
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_about))
@@ -129,6 +135,11 @@ fun AboutPage(
                 stringResource(R.string.credit_noto_sans_bengali_use),
             ),
         )
+        PageRow(
+            title = stringResource(R.string.about_open_licenses),
+            summary = stringResource(R.string.about_licenses_summary),
+            onClick = onOpenLicenses,
+        )
 
         Group(stringResource(R.string.about_group_recitations))
         AboutCredit(
@@ -166,7 +177,7 @@ private fun packLine(english: String, bangla: String): String {
 
 /** One credit: its name, and the lines that say who made it and what for. */
 @Composable
-private fun AboutCredit(title: String, lines: List<String>) {
+internal fun AboutCredit(title: String, lines: List<String>) {
     Column(Modifier.padding(start = Space.Gutter, end = Space.Gutter, bottom = 10.dp)) {
         Text(
             text = title,

@@ -19,7 +19,7 @@ import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
 
 /** The pages the settings hub opens, one at a time. */
-enum class SettingsPage { Language, Theme, FontSize, Reciters, Daily, Translations, Tafsirs, Tajweed, About }
+enum class SettingsPage { Language, Theme, FontSize, Reciters, Daily, Translations, Tafsirs, Tajweed, About, Licenses }
 
 @Composable
 fun SettingsPage.title(): String = stringResource(
@@ -33,6 +33,7 @@ fun SettingsPage.title(): String = stringResource(
         SettingsPage.Tafsirs -> R.string.settings_title_tafsirs
         SettingsPage.Tajweed -> R.string.settings_title_tajweed
         SettingsPage.About -> R.string.settings_title_about
+        SettingsPage.Licenses -> R.string.settings_title_licenses
     },
 )
 

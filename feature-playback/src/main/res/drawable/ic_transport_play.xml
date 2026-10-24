@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The pill's play mark, at the notification's own 24 dp: the same triangle
+     the reading draws, so the shade and the capsule carry one hand. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M5.28,2.4 L18.72,12 L5.28,21.6 Z" />
+</vector>
