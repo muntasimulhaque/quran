@@ -27,7 +27,7 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * place. A button that is not one of the four transports is returned
  * untouched.
  */
-class AppMediaNotificationProvider(context: Context) :
+open class AppMediaNotificationProvider(context: Context) :
     DefaultMediaNotificationProvider(context) {
 
     init {

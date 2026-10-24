@@ -9,20 +9,27 @@ import android.os.SystemClock
 import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.CommandButton
 import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaController
+import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionToken
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.ListenableFuture
 import io.github.muntasimulhaque.quran.feature.playback.R as PlaybackR
+import io.github.muntasimulhaque.quran.playback.AppMediaNotificationProvider
 import io.github.muntasimulhaque.quran.playback.PlaybackService
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -38,9 +45,12 @@ import org.junit.runner.RunWith
  * actually showing: every action icon must be one of the app's own four
  * drawables, and none may be one of the library's stock transport drawables.
  *
- * The paused state shows play, previous, and next; starting the recitation
- * rebuilds the same notification with pause, so both faces of the middle
- * button are read.
+ * The paused notification shows play, previous, and next. The middle
+ * button's pause face is read from the same provider with the pause branch
+ * chosen, because whether the phone grants audio focus is not the app's
+ * decision: a test that starts real playback fails when another app holds
+ * the focus, for a reason the app did not choose. The posted notification's
+ * three marks are read from the shade itself.
  */
 @RunWith(AndroidJUnit4::class)
 class PlaybackNotificationTest {
@@ -92,18 +102,12 @@ class PlaybackNotificationTest {
                 controller.prepare()
             }
 
-            val paused = awaitNotification(manager, context) { actions ->
+            val posted = awaitNotification(manager, context) { actions ->
                 actions.any { it.getIcon().resId == PlaybackR.drawable.ic_transport_play }
             }
-            assertAppMarks(paused.notification.actions.map { it.getIcon().resId })
+            assertTheNotificationCarriesAppMarks(posted.notification.actions.map { it.getIcon().resId })
 
-            InstrumentationRegistry.getInstrumentation().runOnMainSync {
-                controller.play()
-            }
-            val playing = awaitNotification(manager, context) { actions ->
-                actions.any { it.getIcon().resId == PlaybackR.drawable.ic_transport_pause }
-            }
-            assertAppMarks(playing.notification.actions.map { it.getIcon().resId })
+            assertThePauseMarkIsTheAppsOwn(context)
         } finally {
             InstrumentationRegistry.getInstrumentation().runOnMainSync {
                 controller.stop()
@@ -116,35 +120,91 @@ class PlaybackNotificationTest {
     }
 
     /**
-     * The action marks, read from the posted notification: the app's previous,
-     * play or pause, and next are all there, and not one stock Media3 mark is.
+     * The action marks read from the posted notification: the app's previous,
+     * play or pause, and next are all there, and every mark is one of the
+     * app's own four.
      */
-    private fun assertAppMarks(icons: List<Int>) {
+    private fun assertTheNotificationCarriesAppMarks(icons: List<Int>) {
+        val appMarks = appMarks()
         assertTrue(
             "the notification must offer the app's previous mark: $icons",
-            icons.contains(PlaybackR.drawable.ic_transport_previous),
+            PlaybackR.drawable.ic_transport_previous in icons,
         )
         assertTrue(
             "the notification must offer the app's next mark: $icons",
-            icons.contains(PlaybackR.drawable.ic_transport_next),
+            PlaybackR.drawable.ic_transport_next in icons,
         )
         assertTrue(
             "the notification must offer the app's play or pause mark: $icons",
-            icons.contains(PlaybackR.drawable.ic_transport_play) ||
-                icons.contains(PlaybackR.drawable.ic_transport_pause),
-        )
-        val stock = setOf(
-            androidx.media3.session.R.drawable.media3_icon_play,
-            androidx.media3.session.R.drawable.media3_icon_pause,
-            androidx.media3.session.R.drawable.media3_icon_next,
-            androidx.media3.session.R.drawable.media3_icon_previous,
+            PlaybackR.drawable.ic_transport_play in icons ||
+                PlaybackR.drawable.ic_transport_pause in icons,
         )
         assertTrue(
-            "no action may wear a stock Media3 transport mark: $icons",
-            icons.none { it in stock },
+            "no action may wear a mark that is not the app's own: $icons",
+            icons.all { it in appMarks },
         )
-        assertFalse("the notification carries actions", icons.isEmpty())
+        assertFalse(
+            "no action may wear a stock Media3 transport mark: $icons",
+            icons.any { it in stockMarks() },
+        )
     }
+
+    /**
+     * The pause face, read from the same provider the service sets, with the
+     * pause branch chosen. Building the notification's pause state needs a
+     * playing player, and the posting of it is the system's audio focus
+     * decision; the provider's button list is the app's own answer and is
+     * read here without a device sound.
+     */
+    private fun assertThePauseMarkIsTheAppsOwn(context: Context) {
+        val buttons = AtomicReference<List<CommandButton>>()
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            val player = ExoPlayer.Builder(context).build()
+            val session = MediaSession.Builder(context, player)
+                .setId("playback-notification-test")
+                .build()
+            try {
+                val commands = Player.Commands.Builder()
+                    .add(Player.COMMAND_PLAY_PAUSE)
+                    .add(Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM)
+                    .add(Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)
+                    .build()
+                buttons.set(
+                    Inspector(context).buttons(session, commands, showPauseButton = true),
+                )
+            } finally {
+                session.release()
+                player.release()
+            }
+        }
+        val marks = buttons.get()
+        val pause = marks.firstOrNull { it.icon == CommandButton.ICON_PAUSE }
+            ?: throw AssertionError("the provider must offer a pause button: $marks")
+        assertEquals(
+            "the pause mark is the app's own",
+            PlaybackR.drawable.ic_transport_pause,
+            pause.iconResId,
+        )
+        assertTrue(
+            "every provider button must wear the app's own mark: " +
+                marks.map { it.iconResId },
+            marks.all { it.iconResId in appMarks() },
+        )
+    }
+
+    private fun appMarks(): Set<Int> = setOf(
+        PlaybackR.drawable.ic_transport_play,
+        PlaybackR.drawable.ic_transport_pause,
+        PlaybackR.drawable.ic_transport_next,
+        PlaybackR.drawable.ic_transport_previous,
+    )
+
+    private fun stockMarks(): Set<Int> = setOf(
+        androidx.media3.session.R.drawable.media3_icon_play,
+        androidx.media3.session.R.drawable.media3_icon_pause,
+        androidx.media3.session.R.drawable.media3_icon_next,
+        androidx.media3.session.R.drawable.media3_icon_previous,
+    )
 
     /**
      * Waits for the media notification to carry the mark a state expects. The
@@ -173,10 +233,10 @@ class PlaybackNotificationTest {
         throw AssertionError("the media notification never carried the wanted mark: $last")
     }
 
-    /** A half second of silence, so the player reaches READY without a device sound. */
+    /** A second of silence, so the player reaches READY without a device sound. */
     private fun writeSilence(file: File) {
         val sampleRate = 8_000
-        val samples = sampleRate / 2
+        val samples = sampleRate
         val dataBytes = samples * 2
         val out = ByteArrayOutputStream()
         fun ascii(value: String) = out.write(value.toByteArray(Charsets.US_ASCII))
@@ -205,5 +265,18 @@ class PlaybackNotificationTest {
         le32(dataBytes)
         out.write(ByteArray(dataBytes))
         file.writeBytes(out.toByteArray())
+    }
+
+    /**
+     * The provider with its protected button list in reach, so the pause
+     * branch can be read without starting the service.
+     */
+    private class Inspector(context: Context) : AppMediaNotificationProvider(context) {
+        fun buttons(
+            session: MediaSession,
+            commands: Player.Commands,
+            showPauseButton: Boolean,
+        ): List<CommandButton> =
+            getMediaButtons(session, commands, ImmutableList.of(), showPauseButton)
     }
 }
