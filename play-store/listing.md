@@ -135,7 +135,7 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 40105372374 on 11.2: all three legs green with eight frames each, every frame read. The reading, chrome, opening, Browse, ayah card, and tafsir carry the QPC text; the tablet settings frames carry the 11.2 version line, the phone settings frame is the hub's first screen and cuts before About as in 11.1, and the Licenses page is not among the eight frames. The Tajweed page is not in the set, so its word samples are not among the frames.
+The set is from capture run 40171146720 on 11.3: all three legs green with eight frames each, every frame read. The reading, chrome, opening, Browse, ayah card, and tafsir carry the QPC text; the tablet settings frames carry the 11.3 version line, the phone settings frame is the hub's first screen and cuts before About as in 11.2, and the Licenses page is not among the eight frames. The Tajweed page is not in the set, so its word samples are not among the frames.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
