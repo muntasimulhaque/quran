@@ -102,14 +102,19 @@ fun SettingsHub(
                 settings.wordsSp.toInt(),
             ),
         ) { onOpen(SettingsPage.FontSize) }
-        // What the reading draws, in the order the reader puts it together: the
-        // word meanings, which sit closest to the Arabic, then the translation,
-        // then the tafsir (owner report, 2.3). Each switch says whether the
-        // reading shows what it names, and the rest of the row opens the list
-        // it is chosen from. The switch is the only thing that switches, so a
-        // reader who came to look at the translations never changes the reading
-        // by looking (owner report, 2.3).
-        WordByWordRow(settings, packs, packSetup, onWordByWord)
+        // What the reading draws, in the order the page draws it: the tajweed
+        // colors, which are the Arabic line itself, then the word meanings
+        // under it, then the translation, then the tafsir behind the ayah
+        // card (owner report, 2.3). The four are one group of rows the reader
+        // reads top to bottom against the page, and the colors stood between
+        // the meanings and the translation: the one row that draws the Quran's
+        // own line was filed with the two that add prose under it, and the
+        // group broke in the middle (owner decision, this session). Each
+        // switch says whether the reading shows what it names, and the rest
+        // of the row opens the list it is chosen from. The switch is the only
+        // thing that switches, so a reader who came to look at the
+        // translations never changes the reading by looking (owner report,
+        // 2.3).
         ToggleRow(
             title = stringResource(R.string.settings_tajweed_title),
             subtitle = stringResource(R.string.settings_tajweed_summary),
@@ -119,6 +124,7 @@ fun SettingsHub(
             openLabel = stringResource(R.string.settings_open_tajweed),
             switchTag = "switch-tajweed",
         )
+        WordByWordRow(settings, packs, packSetup, onWordByWord)
         val hasTranslation = hasInstalledTranslation(settings, packs)
         val hasTafsir = hasInstalledTafsir(settings, packs)
         ToggleRow(
@@ -252,6 +258,7 @@ internal fun WordByWordRow(
         subtitle = subtitle,
         checked = settings.wordByWord && installed,
         onChange = onWordByWord,
+        switchTag = "switch-words",
     )
 }
 

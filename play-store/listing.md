@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 11.3 (versionCode 115)
+Version: 11.4 (versionCode 116)
 
 ## Listing
 
@@ -155,8 +155,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (11.3, 338 characters)
-11.3 keeps the reading in step with your library. A translation turned off leaves the page at once, a content update can no longer leave an older ayah line on screen, and a content file that arrives damaged is set aside and repaired quietly on Wi-Fi instead of leaving a blank page. The Quran text, translations, and tafsir are unchanged.
+## Release notes (11.4, 381 characters)
+11.4 sets a Quran-only page the way a printed page does. With the word meanings and the translation off, the verses now stand close together, a quarter of a line apart, so the screen holds four verses in ten more than before. In Settings, the Tajweed colors row moves above the word meanings, with the other reading switches. The Quran text, translations, and tafsir are unchanged.
 
 ## Before each release
 

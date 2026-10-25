@@ -146,10 +146,34 @@ internal fun AyahBlock(
     // The padding belongs to the paper, so the gaps between ayahs still
     // answer a tap with the reading chrome. The block is set apart by the
     // room around it, not by a rule: the app draws no separators.
+    //
+    // How much room is two cases and not one, because the block is two
+    // things. Carrying a translation or a word list, it is a card, and two
+    // cards need the room the app's rows keep ([Space.Row], with the wash's
+    // own 10 dp inside), because the eye has to leave one stack of text and
+    // find the head of the next. Arabic only, it is a line of the mushaf,
+    // and the verses of a page ride the line's own rhythm, one after
+    // another, as the print sets them.
+    //
+    // They did not. An Arabic-only block kept the card's 44 dp, so a verse
+    // stood 1.8 of a line from the next, with about three times the white a
+    // line break leaves between one verse's last mark and the next verse's
+    // first: one page with two rhythms, which reads as a table of rows. At
+    // [Space.Tight] inside and out a verse stands 16 dp from the next, a
+    // quarter of a line further than a line break and twice the white of
+    // one, so the glass holds four verses in ten more than it did. The
+    // face's own medallion still closes the verse and the line still ends
+    // ragged at the margin, so the reader loses a blank line and nothing
+    // else (owner decision, this session: the verse gap was the room a
+    // Browse row keeps, and the Quran was borrowing a list's rhythm).
+    //
+    // The surah's own opening above the first verse keeps its 14 dp foot, so
+    // the surah's name stands 22 dp off that verse, more than two verses
+    // stand from each other.
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = Space.Row),
+            .padding(vertical = if (arabicOnly) Space.Tight else Space.Row),
     ) {
         val haptics = LocalHapticFeedback.current
         val press = remember { MutableInteractionSource() }
@@ -191,7 +215,12 @@ internal fun AyahBlock(
                         },
                     )
                 }
-                .padding(horizontal = 8.dp, vertical = 10.dp),
+                .padding(
+                    horizontal = 8.dp,
+                    // The wash's own room, and the tighter measure on a page
+                    // that draws the Quran alone: see the block above.
+                    vertical = if (arabicOnly) Space.Tight else 10.dp,
+                ),
         ) {
             // The ayah's reference stands at the head of its block, in the
             // reader's own digits, so the reader meets it as the block arrives

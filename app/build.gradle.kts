@@ -197,8 +197,8 @@ android {
         applicationId = "io.github.muntasimulhaque.quran"
         minSdk = 24
         targetSdk = 37
-        versionCode = 115
-        versionName = "11.3"
+        versionCode = 116
+        versionName = "11.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
