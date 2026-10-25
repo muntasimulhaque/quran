@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 11.2 (versionCode 114)
+Version: 11.3 (versionCode 115)
 
 ## Listing
 
@@ -155,8 +155,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (11.2, 320 characters)
-11.2 replaces the Bangla translation with আল-বায়ান সরল অর্থানুবাদ (Al-Bayan Simple Translation). Its 182 translator notes open in the footnote sheet, like Saheeh International's. A star with no note, and extra stars QUL left unfilled, are gone. The old Bangla translation is removed. The reading is otherwise unchanged.
+## Release notes (11.3, 338 characters)
+11.3 keeps the reading in step with your library. A translation turned off leaves the page at once, a content update can no longer leave an older ayah line on screen, and a content file that arrives damaged is set aside and repaired quietly on Wi-Fi instead of leaving a blank page. The Quran text, translations, and tafsir are unchanged.
 
 ## Before each release
 

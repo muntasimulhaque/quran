@@ -97,7 +97,13 @@ fun ReadingList(
     // the surah changes, because it is read during composition rather than
     // from an effect. That is what makes the turn at the end of a surah land
     // on text instead of on the paper.
-    val ahead = remember(content, surah.number, metrics.wordByWord) {
+    val ahead = remember(
+        content,
+        surah.number,
+        metrics.wordByWord,
+        metrics.translationPacks,
+        contentLanguage,
+    ) {
         cachedRows(surah.number)
     }
     val rows = ahead ?: loaded?.takeIf { it.first == surah.number }?.second.orEmpty()

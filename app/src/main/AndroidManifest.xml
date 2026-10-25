@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- The reader approved one network use and only one: downloading
-         recitation packages from the project's own release page, when they ask
-         to play a surah. No analytics, no other host, nothing at launch. -->
+    <!-- The reader approved one network use and only one: content from this
+         project's own release page, on their word. The chosen language's
+         translation and tafsir arrive for that language, a word list arrives
+         with the reading toggle that turns it on, and a recitation package
+         arrives for one surah after Play and the shown size. No analytics, no
+         other host, nothing at launch. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />

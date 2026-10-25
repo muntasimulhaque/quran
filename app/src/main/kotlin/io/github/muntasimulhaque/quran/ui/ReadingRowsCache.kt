@@ -129,8 +129,15 @@ internal class ReadingRowsCache(
      * is every call site but the size sample, and that one wraps this in one.
      */
     fun row(ayahNumber: Int, wordByWord: Boolean): ReadingRow? {
+        // The generation is read before the database, and the row is kept only
+        // under the same generation. A pack arriving, a language change, or a
+        // switch of the word aid clears the cache on the main thread while a
+        // worker may be reading one ayah for the size sample or the share
+        // card; without this check that worker could put the old library's row
+        // back after the clear, and the next surface would draw it.
+        val readUnder = synchronized(lock) { generation }
         val open = database() ?: return null
-        synchronized(rowCache) { rowCache[ayahNumber] }?.let { return it }
+        synchronized(lock) { rowCache[ayahNumber] }?.let { return it }
         val ayah = open.ayah(ayahNumber) ?: return null
         val words = open.wordsForAyahs(listOf(ayahNumber))[ayahNumber].orEmpty()
         val translations = translationLines(open, listOf(ayahNumber))[ayahNumber].orEmpty()
@@ -140,7 +147,10 @@ internal class ReadingRowsCache(
             emptyList()
         }
         val row = ReadingRow(ayah, words, translations, meanings)
-        synchronized(rowCache) { rowCache[ayahNumber] = row }
+        synchronized(lock) {
+            if (generation != readUnder) return null
+            rowCache[ayahNumber] = row
+        }
         return row
     }
 

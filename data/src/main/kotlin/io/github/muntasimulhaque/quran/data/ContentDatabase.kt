@@ -1344,17 +1344,44 @@ class ContentDatabase private constructor(
             attached += PackCatalog.CORE_ID
             for (id in installed) {
                 if (id == PackCatalog.CORE_ID) continue
+                val pack = catalog.get(id) ?: continue
                 val file = store.fileFor(id)
                 if (!file.exists()) continue
-                runCatching {
-                    database.execSQL("ATTACH DATABASE ? AS \"" + id.replace("\"", "") + "\"", arrayOf(file.path))
-                }.onSuccess {
+                val schema = id.replace("\"", "")
+                val usable = runCatching {
+                    database.execSQL("ATTACH DATABASE ? AS \"$schema\"", arrayOf(file.path))
+                    val tables = database.rawQuery(
+                        "SELECT name FROM \"$schema\".sqlite_master WHERE type='table'",
+                        null,
+                    ).use { cursor ->
+                        buildSet {
+                            while (cursor.moveToNext()) add(cursor.getString(0))
+                        }
+                    }
+                    tables.containsAll(expectedTables(pack.type))
+                }.getOrElse { failure ->
+                    android.util.Log.w("ContentDatabase", "pack $id could not be attached", failure)
+                    false
+                }
+                if (usable) {
                     attached += id
-                }.onFailure {
-                    android.util.Log.w("ContentDatabase", "pack $id could not be attached", it)
+                } else {
+                    // A SQLite file can be attached even when it is truncated,
+                    // empty, or another pack's file with the wrong name; the
+                    // attach alone is not proof that the schema the app is
+                    // about to query is inside it. Leaving it out of the
+                    // library keeps every surface on the packs that can be
+                    // read, while the catalog's installed set still lets the
+                    // daily integrity pass see the broken file and repair it.
+                    android.util.Log.w(
+                        "ContentDatabase",
+                        "pack $id has no ${expectedTables(pack.type).joinToString(", ")} table; left out of the library",
+                    )
+                    runCatching { database.execSQL("DETACH DATABASE \"$schema\"") }
                 }
             }
-            // A pack whose attach failed is not in the library: a query for
+            // A pack whose attach failed, or whose file does not carry the
+            // tables its type promises, is not in the library: a query for
             // its schema would throw, and every surface that reads it would
             // have to catch the same failure. The catalog keeps the raw
             // installed set, so the daily integrity pass can still see the
@@ -1369,6 +1396,15 @@ class ContentDatabase private constructor(
                 SQLiteDatabase.OPEN_READONLY,
             )
         }.getOrNull()
+
+        /** The tables a pack must carry before any query may reach it. */
+        private fun expectedTables(type: PackType): Set<String> = when (type) {
+            PackType.Translation -> setOf("translation")
+            PackType.Tafsir -> setOf("tafsir_ayah", "tafsir_passage")
+            PackType.Words -> setOf("word_meaning")
+            PackType.Recitation -> setOf("recitation", "recitation_ayah")
+            PackType.Script -> setOf("ayah")
+        }
     }
 }
 

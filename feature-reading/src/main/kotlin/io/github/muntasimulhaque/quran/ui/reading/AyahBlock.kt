@@ -231,6 +231,9 @@ internal fun AyahBlock(
             // decision, the palette session). The visible line is untouched.
             val arabicLine = remember(
                 row.ayah.number,
+                row.ayah.ayah,
+                row.ayah.text,
+                row.words,
                 playing,
                 recitedWord,
                 arabicOnly,
