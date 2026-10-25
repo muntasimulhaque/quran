@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The pill's pause mark, at the notification's own 24 dp: two rounded bars
-     with the same share of the height and the same corner the reading draws. -->
+<!-- The pill's pause mark, at the notification's own 24 dp: the same two bars
+     the reading draws, in the same 24 unit grid and at the set's own bar.
+     NotificationGlyphsTest reads this file against Glyphs. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
     <path
-        android:fillColor="@android:color/white"
-        android:pathData="M7.92,4.8 H9.36 A1.2,1.2 0 0 1 10.56,6 V18 A1.2,1.2 0 0 1 9.36,19.2 H7.92 A1.2,1.2 0 0 1 6.72,18 V6 A1.2,1.2 0 0 1 7.92,4.8 Z" />
+        android:pathData="M8.25,5.25 L8.25,18.75"
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="3"
+        android:strokeLineCap="round" />
     <path
-        android:fillColor="@android:color/white"
-        android:pathData="M14.64,4.8 H16.08 A1.2,1.2 0 0 1 17.28,6 V18 A1.2,1.2 0 0 1 16.08,19.2 H14.64 A1.2,1.2 0 0 1 13.44,18 V6 A1.2,1.2 0 0 1 14.64,4.8 Z" />
+        android:pathData="M15.75,5.25 L15.75,18.75"
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="3"
+        android:strokeLineCap="round" />
 </vector>

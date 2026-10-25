@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -19,7 +20,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
@@ -30,6 +33,14 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * reader asks for it and steps back on its own, which is the whole of the
  * chrome the reading carries. It lives beside the reading screen so the page
  * file is about the page, and the bar is about the bar.
+ *
+ * The controls are anchored to the page, not to the glass. On a screen wider
+ * than the reading column, the row is the page's own width, centered, so
+ * Browse, Search, and Settings stand at the edges of the text they act on; on
+ * a phone the page is the whole glass and nothing moves. A row pinned to the
+ * window's edges left the marks in the margins of a ten inch screen, a hand's
+ * width from the page, and the marks were the right size and still looked lost
+ * (owner report, this session).
  */
 
 /** The bar's own margins; the title aligns with the reading under it. */
@@ -48,6 +59,8 @@ internal fun ReaderTopBar(
     onBrowse: () -> Unit,
     onSearch: () -> Unit,
     onSettings: () -> Unit,
+    /** The reading column's width, which the bar never outgrows. */
+    page: Dp,
     modifier: Modifier = Modifier,
 ) {
     AnimatedVisibility(
@@ -56,7 +69,7 @@ internal fun ReaderTopBar(
         exit = if (reducedMotion) fadeOut() else fadeOut() + slideOutVertically { -it / 3 },
         modifier = modifier,
     ) {
-        Row(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 // The scrim is solid behind the controls and gives way below
@@ -75,29 +88,36 @@ internal fun ReaderTopBar(
                         1f to MaterialTheme.colorScheme.background.copy(alpha = 0f),
                     ),
                 )
-                .windowInsetsPadding(WindowInsets.statusBars)
-                .padding(start = BarStart, end = BarEnd, top = 8.dp, bottom = Space.Gutter),
-            verticalAlignment = Alignment.CenterVertically,
+                .windowInsetsPadding(WindowInsets.statusBars),
+            contentAlignment = Alignment.TopCenter,
         ) {
-            // The bar is one row: Browse leads, the surah
-            // and its juz sit centered, and Search and
-            // Settings close it.
-            IconButton(Icon.Browse, stringResource(R.string.action_browse), onBrowse)
-            Box(
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 4.dp),
-                contentAlignment = Alignment.Center,
+                    .widthIn(max = page + BarStart * 2)
+                    .fillMaxWidth()
+                    .padding(start = BarStart, end = BarEnd, top = 8.dp, bottom = Space.Gutter),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                ReadingTitle(
-                    surah = title,
-                    detail = detail,
-                    action = titleAction,
-                    onClick = onTitle,
-                )
+                // The bar is one row: Browse leads, the surah
+                // and its juz sit centered, and Search and
+                // Settings close it.
+                IconButton(Icon.Browse, stringResource(R.string.action_browse), onBrowse)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 4.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    ReadingTitle(
+                        surah = title,
+                        detail = detail,
+                        action = titleAction,
+                        onClick = onTitle,
+                    )
+                }
+                IconButton(Icon.Search, stringResource(R.string.action_search), onSearch)
+                IconButton(Icon.Settings, stringResource(R.string.action_settings), onSettings)
             }
-            IconButton(Icon.Search, stringResource(R.string.action_search), onSearch)
-            IconButton(Icon.Settings, stringResource(R.string.action_settings), onSettings)
         }
     }
 }

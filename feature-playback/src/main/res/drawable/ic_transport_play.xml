@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- The pill's play mark, at the notification's own 24 dp: the same triangle
-     the reading draws, so the shade and the capsule carry one hand. -->
+     the reading draws, in the same 24 unit grid, so the shade and the capsule
+     carry one hand. The numbers are the set's own; NotificationGlyphsTest
+     reads this file against Glyphs and fails if the two drift apart. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
@@ -8,5 +10,5 @@
     android:viewportHeight="24">
     <path
         android:fillColor="@android:color/white"
-        android:pathData="M5.28,2.4 L18.72,12 L5.28,21.6 Z" />
+        android:pathData="M7.5,3.75 L20.25,12 L7.5,20.25 Z" />
 </vector>

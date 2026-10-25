@@ -30,7 +30,7 @@ import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.clockText
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
-import io.github.muntasimulhaque.quran.ui.reader.Icon
+import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconButton
 import io.github.muntasimulhaque.quran.ui.theme.Space
 

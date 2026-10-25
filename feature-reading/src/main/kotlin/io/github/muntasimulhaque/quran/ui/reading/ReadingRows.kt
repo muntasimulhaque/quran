@@ -184,10 +184,7 @@ internal fun ReadingRows(
     // eye can follow back to its margin on its own. The list itself stays
     // full width, so the paper around the column still answers a tap with the
     // chrome and a drag with the scroll.
-    val measure = minOf(
-        Reading.proseMeasure(LocalReadingVoice.current, metrics.translationSp),
-        Reading.quranMeasure(metrics.arabicSp),
-    )
+    val measure = Reading.column(LocalReadingVoice.current, metrics)
     // The column's own width is what centers it, not the window's: a
     // landscape split, a fold, and a display cutout all move the width the
     // reading actually has, and the measure follows the glass it is drawn on

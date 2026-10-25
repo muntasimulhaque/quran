@@ -62,9 +62,9 @@ val GlyphPress = 40.dp
 
 /**
  * One round control: the target, the spoken name, the press, and the mark the
- * caller draws in the middle. The mark keeps its own size, because a
- * transport's 20 dp mark and a way back's 22 dp mark answer two jobs and the
- * circle they stand in is one.
+ * caller draws in the middle. The mark is 24 dp at every caller, because the
+ * circle every caller stands in is one: a transport mark and a way back that
+ * took two sizes were one job with two answers (owner decision, this session).
  *
  * The circle carries a test tag, because it is the shape a test reads to prove
  * that two neighbours keep their air while their targets touch.

@@ -16,6 +16,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
+import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 import io.github.muntasimulhaque.quran.ui.theme.Radii

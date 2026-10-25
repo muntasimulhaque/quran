@@ -47,9 +47,9 @@ import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
-import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
-import io.github.muntasimulhaque.quran.ui.reader.Icon
-import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
+import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
+import io.github.muntasimulhaque.quran.ui.glyph.Icon
+import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.rich.RichBlocks
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Reading

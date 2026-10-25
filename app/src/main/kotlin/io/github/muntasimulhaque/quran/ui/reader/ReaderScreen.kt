@@ -42,6 +42,8 @@ import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
 import io.github.muntasimulhaque.quran.ui.reading.AyahCard
+import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
+import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.reading.AyahNoteSheet
 import io.github.muntasimulhaque.quran.ui.reading.ReadingList
 import kotlinx.coroutines.Dispatchers
@@ -375,6 +377,7 @@ fun ReaderScreen(
             }
         }
 
+        val page = Reading.column(LocalReadingVoice.current, settings.readingMetrics())
         ReaderTopBar(
             title = surahName(viewModel, settings.ayah),
             detail = stringResource(R.string.juz_label, viewModel.juz),
@@ -387,6 +390,7 @@ fun ReaderScreen(
             onBrowse = { sheet = ReaderSheet.Browse },
             onSearch = { sheet = ReaderSheet.Search },
             onSettings = { sheet = ReaderSheet.Settings },
+            page = page,
             modifier = Modifier.align(Alignment.TopCenter),
         )
 

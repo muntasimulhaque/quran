@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The pill's previous mark, at the notification's own 24 dp: the same
-     leading bar and mirrored triangle the reading draws. -->
+<!-- The pill's previous mark, at the notification's own 24 dp: the same post
+     and mirrored triangle the reading draws, in the same 24 unit grid.
+     NotificationGlyphsTest reads this file against Glyphs. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
@@ -8,8 +9,10 @@
     android:viewportHeight="24">
     <path
         android:fillColor="@android:color/white"
-        android:pathData="M18.33,5.09 L9.99,12 L18.33,18.91 Z" />
+        android:pathData="M18.5,3.75 L9.5,12 L18.5,20.25 Z" />
     <path
-        android:fillColor="@android:color/white"
-        android:pathData="M4.56,3.84 H5.28 A0.96,0.96 0 0 1 6.24,4.8 V19.2 A0.96,0.96 0 0 1 5.28,20.16 H4.56 A0.96,0.96 0 0 1 3.6,19.2 V4.8 A0.96,0.96 0 0 1 4.56,3.84 Z" />
+        android:pathData="M6.5,5.25 L6.5,18.75"
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="3"
+        android:strokeLineCap="round" />
 </vector>

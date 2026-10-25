@@ -19,10 +19,10 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.feature.settings.R
-import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
+import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.reader.IconButton
-import io.github.muntasimulhaque.quran.ui.reader.Icon
-import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
+import io.github.muntasimulhaque.quran.ui.glyph.Icon
+import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**

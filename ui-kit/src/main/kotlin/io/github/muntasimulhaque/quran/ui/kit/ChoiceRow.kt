@@ -24,9 +24,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
-import io.github.muntasimulhaque.quran.ui.reader.Icon
-import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
+import io.github.muntasimulhaque.quran.ui.glyph.GlyphGrid
+import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
+import io.github.muntasimulhaque.quran.ui.glyph.Icon
+import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
@@ -176,6 +177,11 @@ fun ChoiceRow(
  * The check is drawn inside the ring rather than in its place: a bare check
  * left the mark column alternating between circles and checks, and an off
  * row's empty ring was the same shape an off radio wears.
+ *
+ * The ring is drawn on the glyph set's own grid, at the set's one stroke and
+ * its round keyline, so the ring and the check it holds carry one weight. It
+ * had drawn its own 0.09 of the box, which made a "v" of a ring heavier than
+ * every mark beside it (owner decision, this session).
  */
 @Composable
 private fun ChoiceMark(selected: Boolean, radio: Boolean) {
@@ -187,14 +193,18 @@ private fun ChoiceMark(selected: Boolean, radio: Boolean) {
         contentAlignment = Alignment.Center,
     ) {
         Canvas(Modifier.size(22.dp)) {
-            val w = size.width
+            // The set's 24 unit box, its stroke for a mark of this size, and
+            // the 10 unit radius of the choice ring, read at this mark's own
+            // measure.
+            val unit = size.width / GlyphGrid.Size
+            val weight = GlyphGrid.strokeFor(size.width / density)
             drawCircle(
                 color = if (selected) accent else accent.copy(alpha = 0.6f),
-                radius = w * 0.42f,
-                style = Stroke(width = w * 0.09f),
+                radius = 10f * unit,
+                style = Stroke(width = weight * unit),
             )
             if (selected && radio) {
-                drawCircle(color = accent, radius = w * 0.2f)
+                drawCircle(color = accent, radius = 5f * unit)
             }
         }
         if (selected && !radio) {

@@ -2,6 +2,7 @@ package io.github.muntasimulhaque.quran.ui.theme
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.data.ReadingMetrics
 
 /**
  * How long a line of reading is allowed to grow.
@@ -82,6 +83,22 @@ object Reading {
 
     /** The measure of the Quran's own line, drawn in the Hafs face. */
     fun quranMeasure(arabicSp: Float): Dp = measureFor(arabicSp, QURAN_ADVANCE)
+
+    /**
+     * The one column the reading is drawn in: the narrower of the prose's
+     * measure and the Quran's, so neither text runs past a line the eye can
+     * follow back to its margin on its own.
+     *
+     * It lives here because two surfaces need the same answer: the reading
+     * that sets the column, and the chrome that stands at its edges on a
+     * screen wider than the page. A second copy of the minimum would be a
+     * second column the first one could drift away from (owner decision, this
+     * session).
+     */
+    fun column(voice: ReadingVoice, metrics: ReadingMetrics): Dp = minOf(
+        proseMeasure(voice, metrics.translationSp),
+        quranMeasure(metrics.arabicSp),
+    )
 
     // Measured over the shipped text; see the class KDoc.
     private const val LITERATA_ADVANCE = 0.471f

@@ -13,9 +13,9 @@ import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.kit.GlyphButton
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
-import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
-import io.github.muntasimulhaque.quran.ui.reader.Icon
-import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
+import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
+import io.github.muntasimulhaque.quran.ui.glyph.Icon
+import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 
 /**
  * One control in the pill's own row: a glyph the app drew by hand, or a word
@@ -227,12 +227,12 @@ internal fun TransportButton(
 ) {
     val tint = MaterialTheme.colorScheme.onSurfaceVariant
     // The app's one round control: [GlyphTarget] of touch, [GlyphPress] of
-    // press, and the glyph inside it at the size a transport mark wears. The
-    // press is a circle the size of the app's icon button rather than the
-    // whole target, so three of them stand edge to edge with the app's air
-    // between the circles (owner decision, this session). The 20 dp mark stays
-    // 20 dp: the press must not flash a dot inside the target the finger hit
-    // (owner report, an earlier session).
+    // press, and the glyph inside it at [GlyphSize.Control]. The press is a
+    // circle the size of the app's icon button rather than the whole target,
+    // so three of them stand edge to edge with the app's air between the
+    // circles (owner decision, this session). The mark is the control's size
+    // and not the press's: the press must not flash a dot inside the target
+    // the finger hit (owner report, an earlier session).
     GlyphButton(
         description = description,
         onClick = onClick,
@@ -242,7 +242,7 @@ internal fun TransportButton(
         IconGlyph(
             icon = kind.icon,
             tint = tint,
-            modifier = Modifier.size(GlyphSize.Transport),
+            modifier = Modifier.size(GlyphSize.Control),
         )
     }
 }

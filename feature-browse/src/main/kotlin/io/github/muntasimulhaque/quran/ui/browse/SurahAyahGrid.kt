@@ -38,10 +38,8 @@ import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
-import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
-import io.github.muntasimulhaque.quran.ui.reader.Icon
+import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconButton
-import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Wash

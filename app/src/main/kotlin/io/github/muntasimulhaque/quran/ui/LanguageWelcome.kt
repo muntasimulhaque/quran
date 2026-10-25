@@ -34,9 +34,9 @@ import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.clockText
 import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
-import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
-import io.github.muntasimulhaque.quran.ui.reader.Icon
-import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
+import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
+import io.github.muntasimulhaque.quran.ui.glyph.Icon
+import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space

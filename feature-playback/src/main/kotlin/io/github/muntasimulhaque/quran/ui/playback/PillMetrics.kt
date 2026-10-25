@@ -124,12 +124,12 @@ internal val TransportSize = GlyphTarget
  * The circle a transport control's press lights, inside its target: the app's
  * one round control, [GlyphPress].
  *
- * The glyph inside the circle stays 20 dp, so the press is not the mark and
- * the mark is not the press: a mark that filled its target would flash a dot
- * inside the button the finger hit (owner report, an earlier session), and a
- * circle the size of the target cannot stand beside another circle without
- * touching it. 40 dp inside 48 dp is the app's answer to both, and it is
- * Material's own icon button (owner decision, this session).
+ * The glyph inside the circle is the control's own mark, 24 dp, so the press
+ * is not the mark and the mark is not the press: a mark that filled its target
+ * would flash a dot inside the button the finger hit (owner report, an earlier
+ * session), and a circle the size of the target cannot stand beside another
+ * circle without touching it. 40 dp inside 48 dp is the app's answer to both,
+ * and it is Material's own icon button (owner decision, this session).
  */
 internal val TransportShape = GlyphPress
 

@@ -41,9 +41,9 @@ import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
-import io.github.muntasimulhaque.quran.ui.reader.GlyphSize
-import io.github.muntasimulhaque.quran.ui.reader.Icon
-import io.github.muntasimulhaque.quran.ui.reader.IconGlyph
+import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
+import io.github.muntasimulhaque.quran.ui.glyph.Icon
+import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Space
 /** The pages the settings hub opens, one at a time. */
 /**

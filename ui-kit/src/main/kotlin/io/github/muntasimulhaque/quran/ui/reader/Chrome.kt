@@ -31,11 +31,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
+import io.github.muntasimulhaque.quran.ui.glyph.Icon
+import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.kit.GlyphButton
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /**
- * An icon button: a full target of touch, 22 dp of ink, one spoken label.
+ * An icon button: a full target of touch, the control's mark, one spoken
+ * label. The mark is [GlyphSize.Control], the size every mark inside the app's
+ * round control takes, so the top bar's three and the pill's transport draw the
+ * same measure, 24 dp, the measure the Material icon button was drawn for.
  *
  * The target is the smallest the guidelines allow, never the size of the icon,
  * and the press is the app's own round control: the circle inside the target,
@@ -66,7 +72,7 @@ fun IconButton(
             icon = icon,
             tint = ink,
             modifier = Modifier
-                .size(GlyphSize.ChevronNav)
+                .size(GlyphSize.Control)
                 .then(if (rotation != 0f) Modifier.rotate(rotation) else Modifier),
         )
     }
