@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 11.4 (versionCode 116)
+Version: 11.5 (versionCode 117)
 
 ## Listing
 
@@ -135,7 +135,7 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 40180371342 on 11.4: all three legs green with eight frames each, every frame read. The reading, chrome, opening, Browse, ayah card, and tafsir carry the QPC text; the tablet settings frames carry the 11.4 version line and the four reading switches in the page's order, the Tajweed colors first, the phone settings frame is the hub's first screen and cuts before About as in 11.3, and the Licenses page is not among the eight frames. The Tajweed page is not in the set, so its word samples are not among the frames. The reading frames carry the word meanings and the translation, so the Arabic-only page's tighter verse rhythm is not among them; the reading they show is the card rhythm, unchanged.
+The set is from capture run 40208135175 on 11.5: all three legs green with eight frames each, every frame read. The reading, chrome, opening, Browse, ayah card, and tafsir carry the QPC text; the tablet chrome frames show the top bar standing on the reading column instead of the glass's edge, the reading frames carry the new marks, the tablet settings frames carry the 11.5 version line and the four reading switches in the page's order, the Tajweed colors first, the phone settings frame is the hub's first screen and cuts before About as in 11.3, and the Licenses page is not among the eight frames. The Tajweed page is not in the set, so its word samples are not among the frames. The reading frames carry the word meanings and the translation, so the Arabic-only page's tighter verse rhythm is not among them; the reading they show is the card rhythm, unchanged.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
@@ -155,8 +155,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (11.4, 381 characters)
-11.4 sets a Quran-only page the way a printed page does. With the word meanings and the translation off, the verses now stand close together, a quarter of a line apart, so the screen holds four verses in ten more than before. In Settings, the Tajweed colors row moves above the word meanings, with the other reading switches. The Quran text, translations, and tafsir are unchanged.
+## Release notes (11.5, 460 characters)
+11.5 gives the app one icon hand. Every mark shares one grid, one 2 dp line, and round corners, from the tick in a chip to the play triangle, and a filled shape is as round as a stroke's join. The saved ribbon matches the empty one, the clock's hands meet in one joint, and Tafsir is a page with a note in its margin. On a tablet the top bar stands on the reading column instead of the edge of the glass. The Quran text, translations, and tafsir are unchanged.
 
 ## Before each release
 
