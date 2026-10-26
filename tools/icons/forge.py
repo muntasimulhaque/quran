@@ -576,7 +576,7 @@ def render_store(size=512, out=None, ss=4):
     draw_fg(im, scale, size/2*ss - (xc-AX_X)*scale*ss, size/2*ss + (AX_Y - yc)*scale*ss, ss,
             stroke=STROKE_ICON, halo=HALO_ICON, stand=INK)
     if out:
-        im.convert('RGB').resize((size, size), Image.LANCZOS).save(out)
+        im.convert('RGBA').resize((size, size), Image.LANCZOS).save(out)
     return im
 
 DENS = [('mdpi', 48, 48), ('hdpi', 72, 72), ('xhdpi', 96, 96),
