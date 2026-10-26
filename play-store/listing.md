@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 11.5 (versionCode 117)
+Version: 11.6 (versionCode 118)
 
 ## Listing
 
@@ -155,8 +155,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (11.5, 460 characters)
-11.5 gives the app one icon hand. Every mark shares one grid, one 2 dp line, and round corners, from the tick in a chip to the play triangle, and a filled shape is as round as a stroke's join. The saved ribbon matches the empty one, the clock's hands meet in one joint, and Tafsir is a page with a note in its margin. On a tablet the top bar stands on the reading column instead of the edge of the glass. The Quran text, translations, and tafsir are unchanged.
+## Release notes (11.6, 410 characters)
+11.6 is a new face for the app. The mark's feet now close on one point instead of poking past it, the line is a little firmer so the icon holds from a 48 pixel tile to the store, and the two smallest tiles carry their own weight. The feature graphic is redrawn: no frame, the mark at seal size, the name, and The Noble Book under one gold rule. The reading, the Quran text, and every translation are unchanged.
 
 ## Before each release
 

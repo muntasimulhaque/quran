@@ -8,10 +8,10 @@
 #   python tools/icons/forge.py emit      # writes the repo's surface files
 #
 # emit writes: app/src/main/res/drawable/ic_launcher_foreground.xml and
-# ic_launcher_monochrome.xml, the five mipmap legacy tiles, ic_share_mark
-# and ic_daily at mdpi through xxxhdpi, play-store/icon-512.png, and
-# play-store/feature-graphic-1024x500.png, rebuilt with the repo's own
-# Literata and Inter over the paper field and the gold hairline frame.
+# ic_launcher_monochrome.xml, ic_shortcut_mark.xml, the five mipmap legacy
+# tiles, ic_share_mark and ic_daily at mdpi through xxxhdpi,
+# play-store/icon-512.png, and play-store/feature-graphic-1024x500.png,
+# rebuilt with the repo's own Literata and Inter over the paper field.
 # The drawing traces the owner's reference set: the pages are sail arcs
 # diving into a spine that ends at the V where the two pages meet, each
 # plank folds onto the page's outer edge, and each lower end meets the
@@ -25,13 +25,15 @@ GOLD  = (122, 90, 18)    # #7A5A12
 PAPER = (251, 249, 244)   # #FBF9F4
 MUTED = (94, 89, 79)      # #5E594F
 WHITE = (255, 255, 255)
-HAIR  = GOLD              # the banner's gold hairline
 
 # ------------------------------------------------------------ trace geometry
 AX_X, AX_Y = 85.5, 98.5
 S_FG   = 0.415
-STROKE = 1.5
-HALO   = 1.5
+# the banner's own hand: the mark at 210 px carries the icon's weight and
+# the icon's air, so the card and the icon are one drawing seen at two
+# sizes, not two weights of the same drawing
+STROKE = 3.0
+HALO   = 1.4
 # The icon's own line, in trace units: one weight and one ink for the
 # launcher's layers, the legacy tiles, and the store icon. The launcher
 # vector had been taking STROKE as canvas units, 2.4 times heavier than the
@@ -40,8 +42,18 @@ HALO   = 1.5
 # and the icon keeps one ink at 14.3:1, while the feature graphic keeps the
 # ornament gold it draws well at its own size (owner decision, this
 # session).
-STROKE_ICON = 2.6
-HALO_ICON   = 1.9
+# The line weight. 2.6 was the drawing's own hand and read well at 512, but
+# the adaptive icon is rasterized from 72 dp up, and at the bottom of that
+# range 2.6 units is one pixel of gray. 3.2 holds from 72 px to 512 and still
+# keeps the sail curves; 4.4 flattens them (owner decision, the any-size
+# session).
+STROKE_ICON = 3.2
+# The air around the book: the paper stroke that keeps the stand's line clear
+# of the page's edge, so the two never touch. 1.9 left the mark reading as a
+# diagram of two parts; 1.4 seats the book in its stand as one object, and it
+# stays 1.4 when the line grows, which seats it tighter still (owner
+# decision, the feet session).
+HALO_ICON   = 1.4
 STROKE_CANVAS = STROKE_ICON * S_FG
 HALO_CANVAS   = (STROKE_ICON + 2 * HALO_ICON) * S_FG
 
@@ -52,15 +64,20 @@ PAGE_E2  = (38.6, 101.4)
 PAGE_J   = (85.5, 113.7)
 
 CROSS     = (85.5, 128.9)   # where the two planks cross
-PLANK_END = (143.8, 148.8)   # the leg ends on its own line at the wedge's mouth
-                             # and out to the mirrored (right) foot's corner
+# The foot is one point, not two. The leg used to end at (143.8, 148.8) and
+# the closing sweep at (28.5, 149.0): 1.2 trace units apart, which is half
+# the line's own width, so each round cap poked a small beak past the joint
+# and the mark grew a spur at both feet. Both strokes now stop where their
+# centerlines cross, and the corner stays (owner report, the feet session).
+FOOT_TIP  = (28.354, 148.406)
+PLANK_END = (2 * AX_X - FOOT_TIP[0], FOOT_TIP[1])   # the mirrored foot's corner
 WEDGE_O   = (54.15, 118.25)
-# the closing sweep now lands on the plank's own tip, so each foot is one
-# clean tapered face with no open mouth: the sliver between arc and leg was
-# the only spot of the mark that turned to mud at home-screen sizes
+# the closing sweep lands on the plank's own tip, so each foot is one clean
+# tapered face with no open mouth: the sliver between arc and leg was the
+# only spot of the mark that turned to mud at home-screen sizes
 WEDGE_C1  = (44.0, 126.0)
 WEDGE_C2  = (25.6, 137.4)
-WEDGE_F   = (28.5, 149.0)
+WEDGE_F   = FOOT_TIP
 
 ARM_P_F, BAR_P_F = 3.0, 4.6
 RING_F, JUNC_F   = 3.0, 1.2
@@ -421,32 +438,37 @@ def mono_pathdata():
     return bandA, bandB, faces, book
 
 def fg_xml(note):
-    scale, cx, cy = S_FG, 54.0, 54.0
+    return mark_xml(note, 108, S_FG, 54.0, 54.0, STROKE_CANVAS, HALO_CANVAS)
+
+
+def mark_xml(note, dp, scale, cx, cy, stroke, halo_w):
+    """The same mark on any canvas: the launcher's 108 dp and the shortcut
+    door's 48 dp are one drawing at two scales, never two drawings."""
     p = fg_pieces()
-    halo_w = HALO_CANVAS
     parts = []
-    def P(fill, stroke, sw, data):
+    def P(fill, stroke_c, sw, data):
         attrs = []
-        if fill: attrs.append(f'android:fillColor="{fill}"')
-        if stroke:
-            attrs.append(f'android:strokeColor="{stroke}" android:strokeWidth="{fmt(sw)}" '
-                         'android:strokeLineJoin="round" android:strokeLineCap="round"')
+        if fill: attrs.append('android:fillColor="%s"' % fill)
+        if stroke_c:
+            attrs.append('android:strokeColor="%s" android:strokeWidth="%s" '
+                         'android:strokeLineJoin="round" android:strokeLineCap="round"'
+                         % (stroke_c, fmt(sw)))
         attrs.append('android:pathData="%s"' % data)
         return '    <path\n        ' + '\n        '.join(attrs) + ' />'
     for k in ('pl', 'pm', 'wa', 'wb'):
-        parts.append(P(None, '@color/icon_ink', STROKE_CANVAS, svg_segs(p[k], scale, cx, cy)))
+        parts.append(P(None, '@color/icon_ink', stroke, svg_segs(p[k], scale, cx, cy)))
     for k in ('pc', 'pcM'):
         parts.append(P('@color/paper', '@color/paper', halo_w, svg_segs(p[k], scale, cx, cy)))
     for k in ('pc', 'pcM'):
-        parts.append(P('@color/paper', '@color/icon_ink', STROKE_CANVAS, svg_segs(p[k], scale, cx, cy)))
+        parts.append(P('@color/paper', '@color/icon_ink', stroke, svg_segs(p[k], scale, cx, cy)))
     for k in ('ca', 'cb'):
-        parts.append(P(None, '@color/icon_ink', STROKE_CANVAS, svg_segs(p[k], scale, cx, cy)))
+        parts.append(P(None, '@color/icon_ink', stroke, svg_segs(p[k], scale, cx, cy)))
     body = '\n'.join(parts)
     return ('<?xml version="1.0" encoding="utf-8"?>\n'
             '<!--\n  ' + note + '\n-->\n'
             '<vector xmlns:android="http://schemas.android.com/apk/res/android"\n'
-            '    android:width="108dp" android:height="108dp"\n'
-            '    android:viewportWidth="108" android:viewportHeight="108">\n'
+            '    android:width="%ddp" android:height="%ddp"\n'
+            '    android:viewportWidth="%d" android:viewportHeight="%d">\n' % (dp, dp, dp, dp)
             + body + '\n</vector>\n')
 
 def mono_xml(note):
@@ -560,6 +582,16 @@ def render_store(size=512, out=None, ss=4):
 DENS = [('mdpi', 48, 48), ('hdpi', 72, 72), ('xhdpi', 96, 96),
         ('xxhdpi', 144, 144), ('xxxhdpi', 192, 192)]
 
+# The optical ladder. Even at 3.2, a legacy tile at 48 is under a pixel, so the
+# two smallest tiles take more weight and more air; 96 and up are the base
+# weight, and the geometry never moves. The launcher's vector and the store icon
+# keep one weight because the vector is rasterized at 72 dp and up and cannot
+# change weight per density (owner decision, the any-size session).
+OPTICAL = {48: (4.6, 2.3), 72: (3.8, 1.9)}
+
+
+def optical(size):
+    return OPTICAL.get(size, (STROKE_ICON, HALO_ICON))
 
 
 def legacy_png(size, out=None):
@@ -568,8 +600,9 @@ def legacy_png(size, out=None):
     ids = [p[k] for k in ('pl', 'pm', 'wa', 'wb', 'pc', 'pcM')]
     scale, xc, yc = fit_for(ids, None, span_w=size*0.53)
     paper_bg(im)
+    stroke, halo = optical(size)
     draw_fg(im, scale, size/2*4 - (xc-AX_X)*scale*4, size/2*4 + (AX_Y-yc)*scale*4, 4,
-            stroke=STROKE_ICON, halo=HALO_ICON, stand=INK)
+            stroke=stroke, halo=halo, stand=INK)
     im.convert('RGB').resize((size, size), Image.LANCZOS).save(out)
 
 def share_png(size, out=None):
@@ -627,72 +660,65 @@ def _font(path, size, weight=None):
     except Exception:
         return None
 
-def banner_png(out=None, ss=1):
+def banner_png(out=None, ss=1, stand=INK, span=210.0, title=96,
+               caption='THE NOBLE BOOK', track=6.0, cap_size=19):
+    """The shelf card: the mark, the name, a gold rule, the book's own name.
+    The stack is measured and centered as one group, so the mark keeps real air
+    under it instead of sitting on the title. The mark is drawn at four times
+    and laid on the card at 1:1 so its curves are clean; the type is drawn at
+    1:1 so the letterforms are the font's own pixels, never a downsample. The
+    stand is the icon's ink at the icon's weight: the gold was ornament at 1.5
+    units and became a second material at 3.0, and two materials at one weight
+    fight. The gold lives on in the rule under the name, where it does work
+    (owner decision, the surfaces session)."""
     W, H = 1024, 500
-    big = (W*ss, H*ss)
-    im = Image.new('RGBA', big, (0, 0, 0, 0))
-    paper_bg(im)
-    dr = ImageDraw.Draw(im)
-    # the mark as a seal over the name, ink width 196, centered on the axis
-    # at the banner's optical center (512, 176); the mark is the icon's own
-    # one ink, and the gold lives in the frame and the rule below the name
+    im = Image.new('RGBA', (W, H), PAPER + (255,))
     p = fg_pieces()
     ids = [p[k] for k in ('pl', 'pm', 'wa', 'wb', 'pc', 'pcM')]
-    scale, xc, yc = fit_for(ids, None, span_w=196.0)
-    cx, cy = 512*ss, 176*ss + (AX_Y-yc)*scale*ss
-    s = ss
-    lw = STROKE*scale
-    def m(raw, step=60):
-        return [(cx + (q[0]-AX_X)*scale*s, cy + (q[1]-AX_Y)*scale*s) for q in as_pts(raw, step)]
-    for k in ('pl', 'pm', 'wa', 'wb'):
-        stroke_pts(dr, m(p[k]), INK, max(1, round(lw*s)))
-    halo_w = (STROKE + 2*HALO)*scale
-    for k in ('pc', 'pcM'):
-        pts = m(p[k]); fill_pts(dr, pts, PAPER); stroke_pts(dr, pts, PAPER, max(1, round(halo_w*s)))
-    for k in ('pc', 'pcM'):
-        pts = m(p[k]); fill_pts(dr, pts, PAPER); stroke_pts(dr, pts, INK, max(1, round(lw*s)))
-    for k in ('ca', 'cb'):
-        stroke_pts(dr, m(p[k]), INK, max(1, round(lw*s)))
-    # the page's own frame: one gold hairline, inside the page margin
-    # (owner decision, this session: the double rule at the margin and inside
-    # it read as two borders, so the banner keeps the frame alone)
-    fr = [80*ss, 76*ss, 944*ss, 424*ss]
-    dr.rectangle(fr, outline=HAIR, width=max(1, round(2.2*ss)))
-    # texts
-    im2 = banner_text(im)
-    if out:
-        im2.convert('RGB').resize((W, H), Image.LANCZOS).save(out)
-    return im2
+    scale, xc, yc = fit_for(ids, None, span_w=span)
+    tb = trace_bbox(ids)
+    mark_h = (tb[3] - tb[1]) * scale
 
-def banner_text(im):
-    # the name and the caption as one centered stack, spaced by the shipped
-    # file's own measured ink rows: the title's ink runs 296..342, the rule
-    # keeps 12 of air on each side at 354..357, the caption's ink runs
-    # 369..385, and the block splits the band evenly, 37 of air above it and
-    # 37 above the inner frame at 422, so the stack reads as one held group
-    # with the bar breathing between the two lines of type
+    ft = _font(LITERATA, title, 'Regular')
+    bbt = _inner_bbox('Quran', ft)
+    title_h = bbt[3] - bbt[1]
+    fc = _font(INTERF, cap_size, 'Regular')
+    bbc = _inner_bbox(caption, fc)
+    cap_h = bbc[3] - bbc[1]
+
+    g_mark_title, g_title_rule, g_rule_cap = 44, 26, 20
+    total = mark_h + g_mark_title + title_h + g_title_rule + 2 + g_rule_cap + cap_h
+    top = round((H - total) / 2)
+    cy_mark = top + mark_h / 2
+
+    layer = Image.new('RGBA', (W * 4, H * 4), (0, 0, 0, 0))
+    draw_fg(layer, scale, W * 2 - (xc - AX_X) * scale * 4,
+            cy_mark * 4 + (AX_Y - yc) * scale * 4, 4,
+            stroke=STROKE, halo=HALO, stand=stand)
+    im.alpha_composite(layer.resize((W, H), Image.LANCZOS))
+    im = banner_text(im, top + mark_h + g_mark_title, ft, bbt, fc, bbc, caption,
+                     track, g_title_rule, g_rule_cap)
+    if out:
+        im.convert('RGB').save(out)
+    return im
+
+
+def banner_text(im, title_top, ft, bbt, fc, bbc, caption, track, g_title_rule, g_rule_cap):
+    """Set at 1:1 on the banner's own pixels: the title's ink begins at
+    title_top, the gold rule sits g_title_rule under it, the caption g_rule_cap
+    under the rule."""
     dr = ImageDraw.Draw(im)
-    s = im.size[0] // 1024
-    title = 'Quran'
-    f = _font(LITERATA, 120*s, 'Regular')
-    bb = _inner_bbox(title, f)
-    size = int(round(120*s * 300.0/max(1, bb[2]-bb[0])))
-    f = _font(LITERATA, size, 'Regular')
-    bb = _inner_bbox(title, f)
-    dr.text((512*s - (bb[0]+bb[2])/2, 296*s - bb[1]), title, font=f, fill=INK)
-    # the short gold rule between the name and the caption
-    dr.rectangle([467*s, 354*s, 557*s, 357*s], fill=HAIR)
-    # the caption in tracked small caps, centered on the axis; the caption's
-    # em top sits 5 above its ink, measured on the shipped file
-    cap = 'THE NOBLE BOOK'
-    f2 = _font(INTERF, 21*s, 'Regular')
-    track = 5.0*s
-    widths = [dr.textlength(c, font=f2) for c in cap]
-    x = 512*s - (sum(widths) + track*(len(cap)-1)) / 2
-    for c, w in zip(cap, widths):
-        dr.text((x, 364*s), c, font=f2, fill=MUTED)
+    dr.text((512 - (bbt[0] + bbt[2]) / 2, title_top - bbt[1]), 'Quran', font=ft, fill=INK)
+    ry = title_top + (bbt[3] - bbt[1]) + g_title_rule
+    dr.rectangle([512 - 42, ry, 512 + 42, ry + 2], fill=GOLD)
+    widths = [dr.textlength(c, font=fc) for c in caption]
+    x = 512 - (sum(widths) + track * (len(caption) - 1)) / 2
+    cy = ry + g_rule_cap - bbc[1]
+    for c, w in zip(caption, widths):
+        dr.text((x, cy), c, font=fc, fill=MUTED)
         x += w + track
     return im
+
 
 def _inner_bbox(text, font):
     tmp = Image.new('L', (2400, 600))
@@ -769,6 +795,22 @@ def emit():
                  '  reads at 24 dp.')
     open(os.path.join(root, 'app/src/main/res/drawable/ic_launcher_foreground.xml'), 'w', newline='\n').write(fg_xml(fg_note))
     open(os.path.join(root, 'app/src/main/res/drawable/ic_launcher_monochrome.xml'), 'w', newline='\n').write(mono_xml(mono_note))
+    # The shortcut door: the launcher foreground is a 108 dp canvas with the
+    # mark at 41.5 percent, which is right under a mask and too small in a 48 dp
+    # shortcut tile. The door gets the same drawing at 86 percent of a 48 dp
+    # canvas, so the mark stands at the tile's own size (owner report, the
+    # surfaces session).
+    door = 48.0
+    door_scale = 0.86 * door / 115.0
+    door_stroke, door_halo = optical(48)
+    open(os.path.join(root, 'app/src/main/res/drawable/ic_shortcut_mark.xml'), 'w',
+         newline='\n').write(
+        mark_xml('The shortcut door: the app\'s mark at 86 percent of a 48 dp canvas,\n'
+                 '  one ink on the theme\'s paper, drawn from the same geometry as\n'
+                 '  the launcher, the share mark, and the store icon.',
+                 door, door_scale, door / 2, door / 2,
+                 door_stroke * door_scale,
+                 (door_stroke + 2 * door_halo) * door_scale))
     for name, size, _ in DENS:
         legacy_png(size, os.path.join(root, f'app/src/main/res/mipmap-{name}/ic_launcher.png'))
         share_png(size // 2, os.path.join(root, f'app/src/main/res/drawable-{name}/ic_share_mark.png'))

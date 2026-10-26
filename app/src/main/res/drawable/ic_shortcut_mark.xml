@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The shortcut door: the app's mark at 86 percent of a 48 dp canvas,
+  one ink on the theme's paper, drawn from the same geometry as
+  the launcher, the share mark, and the store icon.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp" android:height="48dp"
+    android:viewportWidth="48" android:viewportHeight="48">
+    <path
+        android:strokeColor="@color/icon_ink" android:strokeWidth="1.651" android:strokeLineJoin="round" android:strokeLineCap="round"
+        android:pathData="M7.434,10.826 L5.323,10.826 C4.746,10.826 4.271,11.281 4.247,11.858 L3.623,26.707 C3.592,27.438 4.047,28.102 4.739,28.339 L44.513,41.914" />
+    <path
+        android:strokeColor="@color/icon_ink" android:strokeWidth="1.651" android:strokeLineJoin="round" android:strokeLineCap="round"
+        android:pathData="M40.566,10.826 L42.677,10.826 C43.254,10.826 43.729,11.281 43.753,11.858 L44.377,26.707 C44.408,27.438 43.953,28.102 43.261,28.339 L3.487,41.914" />
+    <path
+        android:strokeColor="@color/icon_ink" android:strokeWidth="1.651" android:strokeLineJoin="round" android:strokeLineCap="round"
+        android:pathData="M12.747,31.089 C9.103,33.871 2.499,37.963 3.487,41.914" />
+    <path
+        android:strokeColor="@color/icon_ink" android:strokeWidth="1.651" android:strokeLineJoin="round" android:strokeLineCap="round"
+        android:pathData="M35.253,31.089 C38.897,33.871 45.501,37.963 44.513,41.914" />
+    <path
+        android:fillColor="@color/paper"
+        android:strokeColor="@color/paper" android:strokeWidth="3.302" android:strokeLineJoin="round" android:strokeLineCap="round"
+        android:pathData="M24,11.329 C20.41,8.098 16.282,7.326 13.59,7.362 C11.078,7.38 7.566,7.381 7.524,9.247 L7.184,24.191 C7.173,24.689 7.505,25.13 7.988,25.257 C12.693,26.118 19.693,27.913 23.46,29.315 C23.733,29.386 24,29.18 24,28.898 L24,11.329 Z" />
+    <path
+        android:fillColor="@color/paper"
+        android:strokeColor="@color/paper" android:strokeWidth="3.302" android:strokeLineJoin="round" android:strokeLineCap="round"
+        android:pathData="M24,11.329 C27.59,8.098 31.718,7.326 34.41,7.362 C36.922,7.38 40.434,7.381 40.476,9.247 L40.816,24.191 C40.827,24.689 40.495,25.13 40.012,25.257 C35.307,26.118 28.307,27.913 24.54,29.315 C24.267,29.386 24,29.18 24,28.898 L24,11.329 Z" />
+    <path
+        android:fillColor="@color/paper"
+        android:strokeColor="@color/icon_ink" android:strokeWidth="1.651" android:strokeLineJoin="round" android:strokeLineCap="round"
+        android:pathData="M24,11.329 C20.41,8.098 16.282,7.326 13.59,7.362 C11.078,7.38 7.566,7.381 7.524,9.247 L7.184,24.191 C7.173,24.689 7.505,25.13 7.988,25.257 C12.693,26.118 19.693,27.913 23.46,29.315 C23.733,29.386 24,29.18 24,28.898 L24,11.329 Z" />
+    <path
+        android:fillColor="@color/paper"
+        android:strokeColor="@color/icon_ink" android:strokeWidth="1.651" android:strokeLineJoin="round" android:strokeLineCap="round"
+        android:pathData="M24,11.329 C27.59,8.098 31.718,7.326 34.41,7.362 C36.922,7.38 40.434,7.381 40.476,9.247 L40.816,24.191 C40.827,24.689 40.495,25.13 40.012,25.257 C35.307,26.118 28.307,27.913 24.54,29.315 C24.267,29.386 24,29.18 24,28.898 L24,11.329 Z" />
+    <path
+        android:strokeColor="@color/icon_ink" android:strokeWidth="1.651" android:strokeLineJoin="round" android:strokeLineCap="round"
+        android:pathData="M7.434,10.826 L6.088,10.826" />
+    <path
+        android:strokeColor="@color/icon_ink" android:strokeWidth="1.651" android:strokeLineJoin="round" android:strokeLineCap="round"
+        android:pathData="M40.566,10.826 L41.912,10.826" />
+</vector>
