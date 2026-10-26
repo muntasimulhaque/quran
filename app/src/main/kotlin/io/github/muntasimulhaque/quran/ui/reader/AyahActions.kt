@@ -72,14 +72,17 @@ internal fun AyahActions(
     val play = stringResource(R.string.action_play)
     val tafsir = stringResource(R.string.action_tafsir)
     val save = stringResource(R.string.action_save)
+    val saved = stringResource(R.string.action_saved)
+    val saveLabel = if (isSaved) saved else save
     val note = stringResource(R.string.action_note)
     val share = stringResource(R.string.action_share)
     // One width for all five actions: the widest word of the five plus the
     // pill's own side padding. Five labels of five lengths then press in five
     // identical capsules instead of five ovals of the words' own making
-    // (owner decision, this session).
+    // (owner decision, this session). Both Save labels are measured, so the
+    // capsule does not grow when the ayah is kept.
     val actionWidth = rememberActionWidth(
-        listOfNotNull(play, if (showTafsir) tafsir else null, save, note, share),
+        listOfNotNull(play, if (showTafsir) tafsir else null, save, saved, note, share),
     )
     val shape = Radii.Pill
     Row(
@@ -106,7 +109,7 @@ internal fun AyahActions(
         // The two marked actions say their state; the three that only answer a
         // tap say nothing, so nothing on the pill reads as a switch it is not.
         TextAction(
-            label = save,
+            label = saveLabel,
             icon = if (isSaved) Icon.BookmarkFilled else Icon.Bookmark,
             onClick = onSave,
             active = isSaved,

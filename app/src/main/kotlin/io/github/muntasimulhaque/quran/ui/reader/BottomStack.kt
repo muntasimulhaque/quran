@@ -12,13 +12,16 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.data.Ayah
+import io.github.muntasimulhaque.quran.data.DownloadError
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
@@ -64,6 +67,8 @@ internal fun BottomStack(
     onMore: (Ayah) -> Unit,
     onShare: (Ayah) -> Unit,
     onTouch: () -> Unit,
+    /** Reports the stack's measured height so the reading can keep its foot clear. */
+    onHeight: (Int) -> Unit = {},
     onReciter: (String) -> Unit,
     reciterId: String,
     reciterName: String,
@@ -73,10 +78,14 @@ internal fun BottomStack(
         modifier = Modifier
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.navigationBars)
+            .onSizeChanged { onHeight(it.height) }
             .padding(bottom = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        DisposableEffect(Unit) {
+            onDispose { onHeight(0) }
+        }
         viewModel.packSetup?.let { setup ->
             Row(
                 modifier = Modifier
@@ -94,7 +103,13 @@ internal fun BottomStack(
                     )
                     Text(
                         text = when {
-                            setup.failed -> stringResource(R.string.pack_download_failed)
+                            setup.failed -> stringResource(
+                                if (setup.failure == DownloadError.Storage) {
+                                    R.string.pack_download_failed_storage
+                                } else {
+                                    R.string.pack_download_failed
+                                },
+                            )
                             setup.progress == null -> stringResource(R.string.reader_pack_preparing)
                             else -> stringResource(
                                 R.string.reader_pack_downloading,

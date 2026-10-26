@@ -1,5 +1,6 @@
 package io.github.muntasimulhaque.quran.ui.reading
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -54,6 +55,7 @@ import io.github.muntasimulhaque.quran.ui.rich.RichBlocks
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -74,6 +76,12 @@ private data class TafsirView(
     val blocks: List<TextBlock>,
 )
 
+/** Every enabled tafsir read once, and whether the read has finished. */
+private data class TafsirLoad(
+    val views: Map<String, TafsirView> = emptyMap(),
+    val done: Boolean = false,
+)
+
 /**
  * The ayah card: one screen per ayah that holds everything deeper without
  * asking the reader to learn an interface.
@@ -90,6 +98,8 @@ fun AyahCard(
     surahName: String,
     tafsirPacks: List<ContentPack>,
     settings: AppSettings,
+    /** The pack a search hit opened the card for, when there is one. */
+    initialTafsirPack: String? = null,
     onAddContent: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -99,38 +109,62 @@ fun AyahCard(
     // answer is already in the tap. With more than one, the doors stand and
     // the reader chooses (owner decision, this session).
     val firstPack = tafsirPacks.singleOrNull()
-    var door by remember(ayah.number) { mutableStateOf(firstPack?.let { Door.Tafsir(it) }) }
+    val wantedPack = initialTafsirPack?.let { id -> tafsirPacks.firstOrNull { it.id == id } }
+    // A search hit opens the pack that carried the match first, so its
+    // passage stands at the head of the card instead of under another pack's
+    // door. The other packs keep the language order the card always used.
+    val orderedPacks = remember(tafsirPacks, initialTafsirPack) {
+        tafsirPacks.sortedWith(
+            compareBy<ContentPack>({ it.id != initialTafsirPack }, { it.language }),
+        )
+    }
+    var door by remember(ayah.number, initialTafsirPack) {
+        mutableStateOf((wantedPack ?: firstPack)?.let { Door.Tafsir(it) })
+    }
 
     // Every enabled tafsir is read as the card opens, not when its door is
     // tapped: the read is one indexed query of a millisecond or two, and
     // paying for it here puts the text in hand before the sheet has finished
     // moving, so the panel opens on prose instead of on "Opening…" (owner
     // report, this session: the wait was the tap-to-read, not the query).
-    val passages by produceState<Map<String, TafsirView>>(
-        initialValue = emptyMap(),
+    val load by produceState<TafsirLoad>(
+        initialValue = TafsirLoad(),
         content,
         ayah.number,
         tafsirPacks,
     ) {
-        value = withContext(Dispatchers.IO) {
+        val views = withContext(Dispatchers.IO) {
             tafsirPacks.mapNotNull { pack ->
-                val passage = content.tafsir(ayah.number, pack.id) ?: return@mapNotNull null
-                val name = content.surah(passage.surah)?.nameSimple
-                    ?: surahName
-                val span = if (passage.fromAyah == passage.toAyah) {
-                    "${passage.surah}:${passage.fromAyah}"
-                } else {
-                    "${passage.surah}:${passage.fromAyah}-${passage.toAyah}"
+                try {
+                    val passage = content.tafsir(ayah.number, pack.id)
+                        ?: return@mapNotNull null
+                    val name = content.surah(passage.surah)?.nameSimple
+                        ?: surahName
+                    val span = if (passage.fromAyah == passage.toAyah) {
+                        "${passage.surah}:${passage.fromAyah}"
+                    } else {
+                        "${passage.surah}:${passage.fromAyah}-${passage.toAyah}"
+                    }
+                    pack.id to TafsirView(
+                        title = passage.source,
+                        range = "$name $span",
+                        passage = passage,
+                        blocks = RichText.parseHtml(passage.text),
+                    )
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (error: Exception) {
+                    // A damaged tafsir pack is a missing passage, not a crash:
+                    // the door says the passage is not here, and the repair
+                    // path can replace the pack.
+                    Log.w("AyahCard", "the tafsir pack ${pack.id} could not be read", error)
+                    null
                 }
-                pack.id to TafsirView(
-                    title = passage.source,
-                    range = "$name $span",
-                    passage = passage,
-                    blocks = RichText.parseHtml(passage.text),
-                )
             }.toMap()
         }
+        value = TafsirLoad(views = views, done = true)
     }
+    val passages = load.views
 
     // The card is the app's one page. The tafsir inside it keeps the reader's
     // own measure, centered on the page, so a ten inch screen centers a
@@ -160,6 +194,16 @@ fun AyahCard(
                 // a still frame does (owner report).
                 .testTag("ayah-card"),
         ) {
+            Text(
+                text = stringResource(
+                    R.string.card_title,
+                    surahName,
+                    localizedDigits(ayah.verseKey),
+                ),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Tight),
+            )
             // The tafsir is drawn only while the reader shows it. The packs
             // still stand in for search; this is what the ayah card draws.
             if (settings.showTafsir) {
@@ -187,7 +231,7 @@ fun AyahCard(
                         modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Block),
                     )
                 }
-                tafsirPacks.sortedBy { it.language }.forEach { pack ->
+                orderedPacks.forEach { pack ->
                     val open = (door as? Door.Tafsir)?.pack?.id == pack.id
                     DoorRow(
                         title = contentPackName(pack.id, pack.name),
@@ -205,7 +249,14 @@ fun AyahCard(
                             val view = passages[pack.id]
                             if (view == null) {
                                 Text(
-                                    text = stringResource(R.string.card_opening_pack, contentPackName(pack.id, pack.name)),
+                                    text = if (load.done) {
+                                        stringResource(R.string.card_tafsir_missing)
+                                    } else {
+                                        stringResource(
+                                            R.string.card_opening_pack,
+                                            contentPackName(pack.id, pack.name),
+                                        )
+                                    },
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )

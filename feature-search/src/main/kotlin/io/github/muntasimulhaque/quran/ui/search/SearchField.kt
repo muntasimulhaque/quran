@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,6 +27,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -47,6 +49,7 @@ internal fun SearchField(
     onClose: () -> Unit,
     focus: FocusRequester,
 ) {
+    val focusManager = LocalFocusManager.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -94,6 +97,10 @@ internal fun SearchField(
                     ),
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    // The keyboard's Search key is the reader saying the query
+                    // is done; it closes the keyboard and leaves the results
+                    // on the page. The query already runs as it settles.
+                    keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
                     modifier = Modifier
                         .weight(1f)
                         .focusRequester(focus),

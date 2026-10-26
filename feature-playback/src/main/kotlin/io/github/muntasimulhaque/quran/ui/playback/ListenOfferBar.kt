@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.data.DownloadError
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.ListenOffer
 import io.github.muntasimulhaque.quran.ui.kit.DownloadLine
@@ -117,7 +118,13 @@ internal fun ListenOfferBar(
                 WordsBlock(
                     name = reciterShortName(offer.reciter, offer.reciterName),
                     title = when {
-                        offer.failed -> stringResource(R.string.playback_download_failed)
+                        offer.failed -> stringResource(
+                            if (offer.failure == DownloadError.Storage) {
+                                R.string.playback_download_failed_storage
+                            } else {
+                                R.string.playback_download_failed
+                            },
+                        )
                         progress != null -> stringResource(
                             R.string.playback_downloading,
                             (progress * 100).toInt(),

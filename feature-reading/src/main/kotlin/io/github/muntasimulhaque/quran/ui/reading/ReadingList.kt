@@ -47,10 +47,17 @@ fun ReadingList(
     /** Reads the surah after this one while the reader is still in it. */
     onReadAhead: (Int) -> Unit,
     metrics: ReadingMetrics,
+    /** The search arrival to reveal, if it belongs to this surah. */
+    reveal: ReadingReveal? = null,
+    /** The reader's own word-by-word switch, before any arrival turns it on. */
+    wordAid: Boolean = metrics.wordByWord,
     /** The reader's place, which moves the list and never the other way round. */
     place: Int,
     /** How far into that ayah the reader was: a long ayah is many screens. */
     placeOffset: Int,
+    /** The width and font scale the depth was measured in; 0 when unknown. */
+    placeOffsetWidth: Int = 0,
+    placeOffsetFontScale: Float = 0f,
     hasTranslation: Boolean,
     /** The reader's language: the reading reads it, and so does the opening. */
     contentLanguage: String,
@@ -63,7 +70,7 @@ fun ReadingList(
     onScrolled: () -> Unit,
     onNextSurah: (Int) -> Unit,
     onAddContent: () -> Unit,
-    onPlaceChanged: (Int, Int) -> Unit,
+    onPlaceChanged: (Int, Int, Int, Float) -> Unit,
     /** True when the reader opened this surah at its top; answered once. */
     startAtOpening: Boolean,
     onOpeningReached: () -> Unit,
@@ -73,6 +80,12 @@ fun ReadingList(
 ) {
     val pageDescription = stringResource(R.string.reading_page_description)
     val hafs = rememberHafs()
+    val effective = remember(metrics, reveal) {
+        metrics.copy(
+            wordByWord = metrics.wordByWord || reveal?.wordByWord == true,
+            showTranslation = metrics.showTranslation || reveal?.showTranslation == true,
+        )
+    }
     // The whole surah arrives at once, so every item has its text before the
     // list is measured: the reader's place lands exactly, and nothing grows or
     // shifts under them while they read. Until the rows for *this* surah are
@@ -88,8 +101,8 @@ fun ReadingList(
         initialValue = null,
         content,
         surah.number,
-        metrics.translationPacks,
-        metrics.wordByWord,
+        effective.translationPacks,
+        effective.wordByWord,
     ) { value = surah.number to loadRows() }
     // The copy read ahead in the surah before this one. It is this surah's
     // own, checked against the surah's number, so a stale list can never be
@@ -100,8 +113,8 @@ fun ReadingList(
     val ahead = remember(
         content,
         surah.number,
-        metrics.wordByWord,
-        metrics.translationPacks,
+        effective.wordByWord,
+        effective.translationPacks,
         contentLanguage,
     ) {
         cachedRows(surah.number)
@@ -111,7 +124,7 @@ fun ReadingList(
 
     // The surah after this one is read while the reader is still in this one,
     // so the turn at its end has its text on hand when it comes.
-    LaunchedEffect(surah.number, content, metrics.wordByWord) { onReadAhead(surah.number) }
+    LaunchedEffect(surah.number, content, effective.wordByWord) { onReadAhead(surah.number) }
 
     var footnote by remember { mutableStateOf<OpenFootnote?>(null) }
     if (ayahs.isEmpty()) {
@@ -124,9 +137,13 @@ fun ReadingList(
         surah = surah,
         rows = rows,
         ayahs = ayahs,
-        metrics = metrics,
+        metrics = effective,
+        reveal = reveal,
+        wordAid = wordAid,
         place = place,
         placeOffset = placeOffset,
+        placeOffsetWidth = placeOffsetWidth,
+        placeOffsetFontScale = placeOffsetFontScale,
         hasTranslation = hasTranslation,
         contentLanguage = contentLanguage,
         nextSurahName = nextSurahName,

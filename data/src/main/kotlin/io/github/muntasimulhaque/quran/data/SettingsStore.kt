@@ -82,6 +82,10 @@ data class AppSettings(
      * decision, this session).
      */
     val ayahOffset: Int = 0,
+    /** The width the stored [ayahOffset] was measured in, in pixels. */
+    val ayahOffsetWidth: Int = 0,
+    /** The font scale the stored [ayahOffset] was measured at. */
+    val ayahOffsetFontScale: Float = 0f,
     val theme: AppTheme = AppTheme.Light,
     /**
      * The language the interface is written in, and the content it reads.
@@ -154,6 +158,13 @@ data class AppSettings(
      * this session: the one-tap ayah of 6.5 was reverted to the long press).
      */
     val longPressHintShown: Boolean = false,
+    /**
+     * The chrome surface the reader has already been shown. Empty on a new
+     * install; the value is the surface set that added the reveal. A release
+     * that adds a chrome surface changes the reveal key, so the next launch
+     * shows the top bar once more without adding a permanent bar.
+     */
+    val chromeReveal: String = "",
 ) {
     val arabicSp: Float get() = TextSize.sp(TypeRole.Arabic, arabicSize)
     val arabicLineSp: Float get() = TextSize.lineSp(TypeRole.Arabic, arabicSize)
@@ -258,6 +269,8 @@ class SettingsStore(private val context: Context) {
         AppSettings(
             ayah = ayah.coerceIn(1, 6236),
             ayahOffset = (preferences[AYAH_OFFSET] ?: 0).coerceAtLeast(0),
+            ayahOffsetWidth = (preferences[AYAH_OFFSET_WIDTH] ?: 0).coerceAtLeast(0),
+            ayahOffsetFontScale = (preferences[AYAH_OFFSET_FONT_SCALE] ?: 0f).coerceAtLeast(0f),
             theme = storedTheme(preferences),
             uiLanguage = preferences[UI_LANGUAGE],
             arabicSize = sizeOf(choices, ARABIC_SIZE, legacy),
@@ -277,6 +290,7 @@ class SettingsStore(private val context: Context) {
             dailyAyah = preferences[DAILY_AYAH] ?: true,
             dailyAyahMinute = storedDailyMinute(preferences),
             longPressHintShown = preferences[HINT_SHOWN] ?: false,
+            chromeReveal = preferences[CHROME_REVEAL] ?: "",
         )
     }
 
@@ -285,13 +299,27 @@ class SettingsStore(private val context: Context) {
      * jump that means the top of an ayah writes zero, so a landing never
      * keeps a depth that belonged to another ayah.
      */
-    suspend fun setAyah(ayah: Int, offset: Int = 0) {
+    suspend fun setAyah(
+        ayah: Int,
+        offset: Int = 0,
+        /** The width the offset was measured in, in pixels; 0 for a jump. */
+        width: Int = 0,
+        /** The font scale the offset was measured at; 0 for a jump. */
+        fontScale: Float = 0f,
+    ) {
         val safeAyah = ayah.coerceIn(1, 6236)
         val safeOffset = offset.coerceAtLeast(0)
         context.settingsStore.edit {
             it[AYAH] = safeAyah
             it[AYAH_OFFSET] = safeOffset
+            it[AYAH_OFFSET_WIDTH] = width.coerceAtLeast(0)
+            it[AYAH_OFFSET_FONT_SCALE] = fontScale.coerceAtLeast(0f)
         }
+    }
+
+    /** Writes the chrome surface the reader has now been shown. */
+    suspend fun setChromeReveal(surface: String) {
+        context.settingsStore.edit { it[CHROME_REVEAL] = surface }
     }
 
     suspend fun setTheme(theme: AppTheme) {
@@ -527,6 +555,8 @@ class SettingsStore(private val context: Context) {
 
         val AYAH = intPreferencesKey("ayah")
         val AYAH_OFFSET = intPreferencesKey("ayah_offset")
+        val AYAH_OFFSET_WIDTH = intPreferencesKey("ayah_offset_width")
+        val AYAH_OFFSET_FONT_SCALE = floatPreferencesKey("ayah_offset_font_scale")
         val THEME = stringPreferencesKey("theme")
         /**
          * The automatic switch the third theme value replaced. Written by no
@@ -569,6 +599,7 @@ class SettingsStore(private val context: Context) {
         val DAILY_AYAH_HOUR = intPreferencesKey("daily_ayah_hour")
         val DAILY_AYAH_MINUTE = intPreferencesKey("daily_ayah_minute")
         val HINT_SHOWN = booleanPreferencesKey("hint_shown")
+        val CHROME_REVEAL = stringPreferencesKey("chrome_reveal")
     }
 }
 

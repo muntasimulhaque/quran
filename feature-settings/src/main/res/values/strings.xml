@@ -26,6 +26,7 @@
     <string name="settings_cancel">Cancel</string>
     <string name="settings_set">Set</string>
     <string name="settings_follow_title">Follow the reciter</string>
+    <string name="settings_follow_subtitle">Scroll the page to the ayah being recited.</string>
     <string name="settings_show_translation_title">Show translation</string>
     <string name="settings_show_tafsir_title">Show tafsir</string>
     <string name="settings_open_translations">Choose translations</string>
@@ -35,8 +36,10 @@
     <string name="settings_tajweed_summary">The rules of recitation, in the printed mushaf\'s colors</string>
     <string name="settings_words_add">Adds the %1$s word meanings · %2$s</string>
     <string name="settings_words_failed">Could not download. Tap to try again.</string>
+    <string name="settings_words_failed_storage">Not enough space to add the word meanings. Free some space, then try again.</string>
 
     <string name="settings_text_size_option">%3$s size %1$d of %2$d</string>
+    <string name="settings_text_size_step">%1$d of %2$d</string>
 
     <string name="settings_downloaded_label">Downloaded surahs (%1$d)</string>
     <string name="settings_downloaded_label_counting">Downloaded surahs</string>
@@ -97,7 +100,8 @@
     <string name="settings_title_translations">Translations</string>
     <string name="settings_title_tafsirs">Tafsirs</string>
     <string name="settings_title_about">About</string>
-    <string name="settings_summary_text">Quran text %1$d, translation %2$d, tafsir %3$d, word meanings %4$d</string>
+    <string name="settings_summary_text_default">Default</string>
+    <string name="settings_summary_text_steps">Quran text %1$s, translation %2$s, tafsir %3$s, word meanings %4$s</string>
     <string name="settings_version_short">Version %1$s</string>
     <string name="settings_none_yet">Not added yet</string>
     <string name="settings_chosen_count">%1$d chosen</string>
@@ -112,31 +116,56 @@
 
     <string name="settings_title_tajweed">Tajweed rules</string>
     <string name="settings_open_tajweed">The rules</string>
-    <string name="settings_tajweed_intro">The printed mushaf marks the rules of recitation in color. These seven groups are the colors the reading draws when Tajweed colors are on: each shows a word from the reading in its color, and every rule keeps its own name.</string>
+    <string name="settings_tajweed_intro">The printed mushaf marks the rules of recitation in color. These seven groups are the colors the reading draws when Tajweed colors are on: each shows a word from the reading in its color, and under each name is one sentence on what the rule asks of the reciter.</string>
     <string name="settings_tajweed_family_silent">Silent letters</string>
+    <string name="settings_tajweed_family_silent_note">Letters that are not sounded when the word is joined to what follows, as in the hamzat ul wasl.</string>
     <string name="settings_tajweed_family_ghunnah">Ghunnah</string>
+    <string name="settings_tajweed_family_ghunnah_note">A nasal sound held for two counts on noon and meem.</string>
     <string name="settings_tajweed_family_qalaqah">Qalqalah</string>
+    <string name="settings_tajweed_family_qalaqah_note">A bounce in the voice on qaf, taa, baa, jeem, or dal when it carries no vowel.</string>
     <string name="settings_tajweed_family_ikhafa">Ikhfa</string>
+    <string name="settings_tajweed_family_ikhafa_note">A noon or tanween is hidden before one of the ikhafa letters and carried by a light nasal sound.</string>
     <string name="settings_tajweed_family_iqlab">Iqlab</string>
+    <string name="settings_tajweed_family_iqlab_note">A noon or tanween becomes a meem before baa, with a nasal sound.</string>
     <string name="settings_tajweed_family_idgham">Idgham</string>
+    <string name="settings_tajweed_family_idgham_note">One letter is joined into the next, with or without a nasal sound according to the pair.</string>
     <string name="settings_tajweed_family_madda">Madda</string>
+    <string name="settings_tajweed_family_madda_note">A vowel is stretched for the counts its rule requires.</string>
     <string name="settings_tajweed_rule_ham_wasl">Hamzat ul Wasl</string>
+    <string name="settings_tajweed_rule_ham_wasl_note">The connective hamzah is dropped when the word is joined to what comes before it.</string>
     <string name="settings_tajweed_rule_laam_shamsiyah">Lam Shamsiyyah</string>
+    <string name="settings_tajweed_rule_laam_shamsiyah_note">The lam is not sounded before a sun letter; the letter after it is doubled.</string>
     <string name="settings_tajweed_rule_slnt">Silent</string>
+    <string name="settings_tajweed_rule_slnt_note">The printed page marks this letter as silent, and it is not sounded.</string>
     <string name="settings_tajweed_rule_ghunnah">Ghunnah</string>
+    <string name="settings_tajweed_rule_ghunnah_note">A nasal sound held for two counts.</string>
     <string name="settings_tajweed_rule_qalaqah">Qalqalah</string>
+    <string name="settings_tajweed_rule_qalaqah_note">A bounce on the five letters of qalqalah when they are silent.</string>
     <string name="settings_tajweed_rule_ikhafa">Ikhfa</string>
+    <string name="settings_tajweed_rule_ikhafa_note">A noon or tanween hidden before an ikhafa letter, with a light nasal glide.</string>
     <string name="settings_tajweed_rule_ikhafa_shafawi">Ikhfa Shafawi</string>
+    <string name="settings_tajweed_rule_ikhafa_shafawi_note">A meem hidden before baa, with a light nasal glide.</string>
     <string name="settings_tajweed_rule_iqlab">Iqlab</string>
+    <string name="settings_tajweed_rule_iqlab_note">A noon or tanween turned into a meem before baa.</string>
     <string name="settings_tajweed_rule_idgham_ghunnah">Idgham with Ghunnah</string>
+    <string name="settings_tajweed_rule_idgham_ghunnah_note">A noon or tanween joined into the next letter with a nasal sound.</string>
     <string name="settings_tajweed_rule_idgham_wo_ghunnah">Idgham without Ghunnah</string>
+    <string name="settings_tajweed_rule_idgham_wo_ghunnah_note">A noon or tanween joined into the next letter without a nasal sound.</string>
     <string name="settings_tajweed_rule_idgham_shafawi">Idgham Shafawi</string>
+    <string name="settings_tajweed_rule_idgham_shafawi_note">A meem joined into a following meem.</string>
     <string name="settings_tajweed_rule_idgham_mutajanisayn">Idgham Mutajanisayn</string>
+    <string name="settings_tajweed_rule_idgham_mutajanisayn_note">Two letters from the same articulation point are joined when they meet.</string>
     <string name="settings_tajweed_rule_idgham_mutaqaribayn">Idgham Mutaqaribayn</string>
+    <string name="settings_tajweed_rule_idgham_mutaqaribayn_note">Two letters from close articulation points are joined when they meet.</string>
     <string name="settings_tajweed_rule_madda_normal">Madd Normal</string>
+    <string name="settings_tajweed_rule_madda_normal_note">The natural stretch of two counts.</string>
     <string name="settings_tajweed_rule_madda_permissible">Madd Permissible</string>
+    <string name="settings_tajweed_rule_madda_permissible_note">A stretch that may be two, four, or six counts, according to the reading.</string>
     <string name="settings_tajweed_rule_madda_obligatory_monfasel">Madd Munfasil</string>
+    <string name="settings_tajweed_rule_madda_obligatory_monfasel_note">A madd letter at the end of a word meets a hamzah at the start of the next.</string>
     <string name="settings_tajweed_rule_madda_obligatory_mottasel">Madd Muttasil</string>
+    <string name="settings_tajweed_rule_madda_obligatory_mottasel_note">A madd letter and a hamzah meet in one word.</string>
     <string name="settings_tajweed_rule_madda_necessary">Madd Necessary</string>
+    <string name="settings_tajweed_rule_madda_necessary_note">A stretch of six counts required by a sukoon or a doubled letter after the madd.</string>
 
 </resources>

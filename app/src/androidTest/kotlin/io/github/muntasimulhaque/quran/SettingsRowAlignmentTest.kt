@@ -258,19 +258,14 @@ class SettingsRowAlignmentTest {
     }
 
     /**
-     * A row keeps no width for a mark it does not draw.
+     * A switch row draws no chevron column and no empty width for a door it
+     * does not have.
      *
-     * The chevron's column used to be reserved on every row, drawn or not, so
-     * a row with no door carried 48 dp of empty sheet in front of its switch.
-     * A switch stands at the row's own margin whatever is in front of it, so
-     * the empty column never kept a switch on one line; what it bought was a
-     * row that grows a door later keeping its switch where it was, which is a
-     * convenience for whoever edits the file and not a thing a reader can see
-     * (owner decision, forty-sixth session).
-     *
-     * This measures the two halves. A row that draws no chevron composes no
-     * chevron slot, so there is no empty column left to be empty, and neither
-     * switch moved to pay for the one that is gone.
+     * The older shape reserved a chevron beside the switch and used it as the
+     * page's door; a row with no page carried empty sheet in front of its
+     * switch. The page now has its own quiet link below the row, so the switch
+     * row is only the switch, and neither row pays for a mark the other one
+     * draws.
      *
      * It does not measure whether a label fits on one line, because that is a
      * question about the words and the phone, not about the column.
@@ -303,15 +298,14 @@ class SettingsRowAlignmentTest {
             }
         }
 
-        // The crispest half of the sentence: a row that draws no chevron
-        // composes no chevron slot, so there is nothing there to be empty.
-        // The slot's own tag is on a row that draws one, which is what makes
-        // this a count of the rows that have a door.
+        // A switch row no longer draws a chevron at all: the page behind it
+        // has its own quiet door below. This pins that no row grows a chevron
+        // column, and that neither switch moves to pay for one.
         val slots = compose.onAllNodesWithTag("chevron-slot", useUnmergedTree = true)
             .fetchSemanticsNodes()
         assertEquals(
-            "only the row that draws a chevron composes one",
-            1,
+            "a switch row draws no chevron",
+            0,
             slots.size,
         )
 

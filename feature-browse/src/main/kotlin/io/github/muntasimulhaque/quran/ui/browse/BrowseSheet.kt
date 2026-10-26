@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -77,14 +78,14 @@ fun BrowseSheet(
     onForget: (Int) -> Unit,
 ) {
     val sheetState = rememberExpandedSheetState()
-    var tab by remember {
+    var tab by rememberSaveable {
         mutableStateOf(if (startOnLastRead) BrowseTab.LastRead else BrowseTab.Surahs)
     }
     // The surah whose ayahs are on screen, or null while the tabs are. The
     // grid is a page inside the sheet, not a second sheet over it: one
     // window, one scrim, and the phone's back returns to the list it came
     // from before it leaves the sheet (owner decision).
-    var gridSurah by remember { mutableStateOf<Int?>(null) }
+    var gridSurah by rememberSaveable { mutableStateOf<Int?>(null) }
     // Each tab keeps its own list state so its place is remembered while the
     // reader moves between tabs, and each list carries a gate so a scroll
     // back to the top never turns into a pull that closes the sheet.
@@ -106,8 +107,8 @@ fun BrowseSheet(
     // the Book is shown, and never again: each tab keeps its own list state
     // so its place is remembered while the reader moves between tabs, and a
     // re-centering on every return would take that place away.
-    var surahsCentered by remember { mutableStateOf(false) }
-    var juzCentered by remember { mutableStateOf(false) }
+    var surahsCentered by rememberSaveable { mutableStateOf(false) }
+    var juzCentered by rememberSaveable { mutableStateOf(false) }
     // The reader's own surah is put in the middle of the Surahs list, the
     // way the grid puts their ayah in the middle of the numbers: Browse is
     // a door to the reader's place, and Al-Fatiha is a long walk from

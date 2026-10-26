@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 11.7 (versionCode 119)
+Version: 11.8 (versionCode 120)
 
 ## Listing
 
@@ -154,6 +154,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (11.8, 495 characters)
+11.8 makes the first minutes and the way back clear. The top bar shows once on a new install, then steps back. Search and Browse results reopen where you left them, and a result arrives with its matched words, meanings, or tafsir passage in view. Settings rows toggle as a whole with a separate page link, font sizes read in steps, and the Tajweed page explains each rule. Reading depth, large-text spacing, storage failures, and pack repair are steadier. The Quran text and packs are unchanged.
 
 ## Release notes (11.7, 411 characters)
 11.7 is the security hardening release. A pack without a checksum is refused; content names are checked against their folders; downloads check every redirect, size, and time; downloaded text opens read-only and verified; the player gives other apps only read commands; search input is bounded; and the build verifies its dependencies and wrapper. The reading, Quran text, translations, and tafsir are unchanged.

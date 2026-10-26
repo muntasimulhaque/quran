@@ -130,7 +130,7 @@ class AyahActionsTest {
         compose.onNodeWithContentDescription(compose.activity.getString(R.string.action_save))
             .performClick()
         compose.waitUntil(timeoutMillis = 15_000) {
-            markOf(compose.activity.getString(R.string.action_save)) == on
+            markOf(compose.activity.getString(R.string.action_saved)) == on
         }
         assertEquals(
             "the note is still there, and is still the note's own mark",
@@ -140,8 +140,9 @@ class AyahActionsTest {
 
         // The second tap is a save of the reader's own, so it asks first: the
         // note goes with it, and the reader's own words are not taken by one
-        // tap of a button.
-        compose.onNodeWithContentDescription(compose.activity.getString(R.string.action_save))
+        // tap of a button. The label says Saved now, which is the truth of
+        // the mark and the name of the next action.
+        compose.onNodeWithContentDescription(compose.activity.getString(R.string.action_saved))
             .performClick()
         compose.waitUntil(timeoutMillis = 15_000) {
             compose.onAllNodesWithTag("remove-saved-confirm", useUnmergedTree = true)

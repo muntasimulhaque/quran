@@ -179,6 +179,7 @@ fun SizeRow(role: TypeRole, step: Float, onChange: (Float) -> Unit) {
     )
     SegmentedRow(
         label = label,
+        valueLabel = stepText(step),
         value = step,
         steps = TextSize.STEPS,
         onSelect = onChange,
@@ -230,6 +231,8 @@ fun SizeRow(role: TypeRole, step: Float, onChange: (Float) -> Unit) {
 @Composable
 private fun SegmentedRow(
     label: String,
+    /** The chosen step, said beside the name: "3 of 5". */
+    valueLabel: String,
     value: Float,
     steps: List<Float>,
     onSelect: (Float) -> Unit,
@@ -243,14 +246,25 @@ private fun SegmentedRow(
             .fillMaxWidth()
             .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Tight, bottom = Space.Tight),
     ) {
-        Text(
-            text = label,
-            // A control's name wears the same words every other row's name
-            // wears, so the sheet reads as one voice (owner decision, the
-            // theme and consistency session).
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = label,
+                // A control's name wears the same words every other row's name
+                // wears, so the sheet reads as one voice (owner decision, the
+                // theme and consistency session).
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                text = valueLabel,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         StepRow(
             steps = steps,
             value = value,

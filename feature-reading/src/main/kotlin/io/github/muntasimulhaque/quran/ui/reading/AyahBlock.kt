@@ -71,6 +71,10 @@ internal fun AyahBlock(
     isSelected: Boolean,
     playingAyah: Int?,
     playingWord: Int?,
+    /** The search arrival to reveal on this ayah, when it is this one. */
+    reveal: ReadingReveal? = null,
+    /** True when the reader's own word-by-word switch is on. */
+    showWordAid: Boolean = metrics.wordByWord,
     onAyah: (Ayah) -> Unit,
     onBackgroundTap: () -> Unit,
     onFootnote: (TranslationLine, Int) -> Unit,
@@ -86,13 +90,16 @@ internal fun AyahBlock(
     // with the face (owner decision, this session). The reference line at
     // the head of the block is not drawn then, so the screen holds the Quran
     // and nothing else.
-    val arabicOnly = !metrics.showTranslation && !metrics.wordByWord
+    val arabicOnly = !metrics.showTranslation && !showWordAid
     // The reader's digits, and a spoken name for them: the reference is a
     // number the reader reads, so it follows the interface's digits, and a
     // screen reader hears it named rather than as a bare key (owner decision,
     // this session).
     val reference = localizedDigits(row.ayah.verseKey)
     val referenceLabel = stringResource(R.string.reading_ayah_reference, reference)
+    val revealWords = reveal?.words.orEmpty()
+    val revealMeanings = reveal?.meanings.orEmpty()
+    val matchWash = MaterialTheme.colorScheme.primary.copy(alpha = Wash.Match)
     // The one spoken shape of the whole ayah. The reference and the Arabic
     // used to carry their own descriptions inside a merged clickable block,
     // and TalkBack preferred those descriptions to the translation and the
@@ -105,7 +112,7 @@ internal fun AyahBlock(
         row.translations,
         row.meanings,
         metrics.showTranslation,
-        metrics.wordByWord,
+        showWordAid,
     ) {
         buildString {
             append(referenceLabel)
@@ -117,7 +124,7 @@ internal fun AyahBlock(
                     append(RichText.plain(line.text.text))
                 }
             }
-            if (metrics.wordByWord) {
+            if (showWordAid) {
                 val glosses = row.meanings.mapNotNull { it.meaning }
                 if (glosses.isNotEmpty()) {
                     append(". ")
@@ -267,8 +274,9 @@ internal fun AyahBlock(
                 recitedWord,
                 arabicOnly,
                 ornamentStyle,
+                revealWords,
             ) {
-                arabic(row, playing, recitedWord, arabicOnly, ornamentStyle)
+                arabic(row, playing, recitedWord, arabicOnly, ornamentStyle, revealWords)
             }
             var textLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
             Text(
@@ -290,16 +298,21 @@ internal fun AyahBlock(
                             drawContent()
                             return@drawWithContent
                         }
+                        arabicLine.matchRanges.forEach { range ->
+                            drawPlayingWordWash(layout, range, matchWash)
+                        }
                         if (range != null) drawPlayingWordWash(layout, range, palette.highlight)
                         drawContent()
                         drawTajweedColors(layout, tajweed, palette.tajweed, metrics.tajweed)
                     },
             )
-            if (metrics.wordByWord && row.meanings.any { it.meaning != null }) {
+            if (showWordAid && row.meanings.any { it.meaning != null }) {
                 WordByWord(
                     meanings = row.meanings,
                     hafs = hafs,
                     metrics = metrics,
+                    highlightWords = revealMeanings,
+                    highlightColor = matchWash,
                     // The aid is an annotation of the ayah above it, not a
                     // second verse: a tighter break than the one before the
                     // translation groups the word list with its line, so the
@@ -348,8 +361,12 @@ internal fun AyahBlock(
     }
 }
 
-/** One Arabic line: its words, and the wash the reciter is on. */
-private data class ArabicLine(val text: AnnotatedString, val washRange: IntRange?)
+/** One Arabic line: its words, the wash the reciter is on, and any search match. */
+private data class ArabicLine(
+    val text: AnnotatedString,
+    val washRange: IntRange?,
+    val matchRanges: List<IntRange>,
+)
 
 /**
  * The ayah as whole words. The recited word carries its range instead of a
@@ -374,6 +391,7 @@ private fun arabic(
     playingWord: Int?,
     ornament: Boolean,
     ornamentStyle: SpanStyle,
+    revealWords: Set<Int>,
 ): ArabicLine {
     val words = row.words
     val line = if (words.isEmpty()) {
@@ -383,23 +401,25 @@ private fun arabic(
                 append(' ')
                 withStyle(ornamentStyle) { append(Arabic.ayahNumber(row.ayah.ayah)) }
             }
-        } to null
+        } to (null to emptyList<IntRange>())
     } else {
         var washRange: IntRange? = null
+        val matchRanges = mutableListOf<IntRange>()
         buildAnnotatedString {
             words.forEachIndexed { index, word ->
                 if (index > 0) append(' ')
                 val start = length
                 append(word.text)
                 if (playing && word.position == playingWord) washRange = start until length
+                if (word.position in revealWords) matchRanges += start until length
             }
             if (ornament) {
                 append(' ')
                 withStyle(ornamentStyle) { append(Arabic.ayahNumber(row.ayah.ayah)) }
             }
-        } to washRange
+        } to (washRange to matchRanges)
     }
-    return ArabicLine(line.first, line.second)
+    return ArabicLine(line.first, line.second.first, line.second.second)
 }
 
 

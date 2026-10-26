@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -35,6 +36,7 @@ import io.github.muntasimulhaque.quran.data.isDark
 import io.github.muntasimulhaque.quran.data.resolved
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.theme.QuranTheme
+import kotlinx.coroutines.delay
 
 
 /**
@@ -133,7 +135,10 @@ fun QuranApp(
         val ready = viewModel.ready
         val failed = viewModel.failure
         when {
-            failed -> ContentProblem(onRetry = { viewModel.retryOpen() })
+            failed -> ContentProblem(
+                storage = viewModel.failureStorage,
+                onRetry = { viewModel.retryOpen() },
+            )
             !ready || content == null -> FirstPaint()
             settings.uiLanguage == null -> {
                 // The first screen is on screen; the system can stop counting.
@@ -198,7 +203,7 @@ fun QuranApp(
  * one action that might fix it.
  */
 @Composable
-private fun ContentProblem(onRetry: () -> Unit) {
+private fun ContentProblem(storage: Boolean, onRetry: () -> Unit) {
     Box(
         Modifier
             .fillMaxSize()
@@ -212,12 +217,16 @@ private fun ContentProblem(onRetry: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = stringResource(R.string.content_problem_title),
+                text = stringResource(
+                    if (storage) R.string.content_problem_storage_title else R.string.content_problem_title,
+                ),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
             )
             Text(
-                text = stringResource(R.string.content_problem_body),
+                text = stringResource(
+                    if (storage) R.string.content_problem_storage_body else R.string.content_problem_body,
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp),
@@ -237,6 +246,11 @@ private fun ContentProblem(onRetry: () -> Unit) {
  */
 @Composable
 private fun FirstPaint() {
+    var slow by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(1_200)
+        slow = true
+    }
     Box(
         Modifier
             .fillMaxSize()
@@ -247,6 +261,14 @@ private fun FirstPaint() {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Masthead()
+            if (slow) {
+                Text(
+                    text = stringResource(R.string.first_paint_preparing),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = Space.Gutter),
+                )
+            }
         }
     }
 }

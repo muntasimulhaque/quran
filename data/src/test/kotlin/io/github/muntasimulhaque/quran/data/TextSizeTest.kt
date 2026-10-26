@@ -38,6 +38,15 @@ class TextSizeTest {
     }
 
     @Test
+    fun everyStepHasItsOneBasedName() {
+        assertEquals(TextSize.STEPS.size, TextSize.stepCount)
+        TextSize.STEPS.forEachIndexed { index, step ->
+            assertEquals(index + 1, TextSize.stepNumber(step))
+        }
+        assertEquals(TextSize.STEPS.size, TextSize.stepNumber(1.6f))
+    }
+
+    @Test
     fun aRetiredSmallStepKeepsItsPlace() {
         // The old 0.75 and 0.85 are gone. 0.75 lands on 0.8, the smallest
         // step now, and 0.85, which sits exactly between 0.8 and 0.9, lands

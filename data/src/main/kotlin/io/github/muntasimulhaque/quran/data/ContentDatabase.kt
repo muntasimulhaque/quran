@@ -1408,10 +1408,11 @@ class ContentDatabase private constructor(
             // A pack whose attach failed, or whose file does not carry the
             // tables its type promises, is not in the library: a query for
             // its schema would throw, and every surface that reads it would
-            // have to catch the same failure. The catalog keeps the raw
-            // installed set, so the daily integrity pass can still see the
-            // broken file and repair it; only the query gate uses [attached].
-            ContentDatabase(database, catalog.withInstalled(installed), attached)
+            // have to catch the same failure. The catalog therefore reports
+            // the attached set, not the raw files: a broken pack reads as not
+            // installed, its Add opens a repair, and the daily integrity pass
+            // still sees the file through the store's own installed set.
+            ContentDatabase(database, catalog.withInstalled(attached), attached)
         }
 
         private fun openCore(store: PackStore, core: ContentPack): SQLiteDatabase? = runCatching {

@@ -12,6 +12,7 @@ import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.browse.BrowseSheet
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
+import io.github.muntasimulhaque.quran.ui.search.SearchArrival
 import io.github.muntasimulhaque.quran.ui.search.SearchSheet
 import io.github.muntasimulhaque.quran.ui.settings.PackSetupState
 import io.github.muntasimulhaque.quran.ui.settings.SettingsActions
@@ -36,6 +37,10 @@ internal fun ReaderSheets(
     onAskExactAlarm: () -> Unit,
     onReminderPermission: () -> Unit,
     onDismiss: () -> Unit,
+    /** A sheet's result opens the sheet's way back. */
+    onResult: (ReaderSheet) -> Unit,
+    /** A search result arrives with the evidence the reading should show. */
+    onSearchResult: (SearchArrival) -> Unit,
     onPendingRemove: (Int) -> Unit,
 ) {
     val context = LocalContext.current
@@ -50,11 +55,11 @@ internal fun ReaderSheets(
             currentAyah = settings.ayah,
             onDismiss = onDismiss,
             onAyah = { ayahNumber ->
-                onDismiss()
+                onResult(ReaderSheet.Browse)
                 viewModel.jumpToAyah(ayahNumber)
             },
             onSurah = { number ->
-                onDismiss()
+                onResult(ReaderSheet.Browse)
                 // From Browse, a surah opens where the reader left it, or at
                 // its top when they have never been there.
                 viewModel.openSurah(number)
@@ -98,12 +103,11 @@ internal fun ReaderSheets(
             // Quran's text reads the results at the same preference.
             arabicStep = settings.arabicSize,
             onDismiss = onDismiss,
-            onAyah = { ayah ->
-                onDismiss()
-                viewModel.jumpToAyah(ayah.number)
+            onAyah = { arrival ->
+                onSearchResult(arrival)
             },
             onSurah = { surah ->
-                onDismiss()
+                onResult(ReaderSheet.Search)
                 viewModel.jumpToSurah(surah.number)
             },
         )
@@ -116,7 +120,7 @@ internal fun ReaderSheets(
                     name = contentPackName(setup.pack.id, setup.pack.name),
                     bytes = setup.pack.bytes,
                     progress = setup.progress,
-                    failed = setup.failed,
+                    failure = setup.failure,
                 )
             },
             recitations = viewModel.recitations,

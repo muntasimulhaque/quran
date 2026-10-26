@@ -16,6 +16,7 @@ import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.core.RecitationPlaylist
 import io.github.muntasimulhaque.quran.core.RecitationQueue
 import io.github.muntasimulhaque.quran.data.ContentDatabase
+import io.github.muntasimulhaque.quran.data.DownloadError
 import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.PlaybackPosition
 import io.github.muntasimulhaque.quran.data.PlaybackPositionStore
@@ -24,6 +25,7 @@ import io.github.muntasimulhaque.quran.data.RecitationDownloader
 import io.github.muntasimulhaque.quran.data.RecitationManifest
 import io.github.muntasimulhaque.quran.data.RecitationStore
 import io.github.muntasimulhaque.quran.data.SafePaths
+import io.github.muntasimulhaque.quran.data.downloadError
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.ui.kit.reciterName
 import kotlinx.coroutines.CoroutineScope
@@ -158,6 +160,7 @@ class PlaybackController(
             pendingIsContinuation = false,
             downloadProgress = null,
             downloadFailed = false,
+            downloadFailure = null,
         )
         startPlayback(recitation, ayahNumber, resume)
     }
@@ -191,6 +194,7 @@ class PlaybackController(
                 pendingIsContinuation = false,
                 downloadProgress = null,
                 downloadFailed = false,
+                downloadFailure = null,
             )
             return
         }
@@ -208,6 +212,7 @@ class PlaybackController(
                 pendingIsContinuation = false,
                 downloadProgress = null,
                 downloadFailed = false,
+                downloadFailure = null,
             )
             return
         }
@@ -257,6 +262,7 @@ class PlaybackController(
             pendingDownloadSurah = null,
             downloadProgress = null,
             downloadFailed = false,
+            downloadFailure = null,
         )
     }
 
@@ -285,13 +291,13 @@ class PlaybackController(
         recitation: String,
         surah: Int,
         onProgress: (Float) -> Unit,
-    ): Boolean {
-        val packageToFetch = manifest.packageFor(recitation, surah) ?: return false
-        val folder = withContext(Dispatchers.IO) { folderFor(recitation, surah) } ?: return false
+    ): DownloadError? {
+        val packageToFetch = manifest.packageFor(recitation, surah) ?: return DownloadError.Other
+        val folder = withContext(Dispatchers.IO) { folderFor(recitation, surah) } ?: return DownloadError.Other
         val result = downloader.download(packageToFetch, folder) { read, total ->
             onProgress(if (total > 0) (read.toFloat() / total).coerceIn(0f, 1f) else 0f)
         }
-        return result.isSuccess
+        return result.exceptionOrNull()?.downloadError()
     }
 
     /**
@@ -313,14 +319,14 @@ class PlaybackController(
         downloadJob = scope.launch {
             _state.update { current ->
                 if (current.pendingDownloadSurah == surah) {
-                    current.copy(downloadProgress = 0f, downloadFailed = false)
+                    current.copy(downloadProgress = 0f, downloadFailed = false, downloadFailure = null)
                 } else {
                     current
                 }
             }
             val folder = withContext(Dispatchers.IO) { folderFor(recitation, surah) }
             if (folder == null) {
-                failDownload(surah)
+                failDownload(surah, DownloadError.Other)
                 return@launch
             }
             val result = downloader.download(packageToFetch, folder) { read, total ->
@@ -347,16 +353,16 @@ class PlaybackController(
                 // its beginning and not from wherever they were last heard.
                 startPlayback(recitation, ayah, resume = false)
             } else {
-                failDownload(surah)
+                failDownload(surah, result.exceptionOrNull()?.downloadError() ?: DownloadError.Other)
             }
         }
     }
 
     /** The failure line, for the request that is still on screen. */
-    private fun failDownload(surah: Int) {
+    private fun failDownload(surah: Int, error: DownloadError) {
         _state.update { current ->
             if (current.pendingDownloadSurah == surah) {
-                current.copy(downloadProgress = null, downloadFailed = true)
+                current.copy(downloadProgress = null, downloadFailed = true, downloadFailure = error)
             } else {
                 current
             }
@@ -390,6 +396,7 @@ class PlaybackController(
                 pendingIsContinuation = false,
                 downloadProgress = null,
                 downloadFailed = false,
+                downloadFailure = null,
             )
         }
     }
@@ -426,6 +433,7 @@ class PlaybackController(
                 pendingIsContinuation = true,
                 downloadProgress = null,
                 downloadFailed = false,
+                downloadFailure = null,
             )
             if (end == EndOfAudio.CONTINUE_SURAH) confirmDownload()
         }

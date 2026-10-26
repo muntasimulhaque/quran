@@ -80,6 +80,12 @@ object TextSize {
         return nearest
     }
 
+    /** The number of the step that carries [step], one based, for the reader's row. */
+    fun stepNumber(step: Float): Int = STEPS.indexOf(step(step)).coerceAtLeast(0) + 1
+
+    /** The number of steps every sized text offers. */
+    val stepCount: Int get() = STEPS.size
+
     /** The size of one piece of text, in scale independent pixels. */
     fun sp(role: TypeRole, step: Float): Float = base(role) * step(step)
 

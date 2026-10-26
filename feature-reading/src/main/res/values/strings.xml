@@ -16,8 +16,10 @@
     <string name="reading_ayah_reference">Ayah %1$s</string>
 
     <string name="card_tafsir_label">Tafsir</string>
+    <string name="card_title">%1$s %2$s</string>
     <string name="card_add_tafsir">Add a tafsir to read this ayah deeper</string>
     <string name="card_opening_pack">Opening %1$s…</string>
+    <string name="card_tafsir_missing">This tafsir has no passage for this ayah.</string>
     <string name="card_door_shown">Shown</string>
     <string name="card_door_hidden">Hidden</string>
     <string name="card_note_take">Take a note</string>

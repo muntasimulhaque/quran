@@ -66,7 +66,7 @@ fun RecitersPage(
         // reading into one that moves with the one being heard.
         ToggleRow(
             title = stringResource(R.string.settings_follow_title),
-            subtitle = null,
+            subtitle = stringResource(R.string.settings_follow_subtitle),
             checked = settings.followReciter,
             onChange = actions.onFollowReciter,
         )

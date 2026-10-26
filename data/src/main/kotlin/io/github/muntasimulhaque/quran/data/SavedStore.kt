@@ -70,13 +70,15 @@ class SavedStore(context: Context) {
     private val writeMutex = Mutex()
 
     /** A full disk or a damaged database is a message, never a crash. */
-    private suspend fun guarded(where: String, block: suspend () -> Unit) {
-        try {
+    private suspend fun guarded(where: String, block: suspend () -> Unit): Boolean {
+        return try {
             block()
+            true
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (error: Exception) {
             android.util.Log.e("SavedStore", where, error)
+            false
         }
     }
     private val _saved = MutableStateFlow<List<SavedAyah>>(emptyList())
@@ -91,7 +93,7 @@ class SavedStore(context: Context) {
      * keep the reader never made, and the question is asked only where there
      * is a mark of their own to remove (owner report).
      */
-    suspend fun toggle(ayahNumber: Int) = withContext(Dispatchers.IO) {
+    suspend fun toggle(ayahNumber: Int): Boolean = withContext(Dispatchers.IO) {
         guarded("toggle") {
         writeMutex.withLock {
             val row = row(ayahNumber)
@@ -130,7 +132,7 @@ class SavedStore(context: Context) {
      * mark and no note can explain. A save the reader did press stays, and so
      * does everything they wrote about it.
      */
-    suspend fun setNote(ayahNumber: Int, note: String?) = withContext(Dispatchers.IO) {
+    suspend fun setNote(ayahNumber: Int, note: String?): Boolean = withContext(Dispatchers.IO) {
         guarded("setNote") {
         writeMutex.withLock {
         val clean = note?.take(MAX_NOTE_LENGTH)?.trim()?.takeIf { it.isNotEmpty() }
@@ -182,7 +184,7 @@ class SavedStore(context: Context) {
      * Removes the ayah from Saved, and the note written on it with it. The
      * screen asks before this when a note exists.
      */
-    suspend fun unsave(ayahNumber: Int) = withContext(Dispatchers.IO) {
+    suspend fun unsave(ayahNumber: Int): Boolean = withContext(Dispatchers.IO) {
         guarded("unsave") {
             writeMutex.withLock {
                 delete(ayahNumber)

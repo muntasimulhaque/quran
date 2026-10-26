@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.core.EndOfAudio
+import io.github.muntasimulhaque.quran.data.DownloadError
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.ListenOffer
 import io.github.muntasimulhaque.quran.playback.ListenOption
@@ -174,7 +175,13 @@ fun PlaybackBar(
     // more, and each ellipsizes rather than push the answer off the row.
     val status = when {
         state.error -> stringResource(R.string.playback_failed)
-        state.downloadFailed -> stringResource(R.string.playback_download_failed)
+        state.downloadFailed -> stringResource(
+            if (state.downloadFailure == DownloadError.Storage) {
+                R.string.playback_download_failed_storage
+            } else {
+                R.string.playback_download_failed
+            },
+        )
         downloading -> {
             val percent = ((progress ?: 0f) * 100).toInt()
             // The surah is always named while its package is on its way, not

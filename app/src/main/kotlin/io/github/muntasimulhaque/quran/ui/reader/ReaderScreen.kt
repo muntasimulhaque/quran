@@ -22,11 +22,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -42,6 +44,8 @@ import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
 import io.github.muntasimulhaque.quran.ui.reading.AyahCard
+import io.github.muntasimulhaque.quran.ui.reading.ReadingReveal
+import io.github.muntasimulhaque.quran.ui.search.SearchArrival
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.reading.AyahNoteSheet
@@ -53,6 +57,17 @@ import kotlinx.coroutines.withContext
 
 /** How long the chrome stays after a touch before it steps back. */
 private const val CHROME_MILLIS = 7000L
+
+/**
+ * The chrome surface this release has to show once. A new install reveals
+ * the top bar on its first reading; a release that adds a surface changes
+ * this key, so the next launch shows the bar once more. The value is written
+ * after the reveal, so the same install never repeats it.
+ */
+internal const val CHROME_REVEAL = "reading-1"
+
+/** Whether this install still owes the reader the one chrome reveal. */
+internal fun chromeRevealNeeded(stored: String?): Boolean = stored != CHROME_REVEAL
 
 /**
  * How long the screen stays awake after the last touch while only the
@@ -98,9 +113,19 @@ fun ReaderScreen(
     val saved by viewModel.saved.collectAsStateWithLifecycle()
     val lastRead by viewModel.lastRead.collectAsStateWithLifecycle()
 
-    var chrome by remember { mutableStateOf(false) }
+    // The reveal also owns the first paper tap. A reader who taps the page
+    // while the reveal is still being read keeps the bar for that look; a
+    // second tap toggles it as usual. The bar still auto-hides on its own, so
+    // the reveal is never a permanent control.
+    var chromeRevealPending by rememberSaveable {
+        mutableStateOf(chromeRevealNeeded(settings.chromeReveal))
+    }
+    var chrome by rememberSaveable { mutableStateOf(chromeRevealPending) }
     var selected by remember { mutableStateOf<Ayah?>(null) }
     var cardAyah by remember { mutableStateOf<Ayah?>(null) }
+    // The tafsir pack a search hit opened the card for; null for the normal
+    // Tafsir pill, where the single enabled pack (or the door list) decides.
+    var cardTafsirPack by remember { mutableStateOf<String?>(null) }
     // The note sheet is keyed by the ayah's number, not by the ayah itself:
     // the pill opens it, and the number is all it needs to write the note and
     // keep the ayah with it.
@@ -116,6 +141,19 @@ fun ReaderScreen(
     // the sheet is written into the saved state, so the choice is answered
     // where it was made (owner decision, 21).
     var sheet by rememberSaveable { mutableStateOf(ReaderSheet.None) }
+    // The sheet a result came from, one level deep. A search or Browse result
+    // closes its sheet, and Back from the reading reopens it at the same
+    // query, tab, and place. The state holder keeps the sheet's own saveable
+    // state while it is out of composition.
+    var returnTo by rememberSaveable { mutableStateOf<ReaderSheet?>(null) }
+    val sheetStates = rememberSaveableStateHolder()
+    // A sheet the reader closed is forgotten after the provider has left the
+    // composition; removing a live provider's state can race its own save.
+    var clearSheet by remember { mutableStateOf<ReaderSheet?>(null) }
+    // The search arrival to reveal on the page, and the height the foot of the
+    // page actually takes, so the reading can keep its last line clear of it.
+    var reveal by remember { mutableStateOf<ReadingReveal?>(null) }
+    var bottomStackHeight by remember { mutableIntStateOf(0) }
     var touch by remember { mutableIntStateOf(0) }
     // The screen is kept awake while the reader is here, but not forever. The
     // window timer releases the flag; a touch takes it back.
@@ -128,12 +166,100 @@ fun ReaderScreen(
     // second tap can never leave a stray sheet behind the capture.
     var sharing by remember { mutableStateOf<ShareRequest?>(null) }
 
+    // The chrome is shown once on a new install (and on a release that adds
+    // a surface). The reveal is written down after a moment, so a process
+    // that dies with the bar still up says it again rather than losing it.
+    LaunchedEffect(Unit) {
+        if (!chromeRevealNeeded(viewModel.settings.chromeReveal)) return@LaunchedEffect
+        delay(1_500)
+        viewModel.markChromeRevealed()
+    }
+
+    /** Opens a sheet from the reading and forgets any stale state it held. */
+    fun openSheet(target: ReaderSheet) {
+        if (sheet == target) return
+        returnTo = null
+        chromeRevealPending = false
+        sheetStates.removeState(target.name)
+        sheet = target
+    }
+
+    /** Closes a sheet the reader closed themselves; a result keeps its state. */
+    fun closeSheet() {
+        val closing = sheet
+        sheet = ReaderSheet.None
+        if (returnTo == null) clearSheet = closing
+    }
+
+    // A sheet the reader closed is forgotten once its provider has left and
+    // its own saveable state has been written back.
+    LaunchedEffect(clearSheet, sheet) {
+        if (sheet != ReaderSheet.None) return@LaunchedEffect
+        clearSheet?.let {
+            sheetStates.removeState(it.name)
+            clearSheet = null
+        }
+    }
+
+    /** A result closes its sheet but keeps it as the reading's way back. */
+    fun resultOpened(from: ReaderSheet) {
+        returnTo = from
+        sheet = ReaderSheet.None
+    }
+
+    /**
+     * A search result arrives with its evidence: the matched Arabic words,
+     * the words whose meanings matched, or the tafsir passage that carried
+     * the match. The reveal is transient and never changes a saved setting.
+     */
+    fun openSearchResult(arrival: SearchArrival) {
+        returnTo = ReaderSheet.Search
+        sheet = ReaderSheet.None
+        chrome = false
+        cardAyah = null
+        cardTafsirPack = null
+        when (arrival) {
+            is SearchArrival.AyahMatch -> {
+                val hasEvidence = arrival.arabicWords.isNotEmpty() ||
+                    arrival.meaningWords.isNotEmpty() ||
+                    arrival.translationPack != null
+                reveal = if (hasEvidence) {
+                    ReadingReveal(
+                        ayah = arrival.ayah.number,
+                        words = arrival.arabicWords,
+                        meanings = arrival.meaningWords.toSet(),
+                        showTranslation = arrival.translationPack != null,
+                        wordByWord = arrival.meaningWords.isNotEmpty(),
+                    )
+                } else {
+                    null
+                }
+                viewModel.jumpToAyah(arrival.ayah.number)
+            }
+            is SearchArrival.TafsirMatch -> {
+                reveal = null
+                viewModel.jumpToAyah(arrival.ayah.number)
+                cardTafsirPack = arrival.pack
+                cardAyah = arrival.ayah
+            }
+        }
+    }
+
     // A sheet, an ayah's actions, a note, or a share is the reader using the
     // app, not listening to it from across the room. Those keep the screen
     // awake; the plain reading and the plain listening are the two that give
     // it back after their own window (owner decision, this session).
     val usingControls = sheet != ReaderSheet.None || selected != null ||
         cardAyah != null || cardNote != null || pendingRemove != null || sharing != null
+
+    // A search reveal belongs to the arrival, not to the page. It leaves on
+    // the reader's first touch (the reading's own handlers below) or after a
+    // few seconds, whichever comes first.
+    LaunchedEffect(reveal) {
+        if (reveal == null) return@LaunchedEffect
+        delay(8_000)
+        reveal = null
+    }
 
     // The wash under an ayah: the one the tap chose, or the one whose
     // note is open over it. A note opened from Browse has no pill behind it,
@@ -190,6 +316,18 @@ fun ReaderScreen(
         enabled = selected == null && raised == RaisedAnswer.Nothing &&
             (viewModel.packSetup != null || playback.downloadProgress != null),
     ) {
+        touch++
+    }
+
+    // A result is a door the reader came through, and Back returns to it
+    // before it closes the reading. This handler is registered last, so it
+    // wins over the in-flight guard above: a download may keep running while
+    // the reader goes back to the results that started it.
+    androidx.activity.compose.BackHandler(
+        enabled = selected == null && raised == RaisedAnswer.Nothing && returnTo != null,
+    ) {
+        sheet = returnTo ?: ReaderSheet.None
+        returnTo = null
         touch++
     }
 
@@ -261,7 +399,7 @@ fun ReaderScreen(
     LaunchedEffect(openSearch) {
         if (openSearch && !searchOpened) {
             searchOpened = true
-            sheet = ReaderSheet.Search
+            openSheet(ReaderSheet.Search)
         }
     }
 
@@ -311,6 +449,7 @@ fun ReaderScreen(
                         if (event.changes.any { it.pressed && !it.previousPressed }) {
                             touch++
                             keepAwake = true
+                            reveal = null
                         }
                     }
                 }
@@ -319,13 +458,16 @@ fun ReaderScreen(
         run {
             val surah = viewModel.surahOf(settings.ayah)
             if (surah != null) {
+                val revealForSurah = reveal?.takeIf {
+                    viewModel.surahOf(it.ayah)?.number == surah.number
+                }
                 ReadingList(
                     content = content,
                     surah = surah,
                     loadRows = {
                         viewModel.readingRows(
                             surah = surah.number,
-                            wordByWord = settings.wordByWord,
+                            wordByWord = settings.wordByWord || revealForSurah?.wordByWord == true,
                         )
                     },
                     // The copy read ahead while the reader was still in the
@@ -335,8 +477,11 @@ fun ReaderScreen(
                     cachedRows = { viewModel.cachedRows(it) },
                     onReadAhead = { viewModel.readAheadSurah(it) },
                     metrics = settings.readingMetrics(),
+                    reveal = revealForSurah,
                     place = settings.ayah,
                     placeOffset = settings.ayahOffset,
+                    placeOffsetWidth = settings.ayahOffsetWidth,
+                    placeOffsetFontScale = settings.ayahOffsetFontScale,
                     hasTranslation = viewModel.enabledTranslationPacks.isNotEmpty(),
                     contentLanguage = viewModel.readingLanguage,
                     nextSurahName = viewModel.surahs
@@ -346,12 +491,20 @@ fun ReaderScreen(
                     playingWord = playback.wordPosition,
                     onAyah = { ayah ->
                         selected = ayah
+                        reveal = null
                         chrome = false
+                        chromeRevealPending = false
                         touch++
                     },
                     onBackgroundTap = {
-                        chrome = !chrome
+                        if (chromeRevealPending) {
+                            chromeRevealPending = false
+                            chrome = true
+                        } else {
+                            chrome = !chrome
+                        }
                         selected = null
+                        reveal = null
                         // A tap on the page is how a raised control is put
                         // away: the paused recitation, a failure, the offer.
                         // It never silences a playing recitation, and never
@@ -361,18 +514,26 @@ fun ReaderScreen(
                         touch++
                     },
                     onScrolled = {
-                        if (chrome) chrome = false
+                        // The first reveal is not put away by the place landing
+                        // on the screen. A scroll of the reader's own after
+                        // the reveal has been answered still hides it as the
+                        // reading always has.
+                        if (!chromeRevealPending && chrome) chrome = false
                         // A scroll is the reader still being here, even when
                         // the chrome is already away and no tap was needed.
                         touch++
                     },
                     onNextSurah = { number -> viewModel.jumpToSurah(number) },
-                    onAddContent = { sheet = ReaderSheet.Settings },
-                    onPlaceChanged = { ayah, offset -> viewModel.onReadingSettled(ayah, offset) },
+                    onAddContent = { openSheet(ReaderSheet.Settings) },
+                    onPlaceChanged = { ayah, offset, width, scale ->
+                        viewModel.onReadingSettled(ayah, offset, width, scale)
+                    },
                     startAtOpening = viewModel.startAtSurahOpening == surah.number,
                     onOpeningReached = { viewModel.consumeSurahOpening(surah.number) },
                     contentPaddingTop = 64.dp,
-                    contentPaddingBottom = 120.dp,
+                    contentPaddingBottom = with(LocalDensity.current) {
+                        bottomStackHeight.toDp()
+                    }.coerceAtLeast(32.dp),
                 )
             }
         }
@@ -386,10 +547,13 @@ fun ReaderScreen(
             // A tap on the surah's name is the way back to its top, the way
             // a reader flips to the beginning of a surah in a printed copy.
             titleAction = stringResource(R.string.action_surah_top),
-            onTitle = { viewModel.jumpToSurahOpening(settings.ayah) },
-            onBrowse = { sheet = ReaderSheet.Browse },
-            onSearch = { sheet = ReaderSheet.Search },
-            onSettings = { sheet = ReaderSheet.Settings },
+            onTitle = {
+                chromeRevealPending = false
+                viewModel.jumpToSurahOpening(settings.ayah)
+            },
+            onBrowse = { openSheet(ReaderSheet.Browse) },
+            onSearch = { openSheet(ReaderSheet.Search) },
+            onSettings = { openSheet(ReaderSheet.Settings) },
             page = page,
             modifier = Modifier.align(Alignment.TopCenter),
         )
@@ -430,6 +594,7 @@ fun ReaderScreen(
                     touch++
                 },
                 onMore = { ayah ->
+                    cardTafsirPack = null
                     cardAyah = ayah
                     selected = null
                 },
@@ -439,6 +604,7 @@ fun ReaderScreen(
                     scope.launch { sharing = loadShareCard(context, viewModel, ayah) }
                 },
                 onTouch = { touch++ },
+                onHeight = { bottomStackHeight = it },
                 onReciter = { viewModel.choosePillReciter(it) },
                 reciterId = settings.recitation,
                 reciterName = reciterShortName(
@@ -483,21 +649,27 @@ fun ReaderScreen(
         )
     }
 
-    ReaderSheets(
-        sheet = sheet,
-        content = content,
-        viewModel = viewModel,
-        settings = settings,
-        saved = saved,
-        lastRead = lastRead,
-        notificationsBlocked = notificationsBlocked,
-        exactGrantWithheld = exactGrantWithheld,
-        onOpenNotificationSettings = onOpenNotificationSettings,
-        onAskExactAlarm = onAskExactAlarm,
-        onReminderPermission = onReminderPermission,
-        onDismiss = { sheet = ReaderSheet.None },
-        onPendingRemove = { pendingRemove = it },
-    )
+    if (sheet != ReaderSheet.None) {
+        sheetStates.SaveableStateProvider(sheet.name) {
+            ReaderSheets(
+                sheet = sheet,
+                content = content,
+                viewModel = viewModel,
+                settings = settings,
+                saved = saved,
+                lastRead = lastRead,
+                notificationsBlocked = notificationsBlocked,
+                exactGrantWithheld = exactGrantWithheld,
+                onOpenNotificationSettings = onOpenNotificationSettings,
+                onAskExactAlarm = onAskExactAlarm,
+                onReminderPermission = onReminderPermission,
+                onDismiss = { closeSheet() },
+                onResult = { resultOpened(it) },
+                onSearchResult = { openSearchResult(it) },
+                onPendingRemove = { pendingRemove = it },
+            )
+        }
+    }
 
     cardAyah?.let { ayah ->
         AyahCard(
@@ -507,11 +679,16 @@ fun ReaderScreen(
                 ?: stringResource(R.string.surah_fallback_name, ayah.surah),
             tafsirPacks = viewModel.enabledTafsirPacks,
             settings = settings,
+            initialTafsirPack = cardTafsirPack,
             onAddContent = {
                 cardAyah = null
-                sheet = ReaderSheet.Settings
+                cardTafsirPack = null
+                openSheet(ReaderSheet.Settings)
             },
-            onDismiss = { cardAyah = null },
+            onDismiss = {
+                cardAyah = null
+                cardTafsirPack = null
+            },
         )
     }
 

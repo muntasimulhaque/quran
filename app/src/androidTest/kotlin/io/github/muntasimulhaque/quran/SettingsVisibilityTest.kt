@@ -85,7 +85,7 @@ class SettingsVisibilityTest {
                 io.github.muntasimulhaque.quran.feature.settings.R.string.settings_show_translation_title,
             )).fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithTag("switch-translation").performClick()
+        compose.onNodeWithTag("row-translation").performClick()
         back()
 
         compose.waitUntil(timeoutMillis = 30_000) {

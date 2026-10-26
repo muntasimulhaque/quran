@@ -1,5 +1,7 @@
 package io.github.muntasimulhaque.quran.playback
 
+import io.github.muntasimulhaque.quran.data.DownloadError
+
 /**
  * One reciter a reader could hear, with what that reciter would cost for the
  * surah at hand: the word timings and the surah's audio together, in bytes.
@@ -29,4 +31,6 @@ data class ListenOffer(
     /** 0..1 while downloading, null when waiting for the reader. */
     val progress: Float? = null,
     val failed: Boolean = false,
+    /** Why the transfer failed, when it did. */
+    val failure: DownloadError? = null,
 )

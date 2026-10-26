@@ -10,7 +10,9 @@ import androidx.compose.runtime.setValue
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ContentPack
+import io.github.muntasimulhaque.quran.data.DownloadError
 import io.github.muntasimulhaque.quran.data.DownloadedSurah
+import io.github.muntasimulhaque.quran.data.downloadError
 import io.github.muntasimulhaque.quran.data.PackCatalog
 import io.github.muntasimulhaque.quran.data.PackDownloader
 import io.github.muntasimulhaque.quran.data.PackStore
@@ -87,8 +89,10 @@ class ContentLibrary(
     data class PackSetup(
         val pack: ContentPack,
         val progress: Float?,
-        val failed: Boolean = false,
-    )
+        val failure: DownloadError? = null,
+    ) {
+        val failed: Boolean get() = failure != null
+    }
 
     private val store = PackStore(application)
     private val downloader = PackDownloader(application)
@@ -116,6 +120,10 @@ class ContentLibrary(
 
     /** True when the content itself could not be opened on this device. */
     var failure by mutableStateOf(false)
+        private set
+
+    /** True when the reason the content could not open is the phone's storage. */
+    var failureStorage by mutableStateOf(false)
         private set
 
     var packSetup by mutableStateOf<PackSetup?>(null)
@@ -191,6 +199,7 @@ class ContentLibrary(
 
     private suspend fun openLibrary() {
         failure = false
+        failureStorage = false
         // Everything that touches the disk stays off the main thread:
         // listing the packs, reading the catalog, and opening the library
         // itself are all work the reader's first frame must not wait on.
@@ -219,6 +228,7 @@ class ContentLibrary(
         val fresh = opened.database.getOrElse {
             android.util.Log.e(TAG, "the content library could not be opened", it)
             failure = true
+            failureStorage = it.downloadError() == DownloadError.Storage
             return
         }
         database = fresh
@@ -368,7 +378,7 @@ class ContentLibrary(
     fun install(id: String) {
         scope.launch {
             val pack = catalog.get(id) ?: return@launch
-            if (pack.installed) {
+            if (database?.installedPack(id) == true) {
                 onInstalled(pack)
                 settingsStore.removePendingPacks(setOf(id))
                 return@launch
@@ -383,7 +393,7 @@ class ContentLibrary(
     /** A pack the reader's language asks for, fetched when it is not here. */
     fun installIfMissing(id: String) {
         val pack = catalog.get(id) ?: return
-        if (pack.installed) return
+        if (database?.installedPack(id) == true) return
         install(pack.id)
     }
 
@@ -395,7 +405,7 @@ class ContentLibrary(
      */
     private suspend fun installNow(id: String): Boolean = installGate.withLock {
         val pack = catalog.get(id) ?: return@withLock false
-        if (pack.installed) return@withLock true
+        if (database?.installedPack(id) == true) return@withLock true
         // A pack already on its way is not asked for twice; a failed one is,
         // because the second attempt is the retry.
         if (packSetup?.let { it.pack.id == id && !it.failed } == true) return@withLock false
@@ -425,7 +435,13 @@ class ContentLibrary(
             }
         }
         if (result.isSuccess) return@withLock true
-        if (job.isActive) packSetup = PackSetup(pack, progress = null, failed = true)
+        if (job.isActive) {
+            packSetup = PackSetup(
+                pack,
+                progress = null,
+                failure = result.exceptionOrNull()?.downloadError() ?: DownloadError.Other,
+            )
+        }
         false
     }
 
@@ -457,7 +473,8 @@ class ContentLibrary(
             while (true) {
                 val next = settingsStore.pendingPacks().firstOrNull { id ->
                     val pack = catalog.get(id) ?: return@firstOrNull false
-                    !pack.installed && (pack.type != PackType.Tafsir || packUpdater.canRefresh())
+                    database?.installedPack(id) != true &&
+                        (pack.type != PackType.Tafsir || packUpdater.canRefresh())
                 } ?: break
                 if (!installNow(next)) break
                 finishInstall(catalog.get(next) ?: break)
@@ -533,22 +550,22 @@ class ContentLibrary(
     suspend fun installFromAssetsOrNetwork(
         pack: ContentPack,
         onProgress: (Float) -> Unit,
-    ): Boolean {
+    ): DownloadError? {
         val fromAssets = runCatching {
             withContext(Dispatchers.IO) { store.install(pack) }
         }.getOrElse { failure ->
             if (failure is CancellationException) throw failure
             false
         }
-        if (fromAssets) return true
+        if (fromAssets) return null
         val result = downloader.download(pack) { read, total ->
             onProgress(if (total > 0) (read.toFloat() / total).coerceIn(0f, 1f) else 0f)
         }
-        return result.isSuccess
+        return result.exceptionOrNull()?.downloadError()
     }
 
-    /** Whether a pack is on the device, for the listening flow's price. */
-    fun isInstalled(id: String): Boolean = id in installed
+    /** Whether a pack is attached and readable, for the listening flow's price. */
+    fun isInstalled(id: String): Boolean = database?.installedPack(id) ?: (id in installed)
 
     /** The catalog's entry for a pack, for its size and its type. */
     fun pack(id: String): ContentPack? = catalog.get(id)

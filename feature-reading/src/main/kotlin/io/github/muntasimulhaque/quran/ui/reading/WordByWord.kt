@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
@@ -78,6 +79,9 @@ internal fun WordByWord(
     meanings: List<WordMeaning>,
     hafs: FontFamily,
     metrics: ReadingMetrics,
+    /** The words a search matched by meaning, washed in the match color. */
+    highlightWords: Set<String> = emptySet(),
+    highlightColor: Color = Color.Transparent,
     modifier: Modifier = Modifier,
 ) {
     if (meanings.isEmpty()) return
@@ -97,6 +101,8 @@ internal fun WordByWord(
                     meaning = meaning,
                     metrics = metrics,
                     hafs = hafs,
+                    highlighted = meaning.word in highlightWords,
+                    highlightColor = highlightColor,
                 )
             }
         }
@@ -116,6 +122,8 @@ private fun WordPair(
     meaning: WordMeaning,
     metrics: ReadingMetrics,
     hafs: FontFamily,
+    highlighted: Boolean,
+    highlightColor: Color,
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         val palette = LocalPagePalette.current
@@ -139,6 +147,8 @@ private fun WordPair(
             ),
             textAlign = TextAlign.Center,
             maxLines = 1,
+            wash = if (highlighted) listOf(meaning.word.indices) else emptyList(),
+            washColor = highlightColor,
             // The gloss is heard in the portable form, the same words a
             // speech engine can pronounce (owner decision, the palette
             // session).

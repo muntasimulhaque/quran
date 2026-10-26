@@ -60,7 +60,7 @@ internal fun AyahRow(
     showSource: Boolean,
     /** The reader's own Arabic step, so the results follow the reading. */
     arabicStep: Float,
-    onAyah: (Ayah) -> Unit,
+    onOpen: () -> Unit,
 ) {
     // The reader's own Arabic step moves the result's Arabic, so a reader who
     // needs a larger Quran reads a larger result too; the snippets stay on
@@ -70,7 +70,7 @@ internal fun AyahRow(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .sheetRow(onClick = { onAyah(hit.ayah) })
+            .sheetRow(onClick = onOpen)
             .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = Space.Row),
     ) {
         Text(
@@ -187,11 +187,11 @@ internal fun AyahRow(
 }
 
 @Composable
-internal fun TafsirRow(hit: SearchHit.TafsirHitResult, onAyah: (Ayah) -> Unit) {
+internal fun TafsirRow(hit: SearchHit.TafsirHitResult, onOpen: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .sheetRow(onClick = { onAyah(hit.ayah) })
+            .sheetRow(onClick = onOpen)
             .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = Space.Row),
     ) {
         val span = if (hit.fromAyah == hit.toAyah) {

@@ -20,6 +20,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -39,7 +41,7 @@ import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlin.math.abs
 
 
 
@@ -51,8 +53,13 @@ internal fun ReadingRows(
     rows: List<ReadingRow>,
     ayahs: List<Int>,
     metrics: ReadingMetrics,
+    reveal: ReadingReveal?,
+    /** The reader's own word-by-word switch, before any arrival turns it on. */
+    wordAid: Boolean,
     place: Int,
     placeOffset: Int,
+    placeOffsetWidth: Int,
+    placeOffsetFontScale: Float,
     hasTranslation: Boolean,
     contentLanguage: String,
     nextSurahName: String?,
@@ -66,7 +73,7 @@ internal fun ReadingRows(
     onScrolled: () -> Unit,
     onNextSurah: (Int) -> Unit,
     onAddContent: () -> Unit,
-    onPlaceChanged: (Int, Int) -> Unit,
+    onPlaceChanged: (Int, Int, Int, Float) -> Unit,
     startAtOpening: Boolean,
     onOpeningReached: () -> Unit,
     contentPaddingTop: Dp,
@@ -75,13 +82,25 @@ internal fun ReadingRows(
     onFootnote: (OpenFootnote?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val density = LocalDensity.current
+    val windowWidth = LocalWindowInfo.current.containerSize.width
+    val fontScale = density.fontScale
+    // The stored depth belongs to the width and font scale it was measured
+    // in. A different phone, a rotation, a split window, or a larger system
+    // font reflows the same pixel into a different line, so the depth is
+    // dropped to the ayah's own top rather than pointing at the wrong text.
+    val depthKnown = windowWidth > 0
+    val depthMatches = placeOffset == 0 ||
+        (depthKnown && placeOffsetWidth == windowWidth &&
+            abs(placeOffsetFontScale - fontScale) < 0.01f)
+    val savedOffset = if (!depthKnown || depthMatches) placeOffset else 0
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = AyahList.indexOf(ayahs, place),
         // The reader may have stopped inside a long ayah that takes more than
         // a screen. The place carries that depth, so the app opens on the
         // line the reader was reading and not on the top of the block
         // (owner decision, this session).
-        initialFirstVisibleItemScrollOffset = placeOffset,
+        initialFirstVisibleItemScrollOffset = savedOffset,
     )
 
     // The surah's introduction opens from its quiet door; once it is open, a
@@ -94,21 +113,20 @@ internal fun ReadingRows(
         if (aboutOpen) aboutOpen = false else onBackgroundTap()
     }
 
-    // Moving the page means reading, and reading wants the page: the chrome
-    // is told to step aside as soon as the list is moving under a finger.
-    LaunchedEffect(listState) {
-        snapshotFlow { listState.isScrollInProgress }
-            .distinctUntilChanged()
-            .collect { scrolling -> if (scrolling) onScrolled() }
-    }
-
     // The reader's place is written down when a drag of their own ends, and
     // never by a scroll the app started. The flag is cleared on the write, so
     // the jump that follows a drag cannot write a place of its own.
     var dragged by remember(surah.number) { mutableStateOf(false) }
+    // Moving the page means reading, and reading wants the page: the chrome
+    // is told to step aside when the reader's own drag begins. The place
+    // landing on screen is not the reader moving the page, so a scroll the
+    // app started does not hide the first reveal.
     LaunchedEffect(listState, surah.number) {
         listState.interactionSource.interactions.collect { interaction ->
-            if (interaction is DragInteraction.Start) dragged = true
+            if (interaction is DragInteraction.Start) {
+                dragged = true
+                onScrolled()
+            }
         }
     }
     LaunchedEffect(listState, surah.number) {
@@ -127,8 +145,16 @@ internal fun ReadingRows(
                 // first ayah at its own top rather than at a depth measured
                 // against a different item.
                 val depth = if (index == 0) 0 else offset
-                AyahList.ayahAt(ayahs, index)?.let { onPlaceChanged(it, depth) }
+                AyahList.ayahAt(ayahs, index)?.let { onPlaceChanged(it, depth, windowWidth, fontScale) }
             }
+    }
+
+    // A depth that does not belong to this layout is rewritten as the ayah's
+    // own top once, so the next launch does not read it as a line again.
+    LaunchedEffect(windowWidth, fontScale, place, placeOffset) {
+        if (placeOffset > 0 && depthKnown && !depthMatches) {
+            onPlaceChanged(place, 0, windowWidth, fontScale)
+        }
     }
 
     // The reader's place moves the list, exactly, and the list never moves
@@ -146,9 +172,9 @@ internal fun ReadingRows(
             return@LaunchedEffect
         }
         if (target != listState.firstVisibleItemIndex ||
-            placeOffset != listState.firstVisibleItemScrollOffset
+            savedOffset != listState.firstVisibleItemScrollOffset
         ) {
-            listState.scrollToItem(target, placeOffset)
+            listState.scrollToItem(target, savedOffset)
         }
     }
 
@@ -253,6 +279,9 @@ internal fun ReadingRows(
                     // does not rebuild its AnnotatedString or recompose it
                     // (owner decision, this session).
                     playingWord = playingWord.takeIf { playingAyah == row.ayah.number },
+                    reveal = reveal?.takeIf { it.ayah == row.ayah.number },
+                    showWordAid = wordAid ||
+                        (reveal?.wordByWord == true && reveal.ayah == row.ayah.number),
                     onAyah = onAyah,
                     onBackgroundTap = dismissAbout,
                     onFootnote = { line, number ->

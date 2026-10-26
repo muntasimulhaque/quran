@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentPack
+import io.github.muntasimulhaque.quran.data.DownloadError
 import io.github.muntasimulhaque.quran.data.DownloadedSurah
 import io.github.muntasimulhaque.quran.data.Recitation
 import io.github.muntasimulhaque.quran.data.ReadingRow
@@ -68,8 +69,10 @@ data class PackSetupState(
     val name: String,
     val bytes: Long,
     val progress: Float?,
-    val failed: Boolean,
-)
+    val failure: DownloadError? = null,
+) {
+    val failed: Boolean get() = failure != null
+}
 
 /**
  * Settings: a hub of one row per setting, each carrying where it stands, and

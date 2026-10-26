@@ -103,7 +103,7 @@ fun SearchSheet(
     /** The reader's own Arabic step, so the results follow the reading. */
     arabicStep: Float,
     onDismiss: () -> Unit,
-    onAyah: (Ayah) -> Unit,
+    onAyah: (SearchArrival) -> Unit,
     onSurah: (Surah) -> Unit,
 ) {
     val sheetState = rememberExpandedSheetState()
@@ -232,7 +232,9 @@ fun SearchSheet(
             ) {
                 items(results.hits, key = { key(it) }) { hit ->
                     when (hit) {
-                        is SearchHit.ReferenceHit -> ReferenceRow(hit.ayah, onAyah)
+                        is SearchHit.ReferenceHit -> ReferenceRow(hit.ayah) {
+                            onAyah(SearchArrival.AyahMatch(hit.ayah))
+                        }
                         is SearchHit.SurahHit -> SurahRow(hit.surah, onSurah)
                         is SearchHit.AyahHit -> AyahRow(
                             hit = hit,
@@ -240,9 +242,20 @@ fun SearchSheet(
                             terms = queryTerms,
                             showSource = translationPacks.size > 1,
                             arabicStep = arabicStep,
-                            onAyah = onAyah,
+                            onOpen = {
+                                onAyah(
+                                    SearchArrival.AyahMatch(
+                                        ayah = hit.ayah,
+                                        arabicWords = hit.arabicMatchedWords,
+                                        meaningWords = hit.matchedWordText,
+                                        translationPack = hit.translation?.pack,
+                                    ),
+                                )
+                            },
                         )
-                        is SearchHit.TafsirHitResult -> TafsirRow(hit, onAyah)
+                        is SearchHit.TafsirHitResult -> TafsirRow(hit) {
+                            onAyah(SearchArrival.TafsirMatch(hit.ayah, hit.pack))
+                        }
                     }
                 }
             }
