@@ -195,10 +195,16 @@ android {
 
     defaultConfig {
         applicationId = "io.github.muntasimulhaque.quran"
+        // targetSdk 37 is the behavior this app is tested against, and it
+        // stays 37. minSdk 24 is the reach: the reading works on Android 7
+        // and later, and an old phone's unpatched platform is a risk of the
+        // phone, not a reason to keep the Book from it. Raising minSdk would
+        // not make targetSdk stronger; it would only leave older readers out
+        // (owner decision, security audit).
         minSdk = 24
         targetSdk = 37
-        versionCode = 118
-        versionName = "11.6"
+        versionCode = 119
+        versionName = "11.7"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

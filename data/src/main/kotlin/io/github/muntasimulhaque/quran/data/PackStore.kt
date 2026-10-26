@@ -49,10 +49,19 @@ class PackCatalog private constructor(private val packs: Map<String, ContentPack
             for (index in 0 until packs.length()) {
                 val pack = packs.optJSONObject(index) ?: continue
                 val id = pack.optString("id")
-                if (id.isEmpty()) continue
+                if (!SafePaths.validId(id)) continue
+                val sha256 = pack.optString("sha256")
+                if (!SafePaths.validHash(sha256)) continue
+                val bytes = pack.optLong("bytes", 0)
+                if (bytes < 0) continue
+                val shipped = pack.optBoolean("shipped", false)
+                if (shipped && id != CORE_ID) continue
+                val type = PackType.ofOrNull(pack.optString("type")) ?: continue
+                val url = pack.optString("url").takeIf { it.isNotEmpty() }
+                if (url != null && !url.startsWith("https://")) continue
                 out[id] = ContentPack(
                     id = id,
-                    type = PackType.of(pack.optString("type")),
+                    type = type,
                     name = pack.optString("name"),
                     language = pack.optString("language"),
                     credit = pack.optString("credit"),
@@ -60,11 +69,11 @@ class PackCatalog private constructor(private val packs: Map<String, ContentPack
                     creditBn = pack.optString("creditBn"),
                     licenseBn = pack.optString("licenseBn"),
                     version = pack.optString("version"),
-                    shipped = pack.optBoolean("shipped", false),
+                    shipped = shipped,
                     ayahs = pack.optInt("ayahs", 6236),
-                    bytes = pack.optLong("bytes", 0),
-                    sha256 = pack.optString("sha256"),
-                    url = pack.optString("url").takeIf { it.isNotEmpty() },
+                    bytes = bytes,
+                    sha256 = sha256,
+                    url = url,
                 )
             }
             return PackCatalog(out)
@@ -81,11 +90,14 @@ class PackStore(private val context: Context) {
 
     /** The shipped core pack, kept in the app's own storage, named by hash. */
     fun coreFile(expectation: ContentPack): File {
+        if (!SafePaths.validHash(expectation.sha256)) {
+            throw IllegalStateException("the core pack has no checksum")
+        }
         val name = "core-${expectation.sha256.take(8)}.db"
         val directory = File(context.filesDir, "content").apply { mkdirs() }
         val target = File(directory, name)
-        if (target.exists() && target.length() == expectation.bytes &&
-            (expectation.sha256.isEmpty() || sha256(target).equals(expectation.sha256, ignoreCase = true))
+        if (target.isFile && target.length() == expectation.bytes &&
+            sha256(target).equals(expectation.sha256, ignoreCase = true)
         ) {
             return target
         }
@@ -94,15 +106,14 @@ class PackStore(private val context: Context) {
             temporary.outputStream().buffered().use { output -> input.copyTo(output) }
         }
         if (temporary.length() != expectation.bytes ||
-            (expectation.sha256.isNotEmpty() &&
-                !sha256(temporary).equals(expectation.sha256, ignoreCase = true))
+            !sha256(temporary).equals(expectation.sha256, ignoreCase = true)
         ) {
             temporary.delete()
             throw IllegalStateException("the shipped Quran text does not match the catalog")
         }
         if (!temporary.renameTo(target)) {
-            temporary.copyTo(target, overwrite = true)
             temporary.delete()
+            throw IllegalStateException("the shipped Quran text could not be placed")
         }
         directory.listFiles { file -> file.name != target.name }?.forEach { it.delete() }
         return target
@@ -126,7 +137,10 @@ class PackStore(private val context: Context) {
         File(context.filesDir, "content").deleteRecursively()
     }
 
-    fun fileFor(id: String): File = File(packDirectory(id), "$id.db")
+    fun fileFor(id: String): File {
+        val directory = packDirectory(id)
+        return SafePaths.childUnder(directory, "$id.db") ?: File(directory, "__invalid__")
+    }
 
     fun installed(): Set<String> = packRoot().listFiles()
         ?.filter { it.isDirectory && File(it, "${it.name}.db").exists() }
@@ -137,33 +151,55 @@ class PackStore(private val context: Context) {
     /**
      * Installs a pack from a file the caller has already verified, or from
      * the app's own assets when the build carried it (development builds and
-     * tests work with no network at all).
+     * tests work with no network at all). The catalog is the expectation:
+     * a file that does not match its length and SHA-256 is not installed,
+     * whichever door it arrived through (owner decision, security audit).
      */
     fun install(id: String, verified: File? = null): Boolean {
-        val target = fileFor(id)
-        if (target.exists()) return true
-        target.parentFile?.mkdirs()
-        val temporary = File(target.parentFile, "$id.db.part")
+        val pack = PackCatalog.load(context).get(id) ?: return false
+        return install(pack, verified)
+    }
+
+    fun install(pack: ContentPack, verified: File? = null): Boolean {
+        if (!SafePaths.validId(pack.id) || !SafePaths.validHash(pack.sha256)) return false
+        val target = fileFor(pack.id)
+        if (target.isFile && (pack.bytes <= 0 || target.length() == pack.bytes) &&
+            sha256(target).equals(pack.sha256, ignoreCase = true)
+        ) {
+            return true
+        }
+        if (target.exists() && !target.delete()) return false
+        val directory = target.parentFile ?: return false
+        directory.mkdirs()
+        val temporary = SafePaths.childUnder(directory, "${pack.id}.db.part") ?: return false
         if (verified != null) {
             verified.copyTo(temporary, overwrite = true)
         } else {
-            val asset = runCatching { context.assets.open("packs/$id.db") }.getOrNull() ?: return false
+            val asset = runCatching { context.assets.open("packs/${pack.id}.db") }.getOrNull() ?: return false
             asset.use { input -> temporary.outputStream().buffered().use { output -> input.copyTo(output) } }
         }
-        if (!temporary.renameTo(target)) {
-            temporary.copyTo(target, overwrite = true)
+        if ((pack.bytes > 0 && temporary.length() != pack.bytes) ||
+            !sha256(temporary).equals(pack.sha256, ignoreCase = true)
+        ) {
             temporary.delete()
+            return false
         }
+        if (!temporary.renameTo(target)) {
+            temporary.delete()
+            return false
+        }
+        PackVerifier(context).remember(pack, target)
         return true
     }
 
     fun remove(id: String): Boolean {
-        val directory = packDirectory(id)
-        val removed = directory.deleteRecursively()
-        return removed
+        val directory = SafePaths.childUnder(packRoot(), id) ?: return false
+        PackVerifier(context).forget(id)
+        return directory.deleteRecursively()
     }
 
     private fun packRoot() = File(context.filesDir, "packs").apply { mkdirs() }
 
-    private fun packDirectory(id: String) = File(packRoot(), id)
+    private fun packDirectory(id: String): File =
+        SafePaths.childUnder(packRoot(), id) ?: File(packRoot(), "__invalid__")
 }

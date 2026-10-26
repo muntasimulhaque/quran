@@ -4,10 +4,12 @@ import android.content.Context
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.coroutineContext
 import java.io.File
 import java.io.FileOutputStream
+import java.net.HttpURLConnection
 import java.security.MessageDigest
 
 /**
@@ -41,44 +43,69 @@ class PackDownloader(private val context: Context) {
     suspend fun download(
         pack: ContentPack,
         onProgress: (downloadedBytes: Long, totalBytes: Long) -> Unit,
-    ): Result<Unit> = withContext(Dispatchers.IO) {
-        val url = pack.url ?: return@withContext Result.failure(
-            IllegalStateException("this pack has no download"),
-        )
-        val directory = File(context.filesDir, "packs/${pack.id}").apply { mkdirs() }
-        val temporary = File(directory, "${pack.id}.db.part")
-        // The first attempt resumes whatever a dropped connection left. An
-        // attempt after a failed verification starts a whole file, because
-        // the only reason to make one is a part that is not this pack.
-        var startAt = temporary.length()
-        while (true) {
-            coroutineContext.ensureActive()
-            val fetched = fetch(url, temporary, startAt, pack.bytes, onProgress)
-            val failure = fetched.exceptionOrNull()
-            if (failure != null) {
-                // A part that already holds the whole file is a completed
-                // transfer whose rename never happened. The server answers
-                // the Range request with 416, and retrying the same range
-                // would stay stuck forever. Throw the part away and start
-                // once from the beginning; the hash check then proves it.
-                if (startAt > 0 && failure.message == "HTTP 416") {
-                    temporary.delete()
-                    startAt = 0L
-                    continue
+    ): Result<Unit> = downloadGate.withLock {
+        withContext(Dispatchers.IO) {
+            val url = pack.url ?: return@withContext Result.failure(
+                IllegalStateException("this pack has no download"),
+            )
+            if (!SafePaths.validId(pack.id) || !SafePaths.validHash(pack.sha256) || pack.bytes < 0) {
+                return@withContext Result.failure(
+                    IllegalStateException("the pack has no valid id or checksum"),
+                )
+            }
+            val root = File(context.filesDir, "packs").apply { mkdirs() }
+            val directory = SafePaths.childUnder(root, pack.id)
+                ?: return@withContext Result.failure(
+                    IllegalStateException("the pack id is not a safe folder name"),
+                )
+            directory.mkdirs()
+            val temporary = SafePaths.childUnder(directory, "${pack.id}.db.part")
+                ?: return@withContext Result.failure(
+                    IllegalStateException("the pack part is not a safe file name"),
+                )
+            // The first attempt resumes whatever a dropped connection left. An
+            // attempt after a failed verification starts a whole file, because
+            // the only reason to make one is a part that is not this pack.
+            var startAt = temporary.length()
+            if (pack.bytes > 0 && startAt > pack.bytes) {
+                temporary.delete()
+                startAt = 0L
+            }
+            while (true) {
+                coroutineContext.ensureActive()
+                val fetched = fetch(url, temporary, startAt, pack.bytes, onProgress)
+                val failure = fetched.exceptionOrNull()
+                if (failure != null) {
+                    // A part that already holds the whole file is a completed
+                    // transfer whose rename never happened. The server answers
+                    // the Range request with 416, and retrying the same range
+                    // would stay stuck forever. Throw the part away and start
+                    // once from the beginning; the hash check then proves it.
+                    if (startAt > 0 && failure.message == "HTTP 416") {
+                        temporary.delete()
+                        startAt = 0L
+                        continue
+                    }
+                    return@withContext Result.failure(failure)
                 }
-                return@withContext Result.failure(failure)
+                if (matches(temporary, pack.sha256)) {
+                    val target = SafePaths.childUnder(directory, "${pack.id}.db")
+                        ?: return@withContext Result.failure(
+                            IllegalStateException("the pack file is not a safe name"),
+                        )
+                    val moved = move(temporary, target)
+                    if (moved.isSuccess) PackVerifier(context).remember(pack, target)
+                    return@withContext moved
+                }
+                temporary.delete()
+                if (startAt == 0L) {
+                    return@withContext Result.failure(IllegalStateException("checksum mismatch"))
+                }
+                startAt = 0L
             }
-            if (pack.sha256.isEmpty() || matches(temporary, pack.sha256)) {
-                return@withContext move(temporary, directory, pack.id)
-            }
-            temporary.delete()
-            if (startAt == 0L) {
-                return@withContext Result.failure(IllegalStateException("checksum mismatch"))
-            }
-            startAt = 0L
+            @Suppress("UNREACHABLE_CODE")
+            Result.failure(IllegalStateException("unreachable"))
         }
-        @Suppress("UNREACHABLE_CODE")
-        Result.failure(IllegalStateException("unreachable"))
     }
 
     /** One HTTP pass, appending to [temporary] from [startAt]. */
@@ -89,37 +116,32 @@ class PackDownloader(private val context: Context) {
         packBytes: Long,
         onProgress: (downloadedBytes: Long, totalBytes: Long) -> Unit,
     ): Result<Unit> {
-        var connection: java.net.HttpURLConnection? = null
+        var connection: HttpURLConnection? = null
         return try {
-            // The app's one network use is HTTPS to the project's own release
-            // page: a URL of another shape, or a redirect that lands on one,
-            // is refused rather than fetched in the clear.
-            if (!url.startsWith("https://") || !ReleaseHosts.isAllowed(url)) {
-                return Result.failure(IllegalStateException("the pack URL is not the project's release host"))
+            // Every redirect is checked before the connection that would use
+            // it is opened, not after the request has already been sent.
+            connection = ReleaseHttp.open(url) { open ->
+                if (startAt > 0) open.setRequestProperty("Range", "bytes=$startAt-")
             }
-            connection = java.net.URL(url).openConnection() as java.net.HttpURLConnection
-            connection.instanceFollowRedirects = true
-            connection.connectTimeout = 20_000
-            connection.readTimeout = 30_000
-            connection.setRequestProperty("Accept", "application/octet-stream")
-            if (startAt > 0) connection.setRequestProperty("Range", "bytes=$startAt-")
-            connection.connect()
-            if (connection.url.protocol != "https" ||
-                !ReleaseHosts.isAllowed(connection.url.toString())
-            ) {
-                return Result.failure(
-                    IllegalStateException("the pack redirect left the project's release host"),
-                )
+            val code = connection.responseCode
+            val resumed = startAt > 0 && code == HttpURLConnection.HTTP_PARTIAL
+            if (!resumed && code !in 200..299) {
+                return Result.failure(IllegalStateException("HTTP $code"))
             }
-            val resumed =
-                startAt > 0 && connection.responseCode == java.net.HttpURLConnection.HTTP_PARTIAL
-            if (!resumed && connection.responseCode !in 200..299) {
-                return Result.failure(IllegalStateException("HTTP ${connection.responseCode}"))
-            }
-            // A server that ignored the Range sends the whole file, and the
-            // part on disk is the wrong thing to append to.
+            if (resumed) validateContentRange(connection, startAt, packBytes)
             val from = if (resumed) startAt else 0L
-            val total = if (packBytes > 0) packBytes else connection.contentLengthLong + from
+            val expected = packBytes
+            val maxBytes = if (expected > 0) expected else MAX_PACK_BYTES
+            val contentLength = connection.contentLengthLong
+            if (contentLength >= 0 && from + contentLength > maxBytes) {
+                return Result.failure(IllegalStateException("the download is larger than the catalog says"))
+            }
+            val type = connection.contentType?.substringBefore(';')?.trim()?.lowercase()
+            if (!type.isNullOrEmpty() && type !in ALLOWED_CONTENT_TYPES) {
+                return Result.failure(IllegalStateException("the download is not an octet stream"))
+            }
+            val total = if (expected > 0) expected else contentLength + from
+            val deadline = System.nanoTime() + MAX_DOWNLOAD_MILLIS * 1_000_000L
             var read = from
             connection.inputStream.use { input ->
                 FileOutputStream(temporary, resumed).buffered().use { output ->
@@ -128,13 +150,22 @@ class PackDownloader(private val context: Context) {
                         // The reader's Cancel, read between chunks, so the
                         // transfer stops within one read of it.
                         coroutineContext.ensureActive()
+                        if (System.nanoTime() > deadline) {
+                            return Result.failure(IllegalStateException("the download took too long"))
+                        }
                         val count = input.read(buffer)
                         if (count < 0) break
-                        output.write(buffer, 0, count)
                         read += count
+                        if (read > maxBytes) {
+                            return Result.failure(IllegalStateException("the download is larger than the catalog says"))
+                        }
+                        output.write(buffer, 0, count)
                         onProgress(read, total)
                     }
                 }
+            }
+            if (expected > 0 && read != expected) {
+                return Result.failure(IllegalStateException("the download ended at $read bytes"))
             }
             Result.success(Unit)
         } catch (cancelled: CancellationException) {
@@ -147,8 +178,30 @@ class PackDownloader(private val context: Context) {
         }
     }
 
+    /**
+     * A resumed response must start where the part ends and, when the catalog
+     * knows the size, end at the catalog's size. A server that answers a
+     * different range is not appended to.
+     */
+    private fun validateContentRange(
+        connection: HttpURLConnection,
+        startAt: Long,
+        packBytes: Long,
+    ) {
+        val header = connection.getHeaderField("Content-Range")
+            ?: throw IllegalStateException("the resumed download has no range")
+        val match = CONTENT_RANGE.find(header.trim())
+            ?: throw IllegalStateException("the resumed range cannot be read")
+        val first = match.groupValues[1].toLongOrNull()
+            ?: throw IllegalStateException("the resumed range cannot be read")
+        val total = match.groupValues[3].takeIf { it != "*" }?.toLongOrNull()
+        if (first != startAt || (packBytes > 0 && total != null && total != packBytes)) {
+            throw IllegalStateException("the resumed range is not this pack")
+        }
+    }
+
     private suspend fun matches(file: File, expected: String): Boolean {
-        if (!file.exists()) return false
+        if (!file.isFile) return false
         val digest = MessageDigest.getInstance("SHA-256")
         file.inputStream().buffered().use { input ->
             val buffer = ByteArray(1 shl 16)
@@ -163,13 +216,30 @@ class PackDownloader(private val context: Context) {
             .equals(expected, ignoreCase = true)
     }
 
-    private fun move(temporary: File, directory: File, id: String): Result<Unit> {
-        val target = File(directory, "$id.db")
-        return runCatching {
-            if (!temporary.renameTo(target)) {
-                temporary.copyTo(target, overwrite = true)
-                temporary.delete()
-            }
+    private fun move(temporary: File, target: File): Result<Unit> = runCatching {
+        if (!temporary.renameTo(target)) {
+            temporary.delete()
+            throw IllegalStateException("the pack could not be moved into place")
         }
+    }
+
+    private companion object {
+        /** One pack transfer at a time, across the library and the updater. */
+        val downloadGate = kotlinx.coroutines.sync.Mutex()
+
+        /** A pack larger than this is not one the catalog offers. */
+        const val MAX_PACK_BYTES = 256L * 1024 * 1024
+
+        /** The longest a transfer may take from first byte to last. */
+        const val MAX_DOWNLOAD_MILLIS = 30L * 60 * 1000
+
+        val ALLOWED_CONTENT_TYPES = setOf(
+            "application/octet-stream",
+            "binary/octet-stream",
+            "application/zip",
+            "application/x-zip-compressed",
+        )
+
+        val CONTENT_RANGE = Regex("""^bytes (\d+)-(\d+)/(\d+|\*)\z""")
     }
 }

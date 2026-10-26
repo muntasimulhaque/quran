@@ -14,8 +14,10 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.nio.file.Files
+import java.security.MessageDigest
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Semaphore
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -45,7 +47,24 @@ class Audio(private val root: File) {
 
     private val githubBase = "https://github.com/muntasimulhaque/quran/releases/download"
 
-    private val client = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.ALWAYS).build()
+    private val client = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NEVER).build()
+
+    /**
+     * The source MP3s the packages are built from, by path and SHA-256.
+     *
+     * The first successful build records the hashes it used. From then on a
+     * build refuses a source file whose bytes have changed, so a CDN or an
+     * upstream export cannot quietly replace a recitation between two
+     * releases. The file is committed after the first run, which is what
+     * turns the recording into a pin (owner decision, security audit).
+     */
+    private val sourceFile = File(root, "content/audio-sources.json")
+    private val sourceHashes = java.util.concurrent.ConcurrentHashMap<String, String>()
+    private val sourceChanged = AtomicBoolean(false)
+
+    init {
+        loadSourceHashes()
+    }
 
     // ------------------------------------------------------------------ sample
 
@@ -70,7 +89,11 @@ class Audio(private val root: File) {
                     "ORDER BY ra.recitation, a.number",
             ) { rs ->
                 val audioPath = rs.getString(1) ?: return@each
-                val file = File(target, audioPath)
+                val file = SafeFiles.audioFile(target, audioPath)
+                if (file == null) {
+                    failures += "$audioPath (unsafe path)"
+                    return@each
+                }
                 if (file.length() > 0) {
                     skipped.incrementAndGet()
                     return@each
@@ -79,6 +102,12 @@ class Audio(private val root: File) {
                 jobs += client.sendAsync(getRequest("https://audio-cdn.tarteel.ai/quran/$audioPath"), HttpResponse.BodyHandlers.ofByteArray())
                     .thenAccept { response ->
                         if (response.statusCode() == 200 && response.body().isNotEmpty()) {
+                            try {
+                                recordSource(audioPath, response.body())
+                            } catch (error: Exception) {
+                                failures += "$audioPath (${error.message})"
+                                return@thenAccept
+                            }
                             file.parentFile?.mkdirs()
                             Files.write(file.toPath(), response.body())
                             downloaded.incrementAndGet()
@@ -93,6 +122,7 @@ class Audio(private val root: File) {
         val bytes = target.walkTopDown().filter { it.isFile }.sumOf { it.length() }
         println("audio: sample at ${target.relativeTo(root)}")
         println("audio: downloaded ${downloaded.get()}, already present ${skipped.get()}, ${bytes / 1024} KB total")
+        writeSourceHashes()
         if (failures.isEmpty()) return 0
         println("AUDIO FAILURES (${failures.size})")
         failures.take(10).forEach { println("  - $it") }
@@ -138,10 +168,23 @@ class Audio(private val root: File) {
             val paths = rows.filter { it.first == reciter && it.second == surah }.map { it.third }
             val zip = File(output, "$reciter/surah-%03d.zip".format(surah))
             val known = existing[reciter]?.get(surah)
-            if (zip.isFile && known != null && zip.length() == known.first &&
-                sha256(zip).equals(known.second, ignoreCase = true)
-            ) {
-                skipped++
+            if (known != null) {
+                if (zip.isFile && zip.length() == known.first &&
+                    sha256(zip).equals(known.second, ignoreCase = true)
+                ) {
+                    skipped++
+                    continue
+                }
+                // A package that has ever been published is recovered from
+                // its hash-pinned release, never rebuilt from the CDN. The
+                // source audio is therefore pinned for every published surah.
+                try {
+                    downloadPublished(reciter, surah, zip, known.first, known.second)
+                    skipped++
+                    print("r")
+                } catch (error: Exception) {
+                    failures += "$reciter surah $surah: ${error.message}"
+                }
                 continue
             }
             try {
@@ -157,6 +200,7 @@ class Audio(private val root: File) {
 
         val manifest = buildManifest(output)
         manifestFile.writeText(manifest)
+        writeSourceHashes()
         println("audio: packs built $built, reused $skipped, manifest at ${manifestFile.relativeTo(root)}")
         if (failures.isEmpty()) return 0
         println("AUDIO FAILURES (${failures.size})")
@@ -171,13 +215,24 @@ class Audio(private val root: File) {
         val semaphore = Semaphore(12)
         val jobs = mutableListOf<CompletableFuture<*>>()
         for (path in paths) {
-            val file = File(raw, path.substringAfterLast('/'))
+            if (SafeFiles.audioFile(raw, path) == null) {
+                throw IllegalStateException("unsafe audio path: $path")
+            }
+            val name = path.substringAfterLast('/')
+            val file = SafeFiles.childUnder(raw, name)
+            if (file == null) throw IllegalStateException("unsafe audio name: $name")
             if (file.length() > 0) continue
             semaphore.acquire()
             jobs += client
                 .sendAsync(getRequest("https://audio-cdn.tarteel.ai/quran/$path"), HttpResponse.BodyHandlers.ofByteArray())
                 .thenAccept { response ->
                     if (response.statusCode() == 200 && response.body().isNotEmpty()) {
+                        try {
+                            recordSource(path, response.body())
+                        } catch (error: Exception) {
+                            failures += "$path (${error.message})"
+                            return@thenAccept
+                        }
                         Files.write(file.toPath(), response.body())
                     } else {
                         failures += "$path (HTTP ${response.statusCode()})"
@@ -189,7 +244,8 @@ class Audio(private val root: File) {
 
         val names = paths.map { it.substringAfterLast('/') }
         for (name in names) {
-            val file = File(raw, name)
+            val file = SafeFiles.childUnder(raw, name)
+                ?: throw IllegalStateException("unsafe audio name: $name")
             if (file.length() == 0L) throw IllegalStateException("missing $name")
             if (!looksLikeAudio(file)) throw IllegalStateException("not an mp3: $name")
         }
@@ -207,7 +263,102 @@ class Audio(private val root: File) {
             }
         }
         // The raw ayah files have served their purpose; the ZIP is the product.
-        names.forEach { File(raw, it).delete() }
+        names.forEach { SafeFiles.childUnder(raw, it)?.delete() }
+    }
+
+    /** An MP3 starts with an ID3 tag or an MPEG frame sync; anything else is not audio. */
+    /**
+     * Recovers one published package from the project's own release, checked
+     * against the manifest's size and SHA-256. A missing or damaged local
+     * package is replaced by this, not by a fresh CDN download.
+     */
+    private fun downloadPublished(
+        reciter: String,
+        surah: Int,
+        destination: File,
+        expectedBytes: Long,
+        expectedSha256: String,
+    ) {
+        val tag = reciterTags[reciter] ?: throw IllegalStateException("unknown reciter: $reciter")
+        val url = "$githubBase/$tag/surah-%03d.zip".format(surah)
+        val temporary = File(destination.parentFile, destination.name + ".part")
+        destination.parentFile?.mkdirs()
+        var connection: java.net.HttpURLConnection? = null
+        try {
+            connection = ReleaseFiles.open(url)
+            if (connection.responseCode !in 200..299) {
+                throw IllegalStateException("HTTP ${connection.responseCode}")
+            }
+            val digest = MessageDigest.getInstance("SHA-256")
+            var read = 0L
+            connection.inputStream.use { input ->
+                temporary.outputStream().buffered().use { output ->
+                    val buffer = ByteArray(1 shl 16)
+                    while (true) {
+                        val count = input.read(buffer)
+                        if (count < 0) break
+                        read += count
+                        if (expectedBytes > 0 && read > expectedBytes) {
+                            throw IllegalStateException("the published package is larger than the manifest says")
+                        }
+                        digest.update(buffer, 0, count)
+                        output.write(buffer, 0, count)
+                    }
+                }
+            }
+            val actual = digest.digest().joinToString("") { "%02x".format(it) }
+            if ((expectedBytes > 0 && read != expectedBytes) ||
+                !actual.equals(expectedSha256, ignoreCase = true)
+            ) {
+                throw IllegalStateException("the published package does not match the manifest")
+            }
+            if (destination.exists() && !destination.delete()) {
+                throw IllegalStateException("the old package could not be replaced")
+            }
+            if (!temporary.renameTo(destination)) {
+                throw IllegalStateException("the published package could not be placed")
+            }
+        } finally {
+            connection?.disconnect()
+            temporary.delete()
+        }
+    }
+
+    private fun loadSourceHashes() {
+        if (!sourceFile.exists()) return
+        val rootJson = runCatching {
+            Json.parseToJsonElement(sourceFile.readText()).jsonObject
+        }.getOrNull() ?: return
+        for ((path, value) in rootJson) {
+            val hash = (value as? JsonPrimitive)?.content ?: continue
+            if (SafeFiles.audioFile(File(root, "content/work"), path) != null) {
+                sourceHashes[path] = hash
+            }
+        }
+    }
+
+    /**
+     * Checks one downloaded source against the recorded hash, or records it
+     * on the first build. A different file is a hard failure, never a quiet
+     * replacement.
+     */
+    private fun recordSource(path: String, bytes: ByteArray) {
+        val actual = MessageDigest.getInstance("SHA-256").digest(bytes)
+            .joinToString("") { "%02x".format(it) }
+        val previous = sourceHashes.putIfAbsent(path, actual)
+        if (previous != null && !previous.equals(actual, ignoreCase = true)) {
+            throw IllegalStateException("the source audio changed: $path")
+        }
+        if (previous == null) sourceChanged.set(true)
+    }
+
+    private fun writeSourceHashes() {
+        if (!sourceChanged.get()) return
+        val json = buildJsonObject {
+            for ((path, hash) in sourceHashes.toSortedMap()) put(path, hash)
+        }
+        sourceFile.parentFile?.mkdirs()
+        sourceFile.writeText(Json { prettyPrint = true }.encodeToString(JsonObject.serializer(), json))
     }
 
     /** An MP3 starts with an ID3 tag or an MPEG frame sync; anything else is not audio. */

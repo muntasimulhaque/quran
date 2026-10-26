@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 11.6 (versionCode 118)
+Version: 11.7 (versionCode 119)
 
 ## Listing
 
@@ -154,6 +154,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (11.7, 411 characters)
+11.7 is the security hardening release. A pack without a checksum is refused; content names are checked against their folders; downloads check every redirect, size, and time; downloaded text opens read-only and verified; the player gives other apps only read commands; search input is bounded; and the build verifies its dependencies and wrapper. The reading, Quran text, translations, and tafsir are unchanged.
 
 ## Release notes (11.6, 410 characters)
 11.6 is a new face for the app. The mark's feet now close on one point instead of poking past it, the line is a little firmer so the icon holds from a 48 pixel tile to the store, and the two smallest tiles carry their own weight. The feature graphic is redrawn: no frame, the mark at seal size, the name, and The Noble Book under one gold rule. The reading, the Quran text, and every translation are unchanged.

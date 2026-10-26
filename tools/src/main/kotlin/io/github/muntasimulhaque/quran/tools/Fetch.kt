@@ -34,7 +34,12 @@ class Fetch(private val root: File) {
         failures += fetchContentDatabase()
         failures += fetchPacks()
         for (dataset in manifest.datasets) {
-            val file = File(root, dataset.path)
+            val file = SafeFiles.resolveUnder(root, dataset.path)
+            if (file == null) {
+                println("fetch: ${dataset.id} has an unsafe path: ${dataset.path}")
+                failures++
+                continue
+            }
             if (file.exists() && sha256(file) == dataset.sha256) {
                 println("fetch: have ${dataset.id}")
                 unpack(dataset.id, file)
@@ -83,7 +88,8 @@ class Fetch(private val root: File) {
     private fun unpack(id: String, archive: File) {
         val targetPath = unpackTargets[id] ?: return
         if (!isZip(archive)) return
-        val target = File(root, targetPath)
+        val target = SafeFiles.resolveUnder(root, targetPath)
+            ?: throw IllegalStateException("the unpack target is not safe: $targetPath")
         val expected = when (id) {
             "quran-font-hafs" -> 1
             else -> return
@@ -117,7 +123,12 @@ class Fetch(private val root: File) {
             val id = Regex("\"id\"\\s*:\\s*\"([^\"]+)\"").find(entry)?.groupValues?.get(1) ?: continue
             val hash = Regex("\"sha256\"\\s*:\\s*\"([0-9a-f]{64})\"").find(entry)?.groupValues?.get(1) ?: continue
             val url = Regex("\"url\"\\s*:\\s*\"([^\"]+)\"").find(entry)?.groupValues?.get(1) ?: continue
-            val target = File(root, "content/packs/$id.db")
+            val target = SafeFiles.resolveUnder(root, "content/packs/$id.db")
+            if (target == null) {
+                println("fetch: pack $id has an unsafe id")
+                failures++
+                continue
+            }
             if (target.exists() && sha256(target) == hash) {
                 println("fetch: have pack $id")
                 continue
@@ -223,11 +234,7 @@ class Fetch(private val root: File) {
     private fun download(url: String, destination: File) {
         destination.parentFile?.mkdirs()
         val temporary = File(destination.parentFile, destination.name + ".part")
-        val connection = java.net.URL(url).openConnection() as java.net.HttpURLConnection
-        connection.instanceFollowRedirects = true
-        connection.connectTimeout = 20_000
-        connection.readTimeout = 120_000
-        connection.connect()
+        val connection = ReleaseFiles.open(url)
         if (connection.responseCode !in 200..299) {
             throw IllegalStateException("HTTP ${connection.responseCode} for $url")
         }

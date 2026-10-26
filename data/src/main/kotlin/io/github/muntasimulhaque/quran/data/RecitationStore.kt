@@ -16,11 +16,11 @@ class RecitationStore(private val context: Context) {
 
     private val imported = File(context.filesDir, "recitations")
     private val assetPrefixes = listOf("recitation/", "audio-dev/")
-    private val assetCache = HashMap<String, Boolean>()
+    private val assetCache = java.util.concurrent.ConcurrentHashMap<String, Boolean>()
 
     /** The playable location of one ayah's audio, or null when it is absent. */
     fun uri(audioPath: String): Uri? {
-        val file = File(imported, audioPath)
+        val file = SafePaths.audioFile(imported, audioPath) ?: return null
         if (file.isFile) return Uri.fromFile(file)
         for (prefix in assetPrefixes) {
             val path = prefix + audioPath
@@ -31,7 +31,8 @@ class RecitationStore(private val context: Context) {
 
     /** The ayah files of one surah for one reciter folder, for sizes and removal. */
     fun filesForSurah(folder: String, surah: Int): List<File> {
-        val directory = File(imported, folder)
+        if (surah !in 1..114) return emptyList()
+        val directory = SafePaths.childUnder(imported, folder) ?: return emptyList()
         // The prefix is a file name, never a number the reader reads, so it
         // is written with the root locale: the process default follows the
         // reader's language, and a Bangla default wrote the prefix in Bangla
@@ -55,7 +56,7 @@ class RecitationStore(private val context: Context) {
 
     /** Removes every downloaded surah of one reciter, for removing a reciter pack. */
     fun removeAll(folder: String): Int {
-        val directory = File(imported, folder)
+        val directory = SafePaths.childUnder(imported, folder) ?: return 0
         val files = directory.listFiles()?.size ?: 0
         directory.deleteRecursively()
         return files

@@ -25,6 +25,12 @@ object Search {
     /** Long queries are narrowed to their first terms rather than refused. */
     const val MAX_TERMS = 6
 
+    /** A pasted paragraph is a search, not a document to scan. */
+    const val MAX_INPUT_LENGTH = 200
+
+    /** One term longer than this cannot be a useful word. */
+    const val MAX_TERM_LENGTH = 64
+
     private val whitespace = Regex("\\s+")
 
     /**
@@ -305,7 +311,7 @@ object Search {
     }
 
     fun parse(input: String): SearchQuery? {
-        val trimmed = input.trim()
+        val trimmed = input.trim().take(MAX_INPUT_LENGTH)
         if (trimmed.isEmpty()) return null
         val arabic = trimmed.codePoints().anyMatch { RichText.isArabic(it) }
         val normalized = if (arabic) {
@@ -314,7 +320,7 @@ object Search {
             normalizeEnglish(trimmed)
         }
         val terms = normalized.split(whitespace)
-            .map { edges.replace(it, "") }
+            .map { edges.replace(it, "").take(MAX_TERM_LENGTH) }
             .filter { it.length >= MIN_TERM_LENGTH }
             .distinct()
             .take(MAX_TERMS)
@@ -358,6 +364,10 @@ object Search {
     fun expandedTerms(terms: List<String>): List<String> {
         val out = LinkedHashSet<String>()
         for (term in terms) {
+            if (term.length > MAX_TERM_LENGTH) {
+                out += term
+                continue
+            }
             out += term
             // The Prophet's blessing is one ligature in the tafsir and
             // three words in a reader's query. The old index keeps the

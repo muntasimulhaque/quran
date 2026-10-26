@@ -63,25 +63,55 @@ fun isZip(file: File): Boolean {
 fun extract(file: File, destination: File): File {
     destination.deleteRecursively()
     destination.mkdirs()
+    val root = destination.canonicalFile
     if (!isZip(file)) {
-        file.copyTo(File(destination, file.name), overwrite = true)
+        val target = SafeFiles.childUnder(root, file.name)
+            ?: throw IllegalStateException("the file name is not safe: ${file.name}")
+        file.copyTo(target, overwrite = true)
         return destination
     }
+    var entries = 0
+    var totalBytes = 0L
     ZipInputStream(file.inputStream().buffered()).use { zip ->
         while (true) {
             val entry = zip.nextEntry ?: break
-            val target = File(destination, entry.name)
+            entries++
+            if (entries > MAX_ENTRIES) throw IllegalStateException("the archive holds too many files")
+            val name = entry.name.trimEnd('/')
+            if (name.isEmpty()) {
+                zip.closeEntry()
+                continue
+            }
+            val target = SafeFiles.resolveUnder(root, name)
+                ?: throw IllegalStateException("the archive names an unsafe path: ${entry.name}")
             if (entry.isDirectory) {
                 target.mkdirs()
             } else {
                 target.parentFile?.mkdirs()
-                target.outputStream().buffered().use { out -> zip.copyTo(out) }
+                target.outputStream().buffered().use { out ->
+                    val buffer = ByteArray(1 shl 16)
+                    var fileBytes = 0L
+                    while (true) {
+                        val count = zip.read(buffer)
+                        if (count < 0) break
+                        fileBytes += count
+                        totalBytes += count
+                        if (fileBytes > MAX_FILE_BYTES || totalBytes > MAX_TOTAL_BYTES) {
+                            throw IllegalStateException("the archive is larger than its kind allows")
+                        }
+                        out.write(buffer, 0, count)
+                    }
+                }
             }
             zip.closeEntry()
         }
     }
     return destination
 }
+
+private const val MAX_ENTRIES = 10_000
+private const val MAX_FILE_BYTES = 256L * 1024 * 1024
+private const val MAX_TOTAL_BYTES = 512L * 1024 * 1024
 
 fun File.firstWithExtension(vararg extensions: String): File? =
     walkTopDown().firstOrNull { f -> extensions.any { f.name.endsWith(it, ignoreCase = true) } }

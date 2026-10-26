@@ -113,6 +113,7 @@ fun SearchSheet(
     var text by rememberSaveable { mutableStateOf("") }
     var results by remember { mutableStateOf(SearchResults()) }
     var searching by remember { mutableStateOf(false) }
+    var failed by remember { mutableStateOf(false) }
     // The source flags survive the window like the query does: a rotation
     // with a chip turned off must not silently turn it back on and change
     // the results under the reader (owner decision, the theme and
@@ -144,8 +145,10 @@ fun SearchSheet(
         if (query == null || !sources.any) {
             results = SearchResults()
             searching = false
+            failed = false
             return@LaunchedEffect
         }
+        failed = false
         delay(SETTLE_MILLIS)
         searching = true
         // The search is blocking work over the reader's whole library, so it
@@ -153,20 +156,23 @@ fun SearchSheet(
         // dropped, and the database checks for the same thing between its own
         // passes so a query already inside SQLite gives up at the next source.
         val found = withContext(Dispatchers.IO) {
-            content.search(
-                SearchRequest(
-                    query = query,
-                    translationPacks = translationPacks,
-                    tafsirPacks = tafsirPacks,
-                    packNames = packNames,
-                    packLanguages = packLanguages,
-                    wordsPack = wordsPack,
-                    sources = sources,
-                    limit = LIMIT,
-                ),
-            )
+            runCatching {
+                content.search(
+                    SearchRequest(
+                        query = query,
+                        translationPacks = translationPacks,
+                        tafsirPacks = tafsirPacks,
+                        packNames = packNames,
+                        packLanguages = packLanguages,
+                        wordsPack = wordsPack,
+                        sources = sources,
+                        limit = LIMIT,
+                    ),
+                )
+            }
         }
-        results = found
+        failed = found.isFailure
+        results = found.getOrElse { SearchResults() }
         searching = false
     }
 
@@ -215,6 +221,7 @@ fun SearchSheet(
                 results = results,
                 searching = searching,
                 hasSources = sources.any,
+                failed = failed,
             )
             LazyColumn(
                 state = resultsList,

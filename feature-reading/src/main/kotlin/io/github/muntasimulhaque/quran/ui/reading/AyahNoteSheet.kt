@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.AppSettings
+import io.github.muntasimulhaque.quran.data.MAX_NOTE_LENGTH
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
@@ -132,7 +133,7 @@ private fun NoteEditor(
         }
         BasicTextField(
             value = draft,
-            onValueChange = { draft = it },
+            onValueChange = { draft = it.take(MAX_NOTE_LENGTH) },
             // The reader writes their note in the reading's own voice at the
             // size they read at, not at a fixed point: it is one voice, the
             // reader's own, and it follows the choice they made for the

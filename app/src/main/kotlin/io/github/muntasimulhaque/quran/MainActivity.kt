@@ -269,10 +269,24 @@ class MainActivity : ComponentActivity() {
      * survives the recreation, so the reader's place and playback are kept.
      */
     override fun onNewIntent(intent: Intent) {
+        val previous = this.intent
         super.onNewIntent(intent)
+        // A second launch with the same request is already the window the
+        // reader is on. Rebuilding it would only churn the activity and give
+        // another app a way to make the reader's window flicker; a new
+        // request still replaces the intent and rebuilds the page.
+        if (sameRequest(previous, intent)) return
         setIntent(intent)
         recreate()
     }
+
+    /** Whether two launches ask the window for the same ayah or door. */
+    private fun sameRequest(previous: Intent?, next: Intent): Boolean =
+        previous != null &&
+            previous.action == next.action &&
+            previous.data == next.data &&
+            previous.getStringExtra(EXTRA_OPEN) == next.getStringExtra(EXTRA_OPEN) &&
+            previous.getIntExtra(EXTRA_AYAH, 0) == next.getIntExtra(EXTRA_AYAH, 0)
 
     /**
      * The verse a `quran://ayah/2:255` link names, or null when the link is

@@ -6,6 +6,7 @@
     <string name="search_status_prompt">Search the Quran, its translations, tafsirs, and word meanings.</string>
     <string name="search_status_searching">Searching…</string>
     <string name="search_status_no_matches">No matches.</string>
+    <string name="search_status_failed">The search could not finish. Try again.</string>
     <string name="search_status_no_sources">Choose at least one place to search.</string>
     <string name="search_status_capped">Showing the first %1$d.</string>
     <string name="search_label_go_to">Go to</string>

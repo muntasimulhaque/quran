@@ -252,7 +252,10 @@ class Packs(private val root: File) {
             target.createStatement().use { statement ->
                 statement.execute("PRAGMA journal_mode=OFF")
                 statement.execute("PRAGMA synchronous=OFF")
-                statement.execute("ATTACH DATABASE '${sourcePath()}' AS src")
+                target.prepareStatement("ATTACH DATABASE ? AS src").use { attach ->
+                    attach.setString(1, sourcePath())
+                    attach.execute()
+                }
             }
             target.autoCommit = false
             target.createStatement().use { statement ->

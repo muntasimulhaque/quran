@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The app reads only the project's own Releases, and only over HTTPS. The
+  platform's own trust anchors are the only ones: a certificate the reader
+  installed for a proxy is not a license to read the Quran's content through
+  that proxy, and no cleartext request is ever made. The content's SHA-256 is
+  the second gate, so a trusted anchor that turns hostile still cannot change
+  a pack.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

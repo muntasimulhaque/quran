@@ -43,45 +43,52 @@ class RecitationDownloader(private val context: Context) {
         folder: String,
         onProgress: (downloadedBytes: Long, totalBytes: Long) -> Unit,
     ): Result<Unit> = withContext(Dispatchers.IO) {
-        // One transfer per attempt: two downloads of one surah would otherwise
-        // stream into the same part file. A part left by a process that died
-        // is the cache's to clear, and the next attempt never reuses it.
-        val temporary = File(
-            context.cacheDir,
-            "recitation-${packageToFetch.recitation}-${packageToFetch.surah}-${System.nanoTime()}.part",
+        if (!SafePaths.validId(packageToFetch.recitation) ||
+            packageToFetch.surah !in 1..114 ||
+            !SafePaths.validHash(packageToFetch.sha256) ||
+            packageToFetch.bytes < 0 ||
+            !SafePaths.validFolder(folder)
+        ) {
+            return@withContext Result.failure(
+                IllegalStateException("the recitation package has no valid identity"),
+            )
+        }
+        // A unique temporary name per attempt: a part left by a process that
+        // died is the cache's to clear, and no two attempts share it.
+        val temporary = runCatching {
+            File.createTempFile("recitation-${packageToFetch.recitation}-", ".part", context.cacheDir)
+        }.getOrNull() ?: return@withContext Result.failure(
+            IllegalStateException("the recitation part could not be created"),
         )
         // Kept outside the try so every way out closes the socket: a cancel
         // throws from the read loop, and the connection is what holds the
         // transfer open.
         var connection: java.net.HttpURLConnection? = null
         try {
-            // The one recitation host is HTTPS, and a redirect that leaves it
-            // is refused: this is the app's only other network use.
-            if (!packageToFetch.url.startsWith("https://") ||
-                !ReleaseHosts.isAllowed(packageToFetch.url)
-            ) {
-                return@withContext Result.failure(
-                    IllegalStateException("the recitation URL is not the project's release host"),
-                )
-            }
-            connection = java.net.URL(packageToFetch.url).openConnection() as java.net.HttpURLConnection
-            connection.instanceFollowRedirects = true
-            connection.connectTimeout = 20_000
-            connection.readTimeout = 30_000
-            connection.setRequestProperty("Accept", "application/octet-stream")
-            connection.connect()
-            if (connection.url.protocol != "https" ||
-                !ReleaseHosts.isAllowed(connection.url.toString())
-            ) {
-                return@withContext Result.failure(
-                    IllegalStateException("the recitation redirect left the project's release host"),
-                )
-            }
+            // Every redirect is checked before the connection that would use
+            // it is opened, not after the request has already been sent.
+            connection = ReleaseHttp.open(packageToFetch.url)
             if (connection.responseCode !in 200..299) {
                 return@withContext Result.failure(IllegalStateException("HTTP ${connection.responseCode}"))
             }
-            val total = if (packageToFetch.bytes > 0) packageToFetch.bytes else connection.contentLengthLong
+            val type = connection.contentType?.substringBefore(';')?.trim()?.lowercase()
+            if (!type.isNullOrEmpty() && type !in ALLOWED_CONTENT_TYPES) {
+                return@withContext Result.failure(IllegalStateException("the recitation is not a zip"))
+            }
+            val maxBytes = if (packageToFetch.bytes > 0) {
+                packageToFetch.bytes
+            } else {
+                MAX_RECITATION_BYTES
+            }
+            val contentLength = connection.contentLengthLong
+            if (contentLength >= 0 && contentLength > maxBytes) {
+                return@withContext Result.failure(
+                    IllegalStateException("the recitation is larger than the manifest says"),
+                )
+            }
+            val total = if (packageToFetch.bytes > 0) packageToFetch.bytes else contentLength
             val digest = MessageDigest.getInstance("SHA-256")
+            val deadline = System.nanoTime() + MAX_DOWNLOAD_MILLIS * 1_000_000L
             var read = 0L
             connection.inputStream.use { input ->
                 temporary.outputStream().buffered().use { output ->
@@ -90,17 +97,32 @@ class RecitationDownloader(private val context: Context) {
                         // The reader's Cancel, read between chunks. A chunk is
                         // 64 KB, so the transfer stops within one read of it.
                         coroutineContext.ensureActive()
+                        if (System.nanoTime() > deadline) {
+                            return@withContext Result.failure(
+                                IllegalStateException("the recitation took too long"),
+                            )
+                        }
                         val count = input.read(buffer)
                         if (count < 0) break
+                        read += count
+                        if (read > maxBytes) {
+                            return@withContext Result.failure(
+                                IllegalStateException("the recitation is larger than the manifest says"),
+                            )
+                        }
                         digest.update(buffer, 0, count)
                         output.write(buffer, 0, count)
-                        read += count
                         onProgress(read, total)
                     }
                 }
             }
             connection.disconnect()
             connection = null
+            if (packageToFetch.bytes > 0 && read != packageToFetch.bytes) {
+                return@withContext Result.failure(
+                    IllegalStateException("the recitation ended at $read bytes"),
+                )
+            }
             val actual = digest.digest().joinToString("") { "%02x".format(it) }
             if (!actual.equals(packageToFetch.sha256, ignoreCase = true)) {
                 return@withContext Result.failure(IllegalStateException("checksum mismatch"))
@@ -132,25 +154,50 @@ class RecitationDownloader(private val context: Context) {
      * one starts was left by a process that is gone.
      */
     private suspend fun unpack(zip: File, folder: String, surah: Int) = unpackGate.withLock {
+        if (!SafePaths.validFolder(folder) || surah !in 1..114) {
+            throw IllegalStateException("the surah folder is not a safe name")
+        }
         val imported = File(context.filesDir, "recitations")
-        val target = File(imported, folder)
+        val target = SafePaths.childUnder(imported, folder)
+            ?: throw IllegalStateException("the surah folder is not a safe name")
         val staging = File(imported, STAGING)
         staging.mkdirs()
         staging.listFiles()?.forEach { it.deleteRecursively() }
         val unpacking = File(staging, "$folder-$surah").apply { mkdirs() }
+        var entries = 0
+        var total = 0L
         ZipInputStream(zip.inputStream().buffered()).use { input ->
             while (true) {
                 coroutineContext.ensureActive()
                 val entry = input.nextEntry ?: break
+                entries++
+                if (entries > MAX_ENTRIES) {
+                    input.closeEntry()
+                    throw IllegalStateException("the package holds too many files")
+                }
                 val name = entry.name
-                // Packages hold flat ayah files; anything that tries to escape is refused.
-                if (name.contains('/') || name.contains('\\') || name.startsWith("..")) {
+                // Packages hold flat ayah files; a directory or a name that
+                // is not one is skipped. The canonical check is the second
+                // gate, so a future package shape cannot escape the folder.
+                if (entry.isDirectory || !AYAH_FILE.matches(name)) {
                     input.closeEntry()
                     continue
                 }
-                if (!entry.isDirectory) {
-                    File(unpacking, name).outputStream().buffered().use { output ->
-                        input.copyTo(output)
+                val file = SafePaths.childUnder(unpacking, name)
+                    ?: throw IllegalStateException("the package names an unsafe file")
+                var fileBytes = 0L
+                file.outputStream().buffered().use { output ->
+                    val buffer = ByteArray(1 shl 16)
+                    while (true) {
+                        coroutineContext.ensureActive()
+                        val count = input.read(buffer)
+                        if (count < 0) break
+                        fileBytes += count
+                        total += count
+                        if (fileBytes > MAX_FILE_BYTES || total > MAX_UNCOMPRESSED_BYTES) {
+                            throw IllegalStateException("the package is larger than a surah")
+                        }
+                        output.write(buffer, 0, count)
                     }
                 }
                 input.closeEntry()
@@ -165,8 +212,10 @@ class RecitationDownloader(private val context: Context) {
         // halfway through the list. A directory rename is one filesystem
         // operation, and the old folder is kept until the new one is in
         // place, so a failed commit restores the previous surah.
-        val landing = File(imported, "$folder-$surah.new")
-        val backup = File(imported, "$folder-$surah.old")
+        val landing = SafePaths.childUnder(imported, "$folder-$surah.new")
+            ?: throw IllegalStateException("the surah landing is not a safe name")
+        val backup = SafePaths.childUnder(imported, "$folder-$surah.old")
+            ?: throw IllegalStateException("the surah backup is not a safe name")
         if (landing.exists()) landing.deleteRecursively()
         if (!target.exists() && backup.exists()) backup.renameTo(target)
         if (!unpacking.renameTo(landing)) {
@@ -195,5 +244,26 @@ class RecitationDownloader(private val context: Context) {
 
         /** One unpack at a time, so the staging root can be swept whole. */
         val unpackGate = Mutex()
+
+        /** One ayah file, flat under its reciter folder. */
+        val AYAH_FILE = Regex("""^[0-9]{6}\.mp3\z""")
+
+        /** A surah package larger than this is not one the manifest offers. */
+        const val MAX_RECITATION_BYTES = 512L * 1024 * 1024
+
+        const val MAX_UNCOMPRESSED_BYTES = 512L * 1024 * 1024
+
+        const val MAX_FILE_BYTES = 256L * 1024 * 1024
+
+        const val MAX_ENTRIES = 10_000
+
+        const val MAX_DOWNLOAD_MILLIS = 30L * 60 * 1000
+
+        val ALLOWED_CONTENT_TYPES = setOf(
+            "application/octet-stream",
+            "binary/octet-stream",
+            "application/zip",
+            "application/x-zip-compressed",
+        )
     }
 }

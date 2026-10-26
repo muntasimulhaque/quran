@@ -108,10 +108,10 @@ class PackUpdater(private val context: Context) {
                 if (preferences.getInt(KEY_INTEGRITY_DAY, -1) == today) {
                     return@withLock emptyList()
                 }
-                // The day is remembered whether or not work was found: the
-                // SHA-256 read is the cost, and it is paid once a day rather
-                // than held open until something is actually wrong.
-                preferences.edit().putInt(KEY_INTEGRITY_DAY, today).apply()
+                // The day is remembered only after the pass has finished.
+                // A process that dies or a download that fails is retried
+                // the same day, not after a whole day of trusting a pack
+                // that was never checked (owner decision, security audit).
                 // The verifier reads a pack only when its bytes have changed
                 // since the last pass that verified them. The hash is the
                 // honest check, but it reads the whole pack, and the tafsir
@@ -126,13 +126,17 @@ class PackUpdater(private val context: Context) {
                         .filter { it.installed && !it.shipped }
                         .filter { pack -> !rememberedIntact(pack, verifier, store) }
                 }.getOrNull() ?: return@withLock emptyList()
-                if (stale.isEmpty()) return@withLock emptyList()
+                if (stale.isEmpty()) {
+                    preferences.edit().putInt(KEY_INTEGRITY_DAY, today).apply()
+                    return@withLock emptyList()
+                }
                 val downloader = PackDownloader(context)
                 val replaced = ArrayList<String>(stale.size)
                 for (pack in stale) {
                     val result = runCatching { downloader.download(pack) { _, _ -> } }.getOrNull()
                     if (result?.isSuccess == true) replaced += pack.id
                 }
+                preferences.edit().putInt(KEY_INTEGRITY_DAY, today).apply()
                 replaced
             }
         }
@@ -152,7 +156,6 @@ class PackUpdater(private val context: Context) {
         val file = store.fileFor(pack.id)
         if (!file.isFile) return false
         if (pack.bytes > 0 && file.length() != pack.bytes) return false
-        if (pack.sha256.isEmpty()) return true
         return verifier.intact(pack)
     }
 

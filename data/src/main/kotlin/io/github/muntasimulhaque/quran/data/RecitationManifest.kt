@@ -42,11 +42,13 @@ class RecitationManifest private constructor(
             val out = HashMap<Pair<String, Int>, RecitationPackage>()
             val root = runCatching { JSONObject(json) }.getOrNull() ?: return RecitationManifest(emptyMap())
             val baseUrl = root.optString("baseUrl")
+            if (!baseUrl.startsWith("https://")) return RecitationManifest(emptyMap())
             val recitations = root.optJSONArray("recitations") ?: JSONArray()
             for (index in 0 until recitations.length()) {
                 val recitation = recitations.optJSONObject(index) ?: continue
                 val id = recitation.optString("id")
                 val tag = recitation.optString("tag")
+                if (!SafePaths.validId(id) || !SafePaths.validTag(tag)) continue
                 val surahs = recitation.optJSONArray("surahs") ?: JSONArray()
                 for (surahIndex in 0 until surahs.length()) {
                     val surah = surahs.optJSONObject(surahIndex) ?: continue
@@ -54,7 +56,11 @@ class RecitationManifest private constructor(
                     val asset = surah.optString("asset")
                     val bytes = surah.optLong("bytes")
                     val sha = surah.optString("sha256")
-                    if (id.isEmpty() || tag.isEmpty() || asset.isEmpty() || number <= 0 || sha.isEmpty()) continue
+                    if (!SafePaths.validZip(asset) || number !in 1..114 ||
+                        bytes < 0 || !SafePaths.validHash(sha)
+                    ) {
+                        continue
+                    }
                     out[id to number] = RecitationPackage(
                         recitation = id,
                         surah = number,

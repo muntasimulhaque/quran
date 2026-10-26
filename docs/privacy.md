@@ -34,8 +34,7 @@ and every download is verified against a SHA-256 recorded at build time:
   on cellular data never pays for it; it waits until the first page is
   readable and never blocks the reading. A pack that fails its checksum is
   discarded and retried later.
-- A daily integrity check of an installed pack whose size or modification
-  time has changed since its last verified read. It reads the local file,
+- A daily integrity check of every installed pack. It reads the local file,
   compares it with the catalog's SHA-256, and downloads a replacement only
   when the file is damaged. It runs on an unmetered connection, at most once
   a day, and after the first page is readable.

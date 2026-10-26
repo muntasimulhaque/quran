@@ -6,6 +6,7 @@
     <string name="search_status_prompt">কুরআন, তার অনুবাদ, তাফসীর ও শব্দের অর্থ অনুসন্ধান করুন।</string>
     <string name="search_status_searching">খোঁজা হচ্ছে…</string>
     <string name="search_status_no_matches">কিছু পাওয়া যায়নি।</string>
+    <string name="search_status_failed">অনুসন্ধান শেষ করা যায়নি। আবার চেষ্টা করুন।</string>
     <string name="search_status_no_sources">খোঁজার জন্য অন্তত একটি জায়গা বাছুন।</string>
     <string name="search_status_capped">প্রথম %1$dটি দেখানো হচ্ছে।</string>
     <string name="search_label_go_to">যান</string>

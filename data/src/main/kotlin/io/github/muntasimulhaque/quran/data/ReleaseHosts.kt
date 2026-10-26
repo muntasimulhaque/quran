@@ -20,6 +20,8 @@ object ReleaseHosts {
     fun isAllowed(url: String): Boolean {
         val uri = runCatching { java.net.URI(url) }.getOrNull() ?: return false
         if (!uri.scheme.equals("https", ignoreCase = true)) return false
+        if (uri.userInfo != null) return false
+        if (uri.port != -1 && uri.port != 443) return false
         val host = uri.host?.lowercase() ?: return false
         return host in allowed
     }

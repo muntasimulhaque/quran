@@ -18,6 +18,8 @@ import java.io.File
 @RunWith(AndroidJUnit4::class)
 class RecitationManifestTest {
 
+    private val hash = "a".repeat(64)
+
     private val sample = """
         {
           "baseUrl": "https://example.test/download",
@@ -26,7 +28,7 @@ class RecitationManifestTest {
               "id": "minshawi",
               "tag": "recitation-minshawi",
               "surahs": [
-                {"surah": 2, "asset": "surah-002.zip", "bytes": 123456, "sha256": "AABB"}
+                {"surah": 2, "asset": "surah-002.zip", "bytes": 123456, "sha256": "${hash}"}
               ]
             }
           ]
@@ -43,7 +45,7 @@ class RecitationManifestTest {
             packageToFetch!!.url,
         )
         assertEquals(123456, packageToFetch.bytes)
-        assertEquals("AABB", packageToFetch.sha256)
+        assertEquals(hash, packageToFetch.sha256)
         assertEquals(setOf(2), manifest.surahs("minshawi"))
     }
 

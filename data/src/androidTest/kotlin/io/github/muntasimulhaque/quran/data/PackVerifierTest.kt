@@ -51,6 +51,16 @@ class PackVerifierTest {
     }
 
     @Test
+    fun aPackWithoutAHashIsNeverIntact() = runBlocking {
+        write("bytes that nobody can verify")
+        val unverifiable = pack("")
+        assertTrue(
+            "a missing checksum is a refusal, not a permission",
+            PackVerifier(context).needsRefresh(listOf(unverifiable)).isNotEmpty(),
+        )
+    }
+
+    @Test
     fun theShippedPackIsNeverFlagged() = runBlocking {
         val core = pack(hashOf("anything")).copy(id = PackCatalog.CORE_ID, shipped = true)
         val stale = PackVerifier(context).needsRefresh(listOf(core))

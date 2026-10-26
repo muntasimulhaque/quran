@@ -25,9 +25,9 @@ class PackCatalogTest {
 
     private val json = """
         {"packs":[
-          {"id":"core","type":"script","name":"Quran","language":"ar","shipped":true},
-          {"id":"words-en","type":"words","name":"Word by word","language":"en"},
-          {"id":"translation-saheeh-en","type":"translation","name":"Saheeh International","language":"en"}
+          {"id":"core","type":"script","name":"Quran","language":"ar","shipped":true,"sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+          {"id":"words-en","type":"words","name":"Word by word","language":"en","sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+          {"id":"translation-saheeh-en","type":"translation","name":"Saheeh International","language":"en","sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
         ]}
     """.trimIndent()
 
@@ -42,6 +42,22 @@ class PackCatalogTest {
         val marked = PackCatalog.parse(json).withInstalled(setOf("words-en"))
         assertTrue("a pack on the device must never read as missing", marked.get("words-en")!!.installed)
         assertFalse(marked.get("translation-saheeh-en")!!.installed)
+    }
+
+    @Test
+    fun aPackWithoutAChecksumIsNotInTheCatalog() {
+        val catalog = PackCatalog.parse(
+            """{"packs":[{"id":"words-en","type":"words","name":"Word by word","language":"en"}]}""",
+        )
+        assertTrue("a missing checksum is a refusal", catalog.get("words-en") == null)
+    }
+
+    @Test
+    fun aPackIdThatCouldEscapeItsFolderIsNotInTheCatalog() {
+        val catalog = PackCatalog.parse(
+            """{"packs":[{"id":"../words-en","type":"words","name":"Word by word","language":"en","sha256":"${"a".repeat(64)}"}]}""",
+        )
+        assertTrue("an unsafe id is a refusal", catalog.all().isEmpty())
     }
 
     @Test
@@ -61,7 +77,7 @@ class PackCatalogTest {
     fun aPacksBanglaCreditAndLicenseAreRead() {
         val parsed = PackCatalog.parse(
             """
-            {"packs":[{"id":"core","type":"script","name":"Quran text","language":"ar",
+            {"packs":[{"id":"core","type":"script","name":"Quran text","language":"ar","sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
               "credit":"English credit","license":"English license",
               "creditBn":"\u09ac\u09be\u0982\u09b2\u09be \u0995\u09c3\u09a4\u09bf\u09a4\u09cd\u09ac",
               "licenseBn":"\u09ac\u09be\u0982\u09b2\u09be \u09b2\u09be\u0987\u09b8\u09c7\u09a8\u09cd\u09b8"}]}

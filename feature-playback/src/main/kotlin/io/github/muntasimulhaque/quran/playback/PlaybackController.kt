@@ -23,6 +23,7 @@ import io.github.muntasimulhaque.quran.data.RecitationAyah
 import io.github.muntasimulhaque.quran.data.RecitationDownloader
 import io.github.muntasimulhaque.quran.data.RecitationManifest
 import io.github.muntasimulhaque.quran.data.RecitationStore
+import io.github.muntasimulhaque.quran.data.SafePaths
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.ui.kit.reciterName
 import kotlinx.coroutines.CoroutineScope
@@ -456,7 +457,7 @@ class PlaybackController(
     private fun folderFor(recitation: String, surah: Int): String? {
         val database = content ?: return null
         val first = database.ayahsOfSurah(surah).firstOrNull() ?: return null
-        return database.recitationAyah(recitation, first.number)?.audioPath?.substringBeforeLast('/')
+        return database.recitationAyah(recitation, first.number)?.audioPath?.let(SafePaths::folderOf)
     }
 
     fun toggle() {

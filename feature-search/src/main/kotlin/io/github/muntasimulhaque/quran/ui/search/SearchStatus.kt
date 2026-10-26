@@ -19,10 +19,12 @@ internal fun StatusLine(
     results: SearchResults,
     searching: Boolean,
     hasSources: Boolean,
+    failed: Boolean,
 ) {
     val total = results.counts.total
     val message = when {
         !hasSources -> stringResource(R.string.search_status_no_sources)
+        failed -> stringResource(R.string.search_status_failed)
         query == null -> stringResource(R.string.search_status_prompt)
         searching && results.hits.isEmpty() -> stringResource(R.string.search_status_searching)
         total == 0 -> stringResource(R.string.search_status_no_matches)

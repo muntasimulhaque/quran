@@ -25,7 +25,11 @@ class Verify(private val root: File) {
     fun run(): Int {
         val manifest = loadManifest(root)
         for (dataset in manifest.datasets) {
-            val file = File(root, dataset.path)
+            val file = SafeFiles.resolveUnder(root, dataset.path)
+            if (file == null) {
+                failures += "${dataset.id}: unsafe dataset path: ${dataset.path}"
+                continue
+            }
             if (!file.exists()) {
                 if (dataset.pending) {
                     println("verify: waiting for a manual download: ${dataset.id} -> ${dataset.path}")
@@ -47,7 +51,7 @@ class Verify(private val root: File) {
         }
 
         for (dataset in manifest.datasets) {
-            val file = File(root, dataset.path)
+            val file = SafeFiles.resolveUnder(root, dataset.path) ?: continue
             if (!file.exists()) continue
             val dir = extract(file, File(work, dataset.id))
             check(dataset, dir)

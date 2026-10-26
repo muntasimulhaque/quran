@@ -20,6 +20,7 @@ import io.github.muntasimulhaque.quran.data.Recitation
 import io.github.muntasimulhaque.quran.data.RecitationManifest
 import io.github.muntasimulhaque.quran.data.RecitationPackage
 import io.github.muntasimulhaque.quran.data.RecitationStore
+import io.github.muntasimulhaque.quran.data.SafePaths
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.translationSelectionAfterRemoval
@@ -406,7 +407,7 @@ class ContentLibrary(
         // never wait on the main thread for. `runCatching` catches the
         // cancellation too, and a cancel is not "the pack is not here".
         val fromAssets = runCatching {
-            withContext(Dispatchers.IO) { store.install(id) }
+            withContext(Dispatchers.IO) { store.install(pack) }
         }.getOrElse { failure ->
             if (failure is CancellationException) throw failure
             false
@@ -496,7 +497,7 @@ class ContentLibrary(
                 store.remove(id)
                 if (pack.type == PackType.Recitation) {
                     val folder = database?.recitationAyah(reciter, 1)?.audioPath
-                        ?.substringBeforeLast('/')
+                        ?.let(SafePaths::folderOf)
                     if (folder != null) recitationStore.removeAll(folder)
                 }
             }
@@ -534,7 +535,7 @@ class ContentLibrary(
         onProgress: (Float) -> Unit,
     ): Boolean {
         val fromAssets = runCatching {
-            withContext(Dispatchers.IO) { store.install(pack.id) }
+            withContext(Dispatchers.IO) { store.install(pack) }
         }.getOrElse { failure ->
             if (failure is CancellationException) throw failure
             false
@@ -597,7 +598,7 @@ class ContentLibrary(
     }
 
     private fun reciterFolder(recitation: String): String? =
-        database?.recitationAyah(recitation, 1)?.audioPath?.substringBeforeLast('/')
+        database?.recitationAyah(recitation, 1)?.audioPath?.let(SafePaths::folderOf)
 
     /**
      * The process is going away; the connection is let go without waiting on

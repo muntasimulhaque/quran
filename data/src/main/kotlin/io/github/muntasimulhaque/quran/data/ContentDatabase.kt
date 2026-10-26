@@ -47,10 +47,11 @@ class ContentDatabase private constructor(
     }
 
     /** The schema of one installed pack, quoted for SQL. */
-    private fun schema(id: String): String = "\"" + id.replace("\"", "") + "\""
+    private fun schema(id: String): String = SafePaths.sqlIdentifier(id)
 
     /** The word list that speaks a language, when the reader has it. */
-    private fun wordsPack(language: String): String = "words-$language"
+    private fun wordsPack(language: String): String =
+        if (SafePaths.validLanguage(language)) "words-$language" else "words-__invalid__"
 
     private fun has(id: String): Boolean = id in installedPacks && id != PackCatalog.CORE_ID
 
@@ -169,14 +170,18 @@ class ContentDatabase private constructor(
      * language; [Surah.nameSimple] carries the name the interface draws.
      */
     private fun surahOf(cursor: android.database.Cursor): Surah {
-        val bangla = cursor.getString(4)
+        val bangla = cursor.getString(4) ?: ""
         return Surah(
             number = cursor.getInt(0),
-            nameArabic = cursor.getString(1),
-            nameSimple = if (displayLanguage.startsWith("bn") && bangla.isNotBlank()) bangla else cursor.getString(2),
-            nameLatin = cursor.getString(3),
+            nameArabic = cursor.getString(1) ?: "",
+            nameSimple = if (displayLanguage.startsWith("bn") && bangla.isNotBlank()) {
+                bangla
+            } else {
+                cursor.getString(2) ?: ""
+            },
+            nameLatin = cursor.getString(3) ?: "",
             nameBangla = bangla,
-            revelationPlace = cursor.getString(5),
+            revelationPlace = cursor.getString(5) ?: "",
             versesCount = cursor.getInt(6),
             bismillahPre = cursor.getInt(7) == 1,
         )
@@ -206,13 +211,15 @@ class ContentDatabase private constructor(
         return query(
             "SELECT text FROM $table WHERE surah = ?",
             arrayOf(surah.toString()),
-        ).use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
+        ).use { cursor ->
+            if (!cursor.moveToFirst() || cursor.isNull(0)) null else cursor.getString(0)
+        }
     }
 
     private fun wordOf(cursor: android.database.Cursor, offset: Int) = Word(
         id = cursor.getInt(offset + 0),
         position = cursor.getInt(offset + 1),
-        text = cursor.getString(offset + 2),
+        text = cursor.getString(offset + 2) ?: "",
         translation = null,
     )
 
@@ -238,9 +245,9 @@ class ContentDatabase private constructor(
         number = cursor.getInt(0),
         surah = cursor.getInt(1),
         ayah = cursor.getInt(2),
-        verseKey = cursor.getString(3),
-        text = cursor.getString(4),
-        tajweed = cursor.getString(5),
+        verseKey = cursor.getString(3) ?: "",
+        text = cursor.getString(4) ?: "",
+        tajweed = cursor.getString(5) ?: "",
     )
 
     fun translations(ayahNumbers: List<Int>, pack: String): Map<Int, TranslationText> {
@@ -254,7 +261,7 @@ class ContentDatabase private constructor(
             val out = HashMap<Int, TranslationText>(ayahNumbers.size)
             while (cursor.moveToNext()) {
                 out[cursor.getInt(0)] = TranslationText(
-                    text = cursor.getString(1),
+                    text = cursor.getString(1) ?: "",
                     footnotes = footnotes(cursor.getString(2)),
                 )
             }
@@ -296,7 +303,7 @@ class ContentDatabase private constructor(
                 val out = HashMap<Int, MutableMap<Int, String>>()
                 while (cursor.moveToNext()) {
                     out.getOrPut(cursor.getInt(0)) { HashMap() }[cursor.getInt(1)] =
-                        cursor.getString(2)
+                        cursor.getString(2) ?: ""
                 }
                 out
             }
@@ -313,7 +320,7 @@ class ContentDatabase private constructor(
             val starts = HashMap<Int, Int>(ayahNumbers.size)
             while (cursor.moveToNext()) {
                 val ayah = cursor.getInt(0)
-                val text = cursor.getString(1)
+                val text = cursor.getString(1) ?: ""
                 val position = cursor.getInt(2)
                 val code = cursor.getString(3) ?: ""
                 val start = starts[ayah] ?: 0
@@ -337,7 +344,7 @@ class ContentDatabase private constructor(
                 arrayOf(ayahNumber.toString()),
             ).use { cursor ->
                 val out = HashMap<Int, String>(cursor.count)
-                while (cursor.moveToNext()) out[cursor.getInt(0)] = cursor.getString(1)
+                while (cursor.moveToNext()) out[cursor.getInt(0)] = cursor.getString(1) ?: ""
                 out
             }
         } else {
@@ -352,7 +359,7 @@ class ContentDatabase private constructor(
             var start = 0
             buildList(cursor.count) {
                 while (cursor.moveToNext()) {
-                    val text = cursor.getString(0)
+                    val text = cursor.getString(0) ?: ""
                     val position = cursor.getInt(1)
                     val code = cursor.getString(2) ?: ""
                     val end = start + text.length
@@ -409,7 +416,7 @@ class ContentDatabase private constructor(
                 surah = cursor.getInt(0),
                 fromAyah = cursor.getInt(1),
                 toAyah = cursor.getInt(2),
-                text = cursor.getString(3),
+                text = cursor.getString(3) ?: "",
             )
         }
     }
@@ -468,7 +475,7 @@ class ContentDatabase private constructor(
                             ayah = cursor.getInt(1),
                             surah = cursor.getInt(2),
                             surahAyah = cursor.getInt(3),
-                            verseKey = cursor.getString(4),
+                            verseKey = cursor.getString(4) ?: "",
                         ),
                     )
                 }
@@ -521,7 +528,7 @@ class ContentDatabase private constructor(
         ).use { cursor ->
             if (!cursor.moveToFirst()) return null
             RecitationAyah(
-                audioPath = cursor.getString(0),
+                audioPath = cursor.getString(0) ?: "",
                 segments = segments(cursor.getString(1)),
             )
         }
@@ -1226,7 +1233,7 @@ class ContentDatabase private constructor(
                 "SELECT source_id, text FROM ${schema(pack)}.tafsir_passage WHERE source_id IN ($placeholders)",
                 chunk.map { it.toString() }.toTypedArray(),
             ).use { cursor ->
-                while (cursor.moveToNext()) out[cursor.getInt(0)] = cursor.getString(1)
+                while (cursor.moveToNext()) out[cursor.getInt(0)] = cursor.getString(1) ?: ""
             }
         }
         return out
@@ -1340,6 +1347,10 @@ class ContentDatabase private constructor(
                     openCore(store, core)
                 }
                 ?: throw ContentUnavailableException("the Quran text could not be opened")
+            runCatching { database.execSQL("PRAGMA query_only=ON") }.getOrElse { failure ->
+                database.close()
+                throw ContentUnavailableException("the content database could not be made read-only")
+            }
             val attached = LinkedHashSet<String>()
             attached += PackCatalog.CORE_ID
             for (id in installed) {
@@ -1347,18 +1358,32 @@ class ContentDatabase private constructor(
                 val pack = catalog.get(id) ?: continue
                 val file = store.fileFor(id)
                 if (!file.exists()) continue
-                val schema = id.replace("\"", "")
+                if (!SafePaths.validId(id)) continue
+                val verifier = PackVerifier(context)
+                if (!verifier.trustedForOpen(pack)) {
+                    android.util.Log.w("ContentDatabase", "pack $id failed its checksum; left out of the library")
+                    continue
+                }
+                val schema = SafePaths.sqlIdentifier(id)
                 val usable = runCatching {
-                    database.execSQL("ATTACH DATABASE ? AS \"$schema\"", arrayOf(file.path))
+                    database.execSQL("ATTACH DATABASE ? AS $schema", arrayOf(file.path))
                     val tables = database.rawQuery(
-                        "SELECT name FROM \"$schema\".sqlite_master WHERE type='table'",
+                        "SELECT name FROM $schema.sqlite_master WHERE type='table'",
                         null,
                     ).use { cursor ->
                         buildSet {
-                            while (cursor.moveToNext()) add(cursor.getString(0))
+                            while (cursor.moveToNext()) add(cursor.getString(0) ?: "")
                         }
                     }
-                    tables.containsAll(expectedTables(pack.type))
+                    val required = expectedColumns(pack.type)
+                    tables.containsAll(required.keys) && required.all { (table, columns) ->
+                        database.rawQuery("PRAGMA $schema.table_info(\"$table\")", null).use { cursor ->
+                            val present = buildSet {
+                                while (cursor.moveToNext()) add(cursor.getString(1) ?: "")
+                            }
+                            present.containsAll(columns)
+                        }
+                    }
                 }.getOrElse { failure ->
                     android.util.Log.w("ContentDatabase", "pack $id could not be attached", failure)
                     false
@@ -1377,7 +1402,7 @@ class ContentDatabase private constructor(
                         "ContentDatabase",
                         "pack $id has no ${expectedTables(pack.type).joinToString(", ")} table; left out of the library",
                     )
-                    runCatching { database.execSQL("DETACH DATABASE \"$schema\"") }
+                    runCatching { database.execSQL("DETACH DATABASE $schema") }
                 }
             }
             // A pack whose attach failed, or whose file does not carry the
@@ -1398,12 +1423,27 @@ class ContentDatabase private constructor(
         }.getOrNull()
 
         /** The tables a pack must carry before any query may reach it. */
-        private fun expectedTables(type: PackType): Set<String> = when (type) {
-            PackType.Translation -> setOf("translation")
-            PackType.Tafsir -> setOf("tafsir_ayah", "tafsir_passage")
-            PackType.Words -> setOf("word_meaning")
-            PackType.Recitation -> setOf("recitation", "recitation_ayah")
-            PackType.Script -> setOf("ayah")
+        private fun expectedTables(type: PackType): Set<String> = expectedColumns(type).keys
+
+        /** The columns each required table must carry before a query reads it. */
+        private fun expectedColumns(type: PackType): Map<String, Set<String>> = when (type) {
+            PackType.Translation -> mapOf(
+                "translation" to setOf("ayah_number", "text", "footnotes"),
+            )
+            PackType.Tafsir -> mapOf(
+                "tafsir_ayah" to setOf("ayah_number", "passage_id"),
+                "tafsir_passage" to setOf("source_id", "surah", "from_ayah", "to_ayah", "text"),
+            )
+            PackType.Words -> mapOf(
+                "word_meaning" to setOf("ayah_number", "position", "meaning"),
+            )
+            PackType.Recitation -> mapOf(
+                "recitation" to setOf("id", "name", "credit"),
+                "recitation_ayah" to setOf("ayah_number", "audio_path", "segments"),
+            )
+            PackType.Script -> mapOf(
+                "ayah" to setOf("number", "surah", "ayah", "verse_key", "text", "tajweed"),
+            )
         }
     }
 }

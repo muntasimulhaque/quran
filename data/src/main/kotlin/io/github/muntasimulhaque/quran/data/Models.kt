@@ -198,13 +198,16 @@ enum class PackType {
     Words;
 
     companion object {
-        fun of(raw: String): PackType = when (raw) {
+        fun of(raw: String): PackType = ofOrNull(raw) ?: Translation
+
+        /** The type the catalog names, or null when it names none we know. */
+        fun ofOrNull(raw: String): PackType? = when (raw) {
             "translation" -> Translation
             "tafsir" -> Tafsir
             "script" -> Script
             "recitation" -> Recitation
             "words" -> Words
-            else -> Translation
+            else -> null
         }
     }
 }

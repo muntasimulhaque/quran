@@ -14,6 +14,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
+const val MAX_NOTE_LENGTH = 16_384
+
 data class SavedAyah(
     val ayahNumber: Int,
     val note: String?,
@@ -131,7 +133,7 @@ class SavedStore(context: Context) {
     suspend fun setNote(ayahNumber: Int, note: String?) = withContext(Dispatchers.IO) {
         guarded("setNote") {
         writeMutex.withLock {
-        val clean = note?.trim()?.takeIf { it.isNotEmpty() }
+        val clean = note?.take(MAX_NOTE_LENGTH)?.trim()?.takeIf { it.isNotEmpty() }
         val row = row(ayahNumber)
         if (row == null) {
             if (clean != null) {

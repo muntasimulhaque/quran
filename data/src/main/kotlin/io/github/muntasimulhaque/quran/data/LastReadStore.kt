@@ -110,7 +110,7 @@ class LastReadStore internal constructor(
     ): Long? = withContext(Dispatchers.IO) {
         guarded("extend") {
             writes.withLock {
-                if (ayahNumber !in AYAH_RANGE) return@withLock null
+                if (ayahNumber !in AYAH_RANGE || surah !in SURAH_RANGE) return@withLock null
                 val rows = readRows()
                 val active = rows.firstOrNull { it.id == activeId && it.surah == surah }
                 val place = active ?: foldTarget(rows, surah, ayahNumber)
@@ -136,7 +136,7 @@ class LastReadStore internal constructor(
     ): Long? = withContext(Dispatchers.IO) {
         guarded("record") {
             writes.withLock {
-                if (ayahNumber !in AYAH_RANGE) return@withLock null
+                if (ayahNumber !in AYAH_RANGE || surah !in SURAH_RANGE) return@withLock null
                 val rows = readRows()
                 val place = foldTarget(rows, surah, ayahNumber)
                 if (place == null) {
@@ -296,5 +296,7 @@ class LastReadStore internal constructor(
         const val CAP = 20
 
         val AYAH_RANGE = 1..6236
+
+        val SURAH_RANGE = 1..114
     }
 }

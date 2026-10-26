@@ -158,13 +158,19 @@ class PlaybackService : MediaSessionService() {
                 session: MediaSession,
                 controller: MediaSession.ControllerInfo,
             ): MediaSession.ConnectionResult {
-                // The reader's own app is the only controller, and it is the
-                // one command it carries beyond the library's own.
-                val commands = MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS
-                    .buildUpon()
-                    .add(SessionCommand(COMMAND_PAUSE_AT_END, Bundle.EMPTY))
-                    .build()
-                return MediaSession.ConnectionResult.AcceptedResultBuilder(session)
+                // Only this app and the phone's trusted controllers receive
+                // the write commands. A notification listener or another
+                // ordinary controller gets the read-only set, and never the
+                // app's own pause-at-end command.
+                val commands = if (controller.isTrusted || controller.packageName == packageName) {
+                    MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS
+                        .buildUpon()
+                        .add(SessionCommand(COMMAND_PAUSE_AT_END, Bundle.EMPTY))
+                        .build()
+                } else {
+                    MediaSession.ConnectionResult.DEFAULT_UNTRUSTED_SESSION_AND_LIBRARY_COMMANDS
+                }
+                return MediaSession.ConnectionResult.AcceptedResultBuilder(session, controller)
                     .setAvailableSessionCommands(commands)
                     .build()
             }
@@ -176,6 +182,11 @@ class PlaybackService : MediaSessionService() {
                 args: Bundle,
             ): ListenableFuture<SessionResult> {
                 if (customCommand.customAction == COMMAND_PAUSE_AT_END) {
+                    if (!controller.isTrusted && controller.packageName != packageName) {
+                        return Futures.immediateFuture(
+                            SessionResult(SessionResult.RESULT_ERROR_PERMISSION_DENIED),
+                        )
+                    }
                     player.setPauseAtEndOfMediaItems(args.getBoolean(ARG_PAUSE_AT_END))
                     return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
                 }
