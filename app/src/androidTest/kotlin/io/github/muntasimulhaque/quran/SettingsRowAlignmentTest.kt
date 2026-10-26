@@ -134,15 +134,17 @@ class SettingsRowAlignmentTest {
         // right edge in pixels, which fails on every device whose density is
         // not one and passes on none of them. Nothing about the rows was
         // wrong; the measurement was (thirty-seventh session).
+        //
+        // A switch row draws no chevron now: its page is a separate link
+        // below. The two page rows are the only chevron columns in this list.
         val slots = compose.onAllNodesWithTag("chevron-slot", useUnmergedTree = true)
         assertEquals(
-            "the page row, the door row and the row with nothing to say draw one each",
-            3,
+            "the two page rows draw one chevron each",
+            2,
             slots.fetchSemanticsNodes().size,
         )
         val pageSlot = slots[0].getUnclippedBoundsInRoot()
-        val doorSlot = slots[1].getUnclippedBoundsInRoot()
-        val bareSlot = slots[2].getUnclippedBoundsInRoot()
+        val bareSlot = slots[1].getUnclippedBoundsInRoot()
         assertEquals(
             "a row that says nothing about itself ends on the same line as one that does",
             pageSlot.right.value,
@@ -150,20 +152,10 @@ class SettingsRowAlignmentTest {
             0.5f,
         )
         assertEquals(
-            "a row with no switch ends with its chevron on the line every switch ends on",
+            "a page row's chevron ends where every switch ends",
             doorSwitch.right.value,
             pageSlot.right.value,
             0.5f,
-        )
-        assertEquals(
-            "the switch is the last mark of the row that has one, after its chevron column",
-            doorSwitch.left.value,
-            doorSlot.right.value,
-            0.5f,
-        )
-        assertTrue(
-            "a page row's chevron has moved to the end, so it stands right of the door row's",
-            pageSlot.left.value > doorSlot.left.value,
         )
 
         // The mark, not only its column: a page row's chevron is the row's
@@ -176,10 +168,10 @@ class SettingsRowAlignmentTest {
         val density = compose.density.density
         val marks = compose.onAllNodesWithTag("row-chevron", useUnmergedTree = true)
             .fetchSemanticsNodes()
-        assertEquals("the three door rows draw one chevron each", 3, marks.size)
+        assertEquals("the two page rows draw one chevron each", 2, marks.size)
         val pageMarkRight = marks[0].boundsInRoot.right / density
         assertEquals(
-            "a row with no switch ends with its chevron on the line every switch ends on",
+            "a page row ends with its chevron on the line every switch ends on",
             alone.right.value,
             pageMarkRight,
             0.5f,

@@ -12,6 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.SectionHead
@@ -128,7 +130,8 @@ fun ToggleRow(
                 quiet = true,
                 modifier = Modifier
                     .padding(start = Space.Gutter, end = Space.Gutter, bottom = Space.Line)
-                    .then(if (doorTag != null) Modifier.testTag(doorTag) else Modifier),
+                    .then(if (doorTag != null) Modifier.testTag(doorTag) else Modifier)
+                    .semantics { contentDescription = openLabel },
             )
         }
     }
