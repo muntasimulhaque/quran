@@ -21,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
@@ -59,7 +58,6 @@ import io.github.muntasimulhaque.quran.ui.theme.Reading
  */
 @Composable
 fun LanguageWelcome(
-    suggested: UiLanguage,
     onChoose: (UiLanguage) -> Unit,
 ) {
     Box(
@@ -96,7 +94,6 @@ fun LanguageWelcome(
                 UiLanguage.entries.forEach { language ->
                     LanguageCard(
                         language = language,
-                        suggested = language == suggested,
                         onClick = { onChoose(language) },
                     )
                 }
@@ -112,11 +109,16 @@ fun LanguageWelcome(
     }
 }
 
-/** One language, named in its own script with the English name beside it, and a quiet mark when the phone speaks it. */
+/**
+ * One language, named in its own script with the English name beside it.
+ *
+ * Neither card carries a second line and neither is marked: the two are drawn
+ * as equal answers at one measure, so the page suggests no language to a
+ * reader who has not chosen yet (owner decision, this session).
+ */
 @Composable
 private fun LanguageCard(
     language: UiLanguage,
-    suggested: Boolean,
     onClick: () -> Unit,
 ) {
     val name = remember(language) { languageChoiceName(language.tag) }
@@ -139,14 +141,6 @@ private fun LanguageCard(
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            if (suggested) {
-                Text(
-                    text = stringResource(R.string.welcome_suggested),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(top = 2.dp),
-                )
-            }
         }
         IconGlyph(
             icon = Icon.Chevron,
@@ -157,11 +151,6 @@ private fun LanguageCard(
         )
     }
 }
-
-/** The language the phone itself asks for, resolved to one of the offered two. */
-@Composable
-fun systemLanguage(): UiLanguage =
-    UiLanguage.suggested(LocalConfiguration.current.locales[0].language)
 
 /**
  * The second half of the one screen before the reading, in the language the

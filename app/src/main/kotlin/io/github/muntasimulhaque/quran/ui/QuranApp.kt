@@ -146,7 +146,6 @@ fun QuranApp(
                     (view.context as? Activity)?.reportFullyDrawn()
                 }
                 LanguageWelcome(
-                    suggested = systemLanguage(),
                     onChoose = { language ->
                         viewModel.chooseLanguage(language)
                         welcomePending = language.tag

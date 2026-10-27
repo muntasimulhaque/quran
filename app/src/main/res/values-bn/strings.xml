@@ -9,7 +9,6 @@
 
     <string name="welcome_title">আপনার ভাষা বেছে নিন</string>
     <string name="welcome_later">সেটিংস থেকে যেকোনো সময় এটি বদলাতে পারবেন।</string>
-    <string name="welcome_suggested">প্রস্তাবিত</string>
 
     <!-- The second half of the one screen before the reading: the reminder is
          on for a new reader, and this is where they are told so and asked for

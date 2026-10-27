@@ -78,14 +78,6 @@ class UiLanguageTest {
     )
 
     @Test
-    fun theSystemLanguageIsSuggestedWhenOffered() {
-        assertEquals(UiLanguage.Bangla, UiLanguage.suggested("bn"))
-        assertEquals(UiLanguage.English, UiLanguage.suggested("en"))
-        assertEquals(UiLanguage.English, UiLanguage.suggested("ar"))
-        assertEquals(UiLanguage.English, UiLanguage.suggested(null))
-    }
-
-    @Test
     fun aFreshChoiceSelectsTheLanguagesOwnPacks() {
         val chosen = AppSettings().withLanguage(UiLanguage.Bangla)
         assertEquals("bn", chosen.uiLanguage)

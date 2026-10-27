@@ -32,9 +32,6 @@ enum class UiLanguage(val tag: String) {
         }
 
     companion object {
-        /** The language the system asks for, or English when it is not offered. */
-        fun suggested(systemTag: String?): UiLanguage = of(systemTag) ?: English
-
         /** The language a stored tag names, or null when it names none. */
         fun of(tag: String?): UiLanguage? = entries.firstOrNull { it.tag == tag }
 
