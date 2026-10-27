@@ -1,6 +1,8 @@
 package io.github.muntasimulhaque.quran
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -30,16 +32,17 @@ import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 
 /**
- * The daily reminder's own page: the whole row is the switch, the page has
- * its own quiet door below, and the moment is chosen on a clock that reaches
- * every minute.
+ * The daily reminder's own page: the switch is the switch, the row is the
+ * door, and the moment is chosen on a clock that reaches every minute.
  *
  * The test follows the shape a reader meets, in the order a reader meets it.
- * The hub row turns the reminder on; the door below opens the page and does
- * not toggle; the page carries the moment; and the time row opens the picker,
- * whose Set writes the moment where the alarm reads it. A row that only
- * answered at its switch was the old shape, and so was a picker that could
- * only reach the top of the hour.
+ * The hub row's switch turns the reminder on and nothing else does; the rest
+ * of the row opens the page; the page carries the same switch at its top and
+ * the moment below it; and the time row opens the picker, whose Set writes the
+ * moment where the alarm reads it. A tap on the row body that flipped the
+ * switch would be the bug this pins, and so would a picker that could only
+ * reach the top of the hour or a page switch that answered a different value
+ * from the hub's.
  */
 @RunWith(AndroidJUnit4::class)
 class DailyAyahToggleTest {
@@ -103,19 +106,22 @@ class DailyAyahToggleTest {
     val rule: TestRule = RuleChain.outerRule(library).around(compose)
 
     @Test
-    fun theRowIsTheSwitchAndItsDoorIsSeparate() {
+    fun theSwitchIsTheSwitchAndTheRowIsTheDoor() {
         openSettings()
+        val title = compose.activity.getString(SettingsR.string.settings_daily_title)
 
-        // The whole row turns the reminder on. A row that only answered at
-        // its switch was the old shape, and this is the new one.
-        compose.onNodeWithTag("row-daily").performClick()
+        // The switch turns the reminder on, and only the switch does.
+        compose.onNodeWithTag("switch-daily").performClick()
         compose.waitUntil(timeoutMillis = 15_000) {
             runBlocking { readSettings().dailyAyah }
         }
 
-        // The page has its own quiet door below the row, and opening it does
-        // not change the setting the row just made.
-        compose.onNodeWithTag("open-daily").performScrollTo().performClick()
+        // The row is a door: it opens the page and it does not toggle. If it
+        // toggled as well, the switch would read off again and the page would
+        // come up with the reminder it was meant to be setting turned off.
+        // The page carries the moment and the same switch at its top, and its
+        // own mark is what the wait holds on to.
+        compose.onNodeWithText(title).performClick()
         compose.waitUntil(timeoutMillis = 15_000) {
             compose.onAllNodesWithTag("daily-page", useUnmergedTree = true)
                 .fetchSemanticsNodes().isNotEmpty()
@@ -149,7 +155,7 @@ class DailyAyahToggleTest {
     fun theHubRowSaysTheMomentItWillArrive() {
         openSettings()
         val title = compose.activity.getString(SettingsR.string.settings_daily_title)
-        compose.onNodeWithTag("row-daily").performClick()
+        compose.onNodeWithTag("switch-daily").performClick()
         // The subtitle is the time itself, so the reader can see the moment
         // without opening the page for it. The digits are the interface's, so
         // the assertion is on the numbers and not on a 12 or 24 hour choice.
@@ -157,6 +163,42 @@ class DailyAyahToggleTest {
             compose.onAllNodesWithText("8:00", substring = true).fetchSemanticsNodes().isNotEmpty()
         }
         compose.onNodeWithText(title).assertIsDisplayed()
+    }
+
+    /**
+     * The page's switch is the same reminder as the hub's.
+     *
+     * One value in two places: the row that opened the page carries a switch,
+     * and the page carries the same one at its top. A reader who tapped the
+     * words to flip it lands here and finds the switch they meant, and turning
+     * it off here turns it off on the hub too (owner decision, this session).
+     */
+    @Test
+    fun thePageSwitchIsTheSameReminder() {
+        openSettings()
+        val title = compose.activity.getString(SettingsR.string.settings_daily_title)
+        // The row is a door, so this opens the page rather than flipping it.
+        compose.onNodeWithText(title).performClick()
+        compose.waitUntil(timeoutMillis = 15_000) {
+            compose.onAllNodesWithTag("daily-page", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("switch-daily-page", useUnmergedTree = true)
+            .performTouchInput { click() }
+        compose.waitUntil(timeoutMillis = 15_000) {
+            runBlocking { readSettings().dailyAyah }
+        }
+        // Back on the hub, the row's own switch reads the same answer.
+        back()
+        compose.onNodeWithTag("switch-daily", useUnmergedTree = true)
+            .performScrollTo()
+            .assertIsOn()
+    }
+
+    private fun back() {
+        InstrumentationRegistry.getInstrumentation()
+            .sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK)
+        Thread.sleep(700)
     }
 
     private suspend fun readSettings() = SettingsStore(context).settings.first()
@@ -179,7 +221,7 @@ class DailyAyahToggleTest {
         }
         // The daily row sits below the fold on the phone profile, so it is
         // scrolled to before it is read or tapped.
-        compose.onNodeWithTag("row-daily").performScrollTo()
+        compose.onNodeWithTag("switch-daily").performScrollTo()
         Thread.sleep(400)
     }
 }

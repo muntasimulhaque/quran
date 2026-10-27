@@ -96,13 +96,17 @@ fun DailyPage(
             .sheetVerticalScroll(rememberScrollState())
             .testTag("daily-page"),
     ) {
-        // The switch is here as well as on the hub row, because the page that
-        // owns the feature should be able to turn it on: a reader who opened
-        // it to set the time and found it off should not have to go back a
-        // page to turn it on (owner decision, this session). The row stays
-        // live while it is off, so a reader who came to move the time is not
-        // asked to turn the daily ayah on first, and a time that is set is a
-        // time that is shown, whether or not it will arrive.
+        // The switch is here as well as on the hub row, and so it is on
+        // every page that owns a reading switch: a reader who opened the page
+        // to set the time and found the reminder off should not have to go
+        // back a page to turn it on. The page that owns the feature owns the
+        // switch that turns it on, and the hub's own switch is the reader's
+        // hand on the same value from the list (owner decision, this
+        // session). The line under it says only that the reminder is off,
+        // because the moment is the row below it. The row stays live while it
+        // is off, so a reader who came to move the time is not asked to turn
+        // the daily ayah on first, and a time that is set is a time that is
+        // shown, whether or not it will arrive.
         ToggleRow(
             title = stringResource(R.string.settings_daily_title),
             subtitle = if (settings.dailyAyah) null else stringResource(R.string.settings_daily_off),

@@ -109,8 +109,6 @@
     <string name="settings_size_translation">Translation</string>
     <string name="settings_size_tafsir">Tafsir</string>
     <string name="settings_size_words">Word meanings</string>
-    <string name="settings_translation_hidden">Translation is hidden in the reading</string>
-    <string name="settings_tafsir_hidden">Tafsir is hidden in the reading</string>
     <string name="settings_group_about">App</string>
     <string name="settings_back">Back</string>
 

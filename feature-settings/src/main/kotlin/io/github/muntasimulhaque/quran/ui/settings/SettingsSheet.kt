@@ -209,6 +209,7 @@ fun SettingsSheet(
                     SettingsPage.Tajweed -> TajweedPage(
                         settings = settings,
                         sample = tajweedSample,
+                        onTajweed = actions.onTajweed,
                     )
                     SettingsPage.About -> AboutPage(
                         packs = packs,

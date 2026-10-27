@@ -69,6 +69,7 @@ class TajweedLegendTest {
                 TajweedPage(
                     settings = AppSettings(),
                     sample = { ayah },
+                    onTajweed = {},
                 )
             }
         }
@@ -88,6 +89,7 @@ class TajweedLegendTest {
                 TajweedPage(
                     settings = AppSettings(),
                     sample = { ayah },
+                    onTajweed = {},
                 )
             }
         }

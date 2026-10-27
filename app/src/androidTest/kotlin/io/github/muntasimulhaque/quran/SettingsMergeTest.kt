@@ -1,6 +1,8 @@
 package io.github.muntasimulhaque.quran
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -18,6 +20,7 @@ import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.feature.settings.R as SettingsR
 import io.github.muntasimulhaque.quran.feature.reading.R as ReadingR
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -35,6 +38,10 @@ import org.junit.runner.RunWith
  * Each switch now carries the chevron that opens its own list, so the
  * translation's row is the translation's door. This test turns the
  * translation off at its switch and opens its list from the same row.
+ *
+ * The page the row opens carries the same switch at its top, so the reader who
+ * tapped the words to flip it finds the switch they meant, and the two are one
+ * value read in two places (owner decision, this session).
  */
 @RunWith(AndroidJUnit4::class)
 class SettingsMergeTest {
@@ -94,6 +101,39 @@ class SettingsMergeTest {
             "the hub must not carry the Translations row as well as the switch",
             hubRows == 0,
         )
+    }
+
+    /**
+     * The page carries the same switch as the row that opened it.
+     *
+     * It is not a second setting: the page reads the value the hub row shows
+     * and writes it where the row reads it. Turning the reading off here is
+     * what the row says when the reader goes back (owner decision, this
+     * session).
+     */
+    @Test
+    fun thePageCarriesTheSwitchesOtherHand() {
+        openSettings()
+        val door = compose.activity.getString(SettingsR.string.settings_open_translations)
+        compose.onNodeWithContentDescription(door, substring = true).performClick()
+        compose.waitUntil(timeoutMillis = 15_000) {
+            compose.onAllNodesWithText("Saheeh International").fetchSemanticsNodes().isNotEmpty()
+        }
+        // The page's switch reads the state the row left, and writes the same
+        // value the row writes. The tap is a finger on the switch, which the
+        // row underneath it answers: the row is the control and the switch is
+        // its picture.
+        compose.onNodeWithTag("switch-translation-page", useUnmergedTree = true)
+            .performTouchInput { click() }
+        compose.waitUntil(timeoutMillis = 15_000) {
+            runBlocking { !SettingsStore(context).settings.first().showTranslation }
+        }
+        // Back on the hub, the row's own switch reads the same answer.
+        InstrumentationRegistry.getInstrumentation()
+            .sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK)
+        Thread.sleep(700)
+        compose.onNodeWithTag("switch-translation", useUnmergedTree = true)
+            .assertIsOff()
     }
 
     private fun openSettings() {

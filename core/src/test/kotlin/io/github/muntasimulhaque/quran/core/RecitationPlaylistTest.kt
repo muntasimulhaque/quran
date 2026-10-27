@@ -5,9 +5,12 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 /**
- * The playlist geometry the surah repeat is built on, pinned here because
- * the surah repeat is the one thing the player cannot do by itself and the
+ * The playlist geometry the surah's end is built on, pinned here because the
+ * surah's end is the one thing the player cannot do by itself and the
  * arithmetic behind it is the whole of what could be wrong with it.
+ *
+ * What the boundary then does belongs to the reader's answer and is pinned in
+ * [RepeatTest]: this is only the crossing.
  */
 class RecitationPlaylistTest {
 
@@ -58,10 +61,9 @@ class RecitationPlaylistTest {
     fun anAdvanceInsideTheSurahIsNotItsEnd() {
         // The player reports an automatic advance at every ayah boundary,
         // and every ayah is one media item. Only the advance that arrives in
-        // another surah may restart one (owner report, this session).
+        // another surah is a surah's end (owner report, an earlier session).
         assertNull(
             RecitationPlaylist.endedSurah(
-                answer = EndOfAudio.REPEAT_SURAH,
                 playing = 1,
                 arrivingMediaId = RecitationPlaylist.mediaId(2, 1),
             ),
@@ -73,46 +75,28 @@ class RecitationPlaylistTest {
         assertEquals(
             1,
             RecitationPlaylist.endedSurah(
-                answer = EndOfAudio.REPEAT_SURAH,
                 playing = 1,
                 arrivingMediaId = RecitationPlaylist.mediaId(1, 2),
             ),
         )
-    }
-
-    @Test
-    fun onlyTheSurahRepeatReadsTheEnd() {
-        for (answer in EndOfAudio.entries - EndOfAudio.REPEAT_SURAH) {
-            assertNull(
-                "$answer must not restart a surah",
-                RecitationPlaylist.endedSurah(
-                    answer = answer,
-                    playing = 1,
-                    arrivingMediaId = RecitationPlaylist.mediaId(1, 2),
-                ),
-            )
-        }
     }
 
     @Test
     fun anAdvanceWithNothingPlayingOrNothingArrivingIsNotAnEnd() {
         assertNull(
             RecitationPlaylist.endedSurah(
-                answer = EndOfAudio.REPEAT_SURAH,
                 playing = null,
                 arrivingMediaId = RecitationPlaylist.mediaId(1, 2),
             ),
         )
         assertNull(
             RecitationPlaylist.endedSurah(
-                answer = EndOfAudio.REPEAT_SURAH,
                 playing = 1,
                 arrivingMediaId = null,
             ),
         )
         assertNull(
             RecitationPlaylist.endedSurah(
-                answer = EndOfAudio.REPEAT_SURAH,
                 playing = 1,
                 arrivingMediaId = "a-file-name.mp3",
             ),

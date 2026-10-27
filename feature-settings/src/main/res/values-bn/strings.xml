@@ -109,8 +109,6 @@
     <string name="settings_size_translation">অনুবাদ</string>
     <string name="settings_size_tafsir">তাফসীর</string>
     <string name="settings_size_words">শব্দের অর্থ</string>
-    <string name="settings_translation_hidden">পাঠে অনুবাদ দেখানো হচ্ছে না</string>
-    <string name="settings_tafsir_hidden">পাঠে তাফসীর দেখানো হচ্ছে না</string>
     <string name="settings_group_about">অ্যাপ</string>
     <string name="settings_back">ফিরে যান</string>
 

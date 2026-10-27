@@ -15,6 +15,8 @@ import androidx.media3.session.SessionToken
 import io.github.muntasimulhaque.quran.core.EndOfAudio
 import io.github.muntasimulhaque.quran.core.RecitationPlaylist
 import io.github.muntasimulhaque.quran.core.RecitationQueue
+import io.github.muntasimulhaque.quran.core.SurahEnding
+import io.github.muntasimulhaque.quran.core.surahEnding
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.DownloadError
 import io.github.muntasimulhaque.quran.data.LanguagePreference
@@ -55,8 +57,11 @@ import kotlinx.coroutines.suspendCancellableCoroutine
  * tested.
  *
  * What happens at the end of the audio is [EndOfAudio], one value, and the
- * surah repeat is the one answer the player cannot give by itself
- * (owner decision).
+ * surah repeat is the one answer the player cannot give by itself (owner
+ * decision). The playlist holds one surah past the one being heard, because a
+ * deliberate Next and Previous cross surahs; the answer is read at the
+ * boundary, where [SurahEnding] says whether the reading rests there, begins
+ * the surah again, or carries on into the next one.
  */
 class PlaybackController(
     private val context: Context,
@@ -402,30 +407,59 @@ class PlaybackController(
     }
 
     /**
-     * The surah ended and the next one is not on the device. The reader's
-     * Continue to the next surah choice decides: off, the offer waits with
-     * the next surah's name and size, so nothing is fetched behind the
-     * reader's back; on, the package is fetched with the reciter being heard
-     * and plays on, and the pill carries the size, the progress, and the
-     * cancel while it does (owner decision).
+     * The surah ended, and the reader's answer carries on into the next one.
+     *
+     * The surah after this one is played when its audio is already on the
+     * device, whether the playlist held it or not, and fetched only when it is
+     * not. While a package is on its way the pill carries the surah's name,
+     * its size, the progress, and the cancel, so nothing is fetched without a
+     * line that says what it is (owner decision).
+     *
+     * This is reached only for an answer that carries on
+     * ([SurahEnding.CARRY_ON]): a reading that rests at the surah's end never
+     * offers the surah after it for a download it did not ask for (owner
+     * report, this session).
      */
-    private fun offerNextSurah() {
-        // A surah that is repeating has not ended; it has begun again, so
-        // there is nothing to offer and no package to fetch. A reading told
-        // to stop after each ayah never reaches a surah's end at all. Both
-        // are the reader's own word, and neither asks for the next package.
-        if (end == EndOfAudio.REPEAT_SURAH || end == EndOfAudio.STOP_AFTER_AYAH) return
-        val surah = _state.value.surah ?: return
-        val recitation = recitationId ?: return
-        val next = surah + 1
-        if (next > 114) return
-        val packageToFetch = manifest.packageFor(recitation, next) ?: return
+    private fun carryOnToTheNextSurah() {
+        val surah = _state.value.surah
+        val recitation = recitationId
+        val next = surah?.plus(1)
+        if (recitation == null || next == null || next > 114) {
+            // Nothing follows the surah's end, so the recitation is over.
+            clearRecitation()
+            return
+        }
+        val packageToFetch = manifest.packageFor(recitation, next)
+        if (packageToFetch == null) {
+            // The reciter has no published package for that surah, so there is
+            // nothing to offer and nothing to play.
+            clearRecitation()
+            return
+        }
+        // The surah is over, so nothing is playing and nothing may stay
+        // marked while the next one is found.
+        restTheMark()
         // The first ayah of the next surah is a query, and the end of a surah
         // is not a place for the main thread to wait on the disk for it.
         scope.launch {
             val first = withContext(Dispatchers.IO) {
                 content?.ayahsOfSurah(next)?.firstOrNull()?.number
-            } ?: return@launch
+            }
+            if (first == null) {
+                clearRecitation()
+                return@launch
+            }
+            val onTheDevice = withContext(Dispatchers.IO) {
+                itemsFor(recitation, next).isNotEmpty()
+            }
+            if (onTheDevice) {
+                // The audio is here but the playlist had already ended, which
+                // is the answer changing to carry on after the boundary had
+                // passed: play the surah rather than offer a package the
+                // reader already holds.
+                startPlayback(recitation, first, resume = false)
+                return@launch
+            }
             requestedAyah = first
             _state.value = _state.value.copy(
                 pendingDownloadSurah = next,
@@ -435,7 +469,7 @@ class PlaybackController(
                 downloadFailed = false,
                 downloadFailure = null,
             )
-            if (end == EndOfAudio.CONTINUE_SURAH) confirmDownload()
+            confirmDownload()
         }
     }
 
@@ -449,6 +483,10 @@ class PlaybackController(
      * is. A deliberate step is a seek and never an automatic transition, so
      * Next and Previous still carry the reader out of the surah, and the
      * repeat then follows the surah they moved to.
+     *
+     * The answer is read when the boundary arrives, not when the playlist was
+     * grown, so a reader who changes the answer mid-surah is answered at that
+     * surah's end and not the next one's (owner decision, this session).
      *
      * False when that surah is not in the playlist, which is the one case
      * the caller has to answer for itself.
@@ -545,15 +583,52 @@ class PlaybackController(
         // A player that never connected is a pill with no transport to stop,
         // and the pill still has to go: the state is cleared whatever the
         // player is, because a failed connect is otherwise a line the reader
-        // cannot put away at all (owner report, this session: the close on a
-        // failed player was a mark that answered nothing).
+        // cannot put away at all (owner report: the close on a failed player
+        // was a mark that answered nothing).
+        clearRecitation()
+    }
+
+    /**
+     * Nothing is left to control: the player lets its items go, and the pill
+     * and the phone's own media notification go with them.
+     *
+     * The reader's Stop and the end of the last surah arrive here together. An
+     * ended player is not an empty one: it keeps its last ayah as the current
+     * item, so the media notification wore a Play that answers nothing, and an
+     * ended player never restarts (owner decision, this session). An ended
+     * recitation and a stopped one are one state: nothing is loaded, nothing
+     * is marked, and the next Play starts from the reader's place.
+     */
+    private fun clearRecitation() {
         val player = controller
+        // Paused first, so a player that was ready to play is not left armed
+        // with nothing to play, and every later event sees one state.
+        player?.pause()
         player?.stop()
         player?.clearMediaItems()
         stoppedAtAyahEnd = false
         _state.value = PlaybackUiState(connected = true)
-        // The reader put the recitation away themselves, so where it was
-        // heard is not a place to offer them again.
+        // Where the recitation was heard is not a place to offer the reader
+        // again: they put it away, or it reached the end they asked for.
+        heardAyah = null
+        syncTicker()
+        scope.launch { positionStore.clear() }
+    }
+
+    /**
+     * The surah is over, so nothing is playing and nothing may stay marked.
+     *
+     * The player keeps the last ayah as its current item, and the next publish
+     * would keep drawing it as the reciting ayah forever; the mark is released
+     * before anything follows it. The offset inside that last ayah is not a
+     * place to come back to either.
+     */
+    private fun restTheMark() {
+        _state.value = _state.value.copy(
+            isPlaying = false,
+            ayahNumber = null,
+            wordPosition = null,
+        )
         heardAyah = null
         syncTicker()
         scope.launch { positionStore.clear() }
@@ -684,13 +759,31 @@ class PlaybackController(
             val player = controller
             if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO && player != null) {
                 val ended = RecitationPlaylist.endedSurah(
-                    end,
                     _state.value.surah,
                     mediaItem?.mediaId,
                 )
-                if (ended != null && restartSurah(player, ended)) {
-                    publish(player)
-                    return
+                if (ended != null) {
+                    // The boundary is where the reader's one answer is read. The
+                    // next surah is in the playlist because a deliberate Next
+                    // may cross into it; the answer, and not the playlist,
+                    // decides whether the audio does (owner decision, this
+                    // session).
+                    when (end.surahEnding) {
+                        SurahEnding.REPEAT -> if (restartSurah(player, ended)) {
+                            publish(player)
+                            return
+                        }
+                        // The surah is over and the reader asked for nothing
+                        // after it, so the audio stops here rather than in the
+                        // next surah. This is the owner's report: "continue to
+                        // the next ayah" is about the ayah, and the end of the
+                        // surah is where the reading rests.
+                        SurahEnding.REST -> {
+                            clearRecitation()
+                            return
+                        }
+                        SurahEnding.CARRY_ON -> Unit
+                    }
                 }
             }
             publish(controller)
@@ -735,28 +828,27 @@ class PlaybackController(
             if (playbackState != Player.STATE_ENDED) return
             val player = controller
             val surah = _state.value.surah
-            if (end == EndOfAudio.REPEAT_SURAH &&
-                player != null && surah != null && restartSurah(player, surah)
-            ) {
-                publish(player)
-                return
+            // The playlist ran out, so the surah is over whatever the answer
+            // says: a repeat begins this surah again, an answer that carries on
+            // has nowhere to go and finds or offers the next surah, and a
+            // reading asked to rest is over.
+            when (end.surahEnding) {
+                SurahEnding.REPEAT -> if (player != null && surah != null && restartSurah(player, surah)) {
+                    publish(player)
+                    return
+                }
+                SurahEnding.CARRY_ON -> {
+                    carryOnToTheNextSurah()
+                    return
+                }
+                SurahEnding.REST -> {
+                    clearRecitation()
+                    return
+                }
             }
-            // The surah ended, so nothing is playing and nothing may stay
-            // marked. The player keeps the last ayah as its current item, and
-            // the next publish would keep drawing it as the reciting ayah
-            // forever; the mark is cleared here, before the next surah is
-            // offered, so the page rests unlit while the reader decides.
-            _state.value = _state.value.copy(
-                isPlaying = false,
-                ayahNumber = null,
-                wordPosition = null,
-            )
-            // The surah is over, so the offset inside its last ayah is not a
-            // place to come back to.
-            heardAyah = null
-            syncTicker()
-            scope.launch { positionStore.clear() }
-            offerNextSurah()
+            // A repeat the playlist cannot make is a surah with nowhere to
+            // begin again: nothing follows it either.
+            clearRecitation()
         }
     }
 
@@ -900,6 +992,20 @@ class PlaybackController(
 
     private fun wordAt(positionMs: Long): Int? = recitedWordAt(segments, positionMs)
 
+    /**
+     * Keeps one surah loaded after the one being heard, whatever the answer
+     * says.
+     *
+     * The playlist is a place the reader may go, not a promise of where the
+     * audio goes. Next and Previous cross surahs deliberately (owner decision,
+     * 9.9), so the surah after this one is loaded while the reader is in this
+     * one; whether the audio follows it is the answer's own rule at the
+     * boundary ([surahEnding]), so a change of answer mid-surah is honoured at
+     * that surah's end (owner decision, this session).
+     *
+     * [RecitationQueue] is what keeps one transition from appending the same
+     * surah twice.
+     */
     private fun maybeAppendNextSurah() {
         val player = controller ?: return
         val id = player.currentMediaItem?.mediaId ?: return

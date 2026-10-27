@@ -105,11 +105,12 @@ fun SettingsHub(
         // reads top to bottom against the page, and the colors stood between
         // the meanings and the translation: the one row that draws the Quran's
         // own line was filed with the two that add prose under it, and the
-        // group broke in the middle (owner decision, this session). Each row
-        // is the switch for what it names, and the quiet door below the row
-        // opens the list it is chosen from. A reader who came to look at the
-        // translations taps the door, not the switch, so looking never
-        // changes the reading (owner report, 2.3).
+        // group broke in the middle (owner decision, this session). Each
+        // switch says whether the reading shows what it names, and the rest
+        // of the row opens the list it is chosen from, where the same switch
+        // stands again at the page's top. The switch is the only thing that
+        // switches, so a reader who came to look at the translations never
+        // changes the reading by looking (owner report, 2.3).
         ToggleRow(
             title = stringResource(R.string.settings_tajweed_title),
             subtitle = stringResource(R.string.settings_tajweed_summary),
@@ -118,8 +119,6 @@ fun SettingsHub(
             onOpen = { onOpen(SettingsPage.Tajweed) },
             openLabel = stringResource(R.string.settings_open_tajweed),
             switchTag = "switch-tajweed",
-            rowTag = "row-tajweed",
-            doorTag = "open-tajweed",
         )
         WordByWordRow(settings, packs, packSetup, onWordByWord)
         val hasTranslation = hasInstalledTranslation(settings, packs)
@@ -128,16 +127,14 @@ fun SettingsHub(
             title = stringResource(R.string.settings_show_translation_title),
             subtitle = translationName(settings, packs),
             checked = settings.showTranslation && hasTranslation,
-            // With no translation on the device the row has nothing to
-            // switch. It stays off and disabled, and the quiet door below
-            // opens the list where the reader can add one.
+            // With no translation on the device the switch has nothing to
+            // show, so it stays off and disabled while the row still opens
+            // the list where the reader can add one.
             onChange = onShowTranslation,
             enabled = hasTranslation,
             onOpen = { onOpen(SettingsPage.Translations) },
             openLabel = stringResource(R.string.settings_open_translations),
             switchTag = "switch-translation",
-            rowTag = "row-translation",
-            doorTag = "open-translation",
         )
         ToggleRow(
             title = stringResource(R.string.settings_show_tafsir_title),
@@ -148,17 +145,15 @@ fun SettingsHub(
             onOpen = { onOpen(SettingsPage.Tafsirs) },
             openLabel = stringResource(R.string.settings_open_tafsirs),
             switchTag = "switch-tafsir",
-            rowTag = "row-tafsir",
-            doorTag = "open-tafsir",
         )
         PageRow(
             title = stringResource(R.string.settings_title_reciters),
             summary = reciterName(settings, recitations),
         ) { onOpen(SettingsPage.Reciters) }
-        // The daily ayah: one ayah a day, at the reader's own moment. The row
-        // turns it on or off, and the quiet door below opens the page that
+        // The daily ayah: one ayah a day, at the reader's own moment. The
+        // switch turns it on or off, and the row is the door to the page that
         // moves its time, so the switch and the clock are read together in one
-        // place (owner report, 2.3).
+        // place (owner report, 2.3). The page repeats the switch at its top.
         ToggleRow(
             title = stringResource(R.string.settings_daily_title),
             subtitle = dailySubtitle(settings, notificationsBlocked, exactGrantWithheld),
@@ -167,8 +162,6 @@ fun SettingsHub(
             onOpen = { onOpen(SettingsPage.Daily) },
             openLabel = stringResource(R.string.settings_open_daily),
             switchTag = "switch-daily",
-            rowTag = "row-daily",
-            doorTag = "open-daily",
         )
         PageRow(
             title = stringResource(R.string.settings_title_about),

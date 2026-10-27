@@ -134,17 +134,15 @@ class SettingsRowAlignmentTest {
         // right edge in pixels, which fails on every device whose density is
         // not one and passes on none of them. Nothing about the rows was
         // wrong; the measurement was (thirty-seventh session).
-        //
-        // A switch row draws no chevron now: its page is a separate link
-        // below. The two page rows are the only chevron columns in this list.
         val slots = compose.onAllNodesWithTag("chevron-slot", useUnmergedTree = true)
         assertEquals(
-            "the two page rows draw one chevron each",
-            2,
+            "the page row, the door row and the row with nothing to say draw one each",
+            3,
             slots.fetchSemanticsNodes().size,
         )
         val pageSlot = slots[0].getUnclippedBoundsInRoot()
-        val bareSlot = slots[1].getUnclippedBoundsInRoot()
+        val doorSlot = slots[1].getUnclippedBoundsInRoot()
+        val bareSlot = slots[2].getUnclippedBoundsInRoot()
         assertEquals(
             "a row that says nothing about itself ends on the same line as one that does",
             pageSlot.right.value,
@@ -152,10 +150,20 @@ class SettingsRowAlignmentTest {
             0.5f,
         )
         assertEquals(
-            "a page row's chevron ends where every switch ends",
+            "a row with no switch ends with its chevron on the line every switch ends on",
             doorSwitch.right.value,
             pageSlot.right.value,
             0.5f,
+        )
+        assertEquals(
+            "the switch is the last mark of the row that has one, after its chevron column",
+            doorSwitch.left.value,
+            doorSlot.right.value,
+            0.5f,
+        )
+        assertTrue(
+            "a page row's chevron has moved to the end, so it stands right of the door row's",
+            pageSlot.left.value > doorSlot.left.value,
         )
 
         // The mark, not only its column: a page row's chevron is the row's
@@ -168,10 +176,10 @@ class SettingsRowAlignmentTest {
         val density = compose.density.density
         val marks = compose.onAllNodesWithTag("row-chevron", useUnmergedTree = true)
             .fetchSemanticsNodes()
-        assertEquals("the two page rows draw one chevron each", 2, marks.size)
+        assertEquals("the three door rows draw one chevron each", 3, marks.size)
         val pageMarkRight = marks[0].boundsInRoot.right / density
         assertEquals(
-            "a page row ends with its chevron on the line every switch ends on",
+            "a row with no switch ends with its chevron on the line every switch ends on",
             alone.right.value,
             pageMarkRight,
             0.5f,
@@ -250,14 +258,19 @@ class SettingsRowAlignmentTest {
     }
 
     /**
-     * A switch row draws no chevron column and no empty width for a door it
-     * does not have.
+     * A row keeps no width for a mark it does not draw.
      *
-     * The older shape reserved a chevron beside the switch and used it as the
-     * page's door; a row with no page carried empty sheet in front of its
-     * switch. The page now has its own quiet link below the row, so the switch
-     * row is only the switch, and neither row pays for a mark the other one
-     * draws.
+     * The chevron's column used to be reserved on every row, drawn or not, so
+     * a row with no door carried 48 dp of empty sheet in front of its switch.
+     * A switch stands at the row's own margin whatever is in front of it, so
+     * the empty column never kept a switch on one line; what it bought was a
+     * row that grows a door later keeping its switch where it was, which is a
+     * convenience for whoever edits the file and not a thing a reader can see
+     * (owner decision, forty-sixth session).
+     *
+     * This measures the two halves. A row that draws no chevron composes no
+     * chevron slot, so there is no empty column left to be empty, and neither
+     * switch moved to pay for the one that is gone.
      *
      * It does not measure whether a label fits on one line, because that is a
      * question about the words and the phone, not about the column.
@@ -290,14 +303,15 @@ class SettingsRowAlignmentTest {
             }
         }
 
-        // A switch row no longer draws a chevron at all: the page behind it
-        // has its own quiet door below. This pins that no row grows a chevron
-        // column, and that neither switch moves to pay for one.
+        // The crispest half of the sentence: a row that draws no chevron
+        // composes no chevron slot, so there is nothing there to be empty.
+        // The slot's own tag is on a row that draws one, which is what makes
+        // this a count of the rows that have a door.
         val slots = compose.onAllNodesWithTag("chevron-slot", useUnmergedTree = true)
             .fetchSemanticsNodes()
         assertEquals(
-            "a switch row draws no chevron",
-            0,
+            "only the row that draws a chevron composes one",
+            1,
             slots.size,
         )
 

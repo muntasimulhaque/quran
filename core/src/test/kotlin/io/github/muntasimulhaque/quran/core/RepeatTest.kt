@@ -79,4 +79,22 @@ class RepeatTest {
             }
         }
     }
+
+    /**
+     * The surah's end, for every answer: the reading rests, begins the surah
+     * again, or carries on into the next one, and nothing else.
+     *
+     * Continue to the next ayah rests. That is the whole of the owner's
+     * report: the answer says what happens when an *ayah* ends, and the surah
+     * is over when its last ayah ends, so the reading stops there and the
+     * next surah is the next answer's business (owner report, this session).
+     */
+    @Test
+    fun theSurahsEndIsReadByTheAnswersOwnRule() {
+        assertEquals(SurahEnding.REST, EndOfAudio.CONTINUE_AYAH.surahEnding)
+        assertEquals(SurahEnding.REST, EndOfAudio.STOP_AFTER_AYAH.surahEnding)
+        assertEquals(SurahEnding.REST, EndOfAudio.REPEAT_AYAH.surahEnding)
+        assertEquals(SurahEnding.REPEAT, EndOfAudio.REPEAT_SURAH.surahEnding)
+        assertEquals(SurahEnding.CARRY_ON, EndOfAudio.CONTINUE_SURAH.surahEnding)
+    }
 }

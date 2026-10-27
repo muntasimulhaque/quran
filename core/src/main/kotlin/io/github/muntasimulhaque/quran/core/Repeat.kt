@@ -27,6 +27,51 @@ enum class EndOfAudio {
 }
 
 /**
+ * What one answer asks of the reading when the surah's last ayah ends: nothing
+ * further, the surah again, or the surah after it.
+ *
+ * The five answers are one value because a reader has one answer, but they are
+ * not the same kind of answer. Three of them are about the ayah and the surah
+ * is simply over when its last ayah ends: the reading rests there, with the
+ * place kept and the audio put away. Two of them carry past that point, one by
+ * beginning the surah again and one by continuing into the next. Which one the
+ * boundary asks is this rule, kept here so the boundary is read one way and
+ * every answer has one stated behaviour (owner decision, this session).
+ *
+ * The player appends the surah after this one whatever the answer, because a
+ * deliberate Next or Previous is a seek and still carries the reader out of
+ * the surah (owner decision, 9.9). The playlist is therefore a place the audio
+ * *may* go, and the answer, read at the boundary, is what decides whether it
+ * does.
+ */
+enum class SurahEnding {
+    /** The surah is over: the recitation rests where it is and nothing follows. */
+    REST,
+
+    /** The surah begins again from its own first ayah. */
+    REPEAT,
+
+    /** The reading carries on into the surah after this one. */
+    CARRY_ON,
+}
+
+/** The answer's own behaviour at the end of a surah. */
+val EndOfAudio.surahEnding: SurahEnding
+    get() = when (this) {
+        EndOfAudio.REPEAT_SURAH -> SurahEnding.REPEAT
+        EndOfAudio.CONTINUE_SURAH -> SurahEnding.CARRY_ON
+        // Continue to the next ayah is about the ayah, not the Book: the
+        // surah's last ayah is the last thing it plays, and the next surah's
+        // own answer is the one that carries past the surah (owner report,
+        // this session). The stop never reaches a surah's end, and the ayah
+        // repeat loops inside it, so both rest by the same rule.
+        EndOfAudio.CONTINUE_AYAH,
+        EndOfAudio.STOP_AFTER_AYAH,
+        EndOfAudio.REPEAT_AYAH,
+        -> SurahEnding.REST
+    }
+
+/**
  * The four stored keys read as the one answer they stand for.
  *
  * The switches are still stored as their own keys, because that is the shape

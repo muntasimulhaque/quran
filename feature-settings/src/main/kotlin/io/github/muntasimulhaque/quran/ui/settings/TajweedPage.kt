@@ -57,11 +57,18 @@ import io.github.muntasimulhaque.quran.ui.theme.TajweedColors
  * The sentence under each family and rule is UI copy, not a print annotation:
  * it says what the rule asks of the reciter, and it belongs to the same
  * review as the content. A qualified reviewer checks it before a release.
+ *
+ * The switch that draws all of this stands at the page's own top, in the same
+ * words and the same state as the hub row that opened it. A reader reading the
+ * colours and finding them not to their taste turns them off where they are,
+ * rather than going back a page for the switch they came from (owner decision,
+ * this session).
  */
 @Composable
 fun TajweedPage(
     settings: AppSettings,
     sample: suspend () -> Ayah?,
+    onTajweed: (Boolean) -> Unit,
 ) {
     val palette = LocalPagePalette.current
     val context = LocalContext.current
@@ -75,6 +82,13 @@ fun TajweedPage(
             .fillMaxWidth()
             .sheetVerticalScroll(rememberScrollState()),
     ) {
+        ToggleRow(
+            title = stringResource(R.string.settings_tajweed_title),
+            subtitle = stringResource(R.string.settings_tajweed_summary),
+            checked = settings.tajweed,
+            onChange = onTajweed,
+            switchTag = "switch-tajweed-page",
+        )
         Text(
             text = stringResource(R.string.settings_tajweed_intro),
             style = MaterialTheme.typography.bodyMedium,

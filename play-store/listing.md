@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 11.8 (versionCode 120)
+Version: 11.9 (versionCode 121)
 
 ## Listing
 
@@ -154,6 +154,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (11.9, 385 characters)
+11.9 puts the settings switches back on their rows: the switch flips the setting and the words open the page, where the same switch waits at the top. The player reads its answer at the surah's end, so Continue to the next ayah rests there instead of rolling into the next surah, and a finished recitation takes its pill and notification with it. The Quran text and packs are unchanged.
 
 ## Release notes (11.8, 495 characters)
 11.8 makes the first minutes and the way back clear. The top bar shows once on a new install, then steps back. Search and Browse results reopen where you left them, and a result arrives with its matched words, meanings, or tafsir passage in view. Settings rows toggle as a whole with a separate page link, font sizes read in steps, and the Tajweed page explains each rule. Reading depth, large-text spacing, storage failures, and pack repair are steadier. The Quran text and packs are unchanged.

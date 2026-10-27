@@ -36,22 +36,26 @@ object RecitationPlaylist {
 
     /**
      * The surah an automatic item advance is ending, or null when the advance
-     * is not the end [answer] repeats.
+     * stays inside it.
      *
      * The playlist is one media item per ayah, so the player reports an
      * automatic advance at every ayah boundary. The one advance that ends a
      * surah is the one that arrives in another surah: reading the advance
      * alone made every ayah's end look like the surah's end, which restarted
-     * the surah at ayah 1 and then looped that ayah forever (owner report,
-     * this session). Only the surah repeat asks this question; every other
-     * answer is left alone.
+     * the surah at ayah 1 and then looped that ayah forever (owner report, an
+     * earlier session).
+     *
+     * This answers only whether the boundary was crossed. What the boundary
+     * then does is the reader's own answer, [EndOfAudio.surahEnding], read at
+     * the crossing: the playlist holds the next surah whatever the answer, so
+     * a deliberate Next and Previous still carry the reader out of the surah,
+     * and the answer decides whether the audio follows it (owner decision, this
+     * session).
      */
     fun endedSurah(
-        answer: EndOfAudio,
         playing: Int?,
         arrivingMediaId: String?,
     ): Int? {
-        if (answer != EndOfAudio.REPEAT_SURAH) return null
         val arrived = surahOf(arrivingMediaId ?: return null) ?: return null
         return playing?.takeIf { it != arrived }
     }
