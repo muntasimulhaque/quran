@@ -88,7 +88,10 @@ class Build(private val root: File) {
             if (sourceDir("translation-al-bayan-bn").firstWithExtension(".json") != null) {
                 val bangla = readAlBayanTranslation("translation-al-bayan-bn", ayahNumbers)
                 insertTranslation(connection, bangla, packId = "translation-al-bayan-bn")
-                println("build: Al-Bayan Simple Translation (Bangla): ${bangla.size} ayahs, ${bangla.values.count { it.footnotes.isNotEmpty() }} notes")
+                val notes = bangla.values.sumOf { translation ->
+                    Regex("\\[\\d+]- ").findAll(translation.footnotes).count()
+                }
+                println("build: Al-Bayan Simple Translation (Bangla): ${bangla.size} ayahs, $notes notes")
             } else {
                 println("build: skipping translation-al-bayan-bn (source not present)")
             }
@@ -260,10 +263,10 @@ class Build(private val root: File) {
 
     /**
      * The QUL JSON shape: one object per ayah with its verse key and its
-     * text. The first star in the sentence becomes the reader's footnote
-     * marker, the body after the blank line becomes the note, and every
-     * other star is a reference QUL did not fill. [bayanAyah] holds that
-     * rule and its tests.
+     * text. QUL keeps one note per ayah; the publisher's Word edition keeps
+     * every note the printed page has, so its 205 notes are read beside the
+     * export and placed on their ayahs. [bayanAyah] holds the marker rule and
+     * its tests, and [readBayanNotes] holds the placement and its gates.
      */
     private fun readAlBayanTranslation(datasetId: String, ayahNumbers: Map<String, Int>): Map<Int, Translation> {
         val file = sourceDir(datasetId).firstWithExtension(".json")
@@ -272,20 +275,53 @@ class Build(private val root: File) {
             .getOrElse { failure -> error("cannot read $datasetId: ${failure.message}") }
         val rows = root["translations"]?.jsonArray
             ?: error("$datasetId has no translations array")
+        val qul = rows.mapNotNull { row ->
+            val entry = row.jsonObject
+            val key = entry["verse_key"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
+            QulVerse(key, bayanTranslation(entry["text"]?.jsonPrimitive?.contentOrNull.orEmpty()))
+        }
+        val docx = sourceDir("translation-al-bayan-bn-notes")
+        val notes = if (File(docx, "word/document.xml").isFile) {
+            readBayanNotes(docx, qul).also { publisherNotes ->
+                println(
+                    "build: Al-Bayan notes from the publisher: " +
+                        "${publisherNotes.byAyah.size} ayahs, " +
+                        "${publisherNotes.byAyah.values.sumOf { it.size }} notes",
+                )
+            }
+        } else {
+            println("build: the Al-Bayan Word edition is not present; QUL's notes stand alone")
+            null
+        }
         val out = HashMap<Int, Translation>(7000)
         for (row in rows) {
             val entry = row.jsonObject
             val key = entry["verse_key"]?.jsonPrimitive?.contentOrNull ?: continue
-            val parsed = bayanAyah(sanitize(entry["text"]?.jsonPrimitive?.contentOrNull ?: ""))
+            val parsed = bayanAyah(
+                raw = sanitize(entry["text"]?.jsonPrimitive?.contentOrNull.orEmpty()),
+                sourceNotes = notes?.byAyah?.get(key),
+                allSourceNotes = notes?.allTexts.orEmpty(),
+                anchorAfter = bayanAnchors[key],
+            )
             if (parsed.text.isBlank()) continue
             val surah = key.substringBefore(':').toIntOrNull() ?: continue
             val ayah = key.substringAfter(':').toIntOrNull() ?: continue
             val first = ayahNumbers["$surah:1"] ?: continue
             val number = first + ayah - 1
-            val note = parsed.note?.let { "[1]- $it" }.orEmpty()
-            out[number] = Translation(number, parsed.text, note)
+            val footnotes = parsed.notes.mapIndexed { index, note -> "[${index + 1}]- $note" }
+                .joinToString(" ")
+            out[number] = Translation(number, parsed.text, footnotes)
         }
         return out
+    }
+
+    /** The sentence of a QUL row, without its stars or the body after the blank line. */
+    private fun bayanTranslation(raw: String): String {
+        val source = raw.replace("\r\n", "\n").replace('\u00AC', ' ').trim()
+        val separator = source.indexOf("\n\n*")
+        return (if (separator >= 0) source.substring(0, separator) else source)
+            .replace("*", "")
+            .trim()
     }
 
     /** The ayah-number rows in the QUL word lists, in either numeral set. */

@@ -78,6 +78,7 @@ class Verify(private val root: File) {
             "translation-saheeh" -> checkSaheeh(dataset.id, dir)
             "saheeh-qul-crosscheck" -> checkSimpleCount(dataset.id, dir, "translation", 6236)
             "translation-al-bayan-bn" -> checkAlBayanJson(dataset.id, dir)
+            "translation-al-bayan-bn-notes" -> checkAlBayanDocx(dataset.id, dir)
             "tafsir-ibn-kathir-en", "tafsir-ibn-kathir-bn" -> checkTafsirQul(dataset.id, dir)
             "word-by-word-english", "word-by-word-bengali" -> checkWordTranslation(dataset.id, dir)
             "recitation-minshawi", "recitation-husary", "recitation-husary-muallim",
@@ -301,6 +302,41 @@ class Verify(private val root: File) {
             keys += key
         }
         if (keys.size != 6236) fail(id, "expected 6236 distinct ayah keys, found ${keys.size}")
+    }
+
+    /**
+     * The publisher's Word edition: 205 real footnotes, 205 references in the
+     * sentences, and 183 paragraphs that carry them. The build reads these
+     * counts, so the gate pins them before a missing note can ship.
+     */
+    private fun checkAlBayanDocx(id: String, dir: File) {
+        val document = File(dir, "word/document.xml")
+        val footnotes = File(dir, "word/footnotes.xml")
+        if (!document.isFile || !footnotes.isFile) {
+            fail(id, "the Word edition has no word/document.xml or word/footnotes.xml")
+            return
+        }
+        val paragraphs = runCatching { document.inputStream().use(::readDocxParagraphs) }
+            .getOrElse { failure ->
+                fail(id, "cannot read document.xml: ${failure.message}")
+                return
+            }
+        val notes = runCatching { footnotes.inputStream().use(::readDocxNotes) }
+            .getOrElse { failure ->
+                fail(id, "cannot read footnotes.xml: ${failure.message}")
+                return
+            }
+        val references = paragraphs.sumOf { it.notes.size }
+        val distinctReferences = paragraphs.flatMap { it.notes }.distinct().size
+        val withNotes = paragraphs.count {
+            it.notes.isNotEmpty() && it.text.any { char -> char in '\u0980'..'\u09FF' }
+        }
+        if (notes.size != 205) fail(id, "expected 205 footnotes, found ${notes.size}")
+        if (references != 205) fail(id, "expected 205 footnote references, found $references")
+        if (distinctReferences != 205) {
+            fail(id, "expected 205 distinct footnote references, found $distinctReferences")
+        }
+        if (withNotes != 183) fail(id, "expected 183 note-bearing paragraphs, found $withNotes")
     }
 
     private fun checkJsonKeys(id: String, dir: File, expected: Int) {

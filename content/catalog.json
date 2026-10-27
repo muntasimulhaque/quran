@@ -15,9 +15,9 @@
             "shipped": true,
             "ayahs": 6236,
             "bytes": 9957376,
-            "sha256": "1c2edec53a663bb11271f476e40c9c649cb748012a47fd571bed0fab32bb71cd",
-            "tag": "pack-core-1c2edec5",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-1c2edec5/core.db"
+            "sha256": "a951bb9703d01006a9ab2a5183a31304019ace9d78b49f38aee6a16a2c6f9f9d",
+            "tag": "pack-core-a951bb97",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-a951bb97/core.db"
         },
         {
             "id": "translation-saheeh-en",
@@ -58,17 +58,17 @@
             "type": "translation",
             "name": "Al-Bayan Simple Translation",
             "language": "bn",
-            "credit": "Al-Bayan Foundation Bangladesh, via the Quranic Universal Library",
-            "creditBn": "আল-বায়ান ফাউন্ডেশন বাংলাদেশ, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে",
+            "credit": "Al-Bayan Foundation Bangladesh, via the Quranic Universal Library and IslamHouse.com",
+            "creditBn": "আল-বায়ান ফাউন্ডেশন বাংলাদেশ, কুরআনিক ইউনিভার্সাল লাইব্রেরি ও ইসলামহাউস থেকে",
             "license": "Al-Bayan Foundation Bangladesh: free to copy and distribute, electronic or paper, unchanged and never for sale. The publisher's grant is printed in the book; IslamHouse publishes an electronic edition with permission.",
             "licenseBn": "আল-বায়ান ফাউন্ডেশন বাংলাদেশ: পরিবর্তন ছাড়া বিনামূল্যে ইলেকট্রনিক বা কাগজে বিতরণ করা যাবে, বিক্রয় নিষিদ্ধ। প্রকাশকের অনুমতিটি বইয়ে মুদ্রিত; ইসলামহাউস অনুমতিসহ একটি ইলেকট্রনিক সংস্করণ প্রকাশ করে।",
-            "version": "QUL",
+            "version": "1.0.0",
             "shipped": false,
             "ayahs": 6236,
-            "bytes": 5648384,
-            "sha256": "a04da33a501f8ca3c749ce931bb6c3b892099d4ec9d7c3b418911b6665cead7a",
-            "tag": "pack-translation-al-bayan-bn-a04da33a",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-translation-al-bayan-bn-a04da33a/translation-al-bayan-bn.db"
+            "bytes": 5652480,
+            "sha256": "0ac6ed9fbe056986de7b6af211ba83ac7585cc41b49479de0765736fce380d22",
+            "tag": "pack-translation-al-bayan-bn-0ac6ed9f",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-translation-al-bayan-bn-0ac6ed9f/translation-al-bayan-bn.db"
         },
         {
             "id": "tafsir-ibn-kathir-bn",

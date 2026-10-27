@@ -1,5 +1,5 @@
 {
-  "contentVersion": "1.4.0",
+  "contentVersion": "1.5.0",
   "note": "Machine-readable source of truth for bundled content.",
   "datasets": [
     {
@@ -396,10 +396,26 @@
       "license": "Al-Bayan Foundation Bangladesh: free to copy and distribute, electronic or paper, unchanged and never for sale. The publisher's grant is printed in the book; IslamHouse publishes an electronic edition with permission.",
       "licenseBn": "আল-বায়ান ফাউন্ডেশন বাংলাদেশ: পরিবর্তন ছাড়া বিনামূল্যে ইলেকট্রনিক বা কাগজে বিতরণ করা যাবে, বিক্রয় নিষিদ্ধ। প্রকাশকের অনুমতিটি বইয়ে মুদ্রিত; ইসলামহাউস অনুমতিসহ একটি ইলেকট্রনিক সংস্করণ প্রকাশ করে।",
       "credit": "Al-Bayan Foundation Bangladesh, via the Quranic Universal Library",
-      "usedFor": "Bangla translation pack (QUL resource 185, content 162); the export's lost-glyph U+00AC sign is removed",
+      "usedFor": "Bangla translation pack (QUL resource 185, content 162); the export's lost-glyph U+00AC sign is removed and the ধরন spelling is corrected to ধরণ",
       "path": "content/raw/qul/bengali-al-bayan.json",
       "bytes": 3485007,
       "sha256": "27290b9647b6d39f3ab4fde988e8522268752e02595f6e4df7291e8fd0555932",
+      "assetUrl": null
+    },
+    {
+      "id": "translation-al-bayan-bn-notes",
+      "name": "Al-Bayan Simple Translation (Rawai Al-bayan), IslamHouse edition footnotes",
+      "source": "IslamHouse.com, from Al-Bayan Foundation Bangladesh",
+      "url": "https://d1.islamhouse.com/data/bn/ih_books/single2/bn_alquranul_Kareem_sorol_orthanubad.docx",
+      "resourceId": "1437",
+      "format": "docx",
+      "license": "Al-Bayan Foundation Bangladesh: free to copy and distribute, electronic or paper, unchanged and never for sale. The publisher's grant is printed in the book; IslamHouse publishes an electronic edition with permission.",
+      "licenseBn": "আল-বায়ান ফাউন্ডেশন বাংলাদেশ: পরিবর্তন ছাড়া বিনামূল্যে ইলেকট্রনিক বা কাগজে বিতরণ করা যাবে, বিক্রয় নিষিদ্ধ। প্রকাশকের অনুমতিটি বইয়ে মুদ্রিত; ইসলামহাউস অনুমতিসহ একটি ইলেকট্রনিক সংস্করণ প্রকাশ করে।",
+      "credit": "Al-Bayan Foundation Bangladesh, via IslamHouse.com",
+      "usedFor": "The 205 page footnotes of the 1437 AH edition, mapped to their ayahs; the note bodies only, never the translation text",
+      "path": "content/raw/islamhouse/bn_alquranul_Kareem_sorol_orthanubad.docx",
+      "bytes": 31156105,
+      "sha256": "92601ca9bc5a3b49869b3f4bbda072948954ea967447b01dcd97c9796921e538",
       "assetUrl": null
     },
     {

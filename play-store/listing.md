@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 11.9 (versionCode 121)
+Version: 12.0 (versionCode 122)
 
 ## Listing
 
@@ -154,6 +154,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (12.0, 455 characters)
+12.0 completes the Bangla translator's notes. The reading now carries all 205 notes of the Al-Bayan publisher's edition, up from 182: the second, third, and fourth notes on ayahs like 5:103 and 5:97 are there, the two welded notes are split, and 34:2's note is restored. The correct ধরণ spelling is used everywhere. The content is 1.5.0 and the Bangla pack 1.0.0; a held pack updates quietly on Wi-Fi. The Quran text and the English reading are unchanged.
 
 ## Release notes (11.9, 385 characters)
 11.9 puts the settings switches back on their rows: the switch flips the setting and the words open the page, where the same switch waits at the top. The player reads its answer at the surah's end, so Continue to the next ayah rests there instead of rolling into the next surah, and a finished recitation takes its pill and notification with it. The Quran text and packs are unchanged.

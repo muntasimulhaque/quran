@@ -12,7 +12,6 @@ import io.github.muntasimulhaque.quran.data.SearchRequest
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -127,8 +126,8 @@ class ContentSearchTest {
     }
 
     @Test
-    fun aBanglaFootnoteCarriesItsQulNote() {
-        // 2:1 carries the first QUL note in the pack. The reading needs the
+    fun aBanglaFootnoteCarriesItsPublisherNote() {
+        // 2:1 carries the first note in the pack. The reading needs the
         // marker and the note under the same number, or the marker opens
         // nothing.
         assertEquals("2:1", content.ayah(8)?.verseKey)
@@ -137,20 +136,37 @@ class ContentSearchTest {
         assertTrue("2:1 must carry its marker", line?.text.orEmpty().contains("[1]"))
         assertEquals(listOf(1), line?.footnotes?.map { it.number })
         assertTrue(
-            "the note must be the QUL note",
+            "the note must be the publisher's note",
             line?.footnotes?.firstOrNull()?.text.orEmpty().contains("এ অক্ষরগুলো কুরআনের"),
         )
     }
 
     @Test
-    fun aStarWithNoNoteLeavesNoFootnote() {
-        // 34:2 has a star and no note body in the QUL export.
+    fun aQulStarWithNoBodyTakesThePublisherNote() {
+        // 34:2's QUL row carries a star and no body; the publisher's Word
+        // edition has the note, so the marker opens it.
         assertEquals("34:2", content.ayah(3608)?.verseKey)
         val line = content.translations(listOf(3608), "translation-al-bayan-bn")[3608]
         assertNotNull("34:2 must carry the Bangla translation", line)
-        assertFalse("34:2 must carry no marker", line?.text.orEmpty().contains("[1]"))
-        assertFalse("34:2 must carry no note", line?.text.orEmpty().contains("*"))
-        assertTrue("34:2 must have an empty note list", line?.footnotes.orEmpty().isEmpty())
+        assertTrue("34:2 must carry its marker", line?.text.orEmpty().contains("[1]"))
+        assertEquals(listOf(1), line?.footnotes?.map { it.number })
+        assertTrue(
+            "the note must be 34:2's note",
+            line?.footnotes?.firstOrNull()?.text.orEmpty().contains("যমীনে যা প্রবেশ করে"),
+        )
+    }
+
+    @Test
+    fun aBanglaAyahCarriesEveryPublisherNote() {
+        // 5:103 names four things, and the publisher explains all four.
+        assertEquals("5:103", content.ayah(772)?.verseKey)
+        val line = content.translations(listOf(772), "translation-al-bayan-bn")[772]
+        assertEquals(listOf(1, 2, 3, 4), line?.footnotes?.map { it.number })
+        assertTrue("the sentence must carry the fourth marker", line?.text.orEmpty().contains("[4]"))
+        assertTrue(
+            "the fourth note must explain হাম",
+            line?.footnotes?.lastOrNull()?.text.orEmpty().contains("হাম"),
+        )
     }
 
     @Test
