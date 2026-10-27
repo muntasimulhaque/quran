@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 12.0 (versionCode 122)
+Version: 12.1 (versionCode 123)
 
 ## Listing
 
@@ -154,6 +154,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (12.1, 321 characters)
+12.1 makes the first screen even. A new install is asked to choose a language without being nudged toward one: the Suggested line under English is gone, so English and Bangla stand as two equal cards of the same height. The reading, the Quran text, every translation, every tafsir, and every pack are unchanged from 12.0.
 
 ## Release notes (12.0, 455 characters)
 12.0 completes the Bangla translator's notes. The reading now carries all 205 notes of the Al-Bayan publisher's edition, up from 182: the second, third, and fourth notes on ayahs like 5:103 and 5:97 are there, the two welded notes are split, and 34:2's note is restored. The correct ধরণ spelling is used everywhere. The content is 1.5.0 and the Bangla pack 1.0.0; a held pack updates quietly on Wi-Fi. The Quran text and the English reading are unchanged.
