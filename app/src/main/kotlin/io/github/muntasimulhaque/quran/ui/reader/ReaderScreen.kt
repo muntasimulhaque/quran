@@ -10,7 +10,10 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +34,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -434,6 +438,9 @@ fun ReaderScreen(
         }
     }
 
+    // The reading is edge to edge, so the foot of the page clears the
+    // system's navigation bar itself; [readingFoot] owns that rule.
+    val navigationBar = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     Box(
         Modifier
             .fillMaxSize()
@@ -531,9 +538,10 @@ fun ReaderScreen(
                     startAtOpening = viewModel.startAtSurahOpening == surah.number,
                     onOpeningReached = { viewModel.consumeSurahOpening(surah.number) },
                     contentPaddingTop = 64.dp,
-                    contentPaddingBottom = with(LocalDensity.current) {
-                        bottomStackHeight.toDp()
-                    }.coerceAtLeast(32.dp),
+                    contentPaddingBottom = readingFoot(
+                        bottomStack = with(LocalDensity.current) { bottomStackHeight.toDp() },
+                        navigationBar = navigationBar,
+                    ),
                 )
             }
         }
@@ -720,3 +728,30 @@ fun ReaderScreen(
 @Composable
 private fun surahName(viewModel: ReaderViewModel, ayah: Int): String =
     viewModel.surahOf(ayah)?.nameSimple ?: stringResource(R.string.reader_fallback_title)
+
+/**
+ * The room the reading keeps under its own last line, before the system's
+ * navigation bar is cleared.
+ */
+private val PageFoot = 32.dp
+
+/**
+ * The reading's foot: the padding the page takes below its last line.
+ *
+ * The reading is drawn edge to edge, so the bottom of the window is the
+ * glass and not the page, and the system's navigation bar is painted over
+ * whatever the list draws there. The foot was 32 dp alone, which a three
+ * button bar (about 50 dp) swallowed whole: the door to the next surah
+ * ended 3 dp above the glass while the design asked for 52, and the last
+ * ayah of any surah could be read half hidden under the bar (owner report,
+ * this session).
+ *
+ * The bar is cleared first and the page's own room is added after it, so
+ * the air the reader sees is the same on a phone with three buttons, a
+ * phone with a gesture bar, and a tablet with a taskbar. A control raised at
+ * the foot already measures its height with the inset inside it (BottomStack
+ * pads itself with the navigation bar) and covers that ground itself, so it
+ * is taken as it stands and the bar is never paid for twice.
+ */
+internal fun readingFoot(bottomStack: Dp, navigationBar: Dp): Dp =
+    maxOf(bottomStack, PageFoot + navigationBar)

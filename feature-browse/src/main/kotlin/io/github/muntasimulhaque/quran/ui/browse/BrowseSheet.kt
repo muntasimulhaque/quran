@@ -103,20 +103,36 @@ fun BrowseSheet(
     val currentSurah = remember(surahs, surahStarts, currentAyah) {
         surahOfAyah(surahs, surahStarts, currentAyah) ?: surahs.firstOrNull()?.number ?: 1
     }
-    // The centering happens once in a sheet, the first time a division of
-    // the Book is shown, and never again: each tab keeps its own list state
-    // so its place is remembered while the reader moves between tabs, and a
-    // re-centering on every return would take that place away.
-    var surahsCentered by rememberSaveable { mutableStateOf(false) }
-    var juzCentered by rememberSaveable { mutableStateOf(false) }
+    // The centering is the sheet's answer to "where am I", and it is given
+    // again on every raising, because Browse's place is the reading's place:
+    // a reader who opened Al-Kahf from the list and read on to An-Nas must
+    // find An-Nas in the middle when the sheet comes back, not Al-Kahf where
+    // their thumb left the glass. The sheet used to restore the list's own
+    // place instead, which was the same answer whenever nothing had moved and
+    // the wrong one the moment the reading had (owner decision, this session).
+    //
+    // The two flags are plain `remember`, so they last no longer than one
+    // raising: inside a raising the reader's own scroll and their tab
+    // switches are left alone, and a new raising centers again. The tab and
+    // the grid are still saved, because a tab is context and a grid is a
+    // level, not a place in the Book.
+    var surahsCentered by remember { mutableStateOf(false) }
+    var juzCentered by remember { mutableStateOf(false) }
     // The reader's own surah is put in the middle of the Surahs list, the
     // way the grid puts their ayah in the middle of the numbers: Browse is
     // a door to the reader's place, and Al-Fatiha is a long walk from
     // Maryam. The ends of the Book clamp the scroll, so the first surah
     // stays at the top and the last at the bottom without a special case
     // (owner decision).
-    LaunchedEffect(tab, surahs, currentSurah) {
-        if (tab != BrowseTab.Surahs || surahsCentered) return@LaunchedEffect
+    LaunchedEffect(tab, surahs, currentSurah, gridSurah) {
+        // The grid covers the list when a saved sheet comes back into it,
+        // and a list that is not on the glass has no viewport to be centered
+        // in: centering it there would leave it at the top with the flag
+        // already spent. Closing the grid runs this again, and only then it
+        // centers.
+        if (tab != BrowseTab.Surahs || surahsCentered || gridSurah != null) {
+            return@LaunchedEffect
+        }
         val index = surahs.indexOfFirst { it.number == currentSurah }
         if (index < 0) return@LaunchedEffect
         centerListItem(surahsList, index)
@@ -148,8 +164,12 @@ fun BrowseSheet(
     val currentJuz = remember(juzStarts, currentAyah) {
         juzStarts.lastOrNull { it.ayah <= currentAyah }?.juz
     }
-    LaunchedEffect(tab, juzStarts, currentJuz) {
-        if (tab != BrowseTab.Juz || juzCentered || currentJuz == null) return@LaunchedEffect
+    LaunchedEffect(tab, juzStarts, currentJuz, gridSurah) {
+        if (tab != BrowseTab.Juz || juzCentered || currentJuz == null ||
+            gridSurah != null
+        ) {
+            return@LaunchedEffect
+        }
         val index = juzStarts.indexOfFirst { it.juz == currentJuz }
         if (index < 0) return@LaunchedEffect
         centerListItem(juzList, index)

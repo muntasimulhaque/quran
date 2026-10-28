@@ -241,7 +241,17 @@ internal fun SurahOpening(
     }
 }
 
-/** The end of a surah, and the door to the next one. */
+/**
+ * The end of a surah, and the door to the next one.
+ *
+ * The column keeps 20 dp under its own last line, and the reading's foot
+ * under the list adds 32 dp above the system's navigation bar, so the card
+ * ends 52 dp above the bar: exactly half the air the opening of a surah is
+ * given above it (64 dp of page padding and 40 dp of the opening itself).
+ * The turn of a page then reads as a shorter breath than the arrival, which
+ * is the order the reader meets them in, never as a card left on the edge of
+ * the glass (owner decision, this session).
+ */
 @Composable
 internal fun SurahEnd(
     surah: Surah,
