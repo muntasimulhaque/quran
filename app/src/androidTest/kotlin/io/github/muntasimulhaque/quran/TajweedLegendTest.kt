@@ -31,6 +31,10 @@ import java.io.File
  * seven families and the eighteen rules are on the page, and the page it
  * draws is kept as a frame beside the test's own result.
  *
+ * The rule names of one family stand on one line, so they are read as
+ * substrings: the node is the family's list, not one rule's own sentence
+ * (owner decision, this session).
+ *
  * The frame is not part of the store set. It is written beside the test so a
  * change to the legend can be looked at the way the tour's frames are looked
  * at, without a ninth frame in the listing.
@@ -77,7 +81,7 @@ class TajweedLegendTest {
         for (name in families + rules) {
             assertTrue(
                 "$name is not on the legend",
-                compose.onAllNodesWithText(name).fetchSemanticsNodes().isNotEmpty(),
+                compose.onAllNodesWithText(name, substring = true).fetchSemanticsNodes().isNotEmpty(),
             )
         }
     }
@@ -96,7 +100,8 @@ class TajweedLegendTest {
         compose.waitForIdle()
         keep("10-tajweed-legend-top", compose.onRoot().captureToImage().asAndroidBitmap())
 
-        compose.onNode(hasScrollAction()).performScrollToNode(hasText("Madd Necessary"))
+        compose.onNode(hasScrollAction())
+            .performScrollToNode(hasText("Madd Necessary", substring = true))
         compose.waitForIdle()
         keep("11-tajweed-legend-foot", compose.onRoot().captureToImage().asAndroidBitmap())
     }
