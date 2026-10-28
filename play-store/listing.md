@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 12.1 (versionCode 123)
+Version: 12.2 (versionCode 124)
 
 ## Listing
 
@@ -154,6 +154,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (12.2, 482 characters)
+12.2 keeps the last line of a surah clear of the phone's navigation bar, and makes Browse open on where you are. The door to the next surah now stands 52 dp above the bar, half the breath a surah's opening is given, and no ayah can end hidden under it. The Surahs and Juz lists put the surah or juz you are reading in the middle every time the sheet comes up; Search still returns to your exact results. The Quran text, every translation, every tafsir, and every pack are unchanged.
 
 ## Release notes (12.1, 321 characters)
 12.1 makes the first screen even. A new install is asked to choose a language without being nudged toward one: the Suggested line under English is gone, so English and Bangla stand as two equal cards of the same height. The reading, the Quran text, every translation, every tafsir, and every pack are unchanged from 12.0.
