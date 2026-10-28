@@ -1,6 +1,7 @@
 package io.github.muntasimulhaque.quran
 
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.test.advanceEventTime
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -116,18 +117,32 @@ class SheetStillnessTest {
 
         compose.mainClock.autoAdvance = false
         val sheet = theSheet()
+        val handle = compose.onAllNodesWithContentDescription("Sheet handle").onFirst()
         val rest = sheet.fetchSemanticsNode().positionInRoot.y
         val places = mutableListOf(rest)
 
-        sheet.performTouchInput { down(center) }
+        // The finger pulls the sheet's own handle, the one place a sheet
+        // answers a pull whatever its content is doing. This leg began in
+        // the middle of the note, which is the note's own text, and a drag
+        // that begins there belongs to the page under it: it moved the sheet
+        // 11 dp on a runner and a hundred on a fast phone, and the reading of
+        // the shrug after it was a reading of the reading's gesture, not the
+        // sheet's (owner report, this session: the interface suite went red on
+        // the runner while the app behaved).
+        handle.performTouchInput { down(center) }
         repeat(20) {
             compose.mainClock.advanceTimeByFrame()
-            sheet.performTouchInput { moveBy(Offset(0f, 5f)) }
+            handle.performTouchInput {
+                // The event's own clock moves with the finger, so the gesture
+                // is the speed a thumb is, not one instant of infinite speed.
+                advanceEventTime(16)
+                moveBy(Offset(0f, 5f))
+            }
             compose.mainClock.advanceTimeByFrame()
             places += runCatching { sheet.fetchSemanticsNode().positionInRoot.y }
                 .getOrNull() ?: Float.NaN
         }
-        sheet.performTouchInput { up() }
+        handle.performTouchInput { up() }
         repeat(80) {
             compose.mainClock.advanceTimeByFrame()
             places += runCatching { sheet.fetchSemanticsNode().positionInRoot.y }

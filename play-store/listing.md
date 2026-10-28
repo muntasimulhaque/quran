@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 12.2 (versionCode 124)
+Version: 12.3 (versionCode 125)
 
 ## Listing
 
@@ -154,6 +154,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (12.3, 473 characters)
+12.3 gives every screen one margin. The ayahs, the translation, the word meanings, search results, settings rows, footnotes, and tafsir all begin on the same line, on a phone, a seven inch tablet, and a ten inch one, and the reading uses the whole page the way a printed mushaf does instead of a narrow column in the middle of the glass. Search, Browse, Settings, and the ayah card are as wide as the screen. The Quran text, every translation, and every pack are unchanged.
 
 ## Release notes (12.2, 482 characters)
 12.2 keeps the last line of a surah clear of the phone's navigation bar, and makes Browse open on where you are. The door to the next surah now stands 52 dp above the bar, half the breath a surah's opening is given, and no ayah can end hidden under it. The Surahs and Juz lists put the surah or juz you are reading in the middle every time the sheet comes up; Search still returns to your exact results. The Quran text, every translation, every tafsir, and every pack are unchanged.
