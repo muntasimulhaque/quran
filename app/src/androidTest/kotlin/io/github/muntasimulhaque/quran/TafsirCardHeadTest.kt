@@ -60,7 +60,6 @@ class TafsirCardHeadTest {
                     setTranslationPacks(emptySet())
                     setTafsirPacks(setOf(PACK_ID))
                     setShowTranslation(true)
-                    setShowTafsir(true)
                     setWordByWord(false)
                     // The first-run long-press note belongs to a new install,
                     // not to the head this test reads.

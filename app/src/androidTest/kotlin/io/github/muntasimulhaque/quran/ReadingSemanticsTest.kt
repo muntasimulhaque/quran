@@ -52,7 +52,6 @@ class ReadingSemanticsTest {
                     setTranslationPacks(emptySet())
                     setTafsirPacks(emptySet())
                     setShowTranslation(true)
-                    setShowTafsir(true)
                     setWordByWord(false)
                     for (role in TypeRole.entries) setTypeSize(role, TextSize.DEFAULT)
                 }

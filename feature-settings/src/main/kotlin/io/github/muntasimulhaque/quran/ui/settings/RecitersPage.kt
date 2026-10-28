@@ -63,10 +63,13 @@ fun RecitersPage(
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         // Following the recitation is a choice about the reciter, not about
         // the page: it sits here, above the list of voices, and turns the
-        // reading into one that moves with the one being heard.
+        // reading into one that moves with the one being heard. The row
+        // carries no line under it: its value is what the switch says, and a
+        // sentence describing the feature in the value slot was the one
+        // shape no other switch row in the sheet wore (owner report).
         ToggleRow(
             title = stringResource(R.string.settings_follow_title),
-            subtitle = stringResource(R.string.settings_follow_subtitle),
+            subtitle = null,
             checked = settings.followReciter,
             onChange = actions.onFollowReciter,
         )

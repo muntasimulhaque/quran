@@ -22,10 +22,17 @@ internal fun StatusLine(
     failed: Boolean,
 ) {
     val total = results.counts.total
+    // Nothing is said while the field is empty. The line carried a prompt
+    // that began with the field's own words ("Search the Quran, or type
+    // 2:255 to go there"), so the same sentence stood twice on one sheet
+    // (owner report). The status line is the results' line now, and an
+    // empty query draws nothing at all: the sheet is the field, the filter
+    // door, and the results, and the first match arrives in a place no row
+    // has to move out of.
     val message = when {
         !hasSources -> stringResource(R.string.search_status_no_sources)
         failed -> stringResource(R.string.search_status_failed)
-        query == null -> stringResource(R.string.search_status_prompt)
+        query == null -> null
         searching && results.hits.isEmpty() -> stringResource(R.string.search_status_searching)
         total == 0 -> stringResource(R.string.search_status_no_matches)
         // A capped list has no honest count: the number the pass collected is
@@ -34,7 +41,7 @@ internal fun StatusLine(
         // how much there is (owner decision, this session).
         results.capped -> stringResource(R.string.search_status_capped, LIMIT)
         else -> pluralStringResource(R.plurals.search_matches, total, total)
-    }
+    } ?: return
     Text(
         text = message,
         style = MaterialTheme.typography.labelMedium,

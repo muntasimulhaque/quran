@@ -67,7 +67,6 @@ class AccessibilityTest {
                     setTranslationPacks(setOf("translation-saheeh-en"))
                     setTafsirPacks(setOf("tafsir-ibn-kathir-en"))
                     setShowTranslation(true)
-                    setShowTafsir(true)
                     setWordByWord(false)
                     for (role in TypeRole.entries) setTypeSize(role, TextSize.DEFAULT)
                 }
@@ -89,7 +88,6 @@ class AccessibilityTest {
                     setTranslationPacks(emptySet())
                     setTafsirPacks(emptySet())
                     setShowTranslation(true)
-                    setShowTafsir(true)
                     setWordByWord(false)
                     for (role in TypeRole.entries) setTypeSize(role, TextSize.DEFAULT)
                 }

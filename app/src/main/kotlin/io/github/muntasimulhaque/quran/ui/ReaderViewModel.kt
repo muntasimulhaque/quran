@@ -175,21 +175,17 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         get() = enabledTranslationPacks.forLanguage(readingLanguage)
 
     /**
-     * The tafsirs search reads: the reader's own switches, narrowed to the
-     * language they chose, and silent while the reader shows no tafsir.
+     * The tafsirs search reads: the reader's own packs, narrowed to the
+     * language they chose.
      *
-     * The pack list and the display switch are two settings: a reader can keep
-     * a tafsir installed and turn its reading off. Search reads a tafsir only
-     * while the reading would draw one, so a result can never open a card with
-     * no passage in it, and the filter row's Tafsir chip follows this same
-     * list (owner decision, this session).
+     * The packs are the whole of the choice: a tafsir is drawn only where the
+     * reader asks for it, from the ayah pill's Tafsir mark, so search has no
+     * master switch to follow and reads exactly what the pill would open. The
+     * filter row's Tafsir chip follows the same list (owner decision, this
+     * session).
      */
     val searchTafsirPacks: List<ContentPack>
-        get() = if (settings.showTafsir) {
-            enabledTafsirPacks.forLanguage(readingLanguage)
-        } else {
-            emptyList()
-        }
+        get() = enabledTafsirPacks.forLanguage(readingLanguage)
 
     /** The pack on its way in, owned by the library. */
     val packSetup: ContentLibrary.PackSetup? get() = library.packSetup
@@ -692,12 +688,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     fun setTajweed(tajweed: Boolean) {
         settings = settings.copy(tajweed = tajweed)
         viewModelScope.launch { settingsStore.setTajweed(tajweed) }
-    }
-
-    /** The reading keeps the reader's chosen tafsirs; this only shows or hides them. */
-    fun setShowTafsir(show: Boolean) {
-        settings = settings.copy(showTafsir = show)
-        viewModelScope.launch { settingsStore.setShowTafsir(show) }
     }
 
     /**

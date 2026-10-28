@@ -36,11 +36,14 @@ private const val LICENSE_SEPARATOR = " · "
  * to open, and a reader who wonders who made the text meets the answer the
  * moment they open About.
  *
- * The fonts' license is the page's one door. The names and the copyright
- * lines stand here as before; the full text of the SIL Open Font License
- * that every bundled face travels under is one tap away, in the app, because
- * a license bundled only beside the source tree is not a license the reader
- * on a phone can read (owner decision, 11.1).
+ * The page has no door at all. It used to end the Fonts group with a row
+ * that opened the full SIL Open Font License, and the reader tapped a
+ * license page that repeated the six credits above it before printing the
+ * text (owner report). The faces are credited here, each by the hand that
+ * made it and the use it is put to; the license texts travel with the files
+ * in the package, where every library's license already travels, and the
+ * manifest records each dataset's terms. A license screen is not part of
+ * reading the Quran, and the app does not teach one.
  *
  * Corrections and rights requests travel through the store listing's contact
  * and the project repository rather than through the app.
@@ -53,7 +56,6 @@ private const val LICENSE_SEPARATOR = " · "
 fun AboutPage(
     packs: List<ContentPack>,
     version: String,
-    onOpenLicenses: () -> Unit,
 ) {
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         Group(stringResource(R.string.settings_group_about))
@@ -134,11 +136,6 @@ fun AboutPage(
                 stringResource(R.string.credit_noto_sans_bengali_by),
                 stringResource(R.string.credit_noto_sans_bengali_use),
             ),
-        )
-        PageRow(
-            title = stringResource(R.string.about_open_licenses),
-            summary = stringResource(R.string.about_licenses_summary),
-            onClick = onOpenLicenses,
         )
 
         Group(stringResource(R.string.about_group_recitations))

@@ -1,5 +1,6 @@
 package io.github.muntasimulhaque.quran.ui.browse
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -164,14 +165,25 @@ private fun PlaceRow(
     onClick: () -> Unit,
     action: Pair<String, () -> Unit>? = null,
 ) {
+    // One gap for every line under the name: the ayah, the note, and the
+    // moment stand on the row's one rhythm, so nothing in the middle of a
+    // row reads as a break the row did not mean. Each line used to carry its
+    // own padding, 4 dp above the ayah and 8 dp above the rest, and with the
+    // fonts' own line boxes on top of it the eye counted the step between
+    // the second line and the third: 11 dp, then 16 dp in one row, and
+    // 11, 18, 16 in a row that carries a note (owner report).
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .sheetRow(onClick = onClick)
             .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = Space.Row),
+        verticalArrangement = Arrangement.spacedBy(Space.Line),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(Space.Line),
+            ) {
                 Text(
                     text = surah,
                     style = MaterialTheme.typography.titleMedium,
@@ -188,7 +200,6 @@ private fun PlaceRow(
                         text = ayah,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = Space.Tight),
                     )
                 }
             }
@@ -217,7 +228,6 @@ private fun PlaceRow(
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = Space.Line),
             )
         }
         if (!detail.isNullOrBlank()) {
@@ -225,7 +235,6 @@ private fun PlaceRow(
                 text = detail,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = Space.Line),
             )
         }
     }

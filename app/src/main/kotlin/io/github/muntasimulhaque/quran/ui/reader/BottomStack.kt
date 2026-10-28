@@ -149,10 +149,12 @@ internal fun BottomStack(
                 // note does not claim to be a save (owner report).
                 isSaved = row?.marked == true,
                 hasNote = !row?.note.isNullOrBlank(),
-                // The deeper door opens tafsir and nothing else, so a reader
-                // who hid tafsir has nothing behind it and the action goes
-                // with the door.
-                showTafsir = viewModel.settings.showTafsir,
+                // The deeper door opens tafsir and nothing else, so it is on
+                // the pill exactly while the reader has a tafsir to open: the
+                // packs are the setting, and there is no switch over them
+                // (owner decision, this session). A pack still on its way in
+                // is not on the device, so the mark arrives with it.
+                showTafsir = viewModel.enabledTafsirPacks.isNotEmpty(),
                 onSave = {
                     // A save of the reader's own, carrying a note, asks
                     // before it goes, so the reader's own words are never

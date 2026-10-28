@@ -133,7 +133,6 @@ class ReadingVerseGapTest {
                 setAyah(1)
                 setTheme(AppTheme.Light)
                 setShowTranslation(showTranslation)
-                setShowTafsir(false)
                 setWordByWord(false)
                 setTajweed(true)
                 for (role in TypeRole.entries) setTypeSize(role, TextSize.DEFAULT)

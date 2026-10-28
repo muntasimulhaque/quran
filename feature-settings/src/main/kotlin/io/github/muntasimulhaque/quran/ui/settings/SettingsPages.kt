@@ -123,7 +123,11 @@ private fun SizeSample(row: ReadingRow, settings: AppSettings) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Row, bottom = Space.Tight),
+            // The sample is its own block, not the first row's label: the
+            // page keeps a block's gap under it and a block's gap between
+            // every two rows, so the four controls read as four blocks under
+            // one page of text (owner decision, this session).
+            .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Row, bottom = Space.Block),
     ) {
         val palette = LocalPagePalette.current
         TajweedText(

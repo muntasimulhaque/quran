@@ -65,7 +65,15 @@ fun TranslationsPage(
     }
 }
 
-/** Tafsirs: as many as the reader wants, each behind its own door. */
+/**
+ * Tafsirs: as many as the reader wants, each behind its own door.
+ *
+ * There is no master switch over the list. The reading opens a tafsir only
+ * when the reader asks for one, from the ayah pill's own Tafsir mark, so
+ * there is no passage being drawn that a switch could hide; a tafsir is on
+ * the reading exactly while a pack is chosen, the same way a reciter is the
+ * reader's voice exactly while it is chosen (owner decision, this session).
+ */
 @Composable
 fun TafsirsPage(
     settings: AppSettings,
@@ -74,18 +82,6 @@ fun TafsirsPage(
     actions: SettingsActions,
 ) {
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
-        // The same switch as the translations page, in the same words as the
-        // hub row: the page that owns the list owns the switch that shows it
-        // (owner decision, this session).
-        val installed = hasInstalledTafsir(settings, packs)
-        ToggleRow(
-            title = stringResource(R.string.settings_show_tafsir_title),
-            subtitle = tafsirSummary(settings, packs),
-            checked = settings.showTafsir && installed,
-            onChange = actions.onShowTafsir,
-            enabled = installed,
-            switchTag = "switch-tafsir-page",
-        )
         LanguageGroups(
             packs = packs,
             type = PackType.Tafsir,

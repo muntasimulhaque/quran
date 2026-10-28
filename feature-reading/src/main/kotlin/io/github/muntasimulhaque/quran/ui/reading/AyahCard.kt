@@ -204,77 +204,79 @@ fun AyahCard(
                 // a still frame does (owner report).
                 .testTag("ayah-card"),
         ) {
-            // The tafsir is drawn only while the reader shows it. The packs
-            // still stand in for search; this is what the ayah card draws.
-            if (settings.showTafsir) {
-                if (tafsirPacks.isEmpty()) {
-                    // The card is only the tafsir doors, so a reader with none
-                    // open gets the door to add one rather than a sheet with
-                    // nothing in it.
-                    AddDoor(
-                        text = stringResource(R.string.card_add_tafsir),
-                        action = stringResource(R.string.reading_action_add),
-                        onClick = onAddContent,
-                        modifier = Modifier.padding(horizontal = SheetRowGutter),
+            // The card is the tafsir it was opened for: the reader tapped
+            // the ayah pill's Tafsir mark, or arrived from a tafsir hit that
+            // named the pack, so there is nothing here to hide behind a
+            // switch. The packs are the choice, and the mark that opens
+            // this card exists exactly while one of them is on the device
+            // (owner decision, this session).
+            if (tafsirPacks.isEmpty()) {
+                // The card is only the tafsir doors, so a reader with none
+                // open gets the door to add one rather than a sheet with
+                // nothing in it.
+                AddDoor(
+                    text = stringResource(R.string.card_add_tafsir),
+                    action = stringResource(R.string.reading_action_add),
+                    onClick = onAddContent,
+                    modifier = Modifier.padding(horizontal = SheetRowGutter),
+                )
+            } else {
+                // The sheet is named by the kind of text it holds, the way
+                // every sheet is named by its own name. It wears the app's
+                // one head over a list, so a label over a group of choices
+                // is one voice wherever the reader meets it.
+                SectionHead(
+                    text = stringResource(R.string.card_tafsir_label),
+                    modifier = Modifier.padding(
+                        start = Space.Gutter,
+                        end = Space.Gutter,
+                        top = Space.Tight,
+                        bottom = Space.Block,
+                    ),
+                )
+                val single = tafsirPacks.singleOrNull()
+                if (single != null) {
+                    // One pack is no choice: the reader tapped Tafsir on
+                    // the pill, or arrived from a search hit that already
+                    // named the pack, so its name is a byline and its
+                    // passage stands under it with no door to fold (owner
+                    // decision, this session).
+                    val packName = contentPackName(single.id, single.name)
+                    Text(
+                        text = packName,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = Space.Gutter),
+                    )
+                    PassageArea(
+                        view = passages[single.id],
+                        done = load.done,
+                        // The byline above already names the pack: the wait
+                        // is never a second copy of the name.
+                        opening = null,
+                        settings = settings,
                     )
                 } else {
-                    // The sheet is named by the kind of text it holds, the way
-                    // every sheet is named by its own name. It wears the app's
-                    // one head over a list, so a label over a group of choices
-                    // is one voice wherever the reader meets it.
-                    SectionHead(
-                        text = stringResource(R.string.card_tafsir_label),
-                        modifier = Modifier.padding(
-                            start = Space.Gutter,
-                            end = Space.Gutter,
-                            top = Space.Tight,
-                            bottom = Space.Block,
-                        ),
-                    )
-                    val single = tafsirPacks.singleOrNull()
-                    if (single != null) {
-                        // One pack is no choice: the reader tapped Tafsir on
-                        // the pill, or arrived from a search hit that already
-                        // named the pack, so its name is a byline and its
-                        // passage stands under it with no door to fold (owner
-                        // decision, this session).
-                        val packName = contentPackName(single.id, single.name)
-                        Text(
-                            text = packName,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(horizontal = Space.Gutter),
+                    orderedPacks.forEach { pack ->
+                        val open = door?.id == pack.id
+                        // The tafsir's own name, in the reader's language.
+                        val packName = contentPackName(pack.id, pack.name)
+                        DoorRow(
+                            title = packName,
+                            subtitle = languageName(pack.language),
+                            open = open,
+                            onClick = { door = if (open) null else pack },
                         )
-                        PassageArea(
-                            view = passages[single.id],
-                            done = load.done,
-                            // The byline above already names the pack: the wait
-                            // is never a second copy of the name.
-                            opening = null,
-                            settings = settings,
-                        )
-                    } else {
-                        orderedPacks.forEach { pack ->
-                            val open = door?.id == pack.id
-                            // The tafsir's own name, in the reader's language.
-                            val packName = contentPackName(pack.id, pack.name)
-                            DoorRow(
-                                title = packName,
-                                subtitle = languageName(pack.language),
-                                open = open,
-                                onClick = { door = if (open) null else pack },
+                        if (open) {
+                            PassageArea(
+                                view = passages[pack.id],
+                                done = load.done,
+                                opening = stringResource(
+                                    R.string.card_opening_pack,
+                                    packName,
+                                ),
+                                settings = settings,
                             )
-                            if (open) {
-                                PassageArea(
-                                    view = passages[pack.id],
-                                    done = load.done,
-                                    opening = stringResource(
-                                        R.string.card_opening_pack,
-                                        packName,
-                                    ),
-                                    settings = settings,
-                                )
-                            }
                         }
                     }
                 }

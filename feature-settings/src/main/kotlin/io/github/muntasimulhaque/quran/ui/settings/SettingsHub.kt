@@ -21,7 +21,7 @@ import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
 
 /** The pages the settings hub opens, one at a time. */
-enum class SettingsPage { Language, Theme, FontSize, Reciters, Daily, Translations, Tafsirs, Tajweed, About, Licenses }
+enum class SettingsPage { Language, Theme, FontSize, Reciters, Daily, Translations, Tafsirs, Tajweed, About }
 
 @Composable
 fun SettingsPage.title(): String = stringResource(
@@ -35,7 +35,6 @@ fun SettingsPage.title(): String = stringResource(
         SettingsPage.Tafsirs -> R.string.settings_title_tafsirs
         SettingsPage.Tajweed -> R.string.settings_title_tajweed
         SettingsPage.About -> R.string.settings_title_about
-        SettingsPage.Licenses -> R.string.settings_title_licenses
     },
 )
 
@@ -52,7 +51,7 @@ private fun themeSummary(settings: AppSettings): String = settings.theme.name()
  * The hub: one row per setting, each carrying where it stands, so a reader
  * can see their own setup at a glance and open only what they came to change.
  *
- * The nine rows read as one list, the app's own surfaces first because they
+ * The ten rows read as one list, the app's own surfaces first because they
  * are the words the reader reads everything else in, then the reading's own
  * choices, then the reciter, then the daily ayah. The four group headings
  * that used to stand over them named parts of one list, and a reader who has
@@ -73,7 +72,6 @@ fun SettingsHub(
     exactGrantWithheld: Boolean,
     packSetup: PackSetupState?,
     onShowTranslation: (Boolean) -> Unit,
-    onShowTafsir: (Boolean) -> Unit,
     onWordByWord: (Boolean) -> Unit,
     onTajweed: (Boolean) -> Unit,
     onDailyAyah: (Boolean) -> Unit,
@@ -105,15 +103,21 @@ fun SettingsHub(
         // reads top to bottom against the page, and the colors stood between
         // the meanings and the translation: the one row that draws the Quran's
         // own line was filed with the two that add prose under it, and the
-        // group broke in the middle (owner decision, this session). Each
-        // switch says whether the reading shows what it names, and the rest
-        // of the row opens the list it is chosen from, where the same switch
-        // stands again at the page's top. The switch is the only thing that
-        // switches, so a reader who came to look at the translations never
-        // changes the reading by looking (owner report, 2.3).
+        // group broke in the middle (owner decision, this session). A switch
+        // says whether the reading shows what it names, and the rest of the
+        // row opens the list it is chosen from. The switch is the only thing
+        // that switches, so a reader who came to look at the translations
+        // never changes the reading by looking (owner report, 2.3).
+        //
+        // The switch row's value slot carries a value or nothing, never a
+        // description: every other switch here says what is chosen under its
+        // name, and "The rules of recitation, in the printed mushaf's colors"
+        // under "Tajweed colors" was the one row explaining itself instead
+        // (owner report). The page it opens says what the colors are, in one
+        // sentence over the legend.
         ToggleRow(
             title = stringResource(R.string.settings_tajweed_title),
-            subtitle = stringResource(R.string.settings_tajweed_summary),
+            subtitle = null,
             checked = settings.tajweed,
             onChange = onTajweed,
             onOpen = { onOpen(SettingsPage.Tajweed) },
@@ -122,7 +126,6 @@ fun SettingsHub(
         )
         WordByWordRow(settings, packs, packSetup, onWordByWord)
         val hasTranslation = hasInstalledTranslation(settings, packs)
-        val hasTafsir = hasInstalledTafsir(settings, packs)
         ToggleRow(
             title = stringResource(R.string.settings_show_translation_title),
             subtitle = translationName(settings, packs),
@@ -136,16 +139,17 @@ fun SettingsHub(
             openLabel = stringResource(R.string.settings_open_translations),
             switchTag = "switch-translation",
         )
-        ToggleRow(
-            title = stringResource(R.string.settings_show_tafsir_title),
-            subtitle = tafsirSummary(settings, packs),
-            checked = settings.showTafsir && hasTafsir,
-            onChange = onShowTafsir,
-            enabled = hasTafsir,
-            onOpen = { onOpen(SettingsPage.Tafsirs) },
-            openLabel = stringResource(R.string.settings_open_tafsirs),
-            switchTag = "switch-tafsir",
-        )
+        // The tafsir is a list, not a switch. The reading opens a tafsir only
+        // when the reader asks for one, from the pill's own Tafsir mark, so
+        // there is no page of tafsir being drawn that a switch could hide:
+        // the packs are the setting, the same way the reciter's voice is the
+        // setting and no switch turns a reciter on (owner decision, this
+        // session).
+        PageRow(
+            title = stringResource(R.string.settings_title_tafsirs),
+            summary = tafsirSummary(settings, packs),
+            modifier = Modifier.testTag("row-tafsirs"),
+        ) { onOpen(SettingsPage.Tafsirs) }
         PageRow(
             title = stringResource(R.string.settings_title_reciters),
             summary = reciterName(settings, recitations),
@@ -171,10 +175,15 @@ fun SettingsHub(
 }
 
 /**
- * The four sizes as a reader reads them: "Default" when every one is on the
- * middle step, and otherwise the step each kind sits on. A row of four raw sp
- * values reads like a settings file; a step number reads like a choice the
- * reader made.
+ * The four sizes in the hub's one line: "Default" while every kind of text
+ * stands on the middle step, and "Adjusted" once the reader has moved one
+ * of them.
+ *
+ * It used to print the place of every kind ("Quran text 3 of 5, translation
+ * 3 of 5, tafsir 3 of 5, word meanings 3 of 5"), which took two or three
+ * lines of the row and said "Default" in four numbers. The page behind the
+ * row shows every step as a filled cell beside the reader's own sample, so
+ * the row's own job is only whether anything has moved (owner report).
  */
 @Composable
 private fun fontSizeSummary(settings: AppSettings): String {
@@ -184,25 +193,14 @@ private fun fontSizeSummary(settings: AppSettings): String {
         settings.tafsirSize,
         settings.wordsSize,
     )
-    if (steps.all { it == TextSize.DEFAULT }) {
-        return stringResource(R.string.settings_summary_text_default)
-    }
     return stringResource(
-        R.string.settings_summary_text_steps,
-        stepText(settings.arabicSize),
-        stepText(settings.translationSize),
-        stepText(settings.tafsirSize),
-        stepText(settings.wordsSize),
+        if (steps.all { it == TextSize.DEFAULT }) {
+            R.string.settings_summary_text_default
+        } else {
+            R.string.settings_summary_text_adjusted
+        },
     )
 }
-
-/** One scale's place: "3 of 5", in the reader's own digits and words. */
-@Composable
-internal fun stepText(step: Float): String = stringResource(
-    R.string.settings_text_size_step,
-    TextSize.stepNumber(step),
-    TextSize.stepCount,
-)
 
 /**
  * The reader's reciter, in the reader's own language: the hub row used to

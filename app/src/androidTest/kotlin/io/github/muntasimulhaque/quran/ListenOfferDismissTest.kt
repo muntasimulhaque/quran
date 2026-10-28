@@ -71,7 +71,6 @@ class ListenOfferDismissTest {
                     setTranslationPacks(emptySet())
                     setTafsirPacks(emptySet())
                     setShowTranslation(true)
-                    setShowTafsir(true)
                     setWordByWord(false)
                     setRecitation("husary")
                     setLongPressHintShown()

@@ -166,6 +166,14 @@ fun AppTheme.name(): String = stringResource(
  * from the smallest to the largest, and the chosen one is filled. The sample
  * above the rows is drawn in the script of the text that is being sized, so
  * Arabic is judged as Arabic.
+ *
+ * The row names nothing else. It used to print "3 of 5" beside every name,
+ * which is the place of the step in a ladder the reader can already see: the
+ * five cells grow from the smallest to the largest and the chosen one is
+ * filled, so the number said the same thing twice, and four of them stacked
+ * turned the page into arithmetic (owner report). A reader who cannot see
+ * the fill still hears the place, because each cell says it (owner decision,
+ * this session).
  */
 @Composable
 fun SizeRow(role: TypeRole, step: Float, onChange: (Float) -> Unit) {
@@ -179,7 +187,6 @@ fun SizeRow(role: TypeRole, step: Float, onChange: (Float) -> Unit) {
     )
     SegmentedRow(
         label = label,
-        valueLabel = stepText(step),
         value = step,
         steps = TextSize.STEPS,
         onSelect = onChange,
@@ -227,12 +234,17 @@ fun SizeRow(role: TypeRole, step: Float, onChange: (Float) -> Unit) {
  * the name has the row to itself and the choices have the row's middle, and
  * the pair reads as one block (these cells were 38 and 46 dp once, named
  * and not done until later).
+ *
+ * The rhythm is what says which name belongs to which pill: the name stands
+ * 4 dp above its own control, and the next row opens 16 dp under it. The
+ * page used to keep 4 dp above and below every row and 8 dp between a name
+ * and its pill, so the gap inside a row and the gap between rows measured
+ * 11 dp and 12 dp on the glass: four controls floated in one column of
+ * equal gaps, and nothing grouped (owner report).
  */
 @Composable
 private fun SegmentedRow(
     label: String,
-    /** The chosen step, said beside the name: "3 of 5". */
-    valueLabel: String,
     value: Float,
     steps: List<Float>,
     onSelect: (Float) -> Unit,
@@ -244,27 +256,16 @@ private fun SegmentedRow(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Tight, bottom = Space.Tight),
+            .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Block),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = label,
-                // A control's name wears the same words every other row's name
-                // wears, so the sheet reads as one voice (owner decision, the
-                // theme and consistency session).
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f),
-            )
-            Text(
-                text = valueLabel,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+        Text(
+            text = label,
+            // A control's name wears the same words every other row's name
+            // wears, so the sheet reads as one voice (owner decision, the
+            // theme and consistency session).
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
         StepRow(
             steps = steps,
             value = value,
@@ -272,7 +273,7 @@ private fun SegmentedRow(
             cell = cell,
             description = description,
             modifier = Modifier
-                .padding(top = Space.Line)
+                .padding(top = Space.Tight)
                 .align(Alignment.CenterHorizontally),
         )
     }

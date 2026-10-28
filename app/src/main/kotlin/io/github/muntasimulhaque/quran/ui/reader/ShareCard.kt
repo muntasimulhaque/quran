@@ -3,11 +3,9 @@ package io.github.muntasimulhaque.quran.ui.reader
 import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -109,16 +107,16 @@ internal suspend fun loadShareCard(
 }
 
 /**
- * The card as an image: the ayah in the reading's own Arabic face, its
- * translation under it, the reference under that, and the app's mark at the
- * foot.
+ * The card as an image: the surah's own name, the reference that names the
+ * ayah, the ayah in the reading's own Arabic face, its translation under it,
+ * and the app's mark at the foot.
  *
  * The card wears the manuscript paper whatever theme the reader is reading
  * in: this picture leaves the app and lands in a chat or a feed, and the
- * app's own face is what the people there should see. It is drawn at one
- * fixed text scale for the same reason: a picture is one artifact shared
- * with everyone, while the reading itself stays as large as the reader asked
- * for. The colors are the theme's own, reached through a
+ * app's own face is what the people there should see. Its type is fixed and
+ * never follows the phone's font size, for the same reason: a picture is one
+ * artifact shared with everyone, while the reading itself stays as large as
+ * the reader asked for. The colors are the theme's own, reached through a
  * MaterialTheme of the paper, so the shared card and the app are one hand.
  */
 @Composable
@@ -145,12 +143,18 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
                 .padding(start = 26.dp, end = 26.dp, top = 30.dp, bottom = Space.Gutter),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // The card is one plaque, and everything on it is centered: the
-            // surah's own name in the ornament's hand, the reference that
-            // names the ayah, the ayah, its translation, and the app's own
-            // foot. Before this, four different alignments met on one narrow
-            // card (owner report): the Arabic right, the translation left,
-            // the reference right, the name left.
+            // The card is one plaque with two axes and one center line. The
+            // labels stand on the center: the surah's own name in the
+            // ornament's hand, the reference that names the ayah, and the
+            // app's foot. Each body of text stands on the edge its script
+            // reads from: the ayah on the right, because Arabic is read from
+            // the right, and its translation at the start, because English
+            // and Bangla are read from the left. Before this the whole card
+            // was centered, which put a four-line translation on a ragged
+            // axis with no straight edge, and before that four alignments met
+            // with the labels alternating too (owner report); this is the
+            // card as the reading draws it, a verse on its own edge and its
+            // meaning at the page's (owner decision, this session).
             card.surahArabic?.takeIf { it.isNotBlank() }?.let { arabicName ->
                 Text(
                     text = arabicName,
@@ -184,7 +188,7 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
                     fontFamily = hafs,
                     fontSize = 26.sp,
                     lineHeight = 48.sp,
-                    textAlign = TextAlign.Center,
+                    textAlign = TextAlign.Right,
                     color = MaterialTheme.colorScheme.onSurface,
                 ),
                 modifier = Modifier
@@ -194,26 +198,22 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
             if (card.translation.isNotEmpty()) {
                 TranslationBody(
                     runs = card.translation,
-                    modifier = Modifier.padding(top = Space.Block),
+                    // The meaning sits close under the verse it renders, one
+                    // row's gap, while the header above the verse keeps a
+                    // block's: the gaps say what belongs with what (owner
+                    // decision, this session).
+                    modifier = Modifier.padding(top = Space.Row),
                     sizeSp = 15f,
                     lineSp = 23f,
                     arabicSp = 21f,
-                    centered = true,
                     // The card is parchment whatever page the reader is on,
                     // so its words wear the paper ink and never the night
                     // page's softer tone.
                     color = PaperInk,
                 )
             }
-            Box(
-                Modifier
-                    .padding(top = Space.Section)
-                    .fillMaxWidth(0.22f)
-                    .height(1.dp)
-                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)),
-            )
             Row(
-                modifier = Modifier.padding(top = Space.Block),
+                modifier = Modifier.padding(top = Space.Section),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 AppMark(mark = mark, modifier = Modifier.size(20.dp))

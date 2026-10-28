@@ -15,6 +15,9 @@
          words are the second choice, never welded to the picture. -->
     <string name="share_image">Share image</string>
     <string name="share_text">Share text</string>
+    <!-- The sheet draws no heading. This is the surface's name for a screen
+         reader, spoken when the window opens and never drawn. -->
+    <string name="share_sheet_announcement">Share ayah</string>
     <string name="share_unavailable">No app on this device can receive a share</string>
 
     <string name="first_paint_title" translatable="false">القرآن</string>

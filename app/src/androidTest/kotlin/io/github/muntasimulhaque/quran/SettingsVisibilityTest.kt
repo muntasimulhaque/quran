@@ -27,11 +27,13 @@ import org.junit.runner.RunWith
 /**
  * The reading draws what the reader asked to see.
  *
- * Settings gained toggles for the translation and the tafsir, on by default.
- * A reader who hid the translation gets the ayah and nothing under it, and
- * the switch brings the same text back without reopening the library: the
- * packs are untouched, the page follows the switch. This test turns the
- * translation off before the activity starts and reads the reading back.
+ * The translation is drawn on the page unasked, so it has a switch, on by
+ * default: a reader who hides it gets the ayah and nothing under it, and the
+ * switch brings the same text back without reopening the library, because
+ * the packs are untouched and the page follows the switch. (The tafsir has
+ * no such switch: it is drawn only from the ayah pill's own mark, so its
+ * packs are its one setting.) This test turns the translation off before the
+ * activity starts and reads the reading back.
  */
 @RunWith(AndroidJUnit4::class)
 class SettingsVisibilityTest {
@@ -49,7 +51,6 @@ class SettingsVisibilityTest {
                     setAyah(1)
                     setTranslationPacks(setOf(TRANSLATION))
                     setShowTranslation(false)
-                    setShowTafsir(true)
                 }
             }
         }
@@ -58,7 +59,6 @@ class SettingsVisibilityTest {
             runBlocking {
                 SettingsStore(context).apply {
                     setShowTranslation(true)
-                    setShowTafsir(true)
                 }
             }
         }

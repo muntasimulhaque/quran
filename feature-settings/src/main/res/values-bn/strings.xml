@@ -26,11 +26,8 @@
     <string name="settings_cancel">বাতিল</string>
     <string name="settings_set">ঠিক করুন</string>
     <string name="settings_follow_title">তিলাওয়াতের সাথে চলুন</string>
-    <string name="settings_follow_subtitle">যে আয়াতটি তিলাওয়াত হচ্ছে, পাতাটি তার কাছে চলে যাবে।</string>
     <string name="settings_show_translation_title">অনুবাদ দেখান</string>
-    <string name="settings_show_tafsir_title">তাফসীর দেখান</string>
     <string name="settings_open_translations">অনুবাদ বাছাই করুন</string>
-    <string name="settings_open_tafsirs">তাফসীর বাছাই করুন</string>
     <string name="settings_words_title">শব্দের অর্থ দেখান</string>
     <string name="settings_tajweed_title">তাজবীদ রঙ</string>
     <string name="settings_tajweed_summary">ছাপা মুসহাফের রঙে তিলাওয়াতের নিয়ম</string>
@@ -39,7 +36,6 @@
     <string name="settings_words_failed_storage">শব্দের অর্থ যোগ করার জায়গা নেই। কিছু জায়গা খালি করে আবার চেষ্টা করুন।</string>
 
     <string name="settings_text_size_option">%3$s · আকার %1$d/%2$d</string>
-    <string name="settings_text_size_step">%1$d / %2$d</string>
 
     <string name="settings_downloaded_label">ডাউনলোড করা সূরা (%1$d)</string>
     <string name="settings_downloaded_label_counting">ডাউনলোড করা সূরা</string>
@@ -63,29 +59,24 @@
     <string name="about_group_recitations">তিলাওয়াত</string>
     <string name="about_license">MIT</string>
     <string name="about_pack_title">%1$s · %2$s</string>
-    <string name="settings_title_licenses">লাইসেন্স</string>
-    <string name="about_open_licenses">ফন্ট লাইসেন্স</string>
-    <string name="about_licenses_summary">SIL ওপেন ফন্ট লাইসেন্স 1.1</string>
-    <string name="licenses_opening">অ্যাপটি KFGQPC হাফস, আমিরি কুরআন, লিটারাটা, নোটো স্যান্স বাংলা, নোটো সেরিফ বাংলা ও ইন্টার ফন্ট SIL ওপেন ফন্ট লাইসেন্স 1.1-এর অধীনে বিতরণ করে। লাইসেন্সের পূর্ণ লেখা নিচে দেওয়া হলো।</string>
-    <string name="licenses_unavailable">এই ফোনে লাইসেন্সের লেখা পড়া যায়নি।</string>
 
     <string name="credit_page_fonts">KFGQPC হাফস উসমানি লিপি</string>
     <string name="credit_page_fonts_by">বাদশাহ ফাহদ গ্লোরিয়াস কুরআন প্রিন্টিং কমপ্লেক্স, অপরিবর্তিত</string>
     <string name="credit_page_fonts_use">কুরআনের লেখা, বিসমিল্লাহ, শব্দে শব্দে সহায়িকা এবং আয়াতের মেডেলিয়ন</string>
     <string name="credit_amiri">আমিরি কুরআন</string>
-    <string name="credit_amiri_by">খালেদ হোসনী, SIL ওপেন ফন্ট লাইসেন্স 1.1</string>
+    <string name="credit_amiri_by">খালেদ হোসনী</string>
     <string name="credit_amiri_use">অ্যাপের নাম, সূরার নাম এবং তাফসীরের আরবি</string>
     <string name="credit_literata">লিটারাটা</string>
-    <string name="credit_literata_by">টাইপটুগেদার, SIL ওপেন ফন্ট লাইসেন্স 1.1</string>
+    <string name="credit_literata_by">টাইপটুগেদার</string>
     <string name="credit_literata_use">অনুবাদ ও তাফসীর</string>
     <string name="credit_noto_serif_bengali">নোটো সেরিফ বাংলা</string>
-    <string name="credit_noto_serif_bengali_by">গুগল, SIL ওপেন ফন্ট লাইসেন্স 1.1</string>
+    <string name="credit_noto_serif_bengali_by">গুগল</string>
     <string name="credit_noto_serif_bengali_use">বাংলা অনুবাদ ও তাফসীর</string>
     <string name="credit_inter">ইন্টার</string>
-    <string name="credit_inter_by">রাসমুস অ্যান্ডারসন, SIL ওপেন ফন্ট লাইসেন্স 1.1</string>
+    <string name="credit_inter_by">রাসমুস অ্যান্ডারসন</string>
     <string name="credit_inter_use">ইন্টারফেস</string>
     <string name="credit_noto_sans_bengali">নোটো স্যান্স বাংলা</string>
-    <string name="credit_noto_sans_bengali_by">গুগল, SIL ওপেন ফন্ট লাইসেন্স 1.1</string>
+    <string name="credit_noto_sans_bengali_by">গুগল</string>
     <string name="credit_noto_sans_bengali_use">বাংলা ইন্টারফেস</string>
     <string name="credit_minshawi">মিনশাবি</string>
     <string name="credit_minshawi_by">মুহাম্মদ সিদ্দিক আল-মিনশাবি, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে</string>
@@ -101,7 +92,7 @@
     <string name="settings_title_tafsirs">তাফসীর</string>
     <string name="settings_title_about">অ্যাপ সম্পর্কে</string>
     <string name="settings_summary_text_default">স্বাভাবিক</string>
-    <string name="settings_summary_text_steps">কুরআনের লেখা %1$s, অনুবাদ %2$s, তাফসীর %3$s, শব্দের অর্থ %4$s</string>
+    <string name="settings_summary_text_adjusted">পরিবর্তিত</string>
     <string name="settings_version_short">সংস্করণ %1$s</string>
     <string name="settings_none_yet">এখনও নেই</string>
     <string name="settings_chosen_count">%1$dটি নির্বাচিত</string>
@@ -112,9 +103,8 @@
     <string name="settings_group_about">অ্যাপ</string>
     <string name="settings_back">ফিরে যান</string>
 
-    <string name="settings_title_tajweed">তাজবীদ নিয়ম</string>
+    <string name="settings_title_tajweed">তাজবীদ রঙ</string>
     <string name="settings_open_tajweed">নিয়মগুলো</string>
-    <string name="settings_tajweed_intro">ছাপা মুসহাফে তিলাওয়াতের নিয়মগুলো রঙে চিহ্নিত থাকে। নিচের সাতটি দল এই পাঠে তাজবীদ রঙ চালু থাকলে যে রঙে আঁকা হয়; প্রতিটি দলে পাঠের একটি শব্দ সেই রঙে দেখানো হয়েছে, আর প্রতিটি নামের নিচে এক বাক্যে বলা আছে নিয়মটি তিলাওয়াতকারীর কাছে কী চায়।</string>
     <string name="settings_tajweed_family_silent">নিরব হরফ</string>
     <string name="settings_tajweed_family_silent_note">যে হরফ পরের শব্দের সাথে মিলিয়ে পড়লে উচ্চারিত হয় না, যেমন হামযাতুল ওয়াসল।</string>
     <string name="settings_tajweed_family_ghunnah">গুন্নাহ</string>
@@ -130,40 +120,22 @@
     <string name="settings_tajweed_family_madda">মাদ</string>
     <string name="settings_tajweed_family_madda_note">নিয়ম অনুযায়ী স্বরকে কয়েক মাত্রা টেনে পড়া।</string>
     <string name="settings_tajweed_rule_ham_wasl">হামযাতুল ওয়াসল</string>
-    <string name="settings_tajweed_rule_ham_wasl_note">সংযোগ-হামযা; পরের শব্দের সাথে মিলিয়ে পড়লে উচ্চারিত হয় না।</string>
     <string name="settings_tajweed_rule_laam_shamsiyah">লাম শামসিয়্যাহ</string>
-    <string name="settings_tajweed_rule_laam_shamsiyah_note">সূর্য-হরফের আগে লাম উচ্চারিত হয় না; পরের হরফ দ্বিগুণ হয়।</string>
     <string name="settings_tajweed_rule_slnt">নিরব</string>
-    <string name="settings_tajweed_rule_slnt_note">ছাপায় নিরব হিসেবে চিহ্নিত হরফ, তিলাওয়াতে উচ্চারিত হয় না।</string>
     <string name="settings_tajweed_rule_ghunnah">গুন্নাহ</string>
-    <string name="settings_tajweed_rule_ghunnah_note">দুই মাত্রা ধরে রাখা নাসিক্য শব্দ।</string>
     <string name="settings_tajweed_rule_qalaqah">কলকলাহ</string>
-    <string name="settings_tajweed_rule_qalaqah_note">সাকিন অবস্থায় কলকলাহর পাঁচ হরফে কম্পনের মতো শব্দ।</string>
     <string name="settings_tajweed_rule_ikhafa">ইখফা</string>
-    <string name="settings_tajweed_rule_ikhafa_note">ইখফার হরফের আগে নূন বা তানবীন লুকিয়ে হালকা নাসিক্য শব্দে পড়া।</string>
     <string name="settings_tajweed_rule_ikhafa_shafawi">ইখফা শাফাবি</string>
-    <string name="settings_tajweed_rule_ikhafa_shafawi_note">বاء-এর আগে মীম লুকিয়ে হালকা নাসিক্য শব্দে পড়া।</string>
     <string name="settings_tajweed_rule_iqlab">ইকলাব</string>
-    <string name="settings_tajweed_rule_iqlab_note">বاء-এর আগে নূন বা তানবীনকে মীমে পরিণত করা।</string>
     <string name="settings_tajweed_rule_idgham_ghunnah">ইদগাম (গুন্নাহসহ)</string>
-    <string name="settings_tajweed_rule_idgham_ghunnah_note">নূন বা তানবীনকে পরের হরফে নাসিক্য শব্দসহ মিলিয়ে দেওয়া।</string>
     <string name="settings_tajweed_rule_idgham_wo_ghunnah">ইদগাম (গুন্নাহ ছাড়া)</string>
-    <string name="settings_tajweed_rule_idgham_wo_ghunnah_note">নূন বা তানবীনকে পরের হরফে নাসিক্য শব্দ ছাড়া মিলিয়ে দেওয়া।</string>
     <string name="settings_tajweed_rule_idgham_shafawi">ইদগাম শাফাবি</string>
-    <string name="settings_tajweed_rule_idgham_shafawi_note">মীমকে পরের মীমে মিলিয়ে দেওয়া।</string>
     <string name="settings_tajweed_rule_idgham_mutajanisayn">ইদগাম মুতাজানিসাইন</string>
-    <string name="settings_tajweed_rule_idgham_mutajanisayn_note">একই উচ্চারণস্থানের দুই হরফ মিললে একটিকে অন্যটিতে মিলিয়ে দেওয়া।</string>
     <string name="settings_tajweed_rule_idgham_mutaqaribayn">ইদগাম মুতাকারিবাইন</string>
-    <string name="settings_tajweed_rule_idgham_mutaqaribayn_note">নিকটবর্তী উচ্চারণস্থানের দুই হরফ মিললে একটিকে অন্যটিতে মিলিয়ে দেওয়া।</string>
     <string name="settings_tajweed_rule_madda_normal">মাদ স্বাভাবিক</string>
-    <string name="settings_tajweed_rule_madda_normal_note">দুই মাত্রার স্বাভাবিক টান।</string>
     <string name="settings_tajweed_rule_madda_permissible">মাদ জায়েজ</string>
-    <string name="settings_tajweed_rule_madda_permissible_note">পাঠ অনুযায়ী দুই, চার বা ছয় মাত্রার টান।</string>
     <string name="settings_tajweed_rule_madda_obligatory_monfasel">মাদ ওয়াজিব (মুনফাসিল)</string>
-    <string name="settings_tajweed_rule_madda_obligatory_monfasel_note">এক শব্দের শেষে মাদ হরফের সাথে পরের শব্দের শুরুতে হামযা মিললে যে টান।</string>
     <string name="settings_tajweed_rule_madda_obligatory_mottasel">মাদ ওয়াজিব (মুত্তাসিল)</string>
-    <string name="settings_tajweed_rule_madda_obligatory_mottasel_note">একই শব্দে মাদ হরফ ও হামযা মিললে যে টান।</string>
     <string name="settings_tajweed_rule_madda_necessary">মাদ লাজিম</string>
-    <string name="settings_tajweed_rule_madda_necessary_note">মাদ হরফের পরে সাকিন বা দ্বিগুণ হরফ এলে ছয় মাত্রার আবশ্যক টান।</string>
 
 </resources>

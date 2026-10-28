@@ -31,13 +31,16 @@ import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 
 /**
- * The deeper door names what is behind it, and each mark says the tap that
- * made it.
+ * The deeper door stands on the pill only while there is a tafsir behind it,
+ * and each mark says the tap that made it.
  *
- * The ayah card holds only the tafsir doors, so the
- * pill carries a Tafsir action with its scroll mark, standing beside Play at
- * the front of the bar. That is the first
- * assertion here. The second is the pair of marks on the same pill: a note
+ * The ayah card holds only the tafsir doors, and the pill is the only door to
+ * it, so the Tafsir action stands with Play, Save, Note, and Share while a
+ * tafsir is on the device and is absent while none is. There is no switch
+ * over the tafsirs: the packs are the choice, and a pack the reader removed
+ * is a door that is not there rather than a card with nothing behind it
+ * (owner decision, this session). That is the first assertion here. The
+ * second is the pair of marks on the same pill: a note
  * keeps its ayah in Saved and never presses Save, so a note written before
  * the activity starts lights Note and leaves Save dark, one tap of Save then
  * lights both because the reader has now pressed Save, and a second tap asks
@@ -69,7 +72,6 @@ class AyahActionsTest {
                     setTranslationPacks(emptySet())
                     setTafsirPacks(emptySet())
                     setShowTranslation(true)
-                    setShowTafsir(true)
                     setWordByWord(false)
                 }
                 // The note the marks are read against, on the ayah the press
@@ -95,12 +97,13 @@ class AyahActionsTest {
     val rule: TestRule = RuleChain.outerRule(library).around(compose)
 
     @Test
-    fun theDeeperDoorNamesTheReadingItWasRaisedOver() {
+    fun theDeeperDoorIsAbsentWhileNoTafsirIsOnTheDevice() {
         waitForReading()
 
-        // The card behind the door is only the tafsirs.
+        // This library carries no tafsir, so there is nothing behind the door
+        // and the pill does not offer it.
         openReadingAyah()
-        compose.onNodeWithContentDescription("Tafsir").assertExists()
+        compose.onNodeWithContentDescription("Tafsir").assertDoesNotExist()
     }
 
         @Test
@@ -164,22 +167,24 @@ class AyahActionsTest {
         // The shape is a child of the clickable, which merges its
         // descendants, so the tag is read from the unmerged tree.
         val shapes = compose.onAllNodesWithTag("ayah-action-shape", useUnmergedTree = true)
-        // Play, Tafsir, Save, Note, Share.
-        shapes.assertCountEquals(5)
-        repeat(5) { index ->
+        // Play, Save, Note, Share: the deeper door is absent on a library
+        // with no tafsir, so the bar carries four (owner decision, this
+        // session).
+        shapes.assertCountEquals(4)
+        repeat(4) { index ->
             shapes[index].assertHeightIsEqualTo(48.dp)
         }
-        // The bar hands its one measured width to all five, so the five
-        // press shapes match rather than five ovals of the words' own making.
+        // The bar hands its one measured width to all of them, so the press
+        // shapes match rather than four ovals of the words' own making.
         val first = shapes[0].getUnclippedBoundsInRoot()
-        val last = shapes[4].getUnclippedBoundsInRoot()
+        val last = shapes[3].getUnclippedBoundsInRoot()
         // The widths are read back through the density, and two nodes placed
         // on the same pixel edge can come back a hair apart in dp (48.0
         // against 47.999992 with Compose 1.12's rounding). A hundredth of a
         // dp is under any drawn difference and keeps the assertion about the
         // one measured width instead of about float noise.
         assertEquals(
-            "the five actions press in one width",
+            "the actions press in one width",
             (first.right - first.left).value,
             (last.right - last.left).value,
             0.01f,
@@ -218,8 +223,14 @@ class AyahActionsTest {
         }
         compose.onAllNodesWithText("1:1", substring = true).onFirst()
             .performTouchInput { longClick() }
+        // The pill is up when Play is: it is the one action every pill
+        // carries, whatever the library holds (owner report, this session:
+        // the wait used to name Tafsir, which is now a door that comes and
+        // goes with the packs).
         compose.waitUntil(timeoutMillis = 60_000) {
-            compose.onAllNodesWithContentDescription("Tafsir").fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithContentDescription(
+                compose.activity.getString(R.string.action_play),
+            ).fetchSemanticsNodes().isNotEmpty()
         }
     }
 

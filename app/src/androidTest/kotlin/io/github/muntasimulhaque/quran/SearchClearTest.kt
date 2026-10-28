@@ -58,7 +58,6 @@ class SearchClearTest {
             settings.setTranslationPacks(setOf("translation-saheeh-en"))
             settings.setTafsirPacks(setOf("tafsir-ibn-kathir-en"))
             settings.setShowTranslation(true)
-            settings.setShowTafsir(true)
             settings.setWordByWord(false)
             settings.setLongPressHintShown()
         }

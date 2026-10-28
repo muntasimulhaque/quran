@@ -18,7 +18,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * The settings hub's four reading switches are one run, in the order the page
+ * The settings hub's four reading rows are one run, in the order the page
  * draws them: the tajweed colors, which are the Arabic line itself, then the
  * word meanings under it, then the translation, then the tafsir behind the
  * ayah card.
@@ -30,6 +30,10 @@ import org.junit.runner.RunWith
  * the Quran's own line was filed with the two that add prose under it (owner
  * decision, the reading switches session). The order is measured here so a
  * later row edit cannot quietly split the group again.
+ *
+ * Three of the four are switches and the last is a list, since the tafsir is
+ * opened from the ayah pill rather than drawn behind a switch (owner
+ * decision, this session); the row's own position is what this measures.
  */
 @RunWith(AndroidJUnit4::class)
 class SettingsRowOrderTest {
@@ -38,7 +42,7 @@ class SettingsRowOrderTest {
     val compose = createComposeRule()
 
     @Test
-    fun theReadingSwitchesRunFromTheLineToTheProse() {
+    fun theReadingRowsRunFromTheLineToTheProse() {
         compose.setContent {
             QuranTheme(theme = AppTheme.Light) {
                 Column(Modifier.verticalScroll(rememberScrollState())) {
@@ -51,7 +55,6 @@ class SettingsRowOrderTest {
                         exactGrantWithheld = false,
                         packSetup = null,
                         onShowTranslation = {},
-                        onShowTafsir = {},
                         onWordByWord = {},
                         onTajweed = {},
                         onDailyAyah = {},
@@ -63,7 +66,7 @@ class SettingsRowOrderTest {
         val tajweed = top("switch-tajweed")
         val words = top("switch-words")
         val translation = top("switch-translation")
-        val tafsir = top("switch-tafsir")
+        val tafsir = top("row-tafsirs")
         assertTrue(
             "the tajweed colors are the Arabic line, so they stand above the meanings " +
                 "(tajweed at $tajweed, meanings at $words)",
@@ -81,9 +84,9 @@ class SettingsRowOrderTest {
         )
     }
 
-    /** Where one switch stands on the page, from the top of the sheet. */
-    private fun top(switchTag: String): Float = compose
-        .onNodeWithTag(switchTag, useUnmergedTree = true)
+    /** Where one row stands on the page, from the top of the sheet. */
+    private fun top(tag: String): Float = compose
+        .onNodeWithTag(tag, useUnmergedTree = true)
         .getUnclippedBoundsInRoot()
         .top
         .value

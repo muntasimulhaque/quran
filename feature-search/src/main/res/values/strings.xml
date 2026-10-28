@@ -3,7 +3,6 @@
     <string name="search_hint">Search the Quran</string>
     <string name="search_close">Close</string>
     <string name="search_clear">Clear search</string>
-    <string name="search_status_prompt">Search the Quran, or type 2:255 to go there.</string>
     <string name="search_status_searching">Searching…</string>
     <string name="search_status_no_matches">No matches.</string>
     <string name="search_status_failed">The search could not finish. Try again.</string>

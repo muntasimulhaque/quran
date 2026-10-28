@@ -22,7 +22,6 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.TypeRole
-import io.github.muntasimulhaque.quran.ui.settings.AboutPage
 import io.github.muntasimulhaque.quran.ui.settings.PageRow
 import io.github.muntasimulhaque.quran.ui.settings.SizeRow
 import io.github.muntasimulhaque.quran.ui.settings.SwitchSlot
@@ -408,36 +407,6 @@ class SettingsRowAlignmentTest {
         val last = marks.last()
         assertEquals("every chevron must sit at one left edge", first.left, last.left, 0.5f)
         assertEquals("every chevron must sit at one right edge", first.right, last.right, 0.5f)
-    }
-
-    /**
-     * The About page has one door, and it is the font license.
-     *
-     * The page used to be facts only, with no door and no chevron (owner
-     * decision, earlier session). The fonts' full license is now readable in
-     * the app, so the Fonts group ends in the one row that opens it, and the
-     * rest of the page stays what it was: version, licenses, and credits,
-     * each read where the reader already is. Corrections and rights requests
-     * still travel through the store listing's contact and the project
-     * repository rather than through the app (owner decision, 11.1).
-     */
-    @Test
-    fun theAboutPageOpensTheFontLicenseAndNothingElse() {
-        compose.setContent {
-            MaterialTheme {
-                AboutPage(
-                    packs = emptyList(),
-                    version = "3.3 (34)",
-                    onOpenLicenses = {},
-                )
-            }
-        }
-
-        val doors = compose.onAllNodes(hasClickAction(), useUnmergedTree = true)
-        assertEquals("the page holds one door", 1, doors.fetchSemanticsNodes().size)
-        val slots = compose.onAllNodesWithTag("chevron-slot", useUnmergedTree = true)
-        assertEquals("and draws one chevron", 1, slots.fetchSemanticsNodes().size)
-        compose.onNodeWithText("Font licenses").assertExists()
     }
 
     /**

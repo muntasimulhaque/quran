@@ -11,14 +11,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.paneTitle
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
@@ -38,6 +41,14 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * image** (the default) and **Share text**. The preview is the same
  * composable the capture draws, so what the reader sees is what the picture
  * will be, not a second drawing that can drift from it.
+ *
+ * The sheet carries no heading. It used to open with the ayah's reference in
+ * a title above the card, which the card already prints under the surah's
+ * name, in a type size no other sheet uses: the surface named the ayah a
+ * third time and said nothing about what it was for (owner report). The two
+ * doors say what it is for, and a screen reader is told the surface's name
+ * through the pane title without a line being drawn (owner decision, this
+ * session).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,6 +59,8 @@ internal fun AyahShareSheet(
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberExpandedSheetState()
+    // The one name the sheet has: spoken when the surface opens, never drawn.
+    val announcement = stringResource(R.string.share_sheet_announcement)
     AppSheet(
         onDismiss = onDismiss,
         sheetState = sheetState,
@@ -60,17 +73,10 @@ internal fun AyahShareSheet(
                 // preview keeps its own scroll for a tall card.
                 .sheetVerticalScroll(rememberScrollState())
                 .padding(bottom = Space.SheetFoot)
+                .semantics { paneTitle = announcement }
                 .testTag("share-sheet"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = card.reference,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = Space.Gutter, end = Space.Gutter, bottom = Space.Block),
-            )
             // The preview keeps the card's own measure and corners, so the
             // reader looks at the artifact rather than at a description of
             // it. It scrolls with the sheet if an ayah makes it tall.
@@ -104,12 +110,20 @@ internal fun AyahShareSheet(
 /** The card, drawn as it will be sent: the preview's own measure, no capture. */
 @Composable
 internal fun ShareCardPreview(card: ShareCard) {
+    // The picture is drawn at one fixed text scale, whatever the phone is set
+    // to: a card is one artifact sent to everyone. The capture pins the scale
+    // and the preview pins it too, or a reader whose phone is at 130% would
+    // approve a card larger and taller than the one they send (owner report,
+    // this session).
+    val density = LocalDensity.current
     Box(
         modifier = Modifier
             .width(ShareCardWidth)
             .clip(Radii.Sheet),
     ) {
-        AyahShareCardContent(card)
+        CompositionLocalProvider(LocalDensity provides Density(density.density, fontScale = 1f)) {
+            AyahShareCardContent(card)
+        }
     }
 }
 

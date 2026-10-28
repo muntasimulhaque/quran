@@ -17,6 +17,7 @@ import io.github.muntasimulhaque.quran.core.RepeatPlan
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 
 private val Context.settingsStore: DataStore<Preferences> by preferencesDataStore(
     name = "reading",
@@ -123,12 +124,16 @@ data class AppSettings(
     val tafsirPacks: Set<String> = emptySet(),
     /**
      * Whether the reading draws what the reader has chosen. The packs say
-     * what they have; these say what the page shows. Both are on by default:
-     * a reader who added a translation or a tafsir means to see it until
-     * they say otherwise.
+     * what they have; this says what the page shows. On by default: a
+     * reader who added a translation means to see it until they say
+     * otherwise.
+     *
+     * The tafsir has no such switch. It is drawn only where the reader asks
+     * for it, from the ayah pill's own Tafsir mark, so the packs are its one
+     * setting, the way the reciter's voice is the recitation's (owner
+     * decision, this session).
      */
     val showTranslation: Boolean = true,
-    val showTafsir: Boolean = true,
     val wordByWord: Boolean = false,
     /**
      * Whether the reading draws the QPC tajweed colors. On from the first
@@ -259,7 +264,15 @@ class SettingsStore(private val context: Context) {
      */
     fun snapshot(): AppSettings = themePreference.snapshot()
 
-    val settings: Flow<AppSettings> = context.settingsStore.data.map { preferences ->
+    /**
+     * The reader's choices, read once the retired tafsir switch has been
+     * carried. The migration runs before the first emission, not in a launch
+     * of its own, so no reader of this flow can meet the state the switch
+     * left behind (owner decision, this session).
+     */
+    val settings: Flow<AppSettings> = context.settingsStore.data
+        .onStart { carryRetiredTafsirSwitch() }
+        .map { preferences ->
         val choices = preferences.asMap()
         val ayah = preferences[AYAH] ?: 1
         // The four sizes arrived after the one size did, so a reader who had
@@ -282,9 +295,8 @@ class SettingsStore(private val context: Context) {
             playbackSpeed = (preferences[PLAYBACK_SPEED] ?: 1f).coerceIn(MIN_SPEED, MAX_SPEED),
             endOfAudio = storedEnd(preferences),
             translationPacks = translationPacks(preferences),
-            tafsirPacks = preferences[TAFSIR_PACKS] ?: emptySet(),
+            tafsirPacks = tafsirPacks(preferences),
             showTranslation = preferences[SHOW_TRANSLATION] ?: true,
-            showTafsir = preferences[SHOW_TAFSIR] ?: true,
             wordByWord = preferences[WORD_BY_WORD] ?: false,
             tajweed = preferences[TAJWEED] ?: true,
             dailyAyah = preferences[DAILY_AYAH] ?: true,
@@ -400,10 +412,6 @@ class SettingsStore(private val context: Context) {
         context.settingsStore.edit { it[TAJWEED] = tajweed }
     }
 
-    suspend fun setShowTafsir(show: Boolean) {
-        context.settingsStore.edit { it[SHOW_TAFSIR] = show }
-    }
-
     suspend fun setWordByWord(show: Boolean) {
         context.settingsStore.edit { it[WORD_BY_WORD] = show }
     }
@@ -433,6 +441,26 @@ class SettingsStore(private val context: Context) {
 
     suspend fun setTafsirPacks(packs: Set<String>) {
         context.settingsStore.edit { it[TAFSIR_PACKS] = packs }
+    }
+
+    /**
+     * Carries the retired tafsir switch into the pack choice, once.
+     *
+     * A reader who turned the switch off said they want no tafsir on the
+     * reading; with the switch gone, that answer is the empty pack set, and
+     * the pack they chose (and may still read in search) is left installed
+     * and simply unchosen. The key is written true in the same edit, so no
+     * later read meets the old answer again: this build cannot write it
+     * false, so a false value only ever means an install from before (owner
+     * decision, this session).
+     */
+    private suspend fun carryRetiredTafsirSwitch() {
+        context.settingsStore.edit { preferences ->
+            if (preferences[LEGACY_SHOW_TAFSIR] == false) {
+                preferences[TAFSIR_PACKS] = emptySet()
+                preferences[LEGACY_SHOW_TAFSIR] = true
+            }
+        }
     }
 
     /**
@@ -531,6 +559,19 @@ class SettingsStore(private val context: Context) {
     }
 
     /**
+     * The tafsirs the reader has on. It reads the retired master switch
+     * first: a reader who had turned tafsir off lands on no tafsir chosen,
+     * and the switch itself is written away in the same breath (see
+     * [carryRetiredTafsirSwitch]).
+     */
+    private fun tafsirPacks(preferences: Preferences): Set<String> =
+        if (preferences[LEGACY_SHOW_TAFSIR] == false) {
+            emptySet()
+        } else {
+            preferences[TAFSIR_PACKS] ?: emptySet()
+        }
+
+    /**
      * The moment the reminder arrives, read from whichever key this install
      * has: the minute of the day the picker writes, or the hour a build
      * before 2.3 wrote (a reader who chose 5 in that build keeps 5:00).
@@ -590,7 +631,13 @@ class SettingsStore(private val context: Context) {
         val TAFSIR_PACKS = stringSetPreferencesKey("tafsir_packs")
         val PENDING_PACKS = stringSetPreferencesKey("pending_packs")
         val SHOW_TRANSLATION = booleanPreferencesKey("show_translation")
-        val SHOW_TAFSIR = booleanPreferencesKey("show_tafsir")
+        /**
+         * The tafsir's master switch, which the packs replaced. Written by
+         * no build since the switch was removed; read only to carry an
+         * install that had it off across to no tafsir chosen, and written
+         * true at that one migration (owner decision, this session).
+         */
+        val LEGACY_SHOW_TAFSIR = booleanPreferencesKey("show_tafsir")
         val WORD_BY_WORD = booleanPreferencesKey("word_by_word")
         val TAJWEED = booleanPreferencesKey("tajweed")
         val DAILY_AYAH = booleanPreferencesKey("daily_ayah")

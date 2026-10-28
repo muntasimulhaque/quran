@@ -21,7 +21,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.LineHeightStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
@@ -60,8 +59,6 @@ fun TranslationBody(
     onFootnote: ((Int) -> Unit)? = null,
     /** The notes this text actually carries; null means every marker is a door. */
     footnoteNumbers: Set<Int>? = null,
-    /** True on a surface that centers its lines, such as the share card. */
-    centered: Boolean = false,
     /**
      * The ink of the words. The reading's own ink is the default; a surface
      * drawn on a ground of its own, such as the share card's paper, passes
@@ -97,7 +94,6 @@ fun TranslationBody(
         ),
         style = base,
         color = color,
-        textAlign = if (centered) TextAlign.Center else TextAlign.Unspecified,
         modifier = modifier.fillMaxWidth(),
     )
 }

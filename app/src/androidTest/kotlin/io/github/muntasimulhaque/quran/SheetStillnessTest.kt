@@ -60,7 +60,6 @@ class SheetStillnessTest {
                     setAyah(1)
                     setTranslationPacks(setOf("translation-saheeh-en"))
                     setShowTranslation(true)
-                    setShowTafsir(true)
                     setLongPressHintShown()
                 }
             }

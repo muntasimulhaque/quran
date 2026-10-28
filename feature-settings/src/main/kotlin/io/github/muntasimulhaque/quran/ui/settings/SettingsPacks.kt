@@ -63,10 +63,6 @@ internal fun tafsirSummary(settings: AppSettings, packs: List<ContentPack>): Str
 internal fun hasInstalledTranslation(settings: AppSettings, packs: List<ContentPack>): Boolean =
     packs.any { it.id in settings.translationPacks && it.installed }
 
-/** [hasInstalledTranslation] for the tafsir's own switch, the same rule. */
-internal fun hasInstalledTafsir(settings: AppSettings, packs: List<ContentPack>): Boolean =
-    packs.any { it.type == PackType.Tafsir && it.installed && it.id in settings.tafsirPacks }
-
 /**
  * The word list the reading speaks: the one that matches the reader's own
  * language, and no other. There is no fallback to English: a Bangla reader
@@ -96,10 +92,15 @@ internal fun translationSubtitle(pack: ContentPack): String {
 }
 
 /**
- * The packs of one kind, grouped by the language they speak, in the
- * alphabetical order of those languages, and alphabetical inside each group.
- * A list of choices is read, not searched: the reader looks for a name, so
- * names are in one order everywhere in the app.
+ * The packs of one kind, read in one list: the language each one speaks, then
+ * the name each row draws. A list of choices is read, not searched, so the
+ * packs are in one order everywhere in the app.
+ *
+ * The list used to stand under a heading per language, and every row under
+ * the heading named the language again in its own line ("Bangla", then
+ * "Bangla · 53 MB"). With one or two packs per language the heading cost a
+ * block of air to say what the first row already said, so the language stayed
+ * in the row and the heading went (owner report).
  */
 @Composable
 internal fun LanguageGroups(
@@ -107,23 +108,8 @@ internal fun LanguageGroups(
     type: PackType,
     row: @Composable (ContentPack) -> Unit,
 ) {
-    val groups = packs.filter { it.type == type }.groupBy { it.language }
-    val names = HashMap<String, String>()
-    for (language in groups.keys) names[language] = languageName(language)
-    groups.entries
-        .sortedBy { (names[it.key] ?: it.key).lowercase() }
-        .forEach { (language, group) ->
-            // The language header is the same heading the settings pages use:
-            // one style, one rhythm, and one TalkBack jump, whether the group
-            // is a language list here or the head of a settings page (owner
-            // decision, the theme and consistency session).
-            Group(names[language] ?: language)
-            // The names inside a group are read by the name the row draws, so
-            // the order is the reader's own alphabet and not the catalog's
-            // English one (owner decision, this session).
-            group
-                .map { pack -> pack to contentPackName(pack.id, pack.name) }
-                .sortedBy { (_, name) -> name.lowercase() }
-                .forEach { (pack, _) -> row(pack) }
-        }
+    packs.filter { it.type == type }
+        .map { pack -> Triple(pack, languageName(pack.language), contentPackName(pack.id, pack.name)) }
+        .sortedWith(compareBy({ (_, language, _) -> language.lowercase() }, { (_, _, name) -> name.lowercase() }))
+        .forEach { (pack, _, _) -> row(pack) }
 }

@@ -118,7 +118,6 @@ class ReadingMarginTest {
                 setAyah(1)
                 setTheme(AppTheme.Light)
                 setShowTranslation(true)
-                setShowTafsir(false)
                 setWordByWord(false)
                 setTajweed(true)
                 for (role in TypeRole.entries) setTypeSize(role, TextSize.DEFAULT)

@@ -57,9 +57,8 @@ Credits: Quran text by the King Fahd Complex for the Printing of the Holy
 Quran, audited against the QUL QPC text, with Tanzil as the independent
 cross-reference. Translation by Saheeh International via QuranEnc. Tafsir
 Ibn Kathir and the recitations via the Quranic Universal Library by Tarteel.
-The app's About page names each source, records each dataset's license
-from the content manifest, and opens the fonts' full SIL Open Font License
-inside the app. The source code is MIT.
+The app's About page names each source and records each dataset's license
+from the content manifest. The source code is MIT.
 
 ## Classification
 
@@ -154,6 +153,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (12.5, 471 characters)
+12.5 quiets the chrome. Settings reads as one rhythm, the font size page drops its step counts, the tafsir is a list rather than a switch (the pill's Tafsir mark is there while a commentary is on), and the Tajweed page is seven colors with their rule names. Browse's Last Read and Saved lines sit on one gap, Search speaks once, and the share sheet opens on the card: the ayah right, its translation left, one fixed type for preview and picture. Text and packs unchanged.
 
 ## Release notes (12.4, 467 characters)
 12.4 reworks the ayah card. With one tafsir it is a page: Tafsir, the commentary's name, then the passage's own reference, so a commentary that begins before the ayah you opened says so. With two, the names are doors and each passage carries its reference under it, and the commentary in your language leads. Turning Show tafsir off now removes tafsir from search too, so no result opens an empty card. The Quran text, every translation, and every pack are unchanged.

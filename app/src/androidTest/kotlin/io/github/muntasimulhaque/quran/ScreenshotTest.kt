@@ -434,7 +434,6 @@ class ScreenshotTest {
             settings.setTranslationPacks(setOf("translation-saheeh-en"))
             settings.setTafsirPacks(setOf("tafsir-ibn-kathir-en", "tafsir-ibn-kathir-bn"))
             settings.setShowTranslation(true)
-            settings.setShowTafsir(true)
             settings.setWordByWord(true)
             // The colors are the 10.3 change; a test that left the switch off
             // would silently strip them from every store frame.

@@ -46,7 +46,6 @@ data class SettingsActions(
     val onTypeSize: (TypeRole, Float) -> Unit = { _, _ -> },
     val onFollowReciter: (Boolean) -> Unit = {},
     val onShowTranslation: (Boolean) -> Unit = {},
-    val onShowTafsir: (Boolean) -> Unit = {},
     val onWordByWord: (Boolean) -> Unit = {},
     val onTajweed: (Boolean) -> Unit = {},
     val onDailyAyah: (Boolean) -> Unit = {},
@@ -117,11 +116,9 @@ fun SettingsSheet(
         // own window: the sheet registers its own back handling there, and a
         // handler in the activity's window never sees the event while the
         // sheet is up.
-        BackHandler(enabled = page != null) {
-            // The license page has one door, and it is on About, so its back
-            // is About rather than the hub (owner decision, 11.1).
-            page = if (page == SettingsPage.Licenses) SettingsPage.About else null
-        }
+        // Back steps out of a page, the way a stack of pages is expected
+        // to behave. There is one level and it is the hub.
+        BackHandler(enabled = page != null) { page = null }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -153,7 +150,6 @@ fun SettingsSheet(
                         exactGrantWithheld = exactGrantWithheld(),
                         packSetup = packSetup,
                         onShowTranslation = actions.onShowTranslation,
-                        onShowTafsir = actions.onShowTafsir,
                         onWordByWord = actions.onWordByWord,
                         onTajweed = actions.onTajweed,
                         onDailyAyah = actions.onDailyAyah,
@@ -163,9 +159,7 @@ fun SettingsSheet(
             } else {
                 PageHeader(
                     title = open.title(),
-                    onBack = {
-                        page = if (open == SettingsPage.Licenses) SettingsPage.About else null
-                    },
+                    onBack = { page = null },
                 )
                 when (open) {
                     SettingsPage.Language -> LanguagePage(
@@ -214,9 +208,7 @@ fun SettingsSheet(
                     SettingsPage.About -> AboutPage(
                         packs = packs,
                         version = version,
-                        onOpenLicenses = { page = SettingsPage.Licenses },
                     )
-                    SettingsPage.Licenses -> LicensesPage()
                 }
             }
         }

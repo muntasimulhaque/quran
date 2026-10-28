@@ -204,8 +204,8 @@ android {
         // (owner decision, security audit).
         minSdk = 24
         targetSdk = 37
-        versionCode = 126
-        versionName = "12.4"
+        versionCode = 127
+        versionName = "12.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -245,9 +245,12 @@ android {
         }
     }
     sourceSets.getByName("main").assets.directories.add(contentAssets.get().asFile.absolutePath)
-    // The font license is packaged from the repository's own copy, so the
-    // text a reader opens in the app and the file a reviewer reads in the
-    // tree are one file, never two that drift (owner decision, 11.1).
+    // The font license travels with the fonts in the package, from the
+    // repository's own copy, so the text a reviewer reads in the tree and the
+    // one the app ships are one file. No screen opens it: the fonts' credits
+    // stand in About, and the license text is the copy that accompanies the
+    // five open font files, the way every library's LICENSE travels in
+    // META-INF (owner decision, this session). Keep the directory packaged.
     sourceSets.getByName("main").assets.directories.add(rootProject.file("licenses").absolutePath)
     // The packs that exist only for development, on the debug variant alone.
     sourceSets.getByName("debug").assets.directories.add(devPackAssets.get().asFile.absolutePath)

@@ -150,7 +150,6 @@ internal fun ReaderSheets(
                 onTypeSize = { role, step -> viewModel.setTypeSize(role, step) },
                 onFollowReciter = { viewModel.setFollowReciter(it) },
                 onShowTranslation = { viewModel.setShowTranslation(it) },
-                onShowTafsir = { viewModel.setShowTafsir(it) },
                 onWordByWord = { viewModel.setWordByWord(it) },
                 onTajweed = { viewModel.setTajweed(it) },
                 onDailyAyah = { enabled ->
