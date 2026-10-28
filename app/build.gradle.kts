@@ -85,6 +85,7 @@ val screenshotPacks = setOf(
     "translation-saheeh-en.db",
     "words-en.db",
     "tafsir-ibn-kathir-en.db",
+    "tafsir-ibn-kathir-bn.db",
     "translation-al-bayan-bn.db",
     "words-bn.db",
 )
@@ -203,8 +204,8 @@ android {
         // (owner decision, security audit).
         minSdk = 24
         targetSdk = 37
-        versionCode = 125
-        versionName = "12.3"
+        versionCode = 126
+        versionName = "12.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

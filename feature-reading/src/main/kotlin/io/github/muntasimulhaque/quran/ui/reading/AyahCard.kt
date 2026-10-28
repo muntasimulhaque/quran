@@ -26,16 +26,16 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.core.TextBlock
+import io.github.muntasimulhaque.quran.core.ayahSpan
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ContentPack
-import io.github.muntasimulhaque.quran.data.TafsirPassage
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.AddDoor
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
@@ -56,13 +56,11 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-private sealed interface Door {
-    data class Tafsir(val pack: ContentPack) : Door
-}
-
 private data class TafsirView(
-    val range: String,
-    val passage: TafsirPassage,
+    /** The passage's surah, named the way the reading names its own. */
+    val surah: String,
+    /** The ayahs the passage covers, for example 41:46-48. */
+    val reference: String,
     /**
      * The passage already parsed into its blocks. The parse is the one heavy
      * step in showing a tafsir, and it is pure work: doing it here, on the
@@ -83,8 +81,17 @@ private data class TafsirLoad(
  * asking the reader to learn an interface.
  *
  * The ayah and its translation and meanings are already on the page, so the
- * card does not repeat them: it opens only the tafsirs. The note is not here at all: it belongs to the pill that the long
- * press raises, one tap away rather than a scroll to the foot of a card.
+ * card does not repeat them: it opens only the tafsirs. The note is not here
+ * at all: it belongs to the pill that the long press raises, one tap away
+ * rather than a scroll to the foot of a card.
+ *
+ * The sheet is named by the kind of text it holds, and each pack is named
+ * once. The reference belongs to the passage and stands with it, because two
+ * packs can cover different ayahs of one surah, so a reference at the head of
+ * the sheet would be a promise only one pack keeps (owner decision, this
+ * session). With one pack there is no choice, so the name is a byline and the
+ * passage stands under it; with more, the name is a door and the passage
+ * unfolds under it.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,22 +107,31 @@ fun AyahCard(
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberExpandedSheetState()
-    // One tafsir on, and the card opens it: the reader tapped Tafsir on the
-    // pill, so the second tap the door list asks for is a question whose
-    // answer is already in the tap. With more than one, the doors stand and
-    // the reader chooses (owner decision, this session).
-    val firstPack = tafsirPacks.singleOrNull()
+    // The pack a search hit named, when there is one: the hit already chose
+    // the commentary, so its door stands open and its passage under it. With
+    // no hit, no door opens of itself, and one pack has no door at all.
     val wantedPack = initialTafsirPack?.let { id -> tafsirPacks.firstOrNull { it.id == id } }
     // A search hit opens the pack that carried the match first, so its
     // passage stands at the head of the card instead of under another pack's
-    // door. The other packs keep the language order the card always used.
-    val orderedPacks = remember(tafsirPacks, initialTafsirPack) {
+    // door. The reader's own language follows it: a pack added by hand in
+    // another language is the exception and never the first door, so with two
+    // Ibn Kathirs the one in the language the reader is reading leads (owner
+    // decision, this session). The fallback is the shell's own, the same
+    // answer it gives before the first choice.
+    val readerLanguage = settings.uiLanguage ?: "en"
+    val orderedPacks = remember(tafsirPacks, initialTafsirPack, readerLanguage) {
         tafsirPacks.sortedWith(
-            compareBy<ContentPack>({ it.id != initialTafsirPack }, { it.language }),
+            compareBy<ContentPack>(
+                { it.id != initialTafsirPack },
+                { it.language != readerLanguage },
+                { it.language },
+            ),
         )
     }
+    // The pack whose door is unfolded. One pack has no door at all, so the
+    // state is read only where there is a choice to make.
     var door by remember(ayah.number, initialTafsirPack) {
-        mutableStateOf((wantedPack ?: firstPack)?.let { Door.Tafsir(it) })
+        mutableStateOf(wantedPack)
     }
 
     // Every enabled tafsir is read as the card opens, not when its door is
@@ -136,22 +152,22 @@ fun AyahCard(
                         ?: return@mapNotNull null
                     val name = content.surah(passage.surah)?.nameSimple
                         ?: surahName
-                    val span = if (passage.fromAyah == passage.toAyah) {
-                        "${passage.surah}:${passage.fromAyah}"
-                    } else {
-                        "${passage.surah}:${passage.fromAyah}-${passage.toAyah}"
-                    }
+                    val reference = ayahSpan(
+                        passage.surah,
+                        passage.fromAyah,
+                        passage.toAyah,
+                    )
                     pack.id to TafsirView(
-                        range = "$name $span",
-                        passage = passage,
+                        surah = name,
+                        reference = reference,
                         blocks = RichText.parseHtml(passage.text),
                     )
                 } catch (cancelled: CancellationException) {
                     throw cancelled
                 } catch (error: Exception) {
                     // A damaged tafsir pack is a missing passage, not a crash:
-                    // the door says the passage is not here, and the repair
-                    // path can replace the pack.
+                    // the passage says it is not here, and the repair path can
+                    // replace the pack.
                     Log.w("AyahCard", "the tafsir pack ${pack.id} could not be read", error)
                     null
                 }
@@ -188,16 +204,6 @@ fun AyahCard(
                 // a still frame does (owner report).
                 .testTag("ayah-card"),
         ) {
-            Text(
-                text = stringResource(
-                    R.string.card_title,
-                    surahName,
-                    localizedDigits(ayah.verseKey),
-                ),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(horizontal = Space.Gutter, vertical = Space.Tight),
-            )
             // The tafsir is drawn only while the reader shows it. The packs
             // still stand in for search; this is what the ayah card draws.
             if (settings.showTafsir) {
@@ -211,54 +217,63 @@ fun AyahCard(
                         onClick = onAddContent,
                         modifier = Modifier.padding(horizontal = SheetRowGutter),
                     )
-                }
-                // The label stands over the tafsir doors in both readings: the
-                // doors themselves name the pack, never the kind of text, so
-                // without a name over them "Ibn Kathir" could be read as the word
-                // by word list. It wears the app's one head over a list, the
-                // same the settings' groups wear, so a label over a group of
-                // choices is one voice wherever the reader meets it (owner
-                // decision, this session).
-                if (tafsirPacks.isNotEmpty()) {
+                } else {
+                    // The sheet is named by the kind of text it holds, the way
+                    // every sheet is named by its own name. It wears the app's
+                    // one head over a list, so a label over a group of choices
+                    // is one voice wherever the reader meets it.
                     SectionHead(
                         text = stringResource(R.string.card_tafsir_label),
-                        modifier = Modifier.padding(horizontal = Space.Gutter, vertical = Space.Block),
+                        modifier = Modifier.padding(
+                            start = Space.Gutter,
+                            end = Space.Gutter,
+                            top = Space.Tight,
+                            bottom = Space.Block,
+                        ),
                     )
-                }
-                orderedPacks.forEach { pack ->
-                    val open = (door as? Door.Tafsir)?.pack?.id == pack.id
-                    // The tafsir's own name, in the reader's language. The door
-                    // and the passage both say it, so it is read once here.
-                    val packName = contentPackName(pack.id, pack.name)
-                    DoorRow(
-                        title = packName,
-                        subtitle = languageName(pack.language),
-                        open = open,
-                        onClick = { door = if (open) null else Door.Tafsir(pack) },
-                    )
-                    if (open) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = Space.Gutter, vertical = Space.Line),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            val view = passages[pack.id]
-                            if (view == null) {
-                                Text(
-                                    text = if (load.done) {
-                                        stringResource(R.string.card_tafsir_missing)
-                                    } else {
-                                        stringResource(
-                                            R.string.card_opening_pack,
-                                            contentPackName(pack.id, pack.name),
-                                        )
-                                    },
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    val single = tafsirPacks.singleOrNull()
+                    if (single != null) {
+                        // One pack is no choice: the reader tapped Tafsir on
+                        // the pill, or arrived from a search hit that already
+                        // named the pack, so its name is a byline and its
+                        // passage stands under it with no door to fold (owner
+                        // decision, this session).
+                        val packName = contentPackName(single.id, single.name)
+                        Text(
+                            text = packName,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = Space.Gutter),
+                        )
+                        PassageArea(
+                            view = passages[single.id],
+                            done = load.done,
+                            // The byline above already names the pack: the wait
+                            // is never a second copy of the name.
+                            opening = null,
+                            settings = settings,
+                        )
+                    } else {
+                        orderedPacks.forEach { pack ->
+                            val open = door?.id == pack.id
+                            // The tafsir's own name, in the reader's language.
+                            val packName = contentPackName(pack.id, pack.name)
+                            DoorRow(
+                                title = packName,
+                                subtitle = languageName(pack.language),
+                                open = open,
+                                onClick = { door = if (open) null else pack },
+                            )
+                            if (open) {
+                                PassageArea(
+                                    view = passages[pack.id],
+                                    done = load.done,
+                                    opening = stringResource(
+                                        R.string.card_opening_pack,
+                                        packName,
+                                    ),
+                                    settings = settings,
                                 )
-                            } else {
-                                TafsirPanel(view, name = packName, settings = settings)
                             }
                         }
                     }
@@ -330,11 +345,57 @@ private fun DoorRow(
     }
 }
 
+/**
+ * The room one passage takes: its text, or the one line that says why it is
+ * not here yet.
+ *
+ * A reader who chose a tafsir and a reader who has only one see the same
+ * block. [opening] is null where the name above already said whose passage is
+ * on its way, so the wait never repeats the name (owner decision, this
+ * session).
+ */
+@Composable
+private fun PassageArea(
+    view: TafsirView?,
+    done: Boolean,
+    opening: String?,
+    settings: AppSettings,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Space.Gutter, vertical = Space.Line),
+        contentAlignment = Alignment.Center,
+    ) {
+        when {
+            view != null -> TafsirPanel(view, settings)
+            done -> Text(
+                text = stringResource(R.string.card_tafsir_missing),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            opening != null -> Text(
+                text = opening,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+/**
+ * The passage under its name: the ayahs it covers, then the prose.
+ *
+ * The reference is the passage's, read from the pack that returned it, so two
+ * tafsirs of one ayah can name the same span or different ones without the
+ * sheet ever promising what only one of them keeps (owner decision, this
+ * session). It stands in the app's title voice, at the head of the prose it
+ * belongs to, and it is a heading to a screen reader, so a reader who cannot
+ * see the page can jump to the passage instead of hearing the whole card.
+ */
 @Composable
 private fun TafsirPanel(
     view: TafsirView,
-    /** The tafsir's own name, in the reader's language. */
-    name: String,
     settings: AppSettings,
 ) {
     Column(
@@ -343,22 +404,17 @@ private fun TafsirPanel(
             .testTag("tafsir-panel")
             .padding(top = Space.Tight),
     ) {
-        // The passage names itself before its first word: whose commentary it
-        // is and the ayahs it covers. It stood at the foot, which on a median
-        // passage of six thousand characters put it two screens below the line
-        // the reader had already read, so a reader who scrolled into a passage
-        // had nothing on the glass telling them what they were reading (owner
-        // decision, this session). The name and the range are one string and
-        // not two, so the line reads as one label at the head of the prose, in
-        // the same muted tone the ayah's own reference wears at the head of its
-        // block: the theme's secondary tone, measured at 6.1:1 and up on every
-        // ground, where the quiet alpha this label once wore measured 3.3:1,
-        // under the theme's own 4.5:1 rule for muted text.
         Text(
-            text = stringResource(R.string.card_tafsir_source, name, localizedDigits(view.range)),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = Space.Tight),
+            text = stringResource(
+                R.string.card_tafsir_reference,
+                view.surah,
+                localizedDigits(view.reference),
+            ),
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier
+                .semantics { heading() }
+                .padding(bottom = Space.Block),
         )
         RichBlocks(
             blocks = view.blocks,

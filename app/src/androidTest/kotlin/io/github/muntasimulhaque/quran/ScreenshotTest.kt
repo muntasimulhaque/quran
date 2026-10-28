@@ -4,8 +4,11 @@ import android.Manifest
 import android.graphics.Bitmap
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
@@ -393,8 +396,8 @@ class ScreenshotTest {
 
     /**
      * The state the tour photographs: the reader's own translation, the word
-     * list that speaks its language, the first tafsir, and the defaults a
-     * fresh install starts from.
+     * list that speaks its language, both tafsirs so the ayah card's doors have
+     * two to choose between, and the defaults a fresh install starts from.
      */
     private fun prepareTheLibrary() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
@@ -418,6 +421,7 @@ class ScreenshotTest {
         store.install("translation-saheeh-en")
         store.install("words-en")
         store.install("tafsir-ibn-kathir-en")
+        store.install("tafsir-ibn-kathir-bn")
         val settings = SettingsStore(context)
         runBlocking {
             settings.setUiLanguage("en")
@@ -428,7 +432,7 @@ class ScreenshotTest {
             settings.setAyah(262)
             settings.setTheme(AppTheme.Light)
             settings.setTranslationPacks(setOf("translation-saheeh-en"))
-            settings.setTafsirPacks(setOf("tafsir-ibn-kathir-en"))
+            settings.setTafsirPacks(setOf("tafsir-ibn-kathir-en", "tafsir-ibn-kathir-bn"))
             settings.setShowTranslation(true)
             settings.setShowTafsir(true)
             settings.setWordByWord(true)
@@ -485,30 +489,23 @@ class ScreenshotTest {
         }
         rule.onNodeWithContentDescription("Tafsir").performClick()
         waitForTag("ayah-card", timeout = 30_000)
-        // A single enabled tafsir opens itself with the card, and its passage
-        // is read and parsed as the card opens. The wait is on the panel
-        // itself, before anything is folded: on the ten inch leg the parse
-        // was still on its way when the door's frame was reached, and the
-        // door's own open state read as folded, so the next tap closed what
-        // it meant to open (the kept frame said "Opening Ibn Kathir...",
-        // owner report, this session).
-        waitForTag("tafsir-panel", timeout = 30_000)
-        // The door's own frame wants the tafsir folded, so it is folded once
-        // here and unfolded for the tafsir frame below.
-        rule.onNodeWithText("Ibn Kathir").performClick()
-        rule.waitUntil(timeoutMillis = 10_000) {
-            rule.onAllNodesWithTag("tafsir-panel", useUnmergedTree = true)
-                .fetchSemanticsNodes().isEmpty()
-        }
+        // Two commentaries, none open. The reference belongs to the passage,
+        // so the card carries none until a door is chosen: this frame is the
+        // choice itself. Both doors read Ibn Kathir, which is why the language
+        // line is there at all.
+        rule.onAllNodesWithText("Ibn Kathir").assertCountEquals(2)
+        rule.onAllNodes(hasText("Al-Baqarah 2:255")).assertCountEquals(0)
         Thread.sleep(600)
         captureScreen("07-ayah-card")
 
-        // 4. The tafsir open on the card: Ibn Kathir for 2:255. The wait is
-        // on the panel's own tag, never a blind sleep: the read and the
-        // parse happen as the card opens, so the fold is all that is left
-        // (owner report, this session).
-        rule.onNodeWithText("Ibn Kathir").performClick()
+        // 4. One commentary open on the card: the English Ibn Kathir for
+        // 2:255, its own reference at the head of its prose. Both doors read
+        // the same name, so the tap is the one whose language is English, and
+        // the wait is on the panel's own tag rather than a blind sleep.
+        rule.onNodeWithText("English").performClick()
         waitForTag("tafsir-panel", timeout = 30_000)
+        rule.onAllNodesWithText("Ibn Kathir").assertCountEquals(2)
+        rule.onNode(hasText("Al-Baqarah 2:255") and isHeading()).assertExists()
         captureScreen("08-tafsir")
         back()
         rule.waitUntil(timeoutMillis = 10_000) {

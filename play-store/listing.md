@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 12.3 (versionCode 125)
+Version: 12.4 (versionCode 126)
 
 ## Listing
 
@@ -154,6 +154,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (12.4, 467 characters)
+12.4 reworks the ayah card. With one tafsir it is a page: Tafsir, the commentary's name, then the passage's own reference, so a commentary that begins before the ayah you opened says so. With two, the names are doors and each passage carries its reference under it, and the commentary in your language leads. Turning Show tafsir off now removes tafsir from search too, so no result opens an empty card. The Quran text, every translation, and every pack are unchanged.
 
 ## Release notes (12.3, 473 characters)
 12.3 gives every screen one margin. The ayahs, the translation, the word meanings, search results, settings rows, footnotes, and tafsir all begin on the same line, on a phone, a seven inch tablet, and a ten inch one, and the reading uses the whole page the way a printed mushaf does instead of a narrow column in the middle of the glass. Search, Browse, Settings, and the ayah card are as wide as the screen. The Quran text, every translation, and every pack are unchanged.
