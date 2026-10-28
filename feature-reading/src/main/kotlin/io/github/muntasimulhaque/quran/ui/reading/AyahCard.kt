@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -52,8 +51,6 @@ import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.rich.RichBlocks
-import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
-import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -164,12 +161,11 @@ fun AyahCard(
     }
     val passages = load.views
 
-    // The card is the app's one page. The tafsir inside it keeps the reader's
-    // own measure, centered on the page, so a ten inch screen centers a
-    // readable column instead of stretching one line across the glass, and a
-    // reader who changes the tafsir size gets more lines, never a longer line
-    // (owner report, the audio and type audit session; owner decision, this
-    // session).
+    // The card is the app's one page, which is the glass, and the tafsir
+    // inside it stands on the app's one margin like every other line of prose:
+    // a ten inch screen reads a longer line and the reader who changes the
+    // tafsir size gets more lines, never a narrower column (owner decision,
+    // this session).
     AppSheet(
         onDismiss = onDismiss,
         sheetState = sheetState,
@@ -183,7 +179,7 @@ fun AyahCard(
                 // and then scrolled back up is the reader reading, never a
                 // pull that closes the card under them.
                 .sheetVerticalScroll(rememberScrollState())
-                .padding(bottom = 28.dp)
+                .padding(bottom = Space.SheetFoot)
                 // The sheet's window appears before its content has been read
                 // off the database, so a capture that keeps the first settled
                 // frame photographs a card missing its translation. The tag
@@ -200,7 +196,7 @@ fun AyahCard(
                 ),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Tight),
+                modifier = Modifier.padding(horizontal = Space.Gutter, vertical = Space.Tight),
             )
             // The tafsir is drawn only while the reader shows it. The packs
             // still stand in for search; this is what the ayah card draws.
@@ -213,7 +209,7 @@ fun AyahCard(
                         text = stringResource(R.string.card_add_tafsir),
                         action = stringResource(R.string.reading_action_add),
                         onClick = onAddContent,
-                        modifier = Modifier.padding(horizontal = Space.Gutter),
+                        modifier = Modifier.padding(horizontal = SheetRowGutter),
                     )
                 }
                 // The label stands over the tafsir doors in both readings: the
@@ -226,7 +222,7 @@ fun AyahCard(
                 if (tafsirPacks.isNotEmpty()) {
                     SectionHead(
                         text = stringResource(R.string.card_tafsir_label),
-                        modifier = Modifier.padding(start = 22.dp, end = 22.dp, top = Space.Block),
+                        modifier = Modifier.padding(horizontal = Space.Gutter, vertical = Space.Block),
                     )
                 }
                 orderedPacks.forEach { pack ->
@@ -244,7 +240,7 @@ fun AyahCard(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 22.dp, vertical = Space.Line),
+                                .padding(horizontal = Space.Gutter, vertical = Space.Line),
                             contentAlignment = Alignment.Center,
                         ) {
                             val view = passages[pack.id]
@@ -343,7 +339,6 @@ private fun TafsirPanel(
 ) {
     Column(
         modifier = Modifier
-            .widthIn(max = Reading.proseMeasure(LocalReadingVoice.current, settings.tafsirSp))
             .fillMaxWidth()
             .testTag("tafsir-panel")
             .padding(top = Space.Tight),

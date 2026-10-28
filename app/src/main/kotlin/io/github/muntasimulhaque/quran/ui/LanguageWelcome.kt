@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -41,7 +40,6 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Inter
 import io.github.muntasimulhaque.quran.ui.theme.NotoSansBengali
-import io.github.muntasimulhaque.quran.ui.theme.Reading
 
 /**
  * The one screen before the reading, shown once: which language the app
@@ -68,15 +66,14 @@ fun LanguageWelcome(
     ) {
         Column(
             modifier = Modifier
-                // The first screen a reader ever meets keeps the same readable
-                // measure as the reading itself: on a tablet a language card
-                // running the full width of the glass is a line of type the
-                // eye has to hunt across, and there is no reason the welcome
-                // should be wider than the Book it leads to.
-                .widthIn(max = Reading.MaxMeasure)
+                // The first screen a reader ever meets stands on the app's
+                // one page: the same margin the reading under it keeps, on
+                // every glass, so a language card is as wide as a settings
+                // row and nothing here is narrower than the Book it leads to
+                // (owner decision, this session).
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 28.dp, vertical = 36.dp),
+                .padding(horizontal = Space.Gutter, vertical = 36.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Masthead()
@@ -179,10 +176,9 @@ fun WelcomeReminder(
     ) {
         Column(
             modifier = Modifier
-                .widthIn(max = Reading.MaxMeasure)
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 28.dp, vertical = 36.dp),
+                .padding(horizontal = Space.Gutter, vertical = 36.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Masthead()

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,7 +35,6 @@ import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
-import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlinx.coroutines.delay
 
@@ -97,9 +95,8 @@ private fun NoteEditor(
     }
     Column(
         modifier = Modifier
-            .widthIn(max = Reading.proseMeasure(LocalReadingVoice.current, settings.translationSp))
             .fillMaxWidth()
-            .padding(horizontal = 22.dp, vertical = 10.dp),
+            .padding(horizontal = Space.Gutter, vertical = 10.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             // The words at the left name the sheet by what the reader is

@@ -15,11 +15,12 @@ import androidx.compose.ui.test.performTouchInput
  * made the suite look broken when it was the tap that was unlucky.
  *
  * The paper's own edge is the reading's quiet margin: the reading list keeps
- * 20 dp of side padding on the narrowest phone, and no ayah, marker, or
- * control reaches into it. Tapping the page's exact center is not safe: a
- * translation's footnote marker sits in the flow of the text, and at the
- * center of Al-Fatihah 1:1 one of them is under the finger, so the tap opens
- * the footnote sheet instead of the chrome (found by this suite).
+ * one gutter less the room a wash reaches past its text on each side, 20 dp on
+ * every glass, and no ayah, marker, or control reaches into it. Tapping the
+ * page's exact center is not safe: a translation's footnote marker sits in the
+ * flow of the text, and at the center of Al-Fatihah 1:1 one of them is under
+ * the finger, so the tap opens the footnote sheet instead of the chrome (found
+ * by this suite).
  */
 fun SemanticsNodeInteraction.tapThePaper() = performTouchInput {
     click(Offset(4f, centerY))

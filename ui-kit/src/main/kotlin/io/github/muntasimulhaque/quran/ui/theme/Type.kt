@@ -298,16 +298,19 @@ val BengaliReading = TextStyle(
 /**
  * The reading voice of the language being read: the style, the line a
  * paragraph of it gets per em of text (an Arabic line is its own, taller
- * thing, and never takes this one), the face cut for an exact drawn size, and
- * the face's measured average advance, which is what turns the reading's
- * character measure into a column width. The theme sets it once from the
- * reader's language; every reading surface takes it from here.
+ * thing, and never takes this one), and the face cut for an exact drawn size.
+ * The theme sets it once from the reader's language; every reading surface
+ * takes it from here.
+ *
+ * It carried the face's measured average advance for as long as the app capped
+ * a column at 65 characters. The column is the glass less the app's one margin
+ * now, so nothing here is asked how wide a character is (owner decision, this
+ * session).
  */
 class ReadingVoice(
     val style: TextStyle,
     val lineRatio: Float,
     val atSize: @Composable (Float) -> FontFamily,
-    val advance: Float,
 )
 
-val LocalReadingVoice = staticCompositionLocalOf { ReadingVoice(LatinReading, 1.6f, ::literataAt, 0.471f) }
+val LocalReadingVoice = staticCompositionLocalOf { ReadingVoice(LatinReading, 1.6f, ::literataAt) }

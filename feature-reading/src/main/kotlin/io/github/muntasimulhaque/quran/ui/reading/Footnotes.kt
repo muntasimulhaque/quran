@@ -4,13 +4,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -19,7 +17,6 @@ import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.Footnote
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
-import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
@@ -65,11 +62,6 @@ internal fun FootnoteSheet(
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberExpandedSheetState()
-    // A note is prose, and a prose line has a measure: the footnote keeps its
-    // own 65-character column, centered on the app's one page, so a reader
-    // who changes the size gets more lines and never a longer one (owner
-    // decision, the theme and consistency session; this session).
-    val prose = Reading.proseMeasure(LocalReadingVoice.current, sizeSp)
     AppSheet(
         onDismiss = onDismiss,
         sheetState = sheetState,
@@ -81,9 +73,12 @@ internal fun FootnoteSheet(
                 // The gate rides with the scroll, so an upward flick on a
                 // short footnote never bounces the sheet on its top anchor.
                 .sheetVerticalScroll(rememberScrollState())
+                // A note is prose on the app's one page: its words stop at
+                // Space.Gutter, the line the ayah it explains stands on, and
+                // a reader who changes the size gets more lines and never a
+                // narrower column (owner decision, this session).
                 .padding(start = Space.Gutter, end = Space.Gutter, bottom = Space.SheetFoot)
                 .testTag("footnote-sheet"),
-            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
                 text = stringResource(
@@ -98,9 +93,7 @@ internal fun FootnoteSheet(
                 // reference line on the reading wears the secondary tone
                 // (owner decision, the theme and consistency session).
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .widthIn(max = prose)
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
             )
             Text(
                 text = footnote.text,
@@ -116,7 +109,6 @@ internal fun FootnoteSheet(
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
-                    .widthIn(max = prose)
                     .fillMaxWidth()
                     .padding(top = Space.Block),
             )

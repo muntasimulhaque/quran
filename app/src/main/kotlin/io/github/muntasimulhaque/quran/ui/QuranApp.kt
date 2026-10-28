@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,7 +26,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.muntasimulhaque.quran.R
-import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.reader.ReaderScreen
 import io.github.muntasimulhaque.quran.ui.theme.Amiri
@@ -211,7 +209,6 @@ private fun ContentProblem(storage: Boolean, onRetry: () -> Unit) {
     ) {
         Column(
             modifier = Modifier
-                .widthIn(max = Reading.MaxMeasure)
                 .padding(horizontal = Space.Gutter),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {

@@ -220,7 +220,7 @@ internal fun SurahOpening(
                         indication = ripple(color = MaterialTheme.colorScheme.primary),
                         onClick = onPaperTap,
                     )
-                    .padding(horizontal = 8.dp, vertical = 10.dp),
+                    .padding(horizontal = Space.WashInset, vertical = 10.dp),
             )
         }
         // The door itself is a button like every other action in the app,

@@ -30,10 +30,11 @@ import androidx.compose.ui.Modifier
  * has no stock state layer to show, and the surface still drags under it
  * because Material's draggable belongs to the whole sheet.
  *
- * The width is [rememberSheetWidth], the app's one page: a window whose
- * margin around the page would be under `Space.Section` a side takes the
- * whole window instead, so the seven inch tablet fills edge to edge and the
- * ten inch screen centers on the reading's own page.
+ * The width is [rememberSheetWidth], which is the window: a sheet is the
+ * glass on every form factor, so the seven inch tablet and the ten inch
+ * screen fill edge to edge the way the phone does, and the app's one margin
+ * (the theme's `Space.Gutter`) is what holds the rows off the edge (owner
+ * decision, this session).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

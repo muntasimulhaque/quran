@@ -152,8 +152,8 @@ fun QuranTheme(
         LocalPagePalette provides palette,
         LocalSwitchPalette provides switches,
         LocalReadingVoice provides when (language) {
-            UiLanguage.Bangla -> ReadingVoice(BengaliReading, 1.706f, { NotoSerifBengali }, 0.425f)
-            UiLanguage.English -> ReadingVoice(LatinReading, 1.6f, ::literataAt, 0.471f)
+            UiLanguage.Bangla -> ReadingVoice(BengaliReading, 1.706f, { NotoSerifBengali })
+            UiLanguage.English -> ReadingVoice(LatinReading, 1.6f, ::literataAt)
         },
     ) {
         val typography = when (language) {

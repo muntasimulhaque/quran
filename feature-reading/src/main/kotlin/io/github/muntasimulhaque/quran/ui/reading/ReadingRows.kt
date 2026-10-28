@@ -5,7 +5,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -27,7 +26,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.core.Arabic
 import io.github.muntasimulhaque.quran.core.AyahList
 import io.github.muntasimulhaque.quran.data.Ayah
@@ -38,8 +36,6 @@ import io.github.muntasimulhaque.quran.data.ReadingRow
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.AddDoor
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
-import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
-import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlin.math.abs
 
@@ -203,109 +199,105 @@ internal fun ReadingRows(
         }
     }
 
-    // The reading sits in a column a person can read, centered when the
-    // screen is wider than it. The column is the reader's own measure: the
-    // character cap of the voice the translation is read in and of the Arabic
-    // above it, whichever is narrower, so neither text runs past a line the
-    // eye can follow back to its margin on its own. The list itself stays
-    // full width, so the paper around the column still answers a tap with the
-    // chrome and a drag with the scroll.
-    val measure = Reading.column(LocalReadingVoice.current, metrics)
-    // The column's own width is what centers it, not the window's: a
-    // landscape split, a fold, and a display cutout all move the width the
-    // reading actually has, and the measure follows the glass it is drawn on
-    // (owner decision, this session).
-    BoxWithConstraints(modifier.fillMaxSize()) {
-        val side = maxOf(20.dp, (maxWidth - measure) / 2)
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .fillMaxSize()
-                .semantics { contentDescription = pageDescription }
-                .pointerInput(Unit) {
-                    // The paper around the text brings the chrome; the text
-                    // itself belongs to its ayah, and every ayah answers its
-                    // own tap.
-                    detectTapGestures(onTap = { dismissAbout() })
+    // The reading's words stop at the app's one margin, on every glass. The
+    // list keeps that margin less the room a wash reaches past its text, so
+    // the ayah and its wash stand on the same two lines on a phone, a seven
+    // inch tablet, and a ten inch screen, and the paper around them stays full
+    // width to answer a tap with the chrome and a drag with the scroll.
+    //
+    // Nothing here reads the window's width: a line of reading no longer
+    // grows or shrinks by a count of characters, only by the glass it is
+    // drawn on, so a reader who turns the text down gets more lines and not a
+    // shorter column (owner decision, this session).
+    val side = Space.Gutter - Space.WashInset
+    LazyColumn(
+        state = listState,
+        modifier = modifier
+            .fillMaxSize()
+            .semantics { contentDescription = pageDescription }
+            .pointerInput(Unit) {
+                // The paper around the text brings the chrome; the text
+                // itself belongs to its ayah, and every ayah answers its own
+                // tap.
+                detectTapGestures(onTap = { dismissAbout() })
+            },
+        contentPadding = PaddingValues(
+            start = side,
+            end = side,
+            top = contentPaddingTop,
+            bottom = contentPaddingBottom,
+        ),
+    ) {
+        item(key = "surah-${surah.number}", contentType = "opening") {
+            SurahOpening(
+                surah = surah,
+                content = content,
+                language = contentLanguage,
+                expanded = aboutOpen,
+                onExpandedChange = { aboutOpen = it },
+                onPaperTap = { if (!aboutOpen) onBackgroundTap() },
+                metrics = metrics,
+            )
+            // The door asks for a translation only while translations are
+            // something the reading draws at all: a reader who hid them in
+            // Settings is not looking for one here.
+            if (metrics.showTranslation && !hasTranslation) {
+                AddDoor(
+                    text = stringResource(R.string.reading_add_translation),
+                    action = stringResource(R.string.reading_action_add),
+                    onClick = onAddContent,
+                    modifier = Modifier.padding(vertical = Space.Tight),
+                )
+            }
+        }
+        items(
+            count = rows.size,
+            key = { "ayah-${rows[it].ayah.number}" },
+            // One slot type for every ayah, so a block that scrolls out
+            // is the block the next one reuses; the opening and the
+            // closing line are their own kinds and never borrow an
+            // ayah's measured composition (owner decision, this
+            // session).
+            contentType = { "ayah" },
+        ) { index ->
+            val row = rows[index]
+            AyahBlock(
+                row = row,
+                hafs = hafs,
+                metrics = metrics,
+                isSelected = selectedAyah == row.ayah.number,
+                playingAyah = playingAyah,
+                // Only the ayah being recited carries the moving word.
+                // Every other block keeps a stable null, so a word change
+                // does not rebuild its AnnotatedString or recompose it
+                // (owner decision, this session).
+                playingWord = playingWord.takeIf { playingAyah == row.ayah.number },
+                reveal = reveal?.takeIf { it.ayah == row.ayah.number },
+                showWordAid = wordAid ||
+                    (reveal?.wordByWord == true && reveal.ayah == row.ayah.number),
+                onAyah = onAyah,
+                onBackgroundTap = dismissAbout,
+                onFootnote = { line, number ->
+                    val note = line.text.footnotes.firstOrNull { it.number == number }
+                    if (note != null) {
+                        onFootnote(
+                            OpenFootnote(
+                                note = note,
+                                reference = row.ayah.verseKey,
+                                sizeSp = metrics.translationSp,
+                                lineSp = metrics.translationLineSp,
+                            ),
+                        )
+                    }
                 },
-            contentPadding = PaddingValues(
-                start = side,
-                end = side,
-                top = contentPaddingTop,
-                bottom = contentPaddingBottom,
-            ),
-        ) {
-            item(key = "surah-${surah.number}", contentType = "opening") {
-                SurahOpening(
-                    surah = surah,
-                    content = content,
-                    language = contentLanguage,
-                    expanded = aboutOpen,
-                    onExpandedChange = { aboutOpen = it },
-                    onPaperTap = { if (!aboutOpen) onBackgroundTap() },
-                    metrics = metrics,
-                )
-                // The door asks for a translation only while translations are
-                // something the reading draws at all: a reader who hid them in
-                // Settings is not looking for one here.
-                if (metrics.showTranslation && !hasTranslation) {
-                    AddDoor(
-                        text = stringResource(R.string.reading_add_translation),
-                        action = stringResource(R.string.reading_action_add),
-                        onClick = onAddContent,
-                        modifier = Modifier.padding(horizontal = Space.Gutter, vertical = Space.Tight),
-                    )
-                }
-            }
-            items(
-                count = rows.size,
-                key = { "ayah-${rows[it].ayah.number}" },
-                // One slot type for every ayah, so a block that scrolls out
-                // is the block the next one reuses; the opening and the
-                // closing line are their own kinds and never borrow an
-                // ayah's measured composition (owner decision, this
-                // session).
-                contentType = { "ayah" },
-            ) { index ->
-                val row = rows[index]
-                AyahBlock(
-                    row = row,
-                    hafs = hafs,
-                    metrics = metrics,
-                    isSelected = selectedAyah == row.ayah.number,
-                    playingAyah = playingAyah,
-                    // Only the ayah being recited carries the moving word.
-                    // Every other block keeps a stable null, so a word change
-                    // does not rebuild its AnnotatedString or recompose it
-                    // (owner decision, this session).
-                    playingWord = playingWord.takeIf { playingAyah == row.ayah.number },
-                    reveal = reveal?.takeIf { it.ayah == row.ayah.number },
-                    showWordAid = wordAid ||
-                        (reveal?.wordByWord == true && reveal.ayah == row.ayah.number),
-                    onAyah = onAyah,
-                    onBackgroundTap = dismissAbout,
-                    onFootnote = { line, number ->
-                        val note = line.text.footnotes.firstOrNull { it.number == number }
-                        if (note != null) {
-                            onFootnote(
-                                OpenFootnote(
-                                    note = note,
-                                    reference = row.ayah.verseKey,
-                                    sizeSp = metrics.translationSp,
-                                    lineSp = metrics.translationLineSp,
-                                ),
-                            )
-                        }
-                    },
-                )
-            }
-            item(key = "end-${surah.number}", contentType = "end") {
-                SurahEnd(
-                    surah = surah,
-                    nextSurahName = nextSurahName,
-                    onNextSurah = onNextSurah,
-                )
-            }
+            )
+        }
+        item(key = "end-${surah.number}", contentType = "end") {
+            SurahEnd(
+                surah = surah,
+                nextSurahName = nextSurahName,
+                onNextSurah = onNextSurah,
+            )
         }
     }
 

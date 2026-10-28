@@ -223,7 +223,7 @@ internal fun AyahBlock(
                     )
                 }
                 .padding(
-                    horizontal = 8.dp,
+                    horizontal = Space.WashInset,
                     // The wash's own room, and the tighter measure on a page
                     // that draws the Quran alone: see the block above.
                     vertical = if (arabicOnly) Space.Tight else 10.dp,

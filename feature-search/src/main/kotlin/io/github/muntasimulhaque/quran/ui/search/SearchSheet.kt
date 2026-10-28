@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -20,7 +19,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
@@ -37,7 +35,6 @@ import io.github.muntasimulhaque.quran.ui.kit.AppSheet
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
-import io.github.muntasimulhaque.quran.ui.theme.Reading
 import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -191,10 +188,12 @@ fun SearchSheet(
         onDismiss = onDismiss,
         sheetState = sheetState,
     ) {
+        // The results stand on the app's one page, which is the sheet, which
+        // is the glass: a row's words stop at Space.Gutter and its own card
+        // reaches outside that line, the same grammar the settings sheet and
+        // the reading keep (owner decision, this session).
         Column(
             modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .widthIn(max = Reading.SearchMeasure)
                 .fillMaxSize()
                 .imePadding(),
         ) {
