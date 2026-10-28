@@ -88,9 +88,23 @@ class SheetStillnessTest {
             compose.onAllNodesWithTag("footnote-sheet", useUnmergedTree = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
-        // The window is up before the sheet has finished moving; the gesture
-        // has to start where the sheet will rest, not under it.
-        Thread.sleep(1_500)
+        // The window is up before the sheet has finished moving, and the
+        // gesture has to start where the sheet will rest, not under it. A
+        // sleep guessed at that moment and guessed wrong on a slow runner: a
+        // sheet still travelling when the clock is paused reads as a sheet at
+        // rest that will not answer a drag, and the interface suite went red
+        // on a runner while the same test passed on the developer's own
+        // phone. The wait is the sheet's own stillness, read twice over one
+        // frame, so no machine's speed can put the finger in the wrong place
+        // (owner report, this session).
+        var last = Float.NaN
+        compose.waitUntil(timeoutMillis = 20_000) {
+            val now = compose.onAllNodesWithTag("footnote-sheet", useUnmergedTree = true)
+                .onLast().fetchSemanticsNode().positionInRoot.y
+            val still = now == last
+            last = now
+            still
+        }
     }
 
     private fun theSheet() =
