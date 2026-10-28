@@ -64,7 +64,6 @@ private sealed interface Door {
 }
 
 private data class TafsirView(
-    val title: String,
     val range: String,
     val passage: TafsirPassage,
     /**
@@ -146,7 +145,6 @@ fun AyahCard(
                         "${passage.surah}:${passage.fromAyah}-${passage.toAyah}"
                     }
                     pack.id to TafsirView(
-                        title = passage.source,
                         range = "$name $span",
                         passage = passage,
                         blocks = RichText.parseHtml(passage.text),
@@ -233,8 +231,11 @@ fun AyahCard(
                 }
                 orderedPacks.forEach { pack ->
                     val open = (door as? Door.Tafsir)?.pack?.id == pack.id
+                    // The tafsir's own name, in the reader's language. The door
+                    // and the passage both say it, so it is read once here.
+                    val packName = contentPackName(pack.id, pack.name)
                     DoorRow(
-                        title = contentPackName(pack.id, pack.name),
+                        title = packName,
                         subtitle = languageName(pack.language),
                         open = open,
                         onClick = { door = if (open) null else Door.Tafsir(pack) },
@@ -261,7 +262,7 @@ fun AyahCard(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             } else {
-                                TafsirPanel(view, settings = settings)
+                                TafsirPanel(view, name = packName, settings = settings)
                             }
                         }
                     }
@@ -334,7 +335,12 @@ private fun DoorRow(
 }
 
 @Composable
-private fun TafsirPanel(view: TafsirView, settings: AppSettings) {
+private fun TafsirPanel(
+    view: TafsirView,
+    /** The tafsir's own name, in the reader's language. */
+    name: String,
+    settings: AppSettings,
+) {
     Column(
         modifier = Modifier
             .widthIn(max = Reading.proseMeasure(LocalReadingVoice.current, settings.tafsirSp))
@@ -342,23 +348,28 @@ private fun TafsirPanel(view: TafsirView, settings: AppSettings) {
             .testTag("tafsir-panel")
             .padding(top = Space.Tight),
     ) {
+        // The passage names itself before its first word: whose commentary it
+        // is and the ayahs it covers. It stood at the foot, which on a median
+        // passage of six thousand characters put it two screens below the line
+        // the reader had already read, so a reader who scrolled into a passage
+        // had nothing on the glass telling them what they were reading (owner
+        // decision, this session). The name and the range are one string and
+        // not two, so the line reads as one label at the head of the prose, in
+        // the same muted tone the ayah's own reference wears at the head of its
+        // block: the theme's secondary tone, measured at 6.1:1 and up on every
+        // ground, where the quiet alpha this label once wore measured 3.3:1,
+        // under the theme's own 4.5:1 rule for muted text.
+        Text(
+            text = stringResource(R.string.card_tafsir_source, name, localizedDigits(view.range)),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = Space.Tight),
+        )
         RichBlocks(
             blocks = view.blocks,
             sizeSp = settings.tafsirSp,
             lineSp = settings.tafsirLineSp,
             arabicSp = settings.arabicInlineSp,
-        )
-        Text(
-            text = localizedDigits(view.range),
-            style = MaterialTheme.typography.labelMedium,
-            // The range is read, not decoration: it is where this tafsir
-            // passage begins and ends. It takes the theme's own secondary
-            // tone, which is measured at 6.1:1 and up on every ground, rather
-            // than a quiet alpha. The 0.7 alpha it wore measured 3.3:1,
-            // under the theme's own 4.5:1 rule for muted text, and this
-            // is the pass that closes it.
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = Space.Row),
         )
     }
 }

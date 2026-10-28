@@ -16,6 +16,7 @@
     <string name="reading_ayah_reference">আয়াত %1$s</string>
 
     <string name="card_tafsir_label">তাফসীর</string>
+    <string name="card_tafsir_source">%1$s · %2$s</string>
     <string name="card_title">%1$s %2$s</string>
     <string name="card_add_tafsir">আয়াতটি ভালোভাবে বোঝার জন্য একটি তাফসীর যোগ করুন</string>
     <string name="card_opening_pack">%1$s খোলা হচ্ছে…</string>
