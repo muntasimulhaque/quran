@@ -27,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.feature.settings.R
+import io.github.muntasimulhaque.quran.ui.kit.DialogButtonSpacing
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.clockText
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
@@ -223,11 +224,12 @@ private fun DailyTimeDialog(
             TextButton(
                 label = stringResource(R.string.settings_cancel),
                 onClick = onDismiss,
-                // The platform's clock dialog lays its two buttons edge to
-                // edge with no spacing of its own, so the action gap is drawn
-                // here; without it Cancel and Set abut (owner decision, this
+                // The platform's clock dialog lays its actions 8 dp apart of
+                // its own, so the padding asks for the rest of the app's one
+                // action gap and Cancel and Set end up as far apart as the
+                // share sheet's two doors, not further (owner report, this
                 // session).
-                modifier = Modifier.padding(end = Space.Row),
+                modifier = Modifier.padding(end = Space.Action - DialogButtonSpacing),
                 quiet = true,
             )
         },

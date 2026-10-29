@@ -65,9 +65,10 @@ class AboutLanguageTest {
     fun thePageNamesTheCoreTextAndItsCreditInBangla() {
         openAbout()
 
-        // The version's digits are the reader's own.
+        // The version's digits are the reader's own, on the page's one line
+        // about the app itself.
         val version = localizedDigits(BuildConfig.VERSION_NAME, Locale.forLanguageTag("bn"))
-        compose.onNodeWithText(version).assertExists()
+        compose.onNodeWithText(version, substring = true).assertExists()
 
         assertTrue(
             "the core text must be named in Bangla",
@@ -109,8 +110,9 @@ class AboutLanguageTest {
         }
         compose.onNodeWithText(about).performScrollTo().performClick()
         compose.waitUntil(timeoutMillis = 15_000) {
-            compose.onAllNodesWithText(compose.activity.getString(SettingsR.string.settings_version))
-                .fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithText(
+                compose.activity.getString(SettingsR.string.about_group_content),
+            ).fetchSemanticsNodes().isNotEmpty()
         }
     }
 }

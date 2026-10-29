@@ -42,23 +42,23 @@
     <string name="settings_downloaded_empty">এই তিলাওয়াতকারীর জন্য এখনও কোনো সূরা ডাউনলোড হয়নি। যেকোনো আয়াতে প্লে ট্যাপ করে একটি যোগ করুন।</string>
     <string name="settings_downloaded_remove">%1$s মুছুন</string>
 
-    <string name="pack_included_suffix">অন্তর্ভুক্ত</string>
     <string name="pack_action_add">যোগ করুন</string>
     <string name="pack_action_remove">মুছুন</string>
     <string name="pack_action_retry">আবার চেষ্টা করুন</string>
     <string name="pack_included">অন্তর্ভুক্ত</string>
     <string name="settings_pack_preparing">প্রস্তুত হচ্ছে…</string>
     <string name="settings_pack_downloading">ডাউনলোড হচ্ছে %1$d%%</string>
-    <string name="pack_installed">%1$s · %2$s</string>
 
     <string name="settings_version">সংস্করণ</string>
-    <string name="settings_license_label">লাইসেন্স</string>
 
     <string name="about_group_content">বিষয়বস্তু</string>
     <string name="about_group_fonts">ফন্ট</string>
     <string name="about_group_recitations">তিলাওয়াত</string>
-    <string name="about_license">MIT</string>
+    <string name="about_version_license">সংস্করণ %1$s · MIT লাইসেন্স</string>
     <string name="about_pack_title">%1$s · %2$s</string>
+    <string name="about_pack_translation">%1$s অনুবাদ</string>
+    <string name="about_pack_tafsir">%1$s তাফসীর</string>
+    <string name="about_pack_words">%1$s শব্দের অর্থ</string>
 
     <string name="credit_page_fonts">KFGQPC হাফস উসমানি লিপি</string>
     <string name="credit_page_fonts_by">বাদশাহ ফাহদ গ্লোরিয়াস কুরআন প্রিন্টিং কমপ্লেক্স, অপরিবর্তিত</string>
@@ -100,42 +100,52 @@
     <string name="settings_size_translation">অনুবাদ</string>
     <string name="settings_size_tafsir">তাফসীর</string>
     <string name="settings_size_words">শব্দের অর্থ</string>
-    <string name="settings_group_about">অ্যাপ</string>
     <string name="settings_back">ফিরে যান</string>
 
     <string name="settings_title_tajweed">তাজবীদ রঙ</string>
     <string name="settings_open_tajweed">নিয়মগুলো</string>
     <string name="settings_tajweed_family_silent">নিরব হরফ</string>
-    <string name="settings_tajweed_family_silent_note">যে হরফ পরের শব্দের সাথে মিলিয়ে পড়লে উচ্চারিত হয় না, যেমন হামযাতুল ওয়াসল।</string>
     <string name="settings_tajweed_family_ghunnah">গুন্নাহ</string>
-    <string name="settings_tajweed_family_ghunnah_note">নূন ও মীমে দুই মাত্রা ধরে রাখা নাসিক্য শব্দ।</string>
     <string name="settings_tajweed_family_qalaqah">কলকলাহ</string>
-    <string name="settings_tajweed_family_qalaqah_note">সাকিন অবস্থায় কাফ, তা, বা, জিম বা দালে কম্পনের মতো শব্দ।</string>
     <string name="settings_tajweed_family_ikhafa">ইখফা</string>
-    <string name="settings_tajweed_family_ikhafa_note">ইখফার হরফের আগে নূন বা তানবীন লুকিয়ে হালকা নাসিক্য শব্দে পড়া।</string>
     <string name="settings_tajweed_family_iqlab">ইকলাব</string>
-    <string name="settings_tajweed_family_iqlab_note">বاء-এর আগে নূন বা তানবীনকে মীমে পরিণত করে নাসিক্য শব্দে পড়া।</string>
     <string name="settings_tajweed_family_idgham">ইদগাম</string>
-    <string name="settings_tajweed_family_idgham_note">নিয়ম অনুযায়ী এক হরফকে পরের হরফে গুন্নাহসহ বা গুন্নাহ ছাড়া মিলিয়ে দেওয়া।</string>
     <string name="settings_tajweed_family_madda">মাদ</string>
-    <string name="settings_tajweed_family_madda_note">নিয়ম অনুযায়ী স্বরকে কয়েক মাত্রা টেনে পড়া।</string>
     <string name="settings_tajweed_rule_ham_wasl">হামযাতুল ওয়াসল</string>
+    <string name="settings_tajweed_rule_ham_wasl_note">সংযোগ-হামযা; পরের শব্দের সাথে মিলিয়ে পড়লে উচ্চারিত হয় না।</string>
     <string name="settings_tajweed_rule_laam_shamsiyah">লাম শামসিয়্যাহ</string>
+    <string name="settings_tajweed_rule_laam_shamsiyah_note">সূর্য-হরফের আগে লাম উচ্চারিত হয় না; পরের হরফ দ্বিগুণ হয়।</string>
     <string name="settings_tajweed_rule_slnt">নিরব</string>
+    <string name="settings_tajweed_rule_slnt_note">ছাপায় নিরব হিসেবে চিহ্নিত হরফ, তিলাওয়াতে উচ্চারিত হয় না।</string>
     <string name="settings_tajweed_rule_ghunnah">গুন্নাহ</string>
+    <string name="settings_tajweed_rule_ghunnah_note">দুই মাত্রা ধরে রাখা নাসিক্য শব্দ।</string>
     <string name="settings_tajweed_rule_qalaqah">কলকলাহ</string>
+    <string name="settings_tajweed_rule_qalaqah_note">সাকিন অবস্থায় কলকলাহর পাঁচ হরফে কম্পনের মতো শব্দ।</string>
     <string name="settings_tajweed_rule_ikhafa">ইখফা</string>
+    <string name="settings_tajweed_rule_ikhafa_note">ইখফার হরফের আগে নূন বা তানবীন লুকিয়ে হালকা নাসিক্য শব্দে পড়া।</string>
     <string name="settings_tajweed_rule_ikhafa_shafawi">ইখফা শাফাবি</string>
+    <string name="settings_tajweed_rule_ikhafa_shafawi_note">বاء-এর আগে মীম লুকিয়ে হালকা নাসিক্য শব্দে পড়া।</string>
     <string name="settings_tajweed_rule_iqlab">ইকলাব</string>
+    <string name="settings_tajweed_rule_iqlab_note">বاء-এর আগে নূন বা তানবীনকে মীমে পরিণত করা।</string>
     <string name="settings_tajweed_rule_idgham_ghunnah">ইদগাম (গুন্নাহসহ)</string>
+    <string name="settings_tajweed_rule_idgham_ghunnah_note">নূন বা তানবীনকে পরের হরফে নাসিক্য শব্দসহ মিলিয়ে দেওয়া।</string>
     <string name="settings_tajweed_rule_idgham_wo_ghunnah">ইদগাম (গুন্নাহ ছাড়া)</string>
+    <string name="settings_tajweed_rule_idgham_wo_ghunnah_note">নূন বা তানবীনকে পরের হরফে নাসিক্য শব্দ ছাড়া মিলিয়ে দেওয়া।</string>
     <string name="settings_tajweed_rule_idgham_shafawi">ইদগাম শাফাবি</string>
+    <string name="settings_tajweed_rule_idgham_shafawi_note">মীমকে পরের মীমে মিলিয়ে দেওয়া।</string>
     <string name="settings_tajweed_rule_idgham_mutajanisayn">ইদগাম মুতাজানিসাইন</string>
+    <string name="settings_tajweed_rule_idgham_mutajanisayn_note">একই উচ্চারণস্থানের দুই হরফ মিললে একটিকে অন্যটিতে মিলিয়ে দেওয়া।</string>
     <string name="settings_tajweed_rule_idgham_mutaqaribayn">ইদগাম মুতাকারিবাইন</string>
+    <string name="settings_tajweed_rule_idgham_mutaqaribayn_note">নিকটবর্তী উচ্চারণস্থানের দুই হরফ মিললে একটিকে অন্যটিতে মিলিয়ে দেওয়া।</string>
     <string name="settings_tajweed_rule_madda_normal">মাদ স্বাভাবিক</string>
+    <string name="settings_tajweed_rule_madda_normal_note">দুই মাত্রার স্বাভাবিক টান।</string>
     <string name="settings_tajweed_rule_madda_permissible">মাদ জায়েজ</string>
+    <string name="settings_tajweed_rule_madda_permissible_note">পাঠ অনুযায়ী দুই, চার বা ছয় মাত্রার টান।</string>
     <string name="settings_tajweed_rule_madda_obligatory_monfasel">মাদ ওয়াজিব (মুনফাসিল)</string>
+    <string name="settings_tajweed_rule_madda_obligatory_monfasel_note">এক শব্দের শেষে মাদ হরফের সাথে পরের শব্দের শুরুতে হামযা মিললে যে টান।</string>
     <string name="settings_tajweed_rule_madda_obligatory_mottasel">মাদ ওয়াজিব (মুত্তাসিল)</string>
+    <string name="settings_tajweed_rule_madda_obligatory_mottasel_note">একই শব্দে মাদ হরফ ও হামযা মিললে যে টান।</string>
     <string name="settings_tajweed_rule_madda_necessary">মাদ লাজিম</string>
+    <string name="settings_tajweed_rule_madda_necessary_note">মাদ হরফের পরে সাকিন বা দ্বিগুণ হরফ এলে ছয় মাত্রার আবশ্যক টান।</string>
 
 </resources>

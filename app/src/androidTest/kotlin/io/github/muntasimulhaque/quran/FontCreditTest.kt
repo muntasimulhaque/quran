@@ -51,7 +51,12 @@ class FontCreditTest {
         compose.onNodeWithText(context.getString(SettingsR.string.credit_literata))
             .performScrollTo()
             .assertIsDisplayed()
-        compose.onNodeWithText(context.getString(SettingsR.string.credit_literata_by))
+        // The hand that made a face and the use it is put to stand on one
+        // line, so a credit is a name and one line about it (owner decision,
+        // this session).
+        val literata = context.getString(SettingsR.string.credit_literata_by) +
+            " · " + context.getString(SettingsR.string.credit_literata_use)
+        compose.onNodeWithText(literata)
             .performScrollTo()
             .assertIsDisplayed()
 

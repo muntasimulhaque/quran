@@ -23,6 +23,23 @@ object Space {
     /** One row's own head and foot: the room a list row keeps around its lines. */
     val Row = 12.dp
 
+    /**
+     * Two actions side by side: the room between the shapes the reader sees.
+     *
+     * The gap is measured pill to pill, not target to target, because the two
+     * answers are read as two shapes and the invisible 48 dp each one keeps is
+     * not part of what the eye separates. Every pair in the app stands on this
+     * one number: the share card's two doors, the reminder dialog's Set and
+     * Cancel, the remove question, the note's Clear and Save, the pill's Retry
+     * and Close. It was 12 dp, and the reminder dialog's pair drew 20 (the
+     * platform lays its own action row 8 dp apart and the app added the 12 on
+     * top), which is the one the owner's eye approved (owner decision, this
+     * session). The shapes are about 33 dp tall, so 20 dp between them reads as
+     * two answers; 12 read as one crowded pair, and a pair that changes width
+     * with a platform constant is not a decision at all.
+     */
+    val Action = 20.dp
+
     /** Two thoughts in one block: the ayah and its word list. */
     val Block = 16.dp
 

@@ -51,7 +51,7 @@ fun TranslationsPage(
         ) { pack ->
             PackChoiceRow(
                 pack = pack,
-                subtitle = translationSubtitle(pack),
+                subtitle = packSizeLine(pack),
                 selected = pack.installed && pack.id in settings.translationPacks,
                 radio = false,
                 setup = packSetup?.takeIf { it.packId == pack.id },
@@ -88,7 +88,7 @@ fun TafsirsPage(
         ) { pack ->
             PackChoiceRow(
                 pack = pack,
-                subtitle = translationSubtitle(pack),
+                subtitle = packSizeLine(pack),
                 selected = pack.installed && pack.id in settings.tafsirPacks,
                 radio = false,
                 setup = packSetup?.takeIf { it.packId == pack.id },

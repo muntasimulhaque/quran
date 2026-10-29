@@ -98,7 +98,7 @@ fun RemoveSavedSheet(
                     label = stringResource(R.string.remove_saved_keep),
                     onClick = onDismiss,
                     modifier = Modifier
-                        .padding(start = Space.Row)
+                        .padding(start = Space.Action)
                         .testTag("remove-saved-keep"),
                 )
             }

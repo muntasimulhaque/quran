@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 12.4 (versionCode 126)
+Version: 12.6 (versionCode 128)
 
 ## Listing
 
@@ -153,6 +153,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (12.6, 422 characters)
+12.6 puts back what 12.5 had taken out. The Tajweed page explains all eighteen rules again, one sentence each, in a shorter layout than before. Translations and tafsirs are grouped under their language again. Last read and Saved stand the ayah 4 dp under its surah, as Browse does. Two buttons side by side stand 20 dp apart everywhere. About is one line of version and license, then the credits. Text and packs unchanged.
 
 ## Release notes (12.5, 471 characters)
 12.5 quiets the chrome. Settings reads as one rhythm, the font size page drops its step counts, the tafsir is a list rather than a switch (the pill's Tafsir mark is there while a commentary is on), and the Tajweed page is seven colors with their rule names. Browse's Last Read and Saved lines sit on one gap, Search speaks once, and the share sheet opens on the card: the ayah right, its translation left, one fixed type for preview and picture. Text and packs unchanged.

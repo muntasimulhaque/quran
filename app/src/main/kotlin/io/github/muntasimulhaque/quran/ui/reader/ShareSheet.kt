@@ -85,12 +85,14 @@ internal fun AyahShareSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Section),
-                // The two doors are a centered pair a Space.Row apart: they
-                // are two standalone actions, not one group, so they wear the
-                // action gap. Weighted buttons made the gap a side effect of
-                // the stretch, wide on the phone and wider on a ten inch
-                // screen (owner decision, this session).
-                horizontalArrangement = Arrangement.spacedBy(Space.Row, Alignment.CenterHorizontally),
+                // The two doors are a centered pair on the app's one action
+                // gap: they are two standalone actions, not one group, so the
+                // gap is the same 20 dp the reminder dialog's Set and Cancel
+                // stand on. Weighted buttons made the gap a side effect of the
+                // stretch, wide on the phone and wider on a ten inch screen,
+                // and 12 dp read as one crowded pair under two wide pills
+                // (owner report, this session).
+                horizontalArrangement = Arrangement.spacedBy(Space.Action, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 TextButton(

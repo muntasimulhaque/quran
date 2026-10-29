@@ -77,30 +77,35 @@ internal fun wantedWordsPack(settings: AppSettings, packs: List<ContentPack>): C
 }
 
 /**
- * One pack's own line on a list page: the language it speaks and whether it
- * came with the app, so a reader never wonders what a size beside a pack
- * means.
+ * One pack's own line on a list page: what it costs to have, and nothing else.
+ * The language it speaks is the heading the row stands under, so a row that
+ * said it again under its own name spent a line repeating the group it is in
+ * (owner report, this session).
  */
 @Composable
-internal fun translationSubtitle(pack: ContentPack): String {
-    val detail = if (pack.shipped) {
-        stringResource(R.string.pack_included_suffix)
+internal fun packSizeLine(pack: ContentPack): String =
+    if (pack.shipped) {
+        stringResource(R.string.pack_included)
     } else {
         formatBytes(pack.bytes)
     }
-    return stringResource(R.string.pack_installed, languageName(pack.language), detail)
-}
 
 /**
- * The packs of one kind, read in one list: the language each one speaks, then
- * the name each row draws. A list of choices is read, not searched, so the
- * packs are in one order everywhere in the app.
+ * The packs of one kind, grouped by the language they speak, in the
+ * alphabetical order of those languages, and alphabetical inside each group.
+ * A list of choices is read, not searched: the reader looks for a name, so
+ * names are in one order everywhere in the app.
  *
- * The list used to stand under a heading per language, and every row under
- * the heading named the language again in its own line ("Bangla", then
- * "Bangla · 53 MB"). With one or two packs per language the heading cost a
- * block of air to say what the first row already said, so the language stayed
- * in the row and the heading went (owner report).
+ * The grouping is what the list grows into. A heading costs its room once per
+ * language, while a language printed under every name costs a line per pack,
+ * so two English translations and two Bangla ones would say "English" and
+ * "Bangla" twice each and still give the eye nothing to group. The heading is
+ * the same one the settings pages use, so it is one style, one rhythm, and one
+ * TalkBack jump whichever group a reader is in (owner decision, this session).
+ *
+ * The list spent 12.5 with no headings and the language in each row's own line
+ * instead, which read as one flat list of names; with more than one pack per
+ * language it stops being readable at all (owner report).
  */
 @Composable
 internal fun LanguageGroups(
@@ -108,8 +113,19 @@ internal fun LanguageGroups(
     type: PackType,
     row: @Composable (ContentPack) -> Unit,
 ) {
-    packs.filter { it.type == type }
-        .map { pack -> Triple(pack, languageName(pack.language), contentPackName(pack.id, pack.name)) }
-        .sortedWith(compareBy({ (_, language, _) -> language.lowercase() }, { (_, _, name) -> name.lowercase() }))
-        .forEach { (pack, _, _) -> row(pack) }
+    val groups = packs.filter { it.type == type }.groupBy { it.language }
+    val names = HashMap<String, String>()
+    for (language in groups.keys) names[language] = languageName(language)
+    groups.entries
+        .sortedBy { (names[it.key] ?: it.key).lowercase() }
+        .forEach { (language, group) ->
+            Group(names[language] ?: language)
+            // The names inside a group are read by the name the row draws, so
+            // the order is the reader's own alphabet and not the catalog's
+            // English one.
+            group
+                .map { pack -> pack to contentPackName(pack.id, pack.name) }
+                .sortedBy { (_, name) -> name.lowercase() }
+                .forEach { (pack, _) -> row(pack) }
+        }
 }

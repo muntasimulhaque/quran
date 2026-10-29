@@ -19,9 +19,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.TajweedFamily
 import io.github.muntasimulhaque.quran.core.TajweedRule
@@ -41,17 +45,31 @@ import io.github.muntasimulhaque.quran.ui.theme.TajweedColors
 /**
  * The legend of the reading's colors: the seven families the page draws when
  * its switch is on, each with one word from the reading in that family's
- * color and one sentence on what the family asks of the reciter.
+ * color, and every rule the family covers with one sentence on what it asks
+ * of the reciter.
  *
- * The colors are seven, one per family, and that is the fact the page is for:
- * a reader looking at a green letter wants to know which of the seven groups
- * it is, not to be taught the eighteen rules. So each family is one block
- * with its word, its name, its sentence, and the names of the rules that
- * wear its color, on one quiet line. The page used to print all eighteen rule
- * names with a sentence each, and three of the seven families said the same
- * sentence twice, once for the family and once for its only rule; with the
- * page's own seven-line introduction above it, the legend ran about three
- * screens to explain seven colors (owner report).
+ * The colors are seven, one per family, and that is the frame the page is
+ * for: a reader looking at a green letter wants to know which of the seven
+ * groups it is. But the group is not the whole answer, because the rules
+ * inside a family ask different things of the voice: idgham with a nasal sound
+ * and idgham without one are the same color and not the same act. So each
+ * family is a head, its name and the sample word that proves the color, and
+ * under it every rule it covers, named and explained.
+ *
+ * A rule is one paragraph, not two lines: the name runs into its sentence in
+ * the family's ink and weight, and the sentence follows in the quiet tone, so
+ * eighteen rules cost eighteen short paragraphs instead of eighteen headings
+ * and eighteen notes with a block of air between each pair. The two spaces
+ * that separate the name from its sentence are the whole of the punctuation,
+ * because English ends a sentence with a period and Bangla with a danda, and
+ * neither belongs between a name and the words that explain it.
+ *
+ * The page used to print all eighteen names, a sentence for each, and one
+ * sentence for the family above them, which said the same thing twice for the
+ * four families that hold a single rule; it then went to the seven families
+ * with their rule names joined on one line, which was a third of the page and
+ * explained none of the words (owner report). What stands here is the
+ * explanation back, without the second reading of it.
  *
  * The sample word is drawn by the reading's own painter, in the reading's own
  * palette, so the legend and the page cannot disagree. It is capped at a
@@ -64,13 +82,13 @@ import io.github.muntasimulhaque.quran.ui.theme.TajweedColors
  * so the sample is the audited text and the audited code, and a content
  * update can never leave the legend showing a word the page does not draw.
  *
- * The sentence under each family is UI copy, not a print annotation: it says
+ * The sentence under each rule is UI copy, not a print annotation: it says
  * what the rule asks of the reciter, and it belongs to the same review as the
  * content. A qualified reviewer checks it before a release.
  *
  * The switch that draws all of this stands at the page's own top, in the same
  * words and the same state as the hub row that opened it. A reader reading the
- * colours and finding them not to their taste turns them off where they are,
+ * colors and finding them not to their taste turns them off where they are,
  * rather than going back a page for the switch they came from (owner decision,
  * an earlier session).
  */
@@ -156,26 +174,50 @@ private fun Family(
                 )
             }
         }
-        Text(
-            text = stringResource(family.note()),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = Space.Tight),
-        )
-        // The rules that wear this color, in one line. The names are words a
-        // reader may have heard and may want to place, and the family's own
-        // sentence has already said what they ask of the reciter, so the
-        // eighteen sentences, a rule each, were the same lesson twice (owner
-        // report).
-        val names = family.rules.map { stringResource(it.label()) }
-        Text(
-            text = names.joinToString(RULE_SEPARATOR),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = Space.Line),
-        )
+        // The rules that wear this color, each named and explained. The family
+        // is one head over them and says nothing of its own: four of the seven
+        // hold a single rule, and a sentence above them was that rule's own
+        // sentence said twice (owner report).
+        family.rules.forEachIndexed { index, rule ->
+            Rule(
+                name = stringResource(rule.label()),
+                sentence = stringResource(rule.note()),
+                modifier = Modifier.padding(top = if (index == 0) Space.Block else Space.Line),
+            )
+        }
     }
 }
+
+/**
+ * One rule: its name in the page's ink and the app's medium weight, its
+ * sentence after it in the quiet tone, on one paragraph.
+ *
+ * The name is a run-in head, so a reader scanning for a word they have heard
+ * finds it at the start of a line without the page paying for a line of its
+ * own, and the sentence that explains it follows to the end of the same
+ * thought.
+ */
+@Composable
+private fun Rule(name: String, sentence: String, modifier: Modifier = Modifier) {
+    val ink = MaterialTheme.colorScheme.onSurface
+    val quiet = MaterialTheme.colorScheme.onSurfaceVariant
+    Text(
+        text = buildAnnotatedString {
+            withStyle(SpanStyle(color = ink, fontWeight = FontWeight.Medium)) { append(name) }
+            append(RuleRunIn)
+            withStyle(SpanStyle(color = quiet)) { append(sentence) }
+        },
+        style = MaterialTheme.typography.bodySmall,
+        modifier = modifier,
+    )
+}
+
+/**
+ * The room between a rule's name and its sentence: two spaces, so a run-in
+ * head separates from its own sentence without a mark that belongs to one
+ * language and not the other.
+ */
+private const val RuleRunIn = "  "
 
 /**
  * The one size the legend's sample word is drawn at, whatever the reader's
@@ -183,9 +225,6 @@ private fun Family(
  * sample stood taller than the family it belongs to.
  */
 private const val LegendSampleSp = 24f
-
-/** How the rule names that share one color stand apart on the page. */
-private const val RULE_SEPARATOR = " · "
 
 /** The family's name in the reader's language. */
 private fun TajweedFamily.title(): Int = when (this) {
@@ -196,17 +235,6 @@ private fun TajweedFamily.title(): Int = when (this) {
     TajweedFamily.IQLAB -> R.string.settings_tajweed_family_iqlab
     TajweedFamily.IDGHAM -> R.string.settings_tajweed_family_idgham
     TajweedFamily.MADDA -> R.string.settings_tajweed_family_madda
-}
-
-/** One sentence on what the family sounds like, under its name. */
-private fun TajweedFamily.note(): Int = when (this) {
-    TajweedFamily.SILENT -> R.string.settings_tajweed_family_silent_note
-    TajweedFamily.GHUNNAH -> R.string.settings_tajweed_family_ghunnah_note
-    TajweedFamily.QALAQAH -> R.string.settings_tajweed_family_qalaqah_note
-    TajweedFamily.IKHAFA -> R.string.settings_tajweed_family_ikhafa_note
-    TajweedFamily.IQLAB -> R.string.settings_tajweed_family_iqlab_note
-    TajweedFamily.IDGHAM -> R.string.settings_tajweed_family_idgham_note
-    TajweedFamily.MADDA -> R.string.settings_tajweed_family_madda_note
 }
 
 /** The rule's name in the reader's language, one string for each rule. */
@@ -229,4 +257,26 @@ private fun TajweedRule.label(): Int = when (this) {
     TajweedRule.MADDA_OBLIGATORY_MONFASEL -> R.string.settings_tajweed_rule_madda_obligatory_monfasel
     TajweedRule.MADDA_OBLIGATORY_MOTTASEL -> R.string.settings_tajweed_rule_madda_obligatory_mottasel
     TajweedRule.MADDA_NECESSARY -> R.string.settings_tajweed_rule_madda_necessary
+}
+
+/** One sentence on what the rule asks of the reciter, after its name. */
+private fun TajweedRule.note(): Int = when (this) {
+    TajweedRule.HAM_WASL -> R.string.settings_tajweed_rule_ham_wasl_note
+    TajweedRule.LAAM_SHAMSIYAH -> R.string.settings_tajweed_rule_laam_shamsiyah_note
+    TajweedRule.SLNT -> R.string.settings_tajweed_rule_slnt_note
+    TajweedRule.GHUNNAH -> R.string.settings_tajweed_rule_ghunnah_note
+    TajweedRule.QALAQAH -> R.string.settings_tajweed_rule_qalaqah_note
+    TajweedRule.IKHAFA -> R.string.settings_tajweed_rule_ikhafa_note
+    TajweedRule.IKHAFA_SHAFAWI -> R.string.settings_tajweed_rule_ikhafa_shafawi_note
+    TajweedRule.IQLAB -> R.string.settings_tajweed_rule_iqlab_note
+    TajweedRule.IDGHAM_GHUNNAH -> R.string.settings_tajweed_rule_idgham_ghunnah_note
+    TajweedRule.IDGHAM_WO_GHUNNAH -> R.string.settings_tajweed_rule_idgham_wo_ghunnah_note
+    TajweedRule.IDGHAM_SHAFAWI -> R.string.settings_tajweed_rule_idgham_shafawi_note
+    TajweedRule.IDGHAM_MUTAJANISAYN -> R.string.settings_tajweed_rule_idgham_mutajanisayn_note
+    TajweedRule.IDGHAM_MUTAQARIBAYN -> R.string.settings_tajweed_rule_idgham_mutaqaribayn_note
+    TajweedRule.MADDA_NORMAL -> R.string.settings_tajweed_rule_madda_normal_note
+    TajweedRule.MADDA_PERMISSIBLE -> R.string.settings_tajweed_rule_madda_permissible_note
+    TajweedRule.MADDA_OBLIGATORY_MONFASEL -> R.string.settings_tajweed_rule_madda_obligatory_monfasel_note
+    TajweedRule.MADDA_OBLIGATORY_MOTTASEL -> R.string.settings_tajweed_rule_madda_obligatory_mottasel_note
+    TajweedRule.MADDA_NECESSARY -> R.string.settings_tajweed_rule_madda_necessary_note
 }

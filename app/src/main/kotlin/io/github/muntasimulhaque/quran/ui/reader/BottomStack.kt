@@ -135,7 +135,7 @@ internal fun BottomStack(
                     // Retry and Close are two standalone actions, so they
                     // stand the action gap apart (owner decision, this
                     // session).
-                    modifier = Modifier.padding(start = Space.Row),
+                    modifier = Modifier.padding(start = Space.Action),
                     quiet = true,
                 )
             }

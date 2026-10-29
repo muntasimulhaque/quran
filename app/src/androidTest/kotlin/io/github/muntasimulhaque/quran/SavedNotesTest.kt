@@ -1,5 +1,6 @@
 package io.github.muntasimulhaque.quran
 
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -16,7 +17,10 @@ import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.SavedStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.feature.reading.R as ReadingR
+import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExternalResource
@@ -93,6 +97,43 @@ class SavedNotesTest {
         }
     }
 
+    /**
+     * The ayah stands under its surah on the step Browse's Surahs and Juz rows
+     * keep between a name and its own label, and the note below them keeps the
+     * row's own line gap.
+     *
+     * A place row used to stand every line under its name 8 dp apart, which
+     * unified the row and put the ayah further from its surah than the same
+     * pair sits one tab away in Surahs: there the step is 4 dp (owner report,
+     * this session). The row now reads as a name and its label, and then the
+     * row's own line about it.
+     */
+    @Test
+    fun theAyahStandsUnderItsNameOnTheBrowsRowGap() {
+        openSaved()
+        compose.waitUntil(timeoutMillis = 30_000) {
+            compose.onAllNodesWithText(NOTE).fetchSemanticsNodes().isNotEmpty()
+        }
+        // Unmerged: the row is one node for the finger and for TalkBack, so
+        // the merged tree hands back the row itself for every line in it and
+        // only the unmerged tree can be asked where a line stands.
+        val name = compose.onNodeWithText(SURAH_NAME, useUnmergedTree = true).getUnclippedBoundsInRoot()
+        val ayah = compose.onNodeWithText(AYAH_LABEL, useUnmergedTree = true).getUnclippedBoundsInRoot()
+        val note = compose.onNodeWithText(NOTE, useUnmergedTree = true).getUnclippedBoundsInRoot()
+
+        val step = (ayah.top - name.bottom).value
+        assertEquals(
+            "the ayah is the surah's own label and stands ${Space.Tight} under it",
+            Space.Tight.value,
+            step,
+            0.5f,
+        )
+        assertTrue(
+            "the reader's note is the row's own line and keeps the row's line gap",
+            (note.top - ayah.bottom).value > Space.Line.value,
+        )
+    }
+
     private fun openSaved() {
         openBrowse()
         compose.onNodeWithText("Saved").performClick()
@@ -125,5 +166,9 @@ class SavedNotesTest {
         const val AYAT_AL_KURSI = 7 + 255
 
         const val NOTE = "Ayat Al-Kursi, the greatest ayah"
+
+        /** Ayat Al-Kursi's surah, and the label the row draws under its name. */
+        const val SURAH_NAME = "Al-Baqarah"
+        const val AYAH_LABEL = "Ayah 255"
     }
 }

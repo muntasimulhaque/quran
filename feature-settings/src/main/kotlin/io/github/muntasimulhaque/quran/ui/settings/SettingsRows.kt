@@ -173,21 +173,3 @@ fun ToggleRow(
         }
     }
 }
-
-/**
- * A line the reader cannot change: a version, a license, what stands where.
- *
- * It is the same words every other row wears, in the same place, and it ends
- * in no mark at all: there is nothing here to tap and nothing here to open, so
- * a chevron would promise a page that is not there (owner decision).
- */
-@Composable
-fun ValueRow(title: String, value: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Row, bottom = Space.Row),
-    ) {
-        RowName(title = title, value = value)
-    }
-}

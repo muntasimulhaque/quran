@@ -44,15 +44,20 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * circle is never sliced by the pill's shorter side: the pill's own clip is
  * what shapes the press (owner decision, this session).
  *
- * Two text buttons side by side stand `Space.Row` (12 dp) apart between
+ * Two text buttons side by side stand `Space.Action` (20 dp) apart between
  * their pills: each is a standalone action, so the pair reads as two answers
  * and the gap belongs between the shapes the reader sees, not between the
  * invisible 48 dp targets each one keeps. The share card's two doors, the
- * reminder dialog's Set and Cancel, the remove question, and a note's Clear
- * and Save all read that one action gap. The app's other side-by-side gap,
- * `Space.Line` (8 dp), belongs to a cluster of same-kind small controls, the
- * search and Browse chips, where the eye reads one group (owner decision,
- * this session).
+ * reminder dialog's Set and Cancel, the remove question, a note's Clear and
+ * Save, and the pill's Retry and Close all read that one action gap. The app's
+ * other side-by-side gap, `Space.Line` (8 dp), belongs to a cluster of
+ * same-kind small controls, the search and Browse chips, where the eye reads
+ * one group (owner decision, this session).
+ *
+ * A pair inside Material's own dialog is not outside the rule: the platform
+ * lays two dialog buttons [DialogButtonSpacing] apart, so the caller asks for
+ * `Space.Action - DialogButtonSpacing` and the shapes end up as far apart as
+ * every other pair in the app.
  */
 @Composable
 fun TextButton(
@@ -98,3 +103,17 @@ fun TextButton(
         }
     }
 }
+
+/**
+ * How far apart Material's own dialog lays two of its buttons.
+ *
+ * `TimePickerDialog` puts its actions in a `Row` with `spacedBy(8.dp)`, and an
+ * `AlertDialog` in a flow row with `ButtonsMainAxisSpacing`, also 8 dp, so a
+ * dialog is never edge to edge however its two buttons look. A caller that
+ * padded its pair by the app's whole action gap drew a gap wider than every
+ * other pair in the app, and nothing on the page said where the extra 8 dp
+ * came from. The number stands here, named, so a Material update that moves it
+ * is one constant to change rather than a silence (owner decision, this
+ * session).
+ */
+val DialogButtonSpacing = 8.dp

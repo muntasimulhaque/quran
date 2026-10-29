@@ -165,13 +165,17 @@ private fun PlaceRow(
     onClick: () -> Unit,
     action: Pair<String, () -> Unit>? = null,
 ) {
-    // One gap for every line under the name: the ayah, the note, and the
-    // moment stand on the row's one rhythm, so nothing in the middle of a
-    // row reads as a break the row did not mean. Each line used to carry its
-    // own padding, 4 dp above the ayah and 8 dp above the rest, and with the
-    // fonts' own line boxes on top of it the eye counted the step between
-    // the second line and the third: 11 dp, then 16 dp in one row, and
-    // 11, 18, 16 in a row that carries a note (owner report).
+    // Two steps, and the same two everywhere: the ayah is the name's own
+    // label and stands `Space.Tight` under it, exactly as a surah's place and
+    // ayah count stand under its name in Browse's two numbered lists, while
+    // the note and the moment are the row's own facts and stand `Space.Line`
+    // below. Each line used to carry its own padding, 4 dp above the ayah and
+    // 8 dp above the rest, which cascaded with the fonts' line boxes into 11,
+    // 16, and 18 dp steps in one row; the row then went to one 8 dp gap for
+    // every line, which unified the row and left the name's label further from
+    // its name than the same pair sits one tab away in Surahs (owner report,
+    // this session). The eye reads the name and the ayah as one block, and the
+    // moment or the note as the row's own line about it.
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -182,7 +186,7 @@ private fun PlaceRow(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(Space.Line),
+                verticalArrangement = Arrangement.spacedBy(Space.Tight),
             ) {
                 Text(
                     text = surah,
