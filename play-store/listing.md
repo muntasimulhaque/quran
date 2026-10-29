@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 12.6 (versionCode 128)
+Version: 12.7 (versionCode 129)
 
 ## Listing
 
@@ -153,6 +153,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (12.7, 391 characters)
+12.7 gives the wide screen a page. On a ten inch tablet the reading stops stretching to the glass: the words keep a 600 dp page, centered, the width the seven inch tablet already reads edge to edge, and the rest becomes margin. Every sheet is that page plus its air, so a settings row switch stands beside its own words again. Every gap is now named from one scale. Text and packs unchanged.
 
 ## Release notes (12.6, 422 characters)
 12.6 puts back what 12.5 had taken out. The Tajweed page explains all eighteen rules again, one sentence each, in a shorter layout than before. Translations and tafsirs are grouped under their language again. Last read and Saved stand the ayah 4 dp under its surah, as Browse does. Two buttons side by side stand 20 dp apart everywhere. About is one line of version and license, then the credits. Text and packs unchanged.
