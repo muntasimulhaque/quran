@@ -261,7 +261,7 @@ private fun EmptyNote(title: String, body: String) {
             text = body,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 8.dp),
+            modifier = Modifier.padding(top = Space.Line),
         )
     }
 }

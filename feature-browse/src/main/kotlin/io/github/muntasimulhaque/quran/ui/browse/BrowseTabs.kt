@@ -19,6 +19,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.theme.Radii
+import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
 
 internal enum class BrowseTab(val labelRes: Int) {
@@ -79,7 +80,7 @@ internal fun BrowseTabChip(
                     },
                 )
                 .indication(press, ripple(color = ink))
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .padding(horizontal = Space.Row, vertical = Space.Line),
         ) {
             Text(
                 text = label,

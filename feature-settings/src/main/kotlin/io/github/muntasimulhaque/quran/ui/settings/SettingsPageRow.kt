@@ -48,9 +48,9 @@ fun PageRow(
             .minimumInteractiveComponentSize()
             .padding(
                 start = Space.Gutter - SheetRowGutter,
-                end = 12.dp - SheetRowGutter,
-                top = 12.dp,
-                bottom = 12.dp,
+                end = Space.Row - SheetRowGutter,
+                top = Space.Row,
+                bottom = Space.Row,
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -60,7 +60,7 @@ fun PageRow(
         RowName(
             title = title,
             value = summary,
-            modifier = Modifier.weight(1f).padding(end = 12.dp),
+            modifier = Modifier.weight(1f).padding(end = Space.Row),
         )
         RowTail(chevron = true)
     }

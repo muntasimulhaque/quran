@@ -174,7 +174,7 @@ internal fun SurahRow(
             // and up on every ground, where the 0.7 alpha it wore measured
             // 3.3:1.
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(end = 16.dp),
+            modifier = Modifier.padding(end = Space.Block),
         )
         SurahNameBlock(surah, Modifier.weight(1f))
         SurahArabicName(surah)
@@ -202,7 +202,7 @@ internal fun JuzRow(
             text = numberLabel(juz),
             width = numberWidth,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(end = 16.dp),
+            modifier = Modifier.padding(end = Space.Block),
         )
         Column(Modifier.weight(1f)) {
             Text(

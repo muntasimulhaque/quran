@@ -126,7 +126,7 @@ internal fun FilterRow(
                 .semantics {
                     stateDescription = if (open) expanded else collapsed
                 }
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .padding(horizontal = Space.Row, vertical = Space.Line),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -245,7 +245,7 @@ internal fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit)
                 },
             )
             .indication(press, ripple(color = ink))
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = Space.Row, vertical = Space.Line),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(5.dp),
     ) {

@@ -51,7 +51,7 @@ fun ThemeRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = Space.Tight),
+            .padding(horizontal = Space.Block, vertical = Space.Tight),
     ) {
         AppTheme.entries.forEach { theme ->
             Column(
@@ -62,7 +62,7 @@ fun ThemeRow(
                     .selectable(selected = theme == selected, role = Role.RadioButton) {
                         onSelect(theme)
                     }
-                    .padding(horizontal = 6.dp, vertical = 8.dp),
+                    .padding(horizontal = 6.dp, vertical = Space.Line),
             ) {
                 ThemeSwatch(theme = theme, chosen = theme == selected)
                 Text(

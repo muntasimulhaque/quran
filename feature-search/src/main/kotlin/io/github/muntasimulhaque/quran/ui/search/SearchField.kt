@@ -40,6 +40,7 @@ import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Radii
+import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
 
 @Composable
@@ -53,7 +54,7 @@ internal fun SearchField(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 18.dp, end = 10.dp, top = 8.dp, bottom = 4.dp),
+            .padding(start = 18.dp, end = 10.dp, top = Space.Line, bottom = Space.Tight),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(
@@ -81,10 +82,10 @@ internal fun SearchField(
                         detectTapGestures(onTap = { focus.requestFocus() })
                     }
                     .padding(
-                        start = 16.dp,
+                        start = Space.Block,
                         end = if (value.isEmpty()) 16.dp else ClearGap,
-                        top = 12.dp,
-                        bottom = 12.dp,
+                        top = Space.Row,
+                        bottom = Space.Row,
                     ),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -139,7 +140,7 @@ internal fun SearchField(
         TextButton(
             label = stringResource(R.string.search_close),
             onClick = onClose,
-            modifier = Modifier.padding(start = 8.dp),
+            modifier = Modifier.padding(start = Space.Line),
             quiet = true,
         )
     }

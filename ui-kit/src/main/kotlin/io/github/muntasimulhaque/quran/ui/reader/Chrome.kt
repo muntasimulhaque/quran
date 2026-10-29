@@ -36,6 +36,7 @@ import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.kit.GlyphButton
 import io.github.muntasimulhaque.quran.ui.theme.Radii
+import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
  * An icon button: a full target of touch, the control's mark, one spoken
@@ -135,7 +136,7 @@ fun TextAction(
             .indication(press, ripple(color = ink, bounded = false))
             .widthIn(min = minWidth)
             .minimumInteractiveComponentSize()
-            .padding(horizontal = 6.dp, vertical = 4.dp)
+            .padding(horizontal = 6.dp, vertical = Space.Tight)
             .testTag("ayah-action-shape")
             .semantics {
                 contentDescription = label

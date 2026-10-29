@@ -275,7 +275,7 @@ internal fun SurahEnd(
             text = stringResource(R.string.reading_surah_complete, surah.nameSimple),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 16.dp),
+            modifier = Modifier.padding(top = Space.Block),
         )
         if (next <= 114 && nextSurahName != null) {
             // The next surah is a card, not a bare line of type: the label
@@ -294,7 +294,7 @@ internal fun SurahEnd(
                     // session).
                     .semantics { role = Role.Button }
                     .clickable { onNextSurah(next) }
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(horizontal = Space.Block, vertical = Space.Row),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(Modifier.weight(1f)) {

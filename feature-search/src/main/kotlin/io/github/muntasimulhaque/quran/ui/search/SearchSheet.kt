@@ -35,6 +35,7 @@ import io.github.muntasimulhaque.quran.ui.kit.AppSheet
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
+import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -227,7 +228,7 @@ fun SearchSheet(
                 modifier = Modifier
                     .weight(1f)
                     .sheetDragGate(resultsGate),
-                contentPadding = PaddingValues(bottom = 28.dp),
+                contentPadding = PaddingValues(bottom = Space.SheetFoot),
             ) {
                 items(results.hits, key = { key(it) }) { hit ->
                     when (hit) {

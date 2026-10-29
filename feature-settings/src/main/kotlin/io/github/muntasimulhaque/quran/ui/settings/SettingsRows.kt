@@ -149,7 +149,7 @@ fun ToggleRow(
             value = subtitle,
             modifier = Modifier
                 .weight(1f)
-                .padding(end = 12.dp),
+                .padding(end = Space.Row),
         )
         // Where the row opens a page, the switch is the only thing that
         // switches, so it takes its own clicks and carries the row's name: a

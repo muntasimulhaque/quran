@@ -81,7 +81,7 @@ internal fun BottomStack(
             .onSizeChanged { onHeight(it.height) }
             .padding(bottom = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(Space.Line),
     ) {
         DisposableEffect(Unit) {
             onDispose { onHeight(0) }
@@ -95,7 +95,7 @@ internal fun BottomStack(
                     .padding(start = 18.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column(Modifier.padding(end = 12.dp)) {
+                Column(Modifier.padding(end = Space.Row)) {
                     Text(
                         text = contentPackName(setup.pack.id, setup.pack.name),
                         style = MaterialTheme.typography.labelMedium,

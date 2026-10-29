@@ -89,7 +89,7 @@ internal fun ReaderTopBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = BarInset, end = BarInset, top = 8.dp, bottom = Space.Gutter),
+                    .padding(start = BarInset, end = BarInset, top = Space.Line, bottom = Space.Gutter),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 // The bar is one row: Browse leads, the surah
@@ -99,7 +99,7 @@ internal fun ReaderTopBar(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = 4.dp),
+                        .padding(horizontal = Space.Tight),
                     contentAlignment = Alignment.Center,
                 ) {
                     ReadingTitle(

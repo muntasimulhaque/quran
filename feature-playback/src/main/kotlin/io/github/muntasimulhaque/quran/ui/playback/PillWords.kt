@@ -118,7 +118,7 @@ internal fun WordsBlock(
                     Modifier.indication(press, ripple(color = MaterialTheme.colorScheme.primary))
                 },
             )
-            .padding(horizontal = 4.dp, vertical = 2.dp),
+            .padding(horizontal = Space.Tight, vertical = 2.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
@@ -149,7 +149,7 @@ internal fun WordsBlock(
                     icon = Icon.Chevron,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
-                        .padding(start = 4.dp)
+                        .padding(start = Space.Tight)
                         .size(GlyphSize.ChevronInline),
                 )
             }
@@ -274,7 +274,7 @@ private fun ReciterDoor(
                     )
                 },
             )
-            .padding(horizontal = 4.dp, vertical = 8.dp)
+            .padding(horizontal = Space.Tight, vertical = Space.Line)
             .testTag("playback-reciter")
             .semantics { contentDescription = name },
         verticalAlignment = Alignment.CenterVertically,
@@ -292,7 +292,7 @@ private fun ReciterDoor(
                 icon = Icon.Chevron,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
-                    .padding(start = 4.dp)
+                    .padding(start = Space.Tight)
                     .size(GlyphSize.ChevronInline),
             )
         }

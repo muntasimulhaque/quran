@@ -116,7 +116,7 @@ fun PageHeader(title: String, onBack: () -> Unit) {
             // the page's own name, and the one heading on it
             modifier = Modifier
                 .semantics { heading() }
-                .padding(start = 4.dp),
+                .padding(start = Space.Tight),
         )
     }
 }

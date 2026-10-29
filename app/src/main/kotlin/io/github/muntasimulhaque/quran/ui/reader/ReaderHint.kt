@@ -30,6 +30,7 @@ import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 import io.github.muntasimulhaque.quran.ui.theme.Radii
+import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlinx.coroutines.delay
 
 /**
@@ -62,7 +63,7 @@ internal fun BoxScope.LongPressHint(
     ) {
         Row(
             modifier = Modifier
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = Space.Section)
                 .floatingLift(Radii.Card)
                 .clip(Radii.Card)
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh)
@@ -71,7 +72,7 @@ internal fun BoxScope.LongPressHint(
                     onSeen()
                 }
                 .minimumInteractiveComponentSize()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = Space.Block, vertical = Space.Row),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconGlyph(
@@ -83,7 +84,7 @@ internal fun BoxScope.LongPressHint(
                 text = stringResource(R.string.hint_long_press_ayah),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(start = 12.dp),
+                modifier = Modifier.padding(start = Space.Row),
             )
         }
     }

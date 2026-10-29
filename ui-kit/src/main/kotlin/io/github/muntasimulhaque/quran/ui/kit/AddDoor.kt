@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 
@@ -56,7 +57,7 @@ fun AddDoor(
             // An indication on the click node would flash the whole slab as
             // a rectangle over the shape (the same rule TextButton wears).
             .indication(press, ripple(color = MaterialTheme.colorScheme.primary))
-            .padding(horizontal = 14.dp, vertical = 12.dp),
+            .padding(horizontal = 14.dp, vertical = Space.Row),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(

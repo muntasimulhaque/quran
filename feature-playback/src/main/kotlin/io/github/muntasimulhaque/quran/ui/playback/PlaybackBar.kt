@@ -32,6 +32,7 @@ import io.github.muntasimulhaque.quran.ui.kit.DownloadLine
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.theme.Radii
+import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlin.math.abs
 
 /**
@@ -341,8 +342,8 @@ fun PlaybackBar(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .padding(bottom = 8.dp)
+                            .padding(horizontal = Space.Block)
+                            .padding(bottom = Space.Line)
                             .height(2.dp)
                             // The line names itself so the air between it and
                             // the row above can be read back by a test: the

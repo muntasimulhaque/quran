@@ -135,8 +135,8 @@ fun ChoiceRow(
             .clip(Radii.Pill)
             .indication(press, ripple())
             .padding(
-                start = 12.dp,
-                end = 12.dp,
+                start = Space.Row,
+                end = Space.Row,
                 top = CapsulePad,
                 bottom = CapsulePad,
             ),
@@ -146,7 +146,7 @@ fun ChoiceRow(
         Column(
             Modifier
                 .weight(1f)
-                .padding(start = 16.dp),
+                .padding(start = Space.Block),
         ) {
             Text(
                 text = title,
@@ -163,7 +163,7 @@ fun ChoiceRow(
             }
         }
         if (trailing != null) {
-            Box(Modifier.padding(start = 12.dp)) { trailing() }
+            Box(Modifier.padding(start = Space.Row)) { trailing() }
         }
     }
 }

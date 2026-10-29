@@ -150,11 +150,11 @@ private fun SurahGridHeader(surah: Surah, onBack: () -> Unit) {
             surah = surah,
             modifier = Modifier
                 .weight(1f)
-                .padding(start = 4.dp)
+                .padding(start = Space.Tight)
                 .semantics { heading() },
             nameMaxLines = 1,
         )
-        SurahArabicName(surah, Modifier.padding(start = 12.dp))
+        SurahArabicName(surah, Modifier.padding(start = Space.Row))
     }
 }
 

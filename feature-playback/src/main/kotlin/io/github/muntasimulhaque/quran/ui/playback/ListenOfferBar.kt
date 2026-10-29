@@ -29,6 +29,7 @@ import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
 import io.github.muntasimulhaque.quran.ui.theme.Radii
+import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
  * One request, named in full: which reciter, which surah, how much, and the
@@ -186,8 +187,8 @@ internal fun ListenOfferBar(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .padding(bottom = 8.dp)
+                        .padding(horizontal = Space.Block)
+                        .padding(bottom = Space.Line)
                         .height(2.dp)
                         .testTag("download-line"),
                 )

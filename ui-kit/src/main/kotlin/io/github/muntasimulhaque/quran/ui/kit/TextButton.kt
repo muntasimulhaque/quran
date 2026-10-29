@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 
@@ -107,7 +108,7 @@ fun TextButton(
 /**
  * How far apart Material's own dialog lays two of its buttons.
  *
- * `TimePickerDialog` puts its actions in a `Row` with `spacedBy(8.dp)`, and an
+ * `TimePickerDialog` puts its actions in a `Row` with `spacedBy(Space.Line)`, and an
  * `AlertDialog` in a flow row with `ButtonsMainAxisSpacing`, also 8 dp, so a
  * dialog is never edge to edge however its two buttons look. A caller that
  * padded its pair by the app's whole action gap drew a gap wider than every

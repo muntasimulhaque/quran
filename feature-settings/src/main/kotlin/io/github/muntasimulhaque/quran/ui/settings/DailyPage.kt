@@ -210,7 +210,7 @@ private fun DailyTimeDialog(
                 text = stringResource(R.string.settings_daily_picker_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(bottom = 12.dp),
+                modifier = Modifier.padding(bottom = Space.Row),
             )
         },
         modeToggleButton = {
