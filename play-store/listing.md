@@ -134,7 +134,9 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 40822283423 on 12.6: all three legs green with eight frames each, every frame accounted for. The reading, chrome, and surah opening frames are byte-identical to 12.5; search, Browse, the ayah card, and the tafsir are identical below the status bar, where the clock and the search field's caret are the whole of the difference. The settings hub changed in one line: it names 12.6, and the phone frame now carries the About row, which 12.5's frame cut before. The pages 12.6 moved are not among the eight: the Tajweed legend, the translations and tafsirs lists with their language headings again, the About page, the share sheet's two doors, and the Last read and Saved rows are none of them the subject of a store frame, and the Browse frame is the Surahs list as always.
+The set is from capture run 40833555012 on 12.7: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen. The ten inch frames are the change: the reading stands on a 600 dp page, so the translation sets 600 dp to the line where it set 1224, and Search, Browse, the settings hub, the ayah card, and the tafsir are 656 dp sheets instead of the whole glass, which brings a setting's name and its own switch from 885 dp apart to 400. The phone and the seven inch tablet are unchanged to the byte in the reading, chrome, and surah opening frames, and differ from 12.6 in the other five only by the status bar's clock, the version line, and the search field's caret. The evidence frames that are not the store's eight are in `play-store/evidence/`: the dark reading and the largest text size on every leg, and the ten inch screen's first portrait frames.
+
+The set before it is from capture run 40822283423 on 12.6: all three legs green with eight frames each, every frame accounted for. The reading, chrome, and surah opening frames are byte-identical to 12.5; search, Browse, the ayah card, and the tafsir are identical below the status bar, where the clock and the search field's caret are the whole of the difference. The settings hub changed in one line: it names 12.6, and the phone frame now carries the About row, which 12.5's frame cut before. The pages 12.6 moved are not among the eight: the Tajweed legend, the translations and tafsirs lists with their language headings again, the About page, the share sheet's two doors, and the Last read and Saved rows are none of them the subject of a store frame, and the Browse frame is the Surahs list as always.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
@@ -154,8 +156,8 @@ What each set shows, in order:
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
 
-## Release notes (12.7, 391 characters)
-12.7 gives the wide screen a page. On a ten inch tablet the reading stops stretching to the glass: the words keep a 600 dp page, centered, the width the seven inch tablet already reads edge to edge, and the rest becomes margin. Every sheet is that page plus its air, so a settings row switch stands beside its own words again. Every gap is now named from one scale. Text and packs unchanged.
+## Release notes (12.7, 392 characters)
+12.7 gives the wide screen a page. On a ten inch tablet the reading stops stretching to the glass: the words keep a 600 dp page, centered, the width the seven inch tablet already reads edge to edge, and the rest becomes margin. A sheet is that page plus its air, so a setting switch comes back within the same card as its name. Every gap is now named from one scale. Text and packs unchanged.
 
 ## Release notes (12.6, 422 characters)
 12.6 puts back what 12.5 had taken out. The Tajweed page explains all eighteen rules again, one sentence each, in a shorter layout than before. Translations and tafsirs are grouped under their language again. Last read and Saved stand the ayah 4 dp under its surah, as Browse does. Two buttons side by side stand 20 dp apart everywhere. About is one line of version and license, then the credits. Text and packs unchanged.
