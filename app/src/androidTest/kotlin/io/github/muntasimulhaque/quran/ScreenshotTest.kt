@@ -266,20 +266,11 @@ class ScreenshotTest {
     }
 
     /**
-     * The directory the build collects: the runner hands us an additional
-     * output directory, and a plain run without one falls back to the app's
-     * own external files.
+     * The directory the build collects: [screenshotOutputDirectory], shared
+     * with the variant frames so the two cannot answer the runner's own
+     * question differently.
      */
-    private fun screenshotDirectory(): File {
-        val instrumentation = InstrumentationRegistry.getInstrumentation()
-        val given = InstrumentationRegistry.getArguments().getString("additionalTestOutputDir")
-        val base = if (given.isNullOrBlank()) {
-            File(instrumentation.targetContext.getExternalFilesDir(null), "screenshots")
-        } else {
-            File(given)
-        }
-        return base
-    }
+    private fun screenshotDirectory(): File = screenshotOutputDirectory()
 
     private fun readingPage() = rule.onAllNodesWithContentDescription("Reading").onFirst()
 

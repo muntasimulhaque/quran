@@ -172,6 +172,21 @@ change, never left as a dead letter.
   parent commit and run the class there before believing a change of yours did
   it. A retry is worth one when it names the failure; a re-wait is worth
   nothing.
+- **A capture class borrows the tour's two rules, or it costs a run.** A frame
+  goes where the runner says (`screenshotOutputDirectory()`, which reads
+  `additionalTestOutputDir`), never into a directory the class spells out: a
+  frame written anywhere else is dropped while every test passes, and the leg
+  comes up short with no failure to read. And the class hands the app back as
+  it found it, in a `finally`: every instrumented class in a run shares one
+  process and one set of settings, so a text size left at the top of the
+  ladder made `SheetStillnessTest` measure the footnote sheet at 1.2 and read
+  a drag of 11 dp against its own 20 dp floor. Both of those cost a green run
+  and looked like defects in the app.
+- **One Gradle call per capture leg.** A second `connectedAndroidTest`
+  invocation replaces the additional output folder, so the first call's frames
+  have to be collected before it, and it pays a second install and a second
+  test runner on top. A frame that wants a different orientation, a different
+  theme, or a different size is a test that changes it itself.
 - **Verify by exit code**, never by grepping piped output. **Do not hand-drive
   the app to verify UI**: JVM suite and lint, push, then read the capture run's
   frames. Every UI claim is backed by a frame or a compose run.

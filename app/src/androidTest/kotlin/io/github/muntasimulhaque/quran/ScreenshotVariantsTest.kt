@@ -64,18 +64,62 @@ class ScreenshotVariantsTest {
     @Test
     fun theDarkReadingAndTheLargeOne() {
         prepareTheLibrary()
+        try {
+            runBlocking { SettingsStore(context).setTheme(AppTheme.Dark) }
+            photograph("variant-dark-$orientation")
 
-        runBlocking { SettingsStore(context).setTheme(AppTheme.Dark) }
-        photograph("variant-dark-$orientation")
-
-        runBlocking {
-            val settings = SettingsStore(context)
-            settings.setTheme(AppTheme.Light)
-            // The top of the ladder, which is the step the reading is least
-            // likely to have been measured at.
-            for (role in TypeRole.entries) settings.setTypeSize(role, TextSize.STEPS.last())
+            runBlocking {
+                val settings = SettingsStore(context)
+                settings.setTheme(AppTheme.Light)
+                // The top of the ladder, which is the step the reading is
+                // least likely to have been measured at.
+                for (role in TypeRole.entries) settings.setTypeSize(role, TextSize.STEPS.last())
+            }
+            photograph("variant-large-$orientation")
+            photographStandingUp()
+        } finally {
+            // The app is handed back as it was found. Every instrumented
+            // class in the run shares one process and one set of settings,
+            // so a size left at the top of the ladder is not this test's
+            // business to leave behind: SheetStillnessTest measured the
+            // footnote sheet at 1.2 and its drag moved 11 dp against a 20 dp
+            // floor, which was this class's leftover and not that sheet's
+            // behavior (owner report, this session).
+            runBlocking {
+                val settings = SettingsStore(context)
+                settings.setTheme(AppTheme.Light)
+                for (role in TypeRole.entries) settings.setTypeSize(role, TextSize.DEFAULT)
+            }
         }
-        photograph("variant-large-$orientation")
+    }
+
+    /**
+     * The reading standing up, on the screens that can stand up.
+     *
+     * The ten inch leg used to be asked for this by a second Gradle call from
+     * the workflow, which cost that leg a second install, a second test
+     * runner, and about a minute of the run; and a second
+     * connectedAndroidTest call replaces the additional output folder, so the
+     * store's eight had to be collected before it. The rotation belongs to
+     * the test that wants the frame. It is best effort: an emulator that
+     * refuses the rotation skips the frame instead of failing a leg whose
+     * store set is already complete.
+     */
+    private fun photographStandingUp() {
+        // A phone on its side is not a screen standing up, so only a window
+        // Android calls a tablet is asked.
+        if (context.resources.configuration.screenWidthDp < 840) return
+        val automation = InstrumentationRegistry.getInstrumentation().uiAutomation
+        val turned = runCatching {
+            automation.executeShellCommand("settings put system accelerometer_rotation 0").close()
+            automation.executeShellCommand("settings put system user_rotation 1").close()
+            Thread.sleep(3_000)
+        }.isSuccess
+        if (!turned) return
+        runCatching { photograph("variant-reading-portrait") }
+        runCatching {
+            automation.executeShellCommand("settings put system user_rotation 0").close()
+        }
     }
 
     /**
@@ -110,12 +154,10 @@ class ScreenshotVariantsTest {
     }
 
     private fun write(name: String, bitmap: Bitmap) {
-        val file = File(screenshotDirectory(), "$name.png")
-        file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        val directory = screenshotOutputDirectory()
+        directory.mkdirs()
+        File(directory, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
-
-    private fun screenshotDirectory(): File =
-        File(context.getExternalFilesDir(null), "screenshots").apply { mkdirs() }
 
     /**
      * What the tour photographs: the reader's own translation and the word

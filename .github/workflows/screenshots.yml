@@ -67,9 +67,10 @@ jobs:
             expected: 10
           - name: tablet10
             profile: pixel_c        # 2560x1800, 10 inch
-            # The eight, the two variants on the glass's side, and the same
-            # two again with the reading standing up.
-            expected: 12
+            # The ten inch screen's own frames, and, when the emulator accepts
+            # the rotation, the reading standing up. That frame is best effort
+            # and is not counted in the floor.
+            expected: 11
     env:
       GH_TOKEN: ${{ github.token }}
       API_LEVEL: "35"
@@ -249,15 +250,6 @@ jobs:
             # the tour never created must not cost the leg its frames.
             mkdir -p store-shots
             find app/build/outputs/connected_android_test_additional_output -type f -name '*.png' -exec cp {} store-shots/ ';' 2>/dev/null || true
-            # The ten inch leg photographs the reading standing up as well as
-            # on its side. The AVD is a landscape machine, so portrait is a
-            # rotation and not a profile, and only the variant class is asked
-            # for: the store's eight must not be re-photographed sideways.
-            # The first run's frames are already in store-shots above, because
-            # a second connectedAndroidTest invocation replaces the additional
-            # output folder, which is the same reason the tour is one call.
-            # Single line: the runner feeds each line to its own shell.
-            if [ "${{ matrix.name }}" = "tablet10" ]; then adb -s emulator-5554 shell settings put system accelerometer_rotation 0 ; adb -s emulator-5554 shell settings put system user_rotation 1 ; sleep 3 ; adb -s emulator-5554 shell pm uninstall io.github.muntasimulhaque.quran >/dev/null 2>&1 || true ; adb -s emulator-5554 shell pm uninstall io.github.muntasimulhaque.quran.test >/dev/null 2>&1 || true ; ./gradlew :app:connectedDebugAndroidTest --console=plain -Pquran.devPacks=screenshot -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotVariantsTest || true ; find app/build/outputs/connected_android_test_additional_output -type f -name '*.png' -exec cp {} store-shots/ ';' 2>/dev/null || true ; adb -s emulator-5554 shell settings put system user_rotation 0 ; fi
             # Prefix every PNG with the form factor so per-leg artifacts never
             # collide. (Single line: the runner feeds this to sh, which chokes
             # on multi-line compound commands.)
