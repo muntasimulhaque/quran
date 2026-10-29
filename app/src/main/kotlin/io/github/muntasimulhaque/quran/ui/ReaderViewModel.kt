@@ -285,16 +285,14 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
                 .distinctUntilChanged()
                 .collect { (ayahNumber, playing, follow) ->
                     if (!playing || ayahNumber == null || library.database == null || !follow) return@collect
-                    // A repeat of the place the reader is already on is not a
-                    // second write. Following the reciter lands on the ayah's
-                    // own top, so the depth is cleared with it.
-                    if (settings.ayah != ayahNumber) settingsStore.setAyah(ayahNumber)
-                    settings = settings.copy(
-                        ayah = ayahNumber,
-                        ayahOffset = 0,
-                        ayahOffsetWidth = 0,
-                        ayahOffsetFontScale = 0f,
-                    )
+                    // Following the reciter is an arrival the app made, so the
+                    // place moves to the ayah being heard and the reading lands
+                    // on its own top. A repeat of the place the reader is
+                    // already on is not a second write.
+                    if (settings.ayah != ayahNumber) {
+                        settingsStore.setAyah(ayahNumber)
+                        settings = settings.copy(ayah = ayahNumber)
+                    }
                 }
         }
         // The pill's chooser names every reciter with that reciter's price for
@@ -354,7 +352,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
                 selectRecitation(pack.id.removePrefix(ContentDatabase.RECITER_PREFIX))
             PackType.Words -> if (!settings.wordByWord) {
                 settings = settings.copy(wordByWord = true)
-                resetReadingDepth()
                 viewModelScope.launch { settingsStore.setWordByWord(true) }
             }
             else -> Unit
@@ -424,30 +421,18 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     private var surahIndexByNumber: Map<Int, Surah>? = null
 
     /**
-     * The reader scrolled the reading and stopped: the ayah they stopped on,
-     * and the depth into it they stopped at. Both are written together, so
-     * the place that comes back is the line they were reading and not the
-     * top of a block that may be many screens tall.
+     * The reader scrolled the reading and stopped: the ayah at the head of the
+     * reading is the place.
+     *
+     * The place used to carry a pixel depth inside the ayah; [AppSettings.ayah]
+     * records why it does not any more (owner decision, this session). A settle
+     * that lands on the ayah already written is not a second write, so a still
+     * thumb costs the store nothing.
      */
-    fun onReadingSettled(ayah: Int, offset: Int, width: Int, fontScale: Float) {
-        val safeOffset = offset.coerceAtLeast(0)
-        val safeWidth = width.coerceAtLeast(0)
-        val safeScale = fontScale.coerceAtLeast(0f)
-        if (settings.ayah == ayah && settings.ayahOffset == safeOffset &&
-            settings.ayahOffsetWidth == safeWidth &&
-            settings.ayahOffsetFontScale == safeScale
-        ) {
-            return
-        }
-        settings = settings.copy(
-            ayah = ayah,
-            ayahOffset = safeOffset,
-            ayahOffsetWidth = safeWidth,
-            ayahOffsetFontScale = safeScale,
-        )
-        viewModelScope.launch {
-            settingsStore.setAyah(ayah, safeOffset, safeWidth, safeScale)
-        }
+    fun onReadingSettled(ayah: Int) {
+        if (settings.ayah == ayah) return
+        settings = settings.copy(ayah = ayah)
+        viewModelScope.launch { settingsStore.setAyah(ayah) }
         notePlace(ayah)
     }
 
@@ -507,16 +492,11 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         // jump; it must not land on the reading this jump is about to select.
         placeJob?.cancel()
         leaveSurah(surah)
-        // A jump lands on the ayah's own top, so the depth the reader had
-        // inside another ayah never follows them here.
-        settings = settings.copy(
-            ayah = clamped,
-            ayahOffset = 0,
-            ayahOffsetWidth = 0,
-            ayahOffsetFontScale = 0f,
-        )
+        // A jump lands on the ayah's own top. The place is the ayah alone, so
+        // there is no depth to carry across.
+        settings = settings.copy(ayah = clamped)
         viewModelScope.launch {
-            settingsStore.setAyah(clamped, 0)
+            settingsStore.setAyah(clamped)
             if (surah != null) activePlaceId = lastReadStore.record(clamped, surah)
         }
     }
@@ -629,30 +609,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             TypeRole.Tafsir -> settings.copy(tafsirSize = value)
             TypeRole.Words -> settings.copy(wordsSize = value)
         }
-        // A size that reshapes the page makes the pixel depth a different
-        // line, so the reading returns to the ayah's own top.
-        if (role != TypeRole.Tafsir) resetReadingDepth()
         viewModelScope.launch { settingsStore.setTypeSize(role, value) }
-    }
-
-    /**
-     * The page changed shape under the stored depth. The depth is dropped to
-     * the ayah's own top, which is still a truthful place; the old pixel
-     * would point at a different line.
-     */
-    private fun resetReadingDepth() {
-        if (settings.ayahOffset == 0 && settings.ayahOffsetWidth == 0 &&
-            settings.ayahOffsetFontScale == 0f
-        ) {
-            return
-        }
-        val ayah = settings.ayah
-        settings = settings.copy(
-            ayahOffset = 0,
-            ayahOffsetWidth = 0,
-            ayahOffsetFontScale = 0f,
-        )
-        viewModelScope.launch { settingsStore.setAyah(ayah, 0) }
     }
 
     fun setFollowReciter(follow: Boolean) {
@@ -687,7 +644,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     /** The reading keeps the reader's chosen translation; this only shows or hides it. */
     fun setShowTranslation(show: Boolean) {
         settings = settings.copy(showTranslation = show)
-        resetReadingDepth()
         viewModelScope.launch { settingsStore.setShowTranslation(show) }
     }
 
@@ -743,7 +699,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     fun setWordByWord(show: Boolean) {
         if (!show) {
             settings = settings.copy(wordByWord = false)
-            resetReadingDepth()
             clearRowCache()
             viewModelScope.launch { settingsStore.setWordByWord(false) }
             return
@@ -758,7 +713,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         val pack = library.pack(wanted) ?: return
         if (library.isInstalled(wanted)) {
             settings = settings.copy(wordByWord = true)
-            resetReadingDepth()
             clearRowCache()
             viewModelScope.launch { settingsStore.setWordByWord(true) }
             return
@@ -797,7 +751,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         val firstRun = settings.uiLanguage == null
         val next = settings.withLanguage(language)
         val chosen = if (firstRun) {
-            next.copy(ayah = 1, ayahOffset = 0, ayahOffsetWidth = 0, ayahOffsetFontScale = 0f)
+            next.copy(ayah = 1)
         } else {
             next
         }
@@ -813,7 +767,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             // with the words around them (owner decision, this session).
             library.refresh()
             if (firstRun) {
-                settingsStore.setAyah(1, 0)
+                settingsStore.setAyah(1)
                 activePlaceId = lastReadStore.record(1, 1)
             }
             settingsStore.addPendingPacks(

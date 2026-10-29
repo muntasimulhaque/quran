@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 12.9 (versionCode 131)
+Version: 13.0 (versionCode 132)
 
 ## Listing
 
@@ -158,6 +158,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (13.0, 452 characters)
+13.0 fixes the reading's place. The app remembers the ayah you were in and nothing else. It used to keep how far down the screen you had scrolled too, and turning the phone made that number wrong, so each swipe snapped to the top of an ayah instead of sliding; in landscape the reading stepped ayah by ayah, and a long ayah could not be read past its first screen. Now the page stays where you leave it, in either orientation. Text and packs unchanged.
 
 ## Release notes (12.9, 465 characters)
 12.9 reads easier: the translation, the tafsir, and the word meanings now stand at the phone's own body size, a touch larger, so a long sitting does not tire the eye. The app opens faster, because it no longer re-reads the Quran's database on every launch, and the reciter's word highlight no longer redraws the page. The quiet daily re-check of packs is gone, so the app does no background work; a damaged pack still repairs with one tap. Text and packs unchanged.

@@ -73,20 +73,23 @@ fun AppTheme.resolved(systemDark: Boolean): AppTheme = when (this) {
  * which content packs are on. Page is not stored; the ayah is the place.
  */
 data class AppSettings(
-    val ayah: Int = 1,
     /**
-     * How far into [ayah] the reader was, in pixels from its top. A long
-     * ayah, Al-Baqarah 2:255 or 2:282 with the word meanings on, takes more
-     * than a screen, and a place that kept only the ayah put the reader back
-     * at the top of the block. The depth is written with the ayah and
-     * cleared by every jump, which lands on the ayah's own top (owner
-     * decision, this session).
+     * Where the reader is: the ayah, and nothing else.
+     *
+     * The place used to carry how many pixels into the ayah the reader had
+     * scrolled, tagged with the width and font scale it was measured in. A
+     * pixel is a fact about one layout, and every change the app invites (a
+     * rotation, one of the five text sizes, the translation, a new phone)
+     * made it meaningless. The app answered a meaningless depth by throwing
+     * it away and putting the ayah at the top, which landed on the reader as
+     * a jump in the middle of their reading (owner report: the landscape
+     * reading stepped ayah by ayah). The place is an ayah now, so there is
+     * nothing to expire and nothing to correct. A reader who stops inside a
+     * long ayah comes back to the top of that ayah, and everything else the
+     * app keeps already speaks in ayahs: the Juz label, the history, the
+     * arrivals, the reminders, the links (owner decision, this session).
      */
-    val ayahOffset: Int = 0,
-    /** The width the stored [ayahOffset] was measured in, in pixels. */
-    val ayahOffsetWidth: Int = 0,
-    /** The font scale the stored [ayahOffset] was measured at. */
-    val ayahOffsetFontScale: Float = 0f,
+    val ayah: Int = 1,
     val theme: AppTheme = AppTheme.Light,
     /**
      * The language the interface is written in, and the content it reads.
@@ -281,9 +284,6 @@ class SettingsStore(private val context: Context) {
         val legacy = sizeOf(choices, TEXT_SIZE)
         AppSettings(
             ayah = ayah.coerceIn(1, 6236),
-            ayahOffset = (preferences[AYAH_OFFSET] ?: 0).coerceAtLeast(0),
-            ayahOffsetWidth = (preferences[AYAH_OFFSET_WIDTH] ?: 0).coerceAtLeast(0),
-            ayahOffsetFontScale = (preferences[AYAH_OFFSET_FONT_SCALE] ?: 0f).coerceAtLeast(0f),
             theme = storedTheme(preferences),
             uiLanguage = preferences[UI_LANGUAGE],
             arabicSize = sizeOf(choices, ARABIC_SIZE, legacy),
@@ -307,26 +307,13 @@ class SettingsStore(private val context: Context) {
     }
 
     /**
-     * Writes the reader's place: the ayah, and how far into it they were. A
-     * jump that means the top of an ayah writes zero, so a landing never
-     * keeps a depth that belonged to another ayah.
+     * Writes the reader's place. It is one number, the ayah, because a place
+     * that carried a pixel depth had to be corrected whenever the page changed
+     * shape, and the correction landed on the reader as a jump
+     * (owner decision, this session).
      */
-    suspend fun setAyah(
-        ayah: Int,
-        offset: Int = 0,
-        /** The width the offset was measured in, in pixels; 0 for a jump. */
-        width: Int = 0,
-        /** The font scale the offset was measured at; 0 for a jump. */
-        fontScale: Float = 0f,
-    ) {
-        val safeAyah = ayah.coerceIn(1, 6236)
-        val safeOffset = offset.coerceAtLeast(0)
-        context.settingsStore.edit {
-            it[AYAH] = safeAyah
-            it[AYAH_OFFSET] = safeOffset
-            it[AYAH_OFFSET_WIDTH] = width.coerceAtLeast(0)
-            it[AYAH_OFFSET_FONT_SCALE] = fontScale.coerceAtLeast(0f)
-        }
+    suspend fun setAyah(ayah: Int) {
+        context.settingsStore.edit { it[AYAH] = ayah.coerceIn(1, 6236) }
     }
 
     /** Writes the chrome surface the reader has now been shown. */
@@ -595,9 +582,6 @@ class SettingsStore(private val context: Context) {
         const val MAX_SPEED = 1.5f
 
         val AYAH = intPreferencesKey("ayah")
-        val AYAH_OFFSET = intPreferencesKey("ayah_offset")
-        val AYAH_OFFSET_WIDTH = intPreferencesKey("ayah_offset_width")
-        val AYAH_OFFSET_FONT_SCALE = floatPreferencesKey("ayah_offset_font_scale")
         val THEME = stringPreferencesKey("theme")
         /**
          * The automatic switch the third theme value replaced. Written by no

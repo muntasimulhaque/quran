@@ -489,9 +489,6 @@ fun ReaderScreen(
                     metrics = settings.readingMetrics(),
                     reveal = revealForSurah,
                     place = settings.ayah,
-                    placeOffset = settings.ayahOffset,
-                    placeOffsetWidth = settings.ayahOffsetWidth,
-                    placeOffsetFontScale = settings.ayahOffsetFontScale,
                     hasTranslation = viewModel.enabledTranslationPacks.isNotEmpty(),
                     contentLanguage = viewModel.readingLanguage,
                     nextSurahName = viewModel.surahs
@@ -535,9 +532,7 @@ fun ReaderScreen(
                     },
                     onNextSurah = { number -> viewModel.jumpToSurah(number) },
                     onAddContent = { openSheet(ReaderSheet.Settings) },
-                    onPlaceChanged = { ayah, offset, width, scale ->
-                        viewModel.onReadingSettled(ayah, offset, width, scale)
-                    },
+                    onPlaceChanged = { ayah -> viewModel.onReadingSettled(ayah) },
                     startAtOpening = viewModel.startAtSurahOpening == surah.number,
                     onOpeningReached = { viewModel.consumeSurahOpening(surah.number) },
                     contentPaddingTop = 64.dp,

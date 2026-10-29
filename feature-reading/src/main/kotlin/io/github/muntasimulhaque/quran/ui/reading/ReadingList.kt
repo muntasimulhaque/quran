@@ -52,13 +52,8 @@ fun ReadingList(
     reveal: ReadingReveal? = null,
     /** The reader's own word-by-word switch, before any arrival turns it on. */
     wordAid: Boolean = metrics.wordByWord,
-    /** The reader's place, which moves the list and never the other way round. */
+    /** The reader's place: the ayah, which the list shows and never corrects. */
     place: Int,
-    /** How far into that ayah the reader was: a long ayah is many screens. */
-    placeOffset: Int,
-    /** The width and font scale the depth was measured in; 0 when unknown. */
-    placeOffsetWidth: Int = 0,
-    placeOffsetFontScale: Float = 0f,
     hasTranslation: Boolean,
     /** The reader's language: the reading reads it, and so does the opening. */
     contentLanguage: String,
@@ -72,7 +67,7 @@ fun ReadingList(
     onScrolled: () -> Unit,
     onNextSurah: (Int) -> Unit,
     onAddContent: () -> Unit,
-    onPlaceChanged: (Int, Int, Int, Float) -> Unit,
+    onPlaceChanged: (Int) -> Unit,
     /** True when the reader opened this surah at its top; answered once. */
     startAtOpening: Boolean,
     onOpeningReached: () -> Unit,
@@ -143,9 +138,6 @@ fun ReadingList(
         reveal = reveal,
         wordAid = wordAid,
         place = place,
-        placeOffset = placeOffset,
-        placeOffsetWidth = placeOffsetWidth,
-        placeOffsetFontScale = placeOffsetFontScale,
         hasTranslation = hasTranslation,
         contentLanguage = contentLanguage,
         nextSurahName = nextSurahName,

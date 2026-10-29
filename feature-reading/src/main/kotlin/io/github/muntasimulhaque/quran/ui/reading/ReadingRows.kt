@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
@@ -20,14 +19,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
-import io.github.muntasimulhaque.quran.core.Arabic
 import io.github.muntasimulhaque.quran.core.AyahList
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
@@ -39,9 +35,6 @@ import io.github.muntasimulhaque.quran.ui.kit.AddDoor
 import io.github.muntasimulhaque.quran.ui.kit.rememberPageMargin
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.theme.Space
-import kotlin.math.abs
-
-
 
 /** The surah's rows, drawn and driven once the text is on hand. */
 @Composable
@@ -55,9 +48,6 @@ internal fun ReadingRows(
     /** The reader's own word-by-word switch, before any arrival turns it on. */
     wordAid: Boolean,
     place: Int,
-    placeOffset: Int,
-    placeOffsetWidth: Int,
-    placeOffsetFontScale: Float,
     hasTranslation: Boolean,
     contentLanguage: String,
     nextSurahName: String?,
@@ -72,7 +62,7 @@ internal fun ReadingRows(
     onScrolled: () -> Unit,
     onNextSurah: (Int) -> Unit,
     onAddContent: () -> Unit,
-    onPlaceChanged: (Int, Int, Int, Float) -> Unit,
+    onPlaceChanged: (Int) -> Unit,
     startAtOpening: Boolean,
     onOpeningReached: () -> Unit,
     contentPaddingTop: Dp,
@@ -81,25 +71,16 @@ internal fun ReadingRows(
     onFootnote: (OpenFootnote?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val density = LocalDensity.current
-    val windowWidth = LocalWindowInfo.current.containerSize.width
-    val fontScale = density.fontScale
-    // The stored depth belongs to the width and font scale it was measured
-    // in. A different phone, a rotation, a split window, or a larger system
-    // font reflows the same pixel into a different line, so the depth is
-    // dropped to the ayah's own top rather than pointing at the wrong text.
-    val depthKnown = windowWidth > 0
-    val depthMatches = placeOffset == 0 ||
-        (depthKnown && placeOffsetWidth == windowWidth &&
-            abs(placeOffsetFontScale - fontScale) < 0.01f)
-    val savedOffset = if (!depthKnown || depthMatches) placeOffset else 0
+    // The stored place is the ayah, so the list opens on it and needs nothing
+    // else. A place used to carry a pixel depth tagged with the width and font
+    // scale it was measured in, and a rotation made the tag stale; the list
+    // then corrected the stale depth by pulling the landed ayah to the top,
+    // which the reader felt as a jump at the end of every drag (owner report:
+    // the landscape reading stepped from ayah to ayah). An ayah cannot go
+    // stale, so there is nothing to correct and nothing to move
+    // (owner decision, this session).
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = AyahList.indexOf(ayahs, place),
-        // The reader may have stopped inside a long ayah that takes more than
-        // a screen. The place carries that depth, so the app opens on the
-        // line the reader was reading and not on the top of the block
-        // (owner decision, this session).
-        initialFirstVisibleItemScrollOffset = savedOffset,
     )
 
     // The surah's introduction opens from its quiet door; once it is open, a
@@ -129,52 +110,33 @@ internal fun ReadingRows(
         }
     }
     LaunchedEffect(listState, surah.number) {
+        // The snapshot is the scroll's own state and the head ayah: the place
+        // is written when a drag of the reader's stops, and the head is read
+        // at that moment. The pixel offset is deliberately not part of it; it
+        // is no longer part of the place either.
         snapshotFlow {
-            Triple(
-                listState.isScrollInProgress,
-                listState.firstVisibleItemIndex,
-                listState.firstVisibleItemScrollOffset,
-            )
+            listState.isScrollInProgress to listState.firstVisibleItemIndex
         }
-            .collect { (scrolling, index, offset) ->
+            .collect { (scrolling, index) ->
                 if (scrolling || !dragged) return@collect
                 dragged = false
-                // The opening item is not an ayah: its own scroll depth
-                // belongs to the surah's top, so the place is written as the
-                // first ayah at its own top rather than at a depth measured
-                // against a different item.
-                val depth = if (index == 0) 0 else offset
-                AyahList.ayahAt(ayahs, index)?.let { onPlaceChanged(it, depth, windowWidth, fontScale) }
+                // The place is the ayah at the head of the reading. The
+                // opening item is not an ayah, so a settle on it writes the
+                // surah's first one, which is where the reader is.
+                AyahList.ayahAt(ayahs, index)?.let(onPlaceChanged)
             }
     }
 
-    // A depth that does not belong to this layout is rewritten as the ayah's
-    // own top once, so the next launch does not read it as a line again.
-    LaunchedEffect(windowWidth, fontScale, place, placeOffset) {
-        if (placeOffset > 0 && depthKnown && !depthMatches) {
-            onPlaceChanged(place, 0, windowWidth, fontScale)
-        }
-    }
-
-    // The reader's place moves the list, exactly, and the list never moves
-    // itself. The place is an ayah and a depth inside it, so a round trip
-    // through the list has to land on the same item at the same depth;
-    // anything less leaves the place behind.
-    LaunchedEffect(place, placeOffset, surah.number, ayahs) {
-        val target = AyahList.indexOf(ayahs, place)
-        // A drag that settles on the surah opening writes the first ayah as
-        // the place, at depth 0. The opening is list index 0 and the first
-        // ayah is index 1, so the round trip would scroll one item down and
-        // hide the opening and the basmalah under the reader's own gesture.
-        // The opening is already the truthful place for that first ayah.
-        if (target == 1 && placeOffset == 0 && listState.firstVisibleItemIndex == 0) {
-            return@LaunchedEffect
-        }
-        if (target != listState.firstVisibleItemIndex ||
-            savedOffset != listState.firstVisibleItemScrollOffset
-        ) {
-            listState.scrollToItem(target, savedOffset)
-        }
+    // A place that arrives from elsewhere moves the list, and a place the list
+    // wrote itself never does, because it is already the ayah the list shows.
+    // That is the whole of the rule, and it is arithmetic in
+    // [AyahList.moveTarget]: a rotation, a text size, a translation toggle, or
+    // a new phone can no longer land as a jump, because the place they hand
+    // back is an ayah the list already stands on.
+    LaunchedEffect(place, surah.number, ayahs) {
+        val target = AyahList.moveTarget(ayahs, place, listState.firstVisibleItemIndex)
+            ?: return@LaunchedEffect
+        listState.scrollToItem(target)
     }
 
     // Opening a surah from Browse lands on its top: the opening item, which
