@@ -134,8 +134,15 @@ class SheetStillnessTest {
             handle.performTouchInput {
                 // The event's own clock moves with the finger, so the gesture
                 // is the speed a thumb is, not one instant of infinite speed.
+                // 20 px a frame is that speed (about 450 dp a second on a
+                // phone). At 5 px a frame the pull was so slow that a
+                // full-height note, which the 12.9 size now fills the screen
+                // with, spent it on the sheet's own gesture arbitration and
+                // the sheet moved 11 px: the test read that as a sheet that
+                // would not move at all, which is a slower finger than any
+                // reader uses (found on both CI shards, 12.9).
                 advanceEventTime(16)
-                moveBy(Offset(0f, 5f))
+                moveBy(Offset(0f, 20f))
             }
             compose.mainClock.advanceTimeByFrame()
             places += runCatching { sheet.fetchSemanticsNode().positionInRoot.y }
@@ -179,7 +186,10 @@ class SheetStillnessTest {
         handle.performTouchInput { down(center) }
         repeat(20) {
             compose.mainClock.advanceTimeByFrame()
-            handle.performTouchInput { moveBy(Offset(0f, 5f)) }
+            // The same thumb speed the small pull takes (about 450 dp a
+            // second): a full-height note now spends a very slow pull on the
+            // sheet's own arbitration before the sheet follows.
+            handle.performTouchInput { moveBy(Offset(0f, 20f)) }
             compose.mainClock.advanceTimeByFrame()
         }
         val moved = handle.fetchSemanticsNode().positionInRoot.y
