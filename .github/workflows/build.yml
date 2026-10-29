@@ -199,10 +199,22 @@ jobs:
   # semantics, playback, and the daily reminder. The screenshot tour runs in
   # the capture workflow on the three store form factors; this job is the
   # gate that says the app's surfaces still answer before a bundle is signed.
+  #
+  # Two shards, because the suite is the wall: the job spends about 220 s on
+  # Gradle, install, and the emulator's boot before a test runs and about
+  # 250 s on the tests, so half the tests on a second emulator buys about
+  # two minutes of wall time and costs a second machine for the same few
+  # minutes. Three shards would reach five minutes and are not worth a third
+  # machine for forty seconds. Each leg pays its own fixed cost, which is why
+  # the saving is less than half.
   app-tests:
-    name: App instrumented tests
+    name: App instrumented tests (${{ matrix.shard }})
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1]
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
@@ -256,7 +268,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: |
             for i in $(seq 1 60); do adb -s emulator-5554 shell ls /sdcard/Android >/dev/null 2>&1 && break; sleep 2; done
-            ./gradlew :app:connectedDebugAndroidTest --console=plain
+            ./gradlew :app:connectedDebugAndroidTest --console=plain -Pandroid.testInstrumentationRunnerArguments.numShards=2 -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }}
 
   # The signed bundle, built here once and handed over to Play from the run's
   # own artifacts. It runs only on a push to main, never on a pull request:
