@@ -60,10 +60,16 @@ jobs:
         include:
           - name: phone
             profile: pixel_2        # 1080x1920
+            # The store's eight, plus the dark reading and the large one.
+            expected: 10
           - name: tablet7
             profile: Nexus 7 2013   # 1200x1920, 7 inch
+            expected: 10
           - name: tablet10
             profile: pixel_c        # 2560x1800, 10 inch
+            # The eight, the two variants on the glass's side, and the same
+            # two again with the reading standing up.
+            expected: 12
     env:
       GH_TOKEN: ${{ github.token }}
       API_LEVEL: "35"
@@ -227,7 +233,7 @@ jobs:
             # leg's frames, and the runner stopped the script at the failed
             # Gradle line before anything was collected (runs 35463781932 and
             # 35974207613, tablet10).
-            ./gradlew :app:connectedDebugAndroidTest --console=plain -Pquran.devPacks=screenshot -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest,io.github.muntasimulhaque.quran.WordByWordTest,io.github.muntasimulhaque.quran.TafsirDirectionTest,io.github.muntasimulhaque.quran.SavedNotesTest,io.github.muntasimulhaque.quran.SettingsVisibilityTest ; echo $? > /tmp/gradle_status
+            ./gradlew :app:connectedDebugAndroidTest --console=plain -Pquran.devPacks=screenshot -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest,io.github.muntasimulhaque.quran.ScreenshotVariantsTest,io.github.muntasimulhaque.quran.WordByWordTest,io.github.muntasimulhaque.quran.TafsirDirectionTest,io.github.muntasimulhaque.quran.SavedNotesTest,io.github.muntasimulhaque.quran.SettingsVisibilityTest ; echo $? > /tmp/gradle_status
             # One automatic rerun of the tour when the first pass loses
             # an emulator race: the residual flake is the slow-render
             # timeout, the launcher class above is designed out, and one
@@ -235,7 +241,7 @@ jobs:
             # failure fails twice and the leg stays red, and the reinstall
             # below starts the second pass from the same clean state the
             # first had.
-            status=$(cat /tmp/gradle_status 2>/dev/null || echo 1) ; if [ "$status" != "0" ]; then echo "the tour failed once, so the emulator gets one recovery rerun" ; sleep 30 ; adb -s emulator-5554 shell pm uninstall io.github.muntasimulhaque.quran >/dev/null 2>&1 || true ; adb -s emulator-5554 shell pm uninstall io.github.muntasimulhaque.quran.test >/dev/null 2>&1 || true ; ./gradlew :app:connectedDebugAndroidTest --console=plain -Pquran.devPacks=screenshot -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest,io.github.muntasimulhaque.quran.WordByWordTest,io.github.muntasimulhaque.quran.TafsirDirectionTest,io.github.muntasimulhaque.quran.SavedNotesTest,io.github.muntasimulhaque.quran.SettingsVisibilityTest ; echo $? > /tmp/gradle_status ; fi
+            status=$(cat /tmp/gradle_status 2>/dev/null || echo 1) ; if [ "$status" != "0" ]; then echo "the tour failed once, so the emulator gets one recovery rerun" ; sleep 30 ; adb -s emulator-5554 shell pm uninstall io.github.muntasimulhaque.quran >/dev/null 2>&1 || true ; adb -s emulator-5554 shell pm uninstall io.github.muntasimulhaque.quran.test >/dev/null 2>&1 || true ; ./gradlew :app:connectedDebugAndroidTest --console=plain -Pquran.devPacks=screenshot -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest,io.github.muntasimulhaque.quran.ScreenshotVariantsTest,io.github.muntasimulhaque.quran.WordByWordTest,io.github.muntasimulhaque.quran.TafsirDirectionTest,io.github.muntasimulhaque.quran.SavedNotesTest,io.github.muntasimulhaque.quran.SettingsVisibilityTest ; echo $? > /tmp/gradle_status ; fi
             # AGP copies the test's additional output off-device (before it
             # uninstalls the app) into the connected additional output folder.
             # Every collection line is guarded, because the runner aborts the
@@ -243,6 +249,15 @@ jobs:
             # the tour never created must not cost the leg its frames.
             mkdir -p store-shots
             find app/build/outputs/connected_android_test_additional_output -type f -name '*.png' -exec cp {} store-shots/ ';' 2>/dev/null || true
+            # The ten inch leg photographs the reading standing up as well as
+            # on its side. The AVD is a landscape machine, so portrait is a
+            # rotation and not a profile, and only the variant class is asked
+            # for: the store's eight must not be re-photographed sideways.
+            # The first run's frames are already in store-shots above, because
+            # a second connectedAndroidTest invocation replaces the additional
+            # output folder, which is the same reason the tour is one call.
+            # Single line: the runner feeds each line to its own shell.
+            if [ "${{ matrix.name }}" = "tablet10" ]; then adb -s emulator-5554 shell settings put system accelerometer_rotation 0 ; adb -s emulator-5554 shell settings put system user_rotation 1 ; sleep 3 ; adb -s emulator-5554 shell pm uninstall io.github.muntasimulhaque.quran >/dev/null 2>&1 || true ; adb -s emulator-5554 shell pm uninstall io.github.muntasimulhaque.quran.test >/dev/null 2>&1 || true ; ./gradlew :app:connectedDebugAndroidTest --console=plain -Pquran.devPacks=screenshot -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotVariantsTest || true ; find app/build/outputs/connected_android_test_additional_output -type f -name '*.png' -exec cp {} store-shots/ ';' 2>/dev/null || true ; adb -s emulator-5554 shell settings put system user_rotation 0 ; fi
             # Prefix every PNG with the form factor so per-leg artifacts never
             # collide. (Single line: the runner feeds this to sh, which chokes
             # on multi-line compound commands.)
@@ -257,7 +272,7 @@ jobs:
             # Count is checked too, so a leg that captured half the tour fails.
             # The last line reports the Gradle result, so a red tour is still
             # red while its frames are safe in the artifact.
-            frames=$(ls store-shots/*.png 2>/dev/null | wc -l) ; echo "frames: $frames" ; if [ "$frames" -lt 8 ]; then echo "the capture is short of the eight frames" ; exit 1 ; fi ; exit $(cat /tmp/gradle_status 2>/dev/null || echo 1)
+            frames=$(ls store-shots/*.png 2>/dev/null | wc -l) ; echo "frames: $frames" ; if [ "$frames" -lt ${{ matrix.expected }} ]; then echo "the capture is short of the ${{ matrix.expected }} frames this leg owes" ; exit 1 ; fi ; exit $(cat /tmp/gradle_status 2>/dev/null || echo 1)
 
       - name: Upload screenshots
         if: always()
