@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,6 +22,7 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.Search
@@ -31,8 +33,11 @@ import io.github.muntasimulhaque.quran.data.SearchRequest
 import io.github.muntasimulhaque.quran.data.SearchResults
 import io.github.muntasimulhaque.quran.data.SearchSources
 import io.github.muntasimulhaque.quran.data.Surah
+import io.github.muntasimulhaque.quran.feature.search.R
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
+import io.github.muntasimulhaque.quran.ui.kit.EmptyNote
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
+import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -216,6 +221,29 @@ fun SearchSheet(
                 hasWords = wordsInstalled,
                 onChange = { sources = it },
             )
+            // Before a query the sheet is the field, the filter door, and the
+            // note that says what the field can be asked, so a reader who
+            // opens the search with a reference in hand does not have to
+            // guess that a reference is a query (owner decision, this
+            // session). The note is the app's one empty page, drawn by
+            // Browse's lists too, and it goes the moment the field holds a
+            // word: it teaches, it does not stand beside an answer.
+            //
+            // It is the results list's first item rather than a block above
+            // it, because the list is the one part of the sheet that is
+            // measured against what is left of the glass: a phone on its side
+            // with the keyboard up leaves the sheet shorter than the field,
+            // the door, and the note together, and a note in the list can
+            // still be scrolled to where a note above it would be cut off.
+            //
+            // The sentence names the reader's own translation only when the
+            // reader has prose on the device. A translation, a tafsir, or the
+            // word list is what a Latin word can match, so with none of the
+            // three installed the note asks for a word from the Quran and
+            // promises nothing that would return nothing.
+            val prose = translationPacks.isNotEmpty() ||
+                tafsirPacks.isNotEmpty() ||
+                wordsInstalled
             StatusLine(
                 query = Search.parse(text),
                 results = results,
@@ -230,6 +258,23 @@ fun SearchSheet(
                     .sheetDragGate(resultsGate),
                 contentPadding = PaddingValues(bottom = Space.SheetFoot),
             ) {
+                if (text.isBlank()) {
+                    item(key = "note") {
+                        EmptyNote(
+                            title = stringResource(R.string.search_empty_title),
+                            body = localizedDigits(
+                                stringResource(
+                                    if (prose) {
+                                        R.string.search_empty_body
+                                    } else {
+                                        R.string.search_empty_body_quran
+                                    },
+                                ),
+                            ),
+                            modifier = Modifier.padding(top = Space.Section),
+                        )
+                    }
+                }
                 items(results.hits, key = { key(it) }) { hit ->
                     when (hit) {
                         is SearchHit.ReferenceHit -> ReferenceRow(hit.ayah) {

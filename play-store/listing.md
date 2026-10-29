@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 12.7 (versionCode 129)
+Version: 12.8 (versionCode 130)
 
 ## Listing
 
@@ -155,6 +155,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (12.8, 406 characters)
+12.8 makes the two quiet pages say what they are for. Search now tells you, before you type, that a word in Arabic or in your translation works and that a reference like 2:255 or kahf 10 goes straight to an ayah. The Tajweed page keeps a color's name at the top while you read its rules, says in one sentence what the colors are, and lets a screen reader jump from color to color. Text and packs unchanged.
 
 ## Release notes (12.7, 392 characters)
 12.7 gives the wide screen a page. On a ten inch tablet the reading stops stretching to the glass: the words keep a 600 dp page, centered, the width the seven inch tablet already reads edge to edge, and the rest becomes margin. A sheet is that page plus its air, so a setting switch comes back within the same card as its name. Every gap is now named from one scale. Text and packs unchanged.

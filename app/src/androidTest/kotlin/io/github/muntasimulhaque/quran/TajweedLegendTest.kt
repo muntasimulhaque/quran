@@ -31,9 +31,12 @@ import java.io.File
  * seven families and the eighteen rules are on the page, and the page it
  * draws is kept as a frame beside the test's own result.
  *
- * The rule names of one family stand on one line, so they are read as
- * substrings: the node is the family's list, not one rule's own sentence
- * (owner decision, this session).
+ * The page is a lazy list, so only what stands near the glass is composed:
+ * each family is read at its own place, after the test has scrolled its head
+ * into view, rather than in one pass over a page that no longer exists whole
+ * in the tree. The head's own title is matched exactly, because a family and
+ * its single rule can share a name (Ghunnah) while the rule's paragraph
+ * carries its sentence after it.
  *
  * The frame is not part of the store set. It is written beside the test so a
  * change to the legend can be looked at the way the tour's frames are looked
@@ -54,16 +57,26 @@ class TajweedLegendTest {
         tajweed = "00000000000100000000ggg0000000ee00000000000000000000000000000000010000660000000000000060604400000hh066060000001000000000000000004400000000000000000000000000060600000000e000066060000000124400000000000000000000000000000000e009909000000000012000000000044000000000000606000000000e0000066660600aa0a00000000aa0a0000e000009909000000000gg000000000000000004400001200000000000000606000000000gg000000066060000044000012000000000008880800000000000009909000000000ggg0000000000000000000hh000000000000550hh0000000000000055000000000000000000550000000000000000666660600000099090000010000000000044001000000000000000000000000000000",
     )
 
-    private val families = listOf(
-        "Silent letters", "Ghunnah", "Qalqalah", "Ikhfa", "Iqlab", "Idgham", "Madda",
-    )
-
-    private val rules = listOf(
-        "Hamzat ul Wasl", "Lam Shamsiyyah", "Silent", "Ghunnah", "Qalqalah", "Ikhfa",
-        "Ikhfa Shafawi", "Iqlab", "Idgham with Ghunnah", "Idgham without Ghunnah",
-        "Idgham Shafawi", "Idgham Mutajanisayn", "Idgham Mutaqaribayn",
-        "Madd Normal", "Madd Permissible", "Madd Munfasil",
-        "Madd Muttasil", "Madd Necessary",
+    private val legend = linkedMapOf(
+        "Silent letters" to listOf("Hamzat ul Wasl", "Lam Shamsiyyah", "Silent"),
+        "Ghunnah" to listOf("Ghunnah"),
+        "Qalqalah" to listOf("Qalqalah"),
+        "Ikhfa" to listOf("Ikhfa", "Ikhfa Shafawi"),
+        "Iqlab" to listOf("Iqlab"),
+        "Idgham" to listOf(
+            "Idgham with Ghunnah",
+            "Idgham without Ghunnah",
+            "Idgham Shafawi",
+            "Idgham Mutajanisayn",
+            "Idgham Mutaqaribayn",
+        ),
+        "Madda" to listOf(
+            "Madd Normal",
+            "Madd Permissible",
+            "Madd Munfasil",
+            "Madd Muttasil",
+            "Madd Necessary",
+        ),
     )
 
     @Test
@@ -78,11 +91,20 @@ class TajweedLegendTest {
             }
         }
         compose.waitForIdle()
-        for (name in families + rules) {
+        for ((family, rules) in legend) {
+            compose.onNode(hasScrollAction()).performScrollToNode(hasText(family))
+            compose.waitForIdle()
             assertTrue(
-                "$name is not on the legend",
-                compose.onAllNodesWithText(name, substring = true).fetchSemanticsNodes().isNotEmpty(),
+                "$family is not on the legend",
+                compose.onAllNodesWithText(family).fetchSemanticsNodes().isNotEmpty(),
             )
+            for (name in rules) {
+                assertTrue(
+                    "$name is not named under $family",
+                    compose.onAllNodesWithText(name, substring = true)
+                        .fetchSemanticsNodes().isNotEmpty(),
+                )
+            }
         }
     }
 

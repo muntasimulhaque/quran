@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.ReadPlace
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.feature.browse.R
+import io.github.muntasimulhaque.quran.ui.kit.EmptyNote
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
@@ -54,6 +55,9 @@ internal fun LastReadList(
         EmptyNote(
             title = stringResource(R.string.last_read_empty_title),
             body = stringResource(R.string.last_read_empty_body),
+            // The note stands in a page that begins under the sheet's own
+            // head, so it keeps the air it has always kept there.
+            modifier = Modifier.padding(vertical = 60.dp),
         )
         return
     }
@@ -121,6 +125,7 @@ internal fun SavedList(
         EmptyNote(
             title = stringResource(R.string.saved_empty_title),
             body = stringResource(R.string.saved_empty_body),
+            modifier = Modifier.padding(vertical = 60.dp),
         )
         return
     }
@@ -241,28 +246,6 @@ private fun PlaceRow(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-    }
-}
-
-@Composable
-private fun EmptyNote(title: String, body: String) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = Space.SheetFoot, vertical = 60.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Text(
-            text = body,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = Space.Line),
-        )
     }
 }
 

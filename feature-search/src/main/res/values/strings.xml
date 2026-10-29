@@ -3,6 +3,9 @@
     <string name="search_hint">Search the Quran</string>
     <string name="search_close">Close</string>
     <string name="search_clear">Clear search</string>
+    <string name="search_empty_title">Search by word or by reference</string>
+    <string name="search_empty_body">Type any word, in Arabic or in your translation. A reference like 2:255 or kahf 10 goes straight to an ayah.</string>
+    <string name="search_empty_body_quran">Type any word from the Quran. A reference like 2:255 or kahf 10 goes straight to an ayah.</string>
     <string name="search_status_searching">Searching…</string>
     <string name="search_status_no_matches">No matches.</string>
     <string name="search_status_failed">The search could not finish. Try again.</string>

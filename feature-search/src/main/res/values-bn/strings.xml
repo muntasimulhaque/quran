@@ -3,6 +3,9 @@
     <string name="search_hint">কুরআনে অনুসন্ধান করুন</string>
     <string name="search_close">বন্ধ</string>
     <string name="search_clear">অনুসন্ধান মুছুন</string>
+    <string name="search_empty_title">শব্দ বা রেফারেন্স দিয়ে খুঁজুন</string>
+    <string name="search_empty_body">আরবিতে বা নিজের অনুবাদে যেকোনো শব্দ লিখুন। 2:255 বা কাহফ 10-এর মতো রেফারেন্স দিলে সোজা সেই আয়াতে পৌঁছে যাবেন।</string>
+    <string name="search_empty_body_quran">কুরআনের যেকোনো শব্দ লিখুন। 2:255 বা কাহফ 10-এর মতো রেফারেন্স দিলে সোজা সেই আয়াতে পৌঁছে যাবেন।</string>
     <string name="search_status_searching">খোঁজা হচ্ছে…</string>
     <string name="search_status_no_matches">কিছু পাওয়া যায়নি।</string>
     <string name="search_status_failed">অনুসন্ধান শেষ করা যায়নি। আবার চেষ্টা করুন।</string>

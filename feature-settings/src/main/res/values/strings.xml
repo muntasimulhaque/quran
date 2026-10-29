@@ -30,7 +30,7 @@
     <string name="settings_open_translations">Choose translations</string>
     <string name="settings_words_title">Show word meanings</string>
     <string name="settings_tajweed_title">Tajweed colors</string>
-    <string name="settings_tajweed_summary">The rules of recitation, in the printed mushaf\'s colors</string>
+    <string name="settings_tajweed_lead">Each color is one family of rules, shown on a word from the reading. Every rule it covers is named under it.</string>
     <string name="settings_words_add">Adds the %1$s word meanings · %2$s</string>
     <string name="settings_words_failed">Could not download. Tap to try again.</string>
     <string name="settings_words_failed_storage">Not enough space to add the word meanings. Free some space, then try again.</string>

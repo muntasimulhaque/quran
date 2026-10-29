@@ -1,12 +1,13 @@
 package io.github.muntasimulhaque.quran.ui.settings
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -35,7 +38,8 @@ import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.feature.settings.R
-import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
+import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
+import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.rich.ArabicFonts
 import io.github.muntasimulhaque.quran.ui.rich.TajweedText
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
@@ -90,7 +94,22 @@ import io.github.muntasimulhaque.quran.ui.theme.TajweedColors
  * words and the same state as the hub row that opened it. A reader reading the
  * colors and finding them not to their taste turns them off where they are,
  * rather than going back a page for the switch they came from (owner decision,
- * an earlier session).
+ * an earlier session). The switch carries no subtitle: the hub row that opens
+ * this page dropped its own on the promise that the page would say what the
+ * colors are, and that sentence stands over the legend instead, below the
+ * switch, where the reader who wants to know what they are looking at reads
+ * it. It says the page's own grammar too, because the word beside a family is
+ * a sample from the reading and not decoration (owner decision, this
+ * session).
+ *
+ * The page is a list, and a family's head stays at the top of the glass while
+ * the reader is inside that family's rules: the page is eighteen sentences
+ * long, and the reader three screens down should not have to scroll back to
+ * learn which color they are reading about. The head is drawn on the sheet's
+ * own ground, so the rules slide under it rather than through it, and each
+ * family's name is a heading to a screen reader, so TalkBack moves from family
+ * to family instead of hearing every rule in order (owner decision, this
+ * session).
  */
 @Composable
 fun TajweedPage(
@@ -105,79 +124,130 @@ fun TajweedPage(
     val samples = remember(ayah) {
         ayah?.let { TajweedSamples.of(it.text, it.tajweed) }.orEmpty()
     }
-    Column(
+    // The page is a list so a family's name can stay at the top of the glass
+    // while the reader is inside that family's rules, and it wears the
+    // sheet's drag gate so a scroll back to the top of the page is never a
+    // pull that closes the sheet.
+    val listState = rememberLazyListState()
+    val gate = remember(listState) { SheetDragGate(listState) }
+    LazyColumn(
+        state = listState,
         modifier = Modifier
             .fillMaxWidth()
-            .sheetVerticalScroll(rememberScrollState()),
+            .sheetDragGate(gate),
+        contentPadding = PaddingValues(bottom = Space.Section),
     ) {
-        ToggleRow(
-            title = stringResource(R.string.settings_tajweed_title),
-            subtitle = stringResource(R.string.settings_tajweed_summary),
-            checked = settings.tajweed,
-            onChange = onTajweed,
-            switchTag = "switch-tajweed-page",
-        )
-        Spacer(Modifier.height(Space.Block))
-        TajweedFamily.entries.forEach { family ->
-            Family(
-                family = family,
-                colors = palette.tajweed,
-                sample = samples.firstOrNull { it.family == family },
-                hafs = hafs,
+        item(key = "switch") {
+            ToggleRow(
+                title = stringResource(R.string.settings_tajweed_title),
+                subtitle = null,
+                checked = settings.tajweed,
+                onChange = onTajweed,
+                switchTag = "switch-tajweed-page",
             )
         }
-        Spacer(Modifier.height(Space.Section))
+        item(key = "lead") {
+            Text(
+                text = stringResource(R.string.settings_tajweed_lead),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(
+                    start = Space.Gutter,
+                    end = Space.Gutter,
+                    top = Space.Tight,
+                    bottom = Space.Block,
+                ),
+            )
+        }
+        TajweedFamily.entries.forEach { family ->
+            stickyHeader(key = "family-${family.name}") {
+                FamilyHead(
+                    family = family,
+                    colors = palette.tajweed,
+                    sample = samples.firstOrNull { it.family == family },
+                    hafs = hafs,
+                )
+            }
+            item(key = "rules-${family.name}") {
+                FamilyRules(family)
+            }
+        }
     }
 }
 
+/**
+ * One family's name and the word that proves its color, kept at the top of the
+ * glass while the reader is inside that family's rules.
+ *
+ * The page is eighteen sentences long, and a reader three screens down needs to
+ * know which color they are reading about without scrolling back for it. The
+ * head is drawn on the sheet's own ground, so a rule slides under it instead of
+ * showing through its words, and it carries the app's quiet air of one line
+ * under it, which is the room a pinned head keeps over the text beneath.
+ *
+ * The name is a heading as well as type: TalkBack has stepped from heading to
+ * heading since 9.1, and a reader who cannot see the page can move from one
+ * family to the next instead of hearing every rule in order.
+ */
 @Composable
-private fun Family(
+private fun FamilyHead(
     family: TajweedFamily,
     colors: TajweedColors,
     sample: TajweedSamples.Sample?,
     hafs: FontFamily,
 ) {
     val palette = LocalPagePalette.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(start = Space.Gutter, end = Space.Gutter, bottom = Space.Line),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(family.title()),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier
+                .weight(1f)
+                .semantics { heading() },
+        )
+        if (sample != null) {
+            // The word is the page's own text and the page's own color,
+            // so the legend and the reading can never disagree. A screen
+            // reader has nothing to do with a color sample, and an
+            // unexplained Arabic word in the middle of the list is noise.
+            TajweedText(
+                text = AnnotatedString(sample.text),
+                code = sample.code,
+                colors = colors,
+                enabled = true,
+                style = TextStyle(
+                    fontFamily = hafs,
+                    fontSize = LegendSampleSp.sp,
+                    lineHeight = (LegendSampleSp * TextSize.lineRatio(TypeRole.Arabic)).sp,
+                    color = palette.ink,
+                ),
+                textAlign = TextAlign.End,
+                modifier = Modifier.clearAndSetSemantics {},
+            )
+        }
+    }
+}
+
+/**
+ * The rules that wear one color, each named and explained. The family is one
+ * head over them and says nothing of its own: four of the seven hold a single
+ * rule, and a sentence above them was that rule's own sentence said twice
+ * (owner report).
+ */
+@Composable
+private fun FamilyRules(family: TajweedFamily) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = Space.Gutter, end = Space.Gutter, bottom = Space.Section),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = stringResource(family.title()),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f),
-            )
-            if (sample != null) {
-                // The word is the page's own text and the page's own color,
-                // so the legend and the reading can never disagree. A screen
-                // reader has nothing to do with a color sample, and an
-                // unexplained Arabic word in the middle of the list is noise.
-                TajweedText(
-                    text = AnnotatedString(sample.text),
-                    code = sample.code,
-                    colors = colors,
-                    enabled = true,
-                    style = TextStyle(
-                        fontFamily = hafs,
-                        fontSize = LegendSampleSp.sp,
-                        lineHeight = (LegendSampleSp * TextSize.lineRatio(TypeRole.Arabic)).sp,
-                        color = palette.ink,
-                    ),
-                    textAlign = TextAlign.End,
-                    modifier = Modifier.clearAndSetSemantics {},
-                )
-            }
-        }
-        // The rules that wear this color, each named and explained. The family
-        // is one head over them and says nothing of its own: four of the seven
-        // hold a single rule, and a sentence above them was that rule's own
-        // sentence said twice (owner report).
         family.rules.forEachIndexed { index, rule ->
             Rule(
                 name = stringResource(rule.label()),
