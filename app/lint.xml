@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The two warnings this app accepts, and the reason for each. Everything else
+  lint can see is fixed, so a new warning is the only one on the list.
+
+  The legacy launcher tile is a full sheet of paper on purpose: it is the same
+  paper as the adaptive icon's background, and Android 7.0 and 7.1, the only
+  releases that read it, draw a legacy icon inside their own white circle or
+  squircle, where a paper card reads as the app's page. The drawing is
+  `tools/icons/forge.py`'s, and rounding the tile would change the app's face
+  on the two releases that still read it (owner decision, this session).
+
+  The themed layer is one silhouette of the book on its stand, traced at the
+  size the shape is read at. Its path is long because the book's own curves
+  are, and the launcher parses it once per icon set, never the app.
+-->
+<lint>
+    <issue id="IconLauncherShape">
+        <ignore path="src/main/res/mipmap-mdpi/ic_launcher.png" />
+        <ignore path="src/main/res/mipmap-hdpi/ic_launcher.png" />
+        <ignore path="src/main/res/mipmap-xhdpi/ic_launcher.png" />
+        <ignore path="src/main/res/mipmap-xxhdpi/ic_launcher.png" />
+        <ignore path="src/main/res/mipmap-xxxhdpi/ic_launcher.png" />
+    </issue>
+    <issue id="VectorPath">
+        <ignore path="src/main/res/drawable/ic_launcher_monochrome.xml" />
+    </issue>
+    <!-- Lint asks for a fullBackupContent beside dataExtractionRules because
+         that attribute only exists from Android 12 on. It is not needed:
+         allowBackup="false" already refuses every backup and restore on
+         Android 11 and below, which is the whole of what the legacy
+         exclusions would say. The file that said it twice was deleted, and the
+         privacy page is the one place the reader is told (owner decision,
+         this session). -->
+    <issue id="DataExtractionRules">
+        <ignore path="src/main/AndroidManifest.xml" />
+    </issue>
+</lint>

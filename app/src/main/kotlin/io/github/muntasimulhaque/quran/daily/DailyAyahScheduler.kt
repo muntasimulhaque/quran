@@ -1,6 +1,7 @@
 package io.github.muntasimulhaque.quran.daily
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -10,7 +11,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.text.Layout
@@ -18,6 +18,7 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.AlignmentSpan
 import androidx.core.app.NotificationCompat
+import androidx.core.net.toUri
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import io.github.muntasimulhaque.quran.MainActivity
@@ -263,8 +264,12 @@ object DailyAyahScheduler {
      */
     fun exactGrantRequest(context: Context): Intent? {
         if (!exactGrantWithheld(context)) return null
+        // The action string is a constant, so the platform copies it into the
+        // app and an older phone simply finds no screen for it: the guard above
+        // is the API check, and lint cannot see through it.
+        @SuppressLint("InlinedApi")
         return Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
-            .setData(Uri.parse("package:" + context.packageName))
+            .setData("package:${context.packageName}".toUri())
     }
 
     /** The reader's own day number, the one the alarm's request code is. */

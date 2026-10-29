@@ -3,12 +3,18 @@
   The window that the system shows before the app draws its own first frame.
   A reader whose system is dark and whose page is dark must never be flashed
   with a white sheet on the way in.
+
+  The base carries every item the app draws with; the qualified copies under
+  values-v29 and values-night-v29 add forceDarkAllowed, which the releases
+  before Android 10 do not know.
 -->
 <resources>
-    <style name="Theme.Quran" parent="android:Theme.Material.NoActionBar">
+    <style name="Theme.Quran.Base" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/night</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
+
+    <style name="Theme.Quran" parent="Theme.Quran.Base" />
 </resources>

@@ -74,7 +74,7 @@ class TextSizeTest {
     @Test
     fun theTafsirIsSetAtTheTranslationSize() {
         // One reading voice: the Ibn Kathir prose stands at the size the
-        // translation stands at, both at 15.3 sp with the same 1.6 line
+        // translation stands at, both at 16.2 sp with the same 1.6 line
         // (owner decision, this session).
         assertEquals(TextSize.sp(TypeRole.Translation, 1f), TextSize.sp(TypeRole.Tafsir, 1f))
         assertEquals(TextSize.lineSp(TypeRole.Translation, 1f), TextSize.lineSp(TypeRole.Tafsir, 1f))
@@ -93,17 +93,18 @@ class TextSizeTest {
     fun theShippedDefaultIsOneEvenStepSmaller() {
         // The default is 1, the middle of the five (owner decision, this
         // session). It renders 0.9 of the old base, so the Arabic stands at
-        // 28.8 sp and the translation at 15.3 sp where they were 32 and 17.
+        // 28.8 sp while the prose is put back to 16.2 sp, a hair under the
+        // platform's own body size (owner decision, this session).
         assertEquals(28.8f, TextSize.sp(TypeRole.Arabic, 1f))
-        assertEquals(15.3f, TextSize.sp(TypeRole.Translation, 1f))
+        assertEquals(16.2f, TextSize.sp(TypeRole.Translation, 1f))
     }
 
     @Test
     fun theWordMeaningSitsAStepUnderTheTranslation() {
-        // 14.4 sp against the translation's 15.3 (owner decision, this
+        // 15.3 sp against the translation's 16.2 (owner decision, this
         // session): the same stand under the translation that 16 held under
         // 17, so the gloss stays a small reading rather than a footnote.
-        assertEquals(14.4f, TextSize.meaningSp(1f))
+        assertEquals(15.3f, TextSize.meaningSp(1f))
     }
 
     @Test
@@ -115,10 +116,10 @@ class TextSizeTest {
         // the reading voice's own sizes, and the meaning sits under the word
         // it glosses (owner decision, the theme and consistency session).
         assertEquals(28.8f, TextSize.sp(TypeRole.Arabic, 1f))
-        assertEquals(25.2f, TextSize.wordSp(1f), 0.001f)
+        assertEquals(26.775f, TextSize.wordSp(1f), 0.001f)
         assertEquals(25.92f, TextSize.inlineArabic(1f), 0.001f)
-        assertEquals(15.3f, TextSize.sp(TypeRole.Translation, 1f))
-        assertEquals(15.3f, TextSize.sp(TypeRole.Tafsir, 1f))
-        assertEquals(14.4f, TextSize.meaningSp(1f))
+        assertEquals(16.2f, TextSize.sp(TypeRole.Translation, 1f))
+        assertEquals(16.2f, TextSize.sp(TypeRole.Tafsir, 1f))
+        assertEquals(15.3f, TextSize.meaningSp(1f))
     }
 }

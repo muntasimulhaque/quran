@@ -64,9 +64,11 @@ change, never left as a dead letter.
    withhold it, never where the notification was refused. Library-merged
    permissions are documented, not fought. A new permission needs the owner's
    sign-off written here first.
-3. **No ads, trackers, analytics, or accounts.** AndroidX, Kotlin, Media3, Room,
-   DataStore, and Glance only; the accessibility test's framework is test-only
-   and never ships. A new dependency is proposed here first.
+3. **No ads, trackers, analytics, or accounts.** AndroidX, Kotlin, Media3, and
+   DataStore only, with kotlinx.serialization in `tools/` alone; the
+   accessibility test's framework is test-only and never ships. The reader's own
+   work never leaves the device: there is no backup, no export, and no import.
+   A new dependency is proposed here first.
 4. **The sacred text is untouchable.** Not one byte of Quran text, translation,
    or tafsir is edited by hand. Content changes only through `tools/`, and every
    dataset carries its source, version, checksum, and license in

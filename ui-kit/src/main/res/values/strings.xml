@@ -11,8 +11,6 @@
     <string name="sheet_handle">Sheet handle</string>
     <string name="reciter_minshawi">Minshawi</string>
     <string name="reciter_husary">Husary</string>
-    <string name="reciter_husary_muallim">Husary Muallim</string>
-    <string name="reciter_husary_mujawwad">Husary Mujawwad</string>
     <string name="pack_name_quran_text">Quran text</string>
     <string name="pack_name_saheeh_international">Saheeh International</string>
     <string name="pack_name_al_bayan">Al-Bayan Simple Translation</string>

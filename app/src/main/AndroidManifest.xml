@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- The reader approved one network use and only one: content from this
          project's own release page, on their word. The chosen language's
@@ -27,17 +28,24 @@
          the boot receiver below puts the alarm back (owner decision). -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- Nothing of the reader's leaves the phone. allowBackup="false" refuses
+         every backup on Android 11 and below; from Android 12 that attribute
+         alone does not stop a device-to-device transfer, so dataExtractionRules
+         carries the refusal there. There is no export, no import, and no other
+         door (owner decision, this session). The back-callback attribute is
+         read only from Android 13 on, and older platforms ignore it, so its
+         API level warning is suppressed here rather than hidden in a baseline. -->
     <application
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:enableOnBackInvokedCallback="true"
         android:networkSecurityConfig="@xml/network_security_config"
         android:supportsRtl="true"
         android:usesCleartextTraffic="false"
-        android:theme="@style/Theme.Quran">
+        android:theme="@style/Theme.Quran"
+        tools:ignore="UnusedAttribute">
         <!-- The reading's one activity. uiMode is deliberately not in its
              configChanges: a theme change is the one configuration change this
              app does not handle itself. The interface language is applied in

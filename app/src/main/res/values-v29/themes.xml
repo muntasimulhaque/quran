@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 10 and later have a force-dark setting of their own, and a phone with
+  it turned on would repaint the window and the splash under a page the app did
+  not choose. The app's two grounds are chosen, so it is refused here. The
+  releases before Android 10 do not know the attribute and take the base.
+-->
+<resources>
+    <style name="Theme.Quran" parent="Theme.Quran.Base">
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+</resources>

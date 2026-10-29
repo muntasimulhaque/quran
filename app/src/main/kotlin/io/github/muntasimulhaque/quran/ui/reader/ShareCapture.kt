@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.core.content.FileProvider
+import androidx.core.graphics.createBitmap
 import java.io.File
 
 /** The measured height of the card, which can stand taller than the screen. */
@@ -127,7 +128,7 @@ internal fun ShareCardCapture(
         // A software bitmap has no texture limit, so the stitched card is the
         // card, whatever the driver would have held.
         val stitched = runCatching {
-            Bitmap.createBitmap(widthPx, total, Bitmap.Config.ARGB_8888)
+            createBitmap(widthPx, total, Bitmap.Config.ARGB_8888)
         }.getOrNull()
         if (stitched == null) {
             onFailed()

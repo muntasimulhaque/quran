@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -64,7 +65,8 @@ fun ReadingList(
     nextSurahName: String?,
     selectedAyah: Int?,
     playingAyah: Int?,
-    playingWord: Int?,
+    /** The word being recited, read only by the ayah being heard. */
+    playedWord: State<Int?>,
     onAyah: (Ayah) -> Unit,
     onBackgroundTap: () -> Unit,
     onScrolled: () -> Unit,
@@ -149,7 +151,7 @@ fun ReadingList(
         nextSurahName = nextSurahName,
         selectedAyah = selectedAyah,
         playingAyah = playingAyah,
-        playingWord = playingWord,
+        playedWord = playedWord,
         hafs = hafs,
         pageDescription = pageDescription,
         onAyah = onAyah,

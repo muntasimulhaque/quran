@@ -184,7 +184,7 @@ fun PlaybackBar(
             },
         )
         downloading -> {
-            val percent = ((progress ?: 0f) * 100).toInt()
+            val percent = (progress * 100).toInt()
             // The surah is always named while its package is on its way, not
             // only on the auto-continue path: a download the reader cannot
             // name is a download they cannot judge (owner report, this

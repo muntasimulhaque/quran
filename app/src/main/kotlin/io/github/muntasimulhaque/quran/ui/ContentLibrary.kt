@@ -265,19 +265,14 @@ class ContentLibrary(
         // A pack the app has updated since this install is replaced
         // quietly, on an unmetered connection, and the library is
         // reopened over it. The reading never waits: this runs after the
-        // first page is ready.
+        // first page is ready. A pack that is damaged on the device is not
+        // hunted in the background: the next open leaves it out of the
+        // library, its row reads Add, and one tap repairs it (owner
+        // decision, this session: the daily re-hash of every installed pack
+        // was the app's only periodic background work, and it bought a
+        // repair the reader could already make in one tap).
         scope.launch {
             if (packUpdater.refresh(catalog).isNotEmpty()) refresh()
-        }
-        // The same library is read back against the catalog's hashes once
-        // a day, on the reader's behalf, so a pack a storage problem or an
-        // interrupted copy has damaged is repaired without anyone asking.
-        // There is no row for it and nothing is shown: a reader should
-        // never meet the word for it (owner decision, this session). It is
-        // unmetered, once a day, and after the first page is readable, all
-        // of which PackUpdater keeps.
-        scope.launch {
-            if (packUpdater.dailyIntegrityRefresh(catalog).isNotEmpty()) refresh()
         }
     }
 

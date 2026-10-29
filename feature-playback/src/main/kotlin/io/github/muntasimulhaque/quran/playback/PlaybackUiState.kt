@@ -10,8 +10,6 @@ data class PlaybackUiState(
     val surah: Int? = null,
     /** The reference of the playing ayah, as its media metadata carries it. */
     val reference: String? = null,
-    /** The word being recited, as the word table numbers it; null when unknown. */
-    val wordPosition: Int? = null,
     /** True when the chosen recitation has no published package for this surah. */
     val unavailable: Boolean = false,
     /** The surah waiting for the reader's download approval. */

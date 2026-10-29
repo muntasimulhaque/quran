@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The night page on Android 10 and later, where the platform's own force-dark
+  may repaint the window or the splash under a page the app did not choose.
+  The releases before Android 10 take the base.
+-->
+<resources>
+    <style name="Theme.Quran" parent="Theme.Quran.Base">
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+</resources>

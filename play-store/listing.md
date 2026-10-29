@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 12.8 (versionCode 130)
+Version: 12.9 (versionCode 131)
 
 ## Listing
 
@@ -79,11 +79,10 @@ from the content manifest. The source code is MIT.
   Releases: the reading of the language the reader chose (its translation,
   and its tafsir on an unmetered connection), a word list when word by word
   is turned on, a recitation package the reader asks for after seeing its
-  size (or the next surah after Continue is turned on), a quiet refresh of
-  an installed pack when the app carries a newer version, and a daily
-  integrity check that downloads a repair only when a local pack is damaged.
-  The refresh and the repair run on an unmetered connection only. Nothing is
-  sent beyond the request. No analytics, no crash reporting, no advertising.
+  size (or the next surah after Continue is turned on), and a quiet refresh
+  of an installed pack when the app carries a newer version. The refresh
+  runs on an unmetered connection only. Nothing is sent beyond the request.
+  No analytics, no crash reporting, no advertising.
 - Privacy policy URL:
   https://muntasimulhaque.github.io/quran/privacy.html
 
@@ -157,6 +156,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (12.9, 465 characters)
+12.9 reads easier: the translation, the tafsir, and the word meanings now stand at the phone's own body size, a touch larger, so a long sitting does not tire the eye. The app opens faster, because it no longer re-reads the Quran's database on every launch, and the reciter's word highlight no longer redraws the page. The quiet daily re-check of packs is gone, so the app does no background work; a damaged pack still repairs with one tap. Text and packs unchanged.
 
 ## Release notes (12.8, 406 characters)
 12.8 makes the two quiet pages say what they are for. Search now tells you, before you type, that a word in Arabic or in your translation works and that a reference like 2:255 or kahf 10 goes straight to an ayah. The Tajweed page keeps a color's name at the top while you read its rules, says in one sentence what the colors are, and lets a screen reader jump from color to color. Text and packs unchanged.

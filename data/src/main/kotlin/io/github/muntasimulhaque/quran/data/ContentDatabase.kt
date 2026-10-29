@@ -1396,8 +1396,8 @@ class ContentDatabase private constructor(
                     // attach alone is not proof that the schema the app is
                     // about to query is inside it. Leaving it out of the
                     // library keeps every surface on the packs that can be
-                    // read, while the catalog's installed set still lets the
-                    // daily integrity pass see the broken file and repair it.
+                    // read, while the file stays in the store, so the pack's
+                    // own row reads Add and one tap repairs it.
                     android.util.Log.w(
                         "ContentDatabase",
                         "pack $id has no ${expectedTables(pack.type).joinToString(", ")} table; left out of the library",
@@ -1410,8 +1410,8 @@ class ContentDatabase private constructor(
             // its schema would throw, and every surface that reads it would
             // have to catch the same failure. The catalog therefore reports
             // the attached set, not the raw files: a broken pack reads as not
-            // installed, its Add opens a repair, and the daily integrity pass
-            // still sees the file through the store's own installed set.
+            // installed, its Add opens a repair, and the store still sees the
+            // file.
             ContentDatabase(database, catalog.withInstalled(attached), attached)
         }
 

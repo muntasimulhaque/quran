@@ -96,11 +96,7 @@ class PackStore(private val context: Context) {
         val name = "core-${expectation.sha256.take(8)}.db"
         val directory = File(context.filesDir, "content").apply { mkdirs() }
         val target = File(directory, name)
-        if (target.isFile && target.length() == expectation.bytes &&
-            sha256(target).equals(expectation.sha256, ignoreCase = true)
-        ) {
-            return target
-        }
+        if (isCoreCopy(target, expectation)) return target
         val temporary = File(directory, "$name.part")
         context.assets.open("content/core.db").use { input ->
             temporary.outputStream().buffered().use { output -> input.copyTo(output) }
@@ -115,9 +111,43 @@ class PackStore(private val context: Context) {
             temporary.delete()
             throw IllegalStateException("the shipped Quran text could not be placed")
         }
+        rememberCore(target, expectation)
         directory.listFiles { file -> file.name != target.name }?.forEach { it.delete() }
         return target
     }
+
+    /**
+     * The copy in the app's own storage, without hashing nine and a half
+     * megabytes on every launch.
+     *
+     * The copy is written to a temporary file, hashed, and only then renamed
+     * into place, so a file that kept its length and its moment is the file
+     * that was verified. The marker carries the catalog's hash too, so another
+     * core pack can never wear an old copy's proof, and the file's name
+     * carries the first eight characters of that hash on top. A file whose
+     * length or moment moved is hashed again, and one that fails is copied
+     * from the assets over it (owner decision, this session: the launch was
+     * paying for a hash of the Quran's database every time).
+     */
+    private fun isCoreCopy(target: File, expectation: ContentPack): Boolean {
+        if (!target.isFile || target.length() != expectation.bytes) return false
+        if (corePreferences().getString(KEY_CORE, null) == coreMarker(target, expectation)) {
+            return true
+        }
+        if (!sha256(target).equals(expectation.sha256, ignoreCase = true)) return false
+        rememberCore(target, expectation)
+        return true
+    }
+
+    private fun rememberCore(file: File, expectation: ContentPack) {
+        corePreferences().edit().putString(KEY_CORE, coreMarker(file, expectation)).apply()
+    }
+
+    private fun coreMarker(file: File, expectation: ContentPack): String =
+        "${file.length()}:${file.lastModified()}:${expectation.sha256}"
+
+    private fun corePreferences() =
+        context.applicationContext.getSharedPreferences("core-pack", Context.MODE_PRIVATE)
 
     private fun sha256(file: File): String {
         val digest = MessageDigest.getInstance("SHA-256")
@@ -134,6 +164,7 @@ class PackStore(private val context: Context) {
 
     /** Forgets the copied core pack, so the next open copies it from the app again. */
     fun discardCore() {
+        corePreferences().edit().remove(KEY_CORE).apply()
         File(context.filesDir, "content").deleteRecursively()
     }
 
@@ -202,4 +233,9 @@ class PackStore(private val context: Context) {
 
     private fun packDirectory(id: String): File =
         SafePaths.childUnder(packRoot(), id) ?: File(packRoot(), "__invalid__")
+
+    private companion object {
+        /** The marker that says which core copy was last hashed and trusted. */
+        const val KEY_CORE = "core"
+    }
 }

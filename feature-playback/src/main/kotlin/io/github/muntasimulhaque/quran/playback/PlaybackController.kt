@@ -119,6 +119,18 @@ class PlaybackController(
     private val _state = MutableStateFlow(PlaybackUiState())
     val state: StateFlow<PlaybackUiState> = _state.asStateFlow()
 
+    /**
+     * The word under the reciter, on a flow of its own.
+     *
+     * It moves ten times a second. It used to travel inside [PlaybackUiState],
+     * so every screen that read the player was recomposed on every tick to
+     * move one wash. The reading now reads this flow inside the one ayah being
+     * heard, so a tick costs one block instead of the page (owner decision,
+     * this session).
+     */
+    private val _wordPosition = MutableStateFlow<Int?>(null)
+    val wordPosition: StateFlow<Int?> = _wordPosition.asStateFlow()
+
     fun attach(content: ContentDatabase) {
         this.content = content
         // The tick is for the word being recited, and it runs only while
@@ -607,6 +619,7 @@ class PlaybackController(
         player?.stop()
         player?.clearMediaItems()
         stoppedAtAyahEnd = false
+        _wordPosition.value = null
         _state.value = PlaybackUiState(connected = true)
         // Where the recitation was heard is not a place to offer the reader
         // again: they put it away, or it reached the end they asked for.
@@ -624,10 +637,10 @@ class PlaybackController(
      * place to come back to either.
      */
     private fun restTheMark() {
+        _wordPosition.value = null
         _state.value = _state.value.copy(
             isPlaying = false,
             ayahNumber = null,
-            wordPosition = null,
         )
         heardAyah = null
         syncTicker()
@@ -814,10 +827,10 @@ class PlaybackController(
             }
             if (reason != Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM) return
             stoppedAtAyahEnd = true
+            _wordPosition.value = null
             _state.value = _state.value.copy(
                 isPlaying = false,
                 ayahNumber = null,
-                wordPosition = null,
             )
             heardAyah = null
             syncTicker()
@@ -941,6 +954,7 @@ class PlaybackController(
         val surah = RecitationPlaylist.surahOf(id)
         val at = player.currentPosition.coerceAtLeast(0)
         if (segmentedAyah != ayahNumber) loadSegments(ayahNumber)
+        _wordPosition.value = wordAt(at)
         _state.value = _state.value.copy(
             connected = true,
             isPlaying = player.isPlaying,
@@ -948,7 +962,6 @@ class PlaybackController(
             ayahNumber = ayahNumber,
             surah = surah,
             reference = player.currentMediaItem?.mediaMetadata?.title?.toString(),
-            wordPosition = wordAt(at),
         )
         rememberHeard(recitationId, ayahNumber, at, player.isPlaying)
         syncTicker()

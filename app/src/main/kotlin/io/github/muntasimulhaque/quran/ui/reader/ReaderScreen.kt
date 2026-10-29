@@ -112,6 +112,11 @@ fun ReaderScreen(
     val settings = viewModel.settings
     val reducedMotion by rememberReducedMotion()
     val playback by viewModel.playbackState.collectAsStateWithLifecycle()
+    // The recited word travels on a flow of its own and is handed down as a
+    // State that this screen never reads, so the tick that moves the wash
+    // invalidates the one ayah being heard instead of the page (owner
+    // decision, this session).
+    val playedWord = viewModel.playedWord.collectAsStateWithLifecycle()
     val saved by viewModel.saved.collectAsStateWithLifecycle()
     val lastRead by viewModel.lastRead.collectAsStateWithLifecycle()
 
@@ -493,7 +498,7 @@ fun ReaderScreen(
                         .firstOrNull { it.number == surah.number + 1 }?.nameSimple,
                     selectedAyah = washedAyah,
                     playingAyah = playback.ayahNumber,
-                    playingWord = playback.wordPosition,
+                    playedWord = playedWord,
                     onAyah = { ayah ->
                         selected = ayah
                         reveal = null

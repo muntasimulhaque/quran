@@ -23,7 +23,9 @@ class CheckDb(private val root: File) {
         Expectation("surah", 114),
         Expectation("ayah", 6236),
         Expectation("word", 83_664),
-        Expectation("recitation_ayah", 24_944),
+        // The database carries the two recitations the app ships, Minshawi
+        // and Husary, 6,236 rows each.
+        Expectation("recitation_ayah", 12_472),
         Expectation("surah_info", 114),
     )
 

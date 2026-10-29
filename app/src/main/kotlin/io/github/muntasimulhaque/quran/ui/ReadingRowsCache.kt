@@ -117,7 +117,7 @@ internal class ReadingRowsCache(
             }.getOrElse { failure ->
                 // One unreadable pack must not take the reading down with it:
                 // the page stays paper until the library can answer, and the
-                // daily integrity read replaces the pack behind the scenes.
+                // pack's own row reads Add so the reader can repair it.
                 android.util.Log.e(TAG, "the rows of surah $surah could not be read", failure)
                 emptyList()
             }

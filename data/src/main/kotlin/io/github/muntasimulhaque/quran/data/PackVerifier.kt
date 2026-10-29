@@ -35,10 +35,10 @@ class PackVerifier(private val context: Context) {
      *
      * The first open after an install hashes the whole file once and keeps a
      * marker of its length, moment, and catalog hash. A later open whose
-     * marker still matches does not read the file again; the daily integrity
-     * pass hashes every pack and refreshes the marker, so a file that moved
-     * without changing its size or moment is still caught once a day. A
-     * missing or malformed hash is always refused.
+     * marker still matches does not read the file again; a file whose length
+     * or moment moved is hashed again, and one that fails is left out of the
+     * library, so its row reads Add and one tap repairs it. A missing or
+     * malformed hash is always refused.
      */
     fun trustedForOpen(pack: ContentPack): Boolean {
         if (!SafePaths.validId(pack.id) || !SafePaths.validHash(pack.sha256)) return false
@@ -52,8 +52,8 @@ class PackVerifier(private val context: Context) {
     /**
      * Whether one pack's bytes match the catalog: its length when the
      * catalog carries one, and its whole SHA-256. It is the honest check and
-     * it is the expensive one, so [PackUpdater.dailyIntegrityRefresh] asks
-     * it once a day.
+     * it is the expensive one, so it is asked when a file has just arrived or
+     * has just moved.
      */
     fun intact(pack: ContentPack): Boolean {
         if (!SafePaths.validId(pack.id) || !SafePaths.validHash(pack.sha256)) return false

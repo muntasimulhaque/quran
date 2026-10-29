@@ -15,6 +15,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import io.github.muntasimulhaque.quran.daily.DailyAyahScheduler
 import io.github.muntasimulhaque.quran.daily.rememberExactGrantWithheld
 import io.github.muntasimulhaque.quran.daily.rememberNotificationsBlocked
@@ -189,7 +190,7 @@ class MainActivity : ComponentActivity() {
                     .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
             else ->
                 Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                    .setData(android.net.Uri.parse("package:" + packageName))
+                    .setData("package:$packageName".toUri())
         }
         try {
             startActivity(page.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))

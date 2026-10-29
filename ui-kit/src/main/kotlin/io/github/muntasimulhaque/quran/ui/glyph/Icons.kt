@@ -148,7 +148,7 @@ private fun solidPath(points: List<GlyphPoint>, corner: Float, at: (GlyphPoint) 
         val endX = current.x + outX / outLength * cut
         val endY = current.y + outY / outLength * cut
         if (index == 0) path.moveTo(startX, startY) else path.lineTo(startX, startY)
-        path.quadraticBezierTo(current.x, current.y, endX, endY)
+        path.quadraticTo(current.x, current.y, endX, endY)
     }
     path.close()
     return path

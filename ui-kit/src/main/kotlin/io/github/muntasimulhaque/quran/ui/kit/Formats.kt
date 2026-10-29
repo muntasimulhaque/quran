@@ -69,8 +69,6 @@ fun formatBytes(bytes: Long): String {
 fun reciterName(context: Context, id: String, fallback: String): String = when (id) {
     "minshawi" -> context.getString(R.string.reciter_minshawi)
     "husary" -> context.getString(R.string.reciter_husary)
-    "husary-muallim" -> context.getString(R.string.reciter_husary_muallim)
-    "husary-mujawwad" -> context.getString(R.string.reciter_husary_mujawwad)
     else -> fallback
 }
 
@@ -101,8 +99,6 @@ fun contentPackName(id: String, fallback: String): String = when (id) {
     "words-en", "words-bn" -> stringResource(R.string.pack_name_word_by_word)
     "reciter-minshawi" -> stringResource(R.string.reciter_minshawi)
     "reciter-husary" -> stringResource(R.string.reciter_husary)
-    "reciter-husary-muallim" -> stringResource(R.string.reciter_husary_muallim)
-    "reciter-husary-mujawwad" -> stringResource(R.string.reciter_husary_mujawwad)
     else -> fallback
 }
 

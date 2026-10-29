@@ -130,6 +130,13 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     val playbackState: StateFlow<PlaybackUiState> = playback.state
 
     /**
+     * The word the reciter is on, which only the ayah being heard reads. It
+     * keeps its own flow so a tick that moves the wash cannot recompose the
+     * screen around it (owner decision, this session).
+     */
+    val playedWord: StateFlow<Int?> = playback.wordPosition
+
+    /**
      * Tells the player whether the reading that draws the wash is on the
      * glass. The shell knows when the window is visible; the player owns the
      * tick and its checkpoint (owner decision, this session).

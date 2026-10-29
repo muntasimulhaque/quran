@@ -81,8 +81,7 @@ class Verify(private val root: File) {
             "translation-al-bayan-bn-notes" -> checkAlBayanDocx(dataset.id, dir)
             "tafsir-ibn-kathir-en", "tafsir-ibn-kathir-bn" -> checkTafsirQul(dataset.id, dir)
             "word-by-word-english", "word-by-word-bengali" -> checkWordTranslation(dataset.id, dir)
-            "recitation-minshawi", "recitation-husary", "recitation-husary-muallim",
-            "recitation-husary-mujawwad" -> checkRecitation(dataset.id, dir)
+            "recitation-minshawi", "recitation-husary" -> checkRecitation(dataset.id, dir)
             "topics" -> checkSimpleCount(dataset.id, dir, "topics", 2512)
             "metadata-surah-names" -> checkJsonKeys(dataset.id, dir, 114)
             "surah-names-bn" -> checkSurahNamesBn(dataset.id, dir)

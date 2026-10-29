@@ -4,10 +4,10 @@
   "words": 77429,
   "markers": 6235,
   "translations": 6236,
-  "recitationSegmentsShifted": 938,
-  "recitationSegmentsMapped": 128,
-  "recitationSegmentsClamped": 1449,
+  "recitationSegmentsShifted": 468,
+  "recitationSegmentsMapped": 64,
+  "recitationSegmentsClamped": 724,
   "problems": 0,
-  "databaseBytes": 110346240,
-  "databaseSha256": "4978df47e1b92a88679684fc78a80758ece844827e0647b3e95661a68896a63d"
+  "databaseBytes": 106381312,
+  "databaseSha256": "0680823899256a46414b374afbef3bb2c77904d676ff0fe68e36ad2c560594af"
 }

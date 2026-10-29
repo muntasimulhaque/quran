@@ -14,11 +14,19 @@
       window on Android: postSplashScreenTheme is a static manifest theme
       too, and windowDisablePreview would trade this for a black flash for
       every reader (owner decision, this session).
+
+      The base carries every item the app draws with, and the qualified
+      copies under values-v29 and values-night-v29 add the one attribute the
+      platform grew later: forceDarkAllowed, which a release before Android
+      10 does not know and would refuse as an unknown attribute if it were
+      written here.
     -->
-    <style name="Theme.Quran" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="Theme.Quran.Base" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@color/paper</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">true</item>
     </style>
+
+    <style name="Theme.Quran" parent="Theme.Quran.Base" />
 </resources>

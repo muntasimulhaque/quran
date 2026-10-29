@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -62,7 +63,8 @@ internal fun ReadingRows(
     nextSurahName: String?,
     selectedAyah: Int?,
     playingAyah: Int?,
-    playingWord: Int?,
+    /** The word being recited, read inside the one ayah being heard. */
+    playedWord: State<Int?>,
     hafs: FontFamily,
     pageDescription: String,
     onAyah: (Ayah) -> Unit,
@@ -271,11 +273,12 @@ internal fun ReadingRows(
                 metrics = metrics,
                 isSelected = selectedAyah == row.ayah.number,
                 playingAyah = playingAyah,
-                // Only the ayah being recited carries the moving word.
-                // Every other block keeps a stable null, so a word change
-                // does not rebuild its AnnotatedString or recompose it
-                // (owner decision, this session).
-                playingWord = playingWord.takeIf { playingAyah == row.ayah.number },
+                // The word is read here, inside this item, and only for the
+                // ayah being recited: a tick that moves the wash invalidates
+                // this one item and leaves the page around it alone (owner
+                // decision, this session). Every other block keeps a stable
+                // null, so a word change never rebuilds its AnnotatedString.
+                playingWord = if (playingAyah == row.ayah.number) playedWord.value else null,
                 reveal = reveal?.takeIf { it.ayah == row.ayah.number },
                 showWordAid = wordAid ||
                     (reveal?.wordByWord == true && reveal.ayah == row.ayah.number),

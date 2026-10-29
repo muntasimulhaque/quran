@@ -3,12 +3,9 @@ package io.github.muntasimulhaque.quran.data
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import java.security.MessageDigest
-import java.util.TimeZone
 
 /**
  * Keeps the packs a reader already has current, without a tap.
@@ -78,87 +75,6 @@ class PackUpdater(private val context: Context) {
             replaced
         }
 
-    /**
-     * A quiet integrity pass, at most once a day, that reads every installed
-     * pack whose bytes have changed since the last pass and compares it with
-     * the catalog's hash, repairing what a storage problem or an interrupted
-     * copy has damaged. A pack whose size and moment are unchanged since it
-     * was verified is not read again: the hash is the honest check, and this
-     * keeps it off a reader's battery when nothing has moved (owner
-     * decision, this session). [refresh] only
-     * re-examines the catalog when its fingerprints change, which is an app
-     * update; this is the second look that runs on the reader's behalf,
-     * without a tap, so a reader never has to know the word for it (owner
-     * decision, this session: the check a reader would not understand is gone
-     * from the surface and kept here instead).
-     *
-     * It is kind to the reader the way [refresh] is: only on an unmetered
-     * connection, only after the reading is already open, and the day it last
-     * ran is remembered so the pass is once a day and not once a launch. A
-     * reader who is offline or metered pays nothing and the pass is retried on
-     * a later launch. A stale pack keeps working while a replacement is
-     * fetched. Returns the ids that changed, so the caller can reopen the
-     * library over them; a failure is left for the next day rather than shown.
-     */
-    suspend fun dailyIntegrityRefresh(catalog: PackCatalog): List<String> =
-        withContext(Dispatchers.IO) {
-            mutex.withLock {
-                if (!unmetered()) return@withLock emptyList()
-                val today = localDay(System.currentTimeMillis())
-                if (preferences.getInt(KEY_INTEGRITY_DAY, -1) == today) {
-                    return@withLock emptyList()
-                }
-                // The day is remembered only after the pass has finished.
-                // A process that dies or a download that fails is retried
-                // the same day, not after a whole day of trusting a pack
-                // that was never checked (owner decision, security audit).
-                // The verifier reads a pack only when its bytes have changed
-                // since the last pass that verified them. The hash is the
-                // honest check, but it reads the whole pack, and the tafsir
-                // is tens of megabytes: a file whose size and moment are
-                // unchanged is the file that was verified, so the read is
-                // skipped and the answer is the same (owner decision, this
-                // session).
-                val verifier = PackVerifier(context)
-                val store = PackStore(context)
-                val stale = runCatching {
-                    catalog.all()
-                        .filter { it.installed && !it.shipped }
-                        .filter { pack -> !rememberedIntact(pack, verifier, store) }
-                }.getOrNull() ?: return@withLock emptyList()
-                if (stale.isEmpty()) {
-                    preferences.edit().putInt(KEY_INTEGRITY_DAY, today).apply()
-                    return@withLock emptyList()
-                }
-                val downloader = PackDownloader(context)
-                val replaced = ArrayList<String>(stale.size)
-                for (pack in stale) {
-                    val result = runCatching { downloader.download(pack) { _, _ -> } }.getOrNull()
-                    if (result?.isSuccess == true) replaced += pack.id
-                }
-                preferences.edit().putInt(KEY_INTEGRITY_DAY, today).apply()
-                replaced
-            }
-        }
-
-    /**
-     * Whether one pack is intact, by its whole SHA-256. The old fast path
-     * trusted a file whose size and modification time were unchanged; a bit
-     * that flips without touching either would be trusted forever. The pass
-     * now hashes every installed pack once a day on a worker, which is the
-     * cost of the answer being true.
-     */
-    private fun rememberedIntact(
-        pack: ContentPack,
-        verifier: PackVerifier,
-        store: PackStore,
-    ): Boolean {
-        val file = store.fileFor(pack.id)
-        if (!file.isFile) return false
-        if (pack.bytes > 0 && file.length() != pack.bytes) return false
-        return verifier.intact(pack)
-    }
-
     /** True only on a connected, unmetered network. */
     private fun unmetered(): Boolean {
         val manager = context.getSystemService(ConnectivityManager::class.java) ?: return false
@@ -184,16 +100,7 @@ class PackUpdater(private val context: Context) {
         return digest.digest().joinToString("") { "%02x".format(it) }
     }
 
-    /** The reader's own day number, so the integrity pass is once a day. */
-    private fun localDay(millis: Long): Int =
-        Math.floorDiv(
-            millis + TimeZone.getDefault().getOffset(millis),
-            DAY_MILLIS,
-        ).toInt()
-
     private companion object {
         const val KEY = "catalog"
-        const val KEY_INTEGRITY_DAY = "integrity_day"
-        const val DAY_MILLIS = 86_400_000L
     }
 }

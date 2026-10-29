@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Android 12 and later split backup from device transfer. Both are refused:
-  the reader's own work leaves the device through the export door they open,
-  and through nothing else.
+  the reader's own work stays on this device, and the app has no door that
+  would carry it anywhere else.
 -->
 <data-extraction-rules>
     <cloud-backup>

@@ -1,6 +1,7 @@
 # Android and Gradle
 local.properties
 .gradle/
+.kotlin/
 build/
 captures/
 .externalNativeBuild/

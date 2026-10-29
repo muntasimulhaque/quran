@@ -23,11 +23,13 @@ enum class TypeRole { Arabic, Translation, Tafsir, Words }
  * smaller" the same number as the step itself, which is why the base below is
  * 0.9 of what it was and not 0.85.
  *
- * The shipped default is one step smaller than it was because the text read a
- * little large on a phone (owner decision, this session): every base is 0.9
- * of its old self, the default keeps the middle of the five, and the reader
- * can still go two steps either way, smaller or larger, from where every text
- * now stands.
+ * The Arabic keeps the 0.9 base the session that read large settled on, and
+ * the prose is the one exception: the translation and the tafsir stand at
+ * 16.2 sp, a hair under the platform's own body size, because a whole page of
+ * 15.3 tired the eye in a long sitting and a reader should not have to find
+ * the size page to read a surah comfortably. The five steps are unchanged,
+ * the default is still the middle of them, and the reader can go two steps
+ * either way from where every text now stands (owner decision, this session).
  *
  * Arabic is set well above the Latin sizes on purpose: its letter bodies are
  * small next to the space the diacritics need, so at the same nominal size it
@@ -37,8 +39,8 @@ enum class TypeRole { Arabic, Translation, Tafsir, Words }
  * takes is paid for in the scroll, which costs a reader nothing.
  *
  * The largest step stops at 1.2. Past that the reading turns into a page of
- * headings. The smallest is 0.8, the compact choice, at 12.24 sp of
- * translation and 11.52 sp of meaning (owner decision, this session). The
+ * headings. The smallest is 0.8, the compact choice, at 12.96 sp of
+ * translation and 12.24 sp of meaning (owner decision, this session). The
  * earlier session pinned 0.75 against the larger base as the readability
  * floor; the two sit within a hair of each other at the default, and the
  * floor stands.
@@ -95,8 +97,8 @@ object TextSize {
     /**
      * The meaning under a word in the word by word aid. This is the size the
      * meaning is read at; the Arabic word above it is derived from it, so the
-     * two can never drift apart. 14.4 sp (owner decision, this session): the
-     * gloss holds the same stand under the translation's 15.3 that 16 held
+     * two can never drift apart. 15.3 sp (owner decision, this session): the
+     * gloss holds the same stand under the translation's 16.2 that 16 held
      * under 17, one point under the translation it means to be, so it reads
      * as a small gloss and not as a footnote.
      */
@@ -111,10 +113,9 @@ object TextSize {
     /**
      * The Arabic word in the word by word aid, derived from its meaning by
      * [WORD_MEANING_RATIO] so the two can never drift apart. At the middle
-     * step the word stands at 25.2 sp, the 7/8 of the Quran's 28.8 that the
-     * session pinned as "one size under" (owner decision, the theme and
-     * consistency session); the aid reads as a small copy of the page, not
-     * as a footnote to itself.
+     * step the word stands at 26.8 sp, one point under the Quran's own 28.8,
+     * so the aid reads as a small copy of the page and not as a footnote to
+     * itself.
      */
     fun wordSp(step: Float): Float = meaningSp(step) * WORD_MEANING_RATIO
 
@@ -132,14 +133,14 @@ object TextSize {
 
     private fun base(role: TypeRole): Float = when (role) {
         TypeRole.Arabic -> 28.8f
-        TypeRole.Translation -> 15.3f
+        TypeRole.Translation -> 16.2f
         // The tafsir is the longest prose the app draws, read in the same
         // sitting as the translation it opens from, so it stands at the
         // translation's own size and not a point under it (owner decision,
         // this session; the two sizes read as one voice now).
-        TypeRole.Tafsir -> 15.3f
+        TypeRole.Tafsir -> 16.2f
         // The word list is derived from [meaningSp] at [WORD_MEANING_RATIO],
-        // the 25.2-over-14.4 stand the aid reads at; this entry is that
+        // the 26.8-over-15.3 stand the aid reads at; this entry is that
         // derivation, written as the number it comes to.
         TypeRole.Words -> MEANING_BASE * WORD_MEANING_RATIO
     }
@@ -166,17 +167,17 @@ object TextSize {
     }
 
     /**
-     * The size the meaning under a word is read at, before any scaling. 14.4
+     * The size the meaning under a word is read at, before any scaling. 15.3
      * sp (owner decision, this session): the meaning is read at length under
-     * every word, and it keeps the same stand under the translation's 15.3
+     * every word, and it keeps the same stand under the translation's 16.2
      * that 16 held under 17, a small reading rather than a footnote.
      */
-    private const val MEANING_BASE = 14.4f
+    private const val MEANING_BASE = 15.3f
 
     /**
-     * The Arabic word's stand over its meaning: 25.2 over 14.4, the 7/8 of
-     * the Quran the session pinned as "one size under" (owner decision, the
-     * theme and consistency session).
+     * The Arabic word's stand over its meaning: 26.8 over 15.3, the same
+     * one-point step over the meaning that the meaning keeps under the
+     * translation (owner decision, the theme and consistency session).
      */
     private const val WORD_MEANING_RATIO = 1.75f
 
