@@ -303,9 +303,10 @@ val BengaliReading = TextStyle(
  * takes it from here.
  *
  * It carried the face's measured average advance for as long as the app capped
- * a column at 65 characters. The column is the glass less the app's one margin
- * now, so nothing here is asked how wide a character is (owner decision, this
- * session).
+ * a column at 65 characters. The column is the page now, and the page is a
+ * width in dp rather than a count of characters, so nothing here is asked how
+ * wide a character is (owner decision: the character measure stays gone, and
+ * the page is `Space.Measure`).
  */
 class ReadingVoice(
     val style: TextStyle,

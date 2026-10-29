@@ -35,6 +35,7 @@ import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.ReadingRow
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.AddDoor
+import io.github.muntasimulhaque.quran.ui.kit.rememberPageMargin
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlin.math.abs
@@ -199,17 +200,20 @@ internal fun ReadingRows(
         }
     }
 
-    // The reading's words stop at the app's one margin, on every glass. The
-    // list keeps that margin less the room a wash reaches past its text, so
-    // the ayah and its wash stand on the same two lines on a phone, a seven
-    // inch tablet, and a ten inch screen, and the paper around them stays full
-    // width to answer a tap with the chrome and a drag with the scroll.
+    // The reading's words stand on the page, on every glass. The list keeps
+    // that page's margin less the room a wash reaches past its text, so the
+    // ayah and its wash stand on the same two lines whether the glass is a
+    // phone (where the page is the whole window) or the ten inch screen
+    // (where the page is 600 dp and the rest is margin), and the paper around
+    // them stays full width to answer a tap with the chrome and a drag with
+    // the scroll.
     //
-    // Nothing here reads the window's width: a line of reading no longer
-    // grows or shrinks by a count of characters, only by the glass it is
-    // drawn on, so a reader who turns the text down gets more lines and not a
-    // shorter column (owner decision, this session).
-    val side = Space.Gutter - Space.WashInset
+    // The margin is the page's, read once here, and not a count of
+    // characters. A reader who turns the text down gets more lines and not a
+    // narrower column, and a reader on a wide screen gets the page the seven
+    // inch tablet already reads instead of a line as long as the glass
+    // (owner decision, this session).
+    val side = rememberPageMargin() - Space.WashInset
     LazyColumn(
         state = listState,
         modifier = modifier

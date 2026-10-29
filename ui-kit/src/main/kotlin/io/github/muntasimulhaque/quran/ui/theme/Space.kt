@@ -3,14 +3,18 @@ package io.github.muntasimulhaque.quran.ui.theme
 import androidx.compose.ui.unit.dp
 
 /**
- * The vertical rhythm every surface keeps, named instead of typed: two
- * surfaces that carry the same kind of break leave the same room for it, so
- * the app reads as one hand from the reading to the settings.
+ * The room every surface keeps, named instead of typed: two surfaces that
+ * carry the same kind of break leave the same room for it, so the app reads as
+ * one hand from the reading to the settings.
  *
  * The reading draws no rules between its parts, so these gaps are the
  * separators: a word list under its ayah, a translation under the words, a
  * reference under the translation. A gap that carries meaning is chosen once
  * here rather than nudged at each call site.
+ *
+ * The ladder is vertical. The three numbers under it are the page: how far a
+ * word stands from the edge of the glass, how wide the page it stands on is
+ * allowed to be, and how far a wash reaches past its words.
  */
 object Space {
 
@@ -50,19 +54,18 @@ object Space {
     val SheetFoot = 28.dp
 
     /**
-     * The one edge every word stops at, on every surface and every glass.
+     * The least air between a word and the edge of the glass.
      *
      * The reading's verse, its translation, the word list under it, a search
      * result, a settings row, a footnote, a tafsir passage, and the welcome
-     * screen all begin on this line and end on its mirror, whatever the
-     * window is. The number does not look at the glass, so the seven inch
-     * tablet and the ten inch screen read the page the phone reads, and a
-     * line runs as far as the paper allows, which is what a printed page does
-     * with the paper it has. What a line of reading does not do is become as
-     * long as a count of characters decided it would be: the 65 character
-     * measure that used to cap every column in the app is gone, and this is
-     * the one rule that decides where a line stops (owner decision, this
-     * session).
+     * screen all begin on this line and end on its mirror.
+     *
+     * It is the floor, not the width. A glass narrow enough to hold a page
+     * takes this much on each side and no more, which is every phone and the
+     * seven inch tablet standing up, so a line runs as far as its paper
+     * allows. A glass wider than a page keeps this much air inside the page
+     * and puts the rest of its width outside it, and that half of the rule
+     * belongs to [Measure] (owner decision, this session).
      *
      * A shape that answers a touch may reach outside the line (a row's press
      * card, the wash of a chosen ayah), and a card holds its own words inside
@@ -71,12 +74,37 @@ object Space {
     val Gutter = 28.dp
 
     /**
+     * The widest a line of reading may run: the page's measure.
+     *
+     * A window holding no more than this is the page. Its words stand
+     * [Gutter] inside the glass and the line runs to the other side, which is
+     * every phone and the seven inch tablet in its portrait. A window wider
+     * than a page is a page on a desk: the words keep this width, centered,
+     * and the glass keeps what is left as margin, so the ten inch screen reads
+     * the page the seven inch screen already reads.
+     *
+     * 600 is the width Android itself calls a tablet (`sw600dp`), the width at
+     * which a phone's window stops being a phone's window, and it is also,
+     * today, the seven inch tablet's own page: edge to edge at 600. So the
+     * number is the platform's, not a guess, and it changes no screen but the
+     * ones that had grown past it.
+     *
+     * It is a length of paper and never a count of characters. The app used to
+     * stop every column at 65 characters, and a line that shortened when a
+     * reader turned the text down is the shape of that mistake (owner
+     * decision: the character measure stays gone). At 600 dp the five text
+     * sizes change how many words a line holds and never how wide the page is,
+     * which is what a printed page does (owner decision, this session).
+     */
+    val Measure = 600.dp
+
+    /**
      * How far the wash of a chosen or playing ayah reaches past its words.
      *
      * A tint whose edge fell on the letters would read as a highlight painted
      * on the Quran rather than as the paper under it, so the reading's list
-     * keeps [Gutter] less this on each side and the wash reaches this far past
-     * the words it stands behind.
+     * keeps its page's margin less this on each side and the wash reaches this
+     * far past the words it stands behind.
      */
     val WashInset = 8.dp
 }

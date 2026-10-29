@@ -33,6 +33,7 @@ import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.data.isDark
 import io.github.muntasimulhaque.quran.data.resolved
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.kit.rememberPageMargin
 import io.github.muntasimulhaque.quran.ui.theme.QuranTheme
 import kotlinx.coroutines.delay
 
@@ -209,7 +210,7 @@ private fun ContentProblem(storage: Boolean, onRetry: () -> Unit) {
     ) {
         Column(
             modifier = Modifier
-                .padding(horizontal = Space.Gutter),
+                .padding(horizontal = rememberPageMargin()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
@@ -225,7 +226,7 @@ private fun ContentProblem(storage: Boolean, onRetry: () -> Unit) {
                 ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 8.dp),
+                modifier = Modifier.padding(top = Space.Line),
             )
             TextButton(
                 label = stringResource(R.string.content_problem_retry),

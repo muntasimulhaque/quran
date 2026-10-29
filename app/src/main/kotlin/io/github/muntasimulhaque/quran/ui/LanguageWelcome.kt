@@ -32,6 +32,7 @@ import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.clockText
 import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
+import io.github.muntasimulhaque.quran.ui.kit.rememberPageMargin
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
@@ -73,7 +74,7 @@ fun LanguageWelcome(
                 // (owner decision, this session).
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = Space.Gutter, vertical = 36.dp),
+                .padding(horizontal = rememberPageMargin(), vertical = 36.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Masthead()
@@ -86,7 +87,7 @@ fun LanguageWelcome(
             )
             Column(
                 modifier = Modifier.padding(top = 26.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(Space.Row),
             ) {
                 UiLanguage.entries.forEach { language ->
                     LanguageCard(
@@ -100,7 +101,7 @@ fun LanguageWelcome(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 24.dp),
+                modifier = Modifier.padding(top = Space.Section),
             )
         }
     }
@@ -125,7 +126,7 @@ private fun LanguageCard(
             .clip(Radii.Sheet)
             .background(MaterialTheme.colorScheme.surface)
             .clickable(role = Role.Button, onClick = onClick)
-            .padding(start = Space.Gutter, end = 12.dp, top = 16.dp, bottom = 16.dp),
+            .padding(start = Space.Gutter, end = Space.Row, top = Space.Block, bottom = Space.Block),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
@@ -197,7 +198,7 @@ fun WelcomeReminder(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 12.dp),
+                modifier = Modifier.padding(top = Space.Row),
             )
             Text(
                 text = stringResource(R.string.welcome_later),

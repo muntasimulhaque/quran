@@ -30,10 +30,13 @@ import androidx.compose.ui.Modifier
  * has no stock state layer to show, and the surface still drags under it
  * because Material's draggable belongs to the whole sheet.
  *
- * The width is [rememberSheetWidth], which is the window: a sheet is the
- * glass on every form factor, so the seven inch tablet and the ten inch
- * screen fill edge to edge the way the phone does, and the app's one margin
- * (the theme's `Space.Gutter`) is what holds the rows off the edge (owner
+ * The width is [rememberSheetWidth], which is the page and its two gutters: on
+ * a phone and on the seven inch tablet standing up the glass is narrower than
+ * that and the sheet is the glass, and on the ten inch screen the sheet is a
+ * 656 dp page centered on it, with the reading's own 600 dp page behind and
+ * the rest of the glass as margin. A sheet is always the page it holds and
+ * never more, so a settings row's switch stays as close to the words that
+ * name it on the ten inch screen as it is on the seven inch tablet (owner
  * decision, this session).
  */
 @OptIn(ExperimentalMaterial3Api::class)
