@@ -43,6 +43,7 @@ import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
 import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.TajweedColors
+import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
 
 /**
  * The legend of the reading's colors: the seven families the page draws when
@@ -221,8 +222,8 @@ private fun FamilyHead(
                 enabled = true,
                 style = arabicStyle(
                     hafs,
-                    LegendSampleSp,
-                    LegendSampleSp * TextSize.lineRatio(TypeRole.Arabic),
+                    TypeLadder.TAJWEED_SAMPLE_SP,
+                    TypeLadder.TAJWEED_SAMPLE_SP * TextSize.lineRatio(TypeRole.Arabic),
                     palette.ink,
                 ),
                 textAlign = TextAlign.End,
@@ -285,14 +286,6 @@ private fun Rule(name: String, sentence: String, modifier: Modifier = Modifier) 
  * language and not the other.
  */
 private const val RuleRunIn = "  "
-
-/**
- * The one size the legend's sample word is drawn at: the reading's default,
- * so the legend and the page meet at one stand. It does not follow the
- * reader's own Arabic step, because a legend is a fixed reference and a
- * sample that grew with the step made the settings page a second reading.
- */
-private const val LegendSampleSp = 24f
 
 /** The family's name in the reader's language. */
 private fun TajweedFamily.title(): Int = when (this) {

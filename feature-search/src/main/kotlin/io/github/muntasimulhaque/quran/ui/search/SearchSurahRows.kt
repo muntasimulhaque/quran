@@ -20,6 +20,7 @@ import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
+import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
 import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
@@ -35,7 +36,7 @@ internal fun ReferenceRow(ayah: Ayah, onAyah: (Ayah) -> Unit) {
         Column(Modifier.weight(1f)) {
             Text(
                 text = stringResource(R.string.search_label_go_to),
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.bodySmall,
                 // A label is not an action: the accent belongs to what
                 // answers a tap (owner decision, this session).
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -74,7 +75,7 @@ internal fun SurahRow(surah: Surah, onSurah: (Surah) -> Unit) {
         Column(Modifier.weight(1f)) {
             Text(
                 text = stringResource(R.string.search_label_surah),
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
             )
             Text(
@@ -99,7 +100,7 @@ internal fun SurahRow(surah: Surah, onSurah: (Surah) -> Unit) {
         }
         Text(
             text = surah.nameArabic,
-            style = amiriDisplay(23f, MaterialTheme.colorScheme.onSurfaceVariant),
+            style = amiriDisplay(TypeLadder.LIST_ARABIC_SP, MaterialTheme.colorScheme.onSurfaceVariant),
         )
         IconGlyph(
             icon = Icon.Chevron,

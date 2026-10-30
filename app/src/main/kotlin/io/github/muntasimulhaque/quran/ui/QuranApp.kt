@@ -30,7 +30,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.reader.ReaderScreen
-import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.data.isDark
 import io.github.muntasimulhaque.quran.data.resolved

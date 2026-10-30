@@ -75,7 +75,7 @@ class TextSizeTest {
     @Test
     fun theTafsirIsSetAtTheTranslationSize() {
         // One reading voice: the Ibn Kathir prose stands at the size the
-        // translation stands at, both at 15 sp with the same 1.5 line
+        // translation stands at, both at 16 sp with the same 1.5 line
         // (owner decision, this session).
         assertEquals(TextSize.sp(TypeRole.Translation, 1f), TextSize.sp(TypeRole.Tafsir, 1f))
         assertEquals(TextSize.lineSp(TypeRole.Translation, 1f), TextSize.lineSp(TypeRole.Tafsir, 1f))
@@ -92,21 +92,21 @@ class TextSizeTest {
     @Test
     fun theShippedDefaultIsOneEvenStepSmaller() {
         // The default is 1, the middle of the five (owner decision, this
-        // session). The Arabic stands at 24 sp, 1.6 times the 15 sp prose:
-        // the owner's eye asked for the Quran one step larger and the prose
-        // one smaller, and the reader can still go down to 19.2.
+        // session). The Arabic stands at 24 sp, 1.5 times the 16 sp prose:
+        // the owner's eye asked for the Quran above the prose, and the reader
+        // can still go down to 19.2.
         assertEquals(24f, TextSize.sp(TypeRole.Arabic, 1f))
-        assertEquals(15f, TextSize.sp(TypeRole.Translation, 1f))
+        assertEquals(16f, TextSize.sp(TypeRole.Translation, 1f))
     }
 
     @Test
     fun theWordMeaningSitsAStepUnderTheTranslation() {
-        // 13.5 sp against the translation's 15: nine tenths of it, a step
+        // 14.4 sp against the translation's 16: nine tenths of it, a step
         // the eye reads as a gloss rather than as a second translation. The
         // five percent it stood at before read as one size used twice (owner
         // decision, this session).
-        assertEquals(15f * 0.9f, TextSize.meaningSp(1f), 0.001f)
-        assertEquals(13.5f * 0.8f, TextSize.meaningSp(0.8f), 0.001f)
+        assertEquals(16f * 0.9f, TextSize.meaningSp(1f), 0.001f)
+        assertEquals(14.4f * 0.8f, TextSize.meaningSp(0.8f), 0.001f)
         // The aid's Arabic word follows the verse and never the gloss, so a
         // bigger gloss cannot carry it past the Quran's own size.
         for (step in TextSize.STEPS) {
@@ -120,16 +120,16 @@ class TextSizeTest {
     @Test
     fun theLadderIsPinned() {
         // The session's ladder, one line per relationship the reader was
-        // promised: the Quran is the anchor at 1.6 times the prose, the word
-        // list reads two points under it, Arabic beside prose is one rule at
+        // promised: the Quran is the anchor at 1.5 times the prose, the word
+        // list reads four points under it, Arabic beside prose is one rule at
         // 0.9 from the Quran in both the translation and the tafsir, the
         // prose stands at the reading voice's own size, and the meaning sits
         // under the word it glosses (owner decision, this session).
         assertEquals(24f, TextSize.sp(TypeRole.Arabic, 1f))
-        assertEquals(22f, TextSize.wordSp(1f), 0.001f)
+        assertEquals(20f, TextSize.wordSp(1f), 0.001f)
         assertEquals(21.6f, TextSize.inlineArabic(1f), 0.001f)
-        assertEquals(15f, TextSize.sp(TypeRole.Translation, 1f))
-        assertEquals(15f, TextSize.sp(TypeRole.Tafsir, 1f))
-        assertEquals(13.5f, TextSize.meaningSp(1f), 0.001f)
+        assertEquals(16f, TextSize.sp(TypeRole.Translation, 1f))
+        assertEquals(16f, TextSize.sp(TypeRole.Tafsir, 1f))
+        assertEquals(14.4f, TextSize.meaningSp(1f), 0.001f)
     }
 }

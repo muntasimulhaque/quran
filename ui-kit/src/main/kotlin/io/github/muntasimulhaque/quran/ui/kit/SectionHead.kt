@@ -12,7 +12,7 @@ import androidx.compose.ui.semantics.semantics
  * About page's groups, the pack lists' groups, and the pill's listening
  * panel.
  *
- * It is the app's label size at Medium, with the tracking a small label
+ * It is the app's label size at SemiBold, with the tracking a small label
  * needs, in the secondary ink. It used to wear the accent, which is the color
  * every control that answers a tap wears: a group's name in lapis read as a
  * button the reader could press, and the sheet had one more blue thing than
@@ -21,7 +21,9 @@ import androidx.compose.ui.semantics.semantics
  *
  * It is small on purpose. A head that is larger than its rows competes with
  * them; this one steps back and lets the choices lead, which is the opposite
- * of the sheet's own name and is why the two cannot share a voice.
+ * of the sheet's own name and is why the two cannot share a voice. Its 12
+ * against the 13 value under it is carried by the weight and the tracking,
+ * not by another size.
  *
  * It is a heading to a screen reader too. TalkBack has navigated by heading
  * since 9.1, and a reader who cannot see the list can jump from one group of

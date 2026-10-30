@@ -50,6 +50,9 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
 import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
+import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
+import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
+import io.github.muntasimulhaque.quran.ui.theme.title
 import io.github.muntasimulhaque.quran.ui.rich.TajweedText
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
@@ -109,7 +112,7 @@ internal fun SurahOpening(
         // and place in quiet type, so every surah opens the same way.
         Text(
             text = surah.nameArabic,
-            style = amiriDisplay(40f, ornament),
+            style = amiriDisplay(TypeLadder.OPENING_ARABIC_SP, ornament),
         )
         // The rule is ornament, never a separator: a short gold rule under the
         // Arabic name, carrying no meaning a reader would lose without it. It
@@ -123,7 +126,9 @@ internal fun SurahOpening(
         )
         Text(
             text = surah.nameSimple,
-            style = MaterialTheme.typography.titleLarge,
+            style = LocalReadingVoice.current.title(
+                TypeLadder.OPENING_NAME_SP + LocalReadingVoice.current.scriptStep,
+            ),
             color = MaterialTheme.colorScheme.onBackground,
             // The surah's own name is this page's title, so a reader who
             // cannot see it can jump to it instead of hearing the opening

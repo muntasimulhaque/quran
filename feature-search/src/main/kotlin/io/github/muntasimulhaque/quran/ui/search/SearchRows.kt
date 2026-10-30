@@ -39,11 +39,11 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
 
 /**
  * The size a line of Arabic in a result is drawn at before the reader's own
- * step: 22 sp, the page's own word size, two points under the Quran's 24. The
- * base is a step under the page, so a list of results stays a list, and the
+ * step: 22 sp, two points under the Quran's 24 and two over the aid's 20.
+ * The base is a step under the page, so a list of results stays a list, and the
  * reader's own Arabic step moves it with the reading: a reader who enlarged
  * the Quran's text for their eyes finds the same preference in the results.
- * The result line is the aid's size, not the page's, and the line ratio is
+ * The result line is a list size, not the page's and not the aid's, and the line ratio is
  * the reading's own, from `TextSize.lineRatio`, so the two surfaces cannot
  * drift apart at the hand of whoever edits one of them next (owner decision,
  * this session).

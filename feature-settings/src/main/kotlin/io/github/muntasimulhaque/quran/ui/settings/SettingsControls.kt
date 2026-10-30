@@ -32,6 +32,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.NightText
 import io.github.muntasimulhaque.quran.ui.theme.PaperBackground
 import io.github.muntasimulhaque.quran.ui.theme.PaperInk
+import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
 import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
@@ -153,7 +154,7 @@ private fun ThemeSwatch(theme: AppTheme, chosen: Boolean) {
                 // session).
                 Text(
                     text = "\u0627",
-                    style = amiriDisplay(18f),
+                    style = amiriDisplay(TypeLadder.SWATCH_SP),
                     color = if (theme == AppTheme.Dark) NightText else PaperInk,
                 )
             }

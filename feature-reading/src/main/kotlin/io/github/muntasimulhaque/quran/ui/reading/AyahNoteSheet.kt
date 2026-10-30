@@ -37,6 +37,7 @@ import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
+import io.github.muntasimulhaque.quran.ui.theme.prose
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlinx.coroutines.delay
 
@@ -140,11 +141,10 @@ private fun NoteEditor(
             // reader's own, and it follows the choice they made for the
             // translation (owner decision, this session: the fixed 16 sp is
             // out, the reading voice is in).
-            textStyle = LocalReadingVoice.current.style.copy(
-                color = MaterialTheme.colorScheme.onSurface,
-                fontSize = settings.translationSp.sp,
-                lineHeight = settings.translationLineSp.sp,
-                fontFamily = LocalReadingVoice.current.atSize(settings.translationSp),
+            textStyle = LocalReadingVoice.current.prose(
+                settings.translationSp,
+                settings.translationLineSp,
+                MaterialTheme.colorScheme.onSurface,
             ),
             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
             modifier = Modifier
@@ -157,10 +157,10 @@ private fun NoteEditor(
                     if (draft.isEmpty()) {
                         Text(
                             text = stringResource(R.string.card_note_hint),
-                            style = LocalReadingVoice.current.style.copy(
-                                fontSize = settings.translationSp.sp,
-                                lineHeight = settings.translationLineSp.sp,
-                                fontFamily = LocalReadingVoice.current.atSize(settings.translationSp),
+                            style = LocalReadingVoice.current.prose(
+                                settings.translationSp,
+                                settings.translationLineSp,
+                                MaterialTheme.colorScheme.onSurfaceVariant,
                             ),
                             // The hint is the one thing in an empty field, so it
                             // has to be read to be a hint at all. The theme's

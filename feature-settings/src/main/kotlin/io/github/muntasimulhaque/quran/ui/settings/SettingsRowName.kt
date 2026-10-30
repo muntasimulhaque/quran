@@ -64,7 +64,7 @@ internal fun RowName(
         if (!value.isNullOrBlank()) {
             Text(
                 text = value,
-                // A row's own value is the caption, 12 at Regular: the settings
+                // A row's own value is the caption, 13 at Regular: the settings
                 // hub is measured by this line, and a value is not a source
                 // line and not a sentence (owner decision, this session).
                 style = MaterialTheme.typography.labelSmall,

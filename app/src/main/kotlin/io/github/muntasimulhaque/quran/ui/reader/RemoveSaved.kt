@@ -71,8 +71,8 @@ fun RemoveSavedSheet(
                 Text(
                     text = note,
                     style = LocalReadingVoice.current.prose(
-                        14f,
-                        14f * LocalReadingVoice.current.lineRatio,
+                        LocalReadingVoice.current.style.fontSize.value,
+                        LocalReadingVoice.current.style.lineHeight.value,
                     ),
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 2,

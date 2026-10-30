@@ -39,7 +39,7 @@ import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.AddDoor
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
-import io.github.muntasimulhaque.quran.ui.kit.SectionHead
+import io.github.muntasimulhaque.quran.ui.kit.SheetTitle
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.languageName
@@ -214,6 +214,19 @@ fun AyahCard(
             // switch. The packs are the choice, and the mark that opens
             // this card exists exactly while one of them is on the device
             // (owner decision, this session).
+            // The card names itself once, in the app's own voice: a sheet
+            // opened from the pill's Tafsir mark is a surface of the app,
+            // and its name is not the passage's title. The Book's voice
+            // starts at the passage's reference below (owner decision, this
+            // session).
+            SheetTitle(
+                text = stringResource(R.string.card_tafsir_label),
+                modifier = Modifier.padding(
+                    start = Space.Gutter,
+                    end = Space.Gutter,
+                    bottom = Space.Block,
+                ),
+            )
             if (tafsirPacks.isEmpty()) {
                 // The card is only the tafsir doors, so a reader with none
                 // open gets the door to add one rather than a sheet with
@@ -225,20 +238,6 @@ fun AyahCard(
                     modifier = Modifier.padding(horizontal = SheetRowGutter),
                 )
             } else {
-                // The kind of text the card holds is a kicker: a small
-                // tracked label over the passage, not a title. "Tafsir"
-                // cannot share the title's size and be read as a title at the
-                // same time; the passage's own reference is the card's title,
-                // and the label says what kind of text follows (owner
-                // decision, this session).
-                SectionHead(
-                    text = stringResource(R.string.card_tafsir_label),
-                    modifier = Modifier.padding(
-                        start = Space.Gutter,
-                        end = Space.Gutter,
-                        bottom = Space.Line,
-                    ),
-                )
                 val single = tafsirPacks.singleOrNull()
                 if (single != null) {
                     // One pack is no choice: the reader tapped Tafsir on
@@ -247,7 +246,7 @@ fun AyahCard(
                     // byline and its passage stands under them with no door
                     // to fold (owner decision, this session). A byline is
                     // metadata, so it wears the meta line rather than a
-                    // title's 16: the card's own evidence is the passage's
+                    // a row's 15: the card's own evidence is the passage's
                     // title below it.
                     val packName = contentPackName(single.id, single.name)
                     Text(
@@ -338,7 +337,7 @@ private fun DoorRow(
         Column(Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             if (subtitle.isNotBlank()) {

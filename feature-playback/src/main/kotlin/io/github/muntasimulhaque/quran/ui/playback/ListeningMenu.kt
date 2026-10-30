@@ -148,7 +148,7 @@ internal fun ColumnScope.ListeningMenu(
                 // The theme's own small label, without a one-off 12 sp
                 // override, so a theme change reaches it (owner decision,
                 // the theme and consistency session).
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.labelSmall,
                 color = if (active) {
                     MaterialTheme.colorScheme.primary
                 } else {

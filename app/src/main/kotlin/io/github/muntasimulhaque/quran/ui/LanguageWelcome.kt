@@ -36,11 +36,11 @@ import io.github.muntasimulhaque.quran.ui.kit.rememberPageMargin
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
-import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Inter
 import io.github.muntasimulhaque.quran.ui.theme.NotoSansBengali
+import io.github.muntasimulhaque.quran.ui.theme.screenSubtitle
 
 /**
  * The one screen before the reading, shown once: which language the app
@@ -136,7 +136,7 @@ private fun LanguageCard(
                 text = name,
                 // The welcome runs before the theme has a language, so a name
                 // in Bengali script asks for its face directly.
-                style = MaterialTheme.typography.titleMedium.copy(
+                style = screenSubtitle().copy(
                     fontFamily = if (language == UiLanguage.Bangla) NotoSansBengali else Inter,
                 ),
                 color = MaterialTheme.colorScheme.onSurface,

@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.theme.screenSubtitle
 
 /**
  * What a page says before it has anything on it: a title that names what the
@@ -49,7 +50,7 @@ fun EmptyNote(
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleMedium,
+            style = screenSubtitle(),
             color = MaterialTheme.colorScheme.onSurface,
         )
         Text(

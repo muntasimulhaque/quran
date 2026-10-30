@@ -26,6 +26,7 @@ import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
+import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
 import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import java.util.Locale
@@ -51,7 +52,7 @@ import java.util.Locale
 @Composable
 internal fun rememberNumberWidth(numbers: List<Int>): Dp {
     val measurer = rememberTextMeasurer()
-    val style = MaterialTheme.typography.labelMedium
+    val style = MaterialTheme.typography.labelSmall
     val density = LocalDensity.current
     val locale = LocalConfiguration.current.locales[0]
     val labels = remember(numbers, locale) { numbers.map { numberLabel(it, locale) } }
@@ -84,7 +85,7 @@ internal fun NumberCell(
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.labelSmall,
             color = color,
             textAlign = TextAlign.End,
             maxLines = 1,
@@ -135,7 +136,7 @@ internal fun SurahNameBlock(
 internal fun SurahArabicName(surah: Surah, modifier: Modifier = Modifier) {
     Text(
         text = surah.nameArabic,
-        style = amiriDisplay(23f, MaterialTheme.colorScheme.onSurfaceVariant),
+        style = amiriDisplay(TypeLadder.LIST_ARABIC_SP, MaterialTheme.colorScheme.onSurfaceVariant),
         modifier = modifier,
     )
 }

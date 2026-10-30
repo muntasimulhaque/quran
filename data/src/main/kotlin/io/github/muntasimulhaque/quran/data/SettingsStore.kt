@@ -176,8 +176,8 @@ data class AppSettings(
     val arabicInlineSp: Float get() = TextSize.inlineArabic(arabicSize)
 
     /**
-     * The prose's step over the Latin base in the reader's script: 18 over
-     * 15 for Bangla, 1 for English. Every prose surface reads through the
+     * The prose's step over the Latin base in the reader's script: 17 over
+     * 16 for Bangla, 1 for English. Every prose surface reads through the
      * getters below, so the note sheet, the ayah card, the settings sample,
      * and the reading all take the script's size from one rule (owner
      * decision, this session).
@@ -202,7 +202,7 @@ data class AppSettings(
     val tafsirSp: Float get() = TextSize.sp(TypeRole.Tafsir, tafsirSize) * prose
     val tafsirLineSp: Float get() = tafsirSp * proseLine
     /**
-     * The aid's Arabic word stays where the verse is, two points under it: it
+     * The aid's Arabic word stays where the verse is, four points under it: it
      * is the Quran's own word, not a line of prose, so the script's prose step
      * does not reach it (owner decision, this session).
      */
@@ -258,7 +258,7 @@ data class ReadingMetrics(
  * reading takes the translation, the tafsir, and the meaning at the script's
  * own size and its 1.722 line, while the Arabic does not move, because the
  * Quran's text is data and not a locale. The aid's Arabic word does not move
- * either: it is a copy of the verse's word, two points under it, so a larger
+ * either: it is a copy of the verse's word, four points under it, so a larger
  * gloss can never push it past the verse (owner decision, this session: the
  * metrics were language-blind, and the Bangla reading was drawn at the Latin
  * sizes).

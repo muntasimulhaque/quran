@@ -193,7 +193,7 @@ private fun AyahNumberCell(number: Int, current: Boolean, onClick: () -> Unit) {
     ) {
         Text(
             text = numberLabel(number),
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.labelSmall,
             color = if (current) {
                 MaterialTheme.colorScheme.onPrimary
             } else {

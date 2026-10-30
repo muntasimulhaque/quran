@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 13.3 (versionCode 135)
+Version: 13.4 (versionCode 136)
 
 ## Listing
 
@@ -166,6 +166,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (13.4, 384 characters)
+13.4 rebuilds the app's type. The Book's face now carries only the Quran's meaning and names, the interface face everything the app says about itself. The page is 20, the reading 16 on a 24 line, the Quran 24 on 48, the word aid 20 with a 14.4 gloss, and the Bangla app draws the weights it declares. The settings list, the ayah card, and search read easier. Text and packs unchanged.
 
 ## Release notes (13.3, 439 characters)
 13.3 is the type release. The reading now has one clear ladder: the Quran at 24 on a 2.0 line, its inline quotes at 21.6, the word list at 22 with 13.5 glosses, and the translation and tafsir at 15 on a 1.5 line. Titles are 18, section heads the body's own size at two weights, labels 12, and the settings list fits whole again. The surah introduction's own headings now stand, and the prose no longer hyphenates. Text and packs unchanged.

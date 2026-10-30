@@ -21,6 +21,7 @@ import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.theme.screenSubtitle
 
 /** How the page joins two facts that belong to one credit, or splits terms. */
 private const val SEPARATOR = " · "
@@ -72,7 +73,7 @@ fun AboutPage(
         // "License" above their own values (owner report, this session).
         Text(
             text = stringResource(R.string.about_version_license, localizedDigits(version)),
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(
                 start = Space.Gutter,
@@ -225,13 +226,13 @@ internal fun AboutCredit(title: String, line: String?, terms: List<String> = emp
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.bodyLarge,
+            style = screenSubtitle(),
             color = MaterialTheme.colorScheme.onSurface,
         )
         if (!line.isNullOrBlank()) {
             Text(
                 text = line,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = Space.Tight),
             )
@@ -239,7 +240,7 @@ internal fun AboutCredit(title: String, line: String?, terms: List<String> = emp
         terms.forEachIndexed { index, term ->
             Text(
                 text = term,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = if (index == 0) Space.Line else Space.Tight),
             )

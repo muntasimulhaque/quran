@@ -58,7 +58,7 @@ import io.github.muntasimulhaque.quran.core.TajweedRule
  *
  * The road not taken: the printed mushaf's brightness (amber near #B76903,
  * teal near #058B89, red near #F00B38) needs a 3.2:1 floor, and the smallest
- * reading step is 23 sp, where 4.5:1 is the rule this app set for itself
+ * reading step is 19.2 sp, where 4.5:1 is the rule this app set for itself
  * (owner decision, this session).
  *
  * The palette's separation, not only its contrast, is pinned by

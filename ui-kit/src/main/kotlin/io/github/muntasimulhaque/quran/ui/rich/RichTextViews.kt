@@ -32,7 +32,7 @@ import io.github.muntasimulhaque.quran.core.TextBlockKind
 import io.github.muntasimulhaque.quran.core.TextRun
 import io.github.muntasimulhaque.quran.core.ScriptMix
 import io.github.muntasimulhaque.quran.core.scriptMix
-import io.github.muntasimulhaque.quran.ui.theme.AmiriText
+import io.github.muntasimulhaque.quran.ui.theme.AmiriBody
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
@@ -122,8 +122,8 @@ fun TranslationBody(
  * paragraphs needs 0.97 em at the median and 1.32 em at the very worst (the
  * Prophet's ligature under a stack of marks, and one Urdu blessing), so
  * [MixedAir] at 1.35 covers the whole distribution while bringing the mixed
- * line down from the old 1.9: at the default tafsir size that is about 29 dp
- * of line for a 15 sp body instead of the 41 dp the all-Arabic block takes,
+ * line down from the old 1.9: at the default tafsir size that is about 21.6
+ * dp of line for a 16 sp body instead of the 30.4 dp the all-Arabic block takes,
  * which is the change that made the tafsir's gaps even (owner report). A
  * block whose inline Arabic is taller than any the sources carry today would
  * need this constant raised with it; the measurement is written here so the
@@ -262,7 +262,7 @@ fun RichBlocks(
             }
             val line = lineHeightFor(
                 mix = mix,
-                // The script's title leading, not its prose box: a 15 sp
+                // The script's title leading, not its prose box: a 16 sp
                 // head at 1.3 is Material's and Apple's own, and the face's
                 // 1.485 box would add about 6 dp above and below every head.
                 // An Arabic block still takes its own measured air below.
@@ -390,7 +390,7 @@ private fun annotated(
                 // (owner decision, this session).
                 withStyle(
                     SpanStyle(
-                        fontFamily = AmiriText,
+                        fontFamily = AmiriBody,
                         fontSize = if (RichText.isHonorific(run.text)) symbolSize else arabicSize,
                         color = if (run.quote) quoteColor ?: quoteFallback else Color.Unspecified,
                         fontSynthesis = FontSynthesis.None,

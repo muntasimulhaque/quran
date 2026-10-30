@@ -124,10 +124,11 @@ internal fun WordsBlock(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = name,
-                // A name in a control, not a group label: 13 at Medium keeps
-                // the pill's compact voice while the weight carries the name
-                // (owner decision, this session).
-                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                // A name in a control, not a group label: 13 at Regular, with
+                // the accent and the chevron carrying the door. The title is
+                // the Medium line now, so the reader sees what is playing
+                // before who is reading it (owner decision, this session).
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -160,8 +161,8 @@ internal fun WordsBlock(
         }
         Text(
             text = title,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+            color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -285,7 +286,7 @@ private fun ReciterDoor(
     ) {
         Text(
             text = name,
-            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.primary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

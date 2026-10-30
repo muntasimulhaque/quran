@@ -233,8 +233,8 @@ private fun PlaceRow(
             Text(
                 text = note,
                 style = LocalReadingVoice.current.prose(
-                    14f,
-                    14f * LocalReadingVoice.current.lineRatio,
+                    15f,
+                    15f * LocalReadingVoice.current.lineRatio,
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 2,

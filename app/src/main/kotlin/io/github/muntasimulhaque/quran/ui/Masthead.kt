@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.R
+import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
 import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
@@ -26,17 +27,17 @@ fun Masthead(modifier: Modifier = Modifier) {
         Text(
             text = stringResource(R.string.first_paint_title),
             style = amiriDisplay(
-                54f,
+                TypeLadder.MASTHEAD_SP,
                 MaterialTheme.colorScheme.onBackground.copy(alpha = 0.9f),
             ),
         )
         Text(
             text = stringResource(R.string.first_paint_subtitle),
-            // The first line a reader meets, under the 54 sp masthead: a 12
+            // The first line a reader meets, under the 48 sp masthead: a 13
             // sp caption under a display line read as a footnote to the
-            // title. 14 at Medium with a little tracking is a subtitle
+            // title. 15 at Medium with a little tracking is a subtitle
             // (owner decision, this session).
-            style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 0.4.sp),
+            style = MaterialTheme.typography.titleSmall.copy(letterSpacing = 0.2.sp),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = Space.Line),
         )

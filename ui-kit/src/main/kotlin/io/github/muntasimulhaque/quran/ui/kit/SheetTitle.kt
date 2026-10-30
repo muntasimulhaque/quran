@@ -15,11 +15,11 @@ import androidx.compose.ui.semantics.semantics
  * its smallest line while a heading inside its text stood above its passage
  * title. A sheet names itself once, in the largest fixed voice it owns, so
  * the reader knows what they opened before they read what it holds. It is
- * 18: a quiet utility header, under Apple's Title 3 (20) and above the 15
- * body. The first attempt at this ladder used 24, and the settings hub lost
- * its last row on a phone; 20 still read as a display line for a utility
- * sheet; 18 is the header that leaves the list its room and stays out of the
- * reader's eyes (owner decision, this session).
+ * 20 at SemiBold in the interface face: Apple's Title 3 and the header of a
+ * utility sheet, not a display line and not a second article title. It is
+ * the app's own name, so it wears the app's voice; the page inside the sheet
+ * is the Book and wears the Book's face (owner decision, this session: the
+ * title was Literata 18, and the Book's names now stay on the page).
  *
  * It is a heading to a screen reader. TalkBack has navigated by heading since
  * 9.1, and a reader who cannot see the sheet can jump to its name instead of

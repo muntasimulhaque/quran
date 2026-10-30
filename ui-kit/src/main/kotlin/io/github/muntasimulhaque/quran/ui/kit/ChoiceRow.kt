@@ -160,7 +160,7 @@ fun ChoiceRow(
                 Text(
                     text = subtitle,
                     // A choice's second line is its value, so it wears the
-                    // caption: 12 at Regular, under a 16 Medium name (owner
+                    // caption: 13 at Regular, under a 15 Medium name (owner
                     // decision, this session).
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

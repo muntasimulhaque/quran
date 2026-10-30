@@ -165,6 +165,7 @@ fun QuranTheme(
                 1.6f,
                 { NotoSerifBengali },
                 BanglaReadingLocale,
+                1f,
             )
             UiLanguage.English -> ReadingVoice(
                 LatinReading,
@@ -173,6 +174,7 @@ fun QuranTheme(
                 TypeLadder.TITLE_LINE,
                 ::literataAt,
                 EnglishReadingLocale,
+                0f,
             )
         },
     ) {
