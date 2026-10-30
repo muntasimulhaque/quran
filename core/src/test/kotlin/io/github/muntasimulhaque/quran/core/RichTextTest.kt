@@ -65,6 +65,18 @@ class RichTextTest {
     }
 
     @Test
+    fun `the prophet ligature is a symbol, not a quotation`() {
+        // A sentence keeps the ligature as its own Arabic run, and the
+        // renderer draws that run at the sentence's size. A run that carries
+        // any letter is a quotation or a phrase and keeps the inline size.
+        assertTrue(RichText.isHonorific("ﷺ"))
+        assertTrue(RichText.isHonorific("ﷺﷺ"))
+        assertFalse(RichText.isHonorific("ﷺ said"))
+        assertFalse(RichText.isHonorific("إِنَّ"))
+        assertFalse(RichText.isHonorific(""))
+    }
+
+    @Test
     fun `footnote markers split out of the sentence`() {
         val runs = RichText.footnotes("In the name of Allah,[2] the Merciful.[3]")
         assertEquals("In the name of Allah,", runs[0].text)

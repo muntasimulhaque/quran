@@ -27,6 +27,7 @@ import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
+import io.github.muntasimulhaque.quran.ui.theme.prose
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -231,8 +232,9 @@ private fun PlaceRow(
             // on every row, so one long note cannot change the list's rhythm.
             Text(
                 text = note,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontFamily = LocalReadingVoice.current.style.fontFamily,
+                style = LocalReadingVoice.current.prose(
+                    14f,
+                    14f * LocalReadingVoice.current.lineRatio,
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 2,

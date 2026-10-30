@@ -119,6 +119,16 @@ object RichText {
 
     fun isArabic(codepoint: Int): Boolean = arabicRanges.any { codepoint in it }
 
+    /**
+     * True when a run is the Prophet's ligature alone. The ligature is a
+     * symbol, not a quotation: a translation keeps it inside an English
+     * sentence, where it is drawn in the Arabic face at the sentence's own
+     * size, so it sits in the line instead of towering over it. A Quranic
+     * quotation is letters and keeps the reading's inline size (owner
+     * decision, this session).
+     */
+    fun isHonorific(text: String): Boolean = text.isNotEmpty() && text.all { it == 'ﷺ' }
+
     /** Script-splits plain text; the caller supplies the styling. */
     fun runs(text: String): List<TextRun> = splitRuns(text)
 

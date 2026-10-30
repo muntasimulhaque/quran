@@ -17,13 +17,13 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
+import io.github.muntasimulhaque.quran.ui.theme.prose
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -65,9 +65,9 @@ fun RemoveSavedSheet(
             if (!note.isNullOrBlank()) {
                 Text(
                     text = note,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontFamily = LocalReadingVoice.current.style.fontFamily,
-                        lineHeight = 20.sp,
+                    style = LocalReadingVoice.current.prose(
+                        14f,
+                        14f * LocalReadingVoice.current.lineRatio,
                     ),
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 2,

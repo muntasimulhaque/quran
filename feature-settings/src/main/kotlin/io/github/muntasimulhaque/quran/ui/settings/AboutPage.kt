@@ -124,6 +124,11 @@ fun AboutPage(
             usedFor = stringResource(R.string.credit_amiri_use),
         )
         Face(
+            title = stringResource(R.string.credit_amiri_text),
+            madeBy = stringResource(R.string.credit_amiri_text_by),
+            usedFor = stringResource(R.string.credit_amiri_text_use),
+        )
+        Face(
             title = stringResource(R.string.credit_literata),
             madeBy = stringResource(R.string.credit_literata_by),
             usedFor = stringResource(R.string.credit_literata_use),

@@ -2,7 +2,6 @@ package io.github.muntasimulhaque.quran.tools
 
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.core.TajweedCodec
-import io.github.muntasimulhaque.quran.core.TextBlockKind
 import io.github.muntasimulhaque.quran.core.TextRun
 import java.awt.Font
 import java.io.File
@@ -153,11 +152,12 @@ class Fonts(private val root: File) {
     }
 
     /**
-     * The app draws four voices: Inter for interface and headings, Literata for
-     * English reading, Amiri Quran for Arabic outside the reading, and the Hafs
-     * font for the canonical words already checked above. Every run the reader
-     * will actually see is probed against the font it will be drawn with,
-     * script by script, so a tofu box can never reach a screen.
+     * The app draws four voices: Literata for the reading, the titles, and the
+     * names, Inter for controls and labels, Amiri for the tafsir's Arabic and
+     * its quotations, and the Hafs font for the canonical words already
+     * checked above. Every run the reader will actually see is probed against
+     * the font it will be drawn with, script by script, so a tofu box can
+     * never reach a screen.
      *
      * What the reader can see is what ships: the core pack carries the surah
      * names and the canonical words, each translation pack carries its own
@@ -172,9 +172,7 @@ class Fonts(private val root: File) {
             return
         }
         val literata = loadFontFile(File(root, "content-assets/src/main/res/font/literata_variable.ttf"))
-        val amiri = loadFontFile(File(root, "content-assets/src/main/res/font/amiri_quran.ttf"))
-        val hafs = loadFontFile(File(root, "content/work/fonts-hafs/UthmanicHafs_V22.ttf"))
-        val inter = loadFontFile(File(root, "content-assets/src/main/res/font/inter_variable.ttf"))
+        val amiri = loadFontFile(File(root, "content-assets/src/main/res/font/amiri_regular.ttf"))
 
         val uncovered = TreeMap<String, Int>()
         var codepoints = 0
@@ -196,30 +194,26 @@ class Fonts(private val root: File) {
                     probe(latin, run.text, label)
                     continue
                 }
-                // Arabic runs are drawn in Amiri Quran, and a letter Amiri
-                // does not have falls back to the Hafs face, exactly as the
-                // app does it. Anything neither font nor the platform can
-                // draw fails the gate.
+                // Arabic runs are drawn in Amiri's body face, which carries
+                // every letter the content has: there is no per-codepoint
+                // fallback any more, so a codepoint it cannot draw fails the
+                // gate.
                 for (codepoint in run.text.codePoints()) {
                     if (codepoint <= 32) continue
                     codepoints++
-                    if (!amiri.canDisplay(codepoint) &&
-                        !hafs.canDisplay(codepoint) &&
-                        !isPlatformScript(codepoint)
-                    ) {
+                    if (!amiri.canDisplay(codepoint) && !isPlatformScript(codepoint)) {
                         uncovered.merge("$label U+${codepoint.toString(16).uppercase()}", 1, Int::plus)
                     }
                 }
             }
         }
 
-        // The surah names and the word meanings: names are drawn in Inter, and
-        // each word list's meanings in Literata, exactly as the reading
-        // draws them.
+        // The surah names and the word meanings are drawn in Literata, the
+        // reading's face, exactly as the app draws them.
         openSqlite(File(packs, "core.db")).use { connection ->
             connection.each("SELECT name_simple, name_latin FROM surah") { rs ->
-                probe(inter, rs.getString(1) ?: "", "surah")
-                probe(inter, rs.getString(2) ?: "", "surah")
+                probe(literata, rs.getString(1) ?: "", "surah")
+                probe(literata, rs.getString(2) ?: "", "surah")
             }
         }
         for (file in packs.listFiles { it -> it.isFile && it.name.startsWith("words-") }.orEmpty()) {
@@ -248,13 +242,13 @@ class Fonts(private val root: File) {
         }
         for (file in packs.listFiles { it -> it.isFile && it.name.startsWith("tafsir-") }.orEmpty()) {
             // The offered tafsirs are Latin, paragraphs and headings drawn in
-            // Literata and Inter, with the tafsir's Arabic quotations in Amiri.
+            // Literata, with the tafsir's Arabic quotations in Amiri's body
+            // face.
             openSqlite(file).use { connection ->
                 connection.each("SELECT text FROM tafsir_passage") { rs ->
                     val text = rs.getString(1) ?: ""
                     for (block in RichText.parseHtml(text)) {
-                        val latin = if (block.kind == TextBlockKind.HEADING) inter else literata
-                        probeRuns(block.runs, latin, file.name)
+                        probeRuns(block.runs, literata, file.name)
                     }
                 }
             }

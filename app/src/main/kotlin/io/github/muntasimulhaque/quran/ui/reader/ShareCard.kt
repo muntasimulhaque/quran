@@ -20,10 +20,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.core.TextRun
@@ -32,7 +30,8 @@ import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.rich.TajweedText
-import io.github.muntasimulhaque.quran.ui.theme.Amiri
+import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
+import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
 import io.github.muntasimulhaque.quran.ui.theme.PaperTajweed
 import io.github.muntasimulhaque.quran.ui.theme.Gold
 import io.github.muntasimulhaque.quran.ui.theme.Lapis
@@ -158,11 +157,7 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
             card.surahArabic?.takeIf { it.isNotBlank() }?.let { arabicName ->
                 Text(
                     text = arabicName,
-                    style = TextStyle(
-                        fontFamily = Amiri,
-                        fontSize = 22.sp,
-                        color = Gold,
-                    ),
+                    style = amiriDisplay(22f, Gold),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -184,13 +179,8 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
                 code = card.tajweed,
                 colors = PaperTajweed,
                 enabled = true,
-                style = TextStyle(
-                    fontFamily = hafs,
-                    fontSize = 26.sp,
-                    lineHeight = 48.sp,
-                    textAlign = TextAlign.Right,
-                    color = MaterialTheme.colorScheme.onSurface,
-                ),
+                style = arabicStyle(hafs, 26f, 48f, MaterialTheme.colorScheme.onSurface),
+                textAlign = TextAlign.Right,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = Space.Block),

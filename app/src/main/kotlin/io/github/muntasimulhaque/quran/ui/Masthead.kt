@@ -8,10 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.R
-import io.github.muntasimulhaque.quran.ui.theme.Amiri
+import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -26,10 +24,9 @@ fun Masthead(modifier: Modifier = Modifier) {
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = stringResource(R.string.first_paint_title),
-            style = TextStyle(
-                fontFamily = Amiri,
-                fontSize = 54.sp,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.9f),
+            style = amiriDisplay(
+                54f,
+                MaterialTheme.colorScheme.onBackground.copy(alpha = 0.9f),
             ),
         )
         Text(

@@ -32,6 +32,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.NightText
 import io.github.muntasimulhaque.quran.ui.theme.PaperBackground
 import io.github.muntasimulhaque.quran.ui.theme.PaperInk
+import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 
@@ -142,9 +143,13 @@ private fun ThemeSwatch(theme: AppTheme, chosen: Boolean) {
             // there is one: on System the split is the mark and a letter
             // straddling both halves would read as neither.
             if (theme != AppTheme.System) {
+                // The letter is drawn in the Quran's display hand, never in
+                // the phone's default Arabic face: a swatch that names the
+                // page must wear the page's own letter (owner decision, this
+                // session).
                 Text(
                     text = "\u0627",
-                    style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp),
+                    style = amiriDisplay(18f),
                     color = if (theme == AppTheme.Dark) NightText else PaperInk,
                 )
             }

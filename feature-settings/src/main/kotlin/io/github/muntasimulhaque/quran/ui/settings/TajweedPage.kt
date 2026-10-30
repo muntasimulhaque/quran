@@ -16,20 +16,17 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.TajweedFamily
 import io.github.muntasimulhaque.quran.core.TajweedRule
 import io.github.muntasimulhaque.quran.core.TajweedSamples
@@ -40,9 +37,10 @@ import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
-import io.github.muntasimulhaque.quran.ui.rich.ArabicFonts
 import io.github.muntasimulhaque.quran.ui.rich.TajweedText
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
+import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
+import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.TajweedColors
 
@@ -118,8 +116,7 @@ fun TajweedPage(
     onTajweed: (Boolean) -> Unit,
 ) {
     val palette = LocalPagePalette.current
-    val context = LocalContext.current
-    val hafs = remember(context) { ArabicFonts(context).hafsFamily }
+    val hafs = rememberHafs()
     val ayah by produceState<Ayah?>(initialValue = null) { value = sample() }
     val samples = remember(ayah) {
         ayah?.let { TajweedSamples.of(it.text, it.tajweed) }.orEmpty()
@@ -222,11 +219,11 @@ private fun FamilyHead(
                 code = sample.code,
                 colors = colors,
                 enabled = true,
-                style = TextStyle(
-                    fontFamily = hafs,
-                    fontSize = LegendSampleSp.sp,
-                    lineHeight = (LegendSampleSp * TextSize.lineRatio(TypeRole.Arabic)).sp,
-                    color = palette.ink,
+                style = arabicStyle(
+                    hafs,
+                    LegendSampleSp,
+                    LegendSampleSp * TextSize.lineRatio(TypeRole.Arabic),
+                    palette.ink,
                 ),
                 textAlign = TextAlign.End,
                 modifier = Modifier.clearAndSetSemantics {},

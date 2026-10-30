@@ -21,10 +21,10 @@ import org.junit.runner.RunWith
  * with them.
  *
  * The page names every face and the hand that made it, and it holds no door:
- * the license screen was a second copy of the same six credits followed by a
+ * the license screen was a second copy of the same seven credits followed by a
  * text no reader asked for, and its opening sentence called the KFGQPC Hafs
  * face OFL when the file carries KFGQPC's own terms (owner report; owner
- * decision, this session). What the five open faces need is a copy of their
+ * decision, this session). What the six open faces need is a copy of their
  * license in the package, and it ships there beside them, the way every
  * library's LICENSE travels in META-INF.
  */
@@ -68,7 +68,7 @@ class FontCreditTest {
     }
 
     /**
-     * The copy of the license the five open faces ship under is still in the
+     * The copy of the license the six open faces ship under is still in the
      * package. No screen opens it, and this is the test that keeps it from
      * being deleted as an unused asset: it is the license accompanying the
      * fonts, not a page of the app.
@@ -78,7 +78,7 @@ class FontCreditTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val text = context.assets.open("OFL-1.1.txt").bufferedReader().use { it.readText() }
         assertTrue(
-            "the package must carry the license the five open faces are under",
+            "the package must carry the license the six open faces are under",
             text.contains("SIL OPEN FONT LICENSE"),
         )
         assertTrue(text.contains("PERMISSION & CONDITIONS"))

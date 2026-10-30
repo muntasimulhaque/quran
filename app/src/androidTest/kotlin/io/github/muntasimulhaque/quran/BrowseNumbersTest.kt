@@ -16,7 +16,7 @@ import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.feature.reading.R as ReadingR
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExternalResource
@@ -25,13 +25,13 @@ import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 
 /**
- * Browse's surah numbers are one column of whole numbers. Digits are not all
- * one width, which is how "100" once lost its last digit: the column was
- * sized on the width of "114", and in the interface face "100" is wider than
- * "114". The column now measures every number the list draws, so a whole
- * three-digit number is always wider on the screen than a narrower one. In a
- * Bangla interface the same column writes the numbers in Bangla digits, not
- * the Latin ones.
+ * Browse's surah numbers are one column of whole numbers, and the interface
+ * writes them in tabular figures: every digit is one width, so a number's
+ * width is its count of digits and never the particular digits it draws. The
+ * column is still measured on every number the list draws, and the two rules
+ * together are what keep "100" whole: it is the width of "114" and cannot
+ * overflow a column sized on it. In a Bangla interface the same column writes
+ * the numbers in Bangla digits, not the Latin ones.
  *
  * The library is prepared before the activity starts, the order a reader
  * creates it in, and the numbers are the only thing the test touches.
@@ -62,9 +62,15 @@ class BrowseNumbersTest {
         openBrowse()
         val hundred = surahNumberWidth(99, "100")
         val hundredFourteen = surahNumberWidth(113, "114")
-        assertTrue(
-            "the whole 100 must be drawn, not clipped to 10 by a column sized on 114",
-            hundred > hundredFourteen,
+        // Tabular figures give the column one width per digit, so a
+        // three-digit number is as wide as the three-digit label the column
+        // was measured on and cannot be the one that overflows (owner
+        // decision, this session: the table's figures do the work the wider
+        // column used to).
+        assertEquals(
+            "every three-digit number must take the column's own width",
+            hundredFourteen,
+            hundred,
         )
 
         // The same column in a Bangla interface writes Bangla digits. The

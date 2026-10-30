@@ -181,14 +181,42 @@ data class AppSettings(
      * the one rule [TextSize.inlineArabic] keeps.
      */
     val arabicInlineSp: Float get() = TextSize.inlineArabic(arabicSize)
-    val translationSp: Float get() = TextSize.sp(TypeRole.Translation, translationSize)
-    val translationLineSp: Float get() = TextSize.lineSp(TypeRole.Translation, translationSize)
-    val tafsirSp: Float get() = TextSize.sp(TypeRole.Tafsir, tafsirSize)
-    val tafsirLineSp: Float get() = TextSize.lineSp(TypeRole.Tafsir, tafsirSize)
+
+    /**
+     * The prose's step over the Latin base in the reader's script: 18 over
+     * 16.2 for Bangla, 1 for English. Every prose surface reads through the
+     * getters below, so the note sheet, the ayah card, the settings sample,
+     * and the reading all take the script's size from one rule (owner
+     * decision, this session).
+     */
+    private val prose: Float
+        get() = if (UiLanguage.of(uiLanguage) == UiLanguage.Bangla) {
+            TextSize.BENGALI_READING_SIZE / TextSize.sp(TypeRole.Translation, TextSize.DEFAULT)
+        } else {
+            1f
+        }
+
+    /** The line the prose takes per em: the script's own, never a borrowed one. */
+    private val proseLine: Float
+        get() = if (UiLanguage.of(uiLanguage) == UiLanguage.Bangla) {
+            TextSize.BENGALI_PROSE_RATIO
+        } else {
+            TextSize.LATIN_PROSE_RATIO
+        }
+
+    val translationSp: Float get() = TextSize.sp(TypeRole.Translation, translationSize) * prose
+    val translationLineSp: Float get() = translationSp * proseLine
+    val tafsirSp: Float get() = TextSize.sp(TypeRole.Tafsir, tafsirSize) * prose
+    val tafsirLineSp: Float get() = tafsirSp * proseLine
+    /**
+     * The aid's Arabic word stays where the verse is, two points under it: it
+     * is the Quran's own word, not a line of prose, so the script's prose step
+     * does not reach it (owner decision, this session).
+     */
     val wordsSp: Float get() = TextSize.wordSp(wordsSize)
     val wordsLineSp: Float get() = TextSize.lineSp(TypeRole.Words, wordsSize)
-    val wordsMeaningSp: Float get() = TextSize.meaningSp(wordsSize)
-    val wordsMeaningLineSp: Float get() = TextSize.meaningLineSp(wordsSize)
+    val wordsMeaningSp: Float get() = TextSize.meaningSp(wordsSize) * prose
+    val wordsMeaningLineSp: Float get() = wordsMeaningSp * proseLine
 
     fun sizeOf(role: TypeRole): Float = when (role) {
         TypeRole.Arabic -> arabicSize
@@ -199,8 +227,8 @@ data class AppSettings(
 }
 
 /**
- * The sizes and switches the reading draws at, taken out of [AppSettings] as
- * one value of their own.
+ * The sizes and switches the reading draws at, in the reader's own script,
+ * taken out of [AppSettings] as one value of their own.
  *
  * The reading hands this to every ayah it draws instead of the whole settings
  * object. A settled scroll writes a new [AppSettings] with the reader's place
@@ -229,7 +257,19 @@ data class ReadingMetrics(
     val wordsMeaningLineSp: Float,
 )
 
-/** The reading's own view of the reader's choices. */
+/**
+ * The reading's own view of the reader's choices, in the script they are
+ * drawn in.
+ *
+ * The sizes are the getters above, which carry the reader's script: a Bangla
+ * reading takes the translation, the tafsir, and the meaning at the script's
+ * own size and its 1.722 line, while the Arabic does not move, because the
+ * Quran's text is data and not a locale. The aid's Arabic word does not move
+ * either: it is a copy of the verse's word, two points under it, so a larger
+ * gloss can never push it past the verse (owner decision, this session: the
+ * metrics were language-blind, and the Bangla reading was drawn at the Latin
+ * sizes).
+ */
 fun AppSettings.readingMetrics(): ReadingMetrics = ReadingMetrics(
     showTranslation = showTranslation,
     wordByWord = wordByWord,

@@ -9,6 +9,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import io.github.muntasimulhaque.quran.data.AppTheme
+import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.data.resolved
 
@@ -117,8 +118,11 @@ val LocalPagePalette = staticCompositionLocalOf { LightPage }
 /**
  * The theme is the whole app: the two grounds, and the voice everything
  * is written in. The voice follows the reader's one language choice: English
- * speaks Inter and Literata, Bangla speaks Noto Sans Bengali and Noto Serif
- * Bengali, and the switch is made here so no surface picks a face of its own.
+ * reads Literata and works in Inter, Bangla reads Noto Serif Bengali and
+ * works in Noto Sans Bengali, and the switch is made here so no surface picks
+ * a face of its own. The reading voice carries the language's own locale as
+ * well, so the hyphenation dictionary and the script's local forms follow the
+ * content and never the phone (owner decision, this session).
  *
  * The ground may be handed as any of the three values, System among them:
  * System is resolved here against the phone's own day and night, so a caller
@@ -152,8 +156,20 @@ fun QuranTheme(
         LocalPagePalette provides palette,
         LocalSwitchPalette provides switches,
         LocalReadingVoice provides when (language) {
-            UiLanguage.Bangla -> ReadingVoice(BengaliReading, 1.706f, { NotoSerifBengali })
-            UiLanguage.English -> ReadingVoice(LatinReading, 1.6f, ::literataAt)
+            UiLanguage.Bangla -> ReadingVoice(
+                BengaliReading,
+                TextSize.BENGALI_PROSE_RATIO,
+                1.594f,
+                { NotoSerifBengali },
+                BanglaReadingLocale,
+            )
+            UiLanguage.English -> ReadingVoice(
+                LatinReading,
+                TextSize.LATIN_PROSE_RATIO,
+                1.485f,
+                ::literataAt,
+                EnglishReadingLocale,
+            )
         },
     ) {
         val typography = when (language) {

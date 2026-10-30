@@ -17,15 +17,15 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.Arabic
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
+import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
+import io.github.muntasimulhaque.quran.ui.theme.prose
 import io.github.muntasimulhaque.quran.ui.rich.TajweedText
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -93,7 +93,11 @@ internal fun WordByWord(
             modifier = modifier
                 .fillMaxWidth()
                 .testTag("word-by-word"),
-            horizontalArrangement = Arrangement.spacedBy(Space.Block),
+            // The pairs are separated by a section's air, not a block's: on a
+            // wide page a row holds five or six pairs, and at a block's gap
+            // they read as one run of words instead of five units (owner
+            // decision, this session).
+            horizontalArrangement = Arrangement.spacedBy(Space.Section),
             verticalArrangement = Arrangement.spacedBy(Space.Block),
         ) {
             meanings.forEach { meaning ->
@@ -132,18 +136,17 @@ private fun WordPair(
             code = meaning.tajweed,
             colors = palette.tajweed,
             enabled = metrics.tajweed,
-            style = TextStyle(
-                fontFamily = hafs,
-                fontSize = metrics.wordsSp.sp,
-                lineHeight = metrics.wordsLineSp.sp,
-                // The pairs are the same words the ayah above already shows.
-                // The uncolored letters step one tone down from the verse's
-                // own ink; the rule-colored letters keep the palette's full
-                // color, because a hue at the gloss alpha would fall under
-                // the contrast floor. The aid stays a gloss by its size and
-                // its meanings, not by dimming the rules (owner report, the
-                // QPC rebuild audit).
-                color = palette.ink.copy(alpha = WordGlossAlpha),
+            // The pairs are the same words the ayah above already shows.
+            // The uncolored letters step one tone down from the verse's own
+            // ink; the rule-colored letters keep the palette's full color,
+            // because a hue at the gloss alpha would fall under the contrast
+            // floor. The aid stays a gloss by its size and its meanings, not
+            // by dimming the rules (owner report, the QPC rebuild audit).
+            style = arabicStyle(
+                hafs,
+                metrics.wordsSp,
+                metrics.wordsLineSp,
+                palette.ink.copy(alpha = WordGlossAlpha),
             ),
             textAlign = TextAlign.Center,
             maxLines = 1,
@@ -158,10 +161,9 @@ private fun WordPair(
         )
         Text(
             text = meaning.meaning.orEmpty(),
-            style = LocalReadingVoice.current.style.copy(
-                fontSize = metrics.wordsMeaningSp.sp,
-                lineHeight = metrics.wordsMeaningLineSp.sp,
-                fontFamily = LocalReadingVoice.current.atSize(metrics.wordsMeaningSp),
+            style = LocalReadingVoice.current.prose(
+                metrics.wordsMeaningSp,
+                metrics.wordsMeaningLineSp,
             ),
             color = LocalPagePalette.current.ink,
             textAlign = TextAlign.Center,

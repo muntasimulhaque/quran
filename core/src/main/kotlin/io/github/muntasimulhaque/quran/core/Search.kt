@@ -281,8 +281,12 @@ object Search {
         start = minOf(start, first)
         end = maxOf(end, last)
         if (start >= end) return readable to ranges
-        val prefix = if (start > 0) "... " else ""
-        val suffix = if (end < readable.length) " ..." else ""
+        // One ellipsis character, not three periods: the mark carries its own
+        // spacing, and the reader sees the cut as the cut it is. The prefix is
+        // two characters and the suffix two, so the highlight offsets shift by
+        // one and no more.
+        val prefix = if (start > 0) "… " else ""
+        val suffix = if (end < readable.length) " …" else ""
         val rebased = ranges.filter { it.first >= start && it.last < end }
             .map { (it.first - start + prefix.length)..(it.last - start + prefix.length) }
         return (prefix + readable.substring(start, end) + suffix) to rebased

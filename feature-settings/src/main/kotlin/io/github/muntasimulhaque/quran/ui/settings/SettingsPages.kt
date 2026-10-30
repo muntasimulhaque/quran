@@ -13,10 +13,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.AppTheme
@@ -25,10 +23,11 @@ import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
+import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
+import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
 import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
-import io.github.muntasimulhaque.quran.ui.rich.ArabicFonts
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.rich.TajweedText
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -118,8 +117,7 @@ fun TextPage(
 
 @Composable
 private fun SizeSample(row: ReadingRow, settings: AppSettings) {
-    val context = LocalContext.current
-    val hafs = remember(context) { ArabicFonts(context).hafsFamily }
+    val hafs = rememberHafs()
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -135,12 +133,7 @@ private fun SizeSample(row: ReadingRow, settings: AppSettings) {
             code = row.ayah.tajweed,
             colors = palette.tajweed,
             enabled = settings.tajweed,
-            style = androidx.compose.ui.text.TextStyle(
-                fontFamily = hafs,
-                fontSize = settings.arabicSp.sp,
-                lineHeight = settings.arabicLineSp.sp,
-                color = palette.ink,
-            ),
+            style = arabicStyle(hafs, settings.arabicSp, settings.arabicLineSp, palette.ink),
             textAlign = TextAlign.Right,
             modifier = Modifier.fillMaxWidth(),
         )

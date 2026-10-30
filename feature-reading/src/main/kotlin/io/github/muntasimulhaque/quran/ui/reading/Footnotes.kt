@@ -13,10 +13,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.Footnote
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
+import io.github.muntasimulhaque.quran.ui.theme.prose
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
@@ -97,17 +97,11 @@ internal fun FootnoteSheet(
             )
             Text(
                 text = footnote.text,
-                style = LocalReadingVoice.current.style.copy(
-                    fontSize = sizeSp.sp,
-                    lineHeight = lineSp.sp,
-                    // The note takes the optical cut of the size it is
-                    // drawn at, like every other prose surface; without it
-                    // the default small-text cut was stretched over the
-                    // reader's chosen size (owner decision, the theme and
-                    // consistency session).
-                    fontFamily = LocalReadingVoice.current.atSize(sizeSp),
+                style = LocalReadingVoice.current.prose(
+                    sizeSp,
+                    lineSp,
+                    MaterialTheme.colorScheme.onSurface,
                 ),
-                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = Space.Block),

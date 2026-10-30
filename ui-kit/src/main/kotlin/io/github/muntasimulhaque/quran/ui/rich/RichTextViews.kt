@@ -7,10 +7,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
@@ -18,29 +16,32 @@ import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontSynthesis
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.BaselineShift
-import androidx.compose.ui.text.style.LineHeightStyle
-import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.core.TextBlock
 import io.github.muntasimulhaque.quran.core.TextBlockKind
 import io.github.muntasimulhaque.quran.core.TextRun
 import io.github.muntasimulhaque.quran.core.ScriptMix
 import io.github.muntasimulhaque.quran.core.scriptMix
+import io.github.muntasimulhaque.quran.ui.theme.AmiriText
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
+import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Wash
+import io.github.muntasimulhaque.quran.ui.theme.prose
 
 /**
  * Draws parsed runs with the manuscript's two voices: Literata for Latin and
- * Amiri Quran for Arabic, with the Hafs face only for the few letters Amiri
- * does not carry. Footnote markers are accent
- * superscripts, and no styling is ever taken inside a word.
+ * Amiri's body face for Arabic. The body face covers every letter the content
+ * carries, so no run is handed to the platform to guess at. Footnote markers
+ * are accent superscripts, and no styling is ever taken inside a word.
  *
  * A paragraph can carry Arabic at a much larger size than its Latin text, and
  * a superscript marker that sits above the line. The line height is therefore
@@ -69,25 +70,22 @@ fun TranslationBody(
 ) {
     val voice = LocalReadingVoice.current
     val body = sizeSp ?: voice.style.fontSize.value
+    val mix = scriptMix(runs)
     val line = lineHeightFor(
-        mix = scriptMix(runs),
+        mix = mix,
         latinLine = lineSp ?: body * voice.lineRatio,
         arabicSp = arabicSp,
     )
-    val base = voice.style.copy(
-        fontSize = body.sp,
-        lineHeight = line.sp,
-        fontFamily = voice.atSize(body),
-        lineHeightStyle = LineHeightStyle(
-            alignment = LineHeightStyle.Alignment.Center,
-            trim = LineHeightStyle.Trim.None,
-        ),
-    )
+    val base = voice.prose(body, line)
     Text(
         text = annotated(
             runs,
             arabicSize = arabicSp.sp,
             markerSize = markerSp(body, 0.70f),
+            // A symbol inside an all-Arabic block is part of that block and
+            // takes its size; inside a Latin sentence it takes the
+            // sentence's.
+            symbolSize = if (mix == ScriptMix.ARABIC) arabicSp.sp else body.sp,
             quoteColor = color,
             onFootnote = onFootnote,
             footnoteNumbers = footnoteNumbers,
@@ -163,7 +161,15 @@ fun HighlightedText(
     color: Color = LocalPagePalette.current.ink,
     maxLines: Int = 4,
 ) {
-    val resolvedStyle = style ?: LocalReadingVoice.current.style
+    // A snippet is reading, so it is set in the reading's own voice, at the
+    // size the voice stands at when a surface has no size of its own: the
+    // interface face inside a result list put the book away the moment a
+    // reader searched it (owner decision, this session).
+    val voice = LocalReadingVoice.current
+    val resolvedStyle = style ?: voice.prose(
+        sizeSp = voice.style.fontSize.value,
+        lineSp = voice.style.lineHeight.value,
+    )
     val wash = MaterialTheme.colorScheme.primary.copy(alpha = Wash.Match)
     val weight = FontWeight.Medium
     Text(
@@ -206,68 +212,55 @@ fun RichBlocks(
     lineSp: Float = 27f,
     arabicSp: Float = 18f,
 ) {
+    val voice = LocalReadingVoice.current
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
-        blocks.forEach { block ->
+        blocks.forEachIndexed { index, block ->
+            val heading = block.kind == TextBlockKind.HEADING
+            // A heading is a real step over the prose, a quarter again its
+            // size and in the reading's own weight. It stood one point above
+            // the body, which the eye read as the same size (owner decision,
+            // this session).
+            val mix = scriptMix(block.runs)
+            val drawn = if (heading) sizeSp * 1.25f else sizeSp
             val line = lineHeightFor(
-                mix = scriptMix(block.runs),
-                latinLine = lineSp,
+                mix = mix,
+                // A heading is set tighter than a paragraph, but never below
+                // the face's own line box: at 20 sp Literata's ink needs
+                // 1.485 of the em, and a long heading (some run to six
+                // lines) set at 1.3 put one line's descenders into the next
+                // line's ascenders.
+                latinLine = if (heading) {
+                    maxOf(drawn * 1.3f, drawn * voice.minimumLineRatio)
+                } else {
+                    lineSp
+                },
                 arabicSp = arabicSp,
             )
-            when (block.kind) {
-                TextBlockKind.HEADING -> Text(
-                    text = annotated(
-                        block.runs,
-                        arabicSize = arabicSp.sp,
-                        markerSize = markerSp(sizeSp, 0.70f),
-                        quoteColor = null,
-                    ),
-                    style = LocalReadingVoice.current.style.copy(
-                        // The heading is the reading's own voice, stepped up
-                        // in size and weight. It wore the interface face on a
-                        // Literata page, which put Inter inside the tafsir
-                        // (owner decision, the theme and consistency
-                        // session).
-                        color = LocalPagePalette.current.ink,
-                        fontFamily = LocalReadingVoice.current.atSize(sizeSp + 1),
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = (sizeSp + 1).sp,
-                        lineHeight = line.sp,
-                        textDirection = TextDirection.Content,
-                    ),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                TextBlockKind.PARAGRAPH -> Text(
-                    text = annotated(
-                        block.runs,
-                        arabicSize = arabicSp.sp,
-                        markerSize = markerSp(sizeSp, 0.70f),
-                        quoteColor = LocalPagePalette.current.ink,
-                    ),
-                    style = LocalReadingVoice.current.style.copy(
-                        fontSize = sizeSp.sp,
-                        lineHeight = line.sp,
-                        fontFamily = LocalReadingVoice.current.atSize(sizeSp),
-                        // A block resolves its own direction from its first
-                        // strong character, never from the interface around
-                        // it: an Arabic paragraph in an English tafsir must
-                        // lay its wrapped lines from the right, and Compose's
-                        // default (TextDirection.Unspecified) takes the
-                        // composition's LTR instead, which started every line
-                        // after the first at the left edge (owner report,
-                        // twenty-ninth session).
-                        textDirection = TextDirection.Content,
-                        lineHeightStyle = LineHeightStyle(
-                            alignment = LineHeightStyle.Alignment.Center,
-                            trim = LineHeightStyle.Trim.None,
-                        ),
-                    ),
+            Text(
+                text = annotated(
+                    block.runs,
+                    arabicSize = arabicSp.sp,
+                    markerSize = markerSp(sizeSp, 0.70f),
+                    symbolSize = if (mix == ScriptMix.ARABIC) arabicSp.sp else drawn.sp,
+                    quoteColor = if (heading) null else LocalPagePalette.current.ink,
+                ),
+                style = voice.prose(
+                    sizeSp = drawn,
+                    lineSp = line,
                     color = LocalPagePalette.current.ink,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
+                    weight = if (heading) FontWeight.SemiBold else FontWeight.Normal,
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    // A heading opens a part of the prose, so it takes a step
+                    // more air above it than the room between two paragraphs:
+                    // the sheet reads as sections instead of as one run
+                    // (owner decision, this session).
+                    .padding(top = if (heading && index > 0) Space.Line else 0.dp),
+            )
         }
     }
 }
@@ -277,6 +270,8 @@ private fun annotated(
     runs: List<TextRun>,
     arabicSize: TextUnit,
     markerSize: TextUnit,
+    /** The size a symbol in a sentence is drawn at: the sentence's own. */
+    symbolSize: TextUnit,
     quoteColor: Color?,
     onFootnote: ((Int) -> Unit)? = null,
     footnoteNumbers: Set<Int>? = null,
@@ -293,8 +288,6 @@ private fun annotated(
     // its own: the reading's ink, never the accent, which now
     // belongs to the marker alone.
     val quoteFallback = LocalPagePalette.current.ink
-    val context = LocalContext.current
-    val arabicFonts = remember(context) { ArabicFonts(context) }
     return buildAnnotatedString {
         runs.forEach { run ->
             val marker = run.marker
@@ -326,11 +319,10 @@ private fun annotated(
                     // are three digits each, and the committed set was captured
                     // before the change.
                     baselineShift = BaselineShift(0.30f),
-                    // Lining figures, so the number in the note reads as a
-                    // number. Literata's default figures are old-style, and an
-                    // old-style two and three at marker size are the two
-                    // shapes a footnote number must not be.
-                    fontFeatureSettings = "lnum",
+                    // Literata's own figures are lining (measured: every
+                    // digit sits on the baseline at cap height), so the marker
+                    // needs no figure feature at all. It wore "lnum", which
+                    // asked for what the face already does.
                 )
                 val linkable = onFootnote != null &&
                     (footnoteNumbers == null || marker in footnoteNumbers)
@@ -352,32 +344,28 @@ private fun annotated(
                     ) { withStyle(style) { append(marker.toString()) } }
                 }
             } else if (run.arabic) {
-                // No shipped content puts bold or italic on an Arabic run, and
-                // the script's faces have no other weight or style to be
-                // found: emphasis that reached here would be synthesized by
-                // the platform, a fake bold that thickens Naskh hairlines and
-                // a skew that has no place on calligraphy. The run draws in
-                // the faces' own shape, always (owner decision, this session).
-                val color = if (run.quote) quoteColor ?: quoteFallback else Color.Unspecified
-                var index = 0
-                while (index < run.text.length) {
-                    val codepoint = run.text.codePointAt(index)
-                    val family = arabicFonts.family(codepoint)
-                    var end = index + Character.charCount(codepoint)
-                    while (end < run.text.length) {
-                        val next = run.text.codePointAt(end)
-                        if (arabicFonts.family(next) != family) break
-                        end += Character.charCount(next)
-                    }
-                    withStyle(
-                        SpanStyle(
-                            fontFamily = family,
-                            fontSize = arabicSize,
-                            color = color,
-                        ),
-                    ) { append(run.text.substring(index, end)) }
-                    index = end
-                }
+                // One face for the tafsir's Arabic: Amiri's body text covers
+                // every letter the content carries, including the Urdu heh and
+                // the pre-shaped phrase the source keeps, so the old
+                // per-codepoint fallback to the Hafs face is gone (owner
+                // decision, this session). No shipped content puts bold or
+                // italic on an Arabic run, and synthesis is off, so an
+                // emphasis that ever reached here would draw the face as it is
+                // rather than a smeared or slanted copy of it.
+                //
+                // The Prophet's ligature is the one exception to the inline
+                // size: it is a symbol inside a sentence, not a quotation, so
+                // it takes the sentence's size and sits in the line. At the
+                // quotation's size it stood a third above the words around it
+                // (owner decision, this session).
+                withStyle(
+                    SpanStyle(
+                        fontFamily = AmiriText,
+                        fontSize = if (RichText.isHonorific(run.text)) symbolSize else arabicSize,
+                        color = if (run.quote) quoteColor ?: quoteFallback else Color.Unspecified,
+                        fontSynthesis = FontSynthesis.None,
+                    ),
+                ) { append(run.text) }
             } else {
                 withStyle(
                     SpanStyle(

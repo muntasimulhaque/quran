@@ -15,11 +15,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.Search
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.SearchHit
@@ -36,6 +34,7 @@ import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.rich.HighlightedText
 import io.github.muntasimulhaque.quran.ui.rich.TajweedText
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
 import io.github.muntasimulhaque.quran.ui.theme.Wash
 
 /**
@@ -100,11 +99,11 @@ internal fun AyahRow(
                 Spacer(Modifier.height(8.dp))
                 TajweedText(
                     text = AnnotatedString(arabicText),
-                    style = TextStyle(
-                        fontFamily = hafs,
-                        fontSize = arabicSize.sp,
-                        lineHeight = arabicLine.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
+                    style = arabicStyle(
+                        hafs,
+                        arabicSize,
+                        arabicLine,
+                        MaterialTheme.colorScheme.onSurface,
                     ),
                     textAlign = TextAlign.Right,
                     maxLines = 4,
@@ -119,17 +118,16 @@ internal fun AyahRow(
                 val joined = line.words.joinToString("  ")
                 TajweedText(
                     text = AnnotatedString(joined),
-                    style = TextStyle(
-                        fontFamily = hafs,
-                        // The matched words keep the line's own size: an
-                        // emphasis that enlarged them re-laid the line under
-                        // the reader while they searched. One size for both
-                        // Arabic lines, moved by the reader's own Arabic
-                        // step (owner decision, the theme and consistency
-                        // session; this session).
-                        fontSize = arabicSize.sp,
-                        lineHeight = arabicLine.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
+                    // The matched words keep the line's own size: an
+                    // emphasis that enlarged them re-laid the line under the
+                    // reader while they searched. One size for both Arabic
+                    // lines, moved by the reader's own Arabic step (owner
+                    // decision, the theme and consistency session).
+                    style = arabicStyle(
+                        hafs,
+                        arabicSize,
+                        arabicLine,
+                        MaterialTheme.colorScheme.onSurface,
                     ),
                     textAlign = TextAlign.Right,
                     maxLines = 3,
@@ -146,7 +144,6 @@ internal fun AyahRow(
             HighlightedText(
                 text = translation.text,
                 ranges = translation.ranges,
-                style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 23.sp),
             )
             if (showSource) {
                 Text(
@@ -179,7 +176,6 @@ internal fun AyahRow(
                 ranges = remember(meaning, terms) {
                     Search.matchRanges(meaning, terms, arabic = false)
                 },
-                style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 23.sp),
                 modifier = Modifier.padding(top = Space.Tight),
             )
         }
@@ -217,7 +213,6 @@ internal fun TafsirRow(hit: SearchHit.TafsirHitResult, onOpen: () -> Unit) {
         HighlightedText(
             text = hit.text,
             ranges = hit.ranges,
-            style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 23.sp),
             maxLines = 5,
         )
     }

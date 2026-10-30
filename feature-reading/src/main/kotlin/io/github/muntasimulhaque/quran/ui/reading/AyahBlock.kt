@@ -37,7 +37,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
@@ -56,6 +55,7 @@ import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.rich.drawTajweedColors
 import io.github.muntasimulhaque.quran.ui.theme.Radii
+import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
@@ -281,12 +281,7 @@ internal fun AyahBlock(
             var textLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
             Text(
                 text = arabicLine.text,
-                style = TextStyle(
-                    fontFamily = hafs,
-                    fontSize = metrics.arabicSp.sp,
-                    lineHeight = metrics.arabicLineSp.sp,
-                    color = palette.ink,
-                ),
+                style = arabicStyle(hafs, metrics.arabicSp, metrics.arabicLineSp, palette.ink),
                 textAlign = TextAlign.Right,
                 onTextLayout = { textLayout = it },
                 modifier = Modifier

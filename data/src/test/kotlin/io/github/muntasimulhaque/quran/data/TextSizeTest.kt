@@ -1,6 +1,7 @@
 package io.github.muntasimulhaque.quran.data
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -101,10 +102,20 @@ class TextSizeTest {
 
     @Test
     fun theWordMeaningSitsAStepUnderTheTranslation() {
-        // 15.3 sp against the translation's 16.2 (owner decision, this
-        // session): the same stand under the translation that 16 held under
-        // 17, so the gloss stays a small reading rather than a footnote.
-        assertEquals(15.3f, TextSize.meaningSp(1f))
+        // 14.58 sp against the translation's 16.2: nine tenths of it, a step
+        // the eye reads as a gloss rather than as a second translation. The
+        // five percent it stood at before read as one size used twice (owner
+        // decision, this session).
+        assertEquals(16.2f * 0.9f, TextSize.meaningSp(1f), 0.001f)
+        assertEquals(14.58f * 0.8f, TextSize.meaningSp(0.8f), 0.001f)
+        // The aid's Arabic word follows the verse and never the gloss, so a
+        // bigger gloss cannot carry it past the Quran's own size.
+        for (step in TextSize.STEPS) {
+            assertTrue(
+                "the aid's word must stay under the verse at $step",
+                TextSize.wordSp(step) < TextSize.sp(TypeRole.Arabic, step),
+            )
+        }
     }
 
     @Test
@@ -120,6 +131,6 @@ class TextSizeTest {
         assertEquals(25.92f, TextSize.inlineArabic(1f), 0.001f)
         assertEquals(16.2f, TextSize.sp(TypeRole.Translation, 1f))
         assertEquals(16.2f, TextSize.sp(TypeRole.Tafsir, 1f))
-        assertEquals(15.3f, TextSize.meaningSp(1f))
+        assertEquals(14.58f, TextSize.meaningSp(1f), 0.001f)
     }
 }

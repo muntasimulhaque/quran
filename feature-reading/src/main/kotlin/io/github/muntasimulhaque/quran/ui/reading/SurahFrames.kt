@@ -30,10 +30,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.Arabic
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.data.ContentDatabase
@@ -45,8 +43,10 @@ import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
-import io.github.muntasimulhaque.quran.ui.theme.Amiri
 import io.github.muntasimulhaque.quran.ui.theme.Radii
+import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
+import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
+import io.github.muntasimulhaque.quran.ui.theme.prose
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.rich.TajweedText
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
@@ -106,11 +106,7 @@ internal fun SurahOpening(
         // and place in quiet type, so every surah opens the same way.
         Text(
             text = surah.nameArabic,
-            style = TextStyle(
-                fontFamily = Amiri,
-                fontSize = 40.sp,
-                color = ornament,
-            ),
+            style = amiriDisplay(40f, ornament),
         )
         // The rule is ornament, never a separator: a short gold rule under the
         // Arabic name, carrying no meaning a reader would lose without it. It
@@ -154,12 +150,7 @@ internal fun SurahOpening(
                 code = line.tajweed,
                 colors = palette.tajweed,
                 enabled = metrics.tajweed,
-                style = TextStyle(
-                    fontFamily = hafs,
-                    fontSize = metrics.arabicSp.sp,
-                    lineHeight = metrics.arabicLineSp.sp,
-                    color = ink,
-                ),
+                style = arabicStyle(hafs, metrics.arabicSp, metrics.arabicLineSp, ink),
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -195,10 +186,9 @@ internal fun SurahOpening(
                 // takes (owner decision, this session). The runs are drawn
                 // plain by design: [RichText.paragraphs] draws no spans
                 // here, so the tags in the source never reach one.
-                style = LocalReadingVoice.current.style.copy(
-                    fontSize = metrics.translationSp.sp,
-                    lineHeight = metrics.translationLineSp.sp,
-                    fontFamily = LocalReadingVoice.current.atSize(metrics.translationSp),
+                style = LocalReadingVoice.current.prose(
+                    metrics.translationSp,
+                    metrics.translationLineSp,
                 ),
                 color = ink.copy(alpha = 0.78f),
                 // No cap on the introduction: it was asked for with a press,

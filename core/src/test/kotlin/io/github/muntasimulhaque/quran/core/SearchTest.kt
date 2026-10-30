@@ -249,7 +249,7 @@ class SearchTest {
         assertTrue("the window must be a window", excerpt.length < text.length)
         assertEquals(1, ranges.size)
         assertEquals("needle", excerpt.substring(ranges.first().first, ranges.first().last + 1))
-        val body = excerpt.removePrefix("... ").removeSuffix(" ...")
+        val body = excerpt.removePrefix("… ").removeSuffix(" …")
         val firstWord = body.substringBefore(' ')
         val lastWord = body.substringAfterLast(' ')
         assertTrue("the window starts mid-word: $firstWord", firstWord.matches(Regex("before\\d+")))

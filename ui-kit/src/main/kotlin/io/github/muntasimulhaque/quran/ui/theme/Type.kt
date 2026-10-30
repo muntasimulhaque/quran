@@ -4,6 +4,7 @@ import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.ExperimentalTextApi
@@ -11,24 +12,41 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontSynthesis
 import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.intl.LocaleList
+import androidx.compose.ui.text.style.Hyphens
+import androidx.compose.ui.text.style.LineBreak
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.content.R
+import io.github.muntasimulhaque.quran.data.TextSize
 
 /**
- * The voices of the app. Arabic is the Book's own: the KFGQPC Hafs face draws
- * the canonical text in the reading, the basmalah, the word-by-word aid, and
- * the ayah's own medallion; Amiri draws the masthead, the surah names, and the
- * Arabic of the tafsir. Everything else follows the reader's one language
- * choice: the interface speaks Inter in English and Noto Sans Bengali in
- * Bangla, and the reading (translation, tafsir, word meanings, notes) is
- * Literata in English and Noto Serif Bengali in Bangla. A Bangla sentence
- * never falls through to the phone's default Bengali font, because the whole
- * voice is swapped, not one glyph at a time.
+ * The voices of the app, under one rule: everything the reader reads is set
+ * in the book's face, and everything the reader works is set in the plain one.
+ *
+ * The Book itself is the KFGQPC Hafs face: the reading, the basmalah, the
+ * word-by-word aid, and the ayah's own medallion. Arabic outside the
+ * canonical text speaks Amiri, the family's body face, which is drawn for
+ * running prose: the tafsir's paragraphs and the quotations inside them.
+ * Amiri Quran, the same design prepared for Quran pages, keeps the display
+ * lines, the masthead and the surah names, whose tall marks need its tall
+ * line box.
+ *
+ * The reader's language then chooses two pairs. English reads Literata and
+ * works in Inter; Bangla reads Noto Serif Bengali and works in Noto Sans
+ * Bengali. The pair is a pair: a title, a surah's name, a translation, and a
+ * tafsir are all the reading face; a control, a label, a count, and a
+ * footnote are all the plain one. Nothing the reader reads is set in the
+ * control face, so a sheet opens inside the book instead of dropping out of
+ * it (owner decision, this session: the titles and the surah names were Inter,
+ * and the tafsir's Arabic and its quotations were Amiri Quran).
  */
 
-/** The interface voice: quiet, exact, never decorative. */
+/** The plain interface voice for English: quiet, exact, never decorative. */
 val Inter = FontFamily(
     Font(R.font.inter_variable, FontWeight.Light),
     Font(R.font.inter_variable, FontWeight.Normal),
@@ -36,7 +54,7 @@ val Inter = FontFamily(
     Font(R.font.inter_variable, FontWeight.SemiBold),
 )
 
-/** The Bangla interface voice: the same job Inter does, in Bengali script. */
+/** The plain interface voice for Bangla: the same job Inter does, in Bengali script. */
 val NotoSansBengali = FontFamily(
     Font(R.font.noto_sans_bengali, FontWeight.Light),
     Font(R.font.noto_sans_bengali, FontWeight.Normal),
@@ -45,13 +63,16 @@ val NotoSansBengali = FontFamily(
 )
 
 /**
- * The reading voice for translations and tafsir. The italic members come
+ * The reading face for English: translations, tafsir, notes, and now the
+ * titles and the surah names, which used to be Inter. The italic members come
  * from the face's own italic variable file (the roman-italic pair of the
  * same Literata 3.103 release, same axes, same metrics), so an emphasized
  * run keeps the page voice mid sentence instead of falling through to the
- * platform default. Only italic spans reach this family; no shipped content
- * carries one today, so the italic stays a face the page is ready for
- * rather than a face the page is drawing (owner decision, this session).
+ * platform default.
+ *
+ * The static family is the fallback a surface gets without asking for a cut;
+ * every reading surface asks through [literataAt], which sets the face's
+ * optical size to the size being drawn.
  */
 val Literata = FontFamily(
     Font(R.font.literata_variable, FontWeight.Normal),
@@ -61,10 +82,10 @@ val Literata = FontFamily(
 )
 
 /**
- * The Bangla reading voice, for translations, tafsir, and notes. The
- * SemiBold member is what a bold run of the tafsir asks for; without it a
- * family is matched to the nearest declared weight and the emphasis would
- * render at Medium.
+ * The Bangla reading face for translations, tafsir, notes, titles, and the
+ * surah names. The SemiBold member is what a bold run of the tafsir asks for;
+ * without it a family is matched to the nearest declared weight and the
+ * emphasis would render at Medium.
  */
 val NotoSerifBengali = FontFamily(
     Font(R.font.noto_serif_bengali, FontWeight.Normal),
@@ -72,15 +93,29 @@ val NotoSerifBengali = FontFamily(
     Font(R.font.noto_serif_bengali, FontWeight.SemiBold),
 )
 
-/** The display voice: the masthead, the surah names, and the tafsir's Arabic. */
+/**
+ * The display voice for Arabic: the masthead and the surah names. This is
+ * Amiri Quran, the release prepared for Quran pages: its line box is 2.449 of
+ * the em against the body face's 1.758, which is what the Quran's marks need
+ * and what [amiriDisplay] trims back to the ink.
+ */
 val Amiri = FontFamily(Font(R.font.amiri_quran))
 
 /**
+ * The body voice for Arabic prose: the tafsir's paragraphs and the
+ * quotations inside them. This is Amiri's running-text face, the same design
+ * as [Amiri] with a normal 1.758 line box and 6,710 characters instead of
+ * 1,446, so it draws every letter the content carries, including the Urdu heh
+ * and the pre-shaped phrase the tafsir source keeps, without borrowing the
+ * Hafs face.
+ */
+val AmiriText = FontFamily(Font(R.font.amiri_regular))
+
+/**
  * The reading voice of the Quran's own text: the KFGQPC Hafs face, the same
- * one the reading, the basmalah, the word by word aid, and the ayah's own
- * medallion are drawn in. It is a font file rather than a resource, so it is
- * loaded from the assets; use [rememberHafs] to get the family on a surface
- * that shows an ayah.
+ * one the reading, the basmalah, and the word-by-word aid are drawn in. It is
+ * a font file rather than a resource, so it is loaded from the assets; use
+ * [rememberHafs] to get the family on a surface that shows an ayah.
  */
 @Composable
 fun rememberHafs(): FontFamily {
@@ -91,66 +126,130 @@ fun rememberHafs(): FontFamily {
 }
 
 /**
- * Every style the app can ask for, in one interface voice. Nothing is left
- * to the Material default, because a style that falls through would draw in
- * another font on a page that has chosen its typefaces.
+ * One Arabic line's style, with the three rules every Arabic run keeps.
+ *
+ * **No synthesized weight or slant.** Android invents a bold by smearing the
+ * regular letters thicker and an italic by slanting them; on a Naskh face
+ * that eats the hairlines and slants a script that has no italic. The faces
+ * ship with the weights the app asks for, so nothing is ever invented.
+ *
+ * **A paragraph that runs right to left.** The app's interface language is
+ * English, so an Arabic paragraph would otherwise be laid out as a
+ * left-to-right one: invisible while a line is pure Arabic, wrong the day a
+ * line carries a Latin word, a bracket, or a reference beside the verse.
+ *
+ * **A line box measured by the script, not centred in it.** Arabic sets its
+ * extra air above the letters, where the marks are, so the alignment is
+ * proportional; [trim] is the one choice a caller makes, because a verse's
+ * own rhythm is measured in its line box while a prose block's air is the
+ * dp around it.
  */
-private fun typographyFor(voice: FontFamily) = Typography(
-    displayLarge = TextStyle(fontFamily = voice, fontWeight = FontWeight.SemiBold, fontSize = 48.sp, lineHeight = 56.sp),
-    displayMedium = TextStyle(fontFamily = voice, fontWeight = FontWeight.SemiBold, fontSize = 40.sp, lineHeight = 48.sp),
-    displaySmall = TextStyle(fontFamily = voice, fontWeight = FontWeight.SemiBold, fontSize = 34.sp, lineHeight = 42.sp),
-    headlineLarge = TextStyle(fontFamily = voice, fontWeight = FontWeight.SemiBold, fontSize = 30.sp, lineHeight = 38.sp),
-    headlineMedium = TextStyle(fontFamily = voice, fontWeight = FontWeight.SemiBold, fontSize = 26.sp, lineHeight = 34.sp),
-    headlineSmall = TextStyle(fontFamily = voice, fontWeight = FontWeight.SemiBold, fontSize = 23.sp, lineHeight = 30.sp),
-    titleLarge = TextStyle(fontFamily = voice, fontWeight = FontWeight.SemiBold, fontSize = 20.sp, lineHeight = 26.sp),
-    titleMedium = TextStyle(fontFamily = voice, fontWeight = FontWeight.Medium, fontSize = 16.sp, lineHeight = 22.sp),
-    titleSmall = TextStyle(fontFamily = voice, fontWeight = FontWeight.Medium, fontSize = 15.sp, lineHeight = 20.sp),
-    bodyLarge = TextStyle(fontFamily = voice, fontWeight = FontWeight.Normal, fontSize = 16.sp, lineHeight = 23.sp),
-    bodyMedium = TextStyle(fontFamily = voice, fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 20.sp),
-    bodySmall = TextStyle(fontFamily = voice, fontWeight = FontWeight.Normal, fontSize = 13.sp, lineHeight = 18.sp),
-    labelLarge = TextStyle(fontFamily = voice, fontWeight = FontWeight.Medium, fontSize = 14.sp, lineHeight = 19.sp),
-    labelMedium = TextStyle(fontFamily = voice, fontWeight = FontWeight.Medium, fontSize = 12.sp, lineHeight = 16.sp),
-    labelSmall = TextStyle(fontFamily = voice, fontWeight = FontWeight.Medium, fontSize = 11.sp, lineHeight = 14.sp),
+fun arabicStyle(
+    family: FontFamily,
+    sizeSp: Float,
+    lineSp: Float,
+    color: Color = Color.Unspecified,
+    trim: LineHeightStyle.Trim = LineHeightStyle.Trim.None,
+): TextStyle = TextStyle(
+    fontFamily = family,
+    fontSize = sizeSp.sp,
+    lineHeight = lineSp.sp,
+    color = color,
+    fontSynthesis = FontSynthesis.None,
+    textDirection = TextDirection.Rtl,
+    lineHeightStyle = LineHeightStyle(
+        alignment = LineHeightStyle.Alignment.Proportional,
+        trim = trim,
+    ),
 )
 
 /**
- * The interface in English: the same ladder as [typographyFor], with each
- * style's typeface resolved at the size the style draws at, so Inter's
- * optical axis shapes the headline and display sizes in display cuts
- * instead of the text cut at its 14 sp floor (owner decision, this session:
- * an optical axis that was in the file and never switched on). The drawn
- * size scales with the system font scale, the way [literataAt] does for the
- * reading voice, so a reader at 2.0 scale reads the cut for double size.
+ * A single line of display Arabic: the surah's name, the masthead, the name
+ * beside a row's Latin one. The line box is 1.4 of the size, not the face's
+ * 2.449, because the face's box is drawn for a Quran page's stacked marks and
+ * would push every designed gap around a name out by most of an em. At 1.4
+ * the ink still fits and the proportional alignment centres it, so the 14 dp
+ * under a surah's name is 14 dp.
+ */
+fun amiriDisplay(sizeSp: Float, color: Color = Color.Unspecified): TextStyle =
+    arabicStyle(Amiri, sizeSp, sizeSp * 1.4f, color)
+
+/**
+ * The display and title ladder, in the book's face: 20, 24, 28, 34, 40, 56.
+ * Nothing here is set in the interface face, because a screen's own name is
+ * read, not operated (owner decision, this session).
+ */
+@Composable
+private fun readingStyle(weight: FontWeight, sizeSp: Float, lineSp: Float): TextStyle =
+    TextStyle(
+        fontFamily = literataAt(sizeSp),
+        fontWeight = weight,
+        fontSize = sizeSp.sp,
+        lineHeight = lineSp.sp,
+        fontSynthesis = FontSynthesis.None,
+        // A title is not a paragraph: the heading breaker keeps a short line
+        // from ending in one orphaned word, and the body's high-quality
+        // paragraph breaker would spend its work where a title has nothing to
+        // optimize (owner decision, this session: titles keep Heading).
+        lineBreak = LineBreak.Heading,
+    )
+
+/**
+ * The plain ladder, in the interface's face: 12, 14, and 16 for words the
+ * reader works with. [tabular] is on for every style that can carry a
+ * number, so a reference, a count, a time, and a pace line up down a rail and
+ * never jitter as the digits change.
+ */
+private fun interStyle(
+    weight: FontWeight,
+    sizeSp: Float,
+    lineSp: Float,
+    scale: Float,
+    tabular: Boolean,
+): TextStyle = TextStyle(
+    fontFamily = interAt(weight, sizeSp * scale),
+    fontWeight = weight,
+    fontSize = sizeSp.sp,
+    lineHeight = lineSp.sp,
+    fontSynthesis = FontSynthesis.None,
+    fontFeatureSettings = if (tabular) "tnum" else null,
+)
+
+/**
+ * The interface in English. The ladder is five sizes under the display
+ * steps, and each is used for what it is: 12 for a label, a reference, a
+ * count, and a caption; 14 for a row's second line; 16 for a row's name and
+ * a field; 20 and up for a screen's title, in Literata. The near pairs the
+ * ladder used to carry (12 and 13, 14 and 15) were two sizes eight and six
+ * percent apart, which the eye cannot read as two steps; the meta line and
+ * the label now share 12, and the hierarchy is tone, not a point of size
+ * (owner decision, this session).
+ *
+ * The drawn size scales with the system font scale for the optical axis, the
+ * way [literataAt] does, so a reader at 2.0 scale reads the cut for double
+ * size.
  */
 @Composable
 internal fun quranTypography(): Typography {
     val scale = LocalDensity.current.fontScale
     return Typography(
-        displayLarge = interStyle(FontWeight.SemiBold, 48f, 56f, scale),
-        displayMedium = interStyle(FontWeight.SemiBold, 40f, 48f, scale),
-        displaySmall = interStyle(FontWeight.SemiBold, 34f, 42f, scale),
-        headlineLarge = interStyle(FontWeight.SemiBold, 30f, 38f, scale),
-        headlineMedium = interStyle(FontWeight.SemiBold, 26f, 34f, scale),
-        headlineSmall = interStyle(FontWeight.SemiBold, 23f, 30f, scale),
-        titleLarge = interStyle(FontWeight.SemiBold, 20f, 26f, scale),
-        titleMedium = interStyle(FontWeight.Medium, 16f, 22f, scale),
-        titleSmall = interStyle(FontWeight.Medium, 15f, 20f, scale),
-        bodyLarge = interStyle(FontWeight.Normal, 16f, 23f, scale),
-        bodyMedium = interStyle(FontWeight.Normal, 14f, 20f, scale),
-        bodySmall = interStyle(FontWeight.Normal, 13f, 18f, scale),
-        labelLarge = interStyle(FontWeight.Medium, 14f, 19f, scale),
-        labelMedium = interStyle(FontWeight.Medium, 12f, 16f, scale),
-        labelSmall = interStyle(FontWeight.Medium, 11f, 14f, scale),
+        displayLarge = readingStyle(FontWeight.SemiBold, 56f, 64f),
+        displayMedium = readingStyle(FontWeight.SemiBold, 48f, 56f),
+        displaySmall = readingStyle(FontWeight.SemiBold, 40f, 48f),
+        headlineLarge = readingStyle(FontWeight.SemiBold, 34f, 42f),
+        headlineMedium = readingStyle(FontWeight.SemiBold, 28f, 36f),
+        headlineSmall = readingStyle(FontWeight.SemiBold, 24f, 32f),
+        titleLarge = readingStyle(FontWeight.SemiBold, 20f, 28f),
+        titleMedium = readingStyle(FontWeight.Medium, 16f, 23f),
+        titleSmall = readingStyle(FontWeight.Medium, 14f, 20f),
+        bodyLarge = interStyle(FontWeight.Normal, 16f, 23f, scale, tabular = false),
+        bodyMedium = interStyle(FontWeight.Normal, 14f, 20f, scale, tabular = false),
+        bodySmall = interStyle(FontWeight.Normal, 12f, 17f, scale, tabular = true),
+        labelLarge = interStyle(FontWeight.Medium, 14f, 19f, scale, tabular = true),
+        labelMedium = interStyle(FontWeight.Medium, 12f, 16f, scale, tabular = true),
+        labelSmall = interStyle(FontWeight.Medium, 12f, 16f, scale, tabular = true),
     )
 }
-
-private fun interStyle(weight: FontWeight, sizeSp: Float, lineHeightSp: Float, scale: Float): TextStyle =
-    TextStyle(
-        fontFamily = interAt(weight, sizeSp * scale),
-        fontWeight = weight,
-        fontSize = sizeSp.sp,
-        lineHeight = lineHeightSp.sp,
-    )
 
 /**
  * Inter cut at the drawn size and weight: the file's optical axis set to the
@@ -181,63 +280,71 @@ private fun interAt(weight: FontWeight, drawnSp: Float): FontFamily =
 private val interCuts = java.util.concurrent.ConcurrentHashMap<String, FontFamily>()
 
 /**
- * The interface in Bangla. The same sizes and weights Inter gets, with line
- * heights of its own: Noto Sans Bengali's own line box is 1.325 of the em and
- * its ink reaches 1.403, past the 1.27 to 1.33 the smallest labels and the
- * largest headlines wear in the English ladder, where a stack of Bengali
- * marks would be crowded by a box borrowed from another script. Every style
- * is therefore set at 1.45 of its size, so the two voices keep one ladder and
- * each script keeps its own air (owner decision, the audio and type audit
- * session).
+ * The interface in Bangla: the same six sizes as the English ladder, in the
+ * script's own two faces. A title is Noto Serif Bengali, the reading face, and
+ * carries 1.6 of its size in line, because that face's own line box is 1.594
+ * of the em and a Bengali title's stacked marks need it; a label, a caption,
+ * and a row's second line are Noto Sans Bengali at 1.45, which clears that
+ * face's 1.403 ink. The two ratios are the script's, not a borrowed
+ * compromise, so the Bangla ladder keeps its own air at every step (owner
+ * decision, the audio and type audit session; the 1.6 titles this session).
  */
 val BanglaTypography = Typography(
-    displayLarge = banglaStyle(FontWeight.SemiBold, 48f),
-    displayMedium = banglaStyle(FontWeight.SemiBold, 40f),
-    displaySmall = banglaStyle(FontWeight.SemiBold, 34f),
-    headlineLarge = banglaStyle(FontWeight.SemiBold, 30f),
-    headlineMedium = banglaStyle(FontWeight.SemiBold, 26f),
-    headlineSmall = banglaStyle(FontWeight.SemiBold, 23f),
-    titleLarge = banglaStyle(FontWeight.SemiBold, 20f),
-    titleMedium = banglaStyle(FontWeight.Medium, 16f),
-    titleSmall = banglaStyle(FontWeight.Medium, 15f),
+    displayLarge = banglaStyle(FontWeight.SemiBold, 56f, serif = true),
+    displayMedium = banglaStyle(FontWeight.SemiBold, 48f, serif = true),
+    displaySmall = banglaStyle(FontWeight.SemiBold, 40f, serif = true),
+    headlineLarge = banglaStyle(FontWeight.SemiBold, 34f, serif = true),
+    headlineMedium = banglaStyle(FontWeight.SemiBold, 28f, serif = true),
+    headlineSmall = banglaStyle(FontWeight.SemiBold, 24f, serif = true),
+    titleLarge = banglaStyle(FontWeight.SemiBold, 20f, serif = true),
+    titleMedium = banglaStyle(FontWeight.Medium, 16f, serif = true),
+    titleSmall = banglaStyle(FontWeight.Medium, 14f, serif = true),
     bodyLarge = banglaStyle(FontWeight.Normal, 16f),
     bodyMedium = banglaStyle(FontWeight.Normal, 14f),
-    bodySmall = banglaStyle(FontWeight.Normal, 13f),
-    labelLarge = banglaStyle(FontWeight.Medium, 14f),
-    labelMedium = banglaStyle(FontWeight.Medium, 12f),
-    labelSmall = banglaStyle(FontWeight.Medium, 11f),
+    bodySmall = banglaStyle(FontWeight.Normal, 12f, tabular = true),
+    labelLarge = banglaStyle(FontWeight.Medium, 14f, tabular = true),
+    labelMedium = banglaStyle(FontWeight.Medium, 12f, tabular = true),
+    labelSmall = banglaStyle(FontWeight.Medium, 12f, tabular = true),
 )
 
-/** One style of the Bangla ladder, at the 1.45 line its script needs. */
-private fun banglaStyle(weight: FontWeight, sizeSp: Float) = TextStyle(
-    fontFamily = NotoSansBengali,
+/** One style of the Bangla ladder, at the line its face needs. */
+private fun banglaStyle(
+    weight: FontWeight,
+    sizeSp: Float,
+    serif: Boolean = false,
+    tabular: Boolean = false,
+): TextStyle = TextStyle(
+    fontFamily = if (serif) NotoSerifBengali else NotoSansBengali,
     fontWeight = weight,
     fontSize = sizeSp.sp,
-    lineHeight = (sizeSp * 1.45f).sp,
+    lineHeight = (sizeSp * if (serif) 1.6f else 1.45f).sp,
+    fontSynthesis = FontSynthesis.None,
+    fontFeatureSettings = if (tabular) "tnum" else null,
+    lineBreak = if (serif) LineBreak.Heading else LineBreak.Simple,
 )
 
 /**
- * Literata at the size it is about to be drawn, in the three weights a
- * paragraph of reading can ask for, upright and italic. The face's optical
- * size axis runs 7 to 72 with the default at 12, so a 17 sp body would
- * otherwise be set in the cut drawn for footnotes. Faces without the axis
- * (the Bengali voices) have one cut and never come through here, and below
- * API 26 the platform ignores the setting.
+ * Literata at the size it is about to be drawn, in the three weights a page
+ * can ask for, upright and italic. The face's optical size axis runs 7 to 72
+ * with the default at 12, so a 17 sp body would otherwise be set in the cut
+ * drawn for footnotes. Faces without the axis (the Bengali voices) have one
+ * cut and never come through here, and below API 26 the platform ignores the
+ * setting.
  *
  * The six members are the whole of what the reading requests: the regular
- * text, the Medium a footnote marker wears, and the SemiBold a bold run of
- * the tafsir wears, each upright and italic. A family is matched by the
- * weight and style each member declares,
- * so a member must exist for every weight a span can request, and each one
- * carries its own wght axis beside the opsz: Compose applies only the
- * variation settings a Font declares, and a family built with the opsz
- * alone loads every member at the file's default 400, so a bold run would
- * be drawn exactly like the regular text around it (the same silence a
- * static face has, made worse by the family looking correct).
+ * text, the Medium a footnote marker and a row's name wear, and the SemiBold
+ * a bold run of the tafsir and a title wear, each upright and italic. A family
+ * is matched by the weight and style each member declares, so a member must
+ * exist for every weight a span can request, and each one carries its own
+ * wght axis beside the opsz: Compose applies only the variation settings a
+ * Font declares, and a family built with the opsz alone loads every member at
+ * the file's default 400, so a bold run would be drawn exactly like the
+ * regular text around it (the same silence a static face has, made worse by
+ * the family looking correct).
  *
- * The opsz is the size the text is actually drawn at, the reader's own
- * scale included: a reader whose scale is doubled reads the cut Literata
- * drew for double size, not the small-text cut stretched over it.
+ * The opsz is the size the text is actually drawn at, the reader's own scale
+ * included: a reader whose scale is doubled reads the cut Literata drew for
+ * double size, not the small-text cut stretched over it.
  */
 @Composable
 fun literataAt(sizeSp: Float): FontFamily {
@@ -271,22 +378,20 @@ private fun literataCut(sizeSp: Float, weight: FontWeight, style: FontStyle): Fo
 
 private val literataCuts = java.util.concurrent.ConcurrentHashMap<Int, FontFamily>()
 
-/** The Latin reading voice, for translations, tafsir, and notes. */
+/** The Latin reading voice at the middle step, for a surface with no size of its own. */
 val LatinReading = TextStyle(
     fontFamily = Literata,
     fontWeight = FontWeight.Normal,
-    fontSize = 17.sp,
-    lineHeight = 27.sp,
+    fontSize = 16.2f.sp,
+    lineHeight = 25.92f.sp,
 )
 
 /**
- * The Bangla reading voice. The body is 18 sp against the Latin 17: Bengali
- * glyphs read smaller than Latin at the same nominal size, so parity needs
- * the extra point. The line is the face's own natural line plus the air
- * Literata's gets: Noto Serif Bengali's natural line is 1.594 of the em,
- * Literata's 1.485 is lifted to 1.588, so at 18 sp the Bangla line is 31.
- * Bengali script stacks its vowel marks above and below the line, and a
- * tighter box clips them.
+ * The Bangla reading voice at the middle step. The body is 18 sp against the
+ * Latin 16.2: Bengali glyphs read smaller than Latin at the same nominal size,
+ * so parity needs the extra point. The line is the face's own natural 1.722
+ * (Noto Serif Bengali's natural box is 1.594 of the em, and the script stacks
+ * vowel marks above and below the line).
  */
 val BengaliReading = TextStyle(
     fontFamily = NotoSerifBengali,
@@ -297,21 +402,84 @@ val BengaliReading = TextStyle(
 
 /**
  * The reading voice of the language being read: the style, the line a
- * paragraph of it gets per em of text (an Arabic line is its own, taller
- * thing, and never takes this one), and the face cut for an exact drawn size.
- * The theme sets it once from the reader's language; every reading surface
- * takes it from here.
+ * paragraph of it gets per em of text, the face cut for an exact drawn size,
+ * and the language's own locale, which decides the hyphenation dictionary and
+ * the local forms of the script. The theme sets it once from the reader's
+ * language; every reading surface takes it from here.
  *
- * It carried the face's measured average advance for as long as the app capped
- * a column at 65 characters. The column is the page now, and the page is a
- * width in dp rather than a count of characters, so nothing here is asked how
- * wide a character is (owner decision: the character measure stays gone, and
- * the page is `Space.Measure`).
+ * It carried the face's measured average advance for as long as the app
+ * capped a column at 65 characters. The column is the page now, and the page
+ * is a width in dp rather than a count of characters, so nothing here is
+ * asked how wide a character is (owner decision: the character measure stays
+ * gone, and the page is `Space.Measure`).
  */
 class ReadingVoice(
     val style: TextStyle,
     val lineRatio: Float,
+    /**
+     * The face's own line box, as a ratio of its size. A multi-line block is
+     * never set tighter than this: below it one line's marks sit in the
+     * next one's air. Literata's box is 1.485 of the em and Noto Serif
+     * Bengali's 1.594.
+     */
+    val minimumLineRatio: Float,
     val atSize: @Composable (Float) -> FontFamily,
+    /** The content's own language, for hyphenation and the script's local forms. */
+    val locale: LocaleList,
 )
 
-val LocalReadingVoice = staticCompositionLocalOf { ReadingVoice(LatinReading, 1.6f, ::literataAt) }
+/**
+ * One paragraph of reading, with the app's one policy for prose.
+ *
+ * The high-quality paragraph breaker instead of the default simple one: a
+ * page of two or three lines is where a greedy breaker leaves a short last
+ * line and a loose one above it, and the reader feels it as an uneven page.
+ * Hyphenation follows the content's own language, not the phone's, so an
+ * English translation hyphenates on an English dictionary even when the
+ * interface is Bangla. The paragraph resolves its own direction from its first
+ * strong character, so an Arabic paragraph in an English tafsir lays its
+ * wrapped lines from the right and a Latin one from the left. The line's extra
+ * air is trimmed from the first and last line, so the dp a surface puts above
+ * and below a paragraph is the air the eye actually sees (owner decisions,
+ * this session).
+ *
+ * The Arabic verse keeps its own line box and does not come through here: its
+ * 1.9 leading is the measured rhythm of the marks, and trimming it would
+ * tighten the verses toward each other (see [arabicStyle]).
+ */
+@Composable
+fun ReadingVoice.prose(
+    sizeSp: Float,
+    lineSp: Float,
+    color: Color = Color.Unspecified,
+    weight: FontWeight = FontWeight.Normal,
+): TextStyle = style.copy(
+    fontFamily = atSize(sizeSp),
+    fontWeight = weight,
+    fontSize = sizeSp.sp,
+    lineHeight = lineSp.sp,
+    color = color,
+    textDirection = TextDirection.Content,
+    localeList = locale,
+    lineBreak = LineBreak.Paragraph,
+    hyphens = Hyphens.Auto,
+    fontSynthesis = FontSynthesis.None,
+    lineHeightStyle = LineHeightStyle(
+        alignment = LineHeightStyle.Alignment.Proportional,
+        trim = LineHeightStyle.Trim.Both,
+    ),
+)
+
+/** The reading's own locale, built once per language. */
+internal val EnglishReadingLocale = LocaleList("en")
+internal val BanglaReadingLocale = LocaleList("bn")
+
+val LocalReadingVoice = staticCompositionLocalOf {
+    ReadingVoice(
+        LatinReading,
+        TextSize.LATIN_PROSE_RATIO,
+        1.485f,
+        ::literataAt,
+        EnglishReadingLocale,
+    )
+}

@@ -11,8 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.search.R
@@ -22,7 +20,7 @@ import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
-import io.github.muntasimulhaque.quran.ui.theme.Amiri
+import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 @Composable
@@ -99,7 +97,7 @@ internal fun SurahRow(surah: Surah, onSurah: (Surah) -> Unit) {
         }
         Text(
             text = surah.nameArabic,
-            style = TextStyle(fontFamily = Amiri, fontSize = 23.sp, color = MaterialTheme.colorScheme.onSurfaceVariant),
+            style = amiriDisplay(23f, MaterialTheme.colorScheme.onSurfaceVariant),
         )
         IconGlyph(
             icon = Icon.Chevron,

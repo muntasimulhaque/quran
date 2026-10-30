@@ -17,18 +17,16 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
-import io.github.muntasimulhaque.quran.ui.theme.Amiri
+import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import java.util.Locale
 
@@ -137,11 +135,7 @@ internal fun SurahNameBlock(
 internal fun SurahArabicName(surah: Surah, modifier: Modifier = Modifier) {
     Text(
         text = surah.nameArabic,
-        style = TextStyle(
-            fontFamily = Amiri,
-            fontSize = 23.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        ),
+        style = amiriDisplay(23f, MaterialTheme.colorScheme.onSurfaceVariant),
         modifier = modifier,
     )
 }
