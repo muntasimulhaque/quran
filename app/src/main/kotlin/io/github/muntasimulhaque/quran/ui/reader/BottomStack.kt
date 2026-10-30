@@ -20,9 +20,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.R
-import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.DownloadError
-import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
@@ -35,8 +33,13 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
- * Everything that can sit at the foot of the page: the pack on its way in,
- * the ayah's own actions, and the playback pill, stacked in one place.
+ * Everything that can sit at the foot of the page: the pack on its way in and
+ * the playback pill, stacked in one place.
+ *
+ * The ayah's own actions are not here any more: they are the app's one popup,
+ * hung from the number at the ayah's head, so the foot belongs to the player
+ * alone and a save no longer competes with a recitation (owner decision, this
+ * session).
  *
  * It lives beside the reading screen rather than inside it because the
  * screen's own file is about the page: what the reader is reading, which
@@ -58,15 +61,6 @@ internal fun BottomStack(
      * itself is [raisedAnswer], beside the screen.
      */
     showPlayback: Boolean,
-    saved: List<SavedAyah>,
-    selected: Ayah?,
-    onPlay: (Ayah) -> Unit,
-    onDeselect: () -> Unit,
-    onNote: (Ayah) -> Unit,
-    onRemoveSaved: (Ayah) -> Unit,
-    onMore: (Ayah) -> Unit,
-    onShare: (Ayah) -> Unit,
-    onTouch: () -> Unit,
     /** Reports the stack's measured height so the reading can keep its foot clear. */
     onHeight: (Int) -> Unit = {},
     onReciter: (String) -> Unit,
@@ -140,43 +134,6 @@ internal fun BottomStack(
                 )
             }
         }
-        selected?.let { ayah ->
-            val row = saved.firstOrNull { it.ayahNumber == ayah.number }
-            AyahActions(
-                // The two marks are the reader's own two hands: the note they
-                // wrote, and the bookmark they pressed. A note keeps its ayah
-                // in Saved, but it never lights the bookmark, so one tap of a
-                // note does not claim to be a save (owner report).
-                isSaved = row?.marked == true,
-                hasNote = !row?.note.isNullOrBlank(),
-                // The deeper door opens tafsir and nothing else, so it is on
-                // the pill exactly while the reader has a tafsir to open: the
-                // packs are the setting, and there is no switch over them
-                // (owner decision, this session). A pack still on its way in
-                // is not on the device, so the mark arrives with it.
-                showTafsir = viewModel.enabledTafsirPacks.isNotEmpty(),
-                onSave = {
-                    // A save of the reader's own, carrying a note, asks
-                    // before it goes, so the reader's own words are never
-                    // removed by one tap. An ayah that only a note kept has
-                    // no save to remove, and one tap of Save makes it.
-                    if (row?.marked == true && !row.note.isNullOrBlank()) {
-                        onRemoveSaved(ayah)
-                    } else {
-                        viewModel.toggleSaved(ayah)
-                    }
-                    onTouch()
-                },
-                onPlay = {
-                    onPlay(ayah)
-                    onDeselect()
-                },
-                onNote = { onNote(ayah) },
-                onMore = { onMore(ayah) },
-                onShare = { onShare(ayah) },
-            )
-        }
-
         val offer = viewModel.listenOffer
         if (showPlayback) {
             val pendingSurahName = playback.pendingDownloadSurah?.let { surah ->

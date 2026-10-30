@@ -3,12 +3,12 @@ package io.github.muntasimulhaque.quran
 import android.Manifest
 import android.os.Build
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
-import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -73,7 +73,6 @@ class ListenOfferDismissTest {
                     setShowTranslation(true)
                     setWordByWord(false)
                     setRecitation("husary")
-                    setLongPressHintShown()
                 }
             }
             PackStore(context).apply {
@@ -92,14 +91,14 @@ class ListenOfferDismissTest {
         compose.waitUntil(timeoutMillis = 90_000) {
             compose.onAllNodesWithContentDescription(readingPage).fetchSemanticsNodes().isNotEmpty()
         }
-        // The first ayah's own actions, raised by the long press.
+        // The first ayah's own door, at the head of its block.
         compose.onAllNodesWithText("1:1", substring = true).onFirst()
-            .performTouchInput { longClick() }
+            .performClick()
         val play = compose.activity.getString(R.string.action_play)
         compose.waitUntil(timeoutMillis = 60_000) {
-            compose.onAllNodesWithContentDescription(play).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithText(play).fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithContentDescription(play).performClick()
+        compose.onNodeWithText(play).performClick()
         compose.waitUntil(timeoutMillis = 60_000) {
             compose.onAllNodesWithTag("listen-offer-bar", useUnmergedTree = true)
                 .fetchSemanticsNodes().isNotEmpty()

@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 13.1 (versionCode 133)
+Version: 13.2 (versionCode 134)
 
 ## Listing
 
@@ -162,6 +162,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (13.2, 339)
+13.2 makes the ayah's actions visible. The number at each ayah's head is now a door: tap it for Play, Tafsir, Save, Note, and Share. The menu is the one the player already opens, it closes on any answer, a scroll, or Back, and nothing hides behind a gesture anymore. The long press and its one-time hint are gone. Text and packs unchanged.
 
 ## Release notes (13.1, 445 characters)
 13.1 is the typography release. Titles, screen names, surah names, and search results now use the book's own face, while controls and labels stay quiet. The prose is set with better line breaks, hyphenation, and trimmed leading; the tafsir's Arabic moves to Amiri's body face. Bangla readers get a larger reading and a taller line, the honorific sits inside its sentence, the word gloss steps back, and numbers line up. Text and packs unchanged.

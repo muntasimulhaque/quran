@@ -178,7 +178,6 @@ class ScreenshotVariantsTest {
                 setShowTranslation(true)
                 setWordByWord(true)
                 setTajweed(true)
-                setLongPressHintShown()
             }
         }
         Thread.sleep(500)

@@ -15,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntRect
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
@@ -30,8 +31,9 @@ import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
  *
  * A surah is the unit the Quran itself gives, and readers read it as one:
  * this view ends where the surah ends, instead of sliding into the next one
- * without a word. Tapping an ayah raises its actions; tapping the paper
- * around it brings the chrome.
+ * without a word. The number at each ayah's head is its own door: the menu it
+ * opens holds the ayah's actions, and the paper around it brings the chrome
+ * (owner decision, this session).
  */
 @Composable
 fun ReadingList(
@@ -59,10 +61,12 @@ fun ReadingList(
     contentLanguage: String,
     nextSurahName: String?,
     selectedAyah: Int?,
+    /** The ayah whose menu is open, so its own door can say so. */
+    menuAyah: Int? = null,
     playingAyah: Int?,
     /** The word being recited, read only by the ayah being heard. */
     playedWord: State<Int?>,
-    onAyah: (Ayah) -> Unit,
+    onAyahMenu: (Ayah, IntRect) -> Unit,
     onBackgroundTap: () -> Unit,
     onScrolled: () -> Unit,
     onNextSurah: (Int) -> Unit,
@@ -142,11 +146,12 @@ fun ReadingList(
         contentLanguage = contentLanguage,
         nextSurahName = nextSurahName,
         selectedAyah = selectedAyah,
+        menuAyah = menuAyah,
         playingAyah = playingAyah,
         playedWord = playedWord,
         hafs = hafs,
         pageDescription = pageDescription,
-        onAyah = onAyah,
+        onAyahMenu = onAyahMenu,
         onBackgroundTap = onBackgroundTap,
         onScrolled = onScrolled,
         onNextSurah = onNextSurah,

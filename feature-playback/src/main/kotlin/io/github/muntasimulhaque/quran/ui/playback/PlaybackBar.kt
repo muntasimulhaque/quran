@@ -28,6 +28,8 @@ import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.ListenOffer
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
+import io.github.muntasimulhaque.quran.ui.kit.AppPopup
+import io.github.muntasimulhaque.quran.ui.kit.PopupAlignment
 import io.github.muntasimulhaque.quran.ui.kit.DownloadLine
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 import io.github.muntasimulhaque.quran.ui.kit.speedText
@@ -358,10 +360,10 @@ fun PlaybackBar(
             // pill's own middle (owner report).
             Box(Modifier.matchParentSize()) {
                 PillMenuAnchor { anchor ->
-                    PillPopup(
-                        open = openMenu != null,
+                    AppPopup(
                         anchor = anchor,
                         onDismiss = { openMenu = null },
+                        alignment = PopupAlignment.Center,
                     ) {
                         PillMenuBody(
                             openMenu = openMenu,

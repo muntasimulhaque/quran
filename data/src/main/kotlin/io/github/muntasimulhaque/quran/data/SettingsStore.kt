@@ -160,13 +160,6 @@ data class AppSettings(
      */
     val dailyAyahMinute: Int = DEFAULT_DAILY_MINUTE,
     /**
-     * Whether the one-time long-press note has been shown. The ayah's own
-     * actions are the richest gesture in the app and the least visible, so
-     * they are said once, quietly, and then never again (owner decision,
-     * this session: the one-tap ayah of 6.5 was reverted to the long press).
-     */
-    val longPressHintShown: Boolean = false,
-    /**
      * The chrome surface the reader has already been shown. Empty on a new
      * install; the value is the surface set that added the reveal. A release
      * that adds a chrome surface changes the reveal key, so the next launch
@@ -341,7 +334,6 @@ class SettingsStore(private val context: Context) {
             tajweed = preferences[TAJWEED] ?: true,
             dailyAyah = preferences[DAILY_AYAH] ?: true,
             dailyAyahMinute = storedDailyMinute(preferences),
-            longPressHintShown = preferences[HINT_SHOWN] ?: false,
             chromeReveal = preferences[CHROME_REVEAL] ?: "",
         )
     }
@@ -450,16 +442,6 @@ class SettingsStore(private val context: Context) {
     /** The moment the daily reminder arrives: minutes from midnight. */
     suspend fun setDailyAyahTime(minuteOfDay: Int) {
         context.settingsStore.edit { it[DAILY_AYAH_MINUTE] = minuteOfDay.coerceIn(0, LAST_MINUTE_OF_DAY) }
-    }
-
-    /**
-     * The one-time long-press note is remembered across launches. It is
-     * written when the note leaves the screen, not when it appears: a
-     * process that dies with the note up says it again rather than losing
-     * it forever.
-     */
-    suspend fun setLongPressHintShown() {
-        context.settingsStore.edit { it[HINT_SHOWN] = true }
     }
 
     suspend fun setTranslationPacks(packs: Set<String>) {
@@ -669,7 +651,6 @@ class SettingsStore(private val context: Context) {
         /** Written by builds before the picker took minutes; read, never written. */
         val DAILY_AYAH_HOUR = intPreferencesKey("daily_ayah_hour")
         val DAILY_AYAH_MINUTE = intPreferencesKey("daily_ayah_minute")
-        val HINT_SHOWN = booleanPreferencesKey("hint_shown")
         val CHROME_REVEAL = stringPreferencesKey("chrome_reveal")
     }
 }

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.ListenOption
+import io.github.muntasimulhaque.quran.ui.kit.PopupMeasure
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
@@ -23,7 +24,7 @@ import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
  * session).
  *
  * The rows fill the popup, which is drawn at the pill's own
- * [PillMenuMeasure], also the measure of the anchor the playing pill hangs it
+ * [PopupMeasure], also the measure of the anchor the playing pill hangs it
  * from, so the list stands on the capsule's centre rather than beside the
  * word that opened it (owner report).
  */

@@ -14,6 +14,12 @@
     <string name="reading_ayah_actions">Ayah actions</string>
     <string name="reading_paper_actions">Show or hide the bar</string>
     <string name="reading_ayah_reference">Ayah %1$s</string>
+    <!-- The ayah's own door: the number at its head opens the actions. The
+         caret turns and the capsule takes the accent while it is open, the way
+         the search sheet's filter door says which way it will move. -->
+    <string name="reading_ayah_door">Ayah %1$s actions</string>
+    <string name="reading_door_expanded">Expanded</string>
+    <string name="reading_door_collapsed">Collapsed</string>
 
     <string name="card_tafsir_label">Tafsir</string>
     <string name="card_tafsir_reference">%1$s %2$s</string>

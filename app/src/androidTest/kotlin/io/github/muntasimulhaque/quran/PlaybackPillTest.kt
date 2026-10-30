@@ -322,7 +322,7 @@ class PlaybackPillTest {
         showPill()
         compose.onNodeWithTag("playback-words").performClick()
         compose.onNode(
-            hasText("Husary") and hasAnyAncestor(hasTestTag("pill-popup")),
+            hasText("Husary") and hasAnyAncestor(hasTestTag("app-popup")),
         ).assertIsNotFocused()
     }
 
@@ -337,7 +337,7 @@ class PlaybackPillTest {
         showPill()
         compose.onNodeWithTag("playback-words").performClick()
         compose.onNodeWithText("Playback speed").assertExists()
-        val menu = compose.onNodeWithTag("pill-popup").fetchSemanticsNode().boundsInWindow
+        val menu = compose.onNodeWithTag("app-popup").fetchSemanticsNode().boundsInWindow
         val pace = compose.onNodeWithTag("playback-speed").fetchSemanticsNode().boundsInWindow
         assertEquals(
             "the pace's own middle is the menu's middle",
@@ -416,13 +416,13 @@ class PlaybackPillTest {
         showPill()
         compose.onNodeWithTag("playback-words").performClick()
         val chosen = compose.onNode(
-            hasText("Husary") and hasAnyAncestor(hasTestTag("pill-popup")),
+            hasText("Husary") and hasAnyAncestor(hasTestTag("app-popup")),
         )
         chosen.assertIsSelected()
         val mark = compose.onAllNodesWithTag("choice-mark", useUnmergedTree = true).onFirst()
             .getUnclippedBoundsInRoot()
         val name = compose.onNode(
-            hasText("Husary") and hasAnyAncestor(hasTestTag("pill-popup")),
+            hasText("Husary") and hasAnyAncestor(hasTestTag("app-popup")),
             useUnmergedTree = true,
         ).getUnclippedBoundsInRoot()
         assertTrue(
@@ -634,22 +634,22 @@ class PlaybackPillTest {
         )
         fun openThePanel() {
             compose.onNodeWithTag("playback-words").performClick()
-            compose.onNodeWithTag("pill-popup").assertExists()
+            compose.onNodeWithTag("app-popup").assertExists()
         }
         openThePanel()
         compose.onAllNodesWithText("0.5x").onFirst().performClick()
         assertEquals("the pace must reach the pill's setter", 0.5f, speed)
-        compose.onNodeWithTag("pill-popup").assertDoesNotExist()
+        compose.onNodeWithTag("app-popup").assertDoesNotExist()
 
         openThePanel()
         compose.onNodeWithText("Repeat the surah").performClick()
         assertEquals("the ending must reach the pill's setter", EndOfAudio.REPEAT_SURAH, end)
-        compose.onNodeWithTag("pill-popup").assertDoesNotExist()
+        compose.onNodeWithTag("app-popup").assertDoesNotExist()
 
         openThePanel()
         compose.onNodeWithText("Minshawi").performClick()
         assertEquals("the voice must reach the pill's setter", "minshawi", reciter)
-        compose.onNodeWithTag("pill-popup").assertDoesNotExist()
+        compose.onNodeWithTag("app-popup").assertDoesNotExist()
     }
 
     /**
@@ -1179,7 +1179,7 @@ class PlaybackPillTest {
      * cannot be: a popup draws in a window of its own, and every node inside
      * it reports coordinates measured from that window's corner, so a compose
      * test can see how big a popup is and never where it hangs.
-     * `PillMenuPositionTest` pins what puts it there, in arithmetic that runs
+     * `AppPopupPositionTest` pins what puts it there, in arithmetic that runs
      * anywhere.
      */
     @Test

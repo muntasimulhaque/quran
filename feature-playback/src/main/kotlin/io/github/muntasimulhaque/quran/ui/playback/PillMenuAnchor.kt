@@ -15,6 +15,16 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.ui.kit.PopupMeasure
+
+/**
+ * The anchor hairline: a menu is placed from the bounds of the box it hangs
+ * on, and a box with no height has no bounds to read, so a zero-height anchor
+ * stands every popup at the window edge instead of the capsule centre. One dp
+ * is the thinnest box that has a place on the page, and it draws nothing.
+ */
+private val AnchorLine = 1.dp
 
 /**
  * The anchor the pill's own popup hangs from, on both of the bars it wears:
@@ -36,7 +46,7 @@ internal fun PillMenuAnchor(content: @Composable (anchor: IntRect) -> Unit) {
     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         Box(
             Modifier
-                .width(PillMenuMeasure)
+                .width(PopupMeasure)
                 .height(AnchorLine)
                 .testTag("pill-menu-anchor")
                 .onGloballyPositioned {

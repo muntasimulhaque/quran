@@ -33,14 +33,14 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /** The room the capsule keeps from the row's own edge, so stacked rows read
  * as a list and the first and last stay clear of the sheet. */
-private val CapsuleGutter = 6.dp
+internal val CapsuleGutter = 6.dp
 
 /** The capsule's own vertical inset: the chip's own 8 dp. */
-private val CapsulePad = 8.dp
+internal val CapsulePad = 8.dp
 
 /** The room from the row's edge to the capsule: 10 plus the row's own 12
  * stands the mark on the app's 22 dp gutter. */
-private val RowGutter = 10.dp
+internal val RowGutter = 10.dp
 
 /**
  * Where the name of a choice row begins, from the row's own edge: the gutter,

@@ -5,12 +5,12 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
-import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -63,7 +63,6 @@ class TafsirCardHeadTest {
                     setWordByWord(false)
                     // The first-run long-press note belongs to a new install,
                     // not to the head this test reads.
-                    setLongPressHintShown()
                 }
             }
         }
@@ -105,7 +104,7 @@ class TafsirCardHeadTest {
         }
     }
 
-    /** The card, from the ayah's own actions: a tap on the paper, then a press. */
+    /** The card, from the ayah's own door: a tap on the number at its head. */
     private fun openTheCard() {
         val page = compose.activity.getString(ReadingR.string.reading_page_description)
         compose.onAllNodesWithContentDescription(page).onFirst().tapThePaper()
@@ -114,13 +113,12 @@ class TafsirCardHeadTest {
                 .fetchSemanticsNodes().isNotEmpty()
         }
         compose.onAllNodesWithText("1:1", substring = true).onFirst()
-            .performTouchInput { longClick() }
+            .performClick()
         val tafsir = compose.activity.getString(R.string.action_tafsir)
         compose.waitUntil(timeoutMillis = 60_000) {
-            compose.onAllNodesWithContentDescription(tafsir)
-                .fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithText(tafsir).fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithContentDescription(tafsir).performClick()
+        compose.onNodeWithText(tafsir).performClick()
         compose.waitUntil(timeoutMillis = 30_000) {
             compose.onAllNodesWithTag("ayah-card").fetchSemanticsNodes().isNotEmpty()
         }

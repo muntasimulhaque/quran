@@ -59,7 +59,6 @@ class SearchHintTest {
             settings.setTafsirPacks(setOf("tafsir-ibn-kathir-en"))
             settings.setShowTranslation(true)
             settings.setWordByWord(false)
-            settings.setLongPressHintShown()
         }
         Thread.sleep(500)
     }

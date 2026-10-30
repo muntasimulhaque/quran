@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.DownloadError
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.ListenOffer
+import io.github.muntasimulhaque.quran.ui.kit.AppPopup
+import io.github.muntasimulhaque.quran.ui.kit.PopupAlignment
 import io.github.muntasimulhaque.quran.ui.kit.DownloadLine
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
@@ -201,10 +203,10 @@ internal fun ListenOfferBar(
         // decision).
         Box(Modifier.matchParentSize()) {
             PillMenuAnchor { anchor ->
-                PillPopup(
-                    open = chooser,
+                AppPopup(
                     anchor = anchor,
                     onDismiss = { chooser = false },
+                    alignment = PopupAlignment.Center,
                 ) {
                     ReciterChoices(
                         options = offer.options,

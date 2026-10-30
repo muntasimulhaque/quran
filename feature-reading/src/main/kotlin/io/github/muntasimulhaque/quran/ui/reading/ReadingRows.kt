@@ -23,6 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.Dp
 import io.github.muntasimulhaque.quran.core.AyahList
 import io.github.muntasimulhaque.quran.data.Ayah
@@ -52,12 +53,14 @@ internal fun ReadingRows(
     contentLanguage: String,
     nextSurahName: String?,
     selectedAyah: Int?,
+    /** The ayah whose menu is open, so its own door can say so. */
+    menuAyah: Int?,
     playingAyah: Int?,
     /** The word being recited, read inside the one ayah being heard. */
     playedWord: State<Int?>,
     hafs: FontFamily,
     pageDescription: String,
-    onAyah: (Ayah) -> Unit,
+    onAyahMenu: (Ayah, IntRect) -> Unit,
     onBackgroundTap: () -> Unit,
     onScrolled: () -> Unit,
     onNextSurah: (Int) -> Unit,
@@ -244,7 +247,8 @@ internal fun ReadingRows(
                 reveal = reveal?.takeIf { it.ayah == row.ayah.number },
                 showWordAid = wordAid ||
                     (reveal?.wordByWord == true && reveal.ayah == row.ayah.number),
-                onAyah = onAyah,
+                isMenuOpen = menuAyah == row.ayah.number,
+                onMenu = onAyahMenu,
                 onBackgroundTap = dismissAbout,
                 onFootnote = { line, number ->
                     val note = line.text.footnotes.firstOrNull { it.number == number }

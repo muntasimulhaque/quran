@@ -82,8 +82,9 @@ private data class TafsirLoad(
  *
  * The ayah and its translation and meanings are already on the page, so the
  * card does not repeat them: it opens only the tafsirs. The note is not here
- * at all: it belongs to the pill that the long press raises, one tap away
- * rather than a scroll to the foot of a card.
+ * at all: it belongs to the ayah's own menu, at the number at its head, one
+ * tap away rather than a scroll to the foot of a card (owner decision, this
+ * session).
  *
  * The sheet is named by the kind of text it holds, and each pack is named
  * once. The reference belongs to the passage and stands with it, because two

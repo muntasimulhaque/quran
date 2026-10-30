@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -45,6 +46,7 @@ import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.readingMetrics
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
+import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
 import io.github.muntasimulhaque.quran.ui.reading.AyahCard
@@ -128,7 +130,10 @@ fun ReaderScreen(
         mutableStateOf(chromeRevealNeeded(settings.chromeReveal))
     }
     var chrome by rememberSaveable { mutableStateOf(chromeRevealPending) }
-    var selected by remember { mutableStateOf<Ayah?>(null) }
+    // The ayah whose own menu is open, and the door it hangs from. One at a
+    // time, never across a rotation: a popup is a moment and not a place
+    // (owner decision, this session).
+    var menu by remember { mutableStateOf<AyahMenuRequest?>(null) }
     var cardAyah by remember { mutableStateOf<Ayah?>(null) }
     // The tafsir pack a search hit opened the card for; null for the normal
     // Tafsir pill, where the single enabled pack (or the door list) decides.
@@ -187,6 +192,7 @@ fun ReaderScreen(
         if (sheet == target) return
         returnTo = null
         chromeRevealPending = false
+        menu = null
         sheetStates.removeState(target.name)
         sheet = target
     }
@@ -223,6 +229,7 @@ fun ReaderScreen(
         returnTo = ReaderSheet.Search
         sheet = ReaderSheet.None
         chrome = false
+        menu = null
         cardAyah = null
         cardTafsirPack = null
         when (arrival) {
@@ -256,7 +263,7 @@ fun ReaderScreen(
     // app, not listening to it from across the room. Those keep the screen
     // awake; the plain reading and the plain listening are the two that give
     // it back after their own window (owner decision, this session).
-    val usingControls = sheet != ReaderSheet.None || selected != null ||
+    val usingControls = sheet != ReaderSheet.None || menu != null ||
         cardAyah != null || cardNote != null || pendingRemove != null || sharing != null
 
     // A search reveal belongs to the arrival, not to the page. It leaves on
@@ -268,11 +275,11 @@ fun ReaderScreen(
         reveal = null
     }
 
-    // The wash under an ayah: the one the tap chose, or the one whose
-    // note is open over it. A note opened from Browse has no pill behind it,
+    // The wash under an ayah: the one whose menu is open, or the one whose
+    // note is open over it. A note opened from Browse has no door behind it,
     // but the reader is still looking at the ayah the note belongs to, so it
     // wears the same mark while the sheet is up.
-    val washedAyah = selected?.number ?: cardNote
+    val washedAyah = menu?.ayah?.number ?: cardNote
 
     // What a tap on the page, and the phone's own Back, answer at the foot of
     // the reading. The pill wears no close any more, so this is the one way a
@@ -297,19 +304,20 @@ fun ReaderScreen(
 
     // The phone's back button dismisses the ayah pill first, then whatever the
     // foot of the page has raised, and only closes the app when nothing is
-    // raised. A reader who tapped an ayah means the pill, and back is the
-    // gesture they already use to put a thing away. The sheets (the ayah card,
-    // the note, Browse, Search, Settings) are their own windows and take back
-    // through their own handlers; this one is for the reading's own foot.
+    // raised. A reader who tapped an ayah's door means its menu, and back is
+    // the gesture they already use to put a thing away. The sheets (the ayah
+    // card, the note, Browse, Search, Settings) are their own windows and take
+    // back through their own handlers; this one is for the reading's own
+    // raised surfaces.
     //
     // Back answers the page's own rule and nothing more: it never silences a
     // recitation that is playing, and it never aborts a package on its way.
-    androidx.activity.compose.BackHandler(enabled = selected != null) {
-        selected = null
+    androidx.activity.compose.BackHandler(enabled = menu != null) {
+        menu = null
         touch++
     }
     androidx.activity.compose.BackHandler(
-        enabled = selected == null && raised != RaisedAnswer.Nothing,
+        enabled = menu == null && raised != RaisedAnswer.Nothing,
     ) {
         putAwayRaised()
         touch++
@@ -320,7 +328,7 @@ fun ReaderScreen(
     // they had asked for. The handler consumes Back while a content pack or
     // a recitation package is in flight, and does nothing else.
     androidx.activity.compose.BackHandler(
-        enabled = selected == null && raised == RaisedAnswer.Nothing &&
+        enabled = menu == null && raised == RaisedAnswer.Nothing &&
             (viewModel.packSetup != null || playback.downloadProgress != null),
     ) {
         touch++
@@ -331,7 +339,7 @@ fun ReaderScreen(
     // wins over the in-flight guard above: a download may keep running while
     // the reader goes back to the results that started it.
     androidx.activity.compose.BackHandler(
-        enabled = selected == null && raised == RaisedAnswer.Nothing && returnTo != null,
+        enabled = menu == null && raised == RaisedAnswer.Nothing && returnTo != null,
     ) {
         sheet = returnTo ?: ReaderSheet.None
         returnTo = null
@@ -494,10 +502,11 @@ fun ReaderScreen(
                     nextSurahName = viewModel.surahs
                         .firstOrNull { it.number == surah.number + 1 }?.nameSimple,
                     selectedAyah = washedAyah,
+                    menuAyah = menu?.ayah?.number,
                     playingAyah = playback.ayahNumber,
                     playedWord = playedWord,
-                    onAyah = { ayah ->
-                        selected = ayah
+                    onAyahMenu = { ayah, anchor ->
+                        menu = AyahMenuRequest(ayah, anchor)
                         reveal = null
                         chrome = false
                         chromeRevealPending = false
@@ -510,7 +519,7 @@ fun ReaderScreen(
                         } else {
                             chrome = !chrome
                         }
-                        selected = null
+                        menu = null
                         reveal = null
                         // A tap on the page is how a raised control is put
                         // away: the paused recitation, a failure, the offer.
@@ -526,6 +535,10 @@ fun ReaderScreen(
                         // the reveal has been answered still hides it as the
                         // reading always has.
                         if (!chromeRevealPending && chrome) chrome = false
+                        // The menu goes with the page: its door moves under
+                        // it, and a popup hung from a moving anchor is worse
+                        // than no popup (owner decision, this session).
+                        menu = null
                         // A scroll is the reader still being here, even when
                         // the chrome is already away and no tap was needed.
                         touch++
@@ -562,20 +575,15 @@ fun ReaderScreen(
             modifier = Modifier.align(Alignment.TopCenter),
         )
 
-        // The long press is the richest gesture in the app and the least
-        // visible, so it is said once, quietly, and then never again.
-        if (!settings.longPressHintShown) {
-            LongPressHint(
-                reducedMotion = reducedMotion,
-                onSeen = { viewModel.markLongPressHintShown() },
-            )
-        }
+        // The long press and its one-time note are gone with the gesture: the
+        // ayah's own number is its door, visible on every ayah, and a
+        // signifier that has to be taught is not a signifier (owner decision,
+        // this session).
 
         val offer = viewModel.listenOffer
         val showPlayback = playback.isAnything() || offer != null
-        val bottomItems = selected != null || showPlayback
         AnimatedVisibility(
-            visible = bottomItems,
+            visible = showPlayback,
             // A reader who asked the phone to reduce motion gets the appearance
             // and the disappearance without the slide; everyone else keeps the
             // lift that says the control comes from the foot of the page.
@@ -587,27 +595,6 @@ fun ReaderScreen(
                 viewModel = viewModel,
                 playback = playback,
                 showPlayback = showPlayback,
-                saved = saved,
-                selected = selected,
-                onPlay = { ayah ->
-                    onPlaybackPermission()
-                    viewModel.playAyah(ayah.number)
-                },
-                onDeselect = {
-                    selected = null
-                    touch++
-                },
-                onMore = { ayah ->
-                    cardTafsirPack = null
-                    cardAyah = ayah
-                    selected = null
-                },
-                onNote = { ayah -> cardNote = ayah.number },
-                onRemoveSaved = { ayah -> pendingRemove = ayah.number },
-                onShare = { ayah ->
-                    scope.launch { sharing = loadShareCard(context, viewModel, ayah) }
-                },
-                onTouch = { touch++ },
                 onHeight = { bottomStackHeight = it },
                 onReciter = { viewModel.choosePillReciter(it) },
                 reciterId = settings.recitation,
@@ -616,6 +603,47 @@ fun ReaderScreen(
                     viewModel.recitations.firstOrNull { it.id == settings.recitation }?.name.orEmpty(),
                 ),
                 reciterOptions = viewModel.pillReciters,
+            )
+        }
+
+        // The ayah's own menu, hung from its door. Every answer closes it and
+        // then does its work, so the reader is returned to the reading rather
+        // than to a panel they have to put away (owner decision, this
+        // session). The popup is the app's one popup, and it is the same one
+        // the playback pill opens.
+        menu?.let { request ->
+            val savedRow = saved.firstOrNull { it.ayahNumber == request.ayah.number }
+            AyahMenu(
+                reference = localizedDigits(request.ayah.verseKey),
+                anchor = request.anchor,
+                isSaved = savedRow?.marked == true,
+                hasNote = !savedRow?.note.isNullOrBlank(),
+                showTafsir = viewModel.enabledTafsirPacks.isNotEmpty(),
+                onDismiss = { menu = null },
+                onPlay = {
+                    onPlaybackPermission()
+                    viewModel.playAyah(request.ayah.number)
+                },
+                onTafsir = {
+                    cardTafsirPack = null
+                    cardAyah = request.ayah
+                },
+                onSave = {
+                    // A save of the reader's own, carrying a note, asks before
+                    // it goes, so the reader's own words are never removed by
+                    // one tap. An ayah that only a note kept has no save to
+                    // remove, and one tap of Save makes it.
+                    if (savedRow?.marked == true && !savedRow.note.isNullOrBlank()) {
+                        pendingRemove = request.ayah.number
+                    } else {
+                        viewModel.toggleSaved(request.ayah)
+                    }
+                    touch++
+                },
+                onNote = { cardNote = request.ayah.number },
+                onShare = {
+                    scope.launch { sharing = loadShareCard(context, viewModel, request.ayah) }
+                },
             )
         }
 
@@ -751,3 +779,12 @@ private val PageFoot = 32.dp
  */
 internal fun readingFoot(bottomStack: Dp, navigationBar: Dp): Dp =
     maxOf(bottomStack, PageFoot + navigationBar)
+
+/**
+ * The ayah whose own menu is open, and the door it hangs from.
+ *
+ * The door is a place on the glass and not a setting, so the pair lives in a
+ * plain `remember`: a rotation closes the menu, which is right, because the
+ * door has moved and the reader's attention has too.
+ */
+private data class AyahMenuRequest(val ayah: Ayah, val anchor: IntRect)

@@ -9,7 +9,6 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
-import androidx.compose.ui.test.longClick
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasContentDescription
@@ -433,7 +432,6 @@ class ScreenshotTest {
             // one-time long-press note has been read in this install, so no
             // frame catches it floating over the opening (owner report, this
             // session: the note belongs to the first run, not the listing).
-            settings.setLongPressHintShown()
             for (role in TypeRole.entries) settings.setTypeSize(role, TextSize.DEFAULT)
         }
         Thread.sleep(500)
@@ -456,17 +454,17 @@ class ScreenshotTest {
         // 3. An ayah's actions, and the card they open. The card carries
         // the tafsir doors, which is the deeper surface a reader meets off
         // the reading. This runs before any scrolling, while 2:255 is still
-        // the verse on screen. The actions are a long press on the ayah,
-        // the one gesture the reading keeps.
+        // the verse on screen. The actions open from the ayah's own door, the
+        // number at its head.
         val pillIsUp = {
-            rule.onAllNodesWithContentDescription("Tafsir").fetchSemanticsNodes().isNotEmpty()
+            rule.onAllNodesWithText("Tafsir").fetchSemanticsNodes().isNotEmpty()
         }
         var pillRaised = false
         repeat(3) {
             if (pillRaised) return@repeat
             runCatching {
                 rule.onAllNodesWithText("2:255", substring = true).onFirst()
-                    .performTouchInput { longClick() }
+                    .performClick()
             }
             pillRaised = runCatching {
                 rule.waitUntil(timeoutMillis = 20_000) { pillIsUp() }
@@ -477,7 +475,7 @@ class ScreenshotTest {
             runCatching { capture("09-ayah-tap-failed") }
             throw AssertionError("the ayah's tap did not raise the actions bar")
         }
-        rule.onNodeWithContentDescription("Tafsir").performClick()
+        rule.onNodeWithText("Tafsir").performClick()
         waitForTag("ayah-card", timeout = 30_000)
         // Two commentaries, none open. The reference belongs to the passage,
         // so the card carries none until a door is chosen: this frame is the
