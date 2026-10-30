@@ -133,7 +133,9 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 41000985652 on 13.1: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. Every surface carries the new type: the titles and names in Literata, the prose with its own breaks and hyphenation, the tafsir's Arabic in Amiri, and the honorific inside its sentence; the settings frame names 13.1. The evidence frames carry the same reading in the dark and at the largest size, and the ten inch portrait.
+The set is from capture run 41041338981 on 13.2: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The reading, the surah opening, the ayah card's ground, and every evidence frame carry the ayah's door; search, Browse, and the tafsir differ from 13.1 only by the status bar's clock; the settings frame names 13.2.
+
+The set before it, 13.1, is from capture run 41000985652: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. Every surface carries the new type: the titles and names in Literata, the prose with its own breaks and hyphenation, the tafsir's Arabic in Amiri, and the honorific inside its sentence; the settings frame named 13.1. The evidence frames carry the same reading in the dark and at the largest size, and the ten inch portrait.
 
 The set before it, 13.0, is from capture run 40917013319: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The reading, chrome, and surah opening frames are byte-identical to 12.9's on all three legs; search, Browse, the ayah card, and the tafsir differ only by the status bar, and the ten inch search frame also by the field's caret; the settings frame differs by the status bar and the version line, which named 13.0. The evidence frames are byte-identical to 12.9's.
 
