@@ -75,39 +75,38 @@ class TextSizeTest {
     @Test
     fun theTafsirIsSetAtTheTranslationSize() {
         // One reading voice: the Ibn Kathir prose stands at the size the
-        // translation stands at, both at 16.2 sp with the same 1.6 line
+        // translation stands at, both at 15 sp with the same 1.5 line
         // (owner decision, this session).
         assertEquals(TextSize.sp(TypeRole.Translation, 1f), TextSize.sp(TypeRole.Tafsir, 1f))
         assertEquals(TextSize.lineSp(TypeRole.Translation, 1f), TextSize.lineSp(TypeRole.Tafsir, 1f))
     }
 
     @Test
-    fun theArabicLineHoldsTheMeasuredRatio() {
-        // 1.9 (owner decision, the audio and type audit session): at 1.85 the
-        // worst frame left about 0.7 dp of air at its tightest point, inside
-        // the Hafs face's own 1.758 line box by a hair; 1.9 lifts it to about
-        // 2.3 dp for about 2.6 percent of the page.
-        assertEquals(28.8f * 1.9f, TextSize.lineSp(TypeRole.Arabic, 1f))
+    fun theArabicLineHoldsTheQuranFoundationsRatio() {
+        // 2.0, the Quran Foundation's own QPC Hafs leading. At 28.8 the app
+        // carried 1.9, measured against the marks; with the base at 24 the
+        // official 2.0 gives the marks their room.
+        assertEquals(24f * 2f, TextSize.lineSp(TypeRole.Arabic, 1f))
     }
 
     @Test
     fun theShippedDefaultIsOneEvenStepSmaller() {
         // The default is 1, the middle of the five (owner decision, this
-        // session). It renders 0.9 of the old base, so the Arabic stands at
-        // 28.8 sp while the prose is put back to 16.2 sp, a hair under the
-        // platform's own body size (owner decision, this session).
-        assertEquals(28.8f, TextSize.sp(TypeRole.Arabic, 1f))
-        assertEquals(16.2f, TextSize.sp(TypeRole.Translation, 1f))
+        // session). The Arabic stands at 24 sp, 1.6 times the 15 sp prose:
+        // the owner's eye asked for the Quran one step larger and the prose
+        // one smaller, and the reader can still go down to 19.2.
+        assertEquals(24f, TextSize.sp(TypeRole.Arabic, 1f))
+        assertEquals(15f, TextSize.sp(TypeRole.Translation, 1f))
     }
 
     @Test
     fun theWordMeaningSitsAStepUnderTheTranslation() {
-        // 14.58 sp against the translation's 16.2: nine tenths of it, a step
+        // 13.5 sp against the translation's 15: nine tenths of it, a step
         // the eye reads as a gloss rather than as a second translation. The
         // five percent it stood at before read as one size used twice (owner
         // decision, this session).
-        assertEquals(16.2f * 0.9f, TextSize.meaningSp(1f), 0.001f)
-        assertEquals(14.58f * 0.8f, TextSize.meaningSp(0.8f), 0.001f)
+        assertEquals(15f * 0.9f, TextSize.meaningSp(1f), 0.001f)
+        assertEquals(13.5f * 0.8f, TextSize.meaningSp(0.8f), 0.001f)
         // The aid's Arabic word follows the verse and never the gloss, so a
         // bigger gloss cannot carry it past the Quran's own size.
         for (step in TextSize.STEPS) {
@@ -121,16 +120,16 @@ class TextSizeTest {
     @Test
     fun theLadderIsPinned() {
         // The session's ladder, one line per relationship the reader was
-        // promised: the Quran is the anchor, the word list reads one size
-        // under it at 7/8, Arabic beside prose is one rule at 0.9 from the
-        // Quran in both the translation and the tafsir, the prose stands at
-        // the reading voice's own sizes, and the meaning sits under the word
-        // it glosses (owner decision, the theme and consistency session).
-        assertEquals(28.8f, TextSize.sp(TypeRole.Arabic, 1f))
-        assertEquals(26.775f, TextSize.wordSp(1f), 0.001f)
-        assertEquals(25.92f, TextSize.inlineArabic(1f), 0.001f)
-        assertEquals(16.2f, TextSize.sp(TypeRole.Translation, 1f))
-        assertEquals(16.2f, TextSize.sp(TypeRole.Tafsir, 1f))
-        assertEquals(14.58f, TextSize.meaningSp(1f), 0.001f)
+        // promised: the Quran is the anchor at 1.6 times the prose, the word
+        // list reads two points under it, Arabic beside prose is one rule at
+        // 0.9 from the Quran in both the translation and the tafsir, the
+        // prose stands at the reading voice's own size, and the meaning sits
+        // under the word it glosses (owner decision, this session).
+        assertEquals(24f, TextSize.sp(TypeRole.Arabic, 1f))
+        assertEquals(22f, TextSize.wordSp(1f), 0.001f)
+        assertEquals(21.6f, TextSize.inlineArabic(1f), 0.001f)
+        assertEquals(15f, TextSize.sp(TypeRole.Translation, 1f))
+        assertEquals(15f, TextSize.sp(TypeRole.Tafsir, 1f))
+        assertEquals(13.5f, TextSize.meaningSp(1f), 0.001f)
     }
 }

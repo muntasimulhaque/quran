@@ -122,7 +122,7 @@ fun ReadingTitle(
             if (!detail.isNullOrBlank()) {
                 Text(
                     text = detail,
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     softWrap = false,

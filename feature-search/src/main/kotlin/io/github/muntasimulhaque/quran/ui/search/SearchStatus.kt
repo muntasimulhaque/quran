@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.core.SearchQuery
 import io.github.muntasimulhaque.quran.data.SearchResults
 import io.github.muntasimulhaque.quran.feature.search.R
@@ -44,8 +43,16 @@ internal fun StatusLine(
     } ?: return
     Text(
         text = message,
-        style = MaterialTheme.typography.labelMedium,
+        // A status line is a caption, not prose: the meta line's 13 reads it
+        // under the field without competing with the results (owner decision,
+        // this session).
+        style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(start = Space.Gutter, end = Space.Gutter, top = 6.dp, bottom = 10.dp),
+        modifier = Modifier.padding(
+            start = Space.Gutter,
+            end = Space.Gutter,
+            top = Space.Tight,
+            bottom = Space.Row,
+        ),
     )
 }

@@ -102,6 +102,10 @@ internal fun ReaderSheets(
             // The reader's own Arabic step, so a reader who enlarged the
             // Quran's text reads the results at the same preference.
             arabicStep = settings.arabicSize,
+            // The reader's own translation size, so a result's snippet is the
+            // same text at the same size as the page it came from.
+            proseSp = settings.translationSp,
+            proseLineSp = settings.translationLineSp,
             onDismiss = onDismiss,
             onAyah = { arrival ->
                 onSearchResult(arrival)

@@ -122,7 +122,7 @@ fun MenuActionRow(
         }
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.titleSmall,
             color = if (active) {
                 MaterialTheme.colorScheme.primary
             } else {

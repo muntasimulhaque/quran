@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
@@ -34,22 +35,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.core.Arabic
 import io.github.muntasimulhaque.quran.core.RichText
+import io.github.muntasimulhaque.quran.core.TextBlock
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.rich.RichBlocks
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
 import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
-import io.github.muntasimulhaque.quran.ui.theme.prose
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.rich.TajweedText
-import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
 import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
@@ -75,8 +76,10 @@ internal fun SurahOpening(
     // language the reader may not read over saying nothing at all (owner
     // decision, this session). The translation, the tafsir, and the word
     // meanings keep the strict one-language rule.
-    val info by produceState<String?>(initialValue = null, surah.number, content, language) {
-        value = withContext(Dispatchers.IO) { content?.surahInfo(surah.number, language) }
+    val info by produceState<List<TextBlock>?>(initialValue = null, surah.number, content, language) {
+        value = withContext(Dispatchers.IO) {
+            content?.surahInfo(surah.number, language)?.let { RichText.parseHtml(it) }
+        }
     }
     // The basmalah is the content's own first ayah, read from the same
     // library the surah is read from, so the words at the head of the surah
@@ -122,7 +125,12 @@ internal fun SurahOpening(
             text = surah.nameSimple,
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(top = Space.Section),
+            // The surah's own name is this page's title, so a reader who
+            // cannot see it can jump to it instead of hearing the opening
+            // read as one run (owner decision, this session).
+            modifier = Modifier
+                .padding(top = Space.Section)
+                .semantics { heading() },
         )
         Text(
             text = stringResource(
@@ -134,7 +142,7 @@ internal fun SurahOpening(
                 },
                 surah.versesCount,
             ),
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = Space.Tight),
         )
@@ -177,30 +185,14 @@ internal fun SurahOpening(
                 Color.Transparent
             }
             val press = remember { MutableInteractionSource() }
-            Text(
-                text = RichText.paragraphs(info.orEmpty()),
-                // Opened, the introduction is the reader's prose, and it
-                // reads at the reading's own voice and size, not at a
-                // caption's: it is the longest text beside the tafsir on
-                // this page, so it takes the same room the translation
-                // takes (owner decision, this session). The runs are drawn
-                // plain by design: [RichText.paragraphs] draws no spans
-                // here, so the tags in the source never reach one.
-                style = LocalReadingVoice.current.prose(
-                    metrics.translationSp,
-                    metrics.translationLineSp,
-                ),
-                color = ink.copy(alpha = 0.78f),
-                // No cap on the introduction: it was asked for with a press,
-                // and it is the reader's to read while the door stays open.
-                // The door is the paragraph itself: the reading around it is
-                // the paper, and only the part that opens is its own target,
-                // so a press shows the boundary of the about and not of the
-                // whole opening. The boundary is the ayah's own rounded one,
-                // and the ayah's own room sits inside it: the shape wraps the
-                // padding, not the letters, so the about answers in the same
-                // shape and color as an ayah and no line of text is left
-                // touching the edge it is standing on.
+            Box(
+                // The introduction is a document, not one paragraph: it is
+                // the same blocks the tafsir is drawn from, so its own heads
+                // (Name, Period of Revelation, Theme) stand as heads instead
+                // of running into the sentence under them. The old shape
+                // flattened every block to plain prose and lost the source's
+                // structure on the page that explains the surah (owner
+                // decision, this session).
                 modifier = Modifier
                     .padding(top = Space.Block)
                     .clip(Radii.Card)
@@ -210,8 +202,21 @@ internal fun SurahOpening(
                         indication = ripple(color = MaterialTheme.colorScheme.primary),
                         onClick = onPaperTap,
                     )
-                    .padding(horizontal = Space.WashInset, vertical = 10.dp),
-            )
+                    .padding(horizontal = Space.WashInset, vertical = Space.Row),
+            ) {
+                RichBlocks(
+                    blocks = info.orEmpty(),
+                    // Opened, the introduction is the reader's prose, and it
+                    // reads at the reading's own voice and size, not at a
+                    // caption's: it is the longest text beside the tafsir on
+                    // this page, so it takes the same room the translation
+                    // takes (owner decision, this session).
+                    sizeSp = metrics.translationSp,
+                    lineSp = metrics.translationLineSp,
+                    arabicSp = metrics.arabicInlineSp,
+                    color = ink.copy(alpha = 0.78f),
+                )
+            }
         }
         // The door itself is a button like every other action in the app,
         // so a word that answers a tap never reads as plain type. It sits
@@ -263,7 +268,7 @@ internal fun SurahEnd(
         )
         Text(
             text = stringResource(R.string.reading_surah_complete, surah.nameSimple),
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = Space.Block),
         )
@@ -290,7 +295,10 @@ internal fun SurahEnd(
                 Column(Modifier.weight(1f)) {
                     Text(
                         text = stringResource(R.string.reading_next_surah),
-                        style = MaterialTheme.typography.labelMedium,
+                        // A label over the next surah's name, so it wears the
+                        // meta line rather than a group head: the card itself
+                        // is the door (owner decision, this session).
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
@@ -312,7 +320,10 @@ internal fun SurahEnd(
             Text(
                 text = stringResource(R.string.reading_end_of_quran),
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
+                // The end of the Book is a statement, not an action: the
+                // accent belongs to what answers a tap (owner decision, this
+                // session).
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(top = 10.dp),
             )
         }

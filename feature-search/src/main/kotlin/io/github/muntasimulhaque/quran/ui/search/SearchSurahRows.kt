@@ -36,7 +36,9 @@ internal fun ReferenceRow(ayah: Ayah, onAyah: (Ayah) -> Unit) {
             Text(
                 text = stringResource(R.string.search_label_go_to),
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
+                // A label is not an action: the accent belongs to what
+                // answers a tap (owner decision, this session).
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
                 text = localizedDigits(ayah.verseKey),

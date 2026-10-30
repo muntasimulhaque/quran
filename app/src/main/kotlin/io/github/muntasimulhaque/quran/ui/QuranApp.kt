@@ -18,6 +18,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -217,8 +219,12 @@ private fun ContentProblem(storage: Boolean, onRetry: () -> Unit) {
                 text = stringResource(
                     if (storage) R.string.content_problem_storage_title else R.string.content_problem_title,
                 ),
-                style = MaterialTheme.typography.titleMedium,
+                // A state that names itself is a page's title, so it wears the
+                // sheet-title voice and a screen reader can land on it (owner
+                // decision, this session).
+                style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.semantics { heading() },
             )
             Text(
                 text = stringResource(
@@ -231,7 +237,7 @@ private fun ContentProblem(storage: Boolean, onRetry: () -> Unit) {
             TextButton(
                 label = stringResource(R.string.content_problem_retry),
                 onClick = onRetry,
-                modifier = Modifier.padding(top = 18.dp),
+                modifier = Modifier.padding(top = Space.Block),
             )
         }
     }
@@ -261,7 +267,9 @@ private fun FirstPaint() {
             if (slow) {
                 Text(
                     text = stringResource(R.string.first_paint_preparing),
-                    style = MaterialTheme.typography.labelMedium,
+                    // A status sentence, not a label (owner decision, this
+                    // session).
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = Space.Gutter),
                 )

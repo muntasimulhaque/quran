@@ -92,7 +92,7 @@ internal fun BottomStack(
                 Column(Modifier.padding(end = Space.Row)) {
                     Text(
                         text = contentPackName(setup.pack.id, setup.pack.name),
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary,
                     )
                     Text(

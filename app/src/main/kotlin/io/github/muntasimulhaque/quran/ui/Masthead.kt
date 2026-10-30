@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -31,7 +32,11 @@ fun Masthead(modifier: Modifier = Modifier) {
         )
         Text(
             text = stringResource(R.string.first_paint_subtitle),
-            style = MaterialTheme.typography.labelMedium,
+            // The first line a reader meets, under the 54 sp masthead: a 12
+            // sp caption under a display line read as a footnote to the
+            // title. 14 at Medium with a little tracking is a subtitle
+            // (owner decision, this session).
+            style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 0.4.sp),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = Space.Line),
         )

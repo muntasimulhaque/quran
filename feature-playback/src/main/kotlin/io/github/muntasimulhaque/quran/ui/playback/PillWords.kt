@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
@@ -123,7 +124,10 @@ internal fun WordsBlock(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = name,
-                style = MaterialTheme.typography.labelMedium,
+                // A name in a control, not a group label: 13 at Medium keeps
+                // the pill's compact voice while the weight carries the name
+                // (owner decision, this session).
+                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
                 color = MaterialTheme.colorScheme.primary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -135,7 +139,7 @@ internal fun WordsBlock(
             if (!pace.isNullOrBlank()) {
                 Text(
                     text = pace,
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     // The app's air between two things, not the chevron's 4:
@@ -281,7 +285,7 @@ private fun ReciterDoor(
     ) {
         Text(
             text = name,
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
             color = MaterialTheme.colorScheme.primary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

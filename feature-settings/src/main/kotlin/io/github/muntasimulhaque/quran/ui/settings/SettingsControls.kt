@@ -68,7 +68,11 @@ fun ThemeRow(
                 ThemeSwatch(theme = theme, chosen = theme == selected)
                 Text(
                     text = theme.name(),
-                    style = MaterialTheme.typography.labelSmall,
+                    // A swatch's name is a label, not a row's value: it wears
+                    // the label's Medium at 12, where the value under a row
+                    // wears the caption's Regular (owner decision, this
+                    // session).
+                    style = MaterialTheme.typography.labelMedium,
                     color = if (theme == selected) {
                         MaterialTheme.colorScheme.primary
                     } else {
@@ -198,7 +202,16 @@ fun SizeRow(role: TypeRole, step: Float, onChange: (Float) -> Unit) {
         // The letters run from the smallest step to the largest, so the row
         // reads as one scale.
         cell = { index, active ->
-            val size = (11 + index * 2).sp
+            // The sample is the reader's own step at this role, not a private
+            // staircase: the old cells drew 11, 13, 15, 17, and 19, so the
+            // middle step showed a letter a point under the size it set. The
+            // Arabic and the aid's word are drawn at three quarters to fit the
+            // cell, and the scale is the same at every step, so the
+            // differences the eye reads are the differences the reader gets
+            // (owner decision, this session).
+            val roleSp = TextSize.sp(role, TextSize.STEPS[index])
+            val scale = if (role == TypeRole.Arabic || role == TypeRole.Words) 0.75f else 1f
+            val size = (roleSp * scale).sp
             Text(
                 text = if (role == TypeRole.Arabic) "\u0627" else "A",
                 // The Arabic cell is drawn in the Quran's own face, the way
@@ -208,7 +221,10 @@ fun SizeRow(role: TypeRole, step: Float, onChange: (Float) -> Unit) {
                 style = if (role == TypeRole.Arabic) {
                     TextStyle(fontFamily = rememberHafs(), fontSize = size)
                 } else {
-                    MaterialTheme.typography.titleMedium.copy(fontSize = size)
+                    MaterialTheme.typography.titleMedium.copy(
+                        fontSize = size,
+                        lineHeight = (size.value * 1.2f).sp,
+                    )
                 },
                 color = if (active) {
                     MaterialTheme.colorScheme.primary
@@ -268,7 +284,7 @@ private fun SegmentedRow(
             // A control's name wears the same words every other row's name
             // wears, so the sheet reads as one voice (owner decision, the
             // theme and consistency session).
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface,
         )
         StepRow(

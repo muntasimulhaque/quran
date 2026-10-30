@@ -35,6 +35,7 @@ import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
+import io.github.muntasimulhaque.quran.ui.kit.ReferenceLabel
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Wash
 
@@ -130,11 +131,7 @@ internal fun AyahDoor(
                     .padding(start = 10.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = reference,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = ink,
-                )
+                ReferenceLabel(text = reference, color = ink)
                 IconGlyph(
                     icon = Icon.Chevron,
                     tint = if (open) {

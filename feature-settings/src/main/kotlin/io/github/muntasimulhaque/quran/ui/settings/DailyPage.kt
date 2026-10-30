@@ -130,7 +130,10 @@ fun DailyPage(
         if (notificationsBlocked) {
             Text(
                 text = stringResource(R.string.settings_daily_blocked),
-                style = MaterialTheme.typography.bodySmall,
+                // A sentence about the phone's own settings is prose, not a
+                // caption: it reads at the meta line's neighbours, not a point
+                // under them (owner decision, this session).
+                style = MaterialTheme.typography.bodyMedium,
                 // The same ink as the exact-time line below: both are state
                 // lines of the same shape, and the one the page calls the
                 // same shape of truth must not be the loud one (owner
@@ -153,7 +156,7 @@ fun DailyPage(
         if (settings.dailyAyah && exactGrantWithheld && !notificationsBlocked) {
             Text(
                 text = stringResource(R.string.settings_daily_exact_blocked),
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = Space.Gutter, end = Space.Gutter, top = Space.Line),
             )
@@ -208,7 +211,9 @@ private fun DailyTimeDialog(
         title = {
             Text(
                 text = stringResource(R.string.settings_daily_picker_title),
-                style = MaterialTheme.typography.titleMedium,
+                // A dialog names itself in the app's one title voice (owner
+                // decision, this session).
+                style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(bottom = Space.Row),
             )

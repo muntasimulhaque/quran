@@ -28,7 +28,16 @@ data class TextRun(
     val marker: Int? = null,
 )
 
-enum class TextBlockKind { PARAGRAPH, HEADING }
+/**
+ * The two voices a document's own blocks carry: prose, and a head over it.
+ *
+ * A head is two levels, not one: the sources keep a chapter and a sub-topic
+ * apart (`h1` and `h2` in a tafsir, `h2` and `h3` in a surah's introduction),
+ * and a parser that folds all four tags into one kind draws a sub-topic as
+ * loudly as the chapter it belongs to. The screen keeps the level the source
+ * wrote (owner decision, this session).
+ */
+enum class TextBlockKind { PARAGRAPH, HEADING, SUBHEADING }
 
 data class TextBlock(val kind: TextBlockKind, val runs: List<TextRun>)
 
@@ -116,6 +125,12 @@ object RichText {
     private val blankLines = Regex("\\n{3,}")
 
     private val heading = Regex("h[1-4]")
+
+    /** The level a heading tag names: `h1` and `h2` are a chapter, `h3` and `h4` a step under it. */
+    private fun headingKind(tag: String): TextBlockKind = when (tag) {
+        "h3", "h4" -> TextBlockKind.SUBHEADING
+        else -> TextBlockKind.HEADING
+    }
 
     fun isArabic(codepoint: Int): Boolean = arabicRanges.any { codepoint in it }
 
@@ -217,7 +232,7 @@ object RichText {
                 tag == "p" || tag == "/p" -> flushBlock()
                 heading.matches(tag) -> {
                     flushBlock()
-                    kind = TextBlockKind.HEADING
+                    kind = headingKind(tag)
                 }
                 tag.startsWith("/") && heading.matches(tag.removePrefix("/")) -> flushBlock()
                 tag == "br" || tag == "br/" -> if (started && text.isNotEmpty() && text.last() != '\n') text.append('\n')

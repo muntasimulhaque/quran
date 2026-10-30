@@ -160,6 +160,9 @@ fun QuranTheme(
                 BengaliReading,
                 TextSize.BENGALI_PROSE_RATIO,
                 1.594f,
+                // Bengali's title box is the script's own: its matras and
+                // conjuncts need 1.6, where the Latin title can sit at 1.3.
+                1.6f,
                 { NotoSerifBengali },
                 BanglaReadingLocale,
             )
@@ -167,6 +170,7 @@ fun QuranTheme(
                 LatinReading,
                 TextSize.LATIN_PROSE_RATIO,
                 1.485f,
+                TypeLadder.TITLE_LINE,
                 ::literataAt,
                 EnglishReadingLocale,
             )

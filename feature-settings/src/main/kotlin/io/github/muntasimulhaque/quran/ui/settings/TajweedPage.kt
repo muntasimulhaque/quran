@@ -146,7 +146,7 @@ fun TajweedPage(
         item(key = "lead") {
             Text(
                 text = stringResource(R.string.settings_tajweed_lead),
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(
                     start = Space.Gutter,
@@ -203,7 +203,7 @@ private fun FamilyHead(
     ) {
         Text(
             text = stringResource(family.title()),
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier
                 .weight(1f)
@@ -274,7 +274,7 @@ private fun Rule(name: String, sentence: String, modifier: Modifier = Modifier) 
             append(RuleRunIn)
             withStyle(SpanStyle(color = quiet)) { append(sentence) }
         },
-        style = MaterialTheme.typography.bodySmall,
+        style = MaterialTheme.typography.bodyMedium,
         modifier = modifier,
     )
 }
@@ -287,9 +287,10 @@ private fun Rule(name: String, sentence: String, modifier: Modifier = Modifier) 
 private const val RuleRunIn = "  "
 
 /**
- * The one size the legend's sample word is drawn at, whatever the reader's
- * own Arabic step: a legend is read, not recited, and at the largest step the
- * sample stood taller than the family it belongs to.
+ * The one size the legend's sample word is drawn at: the reading's default,
+ * so the legend and the page meet at one stand. It does not follow the
+ * reader's own Arabic step, because a legend is a fixed reference and a
+ * sample that grew with the step made the settings page a second reading.
  */
 private const val LegendSampleSp = 24f
 

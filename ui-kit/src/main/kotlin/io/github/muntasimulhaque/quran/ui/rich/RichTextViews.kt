@@ -9,6 +9,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
@@ -33,9 +35,11 @@ import io.github.muntasimulhaque.quran.core.scriptMix
 import io.github.muntasimulhaque.quran.ui.theme.AmiriText
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.Wash
 import io.github.muntasimulhaque.quran.ui.theme.prose
+import io.github.muntasimulhaque.quran.ui.theme.title
 
 /**
  * Draws parsed runs with the manuscript's two voices: Literata for Latin and
@@ -49,14 +53,18 @@ import io.github.muntasimulhaque.quran.ui.theme.prose
  * otherwise the Arabic and the markers collide with the lines around them as
  * soon as the reader turns the text up. A block with no Arabic keeps the
  * Latin line exactly; see [lineHeightFor] for the two that carry it.
+ *
+ * The size and the line are the caller's and have no defaults: the reader's
+ * own step is a decision a surface makes, and a default here was a third body
+ * size (17 on a 27 line) that nothing chose (owner decision, this session).
  */
 @Composable
 fun TranslationBody(
     runs: List<TextRun>,
+    sizeSp: Float,
+    lineSp: Float,
+    arabicSp: Float,
     modifier: Modifier = Modifier,
-    sizeSp: Float? = null,
-    lineSp: Float? = null,
-    arabicSp: Float = sizeSp ?: 18f,
     onFootnote: ((Int) -> Unit)? = null,
     /** The notes this text actually carries; null means every marker is a door. */
     footnoteNumbers: Set<Int>? = null,
@@ -69,11 +77,11 @@ fun TranslationBody(
     color: Color = LocalPagePalette.current.ink,
 ) {
     val voice = LocalReadingVoice.current
-    val body = sizeSp ?: voice.style.fontSize.value
+    val body = sizeSp
     val mix = scriptMix(runs)
     val line = lineHeightFor(
         mix = mix,
-        latinLine = lineSp ?: body * voice.lineRatio,
+        latinLine = lineSp,
         arabicSp = arabicSp,
     )
     val base = voice.prose(body, line)
@@ -101,9 +109,9 @@ fun TranslationBody(
  *
  * Arabic draws its diacritics above and its descenders below letters, so an
  * Arabic paragraph needs more air than a Latin one. The mistake this fixes
- * (owner report) was giving a whole Latin paragraph the Arabic
- * paragraph's air because one quotation appeared in it: every line of an
- * English tafsir paragraph breathed at 42.6 px for one inline word.
+ * (owner report) was giving a whole Latin paragraph the Arabic paragraph's
+ * air because one quotation appeared in it: every line of an English tafsir
+ * paragraph breathed at the all-Arabic block's line for one inline word.
  *
  * The two ratios are grounded in the sources' own glyphs, not in taste. The
  * Amiri ink of the tafsir's Arabic-only paragraphs needs 1.67 em at the
@@ -114,12 +122,12 @@ fun TranslationBody(
  * paragraphs needs 0.97 em at the median and 1.32 em at the very worst (the
  * Prophet's ligature under a stack of marks, and one Urdu blessing), so
  * [MixedAir] at 1.35 covers the whole distribution while bringing the mixed
- * line down from the old 1.9: at the default tafsir size that is 30.2 px of
- * line instead of 42.6 for a 16 sp body, which is the change that made the
- * tafsir's gaps even (owner report). A block whose inline Arabic is
- * taller than any the sources carry today would need this constant raised
- * with it; the measurement is written here so the next session can redo it
- * rather than guess.
+ * line down from the old 1.9: at the default tafsir size that is about 29 dp
+ * of line for a 15 sp body instead of the 41 dp the all-Arabic block takes,
+ * which is the change that made the tafsir's gaps even (owner report). A
+ * block whose inline Arabic is taller than any the sources carry today would
+ * need this constant raised with it; the measurement is written here so the
+ * next session can redo it rather than guess.
  *
  * The tafsir briefly read its Arabic in Hafs (owner decision, the audio and
  * type audit session) and is back in Amiri (owner decision, this session):
@@ -151,25 +159,29 @@ private fun markerSp(bodySp: Float, share: Float) = maxOf(bodySp * share, Marker
 /**
  * A plain sentence with the matched words washed in the accent color. Used by
  * search results, where the text is a snippet rather than rich runs.
+ *
+ * The size and the line are the reader's own, passed in: a result is the same
+ * text as the reading, and a reader who set the translation to a larger step
+ * must not meet it small again in the sheet they searched from. The fixed base
+ * it used to stand at was a size the reader could not move (owner decision,
+ * this session).
  */
 @Composable
 fun HighlightedText(
     text: String,
     ranges: List<IntRange>,
+    sizeSp: Float,
+    lineSp: Float,
     modifier: Modifier = Modifier,
     style: TextStyle? = null,
     color: Color = LocalPagePalette.current.ink,
     maxLines: Int = 4,
 ) {
-    // A snippet is reading, so it is set in the reading's own voice, at the
-    // size the voice stands at when a surface has no size of its own: the
+    // A snippet is reading, so it is set in the reading's own voice: the
     // interface face inside a result list put the book away the moment a
     // reader searched it (owner decision, this session).
     val voice = LocalReadingVoice.current
-    val resolvedStyle = style ?: voice.prose(
-        sizeSp = voice.style.fontSize.value,
-        lineSp = voice.style.lineHeight.value,
-    )
+    val resolvedStyle = style ?: voice.prose(sizeSp = sizeSp, lineSp = lineSp)
     val wash = MaterialTheme.colorScheme.primary.copy(alpha = Wash.Match)
     val weight = FontWeight.Medium
     Text(
@@ -197,46 +209,64 @@ fun HighlightedText(
 }
 
 /**
- * Draws the tafsir's paragraphs and headings. The size the reader chose for
- * the tafsir moves the whole block, headings included, and the line height
- * gives the quoted Arabic inside a Latin paragraph room to breathe. The
- * defaults stand at the reading's own two sizes a rich block is drawn at:
- * the tafsir's body and line, which TafsirDirectionTest overrides with its
- * own when it pins the direction rule.
+ * Draws a document's paragraphs and its two levels of head.
+ *
+ * The size is the reader's own, so the whole document moves with it, and the
+ * staircase is built from the body: a section head is the body's own size at
+ * SemiBold, and a sub-section is the body's own size at Medium, two weight
+ * levels the way Apple's Headline is 17 semibold against a 17 Body. The head
+ * used to be a quarter again the body, which put it within a quarter point of
+ * the passage title above it, and the sub-head used to be a fourth size,
+ * which made three heavy lines where the document needs one. The two levels
+ * are weight, not size, so a long reading never carries a ladder of big heads
+ * (owner decision, this session).
+ *
+ * A head is set like a head and not like a paragraph: the heading breaker, no
+ * hyphenation, [TypeLadder.TITLE_LINE] in Latin (1.6 in Bengali, through the
+ * voice), and the heading semantics a screen reader navigates by. It carries a
+ * step more air above it than the paragraph gap, so a sheet reads as sections
+ * rather than as one run. The size and the line have no defaults: the
+ * reader's own step is a decision the surface makes (owner decision, this
+ * session).
  */
 @Composable
 fun RichBlocks(
     blocks: List<TextBlock>,
+    sizeSp: Float,
+    lineSp: Float,
+    arabicSp: Float,
     modifier: Modifier = Modifier,
-    sizeSp: Float = 17f,
-    lineSp: Float = 27f,
-    arabicSp: Float = 18f,
+    /** The ink of the document; the reading's own unless a surface's ground differs. */
+    color: Color = LocalPagePalette.current.ink,
 ) {
     val voice = LocalReadingVoice.current
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(18.dp),
+        verticalArrangement = Arrangement.spacedBy(Space.Block),
     ) {
         blocks.forEachIndexed { index, block ->
-            val heading = block.kind == TextBlockKind.HEADING
-            // A heading is a real step over the prose, a quarter again its
-            // size and in the reading's own weight. It stood one point above
-            // the body, which the eye read as the same size (owner decision,
-            // this session).
+            val head = block.kind != TextBlockKind.PARAGRAPH
             val mix = scriptMix(block.runs)
-            val drawn = if (heading) sizeSp * 1.25f else sizeSp
+            val drawn = when (block.kind) {
+                TextBlockKind.HEADING -> TypeLadder.headingSp(sizeSp)
+                TextBlockKind.SUBHEADING -> TypeLadder.subheadingSp(sizeSp)
+                TextBlockKind.PARAGRAPH -> sizeSp
+            }
+            // The head and the sub-head share the body's size; their level is
+            // the weight, SemiBold then Medium, so a section never reads as a
+            // second title in a long passage.
+            val headWeight = when (block.kind) {
+                TextBlockKind.HEADING -> FontWeight.SemiBold
+                TextBlockKind.SUBHEADING -> FontWeight.Medium
+                TextBlockKind.PARAGRAPH -> FontWeight.Normal
+            }
             val line = lineHeightFor(
                 mix = mix,
-                // A heading is set tighter than a paragraph, but never below
-                // the face's own line box: at 20 sp Literata's ink needs
-                // 1.485 of the em, and a long heading (some run to six
-                // lines) set at 1.3 put one line's descenders into the next
-                // line's ascenders.
-                latinLine = if (heading) {
-                    maxOf(drawn * 1.3f, drawn * voice.minimumLineRatio)
-                } else {
-                    lineSp
-                },
+                // The script's title leading, not its prose box: a 15 sp
+                // head at 1.3 is Material's and Apple's own, and the face's
+                // 1.485 box would add about 6 dp above and below every head.
+                // An Arabic block still takes its own measured air below.
+                latinLine = if (head) drawn * voice.titleRatio else lineSp,
                 arabicSp = arabicSp,
             )
             Text(
@@ -245,21 +275,21 @@ fun RichBlocks(
                     arabicSize = arabicSp.sp,
                     markerSize = markerSp(sizeSp, 0.70f),
                     symbolSize = if (mix == ScriptMix.ARABIC) arabicSp.sp else drawn.sp,
-                    quoteColor = if (heading) null else LocalPagePalette.current.ink,
+                    quoteColor = if (head) null else color,
                 ),
-                style = voice.prose(
-                    sizeSp = drawn,
-                    lineSp = line,
-                    color = LocalPagePalette.current.ink,
-                    weight = if (heading) FontWeight.SemiBold else FontWeight.Normal,
-                ),
+                style = if (head) {
+                    voice.title(drawn, line, weight = headWeight, color = color)
+                } else {
+                    voice.prose(drawn, line, color = color)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    // A heading opens a part of the prose, so it takes a step
+                    .then(if (head) Modifier.semantics { heading() } else Modifier)
+                    // A head opens a part of the prose, so it takes a step
                     // more air above it than the room between two paragraphs:
                     // the sheet reads as sections instead of as one run
                     // (owner decision, this session).
-                    .padding(top = if (heading && index > 0) Space.Line else 0.dp),
+                    .padding(top = if (head && index > 0) Space.Section - Space.Block else 0.dp),
             )
         }
     }
@@ -369,7 +399,11 @@ private fun annotated(
             } else {
                 withStyle(
                     SpanStyle(
-                        fontWeight = if (run.bold) FontWeight.SemiBold else null,
+                        // Emphasis is a step, not a shout: the bold run wears
+                        // the face's Medium, so a word inside a paragraph
+                        // cannot carry the same weight as the title above it
+                        // (owner decision, this session).
+                        fontWeight = if (run.bold) FontWeight.Medium else null,
                         fontStyle = if (run.italic) FontStyle.Italic else null,
                         color = if (run.quote) quoteColor ?: quoteFallback else Color.Unspecified,
                     ),

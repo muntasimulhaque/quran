@@ -177,7 +177,7 @@ data class AppSettings(
 
     /**
      * The prose's step over the Latin base in the reader's script: 18 over
-     * 16.2 for Bangla, 1 for English. Every prose surface reads through the
+     * 15 for Bangla, 1 for English. Every prose surface reads through the
      * getters below, so the note sheet, the ayah card, the settings sample,
      * and the reading all take the script's size from one rule (owner
      * decision, this session).

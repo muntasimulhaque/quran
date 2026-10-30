@@ -28,6 +28,7 @@ import io.github.muntasimulhaque.quran.core.TextRun
 import io.github.muntasimulhaque.quran.core.localizedDigits
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
+import io.github.muntasimulhaque.quran.ui.kit.ReferenceLabel
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.rich.TajweedText
 import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
@@ -162,14 +163,13 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
-            Text(
+            ReferenceLabel(
                 text = card.reference,
-                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = if (card.surahArabic.isNullOrBlank()) 0.dp else 6.dp),
+                    .padding(top = if (card.surahArabic.isNullOrBlank()) 0.dp else Space.Line),
             )
             TajweedText(
                 // The card is paper whatever the reader's page. The theme's
@@ -179,7 +179,14 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
                 code = card.tajweed,
                 colors = PaperTajweed,
                 enabled = true,
-                style = arabicStyle(hafs, 26f, 48f, MaterialTheme.colorScheme.onSurface),
+                // The verse is the reading at the middle step, and the card's
+                // line is the reading's own ratio: 24 on a 48 line (2.0, the
+                // Quran Foundation's own QPC Hafs leading), 15 on a 22.5
+                // (1.5), and the inline Arabic at 21.6 (0.9 of the card's
+                // Arabic). One fixed specimen of the reading's own numbers, so
+                // the picture and the page are one hand (owner decision, this
+                // session).
+                style = arabicStyle(hafs, 24f, 24f * 2f, MaterialTheme.colorScheme.onSurface),
                 textAlign = TextAlign.Right,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -194,8 +201,10 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
                     // decision, this session).
                     modifier = Modifier.padding(top = Space.Row),
                     sizeSp = 15f,
-                    lineSp = 23f,
-                    arabicSp = 21f,
+                    lineSp = 15f * 1.5f,
+                    // The inline Arabic keeps the app's one rule, nine tenths
+                    // of the card's Arabic size: 21.6 against the 24 verse.
+                    arabicSp = 24f * 0.9f,
                     // The card is parchment whatever page the reader is on,
                     // so its words wear the paper ink and never the night
                     // page's softer tone.

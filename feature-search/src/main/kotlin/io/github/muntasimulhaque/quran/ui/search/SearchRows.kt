@@ -17,7 +17,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.core.Search
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.SearchHit
@@ -27,6 +26,7 @@ import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.arabicLineFor
 import io.github.muntasimulhaque.quran.data.shouldShowWordMeaning
 import io.github.muntasimulhaque.quran.feature.search.R
+import io.github.muntasimulhaque.quran.ui.kit.ReferenceLabel
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
@@ -39,14 +39,14 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
 
 /**
  * The size a line of Arabic in a result is drawn at before the reader's own
- * step: 22 sp, the size both Arabic lines of a result share, the whole ayah
- * and the matched words alone. The base is a step under the page, so a list
- * of results stays a list, and the reader's own Arabic step moves it with the
- * reading: a reader who enlarged the Quran's text for their eyes finds the
- * same preference in the results (owner decision, the theme and consistency
- * session; the step reaches search, this session). The line ratio is the
- * reading's own, from `TextSize.lineRatio`, so the two surfaces cannot drift
- * apart at the hand of whoever edits one of them next.
+ * step: 22 sp, the page's own word size, two points under the Quran's 24. The
+ * base is a step under the page, so a list of results stays a list, and the
+ * reader's own Arabic step moves it with the reading: a reader who enlarged
+ * the Quran's text for their eyes finds the same preference in the results.
+ * The result line is the aid's size, not the page's, and the line ratio is
+ * the reading's own, from `TextSize.lineRatio`, so the two surfaces cannot
+ * drift apart at the hand of whoever edits one of them next (owner decision,
+ * this session).
  */
 private const val SearchArabicSp = 22f
 
@@ -59,11 +59,16 @@ internal fun AyahRow(
     showSource: Boolean,
     /** The reader's own Arabic step, so the results follow the reading. */
     arabicStep: Float,
+    /** The reader's own translation size, so a snippet is the reading's own text. */
+    proseSp: Float,
+    proseLineSp: Float,
     onOpen: () -> Unit,
 ) {
     // The reader's own Arabic step moves the result's Arabic, so a reader who
-    // needs a larger Quran reads a larger result too; the snippets stay on
-    // the interface ladder, because a result list is for scanning.
+    // needs a larger Quran reads a larger result too. The snippet follows the
+    // translation's step as well: it is the same text the reader reads on the
+    // page, and a reader who raised the translation must not meet it small
+    // again in the sheet they searched from (owner decision, this session).
     val arabicSize = SearchArabicSp * TextSize.step(arabicStep)
     val arabicLine = arabicSize * TextSize.lineRatio(TypeRole.Arabic)
     Column(
@@ -72,11 +77,7 @@ internal fun AyahRow(
             .sheetRow(onClick = onOpen)
             .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = Space.Row),
     ) {
-        Text(
-            text = localizedDigits(hit.ayah.verseKey),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-        )
+        ReferenceLabel(text = localizedDigits(hit.ayah.verseKey))
         // The Arabic is drawn when it is the match, or when the row has
         // nothing else to say; otherwise the row opens with the evidence
         // instead of with a page of text that never matched (owner report,
@@ -96,7 +97,7 @@ internal fun AyahRow(
         // session).
         when (val line = arabicLineFor(hit)) {
             SearchArabicLine.Ayah -> {
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Space.Line))
                 TajweedText(
                     text = AnnotatedString(arabicText),
                     style = arabicStyle(
@@ -114,7 +115,7 @@ internal fun AyahRow(
             }
 
             is SearchArabicLine.Words -> {
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Space.Line))
                 val joined = line.words.joinToString("  ")
                 TajweedText(
                     text = AnnotatedString(joined),
@@ -140,18 +141,21 @@ internal fun AyahRow(
             SearchArabicLine.None -> Unit
         }
         hit.translation?.let { translation ->
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(Space.Line))
             HighlightedText(
                 text = translation.text,
                 ranges = translation.ranges,
+                sizeSp = proseSp,
+                lineSp = proseLineSp,
             )
             if (showSource) {
                 Text(
                     text = contentPackName(translation.pack, translation.packName),
-                    style = MaterialTheme.typography.labelMedium,
-                    // A pack's name is read, so it keeps the theme's own
-                    // secondary tone; the 0.7 alpha it wore measured 3.3:1,
-                    // under the theme's 4.5:1 rule.
+                    style = MaterialTheme.typography.bodySmall,
+                    // A pack's name is a source line, so it wears the meta
+                    // voice and the theme's own secondary tone; the 0.7 alpha
+                    // it once wore measured 3.3:1, under the theme's 4.5:1
+                    // rule.
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = Space.Tight),
                 )
@@ -168,7 +172,10 @@ internal fun AyahRow(
             Text(
                 text = stringResource(R.string.search_word_meaning_label),
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
+                // A label naming the evidence under it is not an action: the
+                // accent belongs to what answers a tap (owner decision, this
+                // session).
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = Space.Block),
             )
             HighlightedText(
@@ -176,6 +183,8 @@ internal fun AyahRow(
                 ranges = remember(meaning, terms) {
                     Search.matchRanges(meaning, terms, arabic = false)
                 },
+                sizeSp = proseSp,
+                lineSp = proseLineSp,
                 modifier = Modifier.padding(top = Space.Tight),
             )
         }
@@ -183,7 +192,12 @@ internal fun AyahRow(
 }
 
 @Composable
-internal fun TafsirRow(hit: SearchHit.TafsirHitResult, onOpen: () -> Unit) {
+internal fun TafsirRow(
+    hit: SearchHit.TafsirHitResult,
+    proseSp: Float,
+    proseLineSp: Float,
+    onOpen: () -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -202,17 +216,18 @@ internal fun TafsirRow(hit: SearchHit.TafsirHitResult, onOpen: () -> Unit) {
                 hit.surahName,
                 localizedDigits(span),
             ),
-            style = MaterialTheme.typography.labelMedium,
-            // The pack's name is a name, not an action: the tafsir row's
-            // label wears the same secondary tone the translation's pack
-            // name wears, where it wore the accent (owner decision, the
-            // theme and consistency session).
+            style = MaterialTheme.typography.bodySmall,
+            // The pack's name and the passage's span are a source line, not
+            // an action: the meta voice and the secondary tone, where it wore
+            // the accent (owner decision, the theme and consistency session).
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Space.Line))
         HighlightedText(
             text = hit.text,
             ranges = hit.ranges,
+            sizeSp = proseSp,
+            lineSp = proseLineSp,
             maxLines = 5,
         )
     }

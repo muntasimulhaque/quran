@@ -83,10 +83,10 @@ fun LanguageWelcome(
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 40.dp),
+                modifier = Modifier.padding(top = Space.Gutter),
             )
             Column(
-                modifier = Modifier.padding(top = 26.dp),
+                modifier = Modifier.padding(top = Space.Section),
                 verticalArrangement = Arrangement.spacedBy(Space.Row),
             ) {
                 UiLanguage.entries.forEach { language ->
@@ -98,7 +98,9 @@ fun LanguageWelcome(
             }
             Text(
                 text = stringResource(R.string.welcome_later),
-                style = MaterialTheme.typography.bodySmall,
+                // A sentence, not a caption: it tells the reader the choice
+                // is not permanent (owner decision, this session).
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = Space.Section),
@@ -188,7 +190,7 @@ fun WelcomeReminder(
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 40.dp),
+                modifier = Modifier.padding(top = Space.Gutter),
             )
             Text(
                 text = stringResource(
@@ -202,7 +204,7 @@ fun WelcomeReminder(
             )
             Text(
                 text = stringResource(R.string.welcome_later),
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = Space.Gutter),
@@ -210,12 +212,12 @@ fun WelcomeReminder(
             TextButton(
                 label = stringResource(R.string.welcome_reminder_turn_on),
                 onClick = onTurnOn,
-                modifier = Modifier.padding(top = 18.dp),
+                modifier = Modifier.padding(top = Space.Block),
             )
             TextButton(
                 label = stringResource(R.string.welcome_reminder_not_now),
                 onClick = onNotNow,
-                modifier = Modifier.padding(top = 6.dp),
+                modifier = Modifier.padding(top = Space.Line),
                 quiet = true,
             )
         }

@@ -35,13 +35,13 @@ class ReadingMetricsTest {
     fun englishProseKeepsTheLatinBase() {
         val english = settings(UiLanguage.English.tag)
         val reading = english.readingMetrics()
-        assertEquals(16.2f, reading.translationSp, 0.001f)
-        assertEquals(16.2f * 1.6f, reading.translationLineSp, 0.001f)
-        assertEquals(16.2f, english.tafsirSp, 0.001f)
-        assertEquals(16.2f * 1.6f, english.tafsirLineSp, 0.001f)
-        assertEquals(14.58f, reading.wordsMeaningSp, 0.001f)
-        assertEquals(28.8f, reading.arabicSp, 0.001f)
-        assertEquals(26.775f, reading.wordsSp, 0.001f)
+        assertEquals(15f, reading.translationSp, 0.001f)
+        assertEquals(15f * 1.5f, reading.translationLineSp, 0.001f)
+        assertEquals(15f, english.tafsirSp, 0.001f)
+        assertEquals(15f * 1.5f, english.tafsirLineSp, 0.001f)
+        assertEquals(13.5f, reading.wordsMeaningSp, 0.001f)
+        assertEquals(24f, reading.arabicSp, 0.001f)
+        assertEquals(22f, reading.wordsSp, 0.001f)
     }
 
     @Test
@@ -55,9 +55,9 @@ class ReadingMetricsTest {
         assertEquals(16.2f, reading.wordsMeaningSp, 0.001f)
         // The Quran's text is data, not a locale: it does not take the
         // script's step.
-        assertEquals(28.8f, reading.arabicSp, 0.001f)
+        assertEquals(24f, reading.arabicSp, 0.001f)
         // The aid's word is a copy of the verse, so it stays under it.
-        assertEquals(26.775f, reading.wordsSp, 0.001f)
+        assertEquals(22f, reading.wordsSp, 0.001f)
     }
 
     @Test
@@ -76,8 +76,8 @@ class ReadingMetricsTest {
         // until the welcome screen answers, so the metrics must not divide by
         // a language that is not there.
         val first = settings(null)
-        assertEquals(16.2f, first.translationSp, 0.001f)
-        assertEquals(16.2f * 1.6f, first.translationLineSp, 0.001f)
-        assertEquals(16.2f, first.tafsirSp, 0.001f)
+        assertEquals(15f, first.translationSp, 0.001f)
+        assertEquals(15f * 1.5f, first.translationLineSp, 0.001f)
+        assertEquals(15f, first.tafsirSp, 0.001f)
     }
 }

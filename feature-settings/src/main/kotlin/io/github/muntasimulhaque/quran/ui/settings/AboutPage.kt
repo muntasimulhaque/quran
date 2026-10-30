@@ -72,7 +72,7 @@ fun AboutPage(
         // "License" above their own values (owner report, this session).
         Text(
             text = stringResource(R.string.about_version_license, localizedDigits(version)),
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(
                 start = Space.Gutter,
@@ -231,7 +231,7 @@ internal fun AboutCredit(title: String, line: String?, terms: List<String> = emp
         if (!line.isNullOrBlank()) {
             Text(
                 text = line,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = Space.Tight),
             )
@@ -239,7 +239,7 @@ internal fun AboutCredit(title: String, line: String?, terms: List<String> = emp
         terms.forEachIndexed { index, term ->
             Text(
                 text = term,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = if (index == 0) Space.Line else Space.Tight),
             )

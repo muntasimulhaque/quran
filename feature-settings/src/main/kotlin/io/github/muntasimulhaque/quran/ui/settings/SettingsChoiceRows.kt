@@ -99,10 +99,10 @@ private fun PackTrailing(
                     stringResource(R.string.settings_pack_downloading, (setup.progress * 100).toInt())
                 },
                 // The same value style every row's status wears: the hub
-                // draws this download as bodySmall under its name, and the
+                // draws this download as the caption under its name, and the
                 // same fact must not change size between the two doors
-                // (owner decision, the theme and consistency session).
-                style = MaterialTheme.typography.bodySmall,
+                // (owner decision, this session).
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             TextButton(
@@ -120,7 +120,9 @@ private fun PackTrailing(
 
         pack.shipped -> Text(
             text = stringResource(R.string.pack_included),
-            style = MaterialTheme.typography.labelMedium,
+            // A fact about the row is its value, so it is the caption (owner
+            // decision, this session).
+            style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 

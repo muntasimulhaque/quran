@@ -105,6 +105,9 @@ fun SearchSheet(
     wordsInstalled: Boolean,
     /** The reader's own Arabic step, so the results follow the reading. */
     arabicStep: Float,
+    /** The reader's own translation size, so a snippet is the reading's own text. */
+    proseSp: Float,
+    proseLineSp: Float,
     onDismiss: () -> Unit,
     onAyah: (SearchArrival) -> Unit,
     onSurah: (Surah) -> Unit,
@@ -287,6 +290,8 @@ fun SearchSheet(
                             terms = queryTerms,
                             showSource = translationPacks.size > 1,
                             arabicStep = arabicStep,
+                            proseSp = proseSp,
+                            proseLineSp = proseLineSp,
                             onOpen = {
                                 onAyah(
                                     SearchArrival.AyahMatch(
@@ -298,7 +303,11 @@ fun SearchSheet(
                                 )
                             },
                         )
-                        is SearchHit.TafsirHitResult -> TafsirRow(hit) {
+                        is SearchHit.TafsirHitResult -> TafsirRow(
+                            hit = hit,
+                            proseSp = proseSp,
+                            proseLineSp = proseLineSp,
+                        ) {
                             onAyah(SearchArrival.TafsirMatch(hit.ayah, hit.pack))
                         }
                     }

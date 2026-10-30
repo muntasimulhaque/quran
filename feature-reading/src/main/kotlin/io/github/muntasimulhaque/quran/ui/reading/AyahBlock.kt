@@ -382,7 +382,7 @@ internal fun AyahBlock(
                     if (row.translations.size > 1) {
                         Text(
                             text = contentPackName(line.pack, line.packName),
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.bodySmall,
                             // The pack's name is read, so it keeps the theme's
                             // own secondary tone. The 0.75 alpha it wore
                             // measured 3.3:1, under the 4.5:1 rule the search

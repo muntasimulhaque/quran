@@ -52,7 +52,11 @@ internal fun RowName(
     Column(modifier) {
         Text(
             text = title,
-            style = MaterialTheme.typography.bodyLarge,
+            // A row's name: the interface's own voice at Medium, one weight
+            // above the value under it and the same size as the body, so a
+            // list reads as names with facts under them (owner decision, this
+            // session).
+            style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
@@ -60,7 +64,10 @@ internal fun RowName(
         if (!value.isNullOrBlank()) {
             Text(
                 text = value,
-                style = MaterialTheme.typography.bodySmall,
+                // A row's own value is the caption, 12 at Regular: the settings
+                // hub is measured by this line, and a value is not a source
+                // line and not a sentence (owner decision, this session).
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,

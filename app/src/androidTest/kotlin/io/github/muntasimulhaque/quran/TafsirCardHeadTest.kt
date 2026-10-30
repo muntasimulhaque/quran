@@ -1,6 +1,9 @@
 package io.github.muntasimulhaque.quran
 
+import android.graphics.Bitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
@@ -11,6 +14,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -27,6 +31,7 @@ import org.junit.rules.ExternalResource
 import org.junit.rules.RuleChain
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
+import java.io.File
 
 /**
  * One tafsir is a page, not a list of one.
@@ -86,15 +91,34 @@ class TafsirCardHeadTest {
             SURAH,
             "1:1",
         )
+        // The byline is the pack and its language, one meta line: a source is
+        // not a title, and the passage's reference is (owner decision, this
+        // session).
+        val language = java.util.Locale.forLanguageTag("en").getDisplayName()
+        val byline = compose.activity.getString(
+            ReadingR.string.card_pack_byline,
+            pack,
+            language,
+        )
 
-        // The name is a byline: one node, and it answers no touch.
-        compose.onAllNodesWithText(pack).assertCountEquals(1)
-        compose.onAllNodes(hasText(pack) and hasClickAction()).assertCountEquals(0)
+        // The byline is one node, and it answers no touch.
+        compose.onAllNodesWithText(byline).assertCountEquals(1)
+        compose.onAllNodes(hasText(byline) and hasClickAction()).assertCountEquals(0)
 
         // The sheet is named by the kind of text, and the passage by its own
         // reference, both words a screen reader can jump between.
         compose.onNode(hasText(label) and isHeading()).assertExists()
         compose.onNode(hasText(reference) and isHeading()).assertExists()
+
+        // The frame this head is reviewed from: the single-pack card the
+        // owner's report came from, kept beside the tour's frames so the
+        // byline and the passage title can be read on the glass, not only in
+        // the semantics tree (owner decision, this session).
+        compose.waitForIdle()
+        val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
+        File(screenshotOutputDirectory(), "tafsir-byline.png").outputStream().use { output ->
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, output)
+        }
     }
 
     private fun waitForReading() {

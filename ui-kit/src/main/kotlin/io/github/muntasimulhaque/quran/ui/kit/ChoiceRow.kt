@@ -150,13 +150,19 @@ fun ChoiceRow(
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyLarge,
+                // A choice's name wears the row-name voice, so a settings
+                // list and the pill's menus read as one hand (owner decision,
+                // this session).
+                style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             if (!subtitle.isNullOrBlank()) {
                 Text(
                     text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
+                    // A choice's second line is its value, so it wears the
+                    // caption: 12 at Regular, under a 16 Medium name (owner
+                    // decision, this session).
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = Space.Tight),
                 )

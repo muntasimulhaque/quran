@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 13.2 (versionCode 134)
+Version: 13.3 (versionCode 135)
 
 ## Listing
 
@@ -164,6 +164,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (13.3, 439 characters)
+13.3 is the type release. The reading now has one clear ladder: the Quran at 24 on a 2.0 line, its inline quotes at 21.6, the word list at 22 with 13.5 glosses, and the translation and tafsir at 15 on a 1.5 line. Titles are 18, section heads the body's own size at two weights, labels 12, and the settings list fits whole again. The surah introduction's own headings now stand, and the prose no longer hyphenates. Text and packs unchanged.
 
 ## Release notes (13.2, 339)
 13.2 makes the ayah's actions visible. The number at each ayah's head is now a door: tap it for Play, Tafsir, Save, Note, and Share. The menu is the one the player already opens, it closes on any answer, a scroll, or Back, and nothing hides behind a gesture anymore. The long press and its one-time hint are gone. Text and packs unchanged.

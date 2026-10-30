@@ -136,7 +136,7 @@ internal fun FilterRow(
             )
             Text(
                 text = state,
-                style = MaterialTheme.typography.labelMedium,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = Space.Line),
             )

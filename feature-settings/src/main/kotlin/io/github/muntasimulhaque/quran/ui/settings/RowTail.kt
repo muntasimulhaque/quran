@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,11 +14,10 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
+import io.github.muntasimulhaque.quran.ui.kit.SheetTitle
 import io.github.muntasimulhaque.quran.ui.reader.IconButton
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
@@ -109,14 +107,11 @@ fun PageHeader(title: String, onBack: () -> Unit) {
             tint = MaterialTheme.colorScheme.onSurface,
             rotation = 90f,
         )
-        Text(
+        SheetTitle(
             text = title,
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-            // the page's own name, and the one heading on it
-            modifier = Modifier
-                .semantics { heading() }
-                .padding(start = Space.Tight),
+            // The page's own name, in the app's one title voice; the air
+            // beside the back mark belongs to this head.
+            modifier = Modifier.padding(start = Space.Tight),
         )
     }
 }

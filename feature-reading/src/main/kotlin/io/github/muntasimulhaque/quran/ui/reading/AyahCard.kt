@@ -52,6 +52,9 @@ import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.rich.RichBlocks
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
+import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
+import io.github.muntasimulhaque.quran.ui.theme.title
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -222,32 +225,44 @@ fun AyahCard(
                     modifier = Modifier.padding(horizontal = SheetRowGutter),
                 )
             } else {
-                // The sheet is named by the kind of text it holds, the way
-                // every sheet is named by its own name. It wears the app's
-                // one head over a list, so a label over a group of choices
-                // is one voice wherever the reader meets it.
+                // The kind of text the card holds is a kicker: a small
+                // tracked label over the passage, not a title. "Tafsir"
+                // cannot share the title's size and be read as a title at the
+                // same time; the passage's own reference is the card's title,
+                // and the label says what kind of text follows (owner
+                // decision, this session).
                 SectionHead(
                     text = stringResource(R.string.card_tafsir_label),
                     modifier = Modifier.padding(
                         start = Space.Gutter,
                         end = Space.Gutter,
-                        top = Space.Tight,
-                        bottom = Space.Block,
+                        bottom = Space.Line,
                     ),
                 )
                 val single = tafsirPacks.singleOrNull()
                 if (single != null) {
                     // One pack is no choice: the reader tapped Tafsir on
                     // the pill, or arrived from a search hit that already
-                    // named the pack, so its name is a byline and its
-                    // passage stands under it with no door to fold (owner
-                    // decision, this session).
+                    // named the pack, so its name and its language are one
+                    // byline and its passage stands under them with no door
+                    // to fold (owner decision, this session). A byline is
+                    // metadata, so it wears the meta line rather than a
+                    // title's 16: the card's own evidence is the passage's
+                    // title below it.
                     val packName = contentPackName(single.id, single.name)
                     Text(
-                        text = packName,
-                        style = MaterialTheme.typography.labelMedium,
+                        text = stringResource(
+                            R.string.card_pack_byline,
+                            packName,
+                            languageName(single.language),
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = Space.Gutter),
+                        modifier = Modifier.padding(
+                            start = Space.Gutter,
+                            end = Space.Gutter,
+                            bottom = Space.Block,
+                        ),
                     )
                     PassageArea(
                         view = passages[single.id],
@@ -308,7 +323,12 @@ private fun DoorRow(
             .semantics {
                 if (state != null) stateDescription = state
             }
-            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = Space.Block),
+            // The row's own room is the app's row gap, not the block gap: two
+            // doors stand 24 dp apart (12 above and 12 below each), the room
+            // the card keeps between two things of one kind, and the sheet's
+            // name sits closer to the first door than a section break
+            // (owner decision, this session).
+            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = Space.Row),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // The value is under its name, the way every row in every sheet
@@ -324,7 +344,7 @@ private fun DoorRow(
             if (subtitle.isNotBlank()) {
                 Text(
                     text = subtitle,
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = Space.Tight),
                 )
@@ -367,19 +387,19 @@ private fun PassageArea(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = Space.Gutter, vertical = Space.Line),
+            .padding(horizontal = Space.Gutter),
         contentAlignment = Alignment.Center,
     ) {
         when {
             view != null -> TafsirPanel(view, settings)
             done -> Text(
                 text = stringResource(R.string.card_tafsir_missing),
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             opening != null -> Text(
                 text = opening,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -392,20 +412,25 @@ private fun PassageArea(
  * The reference is the passage's, read from the pack that returned it, so two
  * tafsirs of one ayah can name the same span or different ones without the
  * sheet ever promising what only one of them keeps (owner decision, this
- * session). It stands in the app's title voice, at the head of the prose it
- * belongs to, and it is a heading to a screen reader, so a reader who cannot
- * see the page can jump to the passage instead of hearing the whole card.
+ * session). It is the passage's title: [TypeLadder.articleTitleSp], which is
+ * 18 at the default body and stays between 18 and 22 at every reader step, so
+ * it stands above the document's own heads at every step without becoming a
+ * page title on a phone. Its line is the script's title leading, not the
+ * face's prose box, because a one-line title is not a paragraph. It is a
+ * heading to a screen reader, so a reader who cannot see the page can jump to
+ * the passage instead of hearing the whole card.
  */
 @Composable
 private fun TafsirPanel(
     view: TafsirView,
     settings: AppSettings,
 ) {
+    val voice = LocalReadingVoice.current
+    val titleSp = TypeLadder.articleTitleSp(settings.tafsirSp)
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .testTag("tafsir-panel")
-            .padding(top = Space.Tight),
+            .testTag("tafsir-panel"),
     ) {
         Text(
             text = stringResource(
@@ -413,7 +438,7 @@ private fun TafsirPanel(
                 view.surah,
                 localizedDigits(view.reference),
             ),
-            style = MaterialTheme.typography.titleLarge,
+            style = voice.title(titleSp),
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier
                 .semantics { heading() }

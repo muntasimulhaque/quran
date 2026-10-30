@@ -152,7 +152,7 @@ private fun ReciterDownloads(
     if (rows.isEmpty()) {
         Text(
             text = stringResource(R.string.settings_downloaded_empty),
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = ChoiceRowNameInset, end = Space.Gutter, bottom = Space.Block),
         )
@@ -239,12 +239,14 @@ private fun DownloadedSurahRow(row: DownloadedSurah, onRemove: () -> Unit) {
         Column(Modifier.weight(1f)) {
             Text(
                 text = row.name,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
                 text = formatBytes(row.bytes),
-                style = MaterialTheme.typography.bodySmall,
+                // A size is the row's value, so it wears the caption, not a
+                // source line (owner decision, this session).
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = Space.Tight),
             )

@@ -12,6 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.Footnote
 import io.github.muntasimulhaque.quran.feature.reading.R
@@ -87,13 +89,14 @@ internal fun FootnoteSheet(
                     surahName,
                     localizedDigits(reference),
                 ),
-                style = MaterialTheme.typography.labelMedium,
-                // The marker that opened this sheet keeps the action color;
-                // the sheet's own name is a reference line, and every other
-                // reference line on the reading wears the secondary tone
-                // (owner decision, the theme and consistency session).
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.titleLarge,
+                // The name of the sheet, in the app's one sheet-title voice:
+                // the footnote's own reference is what names it, so a reader
+                // who opened the wrong marker knows it before reading a line.
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics { heading() },
             )
             Text(
                 text = footnote.text,

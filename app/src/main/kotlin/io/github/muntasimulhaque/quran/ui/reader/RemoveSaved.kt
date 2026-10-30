@@ -13,6 +13,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -54,13 +56,16 @@ fun RemoveSavedSheet(
                 // The gate rides with the scroll, so an upward flick on the
                 // question never bounces the sheet on its top anchor.
                 .sheetVerticalScroll(rememberScrollState())
-                .padding(horizontal = Space.Gutter, vertical = 10.dp)
+                .padding(horizontal = Space.Gutter, vertical = Space.Row)
                 .padding(bottom = Space.SheetFoot),
         ) {
             Text(
                 text = stringResource(R.string.remove_saved_title),
-                style = MaterialTheme.typography.titleMedium,
+                // The sheet's own name, in the app's one title voice (owner
+                // decision, this session).
+                style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.semantics { heading() },
             )
             if (!note.isNullOrBlank()) {
                 Text(

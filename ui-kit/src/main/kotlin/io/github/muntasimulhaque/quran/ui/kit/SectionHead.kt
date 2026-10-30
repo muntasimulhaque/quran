@@ -6,22 +6,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 
 /**
  * The one voice a label over a list wears, wherever the app draws one: the
- * settings hub's groups, the ayah card's tafsir doors, and the pill's
- * listening panel.
+ * About page's groups, the pack lists' groups, and the pill's listening
+ * panel.
  *
- * It is the app's small label size in the accent, at a weight above the choice
- * rows it opens, so it reads as the name of what follows rather than as
- * another row: a label that wore the same voice as the things under it made a
- * list read as one undifferentiated block, and the air between the rows had no
- * rhythm to lean on (owner report, this session: the pill's own panel was
- * twelve lines of one size). It is small on purpose. A head that is larger
- * than its rows competes with them; this one steps back and lets the choices
- * lead, which is the opposite of the row's own name and is why the two cannot
- * share a voice.
+ * It is the app's label size at Medium, with the tracking a small label
+ * needs, in the secondary ink. It used to wear the accent, which is the color
+ * every control that answers a tap wears: a group's name in lapis read as a
+ * button the reader could press, and the sheet had one more blue thing than
+ * it had doors (owner decision, this session). A label that only names what
+ * follows is quiet; the rows under it lead.
+ *
+ * It is small on purpose. A head that is larger than its rows competes with
+ * them; this one steps back and lets the choices lead, which is the opposite
+ * of the sheet's own name and is why the two cannot share a voice.
  *
  * It is a heading to a screen reader too. TalkBack has navigated by heading
  * since 9.1, and a reader who cannot see the list can jump from one group of
@@ -36,8 +36,8 @@ import androidx.compose.ui.text.font.FontWeight
 fun SectionHead(text: String, modifier: Modifier = Modifier) {
     Text(
         text = text,
-        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-        color = MaterialTheme.colorScheme.primary,
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = modifier.semantics { heading() },
     )
 }
