@@ -133,7 +133,9 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 40917013319 on 13.0: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The reading, chrome, and surah opening frames are byte-identical to 12.9's on all three legs; search, Browse, the ayah card, and the tafsir differ only by the status bar, and the ten inch search frame also by the field's caret; the settings frame differs by the status bar and the version line, which now names 13.0. The evidence frames are byte-identical to 12.9's.
+The set is from capture run 41000985652 on 13.1: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. Every surface carries the new type: the titles and names in Literata, the prose with its own breaks and hyphenation, the tafsir's Arabic in Amiri, and the honorific inside its sentence; the settings frame names 13.1. The evidence frames carry the same reading in the dark and at the largest size, and the ten inch portrait.
+
+The set before it, 13.0, is from capture run 40917013319: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The reading, chrome, and surah opening frames are byte-identical to 12.9's on all three legs; search, Browse, the ayah card, and the tafsir differ only by the status bar, and the ten inch search frame also by the field's caret; the settings frame differs by the status bar and the version line, which named 13.0. The evidence frames are byte-identical to 12.9's.
 
 The set before it, 12.9, is from capture run 40889505454: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The reading, surah opening, tafsir, and search frames carry the larger prose, the settings frame names 12.9, and Browse and the ayah card differ from 12.8 only by the status bar's clock; the evidence frames are the new size in the same grounds.
 
@@ -160,6 +162,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (13.1, 445 characters)
+13.1 is the typography release. Titles, screen names, surah names, and search results now use the book's own face, while controls and labels stay quiet. The prose is set with better line breaks, hyphenation, and trimmed leading; the tafsir's Arabic moves to Amiri's body face. Bangla readers get a larger reading and a taller line, the honorific sits inside its sentence, the word gloss steps back, and numbers line up. Text and packs unchanged.
 
 ## Release notes (13.0, 452 characters)
 13.0 fixes the reading's place. The app remembers the ayah you were in and nothing else. It used to keep how far down the screen you had scrolled too, and turning the phone made that number wrong, so each swipe snapped to the top of an ayah instead of sliding; in landscape the reading stepped ayah by ayah, and a long ayah could not be read past its first screen. Now the page stays where you leave it, in either orientation. Text and packs unchanged.
