@@ -172,10 +172,20 @@ class AyahActionsTest {
         val play = compose.activity.getString(R.string.action_play)
         compose.onNodeWithText(play).assertHeightIsEqualTo(48.dp)
 
-        // The menu goes with the page: a swipe of the reader's own puts it
-        // away, because its door moves under it (owner decision, this
-        // session).
+        // A tap on the page puts the menu away, and the door says it is
+        // closed again while it is still on the glass.
         val page = compose.activity.getString(ReadingR.string.reading_page_description)
+        compose.onNodeWithContentDescription(page).performClick()
+        waitForMenuClosed()
+        assertEquals(
+            "the door is closed again once its menu is away",
+            compose.activity.getString(ReadingR.string.reading_door_collapsed),
+            doorState(),
+        )
+
+        // And a scroll of the reader's own puts it away too, because its door
+        // moves under it (owner decision, this session).
+        openTheDoor()
         compose.onNodeWithContentDescription(page).performTouchInput {
             swipe(
                 start = Offset(center.x, height * 0.82f),
@@ -184,15 +194,14 @@ class AyahActionsTest {
             )
         }
         waitForMenuClosed()
-        assertEquals(
-            "the door is closed again once its menu is away",
-            compose.activity.getString(ReadingR.string.reading_door_collapsed),
-            compose.onNodeWithContentDescription(doorName())
-                .fetchSemanticsNode()
-                .config
-                .getOrElseNullable(SemanticsProperties.StateDescription) { null },
-        )
     }
+
+    /** What the door says about its own state, in the app's words. */
+    private fun doorState(): String? = compose
+        .onNodeWithContentDescription(doorName())
+        .fetchSemanticsNode()
+        .config
+        .getOrElseNullable(SemanticsProperties.StateDescription) { null }
 
     /** What a row of the menu says about its own mark, in the app's words. */
     private fun markOf(label: String): String? = compose

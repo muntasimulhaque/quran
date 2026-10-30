@@ -42,12 +42,11 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
  * The door's own line: the 48 dp every control owes the finger, taken as the
  * reference's line rather than added under it.
  *
- * The visible capsule is 24 dp and stands on the row's own middle, so the
- * line's air is the target's air and the row costs the page nothing it did
- * not already pay for the reference. The block gives its own head air back to
- * the row when the door is drawn, so the capsule stands where the reference
- * stood and the ayah's Arabic begins where it always began (owner decision,
- * this session).
+ * The visible capsule is 24 dp and stands on the row's middle, so the line's
+ * air is the target's air. The block keeps its own room above and below the
+ * row, so two cards still stand the 24 dp apart the reading keeps, and the
+ * ayah's head is a little taller than the bare reference line was (owner
+ * decision, this session).
  */
 private val DoorRow = 48.dp
 
@@ -58,11 +57,11 @@ private val DoorRow = 48.dp
  * The reference used to be bare type, and the ayah's actions were a long
  * press that nothing on the page announced. It is now the one visible
  * signifier on every ayah, at the one place the reader already looks for the
- * ayah's name. It keeps the 48 dp every control owes the finger, and the
- * block gives its own head air back to the row, so the capsule stands where
- * the reference stood and the verses keep their rhythm (owner decision, this
- * session: the one-tap ayah of 6.5 and the long press that followed it are
- * both gone, because a signifier that must be taught is not a signifier).
+ * ayah's name. It keeps the 48 dp every control owes the finger, and it
+ * stands inside the room the ayah already kept, so the card gap is untouched
+ * and each head is a little taller (owner decision, this session: the one-tap
+ * ayah of 6.5 and the long press that followed it are both gone, because a
+ * signifier that must be taught is not a signifier).
  *
  * It carries its state the way the search sheet's filter door does: a caret
  * that turns when the menu is open, and the accent's own tone on the capsule,

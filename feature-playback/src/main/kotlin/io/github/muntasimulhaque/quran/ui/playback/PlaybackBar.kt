@@ -357,10 +357,12 @@ fun PlaybackBar(
             }
             // The popup's anchor stands on the capsule's measure without ever
             // deciding it: a menu wider than the pill still hangs from the
-            // pill's own middle (owner report).
+            // pill's own middle (owner report). The anchor is always on the
+            // page, so it is measured before a menu is asked for, and the
+            // popup itself is composed only while one is open.
             Box(Modifier.matchParentSize()) {
                 PillMenuAnchor { anchor ->
-                    AppPopup(
+                    if (openMenu != null) AppPopup(
                         anchor = anchor,
                         onDismiss = { openMenu = null },
                         alignment = PopupAlignment.Center,

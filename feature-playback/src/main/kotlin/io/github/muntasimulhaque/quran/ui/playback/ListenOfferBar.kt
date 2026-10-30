@@ -203,7 +203,7 @@ internal fun ListenOfferBar(
         // decision).
         Box(Modifier.matchParentSize()) {
             PillMenuAnchor { anchor ->
-                AppPopup(
+                if (chooser) AppPopup(
                     anchor = anchor,
                     onDismiss = { chooser = false },
                     alignment = PopupAlignment.Center,

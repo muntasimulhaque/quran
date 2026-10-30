@@ -184,15 +184,11 @@ internal fun AyahBlock(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            // The door is a 48 dp row, and its own air is the block head's
-            // air: the top gap it used to keep over the reference is given
-            // back to the row when the door is drawn, so the capsule stands
-            // where the reference stood and the verses keep their rhythm
-            // (owner decision, this session).
-            .padding(
-                top = if (arabicOnly) Space.Tight else 0.dp,
-                bottom = if (arabicOnly) Space.Tight else Space.Row,
-            ),
+            // The door is a 48 dp row, and it stands inside the head the
+            // block already kept: the card's own room above and below it is
+            // untouched, so two blocks that carry more than the Arabic still
+            // stand 24 dp apart (owner decision, this session).
+            .padding(vertical = if (arabicOnly) Space.Tight else Space.Row),
     ) {
         val press = remember { MutableInteractionSource() }
         // The block's own place on the glass, for the screen reader's action:
