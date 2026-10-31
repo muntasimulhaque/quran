@@ -35,10 +35,8 @@ you kept, with your note under the ayah it was written on, and a Last read
 list that keeps the places you have been reading so you can return to one
 you left.
 
-Browse and Search are doors at the top of the reading, and the sliders
-beside them open the page's own sizes and switches, with Settings at the
-foot of that panel. There is no bottom bar to learn. More than one
-translation may be on at once, and
+Browse, Search, and Settings are doors at the top of the reading. There is
+no bottom bar to learn. More than one translation may be on at once, and
 each one draws in its own place under the ayah.
 
 Recitation plays Minshawi or Husary, with the page following the reciter
@@ -135,7 +133,9 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 41179632238 on 13.6: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The settings frame names 13.6 on every leg. The reading, chrome, surah opening, and every evidence frame are byte-identical to 13.5's; search, Browse, the ayah card, and the tafsir differ only by the status bar's clock (and, on search, the field's caret), and the settings frame also by the version line. The five frames that changed are not the subject of 13.6's menu, which is not among the store's eight.
+The set is from capture run 41190473654 on 13.7: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The reading, chrome, surah opening, Browse, and settings are the change: the Quran stands at 26 with 16 prose, Bangla uses the same sizes as English, the chrome carries Browse, Search, and the gear, the opening says Madani, Browse says Makki and Madani, and the settings frame names 13.7 on every leg. The search frame is translation-only and differs by the status bar's clock and the field's caret; the ayah card and the tafsir carry the larger Arabic where it appears. The evidence frames carry the same reading in the dark and at the largest size, and the ten inch portrait. The ayah grid is not among the store's eight; its review frame is `play-store/evidence/phone_ayah-grid.png`, captured separately on the phone AVD.
+
+The set before it is from capture run 41179632238 on 13.6: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The settings frame names 13.6 on every leg. The reading, chrome, surah opening, and every evidence frame are byte-identical to 13.5's; search, Browse, the ayah card, and the tafsir differ only by the status bar's clock (and, on search, the field's caret), and the settings frame also by the version line. The five frames that changed are not the subject of 13.6's menu, which is not among the store's eight.
 
 The set is from capture run 41173502151 on 13.5: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The Browse frame carries the reader's current surah, marked with the app's selected wash and an accent number; the settings frame names 13.5 on every leg. The reading, chrome, and surah opening frames are byte-identical to 13.4's; search, the ayah card, and the tafsir differ only by the status bar's clock; and the evidence frames are byte-identical to 13.4's, carrying the same reading in the dark and at the largest size, and the ten inch portrait.
 
