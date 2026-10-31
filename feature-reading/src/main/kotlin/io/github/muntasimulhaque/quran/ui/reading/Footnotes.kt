@@ -19,6 +19,7 @@ import io.github.muntasimulhaque.quran.data.Footnote
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.prose
+import io.github.muntasimulhaque.quran.ui.theme.screenSubtitle
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
@@ -90,10 +91,13 @@ internal fun FootnoteSheet(
                     surahName,
                     localizedDigits(reference),
                 ),
-                style = MaterialTheme.typography.titleLarge,
-                // The name of the sheet, in the app's one sheet-title voice:
-                // the footnote's own reference is what names it, so a reader
-                // who opened the wrong marker knows it before reading a line.
+                // A footnote is a small page, not a utility sheet: its
+                // name is the small page's own 16 at Medium, over the
+                // note's 15, so the reference line names the note without
+                // standing over it like a page title (owner decision, this
+                // session). A reader who opened the wrong marker still
+                // knows it before reading a line.
+                style = screenSubtitle(),
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .fillMaxWidth()

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
@@ -20,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,7 +29,7 @@ import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.feature.settings.R
-import io.github.muntasimulhaque.quran.ui.kit.StepRow
+import io.github.muntasimulhaque.quran.ui.kit.ScaleRow
 import io.github.muntasimulhaque.quran.ui.theme.NightBackground
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.NightText
@@ -173,29 +175,24 @@ fun AppTheme.name(): String = stringResource(
 )
 
 /**
- * The size of one kind of text: the row names what it sizes, the steps grow
- * from the smallest to the largest, and the chosen one is filled. The sample
- * above the rows is drawn in the script of the text that is being sized, so
- * Arabic is judged as Arabic.
+ * The size of one kind of text: its name and its scale on one line, the ends
+ * showing the smallest and the largest the kind can be, and the chosen stop
+ * filled. The sample above the rows is the reader's own ayah, so a change is
+ * judged on the page it is about to change.
  *
- * The row names nothing else. It used to print "3 of 5" beside every name,
- * which is the place of the step in a ladder the reader can already see: the
- * five cells grow from the smallest to the largest and the chosen one is
- * filled, so the number said the same thing twice, and four of them stacked
- * turned the page into arithmetic (owner report). A reader who cannot see
- * the fill still hears the place, because each cell says it (owner decision,
- * this session).
+ * The row used to be a name with a 250 dp pill of five 48 dp cells under it, a
+ * line of its own for every kind of text. The cells were the targets the
+ * accessibility rule asked for, and the name moved above them for it; the rail
+ * is one target that fits beside the name, so four kinds of text come down by
+ * a line each and the page still offers every size (owner decision, this
+ * session). The smallest and largest marks at the ends say which way the scale
+ * runs, and the chosen stop's halo says where the reader is.
  */
 @Composable
 fun SizeRow(
     role: TypeRole,
     step: Float,
-    /**
-     * The room the block keeps from its surface's edges. The settings page
-     * keeps the app's one gutter; the reading's display panel is 288 dp wide,
-     * where the five 48 dp steps take 250 and leave 19 a side (owner
-     * decision, this session).
-     */
+    /** The room the block keeps from its surface's edges, the app's one gutter. */
     gutter: Dp = Space.Gutter,
     onChange: (Float) -> Unit,
 ) {
@@ -207,93 +204,13 @@ fun SizeRow(
             TypeRole.Words -> R.string.settings_size_words
         },
     )
-    SegmentedRow(
-        label = label,
-        value = step,
-        steps = TextSize.STEPS,
-        onSelect = onChange,
-        gutter = gutter,
-        // The letters run from the smallest step to the largest, so the row
-        // reads as one scale.
-        cell = { index, active ->
-            // The sample is the reader's own step at this role, not a private
-            // staircase: the old cells drew 11, 13, 15, 17, and 19, so the
-            // middle step showed a letter a point under the size it set. The
-            // Arabic and the aid's word are drawn at three quarters to fit the
-            // cell, and the scale is the same at every step, so the
-            // differences the eye reads are the differences the reader gets
-            // (owner decision, this session).
-            val roleSp = TextSize.sp(role, TextSize.STEPS[index])
-            val scale = if (role == TypeRole.Arabic || role == TypeRole.Words) 0.75f else 1f
-            val size = (roleSp * scale).sp
-            Text(
-                text = if (role == TypeRole.Arabic) "\u0627" else "A",
-                // The Arabic cell is drawn in the Quran's own face, the way
-                // the sample above it is. It wore the interface face, so the
-                // letter the reader was sizing was not the letter they read
-                // (owner decision, the theme and consistency session).
-                style = if (role == TypeRole.Arabic) {
-                    TextStyle(fontFamily = rememberHafs(), fontSize = size)
-                } else {
-                    MaterialTheme.typography.titleMedium.copy(
-                        fontSize = size,
-                        lineHeight = (size.value * 1.2f).sp,
-                    )
-                },
-                color = if (active) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
-            )
-        },
-    ) { chosen ->
-        val index = TextSize.STEPS.indexOf(chosen)
-        stringResource(
-            R.string.settings_text_size_option,
-            index + 1,
-            TextSize.STEPS.size,
-            label,
-        )
-    }
-}
-
-/**
- * One choice out of a few, drawn the same way everywhere it appears: the name
- * of the thing above, the choices in one pill under it, the chosen one filled.
- *
- * The name is above rather than beside because of the 48 dp rule. Every step
- * carries its own touch box, so a row of five is 250 dp wide, and beside a
- * name that would leave the name 60-odd dp on a small phone: "Playback speed"
- * would break in the middle and the Bengali names would break anywhere. Above,
- * the name has the row to itself and the choices have the row's middle, and
- * the pair reads as one block (these cells were 38 and 46 dp once, named
- * and not done until later).
- *
- * The rhythm is what says which name belongs to which pill: the name stands
- * 4 dp above its own control, and the next row opens 16 dp under it. The
- * page used to keep 4 dp above and below every row and 8 dp between a name
- * and its pill, so the gap inside a row and the gap between rows measured
- * 11 dp and 12 dp on the glass: four controls floated in one column of
- * equal gaps, and nothing grouped (owner report).
- */
-@Composable
-private fun SegmentedRow(
-    label: String,
-    value: Float,
-    steps: List<Float>,
-    onSelect: (Float) -> Unit,
-    /** The room the block keeps from its surface's edges. */
-    gutter: Dp,
-    /** What one step draws, given its place in the scale and whether it is chosen. */
-    cell: @Composable (index: Int, active: Boolean) -> Unit,
-    /** What a screen reader says for one step, place and meaning together. */
-    description: @Composable (Float) -> String,
-) {
-    Column(
+    val scale = if (role == TypeRole.Arabic || role == TypeRole.Words) 0.75f else 1f
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = gutter, end = gutter, top = Space.Block),
+            .padding(start = gutter, end = gutter, top = Space.Block)
+            .heightIn(min = 48.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = label,
@@ -302,17 +219,46 @@ private fun SegmentedRow(
             // theme and consistency session).
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Ellipsis,
         )
-        StepRow(
-            steps = steps,
-            value = value,
-            onSelect = onSelect,
-            cell = cell,
-            description = description,
+        ScaleRow(
+            label = label,
+            steps = TextSize.STEPS,
+            value = step,
+            onSelect = onChange,
+            startMark = { SizeMark(role, TextSize.STEPS.first(), scale) },
+            endMark = { SizeMark(role, TextSize.STEPS.last(), scale) },
             modifier = Modifier
-                .padding(top = Space.Tight)
-                .align(Alignment.CenterHorizontally),
+                .weight(1f)
+                .padding(start = Space.Line),
         )
     }
 }
 
+/**
+ * One end of a size scale: the letter at the size that end offers, in the
+ * script it is read in. The Arabic and the aid's word are drawn at three
+ * quarters, so the largest still fits the row; the others at their own size,
+ * as the sample ayah above is drawn.
+ */
+@Composable
+private fun SizeMark(role: TypeRole, step: Float, scale: Float) {
+    val size = (TextSize.sp(role, step) * scale).sp
+    Text(
+        text = if (role == TypeRole.Arabic) "ا" else "A",
+        // The Arabic mark is drawn in the Quran's own face, the way the sample
+        // above it is: the letter the reader is sizing is the letter they
+        // read (owner decision, the theme and consistency session).
+        style = if (role == TypeRole.Arabic) {
+            TextStyle(fontFamily = rememberHafs(), fontSize = size)
+        } else {
+            MaterialTheme.typography.titleMedium.copy(
+                fontSize = size,
+                lineHeight = (size.value * 1.2f).sp,
+            )
+        },
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}

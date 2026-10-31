@@ -1,6 +1,8 @@
 package io.github.muntasimulhaque.quran.ui.playback
 
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -16,8 +18,8 @@ import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.SectionHead
+import io.github.muntasimulhaque.quran.ui.kit.ScaleRow
 import io.github.muntasimulhaque.quran.ui.kit.SpeedSteps
-import io.github.muntasimulhaque.quran.ui.kit.StepRow
 import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
@@ -86,16 +88,28 @@ internal fun ColumnScope.ListeningPanel(
  * the space above it.
  */
 @Composable
-private fun MenuLabel(text: String) {
-    SectionHead(
-        text = text,
-        modifier = Modifier.padding(
-            start = Space.Gutter,
-            top = Space.Row,
-            end = Space.Gutter,
-            bottom = Space.Tight,
-        ),
-    )
+private fun MenuLabel(text: String, value: String? = null) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                start = Space.Gutter,
+                top = Space.Row,
+                end = Space.Gutter,
+                bottom = Space.Tight,
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        SectionHead(text = text, modifier = Modifier.weight(1f))
+        if (value != null) {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(start = Space.Line),
+            )
+        }
+    }
 }
 
 /**
@@ -131,7 +145,7 @@ internal fun ColumnScope.ListeningMenu(
     // reciter chooser's first row already opens with. The room sits over the
     // leading, and the label still stands nearer the paces it names than the
     // top edge.
-    MenuLabel(stringResource(R.string.playback_speed_label))
+    MenuLabel(stringResource(R.string.playback_speed_label), value = speedText(speed))
     // One row, five paces, the chosen one filled: the app's own step row, the
     // same the text sizes wear, so one control is learned once. It stands
     // centred on the menu rather than against its left edge, where it left
@@ -140,33 +154,16 @@ internal fun ColumnScope.ListeningMenu(
     // came from the settings page's old copy and the two had drifted, one
     // filling its whole cell and this one hugging its text (owner decision,
     // this session: one StepRow, one shape).
-    StepRow(
+    ScaleRow(
+        label = stringResource(R.string.playback_speed_label),
         steps = SpeedSteps,
         value = speed,
         onSelect = onSpeed,
-        cell = { index, active ->
-            Text(
-                text = speedText(SpeedSteps[index]),
-                // The theme's own small label, without a one-off 12 sp
-                // override, so a theme change reaches it (owner decision,
-                // the theme and consistency session).
-                style = MaterialTheme.typography.labelSmall,
-                color = if (active) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
-            )
-        },
-        description = { step ->
-            stringResource(
-                R.string.playback_speed_option,
-                speedText(step),
-                stringResource(R.string.playback_speed_label),
-            )
-        },
+        startMark = { SpeedMark(SpeedSteps.first()) },
+        endMark = { SpeedMark(SpeedSteps.last()) },
+        valueText = { step -> speedText(step) },
         modifier = Modifier
-            .align(Alignment.CenterHorizontally)
+            .fillMaxWidth()
             .padding(horizontal = 10.dp)
             .testTag("playback-speed"),
     )
@@ -229,5 +226,15 @@ private fun EndChoice(
         selected = chosen == choice,
         radio = true,
         onClick = { onEndOfAudio(choice) },
+    )
+}
+
+/** One end of the pace scale: the pace that end offers, in the meta voice. */
+@Composable
+private fun SpeedMark(step: Float) {
+    Text(
+        text = speedText(step),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
 }

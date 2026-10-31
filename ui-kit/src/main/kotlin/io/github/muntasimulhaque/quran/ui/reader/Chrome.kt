@@ -18,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.AlignmentLine
+import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.CustomAccessibilityAction
@@ -86,6 +88,13 @@ private val TitlePad = 14.dp
  * controls. The juz label is drawn only when it truly fits beside the whole
  * name: the name of the surah is what the reader looks for, and a tight bar
  * must shorten the label, never the name.
+ *
+ * **The two sit on one baseline** (owner decision, this session). They used
+ * to be centered by their line boxes, and the name's box is 20.8 while the
+ * label's is 19, so the 13 sp label landed at the name's x-height and read as
+ * a subscript on the surah's name. The label's first baseline is placed on
+ * the name's, and the pair is centered in the bar as one unit; the eye reads
+ * `Al-Baqarah  Juz 2` as one line of two sizes, which is what it is.
  *
  * When [onClick] is given the title answers a tap, which is the way back to
  * the top of a long surah without a scroll. It then wears the app's one
@@ -187,9 +196,25 @@ fun ReadingTitle(
             .coerceAtMost(constraints.maxWidth)
         val start = ((width - shapeWidth) / 2).coerceAtLeast(0) + padX
         val height = maxOf(name.height, label?.height ?: 0, 48.dp.roundToPx())
+        // The name's own line is the one the label joins: the name is placed
+        // on the bar's middle, and the label's baseline is set on the name's.
+        // A label with no reported baseline falls back to its own middle, so
+        // a face without metrics cannot throw the placement off.
+        val nameTop = (height - name.height) / 2
+        val nameBaseline = name[FirstBaseline]
         layout(width, height) {
-            name.place(start, (height - name.height) / 2)
-            label?.place(start + name.width + gap, (height - label.height) / 2)
+            name.place(start, nameTop)
+            label?.let { placeable ->
+                val labelBaseline = placeable[FirstBaseline]
+                val top = if (nameBaseline == AlignmentLine.Unspecified ||
+                    labelBaseline == AlignmentLine.Unspecified
+                ) {
+                    (height - placeable.height) / 2
+                } else {
+                    nameTop + nameBaseline - labelBaseline
+                }
+                placeable.place(start + name.width + gap, top)
+            }
         }
     }
 }

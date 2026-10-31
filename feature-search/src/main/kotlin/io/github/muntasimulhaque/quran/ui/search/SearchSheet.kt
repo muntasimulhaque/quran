@@ -321,6 +321,7 @@ fun SearchSheet(
                             RecentSearches(
                                 queries = recents,
                                 onQuery = { text = it },
+                                onRemove = { recents = history.remove(it) },
                                 onClear = { recents = history.clear() },
                             )
                         }
@@ -393,54 +394,4 @@ private fun key(hit: SearchHit): String = when (hit) {
     is SearchHit.SurahHit -> "surah-${hit.surah.number}"
     is SearchHit.AyahHit -> "ayah-${hit.ayah.number}"
     is SearchHit.TafsirHitResult -> "tafsir-${hit.pack}-${hit.surah}-${hit.fromAyah}"
-}
-
-/**
- * The queries the reader acted on before, as chips over the empty sheet.
- *
- * A search usually begins with a word the reader has already used, and the
- * empty sheet is the one place that can hand it back. The chips are the app's
- * own text button in its quiet tone, so a query never reads as the field's
- * own text or as the app's one action; the head names the block, and Clear
- * empties the list on the phone as well. A query is only here because the
- * reader opened something it found, which is why the list is short and
- * useful instead of a record of every keystroke (owner decision, this
- * session).
- */
-@Composable
-private fun RecentSearches(
-    queries: List<String>,
-    onQuery: (String) -> Unit,
-    onClear: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Section),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            SectionHead(
-                text = stringResource(R.string.search_recent_title),
-                modifier = Modifier.weight(1f),
-            )
-            TextButton(
-                label = stringResource(R.string.search_recent_clear),
-                onClick = onClear,
-                quiet = true,
-            )
-        }
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(Space.Line),
-            // The chip is a 36 dp pill inside a 48 dp target, so the row gap
-            // the eye reads is this spacing plus the 6 dp of target above and
-            // below each pill; 0 here leaves a 12 dp block break between rows
-            // while the chips keep the size the search filters already have.
-            verticalArrangement = Arrangement.spacedBy(0.dp),
-        ) {
-            queries.forEach { query ->
-                QueryChip(label = query, onClick = { onQuery(query) })
-            }
-        }
-    }
 }

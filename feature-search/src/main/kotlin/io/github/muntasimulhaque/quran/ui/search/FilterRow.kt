@@ -277,38 +277,3 @@ internal fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit)
         )
     }
 }
-
-/**
- * A recent query is a suggestion, not an action: it wears the app's chip, not
- * the action pill, because tapping it fills the field and runs the search
- * rather than completing a flow. It is the same chip as the source filters,
- * without the check, so the two kinds of search chip read as one family.
- */
-@Composable
-internal fun QueryChip(label: String, onClick: () -> Unit) {
-    val press = remember { MutableInteractionSource() }
-    val ink = MaterialTheme.colorScheme.onSurfaceVariant
-    Row(
-        modifier = Modifier
-            .clickable(
-                interactionSource = press,
-                indication = null,
-                role = Role.Button,
-                onClick = onClick,
-            )
-            .minimumInteractiveComponentSize()
-            .clip(Radii.Pill)
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door))
-            .indication(press, ripple(color = ink))
-            .padding(horizontal = Space.Row, vertical = Space.Line),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            color = ink,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-    }
-}

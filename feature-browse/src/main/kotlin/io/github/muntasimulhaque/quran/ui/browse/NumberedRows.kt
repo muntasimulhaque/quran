@@ -32,6 +32,7 @@ import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
 import io.github.muntasimulhaque.quran.ui.theme.Wash
 import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
+import io.github.muntasimulhaque.quran.ui.theme.bookRowName
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import java.util.Locale
 
@@ -105,6 +106,10 @@ internal fun NumberCell(
  * the row that opened it, which made the same surah look like two different
  * things one tap apart (owner report).
  *
+ * The list's name is [bookRowName], the row name's 15 in the Book's face; a
+ * page's head (the ayah grid) keeps the Book's 16, because it names the page
+ * it leads and has the back mark beside it (owner decision, this session).
+ *
  * [nameMaxLines] is one where the header shares its row with the back mark
  * and the name may have to give; the list row lets its name run whole.
  */
@@ -113,11 +118,12 @@ internal fun SurahNameBlock(
     surah: Surah,
     modifier: Modifier = Modifier,
     nameMaxLines: Int = Int.MAX_VALUE,
+    pageName: Boolean = false,
 ) {
     Column(modifier) {
         Text(
             text = surah.nameSimple,
-            style = MaterialTheme.typography.titleMedium,
+            style = if (pageName) MaterialTheme.typography.titleMedium else bookRowName(),
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = nameMaxLines,
             overflow = if (nameMaxLines == 1) TextOverflow.Ellipsis else TextOverflow.Clip,
@@ -245,7 +251,7 @@ internal fun JuzRow(
         Column(Modifier.weight(1f)) {
             Text(
                 text = stringResource(R.string.juz_title, juz),
-                style = MaterialTheme.typography.titleMedium,
+                style = bookRowName(),
                 color = MaterialTheme.colorScheme.onSurface,
             )
             // A juz with no surah to name draws no line: an empty Text was

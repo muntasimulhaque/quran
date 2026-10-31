@@ -45,8 +45,6 @@ import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.AddDoor
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
-import io.github.muntasimulhaque.quran.ui.kit.ReferenceLabel
-import io.github.muntasimulhaque.quran.ui.kit.SheetTitle
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.languageName
@@ -96,13 +94,16 @@ private data class TafsirLoad(
  * tap away rather than a scroll to the foot of a card (owner decision, this
  * session).
  *
- * The sheet is named by the kind of text it holds, and each pack is named
- * once. The reference belongs to the passage and stands with it, because two
- * packs can cover different ayahs of one surah, so a reference at the head of
- * the sheet would be a promise only one pack keeps (owner decision, this
- * session). With one pack there is no choice, so the name is a byline and the
- * passage stands under it; with more, the name is a door and the passage
- * unfolds under it.
+ * The sheet opens on the commentary, not on a name for it. The reader came
+ * from the ayah's own Tafsir mark, so the drawn `Tafsir` head and its
+ * `Ayah 2:255` line said what the reader already knew and what the passage's
+ * own title says below (owner decision, this session). What is drawn first is
+ * the pack itself: one pack is a byline, and more than one is a door, both at
+ * the row name's 15 so the source line reads the same size whether or not
+ * there is a choice to make. The reference belongs to the passage and stands
+ * with it, because two packs can cover different ayahs of one surah, so a
+ * reference at the head of the sheet would be a promise only one pack keeps
+ * (owner decision, this session).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -234,35 +235,12 @@ fun AyahCard(
             // switch. The packs are the choice, and the mark that opens
             // this card exists exactly while one of them is on the device
             // (owner decision, this session).
-            // The card names itself once, in the app's own voice: a sheet
-            // opened from the pill's Tafsir mark is a surface of the app,
-            // and its name is not the passage's title. The Book's voice
-            // starts at the passage's reference below (owner decision, this
-            // session).
-            SheetTitle(
-                text = stringResource(R.string.card_tafsir_label),
-                modifier = Modifier.padding(
-                    start = Space.Gutter,
-                    end = Space.Gutter,
-                    bottom = Space.Tight,
-                ),
-            )
-            // The card is about one ayah before it is about one commentary.
-            // The passage under each door names the passage's own range; this
-            // line is the reader's subject, so a card with two commentaries
-            // says which ayah both of them are answering (owner decision,
+            // The card opens on the pack. The reader came from the ayah's
+            // Tafsir mark, so a drawn `Tafsir` head and an `Ayah 2:255` line
+            // repeated what they already knew and what the passage's title
+            // says below; the source line is the first thing the card has to
+            // say, and the passage's own title follows it (owner decision,
             // this session).
-            ReferenceLabel(
-                text = stringResource(
-                    R.string.reading_ayah_reference,
-                    localizedDigits(ayah.verseKey),
-                ),
-                modifier = Modifier.padding(
-                    start = Space.Gutter,
-                    end = Space.Gutter,
-                    bottom = Space.Block,
-                ),
-            )
             if (tafsirPacks.isEmpty()) {
                 // The card is only the tafsir doors, so a reader with none
                 // open gets the door to add one rather than a sheet with
@@ -280,10 +258,12 @@ fun AyahCard(
                     // the pill, or arrived from a search hit that already
                     // named the pack, so its name and its language are one
                     // byline and its passage stands under them with no door
-                    // to fold (owner decision, this session). A byline is
-                    // metadata, so it wears the meta line rather than a
-                    // a row's 15: the card's own evidence is the passage's
-                    // title below it.
+                    // to fold (owner decision, this session). The byline is
+                    // a source line, so it stays in the secondary ink, but
+                    // it wears the row name's 15: with two packs the same
+                    // words are the door's 15, and one source line must not
+                    // change size with the number of packs on the device
+                    // (owner decision, this session).
                     val packName = contentPackName(single.id, single.name)
                     Text(
                         text = stringResource(
@@ -291,7 +271,7 @@ fun AyahCard(
                             packName,
                             languageName(single.language),
                         ),
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(
                             start = Space.Gutter,

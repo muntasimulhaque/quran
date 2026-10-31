@@ -138,11 +138,16 @@ enum class PopupAlignment { Center, Start }
  * no room below it, so its menu still rises exactly as it always has; a door
  * in the middle of the page opens downward, the way a menu under a field
  * does, and one near the foot flips above. When the roomier side cannot hold
- * the whole menu, the menu slides inside the window's safe band, even over
- * the door, so no action is hidden behind a scroll the reader did not ask
- * for. The ground between the popup and the anchor yields before an action
- * does. What does not fit even the whole band still scrolls, and the popup
- * fades at the edge that has more.
+ * the whole menu, the menu slides inside the window's safe band, so no action
+ * is hidden behind a scroll the reader did not ask for. **A door's menu does
+ * not cover the door while it does that**: if the clamped menu would cross the
+ * door, and the window has room beside it, the menu stands beside the door
+ * instead, centred on it, so the number the reader tapped stays in sight with
+ * every action (owner decision, this session). A capsule's menu (the pill's)
+ * has no beside to stand on without leaving the capsule's middle, so it keeps
+ * the band's clamp. The ground between the popup and the anchor yields before
+ * an action does. What does not fit even the whole band still scrolls, and the
+ * popup fades at the edge that has more.
  *
  * The popup takes `width` wide, [PopupMeasure] by default, the popup's own
  * corners and lift, the surface tone the app floats on, and [PopupGutter] at
@@ -302,8 +307,9 @@ internal fun popupSide(above: Int, below: Int): PopupSide =
 /**
  * Where the app's popup stands: on the roomier side of its anchor with
  * [gap] of the page's ground between when that side can hold it; otherwise
- * inside the window's safe band, even over the anchor; aligned the way its
- * anchor asks, and never off the glass.
+ * inside the window's safe band, beside a door's own edge when the band would
+ * cross it and the window can hold it there, and over the anchor only when
+ * neither side can; aligned the way its anchor asks, and never off the glass.
  *
  * The anchor is a box, and the box's own bounds are read here rather than
  * left to the library: this is the one place in the app that says where a
@@ -357,14 +363,39 @@ internal class AppPopupPosition(
         // The side decides which way the menu opens when the ground allows
         // it. When the menu is taller than that side's room, it slides inside
         // the safe band instead of growing past the glass or hiding a row
-        // behind a scroll: it may cross the door, because an action is worth
-        // more than the ground between them.
+        // behind a scroll.
         val preferred = when (side) {
             PopupSide.Below -> anchor.bottom + gap
             PopupSide.Above -> anchor.top - gap - popupContentSize.height
         }
         val lastTop = (bottomLimit - popupContentSize.height).coerceAtLeast(topLimit)
-        val y = preferred.coerceIn(topLimit, lastTop)
-        return IntOffset(x, y)
+        var y = preferred.coerceIn(topLimit, lastTop)
+        // A door's menu keeps the door in sight (owner decision, this
+        // session). When the clamped menu would cross the door, it stands
+        // beside the door instead: on the side with more room, centred on the
+        // door's own middle, with every row still on the glass. The number the
+        // reader tapped is the one thing the menu must not hide, because it is
+        // what says which ayah the menu is about. A capsule's menu (Center)
+        // keeps its own middle and the band's clamp: the pill has no leading
+        // edge to stand beside.
+        val crossesDoor = y < anchor.bottom && y + popupContentSize.height > anchor.top
+        var placedX = x
+        if (alignment == PopupAlignment.Start && crossesDoor) {
+            val rightRoom = windowSize.width - edge - (anchor.right + gap)
+            val leftRoom = (anchor.left - gap) - edge
+            when {
+                rightRoom >= width && rightRoom >= leftRoom -> {
+                    placedX = anchor.right + gap
+                    y = (anchor.center.y - popupContentSize.height / 2)
+                        .coerceIn(topLimit, lastTop)
+                }
+                leftRoom >= width -> {
+                    placedX = anchor.left - gap - width
+                    y = (anchor.center.y - popupContentSize.height / 2)
+                        .coerceIn(topLimit, lastTop)
+                }
+            }
+        }
+        return IntOffset(placedX, y)
     }
 }

@@ -5,6 +5,7 @@ import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -28,9 +29,11 @@ import org.junit.Test
  *
  * The ground is kept when the menu fits on the side it prefers. When the
  * window is shorter than that side's room, the menu slides inside the safe
- * band, even over the anchor, so the rule never hides an action behind a
- * scroll it did not need. The ground yields before an action does. A menu
- * taller than the whole band still scrolls inside the popup.
+ * band, so the rule never hides an action behind a scroll it did not need.
+ * A door's menu then stands beside the door when the window can hold it
+ * there, so the number the reader tapped stays in sight; a capsule's menu
+ * keeps its own middle over the band. A menu taller than the whole band still
+ * scrolls inside the popup.
  */
 class AppPopupPositionTest {
 
@@ -194,10 +197,12 @@ class AppPopupPositionTest {
     }
 
     @Test
-    fun aMenuThatFitsNeitherSideTakesTheSafeBand() {
+    fun aDoorMenuThatCannotFitEitherSideStandsBesideTheDoor() {
         // A door in the middle of a landscape phone: the menu is taller than
-        // either side's room, but it fits the window. It takes the band and
-        // may cover the door, because an action is worth more than the ground.
+        // either side's ground. It stands beside the door on the side with the
+        // room, centred on the door, and every row stays on the glass, so the
+        // number the reader tapped is never covered (owner decision, this
+        // session).
         val anchor = IntRect(left = 84, top = 440, right = 260, bottom = 546)
         val window = 960
         val status = 72
@@ -206,7 +211,7 @@ class AppPopupPositionTest {
         val bandTop = status
         val bandBottom = window - navigation
 
-        val below = place(
+        val at = place(
             anchor = anchor,
             content = content,
             window = IntSize(1_080, window),
@@ -216,29 +221,66 @@ class AppPopupPositionTest {
             bottomLimit = bandBottom,
         )
         assertEquals(
-            "a menu that cannot fit below slides up so its foot stays on the glass",
-            bandBottom - content.height,
-            below.y,
+            "the menu stands clear of the door's trailing edge",
+            anchor.right + gap,
+            at.x,
         )
         assertEquals(
-            "its foot keeps the window's own line",
-            bandBottom,
-            below.y + content.height,
+            "the menu's middle is the door's middle",
+            anchor.center.y,
+            at.y + content.height / 2,
         )
+        assertTrue(
+            "the whole menu is inside the band's foot, was ${at.y + content.height}",
+            at.y + content.height <= bandBottom,
+        )
+        assertTrue("the whole menu is inside the band's head, was ${at.y}", at.y >= bandTop)
+    }
 
-        val above = place(
+    @Test
+    fun aDoorNearTheTrailingEdgeStandsItsMenuOnTheLeadingSide() {
+        val anchor = IntRect(left = 900, top = 440, right = 1_000, bottom = 546)
+        val content = IntSize(480, 480)
+        val at = place(
             anchor = anchor,
             content = content,
-            window = IntSize(1_080, window),
+            window = IntSize(1_080, 960),
             alignment = PopupAlignment.Start,
+            side = PopupSide.Below,
+            topLimit = 72,
+            bottomLimit = 888,
+        )
+        assertEquals(
+            "a door against the trailing edge opens its menu inward",
+            anchor.left - gap - content.width,
+            at.x,
+        )
+    }
+
+    @Test
+    fun aCapsuleMenuThatCannotFitEitherSideTakesTheSafeBand() {
+        // The pill is a centred thing, and its menu keeps that middle: a
+        // capsule has no leading edge to stand beside, so it takes the band.
+        val anchor = IntRect(left = 300, top = 440, right = 780, bottom = 500)
+        val content = IntSize(480, 480)
+        val at = place(
+            anchor = anchor,
+            content = content,
+            window = IntSize(1_080, 960),
+            alignment = PopupAlignment.Center,
             side = PopupSide.Above,
-            topLimit = bandTop,
-            bottomLimit = bandBottom,
+            topLimit = 72,
+            bottomLimit = 888,
+        )
+        assertEquals(
+            "a capsule's menu takes the band and still keeps the capsule's middle",
+            anchor.center.x - content.width / 2,
+            at.x,
         )
         assertEquals(
             "a menu that cannot fit above slides down so its head stays on the glass",
-            bandTop,
-            above.y,
+            72,
+            at.y,
         )
     }
 

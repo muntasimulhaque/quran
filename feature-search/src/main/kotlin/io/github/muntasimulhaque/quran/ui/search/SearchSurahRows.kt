@@ -22,6 +22,7 @@ import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
 import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
+import io.github.muntasimulhaque.quran.ui.theme.bookRowName
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 @Composable
@@ -80,7 +81,7 @@ internal fun SurahRow(surah: Surah, onSurah: (Surah) -> Unit) {
             )
             Text(
                 text = surah.nameSimple,
-                style = MaterialTheme.typography.titleMedium,
+                style = bookRowName(),
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(top = Space.Tight),
             )

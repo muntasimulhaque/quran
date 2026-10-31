@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertWidthIsAtLeast
@@ -11,13 +13,14 @@ import androidx.compose.ui.test.click
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isSelectable
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.AppTheme
@@ -409,34 +412,36 @@ class SettingsRowAlignmentTest {
         assertEquals("every chevron must sit at one right edge", first.right, last.right, 0.5f)
     }
 
-    /**
-     * Every step of every segmented row is a 48 dp target.
+        /**
+     * The text size rail is one adjustable 48 dp control.
      *
-     * The text sizes drew 38 dp cells, under the design document's own rule,
-     * and the fix was structural: an outer 48 dp touch box with the mark
-     * inside it. The name moved above the steps for it, because five 48 dp
-     * boxes are 250 dp wide and a name beside them would break in the middle
-     * on a small phone. The measurement is the rule's own number, read off the
-     * real controls.
+     * The five cells this replaced were five targets of their own, which is why
+     * they needed 250 dp and a line above them. The rail is one finger sized
+     * strip that carries the whole scale: a tap or a drag chooses the nearest
+     * stop, and a screen reader adjusts it through its own SetProgress action.
+     * The test drives that action, the same road TalkBack takes, and reads the
+     * five stops from the range (owner decision, this session).
      */
     @Test
-    fun everyStepIsAFortyEightDpTarget() {
+    fun theTextSizeRailIsOneAdjustableControl() {
+        var chosen: Float? = null
         compose.setContent {
             MaterialTheme {
                 Column {
-                    SizeRow(TypeRole.Translation, 1f) {}
+                    SizeRow(TypeRole.Translation, 1f) { chosen = it }
                 }
             }
         }
-        val steps = compose.onAllNodes(isSelectable(), useUnmergedTree = true)
-        assertEquals(
-            "the text size row's five steps",
-            5,
-            steps.fetchSemanticsNodes().size,
+        val scale = compose.onNode(
+            SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo),
         )
-        steps.onFirst().assertWidthIsAtLeast(48.dp)
-        steps.onFirst().assertHeightIsAtLeast(48.dp)
-        steps.onLast().assertWidthIsAtLeast(48.dp)
-        steps.onLast().assertHeightIsAtLeast(48.dp)
+        scale.assertHeightIsAtLeast(48.dp)
+        val info = scale.fetchSemanticsNode()
+            .config[SemanticsProperties.ProgressBarRangeInfo]
+        assertEquals(0f, info.range.start, 0.001f)
+        assertEquals(4f, info.range.endInclusive, 0.001f)
+        assertEquals("five stops carry three steps between the ends", 3, info.steps)
+        scale.performSemanticsAction(SemanticsActions.SetProgress) { it(0f) }
+        assertEquals(0.8f, chosen ?: 0f, 0.001f)
     }
 }

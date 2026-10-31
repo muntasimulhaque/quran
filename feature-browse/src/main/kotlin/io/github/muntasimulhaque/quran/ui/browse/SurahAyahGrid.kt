@@ -161,6 +161,7 @@ private fun SurahGridHeader(surah: Surah, onBack: () -> Unit) {
                 .padding(start = Space.Tight)
                 .semantics { heading() },
             nameMaxLines = 1,
+            pageName = true,
         )
         SurahArabicName(surah, Modifier.padding(start = Space.Row))
     }

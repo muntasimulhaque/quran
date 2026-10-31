@@ -35,6 +35,13 @@ class SearchHistory(context: Context) {
         return next
     }
 
+    /** One query gone, on the phone and in the caller's copy. */
+    fun remove(query: String): List<String> {
+        val next = RecentQueries.remove(read(), query)
+        write(next)
+        return next
+    }
+
     /** The list emptied, in one place and in the other. */
     fun clear(): List<String> {
         write(emptyList())
@@ -77,6 +84,19 @@ object RecentQueries {
                 if (kept.isNotEmpty() && kept.lowercase(Locale.ROOT) != folded) add(kept)
             }
         }.take(LIMIT)
+    }
+
+    /**
+     * The list without [query]. The chip hands back the spelling the list
+     * holds, so the match is exact; the fold is there for the stored list,
+     * where one query is kept once whatever its capitals (owner decision,
+     * this session).
+     */
+    fun remove(existing: List<String>, query: String): List<String> {
+        val folded = query.trim().replace(Spaces, " ").lowercase(Locale.ROOT)
+        return existing
+            .filterNot { it.trim().replace(Spaces, " ").lowercase(Locale.ROOT) == folded }
+            .take(LIMIT)
     }
 
     /** Newline is the one separator a single-line query cannot hold. */

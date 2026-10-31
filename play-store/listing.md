@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 13.8 (versionCode 140)
+Version: 13.9 (versionCode 141)
 
 ## Listing
 
@@ -174,6 +174,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (13.9, 496 characters)
+13.9 quiets the page and its controls. Translation and tafsir come down a step, and a tafsir passage's title leads by its weight, not a bigger size. The surah and juz share one baseline in the top bar. The tafsir card opens on the commentary itself, and About's credits are smaller. Recent searches can be removed one at a time, a landscape menu stays clear of the number, the size and pace rows are one rail, and the daily time has a page. The reciter's Remove is gone. Text and packs unchanged.
 
 ## Release notes (13.8, 424 characters)
 13.8 makes the page more legible and the app more honest. Tajweed colors are now chosen and tested for color vision. Search names its field, never shows an old result under a new query, and leaves the keyboard down when you return to results. Notes keep unsaved words through a closed sheet and a failed save. Every sheet names itself to a screen reader, and the ayah card says which ayah it opens. Text and packs unchanged.

@@ -98,7 +98,6 @@ fun RecitersPage(
                 if (pack.installed) {
                     ReciterDownloads(
                         recitation = id,
-                        reciterName = name,
                         downloadedSurahs = downloadedSurahs,
                         actions = actions,
                         onRemovePack = { actions.onRemovePack(pack.id) },
@@ -127,11 +126,17 @@ fun RecitersPage(
  * and shift every row above it (owner decision, this session). While the
  * count is on its way the label carries no number, so the count appears in
  * place as a text change that moves nothing.
+ *
+ * **The last surah takes the reciter's pack with it** (owner decision, this
+ * session). The pack is the timings and audio paths of the voice, so with no
+ * audio on the device it is a held file with nothing to hold: the row's own
+ * Remove is the whole act, and the separate Remove <reciter> button that
+ * used to stand at the foot of the list is gone. The voice stays in the list
+ * above, and the next Play fetches the pack again with the surah it needs.
  */
 @Composable
 private fun ReciterDownloads(
     recitation: String,
-    reciterName: String,
     downloadedSurahs: suspend (String) -> List<DownloadedSurah>,
     actions: SettingsActions,
     onRemovePack: () -> Unit,
@@ -165,22 +170,16 @@ private fun ReciterDownloads(
                     actions.onRemoveDownloads(recitation, row.surah)
                     // Whatever the removal did, the list is read from the
                     // device again: the row goes when its files are gone.
-                    downloaded = downloadedSurahs(recitation).sortedBy { it.surah }
+                    val left = downloadedSurahs(recitation).sortedBy { it.surah }
+                    downloaded = left
+                    // The last file is the pack's own reason to stay, so it
+                    // goes with the file. The voice row above stays, and the
+                    // next Play fetches the pack again with its surah.
+                    if (left.isEmpty()) onRemovePack()
                 }
             }
         }
     }
-    // Removing the reciter's pack used to be a second action inside the
-    // reciter's own radio row. A single-select row cannot carry a nested
-    // action without saying two things at once, so the removal lives here,
-    // after the downloads it governs, where it names the voice it removes
-    // (owner decision, this session).
-    TextButton(
-        label = stringResource(R.string.settings_downloaded_remove, reciterName),
-        onClick = onRemovePack,
-        modifier = Modifier.padding(start = ChoiceRowNameInset, top = Space.Line),
-        quiet = true,
-    )
     Spacer(Modifier.height(Space.Block))
 }
 

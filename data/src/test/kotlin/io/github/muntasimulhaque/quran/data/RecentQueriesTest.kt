@@ -57,4 +57,38 @@ class RecentQueriesTest {
         assertEquals(listOf("mercy", "light"), RecentQueries.decode(stored))
         assertTrue(RecentQueries.decode(null).isEmpty())
     }
+
+    @Test
+    fun oneQueryLeavesAndTheOthersKeepTheirOrder() {
+        val existing = listOf("mercy", "absolute", "light")
+        assertEquals(
+            listOf("absolute", "light"),
+            RecentQueries.remove(existing, "mercy"),
+        )
+        assertEquals(
+            listOf("mercy", "light"),
+            RecentQueries.remove(existing, "absolute"),
+        )
+    }
+
+    @Test
+    fun theMatchDoesNotCareAboutCaseOrSpaces() {
+        val existing = listOf("Mercy", "absolute")
+        assertEquals(listOf("absolute"), RecentQueries.remove(existing, "  MERCY "))
+    }
+
+    @Test
+    fun aQueryThatIsNotThereChangesNothing() {
+        val existing = listOf("mercy", "absolute")
+        assertEquals(existing, RecentQueries.remove(existing, "light"))
+        assertEquals(existing, RecentQueries.remove(existing, " "))
+    }
+
+    @Test
+    fun theListStillKeepsItsLimitAfterARemoval() {
+        val existing = listOf("one", "two", "three", "four", "five", "six")
+        val after = RecentQueries.remove(existing, "three")
+        assertEquals(listOf("one", "two", "four", "five", "six"), after)
+        assertEquals(RecentQueries.LIMIT, after.size)
+    }
 }

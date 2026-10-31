@@ -23,28 +23,26 @@ enum class TypeRole { Arabic, Translation, Tafsir, Words }
  * smaller" the same number as the step itself, which is why the base below is
  * 0.9 of what it was and not 0.85.
  *
- * The prose sits at 16 sp on a 1.5 line. It stood at 17, then 16, then 15;
- * the owner asked for the translation and the tafsir to come down one more
- * step, and the next audit brought them back to 16, because 15 read as a
- * subhead and the page had lost its body. 16 is Material's body size and
- * the face's own reading size; the reading face and the interface face keep
- * the Book apart from the chrome even at the same size. The five steps are
- * unchanged and the default is still the middle of them (owner decision,
- * this session).
+ * The prose sits at 15 sp on a 1.5 line. It stood at 17, then 16, then 15,
+ * then 16 again, and now 15 by the owner's eye on the page: the reading body
+ * is the interface's own 15, and the Book's face is what keeps the two
+ * apart. The line stays the book's 1.5, so the smaller letters keep the
+ * page's air instead of tightening toward it (owner decision, this
+ * session).
  *
  * Arabic is set above the Latin sizes on purpose: its letter bodies are
  * small next to the space the diacritics need, so at the same nominal size it
- * reads visibly smaller than Latin text. The base is 26 sp, 1.625 times the
- * 16 sp translation: the owner's eye asked for the Quran one step larger
- * while the prose stayed at the size the page needs, and this is the ratio
- * that did it. It is more contrast than the field (Quran for Android 1.4,
- * Quran.com 1.28), and less than the app's own 1.8 before the field audit;
- * the reader can still go down to 20.8 at the smallest step and up to 31.2
- * at the largest (owner decision, this session).
+ * reads visibly smaller than Latin text. The base is 26 sp, 1.733 times the
+ * 15 sp translation: the owner's eye asked for the Quran one step larger
+ * while the prose came down, and this is the ratio that did it. It is more
+ * contrast than the field (Quran for Android 1.4, Quran.com 1.28), and just
+ * under the app's own 1.8 before the field audit; the reader can still go
+ * down to 20.8 at the smallest step and up to 31.2 at the largest (owner
+ * decision, this session).
  *
  * The largest step stops at 1.2. Past that the reading turns into a page of
- * headings. The smallest is 0.8, the compact choice, at 12.8 sp of translation
- * and 11.5 sp of meaning (owner decision, this session). The earlier session
+ * headings. The smallest is 0.8, the compact choice, at 12 sp of translation
+ * and 10.8 sp of meaning (owner decision, this session). The earlier session
  * pinned 0.75 against the larger base as the readability floor; the two sit
  * within a hair of each other at the default, and the floor stands.
  */
@@ -116,12 +114,12 @@ object TextSize {
 
     /**
      * The meaning under a word in the word by word aid: the size the meaning
-     * is read at, 14.4 sp at the middle step. It is nine tenths of the
-     * translation's 16, a step the eye reads as a gloss rather than as a
+     * is read at, 13.5 sp at the middle step. It is nine tenths of the
+     * translation's 15, a step the eye reads as a gloss rather than as a
      * second translation. It stood five percent under the translation, which
      * read as one size used twice; a tenth under is the distance that says
      * which line is the verse's meaning and which is the reading's own (owner
-     * decision, this session). At the smallest step the gloss is 11.5 sp.
+     * decision, this session). At the smallest step the gloss is 10.8 sp.
      */
     fun meaningSp(step: Float): Float = MEANING_BASE * step(step)
 
@@ -158,12 +156,12 @@ object TextSize {
 
     private fun base(role: TypeRole): Float = when (role) {
         TypeRole.Arabic -> ARABIC_BASE
-        TypeRole.Translation -> 16f
+        TypeRole.Translation -> 15f
         // The tafsir is the longest prose the app draws, read in the same
         // sitting as the translation it opens from, so it stands at the
         // translation's own size and not a point under it (owner decision,
         // this session; the two sizes read as one voice now).
-        TypeRole.Tafsir -> 16f
+        TypeRole.Tafsir -> 15f
         // The aid's Arabic word, the stand the Quran's own text takes four
         // points down; see [wordSp].
         TypeRole.Words -> WORD_BASE
@@ -189,9 +187,9 @@ object TextSize {
 
     /**
      * The size the meaning under a word is read at, before any scaling: nine
-     * tenths of the translation's base. See [meaningSp].
+     * tenths of the translation's 15 sp base, 13.5. See [meaningSp].
      */
-    private const val MEANING_BASE = 14.4f
+    private const val MEANING_BASE = 13.5f
 
     /** The Quran's own base, the anchor every other reading size is read against. */
     private const val ARABIC_BASE = 26f

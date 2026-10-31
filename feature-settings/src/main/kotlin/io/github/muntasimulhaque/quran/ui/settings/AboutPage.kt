@@ -21,7 +21,6 @@ import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.theme.Space
-import io.github.muntasimulhaque.quran.ui.theme.screenSubtitle
 
 /** How the page joins two facts that belong to one credit, or splits terms. */
 private const val SEPARATOR = " · "
@@ -212,10 +211,13 @@ private fun Face(title: String, madeBy: String, usedFor: String) {
  * One credit: its name in the sheet's row size, one line that says what it is,
  * and, when the thing carries terms, those terms under it.
  *
- * The name is the size a settings row's name wears, so the page and the sheet
- * behind it read as one hand; the line under it is the size every row's value
- * wears. Nothing is uppercase, nothing is a badge, and no credit is a door:
- * the page is facts and credits, and a reader reads it once.
+ * The name is the size a settings row's name wears, 15 at Medium, so the page
+ * and the sheet behind it read as one hand; the line under it is the size
+ * every row's value wears. It wore the small page's 16, which made a credit
+ * head stand as tall as an empty state's name over a line two points under it
+ * (owner report, this session). Nothing is uppercase, nothing is a badge, and
+ * no credit is a door: the page is facts and credits, and a reader reads it
+ * once.
  */
 @Composable
 internal fun AboutCredit(title: String, line: String?, terms: List<String> = emptyList()) {
@@ -228,7 +230,7 @@ internal fun AboutCredit(title: String, line: String?, terms: List<String> = emp
     ) {
         Text(
             text = title,
-            style = screenSubtitle(),
+            style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface,
         )
         if (!line.isNullOrBlank()) {

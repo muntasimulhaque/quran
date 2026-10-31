@@ -28,6 +28,7 @@ import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
+import io.github.muntasimulhaque.quran.ui.theme.bookRowName
 import io.github.muntasimulhaque.quran.ui.theme.prose
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
@@ -197,7 +198,7 @@ private fun PlaceRow(
             ) {
                 Text(
                     text = surah,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = bookRowName(),
                     // A place's name is the row's name, and every other
                     // row's name is the theme's own ink; the accent here
                     // read as a link or a selection the row does not have

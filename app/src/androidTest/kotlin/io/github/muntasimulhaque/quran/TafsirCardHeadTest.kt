@@ -36,12 +36,14 @@ import java.io.File
 /**
  * One tafsir is a page, not a list of one.
  *
- * With a single pack the card names the kind once and the pack once, and the
- * passage's own reference heads its prose. There is no door to fold, so the
- * name is a byline and never a control, and the reference belongs to the
- * passage instead of the sheet (owner decision, this session). The two-pack
- * case is the doors' own case, pinned by the tour's card frames on all three
- * form factors; this test pins the common one.
+ * With a single pack the card opens on the pack and then on the passage:
+ * there is no drawn `Tafsir` head and no `Ayah 2:255` line above it, because
+ * the reader came from the ayah's own Tafsir mark and the passage's own
+ * reference already says which ayahs it covers. There is no door to fold, so
+ * the pack is a byline and never a control, and it reads at the row name's 15
+ * in both the one-pack and the two-pack case (owner decision, this session).
+ * The two-pack case is the doors' own case, pinned by the tour's card frames
+ * on all three form factors; this test pins the common one.
  *
  * The card is opened the way a reader opens it, from the ayah's actions, not
  * by composing it in isolation: the claim is about the surface the app draws.
@@ -85,7 +87,6 @@ class TafsirCardHeadTest {
         }
 
         val pack = compose.activity.getString(KitR.string.pack_name_ibn_kathir)
-        val label = compose.activity.getString(ReadingR.string.card_tafsir_label)
         val reference = compose.activity.getString(
             ReadingR.string.card_tafsir_reference,
             SURAH,
@@ -101,14 +102,16 @@ class TafsirCardHeadTest {
             language,
         )
 
-        // The byline is one node, and it answers no touch.
+        // The byline is one node, it answers no touch, and it is a source
+        // line rather than a heading.
         compose.onAllNodesWithText(byline).assertCountEquals(1)
         compose.onAllNodes(hasText(byline) and hasClickAction()).assertCountEquals(0)
+        compose.onAllNodes(hasText(byline) and isHeading()).assertCountEquals(0)
 
-        // The sheet is named by the kind of text, and the passage by its own
-        // reference, both words a screen reader can jump between.
-        compose.onNode(hasText(label) and isHeading()).assertExists()
+        // The passage's own reference is the card's heading, the word a
+        // screen reader can jump to. The old drawn `Tafsir` head is gone.
         compose.onNode(hasText(reference) and isHeading()).assertExists()
+        compose.onAllNodesWithText("Tafsir").assertCountEquals(0)
 
         // The frame this head is reviewed from: the single-pack card the
         // owner's report came from, kept beside the tour's frames so the

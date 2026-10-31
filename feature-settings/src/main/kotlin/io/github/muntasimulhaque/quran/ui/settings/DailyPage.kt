@@ -7,33 +7,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TimeInput
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.TimePickerDialog
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.feature.settings.R
-import io.github.muntasimulhaque.quran.ui.kit.DialogButtonSpacing
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.clockText
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
-import io.github.muntasimulhaque.quran.ui.glyph.Icon
-import io.github.muntasimulhaque.quran.ui.reader.IconButton
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -50,11 +38,11 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * page carries the choice, opened from inside it the way the translation and
  * the tafsir open their lists.
  *
- * The moment itself is asked for with the one control for it that a reader
- * has already learned somewhere else: the phone's own clock, with the time
- * available to be typed as well. That reaches every minute of the day, which
- * a row of hours could not, and it says AM or PM in the reader's own language
- * rather than leaving a bare number to be interpreted.
+ * The moment itself is asked for on the app's own time page: the time as the
+ * subject, an hour tape and a minute tape, and the phone's own 24 or 12 hour
+ * reading with its AM/PM pair. The tapes reach every minute of the day, which
+ * a row of hours could not, and the page is drawn in the app's hand rather
+ * than borrowing the platform's clock (owner decision, this session).
  *
  * The phone's permission to notify is asked for from the two moments that
  * prove the reader wants the daily ayah, which the shell wires up: turning it
@@ -179,122 +167,5 @@ fun DailyPage(
                 onDailyAyahTime(minute)
             },
         )
-    }
-}
-
-/**
- * The clock the moment is chosen on: the platform's Material clock, wearing
- * this app's colors, with the time available to be typed as well.
- *
- * Both halves are here on purpose. Turning a clock is the fastest way to "the
- * usual time", and typing is the fastest way to an exact one, and a reader who
- * wants the one should never be handed the other. The typed half is also the
- * half a blind reader and a reader with a shaky finger will use, since it is
- * two fields and no aim.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun DailyTimeDialog(
-    minuteOfDay: Int,
-    onDismiss: () -> Unit,
-    onPick: (Int) -> Unit,
-) {
-    val state = rememberTimePickerState(
-        initialHour = minuteOfDay / 60,
-        initialMinute = minuteOfDay % 60,
-    )
-    var typing by rememberSaveable { mutableStateOf(false) }
-    val toggleLabel = stringResource(
-        if (typing) R.string.settings_daily_picker_clock else R.string.settings_daily_picker_keyboard,
-    )
-    TimePickerDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = stringResource(R.string.settings_daily_picker_title),
-                // A dialog names itself in the app's one title voice (owner
-                // decision, this session).
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(bottom = Space.Row),
-            )
-        },
-        modeToggleButton = {
-            IconButton(
-                icon = if (typing) Icon.Clock else Icon.Keyboard,
-                description = toggleLabel,
-                onClick = { typing = !typing },
-            )
-        },
-        dismissButton = {
-            TextButton(
-                label = stringResource(R.string.settings_cancel),
-                onClick = onDismiss,
-                // The platform's clock dialog lays its actions 8 dp apart of
-                // its own, so the padding asks for the rest of the app's one
-                // action gap and Cancel and Set end up as far apart as the
-                // share sheet's two doors, not further (owner report, this
-                // session).
-                modifier = Modifier.padding(end = Space.Action - DialogButtonSpacing),
-                quiet = true,
-            )
-        },
-        confirmButton = {
-            TextButton(
-                label = stringResource(R.string.settings_set),
-                onClick = { onPick(state.hour * 60 + state.minute) },
-            )
-        },
-    ) {
-        // The one stock Material surface in the app asks for roles this app
-        // has given its own meanings. `outline` is the decorative hairline,
-        // not the 3:1 boundary a text field owes, and the display roles are
-        // the Book's Literata, not the interface's face. The picker gets its
-        // own two-role copy for its own subtree, so the rest of the app keeps
-        // the palette and the two voices it chose (owner decision, this
-        // session).
-        val interfaceFamily = MaterialTheme.typography.titleSmall.fontFamily
-        val interfaceType = MaterialTheme.typography.copy(
-            displayLarge = MaterialTheme.typography.displayLarge.copy(
-                fontFamily = interfaceFamily,
-                fontWeight = FontWeight.Medium,
-            ),
-            displayMedium = MaterialTheme.typography.displayMedium.copy(
-                fontFamily = interfaceFamily,
-                fontWeight = FontWeight.Medium,
-            ),
-            displaySmall = MaterialTheme.typography.displaySmall.copy(
-                fontFamily = interfaceFamily,
-                fontWeight = FontWeight.Medium,
-            ),
-            headlineLarge = MaterialTheme.typography.headlineLarge.copy(
-                fontFamily = interfaceFamily,
-                fontWeight = FontWeight.Medium,
-            ),
-            headlineMedium = MaterialTheme.typography.headlineMedium.copy(
-                fontFamily = interfaceFamily,
-                fontWeight = FontWeight.Medium,
-            ),
-            headlineSmall = MaterialTheme.typography.headlineSmall.copy(
-                fontFamily = interfaceFamily,
-                fontWeight = FontWeight.Medium,
-            ),
-            titleMedium = MaterialTheme.typography.titleMedium.copy(
-                fontFamily = interfaceFamily,
-                fontWeight = FontWeight.Medium,
-            ),
-        )
-        MaterialTheme(
-            colorScheme = MaterialTheme.colorScheme.copy(
-                outline = MaterialTheme.colorScheme.onSurfaceVariant,
-            ),
-            typography = interfaceType,
-        ) {
-            if (typing) {
-                TimeInput(state)
-            } else {
-                TimePicker(state)
-            }
-        }
     }
 }

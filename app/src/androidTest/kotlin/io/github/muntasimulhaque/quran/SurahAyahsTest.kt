@@ -19,7 +19,7 @@ import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.feature.reading.R as ReadingR
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExternalResource
@@ -85,7 +85,7 @@ class SurahAyahsTest {
     }
 
     @Test
-    fun theGridHeaderNamesTheSurahInTheListsOwnType() {
+    fun theGridHeaderLeadsTheListByAPagePoints() {
         openBrowse()
         val fromList = compose
             .onNodeWithText("Al-Baqarah", useUnmergedTree = true)
@@ -95,14 +95,17 @@ class SurahAyahsTest {
         val fromHeader = compose
             .onNodeWithText("Al-Baqarah", useUnmergedTree = true)
             .getUnclippedBoundsInRoot()
-        // The name's line height is its type: titleMedium in both places,
-        // where the header used to draw it a size larger than the row the
-        // reader tapped (owner report).
-        assertEquals(
-            "the grid header must name the surah at the list row's own size",
-            fromList.height.value,
-            fromHeader.height.value,
-            0.5f,
+        // The list row's name is the row's 15; the grid header is a page's
+        // 16, one point over it. The header must lead the row, and it must
+        // not go back to the extra size it once drew: one point, not a step
+        // (owner decision, this session).
+        assertTrue(
+            "the header's name must lead the list row's name: list ${fromList.height}, header ${fromHeader.height}",
+            fromHeader.height.value > fromList.height.value,
+        )
+        assertTrue(
+            "the header must not name the surah a whole size over the row: list ${fromList.height}, header ${fromHeader.height}",
+            fromHeader.height.value - fromList.height.value < 2f,
         )
     }
 

@@ -30,6 +30,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.text.TextLayoutResult
@@ -305,7 +306,8 @@ class PlaybackPillTest {
         compose.onNodeWithText("Reciter").assertExists()
         compose.onNodeWithText("Playback speed").assertExists()
         compose.onNodeWithText("When the audio ends").assertExists()
-        compose.onAllNodesWithText("0.5x").onFirst().performClick()
+        compose.onNodeWithTag("playback-speed")
+            .performSemanticsAction(SemanticsActions.SetProgress) { it(0f) }
         assertEquals(0.5f, speed)
     }
 
@@ -637,7 +639,8 @@ class PlaybackPillTest {
             compose.onNodeWithTag("app-popup").assertExists()
         }
         openThePanel()
-        compose.onAllNodesWithText("0.5x").onFirst().performClick()
+        compose.onNodeWithTag("playback-speed")
+            .performSemanticsAction(SemanticsActions.SetProgress) { it(0f) }
         assertEquals("the pace must reach the pill's setter", 0.5f, speed)
         compose.onNodeWithTag("app-popup").assertDoesNotExist()
 

@@ -5,9 +5,11 @@ import android.content.Intent
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -32,6 +34,10 @@ import org.junit.runner.RunWith
  * `data` pin; this test pins that the sheet draws the list, that a chip puts
  * its query back in the field, and that Clear empties the list on the phone
  * as well as on the glass (owner decision, this session).
+ *
+ * A chip can also go on its own: a long press raises the one row menu, and
+ * Remove takes the one word from the phone while the others stay, which is
+ * the per query door Clear never was (owner decision, this session).
  */
 @RunWith(AndroidJUnit4::class)
 class RecentSearchesTest {
@@ -92,6 +98,26 @@ class RecentSearchesTest {
             rule.onAllNodes(hasSetTextAction() and hasText("mercy"))
                 .fetchSemanticsNodes().isNotEmpty()
         }
+    }
+
+    @Test
+    fun aLongPressRemovesOnlyThatQuery() {
+        SearchHistory(context).record("absolute")
+        openSearch()
+        rule.waitUntil(timeoutMillis = 15_000) {
+            rule.onAllNodesWithText("Recent searches").fetchSemanticsNodes().isNotEmpty()
+        }
+        rule.onNodeWithText("mercy").performTouchInput { longClick() }
+        rule.waitUntil(timeoutMillis = 15_000) {
+            rule.onAllNodesWithText("Remove").fetchSemanticsNodes().isNotEmpty()
+        }
+        rule.onNodeWithText("Remove").performClick()
+        rule.waitUntil(timeoutMillis = 15_000) {
+            rule.onAllNodesWithText("mercy").fetchSemanticsNodes().isEmpty()
+        }
+        assertTrue("the chip's own word is gone", rule.onAllNodesWithText("mercy").fetchSemanticsNodes().isEmpty())
+        assertTrue("the other word stays", rule.onAllNodesWithText("absolute").fetchSemanticsNodes().isNotEmpty())
+        assertTrue("the phone keeps only the other word", SearchHistory(context).read() == listOf("absolute"))
     }
 
     @Test

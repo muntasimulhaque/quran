@@ -21,8 +21,8 @@
     <string name="settings_daily_exact_blocked">Your phone has exact alarms off, so the ayah can arrive late.</string>
     <string name="settings_daily_exact_action">Allow exact alarms</string>
     <string name="settings_daily_picker_title">When the daily ayah arrives</string>
-    <string name="settings_daily_picker_keyboard">Type the time instead</string>
-    <string name="settings_daily_picker_clock">Turn the clock instead</string>
+    <string name="settings_daily_picker_hour">Hour</string>
+    <string name="settings_daily_picker_minute">Minute</string>
     <string name="settings_cancel">Cancel</string>
     <string name="settings_set">Set</string>
     <string name="settings_follow_title">Follow the reciter</string>
@@ -35,7 +35,6 @@
     <string name="settings_words_failed">Could not download. Tap to try again.</string>
     <string name="settings_words_failed_storage">Not enough space to add the word meanings. Free some space, then try again.</string>
 
-    <string name="settings_text_size_option">%3$s size %1$d of %2$d</string>
 
     <string name="settings_downloaded_label">Downloaded surahs (%1$d)</string>
     <string name="settings_downloaded_label_counting">Downloaded surahs</string>

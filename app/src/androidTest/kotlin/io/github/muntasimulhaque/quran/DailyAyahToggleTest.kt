@@ -33,7 +33,8 @@ import org.junit.runner.RunWith
 
 /**
  * The daily reminder's own page: the switch is the switch, the row is the
- * door, and the moment is chosen on a clock that reaches every minute.
+ * door, and the moment is chosen on the app's own hour and minute tapes,
+ * which reach every minute.
  *
  * The test follows the shape a reader meets, in the order a reader meets it.
  * The hub row's switch turns the reminder on and nothing else does; the rest
