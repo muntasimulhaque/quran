@@ -84,7 +84,7 @@ internal fun BrowseTabChip(
         ) {
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.labelLarge,
                 color = ink,
             )
         }

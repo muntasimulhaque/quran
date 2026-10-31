@@ -396,18 +396,14 @@ private fun RecentSearches(
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(Space.Line),
-            // The chip is a 33 dp pill inside a 48 dp target, so the row gap
-            // the eye reads is this spacing plus the 8 dp of target above and
-            // below each pill; 0 here leaves a 16 dp block break between rows
+            // The chip is a 36 dp pill inside a 48 dp target, so the row gap
+            // the eye reads is this spacing plus the 6 dp of target above and
+            // below each pill; 0 here leaves a 12 dp block break between rows
             // while the chips keep the size the search filters already have.
             verticalArrangement = Arrangement.spacedBy(0.dp),
         ) {
             queries.forEach { query ->
-                TextButton(
-                    label = query,
-                    onClick = { onQuery(query) },
-                    quiet = true,
-                )
+                QueryChip(label = query, onClick = { onQuery(query) })
             }
         }
     }

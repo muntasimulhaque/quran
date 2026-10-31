@@ -7,8 +7,8 @@
     <string name="browse_back">ফিরে যান</string>
     <string name="browse_ayah_current">বর্তমান</string>
 
-    <string name="place_makkah">মক্কা</string>
-    <string name="place_madinah">মদিনা</string>
+    <string name="revelation_makki">মাক্কী</string>
+    <string name="revelation_madani">মাদানী</string>
     <string name="surah_meta_place_ayahs">%1$s  ·  %2$d আয়াত</string>
     <string name="juz_title">পারা %1$d</string>
     <string name="juz_starts_at">%1$s, আয়াত %2$d থেকে শুরু</string>

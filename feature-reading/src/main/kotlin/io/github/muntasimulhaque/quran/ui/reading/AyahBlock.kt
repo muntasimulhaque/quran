@@ -13,10 +13,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.text.selection.SelectionState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -69,6 +71,8 @@ import kotlin.math.min
 internal fun AyahBlock(
     row: ReadingRow,
     hafs: FontFamily,
+    /** The surface's selection clearer, so one touch puts the menu away. */
+    selectionClearer: SelectionClearer,
     metrics: ReadingMetrics,
     isSelected: Boolean,
     playingAyah: Int?,
@@ -172,17 +176,17 @@ internal fun AyahBlock(
     // They did not. An Arabic-only block kept the card's 44 dp, so a verse
     // stood 1.8 of a line from the next, with about three times the white a
     // line break leaves between one verse's last mark and the next verse's
-    // first: one page with two rhythms, which reads as a table of rows. At
-    // [Space.Tight] inside and out a verse stands 16 dp from the next, a
-    // quarter of a line further than a line break and twice the white of
-    // one, so the glass holds four verses in ten more than it did. The
-    // face's own medallion still closes the verse and the line still ends
-    // ragged at the margin, so the reader loses a blank line and nothing
-    // else (owner decision, this session: the verse gap was the room a
-    // Browse row keeps, and the Quran was borrowing a list's rhythm).
+    // first: one page with two rhythms, which reads as a table of rows. The
+    // outer paper gap is gone now, and only the wash's own [Space.Tight] on
+    // each side stands between two verses: 8 dp from text to text, so the
+    // glass holds more of the surah and the face's own medallion is the
+    // separator, not a blank line. The line still ends ragged at the margin,
+    // so the reader loses a blank line and nothing else (owner decision, this
+    // session: the verse gap was the room a Browse row keeps, and the Quran
+    // was borrowing a list's rhythm).
     //
     // The surah's own opening above the first verse keeps its 14 dp foot, so
-    // the surah's name stands 22 dp off that verse, more than two verses
+    // the surah's name stands 18 dp off that verse, more than two verses
     // stand from each other.
     Column(
         modifier = Modifier
@@ -191,7 +195,7 @@ internal fun AyahBlock(
             // block already kept: the card's own room above and below it is
             // untouched, so two blocks that carry more than the Arabic still
             // stand 24 dp apart (owner decision, this session).
-            .padding(vertical = if (arabicOnly) Space.Tight else Space.Row),
+            .padding(vertical = if (arabicOnly) 0.dp else Space.Row),
     ) {
         val press = remember { MutableInteractionSource() }
         // The block's own place on the glass, for the screen reader's action:
@@ -402,8 +406,15 @@ internal fun AyahBlock(
                     // only as a picture of the page. The Quran above it stays
                     // outside the selection, because the page's own touch
                     // belongs to the verse and the verse is not a paragraph
-                    // (owner decision, this session).
-                    SelectionContainer {
+                    // (owner decision, this session). The line registers its
+                    // state with the surface's clearer, so the reader's next
+                    // touch anywhere puts the platform menu away.
+                    val selection = remember(line) { SelectionState() }
+                    DisposableEffect(selection, selectionClearer) {
+                        selectionClearer.register(selection)
+                        onDispose { selectionClearer.unregister(selection) }
+                    }
+                    SelectionContainer(selection) {
                         TranslationBody(
                             runs = remember(line.text.text) { RichText.footnotes(line.text.text) },
                             modifier = Modifier.padding(

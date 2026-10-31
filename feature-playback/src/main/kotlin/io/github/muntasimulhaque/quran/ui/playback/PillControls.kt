@@ -191,7 +191,11 @@ internal fun PillControls(
                     onClick = control.onClick,
                     actions = control.actions,
                 )
-                is WordControl -> TextButton(label = control.label, onClick = control.onClick)
+                is WordControl -> TextButton(
+                    label = control.label,
+                    onClick = control.onClick,
+                    prominent = true,
+                )
             }
         }
     }

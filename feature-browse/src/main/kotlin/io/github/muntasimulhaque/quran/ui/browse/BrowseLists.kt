@@ -280,7 +280,7 @@ private fun moment(at: Long, now: Long = System.currentTimeMillis()): String {
 @Composable
 internal fun placeName(place: String): String =
     if (place.equals("makkah", true)) {
-        stringResource(R.string.place_makkah)
+        stringResource(R.string.revelation_makki)
     } else {
-        stringResource(R.string.place_madinah)
+        stringResource(R.string.revelation_madani)
     }

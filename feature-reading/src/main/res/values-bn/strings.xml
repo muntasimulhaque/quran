@@ -3,8 +3,8 @@
     <string name="reading_page_description">পাঠ</string>
     <string name="reading_add_translation">আপনার ভাষায় এই সূরা পড়তে একটি অনুবাদ যোগ করুন</string>
     <string name="reading_action_add">যোগ করুন</string>
-    <string name="reading_place_makkah">মক্কা</string>
-    <string name="reading_place_madinah">মদিনা</string>
+    <string name="reading_revelation_makki">মাক্কী</string>
+    <string name="reading_revelation_madani">মাদানী</string>
     <string name="reading_surah_meta">%1$s  ·  %2$d আয়াত</string>
     <string name="reading_about_surah">এই সূরা সম্পর্কে</string>
     <string name="reading_hide">লুকান</string>

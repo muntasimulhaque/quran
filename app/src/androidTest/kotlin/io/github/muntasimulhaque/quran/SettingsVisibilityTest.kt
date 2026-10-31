@@ -79,14 +79,8 @@ class SettingsVisibilityTest {
         )
 
         revealChrome()
-        // Settings is the display panel's last row now (owner decision, this
-        // session).
-        compose.onNodeWithContentDescription(compose.activity.getString(R.string.action_display))
+        compose.onNodeWithContentDescription(compose.activity.getString(R.string.action_settings))
             .performClick()
-        compose.waitUntil(timeoutMillis = 15_000) {
-            compose.onAllNodesWithTag("display-all-settings").fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onNodeWithTag("display-all-settings").performClick()
         compose.waitUntil(timeoutMillis = 15_000) {
             compose.onAllNodesWithText(compose.activity.getString(
                 io.github.muntasimulhaque.quran.feature.settings.R.string.settings_show_translation_title,
@@ -114,7 +108,7 @@ class SettingsVisibilityTest {
             .tapThePaper()
         compose.waitUntil(timeoutMillis = 15_000) {
             compose.onAllNodesWithContentDescription(
-                compose.activity.getString(R.string.action_display),
+                compose.activity.getString(R.string.action_settings),
             ).fetchSemanticsNodes().isNotEmpty()
         }
     }

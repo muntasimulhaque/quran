@@ -54,6 +54,7 @@ import io.github.muntasimulhaque.quran.ui.reading.ReadingReveal
 import io.github.muntasimulhaque.quran.ui.search.SearchArrival
 import io.github.muntasimulhaque.quran.ui.reading.AyahNoteSheet
 import io.github.muntasimulhaque.quran.ui.reading.ReadingList
+import io.github.muntasimulhaque.quran.ui.reading.SelectionClearer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -140,11 +141,10 @@ fun ReaderScreen(
     // time, never across a rotation: a popup is a moment and not a place
     // (owner decision, this session).
     var menu by remember { mutableStateOf<AyahMenuRequest?>(null) }
-    // The display panel's anchor: the sliders mark's own box on the glass, or
-    // null while the panel is not up. It is a moment, not a place, so it is
-    // not saved across a rotation, the same as the ayah menu (owner decision,
-    // this session).
-    var displayAnchor by remember { mutableStateOf<IntRect?>(null) }
+    // The reading's text selection is a moment, not a place: it is cleared by
+    // the next touch anywhere on the page or the chrome, and it is never saved
+    // across a rotation (owner decision, this session).
+    val selectionClearer = remember { SelectionClearer() }
     var cardAyah by remember { mutableStateOf<Ayah?>(null) }
     // The tafsir pack a search hit opened the card for; null for the normal
     // Tafsir pill, where the single enabled pack (or the door list) decides.
@@ -204,7 +204,7 @@ fun ReaderScreen(
         returnTo = null
         chromeRevealPending = false
         menu = null
-        displayAnchor = null
+        selectionClearer.clear()
         sheetStates.removeState(target.name)
         sheet = target
     }
@@ -406,20 +406,10 @@ fun ReaderScreen(
     }
 
     // The chrome steps back on its own; a chosen ayah waits for the reader.
-    // The reading's display holds the bar open while it is up: the panel hangs
-    // from the bar, and a bar that stepped back mid-adjustment would take the
-    // panel with it (owner decision, this session).
-    LaunchedEffect(chrome, touch, displayAnchor) {
-        if (!chrome || displayAnchor != null) return@LaunchedEffect
+    LaunchedEffect(chrome, touch) {
+        if (!chrome) return@LaunchedEffect
         delay(CHROME_MILLIS)
         chrome = false
-    }
-
-    // The display panel goes when the bar goes: a panel hung from a mark that
-    // has stepped back would float over the page pointing at nothing (owner
-    // decision, this session).
-    LaunchedEffect(chrome) {
-        if (!chrome) displayAnchor = null
     }
 
     // The localized fallback line for a device with no receiving app, read
@@ -487,6 +477,7 @@ fun ReaderScreen(
                     while (true) {
                         val event = awaitPointerEvent(PointerEventPass.Initial)
                         if (event.changes.any { it.pressed && !it.previousPressed }) {
+                            selectionClearer.clear()
                             touch++
                             keepAwake = true
                             reveal = null
@@ -503,6 +494,7 @@ fun ReaderScreen(
                 }
                 ReadingList(
                     content = content,
+                    selectionClearer = selectionClearer,
                     surah = surah,
                     loadRows = {
                         viewModel.readingRows(
@@ -594,32 +586,9 @@ fun ReaderScreen(
             },
             onBrowse = { openSheet(ReaderSheet.Browse) },
             onSearch = { openSheet(ReaderSheet.Search) },
-            onDisplay = { displayAnchor = it },
+            onSettings = { openSheet(ReaderSheet.Settings) },
             modifier = Modifier.align(Alignment.TopCenter),
         )
-
-        // The reading's display, hung from the sliders mark while it is up.
-        // The sizes and the three reading switches are the page's own, and
-        // the hub is the panel's last row: a reader changes how the page
-        // looks without leaving it, and Settings stays where it was (owner
-        // decision, this session).
-        displayAnchor?.let { anchor ->
-            DisplayPanel(
-                anchor = anchor,
-                settings = settings,
-                hasTranslation = viewModel.enabledTranslationPacks.isNotEmpty(),
-                hasWords = content.installedPack(viewModel.wantedWordsPack()),
-                onTypeSize = { role, step -> viewModel.setTypeSize(role, step) },
-                onShowTranslation = { viewModel.setShowTranslation(it) },
-                onWordByWord = { viewModel.setWordByWord(it) },
-                onTajweed = { viewModel.setTajweed(it) },
-                onAllSettings = {
-                    displayAnchor = null
-                    openSheet(ReaderSheet.Settings)
-                },
-                onDismiss = { displayAnchor = null },
-            )
-        }
 
         // The long press and its one-time note are gone with the gesture: the
         // ayah's own number is its door, visible on every ayah, and a

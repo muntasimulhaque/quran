@@ -115,7 +115,7 @@ internal fun SurahRow(surah: Surah, onSurah: (Surah) -> Unit) {
 @Composable
 internal fun placeName(place: String): String =
     if (place.equals("makkah", true)) {
-        stringResource(R.string.search_place_makkah)
+        stringResource(R.string.search_revelation_makki)
     } else {
-        stringResource(R.string.search_place_madinah)
+        stringResource(R.string.search_revelation_madani)
     }

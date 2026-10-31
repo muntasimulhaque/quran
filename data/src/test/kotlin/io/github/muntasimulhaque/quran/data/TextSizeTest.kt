@@ -83,19 +83,19 @@ class TextSizeTest {
 
     @Test
     fun theArabicLineHoldsTheQuranFoundationsRatio() {
-        // 2.0, the Quran Foundation's own QPC Hafs leading. At 28.8 the app
-        // carried 1.9, measured against the marks; with the base at 24 the
+        // 2.0, the Quran Foundation's own QPC Hafs leading. At 31.2 the app
+        // carried 1.9, measured against the marks; with the base at 26 the
         // official 2.0 gives the marks their room.
-        assertEquals(24f * 2f, TextSize.lineSp(TypeRole.Arabic, 1f))
+        assertEquals(26f * 2f, TextSize.lineSp(TypeRole.Arabic, 1f))
     }
 
     @Test
     fun theShippedDefaultIsOneEvenStepSmaller() {
         // The default is 1, the middle of the five (owner decision, this
-        // session). The Arabic stands at 24 sp, 1.5 times the 16 sp prose:
+        // session). The Arabic stands at 26 sp, 1.625 times the 16 sp prose:
         // the owner's eye asked for the Quran above the prose, and the reader
-        // can still go down to 19.2.
-        assertEquals(24f, TextSize.sp(TypeRole.Arabic, 1f))
+        // can still go down to 20.8.
+        assertEquals(26f, TextSize.sp(TypeRole.Arabic, 1f))
         assertEquals(16f, TextSize.sp(TypeRole.Translation, 1f))
     }
 
@@ -120,14 +120,14 @@ class TextSizeTest {
     @Test
     fun theLadderIsPinned() {
         // The session's ladder, one line per relationship the reader was
-        // promised: the Quran is the anchor at 1.5 times the prose, the word
+        // promised: the Quran is the anchor at 1.625 times the prose, the word
         // list reads four points under it, Arabic beside prose is one rule at
         // 0.9 from the Quran in both the translation and the tafsir, the
         // prose stands at the reading voice's own size, and the meaning sits
         // under the word it glosses (owner decision, this session).
-        assertEquals(24f, TextSize.sp(TypeRole.Arabic, 1f))
-        assertEquals(20f, TextSize.wordSp(1f), 0.001f)
-        assertEquals(21.6f, TextSize.inlineArabic(1f), 0.001f)
+        assertEquals(26f, TextSize.sp(TypeRole.Arabic, 1f))
+        assertEquals(22f, TextSize.wordSp(1f), 0.001f)
+        assertEquals(23.4f, TextSize.inlineArabic(1f), 0.001f)
         assertEquals(16f, TextSize.sp(TypeRole.Translation, 1f))
         assertEquals(16f, TextSize.sp(TypeRole.Tafsir, 1f))
         assertEquals(14.4f, TextSize.meaningSp(1f), 0.001f)

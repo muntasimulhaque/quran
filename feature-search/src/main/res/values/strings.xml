@@ -18,8 +18,8 @@
     <string name="search_surah_meta">%1$s  ·  %2$d ayahs</string>
     <string name="search_word_meaning_label">Word meaning</string>
     <string name="search_tafsir_range">%1$s  ·  %2$s %3$s</string>
-    <string name="search_place_makkah">Makkah</string>
-    <string name="search_place_madinah">Madinah</string>
+    <string name="search_revelation_makki">Makki</string>
+    <string name="search_revelation_madani">Madani</string>
 
     <string name="search_filter">Search in</string>
     <string name="search_filter_text">Quran text</string>

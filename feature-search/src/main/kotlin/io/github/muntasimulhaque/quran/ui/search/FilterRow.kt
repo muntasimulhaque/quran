@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.SearchSources
 import io.github.muntasimulhaque.quran.feature.search.R
@@ -158,12 +159,12 @@ internal fun FilterRow(
                     .fillMaxWidth()
                     .padding(top = Space.Line),
                 horizontalArrangement = Arrangement.spacedBy(Space.Line),
-                // A chip is a 32 dp pill inside a 48 dp target, so the row gap
-                // the eye reads is this spacing plus the 8 dp of target above
+                // A chip is a 36 dp pill inside a 48 dp target, so the row gap
+                // the eye reads is this spacing plus the 6 dp of target above
                 // and below each pill. The flow's own 8 dp made that gap 24 dp
                 // against the columns' 8 dp (owner report); 0 here leaves a
-                // 16 dp block break between rows while the chips keep the
-                // 32 dp size the owner chose.
+                // 12 dp block break between rows while the chips keep the
+                // 36 dp size the ladder gives them.
                 verticalArrangement = Arrangement.spacedBy(0.dp),
             ) {
                 FilterChip(stringResource(R.string.search_filter_text), sources.text) {
@@ -204,7 +205,7 @@ internal fun FilterRow(
 @Composable
 internal fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit) {
     // A chip is a small word around a small mark, and it is the same chip the
-    // app draws everywhere: the pill is the label's own 16 dp line with 8 dp
+    // app draws everywhere: the pill is the label's own 20 dp line with 8 dp
     // above and below, so it reads as a chip and not as a slab, and it follows
     // the system font scale because it is the type plus padding and not a
     // fixed box (owner decision, this session: the pill had grown to 48 dp,
@@ -258,8 +259,43 @@ internal fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit)
         }
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.labelLarge,
             color = ink,
+        )
+    }
+}
+
+/**
+ * A recent query is a suggestion, not an action: it wears the app's chip, not
+ * the action pill, because tapping it fills the field and runs the search
+ * rather than completing a flow. It is the same chip as the source filters,
+ * without the check, so the two kinds of search chip read as one family.
+ */
+@Composable
+internal fun QueryChip(label: String, onClick: () -> Unit) {
+    val press = remember { MutableInteractionSource() }
+    val ink = MaterialTheme.colorScheme.onSurfaceVariant
+    Row(
+        modifier = Modifier
+            .clickable(
+                interactionSource = press,
+                indication = null,
+                role = Role.Button,
+                onClick = onClick,
+            )
+            .minimumInteractiveComponentSize()
+            .clip(Radii.Pill)
+            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door))
+            .indication(press, ripple(color = ink))
+            .padding(horizontal = Space.Row, vertical = Space.Line),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            color = ink,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }

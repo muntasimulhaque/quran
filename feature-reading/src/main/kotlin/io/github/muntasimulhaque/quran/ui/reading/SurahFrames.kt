@@ -126,9 +126,7 @@ internal fun SurahOpening(
         )
         Text(
             text = surah.nameSimple,
-            style = LocalReadingVoice.current.title(
-                TypeLadder.OPENING_NAME_SP + LocalReadingVoice.current.scriptStep,
-            ),
+            style = LocalReadingVoice.current.title(TypeLadder.OPENING_NAME_SP),
             color = MaterialTheme.colorScheme.onBackground,
             // The surah's own name is this page's title, so a reader who
             // cannot see it can jump to it instead of hearing the opening
@@ -141,9 +139,9 @@ internal fun SurahOpening(
             text = stringResource(
                 R.string.reading_surah_meta,
                 if (surah.revelationPlace.equals("makkah", true)) {
-                    stringResource(R.string.reading_place_makkah)
+                    stringResource(R.string.reading_revelation_makki)
                 } else {
-                    stringResource(R.string.reading_place_madinah)
+                    stringResource(R.string.reading_revelation_madani)
                 },
                 surah.versesCount,
             ),

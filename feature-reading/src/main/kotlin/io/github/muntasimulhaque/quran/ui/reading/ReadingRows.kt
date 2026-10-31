@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,6 +42,8 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 @Composable
 internal fun ReadingRows(
     content: ContentDatabase,
+    /** The surface's selection clearer, so one touch puts the menu away. */
+    selectionClearer: SelectionClearer,
     surah: Surah,
     rows: List<ReadingRow>,
     ayahs: List<Int>,
@@ -202,25 +205,27 @@ internal fun ReadingRows(
         ),
     ) {
         item(key = "surah-${surah.number}", contentType = "opening") {
-            SurahOpening(
-                surah = surah,
-                content = content,
-                language = contentLanguage,
-                expanded = aboutOpen,
-                onExpandedChange = { aboutOpen = it },
-                onPaperTap = { if (!aboutOpen) onBackgroundTap() },
-                metrics = metrics,
-            )
-            // The door asks for a translation only while translations are
-            // something the reading draws at all: a reader who hid them in
-            // Settings is not looking for one here.
-            if (metrics.showTranslation && !hasTranslation) {
-                AddDoor(
-                    text = stringResource(R.string.reading_add_translation),
-                    action = stringResource(R.string.reading_action_add),
-                    onClick = onAddContent,
-                    modifier = Modifier.padding(vertical = Space.Tight),
+            DisableSelection {
+                SurahOpening(
+                    surah = surah,
+                    content = content,
+                    language = contentLanguage,
+                    expanded = aboutOpen,
+                    onExpandedChange = { aboutOpen = it },
+                    onPaperTap = { if (!aboutOpen) onBackgroundTap() },
+                    metrics = metrics,
                 )
+                // The door asks for a translation only while translations
+                // are something the reading draws at all: a reader who hid
+                // them in Settings is not looking for one here.
+                if (metrics.showTranslation && !hasTranslation) {
+                    AddDoor(
+                        text = stringResource(R.string.reading_add_translation),
+                        action = stringResource(R.string.reading_action_add),
+                        onClick = onAddContent,
+                        modifier = Modifier.padding(vertical = Space.Tight),
+                    )
+                }
             }
         }
         items(
@@ -237,6 +242,7 @@ internal fun ReadingRows(
             AyahBlock(
                 row = row,
                 hafs = hafs,
+                selectionClearer = selectionClearer,
                 metrics = metrics,
                 isSelected = selectedAyah == row.ayah.number,
                 playingAyah = playingAyah,
@@ -269,11 +275,13 @@ internal fun ReadingRows(
             )
         }
         item(key = "end-${surah.number}", contentType = "end") {
-            SurahEnd(
-                surah = surah,
-                nextSurahName = nextSurahName,
-                onNextSurah = onNextSurah,
-            )
+            DisableSelection {
+                SurahEnd(
+                    surah = surah,
+                    nextSurahName = nextSurahName,
+                    onNextSurah = onNextSurah,
+                )
+            }
         }
     }
 

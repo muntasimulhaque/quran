@@ -34,8 +34,9 @@ import org.junit.runner.RunWith
  * keep the room the app's rows keep, [Space.Row] on each side, because the
  * eye has to leave one stack of text and find the head of the next. Arabic
  * only it is a line of the mushaf, and the verses of a page ride the line's
- * own rhythm: [Space.Tight] on each side, so a verse stands about a quarter
- * of a line from the next and the face's own medallion closes it.
+ * own rhythm: the blocks stand edge to edge, and the wash's own [Space.Tight]
+ * on each side is the air, so the face's own medallion closes the verse and
+ * the next begins without a paper gap.
  *
  * The Arabic-only page used to keep the card's 44 dp, standing a verse 1.8 of
  * a line from the next, which read as a table of rows and cost the reader
@@ -60,17 +61,17 @@ class ReadingVerseGapTest {
 
     /**
      * The page that draws the Quran alone rides the line's own rhythm: the two
-     * blocks stand [Space.Tight] apart on each side, and the next verse's line
-     * begins within a line and a half of this one's.
+     * blocks stand edge to edge, their wash keeps [Space.Tight] on each side,
+     * and the next verse's line begins within a line and a half of this one's.
      */
     @Test
     fun theArabicOnlyPageRidesTheLinesOwnRhythm() = onReading(showTranslation = false) {
         val verses = verseBlocks()
         val gap = verses[1].top.value - verses[0].bottom.value
         assertEquals(
-            "two Arabic-only verses must stand ${2 * Space.Tight.value} dp apart, the block's " +
-                "own Space.Tight on each side",
-            2 * Space.Tight.value,
+            "two Arabic-only blocks must stand edge to edge; the wash's own " +
+                "${Space.Tight.value} dp on each side is the air",
+            0f,
             gap,
             1f,
         )

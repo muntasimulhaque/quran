@@ -155,7 +155,8 @@ change, never left as a dead letter.
   meanings are already on the reading, so the card does not repeat them.
 - **the text button**: `ui-kit`'s one shape for a word that acts. A heading, a
   name, or a label is bare type; anything that answers a touch is a rounded
-  shape.
+  shape, except a numeric index, which is bare type with a target and one
+  filled circle for the reader's place.
 - **the pack**: one downloadable set of content or recitation, addressed by its
   own hash. The app reads a pack and never hotlinks one.
 - **the content database**: the read-only SQLite built by `tools/`, shipped as an

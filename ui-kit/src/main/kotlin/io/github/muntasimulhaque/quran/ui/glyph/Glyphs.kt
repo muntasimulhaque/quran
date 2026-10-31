@@ -158,19 +158,6 @@ object Glyphs {
             line(16.33f, 16.33f, 20.75f, 20.75f),
         ),
 
-        // Two rails, each with a knob to hold. A bead strung on a rail reads
-        // as a dot at the sizes the app draws; a knob that crosses the rail
-        // reads as the control a hand takes hold of. The drawing is the old
-        // Settings mark, unchanged; only its job moved, because the reading's
-        // display panel is what the sliders open and the hub wears a gear of
-        // its own (owner decision, this session).
-        Icon.Display to listOf(
-            line(3.25f, 7f, 20.75f, 7f),
-            line(3.25f, 17f, 20.75f, 17f),
-            bar(8.25f, 5.5f, 8.25f, 8.5f),
-            bar(15.75f, 15.5f, 15.75f, 18.5f),
-        ),
-
         // A ring and eight teeth, on the 45 degree steps the page's furniture
         // keeps. A tooth is a Bar, so it carries the set's one weight at every
         // size, and each starts on the ring's own centerline, so the tooth and

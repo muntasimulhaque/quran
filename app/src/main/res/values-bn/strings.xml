@@ -21,9 +21,7 @@
 
     <string name="action_browse">কুরআন ব্রাউজ করুন</string>
     <string name="action_search">অনুসন্ধান</string>
-    <string name="action_display">পড়ার রূপ</string>
-    <string name="display_title">পড়ার রূপ</string>
-    <string name="display_all_settings">সব সেটিংস</string>
+    <string name="action_settings">সেটিংস</string>
     <string name="action_surah_top">সূরার শুরুতে ফিরে যান</string>
     <string name="action_save">সংরক্ষণ</string>
     <string name="action_saved">সংরক্ষিত</string>

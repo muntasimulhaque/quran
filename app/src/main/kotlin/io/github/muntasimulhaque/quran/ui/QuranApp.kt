@@ -237,6 +237,7 @@ private fun ContentProblem(storage: Boolean, onRetry: () -> Unit) {
                 label = stringResource(R.string.content_problem_retry),
                 onClick = onRetry,
                 modifier = Modifier.padding(top = Space.Block),
+                prominent = true,
             )
         }
     }

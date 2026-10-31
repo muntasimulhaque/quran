@@ -101,18 +101,12 @@ class AboutLanguageTest {
             compose.onAllNodesWithContentDescription(readingPage).fetchSemanticsNodes().isNotEmpty()
         }
         compose.onAllNodesWithContentDescription(readingPage).onFirst().tapThePaper()
-        // Settings is the display panel's last row now: the bar's sliders open
-        // the reading's display, and All settings opens the hub (owner
-        // decision, this session).
-        val display = compose.activity.getString(R.string.action_display)
+        // The gear opens the settings hub directly.
+        val settings = compose.activity.getString(R.string.action_settings)
         compose.waitUntil(timeoutMillis = 15_000) {
-            compose.onAllNodesWithContentDescription(display).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithContentDescription(settings).fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithContentDescription(display).performClick()
-        compose.waitUntil(timeoutMillis = 15_000) {
-            compose.onAllNodesWithTag("display-all-settings").fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onNodeWithTag("display-all-settings").performClick()
+        compose.onNodeWithContentDescription(settings).performClick()
         val about = compose.activity.getString(SettingsR.string.settings_title_about)
         compose.waitUntil(timeoutMillis = 15_000) {
             compose.onAllNodesWithText(about).fetchSemanticsNodes().isNotEmpty()

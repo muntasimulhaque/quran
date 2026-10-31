@@ -15,15 +15,10 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.layout.boundsInWindow
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.R
@@ -37,12 +32,10 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * chrome the reading carries. It lives beside the reading screen so the page
  * file is about the page, and the bar is about the bar.
  *
- * The three marks are Browse, Search, and the reading's display. Settings is
- * no longer a mark of its own: it is the last row of the display panel, so
- * the page's sizes and the page's switches are one tap away and the hub is
- * two (owner decision, this session). The sliders mark measures its own place
- * on the glass and hands it to the panel, because the app's one popup hangs
- * from the control it answers and a popup cannot read its anchor back.
+ * The three marks are Browse, Search, and Settings. The gear opens the
+ * settings hub directly: the reading's display panel was a second door to
+ * the same values, and a reader who wants a setting should not have to learn
+ * a shortcut to it (owner decision, this session).
  *
  * Its marks stand on the same two lines as the words under them. A round
  * control is a 48 dp target holding a 24 dp mark, so the row is inset by the
@@ -67,11 +60,9 @@ internal fun ReaderTopBar(
     onTitle: () -> Unit,
     onBrowse: () -> Unit,
     onSearch: () -> Unit,
-    /** The sliders mark was tapped, with its own place on the glass. */
-    onDisplay: (IntRect) -> Unit,
+    onSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val displayBounds = remember { mutableStateOf(IntRect.Zero) }
     AnimatedVisibility(
         visible = visible,
         enter = if (reducedMotion) fadeIn() else fadeIn() + slideInVertically { -it / 3 },
@@ -124,26 +115,7 @@ internal fun ReaderTopBar(
                     )
                 }
                 IconButton(Icon.Search, stringResource(R.string.action_search), onSearch)
-                // The sliders take the bar's last place and measure their own
-                // box, so the display panel hangs from the mark the finger
-                // touched rather than from the bar's centre.
-                Box(
-                    modifier = Modifier.onGloballyPositioned { coordinates ->
-                        val box = coordinates.boundsInWindow()
-                        displayBounds.value = IntRect(
-                            box.left.toInt(),
-                            box.top.toInt(),
-                            box.right.toInt(),
-                            box.bottom.toInt(),
-                        )
-                    },
-                ) {
-                    IconButton(
-                        icon = Icon.Display,
-                        description = stringResource(R.string.action_display),
-                        onClick = { onDisplay(displayBounds.value) },
-                    )
-                }
+                IconButton(Icon.Settings, stringResource(R.string.action_settings), onSettings)
             }
         }
     }

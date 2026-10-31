@@ -18,8 +18,8 @@ import org.junit.Test
  *
  * This is the readable scale: a page is 20, a passage's title 18, a subtitle
  * 16, a Book name 16, a row's name and the app's body 15, a source and a
- * value 13, a label 12, a button 14. The Quran is 24 on a 2.0 line, the aid's
- * word 20, the inline Arabic 21.6, and the gloss 14.4. The Book's prose is 16
+ * value 13, a label 12, a button 14. The Quran is 26 on a 2.0 line, the aid's
+ * word 22, the inline Arabic 23.4, and the gloss 14.4. The Book's prose is 16
  * in its own face and the app's prose is 15 in the interface face, so the two
  * are optically equal and the Book leads by its voice, not by a larger body
  * (owner decision, this session).
@@ -59,7 +59,7 @@ class TypographyTest {
         assertEquals(12f, TypeLadder.LABEL_SP, 0.001f)
         assertEquals(13f, TypeLadder.CAPTION_SP, 0.001f)
         assertEquals(14f, TypeLadder.BUTTON_SP, 0.001f)
-        assertEquals(22f, TypeLadder.TAJWEED_SAMPLE_SP, 0.001f)
+        assertEquals(26f, TypeLadder.TAJWEED_SAMPLE_SP, 0.001f)
         assertEquals(18f, TypeLadder.SWATCH_SP, 0.001f)
         assertEquals(24f, TypeLadder.SHARE_ARABIC_SP, 0.001f)
         assertEquals(22f, TypeLadder.SHARE_NAME_SP, 0.001f)
@@ -123,15 +123,11 @@ class TypographyTest {
     }
 
     @Test
-    fun theBanglaReadingTakesOnePointOverTheLatin() {
-        // 17 against the Latin 16, and the interface 16 against 15: the same
-        // relationship between the Book and the chrome in both scripts.
-        assertEquals(17f, TextSize.BENGALI_READING_SIZE, 0.001f)
-        assertEquals(
-            1.0625f,
-            TextSize.BENGALI_READING_SIZE / TextSize.sp(TypeRole.Translation, TextSize.DEFAULT),
-            0.001f,
-        )
+    fun theBanglaReadingTakesTheLatinSizeAndItsOwnLine() {
+        // The sizes are the same in both scripts; the line is Bengali's own,
+        // because its matras and conjuncts need the taller box.
+        assertEquals(16f, BengaliReading.fontSize.value, 0.001f)
+        assertEquals(16f * 31f / 18f, BengaliReading.lineHeight.value, 0.001f)
         assertEquals(31f / 18f, TextSize.BENGALI_PROSE_RATIO, 0.001f)
     }
 
@@ -144,16 +140,16 @@ class TypographyTest {
 
     @Test
     fun theQuranVoiceKeepsTheAgreedStaircase() {
-        // The Quran is the page's anchor at 24; the prose is 16; the aid's
-        // word is 20, four points under the verse; the inline Amiri is nine
+        // The Quran is the page's anchor at 26; the prose is 16; the aid's
+        // word is 22, four points under the verse; the inline Amiri is nine
         // tenths of the verse; and the gloss is nine tenths of the prose.
-        assertEquals(24f, TextSize.sp(TypeRole.Arabic, TextSize.DEFAULT), 0.001f)
-        assertEquals(48f, TextSize.lineSp(TypeRole.Arabic, TextSize.DEFAULT), 0.001f)
-        assertEquals(20f, TextSize.wordSp(TextSize.DEFAULT), 0.001f)
-        assertEquals(21.6f, TextSize.inlineArabic(TextSize.DEFAULT), 0.001f)
+        assertEquals(26f, TextSize.sp(TypeRole.Arabic, TextSize.DEFAULT), 0.001f)
+        assertEquals(52f, TextSize.lineSp(TypeRole.Arabic, TextSize.DEFAULT), 0.001f)
+        assertEquals(22f, TextSize.wordSp(TextSize.DEFAULT), 0.001f)
+        assertEquals(23.4f, TextSize.inlineArabic(TextSize.DEFAULT), 0.001f)
         assertEquals(14.4f, TextSize.meaningSp(TextSize.DEFAULT), 0.001f)
         assertEquals(
-            1.5f,
+            1.625f,
             TextSize.sp(TypeRole.Arabic, TextSize.DEFAULT) /
                 TextSize.sp(TypeRole.Translation, TextSize.DEFAULT),
             0.001f,

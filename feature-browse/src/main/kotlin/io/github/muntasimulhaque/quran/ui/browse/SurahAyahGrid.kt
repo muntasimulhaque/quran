@@ -2,6 +2,8 @@ package io.github.muntasimulhaque.quran.ui.browse
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,8 +18,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -41,8 +45,6 @@ import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconButton
 import io.github.muntasimulhaque.quran.ui.theme.Space
-import io.github.muntasimulhaque.quran.ui.theme.Radii
-import io.github.muntasimulhaque.quran.ui.theme.Wash
 
 /**
  * The ayahs of one surah, opened from its row in Browse: the surah's own
@@ -58,6 +60,12 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
  * page is composed can never leave the grid on a place that is no longer
  * theirs. A surah with no place of its own starts at its first ayah, which is
  * what opening an unread surah means.
+ *
+ * The grid is a page of numbers, not a wall of buttons. An ordinary ayah is
+ * its number with a 48 dp target and a circular press; the reader's place is
+ * the one filled circle, so the eye lands on where they are instead of on
+ * 286 repeated shapes. A numeric index is bare type with a target; the shape
+ * belongs to the place (owner decision, this session).
  */
 @Composable
 internal fun SurahAyahGrid(
@@ -159,47 +167,65 @@ private fun SurahGridHeader(surah: Surah, onBack: () -> Unit) {
 }
 
 /**
- * One ayah's number in the grid: a shape the finger can see, the reader's own
- * ayah filled, and both states spoken so the grid means the same thing to
- * TalkBack.
+ * One ayah's number in the grid: bare type with a 48 dp target, and the one
+ * filled circle for the reader's place.
  *
- * The cell is 48 dp tall, the floor for a thing a finger
- * aims at, and the grid's columns are as wide as that: a picker of small
- * numbers is exactly the surface where a target under the floor is felt, since
- * the reader aims at a two- or three-digit shape and not at a word.
+ * The cell is 48 dp tall, the floor for a thing a finger aims at, and the
+ * grid's columns are as wide as that. The number is the content, so it is
+ * 15 at Medium with tabular figures; it is not a caption. The reader's place
+ * is a 40 dp filled circle, the only resting shape in the grid, and the press
+ * is a 40 dp circular ripple, so the target the finger gets is larger than
+ * the shape the eye reads. Both states are spoken, so the grid means the same
+ * thing to TalkBack.
  */
 @Composable
 private fun AyahNumberCell(number: Int, current: Boolean, onClick: () -> Unit) {
     val label = stringResource(R.string.last_read_ayah_label, number)
     val currentState = stringResource(R.string.browse_ayah_current)
+    val ink = if (current) {
+        MaterialTheme.colorScheme.onPrimary
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+    val press = remember { MutableInteractionSource() }
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 48.dp)
-            .clip(Radii.Pill)
-            .background(
-                if (current) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
-                },
+            .clickable(
+                interactionSource = press,
+                indication = null,
+                role = Role.Button,
+                onClick = onClick,
             )
-            .clickable(role = Role.Button, onClick = onClick)
             .semantics {
                 contentDescription = label
                 if (current) stateDescription = currentState
             },
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = numberLabel(number),
-            style = MaterialTheme.typography.labelSmall,
-            color = if (current) {
-                MaterialTheme.colorScheme.onPrimary
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            },
-        )
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .then(
+                    if (current) {
+                        Modifier.background(MaterialTheme.colorScheme.primary)
+                    } else {
+                        Modifier
+                    },
+                )
+                .indication(press, ripple(color = ink)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = numberLabel(number),
+                style = MaterialTheme.typography.titleSmall.copy(
+                    fontFeatureSettings = "tnum",
+                ),
+                color = ink,
+            )
+        }
     }
 }
 

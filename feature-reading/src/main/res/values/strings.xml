@@ -3,8 +3,8 @@
     <string name="reading_page_description">Reading</string>
     <string name="reading_add_translation">Add a translation to read this surah in your language</string>
     <string name="reading_action_add">Add</string>
-    <string name="reading_place_makkah">Makkah</string>
-    <string name="reading_place_madinah">Madinah</string>
+    <string name="reading_revelation_makki">Makki</string>
+    <string name="reading_revelation_madani">Madani</string>
     <string name="reading_surah_meta">%1$s  ·  %2$d ayahs</string>
     <string name="reading_about_surah">About this surah</string>
     <string name="reading_hide">Hide</string>

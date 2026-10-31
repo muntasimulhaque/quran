@@ -46,6 +46,16 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * the emphasis costs the palette no new tone. It is never for a destructive
  * action and never for a row in a list.
  *
+ * The quiet tone is also the destructive one: Remove, Clear, and Cancel wear
+ * the same quiet shape, because the app asks before it destroys and never
+ * gives a removal the loudest mark on the page. M3 would reach for the error
+ * color; this app reaches for a question.
+ *
+ * The visible pill is about 34 dp tall, a chip's measure, inside the 48 dp
+ * target every finger gets. It is not Material's 40 dp small button: the
+ * app's actions are compact shapes, and the target is the finger's, not the
+ * eye's.
+ *
  * The click and the node a screen reader focuses own a full 48 dp slab,
  * while the shape the eye reads is drawn on the pill inside it. The ripple
  * draws on the pill too, not on the slab, so the press never flashes outside

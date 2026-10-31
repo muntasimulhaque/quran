@@ -66,7 +66,7 @@ class SurahSearchTest {
     /**
      * The exact act the owner reported: a short query that matches a surah by
      * name, so the first row is the surah's, and the search sheet must stay up
-     * with the row drawn whole. "kahf" is Al-Kahf: Makkah, 110 ayahs.
+     * with the row drawn whole. "kahf" is Al-Kahf: Makki, 110 ayahs.
      */
     @Test
     fun aSurahNameInSearchDrawsItsWholeRow() {
@@ -107,7 +107,7 @@ class SurahSearchTest {
             val tag = language.tag
             val locale = Locale.forLanguageTag(tag)
             val context = localized(tag)
-            val place = context.getString(SearchR.string.search_place_makkah)
+            val place = context.getString(SearchR.string.search_revelation_makki)
             val meta = context.getString(SearchR.string.search_surah_meta, place, 110)
             assertTrue(
                 "the $tag surah meta must name the place",

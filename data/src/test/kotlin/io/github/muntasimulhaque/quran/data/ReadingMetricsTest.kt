@@ -5,17 +5,15 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * The reading's sizes are the reader's script's, not one ladder borrowed by
- * both.
+ * The reading's sizes are one ladder for both scripts; only the line is the
+ * script's own.
  *
- * A Bangla reading takes the translation, the tafsir, and the meaning at 18 sp
- * and their 1.722 line, so a Bengali paragraph reads at the size the script was
- * designed for; the Arabic and the word-by-word aid's own word stay where the
- * Quran's text stands, because the verse is data and its size is the reader's
- * own step. The two languages therefore share one ladder and keep their own
- * air, and the aid's word can never rise above the verse it glosses (owner
- * decision, this session: the metrics were language-blind, and the Bangla
- * reading was drawn at the Latin sizes).
+ * A Bangla reading takes the translation, the tafsir, and the meaning at the
+ * same 16, 16, and 14.4 as English, but at Bengali's 1.722 line, because the
+ * script stacks its vowel marks above and below the letters. The Arabic and
+ * the word-by-word aid's own word stay where the Quran's text stands, because
+ * the verse is data and its size is the reader's own step. The aid's word can
+ * never rise above the verse it glosses (owner decision, this session).
  */
 class ReadingMetricsTest {
 
@@ -40,32 +38,32 @@ class ReadingMetricsTest {
         assertEquals(16f, english.tafsirSp, 0.001f)
         assertEquals(16f * 1.5f, english.tafsirLineSp, 0.001f)
         assertEquals(14.4f, reading.wordsMeaningSp, 0.001f)
-        assertEquals(24f, reading.arabicSp, 0.001f)
-        assertEquals(20f, reading.wordsSp, 0.001f)
+        assertEquals(26f, reading.arabicSp, 0.001f)
+        assertEquals(22f, reading.wordsSp, 0.001f)
     }
 
     @Test
-    fun banglaProseTakesTheScriptsOwnSize() {
+    fun banglaProseTakesTheScriptsOwnLine() {
         val bangla = settings(UiLanguage.Bangla.tag)
         val reading = bangla.readingMetrics()
-        assertEquals(17f, reading.translationSp, 0.001f)
-        assertEquals(17f * TextSize.BENGALI_PROSE_RATIO, reading.translationLineSp, 0.001f)
-        assertEquals(17f, bangla.tafsirSp, 0.001f)
-        assertEquals(17f * TextSize.BENGALI_PROSE_RATIO, bangla.tafsirLineSp, 0.001f)
-        assertEquals(15.3f, reading.wordsMeaningSp, 0.001f)
+        assertEquals(16f, reading.translationSp, 0.001f)
+        assertEquals(16f * TextSize.BENGALI_PROSE_RATIO, reading.translationLineSp, 0.001f)
+        assertEquals(16f, bangla.tafsirSp, 0.001f)
+        assertEquals(16f * TextSize.BENGALI_PROSE_RATIO, bangla.tafsirLineSp, 0.001f)
+        assertEquals(14.4f, reading.wordsMeaningSp, 0.001f)
         // The Quran's text is data, not a locale: it does not take the
-        // script's step.
-        assertEquals(24f, reading.arabicSp, 0.001f)
+        // script's line.
+        assertEquals(26f, reading.arabicSp, 0.001f)
         // The aid's word is a copy of the verse, so it stays under it.
-        assertEquals(20f, reading.wordsSp, 0.001f)
+        assertEquals(22f, reading.wordsSp, 0.001f)
     }
 
     @Test
     fun theSmallestStepKeepsTheBanglaGlossReadable() {
         val bangla = settings(UiLanguage.Bangla.tag, 0.8f)
         val reading = bangla.readingMetrics()
-        assertEquals(13.6f, reading.translationSp, 0.001f)
-        assertEquals(14.4f * 0.8f * (17f / 16f), reading.wordsMeaningSp, 0.001f)
+        assertEquals(12.8f, reading.translationSp, 0.001f)
+        assertEquals(14.4f * 0.8f, reading.wordsMeaningSp, 0.001f)
         // The word still stands under the verse's own step.
         assertTrue(reading.wordsSp < reading.arabicSp)
     }

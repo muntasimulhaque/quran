@@ -34,13 +34,13 @@ enum class TypeRole { Arabic, Translation, Tafsir, Words }
  *
  * Arabic is set above the Latin sizes on purpose: its letter bodies are
  * small next to the space the diacritics need, so at the same nominal size it
- * reads visibly smaller than Latin text. The base is 24 sp, 1.5 times the
- * 16 sp translation: the owner's eye asked for the Quran one step larger and
- * the prose one smaller, and this is the ratio that did it. It is more
- * contrast than the field (Quran for Android 1.4, Quran.com 1.28), and less
- * than the app's own 1.8 before the field audit; the reader can still go down
- * to 19.2 at the smallest step and up to 28.8 at the largest (owner
- * decision, this session).
+ * reads visibly smaller than Latin text. The base is 26 sp, 1.625 times the
+ * 16 sp translation: the owner's eye asked for the Quran one step larger
+ * while the prose stayed at the size the page needs, and this is the ratio
+ * that did it. It is more contrast than the field (Quran for Android 1.4,
+ * Quran.com 1.28), and less than the app's own 1.8 before the field audit;
+ * the reader can still go down to 20.8 at the smallest step and up to 31.2
+ * at the largest (owner decision, this session).
  *
  * The largest step stops at 1.2. Past that the reading turns into a page of
  * headings. The smallest is 0.8, the compact choice, at 12.8 sp of translation
@@ -71,18 +71,6 @@ object TextSize {
      * session: the Bangla reading takes its own line at last).
      */
     const val BENGALI_PROSE_RATIO = 31f / 18f
-
-    /**
-     * The size a Bangla paragraph of reading is drawn at, against the Latin
-     * 16 base. Bengali glyphs read smaller than Latin at the same nominal
-     * size, so parity needs the extra point; the translation, the tafsir, and
-     * the word meaning take this size and its 1.722 line, while the Arabic
-     * and the aid's own word stay where the Quran's text stands (owner
-     * decision, this session: the metrics were language-blind, so the reading
-     * drew Bangla at the Latin sizes, and the next audit gave the reading and
-     * the interface the same one-point step over their Latin bodies).
-     */
-    const val BENGALI_READING_SIZE = 17f
 
     /**
      * The scales the scales have been, by the index that was stored for them
@@ -144,16 +132,15 @@ object TextSize {
     fun meaningLineSp(step: Float): Float = meaningSp(step) * lineRatio(TypeRole.Translation)
 
     /**
-     * The Arabic word in the word by word aid: 20 sp at the middle step, four
-     * points under the Quran's own 24, so the aid reads as a small copy of the
+     * The Arabic word in the word by word aid: 22 sp at the middle step, four
+     * points under the Quran's own 26, so the aid reads as a small copy of the
      * page and not as a footnote to itself.
      *
      * It is a copy of the verse's own word, so it follows the Quran's size and
      * never the gloss's. It used to be derived from the meaning by a ratio,
-     * which was one rule while both took the Latin base; a Bangla reading now
-     * lifts the gloss to its own size, and a ratio would have carried the word
-     * above the verse it belongs to. The word stays here on both languages
-     * (owner decision, this session).
+     * which was one rule while both took the Latin base; the two scripts now
+     * share one size ladder, so the word stays here on both languages (owner
+     * decision, this session).
      */
     fun wordSp(step: Float): Float = WORD_BASE * step(step)
 
@@ -170,7 +157,7 @@ object TextSize {
     fun inlineArabic(step: Float): Float = sp(TypeRole.Arabic, step) * INLINE_ARABIC_RATIO
 
     private fun base(role: TypeRole): Float = when (role) {
-        TypeRole.Arabic -> 24f
+        TypeRole.Arabic -> ARABIC_BASE
         TypeRole.Translation -> 16f
         // The tafsir is the longest prose the app draws, read in the same
         // sitting as the translation it opens from, so it stands at the
@@ -191,8 +178,8 @@ object TextSize {
      */
     fun lineRatio(role: TypeRole): Float = when (role) {
         // 2.0, the Quran Foundation's own leading for the QPC Hafs face in its
-        // font guide. At 28.8 the app carried 1.9, measured against the marks;
-        // with the base at 24 the official 2.0 gives the marks their room and
+        // font guide. At 31.2 the app carried 1.9, measured against the marks;
+        // with the base at 26 the official 2.0 gives the marks their room and
         // matches the field the app was compared with (owner decision, this
         // session).
         TypeRole.Arabic -> 2f
@@ -206,11 +193,14 @@ object TextSize {
      */
     private const val MEANING_BASE = 14.4f
 
+    /** The Quran's own base, the anchor every other reading size is read against. */
+    private const val ARABIC_BASE = 26f
+
     /**
      * The Arabic word in the aid, before any scaling: four points under the
-     * Quran's 24 base. See [wordSp].
+     * Quran's [ARABIC_BASE]. See [wordSp].
      */
-    private const val WORD_BASE = 20f
+    private const val WORD_BASE = ARABIC_BASE - 4f
 
     /**
      * The one stand for Arabic beside prose, in the translation and the

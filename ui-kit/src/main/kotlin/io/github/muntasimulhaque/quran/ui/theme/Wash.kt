@@ -27,8 +27,10 @@ package io.github.muntasimulhaque.quran.ui.theme
  * Download, Share image), and the ink at [Door] is a quiet action or an
  * unselected chip (Cancel, Remove, Share text). The solid level says "you
  * are here"; the two washes say "you can do this", and the quieter one says
- * "this is the light or the ending choice". A solid action button would take
- * the one loud mark away from the selected tab.
+ * "this is the light or the ending choice". The solid level is also the one
+ * prominent answer on a surface that asks a single question (Save, Turn it
+ * on, Download); it never shares that surface with a selected tab or chip,
+ * so the two meanings cannot be read at once.
  */
 object Wash {
 

@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.content.R
 import io.github.muntasimulhaque.quran.data.TextSize
+import io.github.muntasimulhaque.quran.data.TypeRole
 
 /**
  * The voices of the app, under one rule: a face names its own world.
@@ -292,7 +293,7 @@ object TypeLadder {
     const val BUTTON_SP = 14f
 
     /** The one sample word on the tajweed legend, at the reading's default Arabic size. */
-    const val TAJWEED_SAMPLE_SP = 22f
+    val TAJWEED_SAMPLE_SP: Float = TextSize.sp(TypeRole.Arabic, TextSize.DEFAULT)
 
     /** The theme swatch's letter. */
     const val SWATCH_SP = 18f
@@ -485,15 +486,14 @@ internal fun quranTypography(): Typography {
 
 /**
  * A small page's own name: an empty state, a credit, a language's name.
- * 16 at Medium in English and 17 in Bangla, one step over the script's own
- * body (15 and 16) and under the page title. It is the app's voice, so it
- * never borrows the Book's face, and it takes the theme's own interface
- * family, so a Bangla empty state is Noto Sans Bengali and an English one is
- * Inter (owner decision, this session).
+ * 16 at Medium in both scripts, one step over the body and under the page
+ * title. It is the app's voice, so it never borrows the Book's face, and it
+ * takes the theme's own interface family, so a Bangla empty state is Noto
+ * Sans Bengali and an English one is Inter (owner decision, this session).
  */
 @Composable
 fun screenSubtitle(): TextStyle {
-    val size = TypeLadder.SUBTITLE_SP + LocalReadingVoice.current.scriptStep
+    val size = TypeLadder.SUBTITLE_SP
     return MaterialTheme.typography.titleSmall.copy(
         fontSize = size.sp,
         lineHeight = (size * 1.375f).sp,
@@ -531,15 +531,12 @@ private fun interAt(weight: FontWeight, drawnSp: Float): FontFamily =
 private val interCuts = java.util.concurrent.ConcurrentHashMap<String, FontFamily>()
 
 /**
- * The interface in Bangla: the same jobs as the English ladder, in the
- * script's own two voices. The app's voice is Noto Sans Bengali: a page is
- * 21 at SemiBold, a row's name and the app's prose are 16, a value is 14, a
- * label is 13, a button is 15. The Book's voice is Noto Serif Bengali: a
- * surah's name is 17. The script takes one point over the Latin at the body
- * sizes and one at the reading, so the two scripts keep the same
- * relationship between the Book and the chrome (owner decision, this
- * session: the reading is 17 against the Latin 16, the interface 16 against
- * the Latin 15).
+ * The interface in Bangla: the same jobs and the same sizes as the English
+ * ladder, in the script's own two voices. The app's voice is Noto Sans
+ * Bengali: a page is 20 at SemiBold, a row's name and the app's prose are 15,
+ * a value is 13, a label is 12, a button is 14. The Book's voice is Noto Serif
+ * Bengali: a surah's name is 16. The sizes are the same in both scripts; only
+ * the line is the script's own (owner decision, this session).
  *
  * A title and a reading name carry 1.6 of their size in line, because the
  * serif face's own line box is 1.594 of the em and a Bengali title's stacked
@@ -564,15 +561,15 @@ val BanglaTypography = Typography(
     headlineLarge = banglaStyle(FontWeight.SemiBold, 34f, serif = true),
     headlineMedium = banglaStyle(FontWeight.SemiBold, 28f, serif = true),
     headlineSmall = banglaStyle(FontWeight.SemiBold, 24f, serif = true),
-    titleLarge = banglaStyle(FontWeight.SemiBold, 21f),
-    titleMedium = banglaStyle(FontWeight.Medium, 17f, serif = true),
-    titleSmall = banglaStyle(FontWeight.Medium, 16f),
-    bodyLarge = banglaStyle(FontWeight.Normal, 16f),
-    bodyMedium = banglaStyle(FontWeight.Normal, 16f),
-    bodySmall = banglaStyle(FontWeight.Normal, 14f),
-    labelLarge = banglaStyle(FontWeight.Medium, 15f, tabular = true),
-    labelMedium = banglaStyle(FontWeight.SemiBold, 13f, tabular = true),
-    labelSmall = banglaStyle(FontWeight.Normal, 14f, tabular = true),
+    titleLarge = banglaStyle(FontWeight.SemiBold, 20f),
+    titleMedium = banglaStyle(FontWeight.Medium, 16f, serif = true),
+    titleSmall = banglaStyle(FontWeight.Medium, 15f),
+    bodyLarge = banglaStyle(FontWeight.Normal, 15f),
+    bodyMedium = banglaStyle(FontWeight.Normal, 15f),
+    bodySmall = banglaStyle(FontWeight.Normal, 13f),
+    labelLarge = banglaStyle(FontWeight.Medium, 14f, tabular = true),
+    labelMedium = banglaStyle(FontWeight.SemiBold, 12f, tabular = true),
+    labelSmall = banglaStyle(FontWeight.Normal, 13f, tabular = true),
 )
 
 /** One style of the Bangla ladder, at the line its face needs. */
@@ -656,17 +653,17 @@ val LatinReading = TextStyle(
 )
 
 /**
- * The Bangla reading voice at the middle step. The body is 17 sp against the
- * Latin 16: Bengali glyphs read smaller than Latin at the same nominal size,
- * so parity needs the extra point. The line is the face's own natural 1.722
- * (Noto Serif Bengali's natural box is 1.594 of the em, and the script stacks
- * vowel marks above and below the line).
+ * The Bangla reading voice at the middle step. The body is 16 sp, the same
+ * size as the Latin reading, because the two scripts now share one ladder.
+ * The line is the face's own natural 1.722 (Noto Serif Bengali's natural box
+ * is 1.594 of the em, and the script stacks vowel marks above and below the
+ * line).
  */
 val BengaliReading = TextStyle(
     fontFamily = NotoSerifBengali,
     fontWeight = FontWeight.Normal,
-    fontSize = 17.sp,
-    lineHeight = 29.3.sp,
+    fontSize = 16.sp,
+    lineHeight = (16f * 31f / 18f).sp,
 )
 
 /**
@@ -702,13 +699,6 @@ class ReadingVoice(
     val atSize: @Composable (Float) -> FontFamily,
     /** The content's own language, for hyphenation and the script's local forms. */
     val locale: LocaleList,
-    /**
-     * The script's one-point step over the Latin for a fixed Book title: 0 in
-     * English, 1 in Bangla. The app's own sizes carry the step in the theme;
-     * the opening's Latin name is a fixed number the voice draws, so the step
-     * travels with the voice (owner decision, this session).
-     */
-    val scriptStep: Float,
 )
 
 /**
@@ -813,6 +803,5 @@ val LocalReadingVoice = staticCompositionLocalOf {
         TypeLadder.TITLE_LINE,
         ::literataAt,
         EnglishReadingLocale,
-        0f,
     )
 }

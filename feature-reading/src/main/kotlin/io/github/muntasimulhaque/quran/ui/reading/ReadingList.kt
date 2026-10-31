@@ -38,6 +38,8 @@ import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 @Composable
 fun ReadingList(
     content: ContentDatabase,
+    /** The reading's selection clearer, so one touch puts the menu away. */
+    selectionClearer: SelectionClearer,
     surah: Surah,
     loadRows: suspend () -> List<ReadingRow>,
     /**
@@ -137,6 +139,7 @@ fun ReadingList(
     }
     ReadingRows(
         content = content,
+        selectionClearer = selectionClearer,
         surah = surah,
         rows = rows,
         ayahs = ayahs,

@@ -12,10 +12,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.text.selection.SelectionState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -24,6 +26,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -112,6 +117,10 @@ fun AyahCard(
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberExpandedSheetState()
+    // The card's selectable passage registers here, and any touch on the card
+    // clears it, so the platform menu goes when the reader touches anywhere
+    // outside it (owner decision, this session).
+    val selectionClearer = remember { SelectionClearer() }
     // The pack a search hit named, when there is one: the hit already chose
     // the commentary, so its door stands open and its passage under it. With
     // no hit, no door opens of itself, and one pack has no door at all.
@@ -196,6 +205,14 @@ fun AyahCard(
                 .fillMaxWidth()
                 .align(Alignment.CenterHorizontally)
                 .imePadding()
+                .pointerInput(selectionClearer) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent(PointerEventPass.Initial)
+                            if (event.type == PointerEventType.Press) selectionClearer.clear()
+                        }
+                    }
+                }
                 // The gate rides with the scroll: a long tafsir scrolled down
                 // and then scrolled back up is the reader reading, never a
                 // pull that closes the card under them.
@@ -271,6 +288,7 @@ fun AyahCard(
                         // is never a second copy of the name.
                         opening = null,
                         settings = settings,
+                        selectionClearer = selectionClearer,
                     )
                 } else {
                     orderedPacks.forEach { pack ->
@@ -292,6 +310,7 @@ fun AyahCard(
                                     packName,
                                 ),
                                 settings = settings,
+                                selectionClearer = selectionClearer,
                             )
                         }
                     }
@@ -383,6 +402,7 @@ private fun PassageArea(
     done: Boolean,
     opening: String?,
     settings: AppSettings,
+    selectionClearer: SelectionClearer,
 ) {
     Box(
         modifier = Modifier
@@ -391,7 +411,7 @@ private fun PassageArea(
         contentAlignment = Alignment.Center,
     ) {
         when {
-            view != null -> TafsirPanel(view, settings)
+            view != null -> TafsirPanel(view, settings, selectionClearer)
             done -> Text(
                 text = stringResource(R.string.card_tafsir_missing),
                 style = MaterialTheme.typography.bodyMedium,
@@ -424,8 +444,14 @@ private fun PassageArea(
 private fun TafsirPanel(
     view: TafsirView,
     settings: AppSettings,
+    selectionClearer: SelectionClearer,
 ) {
     val voice = LocalReadingVoice.current
+    val selection = remember(view) { SelectionState() }
+    DisposableEffect(selection, selectionClearer) {
+        selectionClearer.register(selection)
+        onDispose { selectionClearer.unregister(selection) }
+    }
     val titleSp = TypeLadder.articleTitleSp(settings.tafsirSp)
     Column(
         modifier = Modifier
@@ -448,8 +474,10 @@ private fun TafsirPanel(
         // selectable, so a long press copies from it with the platform's own
         // menu instead of sending the reader through Share for a picture
         // (owner decision, this session). The heading above it stays outside
-        // the selection: a reference is the card's, not the commentary's.
-        SelectionContainer {
+        // the selection: a reference is the card's, not the commentary's. The
+        // passage registers with the card's clearer, so a touch anywhere on
+        // the card puts the menu away.
+        SelectionContainer(selection) {
             RichBlocks(
                 blocks = view.blocks,
                 sizeSp = settings.tafsirSp,

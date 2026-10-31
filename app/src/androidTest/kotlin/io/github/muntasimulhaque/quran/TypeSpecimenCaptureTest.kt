@@ -164,15 +164,10 @@ class TypeSpecimenCaptureTest {
             }
             // The document's own staircase, at the steps this frame is about:
             // title, head, sub-head, and body are the numbers the card derives
-            // from the reader's size. The Bangla body takes the script's own
-            // step, the same one the settings hand every prose surface.
-            val prose = if (bangla) {
-                TextSize.BENGALI_READING_SIZE / TextSize.sp(TypeRole.Tafsir, TextSize.DEFAULT)
-            } else {
-                1f
-            }
+            // from the reader's size. The sizes are the same in both scripts;
+            // only the line is the script's own.
             for (step in steps) {
-                val body = TextSize.sp(TypeRole.Tafsir, step) * prose
+                val body = TextSize.sp(TypeRole.Tafsir, step)
                 val title = TypeLadder.articleTitleSp(body)
                 val head = TypeLadder.headingSp(body)
                 val sub = TypeLadder.subheadingSp(body)
