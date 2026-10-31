@@ -156,9 +156,9 @@ class AccessibilityTest {
         waitForTag("browse-surahs")
         compose.onNodeWithTag("surah-row-1").performClick()
         waitForTag("surah-ayahs")
-        Espresso.pressBack()
+        Espresso.pressBackUnconditionally()
         waitForTag("browse-surahs")
-        Espresso.pressBack()
+        Espresso.pressBackUnconditionally()
         compose.waitUntil(10_000) {
             compose.onAllNodesWithTag("browse-sheet", useUnmergedTree = true)
                 .fetchSemanticsNodes().isEmpty()
@@ -175,7 +175,7 @@ class AccessibilityTest {
         compose.waitUntil(10_000) {
             compose.onAllNodesWithText("Ibn Kathir").fetchSemanticsNodes().isNotEmpty()
         }
-        Espresso.pressBack()
+        Espresso.pressBackUnconditionally()
         waitForTag("settings-hub")
         compose.onAllNodesWithText("Daily ayah").onFirst().performClick()
         waitForTag("daily-page")
@@ -184,7 +184,7 @@ class AccessibilityTest {
             compose.onAllNodesWithText("When the daily ayah arrives")
                 .fetchSemanticsNodes().isNotEmpty()
         }
-        Espresso.pressBack()
+        Espresso.pressBackUnconditionally()
         compose.waitUntil(10_000) {
             compose.onAllNodesWithText("When the daily ayah arrives")
                 .fetchSemanticsNodes().isEmpty()
@@ -194,10 +194,10 @@ class AccessibilityTest {
         // next Back is sent; a dialog that is still dismissing leaves the
         // root without focus and makes the press look like a failure.
         compose.waitForIdle()
-        Espresso.pressBack()
+        Espresso.pressBackUnconditionally()
         waitForTag("settings-hub")
         compose.waitForIdle()
-        Espresso.pressBack()
+        Espresso.pressBackUnconditionally()
         compose.waitUntil(10_000) {
             compose.onAllNodesWithTag("settings-hub", useUnmergedTree = true)
                 .fetchSemanticsNodes().isEmpty()
@@ -226,7 +226,7 @@ class AccessibilityTest {
         compose.waitUntil(30_000) {
             compose.onAllNodesWithText("2:64").fetchSemanticsNodes().isNotEmpty()
         }
-        Espresso.pressBack()
+        Espresso.pressBackUnconditionally()
 
         // The ayah's own actions, the note editor, and the share preview.
         revealChrome()
@@ -240,7 +240,7 @@ class AccessibilityTest {
             .onFirst().performClick()
         waitForTag("note-sheet")
         Espresso.closeSoftKeyboard()
-        Espresso.pressBack()
+        Espresso.pressBackUnconditionally()
         waitForTagGone("note-sheet")
 
         revealChrome()
@@ -252,7 +252,7 @@ class AccessibilityTest {
         compose.onAllNodesWithText(compose.activity.getString(R.string.action_share))
             .onFirst().performClick()
         waitForTag("share-sheet")
-        Espresso.pressBack()
+        Espresso.pressBackUnconditionally()
     }
 
     private fun awaitReading() {

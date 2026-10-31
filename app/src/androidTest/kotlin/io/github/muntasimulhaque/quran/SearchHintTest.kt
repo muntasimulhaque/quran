@@ -135,7 +135,7 @@ class SearchHintTest {
                 rule.onAllNodesWithContentDescription("Reading")
                     .fetchSemanticsNodes().isNotEmpty()
             }
-            Espresso.pressBack()
+            Espresso.pressBackUnconditionally()
             rule.waitUntil(timeoutMillis = 60_000) {
                 rule.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty()
             }
