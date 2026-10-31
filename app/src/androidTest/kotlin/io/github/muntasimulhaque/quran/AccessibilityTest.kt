@@ -185,9 +185,18 @@ class AccessibilityTest {
                 .fetchSemanticsNodes().isNotEmpty()
         }
         Espresso.pressBack()
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText("When the daily ayah arrives")
+                .fetchSemanticsNodes().isEmpty()
+        }
         waitForTag("daily-page")
+        // The page behind the dialog has to be the focused window before the
+        // next Back is sent; a dialog that is still dismissing leaves the
+        // root without focus and makes the press look like a failure.
+        compose.waitForIdle()
         Espresso.pressBack()
         waitForTag("settings-hub")
+        compose.waitForIdle()
         Espresso.pressBack()
         compose.waitUntil(10_000) {
             compose.onAllNodesWithTag("settings-hub", useUnmergedTree = true)
