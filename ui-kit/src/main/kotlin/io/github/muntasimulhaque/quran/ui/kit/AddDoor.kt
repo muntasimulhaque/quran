@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
@@ -48,6 +49,7 @@ fun AddDoor(
             .clickable(
                 interactionSource = press,
                 indication = null,
+                role = Role.Button,
                 onClick = onClick,
             )
             .minimumInteractiveComponentSize()

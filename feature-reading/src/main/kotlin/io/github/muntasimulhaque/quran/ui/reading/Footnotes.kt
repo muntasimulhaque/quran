@@ -67,6 +67,7 @@ internal fun FootnoteSheet(
     AppSheet(
         onDismiss = onDismiss,
         sheetState = sheetState,
+        name = stringResource(R.string.reading_footnote_sheet_name),
     ) {
         Column(
             modifier = Modifier

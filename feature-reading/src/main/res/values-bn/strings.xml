@@ -31,6 +31,14 @@
     <string name="card_note_edit">নোট সম্পাদনা করুন</string>
     <string name="card_note_hint">এই আয়াতের জন্য একটি নোট লিখুন</string>
     <string name="action_clear">মুছুন</string>
+    <string name="reading_note_sheet_name">নোট</string>
+
     <string name="reading_note_save">সংরক্ষণ</string>
+
+    <string name="reading_note_saving">সংরক্ষণ হচ্ছে…</string>
+
+    <string name="reading_note_failed">নোট সংরক্ষণ করা যায়নি। আপনার ফোনের স্টোরেজ ভরে থাকতে পারে।</string>
+
+    <string name="reading_footnote_sheet_name">টীকা</string>
     <string name="reading_footnote_title">টীকা %1$d  ·  %2$s %3$s</string>
 </resources>

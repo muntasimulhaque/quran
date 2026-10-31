@@ -1,9 +1,13 @@
 package io.github.muntasimulhaque.quran.ui.settings
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -13,8 +17,12 @@ import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
+import io.github.muntasimulhaque.quran.ui.kit.DownloadLine
+import io.github.muntasimulhaque.quran.ui.kit.ChoiceRowNameInset
+import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
+import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -52,18 +60,128 @@ fun PackChoiceRow(
     bottomPadding: Dp = 12.dp,
 ) {
     val busy = setup?.packId == pack.id && setup.failed.not()
+    // A pack that is not here yet is not a choice: its row is one action,
+    // Add or Retry, and the row itself is the door. The old row was a
+    // selectable checkbox whose tap installed the pack, with a second Add
+    // button beside it that did the same thing; a reader heard "not
+    // selected" and then got a download (owner decision, this session).
+    if (!pack.installed || busy) {
+        PackActionRow(
+            pack = pack,
+            subtitle = subtitle,
+            setup = setup,
+            busy = busy,
+            onInstall = onInstall,
+            onCancel = onCancel,
+            bottomPadding = bottomPadding,
+        )
+        return
+    }
     ChoiceRow(
         title = contentPackName(pack.id, pack.name),
         subtitle = subtitle,
         selected = selected,
         radio = radio,
-        // A pack that is not here yet cannot be turned on: its row is the
-        // door that brings it here instead, and nothing looks selectable
-        // while it is on its way in.
-        onClick = if (pack.installed && !busy) onActivate else onInstall,
+        onClick = onActivate,
         bottomPadding = bottomPadding,
-        trailing = { PackTrailing(pack, setup, onInstall, onRemove, onCancel) },
+        // An installed pack is a choice, and Remove is its one supplementary
+        // action at the trailing end of the row (the same member of the
+        // multi-action list that Saved and Last Read already use).
+        trailing = {
+            PackTrailing(pack, setup, onInstall, onRemove, onCancel)
+        },
     )
+}
+
+/**
+ * One pack that is not a choice yet: Add, Retry, or a download on its way.
+ * The whole row is the one act; the word at its trailing end names the act
+ * and is not a second control. While bytes move, the row is a status and the
+ * only button is Cancel, because stopping a transfer is the one thing a
+ * finger should be able to do from here (owner decision, this session).
+ */
+@Composable
+private fun PackActionRow(
+    pack: ContentPack,
+    subtitle: String,
+    setup: PackSetupState?,
+    busy: Boolean,
+    onInstall: () -> Unit,
+    onCancel: () -> Unit,
+    bottomPadding: Dp,
+) {
+    Column(Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .sheetRow(onClick = onInstall, enabled = !busy)
+                .minimumInteractiveComponentSize()
+                .padding(
+                    start = ChoiceRowNameInset - SheetRowGutter,
+                    end = Space.Row - SheetRowGutter,
+                    top = Space.Row,
+                    bottom = (bottomPadding - Space.Row).coerceAtLeast(0.dp),
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            RowName(
+                title = contentPackName(pack.id, pack.name),
+                value = subtitle,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = Space.Row),
+            )
+            if (busy) {
+                Text(
+                    text = if (setup?.progress == null) {
+                        stringResource(R.string.settings_pack_preparing)
+                    } else {
+                        stringResource(
+                            R.string.settings_pack_downloading,
+                            (setup.progress * 100).toInt(),
+                        )
+                    },
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                TextButton(
+                    label = stringResource(R.string.settings_cancel),
+                    onClick = onCancel,
+                    modifier = Modifier.padding(start = Space.Row),
+                    quiet = true,
+                )
+            } else {
+                Text(
+                    text = stringResource(
+                        if (setup?.failed == true) {
+                            R.string.pack_action_retry
+                        } else {
+                            R.string.pack_action_add
+                        },
+                    ),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+        }
+        if (busy) {
+            // The same 2 dp line the pill and the offer carry, so a download
+            // has one shape wherever it is shown (owner decision, this
+            // session).
+            DownloadLine(
+                progress = setup?.progress ?: 0f,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = Space.Gutter,
+                        end = Space.Gutter,
+                        top = Space.Tight,
+                        bottom = Space.Line,
+                    )
+                    .height(2.dp),
+            )
+        }
+    }
 }
 
 /**

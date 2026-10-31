@@ -474,6 +474,12 @@ internal fun quranTypography(): Typography {
         // same size as a source line. A name and its value are told apart by
         // weight and tone, not by a footnote's size (owner decision, this
         // session).
+        //
+        // The M3 slot names are read by job here, not by M3's baseline sizes:
+        // this app's value is 13 and its group label is 12, so a stock
+        // Material surface that asks for labelSmall gets the value size.
+        // Scope one as the time picker is scoped rather than assuming the
+        // baseline scale (owner decision, this session).
         labelSmall = interStyle(
             FontWeight.Normal,
             TypeLadder.CAPTION_SP,

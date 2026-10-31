@@ -30,6 +30,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -325,9 +326,10 @@ internal fun AyahBlock(
                     // and a tap anywhere else on the line is the page's own
                     // tap, exactly as it is on the paper around it (owner
                     // decision, this session). The medallion is a few dp of
-                    // ink and not a 48 dp target; the block's own custom
-                    // action is the screen reader's door and the visible mark
-                    // is the sighted reader's, the way a footnote's marker is.
+                    // ink, so its touch target is grown around the ink to the
+                    // 48 dp every control owes a finger; the ink and the page
+                    // do not move. The block's own custom action remains the
+                    // screen reader's door (owner decision, this session).
                     .then(
                         if (arabicOnly) {
                             Modifier.pointerInput(arabicLine.ornamentRange) {
@@ -335,7 +337,7 @@ internal fun AyahBlock(
                                     val layout = textLayout
                                     val range = arabicLine.ornamentRange
                                     if (layout != null && range != null &&
-                                        layout.getOffsetForPosition(position) in range
+                                        ornamentTarget(layout, range).contains(position)
                                     ) {
                                         onMenu(
                                             row.ayah,
@@ -511,12 +513,53 @@ private fun ornamentAnchor(
     range: IntRange,
     text: IntRect,
 ): IntRect {
-    val box = layout.getBoundingBox(range.first)
+    val box = ornamentBox(layout, range)
     return IntRect(
         text.left + box.left.toInt(),
         text.top + box.top.toInt(),
         text.left + box.right.toInt(),
         text.top + box.bottom.toInt(),
+    )
+}
+
+/**
+ * The medallion's own ink, as one rectangle over every character of its span.
+ * The face draws the medallion from several glyphs, so the first character's
+ * box alone is narrower than the mark the reader sees.
+ */
+private fun ornamentBox(layout: TextLayoutResult, range: IntRange): Rect {
+    var box = layout.getBoundingBox(range.first)
+    for (offset in range) {
+        val next = layout.getBoundingBox(offset)
+        box = Rect(
+            left = minOf(box.left, next.left),
+            top = minOf(box.top, next.top),
+            right = maxOf(box.right, next.right),
+            bottom = maxOf(box.bottom, next.bottom),
+        )
+    }
+    return box
+}
+
+/**
+ * The medallion's touch target: its ink, grown until the shorter side is 48 dp.
+ * The growth is even on both sides, so the target stays centered on the mark
+ * the reader sees; a tap that lands on the paper beside the medallion is the
+ * door, not a miss (owner decision, this session).
+ */
+private fun PointerInputScope.ornamentTarget(
+    layout: TextLayoutResult,
+    range: IntRange,
+): Rect {
+    val box = ornamentBox(layout, range)
+    val side = 48.dp.toPx()
+    val padX = ((side - box.width) / 2f).coerceAtLeast(0f)
+    val padY = ((side - box.height) / 2f).coerceAtLeast(0f)
+    return Rect(
+        left = box.left - padX,
+        top = box.top - padY,
+        right = box.right + padX,
+        bottom = box.bottom + padY,
     )
 }
 

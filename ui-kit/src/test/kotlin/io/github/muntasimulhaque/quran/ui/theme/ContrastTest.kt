@@ -35,6 +35,11 @@ class ContrastTest {
         assertReadable(Lapis, PaperBackground)
         assertReadable(Lapis, PaperSurface)
         assertReadable(PaperOnPrimary, Lapis)
+        // The four container roles a Material component may ask for, so a
+        // stock surface can never fall back to the baseline purple (owner
+        // decision, this session).
+        assertReadable(LightScheme.onSecondaryContainer, LightScheme.secondaryContainer)
+        assertReadable(LightScheme.onTertiaryContainer, LightScheme.tertiaryContainer)
         // The error roles are the quiet voice, so a Material control that
         // asks for one can never paint a stock red (owner decision, this
         // session).
@@ -84,6 +89,8 @@ class ContrastTest {
         assertReadable(LapisLight, NightBackground)
         assertReadable(LapisLight, NightSurface)
         assertReadable(NightOnPrimary, LapisLight)
+        assertReadable(DarkScheme.onSecondaryContainer, DarkScheme.secondaryContainer)
+        assertReadable(DarkScheme.onTertiaryContainer, DarkScheme.tertiaryContainer)
         // The error roles are the quiet voice on this ground too (owner
         // decision, this session).
         assertReadable(DarkScheme.onError, DarkScheme.error)

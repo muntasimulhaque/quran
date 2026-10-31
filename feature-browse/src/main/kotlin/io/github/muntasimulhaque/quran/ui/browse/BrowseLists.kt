@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -58,13 +59,13 @@ internal fun LastReadList(
             body = stringResource(R.string.last_read_empty_body),
             // The note stands in a page that begins under the sheet's own
             // head, so it keeps the air it has always kept there.
-            modifier = Modifier.padding(vertical = 60.dp),
+            modifier = Modifier.padding(vertical = 60.dp).testTag("browse-last-read"),
         )
         return
     }
     LazyColumn(
         state = listState,
-        modifier = listModifier,
+        modifier = listModifier.testTag("browse-last-read"),
         contentPadding = PaddingValues(bottom = Space.SheetFoot),
     ) {
         items(places, key = { it.id }) { place ->
@@ -126,13 +127,13 @@ internal fun SavedList(
         EmptyNote(
             title = stringResource(R.string.saved_empty_title),
             body = stringResource(R.string.saved_empty_body),
-            modifier = Modifier.padding(vertical = 60.dp),
+            modifier = Modifier.padding(vertical = 60.dp).testTag("browse-saved"),
         )
         return
     }
     LazyColumn(
         state = listState,
-        modifier = listModifier,
+        modifier = listModifier.testTag("browse-saved"),
         contentPadding = PaddingValues(bottom = Space.SheetFoot),
     ) {
         items(rows, key = { it.ayahNumber }) { row ->

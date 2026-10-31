@@ -27,11 +27,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.Search
+import io.github.muntasimulhaque.quran.core.SearchQuery
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.SearchHit
@@ -75,6 +78,9 @@ internal const val LIMIT = 200
  * by a search that is still settling.
  */
 private const val SETTLE_MILLIS = 120L
+
+/** One query and the sources it read, so a result can never be shown under a different question. */
+private data class SearchKey(val query: SearchQuery, val sources: SearchSources)
 
 /**
  * The source flags as six booleans in the saved state: the chips survive the
@@ -123,10 +129,15 @@ fun SearchSheet(
 ) {
     val sheetState = rememberExpandedSheetState()
     val focus = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
     val hafs = rememberHafs()
 
     var text by rememberSaveable { mutableStateOf("") }
     var results by remember { mutableStateOf(SearchResults()) }
+    // The key the results belong to. The old results stay in memory while a
+    // new query runs, but they are never drawn under a query that did not
+    // produce them (owner decision, this session).
+    var resultKey by remember { mutableStateOf<SearchKey?>(null) }
     // The queries the reader acted on before, newest first. The list is read
     // from the phone's own shelf when the sheet opens and written back as a
     // result is opened, so a word typed and abandoned is never kept: the
@@ -151,9 +162,23 @@ fun SearchSheet(
     // to the top can never turn into a pull that closes the sheet.
     val resultsList = rememberLazyListState()
     val resultsGate = remember(resultsList) { SheetDragGate(resultsList) }
-    val queryTerms = remember(text) { Search.parse(text)?.terms.orEmpty() }
+    val currentQuery = remember(text) { Search.parse(text) }
+    val currentKey = remember(currentQuery, sources) {
+        currentQuery?.let { SearchKey(it, sources) }
+    }
+    val resultsCurrent = currentKey != null && resultKey == currentKey
+    val queryTerms = currentQuery?.terms.orEmpty()
     LaunchedEffect(sheetState.currentValue) {
-        if (sheetState.currentValue == SheetValue.Expanded) focus.requestFocus()
+        if (sheetState.currentValue == SheetValue.Expanded) {
+            // Type into a fresh search; return from a result to read the
+            // results, not to type over them. The keyboard is the difference
+            // the reader feels (owner decision, this session).
+            if (text.isBlank()) {
+                focus.requestFocus()
+            } else {
+                focusManager.clearFocus()
+            }
+        }
     }
 
     /*
@@ -170,13 +195,18 @@ fun SearchSheet(
         val query = Search.parse(text)
         if (query == null || !sources.any) {
             results = SearchResults()
+            resultKey = null
             searching = false
             failed = false
             return@LaunchedEffect
         }
+        val key = SearchKey(query, sources)
         failed = false
-        delay(SETTLE_MILLIS)
+        // Searching starts now, not after the settle: the old results are
+        // hidden while the pause runs, so the page never shows an answer to
+        // the previous query under the new one.
         searching = true
+        delay(SETTLE_MILLIS)
         // The search is blocking work over the reader's whole library, so it
         // runs on a worker; the delay above is where a superseded query is
         // dropped, and the database checks for the same thing between its own
@@ -199,6 +229,7 @@ fun SearchSheet(
         }
         failed = found.isFailure
         results = found.getOrElse { SearchResults() }
+        resultKey = key
         searching = false
     }
 
@@ -216,6 +247,7 @@ fun SearchSheet(
     AppSheet(
         onDismiss = onDismiss,
         sheetState = sheetState,
+        name = stringResource(R.string.search_sheet_name),
     ) {
         // The results stand on the app's one page, which is the sheet, which
         // is the glass: a row's words stop at Space.Gutter and its own card
@@ -224,7 +256,8 @@ fun SearchSheet(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .imePadding(),
+                .imePadding()
+                .testTag("search-sheet"),
         ) {
             SearchField(
                 value = text,
@@ -268,11 +301,12 @@ fun SearchSheet(
                 tafsirPacks.isNotEmpty() ||
                 wordsInstalled
             StatusLine(
-                query = Search.parse(text),
+                query = currentQuery,
                 results = results,
                 searching = searching,
                 hasSources = sources.any,
                 failed = failed,
+                current = resultsCurrent,
             )
             LazyColumn(
                 state = resultsList,
@@ -307,8 +341,9 @@ fun SearchSheet(
                         )
                     }
                 }
-                items(results.hits, key = { key(it) }) { hit ->
-                    when (hit) {
+                if (resultsCurrent) {
+                    items(results.hits, key = { key(it) }) { hit ->
+                        when (hit) {
                         is SearchHit.ReferenceHit -> ReferenceRow(hit.ayah) {
                             keepQuery()
                             onAyah(SearchArrival.AyahMatch(hit.ayah))
@@ -337,13 +372,14 @@ fun SearchSheet(
                                 )
                             },
                         )
-                        is SearchHit.TafsirHitResult -> TafsirRow(
-                            hit = hit,
-                            proseSp = proseSp,
-                            proseLineSp = proseLineSp,
-                        ) {
-                            keepQuery()
-                            onAyah(SearchArrival.TafsirMatch(hit.ayah, hit.pack))
+                            is SearchHit.TafsirHitResult -> TafsirRow(
+                                hit = hit,
+                                proseSp = proseSp,
+                                proseLineSp = proseLineSp,
+                            ) {
+                                keepQuery()
+                                onAyah(SearchArrival.TafsirMatch(hit.ayah, hit.pack))
+                            }
                         }
                     }
                 }

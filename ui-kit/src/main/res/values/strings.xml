@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-     The sheet's handle, named for a screen reader, the reciters, named the
-     way a reader says them, the app's own packs, and the size units a
-     download prints. The names live here because the pill, the offer, the
-     settings lists, the ayah card, and the search results all draw them, and
-     a Bangla reader must not meet a Latin name in one place and a Bengali
-     one in another, nor an English unit beside a Bengali number.
+     The reciters, named the way a reader says them, the app's own packs, and
+     the size units a download prints. The names live here because the pill,
+     the offer, the settings lists, the ayah card, and the search results all
+     draw them, and a Bangla reader must not meet a Latin name in one place
+     and a Bengali one in another, nor an English unit beside a Bengali
+     number.
 -->
 <resources>
-    <string name="sheet_handle">Sheet handle</string>
     <string name="reciter_minshawi">Minshawi</string>
     <string name="reciter_husary">Husary</string>
     <string name="pack_name_quran_text">Quran text</string>

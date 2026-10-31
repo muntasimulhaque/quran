@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="browse_sheet_name">ব্রাউজ</string>
     <string name="browse_tab_surahs">সূরা</string>
     <string name="browse_tab_juz">পারা</string>
     <string name="browse_tab_last_read">সর্বশেষ পঠিত</string>

@@ -141,14 +141,14 @@ class AyahActionsTest {
             .performClick()
         waitForMenuClosed()
         openTheDoor()
-        val savedLabel = compose.activity.getString(R.string.action_saved)
+        val saveLabel = compose.activity.getString(R.string.action_save)
         compose.waitUntil(timeoutMillis = 15_000) {
-            compose.onAllNodesWithText(savedLabel).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithText(saveLabel).fetchSemanticsNodes().isNotEmpty()
         }
         assertEquals(
             "the reader's own tap marks the ayah",
             on,
-            markOf(savedLabel),
+            markOf(saveLabel),
         )
         assertEquals(
             "the note is still there, and is still the note's own mark",
@@ -158,9 +158,9 @@ class AyahActionsTest {
 
         // The second tap is a save of the reader's own, so it asks first: the
         // note goes with it, and the reader's own words are not taken by one
-        // tap of a button. The row says Saved now, which is the truth of the
-        // mark and the name of the next action.
-        compose.onNodeWithText(savedLabel).performClick()
+        // tap of a button. The row keeps the action word Save and lets the
+        // filled bookmark and its state say that the save is on.
+        compose.onNodeWithText(saveLabel).performClick()
         compose.waitUntil(timeoutMillis = 15_000) {
             compose.onAllNodesWithTag("remove-saved-confirm", useUnmergedTree = true)
                 .fetchSemanticsNodes().isNotEmpty()

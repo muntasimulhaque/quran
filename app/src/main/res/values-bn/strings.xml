@@ -14,7 +14,7 @@
          on for a new reader, and this is where they are told so and asked for
          the two grants it needs, the notification and the exact time. -->
     <string name="welcome_reminder_title">প্রতিদিন একটি আয়াত</string>
-    <string name="welcome_reminder_body">আপনার জন্য নির্ধারিত %1$s-এ একটি নীরব বার্তা। সময়মতো পৌঁছাতে নোটিফিকেশন ও ফোনের অ্যালার্মের অনুমতি দিন।</string>
+    <string name="welcome_reminder_body">প্রতিদিন %1$s-এ একটি নীরব বার্তা। ফোন অনুমতি দিলে সময়মতো পৌঁছাতে নোটিফিকেশন ও সঠিক সময়ের অ্যালার্মের অনুমতি দিন।</string>
     <string name="welcome_reminder_turn_on">চালু করুন</string>
     <string name="welcome_reminder_not_now">এখন নয়</string>
     <string name="first_paint_preparing">লেখা প্রস্তুত হচ্ছে…</string>
@@ -24,12 +24,18 @@
     <string name="action_settings">সেটিংস</string>
     <string name="action_surah_top">সূরার শুরুতে ফিরে যান</string>
     <string name="action_save">সংরক্ষণ</string>
+    <string name="action_removed">মুছে ফেলা হয়েছে</string>
+    <string name="note_saved">নোট সংরক্ষিত হয়েছে</string>
+    <string name="note_cleared">নোট মুছে ফেলা হয়েছে</string>
+
     <string name="action_saved">সংরক্ষিত</string>
     <string name="action_play">শুনুন</string>
     <string name="action_share">শেয়ার</string>
     <string name="ayah_menu_title">আয়াত %1$s-এর কাজ</string>
     <string name="share_image">ছবি শেয়ার করুন</string>
     <string name="share_text">লেখা শেয়ার করুন</string>
+    <string name="share_preview">আয়াত কার্ডের পূর্বরূপ</string>
+
     <string name="share_sheet_announcement">আয়াত শেয়ার</string>
     <string name="share_unavailable">এই ডিভাইসে শেয়ার করার মতো কোনো অ্যাপ নেই</string>
     <string name="action_tafsir">তাফসীর</string>
@@ -50,6 +56,8 @@
     <!-- The question before a save that carries a note is removed: the note
          is the reader's own writing, so it is asked about, never taken by
          one tap. -->
+    <string name="remove_saved_sheet_name">সংরক্ষিত আয়াত মোছা</string>
+
     <string name="remove_saved_title">সংরক্ষিত আয়াতটি মুছবেন?</string>
     <string name="remove_saved_body">এতে লেখা নোটটিও মুছে যাবে।</string>
     <string name="remove_saved_action">মুছুন</string>

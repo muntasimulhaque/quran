@@ -1,6 +1,10 @@
 package io.github.muntasimulhaque.quran.ui.search
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.indication
@@ -37,6 +41,7 @@ import io.github.muntasimulhaque.quran.feature.search.R
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
+import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
@@ -93,6 +98,7 @@ internal fun FilterRow(
     } else {
         stringResource(R.string.search_filter_some, chosen, offered.size)
     }
+    val reducedMotion = rememberReducedMotion()
     val expanded = stringResource(R.string.search_filter_state_expanded)
     val collapsed = stringResource(R.string.search_filter_state_collapsed)
     val press = remember { MutableInteractionSource() }
@@ -153,7 +159,14 @@ internal fun FilterRow(
                     .rotate(if (open) 180f else 0f),
             )
         }
-        AnimatedVisibility(visible = open) {
+        AnimatedVisibility(
+            visible = open,
+            // A reader who asked the phone to reduce motion gets the list
+            // without the height change; the information arrives, the page
+            // does not move (owner decision, this session).
+            enter = if (reducedMotion.value) fadeIn() else expandVertically() + fadeIn(),
+            exit = if (reducedMotion.value) fadeOut() else shrinkVertically() + fadeOut(),
+        ) {
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()

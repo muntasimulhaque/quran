@@ -115,7 +115,7 @@ class SheetStillnessTest {
 
         compose.mainClock.autoAdvance = false
         val sheet = theSheet()
-        val handle = compose.onAllNodesWithContentDescription("Sheet handle").onFirst()
+        val handle = compose.onAllNodesWithTag("sheet-handle", useUnmergedTree = true).onFirst()
         val rest = sheet.fetchSemanticsNode().positionInRoot.y
         val places = mutableListOf(rest)
 
@@ -180,7 +180,7 @@ class SheetStillnessTest {
         openTheFootnote()
 
         compose.mainClock.autoAdvance = false
-        val handle = compose.onAllNodesWithContentDescription("Sheet handle").onFirst()
+        val handle = compose.onAllNodesWithTag("sheet-handle", useUnmergedTree = true).onFirst()
         val rest = handle.fetchSemanticsNode().positionInRoot.y
         handle.performTouchInput { down(center) }
         repeat(20) {

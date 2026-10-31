@@ -302,6 +302,7 @@ fun PlaybackBar(
                             modifier = Modifier
                                 .weight(1f, fill = true)
                                 .testTag("playback-words"),
+                            announce = state.error || state.downloadFailed || state.unavailable,
                         )
                     } else {
                         // No recitation, so one line, and its name opens the
@@ -314,6 +315,7 @@ fun PlaybackBar(
                             modifier = Modifier
                                 .weight(1f, fill = true)
                                 .testTag("playback-words"),
+                            announce = state.error || state.downloadFailed || state.unavailable,
                         )
                     }
                     if (controls.isNotEmpty()) {

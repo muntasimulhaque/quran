@@ -10,10 +10,12 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.click
 import androidx.compose.ui.unit.dp
@@ -26,6 +28,7 @@ import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
+import io.github.muntasimulhaque.quran.feature.reading.R as ReadingR
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
@@ -139,21 +142,52 @@ class AccessibilityTest {
         compose.onNodeWithContentDescription("Search").assertExists()
         compose.onNodeWithContentDescription("Settings").assertExists()
 
-        // Browse, the surah list.
+        // Browse, the surah list and every view it switches between.
         compose.onNodeWithContentDescription("Browse the Quran").performClick()
         waitForTag("browse-sheet")
         compose.onNodeWithTag("browse-sheet").assertExists()
+        compose.onAllNodesWithText("Juz").onFirst().performClick()
+        waitForTag("browse-juz")
+        compose.onAllNodesWithText("Last Read").onFirst().performClick()
+        waitForTag("browse-last-read")
+        compose.onAllNodesWithText("Saved").onFirst().performClick()
+        waitForTag("browse-saved")
+        compose.onAllNodesWithText("Surahs").onFirst().performClick()
+        waitForTag("browse-surahs")
+        compose.onNodeWithTag("surah-row-1").performClick()
+        waitForTag("surah-ayahs")
+        Espresso.pressBack()
+        waitForTag("browse-surahs")
         Espresso.pressBack()
         compose.waitUntil(10_000) {
             compose.onAllNodesWithTag("browse-sheet", useUnmergedTree = true)
                 .fetchSemanticsNodes().isEmpty()
         }
 
-        // Settings, the hub, through the gear.
+        // Settings, the hub and the pages that hold the controls the audit
+        // changed: pack actions, the daily time picker, and the pages' own
+        // titles.
         revealChrome()
         compose.onNodeWithContentDescription("Settings").performClick()
         waitForTag("settings-hub")
         compose.onNodeWithTag("settings-hub").assertExists()
+        compose.onNodeWithTag("row-tafsirs").performClick()
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText("Ibn Kathir").fetchSemanticsNodes().isNotEmpty()
+        }
+        Espresso.pressBack()
+        waitForTag("settings-hub")
+        compose.onAllNodesWithText("Daily ayah").onFirst().performClick()
+        waitForTag("daily-page")
+        compose.onNodeWithText("Time").performClick()
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText("When the daily ayah arrives")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        Espresso.pressBack()
+        waitForTag("daily-page")
+        Espresso.pressBack()
+        waitForTag("settings-hub")
         Espresso.pressBack()
         compose.waitUntil(10_000) {
             compose.onAllNodesWithTag("settings-hub", useUnmergedTree = true)
@@ -179,6 +213,36 @@ class AccessibilityTest {
         }
         compose.onNodeWithText("Quran text").assertHeightIsAtLeast(48.dp)
         compose.onNodeWithText("Quran text").assertWidthIsAtLeast(48.dp)
+        compose.onNode(hasSetTextAction()).performTextInput("mercy")
+        compose.waitUntil(30_000) {
+            compose.onAllNodesWithText("2:64").fetchSemanticsNodes().isNotEmpty()
+        }
+        Espresso.pressBack()
+
+        // The ayah's own actions, the note editor, and the share preview.
+        revealChrome()
+        val door = compose.activity.getString(ReadingR.string.reading_ayah_door, "1:1")
+        compose.onNodeWithContentDescription(door).performClick()
+        compose.waitUntil(20_000) {
+            compose.onAllNodesWithText(compose.activity.getString(R.string.action_note))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onAllNodesWithText(compose.activity.getString(R.string.action_note))
+            .onFirst().performClick()
+        waitForTag("note-sheet")
+        Espresso.closeSoftKeyboard()
+        Espresso.pressBack()
+        waitForTagGone("note-sheet")
+
+        revealChrome()
+        compose.onNodeWithContentDescription(door).performClick()
+        compose.waitUntil(20_000) {
+            compose.onAllNodesWithText(compose.activity.getString(R.string.action_share))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onAllNodesWithText(compose.activity.getString(R.string.action_share))
+            .onFirst().performClick()
+        waitForTag("share-sheet")
         Espresso.pressBack()
     }
 
@@ -234,6 +298,13 @@ class AccessibilityTest {
         compose.waitUntil(timeout) {
             compose.onAllNodesWithTag(tag, useUnmergedTree = true)
                 .fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    private fun waitForTagGone(tag: String, timeout: Long = 15_000) {
+        compose.waitUntil(timeout) {
+            compose.onAllNodesWithTag(tag, useUnmergedTree = true)
+                .fetchSemanticsNodes().isEmpty()
         }
     }
 }

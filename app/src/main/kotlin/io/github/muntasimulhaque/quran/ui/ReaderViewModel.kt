@@ -3,7 +3,6 @@ package io.github.muntasimulhaque.quran.ui
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import android.app.Application
-import android.widget.Toast
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
@@ -45,7 +44,10 @@ import io.github.muntasimulhaque.quran.ui.reader.CHROME_REVEAL
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -53,7 +55,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Locale
 
-/** One row of the reading: a surah's opening, or an ayah. */
+/**
+ * One sentence the reading owes the reader. A save or a removal changes a
+ * mark or a row, so it is announced to a screen reader and not drawn again;
+ * a note, a failure, or an unavailable share has no visible mark of its own,
+ * so it is a Snackbar (owner decision, this session).
+ */
+data class ReaderMessage(val text: Int, val announceOnly: Boolean = false)
+
 /**
  * Holds the reader's place, their choices, and the content they read.
  *
@@ -66,6 +75,16 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     private val savedStore = SavedStore(application)
     private val lastReadStore = LastReadStore(application)
     private val playback = PlaybackController(application, viewModelScope)
+
+    /**
+     * What the reader is told after an act with no visible result of its own.
+     * A save, a note, and a removal each change a mark or a list, but a
+     * screen reader needs the sentence, and a sighted reader who looked away
+     * needs the Snackbar; a failure that used to be a Toast is a Snackbar too
+     * (owner decision, this session).
+     */
+    private val _messages = MutableSharedFlow<ReaderMessage>(extraBufferCapacity = 8)
+    val messages: SharedFlow<ReaderMessage> = _messages.asSharedFlow()
 
     /**
      * The reader's library, in its own file: the open content database, the
@@ -907,7 +926,17 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
     fun toggleSaved(ayah: Ayah) {
         viewModelScope.launch {
-            if (!savedStore.toggle(ayah.number)) toast(R.string.save_failed)
+            val wasMarked = saved.value.firstOrNull { it.ayahNumber == ayah.number }?.marked == true
+            if (savedStore.toggle(ayah.number)) {
+                _messages.tryEmit(
+                    ReaderMessage(
+                        if (wasMarked) R.string.action_removed else R.string.action_saved,
+                        announceOnly = true,
+                    ),
+                )
+            } else {
+                _messages.tryEmit(ReaderMessage(R.string.save_failed))
+            }
         }
     }
 
@@ -920,11 +949,28 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    /** Writes the reader's note on one ayah. It is keyed by number because
-     * the note sheet opens both from the reading and from a Notes row. */
-    fun setNote(ayahNumber: Int, note: String?) {
+    /**
+     * Writes the reader's note on one ayah. It is keyed by number because
+     * the note sheet opens both from the reading and from a Notes row.
+     *
+     * The result is handed back to the sheet when it asks. A failed write no
+     * longer closes the editor and leaves a Toast behind: the sheet keeps the
+     * words and says what went wrong, and only a successful write takes the
+     * sheet away (owner decision, this session).
+     */
+    fun setNote(ayahNumber: Int, note: String?, onResult: ((Boolean) -> Unit)? = null) {
         viewModelScope.launch {
-            if (!savedStore.setNote(ayahNumber, note)) toast(R.string.note_save_failed)
+            val written = savedStore.setNote(ayahNumber, note)
+            if (written) {
+                _messages.tryEmit(
+                    ReaderMessage(
+                        if (note.isNullOrBlank()) R.string.note_cleared else R.string.note_saved,
+                    ),
+                )
+            } else if (onResult == null) {
+                _messages.tryEmit(ReaderMessage(R.string.note_save_failed))
+            }
+            onResult?.invoke(written)
         }
     }
 
@@ -934,7 +980,11 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      */
     fun removeSaved(ayahNumber: Int) {
         viewModelScope.launch {
-            if (!savedStore.unsave(ayahNumber)) toast(R.string.save_failed)
+            if (savedStore.unsave(ayahNumber)) {
+                _messages.tryEmit(ReaderMessage(R.string.action_removed, announceOnly = true))
+            } else {
+                _messages.tryEmit(ReaderMessage(R.string.save_failed))
+            }
         }
     }
 
@@ -1056,10 +1106,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         listenOffer = listenOffer?.copy(progress = value.coerceIn(0f, 1f))
     }
 
-    /** One sentence the reader can act on, beside the screen that failed. */
-    private fun toast(message: Int) {
-        Toast.makeText(getApplication(), message, Toast.LENGTH_LONG).show()
-    }
 
     /** The reader changed the reciter on the offer: it becomes their reciter. */
     fun chooseListenReciter(reciter: String) {

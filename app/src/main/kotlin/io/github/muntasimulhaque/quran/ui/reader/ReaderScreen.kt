@@ -14,7 +14,11 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -24,6 +28,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
@@ -32,6 +37,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
@@ -49,6 +55,8 @@ import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
+import io.github.muntasimulhaque.quran.ui.theme.Radii
+import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.reading.AyahCard
 import io.github.muntasimulhaque.quran.ui.reading.ReadingReveal
 import io.github.muntasimulhaque.quran.ui.search.SearchArrival
@@ -93,6 +101,25 @@ private const val READING_AWAKE_MILLIS = 10 * 60_000L
 
 /** Which sheet is over the reader, if any. */
 internal enum class ReaderSheet { None, Browse, Search, Settings }
+
+/**
+ * The unsaved note drafts, written into the window's saved state as strings.
+ * A note is the reader's own writing, and a closed sheet is not a decision to
+ * throw it away: a draft survives the sheet, a rotation, and a process death
+ * until the note is saved or cleared (owner decision, this session).
+ */
+private val NoteDraftsSaver = listSaver<Map<Int, String>, String>(
+    save = { drafts -> drafts.map { (ayah, text) -> "$ayah\u0000$text" } },
+    restore = { entries ->
+        entries.mapNotNull { entry ->
+            val split = entry.indexOf('\u0000')
+            if (split <= 0) return@mapNotNull null
+            entry.substring(0, split).toIntOrNull()?.let { ayah ->
+                ayah to entry.substring(split + 1)
+            }
+        }.toMap()
+    },
+)
 
 /**
  * The reading screen: one reading, and chrome that only appears
@@ -153,6 +180,14 @@ fun ReaderScreen(
     // the pill opens it, and the number is all it needs to write the note and
     // keep the ayah with it.
     var cardNote by rememberSaveable { mutableStateOf<Int?>(null) }
+    // The reader's unsaved note text, by ayah. A sheet that closes without
+    // saving is not a discarded note: the next opening hands the words back
+    // (owner decision, this session).
+    var noteDrafts by rememberSaveable(stateSaver = NoteDraftsSaver) {
+        mutableStateOf<Map<Int, String>>(emptyMap())
+    }
+    var noteSaving by remember { mutableStateOf(false) }
+    var noteFailed by remember { mutableStateOf(false) }
     // The saved ayah the reader asked to remove while a note is still on it:
     // the confirmation is up until they answer, and the ayah stays saved
     // until they do. Null when nothing is being asked about.
@@ -182,7 +217,20 @@ fun ReaderScreen(
     // window timer releases the flag; a touch takes it back.
     var keepAwake by remember { mutableStateOf(true) }
     val context = androidx.compose.ui.platform.LocalContext.current
+    val resources = LocalResources.current
+    val announceView = LocalView.current
     val scope = rememberCoroutineScope()
+    val snackbar = remember { SnackbarHostState() }
+    LaunchedEffect(Unit) {
+        viewModel.messages.collect { message ->
+            val text = resources.getString(message.text)
+            if (message.announceOnly) {
+                announceView.announceForAccessibility(text)
+            } else {
+                snackbar.showSnackbar(text)
+            }
+        }
+    }
     // What a Share is doing: null when nothing, a card waiting for the
     // reader's choice in the share sheet, and the same card with `capture`
     // set once they asked for the picture. One holder rather than two, so a
@@ -439,11 +487,7 @@ fun ReaderScreen(
         if (!shareAyahText(context, text)) {
             // Nothing can be shared on a device with no receiving app; the
             // reader is told rather than left with a tap that did nothing.
-            android.widget.Toast.makeText(
-                context,
-                shareUnavailable,
-                android.widget.Toast.LENGTH_SHORT,
-            ).show()
+            scope.launch { snackbar.showSnackbar(shareUnavailable) }
         }
     }
 
@@ -464,6 +508,15 @@ fun ReaderScreen(
     // The reading is edge to edge, so the foot of the page clears the
     // system's navigation bar itself; [readingFoot] owns that rule.
     val navigationBar = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    // A Snackbar stands above whatever the foot of the page has raised, and
+    // above the system bar when nothing is raised. The height is the one the
+    // stack already measured, so the two cannot overlap (owner decision,
+    // this session).
+    val snackbarBottom = if (bottomStackHeight > 0) {
+        with(LocalDensity.current) { bottomStackHeight.toDp() } + Space.Line
+    } else {
+        navigationBar + Space.Block
+    }
     Box(
         Modifier
             .fillMaxSize()
@@ -621,6 +674,22 @@ fun ReaderScreen(
             )
         }
 
+        SnackbarHost(
+            hostState = snackbar,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = snackbarBottom),
+        ) { data ->
+            Snackbar(
+                snackbarData = data,
+                modifier = Modifier.padding(horizontal = Space.Gutter),
+                shape = Radii.Card,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                actionColor = MaterialTheme.colorScheme.primary,
+            )
+        }
+
         // The ayah's own menu, hung from its door. Every answer closes it and
         // then does its work, so the reader is returned to the reading rather
         // than to a panel they have to put away (owner decision, this
@@ -655,7 +724,11 @@ fun ReaderScreen(
                     }
                     touch++
                 },
-                onNote = { cardNote = request.ayah.number },
+                onNote = {
+                    noteSaving = false
+                    noteFailed = false
+                    cardNote = request.ayah.number
+                },
                 onShare = {
                     scope.launch { sharing = loadShareCard(context, viewModel, request.ayah) }
                 },
@@ -742,13 +815,40 @@ fun ReaderScreen(
     cardNote?.let { ayahNumber ->
         val savedRow = saved.firstOrNull { it.ayahNumber == ayahNumber }
         AyahNoteSheet(
-            note = savedRow?.note,
+            note = noteDrafts[ayahNumber] ?: savedRow?.note,
             settings = settings,
+            saving = noteSaving,
+            failed = noteFailed,
             onSave = { note ->
-                viewModel.setNote(ayahNumber, note)
+                if (!noteSaving) {
+                    noteSaving = true
+                    noteFailed = false
+                    viewModel.setNote(ayahNumber, note) { written ->
+                        noteSaving = false
+                        if (written) {
+                            noteDrafts = noteDrafts - ayahNumber
+                            cardNote = null
+                        } else {
+                            noteFailed = true
+                        }
+                    }
+                }
+            },
+            onDraftChange = { text ->
+                // An empty draft is not kept: it would hide the saved note
+                // the next time the sheet opens. Clearing a note is the
+                // Clear action, which writes the clear.
+                noteDrafts = if (text.isBlank()) {
+                    noteDrafts - ayahNumber
+                } else {
+                    noteDrafts + (ayahNumber to text)
+                }
+            },
+            onDismiss = {
+                noteSaving = false
+                noteFailed = false
                 cardNote = null
             },
-            onDismiss = { cardNote = null },
         )
     }
 

@@ -8,6 +8,9 @@ import androidx.compose.material3.SheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.paneTitle
+import androidx.compose.ui.semantics.semantics
+import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /**
  * The one sheet every surface in the app is raised in: the footnote, the ayah
@@ -38,6 +41,12 @@ import androidx.compose.ui.Modifier
  * never more, so a settings row's switch stays as close to the words that
  * name it on the ten inch screen as it is on the seven inch tablet (owner
  * decision, this session).
+ *
+ * The sheet's own name is spoken when the window opens and never drawn. A
+ * modal surface has to name itself before its first row, or a screen reader
+ * enters a page with no title; the caller hands the name it already has in
+ * the reader's language, and a sheet with a visible title hands the same one
+ * (owner decision, this session).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,13 +54,22 @@ fun AppSheet(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
     sheetState: SheetState = rememberExpandedSheetState(),
+    /** The sheet's own name for a screen reader; never drawn. */
+    name: String? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        modifier = modifier,
+        modifier = modifier.then(
+            if (name != null) {
+                Modifier.semantics { paneTitle = name }
+            } else {
+                Modifier
+            },
+        ),
         sheetState = sheetState,
         dragHandle = null,
+        shape = Radii.Sheet,
         containerColor = MaterialTheme.colorScheme.surface,
         sheetMaxWidth = rememberSheetWidth(),
     ) {

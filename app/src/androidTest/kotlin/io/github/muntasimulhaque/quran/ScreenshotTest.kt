@@ -479,20 +479,20 @@ class ScreenshotTest {
         waitForTag("ayah-card", timeout = 30_000)
         // Two commentaries, none open. The reference belongs to the passage,
         // so the card carries none until a door is chosen: this frame is the
-        // choice itself. Both doors read Ibn Kathir, which is why the language
-        // line is there at all.
-        rule.onAllNodesWithText("Ibn Kathir").assertCountEquals(2)
+        // choice itself. Both doors carry Ibn Kathir and their language in the
+        // one title, so the choice is readable without a second line.
+        rule.onAllNodesWithText("Ibn Kathir", substring = true).assertCountEquals(2)
         rule.onAllNodes(hasText("Al-Baqarah 2:255")).assertCountEquals(0)
         Thread.sleep(600)
         captureScreen("07-ayah-card")
 
         // 4. One commentary open on the card: the English Ibn Kathir for
-        // 2:255, its own reference at the head of its prose. Both doors read
-        // the same name, so the tap is the one whose language is English, and
-        // the wait is on the panel's own tag rather than a blind sleep.
-        rule.onNodeWithText("English").performClick()
+        // 2:255, its own reference at the head of its prose. The two doors
+        // share the name but not the language, and the English one leads, so
+        // the first byline is the tap.
+        rule.onAllNodesWithText("Ibn Kathir", substring = true).onFirst().performClick()
         waitForTag("tafsir-panel", timeout = 30_000)
-        rule.onAllNodesWithText("Ibn Kathir").assertCountEquals(2)
+        rule.onAllNodesWithText("Ibn Kathir", substring = true).assertCountEquals(2)
         rule.onNode(hasText("Al-Baqarah 2:255") and isHeading()).assertExists()
         captureScreen("08-tafsir")
         back()

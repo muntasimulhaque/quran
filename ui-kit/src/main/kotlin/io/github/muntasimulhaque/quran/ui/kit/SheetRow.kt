@@ -42,12 +42,17 @@ private val SheetRowGap = 2.dp
  * its words to keep the app's own gutter passes `Space.Gutter -
  * SheetRowGutter` for the horizontal padding: the gutter and the padding add
  * up to the one the rest of the sheet stands on.
+ *
+ * A row that answers a tap is a button unless it says otherwise. The role
+ * used to be the caller's to remember, so some rows announced themselves as
+ * buttons and some as bare clickable text; a door should sound like a door
+ * wherever it stands (owner decision, this session).
  */
 @Composable
 fun Modifier.sheetRow(
     onClick: () -> Unit,
     enabled: Boolean = true,
-    role: Role? = null,
+    role: Role? = Role.Button,
 ): Modifier {
     val press = remember { MutableInteractionSource() }
     return this

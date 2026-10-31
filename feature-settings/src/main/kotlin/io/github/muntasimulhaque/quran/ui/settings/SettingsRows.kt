@@ -92,11 +92,13 @@ fun ToggleRow(
     enabled: Boolean = true,
 ) {
     val opens = onOpen != null
-    // The whole row is the door, so its spoken name must carry the title and
-    // the state under it. Naming only the open label made a screen reader
-    // miss "Notifications are off, so the daily ayah cannot arrive" and the
-    // other subtitles that explain why a switch is where it is.
-    val spoken = listOfNotNull(openLabel, title, subtitle)
+    // Two controls, two names. The row is the door, so it says what it opens;
+    // the switch says what it switches and carries the subtitle that explains
+    // its state. The row used to repeat the title and subtitle, so a reader
+    // heard the same setting twice before reaching the switch (owner decision,
+    // this session).
+    val doorName = openLabel?.takeIf { it.isNotBlank() } ?: title
+    val switchName = listOfNotNull(title, subtitle)
         .filter { it.isNotBlank() }
         .joinToString(". ")
     Row(
@@ -110,13 +112,7 @@ fun ToggleRow(
                         // row's own spoken name; the chevron beside the switch
                         // is only a picture of where a tap goes (owner
                         // decision).
-                        .then(
-                            if (spoken.isNotEmpty()) {
-                                Modifier.semantics { contentDescription = spoken }
-                            } else {
-                                Modifier
-                            },
-                        )
+                        .semantics { contentDescription = doorName }
                 } else {
                     Modifier.sheetToggleRow(
                         value = checked,
@@ -167,7 +163,13 @@ fun ToggleRow(
                 // as the track it sits in and left no knob in the control.
                 colors = appSwitchColors(),
                 modifier = Modifier
-                    .then(if (opens) Modifier.semantics { contentDescription = title } else Modifier)
+                    .then(
+                        if (opens) {
+                            Modifier.semantics { contentDescription = switchName }
+                        } else {
+                            Modifier
+                        },
+                    )
                     .then(if (switchTag != null) Modifier.testTag(switchTag) else Modifier),
             )
         }

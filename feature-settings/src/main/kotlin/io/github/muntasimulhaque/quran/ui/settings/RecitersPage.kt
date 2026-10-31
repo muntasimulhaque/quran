@@ -94,21 +94,15 @@ fun RecitersPage(
                     // so the reciter's own room at the foot would read as a
                     // gap between the two.
                     bottomPadding = if (pack.installed) 0.dp else Space.Row,
-                    trailing = {
-                        // A reciter whose timings are on the device can give
-                        // the room back; a reciter nothing was heard from has
-                        // nothing to remove.
-                        if (pack.installed) {
-                            TextButton(
-                                label = stringResource(R.string.pack_action_remove),
-                                onClick = { actions.onRemovePack(pack.id) },
-                                quiet = true,
-                            )
-                        }
-                    },
                 )
                 if (pack.installed) {
-                    ReciterDownloads(id, downloadedSurahs, actions)
+                    ReciterDownloads(
+                        recitation = id,
+                        reciterName = name,
+                        downloadedSurahs = downloadedSurahs,
+                        actions = actions,
+                        onRemovePack = { actions.onRemovePack(pack.id) },
+                    )
                 }
                 Spacer(Modifier.height(Space.Line))
             }
@@ -137,8 +131,10 @@ fun RecitersPage(
 @Composable
 private fun ReciterDownloads(
     recitation: String,
+    reciterName: String,
     downloadedSurahs: suspend (String) -> List<DownloadedSurah>,
     actions: SettingsActions,
+    onRemovePack: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     var open by remember(recitation) { mutableStateOf(false) }
@@ -156,24 +152,35 @@ private fun ReciterDownloads(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = ChoiceRowNameInset, end = Space.Gutter, bottom = Space.Block),
         )
-        return
-    }
-    // Every Remove action wears the app's own button, and the button already
-    // carries its 48 dp target, so the rows need no extra height of their
-    // own: the names sit close together and the block reads as one list
-    // (owner decision, this session: a 40 dp provider wrapped these rows and
-    // never applied, because the button holds its own floor and reads no
-    // provider).
-    rows.forEach { row ->
-        DownloadedSurahRow(row) {
-            scope.launch {
-                actions.onRemoveDownloads(recitation, row.surah)
-                // Whatever the removal did, the list is read from the device
-                // again: the row goes when its files are gone.
-                downloaded = downloadedSurahs(recitation).sortedBy { it.surah }
+    } else {
+        // Every Remove action wears the app's own button, and the button
+        // already carries its 48 dp target, so the rows need no extra height
+        // of their own: the names sit close together and the block reads as
+        // one list (owner decision, this session: a 40 dp provider wrapped
+        // these rows and never applied, because the button holds its own
+        // floor and reads no provider).
+        rows.forEach { row ->
+            DownloadedSurahRow(row) {
+                scope.launch {
+                    actions.onRemoveDownloads(recitation, row.surah)
+                    // Whatever the removal did, the list is read from the
+                    // device again: the row goes when its files are gone.
+                    downloaded = downloadedSurahs(recitation).sortedBy { it.surah }
+                }
             }
         }
     }
+    // Removing the reciter's pack used to be a second action inside the
+    // reciter's own radio row. A single-select row cannot carry a nested
+    // action without saying two things at once, so the removal lives here,
+    // after the downloads it governs, where it names the voice it removes
+    // (owner decision, this session).
+    TextButton(
+        label = stringResource(R.string.settings_downloaded_remove, reciterName),
+        onClick = onRemovePack,
+        modifier = Modifier.padding(start = ChoiceRowNameInset, top = Space.Line),
+        quiet = true,
+    )
     Spacer(Modifier.height(Space.Block))
 }
 

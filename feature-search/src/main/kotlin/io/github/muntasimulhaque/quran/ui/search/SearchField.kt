@@ -30,6 +30,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
@@ -51,6 +52,7 @@ internal fun SearchField(
     focus: FocusRequester,
 ) {
     val focusManager = LocalFocusManager.current
+    val hint = stringResource(R.string.search_hint)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -89,6 +91,19 @@ internal fun SearchField(
                     ),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                // The field's leading mark is a search, not a nav arrow: the
+                // sheet is opened from the top bar and closed by its own
+                // Close, so the magnifier is the one thing a reader needs to
+                // recognize at a glance (owner decision, this session). It is
+                // a drawing, not a control, so it is cleared from semantics.
+                IconGlyph(
+                    icon = Icon.Search,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .padding(end = Space.Line)
+                        .size(GlyphSize.Action)
+                        .clearAndSetSemantics { },
+                )
                 BasicTextField(
                     value = value,
                     onValueChange = onChange,
@@ -104,18 +119,33 @@ internal fun SearchField(
                     keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
                     modifier = Modifier
                         .weight(1f)
-                        .focusRequester(focus),
+                        .focusRequester(focus)
+                        // The hint is a sibling drawing in the decoration box,
+                        // not a label on the editable node. An empty field
+                        // carries the hint as its spoken name, and a field with
+                        // a query lets the typed text speak for itself (owner
+                        // decision, this session).
+                        .then(
+                            if (value.isEmpty()) {
+                                Modifier.semantics { contentDescription = hint }
+                            } else {
+                                Modifier
+                            },
+                        ),
                     decorationBox = { inner ->
                         Box {
                             if (value.isEmpty()) {
                                 Text(
-                                    text = stringResource(R.string.search_hint),
+                                    text = hint,
                                     style = MaterialTheme.typography.bodyLarge,
                                     // The hint is the only text in an empty field,
                                     // so it has to be read to be a hint at all. The
                                     // 0.55 alpha it wore measured 2.5:1, under the
                                     // theme's 4.5:1 rule.
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    // The field's own node already speaks the hint
+                                    // once; the drawn copy is not a second stop.
+                                    modifier = Modifier.clearAndSetSemantics { },
                                 )
                             }
                             inner()

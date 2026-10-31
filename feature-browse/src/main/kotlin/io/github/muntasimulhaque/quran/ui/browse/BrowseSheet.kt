@@ -207,6 +207,7 @@ fun BrowseSheet(
     AppSheet(
         onDismiss = onDismiss,
         sheetState = sheetState,
+        name = stringResource(R.string.browse_sheet_name),
     ) {
         // The grid is one level inside the sheet, so the phone's back returns
         // to the surah list before it leaves the sheet: the same two-level

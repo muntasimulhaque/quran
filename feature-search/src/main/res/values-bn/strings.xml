@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="search_sheet_name">অনুসন্ধান</string>
     <string name="search_hint">কুরআনে অনুসন্ধান করুন</string>
     <string name="search_close">বন্ধ</string>
     <string name="search_clear">অনুসন্ধান মুছুন</string>

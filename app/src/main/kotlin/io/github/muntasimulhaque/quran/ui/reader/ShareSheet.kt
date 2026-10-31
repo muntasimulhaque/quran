@@ -19,6 +19,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Density
@@ -121,7 +123,7 @@ internal fun ShareCardPreview(card: ShareCard) {
     Box(
         modifier = Modifier
             .width(ShareCardWidth)
-            .clip(Radii.Sheet),
+            .clip(Radii.Tile),
     ) {
         CompositionLocalProvider(LocalDensity provides Density(density.density, fontScale = 1f)) {
             AyahShareCardContent(card)
@@ -142,12 +144,18 @@ internal fun ShareCardPreview(card: ShareCard) {
  */
 @Composable
 internal fun ShareCardPreviewBox(card: ShareCard) {
+    val preview = stringResource(R.string.share_preview)
     Box(
         modifier = Modifier
             .padding(horizontal = Space.Gutter)
-            .clip(Radii.Sheet)
+            .clip(Radii.Tile)
             .heightIn(max = 340.dp)
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(rememberScrollState())
+            // The card is a picture of the ayah the reader just read, not a
+            // second reading. A screen reader hears that the preview is here
+            // and moves to the two doors; it does not hear the whole ayah
+            // again before it can choose (owner decision, this session).
+            .clearAndSetSemantics { contentDescription = preview },
     ) {
         ShareCardPreview(card)
     }

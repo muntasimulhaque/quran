@@ -7,6 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import io.github.muntasimulhaque.quran.core.SearchQuery
 import io.github.muntasimulhaque.quran.data.SearchResults
 import io.github.muntasimulhaque.quran.feature.search.R
@@ -19,6 +22,8 @@ internal fun StatusLine(
     searching: Boolean,
     hasSources: Boolean,
     failed: Boolean,
+    /** True when these results belong to the query and filters on screen. */
+    current: Boolean,
 ) {
     val total = results.counts.total
     // Nothing is said while the field is empty. The line carried a prompt
@@ -32,6 +37,11 @@ internal fun StatusLine(
         !hasSources -> stringResource(R.string.search_status_no_sources)
         failed -> stringResource(R.string.search_status_failed)
         query == null -> null
+        // A new query starts before its results exist; the previous results
+        // are never shown under it. The line says the search is running
+        // instead of naming a count that belongs to another question (owner
+        // decision, this session).
+        !current -> stringResource(R.string.search_status_searching)
         searching && results.hits.isEmpty() -> stringResource(R.string.search_status_searching)
         total == 0 -> stringResource(R.string.search_status_no_matches)
         // A capped list has no honest count: the number the pass collected is
@@ -48,11 +58,19 @@ internal fun StatusLine(
         // this session).
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(
-            start = Space.Gutter,
-            end = Space.Gutter,
-            top = Space.Tight,
-            bottom = Space.Row,
-        ),
+        modifier = Modifier
+            .padding(
+                start = Space.Gutter,
+                end = Space.Gutter,
+                top = Space.Tight,
+                bottom = Space.Row,
+            )
+            // A result count, a settled search, or a failure arrives while the
+            // reader's focus is still in the field. The line announces itself
+            // once each time it changes, and a failure interrupts because the
+            // reader has to act on it (owner decision, this session).
+            .semantics {
+                liveRegion = if (failed) LiveRegionMode.Assertive else LiveRegionMode.Polite
+            },
     )
 }

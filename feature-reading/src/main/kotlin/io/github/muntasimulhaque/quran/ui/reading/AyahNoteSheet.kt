@@ -24,7 +24,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -51,13 +54,20 @@ import kotlinx.coroutines.delay
 fun AyahNoteSheet(
     note: String?,
     settings: AppSettings,
+    /** True while the write is in flight, so a second tap cannot start one. */
+    saving: Boolean,
+    /** True after a failed write; the draft stays in the field. */
+    failed: Boolean,
     onSave: (String?) -> Unit,
+    /** The draft as it changes, so closing the sheet never loses it. */
+    onDraftChange: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberExpandedSheetState()
     AppSheet(
         onDismiss = onDismiss,
         sheetState = sheetState,
+        name = stringResource(R.string.reading_note_sheet_name),
     ) {
         Column(
             modifier = Modifier
@@ -66,14 +76,18 @@ fun AyahNoteSheet(
                 // The gate rides with the scroll, so an upward flick on the
                 // note never bounces the sheet on its top anchor.
                 .sheetVerticalScroll(rememberScrollState())
-                .padding(bottom = Space.SheetFoot),
+                .padding(bottom = Space.SheetFoot)
+                .testTag("note-sheet"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             NoteEditor(
                 initial = note,
                 settings = settings,
+                saving = saving,
+                failed = failed,
                 onSave = onSave,
-                onClear = { onSave(null) },
+                onClear = { if (!saving) onSave(null) },
+                onDraftChange = onDraftChange,
             )
         }
     }
@@ -84,13 +98,17 @@ fun AyahNoteSheet(
 private fun NoteEditor(
     initial: String?,
     settings: AppSettings,
+    saving: Boolean,
+    failed: Boolean,
     onSave: (String?) -> Unit,
     onClear: () -> Unit,
+    onDraftChange: (String) -> Unit,
 ) {
     // The draft survives a theme change, a language change, and the window
     // being rebuilt while the reader is still writing. `remember` alone
     // threw the words away with the old composition.
     var draft by rememberSaveable(initial) { mutableStateOf(initial.orEmpty()) }
+    val hint = stringResource(R.string.card_note_hint)
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) {
         delay(160)
@@ -126,8 +144,12 @@ private fun NoteEditor(
                 )
             }
             TextButton(
-                label = stringResource(R.string.reading_note_save),
-                onClick = { onSave(draft.trim().takeIf { it.isNotEmpty() }) },
+                label = stringResource(
+                    if (saving) R.string.reading_note_saving else R.string.reading_note_save,
+                ),
+                onClick = {
+                    if (!saving) onSave(draft.trim().takeIf { it.isNotEmpty() })
+                },
                 // Save and Clear are two standalone actions, so they stand
                 // the action gap apart (owner decision, this session). Save
                 // is the one act the sheet exists for, so it is the app's
@@ -138,7 +160,10 @@ private fun NoteEditor(
         }
         BasicTextField(
             value = draft,
-            onValueChange = { draft = it.take(MAX_NOTE_LENGTH) },
+            onValueChange = {
+                draft = it.take(MAX_NOTE_LENGTH)
+                onDraftChange(draft)
+            },
             // The reader writes their note in the reading's own voice at the
             // size they read at, not at a fixed point: it is one voice, the
             // reader's own, and it follows the choice they made for the
@@ -154,12 +179,19 @@ private fun NoteEditor(
                 .fillMaxWidth()
                 .heightIn(min = 110.dp)
                 .padding(top = 10.dp)
-                .focusRequester(focus),
+                .focusRequester(focus)
+                .then(
+                    if (draft.isEmpty()) {
+                        Modifier.semantics { contentDescription = hint }
+                    } else {
+                        Modifier
+                    },
+                ),
             decorationBox = { inner ->
                 Box {
                     if (draft.isEmpty()) {
                         Text(
-                            text = stringResource(R.string.card_note_hint),
+                            text = hint,
                             style = LocalReadingVoice.current.prose(
                                 settings.translationSp,
                                 settings.translationLineSp,
@@ -169,13 +201,23 @@ private fun NoteEditor(
                             // has to be read to be a hint at all. The theme's
                             // secondary tone measures 6.1:1 and up on every
                             // ground; the 0.5 alpha it wore measured 2.2:1
-                            // and is closed here.
+                            // and is closed here. The field's own node speaks it
+                            // once; the drawn copy is not a second stop.
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.clearAndSetSemantics { },
                         )
                     }
                     inner()
                 }
             },
         )
+        if (failed) {
+            Text(
+                text = stringResource(R.string.reading_note_failed),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(top = Space.Line),
+            )
+        }
     }
 }

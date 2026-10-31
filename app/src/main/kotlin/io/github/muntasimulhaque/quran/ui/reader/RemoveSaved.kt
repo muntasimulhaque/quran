@@ -48,6 +48,7 @@ fun RemoveSavedSheet(
     AppSheet(
         onDismiss = onDismiss,
         sheetState = sheetState,
+        name = stringResource(R.string.remove_saved_sheet_name),
     ) {
         Column(
             modifier = Modifier

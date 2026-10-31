@@ -81,7 +81,6 @@ internal fun AyahMenu(
     val play = stringResource(R.string.action_play)
     val tafsir = stringResource(R.string.action_tafsir)
     val save = stringResource(R.string.action_save)
-    val saved = stringResource(R.string.action_saved)
     val note = stringResource(R.string.action_note)
     val share = stringResource(R.string.action_share)
     val name = stringResource(R.string.ayah_menu_title, reference)
@@ -112,7 +111,7 @@ internal fun AyahMenu(
         }
         MenuActionRow(
             icon = if (isSaved) Icon.BookmarkFilled else Icon.Bookmark,
-            label = if (isSaved) saved else save,
+            label = save,
             onClick = {
                 onDismiss()
                 onSave()

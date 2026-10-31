@@ -2,14 +2,18 @@ package io.github.muntasimulhaque.quran
 
 import android.content.Context
 import android.content.Intent
+import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.PackStore
@@ -106,6 +110,36 @@ class SearchHintTest {
 
             rule.onNodeWithContentDescription(text(SearchR.string.search_clear)).performClick()
             rule.waitUntil(timeoutMillis = 15_000) { noteIsShown() }
+        }
+    }
+
+    /**
+     * Returning to the results is not opening a fresh search.
+     *
+     * The sheet reopens with the query the reader typed. It must not put the
+     * cursor back in the field, because the keyboard would cover the results
+     * the reader pressed Back to see. The field is focused only when it is
+     * empty, which is the moment the reader came to type (owner decision,
+     * this session).
+     */
+    @Test
+    fun returningToTheResultsDoesNotRaiseTheKeyboard() {
+        prepare()
+        openSearch().use {
+            rule.onNode(hasSetTextAction()).performTextInput("mercy")
+            rule.waitUntil(timeoutMillis = 60_000) {
+                rule.onAllNodesWithText("2:64").fetchSemanticsNodes().isNotEmpty()
+            }
+            rule.onAllNodesWithText("2:64").onFirst().performClick()
+            rule.waitUntil(timeoutMillis = 60_000) {
+                rule.onAllNodesWithContentDescription("Reading")
+                    .fetchSemanticsNodes().isNotEmpty()
+            }
+            Espresso.pressBack()
+            rule.waitUntil(timeoutMillis = 60_000) {
+                rule.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty()
+            }
+            rule.onNode(hasSetTextAction()).assertIsNotFocused()
         }
     }
 }

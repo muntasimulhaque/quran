@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.feature.settings.R
@@ -245,10 +246,55 @@ private fun DailyTimeDialog(
             )
         },
     ) {
-        if (typing) {
-            TimeInput(state)
-        } else {
-            TimePicker(state)
+        // The one stock Material surface in the app asks for roles this app
+        // has given its own meanings. `outline` is the decorative hairline,
+        // not the 3:1 boundary a text field owes, and the display roles are
+        // the Book's Literata, not the interface's face. The picker gets its
+        // own two-role copy for its own subtree, so the rest of the app keeps
+        // the palette and the two voices it chose (owner decision, this
+        // session).
+        val interfaceFamily = MaterialTheme.typography.titleSmall.fontFamily
+        val interfaceType = MaterialTheme.typography.copy(
+            displayLarge = MaterialTheme.typography.displayLarge.copy(
+                fontFamily = interfaceFamily,
+                fontWeight = FontWeight.Medium,
+            ),
+            displayMedium = MaterialTheme.typography.displayMedium.copy(
+                fontFamily = interfaceFamily,
+                fontWeight = FontWeight.Medium,
+            ),
+            displaySmall = MaterialTheme.typography.displaySmall.copy(
+                fontFamily = interfaceFamily,
+                fontWeight = FontWeight.Medium,
+            ),
+            headlineLarge = MaterialTheme.typography.headlineLarge.copy(
+                fontFamily = interfaceFamily,
+                fontWeight = FontWeight.Medium,
+            ),
+            headlineMedium = MaterialTheme.typography.headlineMedium.copy(
+                fontFamily = interfaceFamily,
+                fontWeight = FontWeight.Medium,
+            ),
+            headlineSmall = MaterialTheme.typography.headlineSmall.copy(
+                fontFamily = interfaceFamily,
+                fontWeight = FontWeight.Medium,
+            ),
+            titleMedium = MaterialTheme.typography.titleMedium.copy(
+                fontFamily = interfaceFamily,
+                fontWeight = FontWeight.Medium,
+            ),
+        )
+        MaterialTheme(
+            colorScheme = MaterialTheme.colorScheme.copy(
+                outline = MaterialTheme.colorScheme.onSurfaceVariant,
+            ),
+            typography = interfaceType,
+        ) {
+            if (typing) {
+                TimeInput(state)
+            } else {
+                TimePicker(state)
+            }
         }
     }
 }

@@ -145,6 +145,7 @@ internal fun ListenOfferBar(
                     modifier = Modifier
                         .weight(1f, fill = true)
                         .testTag("offer-words"),
+                    announce = offer.failed,
                 )
                 // The state's one answer, and the words give way to it with an
                 // ellipsis: the lead keeps the block and the answer apart when

@@ -35,6 +35,14 @@
     <string name="card_note_edit">Edit note</string>
     <string name="card_note_hint">Write a note for this ayah</string>
     <string name="action_clear">Clear</string>
+    <string name="reading_note_sheet_name">Note</string>
+
     <string name="reading_note_save">Save</string>
+
+    <string name="reading_note_saving">Saving…</string>
+
+    <string name="reading_note_failed">Could not save the note. Your phone storage may be full.</string>
+
+    <string name="reading_footnote_sheet_name">Footnote</string>
     <string name="reading_footnote_title">Footnote %1$d  ·  %2$s %3$s</string>
 </resources>

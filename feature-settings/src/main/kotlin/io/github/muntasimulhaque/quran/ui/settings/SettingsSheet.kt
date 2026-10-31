@@ -106,6 +106,7 @@ fun SettingsSheet(
     AppSheet(
         onDismiss = onDismiss,
         sheetState = sheetState,
+        name = stringResource(R.string.settings_title),
     ) {
         // Back steps out of a page before it closes the sheet, the way a
         // stack of pages is expected to behave. It lives inside the sheet's

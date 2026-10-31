@@ -8,6 +8,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.screenSubtitle
 
@@ -52,6 +54,10 @@ fun EmptyNote(
             text = title,
             style = screenSubtitle(),
             color = MaterialTheme.colorScheme.onSurface,
+            // A page's own name is a heading, so a screen reader can land on
+            // the empty state instead of hearing the field, the filters, and
+            // then two lines of prose with no place to stop.
+            modifier = Modifier.semantics { heading() },
         )
         Text(
             text = body,

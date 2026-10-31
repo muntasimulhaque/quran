@@ -45,6 +45,7 @@ import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.AddDoor
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
+import io.github.muntasimulhaque.quran.ui.kit.ReferenceLabel
 import io.github.muntasimulhaque.quran.ui.kit.SheetTitle
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
@@ -199,6 +200,7 @@ fun AyahCard(
     AppSheet(
         onDismiss = onDismiss,
         sheetState = sheetState,
+        name = stringResource(R.string.card_tafsir_label),
     ) {
         Column(
             modifier = Modifier
@@ -239,6 +241,22 @@ fun AyahCard(
             // session).
             SheetTitle(
                 text = stringResource(R.string.card_tafsir_label),
+                modifier = Modifier.padding(
+                    start = Space.Gutter,
+                    end = Space.Gutter,
+                    bottom = Space.Tight,
+                ),
+            )
+            // The card is about one ayah before it is about one commentary.
+            // The passage under each door names the passage's own range; this
+            // line is the reader's subject, so a card with two commentaries
+            // says which ayah both of them are answering (owner decision,
+            // this session).
+            ReferenceLabel(
+                text = stringResource(
+                    R.string.reading_ayah_reference,
+                    localizedDigits(ayah.verseKey),
+                ),
                 modifier = Modifier.padding(
                     start = Space.Gutter,
                     end = Space.Gutter,
@@ -296,8 +314,12 @@ fun AyahCard(
                         // The tafsir's own name, in the reader's language.
                         val packName = contentPackName(pack.id, pack.name)
                         DoorRow(
-                            title = packName,
-                            subtitle = languageName(pack.language),
+                            title = stringResource(
+                                R.string.card_pack_byline,
+                                packName,
+                                languageName(pack.language),
+                            ),
+                            subtitle = "",
                             open = open,
                             onClick = { door = if (open) null else pack },
                         )

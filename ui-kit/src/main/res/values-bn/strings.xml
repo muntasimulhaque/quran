@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="sheet_handle">শিটের হাতল</string>
     <string name="reciter_minshawi">মিনশাবি</string>
     <string name="reciter_husary">হুসারি</string>
     <string name="pack_name_quran_text">কুরআনের লেখা</string>

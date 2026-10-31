@@ -125,7 +125,7 @@ private fun LanguageCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(Radii.Sheet)
+            .clip(Radii.Tile)
             .background(MaterialTheme.colorScheme.surface)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(start = Space.Gutter, end = Space.Row, top = Space.Block, bottom = Space.Block),

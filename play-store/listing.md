@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 13.7 (versionCode 139)
+Version: 13.8 (versionCode 140)
 
 ## Listing
 
@@ -174,6 +174,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (13.8, 424 characters)
+13.8 makes the page more legible and the app more honest. Tajweed colors are now chosen and tested for color vision. Search names its field, never shows an old result under a new query, and leaves the keyboard down when you return to results. Notes keep unsaved words through a closed sheet and a failed save. Every sheet names itself to a screen reader, and the ayah card says which ayah it opens. Text and packs unchanged.
 
 ## Release notes (13.7, 431 characters)
 13.7 quiets the page. The top bar's gear opens Settings directly again, the reading's display panel is gone, and a tap anywhere puts a text selection away. Surah headers say Makki or Madani. Browse's ayah picker is a page of numbers with one filled circle for your place. The Quran stands at 26, the translation and tafsir at 16, Bangla at the same sizes as English, and Arabic-only verses sit 8 dp apart. Text and packs unchanged.

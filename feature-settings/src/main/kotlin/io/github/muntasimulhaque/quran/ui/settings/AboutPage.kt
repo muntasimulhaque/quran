@@ -57,9 +57,11 @@ private const val SEPARATOR = " · "
  * Corrections and rights requests travel through the store listing's contact
  * and the project repository rather than through the app.
  *
- * The content is checked on the reader's behalf, once a day, without being
- * asked; there is no row for it here, because a reader should never have to
- * know the word for it (owner decision, earlier session).
+ * Content is verified when it is written, trusted by its length and moment
+ * afterwards, and re-hashed when the library opens; a damaged pack is
+ * repaired from its own row. There is no daily pass and no row for it here,
+ * because a reader should never have to know the word for it (owner
+ * decision, earlier session).
  */
 @Composable
 fun AboutPage(

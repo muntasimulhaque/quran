@@ -57,13 +57,16 @@ internal fun BrowseTabChip(
     Box(
         modifier = modifier
             // selectable, not clickable: a chosen tab must say it is chosen
-            // to TalkBack the way the app's other single choices do (owner
-            // decision, the theme and consistency session).
+            // to TalkBack the way the app's other single choices do. The role
+            // is Tab, not RadioButton: these four switch the view of the
+            // sheet, and a reader who hears "radio button" expects a choice
+            // that will be kept rather than a page that will change (owner
+            // decision, this session).
             .selectable(
                 selected = active,
                 interactionSource = press,
                 indication = null,
-                role = Role.RadioButton,
+                role = Role.Tab,
                 onClick = onClick,
             )
             .minimumInteractiveComponentSize(),
