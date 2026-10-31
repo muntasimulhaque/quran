@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 13.4 (versionCode 136)
+Version: 13.5 (versionCode 137)
 
 ## Listing
 
@@ -35,8 +35,10 @@ you kept, with your note under the ayah it was written on, and a Last read
 list that keeps the places you have been reading so you can return to one
 you left.
 
-Browse, Search, and Settings are doors at the top of the reading. There
-is no bottom bar to learn. More than one translation may be on at once, and
+Browse and Search are doors at the top of the reading, and the sliders
+beside them open the page's own sizes and switches, with Settings at the
+foot of that panel. There is no bottom bar to learn. More than one
+translation may be on at once, and
 each one draws in its own place under the ayah.
 
 Recitation plays Minshawi or Husary, with the page following the reciter
@@ -161,13 +163,16 @@ changes.
 What each set shows, in order:
 
 1. The reading with its translation
-2. The chrome: Browse, Search, and Settings
+2. The chrome: Browse, Search, and the reading's display
 3. The surah opening
 4. Search with the matched word marked, and the filters under the field
 5. The settings hub
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (13.5, 388 characters)
+13.5 puts the reading's display in reach. The sliders in the top bar open the page's own sizes and switches, with Settings at the foot. A saved ayah wears a bookmark, Browse marks the surah and juz you are in, translation and tafsir can be copied, and search brings back the last five queries you opened. A new install follows your phone's light or dark setting. Text and packs unchanged.
 
 ## Release notes (13.4, 384 characters)
 13.4 rebuilds the app's type. The Book's face now carries only the Quran's meaning and names, the interface face everything the app says about itself. The page is 20, the reading 16 on a 24 line, the Quran 24 on 48, the word aid 20 with a 14.4 gloss, and the Bangla app draws the weights it declares. The settings list, the ayah card, and search read easier. Text and packs unchanged.

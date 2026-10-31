@@ -169,10 +169,15 @@ internal fun ListenOfferBar(
                         offer.failed -> TextButton(
                             label = stringResource(R.string.playback_retry),
                             onClick = onConfirm,
+                            // The bar exists for this one answer, so it is
+                            // the prominent shape on both paths (owner
+                            // decision, this session).
+                            prominent = true,
                         )
                         else -> TextButton(
                             label = stringResource(R.string.playback_download),
                             onClick = onConfirm,
+                            prominent = true,
                         )
                     }
                 }

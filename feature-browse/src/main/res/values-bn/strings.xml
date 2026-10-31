@@ -32,7 +32,7 @@
     </plurals>
 
     <string name="saved_empty_title">এখনও কিছু সংরক্ষিত হয়নি</string>
-    <string name="saved_empty_body">পড়ার সময় যেকোনো আয়াতে চেপে ধরে রাখুন, তারপর সংরক্ষণ করুন। আপনার সংরক্ষিত আয়াতগুলো এবং সেগুলোতে লেখা নোট এখানে দেখা যাবে, নতুনটি আগে।</string>
+    <string name="saved_empty_body">পড়ার সময় যে-কোনো আয়াতের নম্বরে চাপ দিন, তারপর সংরক্ষণ করুন। আপনার সংরক্ষিত আয়াতগুলো এবং সেগুলোতে লেখা নোট এখানে দেখা যাবে, নতুনটি আগে।</string>
     <string name="notes_detail">নোট লেখা %1$s</string>
     <string name="saved_detail">সংরক্ষণ করা %1$s</string>
     <string name="saved_reference_fallback">আয়াত %1$d</string>

@@ -63,6 +63,8 @@ fun ReadingList(
     selectedAyah: Int?,
     /** The ayah whose menu is open, so its own door can say so. */
     menuAyah: Int? = null,
+    /** The ayahs the reader has pressed Save on, so their doors say so. */
+    savedAyahs: Set<Int> = emptySet(),
     playingAyah: Int?,
     /** The word being recited, read only by the ayah being heard. */
     playedWord: State<Int?>,
@@ -147,6 +149,7 @@ fun ReadingList(
         nextSurahName = nextSurahName,
         selectedAyah = selectedAyah,
         menuAyah = menuAyah,
+        savedAyahs = savedAyahs,
         playingAyah = playingAyah,
         playedWord = playedWord,
         hafs = hafs,

@@ -36,7 +36,7 @@
     </plurals>
 
     <string name="saved_empty_title">Nothing saved yet</string>
-    <string name="saved_empty_body">Press and hold any ayah while reading, then Save. Your saved ayahs and the notes you wrote on them appear here, newest first.</string>
+    <string name="saved_empty_body">Tap the ayah\'s number, then Save. Your saved ayahs and the notes you wrote on them appear here, newest first.</string>
     <string name="notes_detail">Note written %1$s</string>
     <string name="saved_detail">Saved %1$s</string>
     <string name="saved_reference_fallback">Ayah %1$d</string>

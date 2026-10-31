@@ -160,12 +160,33 @@ object Glyphs {
 
         // Two rails, each with a knob to hold. A bead strung on a rail reads
         // as a dot at the sizes the app draws; a knob that crosses the rail
-        // reads as the control a hand takes hold of.
-        Icon.Settings to listOf(
+        // reads as the control a hand takes hold of. The drawing is the old
+        // Settings mark, unchanged; only its job moved, because the reading's
+        // display panel is what the sliders open and the hub wears a gear of
+        // its own (owner decision, this session).
+        Icon.Display to listOf(
             line(3.25f, 7f, 20.75f, 7f),
             line(3.25f, 17f, 20.75f, 17f),
             bar(8.25f, 5.5f, 8.25f, 8.5f),
             bar(15.75f, 15.5f, 15.75f, 18.5f),
+        ),
+
+        // A ring and eight teeth, on the 45 degree steps the page's furniture
+        // keeps. A tooth is a Bar, so it carries the set's one weight at every
+        // size, and each starts on the ring's own centerline, so the tooth and
+        // the rim meet without a seam. The teeth reach the live area's 2 and
+        // 22 exactly, and the ring's hole stays wide enough to read hollow at
+        // the 14 dp stroke (owner decision, this session).
+        Icon.Settings to listOf(
+            ring(12f, 12f, 5.5f),
+            bar(12f, 6.5f, 12f, 3.5f),
+            bar(15.889f, 8.111f, 18.010f, 5.990f),
+            bar(17.5f, 12f, 20.5f, 12f),
+            bar(15.889f, 15.889f, 18.010f, 18.010f),
+            bar(12f, 17.5f, 12f, 20.5f),
+            bar(8.111f, 15.889f, 5.990f, 18.010f),
+            bar(6.5f, 12f, 3.5f, 12f),
+            bar(8.111f, 8.111f, 5.990f, 5.990f),
         ),
 
         // The portrait keyline: a ribbon is a tall thing, and the notch is a

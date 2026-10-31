@@ -282,7 +282,11 @@ fun BrowseSheet(
                         contentPadding = PaddingValues(bottom = Space.SheetFoot),
                     ) {
                         items(surahs, key = { it.number }) { surah ->
-                            SurahRow(surah, surahNumberWidth) { gridSurah = surah.number }
+                            SurahRow(
+                                surah = surah,
+                                numberWidth = surahNumberWidth,
+                                current = surah.number == currentSurah,
+                            ) { gridSurah = surah.number }
                         }
                     }
                     BrowseTab.Juz -> LazyColumn(
@@ -299,6 +303,7 @@ fun BrowseSheet(
                                 numberWidth = juzNumberWidth,
                                 surahName = surah?.nameSimple,
                                 surahAyah = start.surahAyah,
+                                current = start.juz == currentJuz,
                                 // A juz begins at one ayah; a tap opens exactly
                                 // that ayah, which is what the row's own line says.
                                 onJuz = { onAyah(start.ayah) },

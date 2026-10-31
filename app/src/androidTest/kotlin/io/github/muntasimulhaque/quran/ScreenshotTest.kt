@@ -304,7 +304,7 @@ class ScreenshotTest {
     }
 
     private fun chromeIsUp(): Boolean =
-        rule.onAllNodesWithContentDescription("Settings").fetchSemanticsNodes().isNotEmpty()
+        rule.onAllNodesWithContentDescription("Display options").fetchSemanticsNodes().isNotEmpty()
 
     /**
      * A tap on the reading's own quiet margin brings the chrome up.
@@ -529,9 +529,12 @@ class ScreenshotTest {
         captureScreen("04-search")
         back()
 
-        // 7. The settings hub.
+        // 7. The settings hub. The bar's sliders open the reading's display,
+        // and the hub is its last row (owner decision, this session).
         revealChrome()
-        rule.onNodeWithContentDescription("Settings").performClick()
+        rule.onNodeWithContentDescription("Display options").performClick()
+        waitForTag("display-all-settings")
+        rule.onNodeWithTag("display-all-settings").performClick()
         waitForTag("settings-hub")
         captureScreen("05-settings")
         back()

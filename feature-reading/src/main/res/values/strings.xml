@@ -20,6 +20,8 @@
     <string name="reading_ayah_door">Ayah %1$s actions</string>
     <string name="reading_door_expanded">Expanded</string>
     <string name="reading_door_collapsed">Collapsed</string>
+    <!-- The keep the reader made with Save, spoken with the door. -->
+    <string name="reading_door_saved">Saved</string>
 
     <string name="card_tafsir_label">Tafsir</string>
     <string name="card_tafsir_reference">%1$s %2$s</string>

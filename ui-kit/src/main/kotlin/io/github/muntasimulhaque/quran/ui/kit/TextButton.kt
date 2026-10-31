@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
@@ -34,6 +35,16 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * Two tones, one shape: the primary tone carries what the reader came to do
  * (Save, Add, Retry, Download), and the quiet tone carries what ends or
  * removes (Clear, Cancel, Remove).
+ *
+ * **A surface that asks one question has one prominent answer** (owner
+ * decision, this session). The wash is right for a door among doors, but a
+ * note sheet, the reminder card, and a download offer exist to ask for one
+ * act, and a pale shape beside a Cancel read as its equal. [prominent] is
+ * the same pill in the accent at full strength, so the reader's eye has one
+ * place to land. Its fill and ink are the scheme's own `primary` and
+ * `onPrimary`, the pair every ground already measures in `ContrastTest`, so
+ * the emphasis costs the palette no new tone. It is never for a destructive
+ * action and never for a row in a list.
  *
  * The click and the node a screen reader focuses own a full 48 dp slab,
  * while the shape the eye reads is drawn on the pill inside it. The ripple
@@ -66,16 +77,22 @@ fun TextButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     quiet: Boolean = false,
+    /**
+     * The one answer a surface exists to ask for: a solid accent shape with
+     * the accent's own ink. One to a surface, and never on a destructive
+     * act.
+     */
+    prominent: Boolean = false,
 ) {
-    val fill = if (quiet) {
-        MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
-    } else {
-        MaterialTheme.colorScheme.primary.copy(alpha = Wash.Button)
+    val fill = when {
+        prominent -> MaterialTheme.colorScheme.primary
+        quiet -> MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
+        else -> MaterialTheme.colorScheme.primary.copy(alpha = Wash.Button)
     }
-    val ink = if (quiet) {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    } else {
-        MaterialTheme.colorScheme.primary
+    val ink = when {
+        prominent -> MaterialTheme.colorScheme.onPrimary
+        quiet -> MaterialTheme.colorScheme.onSurfaceVariant
+        else -> MaterialTheme.colorScheme.primary
     }
     val press = remember { MutableInteractionSource() }
     Box(
@@ -100,6 +117,13 @@ fun TextButton(
                 text = label,
                 style = MaterialTheme.typography.labelLarge,
                 color = ink,
+                // A button's word is one line: the app's labels are short, and
+                // a caller that hands a long one (a recent search, a query
+                // the reader wrote) gets an ellipsis at the row's edge rather
+                // than a shape that grows past it (owner decision, this
+                // session).
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }

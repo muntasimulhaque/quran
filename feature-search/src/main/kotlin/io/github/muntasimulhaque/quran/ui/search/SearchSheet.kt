@@ -2,9 +2,13 @@ package io.github.muntasimulhaque.quran.ui.search
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -21,7 +25,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,6 +35,7 @@ import io.github.muntasimulhaque.quran.core.Search
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.SearchHit
+import io.github.muntasimulhaque.quran.data.SearchHistory
 import io.github.muntasimulhaque.quran.data.SearchRequest
 import io.github.muntasimulhaque.quran.data.SearchResults
 import io.github.muntasimulhaque.quran.data.SearchSources
@@ -36,7 +43,9 @@ import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.search.R
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
 import io.github.muntasimulhaque.quran.ui.kit.EmptyNote
+import io.github.muntasimulhaque.quran.ui.kit.SectionHead
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
+import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
@@ -118,6 +127,17 @@ fun SearchSheet(
 
     var text by rememberSaveable { mutableStateOf("") }
     var results by remember { mutableStateOf(SearchResults()) }
+    // The queries the reader acted on before, newest first. The list is read
+    // from the phone's own shelf when the sheet opens and written back as a
+    // result is opened, so a word typed and abandoned is never kept: the
+    // reader's hand outruns their intent, and a list of half-typed words is
+    // noise (owner decision, this session).
+    val context = LocalContext.current
+    val history = remember(context) { SearchHistory(context) }
+    var recents by remember { mutableStateOf(history.read()) }
+    val keepQuery: () -> Unit = {
+        if (text.isNotBlank()) recents = history.record(text)
+    }
     var searching by remember { mutableStateOf(false) }
     var failed by remember { mutableStateOf(false) }
     // The source flags survive the window like the query does: a rotation
@@ -262,6 +282,15 @@ fun SearchSheet(
                 contentPadding = PaddingValues(bottom = Space.SheetFoot),
             ) {
                 if (text.isBlank()) {
+                    if (recents.isNotEmpty()) {
+                        item(key = "recent") {
+                            RecentSearches(
+                                queries = recents,
+                                onQuery = { text = it },
+                                onClear = { recents = history.clear() },
+                            )
+                        }
+                    }
                     item(key = "note") {
                         EmptyNote(
                             title = stringResource(R.string.search_empty_title),
@@ -281,9 +310,13 @@ fun SearchSheet(
                 items(results.hits, key = { key(it) }) { hit ->
                     when (hit) {
                         is SearchHit.ReferenceHit -> ReferenceRow(hit.ayah) {
+                            keepQuery()
                             onAyah(SearchArrival.AyahMatch(hit.ayah))
                         }
-                        is SearchHit.SurahHit -> SurahRow(hit.surah, onSurah)
+                        is SearchHit.SurahHit -> SurahRow(hit.surah) { surah ->
+                            keepQuery()
+                            onSurah(surah)
+                        }
                         is SearchHit.AyahHit -> AyahRow(
                             hit = hit,
                             hafs = hafs,
@@ -293,6 +326,7 @@ fun SearchSheet(
                             proseSp = proseSp,
                             proseLineSp = proseLineSp,
                             onOpen = {
+                                keepQuery()
                                 onAyah(
                                     SearchArrival.AyahMatch(
                                         ayah = hit.ayah,
@@ -308,6 +342,7 @@ fun SearchSheet(
                             proseSp = proseSp,
                             proseLineSp = proseLineSp,
                         ) {
+                            keepQuery()
                             onAyah(SearchArrival.TafsirMatch(hit.ayah, hit.pack))
                         }
                     }
@@ -322,4 +357,58 @@ private fun key(hit: SearchHit): String = when (hit) {
     is SearchHit.SurahHit -> "surah-${hit.surah.number}"
     is SearchHit.AyahHit -> "ayah-${hit.ayah.number}"
     is SearchHit.TafsirHitResult -> "tafsir-${hit.pack}-${hit.surah}-${hit.fromAyah}"
+}
+
+/**
+ * The queries the reader acted on before, as chips over the empty sheet.
+ *
+ * A search usually begins with a word the reader has already used, and the
+ * empty sheet is the one place that can hand it back. The chips are the app's
+ * own text button in its quiet tone, so a query never reads as the field's
+ * own text or as the app's one action; the head names the block, and Clear
+ * empties the list on the phone as well. A query is only here because the
+ * reader opened something it found, which is why the list is short and
+ * useful instead of a record of every keystroke (owner decision, this
+ * session).
+ */
+@Composable
+private fun RecentSearches(
+    queries: List<String>,
+    onQuery: (String) -> Unit,
+    onClear: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Section),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            SectionHead(
+                text = stringResource(R.string.search_recent_title),
+                modifier = Modifier.weight(1f),
+            )
+            TextButton(
+                label = stringResource(R.string.search_recent_clear),
+                onClick = onClear,
+                quiet = true,
+            )
+        }
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Space.Line),
+            // The chip is a 33 dp pill inside a 48 dp target, so the row gap
+            // the eye reads is this spacing plus the 8 dp of target above and
+            // below each pill; 0 here leaves a 16 dp block break between rows
+            // while the chips keep the size the search filters already have.
+            verticalArrangement = Arrangement.spacedBy(0.dp),
+        ) {
+            queries.forEach { query ->
+                TextButton(
+                    label = query,
+                    onClick = { onQuery(query) },
+                    quiet = true,
+                )
+            }
+        }
+    }
 }

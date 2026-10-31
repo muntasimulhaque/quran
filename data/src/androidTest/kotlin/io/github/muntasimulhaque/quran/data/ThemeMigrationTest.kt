@@ -71,8 +71,12 @@ class ThemeMigrationTest {
         assertEquals(AppTheme.Light, ThemePreference(context).theme())
         write("night", false)
         assertEquals(AppTheme.Dark, ThemePreference(context).theme())
+    }
+
+    @Test
+    fun aFreshInstallFollowsTheSystem() {
         write(null, null)
-        assertEquals(AppTheme.Light, ThemePreference(context).theme())
+        assertEquals(AppTheme.System, ThemePreference(context).theme())
     }
 
     @Test

@@ -213,6 +213,10 @@ fun WelcomeReminder(
                 label = stringResource(R.string.welcome_reminder_turn_on),
                 onClick = onTurnOn,
                 modifier = Modifier.padding(top = Space.Block),
+                // The card's one ask, so it is the one prominent answer:
+                // Not now is a quiet shape under it (owner decision, this
+                // session).
+                prominent = true,
             )
             TextButton(
                 label = stringResource(R.string.welcome_reminder_not_now),

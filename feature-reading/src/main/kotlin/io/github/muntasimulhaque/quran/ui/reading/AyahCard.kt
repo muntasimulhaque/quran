@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -443,11 +444,18 @@ private fun TafsirPanel(
                 .semantics { heading() }
                 .padding(bottom = Space.Block),
         )
-        RichBlocks(
-            blocks = view.blocks,
-            sizeSp = settings.tafsirSp,
-            lineSp = settings.tafsirLineSp,
-            arabicSp = settings.arabicInlineSp,
-        )
+        // A commentary is the reader's to keep a sentence of: the passage is
+        // selectable, so a long press copies from it with the platform's own
+        // menu instead of sending the reader through Share for a picture
+        // (owner decision, this session). The heading above it stays outside
+        // the selection: a reference is the card's, not the commentary's.
+        SelectionContainer {
+            RichBlocks(
+                blocks = view.blocks,
+                sizeSp = settings.tafsirSp,
+                lineSp = settings.tafsirLineSp,
+                arabicSp = settings.arabicInlineSp,
+            )
+        }
     }
 }

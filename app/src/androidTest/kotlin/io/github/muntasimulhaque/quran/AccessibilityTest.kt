@@ -133,11 +133,12 @@ class AccessibilityTest {
         awaitReading()
         compose.onNodeWithContentDescription("Reading").assertExists()
 
-        // The chrome: Browse, Search, Settings.
+        // The chrome: Browse, Search, and the reading's display. Settings is
+        // the display panel's last row now (owner decision, this session).
         revealChrome()
         compose.onNodeWithContentDescription("Browse the Quran").assertExists()
         compose.onNodeWithContentDescription("Search").assertExists()
-        compose.onNodeWithContentDescription("Settings").assertExists()
+        compose.onNodeWithContentDescription("Display options").assertExists()
 
         // Browse, the surah list.
         compose.onNodeWithContentDescription("Browse the Quran").performClick()
@@ -149,9 +150,11 @@ class AccessibilityTest {
                 .fetchSemanticsNodes().isEmpty()
         }
 
-        // Settings, the hub.
+        // Settings, the hub, through the reading's display panel.
         revealChrome()
-        compose.onNodeWithContentDescription("Settings").performClick()
+        compose.onNodeWithContentDescription("Display options").performClick()
+        waitForTag("display-all-settings")
+        compose.onNodeWithTag("display-all-settings").performClick()
         waitForTag("settings-hub")
         compose.onNodeWithTag("settings-hub").assertExists()
         Espresso.pressBack()
@@ -214,7 +217,7 @@ class AccessibilityTest {
     /** A tap on the reading's own quiet margin brings the chrome up. */
     private fun revealChrome() {
         repeat(3) {
-            if (compose.onAllNodesWithContentDescription("Settings")
+            if (compose.onAllNodesWithContentDescription("Display options")
                     .fetchSemanticsNodes().isNotEmpty()
             ) {
                 return
@@ -223,7 +226,7 @@ class AccessibilityTest {
                 .performTouchInput { click(Offset(4f, height * 0.5f)) }
             runCatching {
                 compose.waitUntil(4_000) {
-                    compose.onAllNodesWithContentDescription("Settings")
+                    compose.onAllNodesWithContentDescription("Display options")
                         .fetchSemanticsNodes().isNotEmpty()
                 }
             }

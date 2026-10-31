@@ -27,16 +27,18 @@ class ThemePreference(context: Context) {
         context.applicationContext.getSharedPreferences("ui-theme", Context.MODE_PRIVATE)
 
     /**
-     * The stored page, or Light before any choice has been made. The theme
-     * has always had a default, so this never answers null.
+     * The stored page, or System before any choice has been made. The theme
+     * has always had a default, so this never answers null: a fresh install
+     * follows the phone's own day and night until the reader picks a ground
+     * (owner decision, this session).
      */
     fun theme(): AppTheme {
         val auto = preferences.getBoolean(KEY_AUTO_NIGHT, false)
         return when (preferences.getString(KEY_THEME, null)) {
-            "light" -> AppTheme.Light
-            "dark" -> AppTheme.Dark
+            null -> AppTheme.System
             "system" -> AppTheme.System
-            "night", "black" -> if (auto) AppTheme.System else AppTheme.Dark
+            "light", "paper", "sepia" -> if (auto) AppTheme.System else AppTheme.Light
+            "dark", "night", "black" -> if (auto) AppTheme.System else AppTheme.Dark
             else -> if (auto) AppTheme.System else AppTheme.Light
         }
     }

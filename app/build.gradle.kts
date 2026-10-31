@@ -204,8 +204,8 @@ android {
         // (owner decision, security audit).
         minSdk = 24
         targetSdk = 37
-        versionCode = 136
-        versionName = "13.4"
+        versionCode = 137
+        versionName = "13.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

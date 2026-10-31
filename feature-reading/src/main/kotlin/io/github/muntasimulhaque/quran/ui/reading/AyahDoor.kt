@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -37,6 +38,7 @@ import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.kit.ReferenceLabel
 import io.github.muntasimulhaque.quran.ui.theme.Radii
+import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
 
 /**
@@ -73,11 +75,24 @@ private val DoorRow = 48.dp
  * [onOpen] hands the door's own place on the glass to the caller, measured in
  * the window, because the menu hangs from the door and a popup cannot read
  * its anchor back through a test.
+ *
+ * **The door also says what the reader kept** (owner decision, this session).
+ * Save closes the menu and leaves the page exactly as it was, so the only way
+ * to learn that the tap worked was to open the menu again. A saved ayah now
+ * wears the app's filled bookmark beside its number, in the accent, and the
+ * mark is spoken with the door's own state. It is the Save mark and never a
+ * note's keep, because the app keeps those two apart: the bookmark says the
+ * reader asked for it, and a note written on an ayah is the note's own mark in
+ * the menu. The Arabic-only reading draws the verse's printed medallion as its
+ * door, so this mark belongs to the reference line and the page keeps its
+ * Quran alone.
  */
 @Composable
 internal fun AyahDoor(
     reference: String,
     open: Boolean,
+    /** True when the reader pressed Save on this ayah. */
+    marked: Boolean = false,
     onOpen: (IntRect) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -86,6 +101,7 @@ internal fun AyahDoor(
     val name = stringResource(R.string.reading_ayah_door, reference)
     val expanded = stringResource(R.string.reading_door_expanded)
     val collapsed = stringResource(R.string.reading_door_collapsed)
+    val saved = stringResource(R.string.reading_door_saved)
     val ink = if (open) {
         MaterialTheme.colorScheme.primary
     } else {
@@ -119,7 +135,15 @@ internal fun AyahDoor(
                 .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp)
                 .semantics {
                     contentDescription = name
-                    stateDescription = if (open) expanded else collapsed
+                    // The door says every state it is in, in the order the
+                    // reader meets them: the keep, then whether the menu is
+                    // open. A mark a reader cannot see is one they were never
+                    // told about, and a bookmark is a color before it is a
+                    // sentence (owner decision, this session).
+                    stateDescription = buildList {
+                        if (marked) add(saved)
+                        add(if (open) expanded else collapsed)
+                    }.joinToString(", ")
                 },
             contentAlignment = Alignment.Center,
         ) {
@@ -132,6 +156,20 @@ internal fun AyahDoor(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 ReferenceLabel(text = reference, color = ink)
+                if (marked) {
+                    IconGlyph(
+                        icon = Icon.BookmarkFilled,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .padding(start = Space.Tight)
+                            .size(GlyphSize.ChevronInline)
+                            // The mark is a drawing, not a control, so it
+                            // carries no name of its own; the tag is how a
+                            // test sees that the door of a saved ayah draws
+                            // it (owner decision, this session).
+                            .testTag("door-saved"),
+                    )
+                }
                 IconGlyph(
                     icon = Icon.Chevron,
                     tint = if (open) {

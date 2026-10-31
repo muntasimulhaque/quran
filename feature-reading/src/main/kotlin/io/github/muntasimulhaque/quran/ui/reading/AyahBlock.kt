@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
@@ -78,6 +79,8 @@ internal fun AyahBlock(
     showWordAid: Boolean = metrics.wordByWord,
     /** True while this ayah's menu is open, so its own door can say so. */
     isMenuOpen: Boolean = false,
+    /** True when the reader has pressed Save on this ayah. */
+    saved: Boolean = false,
     /** The ayah's door was tapped, with its own place on the glass. */
     onMenu: (Ayah, IntRect) -> Unit,
     onBackgroundTap: () -> Unit,
@@ -260,6 +263,7 @@ internal fun AyahBlock(
                 AyahDoor(
                     reference = reference,
                     open = isMenuOpen,
+                    marked = saved,
                     onOpen = { onMenu(row.ayah, it) },
                 )
             }
@@ -393,19 +397,27 @@ internal fun AyahBlock(
                             modifier = Modifier.padding(top = Space.Block),
                         )
                     }
-                    TranslationBody(
-                        runs = remember(line.text.text) { RichText.footnotes(line.text.text) },
-                        modifier = Modifier.padding(
-                            top = if (row.translations.size > 1) Space.Tight else Space.Block,
-                        ),
-                        sizeSp = metrics.translationSp,
-                        lineSp = metrics.translationLineSp,
-                        arabicSp = metrics.arabicInlineSp,
-                        onFootnote = { number -> onFootnote(line, number) },
-                        footnoteNumbers = remember(line.text.footnotes) {
-                            line.text.footnotes.map { it.number }.toSet()
-                        },
-                    )
+                    // The translation is the reader's to copy: a line of
+                    // Saheeh International can leave the app as words, not
+                    // only as a picture of the page. The Quran above it stays
+                    // outside the selection, because the page's own touch
+                    // belongs to the verse and the verse is not a paragraph
+                    // (owner decision, this session).
+                    SelectionContainer {
+                        TranslationBody(
+                            runs = remember(line.text.text) { RichText.footnotes(line.text.text) },
+                            modifier = Modifier.padding(
+                                top = if (row.translations.size > 1) Space.Tight else Space.Block,
+                            ),
+                            sizeSp = metrics.translationSp,
+                            lineSp = metrics.translationLineSp,
+                            arabicSp = metrics.arabicInlineSp,
+                            onFootnote = { number -> onFootnote(line, number) },
+                            footnoteNumbers = remember(line.text.footnotes) {
+                                line.text.footnotes.map { it.number }.toSet()
+                            },
+                        )
+                    }
                 }
             }
         }

@@ -39,6 +39,14 @@ import io.github.muntasimulhaque.quran.data.resolved
  * with, and it is named with the switch in `Switch.kt`: a control that reads
  * as a control is the one thing a scheme role should not be left to answer
  * for by accident.
+ *
+ * The error roles are the app's quiet voice in both grounds, because this app
+ * has no red. The Quran's own qalaqah is the page's only red, and a red the
+ * interface wore would borrow a color the reading uses for a rule of
+ * recitation. A failure here is a sentence, the pill's line or the toast,
+ * never a hue, so a Material control that asks for an error tone paints the
+ * ink it already reads in, and a stock red can never reach the glass (owner
+ * decision, this session).
  */
 internal val LightScheme = lightColorScheme(
     primary = Lapis,
@@ -64,6 +72,10 @@ internal val LightScheme = lightColorScheme(
     inverseSurface = PaperInk,
     inverseOnSurface = PaperSurface,
     inversePrimary = LapisLight,
+    error = PaperInk,
+    onError = PaperSurface,
+    errorContainer = PaperControl,
+    onErrorContainer = PaperInk,
     outline = PaperOutline,
     outlineVariant = PaperOutline,
     scrim = Color(0xFF14130F),
@@ -93,6 +105,10 @@ internal val DarkScheme = darkColorScheme(
     inverseSurface = NightText,
     inverseOnSurface = NightBackground,
     inversePrimary = Lapis,
+    error = NightText,
+    onError = NightBackground,
+    errorContainer = NightControl,
+    onErrorContainer = NightText,
     outline = NightOutline,
     outlineVariant = NightOutline,
     scrim = Color(0xFF000000),

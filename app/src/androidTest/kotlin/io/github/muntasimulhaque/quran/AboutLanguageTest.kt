@@ -2,9 +2,11 @@ package io.github.muntasimulhaque.quran
 
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -99,11 +101,18 @@ class AboutLanguageTest {
             compose.onAllNodesWithContentDescription(readingPage).fetchSemanticsNodes().isNotEmpty()
         }
         compose.onAllNodesWithContentDescription(readingPage).onFirst().tapThePaper()
-        val settings = compose.activity.getString(R.string.action_settings)
+        // Settings is the display panel's last row now: the bar's sliders open
+        // the reading's display, and All settings opens the hub (owner
+        // decision, this session).
+        val display = compose.activity.getString(R.string.action_display)
         compose.waitUntil(timeoutMillis = 15_000) {
-            compose.onAllNodesWithContentDescription(settings).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithContentDescription(display).fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithContentDescription(settings).performClick()
+        compose.onNodeWithContentDescription(display).performClick()
+        compose.waitUntil(timeoutMillis = 15_000) {
+            compose.onAllNodesWithTag("display-all-settings").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("display-all-settings").performClick()
         val about = compose.activity.getString(SettingsR.string.settings_title_about)
         compose.waitUntil(timeoutMillis = 15_000) {
             compose.onAllNodesWithText(about).fetchSemanticsNodes().isNotEmpty()

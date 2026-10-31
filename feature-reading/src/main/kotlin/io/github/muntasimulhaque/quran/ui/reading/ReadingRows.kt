@@ -55,6 +55,8 @@ internal fun ReadingRows(
     selectedAyah: Int?,
     /** The ayah whose menu is open, so its own door can say so. */
     menuAyah: Int?,
+    /** The ayahs the reader has pressed Save on, so their doors say so. */
+    savedAyahs: Set<Int> = emptySet(),
     playingAyah: Int?,
     /** The word being recited, read inside the one ayah being heard. */
     playedWord: State<Int?>,
@@ -248,6 +250,7 @@ internal fun ReadingRows(
                 showWordAid = wordAid ||
                     (reveal?.wordByWord == true && reveal.ayah == row.ayah.number),
                 isMenuOpen = menuAyah == row.ayah.number,
+                saved = row.ayah.number in savedAyahs,
                 onMenu = onAyahMenu,
                 onBackgroundTap = dismissAbout,
                 onFootnote = { line, number ->

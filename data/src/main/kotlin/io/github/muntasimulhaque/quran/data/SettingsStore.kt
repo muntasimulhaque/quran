@@ -90,7 +90,13 @@ data class AppSettings(
      * arrivals, the reminders, the links (owner decision, this session).
      */
     val ayah: Int = 1,
-    val theme: AppTheme = AppTheme.Light,
+    /**
+     * The page the app opens on. System until the reader chooses a ground,
+     * so a new install follows the phone's own day and night, the way every
+     * other app on the phone does; Light and Dark are the reader's own
+     * answers once they have made one (owner decision, this session).
+     */
+    val theme: AppTheme = AppTheme.System,
     /**
      * The language the interface is written in, and the content it reads.
      * Null until the reader has chosen, which is what shows the welcome
@@ -531,10 +537,12 @@ class SettingsStore(private val context: Context) {
     private fun storedTheme(preferences: Preferences): AppTheme {
         val auto = preferences[AUTO_NIGHT] == true
         return when (preferences[THEME]) {
-            "light" -> AppTheme.Light
-            "dark" -> AppTheme.Dark
+            // A fresh install has no page of its own yet, so it follows the
+            // phone until the reader picks one (owner decision, this session).
+            null -> AppTheme.System
             "system" -> AppTheme.System
-            "night", "black" -> if (auto) AppTheme.System else AppTheme.Dark
+            "light", "paper", "sepia" -> if (auto) AppTheme.System else AppTheme.Light
+            "dark", "night", "black" -> if (auto) AppTheme.System else AppTheme.Dark
             else -> if (auto) AppTheme.System else AppTheme.Light
         }
     }

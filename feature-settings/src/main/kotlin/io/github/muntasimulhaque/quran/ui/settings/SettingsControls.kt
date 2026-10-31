@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.AppTheme
@@ -186,7 +187,18 @@ fun AppTheme.name(): String = stringResource(
  * this session).
  */
 @Composable
-fun SizeRow(role: TypeRole, step: Float, onChange: (Float) -> Unit) {
+fun SizeRow(
+    role: TypeRole,
+    step: Float,
+    /**
+     * The room the block keeps from its surface's edges. The settings page
+     * keeps the app's one gutter; the reading's display panel is 288 dp wide,
+     * where the five 48 dp steps take 250 and leave 19 a side (owner
+     * decision, this session).
+     */
+    gutter: Dp = Space.Gutter,
+    onChange: (Float) -> Unit,
+) {
     val label = stringResource(
         when (role) {
             TypeRole.Arabic -> R.string.settings_size_arabic
@@ -200,6 +212,7 @@ fun SizeRow(role: TypeRole, step: Float, onChange: (Float) -> Unit) {
         value = step,
         steps = TextSize.STEPS,
         onSelect = onChange,
+        gutter = gutter,
         // The letters run from the smallest step to the largest, so the row
         // reads as one scale.
         cell = { index, active ->
@@ -270,6 +283,8 @@ private fun SegmentedRow(
     value: Float,
     steps: List<Float>,
     onSelect: (Float) -> Unit,
+    /** The room the block keeps from its surface's edges. */
+    gutter: Dp,
     /** What one step draws, given its place in the scale and whether it is chosen. */
     cell: @Composable (index: Int, active: Boolean) -> Unit,
     /** What a screen reader says for one step, place and meaning together. */
@@ -278,7 +293,7 @@ private fun SegmentedRow(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Block),
+            .padding(start = gutter, end = gutter, top = Space.Block),
     ) {
         Text(
             text = label,

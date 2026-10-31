@@ -1,5 +1,6 @@
 package io.github.muntasimulhaque.quran.ui.browse
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +18,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -27,6 +30,7 @@ import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
+import io.github.muntasimulhaque.quran.ui.theme.Wash
 import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import java.util.Locale
@@ -146,18 +150,37 @@ internal fun SurahArabicName(surah: Surah, modifier: Modifier = Modifier) {
  * name. The row opens the surah's own ayahs, so it carries a test tag as
  * well: the copy above it changes with the interface language, and a door a
  * test has to find cannot be found by its words alone.
+ *
+ * **The reader's own surah says so** (owner decision, this session). The list
+ * opens centered on the surah the reader is in, and a centering with no mark
+ * reads as an accident: the row wears the app's quiet selected wash and its
+ * number takes the accent, the same pair the ayah grid already puts on the
+ * reader's own ayah. A row that is the reader's place is a state, not a
+ * second door: the wash says where they are, the tap still opens the surah.
  */
 @Composable
 internal fun SurahRow(
     surah: Surah,
     numberWidth: Dp,
+    current: Boolean = false,
     onClick: () -> Unit,
 ) {
+    val currentState = stringResource(R.string.browse_ayah_current)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .sheetRow(onClick = onClick)
+            .then(
+                if (current) {
+                    Modifier.background(
+                        MaterialTheme.colorScheme.primary.copy(alpha = Wash.Selected),
+                    )
+                } else {
+                    Modifier
+                },
+            )
             .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = Space.Row)
+            .semantics { if (current) stateDescription = currentState }
             .testTag("surah-row-${surah.number}"),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -165,10 +188,14 @@ internal fun SurahRow(
             text = numberLabel(surah.number),
             width = numberWidth,
             // The number is read, so it takes the theme's own secondary
-            // tone and not a quiet alpha: onSurfaceVariant measures 6.1:1
-            // and up on every ground, where the 0.7 alpha it wore measured
-            // 3.3:1.
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            // tone and not a quiet alpha; the reader's own surah takes the
+            // accent, because it is the one number on the page that is a
+            // state as well as a name (owner decision, this session).
+            color = if (current) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
             modifier = Modifier.padding(end = Space.Block),
         )
         SurahNameBlock(surah, Modifier.weight(1f))
@@ -183,20 +210,36 @@ internal fun JuzRow(
     numberWidth: Dp,
     surahName: String?,
     surahAyah: Int,
+    current: Boolean = false,
     onJuz: () -> Unit,
 ) {
+    val currentState = stringResource(R.string.browse_ayah_current)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .sheetRow(onClick = onJuz)
+            .then(
+                if (current) {
+                    Modifier.background(
+                        MaterialTheme.colorScheme.primary.copy(alpha = Wash.Selected),
+                    )
+                } else {
+                    Modifier
+                },
+            )
             .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = Space.Row)
+            .semantics { if (current) stateDescription = currentState }
             .testTag("juz-row-$juz"),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         NumberCell(
             text = numberLabel(juz),
             width = numberWidth,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = if (current) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
             modifier = Modifier.padding(end = Space.Block),
         )
         Column(Modifier.weight(1f)) {

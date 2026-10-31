@@ -35,6 +35,11 @@ class ContrastTest {
         assertReadable(Lapis, PaperBackground)
         assertReadable(Lapis, PaperSurface)
         assertReadable(PaperOnPrimary, Lapis)
+        // The error roles are the quiet voice, so a Material control that
+        // asks for one can never paint a stock red (owner decision, this
+        // session).
+        assertReadable(LightScheme.onError, LightScheme.error)
+        assertReadable(LightScheme.onErrorContainer, LightScheme.errorContainer)
         assertReadable(PaperTajweed.silent, PaperBackground)
         assertReadable(PaperTajweed.ghunnah, PaperBackground)
         assertReadable(PaperTajweed.qalaqah, PaperBackground)
@@ -57,6 +62,10 @@ class ContrastTest {
         // family, for the reason the class notes. The sheet is the ground
         // the wash is laid over.
         assertReadable(PaperInk, blend(LightScheme.primary, PaperSurface, Wash.Match))
+        // Browse's current row wears the selected wash under its quiet words,
+        // so the muted voice is measured on that ground too (owner decision,
+        // this session).
+        assertReadable(PaperMuted, blend(LightScheme.primary, PaperSurface, Wash.Selected))
     }
 
     @Test
@@ -75,6 +84,10 @@ class ContrastTest {
         assertReadable(LapisLight, NightBackground)
         assertReadable(LapisLight, NightSurface)
         assertReadable(NightOnPrimary, LapisLight)
+        // The error roles are the quiet voice on this ground too (owner
+        // decision, this session).
+        assertReadable(DarkScheme.onError, DarkScheme.error)
+        assertReadable(DarkScheme.onErrorContainer, DarkScheme.errorContainer)
         assertReadable(NightTajweed.silent, NightBackground)
         assertReadable(NightTajweed.ghunnah, NightBackground)
         assertReadable(NightTajweed.qalaqah, NightBackground)
@@ -91,6 +104,9 @@ class ContrastTest {
             DarkPage.highlight.alpha * 0.55f,
         )
         assertReadable(NightInk, blend(DarkScheme.primary, NightSurface, Wash.Match))
+        // The night sheet's current row, on the same selected wash (owner
+        // decision, this session).
+        assertReadable(NightMuted, blend(DarkScheme.primary, NightSurface, Wash.Selected))
     }
 
     /**

@@ -17,6 +17,7 @@
     <string name="reading_ayah_door">আয়াত %1$s-এর কাজ</string>
     <string name="reading_door_expanded">খোলা</string>
     <string name="reading_door_collapsed">বন্ধ</string>
+    <string name="reading_door_saved">সংরক্ষিত</string>
 
     <string name="card_tafsir_label">তাফসীর</string>
     <string name="card_tafsir_reference">%1$s %2$s</string>

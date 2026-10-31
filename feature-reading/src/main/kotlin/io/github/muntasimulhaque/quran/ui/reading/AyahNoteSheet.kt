@@ -129,8 +129,11 @@ private fun NoteEditor(
                 label = stringResource(R.string.reading_note_save),
                 onClick = { onSave(draft.trim().takeIf { it.isNotEmpty() }) },
                 // Save and Clear are two standalone actions, so they stand
-                // the action gap apart (owner decision, this session).
+                // the action gap apart (owner decision, this session). Save
+                // is the one act the sheet exists for, so it is the app's
+                // one prominent shape (owner decision, this session).
                 modifier = Modifier.padding(start = Space.Action),
+                prominent = true,
             )
         }
         BasicTextField(

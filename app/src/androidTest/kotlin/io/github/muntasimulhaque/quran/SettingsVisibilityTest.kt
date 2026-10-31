@@ -2,6 +2,7 @@ package io.github.muntasimulhaque.quran
 
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -78,8 +79,14 @@ class SettingsVisibilityTest {
         )
 
         revealChrome()
-        compose.onNodeWithContentDescription(compose.activity.getString(R.string.action_settings))
+        // Settings is the display panel's last row now (owner decision, this
+        // session).
+        compose.onNodeWithContentDescription(compose.activity.getString(R.string.action_display))
             .performClick()
+        compose.waitUntil(timeoutMillis = 15_000) {
+            compose.onAllNodesWithTag("display-all-settings").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("display-all-settings").performClick()
         compose.waitUntil(timeoutMillis = 15_000) {
             compose.onAllNodesWithText(compose.activity.getString(
                 io.github.muntasimulhaque.quran.feature.settings.R.string.settings_show_translation_title,
@@ -107,7 +114,7 @@ class SettingsVisibilityTest {
             .tapThePaper()
         compose.waitUntil(timeoutMillis = 15_000) {
             compose.onAllNodesWithContentDescription(
-                compose.activity.getString(R.string.action_settings),
+                compose.activity.getString(R.string.action_display),
             ).fetchSemanticsNodes().isNotEmpty()
         }
     }

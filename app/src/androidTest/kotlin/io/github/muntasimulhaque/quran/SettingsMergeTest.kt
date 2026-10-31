@@ -143,11 +143,17 @@ class SettingsMergeTest {
         }
         compose.onAllNodesWithContentDescription(readingPage).onFirst()
             .tapThePaper()
-        val settings = compose.activity.getString(R.string.action_settings)
+        // Settings is the display panel's last row now (owner decision, this
+        // session).
+        val display = compose.activity.getString(R.string.action_display)
         compose.waitUntil(timeoutMillis = 15_000) {
-            compose.onAllNodesWithContentDescription(settings).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithContentDescription(display).fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithContentDescription(settings).performClick()
+        compose.onNodeWithContentDescription(display).performClick()
+        compose.waitUntil(timeoutMillis = 15_000) {
+            compose.onAllNodesWithTag("display-all-settings").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("display-all-settings").performClick()
         compose.waitUntil(timeoutMillis = 15_000) {
             compose.onAllNodesWithTag("settings-hub", useUnmergedTree = true)
                 .fetchSemanticsNodes().isNotEmpty()

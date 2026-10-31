@@ -120,6 +120,12 @@ fun ReaderScreen(
     // decision, this session).
     val playedWord = viewModel.playedWord.collectAsStateWithLifecycle()
     val saved by viewModel.saved.collectAsStateWithLifecycle()
+    // The Save marks, by ayah, so a door can say what the reader kept. A note
+    // alone is not a Save: the two marks are the reader's own and the app
+    // keeps them apart (owner decision, this session).
+    val savedAyahs = remember(saved) {
+        saved.filter { it.marked }.map { it.ayahNumber }.toSet()
+    }
     val lastRead by viewModel.lastRead.collectAsStateWithLifecycle()
 
     // The reveal also owns the first paper tap. A reader who taps the page
@@ -134,6 +140,11 @@ fun ReaderScreen(
     // time, never across a rotation: a popup is a moment and not a place
     // (owner decision, this session).
     var menu by remember { mutableStateOf<AyahMenuRequest?>(null) }
+    // The display panel's anchor: the sliders mark's own box on the glass, or
+    // null while the panel is not up. It is a moment, not a place, so it is
+    // not saved across a rotation, the same as the ayah menu (owner decision,
+    // this session).
+    var displayAnchor by remember { mutableStateOf<IntRect?>(null) }
     var cardAyah by remember { mutableStateOf<Ayah?>(null) }
     // The tafsir pack a search hit opened the card for; null for the normal
     // Tafsir pill, where the single enabled pack (or the door list) decides.
@@ -193,6 +204,7 @@ fun ReaderScreen(
         returnTo = null
         chromeRevealPending = false
         menu = null
+        displayAnchor = null
         sheetStates.removeState(target.name)
         sheet = target
     }
@@ -394,10 +406,20 @@ fun ReaderScreen(
     }
 
     // The chrome steps back on its own; a chosen ayah waits for the reader.
-    LaunchedEffect(chrome, touch) {
-        if (!chrome) return@LaunchedEffect
+    // The reading's display holds the bar open while it is up: the panel hangs
+    // from the bar, and a bar that stepped back mid-adjustment would take the
+    // panel with it (owner decision, this session).
+    LaunchedEffect(chrome, touch, displayAnchor) {
+        if (!chrome || displayAnchor != null) return@LaunchedEffect
         delay(CHROME_MILLIS)
         chrome = false
+    }
+
+    // The display panel goes when the bar goes: a panel hung from a mark that
+    // has stepped back would float over the page pointing at nothing (owner
+    // decision, this session).
+    LaunchedEffect(chrome) {
+        if (!chrome) displayAnchor = null
     }
 
     // The localized fallback line for a device with no receiving app, read
@@ -503,6 +525,7 @@ fun ReaderScreen(
                         .firstOrNull { it.number == surah.number + 1 }?.nameSimple,
                     selectedAyah = washedAyah,
                     menuAyah = menu?.ayah?.number,
+                    savedAyahs = savedAyahs,
                     playingAyah = playback.ayahNumber,
                     playedWord = playedWord,
                     onAyahMenu = { ayah, anchor ->
@@ -571,9 +594,32 @@ fun ReaderScreen(
             },
             onBrowse = { openSheet(ReaderSheet.Browse) },
             onSearch = { openSheet(ReaderSheet.Search) },
-            onSettings = { openSheet(ReaderSheet.Settings) },
+            onDisplay = { displayAnchor = it },
             modifier = Modifier.align(Alignment.TopCenter),
         )
+
+        // The reading's display, hung from the sliders mark while it is up.
+        // The sizes and the three reading switches are the page's own, and
+        // the hub is the panel's last row: a reader changes how the page
+        // looks without leaving it, and Settings stays where it was (owner
+        // decision, this session).
+        displayAnchor?.let { anchor ->
+            DisplayPanel(
+                anchor = anchor,
+                settings = settings,
+                hasTranslation = viewModel.enabledTranslationPacks.isNotEmpty(),
+                hasWords = content.installedPack(viewModel.wantedWordsPack()),
+                onTypeSize = { role, step -> viewModel.setTypeSize(role, step) },
+                onShowTranslation = { viewModel.setShowTranslation(it) },
+                onWordByWord = { viewModel.setWordByWord(it) },
+                onTajweed = { viewModel.setTajweed(it) },
+                onAllSettings = {
+                    displayAnchor = null
+                    openSheet(ReaderSheet.Settings)
+                },
+                onDismiss = { displayAnchor = null },
+            )
+        }
 
         // The long press and its one-time note are gone with the gesture: the
         // ayah's own number is its door, visible on every ayah, and a
