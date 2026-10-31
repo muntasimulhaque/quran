@@ -18,14 +18,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusTarget
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -37,8 +42,7 @@ import androidx.compose.ui.window.PopupProperties
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /**
- * The measure of every popup in the app, and of the anchor the pill hangs one
- * from.
+ * The measure of the app's panels, and of the anchor the pill hangs one from.
  *
  * A popup takes its own edge from the anchor it was given, so an anchor of
  * another measure would stand the menu beside the control's middle rather
@@ -49,11 +53,12 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * around them, which is the measure the listener has to get and the widest
  * the two ever were.
  *
- * The reading's ayah menu is this measure too. It carries five rows rather
- * than a panel, so it is wider than its words need; that air is the price of
- * one menu in the app instead of two, and the rows keep their names on the
- * one leading rail the pill's rows already stand on (owner decision, this
- * session).
+ * It is the default width, not the only one. The reading's ayah menu takes a
+ * narrower measure of its own: five one-word rows do not need the panel's
+ * width, and the air the shared measure left on their right was paid for by
+ * covering the page. The shape, the row rhythm, the leading rail, the lift,
+ * and the behavior stay shared; the width follows the content (owner
+ * decision, this session: one menu family, not one measure).
  */
 val PopupMeasure = 288.dp
 
@@ -80,6 +85,18 @@ val PopupGutter = 10.dp
  * the popup's 20 dp corner, so the two silhouettes never meet.
  */
 val PopupGap = 10.dp
+
+/**
+ * How much of a popup's edge fades when its content is taller than the safe
+ * band.
+ *
+ * The fade is the popup's own way of saying that a cut row is not a broken
+ * row: the content dissolves into the surface it stands on, so the reader
+ * sees that there is more rather than a row that stopped halfway. It sits
+ * over the gutter and the very edge of the first or last row, where no word
+ * lives, so the cue costs no legibility.
+ */
+private val PopupFade = 20.dp
 
 /**
  * The least air between a popup and the edge of the glass.
@@ -116,25 +133,27 @@ enum class PopupAlignment { Center, Start }
  * [AppPopupPosition] is the one rule, and a JVM test pins it because a
  * popup's place on the glass cannot be read back through a compose test.
  *
- * **It opens on the side with more room** (owner decision, this session). A
- * pill at the foot of the page has no room below it, so its menu still rises
- * exactly as it always has; a door in the middle of the page opens downward,
- * the way a menu under a field does, and one near the foot flips above. The
- * room is the larger side's, and the popup never grows past it: what does not
- * fit scrolls inside, so the position rule never has to clamp and the ground
- * between the popup and the anchor holds on the shortest window as it does on
- * the tallest.
+ * **It prefers the side with more room, but the whole safe band is the
+ * limit** (owner decision, this session). A pill at the foot of the page has
+ * no room below it, so its menu still rises exactly as it always has; a door
+ * in the middle of the page opens downward, the way a menu under a field
+ * does, and one near the foot flips above. When the roomier side cannot hold
+ * the whole menu, the menu slides inside the window's safe band, even over
+ * the door, so no action is hidden behind a scroll the reader did not ask
+ * for. The ground between the popup and the anchor yields before an action
+ * does. What does not fit even the whole band still scrolls, and the popup
+ * fades at the edge that has more.
  *
- * The popup takes [PopupMeasure] wide, the popup's own corners and lift, the
- * surface tone the app floats on, and [PopupGutter] at the head and foot, so
- * the first and last rows stay clear of the curve. [name] is its pane title,
- * spoken and never drawn, the same shape the share sheet's announcement
- * already wears: a reader who cannot see the menu hears what it belongs to
- * before its first row. The panel takes the focus once it has settled, so the
- * first row never opens looking chosen, and a tap outside, Back, or a scroll
- * of the page puts it away (owner decision, this session: the popup goes
- * with the page, because an anchor that moves under a hanging menu leaves it
- * pointing at nothing).
+ * The popup takes `width` wide, [PopupMeasure] by default, the popup's own
+ * corners and lift, the surface tone the app floats on, and [PopupGutter] at
+ * the head and foot, so the first and last rows stay clear of the curve.
+ * [name] is its pane title, spoken and never drawn, the same shape the share
+ * sheet's announcement already wears: a reader who cannot see the menu hears
+ * what it belongs to before its first row. The panel takes the focus once it
+ * has settled, so the first row never opens looking chosen, and a tap
+ * outside, Back, or a scroll of the page puts it away (owner decision, this
+ * session: the popup goes with the page, because an anchor that moves under a
+ * hanging menu leaves it pointing at nothing).
  */
 @Composable
 fun AppPopup(
@@ -142,6 +161,8 @@ fun AppPopup(
     anchor: IntRect,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    /** The popup's own measure; the panels take [PopupMeasure], the ayah menu its own. */
+    width: Dp = PopupMeasure,
     alignment: PopupAlignment = PopupAlignment.Center,
     /** What the menu belongs to, for a screen reader. Never drawn. */
     name: String? = null,
@@ -161,12 +182,19 @@ fun AppPopup(
         WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding().roundToPx()
     }
     val windowHeight = LocalView.current.height.coerceAtLeast(1)
+    // The safe band is the whole window the popup may use, with the system's
+    // own bars cleared. The menu is capped to it rather than to one side's
+    // room, so a short window can still show every row; the side is only the
+    // preference that decides which way the menu opens first.
+    val topLimit = status
+    val bottomLimit = (windowHeight - navigation).coerceAtLeast(topLimit)
+    val band = (bottomLimit - topLimit).coerceAtLeast(0)
     val above = popupRoomAbove(anchor, status, gap)
     val below = popupRoomBelow(anchor, windowHeight, navigation, gap)
     val side = popupSide(above = above, below = below)
-    val room = with(density) {
-        (if (side == PopupSide.Below) below else above).coerceAtLeast(0).toDp()
-    }
+    val room = with(density) { band.toDp() }
+    val surface = MaterialTheme.colorScheme.surfaceContainerHigh
+    val scroll = rememberScrollState()
     Popup(
         onDismissRequest = onDismiss,
         properties = PopupProperties(focusable = true),
@@ -176,6 +204,8 @@ fun AppPopup(
             edge = edge,
             alignment = alignment,
             side = side,
+            topLimit = topLimit,
+            bottomLimit = bottomLimit,
         ),
     ) {
         // The popup's window hands the focus to its first focusable child, and
@@ -192,17 +222,47 @@ fun AppPopup(
         }
         Column(
             modifier = modifier
-                .width(PopupMeasure)
+                .width(width)
                 .heightIn(max = room)
                 .floatingLift(Radii.Popup)
                 .clip(Radii.Popup)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .background(surface)
+                .drawWithContent {
+                    drawContent()
+                    // The fade is on the viewport, not on the scrolling
+                    // content, so it stays at the menu's edge. It covers the
+                    // gutter and the very edge of the next row, where no
+                    // word lives, and it is drawn only at an edge that has
+                    // more behind it.
+                    val fade = PopupFade.toPx()
+                    if (scroll.canScrollBackward) {
+                        drawRect(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(surface, surface.copy(alpha = 0f)),
+                                startY = 0f,
+                                endY = fade,
+                            ),
+                            size = Size(size.width, fade),
+                        )
+                    }
+                    if (scroll.canScrollForward) {
+                        drawRect(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(surface.copy(alpha = 0f), surface),
+                                startY = size.height - fade,
+                                endY = size.height,
+                            ),
+                            topLeft = Offset(0f, size.height - fade),
+                            size = Size(size.width, fade),
+                        )
+                    }
+                }
                 .padding(vertical = PopupGutter)
                 .testTag("app-popup")
                 .semantics { if (name != null) paneTitle = name }
                 .focusRequester(openingFocus)
                 .focusTarget()
-                .sheetVerticalScroll(rememberScrollState()),
+                .sheetVerticalScroll(scroll),
             content = content,
         )
     }
@@ -240,9 +300,10 @@ internal fun popupSide(above: Int, below: Int): PopupSide =
     if (below >= above) PopupSide.Below else PopupSide.Above
 
 /**
- * Where the app's popup stands: on the roomier side of its anchor, with
- * [gap] of the page's ground between, aligned the way its anchor asks, and
- * never off the glass.
+ * Where the app's popup stands: on the roomier side of its anchor with
+ * [gap] of the page's ground between when that side can hold it; otherwise
+ * inside the window's safe band, even over the anchor; aligned the way its
+ * anchor asks, and never off the glass.
  *
  * The anchor is a box, and the box's own bounds are read here rather than
  * left to the library: this is the one place in the app that says where a
@@ -258,6 +319,10 @@ internal class AppPopupPosition(
     private val edge: Int,
     private val alignment: PopupAlignment,
     private val side: PopupSide,
+    /** The first line the popup may use, with the system's top bar cleared. */
+    private val topLimit: Int,
+    /** The last line the popup may use, with the system's bottom bar cleared. */
+    private val bottomLimit: Int,
 ) : PopupPositionProvider {
     override fun calculatePosition(
         anchorBounds: IntRect,
@@ -289,12 +354,17 @@ internal class AppPopupPosition(
         } else {
             aligned.coerceIn(0, lastLeft)
         }
-        // The room on the chosen side was handed to the popup's own measure,
-        // so this is never a clamp: it is the placement the ground allows.
-        val y = when (side) {
+        // The side decides which way the menu opens when the ground allows
+        // it. When the menu is taller than that side's room, it slides inside
+        // the safe band instead of growing past the glass or hiding a row
+        // behind a scroll: it may cross the door, because an action is worth
+        // more than the ground between them.
+        val preferred = when (side) {
             PopupSide.Below -> anchor.bottom + gap
             PopupSide.Above -> anchor.top - gap - popupContentSize.height
         }
+        val lastTop = (bottomLimit - popupContentSize.height).coerceAtLeast(topLimit)
+        val y = preferred.coerceIn(topLimit, lastTop)
         return IntOffset(x, y)
     }
 }

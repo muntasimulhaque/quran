@@ -3,6 +3,7 @@ package io.github.muntasimulhaque.quran.ui.reader
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.kit.AppPopup
@@ -10,15 +11,26 @@ import io.github.muntasimulhaque.quran.ui.kit.MenuActionRow
 import io.github.muntasimulhaque.quran.ui.kit.PopupAlignment
 
 /**
+ * The ayah menu's own width: the app's 288 dp panel measure less a quarter,
+ * because its longest row is one word and the shared width left more than
+ * half the popup empty. The 216 dp holds the five rows on the one leading
+ * rail, keeps the menu from covering more of the page than it needs to, and
+ * lets a label that outgrows it wrap rather than be clipped (owner decision,
+ * this session).
+ */
+private val AyahMenuMeasure = 216.dp
+
+/**
  * The ayah's own actions, in the app's one popup, hung from the ayah's door.
  *
- * The popup is the pill's popup, not a second menu: the same measure, the
- * same corners, the same floating ground, the same focus that waits for the
- * panel to settle so the first row never opens looking chosen, and the same
- * rule that an answer puts the panel away. The only thing this menu adds to
- * the app's vocabulary is a row that acts instead of one that chooses, and
- * even that shares the choice row's rail to the dp (owner decision, this
- * session).
+ * The popup is the pill's popup, not a second menu: the same corners, the
+ * same floating ground, the same focus that waits for the panel to settle so
+ * the first row never opens looking chosen, the same row rhythm, and the
+ * same rule that an answer puts the panel away. Only the width is its own,
+ * because five one-word rows do not need the panel's 288 dp (owner decision,
+ * this session). The only thing this menu adds to the app's vocabulary is a
+ * row that acts instead of one that chooses, and even that shares the choice
+ * row's rail to the dp (owner decision, this session).
  *
  * The order is the reader's intent, not the control's kind (owner decision,
  * forty-sixth session). The two reasons to open an ayah's actions lead: hear
@@ -48,7 +60,8 @@ import io.github.muntasimulhaque.quran.ui.kit.PopupAlignment
  *
  * [anchor] is the door's own place on the glass, measured by the door, and
  * the menu hangs from its leading edge on the roomier side: below a door near
- * the head of the page, above one near the foot. [name] is the menu's pane
+ * the head of the page, above one near the foot, and inside the window's safe
+ * band when neither side can hold the whole list. [name] is the menu's pane
  * title, spoken and never drawn.
  */
 @Composable
@@ -75,6 +88,7 @@ internal fun AyahMenu(
     AppPopup(
         anchor = anchor,
         onDismiss = onDismiss,
+        width = AyahMenuMeasure,
         alignment = PopupAlignment.Start,
         name = name,
     ) {

@@ -104,8 +104,10 @@ import kotlin.math.abs
  * chooser at one end of the capsule and the listening menu at the other (owner
  * report): two popups in two places on one control. So the capsule holds the
  * menu, from one anchor on its own centre. The merged panel is taller than the
- * two menus were apart, so the popup caps itself to the ground above the
- * capsule and scrolls what does not fit, and the anchor stands on the
+ * two menus were apart, so the popup caps itself to the window's safe band
+ * and scrolls what does not fit. It takes the whole band when the ground
+ * above the capsule cannot hold it, so the pace and the ending are not hidden
+ * behind a scroll the window did not need, and the anchor stands on the
  * capsule's whole measure without ever deciding it.
  */
 @Composable

@@ -1,9 +1,13 @@
 package io.github.muntasimulhaque.quran
 
+import android.os.ParcelFileDescriptor
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertHeightIsEqualTo
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -194,6 +198,71 @@ class AyahActionsTest {
             )
         }
         waitForMenuClosed()
+    }
+
+    @Test
+    fun theAyahMenuTakesItsOwnNarrowerMeasure() {
+        waitForReading()
+        openTheDoor()
+
+        // The five rows are one word each, so the menu no longer borrows the
+        // pill panel's 288 dp. The popup's own column carries the measure,
+        // and the widest row still has room on the glass.
+        compose.onNodeWithTag("app-popup").assertWidthIsEqualTo(216.dp)
+        compose.onNodeWithText(compose.activity.getString(R.string.action_share))
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun theWholeMenuFitsALandscapeWindow() {
+        // The activity's requested orientation is not enough on this runner:
+        // the display stays where the user left it. The shell command is the
+        // same one the capture tour uses. The phone is left in portrait and
+        // rotation-locked, which is the orientation the rest of the suite
+        // expects and the state the capture tour leaves its own AVD in.
+        shell("settings put system accelerometer_rotation 0")
+        try {
+            shell("settings put system user_rotation 0")
+            compose.waitUntil(timeoutMillis = 15_000) {
+                val root = composeRoot() ?: return@waitUntil false
+                root.boundsInWindow.height > root.boundsInWindow.width
+            }
+            waitForReading()
+
+            shell("settings put system user_rotation 1")
+            compose.waitUntil(timeoutMillis = 30_000) {
+                val root = composeRoot() ?: return@waitUntil false
+                root.boundsInWindow.width > root.boundsInWindow.height
+            }
+            waitForReading()
+            openTheDoor()
+
+            // The reading's window is short on its side, so the menu used to
+            // stop at the room above the door and hide the foot behind a
+            // scroll. Every action now fits the safe band.
+            compose.onNodeWithText(compose.activity.getString(R.string.action_note))
+                .assertIsDisplayed()
+            compose.onNodeWithText(compose.activity.getString(R.string.action_share))
+                .assertIsDisplayed()
+        } finally {
+            shell("settings put system user_rotation 0")
+            shell("settings put system accelerometer_rotation 0")
+        }
+    }
+
+    /** The window's own root, for the tests that ask about its shape. */
+    private fun composeRoot() = compose
+        .onAllNodes(isRoot(), useUnmergedTree = true)
+        .fetchSemanticsNodes()
+        .firstOrNull()
+
+    /** A shell command through the instrumentation's own shell, as the tour does. */
+    private fun shell(command: String): String {
+        val descriptor = InstrumentationRegistry.getInstrumentation().uiAutomation
+            .executeShellCommand(command)
+        return ParcelFileDescriptor.AutoCloseInputStream(descriptor).use { stream ->
+            stream.bufferedReader().readText()
+        }
     }
 
     /** What the door says about its own state, in the app's words. */

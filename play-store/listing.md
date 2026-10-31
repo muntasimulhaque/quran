@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 13.5 (versionCode 137)
+Version: 13.6 (versionCode 138)
 
 ## Listing
 
@@ -172,6 +172,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (13.6, 324 characters)
+13.6 keeps the ayah's actions on screen. In landscape, the menu used to stop at the room on one side and hide the last actions behind a scroll; it now takes the whole window when it must, and only scrolls when the window itself is too short. The menu is narrower too, so it covers less of the page. Text and packs unchanged.
 
 ## Release notes (13.5, 388 characters)
 13.5 puts the reading's display in reach. The sliders in the top bar open the page's own sizes and switches, with Settings at the foot. A saved ayah wears a bookmark, Browse marks the surah and juz you are in, translation and tafsir can be copied, and search brings back the last five queries you opened. A new install follows your phone's light or dark setting. Text and packs unchanged.

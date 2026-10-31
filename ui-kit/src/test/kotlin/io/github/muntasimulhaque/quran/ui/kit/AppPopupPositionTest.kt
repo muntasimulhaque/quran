@@ -26,9 +26,11 @@ import org.junit.Test
  * a list under a field does, until the glass runs out below and the menu flips
  * above.
  *
- * The ground is absolute on the side the popup takes: it never grows past the
- * room there, so the position rule never clamps and the two shapes cannot
- * meet on any window. What does not fit scrolls inside the popup.
+ * The ground is kept when the menu fits on the side it prefers. When the
+ * window is shorter than that side's room, the menu slides inside the safe
+ * band, even over the anchor, so the rule never hides an action behind a
+ * scroll it did not need. The ground yields before an action does. A menu
+ * taller than the whole band still scrolls inside the popup.
  */
 class AppPopupPositionTest {
 
@@ -94,6 +96,8 @@ class AppPopupPositionTest {
             edge = edge,
             alignment = PopupAlignment.Start,
             side = PopupSide.Below,
+            topLimit = 0,
+            bottomLimit = 1_920,
         ).calculatePosition(
             anchorBounds = anchor,
             windowSize = IntSize(1_080, 1_920),
@@ -189,18 +193,71 @@ class AppPopupPositionTest {
         assertEquals("a popup wider than the window starts at the window's edge", 0, wider.x)
     }
 
+    @Test
+    fun aMenuThatFitsNeitherSideTakesTheSafeBand() {
+        // A door in the middle of a landscape phone: the menu is taller than
+        // either side's room, but it fits the window. It takes the band and
+        // may cover the door, because an action is worth more than the ground.
+        val anchor = IntRect(left = 84, top = 440, right = 260, bottom = 546)
+        val window = 960
+        val status = 72
+        val navigation = 72
+        val content = IntSize(480, 480)
+        val bandTop = status
+        val bandBottom = window - navigation
+
+        val below = place(
+            anchor = anchor,
+            content = content,
+            window = IntSize(1_080, window),
+            alignment = PopupAlignment.Start,
+            side = PopupSide.Below,
+            topLimit = bandTop,
+            bottomLimit = bandBottom,
+        )
+        assertEquals(
+            "a menu that cannot fit below slides up so its foot stays on the glass",
+            bandBottom - content.height,
+            below.y,
+        )
+        assertEquals(
+            "its foot keeps the window's own line",
+            bandBottom,
+            below.y + content.height,
+        )
+
+        val above = place(
+            anchor = anchor,
+            content = content,
+            window = IntSize(1_080, window),
+            alignment = PopupAlignment.Start,
+            side = PopupSide.Above,
+            topLimit = bandTop,
+            bottomLimit = bandBottom,
+        )
+        assertEquals(
+            "a menu that cannot fit above slides down so its head stays on the glass",
+            bandTop,
+            above.y,
+        )
+    }
+
     private fun place(
         anchor: IntRect,
         content: IntSize,
         window: IntSize,
         alignment: PopupAlignment,
         side: PopupSide,
+        topLimit: Int = 0,
+        bottomLimit: Int = window.height,
     ): IntOffset = AppPopupPosition(
         anchor = anchor,
         gap = gap,
         edge = edge,
         alignment = alignment,
         side = side,
+        topLimit = topLimit,
+        bottomLimit = bottomLimit,
     ).calculatePosition(
         anchorBounds = anchor,
         windowSize = window,

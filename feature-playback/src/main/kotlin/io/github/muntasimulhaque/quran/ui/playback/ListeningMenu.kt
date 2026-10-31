@@ -35,10 +35,12 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * decision, this session).
  *
  * It may stand taller than the two menus did apart, so the popup caps it to
- * the ground above the capsule and what does not fit scrolls, as every popup
- * of the pill's already does. The voices keep the app's choice row, with the
- * leading mark and what that voice would still need for the surah at hand, so
- * a reciter is chosen with its price in view.
+ * the window's safe band and what does not fit scrolls, with the edge fade
+ * saying there is more. It takes the whole band when the ground above the
+ * capsule cannot hold it, so no answer is hidden behind a scroll the window
+ * did not need. The voices keep the app's choice row, with the leading mark
+ * and what that voice would still need for the surah at hand, so a reciter is
+ * chosen with its price in view.
  *
  * **Every answer puts the panel away** (owner decision, this session). The
  * voice list has always closed on its choice, and the pace and the ending
