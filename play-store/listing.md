@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 13.9 (versionCode 141)
+Version: 14.0 (versionCode 142)
 
 ## Listing
 
@@ -133,7 +133,7 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 41190473654 on 13.7: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The reading, chrome, surah opening, Browse, and settings are the change: the Quran stands at 26 with 16 prose, Bangla uses the same sizes as English, the chrome carries Browse, Search, and the gear, the opening says Madani, Browse says Makki and Madani, and the settings frame names 13.7 on every leg. The search frame is translation-only and differs by the status bar's clock and the field's caret; the ayah card and the tafsir carry the larger Arabic where it appears. The evidence frames carry the same reading in the dark and at the largest size, and the ten inch portrait. The ayah grid is not among the store's eight; its review frame is `play-store/evidence/phone_ayah-grid.png`, captured separately on the phone AVD.
+The set is from capture run 41281668937 on 14.0: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The reading, the search field, and the tafsir carry the larger type: the translation and the tafsir at 16 on the 1.5 line, the passage title 17, the gloss 15, the inline Arabic and the ayah medallion 24, and the search field 16. The settings frame names 14.0 on every leg. The evidence frames carry the same reading in the dark and at the largest size, and the ten inch portrait.
 
 The set before it is from capture run 41179632238 on 13.6: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The settings frame names 13.6 on every leg. The reading, chrome, surah opening, and every evidence frame are byte-identical to 13.5's; search, Browse, the ayah card, and the tafsir differ only by the status bar's clock (and, on search, the field's caret), and the settings frame also by the version line. The five frames that changed are not the subject of 13.6's menu, which is not among the store's eight.
 
@@ -174,6 +174,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (14.0, 449 characters)
+14.0 sets the reading at the size the Book's face asks for. Translation, tafsir, notes, and footnotes stand at 16 on the 1.5 line, with a passage title at 17 and the tafsir heads at the body's size. The word meaning is 15, the inline Arabic and the ayah medallion 24. The search field and welcome page are 16, the pill and download notice 14, and saved notes follow your reading size. Bangla uses the same sizes as English. Text and packs unchanged.
 
 ## Release notes (13.9, 496 characters)
 13.9 quiets the page and its controls. Translation and tafsir come down a step, and a tafsir passage's title leads by its weight, not a bigger size. The surah and juz share one baseline in the top bar. The tafsir card opens on the commentary itself, and About's credits are smaller. Recent searches can be removed one at a time, a landscape menu stays clear of the number, the size and pace rows are one rail, and the daily time has a page. The reciter's Remove is gone. Text and packs unchanged.
