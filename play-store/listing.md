@@ -133,6 +133,8 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
+The set is from capture run 41334761954 on 14.3: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The surah opening carries the Arabic and Latin names without the gold rule, the settings frame names 14.3 on every leg, and the other frames differ from 14.2's only by the status bar's clock and the search field's caret. The evidence frames are unchanged.
+
 The set is from capture run 41323611005 on 14.2: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The chrome frame carries the two-rail settings mark, and the settings frame names 14.2 on every leg; wherever a sheet leaves the top bar showing, the mark is the new one. The reading, the surah opening, and every evidence frame are byte-identical to 14.1's, and the other frames differ only by the status bar's clock, the search field's caret, and the mark where the top bar shows behind a sheet. The evidence frames are unchanged.
 
 The set is from capture run 41298053605 on 14.1: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The chrome frame carries the new gear; the ayah card and the tafsir name English and Bangla above Ibn Kathir; the settings frame names 14.1 on every leg. The reading, the surah opening, search, and Browse are otherwise the 14.0 page, and every evidence frame carries the same reading in the dark, at the largest size, and the ten inch portrait.
