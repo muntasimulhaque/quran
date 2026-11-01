@@ -12,11 +12,13 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,38 +26,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.boundsInWindow
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.feature.search.R
+import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
-import io.github.muntasimulhaque.quran.ui.kit.AppPopup
-import io.github.muntasimulhaque.quran.ui.kit.MenuActionRow
-import io.github.muntasimulhaque.quran.ui.kit.PopupAlignment
+import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.kit.SectionHead
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
-
-/**
- * The one row's menu a chip raises: the width a single short word needs, not
- * the panel's 288 and not the ayah menu's 216. The menu family keeps its shape
- * and its row rhythm; only the measure follows the content (owner decision:
- * one menu family, not one measure).
- *
- * It is 160, not 176: the row's own leading rail, its mark, its word, and the
- * popup's gutters need about 154 dp, and the extra 22 dp read as an empty
- * right side under a six letter word (owner report, this session).
- */
-private val RecentChipMenu = 160.dp
 
 /**
  * The queries the reader acted on before, as chips over the empty sheet.
@@ -69,25 +56,30 @@ private val RecentChipMenu = 160.dp
  * every keystroke (owner decision, this session).
  *
  * **A chip can also go on its own** (owner decision, this session). A long
- * press raises the app's one popup with one row, Remove, and the query leaves
- * the list and the phone. Clear stays: the two answer two questions, this
- * word and all of them, and clearing a whole session should not be five long
- * presses. The long press is not the only road, because a gesture that has to
- * be taught is not a signifier: the chip also carries a spoken Remove action,
- * so a reader using TalkBack removes it without the gesture.
+ * press arms the chip, and the app's X appears at its trailing end, inside the
+ * same capsule: the one shape that says "take this text away" everywhere else.
+ * The armed chip is then the removing control in whole, so the X is a mark and
+ * not a second target inside a 36 dp chip, and the reader's finger keeps the
+ * app's 48 dp floor. The query leaves the list and the phone on that tap.
+ * Clear stays: the two answer two questions, this word and all of them, and
+ * clearing a whole session should not be five long presses.
+ *
+ * The long press is not the only road, because a gesture that has to be taught
+ * is not a signifier: the chip also carries a spoken Remove action, so a
+ * reader using TalkBack removes it without the gesture.
  *
  * The row wears the quiet ink, because the app never gives a removal the
  * loudest word on a surface (owner report: Remove was brighter than the Clear
  * beside it). The mark stays the app's X, which is the same 'take this text
- * away' the field's clear wears.
+ * away' the field's clear wears. The armed ground steps from [Wash.Door] to
+ * [Wash.Selected], the wash the app gives a chosen thing, so the state is
+ * read before the mark is.
  *
- * The menu takes the chip's middle. A chip is a capsule, and [AppPopup]'s own
- * rule answers a capsule with [PopupAlignment.Center]; the Start alignment is
- * the door's, and the chip is not a door. Start put the menu's left edge on
- * the chip's left edge and let it run off to the right, so a wider menu no
- * longer read as belonging to the word that raised it (owner report, this
- * session). A chip near the leading edge still clamps to the window's gutter,
- * which is the window's rule and not a second alignment.
+ * One chip is armed at a time. Tapping another chip searches for it and lays
+ * the first one down; tapping the armed chip removes it; a long press on it
+ * again lays it down. The armed chip grows by the X's width, which is the
+ * deliberate cost of a mark inside the capsule rather than a badge crossing
+ * its edge (owner decision, this session).
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -97,6 +89,13 @@ internal fun RecentSearches(
     onRemove: (String) -> Unit,
     onClear: () -> Unit,
 ) {
+    var armed by remember { mutableStateOf<String?>(null) }
+    // A word that has left the list cannot stay armed. The list is read from
+    // the phone when the sheet opens and written as a result is opened, so a
+    // clear or a new search can rebuild it under the state.
+    LaunchedEffect(queries) {
+        if (armed != null && armed !in queries) armed = null
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -125,8 +124,16 @@ internal fun RecentSearches(
             queries.forEach { query ->
                 RecentChip(
                     label = query,
-                    onQuery = { onQuery(query) },
-                    onRemove = { onRemove(query) },
+                    armed = armed == query,
+                    onQuery = {
+                        armed = null
+                        onQuery(query)
+                    },
+                    onArm = { armed = if (armed == query) null else query },
+                    onRemove = {
+                        armed = null
+                        onRemove(query)
+                    },
                 )
             }
         }
@@ -134,44 +141,36 @@ internal fun RecentSearches(
 }
 
 /**
- * One recent query: a chip that fills the field on a tap, and that says how to
- * remove itself on a long press or through a screen reader's own action.
+ * One recent query: a chip that fills the field on a tap, and that turns into
+ * its own removing control on a long press.
  *
- * The popup hangs from the chip's own place on the glass, measured here
- * because a popup cannot read its anchor back through a test, and it opens
- * with the query as its spoken name: a reader who cannot see the chip hears
- * which word the one row is about to remove.
+ * The whole chip is the target in both states, so the X is a mark and not a
+ * second, smaller control inside a 36 dp capsule. The chip keeps the app's
+ * 48 dp target, and the mark is the same [Icon.Close] the field's clear wears
+ * (owner decision, this session).
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun RecentChip(
     label: String,
+    armed: Boolean,
     onQuery: () -> Unit,
+    onArm: () -> Unit,
     onRemove: () -> Unit,
 ) {
     val press = remember { MutableInteractionSource() }
     val ink = MaterialTheme.colorScheme.onSurfaceVariant
     val remove = stringResource(R.string.search_recent_remove)
-    val bounds = remember { mutableStateOf(IntRect.Zero) }
-    var anchor by remember { mutableStateOf<IntRect?>(null) }
     Row(
         modifier = Modifier
-            .onGloballyPositioned { coordinates ->
-                val box = coordinates.boundsInWindow()
-                bounds.value = IntRect(
-                    box.left.toInt(),
-                    box.top.toInt(),
-                    box.right.toInt(),
-                    box.bottom.toInt(),
-                )
-            }
             .combinedClickable(
                 interactionSource = press,
                 indication = null,
                 role = Role.Button,
-                onClick = onQuery,
+                onClickLabel = if (armed) remove else null,
                 onLongClickLabel = remove,
-                onLongClick = { anchor = bounds.value },
+                onLongClick = onArm,
+                onClick = if (armed) onRemove else onQuery,
             )
             .semantics {
                 customActions = listOf(
@@ -181,9 +180,16 @@ private fun RecentChip(
                     },
                 )
             }
+            .testTag(if (armed) "recent-armed" else "recent-chip")
             .minimumInteractiveComponentSize()
             .clip(Radii.Pill)
-            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door))
+            .background(
+                if (armed) {
+                    MaterialTheme.colorScheme.primary.copy(alpha = Wash.Selected)
+                } else {
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
+                },
+            )
             .indication(press, ripple(color = ink))
             .padding(horizontal = Space.Row, vertical = Space.Line),
         verticalAlignment = Alignment.CenterVertically,
@@ -195,26 +201,13 @@ private fun RecentChip(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
-    }
-    anchor?.let { at ->
-        AppPopup(
-            anchor = at,
-            onDismiss = { anchor = null },
-            width = RecentChipMenu,
-            alignment = PopupAlignment.Center,
-            name = label,
-        ) {
-            MenuActionRow(
+        if (armed) {
+            IconGlyph(
                 icon = Icon.Close,
-                label = remove,
-                // The one removing word in a menu: the quiet ink, as Clear
-                // beside it and every other removal in the app (owner
-                // decision, this version).
-                quiet = true,
-                onClick = {
-                    anchor = null
-                    onRemove()
-                },
+                tint = ink,
+                modifier = Modifier
+                    .padding(start = Space.Line)
+                    .size(GlyphSize.Action),
             )
         }
     }

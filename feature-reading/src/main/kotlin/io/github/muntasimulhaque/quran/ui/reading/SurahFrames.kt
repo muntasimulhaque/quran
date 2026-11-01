@@ -107,22 +107,15 @@ internal fun SurahOpening(
             .padding(top = 40.dp, bottom = 14.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // The opening of a surah is the one arrival in the reading: the Arabic
-        // name in the ornament gold, a short gold rule under it, and the name
-        // and place in quiet type, so every surah opens the same way.
+        // The opening of a surah is the one arrival in the reading: the
+        // Arabic name in the ornament gold, then the name and place in quiet
+        // type, so every surah opens the same way. The two names are one
+        // header, so the Latin name stands a row's gap under the Arabic; the
+        // gold rule that used to divide them was ornament, and it made the
+        // arrival read as two separate lines (owner decision, this session).
         Text(
             text = surah.nameArabic,
             style = amiriDisplay(TypeLadder.OPENING_ARABIC_SP, ornament),
-        )
-        // The rule is ornament, never a separator: a short gold rule under the
-        // Arabic name, carrying no meaning a reader would lose without it. It
-        // is a hairline of the same gold, held well inside the measure.
-        Box(
-            Modifier
-                .padding(top = 14.dp)
-                .fillMaxWidth(0.3f)
-                .height(1.dp)
-                .background(ornament.copy(alpha = 0.55f)),
         )
         Text(
             text = surah.nameSimple,
@@ -132,7 +125,7 @@ internal fun SurahOpening(
             // cannot see it can jump to it instead of hearing the opening
             // read as one run (owner decision, this session).
             modifier = Modifier
-                .padding(top = Space.Section)
+                .padding(top = Space.Row)
                 .semantics { heading() },
         )
         Text(

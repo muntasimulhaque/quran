@@ -81,22 +81,24 @@ import java.util.Locale
  *    the system scale; a voice that is not a recitation keeps one line and
  *    the voice list alone, because the pace and the end answer a recitation
  *    that is not there (owner decision, this version).
- * 5. The block's two lines are the place over the reciter's name and the
- *    ayah's key while playing, and the reciter's name over the state's
- *    sentence when there is no recitation (owner decision, this version).
- *    Nothing in the pill touches a neighbour or the capsule: the block keeps
- *    the app's air above and below, the answer keeps it at its end, and the
- *    words' own end keeps the shoulder's air, where an 8 dp pad read as a
- *    name touching the border (owner decision, this session).
+ * 5. The block's two lines are the place over the ayah's key, the reciter's
+ *    name, and the pace when it is not 1x while playing, and the reciter's
+ *    name over the state's sentence when there is no recitation (owner
+ *    decision, this version). Nothing in the pill touches a neighbour or the
+ *    capsule: the block keeps the app's air above and below, the answer keeps
+ *    it at its end, and the words' own end keeps the shoulder's air, where an
+ *    8 dp pad read as a name touching the border (owner decision, this
+ *    session).
  * 6. The reciter is chosen on the pill and not in the settings, and the
  *    chooser carries every voice with what it would still cost for the surah
  *    at hand, so the choice is made with the number in view (owner report).
- * 7. The pill says where the reader is: the surah's name over the voice and
- *    the ayah's key, and the key never gives way. The pace is not on the pill
- *    any more; the listening panel carries it, because the meta line has no
- *    room for a third fact (owner decision, this version). It does not say
- *    what happens at the end of the audio: the switch that carries the answer
- *    says its own state where the reader turned it (owner report).
+ * 7. The pill says where the reader is: the surah's name over the ayah's
+ *    key, the voice, and the pace when it is not 1x. The key and the pace
+ *    never give way; the voice does, because the key says which ayah and the
+ *    pace says how fast (owner decision, this session). The pace is read back
+ *    from the listening panel, where it is set. It does not say what happens
+ *    at the end of the audio: the switch that carries the answer says its own
+ *    state where the reader turned it (owner report).
  * 8. The popup stands on the capsule's own centre, on the phone and on the
  *    wide glass alike. A menu is placed from the box it hangs on, and an
  *    anchor on the word the reader touched put the reciter chooser at one
@@ -502,8 +504,8 @@ class PlaybackPillTest {
     }
 
     /**
-     * The block's two lines: the place over the reciter's name and the ayah's
-     * key, both inside one door, and the block's own shape keeps the capsule's
+     * The block's two lines: the place over the ayah's key and the reciter's
+     * name, both inside one door, and the block's own shape keeps the capsule's
      * air above and below it, and the words' own air at its end.
      */
     @Test
@@ -526,8 +528,8 @@ class PlaybackPillTest {
             name.top.value < key.bottom.value && name.bottom.value > key.top.value,
         )
         assertTrue(
-            "the key follows the voice: $name and $key",
-            key.left.value >= name.right.value,
+            "the key leads the voice: $key and $name",
+            key.right.value <= name.left.value + 0.5f,
         )
         assertEquals(
             "the block keeps the app's air above it",
@@ -1217,16 +1219,34 @@ class PlaybackPillTest {
     }
 
     @Test
-    fun thePaceLivesInTheListeningPanel() {
-        // The pace is a setting, and it lives where it is set. The pill's meta
-        // line has no room for a third fact now that the ayah's key sits
-        // there, so a recitation at 0.75x says so in the panel alone (owner
-        // decision, this version).
+    fun thePillReadsBackAPaceThatIsNotTheDefault() {
+        // The panel is where the pace is set; the pill is where it is read
+        // back after the panel closes. The line leads with the reference,
+        // then the voice, then the pace, so the immutable place comes before
+        // the chosen voice (owner decision, this session).
         showPill(speed = 0.75f)
-        compose.onAllNodesWithText("0.75x", useUnmergedTree = true).assertCountEquals(0)
         compose.onNodeWithText("Al-Baqarah").assertIsDisplayed()
-        compose.onNodeWithTag("playback-words").performClick()
-        compose.onNodeWithText("0.75x").assertExists()
+        val reference = compose.onNodeWithText("2:255", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
+        val voice = compose.onNodeWithText("Husary", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
+        val pace = compose.onNodeWithText("0.75x", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
+        assertTrue(
+            "the ayah key must lead the voice: $reference, $voice",
+            reference.right.value <= voice.left.value + 0.5f,
+        )
+        assertTrue(
+            "the pace must trail the voice: $voice, $pace",
+            voice.right.value <= pace.left.value + 0.5f,
+        )
+    }
+
+    @Test
+    fun thePillSaysNothingAtTheDefaultPace() {
+        // 1x is the pace the app starts at, so the line does not say it.
+        showPill(speed = 1f)
+        compose.onAllNodesWithText("1x", useUnmergedTree = true).assertCountEquals(0)
     }
 
     /**

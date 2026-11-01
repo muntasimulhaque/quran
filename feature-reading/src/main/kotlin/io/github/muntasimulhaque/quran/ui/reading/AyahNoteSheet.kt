@@ -30,14 +30,19 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.MAX_NOTE_LENGTH
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
+import io.github.muntasimulhaque.quran.ui.kit.RoundedSelectionColors
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
+import io.github.muntasimulhaque.quran.ui.kit.roundedSelection
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.prose
@@ -106,8 +111,17 @@ private fun NoteEditor(
 ) {
     // The draft survives a theme change, a language change, and the window
     // being rebuilt while the reader is still writing. `remember` alone
-    // threw the words away with the old composition.
-    var draft by rememberSaveable(initial) { mutableStateOf(initial.orEmpty()) }
+    // threw the words away with the old composition. It is a TextFieldValue
+    // so the app can draw the rounded wash under the reader's selection.
+    var draft by rememberSaveable(initial, stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(
+            TextFieldValue(
+                initial.orEmpty(),
+                selection = TextRange(initial.orEmpty().length),
+            ),
+        )
+    }
+    var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
     val hint = stringResource(R.string.card_note_hint)
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) {
@@ -148,7 +162,7 @@ private fun NoteEditor(
                     if (saving) R.string.reading_note_saving else R.string.reading_note_save,
                 ),
                 onClick = {
-                    if (!saving) onSave(draft.trim().takeIf { it.isNotEmpty() })
+                    if (!saving) onSave(draft.text.trim().takeIf { it.isNotEmpty() })
                 },
                 // Save and Clear are two standalone actions, so they stand
                 // the action gap apart (owner decision, this session). Save
@@ -158,59 +172,69 @@ private fun NoteEditor(
                 prominent = true,
             )
         }
-        BasicTextField(
-            value = draft,
-            onValueChange = {
-                draft = it.take(MAX_NOTE_LENGTH)
-                onDraftChange(draft)
-            },
-            // The reader writes their note in the reading's own voice at the
-            // size they read at, not at a fixed point: it is one voice, the
-            // reader's own, and it follows the choice they made for the
-            // translation (owner decision, this session: the fixed 16 sp is
-            // out, the reading voice is in).
-            textStyle = LocalReadingVoice.current.prose(
-                settings.translationSp,
-                settings.translationLineSp,
-                MaterialTheme.colorScheme.onSurface,
-            ),
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 110.dp)
-                .padding(top = 10.dp)
-                .focusRequester(focus)
-                .then(
-                    if (draft.isEmpty()) {
-                        Modifier.semantics { contentDescription = hint }
+        RoundedSelectionColors {
+            BasicTextField(
+                value = draft,
+                onValueChange = { next ->
+                    val text = next.text.take(MAX_NOTE_LENGTH)
+                    val previous = draft.text
+                    draft = if (text.length == next.text.length) {
+                        next
                     } else {
-                        Modifier
-                    },
-                ),
-            decorationBox = { inner ->
-                Box {
-                    if (draft.isEmpty()) {
-                        Text(
-                            text = hint,
-                            style = LocalReadingVoice.current.prose(
-                                settings.translationSp,
-                                settings.translationLineSp,
-                                MaterialTheme.colorScheme.onSurfaceVariant,
-                            ),
-                            // The hint is the one thing in an empty field, so it
-                            // has to be read to be a hint at all. The theme's
-                            // secondary tone measures 6.1:1 and up on every
-                            // ground; the 0.5 alpha it wore measured 2.2:1
-                            // and is closed here. The field's own node speaks it
-                            // once; the drawn copy is not a second stop.
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.clearAndSetSemantics { },
-                        )
+                        TextFieldValue(text, selection = TextRange(text.length))
                     }
-                    inner()
-                }
-            },
-        )
+                    if (text != previous) onDraftChange(text)
+                },
+                // The reader writes their note in the reading's own voice at the
+                // size they read at, not at a fixed point: it is one voice, the
+                // reader's own, and it follows the choice they made for the
+                // translation (owner decision, this session: the fixed 16 sp is
+                // out, the reading voice is in).
+                textStyle = LocalReadingVoice.current.prose(
+                    settings.translationSp,
+                    settings.translationLineSp,
+                    MaterialTheme.colorScheme.onSurface,
+                ),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                onTextLayout = { layout = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 110.dp)
+                    .padding(top = 10.dp)
+                    .focusRequester(focus)
+                    .roundedSelection(layout, draft.selection)
+                    .then(
+                        if (draft.text.isEmpty()) {
+                            Modifier.semantics { contentDescription = hint }
+                        } else {
+                            Modifier
+                        },
+                    ),
+                decorationBox = { inner ->
+                    Box {
+                        if (draft.text.isEmpty()) {
+                            Text(
+                                text = hint,
+                                style = LocalReadingVoice.current.prose(
+                                    settings.translationSp,
+                                    settings.translationLineSp,
+                                    MaterialTheme.colorScheme.onSurfaceVariant,
+                                ),
+                                // The hint is the one thing in an empty field, so it
+                                // has to be read to be a hint at all. The theme's
+                                // secondary tone measures 6.1:1 and up on every
+                                // ground; the 0.5 alpha it wore measured 2.2:1
+                                // and is closed here. The field's own node speaks it
+                                // once; the drawn copy is not a second stop.
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.clearAndSetSemantics { },
+                            )
+                        }
+                        inner()
+                    }
+                },
+            )
+        }
         if (failed) {
             Text(
                 text = stringResource(R.string.reading_note_failed),

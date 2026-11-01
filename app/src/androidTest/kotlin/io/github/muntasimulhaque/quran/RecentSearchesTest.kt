@@ -6,6 +6,7 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.longClick
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -35,9 +36,10 @@ import org.junit.runner.RunWith
  * its query back in the field, and that Clear empties the list on the phone
  * as well as on the glass (owner decision, this session).
  *
- * A chip can also go on its own: a long press raises the one row menu, and
- * Remove takes the one word from the phone while the others stay, which is
- * the per query door Clear never was (owner decision, this session).
+ * A chip can also go on its own: a long press arms it, its X appears inside
+ * the capsule, and the next tap takes the one word from the phone while the
+ * others stay, which is the per query door Clear never was (owner decision,
+ * this session).
  */
 @RunWith(AndroidJUnit4::class)
 class RecentSearchesTest {
@@ -109,9 +111,10 @@ class RecentSearchesTest {
         }
         rule.onNodeWithText("mercy").performTouchInput { longClick() }
         rule.waitUntil(timeoutMillis = 15_000) {
-            rule.onAllNodesWithText("Remove").fetchSemanticsNodes().isNotEmpty()
+            rule.onAllNodesWithText("mercy").fetchSemanticsNodes().isNotEmpty() &&
+                rule.onAllNodesWithTag("recent-armed").fetchSemanticsNodes().isNotEmpty()
         }
-        rule.onNodeWithText("Remove").performClick()
+        rule.onNodeWithText("mercy").performClick()
         rule.waitUntil(timeoutMillis = 15_000) {
             rule.onAllNodesWithText("mercy").fetchSemanticsNodes().isEmpty()
         }

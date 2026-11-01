@@ -76,21 +76,23 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  *
  * **The place leads, and the ayah key never gives way** (owner decision,
  * this version). The block's first line is the surah's own name at the
- * card's 14 Medium. The second line is the reciter's name and the ayah's key
- * (2:255) at 13, so the place is one phrase and the key is a fact beside the
- * voice. The pill's type follows the system scale only up to the app's
- * largest step, 1.2, and stops there: the line is 140 dp, where the longest
- * name is 128.9 and the voice and the key 136.9, so the place is whole
- * instead of being cut at 1.3. The reading and the panel still follow the
- * reader's scale (owner decision, this version). If the glass is narrower
- * than the reference phone, the reciter's name gives way first, because the
- * key says which ayah and the name says who.
+ * card's 14 Medium. The second line leads with the ayah's key (2:255) at 13,
+ * then the reciter's name in the accent, then the pace when it is not 1x. The
+ * order is the app's reference grammar: the immutable place, then the chosen
+ * voice, then how fast it is read. The pill's type follows the system scale
+ * only up to the app's largest step, 1.2, and stops there: the line is 140
+ * dp, where the longest name is 128.9 and the voice and the key 136.9, so the
+ * place is whole instead of being cut at 1.3. The reading and the panel still
+ * follow the reader's scale (owner decision, this version). If the glass is
+ * narrower than the reference phone, the reciter's name gives way first,
+ * because the key says which ayah and the name says who.
  *
- * **The pace lives in the listening panel now** (owner decision, this
- * version). It used to stand beside the reciter on the pill; the place line
- * and the key leave the meta line no room for a third fact, and the panel is
- * where the pace is set. The pill says who and where; the panel says how
- * fast and what happens at the end.
+ * **The pace lives in the listening panel, and the pill reads it back**
+ * (owner decision, this session). The panel is where the pace is set, and
+ * its own step row says the chosen value; the pill says it again beside the
+ * voice when it is not 1x, so the reader who closed the panel still knows how
+ * fast the recitation is. The pill says where, who, and how fast; the panel
+ * also says what happens at the end.
  *
  * **Nothing touches.** The words keep [PillEndAir] at their own end, because a
  * capsule's end is a sphere and an [PillAir] measured from its widest point
@@ -144,7 +146,7 @@ fun PlaybackBar(
      * cannot tell whether it is the surah they wanted (owner report).
      */
     pendingAudio: String? = null,
-    /** The reader's pace, drawn in the listening panel and not on the pill. */
+    /** The reader's pace, drawn in the panel and read back on the pill when it is not 1x. */
     speed: Float = 1f,
     /** What happens as the reading moves on, set from the panel's own list. */
     end: EndOfAudio = EndOfAudio.CONTINUE_AYAH,
@@ -302,12 +304,13 @@ fun PlaybackBar(
                 ) {
                     if (playing) {
                         // The recitation exists, so the place leads, the
-                        // voice and the ayah's key follow, and the door is
-                        // the whole listening panel.
+                        // ayah's key, the voice, and the pace follow, and the
+                        // door is the whole listening panel.
                         PlayingWordsBlock(
                             placeName = placeName,
                             reciter = reciterName,
                             reference = playbackPlace(reference.orEmpty()),
+                            speed = speed,
                             onOpen = { openMenu = PillMenu.Listening },
                             modifier = Modifier
                                 .weight(1f, fill = true)

@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
+import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
@@ -141,14 +142,14 @@ internal fun OfferWordsBlock(
 }
 
 /**
- * The playing pill's words: the place on the first line, the voice and the
- * ayah key on the second.
+ * The playing pill's words: the place on the first line, the ayah key, the
+ * voice, and the pace on the second.
  *
  * The place is the surah's own name at the card's 14 Medium, in the page's
- * ink. Under it, the reciter's name in the accent and the app's ayah
- * reference (2:255) in the ink, with the door's chevron at the end. The
- * whole block is the one door to the listening panel, where the full place
- * and the pace live.
+ * ink. Under it, the app's ayah reference (2:255) in the ink, the reciter's
+ * name in the accent, and the pace when it is not 1x in the quiet ink, with
+ * the door's chevron at the end. The whole block is the one door to the
+ * listening panel, where the full place and the pace scale live.
  *
  * **The place leads, and the key never gives way** (owner decision, this
  * version). The pill's type follows the system scale only up to the app's
@@ -158,9 +159,11 @@ internal fun OfferWordsBlock(
  * reading and the listening panel still take the reader's scale; the pill is
  * a control with a fixed line (owner decision, this version). If the glass is
  * narrower than the app's reference phone, the reciter's name gives way
- * first, because the key is the fact and the name is the voice. The pace is
- * not here: the meta line has no room for a third fact, and the listening
- * panel carries it.
+ * first, because the key is the fact and the name is the voice. The
+ * reference leads the meta line, the voice follows, and the pace trails it:
+ * the immutable place, then the chosen voice, then how fast it is read. The
+ * pace is drawn only when it is not 1x, because 1x is the pace the app starts
+ * at and a line does not need to say it.
  *
  * The block is 48 dp tall inside the capsule, so the two lines and the
  * chevron are not the whole of what a finger has to hit; its 4 dp inset
@@ -175,6 +178,8 @@ internal fun PlayingWordsBlock(
     reciter: String,
     /** The ayah's reference, already in the reader's digits. */
     reference: String,
+    /** The reader's pace, drawn only when it is not the app's own 1x. */
+    speed: Float,
     /** The door the block is, or null where there is nothing to open. */
     onOpen: (() -> Unit)?,
     modifier: Modifier = Modifier,
@@ -228,25 +233,41 @@ internal fun PlayingWordsBlock(
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
+                    text = reference,
+                    // The app's reference leads the meta line: 13 at Regular,
+                    // the precise place under the surah's name. The key never
+                    // gives way; the voice after it does (owner decision, this
+                    // version).
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                )
+                Text(
                     text = reciter,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    // The voice gives way first: the key and the chevron are
-                    // measured before the name, so the ayah key can never be the
-                    // thing an ellipsis takes (owner decision, this version).
-                    modifier = Modifier.weight(1f, fill = false),
+                    // The voice gives way first: the key, the pace, and the
+                    // chevron are measured before the name, so neither the
+                    // ayah key nor the pace can be the thing an ellipsis takes
+                    // (owner decision, this version).
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .padding(start = Space.Line),
                 )
-                Text(
-                    text = reference,
-                    // The app's reference beside the voice: 13 at Regular, a
-                    // value under the place rather than a second title.
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    modifier = Modifier.padding(start = Space.Line),
-                )
+                if (speed != 1f) {
+                    Text(
+                        text = speedText(speed),
+                        // The pace is the pill's read-back after the panel
+                        // closes: the quiet value beside the voice, not a
+                        // second title (owner decision, this session).
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        modifier = Modifier.padding(start = Space.Line),
+                    )
+                }
                 if (onOpen != null) {
                     IconGlyph(
                         icon = Icon.Chevron,

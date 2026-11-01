@@ -70,6 +70,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -85,8 +86,10 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
+import io.github.muntasimulhaque.quran.ui.kit.RoundedSelectionColors
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
+import io.github.muntasimulhaque.quran.ui.kit.roundedSelection
 import io.github.muntasimulhaque.quran.ui.reader.IconButton
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -541,28 +544,33 @@ private fun TimeField(
     // editor would close before the request landed. The flag ignores that
     // first empty event and commits only a focus that was actually held.
     var focused by remember(editing) { mutableStateOf(false) }
+    var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
     val ink = MaterialTheme.colorScheme.onSurface
     if (editing) {
-        BasicTextField(
-            value = field,
-            onValueChange = onFieldChange,
-            textStyle = style.copy(color = ink),
-            singleLine = true,
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-            keyboardOptions = keyboardOptions,
-            keyboardActions = keyboardActions,
-            modifier = Modifier
-                .width(slot)
-                .focusRequester(focus)
-                .onFocusChanged { state ->
-                    if (state.isFocused) {
-                        focused = true
-                    } else if (focused) {
-                        onFocusLost()
+        RoundedSelectionColors {
+            BasicTextField(
+                value = field,
+                onValueChange = onFieldChange,
+                textStyle = style.copy(color = ink),
+                singleLine = true,
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                keyboardOptions = keyboardOptions,
+                keyboardActions = keyboardActions,
+                onTextLayout = { layout = it },
+                modifier = Modifier
+                    .width(slot)
+                    .focusRequester(focus)
+                    .onFocusChanged { state ->
+                        if (state.isFocused) {
+                            focused = true
+                        } else if (focused) {
+                            onFocusLost()
+                        }
                     }
-                }
-                .semantics { contentDescription = name },
-        )
+                    .roundedSelection(layout, field.selection)
+                    .semantics { contentDescription = name },
+            )
+        }
     } else {
         Text(
             text = value,

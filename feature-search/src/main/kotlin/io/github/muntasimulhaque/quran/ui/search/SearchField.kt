@@ -19,7 +19,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,13 +38,18 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.feature.search.R
-import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
+import io.github.muntasimulhaque.quran.ui.kit.RoundedSelectionColors
+import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.kit.roundedSelection
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
@@ -53,126 +63,147 @@ internal fun SearchField(
 ) {
     val focusManager = LocalFocusManager.current
     val hint = stringResource(R.string.search_hint)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 18.dp, end = 10.dp, top = Space.Line, bottom = Space.Tight),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
+    // The field owns a TextFieldValue so the app can draw the rounded wash
+    // under the reader's selection; the sheet still passes a plain String.
+    // The external value wins whenever it differs, which is how a recent chip
+    // or the clear mark reaches the field.
+    var field by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue(value, selection = TextRange(value.length)))
+    }
+    LaunchedEffect(value) {
+        if (field.text != value) {
+            field = TextFieldValue(value, selection = TextRange(value.length))
+        }
+    }
+    var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
+    RoundedSelectionColors {
         Row(
             modifier = Modifier
-                .weight(1f)
-                // The field's own pill owes a finger the 48 dp floor every
-                // other control holds; at 47 it was the one control under it
-                // (owner decision, the theme and consistency session).
-                .defaultMinSize(minHeight = 48.dp)
-                .clip(Radii.Pill)
-                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)),
+                .fillMaxWidth()
+                .padding(start = 18.dp, end = 10.dp, top = Space.Line, bottom = Space.Tight),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(
                 modifier = Modifier
                     .weight(1f)
-                    // The pill is the field's own shape, so a tap anywhere
-                    // inside it reaches the field: the words, and the quiet
-                    // ground around them. The text field's own target is the
-                    // line of text it draws, and the padding around that line
-                    // used to answer nothing (owner decision, this session).
-                    // The clear mark keeps its own tap beside this region, so
-                    // emptying the field is never also a tap into it.
-                    .pointerInput(focus) {
-                        detectTapGestures(onTap = { focus.requestFocus() })
-                    }
-                    .padding(
-                        start = Space.Block,
-                        end = if (value.isEmpty()) 16.dp else ClearGap,
-                        top = Space.Row,
-                        bottom = Space.Row,
-                    ),
+                    // The field's own pill owes a finger the 48 dp floor every
+                    // other control holds; at 47 it was the one control under it
+                    // (owner decision, the theme and consistency session).
+                    .defaultMinSize(minHeight = 48.dp)
+                    .clip(Radii.Pill)
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // The field's leading mark is a search, not a nav arrow: the
-                // sheet is opened from the top bar and closed by its own
-                // Close, so the magnifier is the one thing a reader needs to
-                // recognize at a glance (owner decision, this session). It is
-                // a drawing, not a control, so it is cleared from semantics.
-                IconGlyph(
-                    icon = Icon.Search,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .padding(end = Space.Line)
-                        .size(GlyphSize.Action)
-                        .clearAndSetSemantics { },
-                )
-                BasicTextField(
-                    value = value,
-                    onValueChange = onChange,
-                    singleLine = true,
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(
-                        color = MaterialTheme.colorScheme.onSurface,
-                    ),
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    // The keyboard's Search key is the reader saying the query
-                    // is done; it closes the keyboard and leaves the results
-                    // on the page. The query already runs as it settles.
-                    keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
+                Row(
                     modifier = Modifier
                         .weight(1f)
-                        .focusRequester(focus)
-                        // The hint is a sibling drawing in the decoration box,
-                        // not a label on the editable node. An empty field
-                        // carries the hint as its spoken name, and a field with
-                        // a query lets the typed text speak for itself (owner
-                        // decision, this session).
-                        .then(
-                            if (value.isEmpty()) {
-                                Modifier.semantics { contentDescription = hint }
-                            } else {
-                                Modifier
-                            },
-                        ),
-                    decorationBox = { inner ->
-                        Box {
-                            if (value.isEmpty()) {
-                                Text(
-                                    text = hint,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    // The hint is the only text in an empty field,
-                                    // so it has to be read to be a hint at all. The
-                                    // 0.55 alpha it wore measured 2.5:1, under the
-                                    // theme's 4.5:1 rule.
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    // The field's own node already speaks the hint
-                                    // once; the drawn copy is not a second stop.
-                                    modifier = Modifier.clearAndSetSemantics { },
-                                )
-                            }
-                            inner()
+                        // The pill is the field's own shape, so a tap anywhere
+                        // inside it reaches the field: the words, and the quiet
+                        // ground around them. The text field's own target is the
+                        // line of text it draws, and the padding around that line
+                        // used to answer nothing (owner decision, this session).
+                        // The clear mark keeps its own tap beside this region, so
+                        // emptying the field is never also a tap into it.
+                        .pointerInput(focus) {
+                            detectTapGestures(onTap = { focus.requestFocus() })
                         }
-                    },
-                )
+                        .padding(
+                            start = Space.Block,
+                            end = if (field.text.isEmpty()) 16.dp else ClearGap,
+                            top = Space.Row,
+                            bottom = Space.Row,
+                        ),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    // The field's leading mark is a search, not a nav arrow: the
+                    // sheet is opened from the top bar and closed by its own
+                    // Close, so the magnifier is the one thing a reader needs to
+                    // recognize at a glance (owner decision, this session). It is
+                    // a drawing, not a control, so it is cleared from semantics.
+                    IconGlyph(
+                        icon = Icon.Search,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .padding(end = Space.Line)
+                            .size(GlyphSize.Action)
+                            .clearAndSetSemantics { },
+                    )
+                    BasicTextField(
+                        value = field,
+                        onValueChange = { next ->
+                            field = next
+                            if (next.text != value) onChange(next.text)
+                        },
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.bodyLarge.copy(
+                            color = MaterialTheme.colorScheme.onSurface,
+                        ),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        // The keyboard's Search key is the reader saying the query
+                        // is done; it closes the keyboard and leaves the results
+                        // on the page. The query already runs as it settles.
+                        keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
+                        onTextLayout = { layout = it },
+                        modifier = Modifier
+                            .weight(1f)
+                            .focusRequester(focus)
+                            .roundedSelection(layout, field.selection)
+                            // The hint is a sibling drawing in the decoration box,
+                            // not a label on the editable node. An empty field
+                            // carries the hint as its spoken name, and a field with
+                            // a query lets the typed text speak for itself (owner
+                            // decision, this session).
+                            .then(
+                                if (field.text.isEmpty()) {
+                                    Modifier.semantics { contentDescription = hint }
+                                } else {
+                                    Modifier
+                                },
+                            ),
+                        decorationBox = { inner ->
+                            Box {
+                                if (field.text.isEmpty()) {
+                                    Text(
+                                        text = hint,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        // The hint is the only text in an empty field,
+                                        // so it has to be read to be a hint at all. The
+                                        // 0.55 alpha it wore measured 2.5:1, under the
+                                        // theme's 4.5:1 rule.
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        // The field's own node already speaks the hint
+                                        // once; the drawn copy is not a second stop.
+                                        modifier = Modifier.clearAndSetSemantics { },
+                                    )
+                                }
+                                inner()
+                            }
+                        },
+                    )
+                }
+                // The mark that empties the field, drawn only while there is a
+                // query to empty. It keeps the field focused and the keyboard up,
+                // so the reader types their next word straight away rather than
+                // reaching back for a backspace at the end of the line (owner
+                // decision, this session).
+                if (field.text.isNotEmpty()) {
+                    ClearFieldButton(
+                        onClick = {
+                            field = TextFieldValue("")
+                            onChange("")
+                            focus.requestFocus()
+                        },
+                    )
+                }
             }
-            // The mark that empties the field, drawn only while there is a
-            // query to empty. It keeps the field focused and the keyboard up,
-            // so the reader types their next word straight away rather than
-            // reaching back for a backspace at the end of the line (owner
-            // decision, this session).
-            if (value.isNotEmpty()) {
-                ClearFieldButton(
-                    onClick = {
-                        onChange("")
-                        focus.requestFocus()
-                    },
-                )
-            }
+            TextButton(
+                label = stringResource(R.string.search_close),
+                onClick = onClose,
+                modifier = Modifier.padding(start = Space.Line),
+                quiet = true,
+            )
         }
-        TextButton(
-            label = stringResource(R.string.search_close),
-            onClick = onClose,
-            modifier = Modifier.padding(start = Space.Line),
-            quiet = true,
-        )
     }
 }
 

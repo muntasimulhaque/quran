@@ -1,13 +1,11 @@
 package io.github.muntasimulhaque.quran.ui.playback
 
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.heading
@@ -112,8 +110,9 @@ internal fun ColumnScope.ListeningPanel(
  * the space above it.
  */
 @Composable
-private fun MenuLabel(text: String, value: String? = null) {
-    Row(
+private fun MenuLabel(text: String) {
+    SectionHead(
+        text = text,
         modifier = Modifier
             .fillMaxWidth()
             .padding(
@@ -122,18 +121,7 @@ private fun MenuLabel(text: String, value: String? = null) {
                 end = Space.Gutter,
                 bottom = Space.Tight,
             ),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        SectionHead(text = text, modifier = Modifier.weight(1f))
-        if (value != null) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(start = Space.Line),
-            )
-        }
-    }
+    )
 }
 
 /**
@@ -169,7 +157,7 @@ internal fun ColumnScope.ListeningMenu(
     // reciter chooser's first row already opens with. The room sits over the
     // leading, and the label still stands nearer the paces it names than the
     // top edge.
-    MenuLabel(stringResource(R.string.playback_speed_label), value = speedText(speed))
+    MenuLabel(stringResource(R.string.playback_speed_label))
     // One row, five paces, the chosen one filled: the app's own step row, the
     // same the text sizes wear, so one control is learned once. It stands
     // centred on the menu rather than against its left edge, where it left
