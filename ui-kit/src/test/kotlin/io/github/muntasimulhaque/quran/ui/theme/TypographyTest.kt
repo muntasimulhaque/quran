@@ -86,9 +86,11 @@ class TypographyTest {
         assertEquals(14f, TypeLadder.COMPACT_SP, 0.001f)
         assertEquals(26f, TypeLadder.TAJWEED_SAMPLE_SP, 0.001f)
         assertEquals(18f, TypeLadder.SWATCH_SP, 0.001f)
-        assertEquals(24f, TypeLadder.SHARE_ARABIC_SP, 0.001f)
+        // The card is the reading at its default step: 26 Arabic to 16 prose,
+        // the same 1.625 the page keeps, and 24 inline under it.
+        assertEquals(26f, TypeLadder.SHARE_ARABIC_SP, 0.001f)
         assertEquals(22f, TypeLadder.SHARE_NAME_SP, 0.001f)
-        assertEquals(22f, TypeLadder.SHARE_INLINE_SP, 0.001f)
+        assertEquals(24f, TypeLadder.SHARE_INLINE_SP, 0.001f)
     }
 
     @Test

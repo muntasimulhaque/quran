@@ -14,6 +14,8 @@ internal fun ColumnScope.PillMenuBody(
     selected: String?,
     speed: Float,
     end: EndOfAudio,
+    /** The full place, for the listening panel's head; null when it is unknown. */
+    place: String? = null,
     onDismiss: () -> Unit,
     onReciter: (String) -> Unit,
     onSpeed: (Float) -> Unit,
@@ -38,6 +40,7 @@ internal fun ColumnScope.PillMenuBody(
             },
             speed = speed,
             end = end,
+            place = place,
             onSpeed = {
                 onDismiss()
                 onSpeed(it)

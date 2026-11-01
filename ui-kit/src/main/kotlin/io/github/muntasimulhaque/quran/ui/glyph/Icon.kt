@@ -20,7 +20,7 @@ enum class Icon {
     /** The magnifier that opens Search. */
     Search,
 
-    /** A ring and its eight teeth: the settings hub. */
+    /** Two rails with their handles: the sliders that open the settings hub. */
     Settings,
 
     /** The empty ribbon that keeps an ayah. */

@@ -32,7 +32,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * chrome the reading carries. It lives beside the reading screen so the page
  * file is about the page, and the bar is about the bar.
  *
- * The three marks are Browse, Search, and Settings. The gear opens the
+ * The three marks are Browse, Search, and Settings. The sliders open the
  * settings hub directly: the reading's display panel was a second door to
  * the same values, and a reader who wants a setting should not have to learn
  * a shortcut to it (owner decision, this session).

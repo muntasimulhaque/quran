@@ -120,6 +120,14 @@ class PlaybackController(
     val state: StateFlow<PlaybackUiState> = _state.asStateFlow()
 
     /**
+     * The surahs' names in the reader's language, kept as each playlist is
+     * built, so the pill's place line does not query the content database on
+     * every player event. A name is read once per surah, and the map holds at
+     * most the 114 names (owner decision, this version).
+     */
+    private val placeNames = mutableMapOf<Int, String>()
+
+    /**
      * The word under the reciter, on a flow of its own.
      *
      * It moves ten times a second. It used to travel inside [PlaybackUiState],
@@ -714,6 +722,7 @@ class PlaybackController(
         val database = content ?: return emptyList()
         val spoken = spokenContext()
         val surahName = database.surah(surah)?.nameSimple.orEmpty()
+        if (surahName.isNotBlank()) placeNames[surah] = surahName
         val artist = reciterName(
             spoken,
             recitation,
@@ -961,7 +970,8 @@ class PlaybackController(
             recitation = recitationId,
             ayahNumber = ayahNumber,
             surah = surah,
-            reference = player.currentMediaItem?.mediaMetadata?.title?.toString(),
+            reference = surah?.let { "$it:$ayahNumber" },
+            placeName = surah?.let { placeNames[it] },
         )
         rememberHeard(recitationId, ayahNumber, at, player.isPlaying)
         syncTicker()

@@ -40,8 +40,10 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  *
  * The offer keeps its own single row whatever the width, and that is not an
  * oversight: its words are a name and a size, and its answer is one word. Its
- * words are the pill's own [WordsBlock], so the offer and the playing capsule
- * wear one shape: a line of type over a line, with one door and one answer.
+ * words are the pill's own [OfferWordsBlock], and the playing capsule's
+ * [PlayingWordsBlock] keeps the same silhouette, so the offer and the playing
+ * pill wear one shape: a line of type over a line, with one door and one
+ * answer.
  *
  * **Its door is the reciter chooser, alone** (owner decision, this session).
  * The playing pill's block opens the merged panel, with the pace and the end
@@ -118,7 +120,7 @@ internal fun ListenOfferBar(
             ) {
                 // The words and the answer, one shape each: the block gives way
                 // with an ellipsis, and the answer keeps its whole word.
-                WordsBlock(
+                OfferWordsBlock(
                     name = reciterShortName(offer.reciter, offer.reciterName),
                     title = when {
                         offer.failed -> stringResource(

@@ -9,7 +9,9 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.muntasimulhaque.quran.ui.reader.ShareCard
+import io.github.muntasimulhaque.quran.ui.reader.ShareCardWidths
 import io.github.muntasimulhaque.quran.ui.reader.ShareCardCapture
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -22,9 +24,11 @@ import org.junit.runner.RunWith
  * The card's picture is read off a graphics layer, and on API 28 and up that
  * read-back is a hardware bitmap: a texture, capped by the device's own size
  * limit. A long ayah at a large text scale passes 4,096 px and loses its
- * tail. This test draws the longest ayah in the Book, which is three slices
- * tall, and checks the stitched picture is the card's real height with the
- * last slice's pixels in it.
+ * tail. This test draws the longest ayah in the Book at the card's base 320
+ * dp, which is four slices tall, and checks the stitched picture is the
+ * card's real height with the last slice's pixels in it. A long ayah takes
+ * a wider card when the preview picks its shape; the base width is asked
+ * for here so the slices are the thing under test.
  */
 @RunWith(AndroidJUnit4::class)
 class ShareCardCaptureTest {
@@ -50,8 +54,9 @@ class ShareCardCaptureTest {
         val card = image
         assertNotNull("the card must be captured", card)
         println("SHARE_CARD image=${card!!.width}x${card.height}")
-        // The card's own measure at this density is 840 px wide; its height
-        // is whatever the text needs, and the point is that nothing capped it.
+        // The capture draws at 3x the card's measure, so 320 dp is 960 px
+        // wide; its height is whatever the text needs, and the point is that
+        // nothing capped it.
         assertTrue("the card must be wider than one pixel", card.width > 100)
         assertTrue(
             "a long ayah must keep its tail: ${card.height} px is a slice cap, not a card",
@@ -73,6 +78,32 @@ class ShareCardCaptureTest {
             "the last slice must be painted, not a transparent gap",
             android.graphics.Color.alpha(tail) == 255,
         )
+    }
+
+    @Test
+    fun captureWiderThanTheGlass() {
+        var image: ImageBitmap? = null
+        var failed = false
+        compose.setContent {
+            Box(androidx.compose.ui.Modifier.fillMaxSize()) {
+                ShareCardCapture(
+                    card = LONG_CARD,
+                    // The widest card the ladder draws, which is wider than
+                    // this phone's own 1,080 px glass. The capture records it
+                    // offscreen, so the picture keeps the measure the preview
+                    // chose instead of being squeezed to the window.
+                    width = ShareCardWidths.last(),
+                    onImage = { image = it },
+                    onFailed = { failed = true },
+                )
+            }
+        }
+        compose.waitUntil(timeoutMillis = 60_000) { image != null || failed }
+        assertTrue("a wide card must not fail", !failed)
+        val card = image
+        assertNotNull("the wide card must be captured", card)
+        assertEquals("560 dp at the capture's 3x", 1680, card!!.width)
+        assertTrue("the wide card keeps its own height", card.height > 1080)
     }
 
     private companion object {

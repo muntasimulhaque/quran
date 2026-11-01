@@ -8,8 +8,18 @@ data class PlaybackUiState(
     val recitation: String? = null,
     val ayahNumber: Int? = null,
     val surah: Int? = null,
-    /** The reference of the playing ayah, as its media metadata carries it. */
+    /**
+     * The playing ayah's key, surah:ayah, for the pill's own line. It is the
+     * app's reference in its data form (2:255), not the notification's
+     * sentence; the pill localizes its digits where it draws them.
+     */
     val reference: String? = null,
+    /**
+     * The surah's name in the reader's language, read from the playlist the
+     * media session was built with. The pill leads with it; the notification's
+     * title keeps its own sentence.
+     */
+    val placeName: String? = null,
     /** True when the chosen recitation has no published package for this surah. */
     val unavailable: Boolean = false,
     /** The surah waiting for the reader's download approval. */

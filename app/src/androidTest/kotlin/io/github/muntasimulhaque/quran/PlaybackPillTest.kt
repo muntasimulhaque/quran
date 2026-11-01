@@ -4,10 +4,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assert
@@ -35,6 +37,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -51,6 +54,7 @@ import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.theme.QuranTheme
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -73,24 +77,25 @@ import java.util.Locale
  *    are on the pill even when no offer preceded it (owner decision).
  * 4. The playing pill is one row in every voice, the offer's shape: the words
  *    block at the leading end and one answer at the trailing end, 64 dp tall.
- *    The block gives way with an ellipsis before the answer does; a voice that
- *    is not a recitation keeps one line and the voice list alone, because the
- *    pace and the end answer a recitation that is not there (owner decision,
- *    this session).
- * 5. The block's two lines are the reciter's name over the place while
- *    playing, and the name over the state's sentence when there is no
- *    recitation. Nothing in the pill touches a neighbour or the capsule: the
- *    block keeps the app's air above and below, the answer keeps it at its
- *    end, and the words' own end keeps the shoulder's air, where an 8 dp pad
- *    read as a name touching the border (owner decision, this session). * 6. The reciter is chosen on the pill and not in the settings, and the
+ *    The place's line and the voice's line give way only at the extreme of
+ *    the system scale; a voice that is not a recitation keeps one line and
+ *    the voice list alone, because the pace and the end answer a recitation
+ *    that is not there (owner decision, this version).
+ * 5. The block's two lines are the place over the reciter's name and the
+ *    ayah's key while playing, and the reciter's name over the state's
+ *    sentence when there is no recitation (owner decision, this version).
+ *    Nothing in the pill touches a neighbour or the capsule: the block keeps
+ *    the app's air above and below, the answer keeps it at its end, and the
+ *    words' own end keeps the shoulder's air, where an 8 dp pad read as a
+ *    name touching the border (owner decision, this session).
+ * 6. The reciter is chosen on the pill and not in the settings, and the
  *    chooser carries every voice with what it would still cost for the surah
  *    at hand, so the choice is made with the number in view (owner report).
- * 7. The pill says where the reader is, and the pace stands beside the
- *    reciter's name when it is not the ordinary one: a tail at the end of the
- *    place was the first thing the line's ellipsis cut, and at the longest
- *    names the place alone is wider than the line (owner decision, this
- *    session). It does not say what happens at the end of the audio: the
- *    sentence does not fit the line, and the switch that carries the answer
+ * 7. The pill says where the reader is: the surah's name over the voice and
+ *    the ayah's key, and the key never gives way. The pace is not on the pill
+ *    any more; the listening panel carries it, because the meta line has no
+ *    room for a third fact (owner decision, this version). It does not say
+ *    what happens at the end of the audio: the switch that carries the answer
  *    says its own state where the reader turned it (owner report).
  * 8. The popup stands on the capsule's own centre, on the phone and on the
  *    wide glass alike. A menu is placed from the box it hangs on, and an
@@ -110,8 +115,9 @@ import java.util.Locale
  *     about 210 for a transfer that widened again as its percent did. The
  *     playing capsule, the offer, and the transfer now stand at 328 dp on a
  *     360 dp glass, and the words and the answer keep its two ends while the
- *     ground between them takes what the words do not need. The place is one
- *     line and may end in an ellipsis at the longest names.
+ *     ground between them takes what the words do not need. The place's line
+ *     is whole at the app's text sizes, and the ayah's key is whole at every
+ *     one.
  * 11. The offer prints the surah's own name whole in the line it shares with
  *     the size, in either language: the size may give way at the end of the
  *     line, the name never does (owner decision, this session).
@@ -144,7 +150,10 @@ class PlaybackPillTest {
         onStop: () -> Unit = {},
         onCancelDownload: () -> Unit = {},
         state: PlaybackUiState = PlaybackUiState(),
-        reference: String? = "Al-Baqarah 2:255",
+        reference: String? = "2:255",
+        placeName: String? = "Al-Baqarah",
+        /** The system text scale, for the legs that test the largest step. */
+        fontScale: Float = 1f,
         pendingAudio: String? = null,
         pillWidth: Modifier = Modifier,
         /**
@@ -182,6 +191,7 @@ class PlaybackPillTest {
                             ListenOption("minshawi", "Minshawi", 177_000_000L),
                         ),
                         reference = reference,
+                        placeName = placeName,
                         pendingLabel = "Continue to Al-Baqarah \u00b7 177 MB",
                         pendingAudio = pendingAudio,
                         speed = speed,
@@ -204,11 +214,13 @@ class PlaybackPillTest {
                 // popup's old room rule, which capped it at the ground above
                 // the capsule, left the menu no room at all and the legs
                 // failed on a ground the app never gives the pill.
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.BottomCenter,
-                ) {
-                    if (measureWidth == null) pill() else WideBox(measureWidth) { pill() }
+                AtFontScale(fontScale) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.BottomCenter,
+                    ) {
+                        if (measureWidth == null) pill() else WideBox(measureWidth) { pill() }
+                    }
                 }
             }
         }
@@ -236,6 +248,7 @@ class PlaybackPillTest {
                         reciterId = "husary",
                         reciterOptions = listOf(ListenOption("husary", "Husary", 0L)),
                         reference = state.value.reference,
+                        placeName = state.value.placeName,
                         pendingLabel = "Continue to Al-Baqarah \u00b7 177 MB",
                         onToggle = {},
                         onNext = {},
@@ -249,6 +262,33 @@ class PlaybackPillTest {
                 }
             }
         }
+    }
+
+    /**
+     * The pill at a system text scale, for the legs that test the largest step.
+     * The density is the screen's; only the font scale is chosen.
+     */
+    @Composable
+    private fun AtFontScale(fontScale: Float, content: @Composable () -> Unit) {
+        if (fontScale == 1f) {
+            content()
+            return
+        }
+        val density = LocalDensity.current
+        CompositionLocalProvider(
+            LocalDensity provides Density(density.density, fontScale),
+            content = content,
+        )
+    }
+
+    /** The lines a text drew, read off the node the reader would meet. */
+    private fun layoutOf(text: String): TextLayoutResult {
+        val results = mutableListOf<TextLayoutResult>()
+        val node = compose.onNodeWithText(text, useUnmergedTree = true).fetchSemanticsNode()
+        val action = node.config[SemanticsActions.GetTextLayoutResult].action
+            ?: throw AssertionError("no laid-out text for $text")
+        action(results)
+        return results.first()
     }
 
     /**
@@ -462,22 +502,32 @@ class PlaybackPillTest {
     }
 
     /**
-     * The block's two lines: the reciter's name over the place, both inside
-     * one door, and the block's own shape keeps the capsule's air above and
-     * below it, and the words' own air at its end.
+     * The block's two lines: the place over the reciter's name and the ayah's
+     * key, both inside one door, and the block's own shape keeps the capsule's
+     * air above and below it, and the words' own air at its end.
      */
     @Test
-    fun thePlayingPillStacksTheNameOverThePlace() {
+    fun thePlayingPillLeadsWithThePlace() {
         showPill()
         val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
         val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
+        val place = compose.onNodeWithText("Al-Baqarah", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
         val name = compose.onNodeWithText("Husary", useUnmergedTree = true)
             .getUnclippedBoundsInRoot()
-        val place = compose.onNodeWithText("Al-Baqarah 2:255", useUnmergedTree = true)
+        val key = compose.onNodeWithText("2:255", useUnmergedTree = true)
             .getUnclippedBoundsInRoot()
         assertTrue(
-            "the reciter's name must stand above the place: $name and $place",
-            name.bottom.value <= place.top.value + 0.5f,
+            "the place must stand above the voice: $place and $name",
+            place.bottom.value <= name.top.value + 0.5f,
+        )
+        assertTrue(
+            "the voice and the key share one line: $name and $key",
+            name.top.value < key.bottom.value && name.bottom.value > key.top.value,
+        )
+        assertTrue(
+            "the key follows the voice: $name and $key",
+            key.left.value >= name.right.value,
         )
         assertEquals(
             "the block keeps the app's air above it",
@@ -656,27 +706,38 @@ class PlaybackPillTest {
     }
 
     /**
-     * The place line takes the row the transport gave back (owner decision,
-     * this session). At the tightest glass the app draws the pill on, a 360 dp
-     * phone, the capsule is the page's 328 and the transport takes 144 of it:
-     * what is left for the place is 140 dp, where three circles the size of
-     * their targets left 120. A place longer than that still ends in an
-     * ellipsis, because the reader keeps the word Ayah on the line.
+     * The place and the key are whole at the pill's capped type (owner
+     * decision, this version). The pill's type follows the system scale only
+     * up to the app's largest step, 1.2: past it the longest surah name would
+     * take 139.7 dp of the line's 140 at 1.3 and the meta line 146, so the
+     * type stops at 1.2, where the place is 128.9 and the key line 136.9. The
+     * block keeps the cap, so the place is whole at every system scale and
+     * the key is never the thing an ellipsis takes.
      */
     @Test
-    fun thePlaceLineKeepsTheRowTheTransportGaveIt() {
+    fun thePlaceAndTheKeyStayWholeAtTheLargestStep() {
         showPill(
             pillWidth = Modifier.width(360.dp),
-            reference = "Al-Mumtahanah, Ayah 13",
+            reference = "60:13",
+            placeName = "Al-Mumtahanah",
+            fontScale = 1.3f,
         )
-        val place = compose.onNodeWithText("Al-Mumtahanah, Ayah 13", useUnmergedTree = true)
-            .getUnclippedBoundsInRoot()
-        assertEquals(
-            "the place line keeps the row the transport gave it: place $place",
-            140f,
-            (place.right - place.left).value,
-            1f,
-        )
+        val place = layoutOf("Al-Mumtahanah")
+        assertFalse("the place must be whole at 1.3: $place", place.isLineEllipsized(0))
+        val key = layoutOf("60:13")
+        assertFalse("the ayah key must be whole at 1.3: $key", key.isLineEllipsized(0))
+    }
+
+    /**
+     * The listening panel names the whole place at its head, the one sentence
+     * the compact pill cannot hold: the surah and the ayah, the same the lock
+     * screen carries (owner decision, this version).
+     */
+    @Test
+    fun theListeningPanelNamesTheWholePlace() {
+        showPill(state = PlaybackUiState(ayahNumber = 255))
+        compose.onNodeWithTag("playback-words").performClick()
+        compose.onNodeWithText("Al-Baqarah, Ayah 255").assertExists()
     }
 
     /**
@@ -1146,7 +1207,7 @@ class PlaybackPillTest {
         // where it is turned. The pill is a control over the page, and the
         // sentence does not fit the line it has (owner report).
         showPill(end = EndOfAudio.REPEAT_SURAH)
-        compose.onNodeWithText("Al-Baqarah 2:255").assertIsDisplayed()
+        compose.onNodeWithText("Al-Baqarah").assertIsDisplayed()
         assertEquals(
             "the pill must not carry the end of the audio",
             0,
@@ -1156,20 +1217,16 @@ class PlaybackPillTest {
     }
 
     @Test
-    fun thePillStillCarriesThePace() {
-        // A recitation at 0.75x is a mark and not a sentence, and it is the
-        // one thing about the audio a reader notices without being told. It
-        // stands on the voice's own line now, over the place, and the place
-        // says the place alone (owner decision, this session).
+    fun thePaceLivesInTheListeningPanel() {
+        // The pace is a setting, and it lives where it is set. The pill's meta
+        // line has no room for a third fact now that the ayah's key sits
+        // there, so a recitation at 0.75x says so in the panel alone (owner
+        // decision, this version).
         showPill(speed = 0.75f)
-        val pace = compose.onNodeWithText("0.75x", useUnmergedTree = true)
-            .getUnclippedBoundsInRoot()
-        val place = compose.onNodeWithText("Al-Baqarah 2:255", useUnmergedTree = true)
-            .getUnclippedBoundsInRoot()
-        assertTrue(
-            "the pace must stand over the place, on the name's line: pace $pace, place $place",
-            pace.bottom.value <= place.top.value,
-        )
+        compose.onAllNodesWithText("0.75x", useUnmergedTree = true).assertCountEquals(0)
+        compose.onNodeWithText("Al-Baqarah").assertIsDisplayed()
+        compose.onNodeWithTag("playback-words").performClick()
+        compose.onNodeWithText("0.75x").assertExists()
     }
 
     /**

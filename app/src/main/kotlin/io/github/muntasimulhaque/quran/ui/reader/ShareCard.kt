@@ -21,6 +21,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.core.RichText
@@ -47,9 +48,67 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlin.math.abs
 
-/** The card's own width: one column of reading, the size a phone shows well. */
-internal val ShareCardWidth = 320.dp
+/**
+ * The widths a card may take, narrowest first.
+ *
+ * The card is one column of reading at 320 dp, the width that shows a phone
+ * ayah well. Its height is the ayah's and not a design number, so a long ayah
+ * would otherwise be a strip: at 320, Al-Baqarah 2:255 is 1:3 and 2:282 is
+ * 1:9, and a receiver that clamps a tall picture at 1280 px shows the longest
+ * one about 174 px wide. The card therefore widens before it grows into a
+ * strip, in 80 dp steps up to the 560 that is still narrower than the
+ * reading's own 600 dp page. [shareCardWidth] picks the step from the
+ * measured card, and the preview and the capture both read that one answer
+ * (owner decision, this version).
+ */
+internal val ShareCardWidths = listOf(320.dp, 400.dp, 480.dp, 560.dp)
+
+/**
+ * The shape every card aims at: twice as tall as it is wide.
+ *
+ * A portrait poster at 1:2 is a chat picture; 1:3 is a receipt and 1:9 is a
+ * strip a receiver shrinks to nothing. The card takes the width whose measured
+ * card stands closest to this ratio, because a wider card is a shorter card,
+ * and a receiver that clamps the height shows a shorter picture wider and its
+ * type larger. The common ayah never leaves 320; Al-Baqarah 2:255 lands at 400
+ * (1:2.15) and 2:282 at 560 (1:2.26) (owner decision, this version).
+ */
+internal const val ShareCardPosterRatio = 2f
+
+/** One measured card: the width it was drawn at, and the height it took. */
+internal data class ShareCardMeasure(val width: Dp, val height: Dp) {
+    /** The height per one unit of width: the card's own shape. */
+    val ratio: Float get() = if (width.value > 0f) height.value / width.value else 0f
+}
+
+/**
+ * The width whose card stands closest to [ShareCardPosterRatio].
+ *
+ * [measures] are the cards measured narrowest first. The search stops at the
+ * first width at or under the ratio, because every wider card is shorter
+ * still and can only be farther from it; a tie goes to the narrower card, and
+ * an empty list to the ladder's first width. The arithmetic is here so a JVM
+ * test can pin the rule without a screen, which is the only way a card's
+ * shape can be read back.
+ */
+internal fun shareCardWidth(measures: List<ShareCardMeasure>): Dp {
+    val first = measures.firstOrNull() ?: return ShareCardWidths.first()
+    var best = first
+    var bestGap = abs(first.ratio - ShareCardPosterRatio)
+    if (first.ratio > ShareCardPosterRatio) {
+        for (measure in measures.drop(1)) {
+            val gap = abs(measure.ratio - ShareCardPosterRatio)
+            if (gap < bestGap) {
+                best = measure
+                bestGap = gap
+            }
+            if (measure.ratio <= ShareCardPosterRatio) break
+        }
+    }
+    return best.width
+}
 
 /**
  * One ayah, ready to become a picture: the Arabic, the first translation the
@@ -173,11 +232,13 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
                 colors = PaperTajweed,
                 enabled = true,
                 // The verse is the card's fixed specimen, and its numbers
-                // are the reading's own: 24 on a 48 line (2.0, the Quran
-                // Foundation's own QPC Hafs leading), the translation at its
-                // voice's size and 1.5 line, and the inline Arabic at 22, a
-                // step under the card's 24. The picture and the page are one
-                // hand (owner decision, this session).
+                // are the reading's own at the step it ships on: 26 on a 52
+                // line (2.0, the Quran Foundation's own QPC Hafs leading),
+                // the translation at the voice's 16 and 1.5 line, and the
+                // inline Arabic at 24, the reading's one stand for Arabic
+                // beside prose. The card's ratio is the page's 1.625, not a
+                // third one (owner decision, this version: 24/16 had drifted
+                // from the reading when 13.7 raised the verse to 26).
                 style = arabicStyle(
                     hafs,
                     TypeLadder.SHARE_ARABIC_SP,
@@ -200,7 +261,7 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
                     sizeSp = LocalReadingVoice.current.style.fontSize.value,
                     lineSp = LocalReadingVoice.current.style.lineHeight.value,
                     // The inline Arabic is a step under the card's verse:
-                    // 22 against the 24, the relation the reading keeps.
+                    // 24 against the 26, the reading's own relation.
                     arabicSp = TypeLadder.SHARE_INLINE_SP,
                     // The card is parchment whatever page the reader is on,
                     // so its words wear the paper ink and never the night

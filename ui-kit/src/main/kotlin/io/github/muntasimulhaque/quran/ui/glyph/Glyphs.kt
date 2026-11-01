@@ -47,7 +47,7 @@ object GlyphGrid {
     /** The set's one line weight, in grid units at 24 dp: 2 dp at every size. */
     const val Stroke = 2f
 
-    /** A filled bar: the pause's two, the skips' posts, the tafsir's rolls. */
+    /** A filled bar: the pause's two, the skips' posts, a slider's grip. */
     const val Bar = 3f
 
     /** The live area: the room a drawing keeps at every edge of the square. */
@@ -162,16 +162,20 @@ object Glyphs {
             line(16.33f, 16.33f, 20.75f, 20.75f),
         ),
 
-        // A ring and eight teeth, on the 45 degree steps the page's furniture
-        // keeps. The teeth are solid tapered teeth, not bars: a bar carries the
-        // set's 3 unit weight, so a ring at 2 and eight bars at 3 made the gear
-        // the one mark with two line weights, and a round cap on a stub three
-        // units long read as a sun ray at 24 dp (owner report, this session).
-        // Each tooth starts under the ring, runs to the circle keyline, and
-        // ends on a flat tip the solid's own corner rounds; the ring is drawn
-        // last, so its stroke closes the rim over the roots and no two shapes
-        // leave an anti-aliased seam at the joint.
-        Icon.Settings to gearTeeth() + ring(12f, 12f, 5.5f),
+        // Two rails, each with a grip to hold. The app carried this drawing
+        // for Settings until 13.5, when a gear took the mark for a display
+        // panel and then for the hub itself: a gear needs mass to read, and
+        // eight filled teeth on a 20 unit circle close into a sun at 24 dp.
+        // 14.1 redrew the cog and the eye still read a flower (owner report,
+        // this version). The rails are the set's line and the grips are its
+        // one filled weight, so the mark is the app's own hand and the thing
+        // a hand takes hold of (owner decision: two rails and two handles).
+        Icon.Settings to listOf(
+            line(3.25f, 7f, 20.75f, 7f),
+            line(3.25f, 17f, 20.75f, 17f),
+            bar(8.25f, 5.5f, 8.25f, 8.5f),
+            bar(15.75f, 15.5f, 15.75f, 18.5f),
+        ),
 
         // The portrait keyline: a ribbon is a tall thing, and the notch is a
         // quarter of its height so the tail reads as a fold rather than a cut.
@@ -290,43 +294,6 @@ object Glyphs {
 }
 
 private fun point(x: Float, y: Float) = GlyphPoint(x, y)
-
-/**
- * The Settings gear's eight teeth, on the set's 45 degree steps.
- *
- * A tooth is a tapered solid that starts under the ring (radius 5.5, where the
- * ring's stroke hides its root) and ends at the circle keyline (radius 10,
- * the outer ink the test measures). Its root is 4.3 units wide and its tip
- * 3.0, so the eye reads a tooth with a flat end rather than a radial ray with
- * a round cap. The ring is drawn after the teeth, so the rim is one unbroken
- * stroke and the roots never show a second edge.
- */
-private fun gearTeeth(): List<GlyphShape> {
-    val center = GlyphGrid.Size / 2f
-    val rootRadius = 5.5f
-    val tipRadius = 10f
-    val rootHalf = 2.15f
-    val tipHalf = 1.5f
-    return List(8) { index ->
-        val angle = (-90.0 + index * 45.0) * PI / 180.0
-        val alongX = cos(angle).toFloat()
-        val alongY = sin(angle).toFloat()
-        val acrossX = -alongY
-        val acrossY = alongX
-        fun at(radius: Float, across: Float) = GlyphPoint(
-            x = center + alongX * radius + acrossX * across,
-            y = center + alongY * radius + acrossY * across,
-        )
-        GlyphShape.Solid(
-            listOf(
-                at(rootRadius, rootHalf),
-                at(tipRadius, tipHalf),
-                at(tipRadius, -tipHalf),
-                at(rootRadius, -rootHalf),
-            ),
-        )
-    }
-}
 
 /** Pairs of coordinates, in the order the line visits them. */
 private fun points(vararg values: Float): List<GlyphPoint> {

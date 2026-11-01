@@ -76,6 +76,11 @@ private val RecentChipMenu = 160.dp
  * be taught is not a signifier: the chip also carries a spoken Remove action,
  * so a reader using TalkBack removes it without the gesture.
  *
+ * The row wears the quiet ink, because the app never gives a removal the
+ * loudest word on a surface (owner report: Remove was brighter than the Clear
+ * beside it). The mark stays the app's X, which is the same 'take this text
+ * away' the field's clear wears.
+ *
  * The menu takes the chip's middle. A chip is a capsule, and [AppPopup]'s own
  * rule answers a capsule with [PopupAlignment.Center]; the Start alignment is
  * the door's, and the chip is not a door. Start put the menu's left edge on
@@ -202,6 +207,10 @@ private fun RecentChip(
             MenuActionRow(
                 icon = Icon.Close,
                 label = remove,
+                // The one removing word in a menu: the quiet ink, as Clear
+                // beside it and every other removal in the app (owner
+                // decision, this version).
+                quiet = true,
                 onClick = {
                     anchor = null
                     onRemove()

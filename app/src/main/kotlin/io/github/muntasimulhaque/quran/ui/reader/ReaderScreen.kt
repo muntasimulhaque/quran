@@ -240,6 +240,10 @@ fun ReaderScreen(
     // is composed from the first preview until the reader dismisses it.
     var sharing by remember { mutableStateOf<ShareCard?>(null) }
     var capturing by remember { mutableStateOf(false) }
+    // The width the share sheet measured and chose for this card. The door
+    // hands it back here, and the capture draws that one card: the preview
+    // and the picture are never two shapes (owner decision, this version).
+    var captureWidth by remember { mutableStateOf(ShareCardWidths.first()) }
 
     // The chrome is shown once on a new install (and on a release that adds
     // a surface). The reveal is written down after a moment, so a process
@@ -468,6 +472,9 @@ fun ReaderScreen(
     // here where stringResource is valid; the share itself runs in a plain
     // lambda where a composable call would not be.
     val shareUnavailable = stringResource(R.string.share_unavailable)
+    // Said when the picture cannot be made or handed out. The words still
+    // go, so the reader leaves with the ayah and knows why it was words.
+    val shareCardFailed = stringResource(R.string.share_card_failed)
 
     // A shortcut or a link that asked for the search field opens it once,
     // over the reading it landed on.
@@ -500,6 +507,21 @@ fun ReaderScreen(
     }
 
     /**
+     * The picture could not be made or handed out: the words go instead, and
+     * the reader is told why. The sheet closes before the sentence so the
+     * snackbar is not behind another window, which is the rule
+     * [sharePlainText] already keeps when nothing can receive a share (owner
+     * decision, this version: a tap on Share image that silently posted the
+     * words looked like the picture had been sent).
+     */
+    fun shareWordsInsteadOfPicture(text: String) {
+        sharing = null
+        capturing = false
+        sharePlainText(text)
+        scope.launch { snackbar.showSnackbar(shareCardFailed) }
+    }
+
+    /**
      * The card as a picture, alone. The PNG goes out through the app's own
      * content provider; a full cache or a provider that will not resolve
      * falls back to the plain text, so a Share is never a tap that did
@@ -509,7 +531,7 @@ fun ReaderScreen(
         scope.launch {
             val file = withContext(Dispatchers.IO) { writeShareCard(context, image) }
             val opened = file != null && startShareCard(context, file)
-            if (!opened) sharePlainText(text)
+            if (!opened) shareWordsInsteadOfPicture(text)
         }
     }
 
@@ -752,14 +774,12 @@ fun ReaderScreen(
         sharing?.takeIf { capturing }?.let { card ->
             ShareCardCapture(
                 card = card,
+                width = captureWidth,
                 onImage = { image ->
                     capturing = false
                     shareCard(image, card.text)
                 },
-                onFailed = {
-                    capturing = false
-                    sharePlainText(card.text)
-                },
+                onFailed = { shareWordsInsteadOfPicture(card.text) },
                 modifier = Modifier.align(Alignment.BottomStart),
             )
         }
@@ -773,7 +793,10 @@ fun ReaderScreen(
     sharing?.let { card ->
         AyahShareSheet(
             card = card,
-            onShareImage = { if (!capturing) capturing = true },
+            onShareImage = { width ->
+                captureWidth = width
+                if (!capturing) capturing = true
+            },
             onShareText = { if (!capturing) sharePlainText(card.text) },
             onDismiss = {
                 sharing = null

@@ -66,6 +66,16 @@ fun MenuActionRow(
     state: String? = null,
     /** The room under the row; a row that ends a list keeps the popup's own. */
     bottomPadding: Dp = 12.dp,
+    /**
+     * True for a row that removes something. The app's removing words wear
+     * the quiet ink, never the loudest word on the surface: Remove, Clear and
+     * Cancel are the quiet shape in [TextButton]
+     * for the same reason, and a removal in a menu is the same act in a
+     * different hull. Its mark already stands in that ink; this puts the word
+     * beside it (owner decision, this version: a recent search's Remove was
+     * the brightest word in a panel whose Clear beside it was quiet).
+     */
+    quiet: Boolean = false,
 ) {
     val press = remember { MutableInteractionSource() }
     val ink = if (active) {
@@ -123,10 +133,10 @@ fun MenuActionRow(
         Text(
             text = label,
             style = MaterialTheme.typography.titleSmall,
-            color = if (active) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.onSurface
+            color = when {
+                active -> MaterialTheme.colorScheme.primary
+                quiet -> MaterialTheme.colorScheme.onSurfaceVariant
+                else -> MaterialTheme.colorScheme.onSurface
             },
             modifier = Modifier.padding(start = Space.Block),
         )

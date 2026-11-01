@@ -323,14 +323,27 @@ object TypeLadder {
     /** The theme swatch's letter. */
     const val SWATCH_SP = 18f
 
-    /** The share card's fixed specimen, a card and not the reading. */
-    const val SHARE_ARABIC_SP = 24f
+    /**
+     * The share card's verse: the reading's own Arabic at its default step,
+     * 26. The card is a specimen with the type fixed, because a picture is one
+     * artifact shared with everyone, and the reader's own step does not reach
+     * it; the ratio to the 16 translation, 1.625, is the reading's own at the
+     * step it ships on. It stood at 24 from 13.4, when the reading stood at 24
+     * too, and 13.7 raised the reading and left the card behind (owner report,
+     * this version: the card and the page were two ratios). Read from
+     * [TextSize] so the two cannot drift again (owner decision, this version).
+     */
+    val SHARE_ARABIC_SP: Float = TextSize.sp(TypeRole.Arabic, TextSize.DEFAULT)
 
     /** The surah's Arabic name on the share card. */
     const val SHARE_NAME_SP = 22f
 
-    /** The card's inline Arabic, a step under its verse. */
-    const val SHARE_INLINE_SP = 22f
+    /**
+     * The card's inline Arabic: the reading's one stand for Arabic beside
+     * prose at the default step, 24 of the verse's 26, so the card's step
+     * under its verse is the reading's and not a second ratio.
+     */
+    val SHARE_INLINE_SP: Float = TextSize.inlineArabic(TextSize.DEFAULT)
 
     /**
      * A title's line in the Latin reading face: 1.3, which is what Material's

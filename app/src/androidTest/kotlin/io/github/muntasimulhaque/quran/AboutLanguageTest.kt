@@ -101,7 +101,7 @@ class AboutLanguageTest {
             compose.onAllNodesWithContentDescription(readingPage).fetchSemanticsNodes().isNotEmpty()
         }
         compose.onAllNodesWithContentDescription(readingPage).onFirst().tapThePaper()
-        // The gear opens the settings hub directly.
+        // The sliders open the settings hub directly.
         val settings = compose.activity.getString(R.string.action_settings)
         compose.waitUntil(timeoutMillis = 15_000) {
             compose.onAllNodesWithContentDescription(settings).fetchSemanticsNodes().isNotEmpty()

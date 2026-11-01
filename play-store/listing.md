@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 14.1 (versionCode 143)
+Version: 14.2 (versionCode 144)
 
 ## Listing
 
@@ -176,6 +176,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (14.2, 491 characters)
+14.2 holds the small surfaces. Settings wears the app's two-rail mark again. A recent search's Remove is quiet, and Bangla names Clear and Remove apart. The share card sets its verse at 26 and widens for long ayahs, so a long card is a poster, not a strip. The typed time keeps its slot, with Set above the keyboard. The playing pill leads with the surah over the reciter and the ayah's key, with the pace in the panel and its type capped so the place is never cut. Text and packs unchanged.
 
 ## Release notes (14.1, 394 characters)
 14.1 brings the small surfaces together. The settings gear is redrawn as a cog, the recent-search Remove menu takes the chip's middle, and the tafsir card names its language before its source. The share sheet shows the whole card scaled to fit and stays open for another app. The four text-size rails share one length, and the daily time can be typed as well as taped. Text and packs unchanged.

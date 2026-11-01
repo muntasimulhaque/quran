@@ -10,7 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.EndOfAudio
@@ -22,6 +25,7 @@ import io.github.muntasimulhaque.quran.ui.kit.ScaleRow
 import io.github.muntasimulhaque.quran.ui.kit.SpeedSteps
 import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.theme.compactLabel
 
 /**
  * The whole of what a reader can change about the recitation, in one panel:
@@ -63,7 +67,27 @@ internal fun ColumnScope.ListeningPanel(
     end: EndOfAudio,
     onSpeed: (Float) -> Unit,
     onEndOfAudio: (EndOfAudio) -> Unit,
+    /** The whole place at the panel's head; null when it is unknown. */
+    place: String? = null,
 ) {
+    // The panel names the whole place before its first group: the compact
+    // pill has room for the surah and the key, and the sentence lives here,
+    // the same one the lock screen carries. It is a heading to a screen
+    // reader, which also hears it as the popup's pane title.
+    if (!place.isNullOrBlank()) {
+        Text(
+            text = place,
+            style = compactLabel(),
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Line)
+                .semantics { heading() }
+                .testTag("playback-place"),
+        )
+    }
     if (options.isNotEmpty()) {
         MenuLabel(stringResource(R.string.playback_reciter_label))
         ReciterChoices(options = options, selected = selected, onChoose = onChoose)

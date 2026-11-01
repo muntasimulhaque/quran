@@ -529,7 +529,7 @@ class ScreenshotTest {
         captureScreen("04-search")
         back()
 
-        // 7. The settings hub, through the gear.
+        // 7. The settings hub, through the sliders.
         revealChrome()
         rule.onNodeWithContentDescription("Settings").performClick()
         waitForTag("settings-hub")

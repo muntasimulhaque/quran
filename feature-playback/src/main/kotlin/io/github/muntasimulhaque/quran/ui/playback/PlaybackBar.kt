@@ -32,10 +32,9 @@ import io.github.muntasimulhaque.quran.ui.kit.AppPopup
 import io.github.muntasimulhaque.quran.ui.kit.PopupAlignment
 import io.github.muntasimulhaque.quran.ui.kit.DownloadLine
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
-import io.github.muntasimulhaque.quran.ui.kit.speedText
+import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
-import kotlin.math.abs
 
 /**
  * The playback pill. It speaks in five voices: asking to download a surah,
@@ -44,9 +43,9 @@ import kotlin.math.abs
  * tap on Download, and only for one surah.
  *
  * **The pill is one row, the offer's shape, in every voice** (owner decision,
- * this session). The words are a line of type over a line: the reciter's name
- * over the place while playing, and over the state's own sentence when there
- * is no recitation. The answer stands at the trailing end, one shape: the
+ * this session). The words are a line of type over a line: the place over the
+ * voice and the ayah's key while playing, and the reciter's name over the
+ * state's own sentence when there is no recitation. The answer stands at the trailing end, one shape: the
  * transport while playing, Retry on a failure, the app's one X on a transfer,
  * the Download word on a request, and nothing at all on an answer the app
  * cannot give. The capsule is 64 dp tall, or 74 with a download's line under
@@ -54,8 +53,9 @@ import kotlin.math.abs
  * and paid 120 dp for a line of words that fits beside the controls, and the
  * offer carried a second, shorter block, so one control wore two shapes.
  *
- * **The playing words are one block, and one door.** Its two lines are one
- * question, who and where, and the panel it opens is one panel: the voices,
+ * **The playing words are one block, and one door.** Its two lines are the
+ * place, then the voice and the ayah's key, and the panel it opens is one
+ * panel: the voices,
  * the pace, and what happens at the end of the audio. The voices that are not
  * a recitation keep one line, the name beside the state's sentence, and their
  * name opens the voice list alone, because the pace and the end answer a
@@ -74,18 +74,23 @@ import kotlin.math.abs
  * ground between them takes what the words do not need. The capsule has one
  * width to be at, so it snaps to nothing and animates nothing.
  *
- * The place is one line and gives way with an ellipsis before the name does.
- * On a 360 dp phone the line holds about 140 dp, which carries 108 of the 114
- * surahs' longest places whole in English and 102 in Bangla, and ends the
- * rest short: the reader keeps the word Ayah on the line (owner decision,
- * this session), and that word alone costs about 32 dp.
+ * **The place leads, and the ayah key never gives way** (owner decision,
+ * this version). The block's first line is the surah's own name at the
+ * card's 14 Medium. The second line is the reciter's name and the ayah's key
+ * (2:255) at 13, so the place is one phrase and the key is a fact beside the
+ * voice. The pill's type follows the system scale only up to the app's
+ * largest step, 1.2, and stops there: the line is 140 dp, where the longest
+ * name is 128.9 and the voice and the key 136.9, so the place is whole
+ * instead of being cut at 1.3. The reading and the panel still follow the
+ * reader's scale (owner decision, this version). If the glass is narrower
+ * than the reference phone, the reciter's name gives way first, because the
+ * key says which ayah and the name says who.
  *
- * **The pace is a mark beside the voice, not a tail on the place** (owner
- * decision, this session). It used to be appended to the place, where it was
- * the first thing an ellipsis cut: at the longest names the place is longer
- * than its own line, so a pace at the end of it was never read at all. Who is
- * reading and how fast are one fact about the voice, so the pace stands beside
- * the reciter's name, where the name leaves 90 dp of the line empty.
+ * **The pace lives in the listening panel now** (owner decision, this
+ * version). It used to stand beside the reciter on the pill; the place line
+ * and the key leave the meta line no room for a third fact, and the panel is
+ * where the pace is set. The pill says who and where; the panel says how
+ * fast and what happens at the end.
  *
  * **Nothing touches.** The words keep [PillEndAir] at their own end, because a
  * capsule's end is a sphere and an [PillAir] measured from its widest point
@@ -124,7 +129,13 @@ fun PlaybackBar(
      * the voice list is then not a door.
      */
     reciterOptions: List<ListenOption> = emptyList(),
+    /**
+     * The playing ayah's key, surah:ayah, for the pill's own line. The pill
+     * localizes its digits where it draws them.
+     */
     reference: String?,
+    /** The surah's name in the reader's language; null while it is not known. */
+    placeName: String? = null,
     pendingLabel: String?,
     /**
      * The pending surah's name and size, said while its package downloads
@@ -133,7 +144,7 @@ fun PlaybackBar(
      * cannot tell whether it is the surah they wanted (owner report).
      */
     pendingAudio: String? = null,
-    /** The reader's pace, shown only when it is not the ordinary one. */
+    /** The reader's pace, drawn in the listening panel and not on the pill. */
     speed: Float = 1f,
     /** What happens as the reading moves on, set from the panel's own list. */
     end: EndOfAudio = EndOfAudio.CONTINUE_AYAH,
@@ -202,12 +213,10 @@ fun PlaybackBar(
         }
         needsDownload -> pendingLabel.orEmpty()
         state.unavailable -> stringResource(R.string.playback_unavailable)
-        else -> playbackPlace(reference.orEmpty())
+        // The playing voice says its place in [PlayingWordsBlock]; this
+        // branch is the row the other voices never see.
+        else -> ""
     }
-    // The pace, said only when it is not the ordinary one: at 1x there is
-    // nothing to say, and an extra mark on the line the place is read on would
-    // be the one thing on the pill the reader did not ask for (owner report).
-    val pace = if (abs(speed - 1f) > 0.01f) speedText(speed) else null
     val controls = pillControls(
         state = state,
         downloading = downloading,
@@ -292,17 +301,17 @@ fun PlaybackBar(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (playing) {
-                        // The recitation exists, so its words are the offer's
-                        // block, and its door is the whole listening panel.
-                        WordsBlock(
-                            name = reciterName,
-                            title = status,
-                            pace = pace,
+                        // The recitation exists, so the place leads, the
+                        // voice and the ayah's key follow, and the door is
+                        // the whole listening panel.
+                        PlayingWordsBlock(
+                            placeName = placeName,
+                            reciter = reciterName,
+                            reference = playbackPlace(reference.orEmpty()),
                             onOpen = { openMenu = PillMenu.Listening },
                             modifier = Modifier
                                 .weight(1f, fill = true)
                                 .testTag("playback-words"),
-                            announce = state.error || state.downloadFailed || state.unavailable,
                         )
                     } else {
                         // No recitation, so one line, and its name opens the
@@ -366,10 +375,25 @@ fun PlaybackBar(
             // popup itself is composed only while one is open.
             Box(Modifier.matchParentSize()) {
                 PillMenuAnchor { anchor ->
+                    val place = placeName?.takeIf { it.isNotBlank() }
+                    val fullPlace = when {
+                        place == null -> null
+                        state.ayahNumber != null -> localizedDigits(
+                            stringResource(
+                                R.string.playback_now_playing,
+                                place,
+                                state.ayahNumber,
+                            ),
+                        )
+                        else -> "$place ${playbackPlace(reference.orEmpty())}"
+                    }
                     if (openMenu != null) AppPopup(
                         anchor = anchor,
                         onDismiss = { openMenu = null },
                         alignment = PopupAlignment.Center,
+                        // The panel names the whole place at its head and
+                        // to a screen reader; the voice list keeps no head.
+                        name = fullPlace?.takeIf { openMenu == PillMenu.Listening },
                     ) {
                         PillMenuBody(
                             openMenu = openMenu,
@@ -377,6 +401,7 @@ fun PlaybackBar(
                             selected = reciterId,
                             speed = speed,
                             end = end,
+                            place = fullPlace.takeIf { openMenu == PillMenu.Listening },
                             onDismiss = { openMenu = null },
                             onReciter = onReciter,
                             onSpeed = onSpeed,

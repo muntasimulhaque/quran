@@ -75,29 +75,43 @@ class GlyphsTest {
     }
 
     @Test
-    fun theSettingsMarkKeepsOneWeightAndOneSilhouette() {
+    fun theSettingsMarkIsTwoRailsAndTwoHandles() {
         val shapes = Glyphs.of(Icon.Settings)
-        // The gear is a ring and eight tapered teeth. A Bar is the set's heavy
-        // fill for the transport marks, not a tooth: the old drawing mixed the
-        // ring's 2 unit stroke with eight 3 unit bars, and at 24 dp the round
-        // caps read as a sun rather than a cog (owner report, this session).
-        assertEquals(
-            "the gear's one hollow round",
-            1,
-            shapes.filterIsInstance<GlyphShape.Ring>().size,
+        // The mark the set carried for Settings until 13.5: two rails across
+        // the landscape keyline and a grip crossing each. A gear was the
+        // set's one filled silhouette of eight fine teeth, and at 24 dp its
+        // teeth closed into a sun; 14.1 redrew the cog and it still read a
+        // flower (owner report, this version). The rails are the set's one
+        // line and the grips are its one filled weight, and the grip is the
+        // part a hand takes hold of (owner decision, this version).
+        val rails = shapes.filterIsInstance<GlyphShape.Line>()
+        val grips = shapes.filterIsInstance<GlyphShape.Bar>()
+        assertEquals("the mark's two rails", 2, rails.size)
+        assertEquals("the mark's two grips", 2, grips.size)
+        assertEquals("a rail is a rule, not a drawing", 4, rails.sumOf { it.points.size })
+        assertTrue(
+            "nothing else fills a slider",
+            shapes.none {
+                it is GlyphShape.Solid || it is GlyphShape.Ring ||
+                    it is GlyphShape.Dot || it is GlyphShape.Frame
+            },
         )
-        assertEquals(
-            "the gear's eight teeth",
-            8,
-            shapes.filterIsInstance<GlyphShape.Solid>().size,
+        assertEquals("one rail on each of two rows", 2, rails.map { it.points.first().y }.toSet().size)
+        assertTrue(
+            "a grip crosses its rail rather than running along it",
+            grips.all { it.from.x == it.to.x },
         )
         assertTrue(
-            "a gear tooth must not bring the set's second line weight back",
-            shapes.none { it is GlyphShape.Bar },
+            "a grip must be centred on a rail",
+            grips.all { grip ->
+                rails.any { rail ->
+                    abs(rail.points.first().y - (grip.from.y + grip.to.y) / 2f) <= 0.01f
+                }
+            },
         )
         assertTrue(
-            "the ring must be drawn after the teeth, so its stroke closes the rim",
-            shapes.last() is GlyphShape.Ring,
+            "the two grips stand on the two ends of the rails",
+            grips.any { it.from.x < axis } && grips.any { it.from.x > axis },
         )
     }
 

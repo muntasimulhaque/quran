@@ -13,10 +13,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
@@ -24,70 +26,41 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import kotlin.math.min
 import io.github.muntasimulhaque.quran.ui.theme.compactLabel
 
 /**
- * The pill's words over its answer, on two lines and as one door: who is
- * reading, and where the reader is, or the size the offer names.
+ * The offer's words over its answer: the reciter's name, and the size or
+ * the state's sentence.
  *
- * **The two pills that carry words over an answer wear this block**: the
- * playing capsule, which answers with the transport, and the offer, which
- * answers with Download. The block is the offer's own shape, and the pill
- * joined it (owner decision, this session): one line of type over one answer,
- * 64 dp tall, where the playing pill used to stack a words row over a
- * transport row and pay 120 dp for a line of words that fits beside the
- * controls. The voices that are not a recitation keep the one line beside
- * their answer instead: a failure, a transfer, and an answer the app cannot
- * give each say a sentence rather than a place, and a sentence beside the
- * name is shorter than a block (owner decision, this session).
+ * It is one door to the reciter chooser, because before there is anything
+ * to hear the one question is which voice to fetch. The block carries the
+ * app's 48 dp target, so the two lines and the chevron are not the whole of
+ * what a finger has to hit; its 4 dp inset keeps the type off its own press
+ * shape, and the caller gives its end [PillEndAir]. The second line gives
+ * way before the first: the name names the door, and a size or a percent
+ * may end in an ellipsis on a glass narrow for it. Neither line wraps.
  *
- * The block is one door. Its two lines are one question, who and where, and
- * the panel behind it is one panel: the voices, the pace, and what happens at
- * the end, the whole of what a reader can change about what they are hearing.
- * The offer's block opens the reciter chooser alone, because before there is
- * anything to hear the one question is which voice to fetch, and the pace and
- * the end are answers to a recitation that does not exist yet (owner decision,
- * this session).
- *
- * The block carries the app's 48 dp target, so the two lines and the chevron
- * are not the whole of what a finger has to hit, while the shape the eye sees
- * is the block itself. Its 4 dp inset keeps the type off its own press shape,
- * and the caller gives its end [PillEndAir]: a capsule's end is a sphere, and
- * at the name's line an 8 dp air measured from the widest point read as a name
- * touching the border, which the Bangla matra made plain (owner report, this
- * session).
- *
- * The second line gives way before the first: the name is short and names the
- * door, and a place, a size, or a percent may end in an ellipsis on the glass
- * narrow for it. Neither line wraps: a control that grows a third line stops
- * being a control over the page.
- *
- * The name's line also carries the pace, when the reader has chosen one that
- * is not the ordinary: who is hearing and how fast are one fact about the
- * voice, and the place's own line has no room to give it (owner decision, this
- * session). It stands after the name in the quiet voice, with the chevron last,
- * so the door's own words still end in the mark that says a door (owner
- * decision: a door's chevron ends its line). The pace is not a second door and
- * is not spoken as one: the block is one target with one spoken name.
+ * The playing capsule wears [PlayingWordsBlock] now, because the place leads
+ * there and the ayah key sits with the voice (owner decision, this version).
+ * The two blocks keep this one silhouette: a control over the page must not
+ * change its shape with its voice (owner decision, an earlier version).
  */
 @Composable
-internal fun WordsBlock(
+internal fun OfferWordsBlock(
     /** The reciter's name, or whatever names the thing the block is about. */
     name: String,
-    /** The place, the size, the percent, or the state's sentence. */
+    /** The size, the percent, or the state's sentence. */
     title: String,
-    /**
-     * The pace, when it is not the ordinary one: a mark on the voice's own
-     * line. Null at 1x, where there is nothing to say.
-     */
-    pace: String? = null,
     /**
      * The door the block is, or null where there is nothing to open: while a
      * package is on its way, the transfer's X is the one thing to press, and
@@ -130,30 +103,16 @@ internal fun WordsBlock(
                 text = name,
                 // A name in a control, not a group label: 13 at Regular, with
                 // the accent and the chevron carrying the door. The title is
-                // the compact 14 Medium line, so the reader sees what is
-                // playing before who is reading it (owner decision, this
-                // session).
+                // the compact 14 Medium line, so the reader sees the state
+                // before who is offering it (owner decision, this version).
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 // The name is measured first and keeps its whole width; the
-                // pace and the chevron need their own room after it, never
-                // over it.
+                // chevron needs its own room after it, never over it.
                 modifier = Modifier.weight(1f, fill = false),
             )
-            if (!pace.isNullOrBlank()) {
-                Text(
-                    text = pace,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    // The app's air between two things, not the chevron's 4:
-                    // the pace is a fact beside the name rather than the
-                    // door's own tail.
-                    modifier = Modifier.padding(start = Space.Line),
-                )
-            }
             if (onOpen != null) {
                 IconGlyph(
                     icon = Icon.Chevron,
@@ -178,6 +137,127 @@ internal fun WordsBlock(
                 },
             ),
         )
+    }
+}
+
+/**
+ * The playing pill's words: the place on the first line, the voice and the
+ * ayah key on the second.
+ *
+ * The place is the surah's own name at the card's 14 Medium, in the page's
+ * ink. Under it, the reciter's name in the accent and the app's ayah
+ * reference (2:255) in the ink, with the door's chevron at the end. The
+ * whole block is the one door to the listening panel, where the full place
+ * and the pace live.
+ *
+ * **The place leads, and the key never gives way** (owner decision, this
+ * version). The pill's type follows the system scale only up to the app's
+ * largest step, 1.2, and stops there: at that size the longest surah name is
+ * 128.9 dp of the line's 140, and the voice and the ayah key are 136.9, so
+ * the place is whole at every system scale instead of being cut at 1.3. The
+ * reading and the listening panel still take the reader's scale; the pill is
+ * a control with a fixed line (owner decision, this version). If the glass is
+ * narrower than the app's reference phone, the reciter's name gives way
+ * first, because the key is the fact and the name is the voice. The pace is
+ * not here: the meta line has no room for a third fact, and the listening
+ * panel carries it.
+ *
+ * The block is 48 dp tall inside the capsule, so the two lines and the
+ * chevron are not the whole of what a finger has to hit; its 4 dp inset
+ * keeps the type off its own press shape, and the caller gives its end
+ * [PillEndAir].
+ */
+@Composable
+internal fun PlayingWordsBlock(
+    /** The surah's name in the reader's language; null while it is not known. */
+    placeName: String?,
+    /** The reciter's name. */
+    reciter: String,
+    /** The ayah's reference, already in the reader's digits. */
+    reference: String,
+    /** The door the block is, or null where there is nothing to open. */
+    onOpen: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+) {
+    val press = remember { MutableInteractionSource() }
+    // The pill is a control with a fixed line, so its type follows the system
+    // scale only up to the app's largest text step. Past it the line would
+    // cut the place, and a cut place is worse than a control that holds its
+    // measure; the reading and the listening panel still take the reader's
+    // own scale (owner decision, this version).
+    val density = LocalDensity.current
+    val capped = Density(density.density, min(density.fontScale, TextSize.STEPS.last()))
+    Column(
+        modifier = modifier
+            .then(
+                if (onOpen == null) {
+                    Modifier
+                } else {
+                    Modifier
+                        .clickable(
+                            interactionSource = press,
+                            indication = null,
+                            role = Role.Button,
+                            onClick = onOpen,
+                        )
+                        .minimumInteractiveComponentSize()
+                },
+            )
+            .clip(Radii.Pill)
+            .then(
+                if (onOpen == null) {
+                    Modifier
+                } else {
+                    Modifier.indication(press, ripple(color = MaterialTheme.colorScheme.primary))
+                },
+            )
+            .padding(horizontal = Space.Tight, vertical = 2.dp),
+    ) {
+        CompositionLocalProvider(LocalDensity provides capped) {
+            if (!placeName.isNullOrBlank()) {
+                Text(
+                    text = placeName,
+                    // The place leads: the card's 14 Medium, in the page's
+                    // ink. It is whole at the pill's capped type; the ayah key
+                    // below is never cut (owner decision, this version).
+                    style = compactLabel(),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = reciter,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    // The voice gives way first: the key and the chevron are
+                    // measured before the name, so the ayah key can never be the
+                    // thing an ellipsis takes (owner decision, this version).
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                Text(
+                    text = reference,
+                    // The app's reference beside the voice: 13 at Regular, a
+                    // value under the place rather than a second title.
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    modifier = Modifier.padding(start = Space.Line),
+                )
+                if (onOpen != null) {
+                    IconGlyph(
+                        icon = Icon.Chevron,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .padding(start = Space.Tight)
+                            .size(GlyphSize.ChevronInline),
+                    )
+                }
+            }
+        }
     }
 }
 

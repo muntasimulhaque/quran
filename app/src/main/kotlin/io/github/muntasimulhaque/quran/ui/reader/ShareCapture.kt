@@ -6,7 +6,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Build
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -27,14 +27,13 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.core.content.FileProvider
 import androidx.core.graphics.createBitmap
 import java.io.File
-
-/** The measured height of the card, which can stand taller than the screen. */
-private class CardHeight(var px: Int = 0)
+import kotlin.math.roundToInt
 
 /**
  * The tallest slice the capture asks the GPU to hold at once.
@@ -52,6 +51,19 @@ private class CardHeight(var px: Int = 0)
 private const val CaptureSlicePx = 2048
 
 /**
+ * The card's own resolution: three times its measure, whatever glass it was
+ * made on.
+ *
+ * A picture is one artifact, so its pixels are not the sender's density: a
+ * 560 dp card is 1,680 px wide from a 1.5 density tablet and from a 3.5
+ * density phone alike, and the type is drawn for the same output everywhere.
+ * The card is still designed in dp; the composition is given one density, so
+ * the same design renders at this scale on every device (owner decision, this
+ * version).
+ */
+private const val CaptureScale = 3f
+
+/**
  * The card's one appearance: it composes at the foot of the reader's own
  * screen, is recorded into a graphics layer that is never drawn back, and
  * [onImage] receives the whole card. Nothing of it reaches the eye: the
@@ -59,13 +71,20 @@ private const val CaptureSlicePx = 2048
  * meets a card the reader cannot see, and the whole thing leaves the
  * composition the moment it has been read.
  *
- * The child is measured taller than the screen allows, because a long ayah
- * makes a tall card and a picture must never be cut: the node reports the
- * screen's own height, the child stands outside those bounds (nothing here
- * clips), and the layer records the card slice by slice. Each slice moves
- * the card up by its own height and records one window of it, and the
- * windows are stitched into a single software bitmap, so the output is the
- * card's real size on every device, whatever the GPU's texture limit is.
+ * The card is drawn at the width the preview chose ([width]), at
+ * [CaptureScale] times its measure. The child is measured taller than the
+ * screen allows, because a long ayah makes a tall card and a picture must
+ * never be cut: the node reports the screen's own height, the child stands
+ * outside those bounds (nothing here clips), and the layer records the card
+ * slice by slice. Each slice moves the card up by its own height and records
+ * one window of it, and the windows are stitched into a single software
+ * bitmap, so the output is the card's real size on every device, whatever
+ * the GPU's texture limit is. A card wider than the glass is the same story
+ * in the other axis: [requiredWidth] lets the node stand at its own 1,680 px,
+ * and the picture is recorded offscreen, never drawn on the page.
+ *
+ * The type is pinned at one text scale, because the card is one artifact:
+ * the reader's font size does not reach a picture they send to everyone.
  *
  * If any of it fails, [onFailed] is called and the share falls back to the
  * plain text, so the reader never meets a Share that did nothing.
@@ -73,13 +92,24 @@ private const val CaptureSlicePx = 2048
 @Composable
 internal fun ShareCardCapture(
     card: ShareCard,
+    /**
+     * The width the preview measured and chose. The capture draws the same
+     * card, so the picture and the preview can never be two shapes (owner
+     * decision, this version).
+     */
+    width: Dp = ShareCardWidths.first(),
     onImage: (ImageBitmap) -> Unit,
     onFailed: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val layer = rememberGraphicsLayer()
     val density = LocalDensity.current
-    val widthPx = with(density) { ShareCardWidth.roundToPx() }
+    val render = remember { Density(CaptureScale, fontScale = 1f) }
+    val widthPx = (width.value * CaptureScale).roundToInt().coerceAtLeast(1)
+    // The required width is a dp on the screen's density while the node's
+    // size is the artifact's pixels: this is the dp that measures as
+    // widthPx here.
+    val widthDp = with(density) { widthPx.toDp() }
     // The card's full height, reported by the measuring child, and the slice
     // the capture is photographing right now. Both are Compose state: the
     // effect below must re-run when the card has been measured, and must
@@ -88,7 +118,7 @@ internal fun ShareCardCapture(
     var slice by remember { mutableStateOf(Slice(top = 0, height = 0)) }
     Layout(
         content = {
-            CompositionLocalProvider(LocalDensity provides Density(density.density, fontScale = 1f)) {
+            CompositionLocalProvider(LocalDensity provides render) {
                 AyahShareCardContent(
                     card,
                     Modifier
@@ -98,7 +128,7 @@ internal fun ShareCardCapture(
             }
         },
         modifier = modifier
-            .width(ShareCardWidth)
+            .requiredWidth(widthDp)
             .clearAndSetSemantics { }
             .drawWithContent {
                 val tall = slice.height.takeIf { it > 0 } ?: cardHeight
@@ -111,14 +141,14 @@ internal fun ShareCardCapture(
     ) { measurables, constraints ->
         val child = measurables[0].measure(
             Constraints(
-                minWidth = 0,
-                maxWidth = constraints.maxWidth,
+                minWidth = widthPx,
+                maxWidth = widthPx,
                 minHeight = 0,
                 maxHeight = Constraints.Infinity,
             ),
         )
         val tall = slice.height.takeIf { it > 0 } ?: child.height
-        layout(constraints.maxWidth, tall.coerceAtMost(constraints.maxHeight)) {
+        layout(widthPx, tall.coerceAtMost(constraints.maxHeight)) {
             child.place(0, -slice.top)
         }
     }
@@ -160,8 +190,8 @@ internal fun ShareCardCapture(
             // bitmap first: the slice is under the texture limit by
             // construction, so the copy is the whole window, and the
             // stitched result is software, which the PNG writer can encode
-            // directly (owner report). Below API 26 there is no
-            // hardware config at all, so the copy is skipped.
+            // directly (owner report). Below API 26 there is no hardware
+            // config at all, so the copy is skipped.
             val source = image.asAndroidBitmap()
             val piece = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
                 source.config == Bitmap.Config.HARDWARE
