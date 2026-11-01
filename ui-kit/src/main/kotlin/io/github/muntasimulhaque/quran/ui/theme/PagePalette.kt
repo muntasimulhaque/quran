@@ -14,10 +14,19 @@ import androidx.compose.ui.graphics.Color
  * [highlight] is the wash that follows a recitation. Each theme sets its own,
  * because a lapis wash that reads as ink on paper reads as nothing at all on
  * a night ground.
+ *
+ * [introInk] is the softer tone the surah's opened introduction wears: the
+ * reading's ink at 0.78, a page that steps back under the wash it stands on.
+ * [mastheadInk] is the first paint's display tone, the interface's word at
+ * 0.9, because a 48 sp line does not need the reading's full ink. Both live
+ * here so the theme owns them and the contrast test can measure them, rather
+ * than each call site mixing its own alpha (owner decision, this session).
  */
 data class PagePalette(
     val ink: Color,
     val ornament: Color,
     val highlight: Color,
     val tajweed: TajweedColors,
+    val introInk: Color,
+    val mastheadInk: Color,
 )

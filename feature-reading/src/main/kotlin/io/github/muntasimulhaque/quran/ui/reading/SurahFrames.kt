@@ -217,7 +217,7 @@ internal fun SurahOpening(
                     sizeSp = metrics.translationSp,
                     lineSp = metrics.translationLineSp,
                     arabicSp = metrics.arabicInlineSp,
-                    color = ink.copy(alpha = 0.78f),
+                    color = palette.introInk,
                 )
             }
         }

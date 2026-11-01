@@ -117,6 +117,9 @@ internal fun SavedList(
     texts: Map<Int, AyahText>,
     listState: LazyListState,
     listModifier: Modifier = Modifier,
+    /** The reader's translation size and line, so a note reads as they read. */
+    noteSp: Float,
+    noteLineSp: Float,
     onAyah: (Int) -> Unit,
     onRemove: (Int) -> Unit,
 ) {
@@ -144,6 +147,8 @@ internal fun SavedList(
                 surah = text?.surahName ?: stringResource(R.string.saved_reference_fallback, row.ayahNumber),
                 ayah = text?.ayahLabel,
                 note = note,
+                noteSp = noteSp,
+                noteLineSp = noteLineSp,
                 detail = if (!note.isNullOrBlank()) {
                     stringResource(R.string.notes_detail, moment(row.noteAt ?: row.createdAt))
                 } else {
@@ -170,6 +175,9 @@ private fun PlaceRow(
     ayah: String?,
     detail: String? = null,
     note: String? = null,
+    /** The note's size; the default is the reading voice, for a row with no note. */
+    noteSp: Float = LocalReadingVoice.current.style.fontSize.value,
+    noteLineSp: Float = LocalReadingVoice.current.style.lineHeight.value,
     onClick: () -> Unit,
     action: Pair<String, () -> Unit>? = null,
 ) {
@@ -230,14 +238,14 @@ private fun PlaceRow(
             // The reader's own words are the one part of the row drawn in the
             // reading ink and the reading face, and the only part allowed two
             // lines: a note is how the place is recognised, while the place
-            // and the moment are its labels. The clamp is the same two lines
-            // on every row, so one long note cannot change the list's rhythm.
+            // and the moment are its labels. It follows the translation's own
+            // size and line, so a reader who enlarged the reading does not
+            // meet their own words small again. The clamp is the same two
+            // lines on every row, so one long note cannot change the list's
+            // rhythm.
             Text(
                 text = note,
-                style = LocalReadingVoice.current.prose(
-                    15f,
-                    15f * LocalReadingVoice.current.lineRatio,
-                ),
+                style = LocalReadingVoice.current.prose(noteSp, noteLineSp),
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,

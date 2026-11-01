@@ -23,28 +23,31 @@ enum class TypeRole { Arabic, Translation, Tafsir, Words }
  * smaller" the same number as the step itself, which is why the base below is
  * 0.9 of what it was and not 0.85.
  *
- * The prose sits at 15 sp on a 1.5 line. It stood at 17, then 16, then 15,
- * then 16 again, and now 15 by the owner's eye on the page: the reading body
- * is the interface's own 15, and the Book's face is what keeps the two
- * apart. The line stays the book's 1.5, so the smaller letters keep the
- * page's air instead of tightening toward it (owner decision, this
- * session).
+ * The prose sits at 16 sp on a 1.5 line. It stood at 17, then 16, then 15,
+ * then 16 again, and now 16 by measurement as well as by the owner's eye:
+ * Literata's x-height is 0.507 em against Inter's 0.546, so 15 sp of the
+ * Book's face draws a body 7 percent smaller than the interface's own 15.
+ * Sixteen is the nearest point that makes the two optically equal (8.11 dp
+ * against 8.19), and it is Material's body size and the reading the field
+ * sets (quran.com's 16.8). The line stays the book's 1.5, so the page keeps
+ * its air, and on the 600 dp page the line is about 73 characters, inside
+ * the 45 to 75 a book sets.
  *
  * Arabic is set above the Latin sizes on purpose: its letter bodies are
  * small next to the space the diacritics need, so at the same nominal size it
- * reads visibly smaller than Latin text. The base is 26 sp, 1.733 times the
- * 15 sp translation: the owner's eye asked for the Quran one step larger
- * while the prose came down, and this is the ratio that did it. It is more
- * contrast than the field (Quran for Android 1.4, Quran.com 1.28), and just
- * under the app's own 1.8 before the field audit; the reader can still go
- * down to 20.8 at the smallest step and up to 31.2 at the largest (owner
- * decision, this session).
+ * reads visibly smaller than Latin text. The base is 26 sp, 1.625 times the
+ * 16 sp translation: the owner's eye asked for the Quran above the prose,
+ * and the 2.0 line is the Quran Foundation's own for the QPC Hafs face. It is
+ * more contrast than the field (Quran for Android 1.4, Quran.com 1.28); the
+ * reader can still go down to 20.8 at the smallest step and up to 31.2 at the
+ * largest (owner decision, this session).
  *
  * The largest step stops at 1.2. Past that the reading turns into a page of
- * headings. The smallest is 0.8, the compact choice, at 12 sp of translation
- * and 10.8 sp of meaning (owner decision, this session). The earlier session
- * pinned 0.75 against the larger base as the readability floor; the two sit
- * within a hair of each other at the default, and the floor stands.
+ * headings. The smallest is 0.8, the compact choice, at 12.8 sp of
+ * translation and 12 sp of meaning (owner decision, this session). The
+ * earlier session pinned 0.75 against the larger base as the readability
+ * floor; the two sit within a hair of each other at the default, and the
+ * floor stands.
  */
 object TextSize {
 
@@ -114,12 +117,12 @@ object TextSize {
 
     /**
      * The meaning under a word in the word by word aid: the size the meaning
-     * is read at, 13.5 sp at the middle step. It is nine tenths of the
-     * translation's 15, a step the eye reads as a gloss rather than as a
-     * second translation. It stood five percent under the translation, which
-     * read as one size used twice; a tenth under is the distance that says
-     * which line is the verse's meaning and which is the reading's own (owner
-     * decision, this session). At the smallest step the gloss is 10.8 sp.
+     * is read at, 15 sp at the middle step. It is one point under the
+     * translation's 16, where the aid used to stand at nine tenths: the word
+     * grid and the point keep the meaning a gloss, while the smallest step
+     * lands on 12 sp, the platform's own body floor (owner decision, this
+     * session). At the largest step it is 18 sp, under the translation's
+     * 19.2.
      */
     fun meaningSp(step: Float): Float = MEANING_BASE * step(step)
 
@@ -144,24 +147,36 @@ object TextSize {
 
     /**
      * The one rule for Arabic beside prose, in the translation and in the
-     * tafsir both: 0.9 of the reader's own Quran size. It is the stand at
-     * which Amiri measures the same as the Hafs face (its alef is 0.696 em
-     * against Hafs's 0.636), so an inline quotation reads as the Quran's own
-     * text. One rule replaces the two that had drifted, 0.8 of the Arabic in
-     * the translation and 1.5 of the tafsir prose in the tafsir, which
-     * landed on the same number at the default and hid the fact that they
-     * were two (owner decision, the theme and consistency session).
+     * tafsir both: 24 sp at the default, 24/26 of the reader's own Quran
+     * size. Amiri's alef is 0.696 em against Hafs's 0.636, so an inline
+     * quotation at that stand reads as the Quran's own text without reaching
+     * the verse. One rule replaces the two that had drifted, 0.8 of the
+     * Arabic in the translation and 1.5 of the tafsir prose in the tafsir,
+     * which landed on the same number at the default and hid the fact that
+     * they were two (owner decision, the theme and consistency session).
      */
     fun inlineArabic(step: Float): Float = sp(TypeRole.Arabic, step) * INLINE_ARABIC_RATIO
 
+    /**
+     * The ayah's printed medallion, the verse-end mark: 24 sp at the
+     * default, 24/26 of the reader's own Quran size, so it follows the
+     * Arabic through the five steps. Its ink is about 0.89 of the em, so the
+     * digits inside it are drawn at nearly the verse's own size instead of
+     * at a bracket's (owner decision, this session).
+     */
+    fun medallionSp(step: Float): Float = medallionAt(sp(TypeRole.Arabic, step))
+
+    /** The medallion at a drawn Arabic size: 24/26 of it. */
+    fun medallionAt(arabicSp: Float): Float = arabicSp * MEDALLION_RATIO
+
     private fun base(role: TypeRole): Float = when (role) {
         TypeRole.Arabic -> ARABIC_BASE
-        TypeRole.Translation -> 15f
+        TypeRole.Translation -> 16f
         // The tafsir is the longest prose the app draws, read in the same
         // sitting as the translation it opens from, so it stands at the
         // translation's own size and not a point under it (owner decision,
         // this session; the two sizes read as one voice now).
-        TypeRole.Tafsir -> 15f
+        TypeRole.Tafsir -> 16f
         // The aid's Arabic word, the stand the Quran's own text takes four
         // points down; see [wordSp].
         TypeRole.Words -> WORD_BASE
@@ -186,10 +201,10 @@ object TextSize {
     }
 
     /**
-     * The size the meaning under a word is read at, before any scaling: nine
-     * tenths of the translation's 15 sp base, 13.5. See [meaningSp].
+     * The size the meaning under a word is read at, before any scaling: one
+     * point under the translation's 16 sp base, 15. See [meaningSp].
      */
-    private const val MEANING_BASE = 13.5f
+    private const val MEANING_BASE = 15f
 
     /** The Quran's own base, the anchor every other reading size is read against. */
     private const val ARABIC_BASE = 26f
@@ -202,10 +217,17 @@ object TextSize {
 
     /**
      * The one stand for Arabic beside prose, in the translation and the
-     * tafsir alike: 0.9 of the Quran's own size. It is the size at which
-     * Amiri's alef (0.696 em) measures the same as Hafs's (0.636 em), so an
-     * inline quotation reads as the Quran's own text (owner decision, the
-     * theme and consistency session).
+     * tafsir alike: 24 of the Quran's own 26, a step under the verse and
+     * still the Quran's text. Amiri's alef (0.696 em) measures against
+     * Hafs's (0.636 em) at this stand without reaching the verse (owner
+     * decision, this session).
      */
-    private const val INLINE_ARABIC_RATIO = 0.9f
+    private const val INLINE_ARABIC_RATIO = 24f / ARABIC_BASE
+
+    /**
+     * The medallion's stand: 24 of the Quran's own 26, the same step under
+     * the verse as the inline Arabic, so the printed mark closes the line
+     * without growing past it. See [medallionSp].
+     */
+    private const val MEDALLION_RATIO = 24f / ARABIC_BASE
 }

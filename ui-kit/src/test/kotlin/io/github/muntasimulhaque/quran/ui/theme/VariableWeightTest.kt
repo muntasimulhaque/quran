@@ -27,7 +27,9 @@ class VariableWeightTest {
 
     @Test
     fun everyVariableFamilyBuildsItsMembersWithTheWeightAxis() {
-        val type = themeSource().readText()
+        // The working tree is written with CRLF on Windows; the guard is about
+        // the source, not its line endings.
+        val type = themeSource().readText().replace(System.lineSeparator(), "\n")
         for (family in FAMILIES) {
             val start = type.indexOf("val $family = FontFamily(")
             assertTrue("the $family family was not found in Type.kt", start >= 0)

@@ -71,6 +71,15 @@ class ContrastTest {
         // so the muted voice is measured on that ground too (owner decision,
         // this session).
         assertReadable(PaperMuted, blend(LightScheme.primary, PaperSurface, Wash.Selected))
+        // The two text tones outside the scheme, measured the way they are drawn:
+        // the opened surah introduction at 0.78 of the reading ink, and the
+        // masthead at 0.9 of the interface word.
+        assertReadable(blend(LightPage.introInk, PaperBackground, LightPage.introInk.alpha), PaperBackground)
+        assertReadable(
+            blend(LightPage.introInk, blend(LightScheme.primary, PaperBackground, Wash.Selected), LightPage.introInk.alpha),
+            blend(LightScheme.primary, PaperBackground, Wash.Selected),
+        )
+        assertReadable(blend(LightPage.mastheadInk, PaperBackground, LightPage.mastheadInk.alpha), PaperBackground)
     }
 
     @Test
@@ -114,6 +123,13 @@ class ContrastTest {
         // The night sheet's current row, on the same selected wash (owner
         // decision, this session).
         assertReadable(NightMuted, blend(DarkScheme.primary, NightSurface, Wash.Selected))
+        // The same two tones on the night page.
+        assertReadable(blend(DarkPage.introInk, NightBackground, DarkPage.introInk.alpha), NightBackground)
+        assertReadable(
+            blend(DarkPage.introInk, blend(DarkScheme.primary, NightBackground, Wash.Selected), DarkPage.introInk.alpha),
+            blend(DarkScheme.primary, NightBackground, Wash.Selected),
+        )
+        assertReadable(blend(DarkPage.mastheadInk, NightBackground, DarkPage.mastheadInk.alpha), NightBackground)
     }
 
     /**

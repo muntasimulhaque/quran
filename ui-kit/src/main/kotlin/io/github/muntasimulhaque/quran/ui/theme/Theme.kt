@@ -128,6 +128,8 @@ internal val LightPage = PagePalette(
     ornament = Gold,
     highlight = Color(0x381B4D7A),
     tajweed = PaperTajweed,
+    introInk = PaperInk.copy(alpha = 0.78f),
+    mastheadInk = PaperInk.copy(alpha = 0.9f),
 )
 
 internal val DarkPage = PagePalette(
@@ -135,6 +137,8 @@ internal val DarkPage = PagePalette(
     ornament = NightGold,
     highlight = Color(0x4795C0EA),
     tajweed = NightTajweed,
+    introInk = NightInk.copy(alpha = 0.78f),
+    mastheadInk = NightText.copy(alpha = 0.9f),
 )
 
 val LocalPagePalette = staticCompositionLocalOf { LightPage }

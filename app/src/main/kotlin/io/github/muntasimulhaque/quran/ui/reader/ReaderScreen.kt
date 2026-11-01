@@ -855,6 +855,8 @@ fun ReaderScreen(
     pendingRemove?.let { ayahNumber ->
         RemoveSavedSheet(
             note = saved.firstOrNull { it.ayahNumber == ayahNumber }?.note,
+            noteSp = settings.translationSp,
+            noteLineSp = settings.translationLineSp,
             onConfirm = {
                 viewModel.removeSaved(ayahNumber)
                 pendingRemove = null

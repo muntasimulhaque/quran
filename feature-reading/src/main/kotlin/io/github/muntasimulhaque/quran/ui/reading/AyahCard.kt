@@ -435,9 +435,10 @@ private fun PassageArea(
  * tafsirs of one ayah can name the same span or different ones without the
  * sheet ever promising what only one of them keeps (owner decision, this
  * session). It is the passage's title: [TypeLadder.articleTitleSp], which is
- * 18 at the default body and stays between 18 and 22 at every reader step, so
- * it stands above the document's own heads at every step without becoming a
- * page title on a phone. Its line is the script's title leading, not the
+ * 17 at the default 16 body and moves from 13.8 to 19.5 across the reader's
+ * steps, capped at 19.5, so it stands above the document's own heads at every
+ * step without becoming a page title on a phone. Its line is the script's
+ * title leading, not the
  * face's prose box, because a one-line title is not a paragraph. It is a
  * heading to a screen reader, so a reader who cannot see the page can jump to
  * the passage instead of hearing the whole card.

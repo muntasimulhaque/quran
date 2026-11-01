@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.R
+import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
 import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -28,7 +29,7 @@ fun Masthead(modifier: Modifier = Modifier) {
             text = stringResource(R.string.first_paint_title),
             style = amiriDisplay(
                 TypeLadder.MASTHEAD_SP,
-                MaterialTheme.colorScheme.onBackground.copy(alpha = 0.9f),
+                LocalPagePalette.current.mastheadInk,
             ),
         )
         Text(

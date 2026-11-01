@@ -53,6 +53,8 @@ internal fun ReaderSheets(
             saved = saved,
             lastRead = lastRead,
             currentAyah = settings.ayah,
+            noteSp = settings.translationSp,
+            noteLineSp = settings.translationLineSp,
             onDismiss = onDismiss,
             onAyah = { ayahNumber ->
                 onResult(ReaderSheet.Browse)

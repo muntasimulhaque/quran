@@ -89,7 +89,7 @@ fun TranslationBody(
         text = annotated(
             runs,
             arabicSize = arabicSp.sp,
-            markerSize = markerSp(body, 0.70f),
+            markerSize = markerSp(body, MarkerShare),
             // A symbol inside an all-Arabic block is part of that block and
             // takes its size; inside a Latin sentence it takes the
             // sentence's.
@@ -122,9 +122,10 @@ fun TranslationBody(
  * paragraphs needs 0.97 em at the median and 1.32 em at the very worst (the
  * Prophet's ligature under a stack of marks, and one Urdu blessing), so
  * [MixedAir] at 1.35 covers the whole distribution while bringing the mixed
- * line down from the old 1.9: at the default tafsir size that is about 21.6
- * dp of line for a 16 sp body instead of the 30.4 dp the all-Arabic block takes,
- * which is the change that made the tafsir's gaps even (owner report). A
+ * line down from the old 1.9: at the default tafsir size that is about 32.4
+ * dp of line for the 16 sp body with the 24 sp inline Arabic, instead of the
+ * 45.6 dp the all-Arabic block takes, which is the change that made the
+ * tafsir's gaps even (owner report). A
  * block whose inline Arabic is taller than any the sources carry today would
  * need this constant raised with it; the measurement is written here so the
  * next session can redo it rather than guess.
@@ -146,9 +147,15 @@ private const val MixedAir = 1.35f
 private const val ArabicAir = 1.9f
 
 /**
+ * The share of the body a footnote marker is drawn at: 11 at the 16 sp
+ * reading body, a figure that sits on the line without becoming a word.
+ */
+private const val MarkerShare = 11f / 16f
+
+/**
  * The floor under a footnote marker's size. The marker is set at a share of
- * the body it annotates, so at the smallest translation step a 0.70 share
- * is about 8 sp: a figure too small to read and too thin to tap (owner
+ * the body it annotates, so at the smallest translation step the share is
+ * about 9 sp: a figure too small to read and too thin to tap (owner
  * decision, forty-seventh session). Ten is the smallest that still reads
  * as a number, holds its own above the line, and gives the finger room.
  */
@@ -273,7 +280,7 @@ fun RichBlocks(
                 text = annotated(
                     block.runs,
                     arabicSize = arabicSp.sp,
-                    markerSize = markerSp(sizeSp, 0.70f),
+                    markerSize = markerSp(sizeSp, MarkerShare),
                     symbolSize = if (mix == ScriptMix.ARABIC) arabicSp.sp else drawn.sp,
                     quoteColor = if (head) null else color,
                 ),

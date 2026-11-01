@@ -92,11 +92,11 @@ internal fun FootnoteSheet(
                     localizedDigits(reference),
                 ),
                 // A footnote is a small page, not a utility sheet: its
-                // name is the small page's own 16 at Medium, over the
-                // note's 15, so the reference line names the note without
-                // standing over it like a page title (owner decision, this
-                // session). A reader who opened the wrong marker still
-                // knows it before reading a line.
+                // name is the small page's own 16 at Medium, at the note's
+                // 16, so the reference line names the note by its face and
+                // its gap without standing over it like a page title (owner
+                // decision, this session). A reader who opened the wrong
+                // marker still knows it before reading a line.
                 style = screenSubtitle(),
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier

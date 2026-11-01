@@ -220,44 +220,52 @@ fun amiriDisplay(sizeSp: Float, color: Color = Color.Unspecified): TextStyle =
  * The sizes are the jobs, and the steps between them are visible:
  *
  * - **Page.** A sheet's, a page's, or an error's own name: 20 at SemiBold,
- *   Apple's Title 3, over the 15 body. It is the header of a utility sheet,
- *   not a display line and not a second article title.
+ *   Apple's Title 3, over the 15 interface body and the 16 reading body. It
+ *   is the header of a utility sheet, not a display line and not a second
+ *   article title.
  * - **Article.** A passage's title in the Book's voice: one point over the
- *   body it titles at every step, 16 at the default 15. The weight and the
- *   title's tighter line carry the rest; a title is not a second ladder.
+ *   16 reading body at the default, 17, and capped at 19.5 so it never crosses
+ *   the page's own 20 at the largest step. The weight and the title's
+ *   tighter line carry the rest; a title is not a second ladder.
  * - **Subtitle.** An empty state's name, a credit's name, a language's
- *   name: 16 at Medium, one step over the body and one under the page.
+ *   name: 16 at Medium, one step over the interface body and one under the
+ *   page.
  * - **Book name over a page.** A surah's name in a bar or a level header:
  *   16 at Medium in the Book's face, one point over the app's row name
  *   because it names the page. The opening's Latin name is 20, the page's
  *   own title.
  * - **Book name in a list.** A surah's name in a list of surahs: the row
  *   name's 15, carried by the Book's face rather than by a larger size.
- * - **Name.** A row's name: 15 at Medium, the body's size and one weight
- *   level up, so a name reads as a name without shouting.
- * - **Body.** The app's prose and a field: 15 at Regular. The Book's prose
- *   is 15 at Regular in its own face; the two share the body and the Book
- *   leads by its voice.
- * - **Meta.** A source line under a name, a value, a count, a status: 13,
- *   Apple's footnote. It is also a row's own value now: the 12 value the
+ * - **Name.** A row's name: 15 at Medium, the interface body's size and one
+ *   weight level up, so a name reads as a name without shouting.
+ * - **Body.** The app's prose and a row: 15 at Regular. The Book's prose is
+ *   16 at Regular in its own face, because Literata's smaller x-height
+ *   needs the point to match Inter's 15 optically; the Book leads by its
+ *   voice and by that point.
+ * - **Field.** The search field and the welcome page: 16 at Regular,
+ *   Material's bodyLarge. It is the one text the reader types, and the one
+ *   page of prose in the chrome.
+ * - **Meta.** A source line under a name, a count, a status: 13, Apple's
+ *   footnote. A row's own value is the same size, tabular; the 12 value the
  *   sheet used to wear read as a footnote under the thing it described.
  * - **Label.** A group's name over a list: 12 at SemiBold with tracking, in
  *   the secondary ink. A label is smaller than the value under it on
  *   purpose: it steps back and lets the choices lead.
  * - **Button.** A word on a shape: 14 at Medium, Material's labelLarge.
+ * - **Compact.** The playback pill's title and the download notice: 14, one
+ *   step over meta and under the body. A compact surface is a control or a
+ *   status, not a page.
  *
  * A document's own scale moves with the reader's step: the article title is
- * one point over [TypeLadder.BODY_SP] at the body's own size, and every head
- * is the body's own size at a weight, the way Apple's Headline is its Body at
- * Semibold. One title, body-size heads: a reading page, not a magazine.
+ * one point over the body at the reader's own size, capped at 19.5, and every
+ * head is the body's own size at a weight, the way Apple's Headline is its
+ * Body at Semibold. One title, body-size heads: a reading page, not a
+ * magazine.
  */
 object TypeLadder {
 
     /** A sheet's, a page's, or an error's own name: the interface face at SemiBold. */
     const val SHEET_SP = 20f
-
-    /** A passage's title at the default body, in the Book's face. */
-    const val ARTICLE_SP = 16f
 
     /** An empty state's name, a credit's name, a language's name. */
     const val SUBTITLE_SP = 16f
@@ -288,8 +296,11 @@ object TypeLadder {
     /** A row's name, in the interface face at Medium. */
     const val NAME_SP = 15f
 
-    /** The interface's prose and a field. */
+    /** The interface's prose and a row. */
     const val BODY_SP = 15f
+
+    /** The search field and the welcome page: Material's bodyLarge. */
+    const val FIELD_SP = 16f
 
     /** A source line under a name: where it comes from, a place, a count. */
     const val META_SP = 13f
@@ -297,11 +308,14 @@ object TypeLadder {
     /** A group's name over a list. */
     const val LABEL_SP = 12f
 
-    /** A row's own value under its name. */
-    const val CAPTION_SP = 13f
+    /** A row's own value under its name: the meta size, tabular. */
+    const val VALUE_SP = 13f
 
     /** A word on a shape. */
     const val BUTTON_SP = 14f
+
+    /** A compact surface's body or label: the pill and the download notice. */
+    const val COMPACT_SP = 14f
 
     /** The one sample word on the tajweed legend, at the reading's default Arabic size. */
     val TAJWEED_SAMPLE_SP: Float = TextSize.sp(TypeRole.Arabic, TextSize.DEFAULT)
@@ -315,6 +329,9 @@ object TypeLadder {
     /** The surah's Arabic name on the share card. */
     const val SHARE_NAME_SP = 22f
 
+    /** The card's inline Arabic, a step under its verse. */
+    const val SHARE_INLINE_SP = 22f
+
     /**
      * A title's line in the Latin reading face: 1.3, which is what Material's
      * 22/28 and Apple's 22/28 titles use. It is not the face's declared
@@ -325,12 +342,17 @@ object TypeLadder {
 
     /**
      * An article's title over its own text: one point over the body it
-     * titles, at every step, 16 at the default 15. The title's Semibold and
-     * its 1.3 line carry the hierarchy, so a floor and a cap are not needed:
-     * at the smallest body the title still leads it, and at the largest it
-     * still stays under the page's own 20 (owner decision, this session).
+     * titles, 17 at the default 16. The title's Semibold and its 1.3 line
+     * carry the hierarchy; the cap below keeps it under the page's own 20 at
+     * the largest step (owner decision, this session).
      */
     const val ARTICLE_TITLE_LEAD = 1f
+
+    /**
+     * The title's ceiling: half a point under the page's own name, so the
+     * content can never outgrow the chrome at the largest text step.
+     */
+    const val ARTICLE_TITLE_MAX = SHEET_SP - 0.5f
 
     /**
      * A section's head is the body's size at SemiBold; a sub-head is the same
@@ -341,8 +363,9 @@ object TypeLadder {
     const val HEADING = 1f
     const val SUBHEADING = 1f
 
-    /** A passage's title at this body size: one point over it. */
-    fun articleTitleSp(bodySp: Float): Float = bodySp + ARTICLE_TITLE_LEAD
+    /** A passage's title at this body size: one point over it, under the page. */
+    fun articleTitleSp(bodySp: Float): Float =
+        minOf(bodySp + ARTICLE_TITLE_LEAD, ARTICLE_TITLE_MAX)
 
     /** A section's head at this body size: the body's own size. */
     fun headingSp(bodySp: Float): Float = bodySp * HEADING
@@ -352,10 +375,11 @@ object TypeLadder {
 }
 
 /**
- * The display and title ladder, in the book's face: the Book's names and a
- * passage's title. The app's own names (a sheet, a page, an empty state)
- * are in the interface face, because a surface of the app names itself in
- * the app's voice (owner decision, this session).
+ * The title ladder, in the book's face: the Book's names. The app's own
+ * names (a sheet, a page, an empty state) are in the interface face, because
+ * a surface of the app names itself in the app's voice (owner decision, this
+ * session). The display and headline slots are the interface's; the Book's
+ * display lines are asked for by name.
  *
  * [trackingSp] is the optical tracking: a title is set a little tighter than
  * the face's raw spacing, and the larger the cut the more it closes, because
@@ -414,17 +438,26 @@ private fun interStyle(
 /**
  * The interface in English, by job, from [TypeLadder].
  *
- * The page is the app's own name now: 20 at SemiBold (titleLarge), Apple's
- * Title 3, over the 15 body. The Book's name over a page is 16 at Medium in
- * the Book's face (titleMedium); a list's Book name is 15 in the same face
- * ([bookRowName]); a row's name is 15 at Medium (titleSmall); the body and a
- * field are 15; a source, a value, a count and a status are 13; a group's
- * label is 12 at SemiBold with tracking; a button's word is 14.
+ * The page is the app's own name: 20 at SemiBold (titleLarge), Apple's
+ * Title 3, over the 15 interface body and the 16 reading body. The Book's
+ * name over a page is 16 at Medium in the Book's face (titleMedium); a
+ * list's Book name is 15 in the same face ([bookRowName]); a row's name is
+ * 15 at Medium (titleSmall); the app's prose and a row are 15 (bodyMedium);
+ * a field and the welcome page are 16 (bodyLarge); a source, a value, a
+ * count and a status are 13; a group's label is 12 at SemiBold with
+ * tracking; a button's word is 14; a compact surface is 14 through
+ * [compactBody] or [compactLabel].
  *
  * The meta and the value are one size now. The 13 meta line and the 12
  * caption were two names for the same quiet fact, and the 12 value read as a
  * footnote under the thing it described. A value is a caption no more: it
- * is the meta line that belongs to its row (owner decision, this session).
+ * is the meta line that belongs to its row, tabular (owner decision, this
+ * session).
+ *
+ * The display and headline slots are the interface's, because no surface
+ * asks a theme slot for a Book display line: the Book's display lines are
+ * amiriDisplay and [ReadingVoice.title], and a stock Material surface
+ * should never fall into Literata.
  *
  * The drawn size scales with the system font scale for the optical axis, the
  * way [literataAt] does, so a reader at 2.0 scale reads the cut for double
@@ -434,12 +467,54 @@ private fun interStyle(
 internal fun quranTypography(): Typography {
     val scale = LocalDensity.current.fontScale
     return Typography(
-        displayLarge = readingStyle(FontWeight.SemiBold, 56f, 64f, -0.5f),
-        displayMedium = readingStyle(FontWeight.SemiBold, 48f, 56f, -0.4f),
-        displaySmall = readingStyle(FontWeight.SemiBold, 40f, 48f, -0.3f),
-        headlineLarge = readingStyle(FontWeight.SemiBold, 34f, 42f, -0.3f),
-        headlineMedium = readingStyle(FontWeight.SemiBold, 28f, 36f, -0.2f),
-        headlineSmall = readingStyle(FontWeight.SemiBold, 24f, 36f, -0.2f),
+        displayLarge = interStyle(
+            FontWeight.SemiBold,
+            56f,
+            64f,
+            scale,
+            tabular = false,
+            trackingSp = -0.5f,
+        ),
+        displayMedium = interStyle(
+            FontWeight.SemiBold,
+            48f,
+            56f,
+            scale,
+            tabular = false,
+            trackingSp = -0.4f,
+        ),
+        displaySmall = interStyle(
+            FontWeight.SemiBold,
+            40f,
+            48f,
+            scale,
+            tabular = false,
+            trackingSp = -0.3f,
+        ),
+        headlineLarge = interStyle(
+            FontWeight.SemiBold,
+            34f,
+            42f,
+            scale,
+            tabular = false,
+            trackingSp = -0.3f,
+        ),
+        headlineMedium = interStyle(
+            FontWeight.SemiBold,
+            28f,
+            36f,
+            scale,
+            tabular = false,
+            trackingSp = -0.2f,
+        ),
+        headlineSmall = interStyle(
+            FontWeight.SemiBold,
+            24f,
+            36f,
+            scale,
+            tabular = false,
+            trackingSp = -0.2f,
+        ),
         titleLarge = interStyle(
             FontWeight.SemiBold,
             TypeLadder.SHEET_SP,
@@ -460,7 +535,13 @@ internal fun quranTypography(): Typography {
             scale,
             tabular = false,
         ),
-        bodyLarge = interStyle(FontWeight.Normal, TypeLadder.BODY_SP, 22f, scale, tabular = false),
+        bodyLarge = interStyle(
+            FontWeight.Normal,
+            TypeLadder.FIELD_SP,
+            24f,
+            scale,
+            tabular = false,
+        ),
         bodyMedium = interStyle(FontWeight.Normal, TypeLadder.BODY_SP, 22f, scale, tabular = false),
         bodySmall = interStyle(FontWeight.Normal, TypeLadder.META_SP, 19f, scale, tabular = false),
         labelLarge = interStyle(
@@ -491,7 +572,7 @@ internal fun quranTypography(): Typography {
         // baseline scale (owner decision, this session).
         labelSmall = interStyle(
             FontWeight.Normal,
-            TypeLadder.CAPTION_SP,
+            TypeLadder.VALUE_SP,
             18f,
             scale,
             tabular = true,
@@ -522,19 +603,74 @@ fun bookRowName(): TextStyle {
 
 /**
  * A small page's own name: an empty state, a credit, a language's name.
- * 16 at Medium in both scripts, one step over the body and under the page
- * title. It is the app's voice, so it never borrows the Book's face, and it
- * takes the theme's own interface family, so a Bangla empty state is Noto
- * Sans Bengali and an English one is Inter (owner decision, this session).
+ * 16 at Medium in both scripts, one step over the interface body and under
+ * the page title. It is the app's voice, so it never borrows the Book's
+ * face, and it takes the theme's own interface family, so a Bangla empty
+ * state is Noto Sans Bengali and an English one is Inter (owner decision,
+ * this session).
+ *
+ * The line is the base style's own, not a second number: the English title
+ * style's 1.333 and the Bangla 1.45 are the scripts' boxes, and a hard-coded
+ * 1.375 set the Bangla name at 22 where its face asked for 23.2.
  */
 @Composable
 fun screenSubtitle(): TextStyle {
+    val base = MaterialTheme.typography.titleSmall
     val size = TypeLadder.SUBTITLE_SP
-    return MaterialTheme.typography.titleSmall.copy(
+    val baseSize = base.fontSize.value
+    val ratio = if (baseSize > 0f && base.lineHeight.value > 0f) {
+        base.lineHeight.value / baseSize
+    } else {
+        1.375f
+    }
+    return base.copy(
         fontSize = size.sp,
-        lineHeight = (size * 1.375f).sp,
+        lineHeight = (size * ratio).sp,
         fontWeight = FontWeight.Medium,
         letterSpacing = 0.sp,
+    )
+}
+
+/**
+ * A compact surface's body line: the download notice, and the pill's status
+ * if a caller wants it at 14. 14 at the base body style's own line, so the
+ * notice is one step over meta and one under the body, and the Bangla line
+ * stays the script's 1.45 (owner decision, this session).
+ */
+@Composable
+fun compactBody(): TextStyle {
+    val base = MaterialTheme.typography.bodySmall
+    val size = TypeLadder.COMPACT_SP
+    val baseSize = base.fontSize.value
+    val ratio = if (baseSize > 0f && base.lineHeight.value > 0f) {
+        base.lineHeight.value / baseSize
+    } else {
+        1.46f
+    }
+    return base.copy(
+        fontSize = size.sp,
+        lineHeight = (size * ratio).sp,
+    )
+}
+
+/**
+ * A compact surface's label: the playback pill's title at 14 Medium. It is
+ * separate from [compactBody] because the pill's title is a name at Medium,
+ * not a sentence at Regular (owner decision, this session).
+ */
+@Composable
+fun compactLabel(): TextStyle {
+    val base = MaterialTheme.typography.titleSmall
+    val size = TypeLadder.COMPACT_SP
+    val baseSize = base.fontSize.value
+    val ratio = if (baseSize > 0f && base.lineHeight.value > 0f) {
+        base.lineHeight.value / baseSize
+    } else {
+        1.333f
+    }
+    return base.copy(
+        fontSize = size.sp,
+        lineHeight = (size * ratio).sp,
     )
 }
 
@@ -568,11 +704,14 @@ private val interCuts = java.util.concurrent.ConcurrentHashMap<String, FontFamil
 
 /**
  * The interface in Bangla: the same jobs and the same sizes as the English
- * ladder, in the script's own two voices. The app's voice is Noto Sans
- * Bengali: a page is 20 at SemiBold, a row's name and the app's prose are 15,
- * a value is 13, a label is 12, a button is 14. The Book's voice is Noto Serif
- * Bengali: a surah's name is 16. The sizes are the same in both scripts; only
- * the line is the script's own (owner decision, this session).
+ * ladder, read from [TypeLadder] so the two can never drift, in the script's
+ * own two voices. The app's voice is Noto Sans Bengali; the Book's voice is
+ * Noto Serif Bengali. The sizes are the same in both scripts; only the line
+ * is the script's own (owner decision, this session).
+ *
+ * The display and headline slots are the interface's, because no surface
+ * asks a theme slot for a Book display line. The Book's display lines are
+ * `amiriDisplay` and [ReadingVoice.title].
  *
  * A title and a reading name carry 1.6 of their size in line, because the
  * serif face's own line box is 1.594 of the em and a Bengali title's stacked
@@ -591,21 +730,21 @@ private val interCuts = java.util.concurrent.ConcurrentHashMap<String, FontFamil
  * apart.
  */
 val BanglaTypography = Typography(
-    displayLarge = banglaStyle(FontWeight.SemiBold, 56f, serif = true),
-    displayMedium = banglaStyle(FontWeight.SemiBold, 48f, serif = true),
-    displaySmall = banglaStyle(FontWeight.SemiBold, 40f, serif = true),
-    headlineLarge = banglaStyle(FontWeight.SemiBold, 34f, serif = true),
-    headlineMedium = banglaStyle(FontWeight.SemiBold, 28f, serif = true),
-    headlineSmall = banglaStyle(FontWeight.SemiBold, 24f, serif = true),
-    titleLarge = banglaStyle(FontWeight.SemiBold, 20f),
-    titleMedium = banglaStyle(FontWeight.Medium, 16f, serif = true),
-    titleSmall = banglaStyle(FontWeight.Medium, 15f),
-    bodyLarge = banglaStyle(FontWeight.Normal, 15f),
-    bodyMedium = banglaStyle(FontWeight.Normal, 15f),
-    bodySmall = banglaStyle(FontWeight.Normal, 13f),
-    labelLarge = banglaStyle(FontWeight.Medium, 14f, tabular = true),
-    labelMedium = banglaStyle(FontWeight.SemiBold, 12f, tabular = true),
-    labelSmall = banglaStyle(FontWeight.Normal, 13f, tabular = true),
+    displayLarge = banglaStyle(FontWeight.SemiBold, 56f),
+    displayMedium = banglaStyle(FontWeight.SemiBold, 48f),
+    displaySmall = banglaStyle(FontWeight.SemiBold, 40f),
+    headlineLarge = banglaStyle(FontWeight.SemiBold, 34f),
+    headlineMedium = banglaStyle(FontWeight.SemiBold, 28f),
+    headlineSmall = banglaStyle(FontWeight.SemiBold, 24f),
+    titleLarge = banglaStyle(FontWeight.SemiBold, TypeLadder.SHEET_SP),
+    titleMedium = banglaStyle(FontWeight.Medium, TypeLadder.BOOK_NAME_SP, serif = true),
+    titleSmall = banglaStyle(FontWeight.Medium, TypeLadder.NAME_SP),
+    bodyLarge = banglaStyle(FontWeight.Normal, TypeLadder.FIELD_SP),
+    bodyMedium = banglaStyle(FontWeight.Normal, TypeLadder.BODY_SP),
+    bodySmall = banglaStyle(FontWeight.Normal, TypeLadder.META_SP),
+    labelLarge = banglaStyle(FontWeight.Medium, TypeLadder.BUTTON_SP, tabular = true),
+    labelMedium = banglaStyle(FontWeight.SemiBold, TypeLadder.LABEL_SP, tabular = true),
+    labelSmall = banglaStyle(FontWeight.Normal, TypeLadder.VALUE_SP, tabular = true),
 )
 
 /** One style of the Bangla ladder, at the line its face needs. */
@@ -684,12 +823,12 @@ private val literataCuts = java.util.concurrent.ConcurrentHashMap<Int, FontFamil
 val LatinReading = TextStyle(
     fontFamily = Literata,
     fontWeight = FontWeight.Normal,
-    fontSize = 15.sp,
-    lineHeight = 22.5.sp,
+    fontSize = 16.sp,
+    lineHeight = 24.sp,
 )
 
 /**
- * The Bangla reading voice at the middle step. The body is 15 sp, the same
+ * The Bangla reading voice at the middle step. The body is 16 sp, the same
  * size as the Latin reading, because the two scripts share one ladder. The
  * line is the face's own natural 1.722 (Noto Serif Bengali's natural box is
  * 1.594 of the em, and the script stacks vowel marks above and below the
@@ -698,8 +837,8 @@ val LatinReading = TextStyle(
 val BengaliReading = TextStyle(
     fontFamily = NotoSerifBengali,
     fontWeight = FontWeight.Normal,
-    fontSize = 15.sp,
-    lineHeight = (15f * 31f / 18f).sp,
+    fontSize = 16.sp,
+    lineHeight = (16f * 31f / 18f).sp,
 )
 
 /**

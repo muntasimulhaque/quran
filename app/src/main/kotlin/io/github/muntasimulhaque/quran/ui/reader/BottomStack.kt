@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.data.DownloadError
@@ -31,6 +32,7 @@ import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.playback.PlaybackBar
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.theme.compactBody
 
 /**
  * Everything that can sit at the foot of the page: the pack on its way in and
@@ -89,11 +91,13 @@ internal fun BottomStack(
                     .padding(start = 18.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column(Modifier.padding(end = Space.Row)) {
+                Column(Modifier.padding(end = Space.Row).weight(1f)) {
                     Text(
                         text = contentPackName(setup.pack.id, setup.pack.name),
-                        style = MaterialTheme.typography.bodySmall,
+                        style = compactBody(),
                         color = MaterialTheme.colorScheme.primary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                     Text(
                         text = when {
@@ -111,8 +115,10 @@ internal fun BottomStack(
                                 formatBytes(setup.pack.bytes),
                             )
                         },
-                        style = MaterialTheme.typography.bodySmall,
+                        style = compactBody(),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
                 if (setup.failed) {

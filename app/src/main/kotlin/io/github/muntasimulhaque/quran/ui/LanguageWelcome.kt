@@ -100,7 +100,7 @@ fun LanguageWelcome(
                 text = stringResource(R.string.welcome_later),
                 // A sentence, not a caption: it tells the reader the choice
                 // is not permanent (owner decision, this session).
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = Space.Section),
@@ -197,14 +197,14 @@ fun WelcomeReminder(
                     R.string.welcome_reminder_body,
                     clockText(DEFAULT_DAILY_MINUTE),
                 ),
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = Space.Row),
             )
             Text(
                 text = stringResource(R.string.welcome_later),
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = Space.Gutter),

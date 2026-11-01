@@ -70,6 +70,9 @@ fun BrowseSheet(
     saved: List<SavedAyah>,
     lastRead: List<ReadPlace>,
     currentAyah: Int,
+    /** The reader's translation size and line, for the saved notes. */
+    noteSp: Float,
+    noteLineSp: Float,
     startOnLastRead: Boolean = false,
     onDismiss: () -> Unit,
     onAyah: (Int) -> Unit,
@@ -324,6 +327,8 @@ fun BrowseSheet(
                         texts = texts,
                         listState = savedList,
                         listModifier = Modifier.sheetDragGate(savedGate),
+                        noteSp = noteSp,
+                        noteLineSp = noteLineSp,
                         onAyah = onAyah,
                         onRemove = onRemoveSaved,
                     )

@@ -75,7 +75,7 @@ class TextSizeTest {
     @Test
     fun theTafsirIsSetAtTheTranslationSize() {
         // One reading voice: the Ibn Kathir prose stands at the size the
-        // translation stands at, both at 15 sp with the same 1.5 line
+        // translation stands at, both at 16 sp with the same 1.5 line
         // (owner decision, this session).
         assertEquals(TextSize.sp(TypeRole.Translation, 1f), TextSize.sp(TypeRole.Tafsir, 1f))
         assertEquals(TextSize.lineSp(TypeRole.Translation, 1f), TextSize.lineSp(TypeRole.Tafsir, 1f))
@@ -92,21 +92,20 @@ class TextSizeTest {
     @Test
     fun theShippedDefaultIsOneEvenStepSmaller() {
         // The default is 1, the middle of the five (owner decision, this
-        // session). The Arabic stands at 26 sp, 1.733 times the 15 sp prose:
+        // session). The Arabic stands at 26 sp, 1.625 times the 16 sp prose:
         // the owner's eye asked for the Quran above the prose, and the reader
         // can still go down to 20.8.
         assertEquals(26f, TextSize.sp(TypeRole.Arabic, 1f))
-        assertEquals(15f, TextSize.sp(TypeRole.Translation, 1f))
+        assertEquals(16f, TextSize.sp(TypeRole.Translation, 1f))
     }
 
     @Test
     fun theWordMeaningSitsAStepUnderTheTranslation() {
-        // 13.5 sp against the translation's 15: nine tenths of it, a step
-        // the eye reads as a gloss rather than as a second translation. The
-        // five percent it stood at before read as one size used twice (owner
-        // decision, this session).
-        assertEquals(15f * 0.9f, TextSize.meaningSp(1f), 0.001f)
-        assertEquals(13.5f * 0.8f, TextSize.meaningSp(0.8f), 0.001f)
+        // 15 sp against the translation's 16: one point under, the smallest
+        // step of the platform's 12 sp body floor, and the word grid does the
+        // rest of the separating (owner decision, this session).
+        assertEquals(15f, TextSize.meaningSp(1f), 0.001f)
+        assertEquals(12f, TextSize.meaningSp(0.8f), 0.001f)
         // The aid's Arabic word follows the verse and never the gloss, so a
         // bigger gloss cannot carry it past the Quran's own size.
         for (step in TextSize.STEPS) {
@@ -127,9 +126,11 @@ class TextSizeTest {
         // under the word it glosses (owner decision, this session).
         assertEquals(26f, TextSize.sp(TypeRole.Arabic, 1f))
         assertEquals(22f, TextSize.wordSp(1f), 0.001f)
-        assertEquals(23.4f, TextSize.inlineArabic(1f), 0.001f)
-        assertEquals(15f, TextSize.sp(TypeRole.Translation, 1f))
-        assertEquals(15f, TextSize.sp(TypeRole.Tafsir, 1f))
-        assertEquals(13.5f, TextSize.meaningSp(1f), 0.001f)
+        assertEquals(24f, TextSize.inlineArabic(1f), 0.001f)
+        assertEquals(24f, TextSize.medallionSp(1f), 0.001f)
+        assertEquals(24f, TextSize.medallionAt(26f), 0.001f)
+        assertEquals(16f, TextSize.sp(TypeRole.Translation, 1f))
+        assertEquals(16f, TextSize.sp(TypeRole.Tafsir, 1f))
+        assertEquals(15f, TextSize.meaningSp(1f), 0.001f)
     }
 }

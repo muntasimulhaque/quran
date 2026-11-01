@@ -54,6 +54,7 @@ import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.ReadingRow
+import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TranslationLine
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
@@ -148,12 +149,13 @@ internal fun AyahBlock(
     val ornamentStyle = remember(hafs, metrics.arabicSp, palette.ornament) {
         SpanStyle(
             fontFamily = hafs,
-            // 0.9 of the ayah: the medallion's own ink is about 0.89 em tall,
-            // so this lands it on the line the way the printed page does and
-            // keeps the digits inside it legible (owner decision, this
-            // session). It replaces the 0.72 the Amiri rosette wore, whose
-            // oval openwork read as a bracket and whose digits were tiny.
-            fontSize = (metrics.arabicSp * 0.9f).sp,
+            // 24 of the ayah's 26: the medallion's own ink is about 0.89 em
+            // tall, so this lands it on the line the way the printed page
+            // does and keeps the digits inside it legible (owner decision,
+            // this session). It replaces the 0.72 the Amiri rosette wore,
+            // whose oval openwork read as a bracket and whose digits were
+            // tiny.
+            fontSize = TextSize.medallionAt(metrics.arabicSp).sp,
             color = palette.ornament,
         )
     }

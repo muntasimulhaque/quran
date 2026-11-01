@@ -41,6 +41,9 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 @Composable
 fun RemoveSavedSheet(
     note: String?,
+    /** The reader's translation size and line, so the note reads as they read. */
+    noteSp: Float,
+    noteLineSp: Float,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -71,10 +74,7 @@ fun RemoveSavedSheet(
             if (!note.isNullOrBlank()) {
                 Text(
                     text = note,
-                    style = LocalReadingVoice.current.prose(
-                        LocalReadingVoice.current.style.fontSize.value,
-                        LocalReadingVoice.current.style.lineHeight.value,
-                    ),
+                    style = LocalReadingVoice.current.prose(noteSp, noteLineSp),
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,

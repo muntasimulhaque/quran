@@ -23,7 +23,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
@@ -32,6 +31,7 @@ import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.theme.compactLabel
 
 /**
  * The pill's words over its answer, on two lines and as one door: who is
@@ -130,8 +130,9 @@ internal fun WordsBlock(
                 text = name,
                 // A name in a control, not a group label: 13 at Regular, with
                 // the accent and the chevron carrying the door. The title is
-                // the Medium line now, so the reader sees what is playing
-                // before who is reading it (owner decision, this session).
+                // the compact 14 Medium line, so the reader sees what is
+                // playing before who is reading it (owner decision, this
+                // session).
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
                 maxLines = 1,
@@ -165,7 +166,7 @@ internal fun WordsBlock(
         }
         Text(
             text = title,
-            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+            style = compactLabel(),
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

@@ -184,9 +184,9 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
                 // The verse is the card's fixed specimen, and its numbers
                 // are the reading's own: 24 on a 48 line (2.0, the Quran
                 // Foundation's own QPC Hafs leading), the translation at its
-                // voice's size and 1.5 line, and the inline Arabic at 21.6
-                // (0.9 of the card's Arabic). The picture and the page are
-                // one hand (owner decision, this session).
+                // voice's size and 1.5 line, and the inline Arabic at 22, a
+                // step under the card's 24. The picture and the page are one
+                // hand (owner decision, this session).
                 style = arabicStyle(
                     hafs,
                     TypeLadder.SHARE_ARABIC_SP,
@@ -208,9 +208,9 @@ internal fun AyahShareCardContent(card: ShareCard, modifier: Modifier = Modifier
                     modifier = Modifier.padding(top = Space.Row),
                     sizeSp = LocalReadingVoice.current.style.fontSize.value,
                     lineSp = LocalReadingVoice.current.style.lineHeight.value,
-                    // The inline Arabic keeps the app's one rule, nine tenths
-                    // of the card's Arabic size: 21.6 against the 24 verse.
-                    arabicSp = TypeLadder.SHARE_ARABIC_SP * 0.9f,
+                    // The inline Arabic is a step under the card's verse:
+                    // 22 against the 24, the relation the reading keeps.
+                    arabicSp = TypeLadder.SHARE_INLINE_SP,
                     // The card is parchment whatever page the reader is on,
                     // so its words wear the paper ink and never the night
                     // page's softer tone.
