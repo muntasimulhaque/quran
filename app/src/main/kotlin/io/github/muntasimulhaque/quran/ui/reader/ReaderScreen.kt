@@ -231,11 +231,15 @@ fun ReaderScreen(
             }
         }
     }
-    // What a Share is doing: null when nothing, a card waiting for the
-    // reader's choice in the share sheet, and the same card with `capture`
-    // set once they asked for the picture. One holder rather than two, so a
-    // second tap can never leave a stray sheet behind the capture.
-    var sharing by remember { mutableStateOf<ShareRequest?>(null) }
+    // What a Share is doing: the card the reader is looking at in the share
+    // sheet, and whether its picture is being captured right now. The two are
+    // separate because the sheet stays up while the capture runs: a reader who
+    // sends the card to one app can send it to another from the same sheet,
+    // instead of raising the sheet again for every receiver (owner report,
+    // this session). `sharing` is non-null for the whole visit, so the sheet
+    // is composed from the first preview until the reader dismisses it.
+    var sharing by remember { mutableStateOf<ShareCard?>(null) }
+    var capturing by remember { mutableStateOf(false) }
 
     // The chrome is shown once on a new install (and on a release that adds
     // a surface). The reveal is written down after a moment, so a process
@@ -485,8 +489,12 @@ fun ReaderScreen(
      */
     fun sharePlainText(text: String) {
         if (!shareAyahText(context, text)) {
-            // Nothing can be shared on a device with no receiving app; the
-            // reader is told rather than left with a tap that did nothing.
+            // Nothing can be shared on a device with no receiving app. The
+            // sheet closes so the snackbar under it is seen: a modal sheet
+            // has its own window and would hide the one line that says the
+            // tap did nothing. The reader can raise the sheet again.
+            sharing = null
+            capturing = false
             scope.launch { snackbar.showSnackbar(shareUnavailable) }
         }
     }
@@ -730,6 +738,7 @@ fun ReaderScreen(
                     cardNote = request.ayah.number
                 },
                 onShare = {
+                    capturing = false
                     scope.launch { sharing = loadShareCard(context, viewModel, request.ayah) }
                 },
             )
@@ -737,35 +746,39 @@ fun ReaderScreen(
 
         // The share card, composed for its capture alone. It never reaches
         // the screen: the layer it records into is read back and then the
-        // whole node leaves the composition. This capture runs only after
-        // the reader has chosen Share image, so the words-only door never
-        // pays for a bitmap.
-        sharing?.takeIf { it.capture }?.let { card ->
+        // whole node leaves the composition. This capture runs only while
+        // `capturing` is set, so the words-only door never pays for a bitmap,
+        // and the share sheet behind it stays composed for the next receiver.
+        sharing?.takeIf { capturing }?.let { card ->
             ShareCardCapture(
-                card = card.card,
+                card = card,
                 onImage = { image ->
-                    sharing = null
-                    shareCard(image, card.card.text)
+                    capturing = false
+                    shareCard(image, card.text)
                 },
                 onFailed = {
-                    sharing = null
-                    sharePlainText(card.card.text)
+                    capturing = false
+                    sharePlainText(card.text)
                 },
                 modifier = Modifier.align(Alignment.BottomStart),
             )
         }
     }
 
-    // The share sheet: the real card as a preview, and the two doors.
-    sharing?.takeIf { !it.capture }?.let { ready ->
+    // The share sheet: the real card as a preview, and the two doors. It stays
+    // up after either door: the reader may want the same card in another app,
+    // and the sheet is the one place that says what the card is. It closes on
+    // a dismiss, or on a share that found no receiver (so the snackbar is not
+    // hidden behind the sheet's own window).
+    sharing?.let { card ->
         AyahShareSheet(
-            card = ready.card,
-            onShareImage = { sharing = ready.copy(capture = true) },
-            onShareText = {
+            card = card,
+            onShareImage = { if (!capturing) capturing = true },
+            onShareText = { if (!capturing) sharePlainText(card.text) },
+            onDismiss = {
                 sharing = null
-                sharePlainText(ready.card.text)
+                capturing = false
             },
-            onDismiss = { sharing = null },
         )
     }
 

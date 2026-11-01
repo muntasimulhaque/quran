@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
@@ -18,9 +19,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -187,7 +190,24 @@ fun AppTheme.name(): String = stringResource(
  * a line each and the page still offers every size (owner decision, this
  * session). The smallest and largest marks at the ends say which way the scale
  * runs, and the chosen stop's halo says where the reader is.
+ *
+ * **The four rails are one length** (owner report, this session). The label
+ * and the two end marks used to take their own intrinsic width, so "Quran
+ * text" left a longer rail than "Word meanings" and the page read as four
+ * different controls. The label now keeps a fixed column and each mark a
+ * fixed slot, both scaled with the system font scale, so the rail between
+ * them is the same on every row of a given page. On a tablet the page is
+ * wider and every rail is longer together; the equality is what the eye
+ * reads, not one dp value. The label's single line ellipsizes if a translation
+ * or a larger font outgrows the column, and the marks stay centred in their
+ * slots so a wide Arabic alef and a narrow Latin A start the rail on one
+ * line.
  */
+private val SizeLabel = 120.dp
+
+/** The slot one end mark keeps, so the rail's two ends never move. */
+private val SizeMarkSlot = 24.dp
+
 @Composable
 fun SizeRow(
     role: TypeRole,
@@ -205,6 +225,9 @@ fun SizeRow(
         },
     )
     val scale = if (role == TypeRole.Arabic || role == TypeRole.Words) 0.75f else 1f
+    val fontScale = LocalDensity.current.fontScale
+    val labelSlot = SizeLabel * fontScale
+    val markSlot = SizeMarkSlot * fontScale
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -216,9 +239,12 @@ fun SizeRow(
             text = label,
             // A control's name wears the same words every other row's name
             // wears, so the sheet reads as one voice (owner decision, the
-            // theme and consistency session).
+            // theme and consistency session). The fixed column is the rail's
+            // leading line: the four names may be different lengths, the
+            // four rails may not start on four different ones.
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.width(labelSlot),
             maxLines = 1,
             softWrap = false,
             overflow = TextOverflow.Ellipsis,
@@ -228,8 +254,12 @@ fun SizeRow(
             steps = TextSize.STEPS,
             value = step,
             onSelect = onChange,
-            startMark = { SizeMark(role, TextSize.STEPS.first(), scale) },
-            endMark = { SizeMark(role, TextSize.STEPS.last(), scale) },
+            startMark = {
+                SizeMark(role, TextSize.STEPS.first(), scale, Modifier.width(markSlot))
+            },
+            endMark = {
+                SizeMark(role, TextSize.STEPS.last(), scale, Modifier.width(markSlot))
+            },
             modifier = Modifier
                 .weight(1f)
                 .padding(start = Space.Line),
@@ -241,10 +271,17 @@ fun SizeRow(
  * One end of a size scale: the letter at the size that end offers, in the
  * script it is read in. The Arabic and the aid's word are drawn at three
  * quarters, so the largest still fits the row; the others at their own size,
- * as the sample ayah above is drawn.
+ * as the sample ayah above is drawn. [modifier] is the fixed mark slot, and
+ * the letter stands on its middle so two marks of different scripts read on
+ * one line.
  */
 @Composable
-private fun SizeMark(role: TypeRole, step: Float, scale: Float) {
+private fun SizeMark(
+    role: TypeRole,
+    step: Float,
+    scale: Float,
+    modifier: Modifier = Modifier,
+) {
     val size = (TextSize.sp(role, step) * scale).sp
     Text(
         text = if (role == TypeRole.Arabic) "ا" else "A",
@@ -260,5 +297,7 @@ private fun SizeMark(role: TypeRole, step: Float, scale: Float) {
             )
         },
         color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+        modifier = modifier,
     )
 }

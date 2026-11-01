@@ -48,10 +48,14 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
 /**
  * The one row's menu a chip raises: the width a single short word needs, not
  * the panel's 288 and not the ayah menu's 216. The menu family keeps its shape
- * and its row rhythm; only the measure follows the content (owner decision,
- * this session: one menu family, not one measure).
+ * and its row rhythm; only the measure follows the content (owner decision:
+ * one menu family, not one measure).
+ *
+ * It is 160, not 176: the row's own leading rail, its mark, its word, and the
+ * popup's gutters need about 154 dp, and the extra 22 dp read as an empty
+ * right side under a six letter word (owner report, this session).
  */
-private val RecentChipMenu = 176.dp
+private val RecentChipMenu = 160.dp
 
 /**
  * The queries the reader acted on before, as chips over the empty sheet.
@@ -71,6 +75,14 @@ private val RecentChipMenu = 176.dp
  * presses. The long press is not the only road, because a gesture that has to
  * be taught is not a signifier: the chip also carries a spoken Remove action,
  * so a reader using TalkBack removes it without the gesture.
+ *
+ * The menu takes the chip's middle. A chip is a capsule, and [AppPopup]'s own
+ * rule answers a capsule with [PopupAlignment.Center]; the Start alignment is
+ * the door's, and the chip is not a door. Start put the menu's left edge on
+ * the chip's left edge and let it run off to the right, so a wider menu no
+ * longer read as belonging to the word that raised it (owner report, this
+ * session). A chip near the leading edge still clamps to the window's gutter,
+ * which is the window's rule and not a second alignment.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -184,7 +196,7 @@ private fun RecentChip(
             anchor = at,
             onDismiss = { anchor = null },
             width = RecentChipMenu,
-            alignment = PopupAlignment.Start,
+            alignment = PopupAlignment.Center,
             name = label,
         ) {
             MenuActionRow(

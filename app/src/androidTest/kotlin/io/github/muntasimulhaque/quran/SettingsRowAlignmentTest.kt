@@ -200,6 +200,36 @@ class SettingsRowAlignmentTest {
     }
 
     /**
+     * The four size rails are one length. The owner read the text page as four
+     * different controls because each label took its own width and each end
+     * mark its own; the fixed label column and mark slots are the one rule that
+     * makes the rails equal, and this reads the rail the eye sees.
+     */
+    @Test
+    fun theFourSizeRailsAreOneLength() {
+        compose.setContent {
+            QuranTheme(theme = AppTheme.Light) {
+                Column {
+                    TypeRole.entries.forEach { role ->
+                        SizeRow(role = role, step = 1f, onChange = {})
+                    }
+                }
+            }
+        }
+
+        val rails = compose.onAllNodesWithTag("scale-rail", useUnmergedTree = true)
+            .fetchSemanticsNodes()
+        assertEquals("one rail for each kind of text", 4, rails.size)
+        val first = rails.first().boundsInRoot
+        rails.forEach { node ->
+            val rail = node.boundsInRoot
+            assertEquals("every rail starts on one line", first.left, rail.left, 1f)
+            assertEquals("every rail ends on one line", first.right, rail.right, 1f)
+            assertTrue("a rail must keep some measure", rail.width > 1f)
+        }
+    }
+
+    /**
      * A row that carries a switch is as tall as a row that does not: the
      * switch owes the finger its target, and it does not owe the row its
      * height. The hub read as two rhythms alternating down the sheet until

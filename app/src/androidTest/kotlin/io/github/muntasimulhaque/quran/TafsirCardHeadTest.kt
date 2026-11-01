@@ -3,8 +3,10 @@ package io.github.muntasimulhaque.quran
 import android.graphics.Bitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
@@ -13,6 +15,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -40,10 +43,12 @@ import java.io.File
  * there is no drawn `Tafsir` head and no `Ayah 2:255` line above it, because
  * the reader came from the ayah's own Tafsir mark and the passage's own
  * reference already says which ayahs it covers. There is no door to fold, so
- * the pack is a byline and never a control, and it reads at the row name's 15
- * in both the one-pack and the two-pack case (owner decision, this session).
- * The two-pack case is the doors' own case, pinned by the tour's card frames
- * on all three form factors; this test pins the common one.
+ * the pack is a two-line head and never a control: its language at the
+ * settings group's 12 in the secondary ink, then its name at the row name's
+ * 15. The language is a qualifier and not a heading; the pack's name is not a
+ * heading either, because the passage's reference below is. The two-pack case
+ * is the doors' own case, pinned by the tour's card frames on all three form
+ * factors; this test pins the common one.
  *
  * The card is opened the way a reader opens it, from the ayah's actions, not
  * by composing it in isolation: the claim is about the surface the app draws.
@@ -92,21 +97,20 @@ class TafsirCardHeadTest {
             SURAH,
             "1:1",
         )
-        // The byline is the pack and its language, one meta line: a source is
-        // not a title, and the passage's reference is (owner decision, this
-        // session).
+        // The head is two lines: the language that qualifies the source, then
+        // the source's own name. Neither line is a control or a heading; the
+        // passage's reference below is what a screen reader jumps to.
         val language = java.util.Locale.forLanguageTag("en").getDisplayName()
-        val byline = compose.activity.getString(
-            ReadingR.string.card_pack_byline,
-            pack,
-            language,
-        )
-
-        // The byline is one node, it answers no touch, and it is a source
-        // line rather than a heading.
-        compose.onAllNodesWithText(byline).assertCountEquals(1)
-        compose.onAllNodes(hasText(byline) and hasClickAction()).assertCountEquals(0)
-        compose.onAllNodes(hasText(byline) and isHeading()).assertCountEquals(0)
+        compose.onNodeWithTag("pack-language").assertTextEquals(language)
+        compose.onNodeWithTag("pack-name").assertTextEquals(pack)
+        compose.onAllNodes(hasTestTag("pack-language") and hasClickAction())
+            .assertCountEquals(0)
+        compose.onAllNodes(hasTestTag("pack-language") and isHeading())
+            .assertCountEquals(0)
+        compose.onAllNodes(hasTestTag("pack-name") and hasClickAction())
+            .assertCountEquals(0)
+        compose.onAllNodes(hasTestTag("pack-name") and isHeading())
+            .assertCountEquals(0)
 
         // The passage's own reference is the card's heading, the word a
         // screen reader can jump to. The old drawn `Tafsir` head is gone.
@@ -114,12 +118,12 @@ class TafsirCardHeadTest {
         compose.onAllNodesWithText("Tafsir").assertCountEquals(0)
 
         // The frame this head is reviewed from: the single-pack card the
-        // owner's report came from, kept beside the tour's frames so the
-        // byline and the passage title can be read on the glass, not only in
-        // the semantics tree (owner decision, this session).
+        // owner's report came from, kept beside the tour's frames so the two
+        // head lines and the passage title can be read on the glass, not only
+        // in the semantics tree (owner decision, this session).
         compose.waitForIdle()
         val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
-        File(screenshotOutputDirectory(), "tafsir-byline.png").outputStream().use { output ->
+        File(screenshotOutputDirectory(), "tafsir-head.png").outputStream().use { output ->
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, output)
         }
     }

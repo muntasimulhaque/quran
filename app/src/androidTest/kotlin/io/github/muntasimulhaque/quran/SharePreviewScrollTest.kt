@@ -1,13 +1,9 @@
 package io.github.muntasimulhaque.quran
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
-import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.ui.reader.ShareCard
@@ -17,16 +13,15 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * The share sheet's preview scrolls a long card instead of clipping it.
+ * The share sheet's preview is the whole card, scaled to the room it has.
  *
- * The height cap has to sit on the viewport, outside the scroll. With the
- * two swapped the cap lands on the card itself, the card is held at 340 dp,
- * the scroll has nothing to scroll, and the tail is clipped off the bottom:
- * a reader with a long ayah sees the first lines and a cut (owner report).
- * The test draws the same box the sheet draws, with the longest ayah
- * in the Book, and scrolls the translation's last words into view. A clipped
- * card cannot answer that scroll, so this fails on the old order and passes
- * on the new one.
+ * The old preview held the card behind a 340 dp viewport and scrolled it, so
+ * an ordinary ayah's card was already cut and the reader had to scroll to see
+ * the end of what they were about to send. The preview now measures the card
+ * at its real 320 dp, scales it by the smaller of the room's width and height
+ * ratios, and lays the whole thing out. This test draws the longest ayah in
+ * the Book, the card with the most to lose, and asserts the last words are on
+ * the glass without a scroll.
  */
 @RunWith(AndroidJUnit4::class)
 class SharePreviewScrollTest {
@@ -35,18 +30,17 @@ class SharePreviewScrollTest {
     val compose = createComposeRule()
 
     @Test
-    fun theFootOfALongCardCanBeScrolledTo() {
+    fun theWholeLongCardIsInThePreview() {
         compose.setContent { ShareCardPreviewBox(LONG_CARD) }
         compose.waitForIdle()
-        // The tail exists even when it is clipped; that is the card being
-        // measured. Bringing it into the viewport is what the reader does,
-        // and what a clamped card cannot answer.
+        // The tail is on the glass in the same frame as the head: the card is
+        // one scaled picture, not a viewport with a scroll. There is nothing
+        // to scroll to, so the assertion is the displayed bound itself.
         val tail = compose.onAllNodesWithText(
             "knowing of all things.",
             substring = true,
             useUnmergedTree = true,
         ).onFirst()
-        tail.performScrollTo()
         tail.assertIsDisplayed()
     }
 

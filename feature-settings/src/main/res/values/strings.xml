@@ -23,6 +23,7 @@
     <string name="settings_daily_picker_title">When the daily ayah arrives</string>
     <string name="settings_daily_picker_hour">Hour</string>
     <string name="settings_daily_picker_minute">Minute</string>
+    <string name="settings_daily_picker_type">Type the time</string>
     <string name="settings_cancel">Cancel</string>
     <string name="settings_set">Set</string>
     <string name="settings_follow_title">Follow the reciter</string>

@@ -75,6 +75,33 @@ class GlyphsTest {
     }
 
     @Test
+    fun theSettingsMarkKeepsOneWeightAndOneSilhouette() {
+        val shapes = Glyphs.of(Icon.Settings)
+        // The gear is a ring and eight tapered teeth. A Bar is the set's heavy
+        // fill for the transport marks, not a tooth: the old drawing mixed the
+        // ring's 2 unit stroke with eight 3 unit bars, and at 24 dp the round
+        // caps read as a sun rather than a cog (owner report, this session).
+        assertEquals(
+            "the gear's one hollow round",
+            1,
+            shapes.filterIsInstance<GlyphShape.Ring>().size,
+        )
+        assertEquals(
+            "the gear's eight teeth",
+            8,
+            shapes.filterIsInstance<GlyphShape.Solid>().size,
+        )
+        assertTrue(
+            "a gear tooth must not bring the set's second line weight back",
+            shapes.none { it is GlyphShape.Bar },
+        )
+        assertTrue(
+            "the ring must be drawn after the teeth, so its stroke closes the rim",
+            shapes.last() is GlyphShape.Ring,
+        )
+    }
+
+    @Test
     fun thePlayTriangleIsMeasuredByItsMass() {
         val triangle = Glyphs.of(Icon.Play).single() as GlyphShape.Solid
         // A triangle's mass sits left of its box, so a triangle centered by its

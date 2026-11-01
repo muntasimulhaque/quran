@@ -1,5 +1,9 @@
 package io.github.muntasimulhaque.quran.ui.glyph
 
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
+
 /**
  * The set's one ruler, and the only numbers a drawing may use.
  *
@@ -159,22 +163,15 @@ object Glyphs {
         ),
 
         // A ring and eight teeth, on the 45 degree steps the page's furniture
-        // keeps. A tooth is a Bar, so it carries the set's one weight at every
-        // size, and each starts on the ring's own centerline, so the tooth and
-        // the rim meet without a seam. The teeth reach the live area's 2 and
-        // 22 exactly, and the ring's hole stays wide enough to read hollow at
-        // the 14 dp stroke (owner decision, this session).
-        Icon.Settings to listOf(
-            ring(12f, 12f, 5.5f),
-            bar(12f, 6.5f, 12f, 3.5f),
-            bar(15.889f, 8.111f, 18.010f, 5.990f),
-            bar(17.5f, 12f, 20.5f, 12f),
-            bar(15.889f, 15.889f, 18.010f, 18.010f),
-            bar(12f, 17.5f, 12f, 20.5f),
-            bar(8.111f, 15.889f, 5.990f, 18.010f),
-            bar(6.5f, 12f, 3.5f, 12f),
-            bar(8.111f, 8.111f, 5.990f, 5.990f),
-        ),
+        // keeps. The teeth are solid tapered teeth, not bars: a bar carries the
+        // set's 3 unit weight, so a ring at 2 and eight bars at 3 made the gear
+        // the one mark with two line weights, and a round cap on a stub three
+        // units long read as a sun ray at 24 dp (owner report, this session).
+        // Each tooth starts under the ring, runs to the circle keyline, and
+        // ends on a flat tip the solid's own corner rounds; the ring is drawn
+        // last, so its stroke closes the rim over the roots and no two shapes
+        // leave an anti-aliased seam at the joint.
+        Icon.Settings to gearTeeth() + ring(12f, 12f, 5.5f),
 
         // The portrait keyline: a ribbon is a tall thing, and the notch is a
         // quarter of its height so the tail reads as a fold rather than a cut.
@@ -293,6 +290,43 @@ object Glyphs {
 }
 
 private fun point(x: Float, y: Float) = GlyphPoint(x, y)
+
+/**
+ * The Settings gear's eight teeth, on the set's 45 degree steps.
+ *
+ * A tooth is a tapered solid that starts under the ring (radius 5.5, where the
+ * ring's stroke hides its root) and ends at the circle keyline (radius 10,
+ * the outer ink the test measures). Its root is 4.3 units wide and its tip
+ * 3.0, so the eye reads a tooth with a flat end rather than a radial ray with
+ * a round cap. The ring is drawn after the teeth, so the rim is one unbroken
+ * stroke and the roots never show a second edge.
+ */
+private fun gearTeeth(): List<GlyphShape> {
+    val center = GlyphGrid.Size / 2f
+    val rootRadius = 5.5f
+    val tipRadius = 10f
+    val rootHalf = 2.15f
+    val tipHalf = 1.5f
+    return List(8) { index ->
+        val angle = (-90.0 + index * 45.0) * PI / 180.0
+        val alongX = cos(angle).toFloat()
+        val alongY = sin(angle).toFloat()
+        val acrossX = -alongY
+        val acrossY = alongX
+        fun at(radius: Float, across: Float) = GlyphPoint(
+            x = center + alongX * radius + acrossX * across,
+            y = center + alongY * radius + acrossY * across,
+        )
+        GlyphShape.Solid(
+            listOf(
+                at(rootRadius, rootHalf),
+                at(tipRadius, tipHalf),
+                at(tipRadius, -tipHalf),
+                at(rootRadius, -rootHalf),
+            ),
+        )
+    }
+}
 
 /** Pairs of coordinates, in the order the line visits them. */
 private fun points(vararg values: Float): List<GlyphPoint> {

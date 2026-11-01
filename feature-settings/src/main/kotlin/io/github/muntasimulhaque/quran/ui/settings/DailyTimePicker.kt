@@ -1,6 +1,9 @@
 package io.github.muntasimulhaque.quran.ui.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -21,6 +25,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
@@ -42,8 +49,14 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
@@ -55,14 +68,22 @@ import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import io.github.muntasimulhaque.quran.feature.settings.R
+import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
+import io.github.muntasimulhaque.quran.ui.reader.IconButton
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
@@ -102,6 +123,22 @@ private val TapeLabel = 64.dp
  * a sighted reader can drag the tape or tap the number they want and the tape
  * carries it to the middle.
  *
+ * **The title stands on the dialog's one axis** (owner report, this session).
+ * The time is centered and the page is a floating sheet of its own, so a
+ * left-aligned question over a centered subject read as a layout accident.
+ * It is still the small page's 16, not the 20 of a full sheet: the time is the
+ * subject, and the question steps back.
+ *
+ * **The moment can be typed** (owner report, this session). The big digits
+ * are a field pair: tapping or long pressing the hour or the minute selects
+ * that value and raises the number keyboard, and the existing keyboard mark
+ * at the leading end of the button row is the visible door to the same
+ * editor. The field selects all of its value, takes two digits, commits on
+ * the IME's Next or Done or on losing focus, and brings the tape to the value
+ * it committed. A value typed in 12-hour mode stays in the period already
+ * chosen; an out-of-range entry is clamped rather than rejected, so the
+ * reader always leaves with a time.
+ *
  * Set is the page's one answer and Cancel its quiet exit, in the app's own
  * two button shapes. The dialog is the app's floating cloth, corners, and
  * lift, so it stands over the settings page as a part of the same app.
@@ -129,9 +166,102 @@ internal fun DailyTimeDialog(
     val title = stringResource(R.string.settings_daily_picker_title)
     val hourName = stringResource(R.string.settings_daily_picker_hour)
     val minuteName = stringResource(R.string.settings_daily_picker_minute)
+    val typeName = stringResource(R.string.settings_daily_picker_type)
+
+    // The typed value is a draft until it is committed, so an empty field can
+    // be cleared and retyped without the displayed time jumping to 0. The
+    // tape and the field share the committed hour and minute, and the field
+    // selects the whole value when it opens: a reader who taps 08 and types 1
+    // gets 01, not 081.
+    var editing by rememberSaveable { mutableStateOf(TimePart.None) }
+    // The keyboard is hidden only after an editor was actually open. Hiding it
+    // on the dialog's first frame sent an IME transaction with no field on
+    // screen, and the next Back landed while the window was still settling
+    // (found by the accessibility run, this session).
+    var hadEditing by remember { mutableStateOf(false) }
+    var hourField by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue(""))
+    }
+    var minuteField by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue(""))
+    }
+    val hourFocus = remember { FocusRequester() }
+    val minuteFocus = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
+    val time = timeStyle()
+    val hourStyle = time.copy(textAlign = TextAlign.End)
+    val minuteStyle = time.copy(textAlign = TextAlign.Start)
+
+    fun commitHour() {
+        if (editing != TimePart.Hour) return
+        val entered = hourField.text.toIntOrNull()
+        if (entered != null) {
+            hour = if (twentyFour) {
+                entered.coerceIn(0, 23)
+            } else {
+                val twelve = entered.coerceIn(1, 12)
+                (twelve % 12) + if (evening) 12 else 0
+            }
+        }
+        editing = TimePart.None
+    }
+
+    fun commitMinute() {
+        if (editing != TimePart.Minute) return
+        minuteField.text.toIntOrNull()?.let { minute = it.coerceIn(0, 59) }
+        editing = TimePart.None
+    }
+
+    fun begin(part: TimePart) {
+        commitHour()
+        commitMinute()
+        editing = part
+        when (part) {
+            TimePart.Hour -> {
+                val text = hourText(hour, twentyFour, locale)
+                hourField = TextFieldValue(text, selection = TextRange(0, text.length))
+            }
+            TimePart.Minute -> {
+                val text = minuteText(minute, locale)
+                minuteField = TextFieldValue(text, selection = TextRange(0, text.length))
+            }
+            TimePart.None -> Unit
+        }
+    }
+
+    fun dismiss() {
+        // The dialog's window is about to leave; a focused child inside it
+        // would keep the focus on a window that no longer exists, and the
+        // settings page behind it never gets the next Back. Clear the
+        // dialog's own focus before the window goes, the same way a popup
+        // hands its focus back when it closes.
+        focusManager.clearFocus(force = true)
+        if (editing != TimePart.None) keyboard?.hide()
+        onDismiss()
+    }
+
+    LaunchedEffect(editing) {
+        when (editing) {
+            TimePart.Hour -> {
+                hadEditing = true
+                hourFocus.requestFocus()
+                keyboard?.show()
+            }
+            TimePart.Minute -> {
+                hadEditing = true
+                minuteFocus.requestFocus()
+                keyboard?.show()
+            }
+            TimePart.None -> if (hadEditing) {
+                hadEditing = false
+                keyboard?.hide()
+            }
+        }
+    }
 
     Dialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = ::dismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         BoxWithConstraints(
@@ -148,6 +278,7 @@ internal fun DailyTimeDialog(
                     .floatingLift(Radii.Popup)
                     .clip(Radii.Popup)
                     .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                    .imePadding()
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 20.dp, vertical = 20.dp)
                     .semantics { paneTitle = title }
@@ -157,6 +288,8 @@ internal fun DailyTimeDialog(
                     text = title,
                     style = screenSubtitle(),
                     color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
                 )
                 Spacer(Modifier.height(Space.Line))
                 Row(
@@ -164,21 +297,69 @@ internal fun DailyTimeDialog(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        text = hourText(hour, twentyFour, locale),
-                        style = timeStyle(),
-                        color = MaterialTheme.colorScheme.onSurface,
+                    TimeField(
+                        value = hourText(hour, twentyFour, locale),
+                        editing = editing == TimePart.Hour,
+                        field = hourField,
+                        onFieldChange = { value ->
+                            val digits = value.text.filter { it.isDigit() }.take(2)
+                            hourField = value.copy(
+                                text = digits,
+                                selection = TextRange(digits.length),
+                            )
+                        },
+                        style = hourStyle,
+                        name = hourName,
+                        focus = hourFocus,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Next,
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onNext = {
+                                commitHour()
+                                begin(TimePart.Minute)
+                            },
+                            onDone = {
+                                commitHour()
+                                focusManager.clearFocus()
+                            },
+                        ),
+                        onFocusLost = ::commitHour,
+                        onClick = { begin(TimePart.Hour) },
                     )
                     Text(
                         text = ":",
-                        style = timeStyle(),
+                        style = time,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 2.dp),
                     )
-                    Text(
-                        text = minuteText(minute, locale),
-                        style = timeStyle(),
-                        color = MaterialTheme.colorScheme.onSurface,
+                    TimeField(
+                        value = minuteText(minute, locale),
+                        editing = editing == TimePart.Minute,
+                        field = minuteField,
+                        onFieldChange = { value ->
+                            val digits = value.text.filter { it.isDigit() }.take(2)
+                            minuteField = value.copy(
+                                text = digits,
+                                selection = TextRange(digits.length),
+                            )
+                        },
+                        style = minuteStyle,
+                        name = minuteName,
+                        focus = minuteFocus,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Done,
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                commitMinute()
+                                focusManager.clearFocus()
+                            },
+                        ),
+                        onFocusLost = ::commitMinute,
+                        onClick = { begin(TimePart.Minute) },
                     )
                     if (!twentyFour) {
                         Text(
@@ -199,12 +380,18 @@ internal fun DailyTimeDialog(
                         PeriodChoice(
                             label = periodName(pm = false, locale = locale),
                             chosen = !evening,
-                        ) { hour = hour % 12 }
+                        ) {
+                            commitHour()
+                            hour = hour % 12
+                        }
                         Spacer(Modifier.width(Space.Action))
                         PeriodChoice(
                             label = periodName(pm = true, locale = locale),
                             chosen = evening,
-                        ) { hour = (hour % 12) + 12 }
+                        ) {
+                            commitHour()
+                            hour = (hour % 12) + 12
+                        }
                     }
                 }
                 Spacer(Modifier.height(Space.Block))
@@ -227,23 +414,115 @@ internal fun DailyTimeDialog(
                 Spacer(Modifier.height(Space.Block))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
+                    horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    TextButton(
-                        label = stringResource(R.string.settings_cancel),
-                        onClick = onDismiss,
-                        quiet = true,
+                    // The keyboard is the visible door to the typed time: the
+                    // large digits also answer a tap or a long press, but a
+                    // gesture that has to be taught is not a signifier, and
+                    // this mark already says what the second way in is.
+                    IconButton(
+                        icon = Icon.Keyboard,
+                        description = typeName,
+                        onClick = { begin(TimePart.Hour) },
                     )
-                    TextButton(
-                        label = stringResource(R.string.settings_set),
-                        onClick = { onPick(hour * 60 + minute) },
-                        modifier = Modifier.padding(start = Space.Action),
-                        prominent = true,
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        TextButton(
+                            label = stringResource(R.string.settings_cancel),
+                            onClick = ::dismiss,
+                            quiet = true,
+                        )
+                        TextButton(
+                            label = stringResource(R.string.settings_set),
+                            onClick = {
+                                commitHour()
+                                commitMinute()
+                                focusManager.clearFocus(force = true)
+                                onPick(hour * 60 + minute)
+                            },
+                            modifier = Modifier.padding(start = Space.Action),
+                            prominent = true,
+                        )
+                    }
                 }
             }
         }
+    }
+}
+
+/** The part of the time a field is editing, or no field at all. */
+private enum class TimePart { None, Hour, Minute }
+
+/**
+ * One half of the big time: the committed value at rest, or the typed draft
+ * while it is being edited.
+ *
+ * The reader can tap or long press the digits; the keyboard mark under the
+ * tapes opens the same editor, and the field selects all of its value when it
+ * opens. The number keyboard, two digits, and the IME's Next save the reader
+ * from a decimal point or a third digit. A lost focus commits, so tapping the
+ * other half, the tape, or the Set button never loses what was typed.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun TimeField(
+    value: String,
+    editing: Boolean,
+    field: TextFieldValue,
+    onFieldChange: (TextFieldValue) -> Unit,
+    style: TextStyle,
+    name: String,
+    focus: FocusRequester,
+    keyboardOptions: KeyboardOptions,
+    keyboardActions: KeyboardActions,
+    onFocusLost: () -> Unit,
+    onClick: () -> Unit,
+) {
+    val press = remember { MutableInteractionSource() }
+    // The first focus event of a newly composed field is "not focused"; the
+    // editor would close before the request landed. The flag ignores that
+    // first empty event and commits only a focus that was actually held.
+    var focused by remember(editing) { mutableStateOf(false) }
+    val ink = MaterialTheme.colorScheme.onSurface
+    if (editing) {
+        BasicTextField(
+            value = field,
+            onValueChange = onFieldChange,
+            textStyle = style.copy(color = ink),
+            singleLine = true,
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            modifier = Modifier
+                .widthIn(min = 40.dp)
+                .focusRequester(focus)
+                .onFocusChanged { state ->
+                    if (state.isFocused) {
+                        focused = true
+                    } else if (focused) {
+                        onFocusLost()
+                    }
+                }
+                .semantics { contentDescription = name },
+        )
+    } else {
+        Text(
+            text = value,
+            style = style,
+            color = ink,
+            modifier = Modifier
+                .widthIn(min = 40.dp)
+                .combinedClickable(
+                    interactionSource = press,
+                    indication = null,
+                    onClick = onClick,
+                    onLongClick = onClick,
+                )
+                .semantics {
+                    contentDescription = name
+                    stateDescription = value
+                },
+        )
     }
 }
 
@@ -306,6 +585,18 @@ private fun TimeTape(
                         .minByOrNull { abs(it.offset + it.size / 2f - middle) }
                         ?.index
                         ?: initial
+                }
+            }
+            // A value that came from the typed field, not from this tape's
+            // own drag, has to bring the tape with it. The tape's drag already
+            // reports the value it centered, so that case stays where it is;
+            // only a value that is not under the tick scrolls. The padding
+            // that centers the first cell makes scrollToItem land the item
+            // under the tick.
+            LaunchedEffect(selected) {
+                val index = values.indexOf(selected)
+                if (index >= 0 && index != centered) {
+                    state.scrollToItem(index)
                 }
             }
             LaunchedEffect(Unit) {

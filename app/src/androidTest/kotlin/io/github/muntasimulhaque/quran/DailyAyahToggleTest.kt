@@ -1,18 +1,25 @@
 package io.github.muntasimulhaque.quran
 
+import android.graphics.Bitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -30,6 +37,7 @@ import org.junit.rules.ExternalResource
 import org.junit.rules.RuleChain
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
+import java.io.File
 
 /**
  * The daily reminder's own page: the switch is the switch, the row is the
@@ -194,6 +202,61 @@ class DailyAyahToggleTest {
         compose.onNodeWithTag("switch-daily", useUnmergedTree = true)
             .performScrollTo()
             .assertIsOn()
+    }
+
+    /**
+     * The moment can be typed, and the typing has a visible door.
+     *
+     * The big hour and minute answer a tap or a long press, but a gesture that
+     * has to be taught is not a signifier; the keyboard mark under the tapes
+     * is. This opens the picker, photographs it before the keyboard covers the
+     * page, then types 09:30 through the mark, the hour field, the IME's Next,
+     * and the minute field, and reads the stored minute back.
+     */
+    @Test
+    fun theMomentCanBeTypedAndTheKeyboardIsAVisibleDoor() {
+        openSettings()
+        val pageTitle = compose.activity.getString(SettingsR.string.settings_daily_title)
+        compose.onNodeWithText(pageTitle).performClick()
+        compose.waitUntil(timeoutMillis = 15_000) {
+            compose.onAllNodesWithTag("daily-page", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText(compose.activity.getString(SettingsR.string.settings_daily_time_title))
+            .performScrollTo()
+            .performClick()
+        compose.waitUntil(timeoutMillis = 15_000) {
+            compose.onAllNodesWithTag("daily-time-picker", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.waitForIdle()
+        val frame = compose.onRoot().captureToImage().asAndroidBitmap()
+        File(screenshotOutputDirectory(), "daily-time-picker.png").outputStream().use { output ->
+            frame.compress(Bitmap.CompressFormat.PNG, 100, output)
+        }
+
+        val typeName = compose.activity.getString(SettingsR.string.settings_daily_picker_type)
+        compose.onNodeWithContentDescription(typeName).performClick()
+        compose.waitUntil(timeoutMillis = 10_000) {
+            compose.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNode(hasSetTextAction()).performTextInput("09")
+        compose.onNode(hasSetTextAction()).performImeAction()
+        compose.waitUntil(timeoutMillis = 10_000) {
+            compose.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNode(hasSetTextAction()).performTextInput("30")
+        compose.onNode(hasSetTextAction()).performImeAction()
+        compose.waitUntil(timeoutMillis = 10_000) {
+            compose.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isEmpty()
+        }
+        compose.onNodeWithText(compose.activity.getString(SettingsR.string.settings_set))
+            .performClick()
+        assertEquals(
+            "the typed 09:30 must be the minute the alarm reads",
+            9 * 60 + 30,
+            runBlocking { readSettings().dailyAyahMinute },
+        )
     }
 
     private fun back() {

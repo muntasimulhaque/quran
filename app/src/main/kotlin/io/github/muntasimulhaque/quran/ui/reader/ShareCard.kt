@@ -61,13 +61,6 @@ internal val ShareCardWidth = 320.dp
  * footnote markers are dropped from the card: a superscript that cannot be
  * tapped is a number with no door behind it.
  */
-/**
- * A share in progress: the card, and whether the reader has asked for the
- * picture. The words-only door never composes a bitmap, and the capture
- * never runs before the choice.
- */
-internal data class ShareRequest(val card: ShareCard, val capture: Boolean = false)
-
 internal data class ShareCard(
     val arabic: String,
     val tajweed: String = "",
@@ -87,7 +80,7 @@ internal suspend fun loadShareCard(
     context: Context,
     viewModel: ReaderViewModel,
     ayah: Ayah,
-): ShareRequest = withContext(Dispatchers.IO) {
+): ShareCard = withContext(Dispatchers.IO) {
     val line = viewModel.readingRow(ayah.number)?.translations?.firstOrNull()
     val runs = line?.text?.text
         ?.takeIf { it.isNotBlank() }
@@ -96,15 +89,13 @@ internal suspend fun loadShareCard(
     val name = surah?.nameSimple
         ?: context.getString(R.string.surah_fallback_name, ayah.surah)
     val locale = java.util.Locale.forLanguageTag(viewModel.readingLanguage)
-    ShareRequest(
-        ShareCard(
-            arabic = ayah.text,
-            tajweed = ayah.tajweed,
-            translation = runs.orEmpty(),
-            reference = localizedDigits("$name ${ayah.surah}:${ayah.ayah}", locale),
-            text = viewModel.ayahShareText(ayah),
-            surahArabic = surah?.nameArabic,
-        ),
+    ShareCard(
+        arabic = ayah.text,
+        tajweed = ayah.tajweed,
+        translation = runs.orEmpty(),
+        reference = localizedDigits("$name ${ayah.surah}:${ayah.ayah}", locale),
+        text = viewModel.ayahShareText(ayah),
+        surahArabic = surah?.nameArabic,
     )
 }
 

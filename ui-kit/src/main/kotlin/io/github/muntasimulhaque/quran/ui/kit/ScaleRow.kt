@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -73,6 +74,11 @@ private val ChosenStop = 5.dp
  * scrolling page does not take the page's scroll. Both pointer blocks are
  * keyed on [steps] and read the latest [onSelect] through a state, so a drag
  * that changes the value cannot restart its own gesture under the finger.
+ *
+ * The rail itself carries the `scale-rail` tag. The rail is what the reader
+ * reads as one measure, so a test measures the node the eye sees, not the row
+ * around the label and the two marks (owner decision, this session: the four
+ * size rails are one length).
  */
 @Composable
 fun ScaleRow(
@@ -129,6 +135,7 @@ fun ScaleRow(
             modifier = Modifier
                 .weight(1f)
                 .height(48.dp)
+                .testTag("scale-rail")
                 .pointerInput(steps) {
                     detectTapGestures { at -> choose(at.x, size.width) }
                 }

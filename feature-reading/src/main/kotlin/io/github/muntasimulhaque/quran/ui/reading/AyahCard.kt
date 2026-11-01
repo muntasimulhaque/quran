@@ -98,12 +98,23 @@ private data class TafsirLoad(
  * from the ayah's own Tafsir mark, so the drawn `Tafsir` head and its
  * `Ayah 2:255` line said what the reader already knew and what the passage's
  * own title says below (owner decision, this session). What is drawn first is
- * the pack itself: one pack is a byline, and more than one is a door, both at
- * the row name's 15 so the source line reads the same size whether or not
- * there is a choice to make. The reference belongs to the passage and stands
- * with it, because two packs can cover different ayahs of one surah, so a
- * reference at the head of the sheet would be a promise only one pack keeps
- * (owner decision, this session).
+ * the pack itself: one pack is a two-line head, and more than one is a door,
+ * both naming the language before the pack. The language is the label's 12 in
+ * the secondary ink, the pack's name is the row name's 15, and the passage's
+ * reference stands over the prose at the article title's 17, so the source
+ * line reads the same whether or not there is a choice to make. The reference
+ * belongs to the passage and stands with it, because two packs can cover
+ * different ayahs of one surah, so a reference at the head of the sheet would
+ * be a promise only one pack keeps (owner decision, this session).
+ *
+ * **The language leads** (owner decision, this session). The settings pages
+ * already group packs under a language head and then name them, and the card
+ * said "Ibn Kathir · English" in one line, so the same pack was read in two
+ * orders on two surfaces. The card now says "English" over "Ibn Kathir",
+ * one line each: the language qualifies the source, and the source is the
+ * name. A language line is not a heading when it belongs to one pack; the
+ * pack's name and the passage's reference are what a screen reader may jump
+ * to.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -256,23 +267,17 @@ fun AyahCard(
                 if (single != null) {
                     // One pack is no choice: the reader tapped Tafsir on
                     // the pill, or arrived from a search hit that already
-                    // named the pack, so its name and its language are one
-                    // byline and its passage stands under them with no door
-                    // to fold (owner decision, this session). The byline is
-                    // a source line, so it stays in the secondary ink, but
-                    // it wears the row name's 15: with two packs the same
-                    // words are the door's 15, and one source line must not
-                    // change size with the number of packs on the device
-                    // (owner decision, this session).
+                    // named the pack, so its language and its name stand as
+                    // one head and its passage stands under them with no door
+                    // to fold (owner decision, this session). The language is
+                    // the settings pages' group label at 12 in the secondary
+                    // ink; the name keeps the row name's 15, so one source
+                    // line does not change size with the number of packs on
+                    // the device (owner decision, this session).
                     val packName = contentPackName(single.id, single.name)
-                    Text(
-                        text = stringResource(
-                            R.string.card_pack_byline,
-                            packName,
-                            languageName(single.language),
-                        ),
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    PackNames(
+                        language = languageName(single.language),
+                        name = packName,
                         modifier = Modifier.padding(
                             start = Space.Gutter,
                             end = Space.Gutter,
@@ -282,7 +287,7 @@ fun AyahCard(
                     PassageArea(
                         view = passages[single.id],
                         done = load.done,
-                        // The byline above already names the pack: the wait
+                        // The head above already names the pack: the wait
                         // is never a second copy of the name.
                         opening = null,
                         settings = settings,
@@ -291,14 +296,12 @@ fun AyahCard(
                 } else {
                     orderedPacks.forEach { pack ->
                         val open = door?.id == pack.id
-                        // The tafsir's own name, in the reader's language.
+                        // The tafsir's own name, in the reader's language,
+                        // under the language it is in.
                         val packName = contentPackName(pack.id, pack.name)
                         DoorRow(
-                            title = stringResource(
-                                R.string.card_pack_byline,
-                                packName,
-                                languageName(pack.language),
-                            ),
+                            eyebrow = languageName(pack.language),
+                            title = packName,
                             subtitle = "",
                             open = open,
                             onClick = { door = if (open) null else pack },
@@ -325,7 +328,32 @@ fun AyahCard(
 }
 
 @Composable
+private fun PackNames(
+    language: String,
+    name: String,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier) {
+        Text(
+            text = language,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.testTag("pack-language"),
+        )
+        Text(
+            text = name,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier
+                .padding(top = Space.Tight)
+                .testTag("pack-name"),
+        )
+    }
+}
+
+@Composable
 private fun DoorRow(
+    eyebrow: String,
     title: String,
     subtitle: String,
     open: Boolean?,
@@ -357,11 +385,7 @@ private fun DoorRow(
         // still kept from the hub's old shape (owner decision, the theme
         // and consistency session).
         Column(Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
+            PackNames(language = eyebrow, name = title)
             if (subtitle.isNotBlank()) {
                 Text(
                     text = subtitle,
