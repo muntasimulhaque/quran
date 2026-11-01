@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 14.0 (versionCode 142)
+Version: 14.1 (versionCode 143)
 
 ## Listing
 
@@ -174,6 +174,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (14.1, 394 characters)
+14.1 brings the small surfaces together. The settings gear is redrawn as a cog, the recent-search Remove menu takes the chip's middle, and the tafsir card names its language before its source. The share sheet shows the whole card scaled to fit and stays open for another app. The four text-size rails share one length, and the daily time can be typed as well as taped. Text and packs unchanged.
 
 ## Release notes (14.0, 449 characters)
 14.0 sets the reading at the size the Book's face asks for. Translation, tafsir, notes, and footnotes stand at 16 on the 1.5 line, with a passage title at 17 and the tafsir heads at the body's size. The word meaning is 15, the inline Arabic and the ayah medallion 24. The search field and welcome page are 16, the pill and download notice 14, and saved notes follow your reading size. Bangla uses the same sizes as English. Text and packs unchanged.
