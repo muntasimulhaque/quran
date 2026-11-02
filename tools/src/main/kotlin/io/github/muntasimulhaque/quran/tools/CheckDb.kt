@@ -68,7 +68,14 @@ class CheckDb(private val root: File) {
             println("checkdb: sha256 $actualHash does not match $expectedHash")
             failures++
         }
+        // The pack gates read the reader's surah boundary from the core pack,
+        // so the number they expect and the number the page draws come from
+        // one table.
+        val surahByAyah = HashMap<Int, Int>(6236)
         openSqlite(database).use { connection ->
+            connection.each("SELECT number, surah FROM ayah") { rs ->
+                surahByAyah[rs.getInt(1)] = rs.getInt(2)
+            }
             for (expectation in expectations) {
                 val rows = connection.count(expectation.table)
                 if (rows != expectation.rows) {
@@ -146,7 +153,8 @@ class CheckDb(private val root: File) {
                 println("checkdb: catalog matches, ${entries.size} pack file(s) verified")
             }
         }
-        failures += checkSaheehPack()
+        failures += checkSaheehPack(surahByAyah)
+        failures += checkBayanPack(surahByAyah)
         if (failures != 0) {
             println("checkdb: $failures problem(s)")
             return 1
@@ -217,11 +225,11 @@ class CheckDb(private val root: File) {
     }
 
     /**
-     * The translation packs still in their source shape: the Bangla pack
-     * numbers each ayah from 1, so every marker and every note must run 1..n.
-     * The Saheeh pack is checked at its own file by [checkSaheehPack], because
-     * the database keeps the publisher's book-wide numbering and the reader's
-     * numbering is written into the pack.
+     * The database's translation rows still in their source shape: the
+     * Bangla rows number each ayah from 1, so every marker and every note
+     * must run 1..n. The Saheeh rows keep the publisher's book-wide
+     * numbering. The reader's surah numbering is written into the pack files,
+     * so it is checked there by [checkSaheehPack] and [checkBayanPack].
      */
     private fun checkTranslationFootnotes(connection: java.sql.Connection): Int {
         var failures = 0
@@ -263,18 +271,22 @@ class CheckDb(private val root: File) {
     }
 
     /**
-     * The Saheeh pack is the reader's shape: every ayah's notes run 1..n, the
-     * first ayah opens on 1, 3:32 reads the published "they", and 7:143 no
-     * longer draws the marker whose note the export lost. The pack file is
-     * what the app installs, so this is the gate that proves the reader's
-     * page, not the database's source shape.
+     * One translation pack's notes climb through each surah and start the
+     * next surah at one. [surahOf] is the core pack's ayah-to-surah map, so
+     * the gate reads the boundary the reader reads. The function reports its
+     * own failures; the caller names the pack and its extra rules.
      */
-    private fun checkSaheehPack(): Int {
-        val file = File(root, "content/packs/translation-saheeh-en.db")
-        if (!file.exists()) return 0
+    private fun checkSurahNumberedPack(
+        file: File,
+        label: String,
+        expectedNotes: Int,
+        surahOf: Map<Int, Int>,
+    ): Int {
         var failures = 0
         var ayahs = 0
         var notes = 0
+        var surah = 0
+        var surahNotes = 0
         openSqlite(file).use { connection ->
             connection.each("SELECT ayah_number, text, footnotes FROM translation ORDER BY ayah_number") { rs ->
                 ayahs++
@@ -286,31 +298,65 @@ class CheckDb(private val root: File) {
                             ?: error("a note has no number")
                     }
                 }.getOrElse {
-                    println("checkdb: Saheeh pack $number has unreadable footnotes")
+                    println("checkdb: $label pack $number has unreadable footnotes")
                     failures++
                     emptyList()
                 }
                 val markerNumbers = Regex("\\[(\\d+)]").findAll(text)
                     .map { it.groupValues[1].toInt() }
                     .toList()
-                if (markerNumbers != (1..noteNumbers.size).toList()) {
-                    println("checkdb: Saheeh pack $number draws $markerNumbers for ${noteNumbers.size} note(s)")
+                val ayahSurah = surahOf[number]
+                if (ayahSurah == null) {
+                    println("checkdb: $label pack ayah $number is not in the core pack")
+                    failures++
+                    return@each
+                }
+                if (ayahSurah != surah) {
+                    surah = ayahSurah
+                    surahNotes = 0
+                }
+                val expected = (surahNotes + 1..surahNotes + noteNumbers.size).toList()
+                if (markerNumbers != expected) {
+                    println(
+                        "checkdb: $label pack $number draws $markerNumbers " +
+                            "for ${noteNumbers.size} note(s), expected $expected",
+                    )
                     failures++
                 }
-                if (noteNumbers != (1..noteNumbers.size).toList()) {
-                    println("checkdb: Saheeh pack $number numbers its notes $noteNumbers")
+                if (noteNumbers != expected) {
+                    println(
+                        "checkdb: $label pack $number numbers its notes $noteNumbers, " +
+                            "expected $expected",
+                    )
                     failures++
                 }
+                surahNotes += noteNumbers.size
                 notes += noteNumbers.size
             }
             if (ayahs != 6236) {
-                println("checkdb: Saheeh pack has $ayahs ayahs, expected 6236")
+                println("checkdb: $label pack has $ayahs ayahs, expected 6236")
                 failures++
             }
-            if (notes != 1903) {
-                println("checkdb: Saheeh pack carries $notes notes, expected 1903")
+            if (notes != expectedNotes) {
+                println("checkdb: $label pack carries $notes notes, expected $expectedNotes")
                 failures++
             }
+        }
+        return failures
+    }
+
+    /**
+     * The Saheeh pack is the reader's shape: each surah's notes run from 1
+     * and reset at the next surah, 3:32 reads the published "they", and
+     * 7:143 no longer draws the marker whose note the export lost. The pack
+     * file is what the app installs, so this is the gate that proves the
+     * reader's page, not the database's source shape.
+     */
+    private fun checkSaheehPack(surahOf: Map<Int, Int>): Int {
+        val file = File(root, "content/packs/translation-saheeh-en.db")
+        if (!file.exists()) return 0
+        var failures = checkSurahNumberedPack(file, "Saheeh", 1903, surahOf)
+        openSqlite(file).use { connection ->
             val first = connection.scalarLong(
                 "SELECT COUNT(*) FROM translation WHERE ayah_number = 1 " +
                     "AND text LIKE '%[1]%' AND text LIKE '%[2]%'",
@@ -328,15 +374,30 @@ class CheckDb(private val root: File) {
                 failures++
             }
             val dead = connection.scalarLong(
-                "SELECT COUNT(*) FROM translation WHERE ayah_number = 1097 AND text LIKE '%[3]%'",
+                "SELECT COUNT(*) FROM translation WHERE ayah_number = 1097 AND text LIKE '%[403]%'",
             )
             if (dead != 0L) {
-                println("checkdb: Saheeh pack 7:143 still draws the marker with no note")
+                println("checkdb: Saheeh pack 7:143 still draws the source marker with no note")
                 failures++
             }
         }
         if (failures == 0) {
-            println("checkdb: the Saheeh pack numbers $notes notes within their ayahs, 3:32 corrected")
+            println("checkdb: the Saheeh pack numbers 1903 notes within their surahs, 3:32 corrected")
+        }
+        return failures
+    }
+
+    /**
+     * The Bangla pack is the reader's shape too: each surah's notes run from
+     * 1 and reset at the next surah. The database keeps the QUL export's
+     * per-ayah numbers; the pack is what the app installs.
+     */
+    private fun checkBayanPack(surahOf: Map<Int, Int>): Int {
+        val file = File(root, "content/packs/translation-al-bayan-bn.db")
+        if (!file.exists()) return 0
+        val failures = checkSurahNumberedPack(file, "Bangla", 206, surahOf)
+        if (failures == 0) {
+            println("checkdb: the Bangla pack numbers 206 notes within their surahs")
         }
         return failures
     }

@@ -127,30 +127,34 @@ class ContentSearchTest {
     }
 
     @Test
-    fun aSaheehFootnoteNumbersWithinItsAyah() {
-        // The publisher numbers its notes across the book; the pack numbers
-        // each ayah from 1, so Al-Fatihah opens on 1 and 2, not 2 and 3.
-        assertEquals("1:1", content.ayah(1)?.verseKey)
-        val line = content.translations(listOf(1), "translation-saheeh-en")[1]
-        assertNotNull("1:1 must carry the Saheeh translation", line)
-        assertEquals(listOf(1, 2), line?.footnotes?.map { it.number })
-        assertTrue("the first marker must be drawn", line?.text.orEmpty().contains("[1]"))
-        assertTrue("the second marker must be drawn", line?.text.orEmpty().contains("[2]"))
-        assertFalse("there is no third note on 1:1", line?.text.orEmpty().contains("[3]"))
+    fun aSaheehFootnoteNumbersClimbThroughItsSurah() {
+        // The pack numbers each surah from 1. Al-Fatihah's three notes are
+        // 1, 2, and 3; Al-Baqarah opens again on 1 and carries its own run
+        // up to 105. 2:255's six notes are the middle of that run.
+        val fatihah = content.translations(listOf(1, 2), "translation-saheeh-en")
+        assertEquals(listOf(1, 2), fatihah[1]?.footnotes?.map { it.number })
+        assertEquals(listOf(3), fatihah[2]?.footnotes?.map { it.number })
+        val baqarah = content.translations(listOf(8, 262), "translation-saheeh-en")
+        assertEquals(listOf(1), baqarah[8]?.footnotes?.map { it.number })
+        assertEquals(listOf(92, 93, 94, 95, 96, 97), baqarah[262]?.footnotes?.map { it.number })
+        assertTrue("1:1 must carry its first marker", fatihah[1]?.text.orEmpty().contains("[1]"))
+        assertTrue("2:1 must open Al-Baqarah again at 1", baqarah[8]?.text.orEmpty().contains("[1]"))
+        assertTrue("2:255 must carry its 92nd marker", baqarah[262]?.text.orEmpty().contains("[92]"))
         assertTrue(
             "the first note must be the publisher's note on Allah",
-            line?.footnotes?.firstOrNull()?.text.orEmpty().contains("Allāh is a proper name"),
+            fatihah[1]?.footnotes?.firstOrNull()?.text.orEmpty().contains("Allāh is a proper name"),
         )
     }
 
     @Test
     fun aDeadSaheehMarkerIsNotDrawn() {
         // 7:143's [403] has no body in the publisher's export, so the pack
-        // drops it rather than opening an empty sheet.
+        // drops it rather than opening an empty sheet. The ayah's two live
+        // notes are the 39th and 40th of Al-A'raf.
         assertEquals("7:143", content.ayah(1097)?.verseKey)
         val line = content.translations(listOf(1097), "translation-saheeh-en")[1097]
-        assertEquals(listOf(1, 2), line?.footnotes?.map { it.number })
-        assertFalse("the lost note must not leave a number", line?.text.orEmpty().contains("[3]"))
+        assertEquals(listOf(39, 40), line?.footnotes?.map { it.number })
+        assertFalse("the lost note must not leave a number", line?.text.orEmpty().contains("[41]"))
     }
 
     @Test
@@ -215,11 +219,12 @@ class ContentSearchTest {
 
     @Test
     fun aBanglaAyahCarriesEveryPublisherNote() {
-        // 5:103 names four things, and the publisher explains all four.
+        // 5:103 names four things, and the publisher explains all four. The
+        // pack numbers Al-Ma'idah's notes from 1, so these are 4..7.
         assertEquals("5:103", content.ayah(772)?.verseKey)
         val line = content.translations(listOf(772), "translation-al-bayan-bn")[772]
-        assertEquals(listOf(1, 2, 3, 4), line?.footnotes?.map { it.number })
-        assertTrue("the sentence must carry the fourth marker", line?.text.orEmpty().contains("[4]"))
+        assertEquals(listOf(4, 5, 6, 7), line?.footnotes?.map { it.number })
+        assertTrue("the sentence must carry the seventh marker", line?.text.orEmpty().contains("[7]"))
         assertTrue(
             "the fourth note must explain হাম",
             line?.footnotes?.lastOrNull()?.text.orEmpty().contains("হাম"),

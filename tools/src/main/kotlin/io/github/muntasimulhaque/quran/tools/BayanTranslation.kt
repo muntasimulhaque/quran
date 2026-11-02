@@ -172,6 +172,17 @@ private fun withMarkers(translation: String, notes: List<String>, anchorAfter: S
 }
 
 /**
+ * One ayah's sentence with its notes moved into the surah's numbering: the
+ * ayah's first note becomes [base] + 1, and the rest follow. The database
+ * keeps each ayah's notes from one; the pack is the reader's shape.
+ */
+internal fun bayanSurahMarkers(text: String, base: Int): String =
+    Regex("\\[(\\d+)]").replace(text) { match ->
+        val number = match.groupValues[1].toIntOrNull()
+        if (number == null) match.value else "[${base + number}]"
+    }
+
+/**
  * Puts `[1]` after [anchorAfter] when the sentence has it, and after the
  * sentence's last mark otherwise. The text itself is never otherwise changed.
  */

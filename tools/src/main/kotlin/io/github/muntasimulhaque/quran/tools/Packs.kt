@@ -81,7 +81,7 @@ class Packs(private val root: File) {
             language = "en",
             credit = "Noor International Center, via QuranEnc; 3:32 corrected to the published reading",
             creditBn = "Noor International Center, QuranEnc-এর মাধ্যমে; ৩:৩২ প্রকাশিত পাঠ অনুযায়ী সংশোধিত",
-            version = "1.1.2+1",
+            version = "1.1.2+2",
             shipped = false,
             ayahs = 6236,
         ),
@@ -103,7 +103,7 @@ class Packs(private val root: File) {
             language = "bn",
             credit = "Al-Bayan Foundation Bangladesh, via the Quranic Universal Library and IslamHouse.com",
             creditBn = "আল-বায়ান ফাউন্ডেশন বাংলাদেশ, কুরআনিক ইউনিভার্সাল লাইব্রেরি ও ইসলামহাউস থেকে",
-            version = "1.0.0",
+            version = "1.0.1",
             shipped = false,
             ayahs = 6236,
         ),
@@ -254,11 +254,12 @@ class Packs(private val root: File) {
      *
      * QuranEnc exports the notes numbered across the whole book, and its
      * first note belongs to the surah title, which an ayah-keyed file cannot
-     * carry. The pack draws each ayah's notes from 1, the rule the Bangla
-     * pack already follows and the rule Quran.com presents this translation
-     * with. The same pass corrects the export's one printed slip at 3:32,
-     * and drops 7:143's marker whose body the export lost (owner decision,
-     * this session). [SaheehText] holds both rules and their reasons.
+     * carry. The pack numbers each surah's notes from one and starts the
+     * next surah again at one, the rule the Bangla pack follows and the one
+     * the reader's page was asked for (owner decision, this session). The
+     * same pass corrects the export's one printed slip at 3:32, and drops
+     * 7:143's marker whose body the export lost. [SaheehText] holds both
+     * rules and their reasons.
      *
      * The database keeps the publisher's shape; this pack is the only place
      * the reader's numbering is written, so a full rebuild of `quran.db`
@@ -275,21 +276,29 @@ class Packs(private val root: File) {
             "INSERT INTO translation(ayah_number, text, footnotes, text_search) VALUES(?,?,?,?)",
         ).use { insert ->
             target.prepareStatement(
-                "SELECT ayah_number, text, footnotes FROM src.translation " +
-                    "WHERE pack = ? ORDER BY ayah_number",
+                "SELECT t.ayah_number, t.text, t.footnotes, a.surah " +
+                    "FROM src.translation t JOIN src.ayah a ON a.number = t.ayah_number " +
+                    "WHERE t.pack = ? ORDER BY t.ayah_number",
             ).use { select ->
                 select.setString(1, packId)
                 select.executeQuery().use { rs ->
                     var corrected = 0
                     var dropped = 0
                     var notes = 0
+                    var surah = 0
+                    var surahNotes = 0
                     while (rs.next()) {
                         val number = rs.getInt(1)
                         val source = rs.getString(2) ?: ""
                         val storedNotes = notesFromJson(rs.getString(3) ?: "[]")
+                        val ayahSurah = rs.getInt(4)
+                        if (ayahSurah != surah) {
+                            surah = ayahSurah
+                            surahNotes = 0
+                        }
                         val correctedText = saheehCorrected(number, source)
                         if (correctedText != source) corrected += 1
-                        val local = localizeSaheeh(correctedText, storedNotes)
+                        val local = localizeSaheeh(correctedText, storedNotes, surahNotes)
                         dropped += local.dropped.size
                         notes += local.notes
                         if (local.unused.isNotEmpty()) {
@@ -303,6 +312,7 @@ class Packs(private val root: File) {
                         // for the ayahs whose notes carry it.
                         insert.setString(4, Search.normalizeForIndex(RichText.plain(local.text)))
                         insert.addBatch()
+                        surahNotes += local.notes
                     }
                     insert.executeBatch()
                     if (corrected != saheehCorrections.size) {
@@ -315,9 +325,77 @@ class Packs(private val root: File) {
                         error("Saheeh pack: expected 1 marker without a note, found $dropped")
                     }
                     println(
-                        "packs: Saheeh: $notes notes, $corrected correction(s), " +
-                            "$dropped dead marker(s) dropped",
+                        "packs: Saheeh: $notes notes within their surahs, " +
+                            "$corrected correction(s), $dropped dead marker(s) dropped",
                     )
+                }
+            }
+        }
+    }
+
+    /**
+     * The Bangla pack is the reader's shape too. The database numbers each
+     * ayah's notes from one, because the QUL row marks them with stars; the
+     * pack lets the number climb through the surah and starts the next surah
+     * at one, the same rule as Saheeh (owner decision, this session). The
+     * note bodies and the sentence's markers move together, and the search
+     * index keeps its words.
+     */
+    private fun buildBayanTranslation(target: Connection, packId: String) {
+        target.createStatement().use { statement ->
+            statement.execute(
+                "CREATE TABLE translation (ayah_number INTEGER NOT NULL, text TEXT NOT NULL, " +
+                    "footnotes TEXT NOT NULL, text_search TEXT NOT NULL)",
+            )
+        }
+        target.prepareStatement(
+            "INSERT INTO translation(ayah_number, text, footnotes, text_search) VALUES(?,?,?,?)",
+        ).use { insert ->
+            target.prepareStatement(
+                "SELECT t.ayah_number, t.text, t.footnotes, t.text_search, a.surah " +
+                    "FROM src.translation t JOIN src.ayah a ON a.number = t.ayah_number " +
+                    "WHERE t.pack = ? ORDER BY t.ayah_number",
+            ).use { select ->
+                select.setString(1, packId)
+                select.executeQuery().use { rs ->
+                    var surah = 0
+                    var surahNotes = 0
+                    var notes = 0
+                    while (rs.next()) {
+                        val number = rs.getInt(1)
+                        val source = rs.getString(2) ?: ""
+                        val storedNotes = notesFromJson(rs.getString(3) ?: "[]")
+                        val search = rs.getString(4) ?: ""
+                        val ayahSurah = rs.getInt(5)
+                        if (ayahSurah != surah) {
+                            surah = ayahSurah
+                            surahNotes = 0
+                        }
+                        val expected = (1..storedNotes.size).toList()
+                        val markers = Regex("\\[(\\d+)]").findAll(source)
+                            .map { it.groupValues[1].toInt() }
+                            .toList()
+                        if (storedNotes.keys.toList() != expected || markers != expected) {
+                            error(
+                                "Bangla pack: ayah $number draws $markers for " +
+                                    "${storedNotes.size} note(s)",
+                            )
+                        }
+                        val renumbered = LinkedHashMap<Int, String>(storedNotes.size)
+                        for ((old, text) in storedNotes) renumbered[surahNotes + old] = text
+                        val footnotes = renumbered.entries.joinToString(" ") { (n, text) ->
+                            "[$n]- $text"
+                        }
+                        insert.setInt(1, number)
+                        insert.setString(2, bayanSurahMarkers(source, surahNotes))
+                        insert.setString(3, footnotesJson(footnotes))
+                        insert.setString(4, search)
+                        insert.addBatch()
+                        surahNotes += storedNotes.size
+                        notes += storedNotes.size
+                    }
+                    insert.executeBatch()
+                    println("packs: Bangla: $notes notes within their surahs")
                 }
             }
         }
@@ -371,10 +449,10 @@ class Packs(private val root: File) {
                         createFts(statement, "ayah_fts", "text_search", "ayah")
                     }
                     "translation" -> {
-                        if (pack.id == "translation-saheeh-en") {
-                            buildSaheehTranslation(target, pack.id)
-                        } else {
-                            statement.execute(
+                        when (pack.id) {
+                            "translation-saheeh-en" -> buildSaheehTranslation(target, pack.id)
+                            "translation-al-bayan-bn" -> buildBayanTranslation(target, pack.id)
+                            else -> statement.execute(
                                 "CREATE TABLE translation AS SELECT ayah_number, text, footnotes, text_search " +
                                     "FROM src.translation WHERE pack = '${pack.id}'",
                             )

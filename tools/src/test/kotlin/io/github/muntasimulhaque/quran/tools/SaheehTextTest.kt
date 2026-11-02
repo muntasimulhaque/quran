@@ -26,6 +26,15 @@ class SaheehTextTest {
     }
 
     @Test
+    fun `a surah continues where the last ayah left off`() {
+        val notes = saheehNotes("[10]- The first.\n[11]- The second.")
+        val local = localizeSaheeh("First,[10] second.[11]", notes, base = 4)
+        assertEquals("First,[5] second.[6]", local.text)
+        assertEquals("[5]- The first. [6]- The second.", local.footnotes)
+        assertEquals(2, local.notes)
+    }
+
+    @Test
     fun `a marker with no note is dropped and the sentence closes over it`() {
         val notes = saheehNotes(
             "[401]- That no one can see.\n" +

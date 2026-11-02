@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 14.5 (versionCode 147)
+Version: 14.6 (versionCode 148)
 
 ## Listing
 
@@ -184,6 +184,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (14.6, 415 characters)
+14.6 lets the translator's notes climb through each surah. A surah's notes start at 1 and the next surah starts again at 1, in Saheeh International and Al-Bayan alike, so Al-Baqarah runs 1 to 105 and Al-Imran opens on 1. The publisher's book-wide numbers cannot be rebuilt from an ayah-keyed export, and a whole-Quran number would put four digits on half of the English markers. Text and every other pack unchanged.
 
 ## Release notes (14.5, 401 characters)
 14.5 numbers each ayah's translator's notes from 1, so Al-Fatihah opens on notes 1 and 2 instead of 2 and 3. The publisher numbers its notes across the whole book and starts with the surah title, which an ayah-keyed export cannot carry. This update also restores 3:32 to the published "if they turn away" and keeps note numbers out of search results. The Quran text and every other pack are unchanged.

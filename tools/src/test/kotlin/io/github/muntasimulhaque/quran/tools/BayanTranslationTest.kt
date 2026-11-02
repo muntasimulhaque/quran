@@ -179,6 +179,16 @@ class BayanTranslationTest {
     }
 
     @Test
+    fun aSurahContinuesWhereTheLastAyahLeftOff() {
+        // 5:103's four notes are 1..4 in the database; Al-Ma'idah's first
+        // three notes are already open, so the pack draws 4..7.
+        assertEquals(
+            "শব্দ[4] ও শব্দ[5]।",
+            bayanSurahMarkers("শব্দ[1] ও শব্দ[2]।", 3),
+        )
+    }
+
+    @Test
     fun theTwoQulJsonShapesReadAsTheSameRows() {
         // The 2025 export is an array with verse_key and text; the 2026
         // export is one object keyed by verse with the sentence under t.

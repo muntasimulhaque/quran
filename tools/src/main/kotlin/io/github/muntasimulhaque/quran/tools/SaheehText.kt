@@ -13,10 +13,14 @@ import kotlinx.serialization.json.jsonPrimitive
  * The Saheeh International edition numbers its footnotes across the whole
  * book, and its first note is the surah title's. QuranEnc's export is keyed
  * by ayah, so it cannot carry a title note: Al-Fatihah opens on note 2, and
- * every surah start after it leaves one number unused. The reading numbers
- * each ayah's notes from one instead, the rule the Bangla pack already
- * follows and the rule Quran.com presents this same translation with (owner
- * decision, this session).
+ * many surah starts leave one number unused. The reading numbers each
+ * surah's notes from one instead, and starts the next surah again at one
+ * (owner decision, this session). A surah is the unit the reader moves
+ * through, the number climbs through it the way a printed book's notes do,
+ * and the marker stays short: Al-Baqarah's 105 notes reach three digits, and
+ * every other surah stays at two. The publisher's book-wide numbers cannot
+ * be reproduced from an ayah-keyed export anyway, because the title notes
+ * and 7:143's lost note leave gaps.
  *
  * The publisher's words are not touched. The localizer rewrites only the
  * bracketed numbers the sentence draws; the note bodies keep their text. A
@@ -99,12 +103,17 @@ internal fun saheehCorrected(ayah: Int, text: String): String {
 }
 
 /**
- * The sentence with its markers numbered within the ayah. The first marker
- * the sentence carries is 1, the second 2, and a repeated marker keeps the
- * number it was given. The note bodies are emitted in the same order, so a
- * caller that stores the pair has nothing left to number.
+ * The sentence with its markers numbered within the surah. [base] is the
+ * number of notes the surah has already carried, so the first marker the
+ * sentence carries is base + 1, the second base + 2, and a repeated marker
+ * keeps the number it was given. The note bodies are emitted in the same
+ * order, so a caller that stores the pair has nothing left to number.
  */
-internal fun localizeSaheeh(text: String, notes: Map<Int, String>): SaheehLocal {
+internal fun localizeSaheeh(
+    text: String,
+    notes: Map<Int, String>,
+    base: Int = 0,
+): SaheehLocal {
     val numbers = LinkedHashMap<Int, Int>(notes.size)
     val dropped = ArrayList<Int>()
     val out = StringBuilder(text.length)
@@ -119,7 +128,7 @@ internal fun localizeSaheeh(text: String, notes: Map<Int, String>): SaheehLocal 
             last = match.range.last + 1
             continue
         }
-        val number = numbers.getOrPut(source) { numbers.size + 1 }
+        val number = numbers.getOrPut(source) { base + numbers.size + 1 }
         out.append(text, last, match.range.first)
         out.append('[').append(number).append(']')
         last = match.range.last + 1
