@@ -96,6 +96,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
 import io.github.muntasimulhaque.quran.ui.theme.screenSubtitle
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -159,6 +160,13 @@ private val FooterRoom = 48.dp + Space.Block + 20.dp
  * to the value it committed. A value typed in 12-hour mode stays in the
  * period already chosen; an out-of-range entry is clamped rather than
  * rejected, so the reader always leaves with a time.
+ *
+ * **The tape and the field are one value** (owner report, this session).
+ * A tape that moves while its part is being typed writes the draft, so the
+ * big digits follow the tape and the next commit cannot put the old value
+ * back. The tape's one programmatic scroll waits for the drag or fling to
+ * finish, so a value that came from the finger is never pulled back under
+ * it.
  *
  * **The typed digits keep the row, and the buttons keep the glass** (owner
  * report, this version). A text field takes every dp it is offered, so the
@@ -266,6 +274,29 @@ internal fun DailyTimeDialog(
                 minuteField = TextFieldValue(text, selection = TextRange(0, text.length))
             }
             TimePart.None -> Unit
+        }
+    }
+
+    /**
+     * The tape is a door to the same value the field edits, so a tape that
+     * moves while its part is being typed has to write the draft too. Without
+     * this the big digits kept the old draft and the next commit wrote it
+     * back over the tape's choice (owner report, this session).
+     */
+    fun selectHour(value: Int) {
+        hour = if (twentyFour) value else (value % 12) + if (evening) 12 else 0
+        if (editing == TimePart.Hour) {
+            val text = hourText(hour, twentyFour, locale)
+            hourField = TextFieldValue(text, selection = TextRange(0, text.length))
+        }
+    }
+
+    /** The minute's half of [selectHour]. */
+    fun selectMinute(value: Int) {
+        minute = value
+        if (editing == TimePart.Minute) {
+            val text = minuteText(minute, locale)
+            minuteField = TextFieldValue(text, selection = TextRange(0, text.length))
         }
     }
 
@@ -450,16 +481,14 @@ internal fun DailyTimeDialog(
                         values = hours,
                         selected = hourValue,
                         format = { value -> hourText(value, twentyFour, locale) },
-                        onSelect = { value ->
-                            hour = if (twentyFour) value else (value % 12) + if (evening) 12 else 0
-                        },
+                        onSelect = ::selectHour,
                     )
                     TimeTape(
                         label = minuteName,
                         values = minutes,
                         selected = minute,
                         format = { value -> minuteText(value, locale) },
-                        onSelect = { minute = it },
+                        onSelect = ::selectMinute,
                     )
                 }
                 Row(
@@ -661,9 +690,16 @@ private fun TimeTape(
             // under the tick.
             LaunchedEffect(selected) {
                 val index = values.indexOf(selected)
-                if (index >= 0 && index != centered) {
-                    state.scrollToItem(index)
+                if (index < 0 || index == centered) return@LaunchedEffect
+                // A typed value has to bring the tape with it, but the tape's
+                // own drag already reports the value it centers. Wait for the
+                // finger and the fling to finish before the one programmatic
+                // scroll, so the effect never fights the drag it came from
+                // (owner report, this session).
+                if (state.isScrollInProgress) {
+                    snapshotFlow { state.isScrollInProgress }.first { !it }
                 }
+                if (index != centered) state.scrollToItem(index)
             }
             LaunchedEffect(Unit) {
                 snapshotFlow { centered }.drop(1).collect { index ->

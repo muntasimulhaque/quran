@@ -1,24 +1,30 @@
 package io.github.muntasimulhaque.quran
 
 import android.graphics.Bitmap
+import android.text.format.DateFormat
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOn
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -254,6 +260,68 @@ class DailyAyahToggleTest {
             .performClick()
         assertEquals(
             "the typed 09:30 must be the minute the alarm reads",
+            9 * 60 + 30,
+            runBlocking { readSettings().dailyAyahMinute },
+        )
+    }
+
+    /**
+     * The tape and the field are one value while the field is open.
+     *
+     * The owner long-pressed the hour, moved the tape, and the tape did
+     * nothing: the draft the field held was written back on the next commit,
+     * so only the keyboard could change the time. This opens the editor,
+     * moves the hour tape and then the minute tape, and reads the stored
+     * moment after Set, which is the value the alarm actually keeps.
+     */
+    @Test
+    fun theTapeAndTheTypedFieldKeepOneValue() {
+        openSettings()
+        val pageTitle = compose.activity.getString(SettingsR.string.settings_daily_title)
+        compose.onNodeWithText(pageTitle).performClick()
+        compose.waitUntil(timeoutMillis = 15_000) {
+            compose.onAllNodesWithTag("daily-page", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText(compose.activity.getString(SettingsR.string.settings_daily_time_title))
+            .performScrollTo()
+            .performClick()
+        compose.waitUntil(timeoutMillis = 15_000) {
+            compose.onAllNodesWithTag("daily-time-picker", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
+        val hourName = compose.activity.getString(SettingsR.string.settings_daily_picker_hour)
+        val minuteName = compose.activity.getString(SettingsR.string.settings_daily_picker_minute)
+        val twentyFour = DateFormat.is24HourFormat(context)
+
+        // Long-press the big hour to open the field, then move the hour tape
+        // without touching the keyboard.
+        compose.onAllNodesWithContentDescription(hourName).onFirst()
+            .performTouchInput { longClick() }
+        compose.waitUntil(timeoutMillis = 10_000) {
+            compose.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onAllNodesWithContentDescription(hourName).onLast()
+            .performSemanticsAction(SemanticsActions.SetProgress) {
+                it(if (twentyFour) 9f else 8f)
+            }
+        compose.onNode(hasSetTextAction()).assertTextContains("9")
+
+        // The minute's field is a second door to the same tape.
+        compose.onAllNodesWithContentDescription(minuteName).onFirst()
+            .performTouchInput { click() }
+        compose.waitUntil(timeoutMillis = 10_000) {
+            compose.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onAllNodesWithContentDescription(minuteName).onLast()
+            .performSemanticsAction(SemanticsActions.SetProgress) { it(30f) }
+        compose.onNode(hasSetTextAction()).assertTextContains("30")
+
+        compose.onNodeWithText(compose.activity.getString(SettingsR.string.settings_set))
+            .performClick()
+        assertEquals(
+            "the tape's hour and minute must be the moment Set writes",
             9 * 60 + 30,
             runBlocking { readSettings().dailyAyahMinute },
         )

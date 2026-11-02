@@ -187,7 +187,7 @@ class TypographyTest {
     @Test
     fun theBanglaDisplaySlotsAreTheInterfaceFace() {
         // A theme display slot is chrome; the Book's display lines are asked
-        // for by name, in Amiri or the reading voice.
+        // for by name, in Amiri Quran or the reading voice.
         assertEquals(NotoSansBengali, BanglaTypography.displayLarge.fontFamily)
         assertEquals(NotoSansBengali, BanglaTypography.headlineSmall.fontFamily)
     }
@@ -202,7 +202,7 @@ class TypographyTest {
     @Test
     fun theQuranVoiceKeepsTheAgreedStaircase() {
         // The Quran is the page's anchor at 26; the prose is 16; the aid's
-        // word is 22, four points under the verse; the inline Amiri and the
+        // word is 22, four points under the verse; the inline Arabic and the
         // medallion are 24, a step under the verse; and the gloss is 15, one
         // point under the prose. The verse to prose ratio is 1.625 (owner
         // decision, this session).

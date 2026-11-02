@@ -29,7 +29,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInWindow
@@ -43,6 +45,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
@@ -355,18 +358,20 @@ internal fun AyahBlock(
                         },
                     )
                     .drawWithContent {
-                        val range = arabicLine.washRange
+                        val recited = arabicLine.recitedRange
                         val layout = textLayout
                         if (layout == null) {
                             drawContent()
                             return@drawWithContent
                         }
                         arabicLine.matchRanges.forEach { range ->
-                            drawPlayingWordWash(layout, range, matchWash)
+                            drawWordWash(layout, range, matchWash)
                         }
-                        if (range != null) drawPlayingWordWash(layout, range, palette.highlight)
                         drawContent()
                         drawTajweedColors(layout, tajweed, palette.tajweed, metrics.tajweed)
+                        if (recited != null) {
+                            drawRecitationWord(layout, recited, palette.recitationInk)
+                        }
                     },
             )
             if (showWordAid && row.meanings.any { it.meaning != null }) {
@@ -439,10 +444,10 @@ internal fun AyahBlock(
     }
 }
 
-/** One Arabic line: its words, the wash the reciter is on, and any search match. */
+/** One Arabic line: its words, the range the reciter is on, and any search match. */
 private data class ArabicLine(
     val text: AnnotatedString,
-    val washRange: IntRange?,
+    val recitedRange: IntRange?,
     val matchRanges: List<IntRange>,
     /** The printed medallion's own span, which is the ayah's door in Arabic only. */
     val ornamentRange: IntRange?,
@@ -450,9 +455,9 @@ private data class ArabicLine(
 
 /**
  * The ayah as whole words. The recited word carries its range instead of a
- * style span, so the surface above can wash it in a rounded shape: a style
- * boundary inside an Arabic word breaks its letter joining, and a span is
- * always a bare rectangle behind the glyphs.
+ * style span, so the surface above can paint its own glyphs in the recitation
+ * ink: a style boundary inside an Arabic word breaks its letter joining, and
+ * a color span would re-shape the line the reading has already settled.
  *
  * The tajweed colors are not spans either. The line is shaped once and
  * [drawTajweedColors] paints over that one layout, because a color span would
@@ -474,7 +479,7 @@ private fun arabic(
     revealWords: Set<Int>,
 ): ArabicLine {
     val words = row.words
-    var washRange: IntRange? = null
+    var recitedRange: IntRange? = null
     val matchRanges = mutableListOf<IntRange>()
     var ornamentRange: IntRange? = null
     val text = buildAnnotatedString {
@@ -485,7 +490,7 @@ private fun arabic(
                 if (index > 0) append(' ')
                 val start = length
                 append(word.text)
-                if (playing && word.position == playingWord) washRange = start until length
+                if (playing && word.position == playingWord) recitedRange = start until length
                 if (word.position in revealWords) matchRanges += start until length
             }
         }
@@ -499,7 +504,7 @@ private fun arabic(
             ornamentRange = start until length
         }
     }
-    return ArabicLine(text, washRange, matchRanges, ornamentRange)
+    return ArabicLine(text, recitedRange, matchRanges, ornamentRange)
 }
 
 /**
@@ -567,14 +572,43 @@ private fun PointerInputScope.ornamentTarget(
 
 
 /**
- * The current word under the reciter, drawn as one rounded wash per line it
- * spans. The geometry comes from the text layout itself, so the wash sits
- * exactly on the word the reciter is saying, in the reading direction too.
+ * A word's wash, one rounded shape per line it spans. The geometry comes from
+ * the text layout itself, so the wash sits exactly on the word, in the
+ * reading direction too. Used by a search match; the reciter's word is painted
+ * in the recitation ink instead.
  */
-private fun DrawScope.drawPlayingWordWash(
+private fun DrawScope.drawWordWash(
     layout: TextLayoutResult,
     range: IntRange,
     wash: Color,
+) {
+    forEachWordBox(layout, range) { box -> drawWashBox(box, wash) }
+}
+
+/**
+ * The reciter's word, painted in the recitation ink. The color is a paint
+ * pass over the line that was shaped once, not a style span: a span would
+ * re-shape the run and can break a join or drop a mark. The word's own glyph
+ * boxes are the clip, so the ink lands on its letters and nowhere else, and
+ * the pass comes after the tajweed colors so the reciter's word is one mark,
+ * not a rule color under a wash (owner decision, this session).
+ */
+private fun DrawScope.drawRecitationWord(
+    layout: TextLayoutResult,
+    range: IntRange,
+    color: Color,
+) {
+    val path = Path()
+    forEachWordBox(layout, range) { path.addRect(it) }
+    if (path.isEmpty) return
+    clipPath(path) { drawText(textLayoutResult = layout, color = color) }
+}
+
+/** Every line's box of one word, in text order, handed to the caller. */
+private inline fun forEachWordBox(
+    layout: TextLayoutResult,
+    range: IntRange,
+    action: (Rect) -> Unit,
 ) {
     val start = range.first.coerceAtLeast(0)
     val end = range.last.coerceAtMost(layout.layoutInput.text.length - 1)
@@ -584,7 +618,7 @@ private fun DrawScope.drawPlayingWordWash(
     for (offset in start..end) {
         val nextLine = layout.getLineForOffset(offset)
         if (nextLine != line) {
-            box?.let { drawWordWash(it, wash) }
+            box?.let(action)
             box = null
             line = nextLine
         }
@@ -598,11 +632,11 @@ private fun DrawScope.drawPlayingWordWash(
             )
         } ?: charBox
     }
-    box?.let { drawWordWash(it, wash) }
+    box?.let(action)
 }
 
-/** One word's wash: rounded, with the room a mark needs around the glyphs. */
-private fun DrawScope.drawWordWash(box: Rect, wash: Color) {
+/** One word's wash box: rounded, with the room a mark needs around the glyphs. */
+private fun DrawScope.drawWashBox(box: Rect, wash: Color) {
     val pad = box.height * 0.08f
     drawRoundRect(
         color = wash,

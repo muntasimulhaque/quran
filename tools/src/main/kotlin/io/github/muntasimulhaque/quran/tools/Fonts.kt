@@ -153,7 +153,7 @@ class Fonts(private val root: File) {
 
     /**
      * The app draws four voices: Literata for the reading, the titles, and the
-     * names, Inter for controls and labels, Amiri for the tafsir's Arabic and
+     * names, Inter for controls and labels, Kitab for the tafsir's Arabic and
      * its quotations, and the Hafs font for the canonical words already
      * checked above. Every run the reader will actually see is probed against
      * the font it will be drawn with, script by script, so a tofu box can
@@ -172,7 +172,7 @@ class Fonts(private val root: File) {
             return
         }
         val literata = loadFontFile(File(root, "content-assets/src/main/res/font/literata_variable.ttf"))
-        val amiri = loadFontFile(File(root, "content-assets/src/main/res/font/amiri_regular.ttf"))
+        val kitab = loadFontFile(File(root, "content-assets/src/main/res/font/kitab_regular.ttf"))
 
         val uncovered = TreeMap<String, Int>()
         var codepoints = 0
@@ -194,14 +194,14 @@ class Fonts(private val root: File) {
                     probe(latin, run.text, label)
                     continue
                 }
-                // Arabic runs are drawn in Amiri's body face, which carries
-                // every letter the content has: there is no per-codepoint
-                // fallback any more, so a codepoint it cannot draw fails the
-                // gate.
+                // Arabic runs are drawn in Kitab's body face, which carries
+                // every letter and every prose punctuation mark the content
+                // has: there is no per-codepoint fallback any more, so a
+                // codepoint it cannot draw fails the gate.
                 for (codepoint in run.text.codePoints()) {
                     if (codepoint <= 32) continue
                     codepoints++
-                    if (!amiri.canDisplay(codepoint) && !isPlatformScript(codepoint)) {
+                    if (!kitab.canDisplay(codepoint) && !isPlatformScript(codepoint)) {
                         uncovered.merge("$label U+${codepoint.toString(16).uppercase()}", 1, Int::plus)
                     }
                 }
@@ -242,7 +242,7 @@ class Fonts(private val root: File) {
         }
         for (file in packs.listFiles { it -> it.isFile && it.name.startsWith("tafsir-") }.orEmpty()) {
             // The offered tafsirs are Latin, paragraphs and headings drawn in
-            // Literata, with the tafsir's Arabic quotations in Amiri's body
+            // Literata, with the tafsir's Arabic quotations in Kitab's body
             // face.
             openSqlite(file).use { connection ->
                 connection.each("SELECT text FROM tafsir_passage") { rs ->

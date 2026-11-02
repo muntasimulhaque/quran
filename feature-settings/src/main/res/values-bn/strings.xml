@@ -66,9 +66,9 @@
     <string name="credit_amiri">আমিরি কুরআন</string>
     <string name="credit_amiri_by">খালেদ হোসনী</string>
     <string name="credit_amiri_use">অ্যাপের নাম ও সূরার নাম</string>
-    <string name="credit_amiri_text">আমিরি</string>
-    <string name="credit_amiri_text_by">খালেদ হোসনী</string>
-    <string name="credit_amiri_text_use">তাফসীরের আরবি ও তার উদ্ধৃতিগুলো</string>
+    <string name="credit_kitab">কিতাব</string>
+    <string name="credit_kitab_by">খালেদ হোসনী</string>
+    <string name="credit_kitab_use">তাফসীরের আরবি ও তার উদ্ধৃতিগুলো</string>
     <string name="credit_literata">লিটারাটা</string>
     <string name="credit_literata_by">টাইপটুগেদার</string>
     <string name="credit_literata_use">পাঠ, শিরোনাম এবং সূরার নাম</string>

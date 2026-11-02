@@ -39,16 +39,16 @@ class TajweedPaletteTest {
     @Test
     fun nightFamiliesSeparate() = assertSeparated(NightTajweed, NightInk)
 
+    @Test
+    fun paperRecitationInkSeparates() =
+        assertRecitationInk(PaperTajweed, PaperInk, LightPage.recitationInk)
+
+    @Test
+    fun nightRecitationInkSeparates() =
+        assertRecitationInk(NightTajweed, NightInk, DarkPage.recitationInk)
+
     private fun assertSeparated(colors: TajweedColors, ink: Color) {
-        val entries = listOf(
-            "silent" to colors.silent,
-            "ghunnah" to colors.ghunnah,
-            "qalaqah" to colors.qalaqah,
-            "ikhafa" to colors.ikhafa,
-            "iqlab" to colors.iqlab,
-            "idgham" to colors.idgham,
-            "madda" to colors.madda,
-        )
+        val entries = entries(colors)
         for (index in entries.indices) {
             for (other in index + 1 until entries.size) {
                 val delta = distance(entries[index].second, entries[other].second)
@@ -67,6 +67,39 @@ class TajweedPaletteTest {
             )
         }
     }
+
+    /**
+     * The reciter's ink is a second mark on the same letters, so it must be
+     * far enough from every rule color to read as its own thing, and far
+     * enough from the reading's ink to be seen at all (owner decision, this
+     * session).
+     */
+    private fun assertRecitationInk(colors: TajweedColors, ink: Color, recitation: Color) {
+        for ((name, color) in entries(colors)) {
+            val delta = distance(recitation, color)
+            assertTrue(
+                "the recitation ink and $name are ${"%.3f".format(delta)} apart, " +
+                    "under the $RECITATION_FLOOR floor",
+                delta >= RECITATION_FLOOR,
+            )
+        }
+        val fromInk = distance(recitation, ink)
+        assertTrue(
+            "the recitation ink is ${"%.3f".format(fromInk)} from the reading ink, " +
+                "under the $INK_FLOOR floor",
+            fromInk >= INK_FLOOR,
+        )
+    }
+
+    private fun entries(colors: TajweedColors): List<Pair<String, Color>> = listOf(
+        "silent" to colors.silent,
+        "ghunnah" to colors.ghunnah,
+        "qalaqah" to colors.qalaqah,
+        "ikhafa" to colors.ikhafa,
+        "iqlab" to colors.iqlab,
+        "idgham" to colors.idgham,
+        "madda" to colors.madda,
+    )
 
     private fun distance(first: Color, second: Color): Double {
         val a = oklab(first)
@@ -99,5 +132,8 @@ class TajweedPaletteTest {
 
         /** The smallest distance a family may sit from the reading's own ink. */
         const val INK_FLOOR = 0.10
+
+        /** The smallest distance the recitation ink may sit from a family. */
+        const val RECITATION_FLOOR = 0.10
     }
 }

@@ -66,9 +66,9 @@
     <string name="credit_amiri">Amiri Quran</string>
     <string name="credit_amiri_by">Khaled Hosny</string>
     <string name="credit_amiri_use">The masthead and the surah names</string>
-    <string name="credit_amiri_text">Amiri</string>
-    <string name="credit_amiri_text_by">Khaled Hosny</string>
-    <string name="credit_amiri_text_use">The Arabic of the tafsir and its quotations</string>
+    <string name="credit_kitab">Kitab</string>
+    <string name="credit_kitab_by">Khaled Hosny</string>
+    <string name="credit_kitab_use">The Arabic of the tafsir and its quotations</string>
     <string name="credit_literata">Literata</string>
     <string name="credit_literata_by">TypeTogether</string>
     <string name="credit_literata_use">The reading, the titles, and the surah names</string>

@@ -32,7 +32,7 @@ import io.github.muntasimulhaque.quran.core.TextBlockKind
 import io.github.muntasimulhaque.quran.core.TextRun
 import io.github.muntasimulhaque.quran.core.ScriptMix
 import io.github.muntasimulhaque.quran.core.scriptMix
-import io.github.muntasimulhaque.quran.ui.theme.AmiriBody
+import io.github.muntasimulhaque.quran.ui.theme.KitabBody
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
@@ -43,9 +43,10 @@ import io.github.muntasimulhaque.quran.ui.theme.title
 
 /**
  * Draws parsed runs with the manuscript's two voices: Literata for Latin and
- * Amiri's body face for Arabic. The body face covers every letter the content
- * carries, so no run is handed to the platform to guess at. Footnote markers
- * are accent superscripts, and no styling is ever taken inside a word.
+ * Kitab's body face for Arabic. The body face covers every letter and every
+ * prose punctuation mark the content carries, so no run is handed to the
+ * platform to guess at. Footnote markers are accent superscripts, and no
+ * styling is ever taken inside a word.
  *
  * A paragraph can carry Arabic at a much larger size than its Latin text, and
  * a superscript marker that sits above the line. The line height is therefore
@@ -113,26 +114,26 @@ fun TranslationBody(
  * air because one quotation appeared in it: every line of an English tafsir
  * paragraph breathed at the all-Arabic block's line for one inline word.
  *
- * The two ratios are grounded in the sources' own glyphs, not in taste. The
- * Amiri ink of the tafsir's Arabic-only paragraphs needs 1.67 em at the
- * median and 1.84 em at the 90th percentile, so [ArabicAir] stays where it
- * has been at 1.9, just past that tail: the owner's report was about the
- * mixed paragraphs, and the all-Arabic block's own rhythm was not part of
- * it, so its line does not move. The Arabic inside the 4,836 mixed
- * paragraphs needs 0.97 em at the median and 1.32 em at the very worst (the
- * Prophet's ligature under a stack of marks, and one Urdu blessing), so
- * [MixedAir] at 1.35 covers the whole distribution while bringing the mixed
- * line down from the old 1.9: at the default tafsir size that is about 32.4
- * dp of line for the 16 sp body with the 24 sp inline Arabic, instead of the
- * 45.6 dp the all-Arabic block takes, which is the change that made the
- * tafsir's gaps even (owner report). A
- * block whose inline Arabic is taller than any the sources carry today would
- * need this constant raised with it; the measurement is written here so the
- * next session can redo it rather than guess.
+ * The two ratios are grounded in the sources' own glyphs, not in taste.
+ * Kitab's ink in the tafsir's Arabic-only paragraphs needs 1.51 em at the
+ * median, 1.67 em at the 90th percentile, 1.82 at the 99th, and 1.97 at the
+ * very worst in a sample of 348 lines, so [ArabicAir] is 2.0, just past that
+ * tail. The Arabic inside a mixed paragraph is shorter than the all-Arabic
+ * block's, so [MixedAir] stays at 1.35: at the default tafsir size that is
+ * about 32.4 dp of line for the 16 sp body with the 24 sp inline Arabic,
+ * instead of the 48 dp the all-Arabic block takes, which is the rhythm that
+ * made the tafsir's gaps even. A block whose inline Arabic is taller than
+ * any the sources carry today would need this constant raised with it; the
+ * measurement is written here so the next session can redo it rather than
+ * guess.
  *
- * The tafsir briefly read its Arabic in Hafs (owner decision, the audio and
- * type audit session) and is back in Amiri (owner decision, this session):
- * the measurements above were taken in Amiri ink, so they stand as measured.
+ * The tafsir read in Amiri until this session. Amiri's punctuation was
+ * correct, but its ink reaches 2.5 em on the stacked marks and crowded the
+ * 1.9 line; Hafs, the other candidate, is a Quran face whose prose
+ * punctuation slots draw the Arabic footnote marker, so every comma became
+ * a dotted circle. The tafsir reads in Kitab now, the body Naskh Quran.com
+ * and Quran for Android use, which carries both the letters and the
+ * punctuation and keeps the Quran's own line (owner decision, this session).
  */
 private fun lineHeightFor(mix: ScriptMix, latinLine: Float, arabicSp: Float): Float = when (mix) {
     ScriptMix.LATIN -> latinLine
@@ -143,8 +144,8 @@ private fun lineHeightFor(mix: ScriptMix, latinLine: Float, arabicSp: Float): Fl
 /** The air a Latin paragraph with an Arabic quotation gives the quotation. */
 private const val MixedAir = 1.35f
 
-/** The air an all-Arabic paragraph gives its diacritics; unchanged at 1.9. */
-private const val ArabicAir = 1.9f
+/** The air an all-Arabic paragraph gives its diacritics: the Quran's own 2.0. */
+private const val ArabicAir = 2f
 
 /**
  * The share of the body a footnote marker is drawn at: 11 at the 16 sp
@@ -381,14 +382,14 @@ private fun annotated(
                     ) { withStyle(style) { append(marker.toString()) } }
                 }
             } else if (run.arabic) {
-                // One face for the tafsir's Arabic: Amiri's body text covers
-                // every letter the content carries, including the Urdu heh and
-                // the pre-shaped phrase the source keeps, so the old
-                // per-codepoint fallback to the Hafs face is gone (owner
-                // decision, this session). No shipped content puts bold or
-                // italic on an Arabic run, and synthesis is off, so an
-                // emphasis that ever reached here would draw the face as it is
-                // rather than a smeared or slanted copy of it.
+                // One face for the tafsir's Arabic: Kitab's body text covers
+                // every letter and every prose punctuation mark the content
+                // carries, including the Urdu heh and the pre-shaped phrase
+                // the source keeps, so no run falls through to the Hafs face
+                // (owner decision, this session). No shipped content puts
+                // bold or italic on an Arabic run, and synthesis is off, so
+                // an emphasis that ever reached here would draw the face as
+                // it is rather than a smeared or slanted copy of it.
                 //
                 // The Prophet's ligature is the one exception to the inline
                 // size: it is a symbol inside a sentence, not a quotation, so
@@ -397,7 +398,7 @@ private fun annotated(
                 // (owner decision, this session).
                 withStyle(
                     SpanStyle(
-                        fontFamily = AmiriBody,
+                        fontFamily = KitabBody,
                         fontSize = if (RichText.isHonorific(run.text)) symbolSize else arabicSize,
                         color = if (run.quote) quoteColor ?: quoteFallback else Color.Unspecified,
                         fontSynthesis = FontSynthesis.None,

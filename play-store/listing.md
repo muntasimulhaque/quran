@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 14.3 (versionCode 145)
+Version: 14.4 (versionCode 146)
 
 ## Listing
 
@@ -180,6 +180,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (14.4, 368 characters)
+14.4 makes the tafsir read clearly. Its Arabic now uses Kitab, the book face Quran.com uses, so commas and other punctuation are proper marks again and the lines have room. The word being recited is shown in its own ink instead of a wash. In the daily time, moving a tape while its field is open now changes the same value the keyboard edits. Text and packs unchanged.
 
 ## Release notes (14.3, 410 characters)
 14.3 quiets the small surfaces and the surah opening. The gold rule under the surah's Arabic name is gone, and its Latin name sits a row closer. A recent search is removed with the X that appears on its own chip, with no menu. The playing pill reads the ayah, the reciter, and the pace, which shows only when it is not 1x. The time, search, and note fields select with a rounded wash. Text and packs unchanged.

@@ -2,7 +2,8 @@
 
 Six of the faces the app bundles travel under the SIL Open Font License 1.1:
 
-- **Amiri** and **Amiri Quran**: Khaled Hosny and the Amiri project.
+- **Amiri Quran**: Khaled Hosny and the Amiri project.
+- **Kitab**: Khaled Hosny and the Nuqayah project.
 - **Literata**: TypeTogether.
 - **Noto Sans Bengali** and **Noto Serif Bengali**: Google.
 - **Inter**: Rasmus Andersson.

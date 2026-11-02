@@ -148,9 +148,9 @@ object TextSize {
     /**
      * The one rule for Arabic beside prose, in the translation and in the
      * tafsir both: 24 sp at the default, 24/26 of the reader's own Quran
-     * size. Amiri's alef is 0.696 em against Hafs's 0.636, so an inline
-     * quotation at that stand reads as the Quran's own text without reaching
-     * the verse. One rule replaces the two that had drifted, 0.8 of the
+     * size. At that stand an inline quotation reads as the Quran's own text
+     * without reaching the verse. One rule replaces the two that had drifted,
+     * 0.8 of the
      * Arabic in the translation and 1.5 of the tafsir prose in the tafsir,
      * which landed on the same number at the default and hid the fact that
      * they were two (owner decision, the theme and consistency session).
@@ -218,8 +218,7 @@ object TextSize {
     /**
      * The one stand for Arabic beside prose, in the translation and the
      * tafsir alike: 24 of the Quran's own 26, a step under the verse and
-     * still the Quran's text. Amiri's alef (0.696 em) measures against
-     * Hafs's (0.636 em) at this stand without reaching the verse (owner
+     * still the Quran's text at this stand without reaching the verse (owner
      * decision, this session).
      */
     private const val INLINE_ARABIC_RATIO = 24f / ARABIC_BASE

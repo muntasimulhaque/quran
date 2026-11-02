@@ -40,11 +40,10 @@ import io.github.muntasimulhaque.quran.data.TypeRole
  *
  * The Book itself is the KFGQPC Hafs face: the reading, the basmalah, the
  * word-by-word aid, and the ayah's own medallion. Arabic outside the
- * canonical text speaks Amiri, the family's body face, which is drawn for
- * running prose: the tafsir's paragraphs and the quotations inside them.
- * Amiri Quran, the same design drawn for Quran pages, keeps the display
- * lines, the masthead and the surah names, whose tall marks need its tall
- * line box.
+ * canonical text speaks Kitab, the body Naskh drawn for long-form Arabic
+ * books: the tafsir's paragraphs and the quotations inside them. Amiri Quran
+ * keeps the display lines, the masthead and the surah names, whose tall marks
+ * need its tall line box.
  *
  * The reader's language then chooses two pairs. English reads Literata and
  * works in Inter; Bangla reads Noto Serif Bengali and works in Noto Sans
@@ -126,20 +125,24 @@ val NotoSerifBengali = FontFamily(
 /**
  * The display voice for Arabic: the masthead and the surah names. This is
  * Amiri Quran, the release prepared for Quran pages: its line box is 2.449 of
- * the em against the body face's 1.758, which is what the Quran's marks need
+ * the em against a body face's 1.688, which is what the Quran's marks need
  * and what [amiriDisplay] trims back to the ink.
  */
 val AmiriQuran = FontFamily(Font(R.font.amiri_quran))
 
 /**
  * The body voice for Arabic prose: the tafsir's paragraphs and the
- * quotations inside them. This is Amiri's running-text face, the same design
- * as [AmiriQuran] with a normal 1.758 line box and 6,710 characters instead of
- * 1,446, so it draws every letter the content carries, including the Urdu heh
- * and the pre-shaped phrase the tafsir source keeps, without borrowing the
- * Hafs face.
+ * quotations inside them. Kitab is Khaled Hosny's classical Naskh for
+ * long-form Arabic books, built on Scheherazade and extended to the full
+ * Unicode Arabic repertoire. It is the face Quran.com and Quran for Android
+ * draw their Arabic tafsir in, and it carries the prose punctuation that the
+ * Quran's Hafs face has no glyphs for: U+060C, U+061B, U+061F, U+066A to
+ * U+066C, and U+06D4. Its line box is 1.688 of the em, so the tafsir's
+ * Arabic line can be the Quran's own 2.0 without the tall marks crowding
+ * (owner decision, this session: Hafs drew every prose comma as a dotted
+ * circle, and Amiri's tall marks crowded the 1.9 line).
  */
-val AmiriBody = FontFamily(Font(R.font.amiri_regular))
+val KitabBody = FontFamily(Font(R.font.kitab_regular))
 
 /**
  * The reading voice of the Quran's own text: the KFGQPC Hafs face, the same

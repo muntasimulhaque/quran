@@ -35,6 +35,15 @@ class ContrastTest {
         assertReadable(Lapis, PaperBackground)
         assertReadable(Lapis, PaperSurface)
         assertReadable(PaperOnPrimary, Lapis)
+        // The reciter's word is recolored, not washed: its ink must clear the
+        // floor on the page, the sheet, and the reciter's own wash (owner
+        // decision, this session).
+        assertReadable(LightPage.recitationInk, PaperBackground)
+        assertReadable(LightPage.recitationInk, PaperSurface)
+        assertReadable(
+            LightPage.recitationInk,
+            blend(LightScheme.primary, PaperBackground, LightPage.highlight.alpha * 0.55f),
+        )
         // The four container roles a Material component may ask for, so a
         // stock surface can never fall back to the baseline purple (owner
         // decision, this session).
@@ -98,6 +107,12 @@ class ContrastTest {
         assertReadable(LapisLight, NightBackground)
         assertReadable(LapisLight, NightSurface)
         assertReadable(NightOnPrimary, LapisLight)
+        assertReadable(DarkPage.recitationInk, NightBackground)
+        assertReadable(DarkPage.recitationInk, NightSurface)
+        assertReadable(
+            DarkPage.recitationInk,
+            blend(DarkScheme.primary, NightBackground, DarkPage.highlight.alpha * 0.55f),
+        )
         assertReadable(DarkScheme.onSecondaryContainer, DarkScheme.secondaryContainer)
         assertReadable(DarkScheme.onTertiaryContainer, DarkScheme.tertiaryContainer)
         // The error roles are the quiet voice on this ground too (owner
