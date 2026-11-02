@@ -9,6 +9,9 @@ import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.SearchHit
 import io.github.muntasimulhaque.quran.data.SearchRequest
+import io.github.muntasimulhaque.quran.data.SavedAyah
+import io.github.muntasimulhaque.quran.data.SearchArabicLine
+import io.github.muntasimulhaque.quran.data.arabicLineFor
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -123,6 +126,33 @@ class ContentSearchTest {
         assertTrue(
             "the Bangla word must be highlighted in the translation",
             !hit.translation!!.ranges.isNullOrEmpty(),
+        )
+    }
+
+    @Test
+    fun theReadersOwnNotesAreSearchable() = runBlocking {
+        val saved = SavedAyah(
+            ayahNumber = 262,
+            note = "the Throne verse",
+            createdAt = 1_700_000_000_000L,
+            noteAt = 1_700_000_000_000L,
+            saved = true,
+            savedAt = 1_700_000_000_000L,
+            marked = true,
+        )
+        val request = request("throne", translations = false, tafsir = false)
+            .copy(notes = listOf(saved))
+        val results = content.search(request)
+        val hit = results.hits.filterIsInstance<SearchHit.AyahHit>()
+            .firstOrNull { it.ayah.number == 262 }
+        assertNotNull("the reader's note must be found", hit)
+        assertEquals("the note is the row's evidence", "the Throne verse", hit!!.note)
+        assertTrue("the matched word must be highlighted", hit.noteRanges.isNotEmpty())
+        assertEquals("the note is counted as its own source", 1, results.counts.notes)
+        assertEquals(
+            "a note-only row draws the note, not the ayah",
+            SearchArabicLine.None,
+            arabicLineFor(hit),
         )
     }
 

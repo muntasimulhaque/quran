@@ -41,6 +41,7 @@ import io.github.muntasimulhaque.quran.feature.search.R
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
+import io.github.muntasimulhaque.quran.ui.kit.focusRing
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -49,7 +50,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
 /**
  * The sources a query reads, folded away behind one quiet door.
  *
- * The six chips were a wall over the results on a phone, and a reader who
+ * The chips were a wall over the results on a phone, and a reader who
  * ignores them searches everything, which is what the app means by search.
  * The door says what the search reads in two words, and opens the same chips
  * for the reader who wants to narrow it. The fold is remembered for the
@@ -71,6 +72,8 @@ internal fun FilterRow(
     hasTranslations: Boolean,
     hasTafsirs: Boolean,
     hasWords: Boolean,
+    /** True while the reader has at least one note to search. */
+    hasNotes: Boolean,
     onChange: (SearchSources) -> Unit,
 ) {
     // A query folds the source list away: once the reader is searching,
@@ -91,6 +94,7 @@ internal fun FilterRow(
         if (hasTranslations) add(sources.translations)
         if (hasWords) add(sources.words)
         if (hasTafsirs) add(sources.tafsirs)
+        if (hasNotes) add(sources.notes)
     }
     val chosen = offered.count { it }
     val state = if (chosen == offered.size) {
@@ -129,6 +133,7 @@ internal fun FilterRow(
                 )
                 .minimumInteractiveComponentSize()
                 .clip(Radii.Pill)
+                .focusRing(press, Radii.Pill)
                 .indication(press, ripple(color = MaterialTheme.colorScheme.onSurfaceVariant))
                 .semantics {
                     stateDescription = if (open) expanded else collapsed
@@ -204,6 +209,11 @@ internal fun FilterRow(
                         onChange(sources.copy(tafsirs = it))
                     }
                 }
+                if (hasNotes) {
+                    FilterChip(stringResource(R.string.search_filter_notes), sources.notes) {
+                        onChange(sources.copy(notes = it))
+                    }
+                }
             }
         }
     }
@@ -251,6 +261,7 @@ internal fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit)
             )
             .minimumInteractiveComponentSize()
             .clip(Radii.Pill)
+            .focusRing(press, Radii.Pill)
             .background(
                 if (on) {
                     MaterialTheme.colorScheme.primary

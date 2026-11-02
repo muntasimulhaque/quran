@@ -1,18 +1,26 @@
 package io.github.muntasimulhaque.quran.ui.kit
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -24,6 +32,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Wash
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -95,6 +104,7 @@ fun ScaleRow(
     val chosen = steps.indices.minByOrNull { abs(steps[it] - value) } ?: 0
     val spokenValue = valueText?.invoke(steps[chosen])
     val select = rememberUpdatedState(onSelect)
+    val focusSource = remember { MutableInteractionSource() }
     val inset = with(LocalDensity.current) { RailInset.toPx() }
     val rail = MaterialTheme.colorScheme.outline
     val quiet = MaterialTheme.colorScheme.onSurfaceVariant
@@ -114,6 +124,19 @@ fun ScaleRow(
     Row(
         modifier = modifier
             .height(48.dp)
+            .focusable(interactionSource = focusSource)
+            .focusRing(focusSource, Radii.Pill)
+            .onKeyEvent { event ->
+                if (event.type != KeyEventType.KeyDown) return@onKeyEvent false
+                val direction = when (event.key) {
+                    Key.DirectionLeft -> -1
+                    Key.DirectionRight -> 1
+                    else -> return@onKeyEvent false
+                }
+                val next = (chosen + direction).coerceIn(0, steps.lastIndex)
+                if (next != chosen) select.value(steps[next])
+                true
+            }
             .semantics {
                 contentDescription = label
                 if (spokenValue != null) stateDescription = spokenValue

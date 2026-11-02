@@ -133,6 +133,7 @@ fun ChoiceRow(
             // target itself: one shape for anything that answers a tap, so a
             // settings list and the pill's own menu cannot disagree.
             .clip(Radii.Pill)
+            .focusRing(press, Radii.Pill)
             .indication(press, ripple())
             .padding(
                 start = Space.Row,

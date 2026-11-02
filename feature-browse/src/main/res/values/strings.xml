@@ -40,6 +40,7 @@
     <string name="saved_empty_body">Tap the ayah\'s number, then Save. Your saved ayahs and the notes you wrote on them appear here, newest first.</string>
     <string name="notes_detail">Note written %1$s</string>
     <string name="saved_detail">Saved %1$s</string>
+    <string name="browse_saved_removed">Saved ayah removed</string>
     <string name="saved_reference_fallback">Ayah %1$d</string>
     <string name="action_remove">Remove</string>
     <string name="action_forget">Forget</string>

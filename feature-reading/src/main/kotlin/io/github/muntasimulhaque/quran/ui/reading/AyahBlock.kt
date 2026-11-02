@@ -24,6 +24,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -90,6 +92,8 @@ internal fun AyahBlock(
     isMenuOpen: Boolean = false,
     /** True when the reader has pressed Save on this ayah. */
     saved: Boolean = false,
+    /** The focus target a jump lands on, when this is the ayah it landed on. */
+    focusRequester: FocusRequester? = null,
     /** The ayah's door was tapped, with its own place on the glass. */
     onMenu: (Ayah, IntRect) -> Unit,
     onBackgroundTap: () -> Unit,
@@ -222,6 +226,13 @@ internal fun AyahBlock(
                 }
                 .clip(Radii.Card)
                 .background(wash)
+                .then(
+                    if (focusRequester != null) {
+                        Modifier.focusRequester(focusRequester)
+                    } else {
+                        Modifier
+                    },
+                )
                 // A tap belongs to the page: it brings or puts away the
                 // chrome, and it is how a raised control is dismissed. The
                 // ayah's own door is its number, at the head of the block,

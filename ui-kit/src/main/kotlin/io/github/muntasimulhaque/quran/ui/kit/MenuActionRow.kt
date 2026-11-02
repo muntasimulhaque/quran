@@ -109,6 +109,7 @@ fun MenuActionRow(
                 },
             )
             .clip(Radii.Pill)
+            .focusRing(press, Radii.Pill)
             .indication(press, ripple())
             .padding(
                 start = Space.Row,

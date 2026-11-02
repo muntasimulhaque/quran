@@ -9,16 +9,17 @@
     <string name="search_empty_body_quran">Type any word from the Quran. A reference like 2:255 or kahf 10 goes straight to an ayah.</string>
     <string name="search_recent_title">Recent searches</string>
     <string name="search_recent_clear">Clear</string>
-    <string name="search_recent_remove">Remove</string>
+    <string name="search_recent_remove_named">Remove %1$s</string>
     <string name="search_status_searching">Searching…</string>
     <string name="search_status_no_matches">No matches.</string>
     <string name="search_status_failed">The search could not finish. Try again.</string>
     <string name="search_status_no_sources">Choose at least one place to search.</string>
-    <string name="search_status_capped">Showing the first %1$d.</string>
+    <string name="search_status_capped">Showing the first %1$d matches.</string>
     <string name="search_label_go_to">Go to</string>
     <string name="search_label_surah">Surah</string>
     <string name="search_surah_meta">%1$s  ·  %2$d ayahs</string>
     <string name="search_word_meaning_label">Word meaning</string>
+    <string name="search_note_label">Note</string>
     <string name="search_tafsir_range">%1$s  ·  %2$s %3$s</string>
     <string name="search_revelation_makki">Makki</string>
     <string name="search_revelation_madani">Madani</string>
@@ -30,6 +31,7 @@
     <string name="search_filter_translations">Translations</string>
     <string name="search_filter_words">Word meanings</string>
     <string name="search_filter_tafsirs">Tafsirs</string>
+    <string name="search_filter_notes">Notes</string>
     <string name="search_filter_all">Everything</string>
     <string name="search_filter_some">%1$d of %2$d</string>
     <string name="search_filter_state_expanded">Expanded</string>

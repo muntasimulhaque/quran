@@ -37,6 +37,11 @@ fun shouldShowWordMeaning(hit: SearchHit.AyahHit): Boolean =
  * - the row has no other evidence, which is a reference the reader typed, and
  *   the ayah is drawn plain: then it is all the row has to say.
  *
+ * A row whose note carried the match draws no Arabic either: the note is the
+ * evidence, and the excerpt under it says why the ayah is here. A row that
+ * matched both the Arabic and the note keeps the Arabic, because the verse
+ * itself is the stronger answer to the query.
+ *
  * Anything else draws no Arabic at all, and a row the translation already
  * washed is in that group on purpose: the word line would be the same match
  * said twice, which is the very thing this rule's neighbour exists to stop
@@ -50,6 +55,7 @@ fun arabicLineFor(hit: SearchHit.AyahHit): SearchArabicLine =
         !hit.translation?.ranges.isNullOrEmpty() -> SearchArabicLine.None
         shouldShowWordMeaning(hit) && hit.matchedWordText.isNotEmpty() ->
             SearchArabicLine.Words(hit.matchedWordText)
+        hit.note != null -> SearchArabicLine.None
         hit.wordMeaning == null -> SearchArabicLine.Ayah
         else -> SearchArabicLine.None
     }

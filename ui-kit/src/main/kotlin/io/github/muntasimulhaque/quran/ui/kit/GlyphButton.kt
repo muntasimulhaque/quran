@@ -99,6 +99,7 @@ fun GlyphButton(
             modifier = Modifier
                 .size(GlyphPress)
                 .clip(Radii.Pill)
+                .focusRing(press, Radii.Pill)
                 .indication(press, ripple(color = tint))
                 .testTag("glyph-press"),
             contentAlignment = Alignment.Center,

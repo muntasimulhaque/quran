@@ -96,4 +96,5 @@ private fun Modifier.sheetRowSurface(press: MutableInteractionSource): Modifier 
     this
         .padding(horizontal = SheetRowGutter, vertical = SheetRowGap)
         .clip(Radii.Card)
+        .focusRing(press, Radii.Card)
         .indication(press, ripple())

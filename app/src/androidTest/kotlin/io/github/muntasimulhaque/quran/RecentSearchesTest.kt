@@ -5,12 +5,11 @@ import android.content.Intent
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
-import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTouchInput
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -36,8 +35,8 @@ import org.junit.runner.RunWith
  * its query back in the field, and that Clear empties the list on the phone
  * as well as on the glass (owner decision, this session).
  *
- * A chip can also go on its own: a long press arms it, its X appears inside
- * the capsule, and the next tap takes the one word from the phone while the
+ * A chip can also go on its own: its X is always visible at the trailing end
+ * of the capsule, and a tap on it takes the one word from the phone while the
  * others stay, which is the per query door Clear never was (owner decision,
  * this session).
  */
@@ -103,18 +102,14 @@ class RecentSearchesTest {
     }
 
     @Test
-    fun aLongPressRemovesOnlyThatQuery() {
+    fun theVisibleXRemovesOnlyThatQuery() {
         SearchHistory(context).record("absolute")
         openSearch()
         rule.waitUntil(timeoutMillis = 15_000) {
             rule.onAllNodesWithText("Recent searches").fetchSemanticsNodes().isNotEmpty()
         }
-        rule.onNodeWithText("mercy").performTouchInput { longClick() }
-        rule.waitUntil(timeoutMillis = 15_000) {
-            rule.onAllNodesWithText("mercy").fetchSemanticsNodes().isNotEmpty() &&
-                rule.onAllNodesWithTag("recent-armed").fetchSemanticsNodes().isNotEmpty()
-        }
-        rule.onNodeWithText("mercy").performClick()
+        // The X is a real control at rest, named for the word it removes.
+        rule.onNodeWithContentDescription("Remove mercy").performClick()
         rule.waitUntil(timeoutMillis = 15_000) {
             rule.onAllNodesWithText("mercy").fetchSemanticsNodes().isEmpty()
         }

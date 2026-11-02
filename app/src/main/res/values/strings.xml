@@ -41,7 +41,7 @@
          on for a new reader, and this is where they are told so and asked for
          the two grants it needs, the notification and the exact time. -->
     <string name="welcome_reminder_title">One ayah, once a day</string>
-    <string name="welcome_reminder_body">A quiet notification at %1$s each day. Allow notifications and exact alarms so it arrives on time when your phone allows.</string>
+    <string name="welcome_reminder_body">A quiet notification at %1$s each day. Allow notifications and alarms and reminders so it arrives on time when your phone allows.</string>
     <string name="welcome_reminder_turn_on">Turn it on</string>
     <string name="welcome_reminder_not_now">Not now</string>
 
@@ -106,7 +106,11 @@
     <string name="daily_channel_description">One ayah each day, at the time you choose.</string>
     <string name="daily_notification_title">%1$s, Ayah %2$d</string>
     <string name="notification_settings_unavailable">This phone has no notification settings to open.</string>
-    <string name="exact_alarm_settings_unavailable">This phone has no screen to allow the exact time.</string>
+    <string name="exact_alarm_settings_unavailable">This phone has no screen to allow alarms and reminders.</string>
+    <!-- The one permission answer the first screen could not show on a page. -->
+    <string name="permission_notifications_denied">Notifications are off, so the daily ayah cannot arrive.</string>
+    <string name="permission_exact_denied">Alarms and reminders are off, so the daily ayah may arrive late.</string>
+    <string name="permission_notice_settings">Settings</string>
 
     <!-- The three home-screen shortcuts: the same doors the app already has. -->
     <string name="shortcut_continue_short">Continue reading</string>

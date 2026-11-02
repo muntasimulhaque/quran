@@ -42,6 +42,8 @@ internal fun ReaderSheets(
     /** A search result arrives with the evidence the reading should show. */
     onSearchResult: (SearchArrival) -> Unit,
     onPendingRemove: (Int) -> Unit,
+    /** Puts a row removed from Browse back, with its own Undo. */
+    onRestoreSaved: (SavedAyah) -> Unit,
 ) {
     val context = LocalContext.current
     val wordsPack = ContentDatabase.wordsPackId(viewModel.readingLanguage)
@@ -70,18 +72,22 @@ internal fun ReaderSheets(
                 // A save that carries a note asks before it goes, so the
                 // reader's own words are never removed by one tap. The
                 // question opens over the sheet the reader is still standing
-                // in.
+                // in, and Browse's own Snackbar, not the reading's, carries
+                // the Undo: the reading's host is behind this window.
                 val note = saved.firstOrNull { it.ayahNumber == ayahNumber }?.note
                 if (note.isNullOrBlank()) {
-                    viewModel.removeSaved(ayahNumber)
+                    viewModel.removeSaved(ayahNumber, undoable = false)
                 } else {
                     onPendingRemove(ayahNumber)
                 }
             },
+            onRestoreSaved = onRestoreSaved,
             onForget = { viewModel.forgetPlace(it) },
         )
         ReaderSheet.Search -> SearchSheet(
             content = content,
+            /** The reader's own notes, searched beside the packs. */
+            notes = saved,
             // Search reads the language the reader chose and no other: a
             // Bangla reader searches Bangla translations and tafsirs even
             // when an English column was added by hand (owner decision, this

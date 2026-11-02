@@ -37,6 +37,7 @@ import io.github.muntasimulhaque.quran.core.Search
 import io.github.muntasimulhaque.quran.core.SearchQuery
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
+import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.data.SearchHit
 import io.github.muntasimulhaque.quran.data.SearchHistory
 import io.github.muntasimulhaque.quran.data.SearchRequest
@@ -83,12 +84,24 @@ private const val SETTLE_MILLIS = 120L
 private data class SearchKey(val query: SearchQuery, val sources: SearchSources)
 
 /**
- * The source flags as six booleans in the saved state: the chips survive the
- * window with the query they were applied to, so a rotation cannot silently
- * turn a source back on (owner decision, the theme and consistency session).
+ * The source flags as seven booleans in the saved state: the chips survive
+ * the window with the query they were applied to, so a rotation cannot
+ * silently turn a source back on (owner decision, the theme and consistency
+ * session). A saved state from before notes existed has six; the missing
+ * seventh reads as on, which is the default it would have had.
  */
 private val SearchSourcesSaver: Saver<SearchSources, List<Boolean>> = Saver(
-    save = { listOf(it.text, it.surahs, it.references, it.words, it.translations, it.tafsirs) },
+    save = {
+        listOf(
+            it.text,
+            it.surahs,
+            it.references,
+            it.words,
+            it.translations,
+            it.tafsirs,
+            it.notes,
+        )
+    },
     restore = { flags ->
         SearchSources(
             text = flags.getOrElse(0) { true },
@@ -97,6 +110,7 @@ private val SearchSourcesSaver: Saver<SearchSources, List<Boolean>> = Saver(
             words = flags.getOrElse(3) { true },
             translations = flags.getOrElse(4) { true },
             tafsirs = flags.getOrElse(5) { true },
+            notes = flags.getOrElse(6) { true },
         )
     },
 )
@@ -111,6 +125,8 @@ private val SearchSourcesSaver: Saver<SearchSources, List<Boolean>> = Saver(
 @Composable
 fun SearchSheet(
     content: ContentDatabase,
+    /** The reader's own saved notes, searched beside the packs. */
+    notes: List<SavedAyah>,
     translationPacks: List<String>,
     tafsirPacks: List<String>,
     packNames: Map<String, String>,
@@ -222,6 +238,7 @@ fun SearchSheet(
                         packLanguages = packLanguages,
                         wordsPack = wordsPack,
                         sources = sources,
+                        notes = notes,
                         limit = LIMIT,
                     ),
                 )
@@ -275,6 +292,7 @@ fun SearchSheet(
                 hasTranslations = translationPacks.isNotEmpty(),
                 hasTafsirs = tafsirPacks.isNotEmpty(),
                 hasWords = wordsInstalled,
+                hasNotes = notes.any { !it.note.isNullOrBlank() },
                 onChange = { sources = it },
             )
             // Before a query the sheet is the field, the filter door, and the
@@ -369,6 +387,7 @@ fun SearchSheet(
                                         arabicWords = hit.arabicMatchedWords,
                                         meaningWords = hit.matchedWordText,
                                         translationPack = hit.translation?.pack,
+                                        note = hit.note,
                                     ),
                                 )
                             },

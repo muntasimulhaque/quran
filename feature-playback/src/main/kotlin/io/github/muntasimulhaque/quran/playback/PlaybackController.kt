@@ -3,7 +3,10 @@ package io.github.muntasimulhaque.quran.playback
 import android.content.ComponentName
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.os.Bundle
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.ContextCompat
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.MediaItem
@@ -30,6 +33,8 @@ import io.github.muntasimulhaque.quran.data.SafePaths
 import io.github.muntasimulhaque.quran.data.downloadError
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.ui.kit.reciterName
+import io.github.muntasimulhaque.quran.ui.theme.PaperBackground
+import java.io.ByteArrayOutputStream
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -718,6 +723,15 @@ class PlaybackController(
         }
     }
 
+    /**
+     * The one picture the lock screen and the shade carry: the app's own
+     * book mark on the reading's paper, drawn once from the launcher icon so
+     * the media surface wears the same hand as the home screen. A reader who
+     * has no launcher icon (an OEM that refuses one) gets no artwork rather
+     * than a broken image (owner decision, this session).
+     */
+    private val artwork: ByteArray? by lazy { mediaArtwork(context) }
+
     private fun itemsFor(recitation: String, surah: Int): List<MediaItem> {
         val database = content ?: return emptyList()
         val spoken = spokenContext()
@@ -744,11 +758,42 @@ class PlaybackController(
                             ),
                         )
                         .setArtist(artist)
+                        .apply {
+                            artwork?.let {
+                                setArtworkData(it, MediaMetadata.PICTURE_TYPE_FRONT_COVER)
+                            }
+                        }
                         .build(),
                 )
                 .build()
         }
     }
+
+    /**
+     * The app's icon, drawn at 512 on the reading's paper. The icon is the
+     * same drawing the launcher and the store carry, and the media surface
+     * is the one place a reader hears the app without the page in front of
+     * them, so it should still see the app. The icon's own adaptive
+     * background is the same paper, so the mark sits on a seamless ground.
+     */
+    private fun mediaArtwork(context: Context): ByteArray? = runCatching {
+        val size = 512
+        val inset = size / 8
+        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        try {
+            val canvas = Canvas(bitmap)
+            canvas.drawColor(PaperBackground.toArgb())
+            val icon = context.packageManager.getApplicationIcon(context.packageName)
+            icon.setBounds(inset, inset, size - inset, size - inset)
+            icon.draw(canvas)
+            ByteArrayOutputStream().use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                out.toByteArray()
+            }
+        } finally {
+            bitmap.recycle()
+        }
+    }.getOrNull()
 
     /**
      * A context wearing the reader's own language, for the one surface that

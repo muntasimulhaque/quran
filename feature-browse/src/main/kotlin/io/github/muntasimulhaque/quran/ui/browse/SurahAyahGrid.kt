@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
+import io.github.muntasimulhaque.quran.ui.kit.focusRing
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.reader.IconButton
@@ -209,6 +210,7 @@ private fun AyahNumberCell(number: Int, current: Boolean, onClick: () -> Unit) {
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
+                .focusRing(press, CircleShape)
                 .then(
                     if (current) {
                         Modifier.background(MaterialTheme.colorScheme.primary)

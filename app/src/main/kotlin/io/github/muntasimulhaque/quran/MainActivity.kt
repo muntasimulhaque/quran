@@ -14,6 +14,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import io.github.muntasimulhaque.quran.daily.DailyAyahScheduler
@@ -23,6 +26,7 @@ import io.github.muntasimulhaque.quran.daily.reminderChannelHidden
 import io.github.muntasimulhaque.quran.core.DailyAyah
 import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.SettingsStore
+import io.github.muntasimulhaque.quran.ui.PermissionNotice
 import io.github.muntasimulhaque.quran.ui.QuranApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,6 +35,17 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 class MainActivity : ComponentActivity() {
+
+    /**
+     * The one thing the phone withheld, waiting for the reading to say it.
+     * A permission answer can arrive on the first screen, before the reading
+     * is composed, so the notice is held here until the reading's own
+     * Snackbar host can draw it (owner decision, this session).
+     */
+    private var permissionNotice by mutableStateOf<PermissionNotice?>(null)
+
+    /** Whether the exact-alarm answer that is coming should be announced. */
+    private var announceExactNotice = false
 
     /**
      * The reader's language belongs to every window of the app. A dialog, a
@@ -70,15 +85,16 @@ class MainActivity : ComponentActivity() {
     // cannot keep.
     private val askOnFirstScreen =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) askExactAlarmIfNeeded()
+            if (granted) {
+                askExactAlarmIfNeeded(announce = true)
+            } else {
+                permissionNotice = PermissionNotice(
+                    text = R.string.permission_notifications_denied,
+                    action = R.string.permission_notice_settings,
+                    kind = PermissionNotice.Kind.Notifications,
+                )
+            }
         }
-
-    // The same permission, asked again at the moment a reader starts a
-    // recitation: that is when the app needs a notification of its own for the
-    // playback controls, and it is the second chance for a reader who did not
-    // grant it on the first screen.
-    private val requestNotifications =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     // The notification permission, asked from the two acts that set the
     // reminder: the reminder cannot arrive without it, so it goes first, and
@@ -96,6 +112,14 @@ class MainActivity : ComponentActivity() {
     private val askExactAlarm =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             DailyAyahScheduler.rearm(this)
+            if (announceExactNotice && DailyAyahScheduler.exactGrantWithheld(this)) {
+                permissionNotice = PermissionNotice(
+                    text = R.string.permission_exact_denied,
+                    action = R.string.permission_notice_settings,
+                    kind = PermissionNotice.Kind.ExactAlarm,
+                )
+            }
+            announceExactNotice = false
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -153,14 +177,15 @@ class MainActivity : ComponentActivity() {
                     },
                 initialReference = reference,
                 openSearch = open == OPEN_SEARCH,
-                onPlaybackPermission = ::ensureNotificationPermission,
                 onReminderPermission = ::ensureReminderPermissions,
                 afterFirstScreen = { recreate() },
                 onFirstScreenDone = ::finishFirstScreen,
+                permissionNotice = permissionNotice,
+                onPermissionNoticeShown = { permissionNotice = null },
                 notificationsBlocked = { notificationsBlocked.value },
                 exactGrantWithheld = { exactGrantWithheld.value },
                 onOpenNotificationSettings = ::openNotificationSettings,
-                onAskExactAlarm = ::askExactAlarmIfNeeded,
+                onAskExactAlarm = { askExactAlarmIfNeeded() },
             )
         }
     }
@@ -214,13 +239,7 @@ class MainActivity : ComponentActivity() {
         if (needsNotificationPermission()) {
             askOnFirstScreen.launch(Manifest.permission.POST_NOTIFICATIONS)
         } else {
-            askExactAlarmIfNeeded()
-        }
-    }
-
-    private fun ensureNotificationPermission() {
-        if (needsNotificationPermission()) {
-            requestNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+            askExactAlarmIfNeeded(announce = true)
         }
     }
 
@@ -244,16 +263,23 @@ class MainActivity : ComponentActivity() {
      * withholding it. A phone with no such screen keeps the batched alarm,
      * and the Daily page still says the exact time is being held back, which
      * is the truth rather than a promise the phone cannot keep.
+     *
+     * [announce] is true only at the first screen, where the reading has no
+     * Daily page to show the state on: the card's answer is the reader's
+     * first and last word on the reminder until they open that page, so a
+     * denied exact time is said once in the reading's Snackbar.
      */
-    private fun askExactAlarmIfNeeded() {
+    private fun askExactAlarmIfNeeded(announce: Boolean = false) {
         // Without the notification granted, an exact alarm fires into a shade
         // that shows nothing, so the exact-time screen waits for a reader who
         // will actually hear the reminder.
         if (needsNotificationPermission()) return
         val request = DailyAyahScheduler.exactGrantRequest(this) ?: return
+        announceExactNotice = announce
         try {
             askExactAlarm.launch(request)
         } catch (notFound: ActivityNotFoundException) {
+            announceExactNotice = false
             Toast.makeText(this, R.string.exact_alarm_settings_unavailable, Toast.LENGTH_LONG).show()
         }
     }

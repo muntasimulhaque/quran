@@ -42,10 +42,13 @@ class PlaybackService : MediaSessionService() {
 
     /**
      * The reader paused and stepped away. The notification and the service are
-     * kept for [PAUSE_TIMEOUT_MS], so a quick return finds the same controls,
-     * and then they are put away: the place is already written, and a paused
+     * kept for [PAUSE_TIMEOUT_MS], so a return finds the same controls, and
+     * then they are put away: the place is already written, and a paused
      * player that stays in the shade forever is a small cost the reader never
-     * asked for (owner decision, this session).
+     * asked for. Thirty minutes is the length of a reading session, but still
+     * short enough that a paused player is not a permanent shade entry (owner
+     * decision, this session: five minutes took the controls away while the
+     * reader was still on the page).
      */
     private val pauseTimeout = Runnable {
         val player = player ?: return@Runnable
@@ -225,10 +228,10 @@ class PlaybackService : MediaSessionService() {
 
         /**
          * How long a paused recitation keeps its notification and its service.
-         * Five minutes is long enough for a step away and short enough that a
-         * player left in the shade is not a permanent one (owner decision,
-         * this session).
+         * Thirty minutes covers a reading session and still puts a forgotten
+         * player away; the task can be swiped sooner (owner decision, this
+         * session).
          */
-        const val PAUSE_TIMEOUT_MS = 5 * 60 * 1000L
+        const val PAUSE_TIMEOUT_MS = 30 * 60 * 1000L
     }
 }

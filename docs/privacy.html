@@ -72,8 +72,10 @@ connection at all.</p>
 <ul>
   <li><code>INTERNET</code>: content from the project's own Releases, as
       described above.</li>
-  <li><code>POST_NOTIFICATIONS</code>: the media notification while recitation
-      plays, and the daily ayah reminder.</li>
+  <li><code>POST_NOTIFICATIONS</code>: the daily ayah reminder. The media
+      notification is a media-session notification, which Android 13 and later
+      exempt from this permission; the app asks for it only where the reminder
+      needs it.</li>
   <li><code>FOREGROUND_SERVICE</code> and
       <code>FOREGROUND_SERVICE_MEDIA_PLAYBACK</code>: keeping recitation
       playing with the screen off.</li>

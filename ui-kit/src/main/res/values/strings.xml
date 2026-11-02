@@ -20,4 +20,7 @@
          is a word of that language too (owner decision, this session). -->
     <string name="unit_kb">KB</string>
     <string name="unit_mb">MB</string>
+    <!-- The one word a removal's Snackbar offers back. It lives here because
+         the reading and Browse both draw the same undo action. -->
+    <string name="action_undo">Undo</string>
 </resources>

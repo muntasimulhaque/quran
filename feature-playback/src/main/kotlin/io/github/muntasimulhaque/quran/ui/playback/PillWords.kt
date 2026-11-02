@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.TextSize
+import io.github.muntasimulhaque.quran.ui.kit.focusRing
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
@@ -90,6 +91,7 @@ internal fun OfferWordsBlock(
                 },
             )
             .clip(Radii.Pill)
+            .focusRing(press, Radii.Pill)
             .then(
                 if (onOpen == null) {
                     Modifier
@@ -209,6 +211,7 @@ internal fun PlayingWordsBlock(
                 },
             )
             .clip(Radii.Pill)
+            .focusRing(press, Radii.Pill)
             .then(
                 if (onOpen == null) {
                     Modifier
@@ -392,6 +395,7 @@ private fun ReciterDoor(
                 },
             )
             .clip(Radii.Pill)
+            .focusRing(press, Radii.Pill)
             .then(
                 if (onOpen == null) {
                     Modifier

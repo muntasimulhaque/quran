@@ -37,6 +37,7 @@ import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.kit.GlyphButton
+import io.github.muntasimulhaque.quran.ui.kit.focusRing
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
@@ -118,6 +119,7 @@ fun ReadingTitle(
     action: String? = null,
     onClick: (() -> Unit)? = null,
 ) {
+    val press = remember { MutableInteractionSource() }
     Layout(
         content = {
             Text(
@@ -143,7 +145,12 @@ fun ReadingTitle(
             if (onClick != null) {
                 Modifier
                     .clip(Radii.Pill)
-                    .clickable(role = Role.Button, onClick = onClick)
+                    .focusRing(press, Radii.Pill)
+                    .clickable(
+                        interactionSource = press,
+                        role = Role.Button,
+                        onClick = onClick,
+                    )
                     // The surah's own name and its juz are the node's text and
                     // stay what a screen reader reads first; the tap is said
                     // beside them as an action rather than over them, because

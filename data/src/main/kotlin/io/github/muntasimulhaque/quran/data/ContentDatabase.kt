@@ -589,7 +589,7 @@ class ContentDatabase private constructor(
         val limit = request.limit
         val sources = request.sources
         val leading = ArrayList<SearchHit>(9)
-        val counts = intArrayOf(0, 0, 0, 0, 0) // arabic, translation, tafsir, words, surahs
+        val counts = intArrayOf(0, 0, 0, 0, 0, 0) // arabic, translation, tafsir, words, surahs, notes
         coroutineContext.ensureActive()
 
         if (sources.surahs) {
@@ -636,6 +636,33 @@ class ContentDatabase private constructor(
         val translationTexts = translationTexts(translationByNumber)
         coroutineContext.ensureActive()
 
+        // The reader's own notes. They are the one source that is not in the
+        // content database: the note is the reader's work, stored beside it,
+        // and the sheet hands the rows in with the request. A note is matched
+        // with the same folding as the rest, and only the note's own excerpt
+        // becomes the row's evidence. A note is never allowed to cost a full
+        // note read per keystroke beyond the saved rows the reader has, and
+        // the list is capped like every other source.
+        val noteMatches = if (sources.notes && !query.terms.isEmpty()) {
+            request.notes.asSequence()
+                .mapNotNull { saved ->
+                    val note = saved.note?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+                    val (excerpt, ranges) = Search.excerpt(
+                        note,
+                        query.terms,
+                        arabic = query.arabic,
+                        window = 160,
+                    )
+                    if (ranges.isEmpty()) null else saved.ayahNumber to (excerpt to ranges)
+                }
+                .take(limit)
+                .toList()
+        } else {
+            emptyList()
+        }
+        counts[5] = noteMatches.size
+        coroutineContext.ensureActive()
+
         // One read for every ayah any source touched, instead of one read per
         // row: a search that matched two hundred ayahs must not cost two
         // hundred queries.
@@ -643,6 +670,7 @@ class ContentDatabase private constructor(
         wanted += arabicNumbers
         wanted += wordMatches.keys
         wanted += translationByNumber.keys
+        wanted += noteMatches.map { it.first }
         val rows = loadRows(wanted)
         for ((number, matched) in arabicWords) {
             rows[number]?.matchedWords = matched
@@ -651,6 +679,11 @@ class ContentDatabase private constructor(
             val row = rows[number] ?: continue
             row.meaning = match.meaning
             row.matchedWordText = meaningWords[number].orEmpty()
+        }
+        for ((number, note) in noteMatches) {
+            val row = rows[number] ?: continue
+            row.note = note.first
+            row.noteRanges = note.second
         }
         for ((number, pack) in translationByNumber) {
             val row = rows[number] ?: continue
@@ -730,6 +763,8 @@ class ContentDatabase private constructor(
                 translation = row.translation,
                 wordMeaning = row.meaning,
                 matchedWordText = row.matchedWordText,
+                note = row.note,
+                noteRanges = row.noteRanges,
             )
         }
         // The kinds run from the verse outward, each still in Quran order
@@ -738,7 +773,7 @@ class ContentDatabase private constructor(
         val (hits, capped) = orderSearchHits(leading, ayahHits, tafsirHits, limit)
         return SearchResults(
             hits = hits,
-            counts = SearchCounts(counts[0], counts[1], counts[2], counts[3], counts[4]),
+            counts = SearchCounts(counts[0], counts[1], counts[2], counts[3], counts[4], counts[5]),
             capped = capped,
         )
     }
@@ -748,6 +783,8 @@ class ContentDatabase private constructor(
         var translation: TranslationHit? = null
         var meaning: String? = null
         var matchedWordText: List<String> = emptyList()
+        var note: String? = null
+        var noteRanges: List<IntRange> = emptyList()
     }
 
     private fun referenceAyahNumber(reference: Search.Reference): Int? {

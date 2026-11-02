@@ -54,6 +54,7 @@ fun AddDoor(
             )
             .minimumInteractiveComponentSize()
             .clip(Radii.Card)
+            .focusRing(press, Radii.Card)
             .background(MaterialTheme.colorScheme.primary.copy(alpha = Wash.Door))
             // The ripple draws after the clip, on the card the reader sees.
             // An indication on the click node would flash the whole slab as

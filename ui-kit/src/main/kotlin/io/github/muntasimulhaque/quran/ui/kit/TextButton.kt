@@ -120,6 +120,7 @@ fun TextButton(
             modifier = Modifier
                 .clip(Radii.Pill)
                 .background(fill)
+                .focusRing(press, Radii.Pill)
                 .indication(press, ripple(color = ink, bounded = false))
                 .padding(horizontal = 14.dp, vertical = 7.dp),
         ) {

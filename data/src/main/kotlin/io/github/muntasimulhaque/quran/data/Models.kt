@@ -94,7 +94,8 @@ sealed interface SearchHit {
 
     /**
      * One ayah, with every source that matched it. A row can carry the Arabic
-     * match, the selected translation, a word meaning, and one tafsir at once.
+     * match, the selected translation, a word meaning, the reader's own note,
+     * and one tafsir at once.
      */
     data class AyahHit(
         val ayah: Ayah,
@@ -110,6 +111,14 @@ sealed interface SearchHit {
          * never one query per row.
          */
         val matchedWordText: List<String> = emptyList(),
+        /**
+         * The reader's own note, when the note carried the match. It is an
+         * excerpt around the match, never the whole note: a search row is a
+         * list result, and the full note opens on the ayah it belongs to.
+         */
+        val note: String? = null,
+        /** Where the query's terms sit in [note], for the row's wash. */
+        val noteRanges: List<IntRange> = emptyList(),
     ) : SearchHit
 
     /** A tafsir passage, which usually spans several ayahs. */
@@ -142,8 +151,10 @@ data class SearchCounts(
     val tafsir: Int = 0,
     val words: Int = 0,
     val surahs: Int = 0,
+    /** The reader's own notes that carried the query. */
+    val notes: Int = 0,
 ) {
-    val total: Int get() = arabic + translation + tafsir + words + surahs
+    val total: Int get() = arabic + translation + tafsir + words + surahs + notes
 }
 
 data class SearchResults(
@@ -165,10 +176,12 @@ data class SearchSources(
     val words: Boolean = true,
     val translations: Boolean = true,
     val tafsirs: Boolean = true,
+    /** The reader's own notes. On by default, like every other source. */
+    val notes: Boolean = true,
 ) {
     /** True while at least one source is on; a search with none has nothing to read. */
     val any: Boolean
-        get() = text || surahs || references || words || translations || tafsirs
+        get() = text || surahs || references || words || translations || tafsirs || notes
 
     /** The whole library, which is where every search starts. */
     companion object {
@@ -187,6 +200,14 @@ data class SearchRequest(
     val wordsPack: String = "words-en",
     /** The sources the reader has not filtered out. */
     val sources: SearchSources = SearchSources.ALL,
+    /**
+     * The reader's own saved notes. They live in the reader's database, not
+     * in the content database, so the search sheet hands them in with the
+     * request and the content pass matches them beside the packs. The list is
+     * small (one row per kept ayah), and only a note with the query's terms
+     * becomes a hit.
+     */
+    val notes: List<SavedAyah> = emptyList(),
     val limit: Int = 200,
 )
 

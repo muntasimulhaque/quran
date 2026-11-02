@@ -9,4 +9,5 @@
     <string name="pack_name_word_by_word">শব্দের অর্থ</string>
     <string name="unit_kb">কেবি</string>
     <string name="unit_mb">এমবি</string>
+    <string name="action_undo">ফিরিয়ে আনুন</string>
 </resources>

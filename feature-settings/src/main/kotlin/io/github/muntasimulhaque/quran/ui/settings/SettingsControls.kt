@@ -10,12 +10,14 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,6 +35,7 @@ import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.ScaleRow
+import io.github.muntasimulhaque.quran.ui.kit.focusRing
 import io.github.muntasimulhaque.quran.ui.theme.NightBackground
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.NightText
@@ -62,12 +65,18 @@ fun ThemeRow(
             .padding(horizontal = Space.Block, vertical = Space.Tight),
     ) {
         AppTheme.entries.forEach { theme ->
+            val press = remember(theme) { MutableInteractionSource() }
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .minimumInteractiveComponentSize()
                     .clip(Radii.Card)
-                    .selectable(selected = theme == selected, role = Role.RadioButton) {
+                    .focusRing(press, Radii.Card)
+                    .selectable(
+                        selected = theme == selected,
+                        interactionSource = press,
+                        role = Role.RadioButton,
+                    ) {
                         onSelect(theme)
                     }
                     .padding(horizontal = 6.dp, vertical = Space.Line),

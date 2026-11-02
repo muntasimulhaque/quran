@@ -18,7 +18,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -71,6 +74,8 @@ internal fun ReadingRows(
     onNextSurah: (Int) -> Unit,
     onAddContent: () -> Unit,
     onPlaceChanged: (Int) -> Unit,
+    /** The ayah a jump landed on, so the reading can announce the place. */
+    onJumped: (Ayah) -> Unit = {},
     startAtOpening: Boolean,
     onOpeningReached: () -> Unit,
     contentPaddingTop: Dp,
@@ -90,6 +95,13 @@ internal fun ReadingRows(
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = AyahList.indexOf(ayahs, place),
     )
+    // A place that arrives from elsewhere is also the place a screen reader
+    // should hear. The focus request moves the reading's own focus to the
+    // target ayah, and the callback announces its reference; the list can
+    // only focus an item it has composed, so the request waits one frame
+    // after the scroll (owner decision, this session).
+    val jumpFocus = remember { FocusRequester() }
+    var jumpAyah by remember { mutableStateOf<Int?>(null) }
 
     // The surah's introduction opens from its quiet door; once it is open, a
     // tap anywhere on the paper, the ayahs, or the closing line puts it away
@@ -145,6 +157,15 @@ internal fun ReadingRows(
         val target = AyahList.moveTarget(ayahs, place, listState.firstVisibleItemIndex)
             ?: return@LaunchedEffect
         listState.scrollToItem(target)
+        jumpAyah = place
+        rows.firstOrNull { it.ayah.number == place }?.ayah?.let(onJumped)
+    }
+
+    LaunchedEffect(jumpAyah, ayahs) {
+        if (jumpAyah == null) return@LaunchedEffect
+        withFrameNanos { }
+        runCatching { jumpFocus.requestFocus() }
+        jumpAyah = null
     }
 
     // Opening a surah from Browse lands on its top: the opening item, which
@@ -257,6 +278,7 @@ internal fun ReadingRows(
                     (reveal?.wordByWord == true && reveal.ayah == row.ayah.number),
                 isMenuOpen = menuAyah == row.ayah.number,
                 saved = row.ayah.number in savedAyahs,
+                focusRequester = if (jumpAyah == row.ayah.number) jumpFocus else null,
                 onMenu = onAyahMenu,
                 onBackgroundTap = dismissAbout,
                 onFootnote = { line, number ->

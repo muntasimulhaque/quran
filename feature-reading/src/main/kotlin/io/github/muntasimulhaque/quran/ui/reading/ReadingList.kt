@@ -76,6 +76,8 @@ fun ReadingList(
     onNextSurah: (Int) -> Unit,
     onAddContent: () -> Unit,
     onPlaceChanged: (Int) -> Unit,
+    /** The ayah a jump landed on, so the reading can announce the place. */
+    onJumped: (Ayah) -> Unit = {},
     /** True when the reader opened this surah at its top; answered once. */
     startAtOpening: Boolean,
     onOpeningReached: () -> Unit,
@@ -163,6 +165,7 @@ fun ReadingList(
         onNextSurah = onNextSurah,
         onAddContent = onAddContent,
         onPlaceChanged = onPlaceChanged,
+        onJumped = onJumped,
         startAtOpening = startAtOpening,
         onOpeningReached = onOpeningReached,
         contentPaddingTop = contentPaddingTop,

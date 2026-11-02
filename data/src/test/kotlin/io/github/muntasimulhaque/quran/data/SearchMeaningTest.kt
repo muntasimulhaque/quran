@@ -17,6 +17,7 @@ class SearchMeaningTest {
         translationRanges: List<IntRange> = emptyList(),
         meaning: String? = null,
         words: List<String> = emptyList(),
+        note: String? = null,
     ) = SearchHit.AyahHit(
         ayah = Ayah(1, 1, 1, "1:1", "text"),
         arabicMatchedWords = (1..arabic).toSet(),
@@ -27,6 +28,8 @@ class SearchMeaningTest {
         },
         wordMeaning = meaning,
         matchedWordText = words,
+        note = note,
+        noteRanges = if (note == null) emptyList() else listOf(0 until note.length),
     )
 
     @Test
@@ -108,6 +111,24 @@ class SearchMeaningTest {
             "with no other evidence the Arabic is all the row has to say",
             SearchArabicLine.Ayah,
             arabicLineFor(hit()),
+        )
+    }
+
+    @Test
+    fun aNoteOnlyRowDrawsTheNoteAndNotTheAyah() {
+        assertEquals(
+            "the note is the evidence, so the Arabic is not decoration",
+            SearchArabicLine.None,
+            arabicLineFor(hit(note = "the Throne verse")),
+        )
+    }
+
+    @Test
+    fun aNoteBesideAMatchingAyahStillShowsTheAyah() {
+        assertEquals(
+            "the verse itself is the stronger answer to the query",
+            SearchArabicLine.Ayah,
+            arabicLineFor(hit(arabic = 1, note = "the Throne verse")),
         )
     }
 }

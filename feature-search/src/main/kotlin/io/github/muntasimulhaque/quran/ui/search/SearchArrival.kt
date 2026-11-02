@@ -23,6 +23,8 @@ sealed interface SearchArrival {
         val arabicWords: Set<Int> = emptySet(),
         val meaningWords: List<String> = emptyList(),
         val translationPack: String? = null,
+        /** The note that carried the match, when the reader's own note did. */
+        val note: String? = null,
     ) : SearchArrival
 
     /** A tafsir hit: the passage to open in the ayah card, by pack. */

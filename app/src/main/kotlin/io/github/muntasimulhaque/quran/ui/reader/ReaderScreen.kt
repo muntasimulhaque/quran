@@ -17,8 +17,10 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -36,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalView
@@ -52,6 +55,8 @@ import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.readingMetrics
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
+import io.github.muntasimulhaque.quran.ui.PermissionNotice
+import io.github.muntasimulhaque.quran.ui.kit.rememberAssistiveNavigation
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
@@ -130,17 +135,25 @@ private val NoteDraftsSaver = listSaver<Map<Int, String>, String>(
 fun ReaderScreen(
     viewModel: ReaderViewModel,
     content: ContentDatabase,
-    onPlaybackPermission: () -> Unit,
     onReminderPermission: () -> Unit,
     notificationsBlocked: () -> Boolean,
     exactGrantWithheld: () -> Boolean,
     onOpenNotificationSettings: () -> Unit,
     onAskExactAlarm: () -> Unit,
+    /** The one permission answer the reading still has to say. */
+    permissionNotice: PermissionNotice? = null,
+    /** The notice has been handed to the Snackbar. */
+    onPermissionNoticeShown: () -> Unit = {},
     /** A shortcut or a deep link that asks for the search field once. */
     openSearch: Boolean = false,
 ) {
     val settings = viewModel.settings
     val reducedMotion by rememberReducedMotion()
+    // A reader using touch exploration or another accessibility service gets
+    // the top bar for as long as they need it: the seven-second step-back is
+    // a quiet-page rule, and a timed control is not a control a screen reader
+    // or a switch can rely on (owner decision, this session).
+    val assistiveNavigation by rememberAssistiveNavigation()
     val playback by viewModel.playbackState.collectAsStateWithLifecycle()
     // The recited word travels on a flow of its own and is handed down as a
     // State that this screen never reads, so the tick that moves the wash
@@ -192,6 +205,11 @@ fun ReaderScreen(
     // the confirmation is up until they answer, and the ayah stays saved
     // until they do. Null when nothing is being asked about.
     var pendingRemove by remember { mutableStateOf<Int?>(null) }
+    // Whether the remove question's answer belongs to the reading's Snackbar
+    // (true) or to Browse's own (false). The question can be raised from
+    // either surface, and the reading's Snackbar is behind the Browse sheet
+    // when the reader is still standing in it (owner decision, this session).
+    var pendingRemoveUndoable by remember { mutableStateOf(true) }
     // The open sheet survives the window, not only the composition: a change
     // of language recreates the Activity, and a sheet kept in plain `remember`
     // closed with the old window while the reader was still in it. The reader
@@ -218,6 +236,7 @@ fun ReaderScreen(
     var keepAwake by remember { mutableStateOf(true) }
     val context = androidx.compose.ui.platform.LocalContext.current
     val resources = LocalResources.current
+    val locale = LocalConfiguration.current.locales[0]
     val announceView = LocalView.current
     val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
@@ -227,7 +246,36 @@ fun ReaderScreen(
             if (message.announceOnly) {
                 announceView.announceForAccessibility(text)
             } else {
-                snackbar.showSnackbar(text)
+                val result = snackbar.showSnackbar(
+                    message = text,
+                    actionLabel = message.action?.let { resources.getString(it) },
+                    withDismissAction = false,
+                    duration = if (message.action != null) {
+                        SnackbarDuration.Long
+                    } else {
+                        SnackbarDuration.Short
+                    },
+                )
+                if (result == SnackbarResult.ActionPerformed) message.onAction?.invoke()
+            }
+        }
+    }
+    // The one permission answer that arrives outside this composition. The
+    // notice is cleared before it is drawn, so a recomposition cannot show it
+    // twice; the action opens the phone's own page for the thing it names.
+    LaunchedEffect(permissionNotice) {
+        val notice = permissionNotice ?: return@LaunchedEffect
+        val result = snackbar.showSnackbar(
+            message = resources.getString(notice.text),
+            actionLabel = resources.getString(notice.action),
+            withDismissAction = false,
+            duration = SnackbarDuration.Long,
+        )
+        onPermissionNoticeShown()
+        if (result == SnackbarResult.ActionPerformed) {
+            when (notice.kind) {
+                PermissionNotice.Kind.Notifications -> onOpenNotificationSettings()
+                PermissionNotice.Kind.ExactAlarm -> onAskExactAlarm()
             }
         }
     }
@@ -316,10 +364,12 @@ fun ReaderScreen(
                 } else {
                     null
                 }
+                cardNote = arrival.note?.let { arrival.ayah.number }
                 viewModel.jumpToAyah(arrival.ayah.number)
             }
             is SearchArrival.TafsirMatch -> {
                 reveal = null
+                cardNote = null
                 viewModel.jumpToAyah(arrival.ayah.number)
                 cardTafsirPack = arrival.pack
                 cardAyah = arrival.ayah
@@ -462,8 +512,8 @@ fun ReaderScreen(
     }
 
     // The chrome steps back on its own; a chosen ayah waits for the reader.
-    LaunchedEffect(chrome, touch) {
-        if (!chrome) return@LaunchedEffect
+    LaunchedEffect(chrome, touch, assistiveNavigation) {
+        if (!chrome || assistiveNavigation) return@LaunchedEffect
         delay(CHROME_MILLIS)
         chrome = false
     }
@@ -644,6 +694,17 @@ fun ReaderScreen(
                     onNextSurah = { number -> viewModel.jumpToSurah(number) },
                     onAddContent = { openSheet(ReaderSheet.Settings) },
                     onPlaceChanged = { ayah -> viewModel.onReadingSettled(ayah) },
+                    onJumped = { ayah ->
+                        announceView.announceForAccessibility(
+                            resources.getString(
+                                io.github.muntasimulhaque.quran.feature.reading.R.string.reading_ayah_reference,
+                                io.github.muntasimulhaque.quran.core.localizedDigits(
+                                    ayah.verseKey,
+                                    locale,
+                                ),
+                            ),
+                        )
+                    },
                     startAtOpening = viewModel.startAtSurahOpening == surah.number,
                     onOpeningReached = { viewModel.consumeSurahOpening(surah.number) },
                     contentPaddingTop = 64.dp,
@@ -735,7 +796,6 @@ fun ReaderScreen(
                 showTafsir = viewModel.enabledTafsirPacks.isNotEmpty(),
                 onDismiss = { menu = null },
                 onPlay = {
-                    onPlaybackPermission()
                     viewModel.playAyah(request.ayah.number)
                 },
                 onTafsir = {
@@ -749,6 +809,7 @@ fun ReaderScreen(
                     // remove, and one tap of Save makes it.
                     if (savedRow?.marked == true && !savedRow.note.isNullOrBlank()) {
                         pendingRemove = request.ayah.number
+                        pendingRemoveUndoable = true
                     } else {
                         viewModel.toggleSaved(request.ayah)
                     }
@@ -822,7 +883,13 @@ fun ReaderScreen(
                 onDismiss = { closeSheet() },
                 onResult = { resultOpened(it) },
                 onSearchResult = { openSearchResult(it) },
-                onPendingRemove = { pendingRemove = it },
+                onPendingRemove = { ayah ->
+                    pendingRemove = ayah
+                    // A row removed from Browse asks and is undone over
+                    // Browse; the reading's Snackbar is behind that sheet.
+                    pendingRemoveUndoable = sheet != ReaderSheet.Browse
+                },
+                onRestoreSaved = { row -> viewModel.restoreSaved(row) },
             )
         }
     }
@@ -894,7 +961,7 @@ fun ReaderScreen(
             noteSp = settings.translationSp,
             noteLineSp = settings.translationLineSp,
             onConfirm = {
-                viewModel.removeSaved(ayahNumber)
+                viewModel.removeSaved(ayahNumber, undoable = pendingRemoveUndoable)
                 pendingRemove = null
             },
             onDismiss = { pendingRemove = null },

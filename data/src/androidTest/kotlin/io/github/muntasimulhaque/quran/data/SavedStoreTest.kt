@@ -57,6 +57,20 @@ class SavedStoreTest {
     }
 
     @Test
+    fun aRestoredRowKeepsItsWordsAndMoments() = runBlocking {
+        store.setNote(262, "The Throne verse")
+        val before = store.saved.value.first { it.ayahNumber == 262 }
+        store.unsave(262)
+        assertTrue("the row is gone before the undo", store.saved.value.isEmpty())
+        assertTrue("the undo puts it back", store.restore(before))
+        assertEquals(
+            "the words and the moments come back exactly",
+            before,
+            store.saved.value.first { it.ayahNumber == 262 },
+        )
+    }
+
+    @Test
     fun aNoteSavesTheAyah() = runBlocking {
         store.setNote(262, "The Throne verse")
         val row = store.saved.value.single()

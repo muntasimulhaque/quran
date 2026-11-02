@@ -12,14 +12,14 @@
     <string name="settings_daily_subtitle_off">বন্ধ</string>
     <string name="settings_daily_subtitle_on">প্রতিদিন একটি আয়াত, সময় %1$s</string>
     <string name="settings_daily_subtitle_blocked">নোটিফিকেশন বন্ধ, তাই প্রতিদিনের আয়াত আসবে না</string>
-    <string name="settings_daily_subtitle_late">সঠিক অ্যালার্ম বন্ধ, তাই আয়াত দেরিতে আসতে পারে</string>
+    <string name="settings_daily_subtitle_late">আলার্ম ও রিমাইন্ডার বন্ধ, তাই আয়াত দেরিতে আসতে পারে</string>
     <string name="settings_open_daily">প্রতিদিনের সময় বাছাই করুন</string>
     <string name="settings_daily_time_title">সময়</string>
     <string name="settings_daily_off">প্রতিদিনের আয়াত বন্ধ আছে</string>
     <string name="settings_daily_blocked">আপনার ফোন এই অ্যাপের নোটিফিকেশন দেখাচ্ছে না, তাই প্রতিদিনের আয়াত আসবে না।</string>
     <string name="settings_daily_blocked_action">নোটিফিকেশন সেটিংস</string>
-    <string name="settings_daily_exact_blocked">আপনার ফোনে সঠিক অ্যালার্ম বন্ধ, তাই আয়াত দেরিতে আসতে পারে।</string>
-    <string name="settings_daily_exact_action">সঠিক অ্যালার্মের অনুমতি দিন</string>
+    <string name="settings_daily_exact_blocked">আপনার ফোনে আলার্ম ও রিমাইন্ডার বন্ধ, তাই আয়াত দেরিতে আসতে পারে।</string>
+    <string name="settings_daily_exact_action">আলার্ম ও রিমাইন্ডারের অনুমতি দিন</string>
     <string name="settings_daily_picker_title">কখন আসবে</string>
     <string name="settings_daily_picker_hour">ঘণ্টা</string>
     <string name="settings_daily_picker_minute">মিনিট</string>

@@ -159,6 +159,27 @@ internal fun AyahRow(
                 )
             }
         }
+        // The reader's own note is evidence of its own: a note-only result
+        // draws no Arabic (the rule is in `data`), so the excerpt is the
+        // row's answer to why it is here. It keeps the reading's voice and
+        // the same match wash as the rest, and the whole note opens on the
+        // ayah when the row is tapped.
+        hit.note?.let { note ->
+            Text(
+                text = stringResource(R.string.search_note_label),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = Space.Block),
+            )
+            HighlightedText(
+                text = note,
+                ranges = hit.noteRanges,
+                sizeSp = proseSp,
+                lineSp = proseLineSp,
+                maxLines = 4,
+                modifier = Modifier.padding(top = Space.Tight),
+            )
+        }
         // The word meaning is drawn only when it is the row's only evidence
         // of the match; the rule is pure and tested in `data` beside the
         // result ordering. When the translation above already carries the

@@ -12,14 +12,14 @@
     <string name="settings_daily_subtitle_off">Off</string>
     <string name="settings_daily_subtitle_on">One ayah a day, at %1$s</string>
     <string name="settings_daily_subtitle_blocked">Notifications are off, so the daily ayah cannot arrive</string>
-    <string name="settings_daily_subtitle_late">Exact alarms are off, so the ayah can arrive late</string>
+    <string name="settings_daily_subtitle_late">Alarms and reminders are off, so the ayah can arrive late</string>
     <string name="settings_open_daily">Choose the daily time</string>
     <string name="settings_daily_time_title">Time</string>
     <string name="settings_daily_off">The daily ayah is off</string>
     <string name="settings_daily_blocked">Your phone is not showing notifications for this app, so the daily ayah cannot arrive.</string>
     <string name="settings_daily_blocked_action">Notification settings</string>
-    <string name="settings_daily_exact_blocked">Your phone has exact alarms off, so the ayah can arrive late.</string>
-    <string name="settings_daily_exact_action">Allow exact alarms</string>
+    <string name="settings_daily_exact_blocked">Your phone has alarms and reminders off, so the ayah can arrive late.</string>
+    <string name="settings_daily_exact_action">Allow alarms and reminders</string>
     <string name="settings_daily_picker_title">When the daily ayah arrives</string>
     <string name="settings_daily_picker_hour">Hour</string>
     <string name="settings_daily_picker_minute">Minute</string>

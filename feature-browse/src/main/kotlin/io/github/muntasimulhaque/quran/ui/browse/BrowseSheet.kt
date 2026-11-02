@@ -2,6 +2,7 @@ package io.github.muntasimulhaque.quran.ui.browse
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -17,6 +18,12 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,7 +49,9 @@ import io.github.muntasimulhaque.quran.ui.kit.AppSheet
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
+import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -79,8 +88,32 @@ fun BrowseSheet(
     onSurah: (Int) -> Unit,
     onRemoveSaved: (Int) -> Unit,
     onForget: (Int) -> Unit,
+    /** Puts a row removed from Saved back, with its own Undo. */
+    onRestoreSaved: (SavedAyah) -> Unit,
 ) {
     val sheetState = rememberExpandedSheetState()
+    val snackbar = remember { SnackbarHostState() }
+    val removedMessage = stringResource(R.string.browse_saved_removed)
+    val undo = stringResource(UiKitR.string.action_undo)
+    // The list the reader saw before the database answered the removal. The
+    // sheet owns the Undo because the reading's Snackbar is behind this
+    // window; a row that leaves the list while the sheet is up is one the
+    // reader can bring back without leaving it (owner decision, this
+    // session).
+    var previousSaved by remember { mutableStateOf(saved) }
+    LaunchedEffect(saved) {
+        val old = previousSaved
+        previousSaved = saved
+        val removed = old.firstOrNull { row -> saved.none { it.ayahNumber == row.ayahNumber } }
+            ?: return@LaunchedEffect
+        val result = snackbar.showSnackbar(
+            message = removedMessage,
+            actionLabel = undo,
+            withDismissAction = false,
+            duration = SnackbarDuration.Long,
+        )
+        if (result == SnackbarResult.ActionPerformed) onRestoreSaved(removed)
+    }
     var tab by rememberSaveable {
         mutableStateOf(if (startOnLastRead) BrowseTab.LastRead else BrowseTab.Surahs)
     }
@@ -216,6 +249,7 @@ fun BrowseSheet(
         // to the surah list before it leaves the sheet: the same two-level
         // behavior a settings page has, one level down.
         BackHandler(enabled = gridSurah != null) { gridSurah = null }
+        Box(Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -334,6 +368,21 @@ fun BrowseSheet(
                     )
                 }
             }
+        }
+        SnackbarHost(
+            hostState = snackbar,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = Space.Gutter, vertical = Space.Line),
+        ) { data ->
+            Snackbar(
+                snackbarData = data,
+                shape = Radii.Card,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                actionColor = MaterialTheme.colorScheme.primary,
+            )
+        }
         }
     }
 }

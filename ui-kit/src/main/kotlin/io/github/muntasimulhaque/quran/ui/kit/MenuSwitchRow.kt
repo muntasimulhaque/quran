@@ -89,6 +89,7 @@ fun MenuSwitchRow(
             )
             .then(if (tag != null) Modifier.testTag(tag) else Modifier)
             .clip(Radii.Pill)
+            .focusRing(press, Radii.Pill)
             .indication(press, ripple())
             .padding(
                 start = Space.Row,

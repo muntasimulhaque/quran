@@ -37,6 +37,7 @@ import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.kit.ReferenceLabel
+import io.github.muntasimulhaque.quran.ui.kit.focusRing
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
@@ -151,6 +152,7 @@ internal fun AyahDoor(
                 modifier = Modifier
                     .clip(Radii.Pill)
                     .background(fill)
+                    .focusRing(press, Radii.Pill)
                     .indication(press, ripple(color = ink, bounded = false))
                     .padding(start = 10.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,

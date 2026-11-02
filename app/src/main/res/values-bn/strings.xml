@@ -14,7 +14,7 @@
          on for a new reader, and this is where they are told so and asked for
          the two grants it needs, the notification and the exact time. -->
     <string name="welcome_reminder_title">প্রতিদিন একটি আয়াত</string>
-    <string name="welcome_reminder_body">প্রতিদিন %1$s-এ একটি নীরব বার্তা। ফোন অনুমতি দিলে সময়মতো পৌঁছাতে নোটিফিকেশন ও সঠিক সময়ের অ্যালার্মের অনুমতি দিন।</string>
+    <string name="welcome_reminder_body">প্রতিদিন %1$s-এ একটি নীরব বার্তা। ফোন অনুমতি দিলে সময়মতো পৌঁছাতে নোটিফিকেশন এবং আলার্ম ও রিমাইন্ডারের অনুমতি দিন।</string>
     <string name="welcome_reminder_turn_on">চালু করুন</string>
     <string name="welcome_reminder_not_now">এখন নয়</string>
     <string name="first_paint_preparing">লেখা প্রস্তুত হচ্ছে…</string>
@@ -84,7 +84,10 @@
     <string name="daily_channel_description">প্রতিদিন একটি আয়াত, আপনি যে সময় বেছে নেবেন।</string>
     <string name="daily_notification_title">%1$s, আয়াত %2$d</string>
     <string name="notification_settings_unavailable">এই ফোনে নোটিফিকেশন সেটিংস নেই।</string>
-    <string name="exact_alarm_settings_unavailable">এই ফোনে সঠিক সময়ের অনুমতি নেওয়ার কোনো পর্দা নেই।</string>
+    <string name="exact_alarm_settings_unavailable">আলার্ম ও রিমাইন্ডারের অনুমতি নেওয়ার কোনো পর্দা এই ফোনে নেই।</string>
+    <string name="permission_notifications_denied">নোটিফিকেশন বন্ধ আছে, তাই প্রতিদিনের আয়াত পৌঁছাতে পারবে না।</string>
+    <string name="permission_exact_denied">আলার্ম ও রিমাইন্ডার বন্ধ আছে, তাই প্রতিদিনের আয়াত দেরিতে আসতে পারে।</string>
+    <string name="permission_notice_settings">সেটিংস</string>
 
     <string name="shortcut_continue_short">পড়া চালিয়ে যান</string>
     <string name="shortcut_continue_long">যেখানে ছেড়েছিলেন সেখানে ফিরুন</string>

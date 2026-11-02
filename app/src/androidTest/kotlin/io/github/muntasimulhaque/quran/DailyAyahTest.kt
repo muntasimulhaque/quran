@@ -130,6 +130,32 @@ class DailyAyahTest {
      * of the same stored translation, which is where the marker is dropped.
      */
     @Test
+    fun theTranslationFollowsTheReadersLanguage() = runBlocking {
+        PackStore(context).install("translation-al-bayan-bn")
+        SettingsStore(context).apply {
+            setUiLanguage("bn")
+            setTranslationPacks(setOf("translation-saheeh-en", "translation-al-bayan-bn"))
+        }
+        val daily = DailyAyahContent.load(context)
+        assertNotNull(daily)
+        val database = openLibrary()
+        try {
+            val expected = database.translations(
+                listOf(daily!!.ayah),
+                "translation-al-bayan-bn",
+            )[daily.ayah]?.text
+            assertNotNull("the Bangla pack must carry the ayah", expected)
+            assertEquals(
+                "the reminder speaks the reader's own language, not the catalog's first pack",
+                io.github.muntasimulhaque.quran.core.RichText.plain(expected!!),
+                daily.translation,
+            )
+        } finally {
+            database.close()
+        }
+    }
+
+    @Test
     fun footnoteMarkersNeverReachTheShade() = runBlocking {
         val content = DailyAyahContent.load(context)
         assertNotNull(content)

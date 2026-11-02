@@ -49,6 +49,7 @@ import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.kit.RoundedSelectionColors
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.kit.focusRing
 import io.github.muntasimulhaque.quran.ui.kit.roundedSelection
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -243,6 +244,7 @@ private fun ClearFieldButton(onClick: () -> Unit) {
             modifier = Modifier
                 .size(ClearRipple)
                 .clip(CircleShape)
+                .focusRing(press, CircleShape)
                 .indication(press, ripple(color = MaterialTheme.colorScheme.onSurfaceVariant)),
             contentAlignment = Alignment.Center,
         ) {

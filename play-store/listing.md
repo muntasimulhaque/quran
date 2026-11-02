@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 14.6 (versionCode 148)
+Version: 14.7 (versionCode 149)
 
 ## Listing
 
@@ -186,6 +186,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (14.7, 409 characters)
+14.7 makes the reader's own work safer. Clearing a note or removing a saved ayah offers Undo. Recent searches show their X at rest. Search finds your own notes. The daily reminder follows your language. The top bar stays with a screen reader, the size rail works with arrow keys, and a paused recitation keeps its controls for 30 minutes. The lock screen shows the app's own artwork. Text and packs unchanged.
 
 ## Release notes (14.6, 415 characters)
 14.6 lets the translator's notes climb through each surah. A surah's notes start at 1 and the next surah starts again at 1, in Saheeh International and Al-Bayan alike, so Al-Baqarah runs 1 to 105 and Al-Imran opens on 1. The publisher's book-wide numbers cannot be rebuilt from an ayah-keyed export, and a whole-Quran number would put four digits on half of the English markers. Text and every other pack unchanged.

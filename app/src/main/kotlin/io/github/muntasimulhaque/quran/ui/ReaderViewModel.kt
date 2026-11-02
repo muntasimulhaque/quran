@@ -41,6 +41,7 @@ import io.github.muntasimulhaque.quran.playback.ListenOffer
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.reader.CHROME_REVEAL
+import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -61,7 +62,14 @@ import java.util.Locale
  * a note, a failure, or an unavailable share has no visible mark of its own,
  * so it is a Snackbar (owner decision, this session).
  */
-data class ReaderMessage(val text: Int, val announceOnly: Boolean = false)
+data class ReaderMessage(
+    val text: Int,
+    val announceOnly: Boolean = false,
+    /** The action a Snackbar offers beside the sentence, if any. */
+    val action: Int? = null,
+    /** What the action does; null when there is no action. */
+    val onAction: (() -> Unit)? = null,
+)
 
 /**
  * Holds the reader's place, their choices, and the content they read.
@@ -693,6 +701,13 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    /** The first screen's reminder card has been answered, either way. */
+    fun markReminderAnswered() {
+        if (settings.reminderAnswered) return
+        settings = settings.copy(reminderAnswered = true)
+        viewModelScope.launch { settingsStore.setReminderAnswered(true) }
+    }
+
     /**
      * The moment the daily reminder arrives, in the reader's own local time.
      *
@@ -770,7 +785,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         val firstRun = settings.uiLanguage == null
         val next = settings.withLanguage(language)
         val chosen = if (firstRun) {
-            next.copy(ayah = 1)
+            next.copy(ayah = 1, reminderAnswered = false)
         } else {
             next
         }
@@ -780,7 +795,12 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         // that recreates for the new locale comes up speaking it.
         languagePreference.set(language.tag)
         viewModelScope.launch {
-            settingsStore.setLanguage(language, next.translationPacks, next.tafsirPacks)
+            settingsStore.setLanguage(
+                language = language,
+                translationPacks = next.translationPacks,
+                tafsirPacks = next.tafsirPacks,
+                firstRun = firstRun,
+            )
             // The surah names are content, and the content now answers in the
             // new language: the library is read again so the names change
             // with the words around them (owner decision, this session).
@@ -926,14 +946,22 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
     fun toggleSaved(ayah: Ayah) {
         viewModelScope.launch {
-            val wasMarked = saved.value.firstOrNull { it.ayahNumber == ayah.number }?.marked == true
+            val row = saved.value.firstOrNull { it.ayahNumber == ayah.number }
+            val wasMarked = row?.marked == true
             if (savedStore.toggle(ayah.number)) {
-                _messages.tryEmit(
-                    ReaderMessage(
-                        if (wasMarked) R.string.action_removed else R.string.action_saved,
-                        announceOnly = true,
-                    ),
-                )
+                if (wasMarked) {
+                    _messages.tryEmit(
+                        ReaderMessage(
+                            text = R.string.action_removed,
+                            action = UiKitR.string.action_undo,
+                            onAction = { restoreSaved(row) },
+                        ),
+                    )
+                } else {
+                    _messages.tryEmit(
+                        ReaderMessage(R.string.action_saved, announceOnly = true),
+                    )
+                }
             } else {
                 _messages.tryEmit(ReaderMessage(R.string.save_failed))
             }
@@ -960,11 +988,19 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      */
     fun setNote(ayahNumber: Int, note: String?, onResult: ((Boolean) -> Unit)? = null) {
         viewModelScope.launch {
+            val previous = saved.value.firstOrNull { it.ayahNumber == ayahNumber }
             val written = savedStore.setNote(ayahNumber, note)
             if (written) {
+                val cleared = note.isNullOrBlank() && previous?.note != null
                 _messages.tryEmit(
                     ReaderMessage(
-                        if (note.isNullOrBlank()) R.string.note_cleared else R.string.note_saved,
+                        text = if (note.isNullOrBlank()) R.string.note_cleared else R.string.note_saved,
+                        action = if (cleared) UiKitR.string.action_undo else null,
+                        onAction = if (cleared) {
+                            { restoreSaved(previous) }
+                        } else {
+                            null
+                        },
                     ),
                 )
             } else if (onResult == null) {
@@ -975,13 +1011,42 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
+     * Puts a removed row back exactly as it was. The Undo action on a removed
+     * save or a cleared note calls this; a restored row keeps its words and
+     * the moments they were written, not a fresh copy.
+     */
+    fun restoreSaved(row: SavedAyah) {
+        viewModelScope.launch {
+            if (!savedStore.restore(row)) {
+                _messages.tryEmit(ReaderMessage(R.string.save_failed))
+            }
+        }
+    }
+
+    /**
      * Removes the reader's save, and the note written on the ayah with it.
      * The screen asks before this when a note exists.
+     *
+     * [undoable] is false when the removal was made from Browse: that sheet
+     * draws its own Undo over the list it changed, and the reading's Snackbar
+     * is behind a window the reader cannot see.
      */
-    fun removeSaved(ayahNumber: Int) {
+    fun removeSaved(ayahNumber: Int, undoable: Boolean = true) {
         viewModelScope.launch {
+            val previous = saved.value.firstOrNull { it.ayahNumber == ayahNumber }
             if (savedStore.unsave(ayahNumber)) {
-                _messages.tryEmit(ReaderMessage(R.string.action_removed, announceOnly = true))
+                _messages.tryEmit(
+                    ReaderMessage(
+                        text = R.string.action_removed,
+                        announceOnly = !undoable,
+                        action = if (undoable) UiKitR.string.action_undo else null,
+                        onAction = if (undoable) {
+                            previous?.let { row -> { restoreSaved(row) } }
+                        } else {
+                            null
+                        },
+                    ),
+                )
             } else {
                 _messages.tryEmit(ReaderMessage(R.string.save_failed))
             }

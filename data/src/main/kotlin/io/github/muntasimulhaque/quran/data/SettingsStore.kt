@@ -160,6 +160,16 @@ data class AppSettings(
      */
     val dailyAyah: Boolean = true,
     /**
+     * Whether the first screen's reminder card was answered. True on every
+     * install that already has a language, so the card is never shown to a
+     * reader who has already made the choice; the first-run flow writes it
+     * false when the language is chosen, and the card's answer writes it
+     * true. A task swipe at the card therefore brings the card back instead
+     * of leaving the reminder on with no permission ask (owner decision,
+     * this session).
+     */
+    val reminderAnswered: Boolean = true,
+    /**
      * The minute of the day the reminder arrives, in the reader's own local
      * time: minutes from midnight, so one whole number carries the hour and
      * the minute and the picker has nothing to reconcile.
@@ -329,6 +339,7 @@ class SettingsStore(private val context: Context) {
             wordByWord = preferences[WORD_BY_WORD] ?: false,
             tajweed = preferences[TAJWEED] ?: true,
             dailyAyah = preferences[DAILY_AYAH] ?: true,
+            reminderAnswered = preferences[REMINDER_ANSWERED] ?: true,
             dailyAyahMinute = storedDailyMinute(preferences),
             chromeReveal = preferences[CHROME_REVEAL] ?: "",
         )
@@ -372,12 +383,23 @@ class SettingsStore(private val context: Context) {
      * all. The boot-time mirror is written first, because the Activity that
      * recreates for the new locale reads it synchronously.
      */
-    suspend fun setLanguage(language: UiLanguage, translationPacks: Set<String>, tafsirPacks: Set<String>) {
+    suspend fun setLanguage(
+        language: UiLanguage,
+        translationPacks: Set<String>,
+        tafsirPacks: Set<String>,
+        firstRun: Boolean = false,
+    ) {
         LanguagePreference(context).set(language.tag)
         context.settingsStore.edit {
             it[UI_LANGUAGE] = language.tag
             it[TRANSLATION_PACKS] = translationPacks
             it[TAFSIR_PACKS] = tafsirPacks
+            // The first language choice is the one that opens the reminder
+            // card, and the card's answer is written on the same row. A
+            // first-run edit that landed without this mark would leave the
+            // reminder on with nothing ever asked (owner decision, this
+            // session).
+            if (firstRun) it[REMINDER_ANSWERED] = false
         }
     }
 
@@ -433,6 +455,11 @@ class SettingsStore(private val context: Context) {
 
     suspend fun setDailyAyah(enabled: Boolean) {
         context.settingsStore.edit { it[DAILY_AYAH] = enabled }
+    }
+
+    /** Writes the first screen's reminder card as answered, once. */
+    suspend fun setReminderAnswered(answered: Boolean) {
+        context.settingsStore.edit { it[REMINDER_ANSWERED] = answered }
     }
 
     /** The moment the daily reminder arrives: minutes from midnight. */
@@ -645,6 +672,8 @@ class SettingsStore(private val context: Context) {
         val WORD_BY_WORD = booleanPreferencesKey("word_by_word")
         val TAJWEED = booleanPreferencesKey("tajweed")
         val DAILY_AYAH = booleanPreferencesKey("daily_ayah")
+        /** Whether the first screen's reminder card has been answered. */
+        val REMINDER_ANSWERED = booleanPreferencesKey("reminder_answered")
 
         /** Written by builds before the picker took minutes; read, never written. */
         val DAILY_AYAH_HOUR = intPreferencesKey("daily_ayah_hour")

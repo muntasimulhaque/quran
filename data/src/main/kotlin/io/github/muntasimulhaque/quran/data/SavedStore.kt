@@ -193,6 +193,36 @@ class SavedStore(context: Context) {
         }
     }
 
+    /**
+     * Puts a removed row back exactly as it was, so an Undo restores the
+     * reader's words and the moments they were written, not a fresh copy of
+     * the row. A row that is still there is overwritten rather than inserted
+     * twice, which is what a second Undo after a re-save would do.
+     */
+    suspend fun restore(row: SavedAyah): Boolean = withContext(Dispatchers.IO) {
+        guarded("restore") {
+            writeMutex.withLock {
+                val values = ContentValues().apply {
+                    put(COLUMN_AYAH, row.ayahNumber)
+                    if (row.note == null) putNull(COLUMN_NOTE) else put(COLUMN_NOTE, row.note)
+                    put(COLUMN_CREATED, row.createdAt)
+                    if (row.noteAt == null) putNull(COLUMN_NOTE_AT) else put(COLUMN_NOTE_AT, row.noteAt)
+                    put(COLUMN_SAVED, if (row.saved) 1 else 0)
+                    if (row.savedAt == null) putNull(COLUMN_SAVED_AT) else put(COLUMN_SAVED_AT, row.savedAt)
+                    put(COLUMN_MARKED, if (row.marked) 1 else 0)
+                }
+                val updated = database().update(
+                    TABLE,
+                    values,
+                    "$COLUMN_AYAH = ?",
+                    arrayOf(row.ayahNumber.toString()),
+                )
+                if (updated == 0) database().insert(TABLE, null, values)
+                refresh()
+            }
+        }
+    }
+
     fun close() = helper.close()
 
     private fun row(ayahNumber: Int): SavedAyah? =

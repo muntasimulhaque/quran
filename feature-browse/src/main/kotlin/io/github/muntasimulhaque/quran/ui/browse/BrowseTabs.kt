@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.feature.browse.R
+import io.github.muntasimulhaque.quran.ui.kit.focusRing
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
@@ -75,6 +76,7 @@ internal fun BrowseTabChip(
         Box(
             modifier = Modifier
                 .clip(Radii.Pill)
+                .focusRing(press, Radii.Pill)
                 .background(
                     if (active) {
                         MaterialTheme.colorScheme.primary

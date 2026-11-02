@@ -54,7 +54,6 @@ fun QuranApp(
     initialReference: Pair<Int, Int>? = null,
     /** A shortcut or a deep link that asks for the search field once. */
     openSearch: Boolean = false,
-    onPlaybackPermission: () -> Unit = {},
     /**
      * What the two acts that set the reminder ask for: the notification,
      * and then, on the phones that withhold it, the exact alarm in the
@@ -74,6 +73,10 @@ fun QuranApp(
      * either case.
      */
     onFirstScreenDone: (Boolean) -> Unit = {},
+    /** The one permission answer the reading still has to say. */
+    permissionNotice: PermissionNotice? = null,
+    /** The notice has been handed to the reading's Snackbar. */
+    onPermissionNoticeShown: () -> Unit = {},
     /** Whether the phone will show this app's notifications, read from the phone. */
     notificationsBlocked: () -> Boolean = { false },
     /** Whether the phone is still withholding the exact alarm. */
@@ -124,9 +127,11 @@ fun QuranApp(
         val content = viewModel.content
         // The language just chosen but the reminder card still on screen: the
         // value survives the recreation that brings the new locale up, so the
-        // card speaks the chosen language. It is forgotten with the process,
-        // which costs the reader nothing: the reading opens and the reminder
-        // stays on, its state told on the Daily page.
+        // card speaks the chosen language. The stored reminderAnswered flag
+        // is the other half: if the task is swiped away at the card, the next
+        // launch still owes the reader the answer, and the card comes back
+        // instead of leaving the reminder on with no permission ask (owner
+        // decision, this session).
         var welcomePending by rememberSaveable { mutableStateOf<String?>(null) }
         // These are read here, in the screen's own scope, and not only inside
         // a nested lambda: the first paint gives way to the reading the
@@ -156,13 +161,14 @@ fun QuranApp(
                     },
                 )
             }
-            welcomePending != null -> {
+            welcomePending != null || !settings.reminderAnswered -> {
                 WelcomeReminder(
                     onTurnOn = {
                         welcomePending = null
                         // The two grants are asked by the shell once the card
                         // is answered; the view model only writes the choice.
                         viewModel.setDailyAyah(enabled = true, onPermission = {})
+                        viewModel.markReminderAnswered()
                         onFirstScreenDone(true)
                     },
                     onNotNow = {
@@ -171,6 +177,7 @@ fun QuranApp(
                         // never arrive; the Daily page asks again at the act
                         // of setting it.
                         viewModel.setDailyAyah(enabled = false, onPermission = {})
+                        viewModel.markReminderAnswered()
                         onFirstScreenDone(false)
                     },
                 )
@@ -183,12 +190,13 @@ fun QuranApp(
                 ReaderScreen(
                     viewModel,
                     content,
-                    onPlaybackPermission,
                     onReminderPermission,
                     notificationsBlocked,
                     exactGrantWithheld,
                     onOpenNotificationSettings,
                     onAskExactAlarm,
+                    permissionNotice = permissionNotice,
+                    onPermissionNoticeShown = onPermissionNoticeShown,
                     openSearch = openSearch,
                 )
             }
