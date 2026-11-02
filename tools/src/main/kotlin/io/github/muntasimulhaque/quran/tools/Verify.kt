@@ -4,7 +4,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import io.github.muntasimulhaque.quran.core.TajweedCodec
@@ -56,6 +55,8 @@ class Verify(private val root: File) {
             val dir = extract(file, File(work, dataset.id))
             check(dataset, dir)
         }
+
+        checkSaheehCrosscheck()
 
         if (failures.isEmpty()) {
             println("structure: all datasets verified")
@@ -164,6 +165,16 @@ class Verify(private val root: File) {
 
     private val entity = Regex("&(?:[a-zA-Z]+|#[0-9]+|#x[0-9A-Fa-f]+);")
 
+    /**
+     * The Saheeh export's own footnote shape, before the build applies either
+     * of this app's rules. The publisher numbers across the book and its
+     * first note belongs to the surah title, so the ayah export leaves one
+     * number unused at every surah start. This gate pins that shape: 1,903
+     * note bodies, 1,904 markers, 113 unused numbers, and exactly one marker
+     * whose body the export lost (7:143's 403). It also pins the one sentence
+     * the build corrects, so a source update that fixes it makes the build
+     * fail and the correction can be removed deliberately.
+     */
     private fun checkSaheeh(id: String, dir: File) {
         openSqlite(db(dir)).use { connection ->
             val rows = connection.count("translations")
@@ -174,7 +185,161 @@ class Verify(private val root: File) {
             if (bad != 0L) fail(id, "$bad translations are incomplete")
             val max = connection.scalarLong("SELECT COUNT(*) FROM translations WHERE id < 1 OR id > 6236")
             if (max != 0L) fail(id, "$max translation ids are out of range")
+
+            var notes = 0
+            var markers = 0
+            val dangling = mutableListOf<Pair<Int, Int>>()
+            val unused = mutableListOf<Pair<Int, Int>>()
+            val markerNumbers = HashSet<Int>()
+            connection.each("SELECT id, translation, footnotes FROM translations ORDER BY id") { rs ->
+                val ayah = rs.getInt(1)
+                val text = rs.getString(2) ?: ""
+                val bodies = saheehNotes(rs.getString(3) ?: "")
+                val drawn = Regex("\\[(\\d+)]").findAll(text)
+                    .map { it.groupValues[1].toInt() }
+                    .toList()
+                notes += bodies.size
+                markers += drawn.size
+                for (number in drawn) {
+                    markerNumbers += number
+                    if (number !in bodies) dangling += ayah to number
+                }
+                for (number in bodies.keys) {
+                    if (number !in drawn) unused += ayah to number
+                }
+            }
+            if (notes != 1903) fail(id, "expected 1903 notes, found $notes")
+            if (markers != 1904) fail(id, "expected 1904 markers, found $markers")
+            if (dangling != listOf(1097 to 403)) {
+                fail(id, "unexpected marker(s) without a note: $dangling")
+            }
+            if (unused.isNotEmpty()) fail(id, "note(s) without a marker: $unused")
+            // The numbers the export never uses are the surah-title notes,
+            // which an ayah-keyed file cannot carry. The 403 hole is the
+            // lost body the build drops, not a title note, so it is counted
+            // by [dangling] above and not here.
+            val missing = (1..markerNumbers.max()).filterNot { it in markerNumbers }
+            if (missing.size != 113) {
+                fail(id, "expected 113 surah-title numbers, found ${missing.size}")
+            }
+            if (1 !in missing) fail(id, "the first note is no longer the surah-title hole")
+
+            val correction = saheehCorrections.firstOrNull { it.ayah == 325 }
+            val target = connection.scalarLong(
+                "SELECT COUNT(*) FROM translations WHERE id = 325 AND translation LIKE ?",
+                "%${correction?.from.orEmpty()}%",
+            )
+            if (target != 1L) fail(id, "the 3:32 sentence the build corrects is no longer in the source")
         }
+    }
+
+    /**
+     * The independent copy of the same translation, compared once at build
+     * time. QUL's file is not shipped and no app code reads it; it is here to
+     * catch a source update that changes a word the publisher did not intend
+     * to change. The known differences are pinned, so a new one fails the
+     * build and an old one cannot be forgotten.
+     *
+     * The copy is the same 1,903 notes. Its 3:32 already reads "they", which
+     * is why the build corrects the publisher's export. Its 4:12 note has a
+     * missing space ("fromthe"), and 192 notes differ only in spacing; the
+     * app does not use QUL's note text, so only the one real typo is pinned.
+     */
+    private fun checkSaheehCrosscheck() {
+        val sourceDir = File(work, "translation-saheeh")
+        val qulDir = File(work, "saheeh-qul-crosscheck")
+        val sourceDb = sourceDir.firstWithExtension(".db", ".sqlite")
+        val qulDb = qulDir.firstWithExtension(".db", ".sqlite")
+        if (sourceDb == null || qulDb == null) {
+            println("cross-check: the two translation copies are not both extracted; skipped")
+            return
+        }
+        val source = LinkedHashMap<String, String>()
+        val sourceNotes = HashMap<String, List<String>>()
+        openSqlite(sourceDb).use { connection ->
+            connection.each("SELECT sura, aya, translation, footnotes FROM translations ORDER BY id") { rs ->
+                val key = "${rs.getInt(1)}:${rs.getInt(2)}"
+                source[key] = rs.getString(3) ?: ""
+                sourceNotes[key] = saheehNotes(rs.getString(4) ?: "").values.toList()
+            }
+        }
+        val qul = LinkedHashMap<String, String>()
+        val qulNotes = HashMap<String, List<String>>()
+        openSqlite(qulDb).use { connection ->
+            connection.each("SELECT sura, ayah, text FROM translation ORDER BY sura, ayah") { rs ->
+                val key = "${rs.getInt(1)}:${rs.getInt(2)}"
+                val raw = rs.getString(3) ?: ""
+                val decoded = runCatching {
+                    Json.parseToJsonElement(raw).jsonPrimitive.content
+                }.getOrElse { raw }
+                qul[key] = decoded.replace(Regex("\\[\\[.*?]]", RegexOption.DOT_MATCHES_ALL), "")
+                qulNotes[key] = Regex("\\[\\[(.*?)]]", RegexOption.DOT_MATCHES_ALL)
+                    .findAll(decoded)
+                    .map { it.groupValues[1].replaceFirst(Regex("^[-\\u2013\\u2014]\\s*"), "").trim() }
+                    .toList()
+            }
+        }
+        if (source.size != qul.size) {
+            fail("saheeh-qul-crosscheck", "the copies have ${source.size} and ${qul.size} ayahs")
+            return
+        }
+        val whitespace = Regex("\\s+")
+        fun fold(text: String) = whitespace.replace(text, " ").trim()
+        val textDifferences = LinkedHashMap<String, Pair<String, String>>()
+        var textSpacing = 0
+        for ((key, text) in source) {
+            val readable = text.replace(Regex("\\(\\d+\\)\\s*"), "").replace(Regex("\\[\\d+]"), "")
+            val a = fold(readable)
+            val b = fold(qul[key].orEmpty())
+            if (a == b) {
+                if (readable.trim() != qul[key].orEmpty().trim()) textSpacing++
+                continue
+            }
+            textDifferences[key] = a to b
+        }
+        if (textDifferences.keys != setOf("3:32")) {
+            fail("saheeh-qul-crosscheck", "unexpected ayah differences: ${textDifferences.keys}")
+        } else {
+            val (a, b) = textDifferences.getValue("3:32")
+            if (!a.contains("But if you turn away") || !b.contains("But if they turn away")) {
+                fail("saheeh-qul-crosscheck", "3:32 changed in a way the build does not expect")
+            }
+        }
+        if (textSpacing != 0) println("cross-check: $textSpacing ayah(s) differ only in spacing")
+
+        val noteDifferences = LinkedHashMap<String, Pair<String, String>>()
+        var noteSpacing = 0
+        var counts = 0
+        for ((key, notes) in sourceNotes) {
+            val other = qulNotes[key].orEmpty()
+            if (notes.size != other.size) {
+                fail("saheeh-qul-crosscheck", "$key has ${notes.size} and ${other.size} notes")
+                counts++
+                continue
+            }
+            for (index in notes.indices) {
+                val rawA = notes[index].trim()
+                val rawB = other[index].trim()
+                val a = fold(rawA)
+                val b = fold(rawB)
+                if (a == b) {
+                    if (rawA != rawB) noteSpacing++
+                    continue
+                }
+                noteDifferences["$key #${index + 1}"] = a to b
+            }
+        }
+        if (counts == 0 && noteDifferences.keys != setOf("4:12 #1")) {
+            fail("saheeh-qul-crosscheck", "unexpected note differences: ${noteDifferences.keys}")
+        } else if (noteDifferences.isNotEmpty()) {
+            val (a, b) = noteDifferences["4:12 #1"] ?: ("" to "")
+            if (!a.contains("from the") || !b.contains("fromthe")) {
+                fail("saheeh-qul-crosscheck", "4:12 changed in a way the build does not expect")
+            }
+        }
+        if (noteSpacing != 0) println("cross-check: $noteSpacing note(s) differ only in spacing")
+        println("cross-check: pinned: 3:32 reads \"they\" in the QUL copy; 4:12's note reads \"fromthe\"")
+        println("cross-check: ${source.size} ayahs and ${sourceNotes.values.sumOf { it.size }} notes compared with QUL")
     }
 
     private fun checkTafsirQul(id: String, dir: File) {
@@ -197,7 +362,7 @@ class Verify(private val root: File) {
     private fun surahVerseCounts(): IntArray {
         val counts = IntArray(115)
         val script = File(work, "quran-script-qpc-hafs").firstWithExtension(".db")
-            ?: error("QPC script database not extracted yet")
+            ?: return counts
         openSqlite(script).use { connection ->
             connection.each("SELECT surah, MAX(ayah) FROM words GROUP BY surah") { rs ->
                 counts[rs.getInt(1)] = rs.getInt(2)
@@ -236,6 +401,14 @@ class Verify(private val root: File) {
             // they are checked against the surah column and for full coverage.
             val seen = HashSet<String>(7000)
             val counts = surahVerseCounts()
+            // The counter check needs the QPC script, which is one of the
+            // large manual exports. A machine without it still gets the
+            // file-name and coverage checks; the missing dataset is already
+            // reported by the manifest pass (owner decision, this session).
+            val hasCounts = counts.any { it > 0 }
+            if (!hasCounts) {
+                println("verify: $id: the QPC script is not extracted; ayah counters skipped")
+            }
             var badFile = 0
             var badCounter = 0
             connection.each("SELECT surah_number, ayah_number, audio_url FROM verses") { rs ->
@@ -251,7 +424,7 @@ class Verify(private val root: File) {
                     badFile++
                     return@each
                 }
-                if (globalIndex(counts, surah, ayah) != rs.getInt(2)) badCounter++
+                if (hasCounts && globalIndex(counts, surah, ayah) != rs.getInt(2)) badCounter++
                 seen += "$surah:$ayah"
             }
             if (badFile != 0) fail(id, "$badFile rows whose file name does not match their surah")
@@ -283,18 +456,11 @@ class Verify(private val root: File) {
                 fail(id, "cannot read JSON: ${failure.message}")
                 return
             }
-        val rows = root["translations"]?.jsonArray
-        if (rows == null) {
-            fail(id, "no translations array")
-            return
-        }
+        val rows = bayanRows(root)
         if (rows.size != 6236) fail(id, "expected 6236 ayahs, found ${rows.size}")
         val keys = HashSet<String>(7000)
-        for (row in rows) {
-            val entry = row.jsonObject
-            val key = entry["verse_key"]?.jsonPrimitive?.contentOrNull
-            val text = entry["text"]?.jsonPrimitive?.contentOrNull
-            if (key.isNullOrBlank() || text.isNullOrBlank()) {
+        for ((key, text) in rows) {
+            if (key.isBlank() || text.isBlank()) {
                 fail(id, "an ayah has no key or no text")
                 continue
             }

@@ -5,11 +5,16 @@ package io.github.muntasimulhaque.quran.tools
  *
  * A pack is what the reader installs; a dataset is what the project audits,
  * hashes, and credits. The two do not share names (the Saheeh International
- * pack is built from the translation dataset and the cross-check dataset, and
- * the English word list carries the surah introductions), so the mapping is
- * written down once, here, and both the database and the catalog read it. That
- * is what makes the credits screen in the app show the real license of every
- * dataset a pack contains instead of a note to go and read a file.
+ * pack is named after the translation dataset, and the English word list
+ * carries the surah introductions), so the mapping is written down once,
+ * here, and both the database and the catalog read it. That is what makes
+ * the credits screen in the app show the real license of every dataset a
+ * pack contains instead of a note to go and read a file.
+ *
+ * The Saheeh cross-check is not listed: it is a build-time audit copy of the
+ * same translation, never a byte of the pack. Listing it here put its QUL
+ * line on the pack's About page, which claimed a distribution route the pack
+ * does not use (owner decision, this session).
  */
 object PackSources {
 
@@ -27,7 +32,7 @@ object PackSources {
             "metadata-ruku",
             "metadata-sajda",
         ),
-        "translation-saheeh-en" to listOf("translation-saheeh", "saheeh-qul-crosscheck"),
+        "translation-saheeh-en" to listOf("translation-saheeh"),
         "tafsir-ibn-kathir-en" to listOf("tafsir-ibn-kathir-en"),
         "translation-al-bayan-bn" to listOf("translation-al-bayan-bn", "translation-al-bayan-bn-notes"),
         "tafsir-ibn-kathir-bn" to listOf("tafsir-ibn-kathir-bn"),

@@ -6,6 +6,7 @@ import android.database.CursorWrapper
 import android.database.MatrixCursor
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
+import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.core.Search
 import io.github.muntasimulhaque.quran.core.SearchQuery
 import kotlinx.coroutines.Dispatchers
@@ -654,11 +655,17 @@ class ContentDatabase private constructor(
         for ((number, pack) in translationByNumber) {
             val row = rows[number] ?: continue
             val translation = translationTexts[pack]?.get(number) ?: continue
+            // A search row is prose, not the reading: it has no marker to
+            // tap, so the stored sentence's bracketed numbers go and the
+            // highlight is measured on the words that remain. Before this,
+            // a result for an ayah with a note printed "Allāh,[2]" at the
+            // reader (owner report, this session).
+            val readable = RichText.plain(translation.text)
             row.translation = TranslationHit(
                 pack = pack,
                 packName = request.packNames[pack] ?: pack,
-                text = translation.text,
-                ranges = Search.matchRanges(translation.text, query.terms, arabic = false),
+                text = readable,
+                ranges = Search.matchRanges(readable, query.terms, arabic = false),
                 footnotes = translation.footnotes,
             )
         }

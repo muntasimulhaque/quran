@@ -1,5 +1,11 @@
 package io.github.muntasimulhaque.quran.tools
 
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+
 /**
  * One ayah of the Al-Bayan translation after its footnotes have been moved out
  * of the sentence.
@@ -25,6 +31,31 @@ internal val bayanAnchors = mapOf(
     "15:76" to "বিদ্যমান",
     "31:12" to "জ্ঞান",
 )
+
+/**
+ * The two shapes QUL has published for the Al-Bayan translation. The 2025
+ * export is an array of objects with `verse_key` and `text`; the 2026 export
+ * is one object keyed by verse with the sentence under `t`. Both carry the
+ * same 6,236 rows, so the reader and the publisher's notes do not depend on
+ * which file a maintainer has (owner decision, this session).
+ */
+internal fun bayanRows(root: JsonObject): List<Pair<String, String>> {
+    val translations = root["translations"]
+    if (translations is JsonArray) {
+        return translations.mapNotNull { row ->
+            val entry = row.jsonObject
+            val key = entry["verse_key"]?.jsonPrimitive?.contentOrNull
+                ?: return@mapNotNull null
+            key to entry["text"]?.jsonPrimitive?.contentOrNull.orEmpty()
+        }
+    }
+    return root.entries.mapNotNull { (key, value) ->
+        if (!key.matches(Regex("^\\d+:\\d+$"))) return@mapNotNull null
+        val text = value.jsonObject["t"]?.jsonPrimitive?.contentOrNull
+            ?: return@mapNotNull null
+        key to text
+    }
+}
 
 /**
  * Splits one QUL Al-Bayan row into the ayah and its notes.

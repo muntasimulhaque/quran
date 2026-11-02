@@ -110,6 +110,7 @@ class CheckDb(private val root: File) {
                 }
             }
             println("checkdb: ${packs.size} pack(s): " + packs.joinToString { it.first })
+            failures += checkTranslationFootnotes(connection)
 
             // The catalog the app reads must describe exactly these packs, and
             // the pack files it points at must be the ones on this machine.
@@ -145,6 +146,7 @@ class CheckDb(private val root: File) {
                 println("checkdb: catalog matches, ${entries.size} pack file(s) verified")
             }
         }
+        failures += checkSaheehPack()
         if (failures != 0) {
             println("checkdb: $failures problem(s)")
             return 1
@@ -211,6 +213,131 @@ class CheckDb(private val root: File) {
         }
         if (markersAsMeanings != 0) failures += markersAsMeanings
         if (failures == 0) println("checkdb: every word joins its ayah and has a meaning in both lists")
+        return failures
+    }
+
+    /**
+     * The translation packs still in their source shape: the Bangla pack
+     * numbers each ayah from 1, so every marker and every note must run 1..n.
+     * The Saheeh pack is checked at its own file by [checkSaheehPack], because
+     * the database keeps the publisher's book-wide numbering and the reader's
+     * numbering is written into the pack.
+     */
+    private fun checkTranslationFootnotes(connection: java.sql.Connection): Int {
+        var failures = 0
+        var ayahs = 0
+        var notes = 0
+        connection.each(
+            "SELECT pack, ayah_number, text, footnotes FROM translation " +
+                "WHERE pack <> 'translation-saheeh-en' ORDER BY pack, ayah_number",
+        ) { rs ->
+            ayahs++
+            val pack = rs.getString(1) ?: ""
+            val number = rs.getInt(2)
+            val text = rs.getString(3) ?: ""
+            val noteNumbers = runCatching {
+                Json.parseToJsonElement(rs.getString(4) ?: "[]").jsonArray.map {
+                    it.jsonObject["n"]?.jsonPrimitive?.content?.toIntOrNull()
+                        ?: error("a note has no number")
+                }
+            }.getOrElse {
+                println("checkdb: $pack $number has unreadable footnotes")
+                failures++
+                emptyList()
+            }
+            val markerNumbers = Regex("\\[(\\d+)]").findAll(text)
+                .map { it.groupValues[1].toInt() }
+                .toList()
+            if (markerNumbers != (1..noteNumbers.size).toList()) {
+                println("checkdb: $pack $number draws $markerNumbers for ${noteNumbers.size} note(s)")
+                failures++
+            }
+            if (noteNumbers != (1..noteNumbers.size).toList()) {
+                println("checkdb: $pack $number numbers its notes $noteNumbers")
+                failures++
+            }
+            notes += noteNumbers.size
+        }
+        if (failures == 0) println("checkdb: $ayahs translation ayahs, $notes notes, all numbered within their ayah")
+        return failures
+    }
+
+    /**
+     * The Saheeh pack is the reader's shape: every ayah's notes run 1..n, the
+     * first ayah opens on 1, 3:32 reads the published "they", and 7:143 no
+     * longer draws the marker whose note the export lost. The pack file is
+     * what the app installs, so this is the gate that proves the reader's
+     * page, not the database's source shape.
+     */
+    private fun checkSaheehPack(): Int {
+        val file = File(root, "content/packs/translation-saheeh-en.db")
+        if (!file.exists()) return 0
+        var failures = 0
+        var ayahs = 0
+        var notes = 0
+        openSqlite(file).use { connection ->
+            connection.each("SELECT ayah_number, text, footnotes FROM translation ORDER BY ayah_number") { rs ->
+                ayahs++
+                val number = rs.getInt(1)
+                val text = rs.getString(2) ?: ""
+                val noteNumbers = runCatching {
+                    Json.parseToJsonElement(rs.getString(3) ?: "[]").jsonArray.map {
+                        it.jsonObject["n"]?.jsonPrimitive?.content?.toIntOrNull()
+                            ?: error("a note has no number")
+                    }
+                }.getOrElse {
+                    println("checkdb: Saheeh pack $number has unreadable footnotes")
+                    failures++
+                    emptyList()
+                }
+                val markerNumbers = Regex("\\[(\\d+)]").findAll(text)
+                    .map { it.groupValues[1].toInt() }
+                    .toList()
+                if (markerNumbers != (1..noteNumbers.size).toList()) {
+                    println("checkdb: Saheeh pack $number draws $markerNumbers for ${noteNumbers.size} note(s)")
+                    failures++
+                }
+                if (noteNumbers != (1..noteNumbers.size).toList()) {
+                    println("checkdb: Saheeh pack $number numbers its notes $noteNumbers")
+                    failures++
+                }
+                notes += noteNumbers.size
+            }
+            if (ayahs != 6236) {
+                println("checkdb: Saheeh pack has $ayahs ayahs, expected 6236")
+                failures++
+            }
+            if (notes != 1903) {
+                println("checkdb: Saheeh pack carries $notes notes, expected 1903")
+                failures++
+            }
+            val first = connection.scalarLong(
+                "SELECT COUNT(*) FROM translation WHERE ayah_number = 1 " +
+                    "AND text LIKE '%[1]%' AND text LIKE '%[2]%'",
+            )
+            if (first != 1L) {
+                println("checkdb: Saheeh pack 1:1 does not start its notes at 1")
+                failures++
+            }
+            val corrected = connection.scalarLong(
+                "SELECT COUNT(*) FROM translation WHERE ayah_number = 325 " +
+                    "AND text LIKE '%if they turn away%' AND text NOT LIKE '%if you turn away%'",
+            )
+            if (corrected != 1L) {
+                println("checkdb: Saheeh pack 3:32 does not carry the published reading")
+                failures++
+            }
+            val dead = connection.scalarLong(
+                "SELECT COUNT(*) FROM translation WHERE ayah_number = 1097 AND text LIKE '%[3]%'",
+            )
+            if (dead != 0L) {
+                println("checkdb: Saheeh pack 7:143 still draws the marker with no note")
+                failures++
+            }
+        }
+        if (failures == 0) {
+            println("checkdb: the Saheeh pack numbers $notes notes within their ayahs, 3:32 corrected")
+        }
         return failures
     }
 

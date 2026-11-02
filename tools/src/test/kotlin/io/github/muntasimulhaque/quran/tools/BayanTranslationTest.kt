@@ -4,6 +4,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
 
 /**
  * The Al-Bayan rows carry the sentence and the notes the reader opens. QUL
@@ -174,5 +176,19 @@ class BayanTranslationTest {
     fun theExportsLostConjunctSignIsRemoved() {
         val parsed = bayanAyah("আর তারা উৎফুল\u00AC হয়, পরবর্তীদের থেকে।")
         assertEquals("আর তারা উৎফুল হয়, পরবর্তীদের থেকে।", parsed.text)
+    }
+
+    @Test
+    fun theTwoQulJsonShapesReadAsTheSameRows() {
+        // The 2025 export is an array with verse_key and text; the 2026
+        // export is one object keyed by verse with the sentence under t.
+        val array = Json.parseToJsonElement(
+            """{"translations":[{"verse_key":"1:1","text":"a"},{"verse_key":"1:2","text":"b"}]}""",
+        ).jsonObject
+        val map = Json.parseToJsonElement(
+            """{"1:1":{"t":"a"},"1:2":{"t":"b"}}""",
+        ).jsonObject
+        assertEquals(listOf("1:1" to "a", "1:2" to "b"), bayanRows(array))
+        assertEquals(listOf("1:1" to "a", "1:2" to "b"), bayanRows(map))
     }
 }

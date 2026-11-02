@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 14.4 (versionCode 146)
+Version: 14.5 (versionCode 147)
 
 ## Listing
 
@@ -182,6 +182,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (14.5, 401 characters)
+14.5 numbers each ayah's translator's notes from 1, so Al-Fatihah opens on notes 1 and 2 instead of 2 and 3. The publisher numbers its notes across the whole book and starts with the surah title, which an ayah-keyed export cannot carry. This update also restores 3:32 to the published "if they turn away" and keeps note numbers out of search results. The Quran text and every other pack are unchanged.
 
 ## Release notes (14.4, 368 characters)
 14.4 makes the tafsir read clearly. Its Arabic now uses Kitab, the book face Quran.com uses, so commas and other punctuation are proper marks again and the lines have room. The word being recited is shown in its own ink instead of a wash. In the daily time, moving a tape while its field is open now changes the same value the keyboard edits. Text and packs unchanged.

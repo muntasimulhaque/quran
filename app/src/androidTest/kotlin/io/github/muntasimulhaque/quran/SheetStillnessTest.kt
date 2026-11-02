@@ -69,7 +69,9 @@ class SheetStillnessTest {
     val rule: TestRule = RuleChain.outerRule(library).around(compose)
 
     /**
-     * Opens the note on 1:1's third marker, the note the owner reported on.
+     * Opens the note on 1:1's second marker, the note the owner reported on.
+     * The publisher's export numbers it 3; the pack numbers the ayah's notes
+     * from 1, so the long note on "Especially Merciful" is marker 2.
      */
     private fun openTheFootnote() {
         val readingPage = compose.activity.getString(ReadingR.string.reading_page_description)
@@ -81,7 +83,7 @@ class SheetStillnessTest {
             .performFirstLinkClick { range ->
                 val link = range.item
                 link is androidx.compose.ui.text.LinkAnnotation.Clickable &&
-                    link.tag == "footnote-3"
+                    link.tag == "footnote-2"
             }
         compose.waitUntil(timeoutMillis = 20_000) {
             compose.onAllNodesWithTag("footnote-sheet", useUnmergedTree = true)

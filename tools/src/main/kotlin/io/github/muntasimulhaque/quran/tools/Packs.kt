@@ -9,6 +9,8 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
+import io.github.muntasimulhaque.quran.core.RichText
+import io.github.muntasimulhaque.quran.core.Search
 import java.io.File
 import java.sql.Connection
 
@@ -77,9 +79,9 @@ class Packs(private val root: File) {
             type = "translation",
             name = "Saheeh International",
             language = "en",
-            credit = "Noor International Center, via QuranEnc",
-            creditBn = "Noor International Center, QuranEnc-\u098f\u09b0 \u09ae\u09be\u09a7\u09cd\u09af\u09ae\u09c7",
-            version = "1.1.2",
+            credit = "Noor International Center, via QuranEnc; 3:32 corrected to the published reading",
+            creditBn = "Noor International Center, QuranEnc-এর মাধ্যমে; ৩:৩২ প্রকাশিত পাঠ অনুযায়ী সংশোধিত",
+            version = "1.1.2+1",
             shipped = false,
             ayahs = 6236,
         ),
@@ -247,6 +249,80 @@ class Packs(private val root: File) {
         return 0
     }
 
+    /**
+     * The Saheeh pack is the reader's shape of the publisher's translation.
+     *
+     * QuranEnc exports the notes numbered across the whole book, and its
+     * first note belongs to the surah title, which an ayah-keyed file cannot
+     * carry. The pack draws each ayah's notes from 1, the rule the Bangla
+     * pack already follows and the rule Quran.com presents this translation
+     * with. The same pass corrects the export's one printed slip at 3:32,
+     * and drops 7:143's marker whose body the export lost (owner decision,
+     * this session). [SaheehText] holds both rules and their reasons.
+     *
+     * The database keeps the publisher's shape; this pack is the only place
+     * the reader's numbering is written, so a full rebuild of `quran.db`
+     * still reproduces its own hash.
+     */
+    private fun buildSaheehTranslation(target: Connection, packId: String) {
+        target.createStatement().use { statement ->
+            statement.execute(
+                "CREATE TABLE translation (ayah_number INTEGER NOT NULL, text TEXT NOT NULL, " +
+                    "footnotes TEXT NOT NULL, text_search TEXT NOT NULL)",
+            )
+        }
+        target.prepareStatement(
+            "INSERT INTO translation(ayah_number, text, footnotes, text_search) VALUES(?,?,?,?)",
+        ).use { insert ->
+            target.prepareStatement(
+                "SELECT ayah_number, text, footnotes FROM src.translation " +
+                    "WHERE pack = ? ORDER BY ayah_number",
+            ).use { select ->
+                select.setString(1, packId)
+                select.executeQuery().use { rs ->
+                    var corrected = 0
+                    var dropped = 0
+                    var notes = 0
+                    while (rs.next()) {
+                        val number = rs.getInt(1)
+                        val source = rs.getString(2) ?: ""
+                        val storedNotes = notesFromJson(rs.getString(3) ?: "[]")
+                        val correctedText = saheehCorrected(number, source)
+                        if (correctedText != source) corrected += 1
+                        val local = localizeSaheeh(correctedText, storedNotes)
+                        dropped += local.dropped.size
+                        notes += local.notes
+                        if (local.unused.isNotEmpty()) {
+                            error("Saheeh pack: ayah $number has note(s) ${local.unused} with no marker")
+                        }
+                        insert.setInt(1, number)
+                        insert.setString(2, local.text)
+                        insert.setString(3, footnotesJson(local.footnotes))
+                        // The search index holds the words, never the note
+                        // numbers: a reader who types a number is not asking
+                        // for the ayahs whose notes carry it.
+                        insert.setString(4, Search.normalizeForIndex(RichText.plain(local.text)))
+                        insert.addBatch()
+                    }
+                    insert.executeBatch()
+                    if (corrected != saheehCorrections.size) {
+                        error(
+                            "Saheeh pack: expected ${saheehCorrections.size} correction(s), " +
+                                "applied $corrected",
+                        )
+                    }
+                    if (dropped != 1) {
+                        error("Saheeh pack: expected 1 marker without a note, found $dropped")
+                    }
+                    println(
+                        "packs: Saheeh: $notes notes, $corrected correction(s), " +
+                            "$dropped dead marker(s) dropped",
+                    )
+                }
+            }
+        }
+    }
+
     private fun buildPack(source: Connection, file: File, pack: Pack) {
         openSqlite(file).use { target ->
             target.createStatement().use { statement ->
@@ -295,10 +371,14 @@ class Packs(private val root: File) {
                         createFts(statement, "ayah_fts", "text_search", "ayah")
                     }
                     "translation" -> {
-                        statement.execute(
-                            "CREATE TABLE translation AS SELECT ayah_number, text, footnotes, text_search " +
-                                "FROM src.translation WHERE pack = '${pack.id}'",
-                        )
+                        if (pack.id == "translation-saheeh-en") {
+                            buildSaheehTranslation(target, pack.id)
+                        } else {
+                            statement.execute(
+                                "CREATE TABLE translation AS SELECT ayah_number, text, footnotes, text_search " +
+                                    "FROM src.translation WHERE pack = '${pack.id}'",
+                            )
+                        }
                         statement.execute("CREATE INDEX translation_ayah ON translation(ayah_number)")
                         createFts(statement, "translation_fts", "text_search", "translation")
                     }

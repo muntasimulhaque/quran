@@ -12,6 +12,7 @@ import io.github.muntasimulhaque.quran.data.SearchRequest
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -123,6 +124,62 @@ class ContentSearchTest {
             "the Bangla word must be highlighted in the translation",
             !hit.translation!!.ranges.isNullOrEmpty(),
         )
+    }
+
+    @Test
+    fun aSaheehFootnoteNumbersWithinItsAyah() {
+        // The publisher numbers its notes across the book; the pack numbers
+        // each ayah from 1, so Al-Fatihah opens on 1 and 2, not 2 and 3.
+        assertEquals("1:1", content.ayah(1)?.verseKey)
+        val line = content.translations(listOf(1), "translation-saheeh-en")[1]
+        assertNotNull("1:1 must carry the Saheeh translation", line)
+        assertEquals(listOf(1, 2), line?.footnotes?.map { it.number })
+        assertTrue("the first marker must be drawn", line?.text.orEmpty().contains("[1]"))
+        assertTrue("the second marker must be drawn", line?.text.orEmpty().contains("[2]"))
+        assertFalse("there is no third note on 1:1", line?.text.orEmpty().contains("[3]"))
+        assertTrue(
+            "the first note must be the publisher's note on Allah",
+            line?.footnotes?.firstOrNull()?.text.orEmpty().contains("Allāh is a proper name"),
+        )
+    }
+
+    @Test
+    fun aDeadSaheehMarkerIsNotDrawn() {
+        // 7:143's [403] has no body in the publisher's export, so the pack
+        // drops it rather than opening an empty sheet.
+        assertEquals("7:143", content.ayah(1097)?.verseKey)
+        val line = content.translations(listOf(1097), "translation-saheeh-en")[1097]
+        assertEquals(listOf(1, 2), line?.footnotes?.map { it.number })
+        assertFalse("the lost note must not leave a number", line?.text.orEmpty().contains("[3]"))
+    }
+
+    @Test
+    fun theSaheehCorrectionCarriesThePublishedReading() {
+        assertEquals("3:32", content.ayah(325)?.verseKey)
+        val line = content.translations(listOf(325), "translation-saheeh-en")[325]
+        assertTrue(
+            "3:32 must read the published third person",
+            line?.text.orEmpty().contains("if they turn away"),
+        )
+        assertFalse(
+            "3:32 must not carry the export's second person",
+            line?.text.orEmpty().contains("if you turn away"),
+        )
+    }
+
+    @Test
+    fun aTranslationSearchRowCarriesNoFootnoteMarkers() = runBlocking {
+        val results = content.search(request("Lord", tafsir = false, limit = 100))
+        val hit = results.hits.filterIsInstance<SearchHit.AyahHit>()
+            .firstOrNull { it.ayah.number == 2 && it.translation?.pack == "translation-saheeh-en" }
+        assertNotNull("1:2 must be found for Lord", hit)
+        val text = hit!!.translation?.text.orEmpty()
+        assertTrue("the row must carry the translation", text.isNotEmpty())
+        assertFalse(
+            "a search row has no marker to tap: $text",
+            Regex("\\[\\d+]").containsMatchIn(text),
+        )
+        assertTrue("the match must stay highlighted", hit.translation!!.ranges.isNotEmpty())
     }
 
     @Test

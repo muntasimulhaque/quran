@@ -4,12 +4,9 @@ import io.github.muntasimulhaque.quran.core.Arabic
 import io.github.muntasimulhaque.quran.core.Search
 import io.github.muntasimulhaque.quran.core.TajweedCodec
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
-import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
@@ -249,6 +246,12 @@ class Build(private val root: File) {
 
     private data class Translation(val number: Int, val text: String, val footnotes: String)
 
+    /**
+     * The publisher's translation as the publisher exports it. The database
+     * keeps the book-wide note numbers and the 3:32 sentence; the Saheeh pack
+     * is the reader's shape, and [Packs] applies the reader's numbering and
+     * the one correction there (owner decision, this session).
+     */
     private fun readTranslation(): Map<Int, Translation> {
         val out = HashMap<Int, Translation>(7000)
         openSqlite(sourceDb("translation-saheeh")).use { connection ->
@@ -273,13 +276,9 @@ class Build(private val root: File) {
             ?: error("no JSON for $datasetId; run verify first")
         val root = runCatching { Json.parseToJsonElement(file.readText()).jsonObject }
             .getOrElse { failure -> error("cannot read $datasetId: ${failure.message}") }
-        val rows = root["translations"]?.jsonArray
-            ?: error("$datasetId has no translations array")
-        val qul = rows.mapNotNull { row ->
-            val entry = row.jsonObject
-            val key = entry["verse_key"]?.jsonPrimitive?.contentOrNull ?: return@mapNotNull null
-            QulVerse(key, bayanTranslation(entry["text"]?.jsonPrimitive?.contentOrNull.orEmpty()))
-        }
+        val rows = bayanRows(root)
+        if (rows.size != 6236) error("$datasetId has ${rows.size} ayahs, expected 6236")
+        val qul = rows.map { (key, text) -> QulVerse(key, bayanTranslation(text)) }
         val docx = sourceDir("translation-al-bayan-bn-notes")
         val notes = if (File(docx, "word/document.xml").isFile) {
             readBayanNotes(docx, qul).also { publisherNotes ->
@@ -294,11 +293,9 @@ class Build(private val root: File) {
             null
         }
         val out = HashMap<Int, Translation>(7000)
-        for (row in rows) {
-            val entry = row.jsonObject
-            val key = entry["verse_key"]?.jsonPrimitive?.contentOrNull ?: continue
+        for ((key, raw) in rows) {
             val parsed = bayanAyah(
-                raw = sanitize(entry["text"]?.jsonPrimitive?.contentOrNull.orEmpty()),
+                raw = sanitize(raw),
                 sourceNotes = notes?.byAyah?.get(key),
                 allSourceNotes = notes?.allTexts.orEmpty(),
                 anchorAfter = bayanAnchors[key],
@@ -745,23 +742,6 @@ class Build(private val root: File) {
             }
             statement.executeBatch()
         }
-    }
-
-    private fun footnotesJson(raw: String): String {
-        val entries = Regex("\\[(\\d+)]-\\s*").findAll(raw).toList()
-        val array = StringBuilder("[")
-        entries.forEachIndexed { index, match ->
-            val start = match.range.last + 1
-            val end = entries.getOrNull(index + 1)?.range?.first ?: raw.length
-            val text = raw.substring(start, end).trim()
-            if (index > 0) array.append(',')
-            array.append(JsonObject(mapOf(
-                "n" to JsonPrimitive(match.groupValues[1]),
-                "text" to JsonPrimitive(text),
-            )))
-        }
-        array.append(']')
-        return array.toString()
     }
 
     private data class IbnRow(
