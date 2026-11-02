@@ -329,7 +329,7 @@ class SearchCheck(private val root: File) {
                     "SELECT ayah_number, text FROM translation WHERE ayah_number % 97 = 1 ORDER BY ayah_number",
                 ) { rs ->
                     val number = rs.getInt(1)
-                    val term = longestWord(rs.getString(2) ?: "", minimum = 3) ?: return@each
+                    val term = longestWord(RichText.plain(rs.getString(2) ?: ""), minimum = 3) ?: return@each
                     val query = Search.parse(term) ?: return@each
                     val expression = Search.matchExpression(query.terms) ?: return@each
                     checked++
