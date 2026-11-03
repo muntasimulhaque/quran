@@ -12,6 +12,18 @@ certificate `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C
 green in all five jobs: 191 app tests across two shards and 55 data tests.
 Content 1.5.0, `content-db-12c95dbe`.
 
+**In 15.2.** Settings becomes one list. A row says where a setting stands and
+opens the page that changes it, so the four reading rows are no longer half a
+switch and half a door: the switch stands at the top of the page it governs,
+next to the list it shows. The word list gains that page, with its size, its
+Add, and its switch. The switch itself is drawn here now, 44 by 24 on the
+app's own grid, so the last borrowed shape in the interface is gone and a
+switch row and a door row end on one line. One failure, one sentence: a failed
+download, a failed save, and a full phone say the same words wherever they
+happen, and the reading and Browse share one Snackbar. The store set is
+rebuilt around a reader rather than the app's own map. The Quran text, every
+translation, every tafsir, every pack, and the content database are unchanged.
+
 **In 15.1.** The search sheet's recent searches and the tafsir card lose their last two rough edges. Recent searches no longer carry Clear all: every word keeps the 48 dp X it already showed, so removing a word is one visible act and a list of five is not a second, bulk question. The caption stands with its chips instead of a Section under the filter door, and the chip capsule is now the label's line plus 8 dp above and below, so it is 36 dp at the default and grows with the system font scale instead of clipping at 200 percent; the filter chips keep their row gap at that size too. On a tafsir card with more than one source, an open passage now ends on the card's block break before the next language, so the next source no longer reads as a caption to the passage above. The Quran text, every translation, every tafsir, every pack, and the content database are unchanged.
 
 **In 15.0.** The search sheet reads as one page. A source that is on wears the accent's tint and the accent's own ink instead of a solid button, so seven sources no longer stand over the results as seven pressed shapes; the door names the one source that is off ("Everything but Translations"), opens itself when none is on, and offers "Turn everything on" while any is off. Its words stand on the page's 28 dp line, the empty note is centered as one block, and "kahf 10" no longer splits across the line that teaches it. Recent searches lead with the query and Clear all offers Undo; no matches teaches the forms the field accepts, a failed search offers its own Retry, and the field keeps its spoken name after the reader types. The Close beside the field is gone: the field takes the page's width and the sheet closes by its handle, the scrim, or Back, the way every other sheet does, and opening the source door puts the keyboard away so the chips have the room. The Quran text, every translation, every tafsir, every pack, and the content database are unchanged.

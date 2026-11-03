@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 15.1 (versionCode 153)
+Version: 15.2 (versionCode 154)
 
 ## Listing
 
@@ -165,6 +165,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (one answer and no close), so every frame that wants a clean
 page is taken before it.
+
+## Release notes (15.2, 431 characters)
+15.2 makes Settings one list. Every row says where a setting stands and opens the page that changes it: the switches moved to the pages they govern, so no row is half a switch and half a door, and the switch is drawn in the app's own hand. Word meanings gain the page they were missing. A failed download, a failed save, and a full phone each say one sentence now instead of three. Text, translations, tafsirs, and packs unchanged.
 
 ## Release notes (15.1, 431 characters)
 15.1 quiets the search sheet and the tafsir card. Recent searches lose Clear all: every word keeps its own visible X, and the caption sits with its chips. The chips now grow with the system text size instead of clipping, and the filter chips keep their row gap at large text. A tafsir passage now ends on the card's block break, so the next language no longer reads as its caption. Text, translations, tafsirs, and packs unchanged.
