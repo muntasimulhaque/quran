@@ -1,28 +1,29 @@
 package io.github.muntasimulhaque.quran.ui.settings
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.feature.settings.R
+import io.github.muntasimulhaque.quran.ui.kit.ActionPill
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceMark
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceMarkSize
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
-import io.github.muntasimulhaque.quran.ui.kit.DownloadLine
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRowNameInset
+import io.github.muntasimulhaque.quran.ui.kit.ChoiceRowTrailingInset
+import io.github.muntasimulhaque.quran.ui.kit.DownloadLine
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
@@ -31,22 +32,43 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
  * One pack in a list of choices: a mark for its state, its name, and the one
- * action it needs. The mark and the name are one control, so a reader who
+ * action it needs. The mark and the name are the choice, so a reader who
  * taps the name of a pack they do not have yet is asking for it, with the
  * size already on the row in front of them; a reader who taps a name they do
- * have turns it on or off. The action at the right is the same door for a
- * reader who looks for a button instead of a row.
+ * have turns it on or off. The word at the right names the row's other act:
+ * Add when the file is not here (the row itself is the door), Remove when it
+ * is (the word is a second control), and a fact when the pack ships.
  *
  * Radios for a reciter, checks for translations, tafsirs, and word lists:
  * one reciter is heard at a time, while more than one reading may be on. The
- * row itself is [ChoiceRow], the app's one selectable row, so a pack list
- * reads the same here as the language list, the reciter list, and the pill's
- * own menus.
+ * row is [ChoiceRow] when its tap is the choice itself, an off pack the
+ * reader can add and check or a pack that is here. It is [PackActionRow]
+ * when the tap is something else: a chosen pack whose file is gone, a failed
+ * download, or a download on its way.
  *
- * [selected] is the reader's choice and not the file's presence. A chosen
- * pack whose file is not on the device draws its mark on the Add row, so the
- * page can never surprise a reader with a column they thought was off (owner
- * report, this session).
+ * [selected] is the reader's choice and not the file's presence. The mark is
+ * drawn on every pack row, chosen or not: a chosen pack wears the check and,
+ * when its file is not on the device, the line that says so; a pack that was
+ * never chosen wears the off ring, because the tap that adds it also chooses
+ * it. The mark column used to stand empty on a pack that was not here, so a
+ * removed pack lost the only visible sign of its state and its name hung off
+ * a 38 dp void (owner report, this session). Drawing the ring changes no
+ * geometry: the column was already held open for it.
+ *
+ * A pack that is not here is a checkbox while the reader has not chosen it:
+ * the tap that adds it also chooses it, so the off ring is a control the reader
+ * can turn on. Once the choice stands and only the file is missing, the row is
+ * a button whose mark is the check, because its act is Add and a checked box
+ * that cannot be unchecked would be a lie. The word at the trailing end is a
+ * pill in the same shape and on the same rail as Remove in both states, so
+ * the row does not change its grammar with its file. It used to be a bare word
+ * at the sheet's 12 dp edge, 14 dp outside the page's 28 dp word line, while
+ * Remove sat on the choice row's 22 dp rail; the eye read two kinds of action
+ * in one list (owner report, this session). Remove still deletes the pack and
+ * clears the reader's choice: the row then draws the off ring, not a blank
+ * column, and the page's switch says there is no translation. A chosen pack
+ * whose file disappears outside the app keeps its check, because the choice is
+ * the reader's (owner decision, this session).
  */
 @Composable
 fun PackChoiceRow(
@@ -69,23 +91,48 @@ fun PackChoiceRow(
     /** The room under the row; a row with a block beneath it keeps less. */
     bottomPadding: Dp = 12.dp,
 ) {
-    val busy = setup?.packId == pack.id && setup.failed.not()
-    // A pack that is not here yet is not a choice the row can make: its row
-    // is one action, Add or Retry, and the row itself is the door. But a
-    // choice the reader already made is still drawn, so a chosen pack whose
-    // file is not on the device cannot look like one that was never chosen.
-    // The old row was a selectable checkbox whose tap installed the pack,
-    // with a second Add button beside it that did the same thing; a reader
-    // heard "not selected" and then got a download (owner decision, this
-    // session: the row's action stays Add, and the mark and its line carry
-    // the choice).
-    if (!pack.installed || busy) {
+    val setupHere = setup?.takeIf { it.packId == pack.id }
+    val busy = setupHere != null && setupHere.failed.not()
+    val failed = setupHere?.failed == true
+    val absent = pack.installed.not()
+    val chosenState = stringResource(R.string.settings_pack_chosen_missing)
+    // The row's value says what the file is and what the choice is doing: a
+    // chosen pack that is not here is a state a reader has to be told, not
+    // one they should have to infer from a mark (owner report, this session).
+    val value = if (absent && selected) {
+        if (subtitle.isBlank()) chosenState else "$subtitle. $chosenState"
+    } else {
+        subtitle
+    }
+    if (absent && selected.not() && failed.not() && busy.not()) {
+        // The common case after Remove: an off choice the reader can turn on.
+        // The row is the checkbox, the Add pill names what checking it costs,
+        // and the tap that checks it also brings the file (owner report, this
+        // session).
+        ChoiceRow(
+            title = contentPackName(pack.id, pack.name),
+            subtitle = value,
+            selected = false,
+            radio = false,
+            onClick = onInstall,
+            bottomPadding = bottomPadding,
+            trailing = {
+                ActionPill(
+                    label = stringResource(R.string.pack_action_add),
+                    modifier = Modifier.testTag("pack-action-add"),
+                )
+            },
+        )
+        return
+    }
+    if (absent || busy) {
         PackActionRow(
             pack = pack,
-            subtitle = subtitle,
+            value = value,
             chosen = selected,
-            setup = setup,
+            setup = setupHere,
             busy = busy,
+            failed = failed,
             onInstall = onInstall,
             onCancel = onCancel,
             bottomPadding = bottomPadding,
@@ -94,7 +141,7 @@ fun PackChoiceRow(
     }
     ChoiceRow(
         title = contentPackName(pack.id, pack.name),
-        subtitle = subtitle,
+        subtitle = value,
         selected = selected,
         radio = radio,
         onClick = onActivate,
@@ -103,66 +150,58 @@ fun PackChoiceRow(
         // action at the trailing end of the row (the same member of the
         // multi-action list that Saved and Last Read already use).
         trailing = {
-            PackTrailing(pack, setup, onInstall, onRemove, onCancel)
+            PackTrailing(pack, setupHere, onInstall, onRemove)
         },
     )
 }
 
 /**
- * One pack that is not a choice yet: Add, Retry, or a download on its way.
- * The whole row is the one act; the word at its trailing end names the act
- * and is not a second control. While bytes move, the row is a status and the
- * only button is Cancel, because stopping a transfer is the one thing a
- * finger should be able to do from here (owner decision, this session).
+ * One pack whose tap is not the choice itself: a chosen pack whose file is
+ * gone, a failed download, or a download on its way. The whole row is the one
+ * act; the word at its trailing end is a pill that names the act and is not a
+ * second control.
  *
- * [chosen] draws the app's choice mark in the column every choice row keeps,
- * and adds the words that say why the row still asks to Add. A row that was
- * never chosen draws no mark and says nothing: an empty ring would read as a
- * choice this row's tap does not make (owner report, this session).
+ * The mark is the reader's choice, drawn in the column every choice row
+ * keeps: an off ring when the pack was never chosen, a check when the reader
+ * chose a pack whose file is gone. It used to be drawn only for the chosen
+ * one, so the never-chosen row's column stood empty and the list lost its off
+ * state (owner report, this session).
+ *
+ * The pill ends on [ChoiceRowTrailingInset], the same rail as the Remove of a
+ * pack that is here, so the row does not change its right edge with its file.
+ * While bytes move, the row is a status and the only button is Cancel,
+ * because stopping a transfer is the one thing a finger should be able to do
+ * from here (owner decision, this session).
  */
 @Composable
 private fun PackActionRow(
     pack: ContentPack,
-    subtitle: String,
+    value: String,
     chosen: Boolean,
     setup: PackSetupState?,
     busy: Boolean,
+    failed: Boolean,
     onInstall: () -> Unit,
     onCancel: () -> Unit,
     bottomPadding: Dp,
 ) {
-    val chosenState = stringResource(R.string.settings_pack_chosen_missing)
-    // The row's value says what the file is and what the choice is doing:
-    // a chosen pack that is not here is a state a reader has to be told, not
-    // one they should have to infer from a mark (owner report, this session).
-    val value = when {
-        !chosen -> subtitle
-        subtitle.isBlank() -> chosenState
-        else -> "$subtitle. $chosenState"
-    }
     Column(Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .sheetRow(onClick = onInstall, enabled = !busy)
                 .minimumInteractiveComponentSize()
-                // The name's rail less the mark and its gap, so a chosen
-                // pack stands on the same line as every choice row.
+                // The name's rail less the mark and its gap, so every pack
+                // stands on the same line as every choice row.
                 .padding(
                     start = ChoiceRowNameInset - ChoiceMarkSize - Space.Block - SheetRowGutter,
-                    end = Space.Row - SheetRowGutter,
+                    end = ChoiceRowTrailingInset - SheetRowGutter,
                     top = Space.Row,
                     bottom = (bottomPadding - Space.Row).coerceAtLeast(0.dp),
                 ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (chosen) {
-                ChoiceMark(selected = true, radio = false)
-            } else {
-                // The mark's column, held open so the name never moves
-                // between a row that carries a choice and one that does not.
-                Box(Modifier.size(ChoiceMarkSize))
-            }
+            ChoiceMark(selected = chosen, radio = false)
             RowName(
                 title = contentPackName(pack.id, pack.name),
                 value = value,
@@ -190,16 +229,17 @@ private fun PackActionRow(
                     quiet = true,
                 )
             } else {
-                Text(
-                    text = stringResource(
-                        if (setup?.failed == true) {
+                ActionPill(
+                    label = stringResource(
+                        if (failed) {
                             R.string.pack_action_retry
                         } else {
                             R.string.pack_action_add
                         },
                     ),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.testTag(
+                        if (failed) "pack-action-retry" else "pack-action-add",
+                    ),
                 )
             }
         }
@@ -224,10 +264,11 @@ private fun PackActionRow(
 }
 
 /**
- * The action one pack row carries: Add when it is not here, Retry when a
- * download failed, its progress while it is on its way, Remove once it is. A
- * row already in use shows nothing else, because the mark at the left already
- * says what state it is in.
+ * The action one pack row carries once it is here: Retry when a download
+ * failed, Remove when it is, and the word that says a shipped pack is
+ * included. A pack that is not here carries its Add or Retry in
+ * [PackActionRow], because its row is the act; this slot is for the actions of
+ * a pack the reading can already use.
  */
 @Composable
 private fun PackTrailing(
@@ -235,45 +276,14 @@ private fun PackTrailing(
     setup: PackSetupState?,
     onInstall: () -> Unit,
     onRemove: () -> Unit,
-    onCancel: () -> Unit,
 ) {
     when {
-        setup?.packId == pack.id && setup.failed ->
+        setup?.failed == true ->
             TextButton(
                 label = stringResource(R.string.pack_action_retry),
                 onClick = onInstall,
+                pillTag = "pack-action-retry",
             )
-
-        // The row on its way in carries its progress and the one word that
-        // ends it. A reader who tapped Add can change their mind while the
-        // bytes are still moving, the same way the pill's own progress row
-        // lets them (owner report, this session).
-        setup?.packId == pack.id -> Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = if (setup.progress == null) {
-                    stringResource(R.string.settings_pack_preparing)
-                } else {
-                    stringResource(R.string.settings_pack_downloading, (setup.progress * 100).toInt())
-                },
-                // The same value style every row's status wears: the hub
-                // draws this download as the caption under its name, and the
-                // same fact must not change size between the two doors
-                // (owner decision, this session).
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            TextButton(
-                label = stringResource(R.string.settings_cancel),
-                onClick = onCancel,
-                modifier = Modifier.padding(start = Space.Row),
-                quiet = true,
-            )
-        }
-
-        !pack.installed -> TextButton(
-            label = stringResource(R.string.pack_action_add),
-            onClick = onInstall,
-        )
 
         pack.shipped -> Text(
             text = stringResource(R.string.pack_included),
@@ -287,6 +297,7 @@ private fun PackTrailing(
             label = stringResource(R.string.pack_action_remove),
             onClick = onRemove,
             quiet = true,
+            pillTag = "pack-action-remove",
         )
     }
 }

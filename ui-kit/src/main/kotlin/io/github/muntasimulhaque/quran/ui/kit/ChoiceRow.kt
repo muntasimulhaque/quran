@@ -59,6 +59,17 @@ val ChoiceMarkSize = 22.dp
 val ChoiceRowNameInset = RowGutter + 12.dp + ChoiceMarkSize + 16.dp
 
 /**
+ * The rail a choice row's trailing action ends on: the row's own gutter plus
+ * the capsule's padding.
+ *
+ * A pill that ends here keeps its word inside the page's [Space.Gutter],
+ * where a bare mark may reach further out. A choice row's Remove and the Add
+ * that takes its place on a pack row end on this one line, so a pack does not
+ * change its right edge with its file (owner decision, this session).
+ */
+val ChoiceRowTrailingInset = RowGutter + Space.Row
+
+/**
  * One thing a reader chooses from a list: the app's one selectable row,
  * wherever the choice appears.
  *
@@ -232,7 +243,9 @@ fun ChoiceMark(selected: Boolean, radio: Boolean) {
             IconGlyph(
                 icon = Icon.Check,
                 tint = accent,
-                modifier = Modifier.size(GlyphSize.Check),
+                modifier = Modifier
+                    .size(GlyphSize.Check)
+                    .testTag("choice-check"),
             )
         }
     }

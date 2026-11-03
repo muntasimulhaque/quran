@@ -15,6 +15,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -80,6 +82,12 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * lays two dialog buttons [DialogButtonSpacing] apart, so the caller asks for
  * `Space.Action - DialogButtonSpacing` and the shapes end up as far apart as
  * every other pair in the app.
+ *
+ * The same shape is available without a click as [ActionPill], for a word
+ * that names a row's own act when the row around it is the control. It is
+ * not a second button: the row owns the target and the spoken state, and the
+ * pill only says what the act is, so the two cannot disagree about where the
+ * finger lands or how many stops TalkBack counts.
  */
 @Composable
 fun TextButton(
@@ -93,17 +101,15 @@ fun TextButton(
      * act.
      */
     prominent: Boolean = false,
+    /**
+     * The anchor a test reads to measure the pill itself, when the button's
+     * 48 dp target is wider than the shape inside it. The target is still the
+     * button.
+     */
+    pillTag: String? = null,
 ) {
-    val fill = when {
-        prominent -> MaterialTheme.colorScheme.primary
-        quiet -> MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
-        else -> MaterialTheme.colorScheme.primary.copy(alpha = Wash.Button)
-    }
-    val ink = when {
-        prominent -> MaterialTheme.colorScheme.onPrimary
-        quiet -> MaterialTheme.colorScheme.onSurfaceVariant
-        else -> MaterialTheme.colorScheme.primary
-    }
+    val fill = buttonFill(quiet = quiet, prominent = prominent)
+    val ink = buttonInk(quiet = quiet, prominent = prominent)
     val press = remember { MutableInteractionSource() }
     Box(
         modifier = modifier
@@ -116,28 +122,94 @@ fun TextButton(
             .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Box(
+        PillBox(
+            label = label,
+            fill = fill,
+            ink = ink,
             modifier = Modifier
-                .clip(Radii.Pill)
-                .background(fill)
                 .focusRing(press, Radii.Pill)
                 .indication(press, ripple(color = ink, bounded = false))
-                .padding(horizontal = 14.dp, vertical = 7.dp),
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelLarge,
-                color = ink,
-                // A button's word is one line: the app's labels are short, and
-                // a caller that hands a long one (a recent search, a query
-                // the reader wrote) gets an ellipsis at the row's edge rather
-                // than a shape that grows past it (owner decision, this
-                // session).
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
+                .then(if (pillTag != null) Modifier.testTag(pillTag) else Modifier),
+        )
     }
+}
+
+/**
+ * The word that names a row's own act, in the same pill a [TextButton] wears,
+ * with no click of its own.
+ *
+ * A row that is already the control (a pack row's Add, a retry, the word at
+ * the end of a row that answers the touch itself) must not grow a second
+ * target at its trailing end, but the word that names its act still has to
+ * read as an action and not as a bare label. This is that shape: the same
+ * fill, ink, type, and 14 dp inset as [TextButton], drawn inside the row that
+ * owns the touch. The row's own 48 dp target and its ripple are the only
+ * control; this pill is the word on it, so TalkBack hears one stop.
+ *
+ * It is never the only control on a surface. A word that does not have a row
+ * behind it is a [TextButton].
+ *
+ * The two tones are the same two the button keeps: the primary tone for what
+ * the row will do (Add, Retry), the quiet tone for what ends or removes.
+ */
+@Composable
+fun ActionPill(
+    label: String,
+    modifier: Modifier = Modifier,
+    quiet: Boolean = false,
+) {
+    PillBox(
+        label = label,
+        fill = buttonFill(quiet = quiet, prominent = false),
+        ink = buttonInk(quiet = quiet, prominent = false),
+        modifier = modifier,
+    )
+}
+
+/** The room a button's word keeps from its pill's edge, horizontally. */
+val ButtonPad = 14.dp
+
+/** One pill, shared by the button that answers a touch and the label on a row. */
+@Composable
+private fun PillBox(
+    label: String,
+    fill: Color,
+    ink: Color,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = Modifier
+            .clip(Radii.Pill)
+            .background(fill)
+            .then(modifier)
+            .padding(horizontal = ButtonPad, vertical = 7.dp),
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            color = ink,
+            // A button's word is one line: the app's labels are short, and a
+            // caller that hands a long one (a recent search, a query the
+            // reader wrote) gets an ellipsis at the row's edge rather than a
+            // shape that grows past it (owner decision, this session).
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+@Composable
+private fun buttonFill(quiet: Boolean, prominent: Boolean): Color = when {
+    prominent -> MaterialTheme.colorScheme.primary
+    quiet -> MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
+    else -> MaterialTheme.colorScheme.primary.copy(alpha = Wash.Button)
+}
+
+@Composable
+private fun buttonInk(quiet: Boolean, prominent: Boolean): Color = when {
+    prominent -> MaterialTheme.colorScheme.onPrimary
+    quiet -> MaterialTheme.colorScheme.onSurfaceVariant
+    else -> MaterialTheme.colorScheme.primary
 }
 
 /**

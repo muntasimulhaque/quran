@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 14.8 (versionCode 150)
+Version: 14.9 (versionCode 151)
 
 ## Listing
 
@@ -190,6 +190,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (14.9, 393 characters)
+14.9 makes every pack's state visible. A translation or tafsir you never chose now wears an empty ring, not a blank column, and after Remove its row is an off checkbox. Add and Retry are pills on the same rail as Remove, with the same shape and type, so one row's two states share one grammar. A downloaded surah's Remove follows that rail. The reading, text, packs, and content are unchanged.
 
 ## Release notes (14.8, 441 characters)
 14.8 keeps your choices yours. A translation you chose whose file is not on the phone now says so in Settings, and the Show translation switch follows your choice. A pack that downloads in the background no longer turns itself on; only your tap or your language choice does. The queue forgets packs you already have, and a language you leave takes its packs with it. Recent searches are as wide as their word again. Text and packs unchanged.

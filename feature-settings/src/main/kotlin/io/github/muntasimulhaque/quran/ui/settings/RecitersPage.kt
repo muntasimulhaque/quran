@@ -35,6 +35,7 @@ import io.github.muntasimulhaque.quran.data.Recitation
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRowNameInset
+import io.github.muntasimulhaque.quran.ui.kit.ChoiceRowTrailingInset
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
@@ -234,8 +235,11 @@ private fun DownloadedSurahRow(row: DownloadedSurah, onRemove: () -> Unit) {
             .fillMaxWidth()
             // The row is already as tall as a finger needs, because the
             // Remove action brings its own touch target; the surah names sit
-            // close together so the list reads as one block.
-            .padding(start = ChoiceRowNameInset, end = Space.Row),
+            // close together so the list reads as one block. The Remove ends
+            // on the choice row's trailing rail, the same rail a pack's
+            // Remove and Add use, so the sheet's file actions stand on one
+            // line (owner decision, this session).
+            .padding(start = ChoiceRowNameInset, end = ChoiceRowTrailingInset),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // The size is under its name, the way every row in the sheet reads:
