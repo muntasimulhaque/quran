@@ -133,10 +133,14 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 41641937540 on 15.1: all three legs green on the
-first pass, ten frames on the phone and the seven inch tablet, eleven on the
-ten inch screen, every frame read. The settings frame names 15.1 on all three
-legs.
+The eight were rebuilt with the settings index: the set is no longer the
+app's own map but a reader's path through it, and it is the first set to show
+the card the app hands out and the page that explains the colors on the
+Quran's own line. The tour was run on all three profiles on the machine that
+built it, eight frames each, every frame green and read; this folder still
+carries the previous set (capture run 41641937540 on 15.1), which the new
+settings hub has dated, and the next capture run on `main` replaces it whole.
+Collect that run's artifacts, not this folder's older files.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
@@ -147,14 +151,20 @@ changes.
 
 What each set shows, in order:
 
-1. The reading with its translation
-2. The chrome: Browse, Search, and Settings
-3. The surah opening
-4. Search with a query in the field and its sources behind the "Search in" door
-5. The settings hub
-6. Browse, Surahs
-7. The ayah card, with its tafsir doors
-8. The tafsir open on the card
+1. The reading, with its translation and its word meanings
+2. The ayah's own actions, opened from the number at its head
+3. The share card the app hands out
+4. The tafsir open on its passage, with the source line above it
+5. Search reading a reference ("kahf 10"), with the places it reads behind the
+   "Search in" door
+6. The Tajweed page: seven color families, each with its word and its rules
+7. The reading at night
+8. The recitation's own door: the pill's offer, naming the surah, the reciter,
+   and the size before a tap
+
+The last frame is last on purpose. The offer stays on the reading until the
+reader answers it (one answer and no close), so every frame that wants a clean
+page is taken before it.
 
 ## Release notes (15.1, 431 characters)
 15.1 quiets the search sheet and the tafsir card. Recent searches lose Clear all: every word keeps its own visible X, and the caption sits with its chips. The chips now grow with the system text size instead of clipping, and the filter chips keep their row gap at large text. A tafsir passage now ends on the card's block break, so the next language no longer reads as its caption. Text, translations, tafsirs, and packs unchanged.

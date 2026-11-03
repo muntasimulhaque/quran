@@ -17,6 +17,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.swipeDown
@@ -64,25 +65,6 @@ import java.io.File
 @RunWith(AndroidJUnit4::class)
 class ScreenshotTest {
 
-    /**
-     * The line a search frame waits for: a count with its digits, or the
-     * capped line that says how many are shown when the count would be a
-     * floor.
-     *
-     * A wait on any text holding "match" is satisfied by the sheet's own "No
-     * matches." line, which is what a query that has not run yet says, so the
-     * store's search frame was a sheet that had found nothing. A count with
-     * its digits, or the capped line, is only ever drawn by a search that
-     * came back, and Compose's own matchers match a string or a substring,
-     * so this is the one that asks for it.
-     */
-    private val matchCount = SemanticsMatcher("a finished search's status") { node ->
-        node.config.getOrElseNullable(SemanticsProperties.Text) { null }
-            ?.any { part ->
-                Regex("""\d+\s+matches""").containsMatchIn(part.text) ||
-                    Regex("""Showing the first \d+""").containsMatchIn(part.text)
-            } == true
-    }
 
     @get:Rule
     val rule = createEmptyComposeRule()
@@ -437,115 +419,212 @@ class ScreenshotTest {
         Thread.sleep(500)
     }
 
+    /**
+     * The eight frames the store shows, in the order a reader meets them.
+     *
+     * The set used to be the app's own map: reading, chrome, opening, search,
+     * settings, Browse, card, tafsir. Three of the eight were the same ayah,
+     * and four of the app's most distinctive surfaces were never photographed
+     * at all. The eight follow a reader now, and two of them show something a
+     * feature list cannot: the card the app hands out, and the page that
+     * explains the colors on the Quran's own line (owner decision, this
+     * session).
+     *
+     * The order is not taste. The last frame is the pill's offer, which stays
+     * on the reading until the reader answers it: it carries one answer and no
+     * close, so every frame that wants a clean page is taken before it.
+     */
     private fun runTheTour() {
         waitForAReading()
 
-        // 1. The reading at 2:255, with nothing over it. The list opens on
-        // the reader's place, so the verse is on screen until anything
-        // scrolls it away.
+        // 1. The reading at 2:255, with nothing over it.
         hideChrome()
         capture("01-reading")
 
-        // 2. The chrome over the reading: Browse, Search, and Settings.
-        revealChrome()
-        capture("02-chrome")
-        hideChrome()
+        // 2. The ayah's own actions, from the number at its head: Play,
+        // Tafsir, Save, Note, Share. The menu is a popup window, so the frame
+        // is the display and not the compose root.
+        openTheAyahActions()
+        captureScreen("02-ayah-actions")
 
-        // 3. An ayah's actions, and the card they open. The card carries
-        // the tafsir doors, which is the deeper surface a reader meets off
-        // the reading. This runs before any scrolling, while 2:255 is still
-        // the verse on screen. The actions open from the ayah's own door, the
-        // number at its head.
-        val pillIsUp = {
-            rule.onAllNodesWithText("Tafsir").fetchSemanticsNodes().isNotEmpty()
-        }
-        var pillRaised = false
-        repeat(3) {
-            if (pillRaised) return@repeat
-            runCatching {
-                rule.onAllNodesWithText("2:255", substring = true).onFirst()
-                    .performClick()
-            }
-            pillRaised = runCatching {
-                rule.waitUntil(timeoutMillis = 20_000) { pillIsUp() }
-            }.isSuccess
-            if (!pillRaised) back()
-        }
-        if (!pillRaised) {
-            runCatching { capture("09-ayah-tap-failed") }
-            throw AssertionError("the ayah's tap did not raise the actions bar")
-        }
-        rule.onNodeWithText("Tafsir").performClick()
+        // 3. The card the app hands out. The sheet opens on the picture of the
+        // ayah, its translation, and the app's own mark.
+        rule.onAllNodesWithText(SHARE).onFirst().performClick()
+        waitForTag("share-sheet", timeout = 30_000)
+        captureScreen("03-share-card")
+        leave("share-sheet")
+
+        // 4. The tafsir, open on its passage. One frame carries the card and
+        // the commentary: the source line names the language and the
+        // commentary, and the passage's own reference stands over its prose.
+        openTheAyahActions()
+        rule.onAllNodesWithText(TAFSIR).onFirst().performClick()
         waitForTag("ayah-card", timeout = 30_000)
-        // Two commentaries, none open. The reference belongs to the passage,
-        // so the card carries none until a door is chosen: this frame is the
-        // choice itself. Both doors carry Ibn Kathir and their language in the
-        // one title, so the choice is readable without a second line.
-        rule.onAllNodesWithText("Ibn Kathir", substring = true).assertCountEquals(2)
-        rule.onAllNodes(hasText("Al-Baqarah 2:255")).assertCountEquals(0)
-        Thread.sleep(600)
-        captureScreen("07-ayah-card")
-
-        // 4. One commentary open on the card: the English Ibn Kathir for
-        // 2:255, its own reference at the head of its prose. The two doors
-        // share the name but not the language, and the English one leads, so
-        // the first byline is the tap.
-        rule.onAllNodesWithText("Ibn Kathir", substring = true).onFirst().performClick()
+        rule.onAllNodesWithText(TAFSIR_SOURCE, substring = true).onFirst().performClick()
         waitForTag("tafsir-panel", timeout = 30_000)
-        rule.onAllNodesWithText("Ibn Kathir", substring = true).assertCountEquals(2)
-        rule.onNode(hasText("Al-Baqarah 2:255") and isHeading()).assertExists()
-        captureScreen("08-tafsir")
-        back()
-        rule.waitUntil(timeoutMillis = 10_000) {
-            rule.onAllNodesWithTag("ayah-card", useUnmergedTree = true)
-                .fetchSemanticsNodes().isEmpty()
-        }
+        captureScreen("04-tafsir")
+        leave("ayah-card")
 
-        // 5. The surah opening, which is the top of the reading list. The
-        // tour scrolls by the list's own anchor rather than by a swipe: one
-        // swipe from 2:255 photographs a mid-surah frame under a name that
-        // promised the opening, because Al-Baqarah is 286 ayahs. The opening
-        // carries its own tag, so the frame is kept only once the opening is
-        // really on screen (owner report, this session).
-        rule.onNodeWithContentDescription("Reading")
-            .performScrollToNode(hasTestTag("surah-opening"))
-        waitForTag("surah-opening")
-        Thread.sleep(800)
-        capture("03-surah-opening")
-
-        // 6. Search, with a word a reader would type.
+        // 5. Search that reads a reference, with the places it reads behind
+        // the door: the one thing a reader cannot guess about this search is
+        // that "kahf 10" is an address and not a string to match.
         revealChrome()
         rule.onNodeWithContentDescription("Search").performClick()
         rule.waitUntil(timeoutMillis = 10_000) {
             rule.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty()
         }
-        rule.onNode(hasSetTextAction()).performTextInput("mercy")
+        rule.onNode(hasSetTextAction()).performTextInput("kahf 10")
         rule.waitUntil(timeoutMillis = 180_000) {
-            rule.onAllNodes(matchCount).fetchSemanticsNodes().isNotEmpty()
+            rule.onAllNodesWithText(GO_TO).fetchSemanticsNodes().isNotEmpty()
         }
-        // Close the keyboard before the frame: its contact-suggestion strip
-        // is not the app, and the store should not show it.
-        back()
-        captureScreen("04-search")
-        back()
+        rule.onAllNodesWithText(SEARCH_IN).onFirst().performClick()
+        rule.waitUntil(timeoutMillis = 10_000) {
+            rule.onAllNodesWithText(SOURCES).fetchSemanticsNodes().isNotEmpty()
+        }
+        // Close the keyboard before the frame: its contact-suggestion strip is
+        // not the app, and the store should not show it. An emulator with a
+        // hardware keyboard shows no IME at all, and a Back there closes the
+        // sheet instead, so the keyboard is dismissed by name.
+        androidx.test.espresso.Espresso.closeSoftKeyboard()
+        captureScreen("05-search")
+        leave("search-sheet")
 
-        // 7. The settings hub, through the sliders.
+        // 6. The page that explains the colors on the Quran's own line: seven
+        // families, each with its word and its rules.
+        openSettingsHub()
+        rule.onNodeWithTag("row-tajweed").performScrollTo().performClick()
+        rule.waitUntil(timeoutMillis = 15_000) {
+            rule.onAllNodesWithText(TAJWEED_FAMILY).fetchSemanticsNodes().isNotEmpty()
+        }
+        captureScreen("06-tajweed")
+        leave("settings-hub")
+
+        // 7. The reading at night: the other half of the app, and the frame
+        // most likely to show what the light page hides. The flip is the
+        // reader's own act, through Settings and Theme: a store write lands on
+        // the next launch, and this frame is taken inside this one. The store
+        // is set back in a finally as a second net, because every class in a
+        // run shares one process and one set of settings.
+        val store = io.github.muntasimulhaque.quran.data.SettingsStore(
+            InstrumentationRegistry.getInstrumentation().targetContext,
+        )
+        try {
+            chooseTheme(DARK)
+            waitForAReading()
+            hideChrome()
+            Thread.sleep(1_200)
+            capture("07-dark-reading")
+        } finally {
+            runCatching { chooseTheme(LIGHT) }
+            kotlinx.coroutines.runBlocking {
+                store.setTheme(io.github.muntasimulhaque.quran.data.AppTheme.Light)
+            }
+            Thread.sleep(600)
+        }
+
+        // 8. The recitation's own door, last: the pill's offer names the
+        // surah, the reciter, and the size before a tap, and it stays on the
+        // reading until the reader answers it.
+        openTheAyahActions()
+        rule.onAllNodesWithText(PLAY).onFirst().performClick()
+        waitForTag("listen-offer-bar", timeout = 30_000)
+        capture("08-listen-offer")
+    }
+
+    /**
+     * The hub, from the reading.
+     *
+     * A sheet that was left on a page comes back up on that page: the open
+     * page is written into the sheet's saved state so a language change does
+     * not lose the reader's place, and the same state is restored when the
+     * sheet is opened again in this window. The tour wants the index, so it
+     * takes the one step back when the page is what came up.
+     */
+    private fun openSettingsHub() {
+        waitForAReading()
         revealChrome()
         rule.onNodeWithContentDescription("Settings").performClick()
-        waitForTag("settings-hub")
-        captureScreen("05-settings")
-        back()
+        val raised = runCatching { waitForTag("settings-hub", timeout = 4_000) }.isSuccess
+        if (!raised) {
+            back()
+            waitForTag("settings-hub")
+        }
+    }
 
-        // 8. Browse, the surah list.
-        revealChrome()
-        rule.onNodeWithContentDescription("Browse the Quran").performClick()
-        waitForTag("browse-sheet")
-        captureScreen("06-browse")
-        back()
+    /** The theme page, reached the way a reader reaches it, and one ground. */
+    private fun chooseTheme(ground: String) {
+        openSettingsHub()
+        rule.onAllNodesWithText(THEME).onFirst().performScrollTo().performClick()
+        rule.waitUntil(timeoutMillis = 15_000) {
+            rule.onAllNodesWithText(ground).fetchSemanticsNodes().isNotEmpty()
+        }
+        rule.onAllNodesWithText(ground).onFirst().performClick()
+        leave("settings-hub")
+        // The reading under the sheet takes the new ground as it closes, and
+        // the first frame after a theme change is the one that repaints.
+        rule.waitForIdle()
+        Thread.sleep(900)
+    }
+
+    /** The ayah's actions, hung from the number at its head. */
+    private fun openTheAyahActions() {
+        var raised = false
+        repeat(3) {
+            if (raised) return@repeat
+            runCatching {
+                rule.onAllNodesWithText("2:255", substring = true).onFirst().performClick()
+            }
+            raised = runCatching {
+                rule.waitUntil(timeoutMillis = 20_000) {
+                    rule.onAllNodesWithText(TAFSIR).fetchSemanticsNodes().isNotEmpty()
+                }
+            }.isSuccess
+            if (!raised) back()
+        }
+        if (!raised) {
+            runCatching { capture("09-ayah-tap-failed") }
+            throw AssertionError("the ayah's tap did not raise the actions bar")
+        }
+    }
+
+    /**
+     * Puts a surface away however deep it stands: a page inside the settings
+     * sheet, a sheet over the reading, or a popup a sheet raised. Back is the
+     * one act every one of them answers, and the wait is on the surface that
+     * has to be gone rather than on a number of presses.
+     */
+    private fun leave(tag: String) {
+        repeat(3) {
+            if (rule.onAllNodesWithTag(tag, useUnmergedTree = true)
+                    .fetchSemanticsNodes().isEmpty()
+            ) {
+                return
+            }
+            back()
+        }
         rule.waitUntil(timeoutMillis = 10_000) {
-            rule.onAllNodesWithTag("browse-sheet", useUnmergedTree = true)
+            rule.onAllNodesWithTag(tag, useUnmergedTree = true)
                 .fetchSemanticsNodes().isEmpty()
         }
+        // The sheet's window outlives its semantics by its closing animation,
+        // and a tap on the paper while the scrim is still up lands on the
+        // scrim: the next step would then read a reading that never came.
+        Thread.sleep(900)
+    }
+
+    private companion object {
+        /** The menu rows and page names the tour stands on. */
+        const val TAFSIR = "Tafsir"
+        const val TAFSIR_SOURCE = "Ibn Kathir"
+        const val SHARE = "Share"
+        const val PLAY = "Play"
+        const val GO_TO = "Go to"
+        const val SEARCH_IN = "Search in"
+        const val SOURCES = "Quran text"
+        const val TAJWEED_FAMILY = "Silent letters"
+        const val THEME = "Theme"
+        const val DARK = "Dark"
+        const val LIGHT = "Light"
     }
 }
 
