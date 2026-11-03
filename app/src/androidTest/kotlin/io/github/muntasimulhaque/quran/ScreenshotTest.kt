@@ -452,7 +452,7 @@ class ScreenshotTest {
         rule.onAllNodesWithText(SHARE).onFirst().performClick()
         waitForTag("share-sheet", timeout = 30_000)
         captureScreen("03-share-card")
-        leave("share-sheet")
+        leave(SHARE_SHEET)
 
         // 4. The tafsir, open on its passage. One frame carries the card and
         // the commentary: the source line names the language and the
@@ -463,7 +463,7 @@ class ScreenshotTest {
         rule.onAllNodesWithText(TAFSIR_SOURCE, substring = true).onFirst().performClick()
         waitForTag("tafsir-panel", timeout = 30_000)
         captureScreen("04-tafsir")
-        leave("ayah-card")
+        leave(AYAH_CARD)
 
         // 5. Search that reads a reference, with the places it reads behind
         // the door: the one thing a reader cannot guess about this search is
@@ -487,7 +487,7 @@ class ScreenshotTest {
         // sheet instead, so the keyboard is dismissed by name.
         androidx.test.espresso.Espresso.closeSoftKeyboard()
         captureScreen("05-search")
-        leave("search-sheet")
+        leave(SEARCH_SHEET)
 
         // 6. The page that explains the colors on the Quran's own line: seven
         // families, each with its word and its rules.
@@ -497,7 +497,7 @@ class ScreenshotTest {
             rule.onAllNodesWithText(TAJWEED_FAMILY).fetchSemanticsNodes().isNotEmpty()
         }
         captureScreen("06-tajweed")
-        leave("settings-hub")
+        leave(SETTINGS_SHEET)
 
         // 7. The reading at night: the other half of the app, and the frame
         // most likely to show what the light page hides. The flip is the
@@ -515,11 +515,17 @@ class ScreenshotTest {
             Thread.sleep(1_200)
             capture("07-dark-reading")
         } finally {
-            runCatching { chooseTheme(LIGHT) }
+            // The light page is a promise to the frame after this one and to
+            // every class after this one: a run shares one process and one set
+            // of settings. The store is written first, so the next launch is
+            // the day whatever else happens here, and the way back is then
+            // taken in the open. A restore that quietly did not happen once
+            // left the recitation's frame on the night page and the leg green.
             kotlinx.coroutines.runBlocking {
                 store.setTheme(io.github.muntasimulhaque.quran.data.AppTheme.Light)
             }
-            Thread.sleep(600)
+            chooseTheme(LIGHT)
+            Thread.sleep(800)
         }
 
         // 8. The recitation's own door, last: the pill's offer names the
@@ -534,22 +540,43 @@ class ScreenshotTest {
     /**
      * The hub, from the reading.
      *
-     * A sheet that was left on a page comes back up on that page: the open
-     * page is written into the sheet's saved state so a language change does
-     * not lose the reader's place, and the same state is restored when the
-     * sheet is opened again in this window. The tour wants the index, so it
-     * takes the one step back when the page is what came up.
+     * A closed sheet forgets the page it was on: opening a sheet clears the
+     * saved state it left behind (see `openSheet` in the reading), so the mark
+     * always rises on the index. A page that rose instead is a real failure and
+     * ends this helper at once.
+     *
+     * The press itself needs more than one try. The bar is summoned and steps
+     * back on its own timer, so a press can land on a mark that is already
+     * fading; the retry re-summons the bar and presses again. The wait after
+     * each press is longer than the sheet's rise, so a press that worked is
+     * never followed by a second one on top of an open sheet.
      */
     private fun openSettingsHub() {
-        waitForAReading()
-        revealChrome()
-        rule.onNodeWithContentDescription("Settings").performClick()
-        val raised = runCatching { waitForTag("settings-hub", timeout = 4_000) }.isSuccess
-        if (!raised) {
-            back()
-            waitForTag("settings-hub")
+        repeat(3) {
+            if (hubIsUp()) return
+            if (pageIsUp()) {
+                throw AssertionError("the settings sheet rose on a page, not on the index")
+            }
+            waitForAReading()
+            revealChrome()
+            runCatching {
+                rule.onNodeWithContentDescription("Settings").performClick()
+            }
+            Thread.sleep(1_400)
+        }
+        if (!hubIsUp()) {
+            throw AssertionError("the settings sheet did not rise on the index")
         }
     }
+
+    private fun hubIsUp(): Boolean = rule
+        .onAllNodesWithTag("settings-hub", useUnmergedTree = true)
+        .fetchSemanticsNodes().isNotEmpty()
+
+    /** A page's own way back is the one mark the index does not draw. */
+    private fun pageIsUp(): Boolean = rule
+        .onAllNodesWithContentDescription(BACK)
+        .fetchSemanticsNodes().isNotEmpty()
 
     /** The theme page, reached the way a reader reaches it, and one ground. */
     private fun chooseTheme(ground: String) {
@@ -559,7 +586,10 @@ class ScreenshotTest {
             rule.onAllNodesWithText(ground).fetchSemanticsNodes().isNotEmpty()
         }
         rule.onAllNodesWithText(ground).onFirst().performClick()
-        leave("settings-hub")
+        // The swatch takes a frame to repaint, and the sheet has to be gone
+        // before the reading behind it can be photographed.
+        Thread.sleep(900)
+        leave(SETTINGS_SHEET)
         // The reading under the sheet takes the new ground as it closes, and
         // the first frame after a theme change is the one that repaints.
         rule.waitForIdle()
@@ -588,27 +618,40 @@ class ScreenshotTest {
     }
 
     /**
-     * Puts a surface away however deep it stands: a page inside the settings
-     * sheet, a sheet over the reading, or a popup a sheet raised. Back is the
-     * one act every one of them answers, and the wait is on the surface that
-     * has to be gone rather than on a number of presses.
+     * Puts a sheet away however deep it stands, and waits for its window.
+     *
+     * The sheet is watched by the name it gives its own window
+     * (`paneTitle`), not by a tag inside it: the settings hub's tag is gone the
+     * moment a page opens, so a helper watching it returned with the sheet
+     * still up and the next step pressed marks behind the scrim. Back is the
+     * one act a page and a sheet both answer, and the wait is on the surface
+     * that has to be gone rather than on a number of presses.
      */
-    private fun leave(tag: String) {
+    private fun leave(sheet: String) {
         repeat(3) {
-            if (rule.onAllNodesWithTag(tag, useUnmergedTree = true)
-                    .fetchSemanticsNodes().isEmpty()
-            ) {
+            if (!sheetIsUp(sheet)) {
+                settle()
                 return
             }
             back()
+            Thread.sleep(700)
         }
-        rule.waitUntil(timeoutMillis = 10_000) {
-            rule.onAllNodesWithTag(tag, useUnmergedTree = true)
-                .fetchSemanticsNodes().isEmpty()
+        if (sheetIsUp(sheet)) {
+            throw AssertionError("the $sheet sheet stayed up")
         }
-        // The sheet's window outlives its semantics by its closing animation,
-        // and a tap on the paper while the scrim is still up lands on the
-        // scrim: the next step would then read a reading that never came.
+        settle()
+    }
+
+    private fun sheetIsUp(sheet: String): Boolean = rule.onAllNodes(
+        SemanticsMatcher.expectValue(SemanticsProperties.PaneTitle, sheet),
+    ).fetchSemanticsNodes().isNotEmpty()
+
+    /**
+     * The sheet's window outlives its semantics by its closing animation, and a
+     * tap on the paper while the scrim is still up lands on the scrim: the next
+     * step would then read a reading that never came.
+     */
+    private fun settle() {
         Thread.sleep(900)
     }
 
@@ -623,6 +666,11 @@ class ScreenshotTest {
         const val SOURCES = "Quran text"
         const val TAJWEED_FAMILY = "Silent letters"
         const val THEME = "Theme"
+        const val BACK = "Back"
+        const val SETTINGS_SHEET = "Settings"
+        const val SEARCH_SHEET = "Search"
+        const val SHARE_SHEET = "Share ayah"
+        const val AYAH_CARD = "Tafsir"
         const val DARK = "Dark"
         const val LIGHT = "Light"
     }
