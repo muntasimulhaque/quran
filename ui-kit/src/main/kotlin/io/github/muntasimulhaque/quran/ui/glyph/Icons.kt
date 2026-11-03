@@ -56,12 +56,15 @@ object GlyphSize {
     val Check = 14.dp
 
     /**
-     * The removing mark inside a recent chip's own 36 dp capsule. The search
-     * field's clear mark is [Control]'s 24 dp inside a 48 dp field, half the
-     * field's height; a chip's X is half the capsule's height, so it scales
-     * with the shape it sits in instead of filling it. At 24 dp in a 36 dp
-     * capsule the X stood two thirds of the chip's height and read as loud as
-     * the query beside it (owner decision, this session).
+     * The removing mark inside a recent chip's capsule. The search field's
+     * clear mark is [Control]'s 24 dp inside a 48 dp field, half the field's
+     * height. The chip's capsule is the label's line plus 8 dp above and
+     * below, so it is 36 dp at the default and its X is half of that. The
+     * mark stays 18 dp at a larger system font scale while the capsule and
+     * the target grow around it, because a mark is a fixed drawing and the
+     * word beside it is the thing that scales (owner decision, this session).
+     * At 24 dp it stood two thirds of the default capsule and read as loud as
+     * the query beside it.
      */
     val ChipRemove = 18.dp
 }

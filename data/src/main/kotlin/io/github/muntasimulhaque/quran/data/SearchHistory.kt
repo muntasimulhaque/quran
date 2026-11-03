@@ -11,8 +11,8 @@ import java.util.Locale
  * when a result is opened, never when a key is typed: a half-typed word is not
  * a search, and a list of them is a list of nothing. Five at most, newest
  * first, and one spelling per query, because the same word typed in two cases
- * is one word. The reader can clear the list in the sheet, and the app never
- * sends it anywhere (owner decision, this session).
+ * is one word. The reader can forget a word in the sheet, and the app never
+ * sends the list anywhere (owner decision, this session).
  *
  * The arithmetic lives in [RecentQueries] rather than here, so a machine with
  * no screen pins the cap, the dedupe, and the round trip; this class is only
@@ -46,17 +46,6 @@ class SearchHistory(context: Context) {
     fun clear(): List<String> {
         write(emptyList())
         return emptyList()
-    }
-
-    /**
-     * The list put back exactly as it was, for an Undo after Clear. The list
-     * came from [read], so the same cleaning is a round trip and the restored
-     * words are the words the reader saw (owner decision, this session).
-     */
-    fun restore(queries: List<String>): List<String> {
-        val next = RecentQueries.decode(RecentQueries.encode(queries))
-        write(next)
-        return next
     }
 
     private fun write(queries: List<String>) {

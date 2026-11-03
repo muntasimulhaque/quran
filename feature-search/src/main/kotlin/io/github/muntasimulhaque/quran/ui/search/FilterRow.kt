@@ -210,6 +210,7 @@ internal fun FilterRow(
     val expanded = stringResource(R.string.search_filter_state_expanded)
     val collapsed = stringResource(R.string.search_filter_state_collapsed)
     val press = remember { MutableInteractionSource() }
+    val chip = chipMeasure()
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -297,13 +298,13 @@ internal fun FilterRow(
                         .fillMaxWidth()
                         .padding(top = Space.Line),
                     horizontalArrangement = Arrangement.spacedBy(Space.Line),
-                    // A chip is a 36 dp pill inside a 48 dp target, so the row gap
-                    // the eye reads is this spacing plus the 6 dp of target above
-                    // and below each pill. The flow's own 8 dp made that gap 24 dp
-                    // against the columns' 8 dp (owner report); 0 here leaves a
-                    // 12 dp block break between rows while the chips keep the
-                    // 36 dp size the ladder gives them.
-                    verticalArrangement = Arrangement.spacedBy(0.dp),
+                    // The chip's pill is the label's line plus 8 dp above and
+                    // below, and its target is at least 48 dp. The measure
+                    // gives the flow the gap the target's air does not
+                    // already leave, so two rows of capsules stand Space.Row
+                    // apart, or the target air where that is more (owner
+                    // decision, this session).
+                    verticalArrangement = Arrangement.spacedBy(chip.rowGap),
                 ) {
                     offered.forEach { source ->
                         FilterChip(source.label, source.on) { on -> onChange(source.set(on)) }

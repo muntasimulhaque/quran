@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -33,13 +34,12 @@ import org.junit.runner.RunWith
  * empty sheet now hands the last few back as chips. The list is written when
  * a result is opened and not when a key is typed, which the pure tests in
  * `data` pin; this test pins that the sheet draws the list, that a chip puts
- * its query back in the field, and that Clear empties the list on the phone
- * as well as on the glass (owner decision, this session).
+ * its query back in the field, and that a chip's own X takes that word from
+ * the phone while the others stay (owner decision, this session).
  *
- * A chip can also go on its own: its X is always visible at the trailing end
- * of the capsule, and a tap on it takes the one word from the phone while the
- * others stay, which is the per query door Clear never was (owner decision,
- * this session).
+ * The X is the only removal: a chip goes on its own, with its X at the
+ * trailing end of the capsule, so a reader who wants to forget a word does
+ * not have to discover a long press (owner decision, this session).
  */
 @RunWith(AndroidJUnit4::class)
 class RecentSearchesTest {
@@ -143,41 +143,35 @@ class RecentSearchesTest {
         )
     }
 
-    @Test
-    fun clearEmptiesTheListOnThePhone() {
-        openSearch()
-        rule.waitUntil(timeoutMillis = 15_000) {
-            rule.onAllNodesWithText("Recent searches").fetchSemanticsNodes().isNotEmpty()
-        }
-        rule.onNodeWithText("Clear all").performClick()
-        rule.waitUntil(timeoutMillis = 15_000) {
-            rule.onAllNodesWithText("Recent searches").fetchSemanticsNodes().isEmpty()
-        }
-        assertTrue(SearchHistory(context).read().isEmpty())
-    }
-
     /**
-     * Clear all gives the words back.
+     * The caption belongs to its chips, not to the filter door above.
      *
-     * The search history is the reader's own work, and every other removal in
-     * the app can be undone; the sheet carries its own snackbar, so a tap that
-     * looked like the wrong one can be taken back without leaving the sheet
-     * (owner decision, this session).
+     * The door's 48 dp target already spends its own air below the words, and
+     * the block used to add a Section on top of that, so the caption stood
+     * about twice as far from the door as the door is from the field. The
+     * caption now opens at Space.Line, one row break under the door (owner
+     * decision, this session).
      */
     @Test
-    fun clearAllOffersTheWordsBack() {
+    fun theCaptionStandsWithItsChips() {
         openSearch()
         rule.waitUntil(timeoutMillis = 15_000) {
             rule.onAllNodesWithText("Recent searches").fetchSemanticsNodes().isNotEmpty()
         }
-        rule.onNodeWithText("Clear all").performClick()
-        rule.waitUntil(timeoutMillis = 15_000) {
-            rule.onAllNodesWithText("Undo").fetchSemanticsNodes().isNotEmpty()
-        }
-        rule.onNodeWithText("Undo").performClick()
-        rule.waitUntil(timeoutMillis = 15_000) {
-            rule.onAllNodesWithText("mercy").fetchSemanticsNodes().isNotEmpty()
-        }
-        assertEquals("the words are back on the phone", listOf("mercy"), SearchHistory(context).read())
+        val door = rule.onNodeWithText("Search in", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
+        val caption = rule.onNodeWithText("Recent searches", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
+        // The door's line ends 8 dp above its content, the 48 dp target adds
+        // 6 under it, the row adds 4, and the caption opens with Space.Line:
+        // 26 dp. The text's own line box adds about a dp to the drawn
+        // bounds, so the tolerance is the line's, not the layout's. The block
+        // used to open with a Section on top of that air.
+        assertEquals(
+            "the caption sits one row break under the filter door",
+            26f,
+            (caption.top - door.bottom).value,
+            2f,
+        )
     }
 }

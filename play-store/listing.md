@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 15.0 (versionCode 152)
+Version: 15.1 (versionCode 153)
 
 ## Listing
 
@@ -192,6 +192,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (15.1, 431 characters)
+15.1 quiets the search sheet and the tafsir card. Recent searches lose Clear all: every word keeps its own visible X, and the caption sits with its chips. The chips now grow with the system text size instead of clipping, and the filter chips keep their row gap at large text. A tafsir passage now ends on the card's block break, so the next language no longer reads as its caption. Text, translations, tafsirs, and packs unchanged.
 
 ## Release notes (14.9, 393 characters)
 14.9 makes every pack's state visible. A translation or tafsir you never chose now wears an empty ring, not a blank column, and after Remove its row is an off checkbox. Add and Retry are pills on the same rail as Remove, with the same shape and type, so one row's two states share one grammar. A downloaded surah's Remove follows that rail. The reading, text, packs, and content are unchanged.

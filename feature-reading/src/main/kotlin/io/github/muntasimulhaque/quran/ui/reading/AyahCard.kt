@@ -294,7 +294,19 @@ fun AyahCard(
                         selectionClearer = selectionClearer,
                     )
                 } else {
+                    // A source that ends in a passage leaves one more
+                    // [Space.Row] before the next source's door, so the last
+                    // prose line and the next language label stand the card's
+                    // block break apart, about 26 dp, instead of only the foot
+                    // of the next row. The passage's foot used to be 0, and
+                    // the next door's own head made the end of a source closer
+                    // to the next one than two doors are to each other (owner
+                    // decision, this session).
+                    var passageOpen = false
                     orderedPacks.forEach { pack ->
+                        if (passageOpen) {
+                            Spacer(Modifier.height(Space.Row))
+                        }
                         val open = door?.id == pack.id
                         // The tafsir's own name, in the reader's language,
                         // under the language it is in.
@@ -306,6 +318,7 @@ fun AyahCard(
                             open = open,
                             onClick = { door = if (open) null else pack },
                         )
+                        passageOpen = open
                         if (open) {
                             PassageArea(
                                 view = passages[pack.id],
@@ -372,10 +385,11 @@ private fun DoorRow(
             .semantics {
                 if (state != null) stateDescription = state
             }
-            // The row's own room is the app's row gap, not the block gap: two
-            // doors stand 24 dp apart (12 above and 12 below each), the room
-            // the card keeps between two things of one kind, and the sheet's
-            // name sits closer to the first door than a section break
+            // The row's own room is the app's row gap, not the block gap: the
+            // sheet row keeps its own 2 dp card gap, and each door keeps 12
+            // above and below, so two doors' heads stand about 28 dp apart,
+            // the room the card keeps between two things of one kind; the
+            // sheet's name sits closer to the first door than a section break
             // (owner decision, this session).
             .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = Space.Row),
         verticalAlignment = Alignment.CenterVertically,

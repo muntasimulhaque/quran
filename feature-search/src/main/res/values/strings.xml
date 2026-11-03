@@ -7,8 +7,6 @@
     <string name="search_empty_body">Type any word, in Arabic or in the language you read in. A reference like 2:255 or kahf&#160;10 goes straight to an ayah.</string>
     <string name="search_empty_body_quran">Type any word from the Quran. A reference like 2:255 or kahf&#160;10 goes straight to an ayah.</string>
     <string name="search_recent_title">Recent searches</string>
-    <string name="search_recent_clear">Clear all</string>
-    <string name="search_recent_cleared">Recent searches cleared</string>
     <string name="search_recent_remove_named">Remove %1$s</string>
     <string name="search_status_searching">Searching…</string>
     <string name="search_status_failed">The search could not finish.</string>
