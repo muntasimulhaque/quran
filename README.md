@@ -4,13 +4,19 @@ A free, open source Quran reader for Android. It opens where you left off
 and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 15.1 (versionCode 153) is on Play, built by CI run 41641937581 on
-main from `cfca1d816626a19987077854ecd5f23c6640cb66` and taken from that run's
-signed bundle `quran-15.1-vc153.aab` (12,885,566 bytes, SHA-256
-`1c5908c78f1e886a153c46a436b76b1ca7ec55becf2069296758adb4a30bd38c`,
-certificate `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`),
-green in all five jobs: 191 app tests across two shards and 55 data tests.
-Content 1.5.0, `content-db-12c95dbe`.
+**Status:** 15.2 (versionCode 154) is built, signed, and ready to submit,
+and its bundle is `quran-15.2-vc154.aab` (12,872,032 bytes, SHA-256
+`4ef1974b9fce98dfaa0ba67f57af7cb0c4fc5d9421b666a0cdf9a46d7019f850`,
+`jar verified`, certificate
+`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`),
+built by CI run 41690302010 on main from
+`7e6648b6` and taken from that run's `quran-signed-aab` artifact. All five
+jobs were green. The store set is from capture run 41690301971: all three legs
+green, eight frames each, every frame read, and no frame carries the version
+line any more, because the settings hub is not one of the eight. Content 1.5.0,
+the database `content-db-12c95dbe`. Owner gates: checkdb, audit, search, fonts,
+and packs are green; verify reports the three raw exports that were already on
+this machine, while the shipped content is unchanged.
 
 **In 15.2.** Settings becomes one list. A row says where a setting stands and
 opens the page that changes it, so the four reading rows are no longer half a

@@ -133,14 +133,12 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The eight were rebuilt with the settings index: the set is no longer the
-app's own map but a reader's path through it, and it is the first set to show
-the card the app hands out and the page that explains the colors on the
-Quran's own line. The tour was run on all three profiles on the machine that
-built it, eight frames each, every frame green and read; this folder still
-carries the previous set (capture run 41641937540 on 15.1), which the new
-settings hub has dated, and the next capture run on `main` replaces it whole.
-Collect that run's artifacts, not this folder's older files.
+The set is from capture run 41690301971 on 15.2: all three legs green on the
+first pass, eight frames each, every frame read. The eight are a reader's path
+through the app rather than the app's own map, and they are the first set to
+show the card the app hands out and the page that explains the colors on the
+Quran's own line. No frame carries the version line any more, because the
+settings hub is not one of the eight.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
