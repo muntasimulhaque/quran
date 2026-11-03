@@ -1,8 +1,10 @@
 package io.github.muntasimulhaque.quran
 
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -67,18 +69,21 @@ class SettingsMergeTest {
     @get:Rule
     val rule: TestRule = RuleChain.outerRule(library).around(compose)
 
+    /**
+     * The row is the door, and it is the only one.
+     *
+     * The hub used to carry a switch and a chevron side by side, with the
+     * chevron holding a spoken name of its own. The row is one door now: it
+     * says the setting and where it stands, and a tap anywhere on it lands on
+     * the list (owner decision, this session).
+     */
     @Test
-    fun theTranslationSwitchCarriesItsOwnDoor() {
+    fun theTranslationRowIsTheDoor() {
         openSettings()
-        val title = compose.activity.getString(SettingsR.string.settings_show_translation_title)
+        val title = compose.activity.getString(SettingsR.string.settings_row_translation)
+        compose.onNodeWithTag("row-translation").assertIsDisplayed()
         compose.onNodeWithText(title).assertIsDisplayed()
-
-        // The door beside the switch is named for what it opens, and the
-        // row's spoken name now also carries the title and the subtitle so a
-        // screen reader does not lose the state under the switch.
-        val door = compose.activity.getString(SettingsR.string.settings_open_translations)
-        compose.onNodeWithContentDescription(door, substring = true).assertIsDisplayed()
-        compose.onNodeWithContentDescription(door, substring = true).performClick()
+        compose.onNodeWithTag("row-translation").performClick()
 
         // And it lands on the translations themselves, not on another hub.
         compose.waitUntil(timeoutMillis = 15_000) {
@@ -87,9 +92,9 @@ class SettingsMergeTest {
     }
 
     /**
-     * The old duplication is gone: there is no hub row that opens the
-     * Translations page a second time under a different name. The page's own
-     * title is on screen once, as the head of the page the door opened.
+     * The hub is an index: it names the page and never draws the list itself.
+     * The page's own title is on screen once, as the head of the page the row
+     * opened.
      */
     @Test
     fun theTranslationListIsNotRepeatedInTheHub() {
@@ -98,42 +103,39 @@ class SettingsMergeTest {
             compose.activity.getString(SettingsR.string.settings_title_translations),
         ).fetchSemanticsNodes().size
         assertTrue(
-            "the hub must not carry the Translations row as well as the switch",
+            "the hub must not carry the Translations list as well as its row",
             hubRows == 0,
         )
     }
 
     /**
-     * The page carries the same switch as the row that opened it.
+     * The page owns the switch, and the hub row reads what the page wrote.
      *
-     * It is not a second setting: the page reads the value the hub row shows
-     * and writes it where the row reads it. Turning the reading off here is
-     * what the row says when the reader goes back (owner decision, this
-     * session).
+     * The row is an index line and the switch is the page's, so the two cannot
+     * disagree by construction: the row's value is computed from the same
+     * setting the switch writes. Turning the reading off here is what the row
+     * says when the reader goes back (owner decision, this session).
      */
     @Test
-    fun thePageCarriesTheSwitchesOtherHand() {
+    fun thePageSwitchIsWhatTheRowReadsBack() {
         openSettings()
-        val door = compose.activity.getString(SettingsR.string.settings_open_translations)
-        compose.onNodeWithContentDescription(door, substring = true).performClick()
+        compose.onNodeWithTag("row-translation").performClick()
         compose.waitUntil(timeoutMillis = 15_000) {
             compose.onAllNodesWithText("Saheeh International").fetchSemanticsNodes().isNotEmpty()
         }
-        // The page's switch reads the state the row left, and writes the same
-        // value the row writes. The tap is a finger on the switch, which the
-        // row underneath it answers: the row is the control and the switch is
-        // its picture.
-        compose.onNodeWithTag("switch-translation-page", useUnmergedTree = true)
+        // A finger on the drawn switch: the row underneath it is the control,
+        // and the switch is its picture.
+        compose.onNodeWithTag("switch-translation-page-mark", useUnmergedTree = true)
             .performTouchInput { click() }
         compose.waitUntil(timeoutMillis = 15_000) {
             runBlocking { !SettingsStore(context).settings.first().showTranslation }
         }
-        // Back on the hub, the row's own switch reads the same answer.
+        // Back on the hub, the row's value says Off.
         InstrumentationRegistry.getInstrumentation()
             .sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK)
         Thread.sleep(700)
-        compose.onNodeWithTag("switch-translation", useUnmergedTree = true)
-            .assertIsOff()
+        compose.onNodeWithTag("row-translation")
+            .assert(hasText(compose.activity.getString(SettingsR.string.settings_state_off)))
     }
 
     private fun openSettings() {

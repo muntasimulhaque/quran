@@ -6,6 +6,8 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -108,14 +110,22 @@ class SemanticsTest {
         Espresso.pressBack()
         waitForTagGone("search-sheet")
 
-        // A switch row is two controls: the door says what it opens, the
-        // switch says what it switches and carries the value under it.
+        // The hub is an index and its row is one door that says where the
+        // setting stands; the switch belongs to the page, where it is one
+        // control that carries its own name and value.
         revealChrome()
         compose.onNodeWithContentDescription("Settings").performClick()
         waitForTag("settings-hub")
-        compose.onNodeWithContentDescription("Choose translations").assertExists()
-        compose.onNodeWithTag("switch-translation")
-            .assert(hasContentDescription("Show translation. Saheeh International"))
+        compose.onNodeWithTag("row-translation")
+            .assert(hasText("Translation"))
+            .assert(hasText("Saheeh International"))
+        compose.onNodeWithTag("row-translation").performClick()
+        waitForTag("switch-translation-page")
+        compose.onNodeWithTag("switch-translation-page")
+            .assert(hasText("Show translation"))
+            .assert(hasText("Saheeh International"))
+            .assert(isToggleable())
+        Espresso.pressBack()
         Espresso.pressBack()
         waitForTagGone("settings-hub")
 

@@ -4,12 +4,14 @@ import android.graphics.Bitmap
 import android.text.format.DateFormat
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onAllNodesWithContentDescription
@@ -121,30 +123,29 @@ class DailyAyahToggleTest {
     val rule: TestRule = RuleChain.outerRule(library).around(compose)
 
     @Test
-    fun theSwitchIsTheSwitchAndTheRowIsTheDoor() {
+    fun theRowIsTheDoorAndThePageCarriesTheSwitch() {
         openSettings()
         val title = compose.activity.getString(SettingsR.string.settings_daily_title)
 
-        // The switch turns the reminder on, and only the switch does.
-        compose.onNodeWithTag("switch-daily").performClick()
-        compose.waitUntil(timeoutMillis = 15_000) {
-            runBlocking { readSettings().dailyAyah }
-        }
-
-        // The row is a door: it opens the page and it does not toggle. If it
-        // toggled as well, the switch would read off again and the page would
-        // come up with the reminder it was meant to be setting turned off.
-        // The page carries the moment and the same switch at its top, and its
-        // own mark is what the wait holds on to.
-        compose.onNodeWithText(title).performClick()
+        // The row is a door: it opens the page and it does not toggle. The
+        // hub is an index and carries no switch at all, so a reader who came
+        // to look at the reminder cannot set it by looking.
+        compose.onNodeWithTag("row-daily").performClick()
         compose.waitUntil(timeoutMillis = 15_000) {
             compose.onAllNodesWithTag("daily-page", useUnmergedTree = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
         assertTrue(
             "opening the page must not change the setting",
-            runBlocking { readSettings().dailyAyah },
+            runBlocking { !readSettings().dailyAyah },
         )
+
+        // The page's own switch turns the reminder on, and it is the only
+        // thing here that does.
+        compose.onNodeWithTag("switch-daily-page", useUnmergedTree = true).performClick()
+        compose.waitUntil(timeoutMillis = 15_000) {
+            runBlocking { readSettings().dailyAyah }
+        }
 
         // The page carries the moment, in the reader's own time format. The
         // digits are the interface's, so the assertion is on the numbers and
@@ -170,10 +171,20 @@ class DailyAyahToggleTest {
     fun theHubRowSaysTheMomentItWillArrive() {
         openSettings()
         val title = compose.activity.getString(SettingsR.string.settings_daily_title)
-        compose.onNodeWithTag("switch-daily").performClick()
-        // The subtitle is the time itself, so the reader can see the moment
-        // without opening the page for it. The digits are the interface's, so
-        // the assertion is on the numbers and not on a 12 or 24 hour choice.
+        // The reminder is set on its page, and the index row reads the moment
+        // back, so the reader can see when it arrives without opening the page
+        // again. The digits are the interface's, so the assertion is on the
+        // numbers and not on a 12 or 24 hour choice.
+        compose.onNodeWithTag("row-daily").performClick()
+        compose.waitUntil(timeoutMillis = 15_000) {
+            compose.onAllNodesWithTag("daily-page", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("switch-daily-page", useUnmergedTree = true).performClick()
+        compose.waitUntil(timeoutMillis = 15_000) {
+            runBlocking { readSettings().dailyAyah }
+        }
+        back()
         compose.waitUntil(timeoutMillis = 15_000) {
             compose.onAllNodesWithText("8:00", substring = true).fetchSemanticsNodes().isNotEmpty()
         }
@@ -181,12 +192,12 @@ class DailyAyahToggleTest {
     }
 
     /**
-     * The page's switch is the same reminder as the hub's.
+     * The page owns the switch, and the hub row reads what it wrote.
      *
-     * One value in two places: the row that opened the page carries a switch,
-     * and the page carries the same one at its top. A reader who tapped the
-     * words to flip it lands here and finds the switch they meant, and turning
-     * it off here turns it off on the hub too (owner decision, this session).
+     * One value in two places: the page turns the reminder on, and the index
+     * row says the moment it will arrive. A reader who taps the row lands on
+     * the switch they came for, and turning it on there is what the row says
+     * when they go back (owner decision, this session).
      */
     @Test
     fun thePageSwitchIsTheSameReminder() {
@@ -203,11 +214,12 @@ class DailyAyahToggleTest {
         compose.waitUntil(timeoutMillis = 15_000) {
             runBlocking { readSettings().dailyAyah }
         }
-        // Back on the hub, the row's own switch reads the same answer.
+        // Back on the hub, the index row reads the same answer: the moment it
+        // will arrive, in place of Off.
         back()
-        compose.onNodeWithTag("switch-daily", useUnmergedTree = true)
+        compose.onNodeWithTag("row-daily")
             .performScrollTo()
-            .assertIsOn()
+            .assert(hasText("8:00", substring = true))
     }
 
     /**
@@ -353,7 +365,7 @@ class DailyAyahToggleTest {
         }
         // The daily row sits below the fold on the phone profile, so it is
         // scrolled to before it is read or tapped.
-        compose.onNodeWithTag("switch-daily").performScrollTo()
+        compose.onNodeWithTag("row-daily").performScrollTo()
         Thread.sleep(400)
     }
 }

@@ -117,92 +117,45 @@ fun PageHeader(title: String, onBack: () -> Unit) {
 }
 
 /**
- * Material 3's switch is one track wide, and a row that draws a switch
- * reserves that exact width for it, so every switch in the sheet ends at one
- * line at the row's own margin.
+ * The mark a settings row ends with: the chevron, when the row opens a page.
  *
- * The number is kept here, beside the code that reserves it, and
- * [SettingsRowAlignmentTest] measures the real control against it. A Material
- * release that widens the track therefore fails there, where the fix is one
- * number, instead of quietly pushing every switch out of its own column and
- * leaving it overlapping the chevron in front of it, which is what a track
- * wider than its slot does (found by that test, thirty-seventh session).
- */
-val SwitchSlot = 52.dp
-
-/**
- * The 48 dp a control owes a finger, and the height the switch's own target
- * keeps even though it no longer sets its row's height (owner decision, this
- * session). Material's switch draws this itself; the number is here because
- * the row now measures the target and reports its words, so a release that
- * shrank the target would quietly shrink the finger's room with it.
- */
-private val SwitchTarget = 48.dp
-
-/**
- * The marks a settings row ends with, in the order a row's own hands read
- * them: the chevron's column, then the switch's.
+ * The chevron is a picture of where a tap goes and not a control of its own.
+ * The whole row is the door, so the row is one stop to a screen reader and the
+ * mark takes no name. A row that also carried a switch used to read as a pair
+ * of marks; the hub carries no switch now, so a row's last mark is either the
+ * chevron or the switch, never both (owner decision, this session).
  *
- * The switch's column exists on a row that has a switch and on no other row.
- * The chevron's column exists on a row that draws a chevron and on no other
- * row: a row with nowhere to switch to keeps no empty room for one, so the
- * chevron in it is the row's last mark, and the mark itself stands on the
- * margin where a switch's own right edge stands rather than in the middle of
- * an empty column in front of it (owner report: the column had moved and left
- * the mark centred inside it).
+ * The slot is 48 dp wide and a width and not a height: a square tail is taller
+ * than the line of text beside it, and a Row takes the height of its tallest
+ * child, so a square stretched every plain row and turned the hub into a
+ * ladder (owner report). The row owes the finger its 48 dp from its own target.
  *
- * Every switch ends at the row's own margin, with or without a chevron in
- * front of it, and that is the whole of the alignment: both columns are read
- * from their right edges, and a right edge never moves.
+ * The mark stands at the end of its slot, so its right edge is the row's own
+ * margin: that is exactly where a switch's right edge stands in the row below
+ * it, and the two kinds of tail keep one line down the sheet.
  */
 @Composable
-internal fun RowTail(
-    chevron: Boolean,
-    switch: (@Composable () -> Unit)? = null,
-) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        ChevronSlot(
-            visible = chevron,
-            // The row's last mark is the one nearest the reader's margin: a
-            // row with a switch reads its chevron against the switch's own
-            // column, and a row without one has nothing after it but the
-            // margin, so its chevron stands on the margin (owner report).
-            contentAlignment = if (switch == null) {
-                Alignment.CenterEnd
-            } else {
-                Alignment.Center
-            },
+internal fun RowTail(chevron: Boolean) {
+    if (!chevron) return
+    Box(
+        modifier = Modifier
+            .width(48.dp)
+            // The slot, not the mark: a mark is centred in its slot, so the
+            // slot's edges are what a row's alignment is about. The tag is on
+            // a row that draws a chevron only, so a count of them is a count
+            // of the rows that have a door (owner report).
+            .testTag("chevron-slot"),
+        contentAlignment = Alignment.CenterEnd,
+    ) {
+        IconGlyph(
+            icon = Icon.Chevron,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .size(GlyphSize.ChevronRow)
+                // The mark says where a tap goes: the chevron points the way
+                // the page slides in, to the right.
+                .rotate(-90f)
+                .testTag("row-chevron"),
         )
-        if (switch != null) {
-            Box(
-                modifier = Modifier
-                    .width(SwitchSlot)
-                    // The switch owes the finger its 48 dp target, and it does
-                    // not owe the row its height. A row that carries a switch
-                    // used to stand 48 dp tall inside its padding, 13 dp more
-                    // than a row whose tallest part is its own two lines, and
-                    // the hub read as two rhythms alternating down the sheet
-                    // (owner report, this session). The target is laid out on
-                    // the row's own middle and takes no height of its own: the
-                    // 6.6 dp it reaches past the words on each side stand in
-                    // the row's 12 dp padding, where there is room for them,
-                    // and the row's height is its words'. The target itself is
-                    // unchanged, and the accessibility test still measures it.
-                    .layout { measurable, constraints ->
-                        val target = SwitchTarget.roundToPx().coerceAtMost(constraints.maxHeight)
-                        val placeable = measurable.measure(
-                            constraints.copy(
-                                minHeight = maxOf(constraints.minHeight, target),
-                            ),
-                        )
-                        layout(placeable.width, 0) {
-                            placeable.place(0, -placeable.height / 2)
-                        }
-                    },
-                contentAlignment = Alignment.CenterEnd,
-            ) {
-                switch()
-            }
-        }
     }
 }

@@ -92,10 +92,6 @@ class LargeTextTest {
                             notificationsBlocked = false,
                             exactGrantWithheld = false,
                             packSetup = null,
-                            onShowTranslation = {},
-                            onWordByWord = {},
-                            onTajweed = {},
-                            onDailyAyah = {},
                             onOpen = {},
                         )
                     }

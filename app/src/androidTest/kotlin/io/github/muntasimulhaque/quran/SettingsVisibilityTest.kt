@@ -82,11 +82,17 @@ class SettingsVisibilityTest {
         compose.onNodeWithContentDescription(compose.activity.getString(R.string.action_settings))
             .performClick()
         compose.waitUntil(timeoutMillis = 15_000) {
-            compose.onAllNodesWithText(compose.activity.getString(
-                io.github.muntasimulhaque.quran.feature.settings.R.string.settings_show_translation_title,
-            )).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithTag("row-translation", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithTag("switch-translation").performClick()
+        // The hub is an index; the switch is on the page the row opens.
+        compose.onNodeWithTag("row-translation").performClick()
+        compose.waitUntil(timeoutMillis = 15_000) {
+            compose.onAllNodesWithTag("switch-translation-page", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("switch-translation-page").performClick()
+        back()
         back()
 
         compose.waitUntil(timeoutMillis = 30_000) {

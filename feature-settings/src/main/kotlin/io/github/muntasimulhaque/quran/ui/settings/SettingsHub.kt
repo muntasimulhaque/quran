@@ -22,7 +22,9 @@ import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
 import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 
 /** The pages the settings hub opens, one at a time. */
-enum class SettingsPage { Language, Theme, FontSize, Reciters, Daily, Translations, Tafsirs, Tajweed, About }
+enum class SettingsPage {
+    Language, Theme, FontSize, Reciters, Daily, Translations, Tafsirs, Words, Tajweed, About,
+}
 
 @Composable
 fun SettingsPage.title(): String = stringResource(
@@ -34,6 +36,7 @@ fun SettingsPage.title(): String = stringResource(
         SettingsPage.Daily -> R.string.settings_daily_title
         SettingsPage.Translations -> R.string.settings_title_translations
         SettingsPage.Tafsirs -> R.string.settings_title_tafsirs
+        SettingsPage.Words -> R.string.settings_title_words
         SettingsPage.Tajweed -> R.string.settings_title_tajweed
         SettingsPage.About -> R.string.settings_title_about
     },
@@ -72,10 +75,6 @@ fun SettingsHub(
     notificationsBlocked: Boolean,
     exactGrantWithheld: Boolean,
     packSetup: PackSetupState?,
-    onShowTranslation: (Boolean) -> Unit,
-    onWordByWord: (Boolean) -> Unit,
-    onTajweed: (Boolean) -> Unit,
-    onDailyAyah: (Boolean) -> Unit,
     onOpen: (SettingsPage) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -98,50 +97,26 @@ fun SettingsHub(
             summary = fontSizeSummary(settings),
         ) { onOpen(SettingsPage.FontSize) }
         // What the reading draws, in the order the page draws it: the tajweed
-        // colors, which are the Arabic line itself, then the word meanings
-        // under it, then the translation, then the tafsir behind the ayah
-        // card (owner report, 2.3). The four are one group of rows the reader
-        // reads top to bottom against the page, and the colors stood between
-        // the meanings and the translation: the one row that draws the Quran's
-        // own line was filed with the two that add prose under it, and the
-        // group broke in the middle (owner decision, this session). A switch
-        // says whether the reading shows what it names, and the rest of the
-        // row opens the list it is chosen from. The switch is the only thing
-        // that switches, so a reader who came to look at the translations
-        // never changes the reading by looking (owner report, 2.3).
-        //
-        // The switch row's value slot carries a value or nothing, never a
-        // description: every other switch here says what is chosen under its
-        // name, and "The rules of recitation, in the printed mushaf's colors"
-        // under "Tajweed colors" was the one row explaining itself instead
-        // (owner report). The page it opens says what the colors are, in one
-        // sentence over the legend.
-        ToggleRow(
+        // colors, which are the Arabic line itself, then the word meanings under
+        // it, then the translation, then the tafsir behind the ayah card. Each
+        // row is a place and the state it stands in, and the page it opens is
+        // where the reader changes it: the hub is an index, and an index carries
+        // no second way to act (owner decision, this session).
+        PageRow(
             title = stringResource(R.string.settings_tajweed_title),
-            subtitle = null,
-            checked = settings.tajweed,
-            onChange = onTajweed,
-            onOpen = { onOpen(SettingsPage.Tajweed) },
-            openLabel = stringResource(R.string.settings_open_tajweed),
-            switchTag = "switch-tajweed",
-        )
-        WordByWordRow(settings, packs, packSetup, onWordByWord)
-        val hasTranslation = hasInstalledTranslation(settings, packs)
-        val chosenTranslation = hasChosenTranslation(settings, packs)
-        ToggleRow(
-            title = stringResource(R.string.settings_show_translation_title),
-            subtitle = translationName(settings, packs),
-            checked = settings.showTranslation && chosenTranslation,
-            // The switch is the reader's answer, so a chosen pack that is not
-            // on the device reads on. It is disabled because there is nothing
-            // to draw yet, not because the choice was undone (owner decision,
-            // this session).
-            onChange = onShowTranslation,
-            enabled = hasTranslation,
-            onOpen = { onOpen(SettingsPage.Translations) },
-            openLabel = stringResource(R.string.settings_open_translations),
-            switchTag = "switch-translation",
-        )
+            summary = onOff(settings.tajweed),
+            modifier = Modifier.testTag("row-tajweed"),
+        ) { onOpen(SettingsPage.Tajweed) }
+        PageRow(
+            title = stringResource(R.string.settings_row_words),
+            summary = wordsSummary(settings, packs, packSetup),
+            modifier = Modifier.testTag("row-words"),
+        ) { onOpen(SettingsPage.Words) }
+        PageRow(
+            title = stringResource(R.string.settings_row_translation),
+            summary = translationSummary(settings, packs),
+            modifier = Modifier.testTag("row-translation"),
+        ) { onOpen(SettingsPage.Translations) }
         // The tafsir is a list, not a switch. The reading opens a tafsir only
         // when the reader asks for one, from the pill's own Tafsir mark, so
         // there is no page of tafsir being drawn that a switch could hide:
@@ -157,19 +132,14 @@ fun SettingsHub(
             title = stringResource(R.string.settings_title_reciters),
             summary = reciterName(settings, recitations),
         ) { onOpen(SettingsPage.Reciters) }
-        // The daily ayah: one ayah a day, at the reader's own moment. The
-        // switch turns it on or off, and the row is the door to the page that
-        // moves its time, so the switch and the clock are read together in one
-        // place (owner report, 2.3). The page repeats the switch at its top.
-        ToggleRow(
+        // The daily ayah: one ayah a day, at the reader's own moment. The time
+        // is the row's value, and the page behind it is where the reminder is
+        // turned on and the hour set.
+        PageRow(
             title = stringResource(R.string.settings_daily_title),
-            subtitle = dailySubtitle(settings, notificationsBlocked, exactGrantWithheld),
-            checked = settings.dailyAyah,
-            onChange = onDailyAyah,
-            onOpen = { onOpen(SettingsPage.Daily) },
-            openLabel = stringResource(R.string.settings_open_daily),
-            switchTag = "switch-daily",
-        )
+            summary = dailySubtitle(settings, notificationsBlocked, exactGrantWithheld),
+            modifier = Modifier.testTag("row-daily"),
+        ) { onOpen(SettingsPage.Daily) }
         PageRow(
             title = stringResource(R.string.settings_title_about),
             summary = stringResource(R.string.settings_version_short, localizedDigits(version)),
@@ -234,7 +204,7 @@ private fun dailySubtitle(
     notificationsBlocked: Boolean,
     exactGrantWithheld: Boolean,
 ): String = when {
-    !settings.dailyAyah -> stringResource(R.string.settings_daily_subtitle_off)
+    !settings.dailyAyah -> stringResource(R.string.settings_state_off)
     notificationsBlocked -> stringResource(R.string.settings_daily_subtitle_blocked)
     exactGrantWithheld -> stringResource(R.string.settings_daily_subtitle_late)
     else -> stringResource(
@@ -243,30 +213,32 @@ private fun dailySubtitle(
     )
 }
 
+/** The hub's two state words. A row says On or Off, and the page says more. */
+@Composable
+private fun onOff(on: Boolean): String = stringResource(
+    if (on) R.string.settings_state_on else R.string.settings_state_off,
+)
+
 /**
- * The word by word switch, and the state of the list behind it. The row is
- * checked only when the aid is on and the list it needs is on the device, so
- * a switch that reads on always means meanings are being drawn; when the
- * list is missing the row says so, with its size, and the same tap that would
- * turn the aid on fetches it.
+ * What the word meanings row says: whether the reading draws the meanings,
+ * and, while the list is on its way or has failed, what the download is
+ * doing. The size and the Add live on the page, so the index row keeps one
+ * short line (owner decision, this session).
  *
- * The row says nothing else. The aid is a switch, the switch says whether the
- * reading draws the meanings, and a line under it restating that, or
- * explaining what a word meaning is to a reader who has just turned the aid
- * on, is the one kind of line a status list does not carry (owner report,
- * 37th session).
+ * The value follows the switch's old rule: it reads On only when the aid is
+ * on and the list it needs is on the device, so an On in the list always
+ * means meanings are being drawn.
  */
 @Composable
-internal fun WordByWordRow(
+private fun wordsSummary(
     settings: AppSettings,
     packs: List<ContentPack>,
     packSetup: PackSetupState?,
-    onWordByWord: (Boolean) -> Unit,
-) {
+): String {
     val wanted = wantedWordsPack(settings, packs)
     val installed = wanted?.installed == true
     val setup = packSetup?.takeIf { it.packId == wanted?.id }
-    val subtitle = when {
+    return when {
         setup != null && setup.failed -> stringResource(
             if (setup.failure == DownloadError.Storage) {
                 UiKitR.string.failure_storage_words
@@ -279,19 +251,20 @@ internal fun WordByWordRow(
             (setup.progress * 100).toInt(),
         )
         setup != null -> stringResource(R.string.settings_pack_preparing)
-        !installed && wanted != null -> stringResource(
-            R.string.settings_words_add,
-            languageName(wanted.language),
-            formatBytes(wanted.bytes),
-        )
-        else -> null
+        else -> onOff(settings.wordByWord && installed)
     }
-    ToggleRow(
-        title = stringResource(R.string.settings_words_title),
-        subtitle = subtitle,
-        checked = settings.wordByWord && installed,
-        onChange = onWordByWord,
-        switchTag = "switch-words",
-    )
 }
 
+/**
+ * What the translation row says: the pack the reading draws with, or Off.
+ * The pack's name is the useful half when the translation is on, and a
+ * chosen pack that is not on the device reads as the reader's file and not
+ * as a missing setting (owner decision, this session).
+ */
+@Composable
+private fun translationSummary(settings: AppSettings, packs: List<ContentPack>): String =
+    if (settings.showTranslation && hasChosenTranslation(settings, packs)) {
+        translationName(settings, packs)
+    } else {
+        stringResource(R.string.settings_state_off)
+    }

@@ -102,3 +102,52 @@ fun TafsirsPage(
         Spacer(Modifier.height(Space.Section))
     }
 }
+
+/**
+ * The word list, on its own page: the switch that draws meanings under the
+ * ayah, and the one list the reading speaks.
+ *
+ * The list is the reader's language's list and no other, so the page shows
+ * one pack and not a catalog: there is nothing to choose between, and a
+ * second list would only invite a reader to read the Quran in a language they
+ * did not ask for. The row is still a choice row, because its tap is the crop
+ * of the aid that sits behind the same question as the switch above it
+ * (owner decision, this session).
+ */
+@Composable
+fun WordsPage(
+    settings: AppSettings,
+    packs: List<ContentPack>,
+    packSetup: PackSetupState?,
+    actions: SettingsActions,
+) {
+    Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
+        val pack = wantedWordsPack(settings, packs)
+        val installed = pack?.installed == true
+        ToggleRow(
+            title = stringResource(R.string.settings_words_title),
+            subtitle = null,
+            checked = settings.wordByWord && installed,
+            onChange = actions.onWordByWord,
+            switchTag = "switch-words-page",
+            enabled = installed,
+        )
+        if (pack != null) {
+            Spacer(Modifier.height(Space.Block))
+            PackChoiceRow(
+                pack = pack,
+                subtitle = packSizeLine(pack),
+                // The one list the reading speaks: a check says the file is
+                // here, and the switch above says whether it is drawn.
+                selected = installed,
+                radio = true,
+                setup = packSetup?.takeIf { it.packId == pack.id },
+                onActivate = { actions.onWordByWord(!settings.wordByWord) },
+                onInstall = { actions.onInstallPack(pack.id) },
+                onRemove = { actions.onRemovePack(pack.id) },
+                onCancel = actions.onPackSetupCancel,
+            )
+        }
+        Spacer(Modifier.height(Space.Section))
+    }
+}

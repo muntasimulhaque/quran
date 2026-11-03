@@ -147,10 +147,6 @@ fun SettingsSheet(
                         notificationsBlocked = notificationsBlocked(),
                         exactGrantWithheld = exactGrantWithheld(),
                         packSetup = packSetup,
-                        onShowTranslation = actions.onShowTranslation,
-                        onWordByWord = actions.onWordByWord,
-                        onTajweed = actions.onTajweed,
-                        onDailyAyah = actions.onDailyAyah,
                         onOpen = { page = it },
                     )
                 }
@@ -193,6 +189,12 @@ fun SettingsSheet(
                         actions = actions,
                     )
                     SettingsPage.Tafsirs -> TafsirsPage(
+                        settings = settings,
+                        packs = packs,
+                        packSetup = packSetup,
+                        actions = actions,
+                    )
+                    SettingsPage.Words -> WordsPage(
                         settings = settings,
                         packs = packs,
                         packSetup = packSetup,

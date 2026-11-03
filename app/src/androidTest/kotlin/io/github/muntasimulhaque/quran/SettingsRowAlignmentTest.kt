@@ -3,7 +3,6 @@ package io.github.muntasimulhaque.quran
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.platform.testTag
@@ -27,7 +26,6 @@ import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.ui.settings.PageRow
 import io.github.muntasimulhaque.quran.ui.settings.SizeRow
-import io.github.muntasimulhaque.quran.ui.settings.SwitchSlot
 import io.github.muntasimulhaque.quran.ui.settings.ToggleRow
 import io.github.muntasimulhaque.quran.ui.theme.QuranTheme
 import org.junit.Assert.assertEquals
@@ -85,20 +83,11 @@ class SettingsRowAlignmentTest {
                         modifier = Modifier.testTag("page-row"),
                     )
                     ToggleRow(
-                        title = "Keep the screen awake",
-                        subtitle = "The page stays lit while you read",
-                        checked = true,
-                        onChange = {},
-                        switchTag = "switch-alone",
-                    )
-                    ToggleRow(
                         title = "Show translation",
                         subtitle = "Saheeh International",
                         checked = true,
                         onChange = {},
-                        onOpen = {},
-                        openLabel = "Open translations",
-                        switchTag = "switch-door",
+                        switchTag = "switch-row",
                     )
                     // A row with nothing to say about itself: it is a name and
                     // a chevron, and it must not be stretched to the height of
@@ -113,98 +102,28 @@ class SettingsRowAlignmentTest {
             }
         }
 
-        val alone = compose.onNodeWithTag("switch-alone", useUnmergedTree = true)
+        // The chevron's slot is a door row's last mark and the track is a
+        // switch row's, and the two end on one line: the eye reads one column
+        // of marks down the sheet whatever each row does.
+        val slot = compose.onAllNodesWithTag("chevron-slot", useUnmergedTree = true)
+            .onFirst()
             .getUnclippedBoundsInRoot()
-        val doorSwitch = compose.onNodeWithTag("switch-door", useUnmergedTree = true)
+        val mark = compose.onNodeWithTag("switch-row-mark", useUnmergedTree = true)
             .getUnclippedBoundsInRoot()
         assertEquals(
-            "the reserved column is the real control's own width, so a Material release that widens the track fails here",
-            SwitchSlot.value,
-            (doorSwitch.right - doorSwitch.left).value,
-            0.5f,
+            "a row's last mark must end where the switch does",
+            slot.right.value,
+            mark.right.value,
+            1f,
         )
         assertEquals(
-            "every switch must end at one line",
-            alone.right.value,
-            doorSwitch.right.value,
-            0.5f,
-        )
-
-        // Every bound here is read the same way, in dp. `boundsInRoot` is in
-        // pixels and `getUnclippedBoundsInRoot` is in dp, and this test once
-        // compared the two: the switch's left edge in dp against the chevron's
-        // right edge in pixels, which fails on every device whose density is
-        // not one and passes on none of them. Nothing about the rows was
-        // wrong; the measurement was (thirty-seventh session).
-        val slots = compose.onAllNodesWithTag("chevron-slot", useUnmergedTree = true)
-        assertEquals(
-            "the page row, the door row and the row with nothing to say draw one each",
-            3,
-            slots.fetchSemanticsNodes().size,
-        )
-        val pageSlot = slots[0].getUnclippedBoundsInRoot()
-        val doorSlot = slots[1].getUnclippedBoundsInRoot()
-        val bareSlot = slots[2].getUnclippedBoundsInRoot()
-        assertEquals(
-            "a row that says nothing about itself ends on the same line as one that does",
-            pageSlot.right.value,
-            bareSlot.right.value,
-            0.5f,
-        )
-        assertEquals(
-            "a row with no switch ends with its chevron on the line every switch ends on",
-            doorSwitch.right.value,
-            pageSlot.right.value,
-            0.5f,
-        )
-        assertEquals(
-            "the switch is the last mark of the row that has one, after its chevron column",
-            doorSwitch.left.value,
-            doorSlot.right.value,
-            0.5f,
-        )
-        assertTrue(
-            "a page row's chevron has moved to the end, so it stands right of the door row's",
-            pageSlot.left.value > doorSlot.left.value,
-        )
-
-        // The mark, not only its column: a page row's chevron is the row's
-        // last mark, and a mark centred in its own column stood a whole
-        // chevron short of the line every switch ends on, which is the gap the
-        // owner read as the row not knowing where it stops (owner report).
-        // The mark is read from the unmerged tree because the slot is
-        // tagged there, so its bounds come back in pixels and are brought to
-        // dp here: this test once compared the two.
-        val density = compose.density.density
-        val marks = compose.onAllNodesWithTag("row-chevron", useUnmergedTree = true)
-            .fetchSemanticsNodes()
-        assertEquals("the three door rows draw one chevron each", 3, marks.size)
-        val pageMarkRight = marks[0].boundsInRoot.right / density
-        assertEquals(
-            "a row with no switch ends with its chevron on the line every switch ends on",
-            alone.right.value,
-            pageMarkRight,
-            0.5f,
-        )
-
-        val page = compose.onNodeWithTag("page-row").getUnclippedBoundsInRoot()
-        assertTrue(
-            "a page row must stay its two lines and its padding, not a 48 dp slot taller",
-            page.bottom - page.top <= 72.dp,
-        )
-        val bare = compose.onNodeWithTag("bare-row").getUnclippedBoundsInRoot()
-        assertTrue(
-            "a row with no value must stay a line and its padding, not a 48 dp slot taller",
-            bare.bottom - bare.top <= 56.dp,
+            "the switch's track is the set's own 44 dp, not the row's width",
+            44f,
+            (mark.right - mark.left).value,
+            1f,
         )
     }
 
-    /**
-     * The four size rails are one length. The owner read the text page as four
-     * different controls because each label took its own width and each end
-     * mark its own; the fixed label column and mark slots are the one rule that
-     * makes the rails equal, and this reads the rail the eye sees.
-     */
     @Test
     fun theFourSizeRailsAreOneLength() {
         compose.setContent {
@@ -238,10 +157,18 @@ class SettingsRowAlignmentTest {
      * The target itself is unshaken: its outer edge still answers the finger,
      * and the row's door does not take it.
      */
+    /**
+     * A switch row is one control from end to end.
+     *
+     * The row is the switch, so the row owes the finger the 48 dp and its
+     * height is the height of a door row beside it; the drawn track is a
+     * picture of the state and not a second target in front of the row's own.
+     * A release that made the track taller, or the row shorter, moves one of
+     * these numbers.
+     */
     @Test
-    fun aSwitchRowKeepsTheListsHeightAndTheSwitchesTarget() {
-        var checked = true
-        var opened = false
+    fun aSwitchRowKeepsTheListsHeightAndIsOneControl() {
+        var toggles = 0
         compose.setContent {
             QuranTheme(theme = AppTheme.Light) {
                 Column {
@@ -254,127 +181,63 @@ class SettingsRowAlignmentTest {
                     ToggleRow(
                         title = "Show translation",
                         subtitle = "Saheeh International",
-                        checked = checked,
-                        onChange = { checked = it },
-                        onOpen = { opened = true },
-                        openLabel = "Open translations",
-                        switchTag = "switch-door",
+                        checked = true,
+                        onChange = { toggles++ },
+                        switchTag = "switch-row",
                     )
                 }
             }
         }
         val page = compose.onNodeWithTag("page-row").getUnclippedBoundsInRoot()
-        val switchRow = compose
-            .onNode(hasText("Show translation") and hasClickAction())
-            .getUnclippedBoundsInRoot()
+        val row = compose.onNodeWithTag("switch-row").getUnclippedBoundsInRoot()
         assertEquals(
-            "a switch row must keep the list's own height, not the switch's 48 dp",
+            "a switch row must keep the list's own height",
             (page.bottom - page.top).value,
-            (switchRow.bottom - switchRow.top).value,
+            (row.bottom - row.top).value,
             1f,
         )
-        // The target the switch owes the finger is 48 dp around its own 32 dp
-        // track, so its top edge stands 8 dp above the track. A finger two dp
-        // inside that edge is on the switch, not on the row's door.
-        val track = compose.onNodeWithTag("switch-door", useUnmergedTree = true)
-        track.performTouchInput {
-            click(Offset(center.x, center.y - 22.dp.toPx()))
-        }
+        assertTrue(
+            "a switch row owes the finger 48 dp",
+            (row.bottom - row.top).value >= 48f,
+        )
+        // The whole row is the control, so a finger on the drawn track flips
+        // it: the mark is the row's, not a second control in front of it.
+        compose.onNodeWithTag("switch-row-mark", useUnmergedTree = true)
+            .performTouchInput { click() }
         compose.runOnIdle {
-            assertTrue(
-                "the switch's own target must answer at its edge, not only at its middle",
-                !checked,
-            )
-            assertTrue("the door must not take the switch's own target", !opened)
+            assertEquals("the row's own mark must answer a finger", 1, toggles)
         }
     }
 
     /**
-     * A row keeps no width for a mark it does not draw.
+     * A page's switch row opens nothing, so it draws no door.
      *
-     * The chevron's column used to be reserved on every row, drawn or not, so
-     * a row with no door carried 48 dp of empty sheet in front of its switch.
-     * A switch stands at the row's own margin whatever is in front of it, so
-     * the empty column never kept a switch on one line; what it bought was a
-     * row that grows a door later keeping its switch where it was, which is a
-     * convenience for whoever edits the file and not a thing a reader can see
-     * (owner decision, forty-sixth session).
-     *
-     * This measures the two halves. A row that draws no chevron composes no
-     * chevron slot, so there is no empty column left to be empty, and neither
-     * switch moved to pay for the one that is gone.
-     *
-     * It does not measure whether a label fits on one line, because that is a
-     * question about the words and the phone, not about the column.
+     * The hub is an index and carries no switches; a page carries the switch
+     * that governs its list and no chevron after it. A row that grew a door
+     * again would be the two-control row this grammar exists to end, and the
+     * empty column would show up here as a second chevron slot.
      */
     @Test
-    fun aRowKeepsNoWidthForAMarkItDoesNotDraw() {
+    fun aSwitchRowKeepsNoColumnForADoor() {
         compose.setContent {
             QuranTheme(theme = AppTheme.Light) {
-                // Two rows side by side in the app's own voice, one with a
-                // door and one without, carrying the same name so the only
-                // variable is the chevron column.
-                Column {
-                    ToggleRow(
-                        title = "Show translation",
-                        subtitle = null,
-                        checked = true,
-                        onChange = {},
-                        switchTag = "long-alone",
-                    )
-                    ToggleRow(
-                        title = "Show translation",
-                        subtitle = null,
-                        checked = true,
-                        onChange = {},
-                        onOpen = {},
-                        openLabel = "Open translations",
-                        switchTag = "short-door",
-                    )
-                }
+                ToggleRow(
+                    title = "Show translation",
+                    subtitle = null,
+                    checked = false,
+                    onChange = {},
+                    switchTag = "switch-row",
+                )
             }
         }
-
-        // The crispest half of the sentence: a row that draws no chevron
-        // composes no chevron slot, so there is nothing there to be empty.
-        // The slot's own tag is on a row that draws one, which is what makes
-        // this a count of the rows that have a door.
-        val slots = compose.onAllNodesWithTag("chevron-slot", useUnmergedTree = true)
-            .fetchSemanticsNodes()
         assertEquals(
-            "only the row that draws a chevron composes one",
-            1,
-            slots.size,
-        )
-
-        val alone = compose.onNodeWithTag("long-alone", useUnmergedTree = true)
-            .getUnclippedBoundsInRoot()
-        val doorSwitch = compose.onNodeWithTag("short-door", useUnmergedTree = true)
-            .getUnclippedBoundsInRoot()
-        assertEquals(
-            "and releasing the chevron column moved no switch",
-            alone.right.value,
-            doorSwitch.right.value,
-            0.5f,
+            "a switch row opens nothing, so it draws no chevron",
+            0,
+            compose.onAllNodesWithTag("chevron-slot", useUnmergedTree = true)
+                .fetchSemanticsNodes().size,
         )
     }
 
-    /**
-     * A row's value is under its name, on every row that has one.
-     *
-     * The hub used to answer the same question twice: a row with no switch
-     * printed its value in a column at the right, measured so that the name
-     * kept its room, and a row with a switch printed the same grey
-     * line under its name, so one list read as two grammars (owner decision).
-     * This is the measurement that says the value is under the name
-     * now: on the sheet's two longest values, the value begins below the name
-     * and on the name's own left edge, and the name still holds a line of its
-     * own rather than one letter at a time.
-     *
-     * The tail is what decided it, and that is measurable too: the marks after
-     * the words sit at one left edge and one right edge whatever the value
-     * says, which is what a value in that tail would have had to fight for.
-     */
     @Test
     fun aValueIsUnderItsNameAndNeverSqueezesIt() {
         compose.setContent {

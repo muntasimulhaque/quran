@@ -54,18 +54,14 @@ class SettingsRowOrderTest {
                         notificationsBlocked = false,
                         exactGrantWithheld = false,
                         packSetup = null,
-                        onShowTranslation = {},
-                        onWordByWord = {},
-                        onTajweed = {},
-                        onDailyAyah = {},
                         onOpen = {},
                     )
                 }
             }
         }
-        val tajweed = top("switch-tajweed")
-        val words = top("switch-words")
-        val translation = top("switch-translation")
+        val tajweed = top("row-tajweed")
+        val words = top("row-words")
+        val translation = top("row-translation")
         val tafsir = top("row-tafsirs")
         assertTrue(
             "the tajweed colors are the Arabic line, so they stand above the meanings " +
