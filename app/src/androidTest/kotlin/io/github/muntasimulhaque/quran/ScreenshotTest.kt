@@ -92,18 +92,24 @@ class ScreenshotTest {
     }
 
     /**
-     * Keeps the whole display for the frames a sheet owns. A modal sheet
-     * lives in its own window, and the compose root cannot PixelCopy that
-     * window's surface, so the search, the settings, the Browse list, and the
-     * ayah card each need one screen capture. A sheet's semantics exist
-     * before its window has drawn and its opening animation has settled, so
-     * the frame is kept only when two captures in a row are identical:
-     * whatever is still arriving photographs differently from the capture
-     * before it, and a settled screen photographs the same twice. This loop
-     * only looks at the screen, unlike the old settle loop that drove the app
-     * between full-screen captures and took the phone emulator down, and the
-     * window list is checked before every frame: a frame of Android is worse
-     * than no frame at all.
+     * Keeps the whole display for the frames a sheet owns.
+     *
+     * A modal sheet lives in its own window, and the compose root cannot
+     * PixelCopy that window's surface, so the ayah's actions, the search, the
+     * settings, the share card, and the tafsir each need one screen capture.
+     * The status bar comes with the display, and so does the clock: on a page
+     * scrolled into a surah it can stand over the first line, which the
+     * reading does by decision (see the head's padding in the reading screen).
+     * The frame is kept as the phone shows it (owner decision, this session).
+     *
+     * A sheet's semantics exist before its window has drawn and its opening
+     * animation has settled, so the frame is kept only when two captures in a
+     * row are identical: whatever is still arriving photographs differently
+     * from the capture before it, and a settled screen photographs the same
+     * twice. This loop only looks at the screen, unlike the old settle loop
+     * that drove the app between full-screen captures and took the phone
+     * emulator down, and the window list is checked before every frame: a
+     * frame of Android is worse than no frame at all.
      */
     private fun captureScreen(name: String) {
         var prior: android.graphics.Bitmap? = null

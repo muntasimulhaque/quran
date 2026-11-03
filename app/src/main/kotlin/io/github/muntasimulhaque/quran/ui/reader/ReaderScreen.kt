@@ -705,6 +705,13 @@ fun ReaderScreen(
                     },
                     startAtOpening = viewModel.startAtSurahOpening == surah.number,
                     onOpeningReached = { viewModel.consumeSurahOpening(surah.number) },
+                    // The air above a surah's opening, and the whole of the
+                    // head's room: the page is drawn edge to edge and keeps no
+                    // inset for the system bar, so a page scrolled into the
+                    // middle of a surah puts its first line under the clock.
+                    // That is the page, not an oversight, and it stays: the
+                    // owner weighed an inset against the full-height page and
+                    // kept the page (owner decision, this session).
                     contentPaddingTop = 64.dp,
                     contentPaddingBottom = readingFoot(
                         bottomStack = with(LocalDensity.current) { bottomStackHeight.toDp() },
