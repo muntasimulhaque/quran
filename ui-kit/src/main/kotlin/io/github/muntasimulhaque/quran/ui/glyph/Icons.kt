@@ -54,6 +54,16 @@ object GlyphSize {
 
     /** The check inside a chip or a choice's ring. */
     val Check = 14.dp
+
+    /**
+     * The removing mark inside a recent chip's own 36 dp capsule. The search
+     * field's clear mark is [Control]'s 24 dp inside a 48 dp field, half the
+     * field's height; a chip's X is half the capsule's height, so it scales
+     * with the shape it sits in instead of filling it. At 24 dp in a 36 dp
+     * capsule the X stood two thirds of the chip's height and read as loud as
+     * the query beside it (owner decision, this session).
+     */
+    val ChipRemove = 18.dp
 }
 
 /**

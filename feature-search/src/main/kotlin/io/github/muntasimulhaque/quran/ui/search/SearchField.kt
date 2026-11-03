@@ -48,7 +48,6 @@ import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.kit.RoundedSelectionColors
-import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.focusRing
 import io.github.muntasimulhaque.quran.ui.kit.roundedSelection
 import io.github.muntasimulhaque.quran.ui.theme.Radii
@@ -59,7 +58,6 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
 internal fun SearchField(
     value: String,
     onChange: (String) -> Unit,
-    onClose: () -> Unit,
     focus: FocusRequester,
 ) {
     val focusManager = LocalFocusManager.current
@@ -81,7 +79,14 @@ internal fun SearchField(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 18.dp, end = 10.dp, top = Space.Line, bottom = Space.Tight),
+                // The field is the one shape at the sheet's head, and it runs
+                // from the page's own 18 dp line on one side to its mirror on
+                // the other. The Close that used to stand beside it took the
+                // last 60 dp of the line and was the only visible dismissal of
+                // its kind in the app; the sheet closes by its handle, the
+                // scrim, and Back like every other sheet (owner decision, this
+                // session).
+                .padding(start = 18.dp, end = 18.dp, top = Space.Line, bottom = Space.Tight),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(
@@ -151,17 +156,12 @@ internal fun SearchField(
                             .focusRequester(focus)
                             .roundedSelection(layout, field.selection)
                             // The hint is a sibling drawing in the decoration box,
-                            // not a label on the editable node. An empty field
-                            // carries the hint as its spoken name, and a field with
-                            // a query lets the typed text speak for itself (owner
+                            // not a label on the editable node. The field keeps
+                            // the hint as its spoken name whether or not it holds
+                            // a query: a name that vanished when the reader typed
+                            // left a text field with no name at all (owner
                             // decision, this session).
-                            .then(
-                                if (field.text.isEmpty()) {
-                                    Modifier.semantics { contentDescription = hint }
-                                } else {
-                                    Modifier
-                                },
-                            ),
+                            .semantics { contentDescription = hint },
                         decorationBox = { inner ->
                             Box {
                                 if (field.text.isEmpty()) {
@@ -198,12 +198,6 @@ internal fun SearchField(
                     )
                 }
             }
-            TextButton(
-                label = stringResource(R.string.search_close),
-                onClick = onClose,
-                modifier = Modifier.padding(start = Space.Line),
-                quiet = true,
-            )
         }
     }
 }
@@ -215,14 +209,13 @@ private val ClearGap = 2.dp
 private val ClearRipple = 40.dp
 
 /**
- * The mark that empties the field: the standard door of a search, and a
- * different job from the Close beside the field. Close ends the search; this
- * empties it and leaves the reader ready to type another query. It appears
- * only while there is a query to clear, so it is never a dead mark on an
- * empty field. Its 48 dp node carries a 40 dp drawn circle for the press,
- * so the ripple stays clear of the field's own pill and the mark reads as a
- * mark inside the pill rather than a control the size of it (owner decision,
- * this session).
+ * The mark that empties the field: the standard door of a search. The sheet
+ * itself ends by its handle, the scrim, or Back; this mark empties the query
+ * and leaves the reader ready to type another. It appears only while there
+ * is a query to clear, so it is never a dead mark on an empty field. Its
+ * 48 dp node carries a 40 dp drawn circle for the press, so the ripple stays
+ * clear of the field's own pill and the mark reads as a mark inside the pill
+ * rather than a control the size of it (owner decision, this session).
  */
 @Composable
 private fun ClearFieldButton(onClick: () -> Unit) {

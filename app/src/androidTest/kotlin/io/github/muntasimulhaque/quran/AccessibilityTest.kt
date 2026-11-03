@@ -1,5 +1,6 @@
 package io.github.muntasimulhaque.quran
 
+import android.accessibilityservice.AccessibilityService
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.ComposeAccessibilityValidator
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -17,6 +18,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.test.click
 import androidx.compose.ui.unit.dp
 import androidx.test.espresso.Espresso
@@ -156,9 +158,9 @@ class AccessibilityTest {
         waitForTag("browse-surahs")
         compose.onNodeWithTag("surah-row-1").performClick()
         waitForTag("surah-ayahs")
-        Espresso.pressBackUnconditionally()
+        back()
         waitForTag("browse-surahs")
-        Espresso.pressBackUnconditionally()
+        back()
         compose.waitUntil(10_000) {
             compose.onAllNodesWithTag("browse-sheet", useUnmergedTree = true)
                 .fetchSemanticsNodes().isEmpty()
@@ -175,7 +177,7 @@ class AccessibilityTest {
         compose.waitUntil(10_000) {
             compose.onAllNodesWithText("Ibn Kathir").fetchSemanticsNodes().isNotEmpty()
         }
-        Espresso.pressBackUnconditionally()
+        back()
         waitForTag("settings-hub")
         compose.onAllNodesWithText("Daily ayah").onFirst().performClick()
         waitForTag("daily-page")
@@ -184,20 +186,21 @@ class AccessibilityTest {
             compose.onAllNodesWithText("When the daily ayah arrives")
                 .fetchSemanticsNodes().isNotEmpty()
         }
-        Espresso.pressBackUnconditionally()
+        back()
         compose.waitUntil(10_000) {
             compose.onAllNodesWithText("When the daily ayah arrives")
                 .fetchSemanticsNodes().isEmpty()
         }
         waitForTag("daily-page")
-        // The page behind the dialog has to be the focused window before the
-        // next Back is sent; a dialog that is still dismissing leaves the
-        // root without focus and makes the press look like a failure.
+        // The dialog is gone and the page behind it is the surface a Back
+        // belongs to. The global Back below goes to whatever window is on
+        // top, so a dialog that is still animating away cannot make the press
+        // fail before the app sees it (owner report, this session).
         compose.waitForIdle()
-        Espresso.pressBackUnconditionally()
+        back()
         waitForTag("settings-hub")
         compose.waitForIdle()
-        Espresso.pressBackUnconditionally()
+        back()
         compose.waitUntil(10_000) {
             compose.onAllNodesWithTag("settings-hub", useUnmergedTree = true)
                 .fetchSemanticsNodes().isEmpty()
@@ -222,11 +225,16 @@ class AccessibilityTest {
         }
         compose.onNodeWithText("Quran text").assertHeightIsAtLeast(48.dp)
         compose.onNodeWithText("Quran text").assertWidthIsAtLeast(48.dp)
+        // The door put the keyboard away, so the field takes the focus back
+        // for the audit's query and gives the IME back before the sheet's
+        // own Back (owner decision, this session).
+        compose.onNode(hasSetTextAction()).requestFocus()
         compose.onNode(hasSetTextAction()).performTextInput("mercy")
         compose.waitUntil(30_000) {
             compose.onAllNodesWithText("2:64").fetchSemanticsNodes().isNotEmpty()
         }
-        Espresso.pressBackUnconditionally()
+        Espresso.closeSoftKeyboard()
+        back()
 
         // The ayah's own actions, the note editor, and the share preview.
         revealChrome()
@@ -240,7 +248,7 @@ class AccessibilityTest {
             .onFirst().performClick()
         waitForTag("note-sheet")
         Espresso.closeSoftKeyboard()
-        Espresso.pressBackUnconditionally()
+        back()
         waitForTagGone("note-sheet")
 
         revealChrome()
@@ -252,13 +260,27 @@ class AccessibilityTest {
         compose.onAllNodesWithText(compose.activity.getString(R.string.action_share))
             .onFirst().performClick()
         waitForTag("share-sheet")
-        Espresso.pressBackUnconditionally()
+        back()
     }
 
     private fun awaitReading() {
         compose.waitUntil(180_000) {
             compose.onAllNodesWithContentDescription("Reading").fetchSemanticsNodes().isNotEmpty()
         }
+    }
+
+    /**
+     * The platform's own Back, sent to the window on top.
+     *
+     * Espresso's `pressBackUnconditionally` addresses a root that has window
+     * focus, and a dialog that is still animating away leaves the activity's
+     * root without it: the press fails before the app ever sees a Back. The
+     * harness's global action goes to whatever window is on top, which is what
+     * the reader's own Back does (owner report, this session).
+     */
+    private fun back() {
+        InstrumentationRegistry.getInstrumentation().uiAutomation
+            .performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK)
     }
 
     /**

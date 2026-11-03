@@ -93,8 +93,17 @@ class SemanticsTest {
         compose.onNodeWithContentDescription("Search").performClick()
         waitForTag("search-sheet")
         assertPaneTitle("Search")
+        val searchHint = context.getString(
+            io.github.muntasimulhaque.quran.feature.search.R.string.search_hint,
+        )
         compose.onNode(hasSetTextAction())
-            .assert(hasContentDescription(context.getString(io.github.muntasimulhaque.quran.feature.search.R.string.search_hint)))
+            .assert(hasContentDescription(searchHint))
+        // A field keeps its name after the reader types: a name that vanished
+        // with the first letter left a text field with no name at all (owner
+        // decision, this session).
+        compose.onNode(hasSetTextAction()).performTextInput("mercy")
+        compose.onNode(hasSetTextAction())
+            .assert(hasContentDescription(searchHint))
         Espresso.closeSoftKeyboard()
         Espresso.pressBack()
         waitForTagGone("search-sheet")

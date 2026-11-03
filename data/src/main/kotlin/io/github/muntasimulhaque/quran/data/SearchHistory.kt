@@ -48,6 +48,17 @@ class SearchHistory(context: Context) {
         return emptyList()
     }
 
+    /**
+     * The list put back exactly as it was, for an Undo after Clear. The list
+     * came from [read], so the same cleaning is a round trip and the restored
+     * words are the words the reader saw (owner decision, this session).
+     */
+    fun restore(queries: List<String>): List<String> {
+        val next = RecentQueries.decode(RecentQueries.encode(queries))
+        write(next)
+        return next
+    }
+
     private fun write(queries: List<String>) {
         preferences.edit().putString(KEY_QUERIES, RecentQueries.encode(queries)).apply()
     }

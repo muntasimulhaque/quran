@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,22 +31,35 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.SearchSources
 import io.github.muntasimulhaque.quran.feature.search.R
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
+import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.focusRing
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
+
+/**
+ * One source the reader's search can read, with the words it wears and the
+ * way its chip changes the set. The list is built once, so the count on the
+ * door, the name of the one source that is off, and the chips cannot
+ * disagree.
+ */
+private data class OfferedSource(
+    val label: String,
+    val on: Boolean,
+    val set: (Boolean) -> SearchSources,
+)
 
 /**
  * The sources a query reads, folded away behind one quiet door.
@@ -63,6 +77,32 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
  * hides its own contents: a reader cannot turn off a source they cannot see.
  * A source the reader does not have is not offered, rather than offered and
  * empty.
+ *
+ * **A chosen chip is a tint, not a button** (owner decision, this session).
+ * Seven sources start on, and seven solid pills over the results read as
+ * seven pressed buttons: the accent became the page's background instead of
+ * the one chosen thing. A chosen chip now wears the ayah door's own open
+ * state, the accent at [Wash.Control] with the accent's ink, so a set of
+ * chosen sources reads as what the reader turned on and the solid accent
+ * stays for the one place and the one answer. The check stays beside the
+ * word, so the state survives a color the reader cannot see.
+ *
+ * **The door tells the truth when one source is off.** "6 of 7" is a count,
+ * and a reader whose one missing source is the reason a query found nothing
+ * cannot read which one from it. One source off is named ("Everything but
+ * Translations"); two or more keep the count. A source the reader does not
+ * have is not counted.
+ *
+ * **A search with no place to look opens the list.** The last source turned
+ * off leaves the status line asking for a source, so the door opens itself
+ * and the reader is not told to choose from a list that is shut. A quiet
+ * "Turn everything on" stands under the chips whenever something is off, so
+ * the reader is never left turning seven chips back on by hand.
+ *
+ * The words of the door stand on the page's own gutter, the line the chips
+ * and every other block keep; the press shape hangs 12 dp to their left so
+ * the ripple has its room without moving the words off the rail (owner
+ * decision, this session).
  */
 @Composable
 internal fun FilterRow(
@@ -88,19 +128,83 @@ internal fun FilterRow(
     // a reader may read a translation and keep the meanings off, or keep the
     // meanings on with no translation at all (owner decision, this session).
     val offered = buildList {
-        add(sources.text)
-        add(sources.surahs)
-        add(sources.references)
-        if (hasTranslations) add(sources.translations)
-        if (hasWords) add(sources.words)
-        if (hasTafsirs) add(sources.tafsirs)
-        if (hasNotes) add(sources.notes)
+        add(
+            OfferedSource(
+                stringResource(R.string.search_filter_text),
+                sources.text,
+            ) { on -> sources.copy(text = on) },
+        )
+        add(
+            OfferedSource(
+                stringResource(R.string.search_filter_surahs),
+                sources.surahs,
+            ) { on -> sources.copy(surahs = on) },
+        )
+        add(
+            OfferedSource(
+                stringResource(R.string.search_filter_references),
+                sources.references,
+            ) { on -> sources.copy(references = on) },
+        )
+        if (hasTranslations) {
+            add(
+                OfferedSource(
+                    stringResource(R.string.search_filter_translations),
+                    sources.translations,
+                ) { on -> sources.copy(translations = on) },
+            )
+        }
+        if (hasWords) {
+            add(
+                OfferedSource(
+                    stringResource(R.string.search_filter_words),
+                    sources.words,
+                ) { on -> sources.copy(words = on) },
+            )
+        }
+        if (hasTafsirs) {
+            add(
+                OfferedSource(
+                    stringResource(R.string.search_filter_tafsirs),
+                    sources.tafsirs,
+                ) { on -> sources.copy(tafsirs = on) },
+            )
+        }
+        if (hasNotes) {
+            add(
+                OfferedSource(
+                    stringResource(R.string.search_filter_notes),
+                    sources.notes,
+                ) { on -> sources.copy(notes = on) },
+            )
+        }
     }
-    val chosen = offered.count { it }
-    val state = if (chosen == offered.size) {
-        stringResource(R.string.search_filter_all)
-    } else {
-        stringResource(R.string.search_filter_some, chosen, offered.size)
+    val chosen = offered.count { it.on }
+    val off = offered.filterNot { it.on }
+    val state = when {
+        off.isEmpty() -> stringResource(R.string.search_filter_all)
+        // One source off is named, so the closed door can explain a query
+        // that found nothing because of it (owner decision, this session).
+        off.size == 1 -> stringResource(R.string.search_filter_all_but, off[0].label)
+        else -> stringResource(R.string.search_filter_some, chosen, offered.size)
+    }
+    val none = chosen == 0
+    // A search with no place to look is not a search: the door opens itself
+    // when the last source is turned off, and again when a query begins,
+    // because the query folds the list shut. The status line's sentence then
+    // always points at a list the reader can see and touch (owner decision,
+    // this session).
+    LaunchedEffect(none, hasQuery) {
+        if (none) open = true
+    }
+    // The door is a choice of place, not a place to type: opening it puts the
+    // keyboard away so the chips and the results have the sheet's room. That
+    // is what keeps the seven chips reachable at the largest text size, where
+    // they can be taller than the sheet with the keyboard up (owner decision,
+    // this session).
+    val focusManager = LocalFocusManager.current
+    LaunchedEffect(open) {
+        if (open) focusManager.clearFocus()
     }
     val reducedMotion = rememberReducedMotion()
     val expanded = stringResource(R.string.search_filter_state_expanded)
@@ -109,7 +213,7 @@ internal fun FilterRow(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Line, bottom = Space.Tight),
+            .padding(top = Space.Line, bottom = Space.Tight),
     ) {
         // The header is a door, drawn the way the app draws every status line
         // that opens something: the words, the state, and a chevron that
@@ -117,12 +221,19 @@ internal fun FilterRow(
         // read as a door and never as a chip that happens to be off. The
         // whole row is the target, and its own gap keeps the words off the
         // ripple (owner decision, this session).
+        //
+        // The 12 dp gap the words keep from the press shape is paid outside
+        // the click, not inside it: the words stand on the page's own gutter
+        // and the press shape hangs to their left, so the door's label lands
+        // on the same rail as the chips it opens (owner decision, this
+        // session: the words stood 12 dp inside every other block).
         Row(
             modifier = Modifier
+                .padding(start = Space.Gutter - Space.Row)
                 // The door is built the way every other shape in the app is:
                 // the click owns the 48 dp target, and the fill and the ripple
                 // are drawn on the pill inside it, the chip's own 8 dp around
-                // the label's 16 dp line. Left the other way round the clip
+                // the label's 20 dp line. Left the other way round the clip
                 // wrapped the whole target, so the highlight read as a 48 dp
                 // slab over a chip-sized row (owner report, this session).
                 .clickable(
@@ -143,7 +254,11 @@ internal fun FilterRow(
         ) {
             Text(
                 text = stringResource(R.string.search_filter),
-                style = MaterialTheme.typography.labelLarge,
+                // The door names its state the way a settings row names its
+                // own value: the row name's 15 over the meta 13, told apart
+                // by weight and tone (owner decision, this session: 14 and
+                // 13 were too near to read as a pair).
+                style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
@@ -172,47 +287,39 @@ internal fun FilterRow(
             enter = if (reducedMotion.value) fadeIn() else expandVertically() + fadeIn(),
             exit = if (reducedMotion.value) fadeOut() else shrinkVertically() + fadeOut(),
         ) {
-            FlowRow(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = Space.Line),
-                horizontalArrangement = Arrangement.spacedBy(Space.Line),
-                // A chip is a 36 dp pill inside a 48 dp target, so the row gap
-                // the eye reads is this spacing plus the 6 dp of target above
-                // and below each pill. The flow's own 8 dp made that gap 24 dp
-                // against the columns' 8 dp (owner report); 0 here leaves a
-                // 12 dp block break between rows while the chips keep the
-                // 36 dp size the ladder gives them.
-                verticalArrangement = Arrangement.spacedBy(0.dp),
+                    .padding(horizontal = Space.Gutter),
             ) {
-                FilterChip(stringResource(R.string.search_filter_text), sources.text) {
-                    onChange(sources.copy(text = it))
-                }
-                FilterChip(stringResource(R.string.search_filter_surahs), sources.surahs) {
-                    onChange(sources.copy(surahs = it))
-                }
-                FilterChip(stringResource(R.string.search_filter_references), sources.references) {
-                    onChange(sources.copy(references = it))
-                }
-                if (hasTranslations) {
-                    FilterChip(stringResource(R.string.search_filter_translations), sources.translations) {
-                        onChange(sources.copy(translations = it))
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = Space.Line),
+                    horizontalArrangement = Arrangement.spacedBy(Space.Line),
+                    // A chip is a 36 dp pill inside a 48 dp target, so the row gap
+                    // the eye reads is this spacing plus the 6 dp of target above
+                    // and below each pill. The flow's own 8 dp made that gap 24 dp
+                    // against the columns' 8 dp (owner report); 0 here leaves a
+                    // 12 dp block break between rows while the chips keep the
+                    // 36 dp size the ladder gives them.
+                    verticalArrangement = Arrangement.spacedBy(0.dp),
+                ) {
+                    offered.forEach { source ->
+                        FilterChip(source.label, source.on) { on -> onChange(source.set(on)) }
                     }
                 }
-                if (hasWords) {
-                    FilterChip(stringResource(R.string.search_filter_words), sources.words) {
-                        onChange(sources.copy(words = it))
-                    }
-                }
-                if (hasTafsirs) {
-                    FilterChip(stringResource(R.string.search_filter_tafsirs), sources.tafsirs) {
-                        onChange(sources.copy(tafsirs = it))
-                    }
-                }
-                if (hasNotes) {
-                    FilterChip(stringResource(R.string.search_filter_notes), sources.notes) {
-                        onChange(sources.copy(notes = it))
-                    }
+                // Seven ways to narrow and no way back to everything is a
+                // trap: the reset stands under the chips, in the quiet shape,
+                // only while there is something to turn back on (owner
+                // decision, this session).
+                if (off.isNotEmpty()) {
+                    TextButton(
+                        label = stringResource(R.string.search_filter_all_on),
+                        onClick = { onChange(SearchSources.ALL) },
+                        modifier = Modifier.padding(top = Space.Line),
+                        quiet = true,
+                    )
                 }
             }
         }
@@ -244,9 +351,16 @@ internal fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit)
     // drawn on the pill inside the click node, not on the node itself: an
     // indication left on the click would flash a rectangle over the shape the
     // reader is looking at.
+    //
+    // The chosen chip wears the accent at [Wash.Control] with the accent's
+    // own ink, the ayah door's open state, rather than the solid accent: seven
+    // sources start on, and seven full-strength pills read as seven pressed
+    // buttons over the results (owner decision, this session). The check is
+    // the second signal, so the state is still read by a reader who cannot
+    // tell the two tints apart.
     val press = remember { MutableInteractionSource() }
     val ink = if (on) {
-        MaterialTheme.colorScheme.onPrimary
+        MaterialTheme.colorScheme.primary
     } else {
         MaterialTheme.colorScheme.onSurfaceVariant
     }
@@ -264,7 +378,7 @@ internal fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit)
             .focusRing(press, Radii.Pill)
             .background(
                 if (on) {
-                    MaterialTheme.colorScheme.primary
+                    MaterialTheme.colorScheme.primary.copy(alpha = Wash.Control)
                 } else {
                     MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
                 },
@@ -272,12 +386,15 @@ internal fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit)
             .indication(press, ripple(color = ink))
             .padding(horizontal = Space.Row, vertical = Space.Line),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        // The mark and the word are one thought, but not one crowded glyph:
+        // the app's cluster gap sits between them, where 5 dp read as if the
+        // check belonged to the first letter (owner decision, this session).
+        horizontalArrangement = Arrangement.spacedBy(Space.Line),
     ) {
         if (on) {
             IconGlyph(
                 icon = Icon.Check,
-                tint = MaterialTheme.colorScheme.onPrimary,
+                tint = ink,
                 modifier = Modifier.size(GlyphSize.Check),
             )
         }

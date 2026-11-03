@@ -75,10 +75,14 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
  * the width it was allowed instead of the width it needed, which made every
  * query a bar of its own and turned the list into a column.
  *
- * The X's target is 48 dp and its mark is 24 dp, the same mark the search
- * field's clear wears. Its spoken name is "Remove <query>", so a screen
- * reader reaches the one word without a custom action and without the long
- * press the chip used to hide.
+ * The X's target is 48 dp and its mark is 18 dp: the field's clear mark is
+ * 24 dp inside a 48 dp field, half the field's height, so the chip's mark is
+ * half the chip's own 36 dp capsule instead of filling two thirds of it and
+ * reading as loud as the query (owner decision, this session). The query is
+ * the thing the reader came back for, so its word takes the primary ink and
+ * the X stays in the quiet tone. Its spoken name is "Remove <query>", so a
+ * screen reader reaches the one word without a custom action and without the
+ * long press the chip used to hide.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -128,12 +132,15 @@ internal fun RecentSearches(
  *
  * The outer box is the 48 dp target of both halves; the capsule behind them
  * is the 36 dp shape the reader sees, and it ends where the two halves end.
- * The word's half wraps its own text, so the chip's width is the word's plus
- * the X's 48 dp and never the row's (owner decision, this session). The
- * word's ripple is the pill's left half, and the X's ripple is the 36 dp
- * circle at its end, so no press paints the invisible target. The X is always
- * drawn, never armed: the old long press was a gesture that had to be taught,
- * and a chip that hides its own removal is a chip that hides a door.
+ * The word's half wraps its own text and keeps 8 dp of air after it, so the
+ * word's target owns the space after its last letter and the X's target, the
+ * one that removes, begins 8 dp further from the word (owner decision, this
+ * session). The chip's width is still the word's plus the X's 48 dp and
+ * never the row's (owner decision, this session). The word's ripple is the
+ * pill's left half, and the X's ripple is the 36 dp circle at its end, so no
+ * press paints the invisible target. The X is always drawn, never armed: the
+ * old long press was a gesture that had to be taught, and a chip that hides
+ * its own removal is a chip that hides a door.
  */
 @Composable
 private fun RecentChip(
@@ -143,7 +150,8 @@ private fun RecentChip(
 ) {
     val queryPress = remember { MutableInteractionSource() }
     val removePress = remember { MutableInteractionSource() }
-    val ink = MaterialTheme.colorScheme.onSurfaceVariant
+    val queryInk = MaterialTheme.colorScheme.onSurface
+    val markInk = MaterialTheme.colorScheme.onSurfaceVariant
     val remove = stringResource(R.string.search_recent_remove_named, label)
     val leftHalf = RoundedCornerShape(
         topStart = ChipRadius,
@@ -206,14 +214,14 @@ private fun RecentChip(
                         .height(36.dp)
                         .clip(leftHalf)
                         .focusRing(queryPress, leftHalf)
-                        .indication(queryPress, ripple(color = ink))
-                        .padding(start = Space.Row),
+                        .indication(queryPress, ripple(color = queryInk))
+                        .padding(start = Space.Row, end = Space.Line),
                     contentAlignment = Alignment.CenterStart,
                 ) {
                     Text(
                         text = label,
                         style = MaterialTheme.typography.labelLarge,
-                        color = ink,
+                        color = queryInk,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -237,13 +245,13 @@ private fun RecentChip(
                         .size(36.dp)
                         .clip(CircleShape)
                         .focusRing(removePress, CircleShape)
-                        .indication(removePress, ripple(color = ink)),
+                        .indication(removePress, ripple(color = markInk)),
                     contentAlignment = Alignment.Center,
                 ) {
                     IconGlyph(
                         icon = Icon.Close,
-                        tint = ink,
-                        modifier = Modifier.size(GlyphSize.Control),
+                        tint = markInk,
+                        modifier = Modifier.size(GlyphSize.ChipRemove),
                     )
                 }
             }

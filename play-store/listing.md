@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 14.9 (versionCode 151)
+Version: 15.0 (versionCode 152)
 
 ## Listing
 

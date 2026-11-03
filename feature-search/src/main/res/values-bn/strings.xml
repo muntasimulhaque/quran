@@ -2,17 +2,19 @@
 <resources>
     <string name="search_sheet_name">অনুসন্ধান</string>
     <string name="search_hint">কুরআনে অনুসন্ধান করুন</string>
-    <string name="search_close">বন্ধ</string>
     <string name="search_clear">অনুসন্ধান মুছুন</string>
     <string name="search_empty_title">শব্দ বা রেফারেন্স দিয়ে খুঁজুন</string>
-    <string name="search_empty_body">আরবিতে বা নিজের অনুবাদে যেকোনো শব্দ লিখুন। 2:255 বা কাহফ 10-এর মতো রেফারেন্স দিলে সোজা সেই আয়াতে পৌঁছে যাবেন।</string>
-    <string name="search_empty_body_quran">কুরআনের যেকোনো শব্দ লিখুন। 2:255 বা কাহফ 10-এর মতো রেফারেন্স দিলে সোজা সেই আয়াতে পৌঁছে যাবেন।</string>
+    <string name="search_empty_body">আরবিতে বা নিজের ভাষায় যেকোনো শব্দ লিখুন। 2:255 বা কাহফ&#160;10-এর মতো রেফারেন্স দিলে সোজা সেই আয়াতে পৌঁছে যাবেন।</string>
+    <string name="search_empty_body_quran">কুরআনের যেকোনো শব্দ লিখুন। 2:255 বা কাহফ&#160;10-এর মতো রেফারেন্স দিলে সোজা সেই আয়াতে পৌঁছে যাবেন।</string>
     <string name="search_recent_title">সাম্প্রতিক অনুসন্ধান</string>
     <string name="search_recent_clear">সব মুছুন</string>
+    <string name="search_recent_cleared">সাম্প্রতিক অনুসন্ধান মুছে ফেলা হয়েছে</string>
     <string name="search_recent_remove_named">%1$s মুছুন</string>
     <string name="search_status_searching">খোঁজা হচ্ছে…</string>
+    <string name="search_status_failed">অনুসন্ধান শেষ করা যায়নি।</string>
+    <string name="search_status_retry">আবার চেষ্টা করুন</string>
     <string name="search_status_no_matches">কিছু পাওয়া যায়নি।</string>
-    <string name="search_status_failed">অনুসন্ধান শেষ করা যায়নি। আবার চেষ্টা করুন।</string>
+    <string name="search_status_no_match_hint">ছোট কোনো শব্দ চেষ্টা করুন, বা 2:255-এর মতো রেফারেন্স দিন।</string>
     <string name="search_status_no_sources">খোঁজার জন্য অন্তত একটি জায়গা বাছুন।</string>
     <string name="search_status_capped">প্রথম %1$dটি মিল দেখানো হচ্ছে।</string>
     <string name="search_label_go_to">যান</string>
@@ -33,6 +35,8 @@
     <string name="search_filter_tafsirs">তাফসীর</string>
     <string name="search_filter_notes">টীকা</string>
     <string name="search_filter_all">সবকিছু</string>
+    <string name="search_filter_all_but">%1$s ছাড়া সবকিছু</string>
+    <string name="search_filter_all_on">সবকিছু চালু করুন</string>
     <string name="search_filter_some">%2$dটির মধ্যে %1$dটি</string>
     <string name="search_filter_state_expanded">খোলা</string>
     <string name="search_filter_state_collapsed">বন্ধ</string>

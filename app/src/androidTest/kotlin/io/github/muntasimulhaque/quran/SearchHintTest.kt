@@ -4,11 +4,13 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ActivityScenario
@@ -140,6 +142,30 @@ class SearchHintTest {
                 rule.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().isNotEmpty()
             }
             rule.onNode(hasSetTextAction()).assertIsNotFocused()
+        }
+    }
+
+    /**
+     * Opening the source door puts the keyboard away.
+     *
+     * The door is a choice of place, not a place to type: the sheet gives the
+     * chips its room, which is what keeps seven chips reachable at the largest
+     * text size, where they can be taller than the sheet with the keyboard up
+     * (owner decision, this session).
+     */
+    @Test
+    fun openingTheSourceDoorPutsTheKeyboardAway() {
+        prepare()
+        openSearch().use {
+            rule.waitUntil(timeoutMillis = 15_000) {
+                rule.onAllNodes(hasSetTextAction() and isFocused())
+                    .fetchSemanticsNodes().isNotEmpty()
+            }
+            rule.onNodeWithText("Search in").performClick()
+            rule.waitUntil(timeoutMillis = 15_000) {
+                rule.onAllNodes(hasSetTextAction() and isFocused())
+                    .fetchSemanticsNodes().isEmpty()
+            }
         }
     }
 }

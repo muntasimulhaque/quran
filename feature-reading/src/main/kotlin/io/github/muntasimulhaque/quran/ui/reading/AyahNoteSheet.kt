@@ -203,13 +203,11 @@ private fun NoteEditor(
                     .padding(top = 10.dp)
                     .focusRequester(focus)
                     .roundedSelection(layout, draft.selection)
-                    .then(
-                        if (draft.text.isEmpty()) {
-                            Modifier.semantics { contentDescription = hint }
-                        } else {
-                            Modifier
-                        },
-                    ),
+                    // The field keeps its name whether or not it holds words:
+                    // a screen reader hears "Write a note for this ayah" and
+                    // then the text, where it used to hear only the text once
+                    // the reader had typed (owner decision, this session).
+                    .semantics { contentDescription = hint },
                 decorationBox = { inner ->
                     Box {
                         if (draft.text.isEmpty()) {

@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.semantics.semantics
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.screenSubtitle
@@ -22,7 +23,9 @@ import io.github.muntasimulhaque.quran.ui.theme.screenSubtitle
  * the same note, because they are the same moment: the reader has already
  * chosen the surface and is only owed the truth about it. So it is two lines
  * of type, the title in the page's ink and its sentence under it in the quiet
- * tone, on the page's own line and centered there. Nothing else is drawn: no
+ * tone, on the page's own line and centered there, the name and the sentence
+ * both, so the note reads as one block instead of two that disagree about
+ * their axis. Nothing else is drawn: no
  * icon, no card, no picture, no button. A note that also offers something is a
  * page selling a feature to a reader who came to read, and the two surfaces
  * that want this note want it quiet (owner decision, this session).
@@ -54,16 +57,26 @@ fun EmptyNote(
             text = title,
             style = screenSubtitle(),
             color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center,
             // A page's own name is a heading, so a screen reader can land on
             // the empty state instead of hearing the field, the filters, and
             // then two lines of prose with no place to stop.
-            modifier = Modifier.semantics { heading() },
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics { heading() },
         )
         Text(
             text = body,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = Space.Line),
+            // The sentence is centered with the name over it (owner decision,
+            // this session). A centered name over a left-aligned block read as
+            // two blocks that disagreed about their axis, and the paragraph's
+            // own ragged right is what a centered paragraph keeps.
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = Space.Line),
         )
     }
 }

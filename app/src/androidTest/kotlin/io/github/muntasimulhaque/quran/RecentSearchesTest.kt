@@ -149,10 +149,35 @@ class RecentSearchesTest {
         rule.waitUntil(timeoutMillis = 15_000) {
             rule.onAllNodesWithText("Recent searches").fetchSemanticsNodes().isNotEmpty()
         }
-        rule.onNodeWithText("Clear").performClick()
+        rule.onNodeWithText("Clear all").performClick()
         rule.waitUntil(timeoutMillis = 15_000) {
             rule.onAllNodesWithText("Recent searches").fetchSemanticsNodes().isEmpty()
         }
         assertTrue(SearchHistory(context).read().isEmpty())
+    }
+
+    /**
+     * Clear all gives the words back.
+     *
+     * The search history is the reader's own work, and every other removal in
+     * the app can be undone; the sheet carries its own snackbar, so a tap that
+     * looked like the wrong one can be taken back without leaving the sheet
+     * (owner decision, this session).
+     */
+    @Test
+    fun clearAllOffersTheWordsBack() {
+        openSearch()
+        rule.waitUntil(timeoutMillis = 15_000) {
+            rule.onAllNodesWithText("Recent searches").fetchSemanticsNodes().isNotEmpty()
+        }
+        rule.onNodeWithText("Clear all").performClick()
+        rule.waitUntil(timeoutMillis = 15_000) {
+            rule.onAllNodesWithText("Undo").fetchSemanticsNodes().isNotEmpty()
+        }
+        rule.onNodeWithText("Undo").performClick()
+        rule.waitUntil(timeoutMillis = 15_000) {
+            rule.onAllNodesWithText("mercy").fetchSemanticsNodes().isNotEmpty()
+        }
+        assertEquals("the words are back on the phone", listOf("mercy"), SearchHistory(context).read())
     }
 }

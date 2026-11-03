@@ -3,6 +3,7 @@ package io.github.muntasimulhaque.quran.ui.search
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,10 +19,16 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -53,10 +60,13 @@ import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
+import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
+import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** More than a screenful of scroll is not a search; the rest is a narrower query. */
@@ -165,8 +175,36 @@ fun SearchSheet(
     val keepQuery: () -> Unit = {
         if (text.isNotBlank()) recents = history.record(text)
     }
+    // Clear all takes the reader's remembered words, so it offers them back:
+    // the app asks before it destroys, and a search history is the reader's
+    // own work even when it is only five words (owner decision, this
+    // session). The sheet carries its own snackbar the way Browse does, and
+    // the host sits above the keyboard.
+    val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val clearedMessage = stringResource(R.string.search_recent_cleared)
+    val undoLabel = stringResource(UiKitR.string.action_undo)
+    val clearRecents: () -> Unit = {
+        val previous = recents
+        recents = history.clear()
+        scope.launch {
+            val result = snackbar.showSnackbar(
+                message = clearedMessage,
+                actionLabel = undoLabel,
+                withDismissAction = false,
+                duration = SnackbarDuration.Long,
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                recents = history.restore(previous)
+            }
+        }
+    }
     var searching by remember { mutableStateOf(false) }
     var failed by remember { mutableStateOf(false) }
+    // A retry is the same query asked again, not a new query: the counter is
+    // part of the search's key, so the effect runs once more without the
+    // reader touching the field (owner decision, this session).
+    var attempt by remember { mutableStateOf(0) }
     // The source flags survive the window like the query does: a rotation
     // with a chip turned off must not silently turn it back on and change
     // the results under the reader (owner decision, the theme and
@@ -207,7 +245,7 @@ fun SearchSheet(
      * search that gives up early when it is superseded (see `search`) cannot
      * give up work that has already been handed to the database.
      */
-    LaunchedEffect(text, content, sources) {
+    LaunchedEffect(text, content, sources, attempt) {
         val query = Search.parse(text)
         if (query == null || !sources.any) {
             results = SearchResults()
@@ -270,140 +308,159 @@ fun SearchSheet(
         // is the glass: a row's words stop at Space.Gutter and its own card
         // reaches outside that line, the same grammar the settings sheet and
         // the reading keep (owner decision, this session).
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .imePadding()
-                .testTag("search-sheet"),
-        ) {
-            SearchField(
-                value = text,
-                onChange = { text = it },
-                // Close ends the search; the field's own clear mark empties
-                // it. One shape does one job, so a reader with a query in the
-                // field is not made to tap twice to leave (owner decision,
-                // this session).
-                onClose = onDismiss,
-                focus = focus,
-            )
-            FilterRow(
-                sources = sources,
-                hasQuery = queryTerms.isNotEmpty(),
-                hasTranslations = translationPacks.isNotEmpty(),
-                hasTafsirs = tafsirPacks.isNotEmpty(),
-                hasWords = wordsInstalled,
-                hasNotes = notes.any { !it.note.isNullOrBlank() },
-                onChange = { sources = it },
-            )
-            // Before a query the sheet is the field, the filter door, and the
-            // note that says what the field can be asked, so a reader who
-            // opens the search with a reference in hand does not have to
-            // guess that a reference is a query (owner decision, this
-            // session). The note is the app's one empty page, drawn by
-            // Browse's lists too, and it goes the moment the field holds a
-            // word: it teaches, it does not stand beside an answer.
-            //
-            // It is the results list's first item rather than a block above
-            // it, because the list is the one part of the sheet that is
-            // measured against what is left of the glass: a phone on its side
-            // with the keyboard up leaves the sheet shorter than the field,
-            // the door, and the note together, and a note in the list can
-            // still be scrolled to where a note above it would be cut off.
-            //
-            // The sentence names the reader's own translation only when the
-            // reader has prose on the device. A translation, a tafsir, or the
-            // word list is what a Latin word can match, so with none of the
-            // three installed the note asks for a word from the Quran and
-            // promises nothing that would return nothing.
-            val prose = translationPacks.isNotEmpty() ||
-                tafsirPacks.isNotEmpty() ||
-                wordsInstalled
-            StatusLine(
-                query = currentQuery,
-                results = results,
-                searching = searching,
-                hasSources = sources.any,
-                failed = failed,
-                current = resultsCurrent,
-            )
-            LazyColumn(
-                state = resultsList,
+        Box(Modifier.fillMaxSize()) {
+            Column(
                 modifier = Modifier
-                    .weight(1f)
-                    .sheetDragGate(resultsGate),
-                contentPadding = PaddingValues(bottom = Space.SheetFoot),
+                    .fillMaxSize()
+                    .imePadding()
+                    .testTag("search-sheet"),
             ) {
-                if (text.isBlank()) {
-                    if (recents.isNotEmpty()) {
-                        item(key = "recent") {
-                            RecentSearches(
-                                queries = recents,
-                                onQuery = { text = it },
-                                onRemove = { recents = history.remove(it) },
-                                onClear = { recents = history.clear() },
+                SearchField(
+                    value = text,
+                    onChange = { text = it },
+                    // The field's own clear mark empties the query. The sheet
+                    // itself ends by its handle, the scrim, or Back, like every
+                    // other sheet; a Close beside the field was the only one of
+                    // its kind and took the field's own room (owner decision,
+                    // this session).
+                    focus = focus,
+                )
+                FilterRow(
+                    sources = sources,
+                    hasQuery = queryTerms.isNotEmpty(),
+                    hasTranslations = translationPacks.isNotEmpty(),
+                    hasTafsirs = tafsirPacks.isNotEmpty(),
+                    hasWords = wordsInstalled,
+                    hasNotes = notes.any { !it.note.isNullOrBlank() },
+                    onChange = { sources = it },
+                )
+                // Before a query the sheet is the field, the filter door, and the
+                // note that says what the field can be asked, so a reader who
+                // opens the search with a reference in hand does not have to
+                // guess that a reference is a query (owner decision, this
+                // session). The note is the app's one empty page, drawn by
+                // Browse's lists too, and it goes the moment the field holds a
+                // word: it teaches, it does not stand beside an answer.
+                //
+                // It is the results list's first item rather than a block above
+                // it, because the list is the one part of the sheet that is
+                // measured against what is left of the glass: a phone on its side
+                // with the keyboard up leaves the sheet shorter than the field,
+                // the door, and the note together, and a note in the list can
+                // still be scrolled to where a note above it would be cut off.
+                //
+                // The sentence names the language the reader reads in only
+                // when the reader has prose on the device. A translation, a
+                // tafsir, or the word list is what a Latin word can match, so
+                // with none of the three installed the note asks for a word
+                // from the Quran and promises nothing that would return
+                // nothing.
+                val prose = translationPacks.isNotEmpty() ||
+                    tafsirPacks.isNotEmpty() ||
+                    wordsInstalled
+                StatusLine(
+                    query = currentQuery,
+                    results = results,
+                    searching = searching,
+                    hasSources = sources.any,
+                    failed = failed,
+                    current = resultsCurrent,
+                    onRetry = { attempt++ },
+                )
+                LazyColumn(
+                    state = resultsList,
+                    modifier = Modifier
+                        .weight(1f)
+                        .sheetDragGate(resultsGate),
+                    contentPadding = PaddingValues(bottom = Space.SheetFoot),
+                ) {
+                    if (text.isBlank()) {
+                        if (recents.isNotEmpty()) {
+                            item(key = "recent") {
+                                RecentSearches(
+                                    queries = recents,
+                                    onQuery = { text = it },
+                                    onRemove = { recents = history.remove(it) },
+                                    onClear = clearRecents,
+                                )
+                            }
+                        }
+                        item(key = "note") {
+                            EmptyNote(
+                                title = stringResource(R.string.search_empty_title),
+                                body = localizedDigits(
+                                    stringResource(
+                                        if (prose) {
+                                            R.string.search_empty_body
+                                        } else {
+                                            R.string.search_empty_body_quran
+                                        },
+                                    ),
+                                ),
+                                modifier = Modifier.padding(top = Space.Section),
                             )
                         }
                     }
-                    item(key = "note") {
-                        EmptyNote(
-                            title = stringResource(R.string.search_empty_title),
-                            body = localizedDigits(
-                                stringResource(
-                                    if (prose) {
-                                        R.string.search_empty_body
-                                    } else {
-                                        R.string.search_empty_body_quran
-                                    },
-                                ),
-                            ),
-                            modifier = Modifier.padding(top = Space.Section),
-                        )
-                    }
-                }
-                if (resultsCurrent) {
-                    items(results.hits, key = { key(it) }) { hit ->
-                        when (hit) {
-                        is SearchHit.ReferenceHit -> ReferenceRow(hit.ayah) {
-                            keepQuery()
-                            onAyah(SearchArrival.AyahMatch(hit.ayah))
-                        }
-                        is SearchHit.SurahHit -> SurahRow(hit.surah) { surah ->
-                            keepQuery()
-                            onSurah(surah)
-                        }
-                        is SearchHit.AyahHit -> AyahRow(
-                            hit = hit,
-                            hafs = hafs,
-                            terms = queryTerms,
-                            showSource = translationPacks.size > 1,
-                            arabicStep = arabicStep,
-                            proseSp = proseSp,
-                            proseLineSp = proseLineSp,
-                            onOpen = {
+                    if (resultsCurrent) {
+                        items(results.hits, key = { key(it) }) { hit ->
+                            when (hit) {
+                            is SearchHit.ReferenceHit -> ReferenceRow(hit.ayah) {
                                 keepQuery()
-                                onAyah(
-                                    SearchArrival.AyahMatch(
-                                        ayah = hit.ayah,
-                                        arabicWords = hit.arabicMatchedWords,
-                                        meaningWords = hit.matchedWordText,
-                                        translationPack = hit.translation?.pack,
-                                        note = hit.note,
-                                    ),
-                                )
-                            },
-                        )
-                            is SearchHit.TafsirHitResult -> TafsirRow(
+                                onAyah(SearchArrival.AyahMatch(hit.ayah))
+                            }
+                            is SearchHit.SurahHit -> SurahRow(hit.surah) { surah ->
+                                keepQuery()
+                                onSurah(surah)
+                            }
+                            is SearchHit.AyahHit -> AyahRow(
                                 hit = hit,
+                                hafs = hafs,
+                                terms = queryTerms,
+                                showSource = translationPacks.size > 1,
+                                arabicStep = arabicStep,
                                 proseSp = proseSp,
                                 proseLineSp = proseLineSp,
-                            ) {
-                                keepQuery()
-                                onAyah(SearchArrival.TafsirMatch(hit.ayah, hit.pack))
+                                onOpen = {
+                                    keepQuery()
+                                    onAyah(
+                                        SearchArrival.AyahMatch(
+                                            ayah = hit.ayah,
+                                            arabicWords = hit.arabicMatchedWords,
+                                            meaningWords = hit.matchedWordText,
+                                            translationPack = hit.translation?.pack,
+                                            note = hit.note,
+                                        ),
+                                    )
+                                },
+                            )
+                                is SearchHit.TafsirHitResult -> TafsirRow(
+                                    hit = hit,
+                                    proseSp = proseSp,
+                                    proseLineSp = proseLineSp,
+                                ) {
+                                    keepQuery()
+                                    onAyah(SearchArrival.TafsirMatch(hit.ayah, hit.pack))
+                                }
                             }
                         }
                     }
                 }
             }
+        SnackbarHost(
+            hostState = snackbar,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .imePadding()
+                .padding(horizontal = Space.Gutter, vertical = Space.Line),
+        ) { data ->
+            Snackbar(
+                snackbarData = data,
+                shape = Radii.Card,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                actionColor = MaterialTheme.colorScheme.primary,
+            )
+        }
         }
     }
 }

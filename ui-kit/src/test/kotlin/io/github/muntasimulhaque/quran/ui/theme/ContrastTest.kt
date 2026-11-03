@@ -80,6 +80,15 @@ class ContrastTest {
         // so the muted voice is measured on that ground too (owner decision,
         // this session).
         assertReadable(PaperMuted, blend(LightScheme.primary, PaperSurface, Wash.Selected))
+        // The quiet ground every button, off chip, and typed field stands on:
+        // the muted voice is measured on the ink wash itself, not only on the
+        // scheme's named slots (owner decision, this session).
+        assertReadable(PaperMuted, blend(PaperInk, PaperSurface, Wash.Door))
+        // A chosen search source wears the ayah door's open state: the
+        // accent's ink on the accent's own tint, where the full-strength fill
+        // read as a pressed button times seven (owner decision, this
+        // session).
+        assertReadable(Lapis, blend(Lapis, PaperSurface, Wash.Control))
         // The two text tones outside the scheme, measured the way they are drawn:
         // the opened surah introduction at 0.78 of the reading ink, and the
         // masthead at 0.9 of the interface word.
@@ -138,6 +147,10 @@ class ContrastTest {
         // The night sheet's current row, on the same selected wash (owner
         // decision, this session).
         assertReadable(NightMuted, blend(DarkScheme.primary, NightSurface, Wash.Selected))
+        // The quiet ground and the chosen search source, as on the day sheet
+        // (owner decision, this session).
+        assertReadable(NightMuted, blend(NightText, NightSurface, Wash.Door))
+        assertReadable(LapisLight, blend(LapisLight, NightSurface, Wash.Control))
         // The same two tones on the night page.
         assertReadable(blend(DarkPage.introInk, NightBackground, DarkPage.introInk.alpha), NightBackground)
         assertReadable(
