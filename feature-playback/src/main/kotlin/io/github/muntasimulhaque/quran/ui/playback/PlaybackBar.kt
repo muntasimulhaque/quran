@@ -35,6 +35,7 @@ import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 
 /**
  * The playback pill. It speaks in five voices: asking to download a surah,
@@ -195,9 +196,9 @@ fun PlaybackBar(
         state.error -> stringResource(R.string.playback_failed)
         state.downloadFailed -> stringResource(
             if (state.downloadFailure == DownloadError.Storage) {
-                R.string.playback_download_failed_storage
+                UiKitR.string.failure_storage
             } else {
-                R.string.playback_download_failed
+                UiKitR.string.failure_download
             },
         )
         downloading -> {

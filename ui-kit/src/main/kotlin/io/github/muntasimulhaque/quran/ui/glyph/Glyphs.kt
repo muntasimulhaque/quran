@@ -231,12 +231,6 @@ object Glyphs {
             line(7.58f, 12.69f, 16.42f, 17.31f),
         ),
 
-        Icon.More to listOf(
-            dot(4.75f, 12f, GlyphGrid.Node),
-            dot(12f, 12f, GlyphGrid.Node),
-            dot(19.25f, 12f, GlyphGrid.Node),
-        ),
-
         // A gloss: a portrait page, a rule at its margin, two lines of the
         // text, and one note written beside them. It is not the reader's note
         // (a folded page) and not a bubble (comments). The page is portrait
@@ -264,17 +258,6 @@ object Glyphs {
             closed(4.75f, 3.25f, 14.75f, 3.25f, 19.25f, 7.75f, 19.25f, 20.75f, 4.75f, 20.75f),
             poly(14.75f, 3.25f, 14.75f, 7.75f, 19.25f, 7.75f),
             line(8.25f, 13.75f, 16.25f, 13.75f),
-        ),
-
-        // Four o'clock: the minute at twelve and the hour at four, both short
-        // of the ring so the dial keeps its air. Ten past ten is the face a
-        // watch is photographed in, but at 24 dp its two hands in the upper
-        // half read as a tick inside a ring before they read as a clock, and
-        // the mark is asked what time it is, not whether the day is done
-        // (owner report).
-        Icon.Clock to listOf(
-            ring(12f, 12f, 8.75f),
-            poly(12f, 6.75f, 12f, 12f, 15.75f, 13.75f),
         ),
 
         // The frame, two rows of keys, and the space bar under them. A key is

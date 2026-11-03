@@ -32,6 +32,7 @@ import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 
 /**
  * One request, named in full: which reciter, which surah, how much, and the
@@ -125,9 +126,9 @@ internal fun ListenOfferBar(
                     title = when {
                         offer.failed -> stringResource(
                             if (offer.failure == DownloadError.Storage) {
-                                R.string.playback_download_failed_storage
+                                UiKitR.string.failure_storage
                             } else {
-                                R.string.playback_download_failed
+                                UiKitR.string.failure_download
                             },
                         )
                         progress != null -> stringResource(

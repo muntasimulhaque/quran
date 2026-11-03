@@ -19,9 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
@@ -46,10 +44,10 @@ import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
+import io.github.muntasimulhaque.quran.ui.kit.AppSnackbar
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
-import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 import kotlinx.coroutines.Dispatchers
@@ -369,20 +367,12 @@ fun BrowseSheet(
                 }
             }
         }
-        SnackbarHost(
+        AppSnackbar(
             hostState = snackbar,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(horizontal = Space.Gutter, vertical = Space.Line),
-        ) { data ->
-            Snackbar(
-                snackbarData = data,
-                shape = Radii.Card,
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                contentColor = MaterialTheme.colorScheme.onSurface,
-                actionColor = MaterialTheme.colorScheme.primary,
-            )
-        }
+        )
         }
     }
 }

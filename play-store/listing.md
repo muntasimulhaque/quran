@@ -133,49 +133,10 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 41641937540 on 15.1: all three legs green on the first pass, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The settings frame names 15.1 on all three legs. The search frame is the first store frame with the 15.0 field: the Close beside it is gone and the field takes the page's width; search, Browse, the ayah card, and the tafsir differ from 14.9 only by the status bar's clock and the search field's caret. The reading, chrome, surah opening, and every evidence frame are byte-identical to 14.9's. The 15.1 recents change is not one of the eight, because search opens on results with the field filled; the tafsir's new source break sits below the passage's visible fold in its store frame, which differs only by the clock. The evidence frames are byte-identical to 14.9's.
-
-The set before it is from capture run 41598132370 on 14.9: all three legs green on the first pass, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The settings frame names 14.9 on all three legs. The reading, chrome, surah opening, and every evidence frame are byte-identical to 14.8's; search, Browse, the ayah card, and the tafsir differ only by the status bar's clock (and search by the field's caret), and the settings frame also by the version line. The pack rows 14.9 changed are not among the store's eight: the translations page is not one of the frames.
-
-The set before it is from capture run 41584944512 on 14.8: all three legs green on the first pass, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The settings frame names 14.8 on all three legs. The reading, chrome, surah opening, and every evidence frame are byte-identical to 14.7's; search, Browse, the ayah card, and the tafsir differ only by the status bar's clock (and search by the field's caret), and the settings frame also by the version line. The recents chip's width, the chosen pack's row, and the Show translation switch are not among the store's eight: search opens on results with the field filled, and the translations page is not one of the frames. The evidence frames carry the same reading in the dark and at the largest size, and the ten inch portrait.
-
-The set before it is from capture run 41501189563 on 14.7: all three legs green on the first pass, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The settings frame names 14.7 on all three legs. The reading, chrome, surah opening, Browse, the ayah card, and the tafsir are unchanged below the status bar; search also carries the new "Showing the first 200 matches." line, and the settings frame carries the version. The new recents X, the Notes filter, the Undo Snackbar, the focus ring, and the Daily page copy are not among the store's eight. The evidence frames carry the same reading in the dark and at the largest size, and the ten inch portrait.
-
-The set before it is from capture run 41458321721 on 14.6: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The settings frame names 14.6 on all three legs. The reading, chrome, and surah opening frames are byte-identical to 14.5's on all three legs, and every evidence frame is byte-identical too; search, Browse, the ayah card, and the tafsir differ only by the status bar's clock (and search by the field's caret), and the settings frame also by the version line. The footnote numbering itself is not in the store's eight: the reading frames show the Arabic and the word list, and the ayah card opens the tafsir doors, not the translation's markers.
-
-The set before it is from capture run 41420881510 on 14.5: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The settings frame names 14.5 on all three legs; the reading, chrome, surah opening, Browse, and every evidence frame are unchanged below the status bar, the ayah card and tafsir differ only by the status bar (and the ayah card by a handful of antialiased pixels), and search differs only by the field's caret and the status bar. The reading's 2:255 frame and the ayah card frame do not show the translation's note numbers, so the footnote change itself is not one of the store's eight; the settings frame's version line is the visible change.
-
-The set before it is from capture run 41394208688 on 14.4: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The settings frame names 14.4 on all three legs, and the tablet tafsir frames carry the Kitab Arabic: proper prose punctuation, the Quran's 2.0 line, and the Arabic quotation under the passage's English. The phone tafsir frame is unchanged because its passage carries no Arabic block; the reading, chrome, surah opening, Browse, and every evidence frame are unchanged below the status bar, the ayah card differs by a handful of antialiased pixels, and search and settings differ only by the caret and the version line.
-
-The set before it is from capture run 41334761954 on 14.3: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The surah opening carries the Arabic and Latin names without the gold rule, the settings frame names 14.3 on every leg, and the other frames differ from 14.2's only by the status bar's clock and the search field's caret. The evidence frames are unchanged.
-
-The set is from capture run 41323611005 on 14.2: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The chrome frame carries the two-rail settings mark, and the settings frame names 14.2 on every leg; wherever a sheet leaves the top bar showing, the mark is the new one. The reading, the surah opening, and every evidence frame are byte-identical to 14.1's, and the other frames differ only by the status bar's clock, the search field's caret, and the mark where the top bar shows behind a sheet. The evidence frames are unchanged.
-
-The set is from capture run 41298053605 on 14.1: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The chrome frame carries the new gear; the ayah card and the tafsir name English and Bangla above Ibn Kathir; the settings frame names 14.1 on every leg. The reading, the surah opening, search, and Browse are otherwise the 14.0 page, and every evidence frame carries the same reading in the dark, at the largest size, and the ten inch portrait.
-
-The set before it is from capture run 41281668937 on 14.0: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The reading, the search field, and the tafsir carry the larger type: the translation and the tafsir at 16 on the 1.5 line, the passage title 17, the gloss 15, the inline Arabic and the ayah medallion 24, and the search field 16. The settings frame names 14.0 on every leg. The evidence frames carry the same reading in the dark and at the largest size, and the ten inch portrait.
-
-The set before it is from capture run 41179632238 on 13.6: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The settings frame names 13.6 on every leg. The reading, chrome, surah opening, and every evidence frame are byte-identical to 13.5's; search, Browse, the ayah card, and the tafsir differ only by the status bar's clock (and, on search, the field's caret), and the settings frame also by the version line. The five frames that changed are not the subject of 13.6's menu, which is not among the store's eight.
-
-The set is from capture run 41173502151 on 13.5: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The Browse frame carries the reader's current surah, marked with the app's selected wash and an accent number; the settings frame names 13.5 on every leg. The reading, chrome, and surah opening frames are byte-identical to 13.4's; search, the ayah card, and the tafsir differ only by the status bar's clock; and the evidence frames are byte-identical to 13.4's, carrying the same reading in the dark and at the largest size, and the ten inch portrait.
-
-The set before it, 13.4, is from capture run 41108647823: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. Every surface carries the new type: the page 20, the reading 16 on a 1.5 line, the Quran 24 on a 2.0 line, the aid 20 with 14.4 glosses, the card's 20 title over 15 pack rows and an 18 passage, and the settings values 13; the settings frame names 13.4 on every leg. The evidence frames carry the same reading in the dark and at the largest size, and the ten inch portrait.
-
-The set before it, 13.3, is from capture run 41088414584: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. Every surface carries the new type: the Quran at 24 on a 2.0 line, the prose at 15, the word list at 22 with 13.5 glosses, the card's 12 kicker over an 18 title and 15 heads, and the settings values 12; the settings frame names 13.3 on every leg.
-
-The set before it, 13.2, is from capture run 41041338981: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The reading, the surah opening, the ayah card's ground, and every evidence frame carry the ayah's door; search, Browse, and the tafsir differ from 13.1 only by the status bar's clock; the settings frame names 13.2.
-
-The set before it, 13.1, is from capture run 41000985652: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. Every surface carries the new type: the titles and names in Literata, the prose with its own breaks and hyphenation, the tafsir's Arabic in Amiri, and the honorific inside its sentence; the settings frame named 13.1. The evidence frames carry the same reading in the dark and at the largest size, and the ten inch portrait.
-
-The set before it, 13.0, is from capture run 40917013319: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The reading, chrome, and surah opening frames are byte-identical to 12.9's on all three legs; search, Browse, the ayah card, and the tafsir differ only by the status bar, and the ten inch search frame also by the field's caret; the settings frame differs by the status bar and the version line, which named 13.0. The evidence frames are byte-identical to 12.9's.
-
-The set before it, 12.9, is from capture run 40889505454: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. The reading, surah opening, tafsir, and search frames carry the larger prose, the settings frame names 12.9, and Browse and the ayah card differ from 12.8 only by the status bar's clock; the evidence frames are the new size in the same grounds.
-
-The set before it, 12.8, is from capture run 40848367986: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen, every frame read. Nothing the eight frames draw changed in 12.8 except the settings hub's own version line, which names 12.8: the reading, chrome, and surah opening frames are byte-identical to 12.7 on all three legs, the search, Browse, ayah card, and tafsir frames differ only by the status bar's clock and the search field's caret, and the settings frame differs by the clock and that line. The two pages 12.8 changed, the empty search sheet's note and the Tajweed page, are not the subject of a store frame. The evidence frames are byte-identical to 12.7's.
-
-The set before it is from capture run 40833555012 on 12.7: all three legs green, ten frames on the phone and the seven inch tablet, eleven on the ten inch screen. The ten inch frames are the change: the reading stands on a 600 dp page, so the translation sets 600 dp to the line where it set 1224, and Search, Browse, the settings hub, the ayah card, and the tafsir are 656 dp sheets instead of the whole glass, which brings a setting's name and its own switch from 885 dp apart to 400. The phone and the seven inch tablet are unchanged to the byte in the reading, chrome, and surah opening frames, and differ from 12.6 in the other five only by the status bar's clock, the version line, and the search field's caret. The evidence frames that are not the store's eight are in `play-store/evidence/`: the dark reading and the largest text size on every leg, and the ten inch screen's first portrait frames.
-
-The set before it is from capture run 40822283423 on 12.6: all three legs green with eight frames each, every frame accounted for. The reading, chrome, and surah opening frames are byte-identical to 12.5; search, Browse, the ayah card, and the tafsir are identical below the status bar, where the clock and the search field's caret are the whole of the difference. The settings hub changed in one line: it names 12.6, and the phone frame now carries the About row, which 12.5's frame cut before. The pages 12.6 moved are not among the eight: the Tajweed legend, the translations and tafsirs lists with their language headings again, the About page, the share sheet's two doors, and the Last read and Saved rows are none of them the subject of a store frame, and the Browse frame is the Surahs list as always.
+The set is from capture run 41641937540 on 15.1: all three legs green on the
+first pass, ten frames on the phone and the seven inch tablet, eleven on the
+ten inch screen, every frame read. The settings frame names 15.1 on all three
+legs.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
@@ -189,7 +150,7 @@ What each set shows, in order:
 1. The reading with its translation
 2. The chrome: Browse, Search, and Settings
 3. The surah opening
-4. Search with the matched word marked, and the filters under the field
+4. Search with a query in the field and its sources behind the "Search in" door
 5. The settings hub
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
@@ -197,108 +158,6 @@ What each set shows, in order:
 
 ## Release notes (15.1, 431 characters)
 15.1 quiets the search sheet and the tafsir card. Recent searches lose Clear all: every word keeps its own visible X, and the caption sits with its chips. The chips now grow with the system text size instead of clipping, and the filter chips keep their row gap at large text. A tafsir passage now ends on the card's block break, so the next language no longer reads as its caption. Text, translations, tafsirs, and packs unchanged.
-
-## Release notes (14.9, 393 characters)
-14.9 makes every pack's state visible. A translation or tafsir you never chose now wears an empty ring, not a blank column, and after Remove its row is an off checkbox. Add and Retry are pills on the same rail as Remove, with the same shape and type, so one row's two states share one grammar. A downloaded surah's Remove follows that rail. The reading, text, packs, and content are unchanged.
-
-## Release notes (14.8, 441 characters)
-14.8 keeps your choices yours. A translation you chose whose file is not on the phone now says so in Settings, and the Show translation switch follows your choice. A pack that downloads in the background no longer turns itself on; only your tap or your language choice does. The queue forgets packs you already have, and a language you leave takes its packs with it. Recent searches are as wide as their word again. Text and packs unchanged.
-
-## Release notes (14.7, 409 characters)
-14.7 makes the reader's own work safer. Clearing a note or removing a saved ayah offers Undo. Recent searches show their X at rest. Search finds your own notes. The daily reminder follows your language. The top bar stays with a screen reader, the size rail works with arrow keys, and a paused recitation keeps its controls for 30 minutes. The lock screen shows the app's own artwork. Text and packs unchanged.
-
-## Release notes (14.6, 415 characters)
-14.6 lets the translator's notes climb through each surah. A surah's notes start at 1 and the next surah starts again at 1, in Saheeh International and Al-Bayan alike, so Al-Baqarah runs 1 to 105 and Al-Imran opens on 1. The publisher's book-wide numbers cannot be rebuilt from an ayah-keyed export, and a whole-Quran number would put four digits on half of the English markers. Text and every other pack unchanged.
-
-## Release notes (14.5, 401 characters)
-14.5 numbers each ayah's translator's notes from 1, so Al-Fatihah opens on notes 1 and 2 instead of 2 and 3. The publisher numbers its notes across the whole book and starts with the surah title, which an ayah-keyed export cannot carry. This update also restores 3:32 to the published "if they turn away" and keeps note numbers out of search results. The Quran text and every other pack are unchanged.
-
-## Release notes (14.4, 368 characters)
-14.4 makes the tafsir read clearly. Its Arabic now uses Kitab, the book face Quran.com uses, so commas and other punctuation are proper marks again and the lines have room. The word being recited is shown in its own ink instead of a wash. In the daily time, moving a tape while its field is open now changes the same value the keyboard edits. Text and packs unchanged.
-
-## Release notes (14.3, 410 characters)
-14.3 quiets the small surfaces and the surah opening. The gold rule under the surah's Arabic name is gone, and its Latin name sits a row closer. A recent search is removed with the X that appears on its own chip, with no menu. The playing pill reads the ayah, the reciter, and the pace, which shows only when it is not 1x. The time, search, and note fields select with a rounded wash. Text and packs unchanged.
-
-## Release notes (14.2, 491 characters)
-14.2 holds the small surfaces. Settings wears the app's two-rail mark again. A recent search's Remove is quiet, and Bangla names Clear and Remove apart. The share card sets its verse at 26 and widens for long ayahs, so a long card is a poster, not a strip. The typed time keeps its slot, with Set above the keyboard. The playing pill leads with the surah over the reciter and the ayah's key, with the pace in the panel and its type capped so the place is never cut. Text and packs unchanged.
-
-## Release notes (14.1, 394 characters)
-14.1 brings the small surfaces together. The settings gear is redrawn as a cog, the recent-search Remove menu takes the chip's middle, and the tafsir card names its language before its source. The share sheet shows the whole card scaled to fit and stays open for another app. The four text-size rails share one length, and the daily time can be typed as well as taped. Text and packs unchanged.
-
-## Release notes (14.0, 449 characters)
-14.0 sets the reading at the size the Book's face asks for. Translation, tafsir, notes, and footnotes stand at 16 on the 1.5 line, with a passage title at 17 and the tafsir heads at the body's size. The word meaning is 15, the inline Arabic and the ayah medallion 24. The search field and welcome page are 16, the pill and download notice 14, and saved notes follow your reading size. Bangla uses the same sizes as English. Text and packs unchanged.
-
-## Release notes (13.9, 496 characters)
-13.9 quiets the page and its controls. Translation and tafsir come down a step, and a tafsir passage's title leads by its weight, not a bigger size. The surah and juz share one baseline in the top bar. The tafsir card opens on the commentary itself, and About's credits are smaller. Recent searches can be removed one at a time, a landscape menu stays clear of the number, the size and pace rows are one rail, and the daily time has a page. The reciter's Remove is gone. Text and packs unchanged.
-
-## Release notes (13.8, 424 characters)
-13.8 makes the page more legible and the app more honest. Tajweed colors are now chosen and tested for color vision. Search names its field, never shows an old result under a new query, and leaves the keyboard down when you return to results. Notes keep unsaved words through a closed sheet and a failed save. Every sheet names itself to a screen reader, and the ayah card says which ayah it opens. Text and packs unchanged.
-
-## Release notes (13.7, 431 characters)
-13.7 quiets the page. The top bar's gear opens Settings directly again, the reading's display panel is gone, and a tap anywhere puts a text selection away. Surah headers say Makki or Madani. Browse's ayah picker is a page of numbers with one filled circle for your place. The Quran stands at 26, the translation and tafsir at 16, Bangla at the same sizes as English, and Arabic-only verses sit 8 dp apart. Text and packs unchanged.
-
-## Release notes (13.6, 324 characters)
-13.6 keeps the ayah's actions on screen. In landscape, the menu used to stop at the room on one side and hide the last actions behind a scroll; it now takes the whole window when it must, and only scrolls when the window itself is too short. The menu is narrower too, so it covers less of the page. Text and packs unchanged.
-
-## Release notes (13.5, 388 characters)
-13.5 puts the reading's display in reach. The sliders in the top bar open the page's own sizes and switches, with Settings at the foot. A saved ayah wears a bookmark, Browse marks the surah and juz you are in, translation and tafsir can be copied, and search brings back the last five queries you opened. A new install follows your phone's light or dark setting. Text and packs unchanged.
-
-## Release notes (13.4, 384 characters)
-13.4 rebuilds the app's type. The Book's face now carries only the Quran's meaning and names, the interface face everything the app says about itself. The page is 20, the reading 16 on a 24 line, the Quran 24 on 48, the word aid 20 with a 14.4 gloss, and the Bangla app draws the weights it declares. The settings list, the ayah card, and search read easier. Text and packs unchanged.
-
-## Release notes (13.3, 439 characters)
-13.3 is the type release. The reading now has one clear ladder: the Quran at 24 on a 2.0 line, its inline quotes at 21.6, the word list at 22 with 13.5 glosses, and the translation and tafsir at 15 on a 1.5 line. Titles are 18, section heads the body's own size at two weights, labels 12, and the settings list fits whole again. The surah introduction's own headings now stand, and the prose no longer hyphenates. Text and packs unchanged.
-
-## Release notes (13.2, 339)
-13.2 makes the ayah's actions visible. The number at each ayah's head is now a door: tap it for Play, Tafsir, Save, Note, and Share. The menu is the one the player already opens, it closes on any answer, a scroll, or Back, and nothing hides behind a gesture anymore. The long press and its one-time hint are gone. Text and packs unchanged.
-
-## Release notes (13.1, 445 characters)
-13.1 is the typography release. Titles, screen names, surah names, and search results now use the book's own face, while controls and labels stay quiet. The prose is set with better line breaks, hyphenation, and trimmed leading; the tafsir's Arabic moves to Amiri's body face. Bangla readers get a larger reading and a taller line, the honorific sits inside its sentence, the word gloss steps back, and numbers line up. Text and packs unchanged.
-
-## Release notes (13.0, 452 characters)
-13.0 fixes the reading's place. The app remembers the ayah you were in and nothing else. It used to keep how far down the screen you had scrolled too, and turning the phone made that number wrong, so each swipe snapped to the top of an ayah instead of sliding; in landscape the reading stepped ayah by ayah, and a long ayah could not be read past its first screen. Now the page stays where you leave it, in either orientation. Text and packs unchanged.
-
-## Release notes (12.9, 465 characters)
-12.9 reads easier: the translation, the tafsir, and the word meanings now stand at the phone's own body size, a touch larger, so a long sitting does not tire the eye. The app opens faster, because it no longer re-reads the Quran's database on every launch, and the reciter's word highlight no longer redraws the page. The quiet daily re-check of packs is gone, so the app does no background work; a damaged pack still repairs with one tap. Text and packs unchanged.
-
-## Release notes (12.8, 406 characters)
-12.8 makes the two quiet pages say what they are for. Search now tells you, before you type, that a word in Arabic or in your translation works and that a reference like 2:255 or kahf 10 goes straight to an ayah. The Tajweed page keeps a color's name at the top while you read its rules, says in one sentence what the colors are, and lets a screen reader jump from color to color. Text and packs unchanged.
-
-## Release notes (12.7, 392 characters)
-12.7 gives the wide screen a page. On a ten inch tablet the reading stops stretching to the glass: the words keep a 600 dp page, centered, the width the seven inch tablet already reads edge to edge, and the rest becomes margin. A sheet is that page plus its air, so a setting switch comes back within the same card as its name. Every gap is now named from one scale. Text and packs unchanged.
-
-## Release notes (12.6, 422 characters)
-12.6 puts back what 12.5 had taken out. The Tajweed page explains all eighteen rules again, one sentence each, in a shorter layout than before. Translations and tafsirs are grouped under their language again. Last read and Saved stand the ayah 4 dp under its surah, as Browse does. Two buttons side by side stand 20 dp apart everywhere. About is one line of version and license, then the credits. Text and packs unchanged.
-
-## Release notes (12.5, 471 characters)
-12.5 quiets the chrome. Settings reads as one rhythm, the font size page drops its step counts, the tafsir is a list rather than a switch (the pill's Tafsir mark is there while a commentary is on), and the Tajweed page is seven colors with their rule names. Browse's Last Read and Saved lines sit on one gap, Search speaks once, and the share sheet opens on the card: the ayah right, its translation left, one fixed type for preview and picture. Text and packs unchanged.
-
-## Release notes (12.4, 467 characters)
-12.4 reworks the ayah card. With one tafsir it is a page: Tafsir, the commentary's name, then the passage's own reference, so a commentary that begins before the ayah you opened says so. With two, the names are doors and each passage carries its reference under it, and the commentary in your language leads. Turning Show tafsir off now removes tafsir from search too, so no result opens an empty card. The Quran text, every translation, and every pack are unchanged.
-
-## Release notes (12.3, 473 characters)
-12.3 gives every screen one margin. The ayahs, the translation, the word meanings, search results, settings rows, footnotes, and tafsir all begin on the same line, on a phone, a seven inch tablet, and a ten inch one, and the reading uses the whole page the way a printed mushaf does instead of a narrow column in the middle of the glass. Search, Browse, Settings, and the ayah card are as wide as the screen. The Quran text, every translation, and every pack are unchanged.
-
-## Release notes (12.2, 482 characters)
-12.2 keeps the last line of a surah clear of the phone's navigation bar, and makes Browse open on where you are. The door to the next surah now stands 52 dp above the bar, half the breath a surah's opening is given, and no ayah can end hidden under it. The Surahs and Juz lists put the surah or juz you are reading in the middle every time the sheet comes up; Search still returns to your exact results. The Quran text, every translation, every tafsir, and every pack are unchanged.
-
-## Release notes (12.1, 321 characters)
-12.1 makes the first screen even. A new install is asked to choose a language without being nudged toward one: the Suggested line under English is gone, so English and Bangla stand as two equal cards of the same height. The reading, the Quran text, every translation, every tafsir, and every pack are unchanged from 12.0.
-
-## Release notes (12.0, 455 characters)
-12.0 completes the Bangla translator's notes. The reading now carries all 205 notes of the Al-Bayan publisher's edition, up from 182: the second, third, and fourth notes on ayahs like 5:103 and 5:97 are there, the two welded notes are split, and 34:2's note is restored. The correct ধরণ spelling is used everywhere. The content is 1.5.0 and the Bangla pack 1.0.0; a held pack updates quietly on Wi-Fi. The Quran text and the English reading are unchanged.
-
-## Release notes (11.9, 385 characters)
-11.9 puts the settings switches back on their rows: the switch flips the setting and the words open the page, where the same switch waits at the top. The player reads its answer at the surah's end, so Continue to the next ayah rests there instead of rolling into the next surah, and a finished recitation takes its pill and notification with it. The Quran text and packs are unchanged.
-
-## Release notes (11.8, 495 characters)
-11.8 makes the first minutes and the way back clear. The top bar shows once on a new install, then steps back. Search and Browse results reopen where you left them, and a result arrives with its matched words, meanings, or tafsir passage in view. Settings rows toggle as a whole with a separate page link, font sizes read in steps, and the Tajweed page explains each rule. Reading depth, large-text spacing, storage failures, and pack repair are steadier. The Quran text and packs are unchanged.
-
-## Release notes (11.7, 411 characters)
-11.7 is the security hardening release. A pack without a checksum is refused; content names are checked against their folders; downloads check every redirect, size, and time; downloaded text opens read-only and verified; the player gives other apps only read commands; search input is bounded; and the build verifies its dependencies and wrapper. The reading, Quran text, translations, and tafsir are unchanged.
-
-## Release notes (11.6, 410 characters)
-11.6 is a new face for the app. The mark's feet now close on one point instead of poking past it, the line is a little firmer so the icon holds from a 48 pixel tile to the store, and the two smallest tiles carry their own weight. The feature graphic is redrawn: no frame, the mark at seal size, the name, and The Noble Book under one gold rule. The reading, the Quran text, and every translation are unchanged.
 
 ## Before each release
 

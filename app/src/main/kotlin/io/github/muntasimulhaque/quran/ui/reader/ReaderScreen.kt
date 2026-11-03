@@ -16,9 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
@@ -56,11 +54,11 @@ import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.readingMetrics
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
 import io.github.muntasimulhaque.quran.ui.PermissionNotice
+import io.github.muntasimulhaque.quran.ui.kit.AppSnackbar
 import io.github.muntasimulhaque.quran.ui.kit.rememberAssistiveNavigation
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
-import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.reading.AyahCard
 import io.github.muntasimulhaque.quran.ui.reading.ReadingReveal
@@ -765,21 +763,13 @@ fun ReaderScreen(
             )
         }
 
-        SnackbarHost(
+        AppSnackbar(
             hostState = snackbar,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
+                .padding(horizontal = Space.Gutter)
                 .padding(bottom = snackbarBottom),
-        ) { data ->
-            Snackbar(
-                snackbarData = data,
-                modifier = Modifier.padding(horizontal = Space.Gutter),
-                shape = Radii.Card,
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                contentColor = MaterialTheme.colorScheme.onSurface,
-                actionColor = MaterialTheme.colorScheme.primary,
-            )
-        }
+        )
 
         // The ayah's own menu, hung from its door. Every answer closes it and
         // then does its work, so the reader is returned to the reading rather

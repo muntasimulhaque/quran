@@ -19,6 +19,7 @@ import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
 import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
+import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 
 /** The pages the settings hub opens, one at a time. */
 enum class SettingsPage { Language, Theme, FontSize, Reciters, Daily, Translations, Tafsirs, Tajweed, About }
@@ -268,9 +269,9 @@ internal fun WordByWordRow(
     val subtitle = when {
         setup != null && setup.failed -> stringResource(
             if (setup.failure == DownloadError.Storage) {
-                R.string.settings_words_failed_storage
+                UiKitR.string.failure_storage_words
             } else {
-                R.string.settings_words_failed
+                UiKitR.string.failure_download
             },
         )
         setup != null && setup.progress != null -> stringResource(

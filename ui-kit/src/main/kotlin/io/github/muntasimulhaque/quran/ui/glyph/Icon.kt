@@ -50,9 +50,6 @@ enum class Icon {
     /** Three ends and their two lines: the ayah leaves the app. */
     Share,
 
-    /** The three dots that say more stands behind this. */
-    More,
-
     /** The gloss in the page's margin. */
     Tafsir,
 
@@ -65,9 +62,6 @@ enum class Icon {
 
     /** The page with its turned corner: what the reader writes. */
     Note,
-
-    /** The face that turns a reminder's time. */
-    Clock,
 
     /** The keys that type the time instead. */
     Keyboard,

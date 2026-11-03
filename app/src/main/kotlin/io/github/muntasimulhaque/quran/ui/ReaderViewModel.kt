@@ -972,7 +972,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
                     )
                 }
             } else {
-                _messages.tryEmit(ReaderMessage(R.string.save_failed))
+                _messages.tryEmit(ReaderMessage(UiKitR.string.failure_save))
             }
         }
     }
@@ -1013,7 +1013,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
                     ),
                 )
             } else if (onResult == null) {
-                _messages.tryEmit(ReaderMessage(R.string.note_save_failed))
+                _messages.tryEmit(ReaderMessage(UiKitR.string.failure_save))
             }
             onResult?.invoke(written)
         }
@@ -1027,7 +1027,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     fun restoreSaved(row: SavedAyah) {
         viewModelScope.launch {
             if (!savedStore.restore(row)) {
-                _messages.tryEmit(ReaderMessage(R.string.save_failed))
+                _messages.tryEmit(ReaderMessage(UiKitR.string.failure_save))
             }
         }
     }
@@ -1057,7 +1057,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
                     ),
                 )
             } else {
-                _messages.tryEmit(ReaderMessage(R.string.save_failed))
+                _messages.tryEmit(ReaderMessage(UiKitR.string.failure_save))
             }
         }
     }

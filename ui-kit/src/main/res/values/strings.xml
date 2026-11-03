@@ -23,4 +23,14 @@
     <!-- The one word a removal's Snackbar offers back. It lives here because
          the reading and Browse both draw the same undo action. -->
     <string name="action_undo">Undo</string>
+
+    <!-- The app's one failure vocabulary: one sentence for one cause, drawn
+         by every surface that can fail, so a download that dies in the pill
+         says the same words as the row in Settings that asked for it. The
+         word list keeps the one sentence that names its subject, because
+         what will not fit is the whole point of that row. -->
+    <string name="failure_download">Could not download. Check your connection.</string>
+    <string name="failure_storage">Not enough space. Free some space, then try again.</string>
+    <string name="failure_storage_words">Not enough space to add the word meanings. Free some space, then try again.</string>
+    <string name="failure_save">Could not save. Your phone\'s storage may be full.</string>
 </resources>

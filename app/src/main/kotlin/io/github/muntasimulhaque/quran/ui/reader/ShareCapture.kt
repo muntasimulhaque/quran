@@ -92,6 +92,7 @@ private const val CaptureScale = 3f
 @Composable
 internal fun ShareCardCapture(
     card: ShareCard,
+    modifier: Modifier = Modifier,
     /**
      * The width the preview measured and chose. The capture draws the same
      * card, so the picture and the preview can never be two shapes (owner
@@ -100,7 +101,6 @@ internal fun ShareCardCapture(
     width: Dp = ShareCardWidths.first(),
     onImage: (ImageBitmap) -> Unit,
     onFailed: () -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     val layer = rememberGraphicsLayer()
     val density = LocalDensity.current

@@ -33,6 +33,7 @@ import io.github.muntasimulhaque.quran.ui.playback.PlaybackBar
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.compactBody
+import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 
 /**
  * Everything that can sit at the foot of the page: the pack on its way in and
@@ -103,9 +104,9 @@ internal fun BottomStack(
                         text = when {
                             setup.failed -> stringResource(
                                 if (setup.failure == DownloadError.Storage) {
-                                    R.string.pack_download_failed_storage
+                                    UiKitR.string.failure_storage
                                 } else {
-                                    R.string.pack_download_failed
+                                    UiKitR.string.failure_download
                                 },
                             )
                             setup.progress == null -> stringResource(R.string.reader_pack_preparing)

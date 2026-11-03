@@ -88,10 +88,6 @@
          other at merge time. -->
     <string name="reader_pack_preparing">Preparing…</string>
     <string name="reader_pack_downloading">Downloading %1$d%% · %2$s</string>
-    <string name="pack_download_failed">Could not download. Check your connection.</string>
-    <string name="pack_download_failed_storage">Not enough space to download. Free some space, then try again.</string>
-    <string name="save_failed">Could not save. Your phone\'s storage may be full.</string>
-    <string name="note_save_failed">Could not save the note. Your phone\'s storage may be full.</string>
 
     <string name="playback_offer">%1$s · %2$s</string>
 

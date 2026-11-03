@@ -36,17 +36,40 @@ import androidx.compose.ui.graphics.Color
  * control in one place. It is the pair that was already there, and it already
  * measured 7.07:1 on Night and up on every ground.
  *
- * There is no off switch without a pair, and there is no disabled pair: no
- * switch in the app is ever disabled, and a color nothing can reach is a
- * color nobody chose.
+ * One switch in the app can be out of reach: Show translation is written as
+ * the reader's answer while the pack that answers it is still arriving, so
+ * the control stands there with nothing to draw behind it. Material paints
+ * that state from its own disabled roles, a set of alphas over `onSurface`
+ * that the theme never chose, and the first version of this file said the app
+ * had no disabled switch at all. It has one, so it has a pair, declared with
+ * the others. The rule is the control's own: a switch out of reach keeps its
+ * knob and gives up its track, because the knob is the state the reader wrote
+ * and the track is the promise that it draws. A disabled control owes no
+ * contrast rule, so the pair is held to the weaker promise that it still
+ * reads as a control: the knob is visible on its track, and the two states
+ * are still told apart.
  */
 data class SwitchPalette(
     val offTrack: Color,
     val offKnob: Color,
     val onTrack: Color,
     val onKnob: Color,
+    val offTrackOutOfReach: Color,
+    val onTrackOutOfReach: Color,
     /** The sheet this switch stands on, kept beside it so a test can measure against it too. */
     val ground: Color,
+)
+
+/**
+ * A tone moved toward the ground it stands on. The only blend the palette
+ * does, and it is here rather than at the call site so the out of reach track
+ * is a number the file declares and a test can read back.
+ */
+private fun Color.dimmedToward(ground: Color, keep: Float): Color = Color(
+    red = red * keep + ground.red * (1f - keep),
+    green = green * keep + ground.green * (1f - keep),
+    blue = blue * keep + ground.blue * (1f - keep),
+    alpha = 1f,
 )
 
 internal val LightSwitch = SwitchPalette(
@@ -54,6 +77,8 @@ internal val LightSwitch = SwitchPalette(
     offKnob = PaperMuted,
     onTrack = Lapis,
     onKnob = PaperOnPrimary,
+    offTrackOutOfReach = PaperControl.dimmedToward(PaperSurface, 0.8f),
+    onTrackOutOfReach = Lapis.dimmedToward(PaperSurface, 0.5f),
     ground = PaperSurface,
 )
 
@@ -62,6 +87,8 @@ internal val DarkSwitch = SwitchPalette(
     offKnob = NightMuted,
     onTrack = LapisLight,
     onKnob = NightOnPrimary,
+    offTrackOutOfReach = NightControl.dimmedToward(NightSurface, 0.8f),
+    onTrackOutOfReach = LapisLight.dimmedToward(NightSurface, 0.5f),
     ground = NightSurface,
 )
 
@@ -78,5 +105,13 @@ fun appSwitchColors(): SwitchColors {
         uncheckedThumbColor = palette.offKnob,
         uncheckedTrackColor = palette.offTrack,
         uncheckedBorderColor = palette.offKnob,
+        // The one out of reach state. The thumbs do not move: a knob out of
+        // reach is still the answer the reader wrote.
+        disabledCheckedThumbColor = palette.onKnob,
+        disabledCheckedTrackColor = palette.onTrackOutOfReach,
+        disabledCheckedBorderColor = palette.onTrackOutOfReach,
+        disabledUncheckedThumbColor = palette.offKnob,
+        disabledUncheckedTrackColor = palette.offTrackOutOfReach,
+        disabledUncheckedBorderColor = palette.offKnob,
     )
 }

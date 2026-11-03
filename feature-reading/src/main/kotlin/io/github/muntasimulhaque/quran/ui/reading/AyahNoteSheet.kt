@@ -47,6 +47,7 @@ import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
 import io.github.muntasimulhaque.quran.ui.theme.prose
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 import kotlinx.coroutines.delay
 
 /**
@@ -235,7 +236,7 @@ private fun NoteEditor(
         }
         if (failed) {
             Text(
-                text = stringResource(R.string.reading_note_failed),
+                text = stringResource(UiKitR.string.failure_save),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(top = Space.Line),

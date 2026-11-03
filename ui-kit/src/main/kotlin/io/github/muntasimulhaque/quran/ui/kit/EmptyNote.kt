@@ -37,9 +37,8 @@ import io.github.muntasimulhaque.quran.ui.theme.screenSubtitle
  * list that begins under a page's head.
  *
  * The sentence is instructive and never a placeholder. It names the act that
- * fills the page ("Press and hold any ayah while reading, then Save") or the
- * forms the page accepts ("a reference like 2:255"), so a reader who reads it
- * knows what to do without touching anything.
+ * fills the page or the forms the page accepts, so a reader who reads it knows
+ * what to do without touching anything.
  */
 @Composable
 fun EmptyNote(

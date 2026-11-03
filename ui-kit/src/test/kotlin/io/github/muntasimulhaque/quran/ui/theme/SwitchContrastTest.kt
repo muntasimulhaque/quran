@@ -26,17 +26,50 @@ class SwitchContrastTest {
     @Test
     fun lightHolds() {
         assertControl(LightSwitch)
+        assertOutOfReach(LightSwitch)
     }
 
     @Test
     fun darkHolds() {
         assertControl(DarkSwitch)
+        assertOutOfReach(DarkSwitch)
     }
 
     private fun assertControl(palette: SwitchPalette) {
         assertBoundary("the off knob on its own track", palette.offKnob, palette.offTrack)
         assertBoundary("the off knob on the sheet", palette.offKnob, palette.ground)
         assertBoundary("the on knob on its own track", palette.onKnob, palette.onTrack)
+    }
+
+    /**
+     * The switch the reader cannot reach.
+     *
+     * A disabled control owes no contrast rule, so this is not the 3:1 above.
+     * It is the weaker promise the app makes instead: the knob still stands
+     * out of its track, and the two states are still told apart, because the
+     * one out of reach switch in the app says "written as your answer,
+     * nothing to draw yet" rather than nothing at all. The track is declared
+     * in [Switch.kt]; Material's own alphas are not this app's to draw.
+     */
+    private fun assertOutOfReach(palette: SwitchPalette) {
+        assertVisible("the out of reach off knob", palette.offKnob, palette.offTrackOutOfReach)
+        assertVisible("the out of reach on knob", palette.onKnob, palette.onTrackOutOfReach)
+        assertTrue(
+            "the out of reach track is the enabled track, so the state cannot be read",
+            palette.offTrackOutOfReach != palette.offTrack || palette.onTrackOutOfReach != palette.onTrack,
+        )
+        assertTrue(
+            "the two states of the out of reach switch are one tone",
+            contrast(palette.onTrackOutOfReach, palette.offTrackOutOfReach) > 1.05,
+        )
+    }
+    private fun assertVisible(what: String, knob: Color, behind: Color) {
+        val ratio = contrast(knob, behind)
+        assertTrue(
+            "$what: ${hex(knob)} on ${hex(behind)} is ${"%.2f".format(ratio)}:1, " +
+                "which is not a knob a reader can find",
+            ratio >= 1.5,
+        )
     }
 
     private fun assertBoundary(what: String, knob: Color, behind: Color) {
