@@ -48,6 +48,7 @@
     <string name="pack_included">Included</string>
     <string name="settings_pack_preparing">Preparing…</string>
     <string name="settings_pack_downloading">Downloading %1$d%%</string>
+    <string name="settings_pack_chosen_missing">Chosen, not on the device yet</string>
 
     <string name="settings_version">Version</string>
 

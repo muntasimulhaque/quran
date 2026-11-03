@@ -519,6 +519,18 @@ class SettingsStore(private val context: Context) {
     }
 
     /**
+     * The queue after a language choice, written in one edit: the language the
+     * reader left takes its packs with it and the new language asks for its
+     * own. A pack the reader added by hand is not a language's default and is
+     * left exactly where it was (owner decision, this session).
+     */
+    suspend fun setPendingForLanguage(previous: UiLanguage?, next: UiLanguage) {
+        context.settingsStore.edit {
+            it[PENDING_PACKS] = pendingAfterLanguage(previous, next, it[PENDING_PACKS].orEmpty())
+        }
+    }
+
+    /**
      * One stored size as a scale. The preference is read by name off the raw
      * map, not through a typed key, because the build that shipped 0.2 wrote
      * these as step indices: reading an Int through a Float key throws, and a

@@ -37,10 +37,11 @@ fun TranslationsPage(
 ) {
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         val installed = hasInstalledTranslation(settings, packs)
+        val chosen = hasChosenTranslation(settings, packs)
         ToggleRow(
             title = stringResource(R.string.settings_show_translation_title),
             subtitle = translationName(settings, packs),
-            checked = settings.showTranslation && installed,
+            checked = settings.showTranslation && chosen,
             onChange = actions.onShowTranslation,
             enabled = installed,
             switchTag = "switch-translation-page",
@@ -52,7 +53,7 @@ fun TranslationsPage(
             PackChoiceRow(
                 pack = pack,
                 subtitle = packSizeLine(pack),
-                selected = pack.installed && pack.id in settings.translationPacks,
+                selected = pack.id in settings.translationPacks,
                 radio = false,
                 setup = packSetup?.takeIf { it.packId == pack.id },
                 onActivate = { actions.onToggleTranslation(pack.id) },
@@ -89,7 +90,7 @@ fun TafsirsPage(
             PackChoiceRow(
                 pack = pack,
                 subtitle = packSizeLine(pack),
-                selected = pack.installed && pack.id in settings.tafsirPacks,
+                selected = pack.id in settings.tafsirPacks,
                 radio = false,
                 setup = packSetup?.takeIf { it.packId == pack.id },
                 onActivate = { actions.onToggleTafsir(pack.id) },

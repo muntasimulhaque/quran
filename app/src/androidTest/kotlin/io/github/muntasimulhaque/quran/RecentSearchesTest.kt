@@ -19,6 +19,7 @@ import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import kotlinx.coroutines.runBlocking
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -116,6 +117,30 @@ class RecentSearchesTest {
         assertTrue("the chip's own word is gone", rule.onAllNodesWithText("mercy").fetchSemanticsNodes().isEmpty())
         assertTrue("the other word stays", rule.onAllNodesWithText("absolute").fetchSemanticsNodes().isNotEmpty())
         assertTrue("the phone keeps only the other word", SearchHistory(context).read() == listOf("absolute"))
+    }
+
+    /**
+     * The chip is the word's own width, not the sheet's. Two short queries
+     * stand on one line because each capsule ends at its own X; a chip that
+     * filled the row put every query on a line of its own, and the list read
+     * as a column of bars (owner report, this session).
+     */
+    @Test
+    fun aChipTakesItsWordAndNotTheRow() {
+        SearchHistory(context).record("absolute")
+        openSearch()
+        rule.waitUntil(timeoutMillis = 15_000) {
+            rule.onAllNodesWithText("Recent searches").fetchSemanticsNodes().isNotEmpty()
+        }
+        val chips = rule.onAllNodesWithTag("recent-chip").fetchSemanticsNodes()
+        assertEquals("two recents draw two chips", 2, chips.size)
+        val first = chips[0].boundsInRoot
+        val second = chips[1].boundsInRoot
+        assertEquals("the two chips stand on one line", first.top, second.top, 1f)
+        assertTrue(
+            "the second chip stands beside the first, not under it",
+            second.left >= first.right - 1f,
+        )
     }
 
     @Test

@@ -31,8 +31,10 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * The translations the reading draws with, in one line: the pack's own name
  * when there is one, a count when there are several, and an honest nothing
  * when the reader has added none. A pack that is chosen but not yet on the
- * device is not counted, so the row never promises a translation the reading
- * cannot draw.
+ * device is not counted, so this line never promises a translation the
+ * reading cannot draw. The switch above it follows the choice instead: the
+ * value says what is here, and the switch says what the reader asked for
+ * (owner decision, this session).
  */
 @Composable
 internal fun translationName(settings: AppSettings, packs: List<ContentPack>): String {
@@ -56,12 +58,25 @@ internal fun tafsirSummary(settings: AppSettings, packs: List<ContentPack>): Str
 }
 
 /**
- * Whether the reading has a translation it can draw. The switch reads on only
- * when this is true, so a row that says "Not added yet" never reads on above
- * its own words (owner decision, this session).
+ * Whether the reading has a translation it can draw, which is also whether
+ * the switch can be used. It is not the switch's state: that is the reader's
+ * own answer, and a chosen pack that is not on the device leaves the switch
+ * on and disabled rather than off, so the row never reports a choice the
+ * reader did not make (owner decision, this session: the switch used to read
+ * on only when a translation could be drawn).
  */
 internal fun hasInstalledTranslation(settings: AppSettings, packs: List<ContentPack>): Boolean =
     packs.any { it.id in settings.translationPacks && it.installed }
+
+/**
+ * Whether the reader has chosen a translation at all, here or not. The
+ * switch's state is this and the reader's own answer; its usability is
+ * [hasInstalledTranslation]. The two questions are drawn apart on purpose: a
+ * chosen pack that is not on the device yet is still the reader's choice, and
+ * the switch says so while it waits (owner decision, this session).
+ */
+internal fun hasChosenTranslation(settings: AppSettings, packs: List<ContentPack>): Boolean =
+    packs.any { it.id in settings.translationPacks }
 
 /**
  * The word list the reading speaks: the one that matches the reader's own

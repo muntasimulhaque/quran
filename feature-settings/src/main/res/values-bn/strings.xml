@@ -48,6 +48,7 @@
     <string name="pack_included">অন্তর্ভুক্ত</string>
     <string name="settings_pack_preparing">প্রস্তুত হচ্ছে…</string>
     <string name="settings_pack_downloading">ডাউনলোড হচ্ছে %1$d%%</string>
+    <string name="settings_pack_chosen_missing">নির্বাচিত, তবে এখনও ডিভাইসে নেই</string>
 
     <string name="settings_version">সংস্করণ</string>
 

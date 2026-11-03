@@ -106,7 +106,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         scope = viewModelScope,
         settingsStore = settingsStore,
         settings = { settings },
-        onInstalled = { pack -> onPackInstalled(pack) },
+        onInstalled = { pack, select -> onPackInstalled(pack, select) },
         onOpened = { opening -> onLibraryOpened(opening) },
         onReopened = { database -> onLibraryReopened(database) },
         onRemoved = { pack, fallback -> onPackRemoved(pack, fallback) },
@@ -364,12 +364,16 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
-     * Adding a pack is also choosing it: a reader who added a reciter wants
-     * to hear them, a reader who added a translation wants to read it, and a
-     * reader who added a word list wants to see the meanings. Anything else
-     * leaves the app showing a pack the reader never asked to use.
+     * Adding a pack is also choosing it, but only when the reader asked for
+     * it in this act (owner decision, this session). [select] is that ask: a
+     * tap on Add, or the word list's own switch. A pack the queue fetched
+     * because a former language asked for it, or because a chosen pack's file
+     * went missing, is installed and left alone: an arrival is not a choice,
+     * so a download can never change the page by itself (owner report, this
+     * session).
      */
-    private fun onPackInstalled(pack: ContentPack) {
+    private fun onPackInstalled(pack: ContentPack, select: Boolean) {
+        if (!select) return
         when (pack.type) {
             PackType.Translation -> if (pack.id !in settings.translationPacks) {
                 toggleTranslationPack(pack.id)
@@ -751,7 +755,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             viewModelScope.launch { settingsStore.setWordByWord(true) }
             return
         }
-        library.install(pack.id)
+        library.install(pack.id, select = true)
     }
 
     /**
@@ -776,13 +780,16 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * stays the reader's own.
      *
      * The language's reading is fetched without another question: the
-     * translation and the tafsir join the pending queue, and the queue brings
-     * them one at a time, the tafsir on an unmetered connection. The word
-     * list is not fetched here: it is off by default, and the toggle is its
-     * own ask when the reader wants it.
+     * language's translation and tafsir become the queue, and the queue brings
+     * them one at a time, the tafsir on an unmetered connection. The language
+     * the reader left takes its packs with it, so a former language's download
+     * can never come back (owner decision, this session). The word list is not
+     * fetched here: it is off by default, and the toggle is its own ask when
+     * the reader wants it.
      */
     fun chooseLanguage(language: UiLanguage) {
         val firstRun = settings.uiLanguage == null
+        val previous = UiLanguage.of(settings.uiLanguage)
         val next = settings.withLanguage(language)
         val chosen = if (firstRun) {
             next.copy(ayah = 1, reminderAnswered = false)
@@ -809,14 +816,16 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
                 settingsStore.setAyah(1)
                 activePlaceId = lastReadStore.record(1, 1)
             }
-            settingsStore.addPendingPacks(
-                setOf(language.content.translation, language.content.tafsir),
-            )
+            // The queue is the language's, not the install's: the language
+            // the reader left takes its packs with it, so a former language's
+            // translation can never come back when an update detaches it
+            // (owner decision, this session).
+            settingsStore.setPendingForLanguage(previous, language)
             library.drainPending()
         }
         // A reader who already reads with word meanings is given the word
         // list of the new language, through the same door the toggle uses.
-        if (chosen.wordByWord) library.installIfMissing(wantedWordsPack())
+        if (chosen.wordByWord) library.installIfMissing(wantedWordsPack(), select = true)
     }
 
     /** The one chrome reveal is written down after the reader has seen it. */
@@ -856,7 +865,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /** The reader's tap on a pack: the library brings it in and selects it. */
-    fun installPack(id: String) = library.install(id)
+    fun installPack(id: String) = library.install(id, select = true)
 
     fun cancelPackSetup() = library.cancelPackSetup()
 

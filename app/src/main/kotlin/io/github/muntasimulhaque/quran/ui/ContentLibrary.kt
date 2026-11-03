@@ -64,11 +64,15 @@ class ContentLibrary(
     /** The reader's choices, as the view model holds them. */
     private val settings: () -> AppSettings,
     /**
-     * A pack arrived, or an installed one was asked for: the host decides
-     * what to turn on, because that is the reader's choice and not a file
-     * fact.
+     * A pack arrived, or an installed one was asked for. [select] is the
+     * reader's ask in this act: their tap on Add, or the word list's own
+     * switch. A language's translation and tafsir are written into the
+     * choices by the language choice itself, so the queue that fetches them
+     * selects nothing. The host decides what to turn on, because that is the
+     * reader's choice and not a file fact; a pack the queue fetched is
+     * installed, never chosen (owner decision, this session).
      */
-    private val onInstalled: (ContentPack) -> Unit,
+    private val onInstalled: (ContentPack, Boolean) -> Unit,
     /** The first open, with the reader's settings and the Book's index. */
     private val onOpened: suspend (Opening) -> Unit,
     /** The library turned over: the host drops what it read from the old one. */
@@ -366,30 +370,31 @@ class ContentLibrary(
 
     /**
      * Brings a pack onto the device, or turns it on when it is already here.
-     * The reader's tap is the ask; the pack is verified before it joins the
-     * library, and what is left of the queue is written down so an
-     * interrupted download continues rather than being forgotten.
+     * [select] is the reader's ask: their tap on Add, or the word list's own
+     * switch. A pack the queue fetches passes false, so it arrives installed
+     * and off and can never change the page by itself (owner decision, this
+     * session).
      */
-    fun install(id: String) {
+    fun install(id: String, select: Boolean) {
         scope.launch {
             val pack = catalog.get(id) ?: return@launch
             if (database?.installedPack(id) == true) {
-                onInstalled(pack)
+                onInstalled(pack, select)
                 settingsStore.removePendingPacks(setOf(id))
                 return@launch
             }
             if (installNow(id)) {
-                finishInstall(catalog.get(id) ?: pack)
+                finishInstall(catalog.get(id) ?: pack, select)
                 settingsStore.removePendingPacks(setOf(id))
             }
         }
     }
 
     /** A pack the reader's language asks for, fetched when it is not here. */
-    fun installIfMissing(id: String) {
+    fun installIfMissing(id: String, select: Boolean) {
         val pack = catalog.get(id) ?: return
         if (database?.installedPack(id) == true) return
-        install(pack.id)
+        install(pack.id, select)
     }
 
     /**
@@ -440,12 +445,18 @@ class ContentLibrary(
         false
     }
 
-    private suspend fun finishInstall(pack: ContentPack) {
+    private suspend fun finishInstall(pack: ContentPack, select: Boolean) {
         packJob = null
         packSetup = null
         // The pack becomes the reader's choice before the library reopens,
         // so the search index that warms behind the reopen knows about it.
-        onInstalled(catalog.get(pack.id)?.copy(installed = true) ?: pack.copy(installed = true))
+        // [select] travels with the arrival: a pack the queue fetched is
+        // installed, not chosen, and the host leaves the switches alone
+        // (owner decision, this session).
+        onInstalled(
+            catalog.get(pack.id)?.copy(installed = true) ?: pack.copy(installed = true),
+            select,
+        )
         refresh()
     }
 
@@ -465,6 +476,16 @@ class ContentLibrary(
         if (draining) return
         draining = true
         try {
+            // A pack that is already attached was asked for once and has
+            // arrived, whichever door brought it. Its queue entry is done;
+            // leaving it behind is what let a former language's pack come
+            // back the next time an update detached it (owner report, this
+            // session).
+            settingsStore.removePendingPacks(
+                settingsStore.pendingPacks().filter { id ->
+                    database?.installedPack(id) == true
+                }.toSet(),
+            )
             while (true) {
                 val next = settingsStore.pendingPacks().firstOrNull { id ->
                     val pack = catalog.get(id) ?: return@firstOrNull false
@@ -472,7 +493,10 @@ class ContentLibrary(
                         (pack.type != PackType.Tafsir || packUpdater.canRefresh())
                 } ?: break
                 if (!installNow(next)) break
-                finishInstall(catalog.get(next) ?: break)
+                // The queue is the reader's past ask, not this moment's: its
+                // arrivals are installed and left alone (owner decision, this
+                // session).
+                finishInstall(catalog.get(next) ?: break, select = false)
                 settingsStore.removePendingPacks(setOf(next))
             }
         } finally {

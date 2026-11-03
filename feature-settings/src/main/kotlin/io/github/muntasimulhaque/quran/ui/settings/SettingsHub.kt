@@ -126,13 +126,15 @@ fun SettingsHub(
         )
         WordByWordRow(settings, packs, packSetup, onWordByWord)
         val hasTranslation = hasInstalledTranslation(settings, packs)
+        val chosenTranslation = hasChosenTranslation(settings, packs)
         ToggleRow(
             title = stringResource(R.string.settings_show_translation_title),
             subtitle = translationName(settings, packs),
-            checked = settings.showTranslation && hasTranslation,
-            // With no translation on the device the switch has nothing to
-            // show, so it stays off and disabled while the row still opens
-            // the list where the reader can add one.
+            checked = settings.showTranslation && chosenTranslation,
+            // The switch is the reader's answer, so a chosen pack that is not
+            // on the device reads on. It is disabled because there is nothing
+            // to draw yet, not because the choice was undone (owner decision,
+            // this session).
             onChange = onShowTranslation,
             enabled = hasTranslation,
             onOpen = { onOpen(SettingsPage.Translations) },

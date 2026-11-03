@@ -1,10 +1,12 @@
 package io.github.muntasimulhaque.quran.ui.settings
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
@@ -16,6 +18,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.feature.settings.R
+import io.github.muntasimulhaque.quran.ui.kit.ChoiceMark
+import io.github.muntasimulhaque.quran.ui.kit.ChoiceMarkSize
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
 import io.github.muntasimulhaque.quran.ui.kit.DownloadLine
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRowNameInset
@@ -38,11 +42,17 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * row itself is [ChoiceRow], the app's one selectable row, so a pack list
  * reads the same here as the language list, the reciter list, and the pill's
  * own menus.
+ *
+ * [selected] is the reader's choice and not the file's presence. A chosen
+ * pack whose file is not on the device draws its mark on the Add row, so the
+ * page can never surprise a reader with a column they thought was off (owner
+ * report, this session).
  */
 @Composable
 fun PackChoiceRow(
     pack: ContentPack,
     subtitle: String,
+    /** The reader's choice, whether or not the pack's file is here. */
     selected: Boolean,
     radio: Boolean,
     setup: PackSetupState?,
@@ -60,15 +70,20 @@ fun PackChoiceRow(
     bottomPadding: Dp = 12.dp,
 ) {
     val busy = setup?.packId == pack.id && setup.failed.not()
-    // A pack that is not here yet is not a choice: its row is one action,
-    // Add or Retry, and the row itself is the door. The old row was a
-    // selectable checkbox whose tap installed the pack, with a second Add
-    // button beside it that did the same thing; a reader heard "not
-    // selected" and then got a download (owner decision, this session).
+    // A pack that is not here yet is not a choice the row can make: its row
+    // is one action, Add or Retry, and the row itself is the door. But a
+    // choice the reader already made is still drawn, so a chosen pack whose
+    // file is not on the device cannot look like one that was never chosen.
+    // The old row was a selectable checkbox whose tap installed the pack,
+    // with a second Add button beside it that did the same thing; a reader
+    // heard "not selected" and then got a download (owner decision, this
+    // session: the row's action stays Add, and the mark and its line carry
+    // the choice).
     if (!pack.installed || busy) {
         PackActionRow(
             pack = pack,
             subtitle = subtitle,
+            chosen = selected,
             setup = setup,
             busy = busy,
             onInstall = onInstall,
@@ -99,37 +114,61 @@ fun PackChoiceRow(
  * and is not a second control. While bytes move, the row is a status and the
  * only button is Cancel, because stopping a transfer is the one thing a
  * finger should be able to do from here (owner decision, this session).
+ *
+ * [chosen] draws the app's choice mark in the column every choice row keeps,
+ * and adds the words that say why the row still asks to Add. A row that was
+ * never chosen draws no mark and says nothing: an empty ring would read as a
+ * choice this row's tap does not make (owner report, this session).
  */
 @Composable
 private fun PackActionRow(
     pack: ContentPack,
     subtitle: String,
+    chosen: Boolean,
     setup: PackSetupState?,
     busy: Boolean,
     onInstall: () -> Unit,
     onCancel: () -> Unit,
     bottomPadding: Dp,
 ) {
+    val chosenState = stringResource(R.string.settings_pack_chosen_missing)
+    // The row's value says what the file is and what the choice is doing:
+    // a chosen pack that is not here is a state a reader has to be told, not
+    // one they should have to infer from a mark (owner report, this session).
+    val value = when {
+        !chosen -> subtitle
+        subtitle.isBlank() -> chosenState
+        else -> "$subtitle. $chosenState"
+    }
     Column(Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .sheetRow(onClick = onInstall, enabled = !busy)
                 .minimumInteractiveComponentSize()
+                // The name's rail less the mark and its gap, so a chosen
+                // pack stands on the same line as every choice row.
                 .padding(
-                    start = ChoiceRowNameInset - SheetRowGutter,
+                    start = ChoiceRowNameInset - ChoiceMarkSize - Space.Block - SheetRowGutter,
                     end = Space.Row - SheetRowGutter,
                     top = Space.Row,
                     bottom = (bottomPadding - Space.Row).coerceAtLeast(0.dp),
                 ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            if (chosen) {
+                ChoiceMark(selected = true, radio = false)
+            } else {
+                // The mark's column, held open so the name never moves
+                // between a row that carries a choice and one that does not.
+                Box(Modifier.size(ChoiceMarkSize))
+            }
             RowName(
                 title = contentPackName(pack.id, pack.name),
-                value = subtitle,
+                value = value,
                 modifier = Modifier
                     .weight(1f)
-                    .padding(end = Space.Row),
+                    .padding(start = Space.Block, end = Space.Row),
             )
             if (busy) {
                 Text(

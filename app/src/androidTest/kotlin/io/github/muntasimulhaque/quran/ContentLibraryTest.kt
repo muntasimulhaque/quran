@@ -13,6 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertFalse
@@ -31,6 +32,13 @@ import org.junit.runner.RunWith
  * here directly, without the reading screen around them. The build carries
  * every pack, so the install path works with no network (owner decision,
  * this session).
+ *
+ * The second and third legs pin the two rules a pack's arrival follows after
+ * the 14.6 report: a pack the queue fetched is installed and **not** chosen,
+ * because the queue is the reader's past ask and not this moment's; and a
+ * queue entry for a pack that is already here is done, so it cannot come
+ * back the next time an update detaches the pack (owner report, this
+ * session).
  */
 @RunWith(AndroidJUnit4::class)
 class ContentLibraryTest {
@@ -40,17 +48,22 @@ class ContentLibraryTest {
         val context = ApplicationProvider.getApplicationContext<Application>()
         // The pack starts off the device, so the install path is the one the
         // test walks. The build carries it as an asset, so no network is used.
+        // A queue entry left by another test would install it first, so the
+        // queue starts empty for this leg.
         PackStore(context).remove("words-en")
+        SettingsStore(context).removePendingPacks(setOf("words-en"))
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
         val opened = CompletableDeferred<ContentLibrary.Opening>()
-        val installed = CompletableDeferred<ContentPack>()
+        val installed = CompletableDeferred<Pair<ContentPack, Boolean>>()
         val removed = CompletableDeferred<ContentPack>()
         val library = ContentLibrary(
             application = context,
             scope = scope,
             settingsStore = SettingsStore(context),
             settings = { AppSettings() },
-            onInstalled = { pack -> if (pack.id == "words-en") installed.complete(pack) },
+            onInstalled = { pack, select ->
+                if (pack.id == "words-en") installed.complete(pack to select)
+            },
             onOpened = { opening -> opened.complete(opening) },
             onReopened = { },
             onRemoved = { pack, _ -> if (pack.id == "words-en") removed.complete(pack) },
@@ -62,9 +75,11 @@ class ContentLibraryTest {
             assertTrue("the Book's index arrives with the opening", opening.surahs.size == 114)
             assertFalse("the pack starts off the device", library.isInstalled("words-en"))
 
-            library.install("words-en")
-            val arrived = withTimeout(60_000) { installed.await() }
+            // The reader's tap on Add: the arrival is their choice.
+            library.install("words-en", select = true)
+            val (arrived, select) = withTimeout(60_000) { installed.await() }
             assertTrue("the callback names the pack", arrived.id == "words-en")
+            assertTrue("a tap on Add chooses the pack", select)
             // The selection callback lands before the reopen finishes, which
             // is the order the reader's tap needs; the state is read back
             // once the library has caught up.
@@ -87,10 +102,105 @@ class ContentLibraryTest {
         }
     }
 
+    @Test
+    fun theQueueInstallsAPackWithoutChoosingIt() = runBlocking {
+        val context = ApplicationProvider.getApplicationContext<Application>()
+        val store = PackStore(context)
+        val settings = SettingsStore(context)
+        // The pack is off the device and on the queue: the state a language
+        // choice from an earlier session leaves behind when its download
+        // never finished.
+        store.remove("words-en")
+        settings.removePendingPacks(setOf("words-en"))
+        settings.addPendingPacks(setOf("words-en"))
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+        val opened = CompletableDeferred<ContentLibrary.Opening>()
+        val installed = CompletableDeferred<Pair<ContentPack, Boolean>>()
+        val library = ContentLibrary(
+            application = context,
+            scope = scope,
+            settingsStore = settings,
+            settings = { AppSettings() },
+            onInstalled = { pack, select ->
+                if (pack.id == "words-en") installed.complete(pack to select)
+            },
+            onOpened = { opening -> opened.complete(opening) },
+            onReopened = { },
+            onRemoved = { _, _ -> },
+        )
+        try {
+            library.open()
+            withTimeout(60_000) { opened.await() }
+            val (arrived, select) = withTimeout(60_000) { installed.await() }
+            assertTrue("the queue brought the pack in", arrived.id == "words-en")
+            assertFalse("an arrival from the queue is not a choice", select)
+            awaitInstalled(library, "words-en", present = true)
+            assertTrue(
+                "the pack is on the device even though it was not chosen",
+                library.isInstalled("words-en"),
+            )
+            // The entry is cleared after the library reopens over the pack,
+            // so the test waits for the queue's own state instead of reading
+            // it the moment the arrival callback lands.
+            withTimeout(60_000) {
+                while ("words-en" in settings.pendingPacks()) delay(50)
+            }
+            assertTrue(
+                "its queue entry is done once it is here",
+                "words-en" !in settings.pendingPacks(),
+            )
+        } finally {
+            library.retire()
+            scope.cancel()
+            settings.removePendingPacks(setOf("words-en"))
+            store.install("words-en")
+        }
+    }
+
+    @Test
+    fun aQueueEntryForAPackThatIsAlreadyHereIsDropped() = runBlocking {
+        val context = ApplicationProvider.getApplicationContext<Application>()
+        val store = PackStore(context)
+        val settings = SettingsStore(context)
+        // The pack is here, and an old language choice left it queued: the
+        // drain used to skip it forever, which is how it could come back
+        // after an update detached it.
+        store.install("words-en")
+        settings.addPendingPacks(setOf("words-en"))
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+        val opened = CompletableDeferred<ContentLibrary.Opening>()
+        val library = ContentLibrary(
+            application = context,
+            scope = scope,
+            settingsStore = settings,
+            settings = { AppSettings() },
+            onInstalled = { _, _ -> },
+            onOpened = { opening -> opened.complete(opening) },
+            onReopened = { },
+            onRemoved = { _, _ -> },
+        )
+        try {
+            library.open()
+            withTimeout(60_000) { opened.await() }
+            withTimeout(60_000) {
+                while ("words-en" in settings.pendingPacks()) delay(50)
+            }
+            assertFalse(
+                "a pack that is already here is done with the queue",
+                "words-en" in settings.pendingPacks(),
+            )
+        } finally {
+            library.retire()
+            scope.cancel()
+            settings.removePendingPacks(setOf("words-en"))
+            store.install("words-en")
+        }
+    }
+
     /** Waits for the library's own state to catch up with its callback. */
     private suspend fun awaitInstalled(library: ContentLibrary, id: String, present: Boolean) {
         withTimeout(60_000) {
-            while (library.isInstalled(id) != present) kotlinx.coroutines.delay(50)
+            while (library.isInstalled(id) != present) delay(50)
         }
     }
 }

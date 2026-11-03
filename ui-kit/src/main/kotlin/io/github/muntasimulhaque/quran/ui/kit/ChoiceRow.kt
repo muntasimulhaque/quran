@@ -43,12 +43,20 @@ internal val CapsulePad = 8.dp
 internal val RowGutter = 10.dp
 
 /**
+ * The mark's own measure: the ring every choice row wears, and the column a
+ * row that is not a choice reserves for it. One number, because a chosen
+ * pack that is not on the device draws the mark in the same column a choice
+ * row draws it (owner decision, this session).
+ */
+val ChoiceMarkSize = 22.dp
+
+/**
  * Where the name of a choice row begins, from the row's own edge: the gutter,
  * the row's own inset, the mark, and the gap to the name. A block that lives
  * under a choice row (a reciter's own surahs) starts on this line, so it
  * reads as belonging to the name above it.
  */
-val ChoiceRowNameInset = RowGutter + 12.dp + 22.dp + 16.dp
+val ChoiceRowNameInset = RowGutter + 12.dp + ChoiceMarkSize + 16.dp
 
 /**
  * One thing a reader chooses from a list: the app's one selectable row,
@@ -189,17 +197,23 @@ fun ChoiceRow(
  * its round keyline, so the ring and the check it holds carry one weight. It
  * had drawn its own 0.09 of the box, which made a "v" of a ring heavier than
  * every mark beside it (owner decision, this session).
+ *
+ * It is public for the one row that is not a choice but still has to carry
+ * one: a pack the reader chose whose file is not on the device yet. The mark
+ * says the choice stands while the row's action says the bytes are not here,
+ * so a chosen translation can never look like one that was never chosen
+ * (owner report, this session).
  */
 @Composable
-private fun ChoiceMark(selected: Boolean, radio: Boolean) {
+fun ChoiceMark(selected: Boolean, radio: Boolean) {
     val accent = MaterialTheme.colorScheme.primary
     Box(
         modifier = Modifier
-            .size(22.dp)
+            .size(ChoiceMarkSize)
             .testTag("choice-mark"),
         contentAlignment = Alignment.Center,
     ) {
-        Canvas(Modifier.size(22.dp)) {
+        Canvas(Modifier.size(ChoiceMarkSize)) {
             // The set's 24 unit box, its stroke for a mark of this size, and
             // the 10 unit radius of the choice ring, read at this mark's own
             // measure.

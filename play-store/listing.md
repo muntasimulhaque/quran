@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 14.7 (versionCode 149)
+Version: 14.8 (versionCode 150)
 
 ## Listing
 
@@ -188,6 +188,9 @@ What each set shows, in order:
 6. Browse, Surahs
 7. The ayah card, with its tafsir doors
 8. The tafsir open on the card
+
+## Release notes (14.8, 441 characters)
+14.8 keeps your choices yours. A translation you chose whose file is not on the phone now says so in Settings, and the Show translation switch follows your choice. A pack that downloads in the background no longer turns itself on; only your tap or your language choice does. The queue forgets packs you already have, and a language you leave takes its packs with it. Recent searches are as wide as their word again. Text and packs unchanged.
 
 ## Release notes (14.7, 409 characters)
 14.7 makes the reader's own work safer. Clearing a note or removing a saved ayah offers Undo. Recent searches show their X at rest. Search finds your own notes. The daily reminder follows your language. The top bar stays with a screen reader, the size rail works with arrow keys, and a paused recitation keeps its controls for 30 minutes. The lock screen shows the app's own artwork. Text and packs unchanged.

@@ -141,4 +141,44 @@ class UiLanguageTest {
         assertTrue("the English default steps aside", "tafsir-ibn-kathir-en" !in after.tafsirPacks)
         assertEquals(setOf("translation-al-bayan-bn"), after.translationPacks)
     }
+
+    @Test
+    fun theQueueFollowsTheLanguageThatAskedForIt() {
+        // A language's packs are asked for once. When the reader moves on,
+        // the packs the old language asked for leave the queue with it, so
+        // an update that detaches one cannot fetch it and turn it on behind
+        // the reader's back (owner report, this session).
+        val after = pendingAfterLanguage(
+            previous = UiLanguage.English,
+            next = UiLanguage.Bangla,
+            pending = setOf("translation-saheeh-en", "tafsir-ibn-kathir-en", "words-en"),
+        )
+        assertEquals(
+            setOf("translation-al-bayan-bn", "tafsir-ibn-kathir-bn", "words-en"),
+            after,
+        )
+    }
+
+    @Test
+    fun aHandAddedPackStaysInTheQueueAcrossALanguageChange() {
+        val after = pendingAfterLanguage(
+            previous = UiLanguage.English,
+            next = UiLanguage.Bangla,
+            pending = setOf("translation-added-by-hand"),
+        )
+        assertEquals(
+            setOf("translation-added-by-hand", "translation-al-bayan-bn", "tafsir-ibn-kathir-bn"),
+            after,
+        )
+    }
+
+    @Test
+    fun aFirstChoiceAsksOnlyForItsOwnPacks() {
+        val after = pendingAfterLanguage(
+            previous = null,
+            next = UiLanguage.English,
+            pending = emptySet(),
+        )
+        assertEquals(setOf("translation-saheeh-en", "tafsir-ibn-kathir-en"), after)
+    }
 }

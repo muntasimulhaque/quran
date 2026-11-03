@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -67,6 +68,13 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
  * for the whole list: the two answer two questions, this word and all of
  * them.
  *
+ * **A chip is as wide as its word, never the row** (owner decision, this
+ * session). The word's half asks for the width it needs and the X keeps its
+ * own 48 dp, so a short query is a short capsule and two of them stand on
+ * one line. The chip used to fill the row because the word's half asked for
+ * the width it was allowed instead of the width it needed, which made every
+ * query a bar of its own and turned the list into a column.
+ *
  * The X's target is 48 dp and its mark is 24 dp, the same mark the search
  * field's clear wears. Its spoken name is "Remove <query>", so a screen
  * reader reaches the one word without a custom action and without the long
@@ -119,11 +127,13 @@ internal fun RecentSearches(
  * One recent query: a chip whose word searches and whose X removes.
  *
  * The outer box is the 48 dp target of both halves; the capsule behind them
- * is the 36 dp shape the reader sees. The word's ripple is the pill's left
- * half, and the X's ripple is the 36 dp circle at its end, so no press paints
- * the invisible target. The X is always drawn, never armed: the old long
- * press was a gesture that had to be taught, and a chip that hides its own
- * removal is a chip that hides a door.
+ * is the 36 dp shape the reader sees, and it ends where the two halves end.
+ * The word's half wraps its own text, so the chip's width is the word's plus
+ * the X's 48 dp and never the row's (owner decision, this session). The
+ * word's ripple is the pill's left half, and the X's ripple is the 36 dp
+ * circle at its end, so no press paints the invisible target. The X is always
+ * drawn, never armed: the old long press was a gesture that had to be taught,
+ * and a chip that hides its own removal is a chip that hides a door.
  */
 @Composable
 private fun RecentChip(
@@ -146,9 +156,11 @@ private fun RecentChip(
             .height(48.dp)
             .testTag("recent-chip"),
     ) {
-        // The word keeps the room the screen has, and gives 48 dp to the X:
-        // a long query ellipsizes instead of pushing the removal off the
-        // glass.
+        // The X's 48 dp comes out of the room before the word is measured,
+        // so a long query ellipsizes instead of pushing the removal off the
+        // glass, and the word takes only what it needs of what is left: the
+        // chip's width is the word's, not the row's (owner decision, this
+        // session).
         val textMax = (maxWidth - 48.dp).coerceAtLeast(48.dp)
         // The capsule the reader sees: 36 dp, centered in the 48 dp target.
         // matchParentSize does not influence the chip's width; the Row below
@@ -181,12 +193,21 @@ private fun RecentChip(
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        // No fill: the word's own width is the chip's, and
+                        // the X's half starts at its last letter. The 12 dp
+                        // the mark keeps around itself is the whole gap
+                        // (owner decision, this session).
+                        //
+                        // The 48 dp floor is the app's: a two-letter query
+                        // still owes the finger a target, so the word's pill
+                        // stops at 48 and grows with the word above it
+                        // (owner decision, this session).
+                        .defaultMinSize(minWidth = 48.dp)
                         .height(36.dp)
                         .clip(leftHalf)
                         .focusRing(queryPress, leftHalf)
                         .indication(queryPress, ripple(color = ink))
-                        .padding(start = Space.Row, end = Space.Line),
+                        .padding(start = Space.Row),
                     contentAlignment = Alignment.CenterStart,
                 ) {
                     Text(

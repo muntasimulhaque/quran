@@ -54,7 +54,15 @@ data class LanguageContent(
     val translation: String,
     val tafsir: String,
     val words: String,
-)
+) {
+    /**
+     * The packs a language choice asks the download queue for: its
+     * translation at once, and its tafsir when the connection is unmetered.
+     * The word list is not here, because it is the reader's own switch and
+     * not a language's default (owner decision, this session).
+     */
+    val asked: Set<String> get() = setOf(translation, tafsir)
+}
 
 /**
  * The settings after a language choice: the tag is stored, and the language's
@@ -99,6 +107,25 @@ fun translationSelectionAfterRemoval(
     if (fallback != null && fallback in offered) kept += fallback
     return kept
 }
+
+/**
+ * The download queue after a language choice: the packs the language the
+ * reader left had asked for leave it, and the new language's packs join it.
+ * A pack the reader added by hand is not a language's default and stays
+ * exactly where it was.
+ *
+ * A queue entry used to outlive the language that asked for it, because a
+ * pack that was already installed was skipped by the drain and never
+ * removed. The day a content update detached that pack, the queue fetched it
+ * again and the app treated the arrival as a choice, so a former language's
+ * translation came back under the ayah with nothing on the glass to explain
+ * it (owner report, this session).
+ */
+fun pendingAfterLanguage(
+    previous: UiLanguage?,
+    next: UiLanguage,
+    pending: Set<String>,
+): Set<String> = pending - previous?.content?.asked.orEmpty() + next.content.asked
 
 /**
  * The packs that speak [language]: what search reads when the reader's chosen
