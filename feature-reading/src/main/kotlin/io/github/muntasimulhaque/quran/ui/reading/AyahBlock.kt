@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -61,6 +62,7 @@ import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.ReadingRow
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TranslationLine
+import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
@@ -72,6 +74,7 @@ import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
+import io.github.muntasimulhaque.quran.ui.theme.prose
 import kotlin.math.max
 import kotlin.math.min
 
@@ -102,6 +105,14 @@ internal fun AyahBlock(
 ) {
     val palette = LocalPagePalette.current
     val playing = row.ayah.number == playingAyah
+    // The word the reader last asked for. A tap on a word opens its meaning in
+    // one quiet line; another tap replaces it, and a tap on the page puts it
+    // away. The page never carries the whole dictionary at once (owner
+    // decision, this session).
+    var tappedWord by remember(row.ayah.number) { mutableStateOf<WordMeaning?>(null) }
+    LaunchedEffect(showWordAid) {
+        if (!showWordAid) tappedWord = null
+    }
     val ayahActions = stringResource(R.string.reading_ayah_actions)
     val paperActions = stringResource(R.string.reading_paper_actions)
     // The end of an ayah in an Arabic-only reading: the KFGQPC face's own
@@ -119,7 +130,6 @@ internal fun AyahBlock(
     val reference = localizedDigits(row.ayah.verseKey)
     val referenceLabel = stringResource(R.string.reading_ayah_reference, reference)
     val revealWords = reveal?.words.orEmpty()
-    val revealMeanings = reveal?.meanings.orEmpty()
     val matchWash = MaterialTheme.colorScheme.primary.copy(alpha = Wash.Match)
     // The one spoken shape of the whole ayah. The reference and the Arabic
     // used to carry their own descriptions inside a merged clickable block,
@@ -244,7 +254,10 @@ internal fun AyahBlock(
                 .clickable(
                     interactionSource = press,
                     indication = null,
-                    onClick = onBackgroundTap,
+                    onClick = {
+                        tappedWord = null
+                        onBackgroundTap()
+                    },
                 )
                 // Every ayah gives a screen reader the same two doors a finger
                 // has: the ayah's own actions, and the paper's own tap. The
@@ -361,6 +374,32 @@ internal fun AyahBlock(
                                             ornamentAnchor(layout, range, textBounds.value),
                                         )
                                     } else {
+                                        tappedWord = null
+                                        onBackgroundTap()
+                                    }
+                                }
+                            }
+                        } else {
+                            Modifier
+                        },
+                    )
+                    .then(
+                        if (showWordAid) {
+                            Modifier.pointerInput(arabicLine.wordRanges, row.meanings) {
+                                detectTapGestures { position ->
+                                    val layout = textLayout
+                                    if (layout == null) {
+                                        onBackgroundTap()
+                                        return@detectTapGestures
+                                    }
+                                    val offset = layout.getOffsetForPosition(position)
+                                    val index = arabicLine.wordRanges.indexOfFirst {
+                                        offset in it
+                                    }
+                                    if (index >= 0) {
+                                        tappedWord = row.meanings.getOrNull(index)
+                                    } else {
+                                        tappedWord = null
                                         onBackgroundTap()
                                     }
                                 }
@@ -386,20 +425,38 @@ internal fun AyahBlock(
                         }
                     },
             )
-            if (showWordAid && row.meanings.any { it.meaning != null }) {
-                WordByWord(
-                    meanings = row.meanings,
-                    hafs = hafs,
-                    metrics = metrics,
-                    highlightWords = revealMeanings,
-                    highlightColor = matchWash,
-                    // The aid is an annotation of the ayah above it, not a
-                    // second verse: a tighter break than the one before the
-                    // translation groups the word list with its line, so the
-                    // reader reads the verse first and the meanings as its
-                    // gloss.
-                    modifier = Modifier.padding(top = Space.Line),
-                )
+            tappedWord?.let { word ->
+                val meaning = word.meaning
+                if (!meaning.isNullOrBlank()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = Space.Line),
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = word.word,
+                            style = arabicStyle(
+                                hafs,
+                                metrics.wordsSp,
+                                metrics.wordsLineSp,
+                                palette.ink,
+                            ),
+                            textAlign = TextAlign.Right,
+                        )
+                        Text(
+                            text = meaning,
+                            style = io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice.current.prose(
+                                metrics.wordsMeaningSp,
+                                metrics.wordsMeaningLineSp,
+                            ),
+                            color = palette.ink,
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(start = Space.Row),
+                        )
+                    }
+                }
             }
             // More than one translation may be on, and each is drawn in its
             // own column; a column is named when there is more than one, and
@@ -473,6 +530,8 @@ private data class ArabicLine(
     val text: AnnotatedString,
     val recitedRange: IntRange?,
     val matchRanges: List<IntRange>,
+    /** Each word's own span, in the verse's order, for a tap to find its meaning. */
+    val wordRanges: List<IntRange>,
     /** The printed medallion's own span, which is the ayah's door in Arabic only. */
     val ornamentRange: IntRange?,
 )
@@ -505,6 +564,7 @@ private fun arabic(
     val words = row.words
     var recitedRange: IntRange? = null
     val matchRanges = mutableListOf<IntRange>()
+    val wordRanges = mutableListOf<IntRange>()
     var ornamentRange: IntRange? = null
     val text = buildAnnotatedString {
         if (words.isEmpty()) {
@@ -514,6 +574,7 @@ private fun arabic(
                 if (index > 0) append(' ')
                 val start = length
                 append(word.text)
+                wordRanges += start until length
                 if (playing && word.position == playingWord) recitedRange = start until length
                 if (word.position in revealWords) matchRanges += start until length
             }
@@ -528,7 +589,7 @@ private fun arabic(
             ornamentRange = start until length
         }
     }
-    return ArabicLine(text, recitedRange, matchRanges, ornamentRange)
+    return ArabicLine(text, recitedRange, matchRanges, wordRanges, ornamentRange)
 }
 
 /**

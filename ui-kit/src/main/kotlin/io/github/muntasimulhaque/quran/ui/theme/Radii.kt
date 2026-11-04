@@ -40,7 +40,7 @@ object Radii {
     /** The reading's own blocks: an ayah, a door, an add row. */
     val Card = RoundedCornerShape(14.dp)
 
-    /** A card that stands on a page: a share card, a welcome tile. */
+    /** A card that stands on a page: a share card, an offer card. */
     val Tile = RoundedCornerShape(18.dp)
 
     /** The page a sheet raises: round at the head, open at the foot. */

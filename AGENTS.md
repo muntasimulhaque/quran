@@ -47,14 +47,14 @@ change, never left as a dead letter.
 ## The law
 
 1. **Offline except one thing.** `INTERNET` serves exactly one purpose: content
-   from this project's own GitHub Releases, and only on the reader's word. The
-   chosen language's translation arrives at once and its tafsir after it
-   (unmetered only when the phone is on cellular); the word list arrives with
-   the reading toggle that turns it on; a recitation package arrives for one
-   surah after Play and the shown size (or after a standing Continue to the next
-   surah); and a held pack refreshes quietly only when the app is newer, only
-   unmetered, only after the first page is readable. No other host is ever
-   contacted, and there is no analytics or telemetry. No WebView.
+   from this project's own GitHub Releases, and only on the reader's word. Both
+   translations ship inside the app; the tafsir arrives on the reader's word
+   (unmetered only when the phone is on cellular), the word list arrives with
+   the tap that turns it on, a recitation package arrives for one surah after
+   Play and the shown size (or after a standing Continue to the next surah),
+   and a held pack refreshes quietly only when the app is newer, only unmetered,
+   only after the first page is readable. No other host is ever contacted, and
+   there is no analytics or telemetry. No WebView.
 2. **Permissions: exactly `INTERNET`, `POST_NOTIFICATIONS`, `FOREGROUND_SERVICE`,
    `FOREGROUND_SERVICE_MEDIA_PLAYBACK`, `SCHEDULE_EXACT_ALARM`,
    `RECEIVE_BOOT_COMPLETED`.** `USE_EXACT_ALARM` is never declared: Play accepts
@@ -82,20 +82,24 @@ change, never left as a dead letter.
 7. **Accessibility is a rule, not a feature.** TalkBack works end to end, the
    reading honors the system font scale at its own five steps, and contrast
    targets live in the theme and are measured by a test.
-8. **Two UI languages, one content language each.** English and Bangla ship
-   together, the strings in each module's `values-bn`; the reader's choice sets
-   the translation, the tafsir, and the word meanings too. Arabic is data, not a
-   locale, so RTL stays on. A new language needs a real translation pass and a
-   `values-xx` folder. The frozen names (`app_name`, `first_paint_title`,
-   `first_paint_subtitle`, the store title) are never translated.
+8. **Two UI languages, one content language each.** English is the default and
+   the fallback, and the app follows the phone's language silently: no language
+   screen. English and Bangla ship together, the strings in each module's
+   `values-bn`; the reader's choice sets the translation, the tafsir, and the
+   word meanings too. Arabic is data, not a locale, so RTL stays on. A new
+   language needs a real translation pass and a `values-xx` folder. The frozen
+   names (`app_name`, `first_paint_title`, `first_paint_subtitle`, the store
+   title) are never translated.
 9. **Reader first.** The app opens where the reader left off. There is no home
    screen, no dashboard, and no permanent tab bar; index, search, library, and
    settings are sheets raised from a slim bar.
-10. **Simple to the bone, fast to the point of invisible, quiet.** No wizard
-    beyond the optional first screen, no dialog before the text, no feature that
-    asks a choice before the reading. Cold start lands on readable text with no
-    spinner, the reading is a scroll through rows already measured, and nothing
-    blocks the main thread. No streaks, badges, social, or guilt.
+10. **Simple to the bone, fast to the point of invisible, quiet.** No wizard,
+    no dialog before the text, no feature that asks a choice before the reading.
+    The reminder is offered after the first surah, never before it. A quiet
+    folio line keeps the reader's place on the page; the full chrome is asked
+    for, not resident. Cold start lands on readable text with no spinner, the
+    reading is a scroll through rows already measured, and nothing blocks the
+    main thread. No streaks, badges, social, or guilt.
 11. **No AI attribution anywhere.** No `Co-Authored-By` trailers, no "generated
     with" footers, no name in contributors, commits, or code.
 12. **The owner's law.** The build waits for the owner's word, and one build

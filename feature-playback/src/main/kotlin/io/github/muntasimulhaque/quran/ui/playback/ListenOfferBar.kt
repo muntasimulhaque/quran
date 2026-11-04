@@ -186,6 +186,18 @@ internal fun ListenOfferBar(
                     }
                 }
             }
+            if (progress == null) {
+                // A question with one visible answer is not a question. Not
+                // now is the same answer the page and Back already give, made
+                // visible under the words so the surah's name keeps its whole
+                // line (owner decision, this session).
+                TextButton(
+                    label = stringResource(R.string.playback_not_now),
+                    onClick = onCancelDownload,
+                    modifier = Modifier.padding(bottom = PillAir),
+                    quiet = true,
+                )
+            }
         }
         // The same drawn line the playing pill wears, so a download is one
         // shape whatever pill carries it (owner decision). It stands in the

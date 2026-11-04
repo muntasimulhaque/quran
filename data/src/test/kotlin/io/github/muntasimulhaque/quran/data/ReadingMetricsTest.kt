@@ -70,9 +70,9 @@ class ReadingMetricsTest {
 
     @Test
     fun anUnchosenLanguageReadsTheLatinVoice() {
-        // A first launch has no language stored; the reading is English
-        // until the welcome screen answers, so the metrics must not divide by
-        // a language that is not there.
+        // A fresh install has no language stored until the first open seeds
+        // it from the phone; the reading is English until then, so the
+        // metrics must not divide by a language that is not there.
         val first = settings(null)
         assertEquals(16f, first.translationSp, 0.001f)
         assertEquals(16f * 1.5f, first.translationLineSp, 0.001f)

@@ -11,22 +11,37 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import io.github.muntasimulhaque.quran.data.Ayah
+import io.github.muntasimulhaque.quran.data.TextSize
+import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.search.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
+import io.github.muntasimulhaque.quran.ui.rich.TajweedText
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
 import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
+import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
 import io.github.muntasimulhaque.quran.ui.theme.bookRowName
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 @Composable
-internal fun ReferenceRow(ayah: Ayah, onAyah: (Ayah) -> Unit) {
+internal fun ReferenceRow(
+    ayah: Ayah,
+    surahName: String?,
+    hafs: FontFamily,
+    arabicStep: Float,
+    onAyah: (Ayah) -> Unit,
+) {
+    val arabicSize = (TextSize.sp(TypeRole.Arabic, TextSize.DEFAULT) - 2f) * TextSize.step(arabicStep)
+    val arabicLine = arabicSize * TextSize.lineRatio(TypeRole.Arabic)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -36,24 +51,26 @@ internal fun ReferenceRow(ayah: Ayah, onAyah: (Ayah) -> Unit) {
     ) {
         Column(Modifier.weight(1f)) {
             Text(
-                text = stringResource(R.string.search_label_go_to),
-                style = MaterialTheme.typography.bodySmall,
-                // A label is not an action: the accent belongs to what
-                // answers a tap (owner decision, this session).
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = localizedDigits(ayah.verseKey),
+                text = listOfNotNull(surahName, localizedDigits(ayah.verseKey))
+                    .joinToString("  ·  "),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(top = Space.Tight),
+            )
+            TajweedText(
+                text = AnnotatedString(ayah.text),
+                style = arabicStyle(
+                    hafs,
+                    arabicSize,
+                    arabicLine,
+                    MaterialTheme.colorScheme.onSurface,
+                ),
+                textAlign = TextAlign.End,
+                maxLines = 2,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Space.Line),
             )
         }
-        // The row is the door, and it ends in the one chevron mark every
-        // other door ends in. An Open button inside a row that already
-        // opened on tap was two controls for one act, and TalkBack met a
-        // row and a nested button (owner decision, the theme and consistency
-        // session).
         IconGlyph(
             icon = Icon.Chevron,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,

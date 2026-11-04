@@ -74,6 +74,10 @@ fun ReadingList(
     onBackgroundTap: () -> Unit,
     onScrolled: () -> Unit,
     onNextSurah: (Int) -> Unit,
+    /** True while the one-time daily reminder offer is still unanswered. */
+    reminderOffer: Boolean = false,
+    onReminderOn: () -> Unit = {},
+    onReminderNotNow: () -> Unit = {},
     onAddContent: () -> Unit,
     onPlaceChanged: (Int) -> Unit,
     /** The ayah a jump landed on, so the reading can announce the place. */
@@ -163,6 +167,9 @@ fun ReadingList(
         onBackgroundTap = onBackgroundTap,
         onScrolled = onScrolled,
         onNextSurah = onNextSurah,
+        reminderOffer = reminderOffer,
+        onReminderOn = onReminderOn,
+        onReminderNotNow = onReminderNotNow,
         onAddContent = onAddContent,
         onPlaceChanged = onPlaceChanged,
         onJumped = onJumped,

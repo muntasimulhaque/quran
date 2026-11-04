@@ -112,10 +112,13 @@ fun TextPage(
     ) { value = preview() }
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         row?.let { sample -> SizeSample(row = sample, settings = settings) }
+        // Two sizes, not four. The Quran is its own text and has its own
+        // step; the meaning the reader reads under it is one step for the
+        // translation, the tafsir, and the word glosses, because a reader
+        // thinks "make the meaning bigger," not four roles (owner decision,
+        // this session).
         SizeRow(TypeRole.Arabic, settings.arabicSize) { onSize(TypeRole.Arabic, it) }
         SizeRow(TypeRole.Translation, settings.translationSize) { onSize(TypeRole.Translation, it) }
-        SizeRow(TypeRole.Tafsir, settings.tafsirSize) { onSize(TypeRole.Tafsir, it) }
-        SizeRow(TypeRole.Words, settings.wordsSize) { onSize(TypeRole.Words, it) }
         Spacer(Modifier.height(Space.Section))
     }
 }

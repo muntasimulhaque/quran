@@ -7,7 +7,6 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
@@ -27,14 +26,13 @@ import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 
 /**
- * An offer with no answer is put away by the page and by Back.
+ * The offer names its way out: Not now, the page, and Back all put it away.
  *
  * The app's raised controls answer a tap on the page: the chrome goes, the
- * ayah pill goes, and a paused transport pill stops. The download offer's own
- * X answered "not now" with exactly that, so it has been taken off the bar
- * (owner decision, this session), and Back answers the same "not now": a
- * question that is raised and not wanted must never be a trap, and a tap on
- * the page is not a path a screen reader can take.
+ * ayah pill goes, and a paused transport pill stops. The download offer now
+ * shows the same answer as a word, so a reader who does not want the package
+ * can see the way out instead of guessing at a gesture (owner decision, this
+ * session).
  *
  * The transfer's own cancel is the app's only remaining X, because a stray
  * tap must never throw away a package the reader asked for.
@@ -103,9 +101,11 @@ class ListenOfferDismissTest {
             compose.onAllNodesWithTag("listen-offer-bar", useUnmergedTree = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
-        // The bar draws no close: its answer is the page, the phone's own
-        // Back, or the Download (owner decision, this session).
-        compose.onNodeWithContentDescription("Not now").assertDoesNotExist()
+        // The offer shows its own way out, in the reader's language.
+        assertFalse(
+            "the offer must show a way out",
+            compose.onAllNodesWithText("Not now").fetchSemanticsNodes().isEmpty(),
+        )
     }
 
     private fun waitForTheOfferToGo() {

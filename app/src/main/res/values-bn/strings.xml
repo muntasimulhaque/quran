@@ -7,21 +7,12 @@
     <string name="surah_fallback_name">সূরা %1$d</string>
     <string name="juz_label">পারা %1$d</string>
 
-    <string name="welcome_title">আপনার ভাষা বেছে নিন</string>
-    <string name="welcome_later">সেটিংস থেকে যেকোনো সময় এটি বদলাতে পারবেন।</string>
-
-    <!-- The second half of the one screen before the reading: the reminder is
-         on for a new reader, and this is where they are told so and asked for
-         the two grants it needs, the notification and the exact time. -->
-    <string name="welcome_reminder_title">প্রতিদিন একটি আয়াত</string>
-    <string name="welcome_reminder_body">প্রতিদিন %1$s-এ একটি নীরব বার্তা। ফোন অনুমতি দিলে সময়মতো পৌঁছাতে নোটিফিকেশন এবং আলার্ম ও রিমাইন্ডারের অনুমতি দিন।</string>
-    <string name="welcome_reminder_turn_on">চালু করুন</string>
-    <string name="welcome_reminder_not_now">এখন নয়</string>
     <string name="first_paint_preparing">লেখা প্রস্তুত হচ্ছে…</string>
 
     <string name="action_browse">কুরআন ব্রাউজ করুন</string>
     <string name="action_search">অনুসন্ধান</string>
     <string name="action_settings">সেটিংস</string>
+    <string name="action_reading_settings">পাঠের সেটিংস</string>
     <string name="action_surah_top">সূরার শুরুতে ফিরে যান</string>
     <string name="action_save">সংরক্ষণ</string>
     <string name="action_removed">মুছে ফেলা হয়েছে</string>

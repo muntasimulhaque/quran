@@ -7,6 +7,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -247,7 +248,15 @@ class AccessibilityTest {
         compose.onAllNodesWithText(compose.activity.getString(R.string.action_note))
             .onFirst().performClick()
         waitForTag("note-sheet")
+        // The note editor takes the focus a moment after the sheet opens,
+        // and the keyboard follows it. Wait for the field so Back goes to the
+        // sheet, not to an IME that was still arriving.
+        compose.waitUntil(5_000) {
+            compose.onAllNodes(hasSetTextAction() and isFocused())
+                .fetchSemanticsNodes().isNotEmpty()
+        }
         Espresso.closeSoftKeyboard()
+        compose.waitForIdle()
         back()
         waitForTagGone("note-sheet")
 

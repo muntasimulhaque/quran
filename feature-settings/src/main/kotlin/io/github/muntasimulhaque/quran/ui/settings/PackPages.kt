@@ -127,7 +127,7 @@ fun WordsPage(
         val installed = pack?.installed == true
         ToggleRow(
             title = stringResource(R.string.settings_words_title),
-            subtitle = null,
+            subtitle = stringResource(R.string.settings_words_lead),
             checked = settings.wordByWord && installed,
             onChange = actions.onWordByWord,
             switchTag = "switch-words-page",

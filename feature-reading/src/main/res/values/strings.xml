@@ -28,6 +28,9 @@
     <string name="card_add_tafsir">Add a tafsir to read this ayah deeper</string>
     <string name="card_opening_pack">Opening %1$s…</string>
     <string name="card_tafsir_missing">This tafsir has no passage for this ayah.</string>
+    <string name="card_tafsir_offer_body">The commentary in this language, %1$s. It downloads once and then works offline.</string>
+    <string name="card_tafsir_add">Add · %1$s</string>
+    <string name="card_tafsir_not_now">Not now</string>
     <string name="card_door_shown">Shown</string>
     <string name="card_door_hidden">Hidden</string>
     <string name="card_note_take">Take a note</string>
@@ -40,6 +43,11 @@
 
     <string name="reading_note_saving">Saving…</string>
 
+
+    <string name="reading_reminder_title">One ayah a day</string>
+    <string name="reading_reminder_body">A quiet ayah once a day, at a time you choose. You can change it or turn it off in Settings.</string>
+    <string name="reading_reminder_turn_on">Turn on</string>
+    <string name="reading_reminder_not_now">Not now</string>
 
     <string name="reading_footnote_sheet_name">Footnote</string>
     <string name="reading_footnote_title">Footnote %1$d  ·  %2$s %3$s</string>

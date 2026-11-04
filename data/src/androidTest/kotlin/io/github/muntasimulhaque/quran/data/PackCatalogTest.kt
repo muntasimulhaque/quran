@@ -67,6 +67,19 @@ class PackCatalogTest {
     }
 
     /**
+     * A translation the build carries is a shipped pack like the core, not a
+     * download the reader has to make before the first page. The catalog
+     * keeps it, and the store can place it from the app's own assets.
+     */
+    @Test
+    fun aShippedTranslationIsCarried() {
+        val catalog = PackCatalog.parse(
+            """{"packs":[{"id":"translation-saheeh-en","type":"translation","name":"Saheeh International","language":"en","shipped":true,"sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","bytes":1}]}""",
+        )
+        assertTrue(catalog.get("translation-saheeh-en")?.shipped == true)
+    }
+
+    /**
      * A pack's Bangla credit and license, when the catalog carries them, are
      * read beside the English pair: the About page shows them in a Bangla
      * interface, and an older catalog with no Bangla line leaves them empty so

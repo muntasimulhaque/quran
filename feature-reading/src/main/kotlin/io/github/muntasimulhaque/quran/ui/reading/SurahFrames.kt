@@ -233,6 +233,56 @@ internal fun SurahOpening(
 }
 
 /**
+ * The one-time reminder offer, at the end of the first surah the reader
+ * finishes. It is not a gate: the reading is already the gift, and the ask
+ * comes after it. Turn on asks the phone for what it needs; Not now writes
+ * the reader's no and never asks again (owner decision, this session).
+ */
+@Composable
+internal fun ReadingReminderOffer(
+    onTurnOn: () -> Unit,
+    onNotNow: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = Space.Section, bottom = Space.Row)
+            .clip(Radii.Card)
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = Wash.Door))
+            .padding(horizontal = Space.Block, vertical = Space.Block)
+            .testTag("reading-reminder-offer"),
+    ) {
+        Text(
+            text = stringResource(R.string.reading_reminder_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            text = stringResource(R.string.reading_reminder_body),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = Space.Line),
+        )
+        Row(
+            modifier = Modifier.padding(top = Space.Block),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            TextButton(
+                label = stringResource(R.string.reading_reminder_turn_on),
+                onClick = onTurnOn,
+                prominent = true,
+            )
+            TextButton(
+                label = stringResource(R.string.reading_reminder_not_now),
+                onClick = onNotNow,
+                modifier = Modifier.padding(start = Space.Action),
+                quiet = true,
+            )
+        }
+    }
+}
+
+/**
  * The end of a surah, and the door to the next one.
  *
  * The column keeps 20 dp under its own last line, and the reading's foot

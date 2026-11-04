@@ -16,8 +16,9 @@ import java.security.MessageDigest
  * entry has no 64-hex SHA-256 is never intact: a missing checksum is a
  * refusal, not a permission (owner decision, security audit).
  *
- * The shipped core pack is not hashed here: it comes from the app's own
- * signed assets and [PackStore.coreFile] checks it on every open.
+ * A shipped pack is not hashed here: it comes from the app's own signed
+ * assets. The core pack is checked by [PackStore.coreFile] on every open;
+ * the shipped translations are checked when they are placed.
  */
 class PackVerifier(private val context: Context) {
 

@@ -50,7 +50,7 @@ class LargeTextTest {
     val compose = createComposeRule()
 
     @Test
-    fun theTopBarKeepsItsThreeDoorsAtTwoHundredPercent() {
+    fun theTopBarKeepsItsDoorsAtTwoHundredPercent() {
         compose.setContent {
             QuranTheme(theme = AppTheme.Light, language = UiLanguage.English) {
                 AtFontScale(2f) {
@@ -63,6 +63,7 @@ class LargeTextTest {
                         onTitle = {},
                         onBrowse = {},
                         onSearch = {},
+                        onReading = {},
                         onSettings = {},
                     )
                 }
@@ -70,6 +71,7 @@ class LargeTextTest {
         }
         compose.onNodeWithContentDescription("Browse the Quran").assertIsDisplayed()
         compose.onNodeWithContentDescription("Search").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Reading settings").assertIsDisplayed()
         compose.onNodeWithContentDescription("Settings").assertIsDisplayed()
         compose.onNodeWithText("Al-Baqarah").assertExists()
     }

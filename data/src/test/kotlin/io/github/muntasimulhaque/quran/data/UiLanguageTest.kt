@@ -43,6 +43,14 @@ class UiLanguageTest {
     }
 
     @Test
+    fun thePhoneLanguageIsTheDefaultAndEnglishIsTheFallback() {
+        assertEquals(UiLanguage.Bangla, UiLanguage.ofSystem("bn"))
+        assertEquals(UiLanguage.English, UiLanguage.ofSystem("en"))
+        assertEquals(UiLanguage.English, UiLanguage.ofSystem("ar"))
+        assertEquals(UiLanguage.English, UiLanguage.ofSystem(null))
+    }
+
+    @Test
     fun searchReadsOnlyTheChosenLanguagesPacks() {
         // The reader's own on switches can hold a pack of another language
         // (one they added by hand); search must still answer in the language
@@ -76,6 +84,17 @@ class UiLanguageTest {
         ayahs = 6236,
         bytes = 1,
     )
+
+    @Test
+    fun aFreshInstallStartsAtAlFatihaWithThePhonesLanguage() {
+        val fresh = AppSettings().bootstrapFor(UiLanguage.Bangla)
+        assertEquals("bn", fresh.uiLanguage)
+        assertEquals(1, fresh.ayah)
+        assertEquals(setOf("translation-al-bayan-bn"), fresh.translationPacks)
+        assertTrue("the tafsir is a download the reader asks for", fresh.tafsirPacks.isEmpty())
+        assertTrue("the reminder is offered after the first surah, not before", !fresh.reminderAnswered)
+        assertTrue("the reminder starts off", !fresh.dailyAyah)
+    }
 
     @Test
     fun aFreshChoiceSelectsTheLanguagesOwnPacks() {

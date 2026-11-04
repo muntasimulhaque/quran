@@ -2,19 +2,17 @@ package io.github.muntasimulhaque.quran.ui.reader
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -33,6 +31,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
@@ -51,11 +50,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ContentDatabase
+import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.readingMetrics
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
+import io.github.muntasimulhaque.quran.ui.settings.SettingsPage
 import io.github.muntasimulhaque.quran.ui.PermissionNotice
 import io.github.muntasimulhaque.quran.ui.kit.AppSnackbar
-import io.github.muntasimulhaque.quran.ui.kit.rememberAssistiveNavigation
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
@@ -70,20 +70,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
-/** How long the chrome stays after a touch before it steps back. */
-private const val CHROME_MILLIS = 7000L
-
-/**
- * The chrome surface this release has to show once. A new install reveals
- * the top bar on its first reading; a release that adds a surface changes
- * this key, so the next launch shows the bar once more. The value is written
- * after the reveal, so the same install never repeats it.
- */
-internal const val CHROME_REVEAL = "reading-1"
-
-/** Whether this install still owes the reader the one chrome reveal. */
-internal fun chromeRevealNeeded(stored: String?): Boolean = stored != CHROME_REVEAL
 
 /**
  * How long the screen stays awake after the last touch while only the
@@ -147,11 +133,6 @@ fun ReaderScreen(
 ) {
     val settings = viewModel.settings
     val reducedMotion by rememberReducedMotion()
-    // A reader using touch exploration or another accessibility service gets
-    // the top bar for as long as they need it: the seven-second step-back is
-    // a quiet-page rule, and a timed control is not a control a screen reader
-    // or a switch can rely on (owner decision, this session).
-    val assistiveNavigation by rememberAssistiveNavigation()
     val playback by viewModel.playbackState.collectAsStateWithLifecycle()
     // The recited word travels on a flow of its own and is handed down as a
     // State that this screen never reads, so the tick that moves the wash
@@ -167,14 +148,9 @@ fun ReaderScreen(
     }
     val lastRead by viewModel.lastRead.collectAsStateWithLifecycle()
 
-    // The reveal also owns the first paper tap. A reader who taps the page
-    // while the reveal is still being read keeps the bar for that look; a
-    // second tap toggles it as usual. The bar still auto-hides on its own, so
-    // the reveal is never a permanent control.
-    var chromeRevealPending by rememberSaveable {
-        mutableStateOf(chromeRevealNeeded(settings.chromeReveal))
-    }
-    var chrome by rememberSaveable { mutableStateOf(chromeRevealPending) }
+    // The folio line is always on the page; the full chrome is the reader's
+    // ask and stays until they put it away. No timer, no first-run reveal.
+    var chrome by rememberSaveable { mutableStateOf(false) }
     // The ayah whose own menu is open, and the door it hangs from. One at a
     // time, never across a rotation: a popup is a moment and not a place
     // (owner decision, this session).
@@ -215,6 +191,11 @@ fun ReaderScreen(
     // the sheet is written into the saved state, so the choice is answered
     // where it was made (owner decision, 21).
     var sheet by rememberSaveable { mutableStateOf(ReaderSheet.None) }
+    // The page the settings sheet opens on. Aa asks for the type page, the
+    // sliders ask for the hub, and the sheet's own Back returns to the reading
+    // when the page was the door that opened it (owner decision, this
+    // session).
+    var settingsStartPage by rememberSaveable { mutableStateOf<SettingsPage?>(null) }
     // The sheet a result came from, one level deep. A search or Browse result
     // closes its sheet, and Back from the reading reopens it at the same
     // query, tab, and place. The state holder keeps the sheet's own saveable
@@ -291,20 +272,11 @@ fun ReaderScreen(
     // and the picture are never two shapes (owner decision, this version).
     var captureWidth by remember { mutableStateOf(ShareCardWidths.first()) }
 
-    // The chrome is shown once on a new install (and on a release that adds
-    // a surface). The reveal is written down after a moment, so a process
-    // that dies with the bar still up says it again rather than losing it.
-    LaunchedEffect(Unit) {
-        if (!chromeRevealNeeded(viewModel.settings.chromeReveal)) return@LaunchedEffect
-        delay(1_500)
-        viewModel.markChromeRevealed()
-    }
-
     /** Opens a sheet from the reading and forgets any stale state it held. */
     fun openSheet(target: ReaderSheet) {
+        if (target != ReaderSheet.Settings) settingsStartPage = null
         if (sheet == target) return
         returnTo = null
-        chromeRevealPending = false
         menu = null
         selectionClearer.clear()
         sheetStates.removeState(target.name)
@@ -509,13 +481,6 @@ fun ReaderScreen(
         }
     }
 
-    // The chrome steps back on its own; a chosen ayah waits for the reader.
-    LaunchedEffect(chrome, touch, assistiveNavigation) {
-        if (!chrome || assistiveNavigation) return@LaunchedEffect
-        delay(CHROME_MILLIS)
-        chrome = false
-    }
-
     // The localized fallback line for a device with no receiving app, read
     // here where stringResource is valid; the share itself runs in a plain
     // lambda where a composable call would not be.
@@ -586,6 +551,7 @@ fun ReaderScreen(
     // The reading is edge to edge, so the foot of the page clears the
     // system's navigation bar itself; [readingFoot] owns that rule.
     val navigationBar = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val statusBar = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     // A Snackbar stands above whatever the foot of the page has raised, and
     // above the system bar when nothing is raised. The height is the one the
     // stack already measured, so the two cannot overlap (owner decision,
@@ -655,16 +621,10 @@ fun ReaderScreen(
                         menu = AyahMenuRequest(ayah, anchor)
                         reveal = null
                         chrome = false
-                        chromeRevealPending = false
                         touch++
                     },
                     onBackgroundTap = {
-                        if (chromeRevealPending) {
-                            chromeRevealPending = false
-                            chrome = true
-                        } else {
-                            chrome = !chrome
-                        }
+                        chrome = !chrome
                         menu = null
                         reveal = null
                         // A tap on the page is how a raised control is put
@@ -676,11 +636,6 @@ fun ReaderScreen(
                         touch++
                     },
                     onScrolled = {
-                        // The first reveal is not put away by the place landing
-                        // on the screen. A scroll of the reader's own after
-                        // the reveal has been answered still hides it as the
-                        // reading always has.
-                        if (!chromeRevealPending && chrome) chrome = false
                         // The menu goes with the page: its door moves under
                         // it, and a popup hung from a moving anchor is worse
                         // than no popup (owner decision, this session).
@@ -690,6 +645,26 @@ fun ReaderScreen(
                         touch++
                     },
                     onNextSurah = { number -> viewModel.jumpToSurah(number) },
+                    // The reminder is offered after the reader has read the
+                    // surah, never before the text. Turning it on is the act
+                    // that asks the phone for the notification and the exact
+                    // time; Not now writes the no and the card never returns
+                    // (owner decision, this session).
+                    reminderOffer = !settings.reminderAnswered,
+                    onReminderOn = {
+                        viewModel.setDailyAyah(
+                            enabled = true,
+                            onPermission = onReminderPermission,
+                        )
+                        viewModel.markReminderAnswered()
+                    },
+                    onReminderNotNow = {
+                        viewModel.setDailyAyah(
+                            enabled = false,
+                            onPermission = onReminderPermission,
+                        )
+                        viewModel.markReminderAnswered()
+                    },
                     onAddContent = { openSheet(ReaderSheet.Settings) },
                     onPlaceChanged = { ayah -> viewModel.onReadingSettled(ayah) },
                     onJumped = { ayah ->
@@ -714,11 +689,38 @@ fun ReaderScreen(
                     // kept the page (owner decision, this session).
                     contentPaddingTop = 64.dp,
                     contentPaddingBottom = readingFoot(
-                        bottomStack = with(LocalDensity.current) { bottomStackHeight.toDp() },
+                        bottomStack = maxOf(
+                            with(LocalDensity.current) { bottomStackHeight.toDp() },
+                            // The folio is always on the page, so the first
+                            // frame already keeps its room even before the
+                            // foot has measured itself.
+                            48.dp + navigationBar,
+                        ),
                         navigationBar = navigationBar,
                     ),
                 )
             }
+        }
+
+        // A quiet paper scrim under the clock, so a line scrolled to the top
+        // never sits under the status bar's icons. It is the status bar's own
+        // height plus a breath, not a second bar: the page keeps its full
+        // height and the Quran keeps its first line (owner decision, this
+        // session).
+        if (!chrome) {
+            Box(
+                Modifier
+                    .align(Alignment.TopCenter)
+                    .fillMaxWidth()
+                    .height(statusBar + Space.Line)
+                    .background(
+                        Brush.verticalGradient(
+                            0f to MaterialTheme.colorScheme.background,
+                            0.72f to MaterialTheme.colorScheme.background,
+                            1f to MaterialTheme.colorScheme.background.copy(alpha = 0f),
+                        ),
+                    ),
+            )
         }
 
         ReaderTopBar(
@@ -730,12 +732,18 @@ fun ReaderScreen(
             // a reader flips to the beginning of a surah in a printed copy.
             titleAction = stringResource(R.string.action_surah_top),
             onTitle = {
-                chromeRevealPending = false
                 viewModel.jumpToSurahOpening(settings.ayah)
             },
             onBrowse = { openSheet(ReaderSheet.Browse) },
             onSearch = { openSheet(ReaderSheet.Search) },
-            onSettings = { openSheet(ReaderSheet.Settings) },
+            onReading = {
+                settingsStartPage = SettingsPage.FontSize
+                openSheet(ReaderSheet.Settings)
+            },
+            onSettings = {
+                settingsStartPage = null
+                openSheet(ReaderSheet.Settings)
+            },
             modifier = Modifier.align(Alignment.TopCenter),
         )
 
@@ -746,29 +754,23 @@ fun ReaderScreen(
 
         val offer = viewModel.listenOffer
         val showPlayback = playback.isAnything() || offer != null
-        AnimatedVisibility(
-            visible = showPlayback,
-            // A reader who asked the phone to reduce motion gets the appearance
-            // and the disappearance without the slide; everyone else keeps the
-            // lift that says the control comes from the foot of the page.
-            enter = if (reducedMotion) fadeIn() else fadeIn() + slideInVertically { it / 3 },
-            exit = if (reducedMotion) fadeOut() else fadeOut() + slideOutVertically { it / 3 },
+        BottomStack(
+            viewModel = viewModel,
+            playback = playback,
+            showPlayback = showPlayback,
+            onHeight = { bottomStackHeight = it },
+            onReciter = { viewModel.choosePillReciter(it) },
+            reciterId = settings.recitation,
+            reciterName = reciterShortName(
+                settings.recitation,
+                viewModel.recitations.firstOrNull { it.id == settings.recitation }?.name.orEmpty(),
+            ),
+            reciterOptions = viewModel.pillReciters,
+            folioTitle = surahName(viewModel, settings.ayah),
+            folioDetail = stringResource(R.string.juz_label, viewModel.juz),
+            onFolio = { chrome = !chrome },
             modifier = Modifier.align(Alignment.BottomCenter),
-        ) {
-            BottomStack(
-                viewModel = viewModel,
-                playback = playback,
-                showPlayback = showPlayback,
-                onHeight = { bottomStackHeight = it },
-                onReciter = { viewModel.choosePillReciter(it) },
-                reciterId = settings.recitation,
-                reciterName = reciterShortName(
-                    settings.recitation,
-                    viewModel.recitations.firstOrNull { it.id == settings.recitation }?.name.orEmpty(),
-                ),
-                reciterOptions = viewModel.pillReciters,
-            )
-        }
+        )
 
         AppSnackbar(
             hostState = snackbar,
@@ -790,7 +792,10 @@ fun ReaderScreen(
                 anchor = request.anchor,
                 isSaved = savedRow?.marked == true,
                 hasNote = !savedRow?.note.isNullOrBlank(),
-                showTafsir = viewModel.enabledTafsirPacks.isNotEmpty(),
+                // The Tafsir door is always on the menu. A reader who has no
+                // pack gets the offer card, not a missing action (owner
+                // decision, this session).
+                showTafsir = true,
                 onDismiss = { menu = null },
                 onPlay = {
                     viewModel.playAyah(request.ayah.number)
@@ -877,6 +882,7 @@ fun ReaderScreen(
                 onOpenNotificationSettings = onOpenNotificationSettings,
                 onAskExactAlarm = onAskExactAlarm,
                 onReminderPermission = onReminderPermission,
+                settingsStartPage = settingsStartPage,
                 onDismiss = { closeSheet() },
                 onResult = { resultOpened(it) },
                 onSearchResult = { openSearchResult(it) },
@@ -899,6 +905,12 @@ fun ReaderScreen(
                 ?: stringResource(R.string.surah_fallback_name, ayah.surah),
             tafsirPacks = viewModel.enabledTafsirPacks,
             settings = settings,
+            tafsirOffer = viewModel.packs.firstOrNull {
+                it.type == PackType.Tafsir &&
+                    it.language == viewModel.readingLanguage &&
+                    !it.installed
+            },
+            onInstallTafsir = { viewModel.installPack(it) },
             initialTafsirPack = cardTafsirPack,
             onAddContent = {
                 cardAyah = null

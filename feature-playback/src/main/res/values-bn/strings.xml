@@ -7,6 +7,7 @@
     <string name="playback_retry">আবার চেষ্টা করুন</string>
     <string name="playback_continue">চালিয়ে যান</string>
     <string name="playback_download">ডাউনলোড</string>
+    <string name="playback_not_now">এখন নয়</string>
     <string name="playback_cancel_download">ডাউনলোড বাতিল</string>
     <string name="playback_stop">থামান</string>
     <string name="playback_previous_ayah">আগের আয়াত</string>

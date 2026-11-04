@@ -46,7 +46,9 @@ import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.AddDoor
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
+import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
+import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
@@ -124,6 +126,14 @@ fun AyahCard(
     surahName: String,
     tafsirPacks: List<ContentPack>,
     settings: AppSettings,
+    /**
+     * The tafsir this build offers in the reader's language, when the reader
+     * does not have it. The card is the moment of intent, so the offer stands
+     * here with its language, name, and size rather than sending the reader
+     * to Settings (owner decision, this session).
+     */
+    tafsirOffer: ContentPack? = null,
+    onInstallTafsir: (String) -> Unit = {},
     /** The pack a search hit opened the card for, when there is one. */
     initialTafsirPack: String? = null,
     onAddContent: () -> Unit,
@@ -253,14 +263,11 @@ fun AyahCard(
             // say, and the passage's own title follows it (owner decision,
             // this session).
             if (tafsirPacks.isEmpty()) {
-                // The card is only the tafsir doors, so a reader with none
-                // open gets the door to add one rather than a sheet with
-                // nothing in it.
-                AddDoor(
-                    text = stringResource(R.string.card_add_tafsir),
-                    action = stringResource(R.string.reading_action_add),
-                    onClick = onAddContent,
-                    modifier = Modifier.padding(horizontal = SheetRowGutter),
+                TafsirOffer(
+                    pack = tafsirOffer,
+                    onInstall = onInstallTafsir,
+                    onDismiss = onDismiss,
+                    onOpenSettings = onAddContent,
                 )
             } else {
                 val single = tafsirPacks.singleOrNull()
@@ -524,6 +531,70 @@ private fun TafsirPanel(
                 sizeSp = settings.tafsirSp,
                 lineSp = settings.tafsirLineSp,
                 arabicSp = settings.arabicInlineSp,
+            )
+        }
+    }
+}
+
+/**
+ * The tafsir the reader does not have yet, offered where the reader asked for
+ * it. The language, the pack's name, and its size are the whole of the
+ * question; Add is the one act, and Not now closes the card. A language with
+ * no offered pack falls back to the Settings door, so the card is never a
+ * sheet with nothing in it (owner decision, this session).
+ */
+@Composable
+private fun TafsirOffer(
+    pack: ContentPack?,
+    onInstall: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onOpenSettings: () -> Unit,
+) {
+    if (pack == null) {
+        AddDoor(
+            text = stringResource(R.string.card_add_tafsir),
+            action = stringResource(R.string.reading_action_add),
+            onClick = onOpenSettings,
+            modifier = Modifier.padding(horizontal = SheetRowGutter),
+        )
+        return
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Space.Gutter, vertical = Space.Section),
+    ) {
+        Text(
+            text = languageName(pack.language),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = contentPackName(pack.id, pack.name),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(top = Space.Tight),
+        )
+        Text(
+            text = stringResource(
+                R.string.card_tafsir_offer_body,
+                formatBytes(pack.bytes),
+            ),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = Space.Line),
+        )
+        Row(modifier = Modifier.padding(top = Space.Block)) {
+            TextButton(
+                label = stringResource(R.string.card_tafsir_add, formatBytes(pack.bytes)),
+                onClick = { onInstall(pack.id) },
+                prominent = true,
+            )
+            TextButton(
+                label = stringResource(R.string.card_tafsir_not_now),
+                onClick = onDismiss,
+                modifier = Modifier.padding(start = Space.Action),
+                quiet = true,
             )
         }
     }

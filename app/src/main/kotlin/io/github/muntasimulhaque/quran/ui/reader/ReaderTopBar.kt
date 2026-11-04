@@ -6,19 +6,25 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.R
@@ -32,10 +38,11 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * chrome the reading carries. It lives beside the reading screen so the page
  * file is about the page, and the bar is about the bar.
  *
- * The three marks are Browse, Search, and Settings. The sliders open the
- * settings hub directly: the reading's display panel was a second door to
- * the same values, and a reader who wants a setting should not have to learn
- * a shortcut to it (owner decision, this session).
+ * The four marks are Browse, Search, Aa, and Settings. Aa opens the type page
+ * directly, because a reader who asks for it is asking about the page they are
+ * looking at; the sliders open the settings hub. The reading's own controls
+ * are one tap from the reading, not a second vocabulary (owner decision, this
+ * session).
  *
  * Its marks stand on the same two lines as the words under them. A round
  * control is a 48 dp target holding a 24 dp mark, so the row is inset by the
@@ -60,6 +67,7 @@ internal fun ReaderTopBar(
     onTitle: () -> Unit,
     onBrowse: () -> Unit,
     onSearch: () -> Unit,
+    onReading: () -> Unit,
     onSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -115,8 +123,34 @@ internal fun ReaderTopBar(
                     )
                 }
                 IconButton(Icon.Search, stringResource(R.string.action_search), onSearch)
+                AaButton(onReading)
                 IconButton(Icon.Settings, stringResource(R.string.action_settings), onSettings)
             }
         }
+    }
+}
+
+/**
+ * The reading's own settings door: two letters, drawn in the app's voice, at
+ * the 48 dp every control owes the finger. It opens the type page directly,
+ * because the reader who asks for "Aa" is asking about the page they are
+ * looking at, not about the app's language or its reminder (owner decision,
+ * this session).
+ */
+@Composable
+private fun AaButton(onClick: () -> Unit) {
+    val name = stringResource(R.string.action_reading_settings)
+    Box(
+        modifier = Modifier
+            .size(48.dp)
+            .clickable(role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = name },
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = "Aa",
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
     }
 }

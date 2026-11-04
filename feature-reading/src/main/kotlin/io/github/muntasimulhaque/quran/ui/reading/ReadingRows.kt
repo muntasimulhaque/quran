@@ -72,6 +72,10 @@ internal fun ReadingRows(
     onBackgroundTap: () -> Unit,
     onScrolled: () -> Unit,
     onNextSurah: (Int) -> Unit,
+    /** True while the one-time daily reminder offer is still unanswered. */
+    reminderOffer: Boolean = false,
+    onReminderOn: () -> Unit = {},
+    onReminderNotNow: () -> Unit = {},
     onAddContent: () -> Unit,
     onPlaceChanged: (Int) -> Unit,
     /** The ayah a jump landed on, so the reading can announce the place. */
@@ -303,6 +307,12 @@ internal fun ReadingRows(
                     nextSurahName = nextSurahName,
                     onNextSurah = onNextSurah,
                 )
+                if (reminderOffer) {
+                    ReadingReminderOffer(
+                        onTurnOn = onReminderOn,
+                        onNotNow = onReminderNotNow,
+                    )
+                }
             }
         }
     }

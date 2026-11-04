@@ -41,7 +41,6 @@ import io.github.muntasimulhaque.quran.playback.PlaybackController
 import io.github.muntasimulhaque.quran.playback.ListenOffer
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
-import io.github.muntasimulhaque.quran.ui.reader.CHROME_REVEAL
 import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -200,9 +199,9 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * back to another language: a Bangla reader is never handed an English
      * column, an English meaning, or an English introduction because the
      * Bangla content has not arrived yet (owner decision, this session). An
-     * install that has not chosen yet answers English, the same answer the
-     * shell gives before the first screen, and the reader never reaches the
-     * reading or the search field before that choice is made.
+     * install that has not been seeded yet answers English, which is the
+     * fallback; a fresh open writes the phone's language before the reading
+     * is shown.
      */
     val readingLanguage: String
         get() = settings.readingLanguage
@@ -714,7 +713,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    /** The first screen's reminder card has been answered, either way. */
+    /** The one-time reminder offer has been answered, either way. */
     fun markReminderAnswered() {
         if (settings.reminderAnswered) return
         settings = settings.copy(reminderAnswered = true)
@@ -783,10 +782,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * English never keeps two defaults fighting; a pack the reader added by
      * hand, like the second translation, is left exactly where it was.
      *
-     * The first choice is the reader's first arrival, so it lands in the reading
-     * of Al-Fatiha, where the Arabic and its meaning meet at once
-     * (owner decision, 4.5). Later changes only move the content; the place
-     * stays the reader's own.
+     * The language is changed from Settings only; a fresh install is seeded
+     * from the phone before the first page, with no screen. A change moves
+     * the content and leaves the reader's place exactly where it was (owner
+     * decision, this session).
      *
      * The language's reading is fetched without another question: the
      * language's translation and tafsir become the queue, and the queue brings
@@ -797,15 +796,9 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * the reader wants it.
      */
     fun chooseLanguage(language: UiLanguage) {
-        val firstRun = settings.uiLanguage == null
         val previous = UiLanguage.of(settings.uiLanguage)
         val next = settings.withLanguage(language)
-        val chosen = if (firstRun) {
-            next.copy(ayah = 1, reminderAnswered = false)
-        } else {
-            next
-        }
-        settings = chosen
+        settings = next
         clearRowCache()
         // The boot-time mirror lands before anything else, so the Activity
         // that recreates for the new locale comes up speaking it.
@@ -815,16 +808,11 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
                 language = language,
                 translationPacks = next.translationPacks,
                 tafsirPacks = next.tafsirPacks,
-                firstRun = firstRun,
             )
             // The surah names are content, and the content now answers in the
             // new language: the library is read again so the names change
             // with the words around them (owner decision, this session).
             library.refresh()
-            if (firstRun) {
-                settingsStore.setAyah(1)
-                activePlaceId = lastReadStore.record(1, 1)
-            }
             // The queue is the language's, not the install's: the language
             // the reader left takes its packs with it, so a former language's
             // translation can never come back when an update detaches it
@@ -834,14 +822,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         }
         // A reader who already reads with word meanings is given the word
         // list of the new language, through the same door the toggle uses.
-        if (chosen.wordByWord) library.installIfMissing(wantedWordsPack(), select = true)
-    }
-
-    /** The one chrome reveal is written down after the reader has seen it. */
-    fun markChromeRevealed() {
-        if (settings.chromeReveal == CHROME_REVEAL) return
-        settings = settings.copy(chromeReveal = CHROME_REVEAL)
-        viewModelScope.launch { settingsStore.setChromeReveal(CHROME_REVEAL) }
+        if (next.wordByWord) library.installIfMissing(wantedWordsPack(), select = true)
     }
 
     fun setTranslationPacks(packs: Set<String>) {

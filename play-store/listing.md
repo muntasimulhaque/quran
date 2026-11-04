@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 15.4 (versionCode 156)
+Version: 15.5 (versionCode 157)
 
 ## Listing
 
@@ -13,14 +13,17 @@ The Quran, offline: translation, tafsir, search, recitation.
 Full description (plain prose; Play strips markdown):
 
 A Quran app built to be read. It opens where you left off and never asks
-you to learn its interface first.
+you to learn its interface first. The English and Bangla translations ship
+with the app, so the first page is readable offline, with no account and no
+waiting.
 
 The Arabic is the QPC Hafs print, word by word, with the rules of recitation
 drawn in the printed mushaf's seven color families and a Tajweed page that
 explains every color in English and Bangla. The reading gives each ayah its
-Saheeh International translation with the original footnotes; when word by
-word is turned on, each word carries its meaning; and the ayah card opens
-Ibn Kathir in English, with the Quran quotations set apart. Bangla readers
+Saheeh International translation with the original footnotes; when word
+meanings are turned on, a tap on any word opens its meaning under the verse;
+and the ayah card opens Ibn Kathir in English, with the Quran quotations set
+apart. Bangla readers
 get the Al-Bayan Simple Translation, Ibn Kathir in Bangla, Bangla word
 meanings, and the surah names in Bengali script, and the whole interface can
 be read in English or Bangla.
@@ -35,9 +38,10 @@ you kept, with your note under the ayah it was written on, and a Last read
 list that keeps the places you have been reading so you can return to one
 you left.
 
-Browse, Search, and Settings are doors at the top of the reading. There is
-no bottom bar to learn. More than one translation may be on at once, and
-each one draws in its own place under the ayah.
+Browse, Search, Aa, and Settings are one tap away in the reading's chrome,
+and a quiet folio line at the foot always says the surah, the juz, and the
+ayah. There is no bottom tab bar to learn. More than one translation may be on
+at once, and each one draws in its own place under the ayah.
 
 Recitation plays Minshawi or Husary, with the page following the reciter
 and the word being recited marked. Audio is not bundled and not streamed:
@@ -76,13 +80,13 @@ from the content manifest. The source code is MIT.
 - Data security: no account, no identifiers, nothing stored off the
   device.
 - The app declares `INTERNET` for content from the project's own GitHub
-  Releases: the reading of the language the reader chose (its translation,
-  and its tafsir on an unmetered connection), a word list when word by word
-  is turned on, a recitation package the reader asks for after seeing its
-  size (or the next surah after Continue is turned on), and a quiet refresh
-  of an installed pack when the app carries a newer version. The refresh
-  runs on an unmetered connection only. Nothing is sent beyond the request.
-  No analytics, no crash reporting, no advertising.
+  Releases: the tafsir of the language the reader chose, on an unmetered
+  connection; a word list when word by word is turned on; a recitation
+  package the reader asks for after seeing its size (or the next surah after
+  Continue is turned on); and a quiet refresh of an installed pack when the
+  app carries a newer version. The refresh runs on an unmetered connection
+  only. Nothing is sent beyond the request. No analytics, no crash
+  reporting, no advertising.
 - Privacy policy URL:
   https://muntasimulhaque.github.io/quran/privacy.html
 
@@ -164,6 +168,9 @@ The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (one answer and no close), so every frame that wants a clean
 page is taken before it.
 
+## Release notes (15.5, 407 characters)
+15.5 opens on the Quran, in your phone's language, with both translations already on the device. The reading keeps a quiet line with your surah and juz, Aa opens the type page, a tap on a word shows its meaning, and a tafsir you do not have is offered where you ask for it. Search shows the verse for a reference result. The audio offer has a clear Not now. Text, translations, tafsirs, and packs unchanged.
+
 ## Release notes (15.4, 375 characters)
 15.4 makes the Font size sample a type specimen. The page shows only the ayah and its translation, without the translation's name above it, and it shows the translation even when the reading's Show translation switch is off, because the sample is there to judge the text size. The reading still names each translation column. Text, translations, tafsirs, and packs unchanged.
 
@@ -221,23 +228,24 @@ something Play would reject.
 
 ## What the app carries, and what a reader adds
 
-The app ships the Quran text only: about ten
-megabytes, a complete offline reading that needs no network and no account. Everything
-else is added by the reader, from the project's own GitHub Releases, with the
-size named before a tap or on the player while a Continue package downloads,
-and a SHA-256 check before it is used:
+The app ships the Quran text and both translations: a complete offline
+reading that needs no network and no account. The tafsir, the word lists,
+and the recitations are added by the reader, from the project's own GitHub
+Releases, with the size named before a tap or on the player while a Continue
+package downloads, and a SHA-256 check before it is used:
 
 | Language | Translation | Tafsir | Word by word |
 |---|---|---|---|
-| English | Saheeh International (2.9 MB) | Ibn Kathir (29.5 MB) | 6.3 MB |
-| Bangla | Al-Bayan Simple Translation (5.6 MB) | Ibn Kathir (56.0 MB) | 8.4 MB |
+| English | Saheeh International (ships) | Ibn Kathir (29.5 MB) | 6.3 MB |
+| Bangla | Al-Bayan Simple Translation (ships) | Ibn Kathir (56.0 MB) | 8.4 MB |
 
 Recitations: Minshawi and Husary, one surah at a time (about 0.2 to 185 MB
 each), plus 1.7 MB of timing data per reciter.
 
 Content updates arrive on their own: when a pack you already have is
-superseded, the app replaces it quietly on Wi-Fi, so the tafsir and
-translation stay current without a tap.
+superseded, the app replaces it quietly on Wi-Fi, so the tafsir and the
+word lists stay current without a tap. The Quran text and the translations
+update with the app itself.
 
 ## Store answers to have ready
 

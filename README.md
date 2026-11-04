@@ -4,19 +4,14 @@ A free, open source Quran reader for Android. It opens where you left off
 and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 15.4 (versionCode 156) was submitted for Play review,
-and its bundle is `quran-15.4-vc156.aab` (12,873,193 bytes, SHA-256
-`4cac32665cee826095a150a7ab105cc1554824e34b7adcb3a16d22a2a6059e39`,
-`jar verified`, certificate
-`53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`),
-built by CI run 41780732745 on main from
-`4e83970c` and taken from that run's `quran-signed-aab` artifact. All five
-jobs were green. The store set is unchanged from capture run 41690301971 on
-15.2: the Font size sample is not among the eight, so no frame moved.
-Content 1.5.0, the database `content-db-12c95dbe`. Owner gates: verify,
-build, checkdb, audit, search, fonts, and packs are green; the database
-rebuild reproduces 12c95dbe exactly. Play has the bundle; the local
-hand-off copy was deleted.
+**Status:** 15.5 (versionCode 157) is being built from this commit. The signed
+bundle, its hash, the green CI run, and the store capture are recorded here
+before the hand-over. Content 1.5.0, the database `content-db-12c95dbe`. The
+Quran text, every translation, every tafsir, every pack, and the content
+database are unchanged; the catalog marks the two translations as shipped.
+
+**In 15.5.** The app opens in the phone's language, with both translations already on the device, and no language screen. The reminder is offered after the first surah, not before the text. A quiet folio line keeps the surah and juz on the page; the full chrome is on tap, with no timer. Aa opens the type page, the reading has two sizes, a tap on a word shows its meaning, and a tafsir you do not have is offered where you ask for it. Search shows the verse for a reference result, the ayah menu is paper, and the audio offer has a clear Not now. Tajweed colors and word meanings start off. The recitation re-encode and the Al-Fatiha bundle are later releases.
+
 
 **In 15.4.** The Font size sample is a type specimen again: the ayah and its translation, without the translation's name, and with the translation shown even when the reading's Show translation switch is off, because the page is there to judge the size of the type. The reading still names each translation column when the rule calls for it. The Quran text, every translation, every tafsir, every pack, and the content database are unchanged.
 

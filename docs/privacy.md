@@ -16,10 +16,11 @@ nothing.
 The app reads the network only for content from the project's own Releases,
 and every download is verified against a SHA-256 recorded at build time:
 
-- The reading of the language the reader chose: the translation arrives as
-  part of that choice, and the tafsir follows on the same choice, waiting for
-  an unmetered connection when the phone is on cellular. A word list arrives
-  when the reader turns word by word on, where the row names its size first.
+- The Quran text and both translations ship inside the app, so the first page
+  and the reader's own language need no network. The tafsir of the language
+  the reader chose arrives on the reader's word, waiting for an unmetered
+  connection when the phone is on cellular. A word list arrives when the
+  reader turns word meanings on, where the row names its size first.
 - A content pack the reader asks for in Settings, after the row names its
   size.
 - A recitation package for one surah, after the reader taps Play, sees the
@@ -44,9 +45,9 @@ connection at all.
   are stored in the app's private storage and never leave it.
 - Downloaded recitation packages live in the app's private storage. Removing
   a surah from the Recitations sheet deletes its files.
-- The app can be used fully offline: text, translation, tafsir, search,
-  bookmarks, notes, and any surah already downloaded all work with no
-  connection.
+- The app can be used fully offline: the Quran text, both translations,
+  search, bookmarks, notes, and any tafsir, word list, or recitation already
+  downloaded all work with no connection.
 
 ## Permissions
 

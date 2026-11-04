@@ -16,6 +16,7 @@ import io.github.muntasimulhaque.quran.ui.search.SearchArrival
 import io.github.muntasimulhaque.quran.ui.search.SearchSheet
 import io.github.muntasimulhaque.quran.ui.settings.PackSetupState
 import io.github.muntasimulhaque.quran.ui.settings.SettingsActions
+import io.github.muntasimulhaque.quran.ui.settings.SettingsPage
 import io.github.muntasimulhaque.quran.ui.settings.SettingsSheet
 
 /**
@@ -36,6 +37,7 @@ internal fun ReaderSheets(
     onOpenNotificationSettings: () -> Unit,
     onAskExactAlarm: () -> Unit,
     onReminderPermission: () -> Unit,
+    settingsStartPage: SettingsPage? = null,
     onDismiss: () -> Unit,
     /** A sheet's result opens the sheet's way back. */
     onResult: (ReaderSheet) -> Unit,
@@ -88,6 +90,12 @@ internal fun ReaderSheets(
             content = content,
             /** The reader's own notes, searched beside the packs. */
             notes = saved,
+            // The reference result names its surah the way Browse and the
+            // reading do, so `18:10` is never a number the reader has to
+            // place from memory (owner decision, this session).
+            surahName = { number ->
+                viewModel.surahs.firstOrNull { it.number == number }?.nameSimple
+            },
             // Search reads the language the reader chose and no other: a
             // Bangla reader searches Bangla translations and tafsirs even
             // when an English column was added by hand (owner decision, this
@@ -159,7 +167,17 @@ internal fun ReaderSheets(
                     }
                 },
                 onTheme = { viewModel.setTheme(it) },
-                onTypeSize = { role, step -> viewModel.setTypeSize(role, step) },
+                onTypeSize = { role, step ->
+                    viewModel.setTypeSize(role, step)
+                    // The translation's step is the meaning's step: the
+                    // tafsir and the word glosses follow it, so two controls
+                    // govern three kinds of prose (owner decision, this
+                    // session).
+                    if (role == io.github.muntasimulhaque.quran.data.TypeRole.Translation) {
+                        viewModel.setTypeSize(io.github.muntasimulhaque.quran.data.TypeRole.Tafsir, step)
+                        viewModel.setTypeSize(io.github.muntasimulhaque.quran.data.TypeRole.Words, step)
+                    }
+                },
                 onFollowReciter = { viewModel.setFollowReciter(it) },
                 onShowTranslation = { viewModel.setShowTranslation(it) },
                 onWordByWord = { viewModel.setWordByWord(it) },
@@ -184,6 +202,7 @@ internal fun ReaderSheets(
                     viewModel.removeDownloads(recitation, surah)
                 },
             ),
+            startPage = settingsStartPage,
             onDismiss = onDismiss,
         )
     }

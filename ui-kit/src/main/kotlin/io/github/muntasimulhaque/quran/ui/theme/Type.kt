@@ -245,7 +245,7 @@ fun amiriDisplay(sizeSp: Float, color: Color = Color.Unspecified): TextStyle =
  *   16 at Regular in its own face, because Literata's smaller x-height
  *   needs the point to match Inter's 15 optically; the Book leads by its
  *   voice and by that point.
- * - **Field.** The search field and the welcome page: 16 at Regular,
+ * - **Field.** The search field: 16 at Regular,
  *   Material's bodyLarge. It is the one text the reader types, and the one
  *   page of prose in the chrome.
  * - **Meta.** A source line under a name, a count, a status: 13, Apple's
@@ -302,7 +302,7 @@ object TypeLadder {
     /** The interface's prose and a row. */
     const val BODY_SP = 15f
 
-    /** The search field and the welcome page: Material's bodyLarge. */
+    /** The search field: Material's bodyLarge. */
     const val FIELD_SP = 16f
 
     /** A source line under a name: where it comes from, a place, a count. */
@@ -459,7 +459,7 @@ private fun interStyle(
  * name over a page is 16 at Medium in the Book's face (titleMedium); a
  * list's Book name is 15 in the same face ([bookRowName]); a row's name is
  * 15 at Medium (titleSmall); the app's prose and a row are 15 (bodyMedium);
- * a field and the welcome page are 16 (bodyLarge); a source, a value, a
+ * a field is 16 (bodyLarge); a source, a value, a
  * count and a status are 13; a group's label is 12 at SemiBold with
  * tracking; a button's word is 14; a compact surface is 14 through
  * [compactBody] or [compactLabel].

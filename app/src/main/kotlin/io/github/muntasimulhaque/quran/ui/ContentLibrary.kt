@@ -18,6 +18,7 @@ import io.github.muntasimulhaque.quran.data.PackDownloader
 import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.PackUpdater
+import io.github.muntasimulhaque.quran.data.PackVerifier
 import io.github.muntasimulhaque.quran.data.Recitation
 import io.github.muntasimulhaque.quran.data.RecitationManifest
 import io.github.muntasimulhaque.quran.data.RecitationPackage
@@ -25,6 +26,8 @@ import io.github.muntasimulhaque.quran.data.RecitationStore
 import io.github.muntasimulhaque.quran.data.SafePaths
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.Surah
+import io.github.muntasimulhaque.quran.data.UiLanguage
+import io.github.muntasimulhaque.quran.data.bootstrapFor
 import io.github.muntasimulhaque.quran.data.translationSelectionAfterRemoval
 import io.github.muntasimulhaque.quran.R
 import kotlinx.coroutines.CancellationException
@@ -210,13 +213,18 @@ class ContentLibrary(
         val opened = withContext(Dispatchers.IO) {
             // The reader's settings are read once, and everything that
             // follows uses that same value: the store is not read twice for
-            // one launch.
-            val storedNow = settingsStore.settings.first()
+            // one launch. A fresh install has no language yet, and the phone
+            // already answered: it is written here, together with the
+            // language's own translation, before the library is opened.
+            var storedNow = settingsStore.settings.first()
+            val offeredNow = PackCatalog.load(application)
+            storedNow = bootstrapLanguage(storedNow)
+            installShipped(offeredNow)
             val installedNow = store.installed()
             // The catalog is marked with what this device has, so a pack
             // that is present is never offered as missing and a language
             // switch never re-fetches what is already here.
-            val catalogNow = PackCatalog.load(application).withInstalled(installedNow)
+            val catalogNow = offeredNow.withInstalled(installedNow)
             // A pack this build no longer offers leaves the reader's choices
             // and the device before the library is opened over them.
             val repaired = repairTranslations(storedNow, catalogNow)
@@ -316,6 +324,45 @@ class ContentLibrary(
             repaired.filter { id -> catalog.get(id)?.installed == false }.toSet(),
         )
         return stored.copy(translationPacks = repaired)
+    }
+
+    /**
+     * The one language decision the app makes for a fresh install: the
+     * phone's own language when the app carries it, English otherwise. The
+     * language's translation is selected and the reminder is off and still
+     * unanswered, so the first page is the Quran and the reminder is offered
+     * later, after the reader has read (owner decision, this session).
+     */
+    private suspend fun bootstrapLanguage(stored: AppSettings): AppSettings {
+        if (stored.uiLanguage != null) return stored
+        val language = UiLanguage.ofSystem()
+        val next = stored.bootstrapFor(language)
+        settingsStore.bootstrapLanguage(
+            language = language,
+            translationPacks = next.translationPacks,
+            tafsirPacks = next.tafsirPacks,
+        )
+        return next
+    }
+
+    /**
+     * The packs this build carries are placed on the device once, before the
+     * catalog is marked. A shipped translation is then a translation the
+     * reader already has, with no download and no network (owner decision,
+     * this session). The core pack has its own copy path and is skipped.
+     */
+    private fun installShipped(catalog: PackCatalog) {
+        val verifier = PackVerifier(application)
+        for (pack in catalog.all()) {
+            if (!pack.shipped || pack.id == PackCatalog.CORE_ID) continue
+            // The marker makes a healthy shipped pack a directory check, not
+            // a hash of the whole file on every launch. A missing or damaged
+            // copy is placed from the app's own assets.
+            if (verifier.trustedForOpen(pack)) continue
+            runCatching { store.install(pack) }.onFailure { failure ->
+                android.util.Log.e(TAG, "the shipped pack ${pack.id} could not be placed", failure)
+            }
+        }
     }
 
     /** After the content could not be opened, this tries again from the start. */

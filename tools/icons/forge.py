@@ -47,7 +47,7 @@ HALO   = 1.4
 # range 2.6 units is one pixel of gray. 3.2 holds from 72 px to 512 and still
 # keeps the sail curves; 4.4 flattens them (owner decision, the any-size
 # session).
-STROKE_ICON = 3.2
+STROKE_ICON = 3.8
 # The air around the book: the paper stroke that keeps the stand's line clear
 # of the page's edge, so the two never touch. 1.9 left the mark reading as a
 # diagram of two parts; 1.4 seats the book in its stand as one object, and it
@@ -571,7 +571,7 @@ def render_store(size=512, out=None, ss=4):
     im = raster_canvas(size, ss)
     p = fg_pieces()
     ids = [p[k] for k in ('pl', 'pm', 'wa', 'wb', 'pc', 'pcM')]
-    scale, xc, yc = fit_for(ids, None, span_w=size*0.53)
+    scale, xc, yc = fit_for(ids, None, span_w=size*0.60)
     paper_bg(im)
     draw_fg(im, scale, size/2*ss - (xc-AX_X)*scale*ss, size/2*ss + (AX_Y - yc)*scale*ss, ss,
             stroke=STROKE_ICON, halo=HALO_ICON, stand=INK)
@@ -598,7 +598,7 @@ def legacy_png(size, out=None):
     im = raster_canvas(size, 4)
     p = fg_pieces()
     ids = [p[k] for k in ('pl', 'pm', 'wa', 'wb', 'pc', 'pcM')]
-    scale, xc, yc = fit_for(ids, None, span_w=size*0.53)
+    scale, xc, yc = fit_for(ids, None, span_w=size*0.60)
     paper_bg(im)
     stroke, halo = optical(size)
     draw_fg(im, scale, size/2*4 - (xc-AX_X)*scale*4, size/2*4 + (AX_Y-yc)*scale*4, 4,
@@ -759,7 +759,7 @@ def preview():
     tiles = []
     for size in (192, 96, 48, 24):
         small = raster_canvas(size, 8)
-        s2, xc2, yc2 = fit_for(ids, None, span_w=size*0.53)
+        s2, xc2, yc2 = fit_for(ids, None, span_w=size*0.60)
         paper_bg(small)
         draw_fg(small, s2, size/2*8 - (xc2-AX_X)*s2*8, size/2*8 + (AX_Y-yc2)*s2*8, 8,
                 stroke=STROKE_ICON, halo=HALO_ICON, stand=INK)

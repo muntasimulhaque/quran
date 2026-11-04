@@ -944,14 +944,14 @@ class PlaybackPillTest {
     }
 
     /**
-     * The offer carries one answer and no close: the name and the size lead,
-     * the Download follows them, and the capsule keeps the words' own air at
-     * the leading end and the app's air at the answer's. Its old X answered
-     * "not now" exactly as a tap on the page does, so it had nothing of its
-     * own to say (owner decision, this session).
+     * The offer carries its answer and its way out: the name and the size
+     * lead, Download follows them, and Not now stands under the words. The
+     * old X was an unlabelled shape; a word says the same no where the reader
+     * can see it, without taking the surah's name's own line (owner decision,
+     * this session).
      */
     @Test
-    fun theOfferCarriesOneAnswerAndNoClose() {
+    fun theOfferCarriesItsAnswerAndItsWayOut() {
         showPill(
             offer = ListenOffer(
                 reciter = "husary",
@@ -966,16 +966,18 @@ class PlaybackPillTest {
         val bar = compose.onNodeWithTag("listen-offer-bar").getUnclippedBoundsInRoot()
         val title = compose.onNodeWithText("Maryam \u00b7 22 MB").getUnclippedBoundsInRoot()
         val download = compose.onNodeWithText("Download").getUnclippedBoundsInRoot()
+        val notNow = compose.onNodeWithText("Not now").getUnclippedBoundsInRoot()
         assertTrue(
             "the words must lead and the answer trail: title $title, download $download",
             title.left.value < download.left.value,
         )
-        compose.onNodeWithContentDescription("Not now").assertDoesNotExist()
-        assertEquals(
-            "the offer's answer keeps the capsule's air at the trailing end",
-            Space.Line.value,
-            (bar.right - download.right).value,
-            1.5f,
+        assertTrue(
+            "the way out must stand under the answer: download $download, not now $notNow",
+            notNow.top.value > download.bottom.value,
+        )
+        assertTrue(
+            "the way out must stay inside the capsule: $notNow of $bar",
+            notNow.right.value < bar.right.value,
         )
         assertEquals(
             "the offer stands at the pill's one measure",

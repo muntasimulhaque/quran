@@ -57,8 +57,8 @@ object Space {
      * The least air between a word and the edge of the glass.
      *
      * The reading's verse, its translation, the word list under it, a search
-     * result, a settings row, a footnote, a tafsir passage, and the welcome
-     * screen all begin on this line and end on its mirror.
+     * result, a settings row, a footnote, a tafsir passage, and the reminder
+     * offer all begin on this line and end on its mirror.
      *
      * It is the floor, not the width. A glass narrow enough to hold a page
      * takes this much on each side and no more, which is every phone and the

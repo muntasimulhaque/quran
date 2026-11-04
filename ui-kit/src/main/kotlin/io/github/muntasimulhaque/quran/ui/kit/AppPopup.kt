@@ -1,6 +1,7 @@
 package io.github.muntasimulhaque.quran.ui.kit
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.WindowInsets
@@ -150,8 +151,10 @@ enum class PopupAlignment { Center, Start }
  * popup fades at the edge that has more.
  *
  * The popup takes `width` wide, [PopupMeasure] by default, the popup's own
- * corners and lift, the surface tone the app floats on, and [PopupGutter] at
- * the head and foot, so the first and last rows stay clear of the curve.
+ * corners and lift, the page's own paper and a hairline, and [PopupGutter] at
+ * the head and foot, so the first and last rows stay clear of the curve. A
+ * menu over the reading is a piece of the page, not a white system panel
+ * dropped on it (owner decision, this session).
  * [name] is its pane title, spoken and never drawn, the same shape the share
  * sheet's announcement already wears: a reader who cannot see the menu hears
  * what it belongs to before its first row. The panel takes the focus once it
@@ -198,7 +201,7 @@ fun AppPopup(
     val below = popupRoomBelow(anchor, windowHeight, navigation, gap)
     val side = popupSide(above = above, below = below)
     val room = with(density) { band.toDp() }
-    val surface = MaterialTheme.colorScheme.surfaceContainerHigh
+    val surface = MaterialTheme.colorScheme.background
     val scroll = rememberScrollState()
     Popup(
         onDismissRequest = onDismiss,
@@ -232,6 +235,7 @@ fun AppPopup(
                 .floatingLift(Radii.Popup)
                 .clip(Radii.Popup)
                 .background(surface)
+                .border(1.dp, MaterialTheme.colorScheme.outline, Radii.Popup)
                 .drawWithContent {
                     drawContent()
                     // The fade is on the viewport, not on the scrolling

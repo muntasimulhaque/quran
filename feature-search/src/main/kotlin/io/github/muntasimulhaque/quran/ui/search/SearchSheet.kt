@@ -118,6 +118,8 @@ fun SearchSheet(
     content: ContentDatabase,
     /** The reader's own saved notes, searched beside the packs. */
     notes: List<SavedAyah>,
+    /** The surah's name in the reader's language, for a reference result. */
+    surahName: (Int) -> String? = { null },
     translationPacks: List<String>,
     tafsirPacks: List<String>,
     packNames: Map<String, String>,
@@ -360,7 +362,12 @@ fun SearchSheet(
                     if (resultsCurrent) {
                         items(results.hits, key = { key(it) }) { hit ->
                             when (hit) {
-                            is SearchHit.ReferenceHit -> ReferenceRow(hit.ayah) {
+                            is SearchHit.ReferenceHit -> ReferenceRow(
+                                ayah = hit.ayah,
+                                surahName = surahName(hit.ayah.surah),
+                                hafs = hafs,
+                                arabicStep = arabicStep,
+                            ) {
                                 keepQuery()
                                 onAyah(SearchArrival.AyahMatch(hit.ayah))
                             }

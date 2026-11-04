@@ -1,14 +1,18 @@
 package io.github.muntasimulhaque.quran.ui.reader
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,7 +21,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.R
@@ -36,8 +42,9 @@ import io.github.muntasimulhaque.quran.ui.theme.compactBody
 import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 
 /**
- * Everything that can sit at the foot of the page: the pack on its way in and
- * the playback pill, stacked in one place.
+ * Everything that sits at the foot of the page: the pack on its way in, the
+ * playback pill, and the folio line that always says where the reader is,
+ * stacked in one place.
  *
  * The ayah's own actions are not here any more: they are the app's one popup,
  * hung from the number at the ayah's head, so the foot belongs to the player
@@ -70,9 +77,14 @@ internal fun BottomStack(
     reciterId: String,
     reciterName: String,
     reciterOptions: List<ListenOption>,
+    /** The page's own furniture, always visible under the controls. */
+    folioTitle: String,
+    folioDetail: String,
+    onFolio: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.navigationBars)
             .onSizeChanged { onHeight(it.height) }
@@ -193,6 +205,44 @@ internal fun BottomStack(
                 onEndOfAudio = { viewModel.setEndOfAudio(it) },
             )
         }
+        ReadingFolio(
+            title = folioTitle,
+            detail = folioDetail,
+            onClick = onFolio,
+        )
+    }
+}
+
+/**
+ * The page's own furniture: the surah, the juz, and the ayah the reader is
+ * on, in one quiet line at the foot. It is always there, so the reader never
+ * has to summon the chrome to know where they are. It uses the margin the
+ * page already keeps and stands below whatever the recitation raised, so the
+ * foot is one column and nothing covers the Quran (owner decision, this
+ * session).
+ */
+@Composable
+private fun ReadingFolio(
+    title: String,
+    detail: String,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .testTag("reading-folio")
+            .heightIn(min = 48.dp)
+            .wrapContentWidth()
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = Space.Gutter),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = "$title  ·  $detail",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 

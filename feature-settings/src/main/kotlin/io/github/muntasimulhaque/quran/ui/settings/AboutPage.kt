@@ -12,15 +12,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
+import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import android.content.Intent
+import android.net.Uri
 
 /** How the page joins two facts that belong to one credit, or splits terms. */
 private const val SEPARATOR = " · "
@@ -53,8 +58,9 @@ private const val SEPARATOR = " · "
  * license screen is not part of reading the Quran, and the app does not teach
  * one.
  *
- * Corrections and rights requests travel through the store listing's contact
- * and the project repository rather than through the app.
+ * Corrections and rights requests travel through the project repository, and
+ * the page ends with one door to it: a letter to the maker, never analytics
+ * and never an account (owner decision, this session).
  *
  * Content is verified when it is written, trusted by its length and moment
  * afterwards, and re-hashed when the library opens; a damaged pack is
@@ -161,6 +167,31 @@ fun AboutPage(
             title = stringResource(R.string.credit_husary),
             madeBy = stringResource(R.string.credit_husary_by),
             usedFor = stringResource(R.string.credit_husary_use),
+        )
+
+        // One door off the page, and it leaves the app for the project's own
+        // issue tracker: a letter to the maker, not analytics and not a
+        // second account (owner decision, this session).
+        val context = LocalContext.current
+        val feedback = stringResource(R.string.about_feedback)
+        TextButton(
+            label = feedback,
+            onClick = {
+                runCatching {
+                    context.startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse("https://github.com/muntasimulhaque/quran/issues"),
+                        ),
+                    )
+                }.onFailure { failure ->
+                    android.util.Log.w("AboutPage", "no browser for feedback", failure)
+                }
+            },
+            modifier = Modifier.padding(
+                start = Space.Gutter,
+                top = Space.Block,
+            ),
         )
 
         Spacer(Modifier.height(Space.Section))

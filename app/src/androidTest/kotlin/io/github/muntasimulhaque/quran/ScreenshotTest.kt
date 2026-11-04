@@ -412,7 +412,10 @@ class ScreenshotTest {
             settings.setTranslationPacks(setOf("translation-saheeh-en"))
             settings.setTafsirPacks(setOf("tafsir-ibn-kathir-en", "tafsir-ibn-kathir-bn"))
             settings.setShowTranslation(true)
-            settings.setWordByWord(true)
+            // The first frame is the reading at its default: the word aid is
+            // a tap now, not a field of pairs under every ayah (owner
+            // decision, this session).
+            settings.setWordByWord(false)
             // The colors are the 10.3 change; a test that left the switch off
             // would silently strip them from every store frame.
             settings.setTajweed(true)
@@ -481,7 +484,7 @@ class ScreenshotTest {
         }
         rule.onNode(hasSetTextAction()).performTextInput("kahf 10")
         rule.waitUntil(timeoutMillis = 180_000) {
-            rule.onAllNodesWithText(GO_TO).fetchSemanticsNodes().isNotEmpty()
+            rule.onAllNodesWithText(REFERENCE_RESULT, substring = true).fetchSemanticsNodes().isNotEmpty()
         }
         rule.onAllNodesWithText(SEARCH_IN).onFirst().performClick()
         rule.waitUntil(timeoutMillis = 10_000) {
@@ -667,7 +670,7 @@ class ScreenshotTest {
         const val TAFSIR_SOURCE = "Ibn Kathir"
         const val SHARE = "Share"
         const val PLAY = "Play"
-        const val GO_TO = "Go to"
+        const val REFERENCE_RESULT = "18:10"
         const val SEARCH_IN = "Search in"
         const val SOURCES = "Quran text"
         const val TAJWEED_FAMILY = "Silent letters"

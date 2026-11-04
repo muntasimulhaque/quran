@@ -82,7 +82,7 @@ class Packs(private val root: File) {
             credit = "Noor International Center, via QuranEnc; 3:32 corrected to the published reading",
             creditBn = "Noor International Center, QuranEnc-এর মাধ্যমে; ৩:৩২ প্রকাশিত পাঠ অনুযায়ী সংশোধিত",
             version = "1.1.2+2",
-            shipped = false,
+            shipped = true,
             ayahs = 6236,
         ),
         Pack(
@@ -104,7 +104,7 @@ class Packs(private val root: File) {
             credit = "Al-Bayan Foundation Bangladesh, via the Quranic Universal Library and IslamHouse.com",
             creditBn = "আল-বায়ান ফাউন্ডেশন বাংলাদেশ, কুরআনিক ইউনিভার্সাল লাইব্রেরি ও ইসলামহাউস থেকে",
             version = "1.0.1",
-            shipped = false,
+            shipped = true,
             ayahs = 6236,
         ),
         Pack(

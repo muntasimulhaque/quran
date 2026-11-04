@@ -90,6 +90,14 @@ val screenshotPacks = setOf(
     "words-bn.db",
 )
 
+// The two translations every install carries. The first page is the Quran
+// in the reader's language, offline, with no download and no language screen;
+// the tafsir and the word lists stay downloads (owner decision, this session).
+val shippedPacks = setOf(
+    "translation-saheeh-en.db",
+    "translation-al-bayan-bn.db",
+)
+
 /**
  * The asset copy as a real task class rather than a script closure: the
  * configuration cache cannot serialize a closure owned by the build script,
@@ -106,6 +114,10 @@ abstract class PrepareContentAssets : DefaultTask() {
     /** The packs a lean build carries. */
     @get:Input
     abstract val packNames: SetProperty<String>
+
+    /** The translations every install carries. */
+    @get:Input
+    abstract val shippedPackNames: SetProperty<String>
 
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -137,11 +149,22 @@ abstract class PrepareContentAssets : DefaultTask() {
     fun copyAssets() {
         val out = contentAssetsOut.get().asFile
         out.deleteRecursively()
-        // The app ships the Quran text and its page layout, and nothing else:
-        // one small pack, plus the catalog of what can be downloaded.
+        // The app ships the Quran text and the two translations, and nothing
+        // else: the core pack, the translations, and the catalog of what can
+        // be downloaded. The first page needs no network (owner decision,
+        // this session).
         val content = File(out, "content").apply { mkdirs() }
         File(packsDir.get().asFile, "core.db").copyTo(File(content, "core.db"), overwrite = true)
         catalogFile.get().asFile.copyTo(File(content, "catalog.json"), overwrite = true)
+        val shippedOut = File(out, "packs").apply { mkdirs() }
+        val shipped = shippedPackNames.get()
+        for (name in shipped) {
+            val source = File(packsDir.get().asFile, name)
+            if (!source.isFile) {
+                throw GradleException("the shipped translation $name is missing; run ./gradlew :tools:run --args=\"packs build\"")
+            }
+            source.copyTo(File(shippedOut, name), overwrite = true)
+        }
         // Development builds carry every pack, so the whole app works with no
         // network at all while it is being built and tested. They are written
         // to the debug variant's own asset directory, never to the main one.
@@ -152,6 +175,7 @@ abstract class PrepareContentAssets : DefaultTask() {
         val names = packNames.get()
         packsDir.get().asFile.listFiles { file -> file.name.endsWith(".db") }
             ?.filter { !lean || it.name in names }
+            ?.filter { it.name !in shipped }
             ?.forEach { pack ->
                 pack.copyTo(File(File(devPacks, "packs"), pack.name), overwrite = true)
             }
@@ -175,6 +199,7 @@ val prepareContentAssets = tasks.register<PrepareContentAssets>("prepareContentA
     dependsOn(":tools:fetchAssets")
     leanScreenshot.set(leanDevPacks)
     packNames.set(screenshotPacks)
+    shippedPackNames.set(shippedPacks)
     buildReportFile.fileValue(contentBuildReport)
     catalogFile.fileValue(contentCatalogFile)
     recitationManifestFile.fileValue(contentRecitationManifest)
@@ -204,8 +229,8 @@ android {
         // (owner decision, security audit).
         minSdk = 24
         targetSdk = 37
-        versionCode = 156
-        versionName = "15.4"
+        versionCode = 157
+        versionName = "15.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

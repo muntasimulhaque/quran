@@ -32,7 +32,8 @@
     <string name="settings_show_translation_title">অনুবাদ দেখান</string>
     <string name="settings_row_words">শব্দের অর্থ</string>
     <string name="settings_title_words">শব্দের অর্থ</string>
-    <string name="settings_words_title">শব্দের অর্থ দেখান</string>
+    <string name="settings_words_title">শব্দের অর্থ জানতে শব্দে ট্যাপ করুন</string>
+    <string name="settings_words_lead">এটি চালু থাকলে পাঠে যেকোনো শব্দে ট্যাপ করলে আয়াতের নিচে তার অর্থ দেখা যাবে।</string>
     <string name="settings_tajweed_title">তাজবীদ রঙ</string>
     <string name="settings_tajweed_lead">প্রতিটি রঙ এক দল নিয়ম, পড়ার একটি শব্দে দেখানো হয়েছে। যে নিয়মগুলো এই রঙে পড়ে, প্রতিটির নাম নিচে লেখা আছে।</string>
 
@@ -56,6 +57,7 @@
     <string name="about_group_fonts">ফন্ট</string>
     <string name="about_group_recitations">তিলাওয়াত</string>
     <string name="about_version_license">সংস্করণ %1$s · MIT লাইসেন্স</string>
+    <string name="about_feedback">মতামত পাঠান</string>
     <string name="about_pack_title">%1$s · %2$s</string>
     <string name="about_pack_translation">%1$s অনুবাদ</string>
     <string name="about_pack_tafsir">%1$s তাফসীর</string>

@@ -16,7 +16,7 @@ import java.security.MessageDigest
  *
  * A pack is installed by placing its database at
  * `filesDir/packs/<id>/<id>.db`. Removing it deletes that file. The core pack
- * (the Quran text and its page layout) is shipped inside the app.
+ * (the Quran text) and the two translations are shipped inside the app.
  */
 class PackCatalog private constructor(private val packs: Map<String, ContentPack>) {
 
@@ -55,7 +55,6 @@ class PackCatalog private constructor(private val packs: Map<String, ContentPack
                 val bytes = pack.optLong("bytes", 0)
                 if (bytes < 0) continue
                 val shipped = pack.optBoolean("shipped", false)
-                if (shipped && id != CORE_ID) continue
                 val type = PackType.ofOrNull(pack.optString("type")) ?: continue
                 val url = pack.optString("url").takeIf { it.isNotEmpty() }
                 if (url != null && !url.startsWith("https://")) continue

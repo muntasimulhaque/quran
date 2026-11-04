@@ -35,6 +35,15 @@ enum class UiLanguage(val tag: String) {
         /** The language a stored tag names, or null when it names none. */
         fun of(tag: String?): UiLanguage? = entries.firstOrNull { it.tag == tag }
 
+        /**
+         * The language this phone speaks, when it speaks one the app carries,
+         * and English otherwise. A fresh install takes this answer without a
+         * question: English is the fallback, not a screen (owner decision,
+         * this session).
+         */
+        fun ofSystem(languageTag: String? = java.util.Locale.getDefault().language): UiLanguage =
+            of(languageTag) ?: English
+
         /** The id of the Saheeh International translation pack. */
         const val TRANSLATION_EN = "translation-saheeh-en"
 
@@ -63,6 +72,26 @@ data class LanguageContent(
      */
     val asked: Set<String> get() = setOf(translation, tafsir)
 }
+
+/**
+ * The page a fresh install opens on: the phone's language, its translation
+ * selected, the reminder off and still unanswered, and the place at
+ * Al-Fatiha. English is the fallback when the phone speaks neither language
+ * the app carries. This is the first decision the app makes on the reader's
+ * behalf, and it makes only the ones the phone already answered (owner
+ * decision, this session).
+ */
+fun AppSettings.bootstrapFor(language: UiLanguage): AppSettings =
+    withLanguage(language).copy(
+        ayah = 1,
+        // The tafsir is a download the reader asks for, not a pack the first
+        // open selects behind their back. The Tafsir action offers it when
+        // they want it; the translation is the only content the first page
+        // needs (owner decision, this session).
+        tafsirPacks = emptySet(),
+        dailyAyah = false,
+        reminderAnswered = false,
+    )
 
 /**
  * The settings after a language choice: the tag is stored, and the language's

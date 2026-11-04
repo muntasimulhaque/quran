@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.LanguagePreference
+import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.SavedStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.feature.reading.R as ReadingR
@@ -46,9 +47,9 @@ import org.junit.runner.RunWith
  * the app's one popup, the same one the playback pill opens, and every answer
  * closes it and then does its work.
  *
- * The deeper door stands in the menu only while there is a tafsir behind it.
- * A pack the reader removed is a row that is not there rather than a card
- * with nothing behind it (owner decision, this session). The two marked rows
+ * The deeper door always stands in the menu. Without a pack it opens the
+ * offer that names the language, the pack, and the size, rather than hiding
+ * the reader's question (owner decision, this session). The two marked rows
  * say the truth of their own mark: a note keeps its ayah in Saved and never
  * presses Save, one tap of Save then lights both because the reader has now
  * pressed Save, and the second tap asks before it takes the note with it
@@ -65,6 +66,10 @@ class AyahActionsTest {
 
     private val library = object : ExternalResource() {
         override fun before() {
+            // The offer leg needs the English tafsir off the device, so the
+            // card has a pack to offer. The library is prepared before the
+            // activity starts.
+            PackStore(context).remove("tafsir-ibn-kathir-en")
             LanguagePreference(context).set("en")
             runBlocking {
                 SettingsStore(context).apply {
@@ -104,14 +109,18 @@ class AyahActionsTest {
     val rule: TestRule = RuleChain.outerRule(library).around(compose)
 
     @Test
-    fun theDeeperDoorIsAbsentWhileNoTafsirIsOnTheDevice() {
+    fun theDeeperDoorOffersATafsirWhileNoneIsOnTheDevice() {
         waitForReading()
         openTheDoor()
 
-        // This library carries no tafsir, so there is nothing behind the row
-        // and the menu does not offer it.
-        compose.onNodeWithText(compose.activity.getString(R.string.action_tafsir))
-            .assertDoesNotExist()
+        // The question is always answered: without a pack, the door opens the
+        // offer that names the language, the pack, and the size.
+        val tafsir = compose.activity.getString(R.string.action_tafsir)
+        compose.onNodeWithText(tafsir).assertExists().performClick()
+        compose.waitUntil(20_000) {
+            compose.onAllNodesWithText("Ibn Kathir", substring = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
     }
 
     @Test

@@ -99,8 +99,8 @@ data class AppSettings(
     val theme: AppTheme = AppTheme.System,
     /**
      * The language the interface is written in, and the content it reads.
-     * Null until the reader has chosen, which is what shows the welcome
-     * screen once, on the first launch and on the update that added it.
+     * Null only on an install from before the phone seed; a fresh install
+     * writes the phone's language on its first open, without a screen.
      */
     val uiLanguage: String? = null,
     val arabicSize: Float = TextSize.DEFAULT,
@@ -145,28 +145,25 @@ data class AppSettings(
     val showTranslation: Boolean = true,
     val wordByWord: Boolean = false,
     /**
-     * Whether the reading draws the QPC tajweed colors. On from the first
-     * launch: the rules are the print's own annotation, and the reader can
-     * turn them off in one switch (owner decision, this session).
+     * Whether the reading draws the QPC tajweed colors. Off on a fresh
+     * install, so the first page is the Quran in one ink; the reader turns
+     * the print's colors on when they want them (owner decision, this
+     * session).
      */
-    val tajweed: Boolean = true,
+    val tajweed: Boolean = false,
     /**
      * The daily reminder: one ayah, once a day, at the reader's own time.
-     * On from the first launch (owner decision, 2.3): the reminder is the
-     * quietest thing the app can do, a silent line in the shade with no sound
-     * and no counting, and rule twelve names it as one of the three things
-     * this app is for. A reader who does not want it turns it off in one tap
-     * on the Daily ayah page, and the alarm is cleared in the same tap.
+     * Off on a fresh install, and offered after the first surah. A reminder
+     * is a small commitment, so the reader makes it rather than inheriting
+     * it (owner decision, this session).
      */
-    val dailyAyah: Boolean = true,
+    val dailyAyah: Boolean = false,
     /**
-     * Whether the first screen's reminder card was answered. True on every
-     * install that already has a language, so the card is never shown to a
-     * reader who has already made the choice; the first-run flow writes it
-     * false when the language is chosen, and the card's answer writes it
-     * true. A task swipe at the card therefore brings the card back instead
-     * of leaving the reminder on with no permission ask (owner decision,
-     * this session).
+     * Whether the one-time reminder offer was answered. False on a fresh
+     * install, so the offer stands at the end of the first surah the reader
+     * finishes; the offer's answer writes it true. An existing install
+     * keeps the true it has always had, so an update never asks again
+     * (owner decision, this session).
      */
     val reminderAnswered: Boolean = true,
     /**
@@ -175,21 +172,14 @@ data class AppSettings(
      * the minute and the picker has nothing to reconcile.
      */
     val dailyAyahMinute: Int = DEFAULT_DAILY_MINUTE,
-    /**
-     * The chrome surface the reader has already been shown. Empty on a new
-     * install; the value is the surface set that added the reveal. A release
-     * that adds a chrome surface changes the reveal key, so the next launch
-     * shows the top bar once more without adding a permanent bar.
-     */
-    val chromeReveal: String = "",
 ) {
     /**
      * The language the reader chose, or English before the choice.
      *
      * One question with one answer: the reading, the order of the translation
      * columns, and the names all ask it here, so no screen can answer it a
-     * second way. A null tag is the first launch, and the reading is English
-     * until the welcome screen answers.
+     * second way. A null tag is a fresh install before the first open's
+     * seed, and English is the fallback.
      */
     val readingLanguage: String
         get() = UiLanguage.of(uiLanguage)?.tag ?: UiLanguage.English.tag
@@ -354,11 +344,10 @@ class SettingsStore(private val context: Context) {
             tafsirPacks = tafsirPacks(preferences),
             showTranslation = preferences[SHOW_TRANSLATION] ?: true,
             wordByWord = preferences[WORD_BY_WORD] ?: false,
-            tajweed = preferences[TAJWEED] ?: true,
-            dailyAyah = preferences[DAILY_AYAH] ?: true,
+            tajweed = preferences[TAJWEED] ?: false,
+            dailyAyah = preferences[DAILY_AYAH] ?: false,
             reminderAnswered = preferences[REMINDER_ANSWERED] ?: true,
             dailyAyahMinute = storedDailyMinute(preferences),
-            chromeReveal = preferences[CHROME_REVEAL] ?: "",
         )
     }
 
@@ -370,11 +359,6 @@ class SettingsStore(private val context: Context) {
      */
     suspend fun setAyah(ayah: Int) {
         context.settingsStore.edit { it[AYAH] = ayah.coerceIn(1, 6236) }
-    }
-
-    /** Writes the chrome surface the reader has now been shown. */
-    suspend fun setChromeReveal(surface: String) {
-        context.settingsStore.edit { it[CHROME_REVEAL] = surface }
     }
 
     suspend fun setTheme(theme: AppTheme) {
@@ -404,19 +388,36 @@ class SettingsStore(private val context: Context) {
         language: UiLanguage,
         translationPacks: Set<String>,
         tafsirPacks: Set<String>,
-        firstRun: Boolean = false,
     ) {
         LanguagePreference(context).set(language.tag)
         context.settingsStore.edit {
             it[UI_LANGUAGE] = language.tag
             it[TRANSLATION_PACKS] = translationPacks
             it[TAFSIR_PACKS] = tafsirPacks
-            // The first language choice is the one that opens the reminder
-            // card, and the card's answer is written on the same row. A
-            // first-run edit that landed without this mark would leave the
-            // reminder on with nothing ever asked (owner decision, this
-            // session).
-            if (firstRun) it[REMINDER_ANSWERED] = false
+        }
+    }
+
+    /**
+     * The one write that turns a fresh install into a reading: the phone's
+     * language, the language's own translation on, the reminder off and
+     * unanswered, and the place at Al-Fatiha. The language screen is gone,
+     * so this is the first decision the app makes on the reader's behalf,
+     * and it makes only the ones the phone already answered (owner decision,
+     * this session).
+     */
+    suspend fun bootstrapLanguage(
+        language: UiLanguage,
+        translationPacks: Set<String>,
+        tafsirPacks: Set<String>,
+    ) {
+        LanguagePreference(context).set(language.tag)
+        context.settingsStore.edit {
+            it[UI_LANGUAGE] = language.tag
+            it[TRANSLATION_PACKS] = translationPacks
+            it[TAFSIR_PACKS] = tafsirPacks
+            it[AYAH] = 1
+            it[DAILY_AYAH] = false
+            it[REMINDER_ANSWERED] = false
         }
     }
 
@@ -474,7 +475,7 @@ class SettingsStore(private val context: Context) {
         context.settingsStore.edit { it[DAILY_AYAH] = enabled }
     }
 
-    /** Writes the first screen's reminder card as answered, once. */
+    /** Writes the one-time reminder offer as answered, once. */
     suspend fun setReminderAnswered(answered: Boolean) {
         context.settingsStore.edit { it[REMINDER_ANSWERED] = answered }
     }
@@ -701,13 +702,12 @@ class SettingsStore(private val context: Context) {
         val WORD_BY_WORD = booleanPreferencesKey("word_by_word")
         val TAJWEED = booleanPreferencesKey("tajweed")
         val DAILY_AYAH = booleanPreferencesKey("daily_ayah")
-        /** Whether the first screen's reminder card has been answered. */
+        /** Whether the one-time reminder offer has been answered. */
         val REMINDER_ANSWERED = booleanPreferencesKey("reminder_answered")
 
         /** Written by builds before the picker took minutes; read, never written. */
         val DAILY_AYAH_HOUR = intPreferencesKey("daily_ayah_hour")
         val DAILY_AYAH_MINUTE = intPreferencesKey("daily_ayah_minute")
-        val CHROME_REVEAL = stringPreferencesKey("chrome_reveal")
     }
 }
 

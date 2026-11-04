@@ -22,9 +22,6 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.muntasimulhaque.quran.R
@@ -60,19 +57,6 @@ fun QuranApp(
      * phone's own screen.
      */
     onReminderPermission: () -> Unit = {},
-    /**
-     * The reader has chosen a language, before the reminder card. The shell
-     * brings the Activity back up in the language just chosen, so the card
-     * and every window after it speak it.
-     */
-    afterFirstScreen: () -> Unit = {},
-    /**
-     * The reminder card's answer: whether the reader turned the daily ayah
-     * on. The shell asks for the two grants it needs (the notification, and
-     * the phone's own exact time) when it is on, and the reading opens in
-     * either case.
-     */
-    onFirstScreenDone: (Boolean) -> Unit = {},
     /** The one permission answer the reading still has to say. */
     permissionNotice: PermissionNotice? = null,
     /** The notice has been handed to the reading's Snackbar. */
@@ -125,14 +109,6 @@ fun QuranApp(
         }
 
         val content = viewModel.content
-        // The language just chosen but the reminder card still on screen: the
-        // value survives the recreation that brings the new locale up, so the
-        // card speaks the chosen language. The stored reminderAnswered flag
-        // is the other half: if the task is swiped away at the card, the next
-        // launch still owes the reader the answer, and the card comes back
-        // instead of leaving the reminder on with no permission ask (owner
-        // decision, this session).
-        var welcomePending by rememberSaveable { mutableStateOf<String?>(null) }
         // These are read here, in the screen's own scope, and not only inside
         // a nested lambda: the first paint gives way to the reading the
         // moment the library opens, and that switch must never wait for a
@@ -145,43 +121,6 @@ fun QuranApp(
                 onRetry = { viewModel.retryOpen() },
             )
             !ready || content == null -> FirstPaint()
-            settings.uiLanguage == null -> {
-                // The first screen is on screen; the system can stop counting.
-                LaunchedEffect(Unit) {
-                    (view.context as? Activity)?.reportFullyDrawn()
-                }
-                LanguageWelcome(
-                    onChoose = { language ->
-                        viewModel.chooseLanguage(language)
-                        welcomePending = language.tag
-                        // The locale belongs to the Activity's own resources,
-                        // so the recreation brings every window up speaking
-                        // the language the reminder card is about to ask in.
-                        afterFirstScreen()
-                    },
-                )
-            }
-            welcomePending != null || !settings.reminderAnswered -> {
-                WelcomeReminder(
-                    onTurnOn = {
-                        welcomePending = null
-                        // The two grants are asked by the shell once the card
-                        // is answered; the view model only writes the choice.
-                        viewModel.setDailyAyah(enabled = true, onPermission = {})
-                        viewModel.markReminderAnswered()
-                        onFirstScreenDone(true)
-                    },
-                    onNotNow = {
-                        welcomePending = null
-                        // Off rather than on under a permission that will
-                        // never arrive; the Daily page asks again at the act
-                        // of setting it.
-                        viewModel.setDailyAyah(enabled = false, onPermission = {})
-                        viewModel.markReminderAnswered()
-                        onFirstScreenDone(false)
-                    },
-                )
-            }
             else -> {
                 // The first page is on screen; the system can stop counting.
                 LaunchedEffect(Unit) {

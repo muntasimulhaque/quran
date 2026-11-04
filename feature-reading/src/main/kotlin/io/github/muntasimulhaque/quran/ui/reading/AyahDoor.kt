@@ -1,6 +1,7 @@
 package io.github.muntasimulhaque.quran.ui.reading
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -38,6 +39,7 @@ import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.kit.ReferenceLabel
 import io.github.muntasimulhaque.quran.ui.kit.focusRing
+import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
@@ -55,8 +57,8 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
 private val DoorRow = 48.dp
 
 /**
- * The ayah's own door: the number at its head, quiet at rest and a capsule
- * while its menu is open.
+ * The ayah's own door: the number at its head, in the ornament gold, with a
+ * gold wash and a hairline while its menu is open.
  *
  * The reference used to be bare type, and the ayah's actions were a long
  * press that nothing on the page announced. It is now the one visible
@@ -103,15 +105,17 @@ internal fun AyahDoor(
     val expanded = stringResource(R.string.reading_door_expanded)
     val collapsed = stringResource(R.string.reading_door_collapsed)
     val saved = stringResource(R.string.reading_door_saved)
-    val ink = if (open) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.onSurface
-    }
+    // The door is the page's own furniture, not a control borrowed from the
+    // interface: the reference and its caret are the ornament gold the surah
+    // name wears, and the open state is a gold wash with a hairline, the way
+    // a printed ayah's number belongs to the page (owner decision, this
+    // session).
+    val ornament = LocalPagePalette.current.ornament
+    val ink = ornament
     val fill = if (open) {
-        MaterialTheme.colorScheme.primary.copy(alpha = Wash.Control)
+        ornament.copy(alpha = Wash.Control)
     } else {
-        MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
+        androidx.compose.ui.graphics.Color.Transparent
     }
     Box(
         modifier = modifier
@@ -152,6 +156,13 @@ internal fun AyahDoor(
                 modifier = Modifier
                     .clip(Radii.Pill)
                     .background(fill)
+                    .then(
+                        if (open) {
+                            Modifier.border(1.dp, ornament.copy(alpha = 0.45f), Radii.Pill)
+                        } else {
+                            Modifier
+                        },
+                    )
                     .focusRing(press, Radii.Pill)
                     .indication(press, ripple(color = ink, bounded = false))
                     .padding(start = 10.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
@@ -174,11 +185,7 @@ internal fun AyahDoor(
                 }
                 IconGlyph(
                     icon = Icon.Chevron,
-                    tint = if (open) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
+                    tint = ornament.copy(alpha = 0.8f),
                     modifier = Modifier
                         .padding(start = 6.dp)
                         .size(GlyphSize.ChevronRow)

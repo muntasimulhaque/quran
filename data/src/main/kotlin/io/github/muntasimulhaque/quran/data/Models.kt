@@ -234,8 +234,8 @@ enum class PackType {
 }
 
 /**
- * One unit of content the reader can have, or not have: the core text and
- * page layout, a translation, a tafsir, a word list, a script. The catalog
+ * One unit of content the reader can have, or not have: the core Quran text,
+ * a translation, a tafsir, a word list, a script. The catalog
  * in the app says what exists; the store says what is on this device.
  */
 data class ContentPack(
