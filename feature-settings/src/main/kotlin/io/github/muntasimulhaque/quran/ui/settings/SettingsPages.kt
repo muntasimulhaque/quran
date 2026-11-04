@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import io.github.muntasimulhaque.quran.core.RichText
@@ -160,7 +161,9 @@ private fun SizeSample(row: ReadingRow, settings: AppSettings) {
                         text = contentPackName(line.pack, line.packName),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = Space.Block),
+                        modifier = Modifier
+                            .padding(top = Space.Block)
+                            .testTag("size-sample-name"),
                     )
                 }
                 TranslationBody(

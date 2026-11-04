@@ -1,6 +1,6 @@
 package io.github.muntasimulhaque.quran
 
-import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
@@ -78,10 +78,15 @@ class TranslationLeadTest {
     fun theSampleLeadsWithTheReadersLanguage() {
         openSettings()
         compose.onNodeWithTag("row-text").performClick()
-        waitForText(SAHEEH)
-        // The sample draws the lead line and names it; the other language is
-        // not under the steps.
-        compose.onAllNodesWithText(AL_BAYAN).assertCountEquals(0)
+        // The sample's name is the one under the steps; the reading behind
+        // the sheet has a name of its own, so the tag scopes this to the
+        // sample and not to every window on the glass.
+        compose.waitUntil(timeoutMillis = 15_000) {
+            compose.onAllNodesWithTag("size-sample-name", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("size-sample-name", useUnmergedTree = true)
+            .assertTextEquals(SAHEEH)
     }
 
     @Test
@@ -89,8 +94,15 @@ class TranslationLeadTest {
         waitForReading()
         waitForText(SAHEEH)
         waitForText(AL_BAYAN)
-        val english = compose.onAllNodesWithText(SAHEEH).onFirst().getUnclippedBoundsInRoot()
-        val bangla = compose.onAllNodesWithText(AL_BAYAN).onFirst().getUnclippedBoundsInRoot()
+        // The unmerged tree is the name that belongs to each column: the
+        // merged ayah block carries both names in one node, so its bounds are
+        // the block's and say nothing about the order.
+        val english = compose.onAllNodesWithText(SAHEEH, useUnmergedTree = true)
+            .onFirst()
+            .getUnclippedBoundsInRoot()
+        val bangla = compose.onAllNodesWithText(AL_BAYAN, useUnmergedTree = true)
+            .onFirst()
+            .getUnclippedBoundsInRoot()
         assertTrue(
             "the reader's own translation stands above the other language",
             english.top < bangla.top,
