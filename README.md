@@ -4,20 +4,18 @@ A free, open source Quran reader for Android. It opens where you left off
 and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 15.3 (versionCode 155) was submitted for Play review,
-and its bundle is `quran-15.3-vc155.aab` (12,874,055 bytes, SHA-256
-`eb6973254d08071561043bbc653db5b5385a281761f1467110aecc0ced50d83d`,
+**Status:** 15.4 (versionCode 156) is built, signed, and ready to submit,
+and its bundle is `quran-15.4-vc156.aab` (12,873,193 bytes, SHA-256
+`4cac32665cee826095a150a7ab105cc1554824e34b7adcb3a16d22a2a6059e39`,
 `jar verified`, certificate
 `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`),
-built by CI run 41775999488 on main from
-`ccc9265e` and taken from that run's `quran-signed-aab` artifact. All five
+built by CI run 41780732745 on main from
+`4e83970c` and taken from that run's `quran-signed-aab` artifact. All five
 jobs were green. The store set is unchanged from capture run 41690301971 on
-15.2: the Font size sample and the Translations page are not among the eight,
-and the tour's reading carries one English translation, so no frame moved.
+15.2: the Font size sample is not among the eight, so no frame moved.
 Content 1.5.0, the database `content-db-12c95dbe`. Owner gates: verify,
 build, checkdb, audit, search, fonts, and packs are green; the database
-rebuild reproduces 12c95dbe exactly. Play has the bundle; the local
-hand-off copy was deleted.
+rebuild reproduces 12c95dbe exactly.
 
 **In 15.4.** The Font size sample is a type specimen again: the ayah and its translation, without the translation's name, and with the translation shown even when the reading's Show translation switch is off, because the page is there to judge the size of the type. The reading still names each translation column when the rule calls for it. The Quran text, every translation, every tafsir, every pack, and the content database are unchanged.
 
