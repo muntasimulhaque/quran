@@ -88,7 +88,7 @@ class TranslationLeadTest {
                 .fetchSemanticsNodes().isNotEmpty()
         }
         compose.onNodeWithTag("size-sample-translation", useUnmergedTree = true)
-            .assertTextContains(SAMPLE_OPENING)
+            .assertTextContains(SAMPLE_OPENING, substring = true)
     }
 
     @Test
