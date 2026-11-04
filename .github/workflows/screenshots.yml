@@ -161,7 +161,7 @@ jobs:
           arch: x86_64
           profile: ${{ matrix.profile }}
           force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -no-snapshot
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
           disable-animations: true
           script: echo "Generated AVD snapshot."
 
@@ -173,7 +173,7 @@ jobs:
           arch: x86_64
           profile: ${{ matrix.profile }}
           force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -no-snapshot
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
           disable-animations: true
           script: |
             # A cold boot can report completion before its emulated storage is
@@ -221,9 +221,11 @@ jobs:
             adb -s emulator-5554 shell pm uninstall --user 0 com.google.android.apps.nexuslauncher 2>&1 || adb -s emulator-5554 shell pm disable-user --user 0 com.google.android.apps.nexuslauncher 2>&1 || true
             # One Gradle run: a second connectedAndroidTest invocation would
             # replace the previous additional output, and with it the
-            # screenshots, so the three capture classes are named in one call.
-            # The lean dev packs carry only what the capture tests install,
-            # which keeps the APK small and the install quick.
+            # screenshots, so the two capture classes are named in one call.
+            # The functional suites live in the build workflow, where they run
+            # once; repeating them on three capture machines only lengthened
+            # the leg. The lean dev packs carry only what the capture tests
+            # install, which keeps the APK small and the install quick.
             #
             # The exit code is saved to a file so the frames are collected even
             # when the tour fails: a red leg keeps its capture to be read
@@ -234,7 +236,7 @@ jobs:
             # leg's frames, and the runner stopped the script at the failed
             # Gradle line before anything was collected (runs 35463781932 and
             # 35974207613, tablet10).
-            ./gradlew :app:connectedDebugAndroidTest --console=plain -Pquran.devPacks=screenshot -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest,io.github.muntasimulhaque.quran.ScreenshotVariantsTest,io.github.muntasimulhaque.quran.WordByWordTest,io.github.muntasimulhaque.quran.TafsirDirectionTest,io.github.muntasimulhaque.quran.SavedNotesTest,io.github.muntasimulhaque.quran.SettingsVisibilityTest ; echo $? > /tmp/gradle_status
+            ./gradlew :app:connectedDebugAndroidTest --console=plain -Pquran.devPacks=screenshot -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest,io.github.muntasimulhaque.quran.ScreenshotVariantsTest ; echo $? > /tmp/gradle_status
             # One automatic rerun of the tour when the first pass loses
             # an emulator race: the residual flake is the slow-render
             # timeout, the launcher class above is designed out, and one
@@ -242,7 +244,7 @@ jobs:
             # failure fails twice and the leg stays red, and the reinstall
             # below starts the second pass from the same clean state the
             # first had.
-            status=$(cat /tmp/gradle_status 2>/dev/null || echo 1) ; if [ "$status" != "0" ]; then echo "the tour failed once, so the emulator gets one recovery rerun" ; sleep 30 ; adb -s emulator-5554 shell pm uninstall io.github.muntasimulhaque.quran >/dev/null 2>&1 || true ; adb -s emulator-5554 shell pm uninstall io.github.muntasimulhaque.quran.test >/dev/null 2>&1 || true ; ./gradlew :app:connectedDebugAndroidTest --console=plain -Pquran.devPacks=screenshot -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest,io.github.muntasimulhaque.quran.ScreenshotVariantsTest,io.github.muntasimulhaque.quran.WordByWordTest,io.github.muntasimulhaque.quran.TafsirDirectionTest,io.github.muntasimulhaque.quran.SavedNotesTest,io.github.muntasimulhaque.quran.SettingsVisibilityTest ; echo $? > /tmp/gradle_status ; fi
+            status=$(cat /tmp/gradle_status 2>/dev/null || echo 1) ; if [ "$status" != "0" ]; then echo "the tour failed once, so the emulator gets one recovery rerun" ; sleep 30 ; adb -s emulator-5554 shell pm uninstall io.github.muntasimulhaque.quran >/dev/null 2>&1 || true ; adb -s emulator-5554 shell pm uninstall io.github.muntasimulhaque.quran.test >/dev/null 2>&1 || true ; ./gradlew :app:connectedDebugAndroidTest --console=plain -Pquran.devPacks=screenshot -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest,io.github.muntasimulhaque.quran.ScreenshotVariantsTest ; echo $? > /tmp/gradle_status ; fi
             # AGP copies the test's additional output off-device (before it
             # uninstalls the app) into the connected additional output folder.
             # Every collection line is guarded, because the runner aborts the

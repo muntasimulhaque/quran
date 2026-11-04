@@ -43,6 +43,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -754,6 +755,9 @@ fun ReaderScreen(
 
         val offer = viewModel.listenOffer
         val showPlayback = playback.isAnything() || offer != null
+        // The foot is furniture over the page, not a row in it: a list
+        // scrolled mid-ayah otherwise draws its text over the folio on a
+        // phone. The snackbar is raised above it below.
         BottomStack(
             viewModel = viewModel,
             playback = playback,
@@ -769,13 +773,16 @@ fun ReaderScreen(
             folioTitle = surahName(viewModel, settings.ayah),
             folioDetail = stringResource(R.string.juz_label, viewModel.juz),
             onFolio = { chrome = !chrome },
-            modifier = Modifier.align(Alignment.BottomCenter),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .zIndex(1f),
         )
 
         AppSnackbar(
             hostState = snackbar,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
+                .zIndex(2f)
                 .padding(horizontal = Space.Gutter)
                 .padding(bottom = snackbarBottom),
         )

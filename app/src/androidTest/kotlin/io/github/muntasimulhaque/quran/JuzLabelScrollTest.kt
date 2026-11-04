@@ -2,6 +2,7 @@ package io.github.muntasimulhaque.quran
 
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performTouchInput
@@ -27,8 +28,8 @@ import org.junit.runner.RunWith
  * written only by a jump or by the recitation's follow, so scrolling from
  * juz 1 into juz 2 left it reading "Juz 1" until something else moved the
  * place (owner report). The reader stands at 2:141, the last ayah of juz 1,
- * swipes into 2:142 and the ayahs after it, and reads the label the way a
- * reader does: a tap on the paper brings the chrome.
+ * swipes into 2:142 and the ayahs after it, and reads the label on the folio
+ * line, which is always on the page and no longer has to be summoned.
  */
 @RunWith(AndroidJUnit4::class)
 class JuzLabelScrollTest {
@@ -61,11 +62,16 @@ class JuzLabelScrollTest {
             compose.onAllNodesWithContentDescription(readingPage).fetchSemanticsNodes().isNotEmpty()
         }
 
-        // The reader stands at 2:141, the last ayah of juz 1, and the chrome
-        // says so.
-        compose.onAllNodesWithContentDescription(readingPage).onFirst().tapThePaper()
-        compose.waitUntil(timeoutMillis = 15_000) {
-            compose.onAllNodesWithText("Juz 1", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
+        // The reader stands at 2:141, the last ayah of juz 1, and the folio
+        // line says so without a gesture. The line is one label, so the juz
+        // is matched inside it rather than as the whole text.
+        compose.waitUntil(timeoutMillis = 30_000) {
+            compose.onAllNodesWithTag("reading-folio", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.waitUntil(timeoutMillis = 30_000) {
+            compose.onAllNodesWithText("Juz 1", substring = true, useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
         }
 
         // A drag of their own, which is what writes the place. Three screens
@@ -77,10 +83,10 @@ class JuzLabelScrollTest {
             compose.waitForIdle()
         }
 
-        // The chrome comes back on a tap, and the label has followed.
-        compose.onAllNodesWithContentDescription(readingPage).onFirst().tapThePaper()
-        compose.waitUntil(timeoutMillis = 15_000) {
-            compose.onAllNodesWithText("Juz 2", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
+        // The folio is still there, and the label has followed the drag.
+        compose.waitUntil(timeoutMillis = 30_000) {
+            compose.onAllNodesWithText("Juz 2", substring = true, useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
         }
     }
 }

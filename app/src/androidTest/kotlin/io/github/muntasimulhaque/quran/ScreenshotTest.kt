@@ -78,17 +78,35 @@ class ScreenshotTest {
      * retry is always safe.
      */
     private fun capture(name: String) {
-        repeat(3) { attempt ->
+        // A single copy can land while the list is still settling after the
+        // foot's first measurement, which tore the phone's first frame: a
+        // line of the translation was drawn twice and the folio had not yet
+        // arrived. The frame is kept only when two copies in a row are
+        // identical, so a still page photographs the same twice.
+        var prior: Bitmap? = null
+        repeat(6) { attempt ->
             rule.waitForIdle()
-            try {
+            Thread.sleep(600)
+            val bitmap = try {
                 val root = rule.onAllNodes(isRoot(), useUnmergedTree = true).onLast()
-                write(name, root.captureToImage().asAndroidBitmap())
-                return
+                root.captureToImage().asAndroidBitmap()
             } catch (error: AssertionError) {
-                if (attempt == 2) throw error
-                Thread.sleep(2_000)
+                if (attempt == 5) throw error
+                null
+            }
+            if (bitmap != null) {
+                val settled = prior != null && prior.sameAs(bitmap)
+                prior?.recycle()
+                prior = bitmap
+                if (settled) {
+                    write(name, bitmap)
+                    bitmap.recycle()
+                    return
+                }
             }
         }
+        prior?.recycle()
+        throw AssertionError("the reading over $name never settled")
     }
 
     /**
@@ -265,6 +283,10 @@ class ScreenshotTest {
         rule.waitUntil(timeoutMillis = 30_000) {
             rule.onAllNodesWithContentDescription("Reading").fetchSemanticsNodes().isNotEmpty()
         }
+        // The folio is part of every reading now, and a frame without it is
+        // not the page the reader sees. Waiting for its tag also lets the
+        // foot finish its first measurement before the first capture.
+        waitForTag("reading-folio", timeout = 15_000)
         // The window is not ready for a gesture in the frame it appears in;
         // the first tap of a run must not be swallowed by startup.
         Thread.sleep(1_500)

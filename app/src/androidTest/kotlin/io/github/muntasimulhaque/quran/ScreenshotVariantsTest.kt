@@ -7,6 +7,7 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
 import androidx.test.core.app.ActivityScenario
@@ -131,6 +132,10 @@ class ScreenshotVariantsTest {
             rule.waitUntil(timeoutMillis = 30_000) {
                 rule.onAllNodesWithContentDescription("Reading").fetchSemanticsNodes().isNotEmpty()
             }
+            rule.waitUntil(timeoutMillis = 15_000) {
+                rule.onAllNodesWithTag("reading-folio", useUnmergedTree = true)
+                    .fetchSemanticsNodes().isNotEmpty()
+            }
             // The window is not ready to be copied in the frame it appears
             // in, and this one is copied still.
             Thread.sleep(2_000)
@@ -140,17 +145,33 @@ class ScreenshotVariantsTest {
 
     /** The settled frame of the app's own surface, never the whole screen. */
     private fun capture(name: String) {
-        repeat(3) { attempt ->
+        // The large reading is the frame most likely to be caught while the
+        // list is still settling after the foot's first measurement. Keep a
+        // frame only when two copies in a row are identical.
+        var prior: Bitmap? = null
+        repeat(6) { attempt ->
             rule.waitForIdle()
-            try {
+            Thread.sleep(600)
+            val bitmap = try {
                 val root = rule.onAllNodes(isRoot(), useUnmergedTree = true).onLast()
-                write(name, root.captureToImage().asAndroidBitmap())
-                return
+                root.captureToImage().asAndroidBitmap()
             } catch (error: AssertionError) {
-                if (attempt == 2) throw error
-                Thread.sleep(2_000)
+                if (attempt == 5) throw error
+                null
+            }
+            if (bitmap != null) {
+                val settled = prior != null && prior.sameAs(bitmap)
+                prior?.recycle()
+                prior = bitmap
+                if (settled) {
+                    write(name, bitmap)
+                    bitmap.recycle()
+                    return
+                }
             }
         }
+        prior?.recycle()
+        throw AssertionError("the reading over $name never settled")
     }
 
     private fun write(name: String, bitmap: Bitmap) {

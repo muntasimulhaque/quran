@@ -20,13 +20,14 @@ import org.junit.runner.RunWith
  * The fonts are credited where a reader already is, and their terms travel
  * with them.
  *
- * The page names every face and the hand that made it, and it holds no door:
- * the license screen was a second copy of the same seven credits followed by a
- * text no reader asked for, and its opening sentence called the KFGQPC Hafs
- * face OFL when the file carries KFGQPC's own terms (owner report; owner
- * decision, this session). What the six open faces need is a copy of their
- * license in the package, and it ships there beside them, the way every
- * library's LICENSE travels in META-INF.
+ * The page names every face and the hand that made it, and the license screen
+ * is gone: it was a second copy of the same seven credits followed by a text
+ * no reader asked for, and its opening sentence called the KFGQPC Hafs face
+ * OFL when the file carries KFGQPC's own terms (owner report; owner decision,
+ * this session). What the six open faces need is a copy of their license in
+ * the package, and it ships there beside them, the way every library's LICENSE
+ * travels in META-INF. The page's one door is the letter to the maker, which
+ * leaves for the project's issue tracker and touches nothing on the device.
  */
 @RunWith(AndroidJUnit4::class)
 class FontCreditTest {
@@ -35,7 +36,7 @@ class FontCreditTest {
     val compose = createComposeRule()
 
     @Test
-    fun theAboutPageCreditsEveryFaceAndHoldsNoDoor() {
+    fun theAboutPageCreditsEveryFaceAndHoldsOneDoor() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         compose.setContent {
             MaterialTheme {
@@ -60,9 +61,15 @@ class FontCreditTest {
             .performScrollTo()
             .assertIsDisplayed()
 
+        // One door, and it is the letter to the maker: the page is facts and
+        // credits, with no second account and no analytics (owner decision,
+        // this session).
+        compose.onNodeWithText(context.getString(SettingsR.string.about_feedback))
+            .performScrollTo()
+            .assertIsDisplayed()
         assertEquals(
-            "About holds no door: the page is facts and credits",
-            0,
+            "About holds its one door: the letter to the maker",
+            1,
             compose.onAllNodes(hasClickAction(), useUnmergedTree = true).fetchSemanticsNodes().size,
         )
     }
