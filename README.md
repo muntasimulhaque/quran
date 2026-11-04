@@ -4,7 +4,7 @@ A free, open source Quran reader for Android. It opens where you left off
 and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 15.3 (versionCode 155) is built, signed, and ready to submit,
+**Status:** 15.3 (versionCode 155) was submitted for Play review,
 and its bundle is `quran-15.3-vc155.aab` (12,874,055 bytes, SHA-256
 `eb6973254d08071561043bbc653db5b5385a281761f1467110aecc0ced50d83d`,
 `jar verified`, certificate
@@ -16,7 +16,8 @@ jobs were green. The store set is unchanged from capture run 41690301971 on
 and the tour's reading carries one English translation, so no frame moved.
 Content 1.5.0, the database `content-db-12c95dbe`. Owner gates: verify,
 build, checkdb, audit, search, fonts, and packs are green; the database
-rebuild reproduces 12c95dbe exactly.
+rebuild reproduces 12c95dbe exactly. Play has the bundle; the local
+hand-off copy was deleted.
 
 **In 15.3.** Your language leads. A reader who keeps two translations on reads the one in their language first, in the reading, the daily reminder, and the share card, and a column in the other language always says which pack it is. The Font size sample shows that same lead line and its name, and follows the Show translation switch, and the Translations page lists the reader's language first. The Quran text, every translation, every tafsir, every pack, and the content database are unchanged.
 
