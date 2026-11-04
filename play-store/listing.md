@@ -153,7 +153,7 @@ changes.
 
 What each set shows, in order:
 
-1. The reading, with its translation and its word meanings
+1. The reading, with its translation, its tajweed colors, and the folio line that names the surah and juz
 2. The ayah's own actions, opened from the number at its head
 3. The share card the app hands out
 4. The tafsir open on its passage, with the source line above it
