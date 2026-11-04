@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.MaterialTheme
@@ -770,9 +771,6 @@ fun ReaderScreen(
                 viewModel.recitations.firstOrNull { it.id == settings.recitation }?.name.orEmpty(),
             ),
             reciterOptions = viewModel.pillReciters,
-            folioTitle = surahName(viewModel, settings.ayah),
-            folioDetail = stringResource(R.string.juz_label, viewModel.juz),
-            onFolio = { chrome = !chrome },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .zIndex(1f),
@@ -786,6 +784,34 @@ fun ReaderScreen(
                 .padding(horizontal = Space.Gutter)
                 .padding(bottom = snackbarBottom),
         )
+
+        // The folio is the page's last layer. The reading list draws its own
+        // text all the way to the glass, so the folio's paper has to sit over
+        // it; keeping it inside the foot stack put it behind the very text it
+        // is there to name on a phone. The band fades in above the line so a
+        // half-scrolled line is put away rather than cut across its glyphs.
+        Box(
+            Modifier
+                .align(Alignment.BottomCenter)
+                .zIndex(3f)
+                .fillMaxWidth()
+                .background(
+                    Brush.verticalGradient(
+                        0f to MaterialTheme.colorScheme.background.copy(alpha = 0f),
+                        0.18f to MaterialTheme.colorScheme.background,
+                        1f to MaterialTheme.colorScheme.background,
+                    ),
+                )
+                .windowInsetsPadding(WindowInsets.navigationBars)
+                .padding(bottom = 10.dp),
+        ) {
+            ReadingFolio(
+                title = surahName(viewModel, settings.ayah),
+                detail = stringResource(R.string.juz_label, viewModel.juz),
+                onClick = { chrome = !chrome },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
 
         // The ayah's own menu, hung from its door. Every answer closes it and
         // then does its work, so the reader is returned to the reading rather

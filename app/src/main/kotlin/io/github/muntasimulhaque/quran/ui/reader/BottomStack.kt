@@ -6,13 +6,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,9 +43,10 @@ import io.github.muntasimulhaque.quran.ui.theme.compactBody
 import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 
 /**
- * Everything that sits at the foot of the page: the pack on its way in, the
- * playback pill, and the folio line that always says where the reader is,
- * stacked in one place.
+ * Everything that sits at the foot of the page: the pack on its way in and
+ * the playback pill, stacked in one place. The folio is drawn by the reading
+ * screen over the room this stack reserves for it, because it has to sit
+ * over the page's own text.
  *
  * The ayah's own actions are not here any more: they are the app's one popup,
  * hung from the number at the ayah's head, so the foot belongs to the player
@@ -77,10 +79,6 @@ internal fun BottomStack(
     reciterId: String,
     reciterName: String,
     reciterOptions: List<ListenOption>,
-    /** The page's own furniture, always visible under the controls. */
-    folioTitle: String,
-    folioDetail: String,
-    onFolio: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -205,11 +203,10 @@ internal fun BottomStack(
                 onEndOfAudio = { viewModel.setEndOfAudio(it) },
             )
         }
-        ReadingFolio(
-            title = folioTitle,
-            detail = folioDetail,
-            onClick = onFolio,
-        )
+        // The folio itself is drawn by the reading screen as its last child,
+        // over the page. This is its room, so the list's foot stays clear even
+        // before the overlay has been measured.
+        Spacer(Modifier.height(48.dp))
     }
 }
 
@@ -222,16 +219,21 @@ internal fun BottomStack(
  * session).
  */
 @Composable
-private fun ReadingFolio(
+internal fun ReadingFolio(
     title: String,
     detail: String,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
+    // The line is paper, not glass: a reading scrolled mid-ayah draws its
+    // text to the bottom of the page, and the folio's own ground is what
+    // keeps that text from running through it. It is the last child of the
+    // reading screen, so it sits over the page rather than behind it.
     Box(
-        modifier = Modifier
+        modifier = modifier
             .testTag("reading-folio")
+            .fillMaxWidth()
             .heightIn(min = 48.dp)
-            .wrapContentWidth()
             .clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = Space.Gutter),
         contentAlignment = Alignment.Center,
