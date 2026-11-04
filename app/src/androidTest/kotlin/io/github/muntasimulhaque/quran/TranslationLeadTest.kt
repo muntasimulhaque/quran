@@ -148,7 +148,10 @@ class TranslationLeadTest {
         const val SAHEEH = "Saheeh International"
         const val AL_BAYAN = "Al-Bayan Simple Translation"
 
-        /** The first words of 1:1 in Saheeh International, marker off. */
-        const val SAMPLE_OPENING = "In the name of"
+        /**
+         * The first words of Al-Ikhlas 112:1 in Saheeh International, which
+         * is the ayah the Font size page samples.
+         */
+        const val SAMPLE_OPENING = "He is All"
     }
 }
