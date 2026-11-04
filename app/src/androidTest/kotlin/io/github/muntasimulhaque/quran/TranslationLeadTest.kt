@@ -1,6 +1,6 @@
 package io.github.muntasimulhaque.quran
 
-import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
@@ -78,15 +78,17 @@ class TranslationLeadTest {
     fun theSampleLeadsWithTheReadersLanguage() {
         openSettings()
         compose.onNodeWithTag("row-text").performClick()
-        // The sample's name is the one under the steps; the reading behind
-        // the sheet has a name of its own, so the tag scopes this to the
-        // sample and not to every window on the glass.
+        // The sample's own translation is the line under the steps; the
+        // reading behind the sheet has its own lines, so the tag scopes this
+        // to the sample and not to every window on the glass. The sample
+        // carries no pack name; the reading is the surface that names a
+        // column.
         compose.waitUntil(timeoutMillis = 15_000) {
-            compose.onAllNodesWithTag("size-sample-name", useUnmergedTree = true)
+            compose.onAllNodesWithTag("size-sample-translation", useUnmergedTree = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithTag("size-sample-name", useUnmergedTree = true)
-            .assertTextEquals(SAHEEH)
+        compose.onNodeWithTag("size-sample-translation", useUnmergedTree = true)
+            .assertTextContains(SAMPLE_OPENING)
     }
 
     @Test
@@ -145,5 +147,8 @@ class TranslationLeadTest {
         const val BANGLA = "translation-al-bayan-bn"
         const val SAHEEH = "Saheeh International"
         const val AL_BAYAN = "Al-Bayan Simple Translation"
+
+        /** The first words of 1:1 in Saheeh International, marker off. */
+        const val SAMPLE_OPENING = "In the name of"
     }
 }

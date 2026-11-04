@@ -19,6 +19,8 @@ build, checkdb, audit, search, fonts, and packs are green; the database
 rebuild reproduces 12c95dbe exactly. Play has the bundle; the local
 hand-off copy was deleted.
 
+**In 15.4.** The Font size sample is a type specimen again: the ayah and its translation, without the translation's name, and with the translation shown even when the reading's Show translation switch is off, because the page is there to judge the size of the type. The reading still names each translation column when the rule calls for it. The Quran text, every translation, every tafsir, every pack, and the content database are unchanged.
+
 **In 15.3.** Your language leads. A reader who keeps two translations on reads the one in their language first, in the reading, the daily reminder, and the share card, and a column in the other language always says which pack it is. The Font size sample shows that same lead line and its name, and follows the Show translation switch, and the Translations page lists the reader's language first. The Quran text, every translation, every tafsir, every pack, and the content database are unchanged.
 
 **In 15.2.** Settings becomes one list. A row says where a setting stands and
@@ -32,8 +34,6 @@ download, a failed save, and a full phone say the same words wherever they
 happen, and the reading and Browse share one Snackbar. The store set is
 rebuilt around a reader rather than the app's own map. The Quran text, every
 translation, every tafsir, every pack, and the content database are unchanged.
-
-**In 15.1.** The search sheet's recent searches and the tafsir card lose their last two rough edges. Recent searches no longer carry Clear all: every word keeps the 48 dp X it already showed, so removing a word is one visible act and a list of five is not a second, bulk question. The caption stands with its chips instead of a Section under the filter door, and the chip capsule is now the label's line plus 8 dp above and below, so it is 36 dp at the default and grows with the system font scale instead of clipping at 200 percent; the filter chips keep their row gap at that size too. On a tafsir card with more than one source, an open passage now ends on the card's block break before the next language, so the next source no longer reads as a caption to the passage above. The Quran text, every translation, every tafsir, every pack, and the content database are unchanged.
 
 ## Content notes
 

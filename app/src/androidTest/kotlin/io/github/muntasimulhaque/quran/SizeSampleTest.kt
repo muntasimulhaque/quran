@@ -19,14 +19,14 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * The Font size sample shows the line the reading leads with, and says whose
- * line it is when the one rule calls for a name.
+ * The Font size sample is the type specimen for the Translation row: the
+ * ayah and its lead translation, with no pack name above it and no reading
+ * switch of its own.
  *
  * The sample used to draw the first translation the catalog held, and the
  * catalog sorts by pack name: Al-Bayan stood before Saheeh, so an English
- * reader's sample was Bangla with no name on it (owner report, this session).
- * The row is built here in the order the reading builds it, so the sample's
- * own choice is one line and its name is the other.
+ * reader's sample was Bangla. The lead now follows the reader's language,
+ * and the sample draws it alone (owner decision, this session).
  */
 @RunWith(AndroidJUnit4::class)
 class SizeSampleTest {
@@ -48,42 +48,48 @@ class SizeSampleTest {
     @Test
     fun englishLeadsWhenBothAreOn() {
         show("en", listOf(english, bangla))
-        waitFor("Saheeh International")
+        waitFor(ENGLISH_LINE)
         compose.onNodeWithText(ENGLISH_LINE).assertExists()
-        compose.onAllNodesWithText("Al-Bayan Simple Translation").assertCountEquals(0)
         compose.onAllNodesWithText(BANGLA_LINE).assertCountEquals(0)
+        compose.onAllNodesWithText("Saheeh International").assertCountEquals(0)
+        compose.onAllNodesWithText("Al-Bayan Simple Translation").assertCountEquals(0)
     }
 
     @Test
     fun banglaLeadsWhenBothAreOn() {
         show("bn", listOf(bangla, english))
-        waitFor("Al-Bayan Simple Translation")
+        waitFor(BANGLA_LINE)
         compose.onNodeWithText(BANGLA_LINE).assertExists()
-        compose.onAllNodesWithText("Saheeh International").assertCountEquals(0)
         compose.onAllNodesWithText(ENGLISH_LINE).assertCountEquals(0)
+        compose.onAllNodesWithText("Saheeh International").assertCountEquals(0)
+        compose.onAllNodesWithText("Al-Bayan Simple Translation").assertCountEquals(0)
     }
 
     @Test
-    fun aForeignLineIsNamedWhenItIsTheOnlyOne() {
-        // The report itself: one Bangla column under an English interface,
-        // with nothing on the glass to say whose line it was.
+    fun aForeignLineIsDrawnWithoutAName() {
+        // The sample is type, not a reading: the Bangla line is drawn alone
+        // under an English interface and says nothing about its pack.
         show("en", listOf(bangla))
-        waitFor("Al-Bayan Simple Translation")
+        waitFor(BANGLA_LINE)
         compose.onNodeWithText(BANGLA_LINE).assertExists()
+        compose.onAllNodesWithText("Al-Bayan Simple Translation").assertCountEquals(0)
     }
 
     @Test
-    fun oneLineInTheReadersOwnLanguageStaysUnnamed() {
+    fun theSampleNeverNamesTheLine() {
         show("en", listOf(english))
         waitFor(ENGLISH_LINE)
         compose.onAllNodesWithText("Saheeh International").assertCountEquals(0)
     }
 
     @Test
-    fun theSwitchHidesTheLineAndItsName() {
+    fun theSwitchDoesNotHideTheTypeSpecimen() {
+        // The reading's Show translation switch is not the sample's: the
+        // reader opened this page to judge the size of the prose, so the
+        // sentence is here either way.
         show("en", listOf(english, bangla), showTranslation = false)
-        compose.waitForIdle()
-        compose.onAllNodesWithText(ENGLISH_LINE).assertCountEquals(0)
+        waitFor(ENGLISH_LINE)
+        compose.onNodeWithText(ENGLISH_LINE).assertExists()
         compose.onAllNodesWithText("Saheeh International").assertCountEquals(0)
     }
 

@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 15.3 (versionCode 155)
+Version: 15.4 (versionCode 156)
 
 ## Listing
 
@@ -163,6 +163,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (one answer and no close), so every frame that wants a clean
 page is taken before it.
+
+## Release notes (15.4, 375 characters)
+15.4 makes the Font size sample a type specimen. The page shows only the ayah and its translation, without the translation's name above it, and it shows the translation even when the reading's Show translation switch is off, because the sample is there to judge the text size. The reading still names each translation column. Text, translations, tafsirs, and packs unchanged.
 
 ## Release notes (15.3, 402 characters)
 15.3 puts your language first. With two translations on, the reading, the daily reminder, and the share card lead with the one in your language, and a column in the other language always says which pack it is. The Font size sample shows that same line and its name, and follows Show translation. The Translations page lists your language's packs first. Text, translations, tafsirs, and packs unchanged.

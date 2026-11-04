@@ -23,8 +23,6 @@ import io.github.muntasimulhaque.quran.data.ReadingRow
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
-import io.github.muntasimulhaque.quran.ui.kit.contentPackName
-import io.github.muntasimulhaque.quran.ui.kit.translationIsNamed
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
 import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
@@ -144,36 +142,22 @@ private fun SizeSample(row: ReadingRow, settings: AppSettings) {
             textAlign = TextAlign.Right,
             modifier = Modifier.fillMaxWidth(),
         )
-        // The translation is drawn only when the reading draws it, so the
-        // sample never promises a line the page would hide. It is the same
-        // lead line the reading shows, and it wears the same name: a reader
-        // who keeps a second language on always knows whose line is above
-        // the steps (owner decision, this session).
-        if (settings.showTranslation) {
-            row.translations.firstOrNull()?.let { line ->
-                val named = translationIsNamed(
-                    drawn = row.translations.size,
-                    language = line.language,
-                    readingLanguage = settings.readingLanguage,
-                )
-                if (named) {
-                    Text(
-                        text = contentPackName(line.pack, line.packName),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier
-                            .padding(top = Space.Block)
-                            .testTag("size-sample-name"),
-                    )
-                }
-                TranslationBody(
-                    runs = remember(line.text.text) { RichText.footnotes(line.text.text) },
-                    modifier = Modifier.padding(top = if (named) Space.Tight else Space.Line),
-                    sizeSp = settings.translationSp,
-                    lineSp = settings.translationLineSp,
-                    arabicSp = settings.arabicInlineSp,
-                )
-            }
+        // The sample is the type specimen for the Translation size row, not a
+        // reading: the ayah and its translation, and nothing else. It carries
+        // no pack name and no reading switch of its own, because the reader
+        // came here to judge the size of the type; the reading still names
+        // each column and follows its own switch (owner decision, this
+        // session).
+        row.translations.firstOrNull()?.let { line ->
+            TranslationBody(
+                runs = remember(line.text.text) { RichText.footnotes(line.text.text) },
+                modifier = Modifier
+                    .padding(top = Space.Line)
+                    .testTag("size-sample-translation"),
+                sizeSp = settings.translationSp,
+                lineSp = settings.translationLineSp,
+                arabicSp = settings.arabicInlineSp,
+            )
         }
     }
 }
