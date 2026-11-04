@@ -183,6 +183,17 @@ data class AppSettings(
      */
     val chromeReveal: String = "",
 ) {
+    /**
+     * The language the reader chose, or English before the choice.
+     *
+     * One question with one answer: the reading, the order of the translation
+     * columns, and the names all ask it here, so no screen can answer it a
+     * second way. A null tag is the first launch, and the reading is English
+     * until the welcome screen answers.
+     */
+    val readingLanguage: String
+        get() = UiLanguage.of(uiLanguage)?.tag ?: UiLanguage.English.tag
+
     val arabicSp: Float get() = TextSize.sp(TypeRole.Arabic, arabicSize)
     val arabicLineSp: Float get() = TextSize.lineSp(TypeRole.Arabic, arabicSize)
     /**
@@ -246,6 +257,11 @@ data class ReadingMetrics(
     val followReciter: Boolean,
     /** The packs the reading draws, which shape every row it loads. */
     val translationPacks: Set<String>,
+    /**
+     * The reader's language, which the translation columns lead with and
+     * which decides whether a column is named when it is the only one.
+     */
+    val readingLanguage: String,
     val arabicSp: Float,
     val arabicLineSp: Float,
     val arabicInlineSp: Float,
@@ -275,6 +291,7 @@ fun AppSettings.readingMetrics(): ReadingMetrics = ReadingMetrics(
     tajweed = tajweed,
     followReciter = followReciter,
     translationPacks = translationPacks,
+    readingLanguage = readingLanguage,
     arabicSp = arabicSp,
     arabicLineSp = arabicLineSp,
     arabicInlineSp = arabicInlineSp,

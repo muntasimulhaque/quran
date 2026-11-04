@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 15.2 (versionCode 154)
+Version: 15.3 (versionCode 155)
 
 ## Listing
 
@@ -163,6 +163,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (one answer and no close), so every frame that wants a clean
 page is taken before it.
+
+## Release notes (15.3, 402 characters)
+15.3 puts your language first. With two translations on, the reading, the daily reminder, and the share card lead with the one in your language, and a column in the other language always says which pack it is. The Font size sample shows that same line and its name, and follows Show translation. The Translations page lists your language's packs first. Text, translations, tafsirs, and packs unchanged.
 
 ## Release notes (15.2, 431 characters)
 15.2 makes Settings one list. Every row says where a setting stands and opens the page that changes it: the switches moved to the pages they govern, so no row is half a switch and half a door, and the switch is drawn in the app's own hand. Word meanings gain the page they were missing. A failed download, a failed save, and a full phone each say one sentence now instead of three. Text, translations, tafsirs, and packs unchanged.

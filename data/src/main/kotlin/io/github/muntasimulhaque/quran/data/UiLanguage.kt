@@ -136,3 +136,16 @@ fun pendingAfterLanguage(
 fun List<ContentPack>.forLanguage(language: String): List<ContentPack> =
     filter { it.language == language }
 
+/**
+ * The packs in the order the reader reads them: the language the reader chose
+ * first, then any other language, each group in the order the catalog gave it
+ * (which is by name).
+ *
+ * A reader who keeps two translations on reads their own language first, and
+ * the other column still follows, named. The catalog's own order is by name,
+ * so "Al-Bayan Simple Translation" stood above "Saheeh International" in an
+ * English reading, and the Font size sample, which draws the first line,
+ * previewed Bangla under an English interface (owner report, this session).
+ */
+fun List<ContentPack>.leadingWith(language: String): List<ContentPack> =
+    sortedBy { if (it.language == language) 0 else 1 }

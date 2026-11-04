@@ -1,6 +1,8 @@
 package io.github.muntasimulhaque.quran.ui.kit
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.Locale
 
@@ -31,5 +33,23 @@ class FormatsTest {
     @Test
     fun aSizeThatIsNotThereSaysNothing() {
         assertEquals("", formatBytes(0L, bangla, "কেবি", "এমবি"))
+    }
+
+    @Test
+    fun aTranslationIsNamedWhenThereIsMoreThanOne() {
+        assertTrue(translationIsNamed(drawn = 2, language = "en", readingLanguage = "en"))
+    }
+
+    @Test
+    fun theOnlyTranslationInTheReadersLanguageIsUnnamed() {
+        assertFalse(translationIsNamed(drawn = 1, language = "en", readingLanguage = "en"))
+    }
+
+    @Test
+    fun aForeignTranslationIsNamedEvenWhenItIsTheOnlyOne() {
+        // The report: one Bangla column under an English interface, with
+        // nothing on the glass to say whose line it was.
+        assertTrue(translationIsNamed(drawn = 1, language = "bn", readingLanguage = "en"))
+        assertTrue(translationIsNamed(drawn = 1, language = "en", readingLanguage = "bn"))
     }
 }

@@ -95,6 +95,7 @@ fun SettingsHub(
         PageRow(
             title = stringResource(R.string.settings_title_text),
             summary = fontSizeSummary(settings),
+            modifier = Modifier.testTag("row-text"),
         ) { onOpen(SettingsPage.FontSize) }
         // What the reading draws, in the order the page draws it: the tajweed
         // colors, which are the Arabic line itself, then the word meanings under

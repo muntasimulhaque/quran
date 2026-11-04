@@ -103,6 +103,17 @@ fun contentPackName(id: String, fallback: String): String = when (id) {
 }
 
 /**
+ * Whether a translation column says which pack it is. It is named when the
+ * reader sees more than one, and also when the only column is in a language
+ * other than the interface's, so a line the reader did not expect is never
+ * left unannounced under the ayah. The reading and the Font size sample ask
+ * this one question, so the sample can never preview a column the page would
+ * not draw (owner decision, this session).
+ */
+fun translationIsNamed(drawn: Int, language: String, readingLanguage: String): Boolean =
+    drawn > 1 || language != readingLanguage
+
+/**
  * A playback pace as the reader reads it: "1x", "0.75x", never a trailing
  * run of digits. It lives here because the settings page that chooses the
  * pace and the pill that reports it must name it the same way; a reader who

@@ -11,7 +11,6 @@ import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.PackType
-import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
@@ -87,7 +86,7 @@ internal fun hasChosenTranslation(settings: AppSettings, packs: List<ContentPack
  * rather than promise a list that does not exist.
  */
 internal fun wantedWordsPack(settings: AppSettings, packs: List<ContentPack>): ContentPack? {
-    val language = UiLanguage.of(settings.uiLanguage)?.tag ?: UiLanguage.English.tag
+    val language = settings.readingLanguage
     return packs.firstOrNull { it.id == ContentDatabase.wordsPackId(language) }
 }
 
@@ -106,10 +105,11 @@ internal fun packSizeLine(pack: ContentPack): String =
     }
 
 /**
- * The packs of one kind, grouped by the language they speak, in the
- * alphabetical order of those languages, and alphabetical inside each group.
- * A list of choices is read, not searched: the reader looks for a name, so
- * names are in one order everywhere in the app.
+ * The packs of one kind, grouped by the language they speak, and alphabetical
+ * inside each group. When [leadingLanguage] names a group, that group stands
+ * first and the rest follow in the alphabetical order of their names: the
+ * Translations page puts the language the reader is reading above the other
+ * one, the same way the reading itself does (owner decision, this session).
  *
  * The grouping is what the list grows into. A heading costs its room once per
  * language, while a language printed under every name costs a line per pack,
@@ -126,13 +126,19 @@ internal fun packSizeLine(pack: ContentPack): String =
 internal fun LanguageGroups(
     packs: List<ContentPack>,
     type: PackType,
+    leadingLanguage: String? = null,
     row: @Composable (ContentPack) -> Unit,
 ) {
     val groups = packs.filter { it.type == type }.groupBy { it.language }
     val names = HashMap<String, String>()
     for (language in groups.keys) names[language] = languageName(language)
     groups.entries
-        .sortedBy { (names[it.key] ?: it.key).lowercase() }
+        .sortedWith(
+            compareBy(
+                { if (leadingLanguage != null && it.key == leadingLanguage) 0 else 1 },
+                { (names[it.key] ?: it.key).lowercase() },
+            ),
+        )
         .forEach { (language, group) ->
             Group(names[language] ?: language)
             // The names inside a group are read by the name the row draws, so

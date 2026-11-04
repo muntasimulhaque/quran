@@ -78,4 +78,11 @@ class ReadingMetricsTest {
         assertEquals(16f * 1.5f, first.translationLineSp, 0.001f)
         assertEquals(16f, first.tafsirSp, 0.001f)
     }
+
+    @Test
+    fun theMetricsCarryTheLanguageTheTranslationColumnsLeadWith() {
+        assertEquals("en", metrics(null).readingLanguage)
+        assertEquals("en", metrics(UiLanguage.English.tag).readingLanguage)
+        assertEquals("bn", metrics(UiLanguage.Bangla.tag).readingLanguage)
+    }
 }

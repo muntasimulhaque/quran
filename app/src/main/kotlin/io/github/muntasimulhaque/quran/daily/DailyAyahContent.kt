@@ -13,6 +13,7 @@ import io.github.muntasimulhaque.quran.data.PackCatalog
 import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.SettingsStore
+import io.github.muntasimulhaque.quran.data.leadingWith
 import kotlinx.coroutines.flow.first
 
 /**
@@ -22,9 +23,10 @@ import kotlinx.coroutines.flow.first
  * The read is deliberately narrow. It opens the same library the reading
  * does, reads exactly one ayah and at most one translation from packs that
  * are already on the device, and closes the library again; nothing is
- * fetched, and nothing is kept. The first enabled translation is the one, the
- * same pack share and search read, so the reminder speaks with the reader's
- * own voice and only one translation ever appears (owner decision, 30).
+ * fetched, and nothing is kept. The lead translation is the one, the same
+ * pack the reading and the share card lead with, so the reminder speaks
+ * with the reader's own voice and only one translation ever appears (owner
+ * decision, 30).
  */
 internal data class DailyAyahContent(
     /** The running number (1..6236), the key the tap and the reading share. */
@@ -71,7 +73,7 @@ internal data class DailyAyahContent(
             val database = runCatching {
                 ContentDatabase.open(application, catalog.withInstalled(installed), installed)
             }.getOrNull() ?: return null
-            database.useLanguage(settings.uiLanguage ?: "en")
+            database.useLanguage(settings.readingLanguage)
             return try {
                 val ayah = database.ayah(wanted) ?: return null
                 val surah = database.surah(ayah.surah)
@@ -88,7 +90,12 @@ internal data class DailyAyahContent(
                     // face that was not set for them (owner decision, the
                     // palette session).
                     arabic = Arabic.portableText(ayah.text),
-                    translation = firstTranslation(database, settings.translationPacks, wanted),
+                    translation = firstTranslation(
+                        database = database,
+                        enabled = settings.translationPacks,
+                        readingLanguage = settings.readingLanguage,
+                        ayah = wanted,
+                    ),
                 )
             } finally {
                 database.close()
@@ -98,17 +105,23 @@ internal data class DailyAyahContent(
         /**
          * The first enabled translation's line for this ayah, in plain words:
          * a notification cannot draw a footnote door, so the markers are
-         * dropped and the note they belong to is left for the reading.
+         * dropped and the note they belong to is left for the reading. The
+         * reader's own language leads, so the reminder speaks the same line
+         * the reading does even when a second translation is on (owner
+         * decision, this session).
          */
         private fun firstTranslation(
             database: ContentDatabase,
             enabled: Set<String>,
+            readingLanguage: String,
             ayah: Int,
         ): String? {
             val pack = database.packs()
-                .firstOrNull {
+                .filter {
                     it.type == PackType.Translation && it.installed && it.id in enabled
                 }
+                .leadingWith(readingLanguage)
+                .firstOrNull()
                 ?.id ?: return null
             val text = database.translations(listOf(ayah), pack)[ayah]?.text ?: return null
             val plain = RichText.plain(text).trim()

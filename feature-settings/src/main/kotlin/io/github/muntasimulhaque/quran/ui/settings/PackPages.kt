@@ -49,6 +49,7 @@ fun TranslationsPage(
         LanguageGroups(
             packs = packs,
             type = PackType.Translation,
+            leadingLanguage = settings.readingLanguage,
         ) { pack ->
             PackChoiceRow(
                 pack = pack,

@@ -145,7 +145,7 @@ fun AyahCard(
     // Ibn Kathirs the one in the language the reader is reading leads (owner
     // decision, this session). The fallback is the shell's own, the same
     // answer it gives before the first choice.
-    val readerLanguage = settings.uiLanguage ?: "en"
+    val readerLanguage = settings.readingLanguage
     val orderedPacks = remember(tafsirPacks, initialTafsirPack, readerLanguage) {
         tafsirPacks.sortedWith(
             compareBy<ContentPack>(

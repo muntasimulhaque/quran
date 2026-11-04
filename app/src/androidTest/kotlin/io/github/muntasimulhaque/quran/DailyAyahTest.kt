@@ -136,15 +136,26 @@ class DailyAyahTest {
             setUiLanguage("bn")
             setTranslationPacks(setOf("translation-saheeh-en", "translation-al-bayan-bn"))
         }
+        assertTheReminderReads("translation-al-bayan-bn")
+
+        // The other way: the catalog sorts by pack name, so Al-Bayan is the
+        // first pack it lists. Under English the reminder must still lead
+        // with Saheeh, not with the catalog's first line (owner report, this
+        // session).
+        SettingsStore(context).setUiLanguage("en")
+        assertTheReminderReads("translation-saheeh-en")
+    }
+
+    private suspend fun assertTheReminderReads(pack: String) {
         val daily = DailyAyahContent.load(context)
         assertNotNull(daily)
         val database = openLibrary()
         try {
             val expected = database.translations(
                 listOf(daily!!.ayah),
-                "translation-al-bayan-bn",
+                pack,
             )[daily.ayah]?.text
-            assertNotNull("the Bangla pack must carry the ayah", expected)
+            assertNotNull("the pack must carry the ayah", expected)
             assertEquals(
                 "the reminder speaks the reader's own language, not the catalog's first pack",
                 io.github.muntasimulhaque.quran.core.RichText.plain(expected!!),

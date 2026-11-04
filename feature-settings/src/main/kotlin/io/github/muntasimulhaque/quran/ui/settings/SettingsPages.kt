@@ -22,6 +22,8 @@ import io.github.muntasimulhaque.quran.data.ReadingRow
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
+import io.github.muntasimulhaque.quran.ui.kit.contentPackName
+import io.github.muntasimulhaque.quran.ui.kit.translationIsNamed
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
 import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
@@ -104,7 +106,11 @@ fun TextPage(
     preview: suspend () -> ReadingRow?,
     onSize: (TypeRole, Float) -> Unit,
 ) {
-    val row by produceState<ReadingRow?>(initialValue = null, settings.translationPacks) { value = preview() }
+    val row by produceState<ReadingRow?>(
+        initialValue = null,
+        settings.translationPacks,
+        settings.readingLanguage,
+    ) { value = preview() }
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         row?.let { sample -> SizeSample(row = sample, settings = settings) }
         SizeRow(TypeRole.Arabic, settings.arabicSize) { onSize(TypeRole.Arabic, it) }
@@ -137,14 +143,34 @@ private fun SizeSample(row: ReadingRow, settings: AppSettings) {
             textAlign = TextAlign.Right,
             modifier = Modifier.fillMaxWidth(),
         )
-        row.translations.firstOrNull()?.let { line ->
-            TranslationBody(
-                runs = remember(line.text.text) { RichText.footnotes(line.text.text) },
-                modifier = Modifier.padding(top = Space.Line),
-                sizeSp = settings.translationSp,
-                lineSp = settings.translationLineSp,
-                arabicSp = settings.arabicInlineSp,
-            )
+        // The translation is drawn only when the reading draws it, so the
+        // sample never promises a line the page would hide. It is the same
+        // lead line the reading shows, and it wears the same name: a reader
+        // who keeps a second language on always knows whose line is above
+        // the steps (owner decision, this session).
+        if (settings.showTranslation) {
+            row.translations.firstOrNull()?.let { line ->
+                val named = translationIsNamed(
+                    drawn = row.translations.size,
+                    language = line.language,
+                    readingLanguage = settings.readingLanguage,
+                )
+                if (named) {
+                    Text(
+                        text = contentPackName(line.pack, line.packName),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = Space.Block),
+                    )
+                }
+                TranslationBody(
+                    runs = remember(line.text.text) { RichText.footnotes(line.text.text) },
+                    modifier = Modifier.padding(top = if (named) Space.Tight else Space.Line),
+                    sizeSp = settings.translationSp,
+                    lineSp = settings.translationLineSp,
+                    arabicSp = settings.arabicInlineSp,
+                )
+            }
         }
     }
 }

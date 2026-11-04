@@ -181,4 +181,48 @@ class UiLanguageTest {
         )
         assertEquals(setOf("translation-saheeh-en", "tafsir-ibn-kathir-en"), after)
     }
+
+    @Test
+    fun theReadersLanguageLeadsTheTranslationColumns() {
+        // The catalog sorts by pack name, so Al-Bayan came before Saheeh and
+        // the Font size sample, which draws the first line, previewed Bangla
+        // under an English interface (owner report, this session).
+        val catalog = listOf(
+            pack("translation-al-bayan-bn", "bn"),
+            pack("translation-saheeh-en", "en"),
+        )
+        assertEquals(
+            listOf("translation-saheeh-en", "translation-al-bayan-bn"),
+            catalog.leadingWith("en").map { it.id },
+        )
+        assertEquals(
+            listOf("translation-al-bayan-bn", "translation-saheeh-en"),
+            catalog.leadingWith("bn").map { it.id },
+        )
+    }
+
+    @Test
+    fun oneLanguagesPacksKeepTheCatalogsOrder() {
+        // Only the language is moved. Inside a group, the order the catalog
+        // gave the packs is the order the reader reads them in.
+        val catalog = listOf(
+            pack("translation-first-en", "en"),
+            pack("translation-second-en", "en"),
+            pack("translation-al-bayan-bn", "bn"),
+        )
+        assertEquals(
+            listOf("translation-first-en", "translation-second-en"),
+            catalog.leadingWith("en").filter { it.language == "en" }.map { it.id },
+        )
+        assertEquals(
+            listOf("translation-first-en", "translation-second-en"),
+            catalog.leadingWith("bn").filter { it.language == "en" }.map { it.id },
+        )
+    }
+
+    @Test
+    fun anUnchosenLanguageReadsEnglish() {
+        assertEquals("en", AppSettings().readingLanguage)
+        assertEquals("bn", AppSettings(uiLanguage = "bn").readingLanguage)
+    }
 }

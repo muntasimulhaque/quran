@@ -64,6 +64,7 @@ import io.github.muntasimulhaque.quran.data.TranslationLine
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
+import io.github.muntasimulhaque.quran.ui.kit.translationIsNamed
 import io.github.muntasimulhaque.quran.ui.rich.TranslationBody
 import io.github.muntasimulhaque.quran.ui.rich.drawTajweedColors
 import io.github.muntasimulhaque.quran.ui.theme.Radii
@@ -401,13 +402,25 @@ internal fun AyahBlock(
                 )
             }
             // More than one translation may be on, and each is drawn in its
-            // own column, named, so the reader always knows whose reading
-            // they are looking at. The library still reads the translation
-            // for the font size sample; the reading draws it only when the
-            // reader asked to see it.
+            // own column; a column is named when there is more than one, and
+            // when it is the only one but not in the reader's language, so
+            // the reader always knows whose reading they are looking at. The
+            // library still reads the translation for the font size sample;
+            // the reading draws it only when the reader asked to see it.
             if (metrics.showTranslation) {
                 row.translations.forEach { line ->
-                    if (row.translations.size > 1) {
+                    // The name is read when more than one translation is drawn,
+                    // and whenever the column is not in the reader's own
+                    // language: a line of another language never stands
+                    // unannounced under the ayah (owner decision, this
+                    // session).
+                    if (
+                        translationIsNamed(
+                            row.translations.size,
+                            line.language,
+                            metrics.readingLanguage,
+                        )
+                    ) {
                         Text(
                             text = contentPackName(line.pack, line.packName),
                             style = MaterialTheme.typography.bodySmall,

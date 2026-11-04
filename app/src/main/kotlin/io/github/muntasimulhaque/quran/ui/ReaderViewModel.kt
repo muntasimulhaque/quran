@@ -33,6 +33,7 @@ import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.data.forLanguage
+import io.github.muntasimulhaque.quran.data.leadingWith
 import io.github.muntasimulhaque.quran.data.withLanguage
 import io.github.muntasimulhaque.quran.R
 import io.github.muntasimulhaque.quran.daily.DailyAyahScheduler
@@ -174,12 +175,20 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     val tafsirPacks: List<ContentPack> get() = packs.filter { it.type == PackType.Tafsir }
 
     /**
-     * The translations the reader turned on and has on the device, in catalog
-     * order. More than one may be on, and each is drawn in its own column
-     * under the ayah; the first is the one search and share read.
+     * The translations the reader turned on and has on the device, the chosen
+     * language's first. More than one may be on, and each is drawn in its own
+     * column under the ayah; the first is the one share and the Font size
+     * sample read.
+     *
+     * The order is the reader's language and not the catalog's: the catalog
+     * sorts by pack name, so Al-Bayan stood above Saheeh under an English
+     * interface and the sample, which draws the first line, previewed Bangla
+     * (owner report, this session).
      */
     val enabledTranslationPacks: List<ContentPack>
-        get() = translationPacks.filter { it.installed && it.id in settings.translationPacks }
+        get() = translationPacks
+            .filter { it.installed && it.id in settings.translationPacks }
+            .leadingWith(readingLanguage)
 
     val enabledTafsirPacks: List<ContentPack>
         get() = tafsirPacks.filter { it.id in settings.tafsirPacks && it.installed }
@@ -196,7 +205,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * reading or the search field before that choice is made.
      */
     val readingLanguage: String
-        get() = UiLanguage.of(settings.uiLanguage)?.tag ?: "en"
+        get() = settings.readingLanguage
 
     /**
      * The translations search reads: the reader's own on switches, narrowed to

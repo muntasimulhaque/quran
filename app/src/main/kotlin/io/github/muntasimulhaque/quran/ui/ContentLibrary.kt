@@ -241,7 +241,7 @@ class ContentLibrary(
         // the Book's index is read with the language set, so Browse, the
         // reading, search, the reminder, and the share card all draw the
         // same name (owner decision, this session).
-        fresh.useLanguage(stored.uiLanguage ?: "en")
+        fresh.useLanguage(stored.readingLanguage)
         // The reader's index of the Book, read on a worker: 114 surahs
         // and the thirty juz boundaries, and the launch frame is not
         // where a query belongs.
@@ -357,7 +357,7 @@ class ContentLibrary(
         // The language may have changed since the last open; the names are
         // read again so a reader who just chose Bangla reads Bangla names
         // without a restart (owner decision, this session).
-        fresh.useLanguage(settings().uiLanguage ?: "en")
+        fresh.useLanguage(settings().readingLanguage)
         surahs = withContext(Dispatchers.IO) { fresh.surahs() }
         packs = fresh.packs()
         onReopened(fresh)
