@@ -4,7 +4,7 @@ A free, open source Quran reader for Android. It opens where you left off
 and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 15.7 (versionCode 159) is ready for Play review from commit
+**Status:** 15.7 (versionCode 159) was submitted to Play review from commit
 `a2e5c29e`. The signed bundle `quran-15.7-vc159.aab` has SHA-256
 `fc15cf3fe3111d7d276a47d74a6f2c58f26f18aa9c00eb461e07dd8e79e1707f`, signed by the
 upload key `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
