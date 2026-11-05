@@ -29,14 +29,6 @@ object Radii {
     /** A capsule: every chip, button, and floating control the app repeats. */
     val Pill = RoundedCornerShape(50)
 
-    /**
-     * The wash under a text selection: a rounded rectangle, not a pill. A
-     * selection belongs to a line of words, so its shape keeps the app's
-     * corner while the wash stays on the text instead of turning every line
-     * into a capsule (owner decision, this session).
-     */
-    val Selection = RoundedCornerShape(SelectionRadius)
-
     /** The reading's own blocks: an ayah, a door, an add row. */
     val Card = RoundedCornerShape(14.dp)
 

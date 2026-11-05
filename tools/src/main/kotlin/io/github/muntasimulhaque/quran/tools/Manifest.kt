@@ -17,7 +17,6 @@ data class Dataset(
     val name: String,
     val source: String,
     val url: String,
-    val resourceId: String,
     val format: String,
     val license: String,
     /**

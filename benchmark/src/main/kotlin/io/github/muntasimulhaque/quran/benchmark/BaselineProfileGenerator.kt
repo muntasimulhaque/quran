@@ -16,7 +16,7 @@ import org.junit.runner.RunWith
  * the runtime can compile them ahead of time instead of on first use.
  *
  * The app already ships a hand-written seed profile
- * (app/src/main/baseline-prof.txt, twenty-five rules naming the launch path by
+ * (app/src/main/baseline-prof.txt, nineteen rules naming the launch path by
  * hand). What this module is for is replacing that seed with a measured one: a
  * generated profile covers the code the reader actually walked, and the
  * startup benchmark is the only way to know what either one is worth.

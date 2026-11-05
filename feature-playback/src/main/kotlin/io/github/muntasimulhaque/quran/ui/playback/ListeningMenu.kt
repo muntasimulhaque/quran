@@ -133,7 +133,7 @@ private fun MenuLabel(text: String) {
  * The pace keeps the app's own step row: the label is a bare line at the
  * menu's left inset and the five paces stand centred under it, as the text
  * sizes do on their own page (owner decision, forty-seventh session). The
- * row itself is [StepRow], the app's one step row, so one control is learned
+ * row itself is [ScaleRow], the app's one step row, so one control is learned
  * once (owner decision, this session: the menu had carried a second copy and
  * the two had drifted).
  *
@@ -165,7 +165,7 @@ internal fun ColumnScope.ListeningMenu(
     // had slipped (owner decision, forty-seventh session). The row itself
     // came from the settings page's old copy and the two had drifted, one
     // filling its whole cell and this one hugging its text (owner decision,
-    // this session: one StepRow, one shape).
+    // this session: one ScaleRow, one shape).
     ScaleRow(
         label = stringResource(R.string.playback_speed_label),
         steps = SpeedSteps,

@@ -1,8 +1,5 @@
 package io.github.muntasimulhaque.quran.ui.theme
 
-import androidx.compose.material3.SwitchColors
-import androidx.compose.material3.SwitchDefaults
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
@@ -93,25 +90,3 @@ internal val DarkSwitch = SwitchPalette(
 )
 
 internal val LocalSwitchPalette = staticCompositionLocalOf { LightSwitch }
-
-/** The switch as the ground the reading is drawn on says it should look. */
-@Composable
-fun appSwitchColors(): SwitchColors {
-    val palette = LocalSwitchPalette.current
-    return SwitchDefaults.colors(
-        checkedThumbColor = palette.onKnob,
-        checkedTrackColor = palette.onTrack,
-        checkedBorderColor = palette.onTrack,
-        uncheckedThumbColor = palette.offKnob,
-        uncheckedTrackColor = palette.offTrack,
-        uncheckedBorderColor = palette.offKnob,
-        // The one out of reach state. The thumbs do not move: a knob out of
-        // reach is still the answer the reader wrote.
-        disabledCheckedThumbColor = palette.onKnob,
-        disabledCheckedTrackColor = palette.onTrackOutOfReach,
-        disabledCheckedBorderColor = palette.onTrackOutOfReach,
-        disabledUncheckedThumbColor = palette.offKnob,
-        disabledUncheckedTrackColor = palette.offTrackOutOfReach,
-        disabledUncheckedBorderColor = palette.offKnob,
-    )
-}

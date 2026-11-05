@@ -6,8 +6,10 @@ on:
     # Only rebuild when something that affects the app actually changes, so
     # doc-only commits (README, AGENTS.md, play-store notes) do not burn an
     # emulator boot, a signed release build, and the content gates. The same
-    # list covers every module, the build files, and the content the build
-    # reads; a path outside it cannot change the app.
+    # list covers every module the build carries, the build files, and the
+    # content the build reads; a path outside it cannot change the app. The
+    # benchmark module is a development tool the build never carries, so it
+    # is not in the list.
     #
     # A version bump lives in app/build.gradle.kts and a catalog change lives
     # in content/, so both still trigger this, which is what the release
@@ -27,7 +29,6 @@ on:
       - "content/quran.db"
       - "content/packs/**"
       - "stability-config.txt"
-      - "benchmark/**"
       - "*.gradle.kts"
       - "gradle.properties"
       - "gradle/**"
@@ -136,9 +137,9 @@ jobs:
 # QuranEnc exports, which are not in the repository. Run them locally with
 # ./gradlew :tools:run --args="verify|audit|fonts" before a release.
 #
-# The app's instrumented tests, including the screenshot tour, live in the
-# screenshots workflow: they run there on all three store form factors, and
-# running them again here would double the CI minutes for the same answer.
+# The app's instrumented tests run in the app-tests job below, sharded across
+# three runners. The store capture runs in the screenshots workflow, on all
+# three store form factors, so the two do not repeat each other's work.
 
   # The data layer's instrumented tests: the saved store, the last-read
   # history, and the recitation manifest. They read and write small SQLite

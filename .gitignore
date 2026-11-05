@@ -3,7 +3,6 @@ local.properties
 .gradle/
 .kotlin/
 build/
-captures/
 .externalNativeBuild/
 .cxx/
 
@@ -18,8 +17,6 @@ keystore.properties
 
 # Content working files (raw downloads, extraction, built database)
 content/raw/
-content/audio/
-content/packs/
 content/work/
 content/build/
 

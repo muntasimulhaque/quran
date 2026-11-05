@@ -34,9 +34,9 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * The reading's top bar, and the one place its margins live.
  *
  * The bar is summoned, never resident: it fades in over the page when the
- * reader asks for it and steps back on its own, which is the whole of the
- * chrome the reading carries. It lives beside the reading screen so the page
- * file is about the page, and the bar is about the bar.
+ * reader asks for it and stays until they put it away, which is the whole of
+ * the chrome the reading carries. It lives beside the reading screen so the
+ * page file is about the page, and the bar is about the bar.
  *
  * The four marks are Browse, Search, Aa, and Settings. Aa opens the type page
  * directly, because a reader who asks for it is asking about the page they are

@@ -573,11 +573,11 @@ class ScreenshotTest {
      * always rises on the index. A page that rose instead is a real failure and
      * ends this helper at once.
      *
-     * The press itself needs more than one try. The bar is summoned and steps
-     * back on its own timer, so a press can land on a mark that is already
-     * fading; the retry re-summons the bar and presses again. The wait after
-     * each press is longer than the sheet's rise, so a press that worked is
-     * never followed by a second one on top of an open sheet.
+     * The press itself needs more than one try. The bar fades in and takes a
+     * moment to answer a touch, so a press can land before its mark is ready;
+     * the retry re-summons the bar and presses again. The wait after each
+     * press is longer than the sheet's rise, so a press that worked is never
+     * followed by a second one on top of an open sheet.
      */
     private fun openSettingsHub() {
         repeat(3) {

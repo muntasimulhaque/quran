@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- The three frozen names (app_name, first_paint_title, first_paint_subtitle)
-         are deliberately absent: the app is named Quran in every language. -->
+    <!-- The frozen names (app_name, share_card_name, first_paint_title,
+         first_paint_subtitle) are deliberately absent: the app is named Quran
+         in every language. -->
 
     <string name="reader_fallback_title">কুরআন</string>
     <string name="surah_fallback_name">সূরা %1$d</string>

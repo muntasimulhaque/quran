@@ -127,12 +127,6 @@ object TextSize {
     fun meaningSp(step: Float): Float = MEANING_BASE * step(step)
 
     /**
-     * The line the meaning under a word gets: the prose ratio, the same 1.5
-     * every Latin paragraph on the page wears.
-     */
-    fun meaningLineSp(step: Float): Float = meaningSp(step) * lineRatio(TypeRole.Translation)
-
-    /**
      * The Arabic word in the word by word aid: 22 sp at the middle step, four
      * points under the Quran's own 26, so the aid reads as a small copy of the
      * page and not as a footnote to itself.

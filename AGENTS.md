@@ -130,9 +130,9 @@ change, never left as a dead letter.
 | `feature-playback/` | the pill, the listening menu, the player |
 | `feature-settings/` | the settings hub and its pages |
 | `ui-kit/` | the theme and palettes, the hand-drawn icons, the shared rows and shapes, the small formatters |
-| `content-assets/` | the faces and the core pack the app ships |
+| `content-assets/` | the faces the app ships |
 | `tools/` | the offline pipeline (`--args="help"` lists it); `tools/icons/forge.py` draws every icon and the feature graphic |
-| `content/` | `quran.db`, `packs/`, `bundled/`, `manifest.json`, `recitation-manifest.json`; `raw/` is local and gitignored |
+| `content/` | `quran.db`, `packs/`, `bundled/`, `manifest.json`, `recitation-manifest.json`, `catalog.json`, `build-report.json`, `surah-names-bn.json`, `audio-sources.json`, `audit-report.md`; `raw/` is local and gitignored |
 | `play-store/` | the listing, the screenshots per form factor, the hand-off AAB |
 | `benchmark/` | the startup profile's generator, development only, never in the bundle |
 | `docs/` | the Pages site and the privacy policy Play links to |

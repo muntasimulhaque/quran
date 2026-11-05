@@ -48,7 +48,6 @@ val NightInk = Color(0xFFDAD7D0)
  * (APCA -57.6) for the small gray words every sheet carries, and this one
  * clears the -60 floor on every ground a sheet stands on. */
 val NightMuted = Color(0xFFC1BCB2)
-val NightHairline = NightOutline
 val NightGold = Color(0xFFDCB870)
 
 // The one interactive accent, and the ornament gold that belongs to the

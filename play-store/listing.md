@@ -139,12 +139,13 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 41982572303 on 15.8: all three legs green, eight
-frames each, every frame read. The eight are a reader's path
-through the app rather than the app's own map, and they are the first set to
-show the card the app hands out and the page that explains the colors on the
-Quran's own line. No frame carries the version line any more, because the
-settings hub is not one of the eight.
+The set is from capture run 41990405116 on 15.9: all three legs green, eight
+frames each, every frame read, and pixel-identical to the 15.8 set. The eight
+are a reader's path through the app rather than the app's own map, and they
+are the first set to show the card the app hands out and the page that
+explains the colors on the Quran's own line. No frame carries the version line
+any more, because the settings hub is not one of the eight. The word sheet's
+frame is new in the evidence set.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
@@ -169,6 +170,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (one answer and no close), so every frame that wants a clean
 page is taken before it.
+
+## Release notes (15.9, 393 characters)
+15.9 opens a word's meaning on its own sheet when you press and hold it: the word, its meaning, and the ayah named above, all on one center line. The reciter's word is a rounded wash again, so its letters keep their own ink and tajweed colors while the voice is on them. The Quran text, both translations, both tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (15.8, 388 characters)
 15.8 ships Al-Fatiha's seven ayahs in both voices inside the app, so the first Play on 1:1 works offline with no download offer. The two reciter timing packs ship too; every other surah still downloads its audio on your word, with the timings already on the device. The Quran text, both translations, both tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
