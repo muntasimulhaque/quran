@@ -4,14 +4,15 @@ A free, open source Quran reader for Android. It opens where you left off
 and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 15.7 (versionCode 159) was submitted to Play review from commit
-`a2e5c29e`. The signed bundle `quran-15.7-vc159.aab` has SHA-256
-`fc15cf3fe3111d7d276a47d74a6f2c58f26f18aa9c00eb461e07dd8e79e1707f`, signed by the
+**Status:** 15.8 (versionCode 160) is ready for Play review from commit
+`b9ddbfe9`. The signed bundle `quran-15.8-vc160.aab` has SHA-256
+`8dd5c52bcc0e3bc882d18fffe18efce73fd4b040010b9cb2b25ca27ac0a2332d`, signed by the
 upload key `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-Build run `41971679772` is green. The 15.6 store set stands because no visible
-UI changed. Content 1.5.0, the database `content-db-12c95dbe`. The Quran text,
-both translations, and both tafsirs are unchanged; the recitation is the
-original MP3 set under the `recitation-minshawi` and `recitation-husary` tags.
+Build run `41982572110` is green and the store capture is run `41982572303`.
+Content 1.5.0, the database `content-db-12c95dbe`. The Quran text, both
+translations, and both tafsirs are unchanged; the recitation is the original
+MP3 set under the `recitation-minshawi` and `recitation-husary` tags. The app
+now carries Al-Fatiha in both voices and both reciter timing packs.
 
 **In 15.8.** Al-Fatiha's seven ayahs for both reciters now ship inside the app, so the first Play on 1:1 works offline with no download offer. The two reciter timing packs ship too; every other surah still downloads its audio on the reader's word, with the word timings already in the app. The Quran text, both translations, both tafsirs, and the content database are unchanged.
 

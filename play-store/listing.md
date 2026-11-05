@@ -139,8 +139,8 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 41690301971 on 15.2: all three legs green on the
-first pass, eight frames each, every frame read. The eight are a reader's path
+The set is from capture run 41982572303 on 15.8: all three legs green, eight
+frames each, every frame read. The eight are a reader's path
 through the app rather than the app's own map, and they are the first set to
 show the card the app hands out and the page that explains the colors on the
 Quran's own line. No frame carries the version line any more, because the
