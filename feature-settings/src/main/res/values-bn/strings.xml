@@ -38,9 +38,10 @@
     <string name="settings_tajweed_lead">প্রতিটি রঙ এক দল নিয়ম, পড়ার একটি শব্দে দেখানো হয়েছে। যে নিয়মগুলো এই রঙে পড়ে, প্রতিটির নাম নিচে লেখা আছে।</string>
 
 
-    <string name="settings_downloaded_label">ডাউনলোড করা সূরা (%1$d)</string>
-    <string name="settings_downloaded_label_counting">ডাউনলোড করা সূরা</string>
-    <string name="settings_downloaded_empty">এই তিলাওয়াতকারীর জন্য এখনও কোনো সূরা ডাউনলোড হয়নি। যেকোনো আয়াতে প্লে ট্যাপ করে একটি যোগ করুন।</string>
+    <string name="settings_downloaded_label">এই ডিভাইসে থাকা সূরা (%1$d)</string>
+    <string name="settings_downloaded_label_counting">এই ডিভাইসে থাকা সূরা</string>
+    <string name="settings_downloaded_empty">এই তিলাওয়াতকারীর জন্য এই ডিভাইসে এখনও কোনো সূরা নেই। যেকোনো আয়াতে প্লে ট্যাপ করে একটি যোগ করুন।</string>
+    <string name="settings_downloaded_bundled">অ্যাপে অন্তর্ভুক্ত</string>
     <string name="settings_downloaded_remove">%1$s মুছুন</string>
 
     <string name="pack_action_add">যোগ করুন</string>
@@ -58,6 +59,7 @@
     <string name="about_group_recitations">তিলাওয়াত</string>
     <string name="about_version_license">সংস্করণ %1$s · MIT লাইসেন্স</string>
     <string name="about_feedback">মতামত পাঠান</string>
+    <string name="about_feedback_subject">কুরআন অ্যাপের মতামত (সংস্করণ %1$s)</string>
     <string name="about_pack_title">%1$s · %2$s</string>
     <string name="about_pack_translation">%1$s অনুবাদ</string>
     <string name="about_pack_tafsir">%1$s তাফসীর</string>

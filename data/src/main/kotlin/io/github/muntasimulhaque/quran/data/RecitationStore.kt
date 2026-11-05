@@ -85,6 +85,46 @@ class RecitationStore(private val context: Context) {
     fun bytesForSurah(folder: String, surah: Int): Long =
         filesForSurah(folder, surah).sumOf { it.length() }
 
+    /**
+     * The bytes of one surah's audio when the app carries it in its own
+     * assets, or zero when it does not.
+     *
+     * The paths come from the recitation pack, exactly as [hasAllAudio] reads
+     * them, so a surah is measured only after every one of its ayahs has been
+     * found in the same asset folder. That keeps the settings page's list and
+     * the player's whole-surah rule on one answer: a partial surah is not a
+     * surah on the device, and it gets no row and no size.
+     *
+     * An asset has no file length on disk that a reader can read without
+     * opening it, so a stored file's descriptor length is the size and a
+     * compressed file's available bytes are. The bundled set is the fourteen
+     * Al-Fatiha files, so this runs once per reciter when the settings page
+     * opens, not on the reading's path.
+     */
+    fun bundledBytes(paths: List<String>): Long {
+        if (paths.isEmpty()) return 0
+        val folder = SafePaths.folderOf(paths.first()) ?: return 0
+        if (paths.any { SafePaths.folderOf(it) != folder }) return 0
+        val names = paths.map { it.substringAfterLast('/') }
+        for (prefix in assetPrefixes) {
+            val listing = assetNames(prefix + folder)
+            if (!names.all { it in listing }) continue
+            return names.sumOf { name -> assetBytes("$prefix$folder/$name") }
+        }
+        return 0
+    }
+
+    /** One bundled file's size, from its descriptor or its stream. */
+    private fun assetBytes(path: String): Long {
+        val declared = runCatching {
+            context.assets.openFd(path).use { it.length }
+        }.getOrDefault(-1L)
+        if (declared >= 0) return declared
+        return runCatching {
+            context.assets.open(path).use { it.available().toLong() }
+        }.getOrDefault(0L)
+    }
+
     fun removeSurah(folder: String, surah: Int): Int {
         val files = filesForSurah(folder, surah)
         files.forEach { it.delete() }

@@ -75,12 +75,14 @@ import java.util.Locale
  *    session).
  * 3. The automatic download says what it is fetching: the name and the size
  *    are on the pill even when no offer preceded it (owner decision).
- * 4. The playing pill is one row in every voice, the offer's shape: the words
- *    block at the leading end and one answer at the trailing end, 64 dp tall.
- *    The place's line and the voice's line give way only at the extreme of
- *    the system scale; a voice that is not a recitation keeps one line and
- *    the voice list alone, because the pace and the end answer a recitation
- *    that is not there (owner decision, this version).
+ * 4. The playing pill is one row in every voice: the words block at the
+ *    leading end and one answer at the trailing end, 64 dp tall. The offer is
+ *    its own compact capsule, 76 dp tall, with one centered line over one
+ *    centered pair; the transfer keeps the one-row shape. The three stand at
+ *    one width. The place's line and the voice's line give way only at the
+ *    extreme of the system scale; a voice that is not a recitation keeps one
+ *    line and the voice list alone, because the pace and the end answer a
+ *    recitation that is not there (owner decision, this version).
  * 5. The block's two lines are the place over the ayah's key, the reciter's
  *    name, and the pace when it is not 1x while playing, and the reciter's
  *    name over the state's sentence when there is no recitation (owner
@@ -89,9 +91,11 @@ import java.util.Locale
  *    it at its end, and the words' own end keeps the shoulder's air, where an
  *    8 dp pad read as a name touching the border (owner decision, this
  *    session).
- * 6. The reciter is chosen on the pill and not in the settings, and the
+ * 6. The reciter is chosen on the playing pill and in the settings, and the
  *    chooser carries every voice with what it would still cost for the surah
  *    at hand, so the choice is made with the number in view (owner report).
+ *    The offer does not carry a chooser: its one line names the chosen voice
+ *    and its height belongs to the two answers (owner decision, this session).
  * 7. The pill says where the reader is: the surah's name over the ayah's
  *    key, the voice, and the pace when it is not 1x. The key and the pace
  *    never give way; the voice does, because the key says which ayah and the
@@ -116,13 +120,14 @@ import java.util.Locale
  *     places, the page's own 328 at the longest, about 230 for an offer, and
  *     about 210 for a transfer that widened again as its percent did. The
  *     playing capsule, the offer, and the transfer now stand at 328 dp on a
- *     360 dp glass, and the words and the answer keep its two ends while the
- *     ground between them takes what the words do not need. The place's line
- *     is whole at the app's text sizes, and the ayah's key is whole at every
- *     one.
+ *     360 dp glass. The playing and transfer rows keep the words and the
+ *     answer at the ends; the offer centers its one line and its pair. The
+ *     place's line is whole at the app's text sizes, and the ayah's key is
+ *     whole at every one.
  * 11. The offer prints the surah's own name whole in the line it shares with
- *     the size, in either language: the size may give way at the end of the
- *     line, the name never does (owner decision, this session).
+ *     the reciter and the size, in either language: the size may give way at
+ *     the end of the line, the name never does (owner decision, this
+ *     session).
  * 12. The transfer's X keeps the capsule's air at its end, and the block and
  *     the transport stand the app's row air apart, measured between the shapes
  *     the reader sees (owner decision).
@@ -137,6 +142,12 @@ import java.util.Locale
  *     edge while the circles keep the app's air, and gives the place 20 dp
  *     more of the capsule than a circle the size of its target allowed (owner
  *     decision, this session).
+ * 16. The offer is a compact centered capsule: one line names the request,
+ *     and Not now and Download stand as one centered pair under it. The
+ *     capsule is 76 dp tall, the least that still gives both buttons their
+ *     48 dp targets. The line is not a door: a 20 dp line cannot also be a
+ *     48 dp target, so the reciter is changed in Settings or on the playing
+ *     pill (owner decision, this session).
  */
 @RunWith(AndroidJUnit4::class)
 class PlaybackPillTest {
@@ -478,8 +489,8 @@ class PlaybackPillTest {
     /**
      * The playing pill is one row (owner decision, this session): the words
      * block at the leading end and the transport at the trailing end, on one
-     * line, in the offer's shape. It used to take two rows on a phone, with
-     * the words on a line of their own above the transport.
+     * line, in the capsule's playing shape. It used to take two rows on a
+     * phone, with the words on a line of their own above the transport.
      */
     @Test
     fun thePlayingPillIsOneRow() {
@@ -743,14 +754,14 @@ class PlaybackPillTest {
     }
 
     /**
-     * The playing pill wears the offer's shape (owner decision): one 64 dp
+     * The playing pill wears its own one-row shape (owner decision): one 64 dp
      * capsule whose words block is 48 dp tall, whose transport circles stand
      * inside their own 48 dp targets, and whose airs are the app's own above,
      * below, between, and at the end. Nothing in it touches a neighbour or the
      * capsule's edge.
      */
     @Test
-    fun thePlayingPillWearsTheOfferShape() {
+    fun thePlayingPillWearsItsOwnShape() {
         showPill()
         val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
         val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
@@ -915,13 +926,13 @@ class PlaybackPillTest {
     }
 
     /**
-     * The offer's words keep the shoulder's air at the capsule's end, where a
-     * capsule's sphere has curved in a few dp by the name's line (owner
-     * decision, this session). Without it the Bangla name, whose matra reaches
-     * the top of its line, read as cut: the ink sat 5 dp inside the border.
+     * The offer is a compact centered capsule: one line names the request, and
+     * the two answers stand as one centered pair under it. The capsule is 76
+     * dp tall, the least that still gives both buttons their 48 dp targets
+     * (owner decision, this session).
      */
     @Test
-    fun theOfferLeadsWithTheWordsAir() {
+    fun theOfferIsCompactAndCentered() {
         showPill(
             offer = ListenOffer(
                 reciter = "husary",
@@ -930,54 +941,18 @@ class PlaybackPillTest {
                 surahName = "Maryam",
                 ayah = 1,
                 bytes = 22L * 1024 * 1024,
-                options = listOf(ListenOption("husary", "Husary", 0L)),
             ),
         )
         val bar = compose.onNodeWithTag("listen-offer-bar").getUnclippedBoundsInRoot()
         val words = compose.onNodeWithTag("offer-words").getUnclippedBoundsInRoot()
+        val notNow = compose.onNodeWithTag("offer-not-now", useUnmergedTree = true).getUnclippedBoundsInRoot()
+        val answer = compose.onNodeWithTag("offer-answer", useUnmergedTree = true).getUnclippedBoundsInRoot()
+        val center = (bar.left + bar.right) / 2
         assertEquals(
-            "the offer's words keep the shoulder's air at the capsule's end",
-            Space.Block.value + Space.Tight.value,
-            (words.left - bar.left).value,
+            "the ask is the compact 76 dp capsule",
+            76f,
+            (bar.bottom - bar.top).value,
             1f,
-        )
-    }
-
-    /**
-     * The offer carries its answer and its way out: the name and the size
-     * lead, Download follows them, and Not now stands under the words. The
-     * old X was an unlabelled shape; a word says the same no where the reader
-     * can see it, without taking the surah's name's own line (owner decision,
-     * this session).
-     */
-    @Test
-    fun theOfferCarriesItsAnswerAndItsWayOut() {
-        showPill(
-            offer = ListenOffer(
-                reciter = "husary",
-                reciterName = "Husary",
-                surah = 19,
-                surahName = "Maryam",
-                ayah = 1,
-                bytes = 22L * 1024 * 1024,
-                options = listOf(ListenOption("husary", "Husary", 0L)),
-            ),
-        )
-        val bar = compose.onNodeWithTag("listen-offer-bar").getUnclippedBoundsInRoot()
-        val title = compose.onNodeWithText("Maryam \u00b7 22 MB").getUnclippedBoundsInRoot()
-        val download = compose.onNodeWithText("Download").getUnclippedBoundsInRoot()
-        val notNow = compose.onNodeWithText("Not now").getUnclippedBoundsInRoot()
-        assertTrue(
-            "the words must lead and the answer trail: title $title, download $download",
-            title.left.value < download.left.value,
-        )
-        assertTrue(
-            "the way out must stand under the answer: download $download, not now $notNow",
-            notNow.top.value > download.bottom.value,
-        )
-        assertTrue(
-            "the way out must stay inside the capsule: $notNow of $bar",
-            notNow.right.value < bar.right.value,
         )
         assertEquals(
             "the offer stands at the pill's one measure",
@@ -985,13 +960,57 @@ class PlaybackPillTest {
             (bar.right - bar.left).value,
             1f,
         )
+        assertEquals(
+            "the words keep the capsule's top air",
+            Space.Line.value,
+            (words.top - bar.top).value,
+            1f,
+        )
+        assertEquals(
+            "the request's one line stands on the capsule's middle",
+            center.value,
+            ((words.left + words.right) / 2).value,
+            1.5f,
+        )
+        assertEquals(
+            "the answer row is the capsule's 48 dp foot",
+            48f,
+            (bar.bottom - words.bottom).value,
+            1f,
+        )
+        assertEquals(
+            "the two answers stand as one centered pair",
+            center.value,
+            ((notNow.left + answer.right) / 2).value,
+            1.5f,
+        )
+        assertEquals(
+            "the answers share one row under the words",
+            answer.top.value,
+            notNow.top.value,
+            1f,
+        )
+        assertTrue(
+            "the answers stand under the request: words $words, answer $answer",
+            answer.top.value >= words.bottom.value,
+        )
+        assertTrue(
+            "Not now leads and the answer trails",
+            notNow.right.value < answer.left.value,
+        )
+        assertEquals(
+            "the pair keeps the app's action gap between the pills",
+            Space.Action.value,
+            (answer.left - notNow.right).value,
+            1.5f,
+        )
     }
 
     /**
      * The offer prints the surah's own name whole in the line it shares with
-     * the size, in the reader's own language: the name is what the reader
-     * reads, so it is the promise, and the size is what gives way when the
-     * line is at its longest (owner decision, this session).
+     * the reciter and the size, in the reader's own language: the name is what
+     * the reader reads, so it is the promise, and the size is what gives way
+     * when the line is at its longest (owner decision, this session).
      *
      * The two names are the content's own longest in each language, and the
      * sizes are the packages' real bytes: `Al-Mumtahanah` at 9.0 MB, and
@@ -1009,7 +1028,6 @@ class PlaybackPillTest {
                 surahName = "Al-Mumtahanah",
                 ayah = 1,
                 bytes = 9_395_684L,
-                options = listOf(ListenOption("husary", "Husary", 0L)),
             ),
             offerTitle = "Al-Mumtahanah \u00b7 9.0 MB",
         )
@@ -1031,7 +1049,6 @@ class PlaybackPillTest {
                 surahName = "আল-মুতাফফিফীন",
                 ayah = 1,
                 bytes = 6_077_998L,
-                options = listOf(ListenOption("husary", "Husary", 0L)),
             ),
             offerTitle = "আল-মুতাফফিফীন \u00b7 ৫.৮ এমবি",
         )

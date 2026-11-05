@@ -9,10 +9,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -31,7 +29,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
@@ -551,7 +548,6 @@ fun ReaderScreen(
     // The reading is edge to edge, so the foot of the page clears the
     // system's navigation bar itself; [readingFoot] owns that rule.
     val navigationBar = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-    val statusBar = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     // A Snackbar stands above whatever the foot of the page has raised, and
     // above the system bar when nothing is raised. The height is the one the
     // stack already measured, so the two cannot overlap (owner decision,
@@ -722,7 +718,9 @@ fun ReaderScreen(
                     // middle of a surah puts its first line under the clock.
                     // That is the page, not an oversight, and it stays: the
                     // owner weighed an inset against the full-height page and
-                    // kept the page (owner decision, this session).
+                    // kept the page. The status bar icons sit over the page
+                    // itself; no paper scrim hides the text under them (owner
+                    // decision, this session).
                     contentPaddingTop = 64.dp,
                     contentPaddingBottom = readingFoot(
                         // Nothing is raised until the reader asks for a
@@ -735,27 +733,6 @@ fun ReaderScreen(
                     ),
                 )
             }
-        }
-
-        // A quiet paper scrim under the clock, so a line scrolled to the top
-        // never sits under the status bar's icons. It is the status bar's own
-        // height plus a breath, not a second bar: the page keeps its full
-        // height and the Quran keeps its first line (owner decision, this
-        // session).
-        if (!chrome) {
-            Box(
-                Modifier
-                    .align(Alignment.TopCenter)
-                    .fillMaxWidth()
-                    .height(statusBar + Space.Line)
-                    .background(
-                        Brush.verticalGradient(
-                            0f to MaterialTheme.colorScheme.background,
-                            0.72f to MaterialTheme.colorScheme.background,
-                            1f to MaterialTheme.colorScheme.background.copy(alpha = 0f),
-                        ),
-                    ),
-            )
         }
 
         // The long press and its one-time note are gone with the gesture: the

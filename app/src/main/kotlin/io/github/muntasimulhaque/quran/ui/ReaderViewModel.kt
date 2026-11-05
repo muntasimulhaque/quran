@@ -248,10 +248,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
     /**
      * The reciters the pill's chooser offers, each with what it would still
-     * need for the surah the reader is hearing. It is the same list the
-     * offer carries, read once per surah and per reciter rather than per
-     * tap: a menu that did its reading as it opened would show the reader
-     * an empty list for a frame.
+     * need for the surah the reader is hearing. It is the one list the
+     * playing pill's panel carries, read once per surah and per reciter
+     * rather than per tap: a menu that did its reading as it opened would
+     * show the reader an empty list for a frame.
      *
      * This and the ayah below are declared here, with the rest of the state,
      * and not further down where they were written first, because the
@@ -856,10 +856,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     fun removePack(id: String) = library.remove(id)
 
     /**
-     * The reader's reciter, chosen in settings or on the offer: it becomes
-     * the default, and an ayah already playing moves to it. The move goes
-     * through the same door Play uses, so a reciter whose timings or audio
-     * are not on the device is offered, never reported as unavailable.
+     * The reader's reciter, chosen in settings or on the playing pill: it
+     * becomes the default, and an ayah already playing moves to it. The move
+     * goes through the same door Play uses, so a reciter whose timings or
+     * audio are not on the device is offered, never reported as unavailable.
      */
     fun selectRecitation(id: String) {
         if (!setRecitation(id)) return
@@ -868,8 +868,8 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
 
     /**
      * Writes the default reciter down, and answers whether it changed. The
-     * offer chooses through this too, so a reader who picks a reciter on the
-     * pill is heard from that reciter from then on.
+     * playing pill's chooser picks through this too, so a reader who chooses
+     * a reciter there is heard from that reciter from then on.
      */
     private fun setRecitation(id: String): Boolean {
         if (id == settings.recitation) return false
@@ -1063,10 +1063,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     /**
      * Listening needs two things that may both be missing: the reciter's word
      * timings, and the surah's own audio. They are asked for once, named in
-     * full, with the reciter changeable in the offer itself. Nothing is
-     * fetched until the reader says so. A surah whose audio is already in the
-     * app's assets, whole, is not missing anything (owner decision, this
-     * session).
+     * full, with the reciter already chosen and the offer naming that voice.
+     * Nothing is fetched until the reader says so. A surah whose audio is
+     * already in the app's assets, whole, is not missing anything (owner
+     * decision, this session).
      */
     private suspend fun missingForListen(recitation: String, ayah: Ayah): Long? {
         val timingsId = ContentDatabase.reciterPack(recitation)
@@ -1082,9 +1082,8 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         return bytes.takeIf { it > 0 }
     }
 
-    private suspend fun offerFor(recitation: String, ayah: Ayah, bytes: Long): ListenOffer {
-        val options = listenOptions(ayah.surah)
-        return ListenOffer(
+    private suspend fun offerFor(recitation: String, ayah: Ayah, bytes: Long): ListenOffer =
+        ListenOffer(
             reciter = recitation,
             reciterName = library.recitations.firstOrNull { it.id == recitation }?.name ?: recitation,
             surah = ayah.surah,
@@ -1092,9 +1091,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
                 ?: getApplication<Application>().getString(R.string.surah_fallback_name, ayah.surah),
             ayah = ayah.number,
             bytes = bytes,
-            options = options,
         )
-    }
 
     /** What one reciter would still need for one surah, in bytes. */
     private suspend fun listenBytes(recitation: String, surah: Int): Long {
@@ -1165,24 +1162,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         listenOffer = listenOffer?.copy(progress = value.coerceIn(0f, 1f))
     }
 
-
-    /** The reader changed the reciter on the offer: it becomes their reciter. */
-    fun chooseListenReciter(reciter: String) {
-        val offer = listenOffer ?: return
-        if (reciter == offer.reciter || offer.progress != null) return
-        setRecitation(reciter)
-        viewModelScope.launch {
-            val ayah = library.database?.ayah(offer.ayah) ?: return@launch
-            val bytes = listenBytes(reciter, ayah.surah)
-            // A reciter whose audio is already on the device needs no offer.
-            if (bytes <= 0L) {
-                listenOffer = null
-                playback.play(reciter, offer.ayah)
-                return@launch
-            }
-            listenOffer = offerFor(reciter, ayah, bytes)
-        }
-    }
 
     fun cancelListen() {
         listenJob?.cancel()

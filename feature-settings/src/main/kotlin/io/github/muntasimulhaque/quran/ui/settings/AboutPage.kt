@@ -58,9 +58,11 @@ private const val SEPARATOR = " · "
  * license screen is not part of reading the Quran, and the app does not teach
  * one.
  *
- * Corrections and rights requests travel through the project repository, and
- * the page ends with one door to it: a letter to the maker, never analytics
- * and never an account (owner decision, this session).
+ * Corrections and rights requests travel to the maker's own inbox, and the
+ * page ends with one door to it: a letter the reader's mail app composes,
+ * never analytics and never an account (owner decision, this session). The
+ * project repository remains the fallback for a phone with no mail app, so a
+ * tap is never dead.
  *
  * Content is verified when it is written, trusted by its length and moment
  * afterwards, and re-hashed when the library opens; a damaged pack is
@@ -169,23 +171,48 @@ fun AboutPage(
             usedFor = stringResource(R.string.credit_husary_use),
         )
 
-        // One door off the page, and it leaves the app for the project's own
-        // issue tracker: a letter to the maker, not analytics and not a
-        // second account (owner decision, this session).
+        // One door off the page, and it opens the reader's own mail app on a
+        // letter to the maker: a correction, a rights request, or a plain
+        // sentence about the app belongs in an inbox, not behind a GitHub
+        // account. The project repository is still the fallback when the phone
+        // has no mail app at all, so the tap is never dead (owner decision,
+        // this session).
         val context = LocalContext.current
         val feedback = stringResource(R.string.about_feedback)
+        val feedbackEmail = stringResource(R.string.about_feedback_email)
+        val feedbackSubject = stringResource(
+            R.string.about_feedback_subject,
+            localizedDigits(version),
+        )
         TextButton(
             label = feedback,
             onClick = {
-                runCatching {
-                    context.startActivity(
-                        Intent(
-                            Intent.ACTION_VIEW,
-                            Uri.parse("https://github.com/muntasimulhaque/quran/issues"),
-                        ),
-                    )
-                }.onFailure { failure ->
-                    android.util.Log.w("AboutPage", "no browser for feedback", failure)
+                val mail = Intent(
+                    Intent.ACTION_SENDTO,
+                    Uri.fromParts("mailto", feedbackEmail, null),
+                ).apply {
+                    putExtra(Intent.EXTRA_SUBJECT, feedbackSubject)
+                }
+                val opened = runCatching { context.startActivity(mail) }
+                    .onFailure { failure ->
+                        android.util.Log.i("AboutPage", "no mail app for feedback", failure)
+                    }
+                    .isSuccess
+                if (!opened) {
+                    runCatching {
+                        context.startActivity(
+                            Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("https://github.com/muntasimulhaque/quran/issues"),
+                            ),
+                        )
+                    }.onFailure { failure ->
+                        android.util.Log.w(
+                            "AboutPage",
+                            "no mail app and no browser for feedback",
+                            failure,
+                        )
+                    }
                 }
             },
             modifier = Modifier.padding(

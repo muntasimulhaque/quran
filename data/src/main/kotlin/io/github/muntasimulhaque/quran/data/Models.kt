@@ -275,8 +275,20 @@ data class JuzStart(
     val verseKey: String,
 )
 
-/** One downloaded surah of one reciter, offered for removal. */
-data class DownloadedSurah(val surah: Int, val name: String, val bytes: Long)
+/**
+ * One surah of one reciter that is on the device, either downloaded by the
+ * reader or bundled in the app's own assets.
+ *
+ * [bundled] is the one fact the settings page needs to tell the two apart: a
+ * bundled surah cannot be removed, because its files travel with the app, so
+ * the page shows the word instead of a Remove that would do nothing.
+ */
+data class DownloadedSurah(
+    val surah: Int,
+    val name: String,
+    val bytes: Long,
+    val bundled: Boolean = false,
+)
 
 /** Everything one reading row needs: the ayah, its words, and its translations. */
 data class ReadingRow(

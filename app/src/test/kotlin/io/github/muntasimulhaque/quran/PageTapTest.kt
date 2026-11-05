@@ -1,7 +1,6 @@
 package io.github.muntasimulhaque.quran
 
 import io.github.muntasimulhaque.quran.playback.ListenOffer
-import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
 import io.github.muntasimulhaque.quran.ui.reader.RaisedAnswer
 import io.github.muntasimulhaque.quran.ui.reader.raisedAnswer
@@ -52,7 +51,6 @@ class PageTapTest {
         surahName = "Al-Baqarah",
         ayah = 1,
         bytes = 22L * 1024 * 1024,
-        options = listOf(ListenOption("husary", "Husary", 0L)),
         progress = progress,
         failed = failed,
     )

@@ -43,16 +43,18 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * recitation is not there. Downloading only ever starts from the reader's own
  * tap on Download, and only for one surah.
  *
- * **The pill is one row, the offer's shape, in every voice** (owner decision,
- * this session). The words are a line of type over a line: the place over the
- * voice and the ayah's key while playing, and the reciter's name over the
- * state's own sentence when there is no recitation. The answer stands at the trailing end, one shape: the
- * transport while playing, Retry on a failure, the app's one X on a transfer,
- * the Download word on a request, and nothing at all on an answer the app
- * cannot give. The capsule is 64 dp tall, or 74 with a download's line under
- * it. Before this the playing pill stacked a words row over a transport row
- * and paid 120 dp for a line of words that fits beside the controls, and the
- * offer carried a second, shorter block, so one control wore two shapes.
+ * **The pill is one row in every voice** (owner decision, this session). The
+ * words are a line of type over a line: the place over the voice and the
+ * ayah's key while playing, and the reciter's name over the state's own
+ * sentence when there is no recitation. The answer stands at the trailing
+ * end, one shape: the transport while playing, Retry on a failure, the app's
+ * one X on a transfer, the Download word on a request, and nothing at all on
+ * an answer the app cannot give. The capsule is 64 dp tall, or 74 with a
+ * download's line under it. The offer is its own compact capsule, 76 dp tall,
+ * with one centered line over one centered pair; the playing pill and the
+ * transfer keep the one-row shape. Before this the playing pill stacked a
+ * words row over a transport row and paid 120 dp for a line of words that
+ * fits beside the controls.
  *
  * **The playing words are one block, and one door.** Its two lines are the
  * place, then the voice and the ayah's key, and the panel it opens is one
@@ -166,7 +168,6 @@ fun PlaybackBar(
     onCancelDownload: () -> Unit,
     onOfferConfirm: () -> Unit = {},
     onOfferCancelDownload: () -> Unit = {},
-    onOfferReciter: (String) -> Unit = {},
     /** The pace, and the end of the audio, set from the panel exactly as from
      * settings. */
     onSpeed: (Float) -> Unit = {},
@@ -179,7 +180,6 @@ fun PlaybackBar(
             title = offerTitle,
             onConfirm = onOfferConfirm,
             onCancelDownload = onOfferCancelDownload,
-            onReciter = onOfferReciter,
             modifier = modifier.padding(horizontal = BarGutter),
         )
         return

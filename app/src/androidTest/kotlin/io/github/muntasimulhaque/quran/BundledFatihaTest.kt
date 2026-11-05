@@ -136,6 +136,30 @@ class BundledFatihaTest {
                 "2:1 is a sample, not a whole surah",
                 library.hasSurahAudio("minshawi", 2),
             )
+            // The settings page answers what the reader can play offline, so
+            // the bundled Fatiha is on its list in both voices, marked as
+            // bundled because the app's own asset cannot be removed.
+            for (reciter in listOf("minshawi", "husary")) {
+                val rows = library.downloadedSurahs(reciter)
+                assertEquals(
+                    "$reciter must list the bundled Al-Fatiha",
+                    listOf(1),
+                    rows.map { it.surah },
+                )
+                assertTrue(
+                    "$reciter's Al-Fatiha must say it is bundled",
+                    rows.single().bundled,
+                )
+                assertTrue(
+                    "$reciter's Al-Fatiha must carry its bundled size",
+                    rows.single().bytes > 0,
+                )
+            }
+            assertEquals(
+                "both reciters carry one playable surah",
+                1,
+                library.downloadedTotals()["husary"]?.first,
+            )
             for (path in fatihaPaths(MINSHAWI_FOLDER) + fatihaPaths(HUSARY_FOLDER)) {
                 assertEquals(
                     "$path must come from the app's own assets",

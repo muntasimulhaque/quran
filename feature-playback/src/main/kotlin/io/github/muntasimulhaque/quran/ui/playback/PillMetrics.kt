@@ -75,8 +75,11 @@ internal val PillMeasure = 328.dp
 internal val PillAir = Space.Line
 
 /**
- * The air the words' own end keeps from the capsule on every pill the app
- * draws: the offer, the transfer, and the playing capsule alike.
+ * The air the words' own end keeps from the capsule on the pills that lead
+ * with their words: the transfer and the playing capsule alike. The offer's
+ * one line is centered and keeps [Space.Section] at each end instead, because
+ * it is the capsule's whole first row and the sphere's curve would clip a line
+ * that started at its widest point (owner decision, this session).
  *
  * The capsule's end is a sphere, half its height, and the words do not stand
  * on the capsule's middle: the name's line starts about 15 dp below the

@@ -2,6 +2,7 @@ package io.github.muntasimulhaque.quran.ui.settings
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -111,10 +112,16 @@ fun RecitersPage(
 }
 
 /**
- * The downloaded surahs of one reciter, with what each one weighs. A surah
- * removed disappears from the list in the same frame, because the list the
- * reader sees is the list the removal changed: a row that stayed after its
- * Remove was tapped would read as a button that did nothing.
+ * The surahs of one reciter that are on the device, bundled or downloaded,
+ * with what each one weighs. A surah removed disappears from the list in the
+ * same frame, because the list the reader sees is the list the removal
+ * changed: a row that stayed after its Remove was tapped would read as a
+ * button that did nothing.
+ *
+ * A bundled surah, Al-Fatiha in both voices, is part of the app's own assets.
+ * It is listed with its size like a downloaded one, because the reader asked
+ * which surahs are already there, and it has no Remove: the word Bundled says
+ * why the row stays and why there is no button that could take it away.
  *
  * The block is indented under the reciter's own name and its label carries a
  * disclosure arrow, so the surahs read as belonging to the reciter above them
@@ -128,12 +135,14 @@ fun RecitersPage(
  * count is on its way the label carries no number, so the count appears in
  * place as a text change that moves nothing.
  *
- * **The last surah takes the reciter's pack with it** (owner decision, this
- * session). The pack is the timings and audio paths of the voice, so with no
- * audio on the device it is a held file with nothing to hold: the row's own
- * Remove is the whole act, and the separate Remove <reciter> button that
- * used to stand at the foot of the list is gone. The voice stays in the list
- * above, and the next Play fetches the pack again with the surah it needs.
+ * **The last downloaded surah takes the reciter's pack with it** (owner
+ * decision, this session). The pack is the timings and audio paths of the
+ * voice, so with no audio on the device it is a held file with nothing to
+ * hold: the row's own Remove is the whole act, and the separate Remove
+ * <reciter> button that used to stand at the foot of the list is gone. The
+ * voice stays in the list above, and the next Play fetches the pack again
+ * with the surah it needs. A bundled surah is the exception: the pack stays
+ * while the app's own audio still plays through its timings.
  */
 @Composable
 private fun ReciterDownloads(
@@ -166,19 +175,26 @@ private fun ReciterDownloads(
         // these rows and never applied, because the button holds its own
         // floor and reads no provider).
         rows.forEach { row ->
-            DownloadedSurahRow(row) {
-                scope.launch {
-                    actions.onRemoveDownloads(recitation, row.surah)
-                    // Whatever the removal did, the list is read from the
-                    // device again: the row goes when its files are gone.
-                    val left = downloadedSurahs(recitation).sortedBy { it.surah }
-                    downloaded = left
-                    // The last file is the pack's own reason to stay, so it
-                    // goes with the file. The voice row above stays, and the
-                    // next Play fetches the pack again with its surah.
-                    if (left.isEmpty()) onRemovePack()
+            val remove: (() -> Unit)? = if (row.bundled) {
+                null
+            } else {
+                {
+                    scope.launch {
+                        actions.onRemoveDownloads(recitation, row.surah)
+                        // Whatever the removal did, the list is read from the
+                        // device again: the row goes when its files are gone.
+                        val left = downloadedSurahs(recitation).sortedBy { it.surah }
+                        downloaded = left
+                        // The last downloaded file is the pack's own reason to
+                        // stay, so it goes with the file. A bundled surah is
+                        // not a download and keeps the timings it plays
+                        // through. The voice row above stays either way, and
+                        // the next Play fetches the pack again if it left.
+                        if (left.isEmpty()) onRemovePack()
+                    }
                 }
             }
+            DownloadedSurahRow(row = row, onRemove = remove)
         }
     }
     Spacer(Modifier.height(Space.Block))
@@ -226,9 +242,9 @@ private fun ReciterDownloadsDoor(open: Boolean, count: Int?, onClick: () -> Unit
     }
 }
 
-/** One downloaded surah: its name, its size, and the one action it needs. */
+/** One surah on the device: its name, its size, and the one action it has. */
 @Composable
-private fun DownloadedSurahRow(row: DownloadedSurah, onRemove: () -> Unit) {
+private fun DownloadedSurahRow(row: DownloadedSurah, onRemove: (() -> Unit)?) {
     val remove = stringResource(R.string.settings_downloaded_remove, row.name)
     Row(
         modifier = Modifier
@@ -261,18 +277,36 @@ private fun DownloadedSurahRow(row: DownloadedSurah, onRemove: () -> Unit) {
                 modifier = Modifier.padding(top = Space.Tight),
             )
         }
-        // A list of identical Remove buttons needs each one to say what it
-        // removes; the button's own word is the same on every row, so the
-        // name of the surah is said beside it (owner decision, the theme and
-        // consistency session).
-        TextButton(
-            label = stringResource(R.string.pack_action_remove),
-            onClick = onRemove,
-            modifier = Modifier
-                .padding(start = Space.Row)
-                .semantics { contentDescription = remove },
-            quiet = true,
-        )
+        if (onRemove != null) {
+            // A list of identical Remove buttons needs each one to say what it
+            // removes; the button's own word is the same on every row, so the
+            // name of the surah is said beside it (owner decision, the theme
+            // and consistency session).
+            TextButton(
+                label = stringResource(R.string.pack_action_remove),
+                onClick = onRemove,
+                modifier = Modifier
+                    .padding(start = Space.Row)
+                    .semantics { contentDescription = remove },
+                quiet = true,
+            )
+        } else {
+            // A bundled surah cannot be removed: its files are the app's own
+            // assets. The row still says what it is and what it weighs, and
+            // the word takes the place the button cannot.
+            Box(
+                modifier = Modifier
+                    .padding(start = Space.Row)
+                    .height(48.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = stringResource(R.string.settings_downloaded_bundled),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
     }
 }
 

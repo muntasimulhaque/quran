@@ -597,10 +597,11 @@ class ContentLibrary(
     /**
      * The reciter the app falls back to when the selected one is removed.
      * The remaining reciter with the most audio on the device wins, because
-     * that is the one the reader has actually been listening to; with nothing
-     * downloaded anywhere the fallback is Husary, the quiet second voice, and
-     * only then the list's own order. A removed reciter is never chosen, even
-     * if a file of his lingers.
+     * that is the one the reader has actually been listening to; the bundled
+     * Al-Fatiha counts because it plays offline, and when no reciter has any
+     * audio at all the fallback is Husary, the quiet second voice, and only
+     * then the list's own order. A removed reciter is never chosen, even if a
+     * file of his lingers.
      */
     private suspend fun fallbackReciter(removed: String): String {
         val candidates = recitations.filter { it.id != removed }
@@ -656,39 +657,47 @@ class ContentLibrary(
     fun packageFor(recitation: String, surah: Int): RecitationPackage? =
         manifest.packageFor(recitation, surah)
 
-    /** Surah to bytes on disk for one reciter, among the published packages. */
+    /**
+     * Surah to bytes on the device for one reciter, downloaded or bundled,
+     * among the published packages.
+     *
+     * The list answers what the reader can play offline, not only what was
+     * downloaded: Al-Fatiha travels in the app's own assets, and a reader who
+     * opens the Reciters page must meet it there. The two are told apart by
+     * [DownloadedSurah.bundled], because a bundled surah cannot be removed and
+     * the page must not offer a Remove that does nothing.
+     */
     suspend fun downloadedSurahs(recitation: String): List<DownloadedSurah> = withContext(Dispatchers.IO) {
+        val db = database ?: return@withContext emptyList()
         val folder = reciterFolder(recitation) ?: return@withContext emptyList()
         val byNumber = surahs.associateBy { it.number }
         manifest.surahs(recitation).mapNotNull { surah ->
-            val bytes = recitationStore.bytesForSurah(folder, surah)
-            if (bytes <= 0) {
-                null
+            val name = byNumber[surah]?.nameSimple
+                ?: application.getString(R.string.surah_fallback_name, surah)
+            val imported = recitationStore.bytesForSurah(folder, surah)
+            if (imported > 0) {
+                DownloadedSurah(surah = surah, name = name, bytes = imported, bundled = false)
             } else {
-                DownloadedSurah(
-                    surah = surah,
-                    name = byNumber[surah]?.nameSimple
-                        ?: application.getString(R.string.surah_fallback_name, surah),
-                    bytes = bytes,
-                )
+                val paths = db.recitationAudioPaths(recitation, surah)
+                if (!recitationStore.hasAllAudio(paths)) return@mapNotNull null
+                val bytes = recitationStore.bundledBytes(paths)
+                if (bytes <= 0) {
+                    null
+                } else {
+                    DownloadedSurah(surah = surah, name = name, bytes = bytes, bundled = true)
+                }
             }
         }.sortedBy { it.surah }
     }
 
-    /** Every reciter's downloaded count and total, newest-fallback order. */
+    /** Every reciter's available count and total, newest-fallback order. */
     suspend fun downloadedTotals(): Map<String, Pair<Int, Long>> = withContext(Dispatchers.IO) {
-        recitations.associate { recitation ->
-            val folder = reciterFolder(recitation.id)
-            val found = if (folder == null) {
-                emptyList()
-            } else {
-                manifest.surahs(recitation.id).mapNotNull { surah ->
-                    val bytes = recitationStore.bytesForSurah(folder, surah)
-                    if (bytes > 0) bytes else null
-                }
-            }
-            recitation.id to (found.size to found.sum())
+        val totals = HashMap<String, Pair<Int, Long>>(recitations.size)
+        for (recitation in recitations) {
+            val rows = downloadedSurahs(recitation.id)
+            totals[recitation.id] = rows.size to rows.sumOf { it.bytes }
         }
+        totals
     }
 
     suspend fun removeDownloads(recitation: String, surah: Int): Boolean = withContext(Dispatchers.IO) {

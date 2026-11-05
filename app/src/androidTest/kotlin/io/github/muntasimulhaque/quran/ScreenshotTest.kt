@@ -552,7 +552,7 @@ class ScreenshotTest {
             Thread.sleep(800)
         }
 
-        // 8. The recitation's own door, last: the pill's offer names the
+        // 8. The recitation's own offer, last: the compact capsule names the
         // surah, the reciter, and the size before a tap, and it stays on the
         // reading until the reader answers it.
         openTheAyahActions()

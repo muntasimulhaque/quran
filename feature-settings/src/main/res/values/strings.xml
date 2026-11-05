@@ -41,9 +41,10 @@
     <string name="settings_tajweed_lead">Each color is one family of rules, shown on a word from the reading. Every rule it covers is named under it.</string>
 
 
-    <string name="settings_downloaded_label">Downloaded surahs (%1$d)</string>
-    <string name="settings_downloaded_label_counting">Downloaded surahs</string>
-    <string name="settings_downloaded_empty">No surahs downloaded for this reciter yet. Tap Play on any ayah to add one.</string>
+    <string name="settings_downloaded_label">Surahs on this device (%1$d)</string>
+    <string name="settings_downloaded_label_counting">Surahs on this device</string>
+    <string name="settings_downloaded_empty">No surahs on this device for this reciter yet. Tap Play on any ayah to add one.</string>
+    <string name="settings_downloaded_bundled">Bundled</string>
     <string name="settings_downloaded_remove">Remove %1$s</string>
 
     <string name="pack_action_add">Add</string>
@@ -61,6 +62,8 @@
     <string name="about_group_recitations">Recitations</string>
     <string name="about_version_license">Version %1$s · MIT license</string>
     <string name="about_feedback">Send feedback</string>
+    <string name="about_feedback_email" translatable="false">muntasim.haque@gmail.com</string>
+    <string name="about_feedback_subject">Quran app feedback (v%1$s)</string>
     <string name="about_pack_title">%1$s · %2$s</string>
     <string name="about_pack_translation">%1$s translation</string>
     <string name="about_pack_tafsir">%1$s tafsir</string>

@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 16.0 (versionCode 162)
+Version: 16.1 (versionCode 163)
 
 ## Listing
 
@@ -164,12 +164,15 @@ What each set shows, in order:
    "Search in" door
 6. The Tajweed page: seven color families, each with its word and its rules
 7. The reading at night
-8. The recitation's own door: the pill's offer, naming the surah, the reciter,
-   and the size before a tap
+8. The recitation's own offer: the compact capsule naming the surah, the
+   reciter, and the size before a tap, with Not now and Download under it
 
 The last frame is last on purpose. The offer stays on the reading until the
-reader answers it (one answer and no close), so every frame that wants a clean
-page is taken before it.
+reader answers it (Not now, Download, the page, or Back), so every frame that
+wants a clean page is taken before it.
+
+## Release notes (16.1, 491 characters)
+16.1 makes the quiet parts fit together. The recitation offer is a compact centered capsule: the reciter, surah, and size on one line, with Not now and Download under it. The reading runs under the clock again. Footnotes and word meanings share the app's sheet title and place line, the Reciters page lists the bundled Al-Fatiha, and Send feedback opens your mail app. The Quran text, both translations, both tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (16.0, 417 characters)
 16.0 gives the page back to the text. The quiet line at the foot is gone, and the bar that holds Browse, Search, and the surah and juz now leaves when you start scrolling and returns with a tap. Aa leaves the bar; the text size lives in Settings, with its sample. The page runs to its own foot. The Quran text, both translations, both tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.

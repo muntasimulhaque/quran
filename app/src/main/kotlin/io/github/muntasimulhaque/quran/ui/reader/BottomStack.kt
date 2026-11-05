@@ -162,7 +162,6 @@ internal fun BottomStack(
                     stringResource(R.string.playback_offer, pending.surahName, formatBytes(pending.bytes))
                 }.orEmpty(),
                 onOfferConfirm = { viewModel.confirmListen() },
-                onOfferReciter = { viewModel.chooseListenReciter(it) },
                 reciterName = reciterName,
                 reciterId = reciterId,
                 reciterOptions = reciterOptions,

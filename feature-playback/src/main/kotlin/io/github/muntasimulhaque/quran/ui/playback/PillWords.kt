@@ -41,104 +41,91 @@ import kotlin.math.min
 import io.github.muntasimulhaque.quran.ui.theme.compactLabel
 
 /**
- * The offer's words over its answer: the reciter's name, and the size or
- * the state's sentence.
+ * The transfer's words: the reciter's name over the state's sentence, with
+ * the progress line under the row.
  *
- * It is one door to the reciter chooser, because before there is anything
- * to hear the one question is which voice to fetch. The block carries the
- * app's 48 dp target, so the two lines and the chevron are not the whole of
- * what a finger has to hit; its 4 dp inset keeps the type off its own press
- * shape, and the caller gives its end [PillEndAir]. The second line gives
- * way before the first: the name names the door, and a size or a percent
- * may end in an ellipsis on a glass narrow for it. Neither line wraps.
- *
- * The playing capsule wears [PlayingWordsBlock] now, because the place leads
- * there and the ayah key sits with the voice (owner decision, this version).
- * The two blocks keep this one silhouette: a control over the page must not
- * change its shape with its voice (owner decision, an earlier version).
+ * The transfer keeps the old two-line block because it is a one-row capsule
+ * with the X at its end, not the offer's two centered rows. The block is not
+ * a door: while a package is on its way, the only control is the X, and a
+ * chevron over words that answer nothing is a door that lies (owner decision,
+ * this session).
  */
 @Composable
-internal fun OfferWordsBlock(
+internal fun TransferWordsBlock(
     /** The reciter's name, or whatever names the thing the block is about. */
     name: String,
-    /** The size, the percent, or the state's sentence. */
+    /** The percent or the state's sentence. */
     title: String,
-    /**
-     * The door the block is, or null where there is nothing to open: while a
-     * package is on its way, the transfer's X is the one thing to press, and
-     * a chevron over words that answer nothing is a door that lies.
-     */
-    onOpen: (() -> Unit)?,
     modifier: Modifier = Modifier,
-    /** True while the title is a failure the reader has to hear. */
-    announce: Boolean = false,
 ) {
-    val press = remember { MutableInteractionSource() }
     Column(
-        modifier = modifier
-            .then(
-                if (onOpen == null) {
-                    Modifier
-                } else {
-                    Modifier
-                        .clickable(
-                            interactionSource = press,
-                            indication = null,
-                            role = Role.Button,
-                            onClick = onOpen,
-                        )
-                        .minimumInteractiveComponentSize()
-                },
-            )
-            .clip(Radii.Pill)
-            .focusRing(press, Radii.Pill)
-            .then(
-                if (onOpen == null) {
-                    Modifier
-                } else {
-                    Modifier.indication(press, ripple(color = MaterialTheme.colorScheme.primary))
-                },
-            )
-            .padding(horizontal = Space.Tight, vertical = 2.dp),
+        modifier = modifier.padding(horizontal = Space.Tight, vertical = 2.dp),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = name,
-                // A name in a control, not a group label: 13 at Regular, with
-                // the accent and the chevron carrying the door. The title is
-                // the compact 14 Medium line, so the reader sees the state
-                // before who is offering it (owner decision, this version).
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                // The name is measured first and keeps its whole width; the
-                // chevron needs its own room after it, never over it.
-                modifier = Modifier.weight(1f, fill = false),
-            )
-            if (onOpen != null) {
-                IconGlyph(
-                    icon = Icon.Chevron,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .padding(start = Space.Tight)
-                        .size(GlyphSize.ChevronInline),
-                )
-            }
-        }
+        Text(
+            text = name,
+            // A name in a control, not a group label: 13 at Regular. The
+            // title is the compact 14 Medium line, so the reader sees the
+            // state before who is offering it (owner decision, this version).
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.primary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
         Text(
             text = title,
             style = compactLabel(),
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.then(
-                if (announce) {
-                    Modifier.semantics { liveRegion = LiveRegionMode.Polite }
-                } else {
-                    Modifier
-                },
-            ),
+        )
+    }
+}
+
+/**
+ * The offer's one line: the reciter's name, then the surah and its size, in
+ * one centered line.
+ *
+ * The line is a name and a fact, not a door. A 20 dp line cannot also be the
+ * 48 dp target a finger needs, and a target that reached into the buttons'
+ * row would steal the air above them; the compact offer spends its height on
+ * the two answers instead. The reciter is changed in Settings or on the
+ * playing pill (owner decision, this session).
+ */
+@Composable
+internal fun OfferLine(
+    name: String,
+    title: String,
+    modifier: Modifier = Modifier,
+    /** True while the title is a failure the reader has to hear. */
+    announce: Boolean = false,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = name,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.primary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        Text(
+            text = title,
+            style = compactLabel(),
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .padding(start = Space.Line)
+                .then(
+                    if (announce) {
+                        Modifier.semantics { liveRegion = LiveRegionMode.Polite }
+                    } else {
+                        Modifier
+                    },
+                ),
         )
     }
 }

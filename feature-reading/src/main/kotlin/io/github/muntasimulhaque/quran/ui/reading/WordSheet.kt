@@ -1,11 +1,11 @@
 package io.github.muntasimulhaque.quran.ui.reading
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
@@ -22,6 +21,8 @@ import io.github.muntasimulhaque.quran.core.Arabic
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
+import io.github.muntasimulhaque.quran.ui.kit.SheetPlace
+import io.github.muntasimulhaque.quran.ui.kit.SheetTitle
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
@@ -47,9 +48,14 @@ import io.github.muntasimulhaque.quran.ui.theme.prose
  *
  * The word is the page's word: the reader's word-meaning size, the page ink,
  * and the tajweed colors when the reader has them on. The meaning is the
- * reader's language in the reading voice, and the reference is the app's own
- * small label. The sheet is not a second reading of the ayah; it holds the
- * one word the reader asked for and the place it holds (owner decision, this
+ * reader's language in the reading voice, and the place is the app's own meta
+ * line under the sheet's title. The sheet is not a second reading of the
+ * ayah; it holds the one word the reader asked for and the place it holds
+ * (owner decision, this session).
+ *
+ * The sheet names itself where every sheet does: [SheetTitle]'s 20 at
+ * SemiBold, then the place in the same 13 meta line the footnote sheet
+ * wears. The word remains the subject under both (owner decision, this
  * session).
  */
 internal data class OpenWord(
@@ -87,21 +93,28 @@ internal fun WordSheet(
                 .testTag("word-sheet"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // The reference is the card's label, not its title: the word is.
-            // A reader who opened the wrong word still knows the ayah before
-            // reading the meaning, the same duty the footnote's head does.
-            Text(
+            // The sheet names itself where every sheet does, then the place
+            // under it: the word is the subject, and a reader who opened the
+            // wrong word still knows the ayah before reading the meaning, the
+            // same duty the footnote's head does.
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center,
+            ) {
+                SheetTitle(text = stringResource(R.string.reading_word_sheet_name))
+            }
+            SheetPlace(
                 text = stringResource(
-                    R.string.reading_word_sheet_where,
+                    R.string.reading_sheet_where,
                     surahName,
                     localizedDigits(word.reference),
                 ),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Space.Tight),
             )
-            // The word is the one heading on the sheet. It is drawn from the
+            // The word is the one subject on the sheet. It is drawn from the
             // page's palette so the reader meets the same word and the same
             // rule colors they pressed and held, and it speaks the portable
             // form rather than the print's encoding (owner decision, this
@@ -119,7 +132,6 @@ internal fun WordSheet(
                     .padding(top = Space.Block)
                     .semantics {
                         contentDescription = Arabic.portableText(word.word)
-                        heading()
                     },
             )
             Text(

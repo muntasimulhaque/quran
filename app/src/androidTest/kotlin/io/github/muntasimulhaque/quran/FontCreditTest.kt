@@ -27,7 +27,9 @@ import org.junit.runner.RunWith
  * this session). What the six open faces need is a copy of their license in
  * the package, and it ships there beside them, the way every library's LICENSE
  * travels in META-INF. The page's one door is the letter to the maker, which
- * leaves for the project's issue tracker and touches nothing on the device.
+ * opens the reader's own mail app on the maker's inbox and touches nothing on
+ * the device. The project's issue tracker is only the fallback for a phone
+ * with no mail app.
  */
 @RunWith(AndroidJUnit4::class)
 class FontCreditTest {
@@ -67,6 +69,11 @@ class FontCreditTest {
         compose.onNodeWithText(context.getString(SettingsR.string.about_feedback))
             .performScrollTo()
             .assertIsDisplayed()
+        assertEquals(
+            "the feedback letter goes to the maker's own inbox",
+            "muntasim.haque@gmail.com",
+            context.getString(SettingsR.string.about_feedback_email),
+        )
         assertEquals(
             "About holds its one door: the letter to the maker",
             1,

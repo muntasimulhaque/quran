@@ -46,7 +46,7 @@
     <string name="reading_reminder_not_now">এখন নয়</string>
 
     <string name="reading_footnote_sheet_name">টীকা</string>
-    <string name="reading_footnote_title">টীকা %1$d  ·  %2$s %3$s</string>
+    <string name="reading_footnote_heading">টীকা %1$s</string>
     <string name="reading_word_sheet_name">শব্দের অর্থ</string>
-    <string name="reading_word_sheet_where">%1$s %2$s</string>
+    <string name="reading_sheet_where">%1$s %2$s</string>
 </resources>
