@@ -4,16 +4,16 @@ A free, open source Quran reader for Android. It opens where you left off
 and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 16.0 (versionCode 162) was submitted to Play review from commit
-`3526fdee`. The signed bundle `quran-16.0-vc162.aab` has SHA-256
-`17fa19135643520274bfc4e4b2dab0a95b75131e345b0e89f77766544da9826e`, signed by the
+**Status:** 16.1 (versionCode 163) is ready for Play review from commit
+`9ecf8310`. The signed bundle `quran-16.1-vc163.aab` has SHA-256
+`b2dbe024416b25bfc2ad74f75a00a39ff4231d72ae1a99126efc0b59d385902f`, signed by the
 upload key `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-Build run `42034914113` is green and the store capture is run `42034913960`.
-The eight store frames show the page with no bar over it and the offer card
-alone at the foot; every frame was read on all three form factors. Content
-1.5.0, the database `content-db-12c95dbe`. The Quran text, both translations,
-both tafsirs, and the recitation are unchanged; the app still carries
-Al-Fatiha in both voices and both reciter timing packs.
+Build run `42083216359` is green and the store capture is run `42083216251`.
+The eight store frames show the page under the clock and the compact centered
+offer; every frame was read on all three form factors. Content 1.5.0, the
+database `content-db-12c95dbe`. The Quran text, both translations, both
+tafsirs, and the recitation are unchanged; the app still carries Al-Fatiha in
+both voices and both reciter timing packs.
 
 **In 16.1.** The recitation offer is a compact centered capsule: the reciter, the surah, and the size on one line, with Not now and Download centered under it. The reading runs under the status bar again, with no paper band under the clock. The footnote and word meaning sheets name themselves with the app's one sheet title and put the place under it at the meta size, and the Reciters page lists the bundled Al-Fatiha under both voices as a surah on the device. Send feedback opens the reader's mail app on the maker's inbox, with the project repository as the fallback. The Quran text, both translations, both tafsirs, and the content database are unchanged.
 

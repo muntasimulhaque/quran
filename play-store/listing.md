@@ -139,13 +139,12 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 41990405116 on 15.9: all three legs green, eight
-frames each, every frame read, and pixel-identical to the 15.8 set. The eight
-are a reader's path through the app rather than the app's own map, and they
-are the first set to show the card the app hands out and the page that
-explains the colors on the Quran's own line. No frame carries the version line
-any more, because the settings hub is not one of the eight. The word sheet's
-frame is new in the evidence set.
+The set is from capture run 42083216251 on 16.1: all three legs green, eight
+frames each, every frame read. The eight are a reader's path through the app
+rather than the app's own map, and the last frame is the compact centered
+offer. The page under the clock and the offer are the two visible changes in
+the set; the word sheet's own frame is in the evidence set. No frame carries
+the version line, because the settings hub is not one of the eight.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
