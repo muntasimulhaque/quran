@@ -275,38 +275,6 @@
       "assetUrl": null
     },
     {
-      "id": "mutashabihat",
-      "name": "Mutashabihat ul Quran",
-      "source": "Quranic Universal Library (QUL) by Tarteel",
-      "url": "https://qul.tarteel.ai/resources/mutashabihat/73",
-      "resourceId": "73",
-      "format": "json",
-      "license": "Distributed via QUL",
-      "licenseBn": "QUL-এর মাধ্যমে বিতরণ",
-      "credit": "Quranic Universal Library (QUL) by Tarteel",
-      "usedFor": "Similar ayat, version 2 feature",
-      "path": "content/raw/qul/mutashabihat.json",
-      "bytes": 39009,
-      "sha256": "2ac8d84e90cf885980ee91756e77240c6bb69b701b4b202d3df282bd2a9181c1",
-      "assetUrl": null
-    },
-    {
-      "id": "topics",
-      "name": "Topics",
-      "source": "Quranic Universal Library (QUL) by Tarteel",
-      "url": "https://qul.tarteel.ai/resources/ayah-topics/45",
-      "resourceId": "45",
-      "format": "sqlite",
-      "license": "Distributed via QUL",
-      "licenseBn": "QUL-এর মাধ্যমে বিতরণ",
-      "credit": "Quranic Universal Library (QUL) by Tarteel",
-      "usedFor": "Topic index, version 2 feature",
-      "path": "content/raw/qul/topics.sqlite.zip",
-      "bytes": 145471,
-      "sha256": "836ad98b66736b576c2316e2c0a7a11b7a2f48f6b07ff0cdcf3fb15d574d2e11",
-      "assetUrl": null
-    },
-    {
       "id": "recitation-minshawi",
       "name": "Muhammad Siddiq Al-Minshawi, murattal",
       "source": "Quranic Universal Library (QUL) by Tarteel",
