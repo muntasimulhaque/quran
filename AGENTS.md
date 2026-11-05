@@ -95,11 +95,12 @@ change, never left as a dead letter.
    settings are sheets raised from a slim bar.
 10. **Simple to the bone, fast to the point of invisible, quiet.** No wizard,
     no dialog before the text, no feature that asks a choice before the reading.
-    The reminder is offered after the first surah, never before it. A quiet
-    folio line keeps the reader's place on the page; the full chrome is asked
-    for, not resident. Cold start lands on readable text with no spinner, the
-    reading is a scroll through rows already measured, and nothing blocks the
-    main thread. No streaks, badges, social, or guilt.
+    The reminder is offered after the first surah, never before it. The bar
+    carries the place and is asked for, never resident: it leaves when the
+    reader moves the page, and the page between visits is bare. Cold start
+    lands on readable text with no spinner, the reading is a scroll through
+    rows already measured, and nothing blocks the main thread. No streaks,
+    badges, social, or guilt.
 11. **No AI attribution anywhere.** No `Co-Authored-By` trailers, no "generated
     with" footers, no name in contributors, commits, or code.
 12. **The owner's law.** The build waits for the owner's word, and one build

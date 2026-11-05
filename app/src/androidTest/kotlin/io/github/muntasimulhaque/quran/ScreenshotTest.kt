@@ -79,10 +79,10 @@ class ScreenshotTest {
      */
     private fun capture(name: String) {
         // A single copy can land while the list is still settling after the
-        // foot's first measurement, which tore the phone's first frame: a
-        // line of the translation was drawn twice and the folio had not yet
-        // arrived. The frame is kept only when two copies in a row are
-        // identical, so a still page photographs the same twice.
+        // first measurement, which tore the phone's first frame: a line of
+        // the translation was drawn twice. The frame is kept only when two
+        // copies in a row are identical, so a still page photographs the same
+        // twice.
         var prior: Bitmap? = null
         repeat(6) { attempt ->
             rule.waitForIdle()
@@ -283,10 +283,6 @@ class ScreenshotTest {
         rule.waitUntil(timeoutMillis = 30_000) {
             rule.onAllNodesWithContentDescription("Reading").fetchSemanticsNodes().isNotEmpty()
         }
-        // The folio is part of every reading now, and a frame without it is
-        // not the page the reader sees. Waiting for its tag also lets the
-        // foot finish its first measurement before the first capture.
-        waitForTag("reading-folio", timeout = 15_000)
         // The window is not ready for a gesture in the frame it appears in;
         // the first tap of a run must not be swallowed by startup.
         Thread.sleep(1_500)

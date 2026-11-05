@@ -1,16 +1,11 @@
 package io.github.muntasimulhaque.quran.ui.reader
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -22,9 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.R
@@ -44,9 +37,9 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 
 /**
  * Everything that sits at the foot of the page: the pack on its way in and
- * the playback pill, stacked in one place. The folio is drawn by the reading
- * screen over the room this stack reserves for it, because it has to sit
- * over the page's own text.
+ * the playback pill, stacked in one place. Nothing is here otherwise, so an
+ * idle page runs to its own foot: the surah and the juz are the bar's, and
+ * the bar is asked for (owner decision, this session).
  *
  * The ayah's own actions are not here any more: they are the app's one popup,
  * hung from the number at the ayah's head, so the foot belongs to the player
@@ -81,6 +74,11 @@ internal fun BottomStack(
     reciterOptions: List<ListenOption>,
     modifier: Modifier = Modifier,
 ) {
+    // A page with nothing raised pays for no foot at all: the stack is not
+    // composed until the reader asks for a recitation or a pack, so its
+    // measured height is zero and the reading keeps only its own foot
+    // (owner decision, this session).
+    if (!showPlayback && viewModel.packSetup == null) return
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -203,48 +201,6 @@ internal fun BottomStack(
                 onEndOfAudio = { viewModel.setEndOfAudio(it) },
             )
         }
-        // The folio itself is drawn by the reading screen as its last child,
-        // over the page. This is its room, so the list's foot stays clear even
-        // before the overlay has been measured.
-        Spacer(Modifier.height(48.dp))
-    }
-}
-
-/**
- * The page's own furniture: the surah, the juz, and the ayah the reader is
- * on, in one quiet line at the foot. It is always there, so the reader never
- * has to summon the chrome to know where they are. It uses the margin the
- * page already keeps and stands below whatever the recitation raised, so the
- * foot is one column and nothing covers the Quran (owner decision, this
- * session).
- */
-@Composable
-internal fun ReadingFolio(
-    title: String,
-    detail: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    // The line is paper, not glass: a reading scrolled mid-ayah draws its
-    // text to the bottom of the page, and the folio's own ground is what
-    // keeps that text from running through it. It is the last child of the
-    // reading screen, so it sits over the page rather than behind it.
-    Box(
-        modifier = modifier
-            .testTag("reading-folio")
-            .fillMaxWidth()
-            .heightIn(min = 48.dp)
-            .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = Space.Gutter),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = "$title  ·  $detail",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
     }
 }
 

@@ -91,8 +91,6 @@ fun SettingsSheet(
     notificationsBlocked: () -> Boolean,
     exactGrantWithheld: () -> Boolean,
     actions: SettingsActions,
-    /** The page a reading door asked for; null opens the hub. */
-    startPage: SettingsPage? = null,
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberExpandedSheetState()
@@ -102,12 +100,9 @@ fun SettingsSheet(
     // page and came back to the reading. The open page and the open credits
     // are written into the saved state, so the sheet comes back up where the
     // choice was made, in the language just chosen.
-    var page by rememberSaveable { mutableStateOf<SettingsPage?>(startPage) }
-    // A page opened as the reading's door closes the whole sheet on Back;
-    // a page opened from the hub steps back to the hub.
-    val back: () -> Unit = {
-        if (startPage != null && page == startPage) onDismiss() else page = null
-    }
+    var page by rememberSaveable { mutableStateOf<SettingsPage?>(null) }
+    // A page opened from the hub steps back to the hub on Back.
+    val back: () -> Unit = { page = null }
     val hubScroll = rememberScrollState()
 
     AppSheet(
@@ -115,13 +110,10 @@ fun SettingsSheet(
         sheetState = sheetState,
         name = stringResource(R.string.settings_title),
     ) {
-        // Back steps out of a page before it closes the sheet, the way a
-        // stack of pages is expected to behave. It lives inside the sheet's
-        // own window: the sheet registers its own back handling there, and a
-        // handler in the activity's window never sees the event while the
-        // sheet is up.
-        // Back steps out of a page, the way a stack of pages is expected
-        // to behave. There is one level and it is the hub.
+        // Back steps out of a page to the hub, the way a stack of pages is
+        // expected to behave. It lives inside the sheet's own window: the
+        // sheet registers its own back handling there, and a handler in the
+        // activity's window never sees the event while the sheet is up.
         BackHandler(enabled = page != null) { back() }
         Column(
             modifier = Modifier

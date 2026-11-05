@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 15.9 (versionCode 161)
+Version: 16.0 (versionCode 162)
 
 ## Listing
 
@@ -38,10 +38,10 @@ you kept, with your note under the ayah it was written on, and a Last read
 list that keeps the places you have been reading so you can return to one
 you left.
 
-Browse, Search, Aa, and Settings are one tap away in the reading's chrome,
-and a quiet folio line at the foot always says the surah, the juz, and the
-ayah. There is no bottom tab bar to learn. More than one translation may be on
-at once, and each one draws in its own place under the ayah.
+Browse, Search, and Settings are one tap away in the reading's chrome: a tap
+on the page brings the bar, with the surah and juz, and a scroll puts it away.
+There is no bottom tab bar to learn. More than one translation may be on at
+once, and each one draws in its own place under the ayah.
 
 Recitation plays Minshawi or Husary, with the page following the reciter
 and the word being recited marked. Al-Fatiha is bundled for both voices, so
@@ -156,7 +156,7 @@ changes.
 
 What each set shows, in order:
 
-1. The reading, with its translation, its tajweed colors, and the folio line that names the surah and juz
+1. The reading at rest: its translation and its tajweed colors, with no bar over the page
 2. The ayah's own actions, opened from the number at its head
 3. The share card the app hands out
 4. The tafsir open on its passage, with the source line above it
@@ -170,6 +170,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (one answer and no close), so every frame that wants a clean
 page is taken before it.
+
+## Release notes (16.0, 417 characters)
+16.0 gives the page back to the text. The quiet line at the foot is gone, and the bar that holds Browse, Search, and the surah and juz now leaves when you start scrolling and returns with a tap. Aa leaves the bar; the text size lives in Settings, with its sample. The page runs to its own foot. The Quran text, both translations, both tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (15.9, 393 characters)
 15.9 opens a word's meaning on its own sheet when you press and hold it: the word, its meaning, and the ayah named above, all on one center line. The reciter's word is a rounded wash again, so its letters keep their own ink and tajweed colors while the voice is on them. The Quran text, both translations, both tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.

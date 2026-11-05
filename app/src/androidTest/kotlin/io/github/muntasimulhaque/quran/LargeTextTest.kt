@@ -63,7 +63,6 @@ class LargeTextTest {
                         onTitle = {},
                         onBrowse = {},
                         onSearch = {},
-                        onReading = {},
                         onSettings = {},
                     )
                 }
@@ -71,7 +70,6 @@ class LargeTextTest {
         }
         compose.onNodeWithContentDescription("Browse the Quran").assertIsDisplayed()
         compose.onNodeWithContentDescription("Search").assertIsDisplayed()
-        compose.onNodeWithContentDescription("Reading settings").assertIsDisplayed()
         compose.onNodeWithContentDescription("Settings").assertIsDisplayed()
         compose.onNodeWithText("Al-Baqarah").assertExists()
     }

@@ -16,7 +16,6 @@ import io.github.muntasimulhaque.quran.ui.search.SearchArrival
 import io.github.muntasimulhaque.quran.ui.search.SearchSheet
 import io.github.muntasimulhaque.quran.ui.settings.PackSetupState
 import io.github.muntasimulhaque.quran.ui.settings.SettingsActions
-import io.github.muntasimulhaque.quran.ui.settings.SettingsPage
 import io.github.muntasimulhaque.quran.ui.settings.SettingsSheet
 
 /**
@@ -37,7 +36,6 @@ internal fun ReaderSheets(
     onOpenNotificationSettings: () -> Unit,
     onAskExactAlarm: () -> Unit,
     onReminderPermission: () -> Unit,
-    settingsStartPage: SettingsPage? = null,
     onDismiss: () -> Unit,
     /** A sheet's result opens the sheet's way back. */
     onResult: (ReaderSheet) -> Unit,
@@ -202,7 +200,6 @@ internal fun ReaderSheets(
                     viewModel.removeDownloads(recitation, surah)
                 },
             ),
-            startPage = settingsStartPage,
             onDismiss = onDismiss,
         )
     }

@@ -1,8 +1,9 @@
 package io.github.muntasimulhaque.quran
 
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performTouchInput
@@ -27,9 +28,10 @@ import org.junit.runner.RunWith
  * when a drag of their own ends. The label used to be a value of its own,
  * written only by a jump or by the recitation's follow, so scrolling from
  * juz 1 into juz 2 left it reading "Juz 1" until something else moved the
- * place (owner report). The reader stands at 2:141, the last ayah of juz 1,
- * swipes into 2:142 and the ayahs after it, and reads the label on the folio
- * line, which is always on the page and no longer has to be summoned.
+ * place (owner report). A drag also puts the bar away, so the test reads the
+ * label the way the reader does: the reader stands at 2:141, the last ayah
+ * of juz 1, swipes into 2:142 and the ayahs after it, and summons the bar
+ * again.
  */
 @RunWith(AndroidJUnit4::class)
 class JuzLabelScrollTest {
@@ -62,31 +64,48 @@ class JuzLabelScrollTest {
             compose.onAllNodesWithContentDescription(readingPage).fetchSemanticsNodes().isNotEmpty()
         }
 
-        // The reader stands at 2:141, the last ayah of juz 1, and the folio
-        // line says so without a gesture. The line is one label, so the juz
-        // is matched inside it rather than as the whole text.
-        compose.waitUntil(timeoutMillis = 30_000) {
-            compose.onAllNodesWithTag("reading-folio", useUnmergedTree = true)
-                .fetchSemanticsNodes().isNotEmpty()
-        }
+        // The reader stands at 2:141, the last ayah of juz 1. The bar is
+        // the reader's ask; summoned, it says where they are. The line is one
+        // label, so the juz is matched inside it rather than as the whole
+        // text.
+        revealTheBar(readingPage)
         compose.waitUntil(timeoutMillis = 30_000) {
             compose.onAllNodesWithText("Juz 1", substring = true, useUnmergedTree = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
 
-        // A drag of their own, which is what writes the place. Three screens
-        // of scrolling land inside juz 2, which begins at 2:142 and runs 111
-        // ayahs, so the swipe count cannot carry past it.
+        // A drag of their own, which is what writes the place and what puts
+        // the bar away. Three screens of scrolling land inside juz 2, which
+        // begins at 2:142 and runs 111 ayahs, so the swipe count cannot carry
+        // past it.
         repeat(3) {
             compose.onAllNodesWithContentDescription(readingPage).onFirst()
                 .performTouchInput { swipeUp() }
             compose.waitForIdle()
         }
 
-        // The folio is still there, and the label has followed the drag.
+        // The bar went with the page, and the reader brings it back. The label
+        // has followed the drag.
+        compose.waitUntil(timeoutMillis = 30_000) {
+            compose.onAllNodesWithContentDescription("Settings").fetchSemanticsNodes().isEmpty()
+        }
+        revealTheBar(readingPage)
         compose.waitUntil(timeoutMillis = 30_000) {
             compose.onAllNodesWithText("Juz 2", substring = true, useUnmergedTree = true)
                 .fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    /**
+     * A tap on the reading's own quiet margin brings the bar up. The exact
+     * centre is not a safe place to tap: an ayah can sit under the finger
+     * there. The margin is the page's quiet edge, where no control lives.
+     */
+    private fun revealTheBar(readingPage: String) {
+        compose.onAllNodesWithContentDescription(readingPage).onFirst()
+            .performTouchInput { click(Offset(4f, height * 0.5f)) }
+        compose.waitUntil(timeoutMillis = 30_000) {
+            compose.onAllNodesWithContentDescription("Settings").fetchSemanticsNodes().isNotEmpty()
         }
     }
 }

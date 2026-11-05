@@ -7,7 +7,6 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
 import androidx.test.core.app.ActivityScenario
@@ -131,10 +130,6 @@ class ScreenshotVariantsTest {
         ActivityScenario.launch(MainActivity::class.java).use {
             rule.waitUntil(timeoutMillis = 30_000) {
                 rule.onAllNodesWithContentDescription("Reading").fetchSemanticsNodes().isNotEmpty()
-            }
-            rule.waitUntil(timeoutMillis = 15_000) {
-                rule.onAllNodesWithTag("reading-folio", useUnmergedTree = true)
-                    .fetchSemanticsNodes().isNotEmpty()
             }
             // The window is not ready to be copied in the frame it appears
             // in, and this one is copied still.

@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.MaterialTheme
@@ -55,7 +54,6 @@ import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.readingMetrics
 import io.github.muntasimulhaque.quran.ui.ReaderViewModel
-import io.github.muntasimulhaque.quran.ui.settings.SettingsPage
 import io.github.muntasimulhaque.quran.ui.PermissionNotice
 import io.github.muntasimulhaque.quran.ui.kit.AppSnackbar
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
@@ -113,9 +111,10 @@ private val NoteDraftsSaver = listSaver<Map<Int, String>, String>(
 )
 
 /**
- * The reading screen: one reading, and chrome that only appears
- * when it is asked for. Everything else in the app happens in a sheet over
- * this surface or in the ayah card, so the page itself is never crowded.
+ * The reading screen: one reading, and chrome that only appears when it is
+ * asked for and leaves when the page moves. Everything else in the app happens
+ * in a sheet over this surface or in the ayah card, so the page itself is
+ * never crowded.
  */
 @Composable
 fun ReaderScreen(
@@ -150,8 +149,8 @@ fun ReaderScreen(
     }
     val lastRead by viewModel.lastRead.collectAsStateWithLifecycle()
 
-    // The folio line is always on the page; the full chrome is the reader's
-    // ask and stays until they put it away. No timer, no first-run reveal.
+    // The bar is the reader's ask and stays until they put it away or start
+    // moving the page. No timer, no first-run reveal.
     var chrome by rememberSaveable { mutableStateOf(false) }
     // The ayah whose own menu is open, and the door it hangs from. One at a
     // time, never across a rotation: a popup is a moment and not a place
@@ -193,11 +192,6 @@ fun ReaderScreen(
     // the sheet is written into the saved state, so the choice is answered
     // where it was made (owner decision, 21).
     var sheet by rememberSaveable { mutableStateOf(ReaderSheet.None) }
-    // The page the settings sheet opens on. Aa asks for the type page, the
-    // sliders ask for the hub, and the sheet's own Back returns to the reading
-    // when the page was the door that opened it (owner decision, this
-    // session).
-    var settingsStartPage by rememberSaveable { mutableStateOf<SettingsPage?>(null) }
     // The sheet a result came from, one level deep. A search or Browse result
     // closes its sheet, and Back from the reading reopens it at the same
     // query, tab, and place. The state holder keeps the sheet's own saveable
@@ -276,7 +270,6 @@ fun ReaderScreen(
 
     /** Opens a sheet from the reading and forgets any stale state it held. */
     fun openSheet(target: ReaderSheet) {
-        if (target != ReaderSheet.Settings) settingsStartPage = null
         if (sheet == target) return
         returnTo = null
         menu = null
@@ -302,10 +295,15 @@ fun ReaderScreen(
         }
     }
 
-    /** A result closes its sheet but keeps it as the reading's way back. */
+    /**
+     * A result closes its sheet but keeps it as the reading's way back. The
+     * arrival is the text, so the bar the reader left through is not waiting
+     * over it (owner decision, this session).
+     */
     fun resultOpened(from: ReaderSheet) {
         returnTo = from
         sheet = ReaderSheet.None
+        chrome = false
     }
 
     /**
@@ -585,6 +583,31 @@ fun ReaderScreen(
                 }
             },
     ) {
+        // The bar is composed before the page it floats over, so a screen
+        // reader meets the controls first when the reader brings them back:
+        // the bar's nodes would otherwise stand after every ayah in the list
+        // (owner decision, this session). zIndex keeps it on top of the page.
+        ReaderTopBar(
+            title = surahName(viewModel, settings.ayah),
+            detail = stringResource(R.string.juz_label, viewModel.juz),
+            visible = chrome,
+            reducedMotion = reducedMotion,
+            // A tap on the surah's name is the way back to its top, the way
+            // a reader flips to the beginning of a surah in a printed copy.
+            titleAction = stringResource(R.string.action_surah_top),
+            onTitle = {
+                viewModel.jumpToSurahOpening(settings.ayah)
+                // The bar must not sit over the name it just went to.
+                chrome = false
+            },
+            onBrowse = { openSheet(ReaderSheet.Browse) },
+            onSearch = { openSheet(ReaderSheet.Search) },
+            onSettings = { openSheet(ReaderSheet.Settings) },
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .zIndex(1f),
+        )
+
         run {
             val surah = viewModel.surahOf(settings.ayah)
             if (surah != null) {
@@ -642,11 +665,22 @@ fun ReaderScreen(
                         // it, and a popup hung from a moving anchor is worse
                         // than no popup (owner decision, this session).
                         menu = null
+                        // A drag of the reader's own is the page moving, and
+                        // the bar must not stand over the page the reader is
+                        // moving. This is the reader's finger, not a jump the
+                        // app started and not a screen reader's scroll action
+                        // (owner decision, this session).
+                        chrome = false
                         // A scroll is the reader still being here, even when
                         // the chrome is already away and no tap was needed.
                         touch++
                     },
-                    onNextSurah = { number -> viewModel.jumpToSurah(number) },
+                    onNextSurah = { number ->
+                        // The next surah is an arrival at its opening; the
+                        // bar has no place over it (owner decision).
+                        chrome = false
+                        viewModel.jumpToSurah(number)
+                    },
                     // The reminder is offered after the reader has read the
                     // surah, never before the text. Turning it on is the act
                     // that asks the phone for the notification and the exact
@@ -691,13 +725,12 @@ fun ReaderScreen(
                     // kept the page (owner decision, this session).
                     contentPaddingTop = 64.dp,
                     contentPaddingBottom = readingFoot(
-                        bottomStack = maxOf(
-                            with(LocalDensity.current) { bottomStackHeight.toDp() },
-                            // The folio is always on the page, so the first
-                            // frame already keeps its room even before the
-                            // foot has measured itself.
-                            48.dp + navigationBar,
-                        ),
+                        // Nothing is raised until the reader asks for a
+                        // recitation or a pack, so the page's own foot is the
+                        // page's (owner decision, this session).
+                        bottomStack = with(LocalDensity.current) {
+                            bottomStackHeight.toDp()
+                        },
                         navigationBar = navigationBar,
                     ),
                 )
@@ -725,30 +758,6 @@ fun ReaderScreen(
             )
         }
 
-        ReaderTopBar(
-            title = surahName(viewModel, settings.ayah),
-            detail = stringResource(R.string.juz_label, viewModel.juz),
-            visible = chrome,
-            reducedMotion = reducedMotion,
-            // A tap on the surah's name is the way back to its top, the way
-            // a reader flips to the beginning of a surah in a printed copy.
-            titleAction = stringResource(R.string.action_surah_top),
-            onTitle = {
-                viewModel.jumpToSurahOpening(settings.ayah)
-            },
-            onBrowse = { openSheet(ReaderSheet.Browse) },
-            onSearch = { openSheet(ReaderSheet.Search) },
-            onReading = {
-                settingsStartPage = SettingsPage.FontSize
-                openSheet(ReaderSheet.Settings)
-            },
-            onSettings = {
-                settingsStartPage = null
-                openSheet(ReaderSheet.Settings)
-            },
-            modifier = Modifier.align(Alignment.TopCenter),
-        )
-
         // The long press and its one-time note are gone with the gesture: the
         // ayah's own number is its door, visible on every ayah, and a
         // signifier that has to be taught is not a signifier (owner decision,
@@ -756,9 +765,9 @@ fun ReaderScreen(
 
         val offer = viewModel.listenOffer
         val showPlayback = playback.isAnything() || offer != null
-        // The foot is furniture over the page, not a row in it: a list
-        // scrolled mid-ayah otherwise draws its text over the folio on a
-        // phone. The snackbar is raised above it below.
+        // The foot belongs to the player and the pack alone. The stack is
+        // composed only while one of them is raised, so an idle page pays for
+        // no bar at all (owner decision, this session).
         BottomStack(
             viewModel = viewModel,
             playback = playback,
@@ -784,34 +793,6 @@ fun ReaderScreen(
                 .padding(horizontal = Space.Gutter)
                 .padding(bottom = snackbarBottom),
         )
-
-        // The folio is the page's last layer. The reading list draws its own
-        // text all the way to the glass, so the folio's paper has to sit over
-        // it; keeping it inside the foot stack put it behind the very text it
-        // is there to name on a phone. The band fades in above the line so a
-        // half-scrolled line is put away rather than cut across its glyphs.
-        Box(
-            Modifier
-                .align(Alignment.BottomCenter)
-                .zIndex(3f)
-                .fillMaxWidth()
-                .background(
-                    Brush.verticalGradient(
-                        0f to MaterialTheme.colorScheme.background.copy(alpha = 0f),
-                        0.18f to MaterialTheme.colorScheme.background,
-                        1f to MaterialTheme.colorScheme.background,
-                    ),
-                )
-                .windowInsetsPadding(WindowInsets.navigationBars)
-                .padding(bottom = 10.dp),
-        ) {
-            ReadingFolio(
-                title = surahName(viewModel, settings.ayah),
-                detail = stringResource(R.string.juz_label, viewModel.juz),
-                onClick = { chrome = !chrome },
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
 
         // The ayah's own menu, hung from its door. Every answer closes it and
         // then does its work, so the reader is returned to the reading rather
@@ -915,7 +896,6 @@ fun ReaderScreen(
                 onOpenNotificationSettings = onOpenNotificationSettings,
                 onAskExactAlarm = onAskExactAlarm,
                 onReminderPermission = onReminderPermission,
-                settingsStartPage = settingsStartPage,
                 onDismiss = { closeSheet() },
                 onResult = { resultOpened(it) },
                 onSearchResult = { openSearchResult(it) },
