@@ -63,16 +63,20 @@ class RecitationManifestTest {
     }
 
     @Test
-    fun storeCountsAndRemovesOnlyTheSurahFiles() {
+    fun storeCountsOpusAndSweepsALegacySurah() {
         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
         val store = RecitationStore(context)
         val folder = "test-folder"
         val directory = File(context.filesDir, "recitations/$folder").apply { mkdirs() }
-        File(directory, "002001.mp3").writeBytes(ByteArray(10))
-        File(directory, "002002.mp3").writeBytes(ByteArray(20))
-        File(directory, "003001.mp3").writeBytes(ByteArray(30))
+        File(directory, "002001.opus").writeBytes(ByteArray(10))
+        File(directory, "002002.opus").writeBytes(ByteArray(20))
+        // A surah downloaded before the Opus re-encode: it is not counted,
+        // and reading the folder removes it so the reader does not keep it.
+        File(directory, "002001.mp3").writeBytes(ByteArray(40))
+        File(directory, "003001.opus").writeBytes(ByteArray(30))
 
         assertEquals(30, store.bytesForSurah(folder, 2))
+        assertTrue(!File(directory, "002001.mp3").exists())
         assertEquals(2, store.removeSurah(folder, 2))
         assertEquals(0, store.bytesForSurah(folder, 2))
         assertEquals(30, store.bytesForSurah(folder, 3))

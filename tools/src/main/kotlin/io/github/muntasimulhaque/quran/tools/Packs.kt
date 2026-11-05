@@ -504,6 +504,18 @@ class Packs(private val root: File) {
                                 "FROM src.recitation_ayah WHERE recitation = '$reciter'",
                         )
                         statement.execute("CREATE INDEX recitation_ayah_ayah ON recitation_ayah(ayah_number)")
+                        // The pack is what the app reads, and the app plays
+                        // Opus only. A path left in the pre-re-encode format
+                        // would make a downloaded surah invisible, so the
+                        // pack build refuses one rather than shipping it.
+                        val notOpus = target.scalarLong(
+                            "SELECT COUNT(*) FROM recitation_ayah WHERE audio_path NOT LIKE '%.opus'",
+                        )
+                        if (notOpus != 0L) {
+                            throw IllegalStateException(
+                                "$reciter has $notOpus recitation paths that are not Opus",
+                            )
+                        }
                     }
                 }
             }

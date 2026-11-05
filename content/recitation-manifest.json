@@ -1,1383 +1,1612 @@
 {
+    "format": "opus",
     "baseUrl": "https://github.com/muntasimulhaque/quran/releases/download",
     "recitations": [
         {
             "id": "minshawi",
-            "tag": "recitation-minshawi",
+            "tag": "recitation-minshawi-opus",
             "surahs": [
                 {
                     "surah": 1,
                     "asset": "surah-001.zip",
-                    "bytes": 675369,
-                    "sha256": "be4b723825e0bc0621c9bd5432e6948145575430e1db4cde3478e26a89408f7b"
+                    "bytes": 357292,
+                    "sha256": "5a1c0764c65bdd152abca3385a86924f4bd2eb49c5ec52673d27fc54a819c28b",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 2,
                     "asset": "surah-002.zip",
-                    "bytes": 130491703,
-                    "sha256": "128cc183ad09652b94c9cb326253402aa10c96db696fc975f591225645dc541a"
+                    "bytes": 66610705,
+                    "sha256": "9e78f18913112baac0ff16d98870a1de447a50e4448c3738b7aeee1a50bae2d5",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 3,
                     "asset": "surah-003.zip",
-                    "bytes": 82250483,
-                    "sha256": "9a98b4689041426b60af16712bdf0ec654a7fba564b5f3fd8d16ed50ebf9bb58"
+                    "bytes": 42089624,
+                    "sha256": "b6aa866c6bb565ea913605db01ac79e3f0c7f317a3f5ef0fea72fe5e1894d08f",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 4,
                     "asset": "surah-004.zip",
-                    "bytes": 81422988,
-                    "sha256": "915c2e2bf8ac314df5ece1b6d5450a340e0db08e49c07801133467d69ef868ac"
+                    "bytes": 41774282,
+                    "sha256": "9505c0753721a7378da00e6dd2b9e24e0b954ef1106d2eca91107453d9339608",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 5,
                     "asset": "surah-005.zip",
-                    "bytes": 63324786,
-                    "sha256": "ffbb694a04770e7dd3a60b5be3ebfb3f30659ea860d3e791fa75b9e0f69fecb4"
+                    "bytes": 32571877,
+                    "sha256": "77b6f7e1f6ddbe6b33741cf76bb78bfc9f2fff177179e8786b541ddfe2ec445b",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 6,
                     "asset": "surah-006.zip",
-                    "bytes": 62682393,
-                    "sha256": "ef3f4d0d087dd21acf83f3a7e361b8847e4fa52a0f53101bc0d5384971f087af"
+                    "bytes": 32194888,
+                    "sha256": "4c8ea05c86583580cfb5de5bcb26645fb71d560d92900e0155e8e48103e1cb95",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 7,
                     "asset": "surah-007.zip",
-                    "bytes": 68898719,
-                    "sha256": "ce5f22f0021cc651f7392eceb3adceea19b1ac6d1b001512f3d667cfe819270c"
+                    "bytes": 35320388,
+                    "sha256": "89cd1c63e7e93eea8838d572670ff9046a2fd7f10c64bc4b817be63ae3ba5674",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 8,
                     "asset": "surah-008.zip",
-                    "bytes": 27958118,
-                    "sha256": "362ab5081d57576ee4f2121d2caab3edf3dfc74ba1f7a51e9506a2ca0abfd135"
+                    "bytes": 14415877,
+                    "sha256": "f7d488cf2e080f9fec652cce1c3c19787f47a0de919df733733e43508fa8cbe3",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 9,
                     "asset": "surah-009.zip",
-                    "bytes": 51071972,
-                    "sha256": "954458af4088634e759d5f4ad45d7bf6c67e4a9e22c63ca1d392f732eab3b066"
+                    "bytes": 26276456,
+                    "sha256": "8f5a6529d47fbd89e71179bbbc41556d83fe724bcf4e99b44bbda2f567b39e06",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 10,
                     "asset": "surah-010.zip",
-                    "bytes": 41221015,
-                    "sha256": "2290804c6f863d6382d6bbd4c6c8139a35714bf9d32866fe901f8e03a079828d"
+                    "bytes": 21062405,
+                    "sha256": "53c31c4df43d135cc27d75388d9a46d7e603f957c161a7d361f5f384e6555622",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 11,
                     "asset": "surah-011.zip",
-                    "bytes": 45550979,
-                    "sha256": "00a5e4b465059428821d06b89911c328c3721ef6aa71b156ea57a102d6a81d1c"
+                    "bytes": 23263451,
+                    "sha256": "005bf02a5a42f824dcfb2da114610a9928390e0f8769c1daf83605bc233d656e",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 12,
                     "asset": "surah-012.zip",
-                    "bytes": 42648012,
-                    "sha256": "89aaa45d9f76df88117e03db0ae01e4c9ed5d1c6a29a50c00f4b01c12f25f930"
+                    "bytes": 21881394,
+                    "sha256": "8b694b948d66ca3b4955b270aca0a5f485bd00a4e2e81bfe167fa321748a41f5",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 13,
                     "asset": "surah-013.zip",
-                    "bytes": 18173973,
-                    "sha256": "5416bdfbe3d69952fe701b69cf890d65510948586b885e1fdd85a21e8712bbed"
+                    "bytes": 9293277,
+                    "sha256": "937054a04be1ced37072a2bd1531c8da9ae95bc4c4da38c4b978122ec2d3d398",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 14,
                     "asset": "surah-014.zip",
-                    "bytes": 17647424,
-                    "sha256": "e677fc6905e16e3b6ccfd2e0e63b532cc0eb6d22bd005502c8707309416d7bf3"
+                    "bytes": 9001775,
+                    "sha256": "0054d395adffd384668541c0ac3c2b5c55921bfab05b6a6c46bbd32d7896b23a",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 15,
                     "asset": "surah-015.zip",
-                    "bytes": 13620427,
-                    "sha256": "ef5489ca5df99efaa433ee24114465277dddd74d733e005b04ceaab62a713e19"
+                    "bytes": 6946083,
+                    "sha256": "505e930dbff3036892ca9423fe74d232bc83e54f96da576684fe0b6ce08bfb5e",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 16,
                     "asset": "surah-016.zip",
-                    "bytes": 35347891,
-                    "sha256": "8a8d1a98aad815eaa376b5dda9b304eaee46a38372e608ecf4e2a7e9877b301c"
+                    "bytes": 18045586,
+                    "sha256": "c1b2940a93a9cb61515e0141b621f0e57979d9479a0e0c89530c3a84d99a6b61",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 17,
                     "asset": "surah-017.zip",
-                    "bytes": 30511275,
-                    "sha256": "341b2aefe8a2cffcb77f2078f776668f23dd296598e97b0f4a11b90f16ced912"
+                    "bytes": 15562189,
+                    "sha256": "ccf5b2d8888cf41056cd8c2a1bb9d953abb1492d24d920332525dc5d841c56e2",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 18,
                     "asset": "surah-018.zip",
-                    "bytes": 33299502,
-                    "sha256": "51e341997147b1016ff5349e7882755cc4bc3c26e10922f2b7c5f210d22ed5bc"
+                    "bytes": 16990427,
+                    "sha256": "f3213a4bb1d0c321fd5e80d49a104196f6d23985e293aa512e5b257c469dac38",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 19,
                     "asset": "surah-019.zip",
-                    "bytes": 20059868,
-                    "sha256": "423279c8fae033ba66a90fe9d94a70164a668f4ae6f242a20ada89a4f2246082"
+                    "bytes": 10249228,
+                    "sha256": "4c911e902a53a57191e6b748d5aea7b48cec2eed851bcc1ff9379c590af3d55a",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 20,
                     "asset": "surah-020.zip",
-                    "bytes": 25841336,
-                    "sha256": "4b78517f9cdcadf5b82679cf4bbf6c91f0916452819e65ed52f1fd6f9e887a45"
+                    "bytes": 13196660,
+                    "sha256": "71d58d9b4d17ae11ae5faca1bf43547a48d044dfaaf9c081197bf96046795214",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 21,
                     "asset": "surah-021.zip",
-                    "bytes": 27241115,
-                    "sha256": "f794be0d79be5cfea028964da9ded865a1117b8d524c1bd2652c502759342f25"
+                    "bytes": 13898689,
+                    "sha256": "03e2350d30b882bbedcdea9749227242eb5cb7fa78d43c3fd9739bb4e58bc87b",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 22,
                     "asset": "surah-022.zip",
-                    "bytes": 26291447,
-                    "sha256": "ea8d657f685c2147d459715eaf22b25e01974bf06d4d35c562b6f6207c8e37b4"
+                    "bytes": 13418801,
+                    "sha256": "b47ada852aabf357e878fcd0e2ab756c284df14caab26afc833f1cbbd7d1b407",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 23,
                     "asset": "surah-023.zip",
-                    "bytes": 22383957,
-                    "sha256": "0b7653c644900cf91a37dba19a1609518381387ecb782a0bcf31d4a9b92997fa"
+                    "bytes": 11413390,
+                    "sha256": "f2c37d97c83de21b4b7c51583ad70737b4c1bb8cdf684e5821cfb52fdc5219f2",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 24,
                     "asset": "surah-024.zip",
-                    "bytes": 27707654,
-                    "sha256": "5238538a5911c48f8359f869ea194f15266e6e6f457ebfa6ad206d102801c047"
+                    "bytes": 14132309,
+                    "sha256": "7e9e6fbe5719788b23527388073ee36bc2f1ea1fc45aa4a384bfbb4096236446",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 25,
                     "asset": "surah-025.zip",
-                    "bytes": 17091648,
-                    "sha256": "14d1e9226e43f2c3bb7f07a2621862da2fe0e90b0bd7498aa73b04ab9e17c217"
+                    "bytes": 8731833,
+                    "sha256": "8d592bf43eb87ab4bfd9e0efb9be12ccc149e69a9e4778f336c12fecc2f84060",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 26,
                     "asset": "surah-026.zip",
-                    "bytes": 25700737,
-                    "sha256": "588a42bd8d46c7723224665ed0928faeed3289fa66db9e36f694c96ab494ad3a"
+                    "bytes": 13107248,
+                    "sha256": "f6b2897a788f22007e3be15539e3fd98f8e2c5b575efe95c67e0a7b040b643a2",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 27,
                     "asset": "surah-027.zip",
-                    "bytes": 23279830,
-                    "sha256": "ab8c329effb3bfc97156996889dbe23fc3ca76d1faeead83f644102323579b45"
+                    "bytes": 11886553,
+                    "sha256": "abb3c03e43869a9d6397d43393017424b26e7ae84973f62af960588e9b122d69",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 28,
                     "asset": "surah-028.zip",
-                    "bytes": 28206918,
-                    "sha256": "fed768150096819b20361325e192ad256ac5a664dfc6ea3b9a79da464e493588"
+                    "bytes": 14387891,
+                    "sha256": "efb2119a75402d3771fa7fe0b2bf98a137c0b57e2eb08a65678d3605ff305933",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 29,
                     "asset": "surah-029.zip",
-                    "bytes": 19630246,
-                    "sha256": "adfe66769f2bcd85c8a81e8e91e04001cf61388f76691d66db7819abe528edfd"
+                    "bytes": 10020686,
+                    "sha256": "d8ad744af9440e5bc907b993bcf5989a24d5e3b8b63226ecad06cfc3346a5f6f",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 30,
                     "asset": "surah-030.zip",
-                    "bytes": 16350326,
-                    "sha256": "cec0452a50e5d26c475da5ed45d3211954e1dae9b818a4f50f2801579010ce8e"
+                    "bytes": 8342185,
+                    "sha256": "c52a9490586d0d1e569191239a0907ad88fe215077ec8af445667330df6fecf3",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 31,
                     "asset": "surah-031.zip",
-                    "bytes": 9972579,
-                    "sha256": "d06457bb536e4acadd2722534db489a937c063fe5a614a2ba30461642da220ba"
+                    "bytes": 5089196,
+                    "sha256": "00726ca667eea5251f65302d069d9371ac93302223349c75efe9af391ca7de49",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 32,
                     "asset": "surah-032.zip",
-                    "bytes": 7075085,
-                    "sha256": "c36b33a84fead5b64de1c0cfd0f83e3c064b3f0cdccdaa675e65fb9e38eb2a00"
+                    "bytes": 3612410,
+                    "sha256": "f340634038f2c9354abc167b63a40d0a3e05fc26ada5187ced73d6d6551d0056",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 33,
                     "asset": "surah-033.zip",
-                    "bytes": 26241449,
-                    "sha256": "3cb840f48e8e114f637de88dce3da620cdf5ebaafac580a748f7804ce06753c8"
+                    "bytes": 13386934,
+                    "sha256": "27c6551b8b380025589bd4462f687df0ca4478f141fd0c50990f4c5daff727c2",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 34,
                     "asset": "surah-034.zip",
-                    "bytes": 17079858,
-                    "sha256": "49c7ab3131543fc8b15dbf0b4422529a4f55662747815738fabc7ebde39a97ca"
+                    "bytes": 8715118,
+                    "sha256": "9c14f9ca4613e3d838a6fc224e17960e26941dd375e8e26bafa397261ca82542",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 35,
                     "asset": "surah-035.zip",
-                    "bytes": 15858994,
-                    "sha256": "ec33d0d516a45daf73ccfb04478d6e380b7da341c1737898149d8236ea11dbe9"
+                    "bytes": 8085627,
+                    "sha256": "95555c7607c16eee4f6c5cbf8ea9c0aa0c502f406027456ca86c8f854df9021c",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 36,
                     "asset": "surah-036.zip",
-                    "bytes": 15126953,
-                    "sha256": "62606d0c34a9ecd1c41e0096a047f79e9eb1402958a638720dea7fbc1d471de0"
+                    "bytes": 7715371,
+                    "sha256": "4f4c5e6b9b1e9dceb09eeb1a11a63f76a8e0edd72abbd77065d3602406b257bf",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 37,
                     "asset": "surah-037.zip",
-                    "bytes": 19823315,
-                    "sha256": "eb8384461dfc7b8d2dca81c0484a4a709a6983e44617b0fcb43c11544bc9174f"
+                    "bytes": 10107696,
+                    "sha256": "2d5e57b5fe5f69fa98adf9045ef6df1898ff96af41ac6f64f95835238896eab4",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 38,
                     "asset": "surah-038.zip",
-                    "bytes": 15840502,
-                    "sha256": "dd2e11fae8579ed78583951c2238a1434246cc9418b5fa3f54742aa72eb60967"
+                    "bytes": 8074603,
+                    "sha256": "84481377d0cf88856207fb42475d669938b0a47c16130f91cece056923bae871",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 39,
                     "asset": "surah-039.zip",
-                    "bytes": 23903590,
-                    "sha256": "15be557873c3f4a76420afc7b9aa31d03d87ba0578235194268ac3e7ad23759d"
+                    "bytes": 12207964,
+                    "sha256": "c07f174abfff22e06ffaa422678ad4d3965d0e0c5a5cdab362b9f07ef3c76bc6",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 40,
                     "asset": "surah-040.zip",
-                    "bytes": 22749984,
-                    "sha256": "3eb1d4ea7563e46e8cbad0f93c5399674f503194595d58d458f07ab24855a137"
+                    "bytes": 11607589,
+                    "sha256": "9b2d14f756b414f02e8733d503273595938ce934c79d0df162811c49d7779ab5",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 41,
                     "asset": "surah-041.zip",
-                    "bytes": 15363438,
-                    "sha256": "26734b522296c9c441b5c92551bcfc6dd0dd0b5433ae8df29c97f913e810a12b"
+                    "bytes": 7833943,
+                    "sha256": "76cd80ddf985a8064eb86c6f66669b31c3f8500abfc688fd9c5d391f5c211095",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 42,
                     "asset": "surah-042.zip",
-                    "bytes": 16076800,
-                    "sha256": "ad40115e491efa93191013ac24851866eab8bd9c91ff5ba1efd66bbce74c9773"
+                    "bytes": 8197516,
+                    "sha256": "cacf723b3a4ccff77ba3842ba4d7379edf16291589836a9cfc88de24841b0677",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 43,
                     "asset": "surah-043.zip",
-                    "bytes": 16285028,
-                    "sha256": "21c3febb7de1d55483cabee436164a2b62e3fa7e1d74bbccb6234db28ba9a68f"
+                    "bytes": 8299821,
+                    "sha256": "75f7a4ce35dc370a8a34c1cd13aa41835e5b3bc359cad865fd8b7751baeb5047",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 44,
                     "asset": "surah-044.zip",
-                    "bytes": 6821944,
-                    "sha256": "f3b65796c3d751cd7959098498dde30e5ee41a024caabd64a82ae397d80d3d3c"
+                    "bytes": 3478542,
+                    "sha256": "34898dac1d808e997d402aeba6dc9445629581c07b9656e03191483453acbde8",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 45,
                     "asset": "surah-045.zip",
-                    "bytes": 9110291,
-                    "sha256": "97ff40dcdaf1aed2950457dde56307de3bc0985caab31d9673b5968d994928ef"
+                    "bytes": 4647081,
+                    "sha256": "898a70f081ea9c42ff2820b3c986ebbbeb4ca60a1029e4bcbeefb154b5098cf9",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 46,
                     "asset": "surah-046.zip",
-                    "bytes": 11413872,
-                    "sha256": "3efe9fe82a2e470c036a5f8181353e0b9b64cc8d47b12b6bcac3539080fd72e1"
+                    "bytes": 5818928,
+                    "sha256": "2ac13bcf0113ead66b5f5383b11eb287bc11d14583e991dfdc4f9b0ee6183b51",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 47,
                     "asset": "surah-047.zip",
-                    "bytes": 10220811,
-                    "sha256": "f8386d30f5d046371d1f28fd1b681c55860f9e06711fc7b0cea371ab82f35fb7"
+                    "bytes": 5211736,
+                    "sha256": "efcc6e7a5209bfeff3877605311989b03de505a4011baebba2541abe33db90ad",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 48,
                     "asset": "surah-048.zip",
-                    "bytes": 11443790,
-                    "sha256": "a6ab816200dd4c9b17d9946ccba110269da99097553ce75b7aef74ef17157c88"
+                    "bytes": 5835775,
+                    "sha256": "a91994c5cbbd78aaf26077a6f8a9352ed17aaf8faa8c9ebde9c352041c65cb4c",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 49,
                     "asset": "surah-049.zip",
-                    "bytes": 7394229,
-                    "sha256": "d9157070e2aebe07444fb4b0cd2c283d172e70314ae5d55fe2fd8f7127c099c5"
+                    "bytes": 3769492,
+                    "sha256": "45b5c32160de40eb3e7c55a200d4810984a58d36ecc923c6b55196349d6c2d0c",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 50,
                     "asset": "surah-050.zip",
-                    "bytes": 6959896,
-                    "sha256": "45e9df86184abc970dd34b711a4c54ca7e5412b38fcbce20412ac422e255902b"
+                    "bytes": 3548123,
+                    "sha256": "cd13d73673d0a3746aea88b6d7be436ac39493e0c4cc23b5aaf60b0f10b29706",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 51,
                     "asset": "surah-051.zip",
-                    "bytes": 6883585,
-                    "sha256": "321e86a5bd723806a4db933b97f2cc2eb6fdd91d5c29b784e2f1616980837a5f"
+                    "bytes": 3508003,
+                    "sha256": "9d55b26fe56f8bed264cf536ecbb945e00bf2a0de868f69fec1c3bc6ce9a176d",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 52,
                     "asset": "surah-052.zip",
-                    "bytes": 5925473,
-                    "sha256": "35965bda7a652e586cb08f403d554836e6ec89a3dd4b4df4be59c94eeca81f5a"
+                    "bytes": 3017883,
+                    "sha256": "ead0c689b5f4c97a3789d29035a8eacee8e5a709e30019e536e9ab1c1c83166c",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 53,
                     "asset": "surah-053.zip",
-                    "bytes": 6655797,
-                    "sha256": "f273a2a5a3b5e9fcec279068f2432a6796f73ebe0d7553fdd234dc33163c6586"
+                    "bytes": 3391957,
+                    "sha256": "4f59d03605294d76b8a00c0511925dbf7f8c5914f7fcf29d9cc1dfb924bc74f4",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 54,
                     "asset": "surah-054.zip",
-                    "bytes": 7143167,
-                    "sha256": "df6bd2f074dbbb344283eefa53080ee0b6154f44e386025db04b0a13d561f114"
+                    "bytes": 3644751,
+                    "sha256": "2a981587991c14071daa12375c1e74da59164bf8ea4552c644f2d7bda1890e1c",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 55,
                     "asset": "surah-055.zip",
-                    "bytes": 8414621,
-                    "sha256": "45d39e879acc53104717db401264a183e5a8b293dad2848d398502c7a5416b3a"
+                    "bytes": 4292228,
+                    "sha256": "90759f52dfdd78ab2ff04a5f7ea1e200f813bced50b9c0d0beeb98b5aef2ae1e",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 56,
                     "asset": "surah-056.zip",
-                    "bytes": 9955881,
-                    "sha256": "5e447be0d9fcbeb8881cb9ffe502737b21439369812fc7bcf3b2876f9dc0dd1a"
+                    "bytes": 5075556,
+                    "sha256": "3c09078e3665701df77a25723c0a32bc7f2b9482ab05f73bf8850f7f4db016ab",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 57,
                     "asset": "surah-057.zip",
-                    "bytes": 13354573,
-                    "sha256": "58b36b940bb975c5fb73c4964015cdadd3b3d3dc053778bbe02b99a0b8bc183a"
+                    "bytes": 6835953,
+                    "sha256": "ef66e2a44c24ba5993537579222ea98c90664f96b20bfddc9a042667b0bb1d8f",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 58,
                     "asset": "surah-058.zip",
-                    "bytes": 9380102,
-                    "sha256": "12a77cfcb96d2c20379118d37bb49145914331e2f391f8ab1c36cbaf686ca0f3"
+                    "bytes": 4786581,
+                    "sha256": "890cd1a40abe18d980efb9c4c48eba4e6bc69965f0fb85b385a086893c17f49f",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 59,
                     "asset": "surah-059.zip",
-                    "bytes": 9021188,
-                    "sha256": "36707c562ec19a059746f6363ac228127c85d4ac1ca21d980ed0bda2566ca513"
+                    "bytes": 4606054,
+                    "sha256": "217f0db6b21727e4d0ed2e442f21b202edc6b044d58e86e67cc4b8bdb36869b4",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 60,
                     "asset": "surah-060.zip",
-                    "bytes": 7409292,
-                    "sha256": "e0eafa0b9424238272acb8360317d130a538553143caeada9071af550130a55c"
+                    "bytes": 3783519,
+                    "sha256": "a2eb11ca63760b5d9e6d800ade769f650c495542f2cb29c20f5c726b5790360b",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 61,
                     "asset": "surah-061.zip",
-                    "bytes": 4169659,
-                    "sha256": "f3f0b6d0e8b8a3b18ab4d27ff34bc68c8a6a5edbeabef0c4597da90a276302d2"
+                    "bytes": 2126195,
+                    "sha256": "db90630be96cb50bf4d5b82c1eff45d1cfe8dceae005d572652912790f4ad570",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 62,
                     "asset": "surah-062.zip",
-                    "bytes": 3265835,
-                    "sha256": "1d9ef987dfb11f256eed87821d13377a548371c891a7607843554807bd1ae3fe"
+                    "bytes": 1665841,
+                    "sha256": "66300ae8dc3f6b7b1720f3704dcdc8c2e20407c99d9c0e60de17bf4f1e38b3ac",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 63,
                     "asset": "surah-063.zip",
-                    "bytes": 3558764,
-                    "sha256": "22eaaeefb4aef2dbf5df9f4b935e9bc2dcd257e4d12b7d4a4207680fc608636d"
+                    "bytes": 1815084,
+                    "sha256": "2f53e532d401a59dec05534ffb21c23d644813d3072086f629253f5210732740",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 64,
                     "asset": "surah-064.zip",
-                    "bytes": 4493798,
-                    "sha256": "049a3ce2f9a404c7454fa8950cd0b943e5f036c54491e0eab5a376822de3e18d"
+                    "bytes": 2292515,
+                    "sha256": "302911280afbeb9d0090557ee133bed2078f921055630e1a5808c75a9efed102",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 65,
                     "asset": "surah-065.zip",
-                    "bytes": 5854883,
-                    "sha256": "86a81ca1a3d933ada22f5b97988375f569fcec2ff77981801e65859dd08b60fd"
+                    "bytes": 2999047,
+                    "sha256": "421ed79d5ff9d638e656516652939992053a2e32d056a38cfdc32f86a860a0c1",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 66,
                     "asset": "surah-066.zip",
-                    "bytes": 5681492,
-                    "sha256": "083220e6f69cf8251a3f52b2d0794a5fa9f010c289345aa2fe07e4feae6cc384"
+                    "bytes": 2905126,
+                    "sha256": "74167b5b208a9844ef403b2ddd29663efb6439e8e68fda0d47bc4f112ebdeef0",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 67,
                     "asset": "surah-067.zip",
-                    "bytes": 6553404,
-                    "sha256": "eae64276e9b08c71ff7cbca28d9ef68b7e43aa204c32190dab590c3952f4fcb3"
+                    "bytes": 3342358,
+                    "sha256": "e5c22b0b1638d57eac998b7aeeb35b7c4b6e8a502574a84f7e98584cf04817d9",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 68,
                     "asset": "surah-068.zip",
-                    "bytes": 6758985,
-                    "sha256": "f09f220f6bed11bcba2a2f9ff584292dcbc8ce49da1d10b42718b58cb66e599d"
+                    "bytes": 3443354,
+                    "sha256": "bb68e658c85b3e2cede233423c73c71aa53e7937428ac31fdfe5cf163fbef260",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 69,
                     "asset": "surah-069.zip",
-                    "bytes": 6218780,
-                    "sha256": "d66d4c6a94034cab4aa4664c8083db4380ecc14802d49b97eb3afdae23435826"
+                    "bytes": 3169957,
+                    "sha256": "6b6f9ec231135ab43b9e5d6f89a4b535d4110fc881f6b9c4791f1f165a93b441",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 70,
                     "asset": "surah-070.zip",
-                    "bytes": 5202742,
-                    "sha256": "51fabfc027a5d331e4d9a6bad155cc54ef5b0e7677f2f7feb9f223aeb9753a49"
+                    "bytes": 2651837,
+                    "sha256": "d147c14c12d7629ead78d8e58500940ea99735557369bf2520597623d93808cf",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 71,
                     "asset": "surah-071.zip",
-                    "bytes": 5228030,
-                    "sha256": "9bbc91cb7235b68312e834bbc5876dc91824f8b5ee48a32c6ab3fd970266697c"
+                    "bytes": 2664934,
+                    "sha256": "5816e3dfb2d1ea87ed358a88783af9a7f51f2477a4dd6ab5107601ce86011384",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 72,
                     "asset": "surah-072.zip",
-                    "bytes": 5926861,
-                    "sha256": "46ec0f1f6b5a09ce6f2dd0ed7244177ce6eec9042a1fa0dc359b005e6dbaadf6"
+                    "bytes": 3025186,
+                    "sha256": "c0db3d21787bbee0b9231a21240ae861c7ed383fb591b22c479b9327a9b40bbf",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 73,
                     "asset": "surah-073.zip",
-                    "bytes": 4262091,
-                    "sha256": "bace3257d9a41464c947da12d4425b4e197793a6699222d27c7f5b7d82db4999"
+                    "bytes": 2173280,
+                    "sha256": "af43edf324c6f168ee5624f733b35fb99cc151c6c2a578d1363c5b30642e432c",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 74,
                     "asset": "surah-074.zip",
-                    "bytes": 5915767,
-                    "sha256": "1481d6b7d962b4075040f7008a43226f0267f672db204403c53681203013a2bc"
+                    "bytes": 3015672,
+                    "sha256": "3f4b3aec15ee21d7f7b4919b298ce92c2e24d3ba14bc10a5df4c900c67377d64",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 75,
                     "asset": "surah-075.zip",
-                    "bytes": 3697938,
-                    "sha256": "ce1aac3721ff2163c284cd006001f921aa0b3f4439fe4d2a9bca0304414a14c8"
+                    "bytes": 1884689,
+                    "sha256": "ca5b2094d0fd8d672234da52b31d833a20699d4a9d154b8fc9113099ef1627fd",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 76,
                     "asset": "surah-076.zip",
-                    "bytes": 6278597,
-                    "sha256": "2d917fd4966d7446c8728d149f421090a8414601523bc5d39246954dbf0f81dc"
+                    "bytes": 3200057,
+                    "sha256": "23270685d4dd8a959e22514206fd2ad6f189165c593511e963aa2177b1795ab5",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 77,
                     "asset": "surah-077.zip",
-                    "bytes": 4870597,
-                    "sha256": "5b014b16ecc69c1740305a36c9c35cf38a52a6eec2aee7af4d2ba03deb4628ca"
+                    "bytes": 2482960,
+                    "sha256": "2581e4219df19ab2eda946dd3fa8aac33ee3473e3acfffad09775a6fb7dd1013",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 78,
                     "asset": "surah-078.zip",
-                    "bytes": 4912711,
-                    "sha256": "55a7a9cb1d6d4806d01758aa2972e783522d204ac1af237976e49cb58a0625ab"
+                    "bytes": 2503874,
+                    "sha256": "4b7c96319695f9127e0712aaeb4f47dc29a617727230a8b4a72fc326489464b2",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 79,
                     "asset": "surah-079.zip",
-                    "bytes": 4660720,
-                    "sha256": "819273ce8d19eaf2f432b72027c6e053ad61653ab9ceba45114e43cdaefd92a1"
+                    "bytes": 2374896,
+                    "sha256": "6b600973ba44822aaf1298f62a4f894d12b53fe646ac884e9e9f2a06e9dab377",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 80,
                     "asset": "surah-080.zip",
-                    "bytes": 3693176,
-                    "sha256": "af0db5952d244d5778d231496147ac56bb1d02efcdbdf341f6993784a1ba0d71"
+                    "bytes": 1880818,
+                    "sha256": "ee0253642027d73f69b5e4501ac64e9f86ca12baf5ed1695087edbde377b790c",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 81,
                     "asset": "surah-081.zip",
-                    "bytes": 2550460,
-                    "sha256": "a6927e5233573208e7bdbf7ca9bda282a4bc4709fdf3a40b22d424c0831b9d80"
+                    "bytes": 1298316,
+                    "sha256": "c9deb05b2bbc69c282e72a92cac86c036b4b31f8d6a7dae894f62abf573491f1",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 82,
                     "asset": "surah-082.zip",
-                    "bytes": 1975741,
-                    "sha256": "d2934798600b5d54164fbc521882f24d27c5f149426fe1fdb7363c33609c2ccc"
+                    "bytes": 1006513,
+                    "sha256": "0694acd78768d06e60d758bca05b07fd55dae406a826230207f251d6cf19966c",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 83,
                     "asset": "surah-083.zip",
-                    "bytes": 4455147,
-                    "sha256": "f47a8a0bcbf40f951331aeb89ad0ac19a5a64ab42139ec5f9255fdf94dab4281"
+                    "bytes": 2271533,
+                    "sha256": "85bb82de0c58c76b906df77c4f9f9203d5ecf445dc8b7e57529d2ac17817355f",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 84,
                     "asset": "surah-084.zip",
-                    "bytes": 2751497,
-                    "sha256": "c144f38607d58efaeeced60120fe37c5baab1a0de5322f684f8522ecd4481412"
+                    "bytes": 1404095,
+                    "sha256": "19c1c5b0f99799cc11d8d4627c0220633b77d4fa66600ba40ab3a4ce5f544a25",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 85,
                     "asset": "surah-085.zip",
-                    "bytes": 2783996,
-                    "sha256": "e3403517e4681a19e901a2330cb7f970a5b974ea6851ff97c6d5166c9067473a"
+                    "bytes": 1419595,
+                    "sha256": "ad48954599e6f2a997c13141a78ea52b0517583bd3709e69fd34155353fc8a92",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 86,
                     "asset": "surah-086.zip",
-                    "bytes": 1586631,
-                    "sha256": "b1d9a00a334628b64230a5436dbe16f0d1d8faf4bf895d2ee347115c56db8b09"
+                    "bytes": 810205,
+                    "sha256": "f9747d9240c1b62fb95b7eb7a834a6877b2a4bba81e333e23858bdbe4f085ac2",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 87,
                     "asset": "surah-087.zip",
-                    "bytes": 1769736,
-                    "sha256": "edfeac6f4fd73dfcdb70f0f8cb5119184e202517155126dd920d358ed135a3cd"
+                    "bytes": 903030,
+                    "sha256": "522fadc377772365d17e6853c5c06999e5d5dd0e8404399d1bae99843ca487cb",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 88,
                     "asset": "surah-088.zip",
-                    "bytes": 2328576,
-                    "sha256": "67732090bb7ea67ce16fd4921173e1d4bb064bb3d85565851a4b86d382e63296"
+                    "bytes": 1187151,
+                    "sha256": "f427b2a7883a2e24cbae4d583c71839e8011d00c7948fafd4752b72de8e0e071",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 89,
                     "asset": "surah-089.zip",
-                    "bytes": 3499217,
-                    "sha256": "54dbf3799685ad839c8f85243a9a2692386df9768ddc731902edf2cd657a74e9"
+                    "bytes": 1784773,
+                    "sha256": "ed40a4630e68126e77ef2237d4dcec55ac6039a3212a27e88173e44ab98c0fb4",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 90,
                     "asset": "surah-090.zip",
-                    "bytes": 2008572,
-                    "sha256": "e515ecabad462fb05b393817e1c9bb2910b0b6e9e88fbfafcedb3d6b7b7a16f7"
+                    "bytes": 1023559,
+                    "sha256": "7e8bf414c4ece936f8508bcd5cbe8e8afab5dc55260b0e96e2690c776b31d780",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 91,
                     "asset": "surah-091.zip",
-                    "bytes": 1494288,
-                    "sha256": "e0ad56ffc76c2850c7d74707e4506e783152535e337a56b297e0b38fd21e4562"
+                    "bytes": 762219,
+                    "sha256": "d466587f451b9dd17fa6ffd79177e9d2fd4da036f5e81799867527d9785b263f",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 92,
                     "asset": "surah-092.zip",
-                    "bytes": 1963224,
-                    "sha256": "bbb2a1d07bec59f631c546b631ff3d8f1088b947183e63977d80d429ebdeccee"
+                    "bytes": 1000779,
+                    "sha256": "9a280cc084ab69add8cbf1d9f3629c9951b6c5d61f87f7b1daafca1acfd2a458",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 93,
                     "asset": "surah-093.zip",
-                    "bytes": 1031289,
-                    "sha256": "6a52e9ca39aaf81af9629bf12ecd686886c47d1b996fadaa361280fdbc0678e2"
+                    "bytes": 525602,
+                    "sha256": "9183651928fb37a017a62a9c0c203acbdb1419dd18072c02d3423fec92765a97",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 94,
                     "asset": "surah-094.zip",
-                    "bytes": 618975,
-                    "sha256": "77610c3e0d1e4b4e3fd5d9ff7e7a93191dcd694269c9e8948dca18ec321e0d54"
+                    "bytes": 315281,
+                    "sha256": "d1b5510dbd108fc134f42d53bbc705bc15ae614969437e01f95905a3190ca9ed",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 95,
                     "asset": "surah-095.zip",
-                    "bytes": 817767,
-                    "sha256": "f9c35756b98de9f277505db3f62f571701e990a16583037494fc7ca86e74055a"
+                    "bytes": 416658,
+                    "sha256": "6464365e70e0813f593a880c9d0a2310d441de78a7a416008b88e9acfb7cbc07",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 96,
                     "asset": "surah-096.zip",
-                    "bytes": 1710775,
-                    "sha256": "982bea5a0b63ad479ac2153484e3e8bdab80f7f0fc979fbfc606bf4d215aac99"
+                    "bytes": 871749,
+                    "sha256": "6665467f3f3552d77d794745fcbaaa75d26bb0cb27e9ab6882073f715172aceb",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 97,
                     "asset": "surah-097.zip",
-                    "bytes": 687036,
-                    "sha256": "07cd4d83c6f74c1a3b0cb547478e68a51333b37a8bf2ab6863d1d7cdac1bde86"
+                    "bytes": 350151,
+                    "sha256": "58c18dea56be71a873db320a6b44c4103e4e7ea6d8745393afe488190c6e6545",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 98,
                     "asset": "surah-098.zip",
-                    "bytes": 2372836,
-                    "sha256": "509f8eec5877ad9559cd6086229998db7673e18ceddb0ba450fcbda70226a77e"
+                    "bytes": 1210150,
+                    "sha256": "b0713884e03dc94c23bcea1bbe35b400b3029a2a999bd66e96f4f747ba8212b4",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 99,
                     "asset": "surah-099.zip",
-                    "bytes": 911992,
-                    "sha256": "2bf9a2a09c11e71258830e1e75b21040d6e170012999e4831624709ead36d762"
+                    "bytes": 465121,
+                    "sha256": "660ebfbc0baf2dc39d22ccd1af0dc1480c7d573c2c767db5c5445ad7a059dc88",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 100,
                     "asset": "surah-100.zip",
-                    "bytes": 972468,
-                    "sha256": "7fdfa63f2197a0755d5f7ba018682880f005d641b55b1ed4949ccfdc532c9c9b"
+                    "bytes": 495454,
+                    "sha256": "55a550ca7268c43ebb84b38040a887621233a49e72ea5ac252dd83ff9d7b18a8",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 101,
                     "asset": "surah-101.zip",
-                    "bytes": 926929,
-                    "sha256": "de22ec393f36394a61c844a57d65f9da507985bd178fadfef4119a10396b1a98"
+                    "bytes": 472209,
+                    "sha256": "289f364d65484cadf4d917599d445d0ca6f056ce5ac4106ab7faf8e5a59393cd",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 102,
                     "asset": "surah-102.zip",
-                    "bytes": 705182,
-                    "sha256": "84b478ee6bcee8b14f8d3696e14835a450191130bfa91d9991bf6c578755d133"
+                    "bytes": 359222,
+                    "sha256": "88f20cb90af8d5bbbed812093fe851b9184a44500f4f56b891c6ec71e720e7d5",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 103,
                     "asset": "surah-103.zip",
-                    "bytes": 345998,
-                    "sha256": "30b1c48cb689b8e22b1f205264cb9749bcb96a5707b3c82c2ff6fedeba818ca6"
+                    "bytes": 176392,
+                    "sha256": "261accdf17f542e22f177dbd8f5719b743e0bbf75e13d789ed49227d87b8eb5a",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 104,
                     "asset": "surah-104.zip",
-                    "bytes": 813718,
-                    "sha256": "fba6c612d27c8c5711467ccddae33cba15bc0dd8e2452bc069e909e9ce4e0563"
+                    "bytes": 414582,
+                    "sha256": "ec06441d9da7d226239b905c715c2a8a3be2a6a05cf2573ec043bbee37b23642",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 105,
                     "asset": "surah-105.zip",
-                    "bytes": 518748,
-                    "sha256": "9a41849b4d4269388d1fac21df837713331d2c70bd8ecd53f6fcf92ad40c0a2a"
+                    "bytes": 264655,
+                    "sha256": "2a582445000373f411474f90130e680198d2c19b15b999d2cd8fa0e9c8c4b3db",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 106,
                     "asset": "surah-106.zip",
-                    "bytes": 450992,
-                    "sha256": "b87c013f858f7c57c53cb0f51fb6def93e18bc8e653932e2ece50dc3cd7afa94"
+                    "bytes": 229858,
+                    "sha256": "ed835aa5116a2369e7d2f735c0d0f4859e94edde68824d419dcb30273189550e",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 107,
                     "asset": "surah-107.zip",
-                    "bytes": 594147,
-                    "sha256": "572620d1ec5fb561f33c09e56bb0173e4a1e71ef8c9d253aaeea9c780c5d7ff5"
+                    "bytes": 302846,
+                    "sha256": "5988b499cb53dcf5b3de336ad11e26712ebe6f3a19fa428b242ac89426551d96",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 108,
                     "asset": "surah-108.zip",
-                    "bytes": 252860,
-                    "sha256": "c703bcebfbe168f2d568bf2f31f587036ffe5e6140788900cd2358dcd979f09a"
+                    "bytes": 128772,
+                    "sha256": "151dd1bd98a9c48c8429c2a29fd9865d1656aced2eaaab86e209ba734ecce97e",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 109,
                     "asset": "surah-109.zip",
-                    "bytes": 650117,
-                    "sha256": "08d411785c9bbcf2435fc40341f902dcd6e456693e9689e3ca410a67b9653d77"
+                    "bytes": 331555,
+                    "sha256": "35503c7ecd38fd789607534c67e05b797da7176d131f3a2f47f97242053b4aeb",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 110,
                     "asset": "surah-110.zip",
-                    "bytes": 440499,
-                    "sha256": "fded09b071f4447da7f21f8aa6865a5dffbc2245542bf8dcc9897476d4792fe5"
+                    "bytes": 224603,
+                    "sha256": "07d23b378a486f979f75d3c7ff5528bfcc87af992befe67d6ebc8967d8999144",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 111,
                     "asset": "surah-111.zip",
-                    "bytes": 494814,
-                    "sha256": "4abfefa399bee5ea7a4bf32749dc8180e5c6c2354c5e123a5bbe9a6f7130c341"
+                    "bytes": 252243,
+                    "sha256": "78ce7d93c142c13376f004876d57f4ffcf780c3835b5e6eccdd67897f1909b0e",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 112,
                     "asset": "surah-112.zip",
-                    "bytes": 223594,
-                    "sha256": "bcec61caf802482d88f19a2ea4c81d65cb4d14742cf0bc1fd2000fc502c6c32a"
+                    "bytes": 113679,
+                    "sha256": "0d99ec0b6b718d1666294e79ad8b245a75cf41e3f63805c6176c1268a7f67286",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 113,
                     "asset": "surah-113.zip",
-                    "bytes": 401291,
-                    "sha256": "7b89dfad4acc650330bb674b1687023e1072922ca9880910833a505172b09a50"
+                    "bytes": 204506,
+                    "sha256": "21c3238aab0fc1e13b1cddd20b158727ae952a3c99655dd73f08115ce8c6d67c",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 114,
                     "asset": "surah-114.zip",
-                    "bytes": 439431,
-                    "sha256": "e13a356487587791815e577d0be97af0f0ec1caeda8380c33710637b09752361"
+                    "bytes": 223736,
+                    "sha256": "32bcfc7bc1c0bcd1b90a209d55149446a10a0a746cc54c97a6421f28dbcee212",
+                    "bitrate": 64000
                 }
             ]
         },
         {
             "id": "husary",
-            "tag": "recitation-husary",
+            "tag": "recitation-husary-opus",
             "surahs": [
                 {
                     "surah": 1,
                     "asset": "surah-001.zip",
-                    "bytes": 754358,
-                    "sha256": "ddae586c7a66c961818f75a5ac08cb203dd749e74dbd9c8f07e6a10b5f273606"
+                    "bytes": 387260,
+                    "sha256": "e3c5fe58d8e46c1b0ca0a2ebfb1bd17dc7a3377c5b555ede89b3c82f004c9a80",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 2,
                     "asset": "surah-002.zip",
-                    "bytes": 185606125,
-                    "sha256": "ebcb30c1c3c5dd153b5d88dde5c716464d7e3ff650176c5121e4ba176457e3b9"
+                    "bytes": 96559626,
+                    "sha256": "b3e7f6330fa3112c5ebecaa28f0d020f4d7322d5d7240a6d49d786dd62aab9a1",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 3,
                     "asset": "surah-003.zip",
-                    "bytes": 107821222,
-                    "sha256": "67ed2726125e70c7efc58c22fbdf9939d96362f5d7a6101a77b4883a3e22587a"
+                    "bytes": 55590468,
+                    "sha256": "99a31d5d08dc95580d6fb72daec67041e56f843039d9f8f98e54871ab4e736cb",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 4,
                     "asset": "surah-004.zip",
-                    "bytes": 106719267,
-                    "sha256": "3dbe63791cb3e535ea6d3c647743da5be9afa9c1d974c998653dd885447662c1"
+                    "bytes": 55710923,
+                    "sha256": "4c027da4ff522ba2a0b922eec928dfc3cacb86fef820d18a0329f8e20d5e9482",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 5,
                     "asset": "surah-005.zip",
-                    "bytes": 85258724,
-                    "sha256": "cb4f8d26c9e75648898cf1bf56049b44fcc07359505d52e90d4651b450a369dc"
+                    "bytes": 44881322,
+                    "sha256": "1906c13e47755ecd11abe20fd8e8519b6d8b9c5dd93bf516c084f545d4bc19a1",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 6,
                     "asset": "surah-006.zip",
-                    "bytes": 94282318,
-                    "sha256": "05181569f7c451d8f01aafb2d6d605b899bc49f90db9232960ac474c0a2db4e4"
+                    "bytes": 50632680,
+                    "sha256": "fc7a9c93b3ebf0e1a711b3207f26571d2e0e2adf27ddd8171b57c6bbd5a23388",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 7,
                     "asset": "surah-007.zip",
-                    "bytes": 97930690,
-                    "sha256": "daf82cae757e7c1fe2898ca43ea951b55eccbc134614eb97fb5225c6481104da"
+                    "bytes": 52209497,
+                    "sha256": "34d6c62a5c16a042e6608566154956a23060a5ceaa610a871d656bf11f52a1a4",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 8,
                     "asset": "surah-008.zip",
-                    "bytes": 38144946,
-                    "sha256": "8eb1a8be99f22401fe2647bed344b9959bdbe37de4fe8addff5b1228da3c3ad3"
+                    "bytes": 20111893,
+                    "sha256": "fc7a5b7e03a826c4988f7bb5b1af438996e8c2385c39d52e105fa62d8230c30f",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 9,
                     "asset": "surah-009.zip",
-                    "bytes": 78327915,
-                    "sha256": "20f123c507cd718ba5beff7bf67b19a9b38caf47430ec4a30c4ab8afdbfa4fa6"
+                    "bytes": 41849249,
+                    "sha256": "d989ccfddf27b65bcf0ecc32fd5754990b998eaa7930bd4acba90121ccc1d01b",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 10,
                     "asset": "surah-010.zip",
-                    "bytes": 55311991,
-                    "sha256": "78810688cae33209261e1eeaaa4b1a97445bada1a4b1d606addb5c9b8129bc45"
+                    "bytes": 28670320,
+                    "sha256": "7c3ff038160d63ec35e9bdc8b3afc77efd75234ed38ac4664a14b0439f6339c5",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 11,
                     "asset": "surah-011.zip",
-                    "bytes": 51545552,
-                    "sha256": "039acaea3d6c5ae404412815b362a0b691d7c761114caccdd59539202e4d52e3"
+                    "bytes": 26507042,
+                    "sha256": "ccd4faef56475a2ee122ba4c69b4796d7b6e12a8aace669d3c2270409e856522",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 12,
                     "asset": "surah-012.zip",
-                    "bytes": 52165621,
-                    "sha256": "1f10aaff6937fc9bcc0b3df060c97c9e40bcd6b49a1dd767aee67f9ef5fb26eb"
+                    "bytes": 27551911,
+                    "sha256": "76c341add20e8e794137f7879c4b12c7ba9ffe56c7e95fe2a1991068d1f1d0b5",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 13,
                     "asset": "surah-013.zip",
-                    "bytes": 24967498,
-                    "sha256": "658b3c9df4d446e6f6603df57bb2bee19b9c8b914a44548458a6139028a2e8b4"
+                    "bytes": 13056712,
+                    "sha256": "f748540d88b394a5a12b45147e2b32b7c9507be847ddc9774ce9d3145ff49a4d",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 14,
                     "asset": "surah-014.zip",
-                    "bytes": 25456391,
-                    "sha256": "f00751c87e548c98b7936bb8d8d3234844af95557f921fbbef11dd1700d58a19"
+                    "bytes": 13304957,
+                    "sha256": "29d2fe42ec0fba7a10d43f1a0ab648ba77fe8b2b6f9892a9f953e2a04f4d6b6c",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 15,
                     "asset": "surah-015.zip",
-                    "bytes": 20786233,
-                    "sha256": "4d1c9cb1d1f3b40814cecb45b1a3c143fc55971a23854d73fec922b7fc30cb36"
+                    "bytes": 10798040,
+                    "sha256": "0c80b584dc3a2f74376ed22e665f3ec993b2c02ab45640dc2c811ff236bb91d8",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 16,
                     "asset": "surah-016.zip",
-                    "bytes": 54383098,
-                    "sha256": "f7134c4b7729ab66c66c9a4d5a57c9f748c9bbeb7a19dd20e97560c3d1b071d7"
+                    "bytes": 28149784,
+                    "sha256": "623d9dea58c0a319c6498ccab396a6ea9b38b73f09a467cb82e939623ec92499",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 17,
                     "asset": "surah-017.zip",
-                    "bytes": 46933768,
-                    "sha256": "c95972a67195892f1fd87135770740cb810de742fa25b37bb39849c690b6f424"
+                    "bytes": 24305407,
+                    "sha256": "2b7a48d8bcfe09f6ca8222c4236c87fe61a532cc827d13f870dfa3c35c9726a3",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 18,
                     "asset": "surah-018.zip",
-                    "bytes": 43855679,
-                    "sha256": "486e37812c5ea5d6ba4311111e00d7254e3920b323ddaf49122b1e91dd682a11"
+                    "bytes": 23013636,
+                    "sha256": "5b78ee79ac99007a0bca48806c2f81679b7926a9ad13d040c0296e6438e3dee4",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 19,
                     "asset": "surah-019.zip",
-                    "bytes": 22702523,
-                    "sha256": "8c654c86d167affa06c6cdf09f5a920e9ec9d630cdd5b5cb0e416f0c02fcc05b"
+                    "bytes": 11863314,
+                    "sha256": "f012dab87b20b248279523ffb577f43b906906344d19b8c918baa367f350fe3e",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 20,
                     "asset": "surah-020.zip",
-                    "bytes": 35270980,
-                    "sha256": "7e3210a0d3e5cf3ef2c8c32d1e1045fb94c9d45fbc8f08b69a4c5eef8bde6321"
+                    "bytes": 18545530,
+                    "sha256": "e8a24fd11315bb25b4436fbe8dcd3f612a901a6c7226f71a6342c112e571dbab",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 21,
                     "asset": "surah-021.zip",
-                    "bytes": 34228871,
-                    "sha256": "7e75d112d69e113d27b3a35052cb5f0da5ce966271950b7e37223b6f4210674d"
+                    "bytes": 18005613,
+                    "sha256": "7379a68a4aeeec549e5c38de6ca490b13517282501a5cfccbf60fd82953e9a83",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 22,
                     "asset": "surah-022.zip",
-                    "bytes": 38654935,
-                    "sha256": "d839ed77eaa2f0c4c792c3ed3edc55c6e8f395c6e788243a6dd40b90458adf7a"
+                    "bytes": 20265548,
+                    "sha256": "8e97f02ddd3baca48cc8e3f82683457fca7af27ea1a8670e4cab759ac609b359",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 23,
                     "asset": "surah-023.zip",
-                    "bytes": 32354029,
-                    "sha256": "9b9c45afd167fbf524bd0a659faf1f9a90f10d81d4874fa57f5c8764d53a313e"
+                    "bytes": 16926145,
+                    "sha256": "75ac199b32b25eb80656805c1a8475372bed0f727cab96273bc7081842471aa1",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 24,
                     "asset": "surah-024.zip",
-                    "bytes": 41013794,
-                    "sha256": "dcc4558a8f33491c26da6e2066d3b18cbcfbd65e25f9b1810d08d5d2c7176125"
+                    "bytes": 21558718,
+                    "sha256": "0da71e76ebd4c9673314b69c0d02593673a5734b5157acc1ea1ccacb2f2e1f97",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 25,
                     "asset": "surah-025.zip",
-                    "bytes": 26920535,
-                    "sha256": "719a9b04a45237e5060eda34667c3739b972e6e4d8db268bdb3dcd28a3671b5a"
+                    "bytes": 14092825,
+                    "sha256": "2c481b2275c0f60c0759f5c8f5347be11c960e618a7389eebc78d763c2f48fdc",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 26,
                     "asset": "surah-026.zip",
-                    "bytes": 45197366,
-                    "sha256": "d4d5adf6357190b3adf95c362a66913bd9e6ec812848bd30f5a8c5aa547af61b"
+                    "bytes": 23768974,
+                    "sha256": "9325d9eb10c2425ebeddf22774dbfe063a43d172b0cce38612699f70e63f7303",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 27,
                     "asset": "surah-027.zip",
-                    "bytes": 38317221,
-                    "sha256": "b4475fa0baae4b2872e9cb1bdaa222f5291083de6fc07f30e58643183d60d65b"
+                    "bytes": 20576886,
+                    "sha256": "1414a4ccefdac71abff94d8c0a536083709ac646603062c773f1fc4830e5ea27",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 28,
                     "asset": "surah-028.zip",
-                    "bytes": 47438398,
-                    "sha256": "b29b75a99577aeb9f07aec0b2b87bb10b86e254f87bf55019a9e65e13d51227d"
+                    "bytes": 25294850,
+                    "sha256": "b5c24a881e97d3cdf4d9e92b5682af755cd6ac7ffa0b3efad56c3626bfbb8855",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 29,
                     "asset": "surah-029.zip",
-                    "bytes": 31226177,
-                    "sha256": "5b92602bca6fbea1cc079f07f9accca9bc48510797fdb9a153c84c017ed026af"
+                    "bytes": 16403749,
+                    "sha256": "4ade0ee9017755bb7e2bd6a937ea794d48a9bc0e6b1d73f5cbbc4c3e8fdb5cc7",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 30,
                     "asset": "surah-030.zip",
-                    "bytes": 26278497,
-                    "sha256": "b2c5040d322c19f2d2250e1c3ec1f3055a3a80a5f63129d9296498c3ee4809a2"
+                    "bytes": 13853831,
+                    "sha256": "ee5c5fc7e76d90dd0bd916e42ec22bc2df4abd88c6dd45889ad59b63d26f158d",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 31,
                     "asset": "surah-031.zip",
-                    "bytes": 17280306,
-                    "sha256": "546bc014db5deb7d2d198bb8114f8a6997dfeba6ee2dcee24a971c04cc15cf40"
+                    "bytes": 9068030,
+                    "sha256": "57df17a5c011e0536043aa6da49bac2c29eaf0860cbd3ccb650346541be9876c",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 32,
                     "asset": "surah-032.zip",
-                    "bytes": 12453961,
-                    "sha256": "ed7a8d4bbb3a0e94177bd6765819c0f75d26b9151eb830cd8bfb74c0846fbd1b"
+                    "bytes": 6576640,
+                    "sha256": "73f9c508572fcfcdf43d46ac1e5ce0219aef7d0404e2fbd730009ad0c52ecbe0",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 33,
                     "asset": "surah-033.zip",
-                    "bytes": 37244442,
-                    "sha256": "31ab436a8613f2d6ba49d4bb8ad837d5e6ac0e8bc860133d3e45cb9b56fdca41"
+                    "bytes": 19467815,
+                    "sha256": "b391cb3b4005e89d1b889b630871ddadc8af688da1a722b437fd2dd0742fec1e",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 34,
                     "asset": "surah-034.zip",
-                    "bytes": 22740952,
-                    "sha256": "1db8e61506ca1834387ce6fd77c486e1b55206c9c0f7322ac4f518a5dce0fd97"
+                    "bytes": 11832070,
+                    "sha256": "4d88ceb74792ff619e3e656fdb3ef0c4e945c998bd1d83813fdaf11f365be31b",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 35,
                     "asset": "surah-035.zip",
-                    "bytes": 21864695,
-                    "sha256": "7e3608493e2a7fe07ffca2d26357efe6ea8e66083cf732ff02207c09f9478ffe"
+                    "bytes": 11428124,
+                    "sha256": "53cbef28496017014450dcd2db29f7cd28d170ae4e3383fab3ca9995b92c0d85",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 36,
                     "asset": "surah-036.zip",
-                    "bytes": 21863686,
-                    "sha256": "fa937eded688d86e38700c7903722f72d066047eff03b3093dfa2b3c10ced83f"
+                    "bytes": 11451535,
+                    "sha256": "a79376c7675af680ddb028f7aac067418c674a7561bd9e87debb015768342e24",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 37,
                     "asset": "surah-037.zip",
-                    "bytes": 31372628,
-                    "sha256": "46ecc3dfd4e192e4b60397724203f38189dd13b2ff10b0b7d408444077abd78c"
+                    "bytes": 16419463,
+                    "sha256": "3af5e76967c497d1ee0deee98a25afb83e553ec5bf2689b7fe5c3cf851edf308",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 38,
                     "asset": "surah-038.zip",
-                    "bytes": 23023514,
-                    "sha256": "aff7da6dbf92dd01a1a02bdbccfae6963120c00ae3fe25b894215e80655d30cf"
+                    "bytes": 12120067,
+                    "sha256": "b9751b04c5b9aeb7915820414011c11c72ffdfadbb1c1ac51c7ee687e8514bfb",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 39,
                     "asset": "surah-039.zip",
-                    "bytes": 35263893,
-                    "sha256": "135378c678343021d34aa89601a5b6138850f704d86fde986919662c5e983d5e"
+                    "bytes": 18652158,
+                    "sha256": "2458b4bcacdd20cd574b09d1236a3627be27581f53a60dabf9a46d376c069fc4",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 40,
                     "asset": "surah-040.zip",
-                    "bytes": 35698948,
-                    "sha256": "a6df1143f9e8da7b888e5c11fbc491c5f693b8bf729fa45bf0336e143e0aabeb"
+                    "bytes": 18846517,
+                    "sha256": "0efc128d7de6692c197a31a2236bdc5c52de14e536820d3b8191019e15627b45",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 41,
                     "asset": "surah-041.zip",
-                    "bytes": 22293041,
-                    "sha256": "22072ac8c33c6f718bc010bbb02e97c100b68966b7903c19ce65f504e6d9a264"
+                    "bytes": 11936339,
+                    "sha256": "992bf2fddf209a7efee282a76055706d225a5c87061a0db501b32ea6845bd1d0",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 42,
                     "asset": "surah-042.zip",
-                    "bytes": 25676777,
-                    "sha256": "bb838f5934b6929f7fc545033f96225e46ceb101820010190b3fc7b393c6feec"
+                    "bytes": 13759262,
+                    "sha256": "be4c2aeb847d370e6e9be0f7d16cfb63ea997f1a346a7e8c19614f0c2499f809",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 43,
                     "asset": "surah-043.zip",
-                    "bytes": 27951747,
-                    "sha256": "e7f70696850e201278b534a18869c8998b3e9c9f27738a55d18fa25bcdcde9c0"
+                    "bytes": 15017398,
+                    "sha256": "e29d56fd166b454fae5f2fc4a0ed9da55d31fed12158e6fa1d677142689991dd",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 44,
                     "asset": "surah-044.zip",
-                    "bytes": 12354622,
-                    "sha256": "d0e00bae61e5a253ea008af2d4ad3bcf170e820c0690c9e74861e76f0309f651"
+                    "bytes": 6664215,
+                    "sha256": "850c7e196aa611765b5cfd6a8852f11df8868248e1d8fb960bff0567d549da77",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 45,
                     "asset": "surah-045.zip",
-                    "bytes": 15864394,
-                    "sha256": "a854fe68ed6afb60290e71fb286e48904d29061d9c00171c52d0d3e960fd0a6d"
+                    "bytes": 8547672,
+                    "sha256": "9211763a1c821ae750fc206032131b634a8a6e008608d6dc745bfb654d6fa9a5",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 46,
                     "asset": "surah-046.zip",
-                    "bytes": 17100340,
-                    "sha256": "5f4f25a0bdd5f83df0ea3aa73cb633ed06744bd9b5e4812326059313dfc4df96"
+                    "bytes": 9250783,
+                    "sha256": "2c33b8e640118a0ab173022028b7cb1654968874f731d7c11339d2b1460c3fa0",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 47,
                     "asset": "surah-047.zip",
-                    "bytes": 16397966,
-                    "sha256": "39efc7f808430780eac7209b5fa18d229f56cfcc67a4d0549e93088668aa46d9"
+                    "bytes": 8670732,
+                    "sha256": "569311be3c80945a365653ffdf0a2a79c50f2621f32a85ed07963f3b1d377eaa",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 48,
                     "asset": "surah-048.zip",
-                    "bytes": 15665297,
-                    "sha256": "26b2b2ce0b3a0e9a09cc62f0b8077b8297efb3e68bc85f34f1d9e4b78fc9c10e"
+                    "bytes": 8173974,
+                    "sha256": "40569705b836efe5ecac249e683c4ab517853ba3bac460ceae3d52bb909f5f27",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 49,
                     "asset": "surah-049.zip",
-                    "bytes": 11673315,
-                    "sha256": "f424f24ce3c32c4f4453f4ff0eeb230e4ee268924522b7158ebeb0eb5e60b15e"
+                    "bytes": 6171030,
+                    "sha256": "be647560cef3d7b9706e1b74ca12fcbf648107fd1452a7b7f54dd4e1c433e321",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 50,
                     "asset": "surah-050.zip",
-                    "bytes": 11790487,
-                    "sha256": "83c361fcf5a6d39c08cc0da799bc0954a92122ccd62b8b77107ce5adca81c9e6"
+                    "bytes": 6194616,
+                    "sha256": "38aae806d37c882f3fd3583696d148bea86dc4a97a8281fda37e85fca1a291e5",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 51,
                     "asset": "surah-051.zip",
-                    "bytes": 10348929,
-                    "sha256": "9733bf93474426a62c8d451e9f446c696765017f83dd0bb4b721c6293d319e4e"
+                    "bytes": 5407277,
+                    "sha256": "321581719952329a659b4fa9c43201aa49b4a7198b36d22771c18c58e56ebfe6",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 52,
                     "asset": "surah-052.zip",
-                    "bytes": 9201478,
-                    "sha256": "589aa7cf4ba0cbebcbd6600cd7f2c2949daebcb85c53abfbf0c7a33aa4faf923"
+                    "bytes": 4767350,
+                    "sha256": "37ab4a3a5ae7b8d1e6a58aaf48e1ae8b5e6f9366df685df2a3bf2a1adcec467a",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 53,
                     "asset": "surah-053.zip",
-                    "bytes": 10635262,
-                    "sha256": "36e2704a735002e147eb50ca101f1fa9e34480d5055a5b31e81755e48f23b0a5"
+                    "bytes": 5476926,
+                    "sha256": "3338b5034578925a18b6c0a696af23b0c503a62e66a54d3c848c07045784c2d3",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 54,
                     "asset": "surah-054.zip",
-                    "bytes": 11303550,
-                    "sha256": "22b9c932665b70e3258567f75c967e123f4e481dfc1deca1d7166a6a2917135e"
+                    "bytes": 5860775,
+                    "sha256": "dfe16cca1204d4206744d0af142a770e3368d666e1a6a62d1eff36cd6234ee55",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 55,
                     "asset": "surah-055.zip",
-                    "bytes": 15827233,
-                    "sha256": "d591936e4723fb0fefafa56b4e2d01bffb93a73d8d85c795955d03504721d5f0"
+                    "bytes": 8261655,
+                    "sha256": "96a7b7a92afd68ebdbd48804878758a7f3b6affdbaf0fc14e7d7645880eace30",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 56,
                     "asset": "surah-056.zip",
-                    "bytes": 15452183,
-                    "sha256": "6e58241936eef43f32bbfecb4e1a8af0dea62453ea160bed89a36e14c862595d"
+                    "bytes": 7985155,
+                    "sha256": "87c84979accf8a110786decae6e64451c8af7133addc262fdbcb7adb789caebf",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 57,
                     "asset": "surah-057.zip",
-                    "bytes": 17076252,
-                    "sha256": "c6ac2e8dd4d67ae076aa8f7e6bf57f3692342c8cec00691401d76e779fc87749"
+                    "bytes": 8903124,
+                    "sha256": "43070c6c9cfcfed53a689072fb44f85718c3684fa830bf4994704b85d2161b16",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 58,
                     "asset": "surah-058.zip",
-                    "bytes": 15238272,
-                    "sha256": "1729b6e021aa15e12e4851992c692aa04f034d488cc1739a176cf2b4c7d9a06d"
+                    "bytes": 7995601,
+                    "sha256": "5036910c3b998d0a401d567f3f7559341baacc222e49c1a2671a8dbb676937ce",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 59,
                     "asset": "surah-059.zip",
-                    "bytes": 12847638,
-                    "sha256": "e77af17b5ca681821806b8f18ac41e5631013b9a81464035367f32667b00a5cf"
+                    "bytes": 6715649,
+                    "sha256": "0f56e082027bb0522e962b76bfe0a268b4856a5db104ce64700a792297e01399",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 60,
                     "asset": "surah-060.zip",
-                    "bytes": 9395684,
-                    "sha256": "9cb94a999cfa81d11b5770460812886c71be50eb27b9bedd93bf20225505a217"
+                    "bytes": 4828600,
+                    "sha256": "2249052d84fca878229ddde1154f62ab746a47035fcf7797fe95dd217108a21c",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 61,
                     "asset": "surah-061.zip",
-                    "bytes": 6474531,
-                    "sha256": "10d2f33f341706b8ea182dcfaee61032add3195c593dca852569b3a6a4ea1d40"
+                    "bytes": 3324405,
+                    "sha256": "bec12f3c65d850c3528100c33573ea454226072e39069a97e71a800240b97e36",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 62,
                     "asset": "surah-062.zip",
-                    "bytes": 5067601,
-                    "sha256": "c1e5b0c79c540af84f8196700973a0070dc62dd5ce9d87dd0deb33bdf70be30f"
+                    "bytes": 2602586,
+                    "sha256": "73ff0caa274367b594f80e8a6eada01bfaf026139154ab33c25a1230d3cff307",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 63,
                     "asset": "surah-063.zip",
-                    "bytes": 5896397,
-                    "sha256": "7db7f6e682bd201ed5374ef1cbbddb11670f56a248c0d90c7e337a50c18d190f"
+                    "bytes": 3073016,
+                    "sha256": "54c522ff198f9eb62c43178f7994c97beafa7fa509b1dc19061d00f9e74ef535",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 64,
                     "asset": "surah-064.zip",
-                    "bytes": 7774818,
-                    "sha256": "6df31376dbb0c866a121f23574a2e490936b1f739070dc723acf0d3834c1c294"
+                    "bytes": 4020162,
+                    "sha256": "c2c6d9ee48348c9ea0e39a9f49594f80c14fa781bca705c041c71c07810b9d11",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 65,
                     "asset": "surah-065.zip",
-                    "bytes": 8358271,
-                    "sha256": "d98ac38eb9a2393f1c351f74652ecebb0dd9ae01a9b22dcf8c5a8f1e1e3f7ab6"
+                    "bytes": 4323857,
+                    "sha256": "f8db76d8b85e2545c0dcf07b545d2e27f21aa6ef51227f61c2334d6d4184d67a",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 66,
                     "asset": "surah-066.zip",
-                    "bytes": 8818076,
-                    "sha256": "ddfe5355a9f77659901c2bb60091540bc16f5532f267c4c39c0d37a7b810637e"
+                    "bytes": 4614173,
+                    "sha256": "9fb299389bbfa55bd9d06c742fa481f5b39117f4f295784e0beb3be47672b64d",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 67,
                     "asset": "surah-067.zip",
-                    "bytes": 10299511,
-                    "sha256": "3a5fd001ebe6839117917c0521d9997731112d4eacc4df0ebb03ea409c07ca70"
+                    "bytes": 5354854,
+                    "sha256": "53b2d82cbdff514e87de99164e8ae414b9c4679568eeded683ef930746e9456a",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 68,
                     "asset": "surah-068.zip",
-                    "bytes": 10488238,
-                    "sha256": "b8136c6a1fc58ea8046b4d28c766a00d155076e3b294939cb81023a10e8d9016"
+                    "bytes": 5424748,
+                    "sha256": "47042f9a19c78ea7515e09ab5d29b1e442eaecdca03ff867909ed277715c8431",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 69,
                     "asset": "surah-069.zip",
-                    "bytes": 7372216,
-                    "sha256": "2f5d102c97b0b57ea144b23dc0ab7365a1bac4d8fb0fa1fcd857c8977b305421"
+                    "bytes": 3794869,
+                    "sha256": "9df43ccc4b990bd2090e4fcc834ae86608dead8ce24c155a3a085d391fa71c25",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 70,
                     "asset": "surah-070.zip",
-                    "bytes": 6701065,
-                    "sha256": "03bab03d24dfbdbac23b19e36d637c6117d93c3e882ee285989e8168525f1880"
+                    "bytes": 3453911,
+                    "sha256": "268a2ca550ece7aa557d82e1491dfb108de2f2c02ea6b960ab8c97bee98f6703",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 71,
                     "asset": "surah-071.zip",
-                    "bytes": 6435858,
-                    "sha256": "337297417df30fa764005496e2e740749bc40ea091be4e52e9a2cf06c07ace9a"
+                    "bytes": 3318381,
+                    "sha256": "4d7a244d48c3358a4402d898798c99d27a4ee89249006f60379389b47cbb0195",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 72,
                     "asset": "surah-072.zip",
-                    "bytes": 7910298,
-                    "sha256": "3d316f9c96370c95bea16343c158a1c59247c751a8c4291bfdec7ca6d1b8db42"
+                    "bytes": 4086935,
+                    "sha256": "6edbd44fb0a010c2f0cc7d528271a91752e7591e3a0c25395e4dc0201a822453",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 73,
                     "asset": "surah-073.zip",
-                    "bytes": 5833604,
-                    "sha256": "b4d1d8814886fd56926ef456a2a0823fd7da1fc05af203d3c17debfa060595b3"
+                    "bytes": 3015752,
+                    "sha256": "65e9457c882c653e22cc2bae7c5461f4c8b7a65bdc97f5842270cb491d9d14a9",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 74,
                     "asset": "surah-074.zip",
-                    "bytes": 6810831,
-                    "sha256": "602330b5cc765ad505fe129d149ffe06adbcbf11c34b096ba5580b979012827b"
+                    "bytes": 3510838,
+                    "sha256": "cee96cdbf745e024fe6cbbd2a9334925e1b99f9bc3d742201c727f5ccb02d9de",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 75,
                     "asset": "surah-075.zip",
-                    "bytes": 4639951,
-                    "sha256": "07f6519b5993430dd6234a4e3543a54c0a708e106a72b75cdc9eca3c9f615afc"
+                    "bytes": 2387022,
+                    "sha256": "12ee5da3e07b0de78316e8ff16b04181a3845f65d739d2ed82f3e442d7f60e20",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 76,
                     "asset": "surah-076.zip",
-                    "bytes": 8056161,
-                    "sha256": "9389a7d2fbf91e878b546b58d221a148cb4d7106343ad548bcb98d2d3c2b9321"
+                    "bytes": 4163151,
+                    "sha256": "f744fef0b459d47be1787f3243ca93bec0385c11929ce7142420756cdf6b96dd",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 77,
                     "asset": "surah-077.zip",
-                    "bytes": 6845196,
-                    "sha256": "c35e1c2815b3d5d63874d7900500a58a63ba4810f4357f5e19d2b4fdbdf2937e"
+                    "bytes": 3537822,
+                    "sha256": "2035875da7420edfee3eb21d8945b6c2e7460414d2eaf0ad91f4c2116403a0c6",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 78,
                     "asset": "surah-078.zip",
-                    "bytes": 6162866,
-                    "sha256": "dfc00c8521579fd7aebb21419f1502cdd2ee677a29498e3d3fdc0bc5dd1fa0b6"
+                    "bytes": 3179726,
+                    "sha256": "ab1e64a3b5f321b17c0449a8d3005e36095b299288afa6285b4de98cc2344a24",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 79,
                     "asset": "surah-079.zip",
-                    "bytes": 6140494,
-                    "sha256": "bef74013701fd69b0fe07a0b7a79488488b6e71ffdd4d384d0aa170f1c0fa4af"
+                    "bytes": 3166660,
+                    "sha256": "00ed41934d34fba6fd3b71af9f19ac8fa69501250cc5164af9fa8d5562f61ab8",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 80,
                     "asset": "surah-080.zip",
-                    "bytes": 4285746,
-                    "sha256": "77e0991eeae27c12087c161244776752a775277806777c5251c1ffd15d845965"
+                    "bytes": 2209613,
+                    "sha256": "0c31fc35e0303764ba157833a4f1700970d037316bca70fd9213c71c9c8a54a3",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 81,
                     "asset": "surah-081.zip",
-                    "bytes": 3260887,
-                    "sha256": "acf1e8683c871982c3fe0e37450e86fb790d3742524f2c9dab43e83cab4f5ebe"
+                    "bytes": 1676420,
+                    "sha256": "830b6ce58e07185e0c51217167c053a85a8f4790fe6a40408b32cfe8ad9d7772",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 82,
                     "asset": "surah-082.zip",
-                    "bytes": 2639685,
-                    "sha256": "2430b66a004ee2a9ce29396453e0180d700cde8b5868a62c24431d46a3ef7c7b"
+                    "bytes": 1381185,
+                    "sha256": "adc077a478ba7c02b742799ffcccce454bfaa298c68343ff771ed8eda8e4da48",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 83,
                     "asset": "surah-083.zip",
-                    "bytes": 6077998,
-                    "sha256": "79526f722b44a699711164f7f13fce969499ae4ca496118df4d03b05f21c3520"
+                    "bytes": 3209325,
+                    "sha256": "66de22b8f89963d8e31787ea82f7a7f0eea8ce717746769f0020dd8a5c08c09d",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 84,
                     "asset": "surah-084.zip",
-                    "bytes": 3460047,
-                    "sha256": "1026a6bf10f948e1f24e6f9f17a185f7d8bf15a5e5be049e5f2af1580cc7ee9b"
+                    "bytes": 1797427,
+                    "sha256": "31a154501a66c5b7b13628b4638d8cc2dda8c9d7c9b9df9fd2f84fec21657e01",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 85,
                     "asset": "surah-085.zip",
-                    "bytes": 3543111,
-                    "sha256": "11c39fbb835fa09c7efae44549d81e4a8490039d3d1843ccd215178eaaaa7da8"
+                    "bytes": 1849219,
+                    "sha256": "a81f561a630dfc996276528c7e73f430b4b624b0da579cff05c94ed857128a84",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 86,
                     "asset": "surah-086.zip",
-                    "bytes": 1966883,
-                    "sha256": "ca5fd366dbfaa0a0b16ec68ebb3c1dae6259abe803f71645be20b790e69c5a35"
+                    "bytes": 1020177,
+                    "sha256": "9a5b6ddd1763a1440e6d6e35fd2bb4673910551e0d3d2cc544ee87d4b902fb7f",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 87,
                     "asset": "surah-087.zip",
-                    "bytes": 2352876,
-                    "sha256": "d37fb6a42fb8156c3963306c462cb502305d3a319a63876e2ad07ba7288c7cea"
+                    "bytes": 1216787,
+                    "sha256": "9354c593ac57a3aa451555d5d935cbc9fce61121fc679be12e6370c9a51ea1c8",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 88,
                     "asset": "surah-088.zip",
-                    "bytes": 3241019,
-                    "sha256": "4bd58a8ca981b75a1f3261cb451a7521ce34fa323cb11c4a42e09f8a8318413b"
+                    "bytes": 1695690,
+                    "sha256": "ce1328ce25112c1ee5161ba83e70a001e6c21e1cecb292bce4a84736735d3d29",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 89,
                     "asset": "surah-089.zip",
-                    "bytes": 4854725,
-                    "sha256": "ce05a19b37a0447491670d9a373f99c7dda53f23d4b699ff79a812bae4c3b819"
+                    "bytes": 2541766,
+                    "sha256": "afa98efbffb86d9ade683ec255cb6926878fd6ff229f7b73fec66faad7407b85",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 90,
                     "asset": "surah-090.zip",
-                    "bytes": 2664571,
-                    "sha256": "314c9ae0f82c5346e8f282b8dc8a9e2ad70cd46e48daf05d2a51f65021e13ba1"
+                    "bytes": 1396653,
+                    "sha256": "6f2ca242c7a7450795d184ea03e66da372d63c7d443c175bb536e53995c5256c",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 91,
                     "asset": "surah-091.zip",
-                    "bytes": 1820467,
-                    "sha256": "8c798ed5c33a95e829b829ebbb391a0a9a48b99f5248f81321a851c4304fc555"
+                    "bytes": 943568,
+                    "sha256": "f7c1def55dac7308044036bfdda2f6d2d379b952e4bfc67ad288fcbf4bafaf76",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 92,
                     "asset": "surah-092.zip",
-                    "bytes": 2424366,
-                    "sha256": "740e51fc39730f13b8071ea25f971eec6f132294c36b527ddc3cd48ca537ffc1"
+                    "bytes": 1256921,
+                    "sha256": "4c5ac309b11f6c6446f1e3dbf43b2e451615af6f7d532324b4a572084f5de382",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 93,
                     "asset": "surah-093.zip",
-                    "bytes": 1293567,
-                    "sha256": "9d654b5801eaff453fc9a73972acb980ac98523e99ac42a7ce58967a0f5758af"
+                    "bytes": 669896,
+                    "sha256": "67fd91e1cf29682c0f354fe85770fdfa368b9aa3a96366fdae33e18495ace57f",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 94,
                     "asset": "surah-094.zip",
-                    "bytes": 795617,
-                    "sha256": "ec8258a37257e40386fdcc1f94f2326b843360ef215fc79798d9be5a75f6bded"
+                    "bytes": 416019,
+                    "sha256": "702b25e2ef05459aa3dbc42564e71633cbe38a613d7137637b926af751df4a5b",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 95,
                     "asset": "surah-095.zip",
-                    "bytes": 1126260,
-                    "sha256": "7253ecaac4a1e1dd557d1ac6fd143d726a208afc9bf502abe16d05fe99aa1d75"
+                    "bytes": 592710,
+                    "sha256": "dec81a30babfa6ded7b9a7d3458b7f44aa19d4167bba7d4ba6891ad21b3e5c05",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 96,
                     "asset": "surah-096.zip",
-                    "bytes": 2229340,
-                    "sha256": "ab6e862d6dda1f45f7defd9d9831ba911624193e3589cbc3dbee78abce0e97a5"
+                    "bytes": 1168627,
+                    "sha256": "8e40a602b263b0b15510a2012824eeb6ec7b3144d34c72259b6e70b9eac09440",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 97,
                     "asset": "surah-097.zip",
-                    "bytes": 858057,
-                    "sha256": "3c3985b955415568f054d5dababbf2e11c9cc3fde82463410c2107ed82146d9b"
+                    "bytes": 451819,
+                    "sha256": "9f689e45e631cdabc071b3b83f5c1217a8156b71445d3db353e7eb06084bfbbe",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 98,
                     "asset": "surah-098.zip",
-                    "bytes": 2689061,
-                    "sha256": "5673040c254f594246f2f8c75666f379d886acf1ad99771cb2f7edcd15885211"
+                    "bytes": 1417099,
+                    "sha256": "5e1cf87a3f31270e05b2b09314589cc102ed6c7a016154acc5ed6fa7c45d3ca2",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 99,
                     "asset": "surah-099.zip",
-                    "bytes": 1187868,
-                    "sha256": "f4e6b8fa3dcf00cb51616812f85698c59096fdeb030fff87f04770f77492909a"
+                    "bytes": 623204,
+                    "sha256": "abe5b936cf1b8a1e5e6a01ebbf6564d5f413ca794f48b59f2126cccaec107f4e",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 100,
                     "asset": "surah-100.zip",
-                    "bytes": 1277049,
-                    "sha256": "d25cdc77285d09483359835eb65e72579949b10275f8c951be7fd49998a72995"
+                    "bytes": 669360,
+                    "sha256": "37c977e88a810b97dbcddc2439d81bbed7b2f49e4d428d4b144f9ea02ec5203a",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 101,
                     "asset": "surah-101.zip",
-                    "bytes": 1232531,
-                    "sha256": "830d6a91aa1ed888e512c2fbd81473aa488b2b1b336898fb938abf1051e27274"
+                    "bytes": 637908,
+                    "sha256": "72cbc1dbc59f77c3a73a94beeedda414da177af57030ff68208d871e5bb2747b",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 102,
                     "asset": "surah-102.zip",
-                    "bytes": 982719,
-                    "sha256": "ef569de88ae23efc73641edb5a2347b57c62bc08a89156f8f0c66a5d9f2c7dff"
+                    "bytes": 513791,
+                    "sha256": "fa7754d0a37895e4be552d2216a66444edad1223d54cef69ddbaa71a7a08d901",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 103,
                     "asset": "surah-103.zip",
-                    "bytes": 447280,
-                    "sha256": "c77e59fc4e7b73c4aa04542b82ba1b324d48310d62e96697b480d769e522d4a2"
+                    "bytes": 239448,
+                    "sha256": "5f4d5b2497437e4be0868f3e2737849730e33aae89403cdf0aee67a6481a5db4",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 104,
                     "asset": "surah-104.zip",
-                    "bytes": 1056321,
-                    "sha256": "dbe693d206b498384b9b8a18f3b6ab3fae52da707ec593d47bc8d26ede246fb4"
+                    "bytes": 547559,
+                    "sha256": "0a88ca0e3e81e38c13c11ec1fedcce6de805bc0c55b081ae73c35bfb10b7285f",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 105,
                     "asset": "surah-105.zip",
-                    "bytes": 725090,
-                    "sha256": "7a45420b805074624c13a93dd69a846402f5abaa87c9751bad5c0252d511c0b9"
+                    "bytes": 376611,
+                    "sha256": "275a87e3de946cdc99e72a7dbc52dbadced257f8fa28f6af8090a9fc53c852ba",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 106,
                     "asset": "surah-106.zip",
-                    "bytes": 625058,
-                    "sha256": "621fa7af7470932317d6586f8c57211c10a5e6d9ad9e8b88be1eaa28cccc0d21"
+                    "bytes": 325273,
+                    "sha256": "e37c876a185160cb0fd85245bd973744fa2caea375969183f204cf86d991a6ac",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 107,
                     "asset": "surah-107.zip",
-                    "bytes": 879868,
-                    "sha256": "6e8b7f9fc935f17f73eaa3ba52b863b4b1a88c85c511961ae8a4ad95bef5cfaa"
+                    "bytes": 457416,
+                    "sha256": "54094d68e4619432b695fc5a902d8d713531cbc32a9b5ddfe98091c7a1a9f572",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 108,
                     "asset": "surah-108.zip",
-                    "bytes": 351318,
-                    "sha256": "3df39d09e54b8aad2e9c2b6bba453e8c65405590e7dbb3db45797ce9189af481"
+                    "bytes": 183407,
+                    "sha256": "8763520b75eea88d3b40b9832f6da12a212299df7764d338b789163c0bf5790a",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 109,
                     "asset": "surah-109.zip",
-                    "bytes": 841569,
-                    "sha256": "f0dcaeb310a6c9ffc14ba09e13deb1b2bde00bf06446274afa8ce69a515e7d15"
+                    "bytes": 438003,
+                    "sha256": "f868ffd2b11fec0d3ae183d11a65fff2344f82076340d22d3d1fa63b49ccb5c0",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 110,
                     "asset": "surah-110.zip",
-                    "bytes": 596731,
-                    "sha256": "17f42d4ec46c807de3ddad8cb7367d78d71df2d7bb206302b0e5008ea341d888"
+                    "bytes": 309830,
+                    "sha256": "2848121f99315d9be1c5e8a16e0cb052f896d35b5b644f50a0ca5e7e0fa1ad47",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 111,
                     "asset": "surah-111.zip",
-                    "bytes": 674417,
-                    "sha256": "9ac624617d0399bd9bd9aa32196ea5721d0c27a17a7508e8274e074fbd6a1ed0"
+                    "bytes": 349841,
+                    "sha256": "3f3e530198f2c5392c99903109f5c834bc7b0d3a0a8cb7f110428f081403e4e6",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 112,
                     "asset": "surah-112.zip",
-                    "bytes": 384052,
-                    "sha256": "515829a199dc9fcf2d195be37ac3bc97c40c96e9d871eda6b04690a160ff7e06"
+                    "bytes": 202433,
+                    "sha256": "fe011bcea36c93fca130139c6540cfe71b07f629ce262ab82ad9f7e06eb12b23",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 113,
                     "asset": "surah-113.zip",
-                    "bytes": 575396,
-                    "sha256": "518a3c3c59e5ff80d3335c5826dacb2d666e3a13a079f48ad9f13695a886eb6d"
+                    "bytes": 296169,
+                    "sha256": "50786c5a75a87c5799f03ea9def8c6cdadaba6cec89ffbb8a287139db0eb45ba",
+                    "bitrate": 64000
                 },
                 {
                     "surah": 114,
                     "asset": "surah-114.zip",
-                    "bytes": 725151,
-                    "sha256": "c3927951509461851416dc2ba16aae9964c6c91d17e0ada54aae884c5e923297"
+                    "bytes": 373421,
+                    "sha256": "d7d71be943f134678384c7fc607e1df734efb9b274944fe60750837356a0e355",
+                    "bitrate": 64000
                 }
             ]
         }

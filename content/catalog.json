@@ -99,10 +99,10 @@
             "version": "QUL",
             "shipped": false,
             "ayahs": 6236,
-            "bytes": 1769472,
-            "sha256": "af264024b1b4a933c38ef64072ae6be93f5045765819159ed12bb6bcebc616f8",
-            "tag": "pack-reciter-minshawi-af264024",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-reciter-minshawi-af264024/reciter-minshawi.db"
+            "bytes": 1777664,
+            "sha256": "82bd535e9c255f201aac9a883f9b7d342a18bb21f33e3347a0673d018edbd83c",
+            "tag": "pack-reciter-minshawi-82bd535e",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-reciter-minshawi-82bd535e/reciter-minshawi.db"
         },
         {
             "id": "reciter-husary",
@@ -116,10 +116,10 @@
             "version": "QUL",
             "shipped": false,
             "ayahs": 6236,
-            "bytes": 1728512,
-            "sha256": "9b09e6cb1b1656e488b8446aa9ce3d79425ddae663a45f7cc73e3ec128b73b84",
-            "tag": "pack-reciter-husary-9b09e6cb",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-reciter-husary-9b09e6cb/reciter-husary.db"
+            "bytes": 1736704,
+            "sha256": "2dac7c769a92268eb53ffbc4db03d1ff03749f31f4a2b8b95e01a73402b81e57",
+            "tag": "pack-reciter-husary-2dac7c76",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-reciter-husary-2dac7c76/reciter-husary.db"
         },
         {
             "id": "words-en",

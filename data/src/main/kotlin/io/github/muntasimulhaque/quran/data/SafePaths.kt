@@ -21,8 +21,12 @@ object SafePaths {
     /** One reciter folder, as the QUL exports name it. */
     private val FOLDER = Regex("^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 
-    /** One flat ayah file under its reciter folder. */
-    private val AUDIO = Regex("^[A-Za-z0-9][A-Za-z0-9._-]{0,63}/[0-9]{6}\\.mp3$")
+    /**
+     * One flat ayah file under its reciter folder. The packages carry Ogg
+     * Opus; an MP3 path is a package from before the re-encode and is not an
+     * ayah file this build can play (owner decision, the Opus migration).
+     */
+    private val AUDIO = Regex("^[A-Za-z0-9][A-Za-z0-9._-]{0,63}/[0-9]{6}\\.opus$")
 
     /** A file name that may be used beside other files. */
     private val SEGMENT = Regex("^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")

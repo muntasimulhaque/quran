@@ -29,7 +29,17 @@ class RecitationStore(private val context: Context) {
         return null
     }
 
-    /** The ayah files of one surah for one reciter folder, for sizes and removal. */
+    /**
+     * The ayah files of one surah for one reciter folder, for sizes and removal.
+     *
+     * A surah downloaded from a build before the Opus re-encode is MP3, and
+     * this build neither counts nor plays MP3. Those files are removed as
+     * soon as the folder is read, so an update does not keep a surah twice on
+     * the phone and the reader sees the download offer for it again. The
+     * package installs a whole surah folder, so a fresh download would replace
+     * them anyway; the sweep is for a reader who updates and does not tap
+     * Play for a while (owner decision, the Opus migration).
+     */
     fun filesForSurah(folder: String, surah: Int): List<File> {
         if (surah !in 1..114) return emptyList()
         val directory = SafePaths.childUnder(imported, folder) ?: return emptyList()
@@ -40,9 +50,13 @@ class RecitationStore(private val context: Context) {
         // hold. A reader who downloaded a surah in one language then met a
         // download offer for it in the other (owner report, this session).
         val prefix = String.format(Locale.ROOT, "%03d", surah)
-        return directory.listFiles { file ->
-            file.isFile && file.name.startsWith(prefix) && file.name.endsWith(".mp3")
+        val files = directory.listFiles { file ->
+            file.isFile && file.name.startsWith(prefix) && file.name.endsWith(AYAH_SUFFIX)
         }?.toList().orEmpty()
+        directory.listFiles { file ->
+            file.isFile && file.name.startsWith(prefix) && file.name.endsWith(LEGACY_SUFFIX)
+        }?.forEach { it.delete() }
+        return files
     }
 
     fun bytesForSurah(folder: String, surah: Int): Long =
@@ -64,5 +78,13 @@ class RecitationStore(private val context: Context) {
 
     private fun assetExists(path: String): Boolean = assetCache.getOrPut(path) {
         runCatching { context.assets.open(path).close() }.isSuccess
+    }
+
+    private companion object {
+        /** The one extension a current recitation package carries. */
+        const val AYAH_SUFFIX = ".opus"
+
+        /** The extension of a surah downloaded before the Opus re-encode. */
+        const val LEGACY_SUFFIX = ".mp3"
     }
 }

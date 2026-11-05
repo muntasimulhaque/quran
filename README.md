@@ -13,6 +13,8 @@ Content 1.5.0, the database `content-db-12c95dbe`. The Quran text, every
 translation, every tafsir, every pack, and the content database are unchanged;
 the catalog marks the two translations as shipped.
 
+**In 15.6.** The recitation is re-encoded in Ogg Opus at 64 kbps mono, about half the size of the old MP3 set, with the same word timings and the same reciters. The old MP3 packages stay under their old tags for readers still on 15.5; the new app reads the new Opus packages, one surah at a time as before. The Quran text, both translations, and both tafsirs are unchanged.
+
 **In 15.5.** The app opens in the phone's language, with both translations already on the device, and no language screen. The reminder is offered after the first surah, not before the text. A quiet folio line keeps the surah and juz on the page; the full chrome is on tap, with no timer. Aa opens the type page, the reading has two sizes, a tap on a word shows its meaning, and a tafsir you do not have is offered where you ask for it. Search shows the verse for a reference result, the ayah menu is paper, and the audio offer has a clear Not now. Tajweed colors and word meanings start off. The recitation re-encode and the Al-Fatiha bundle are later releases.
 
 

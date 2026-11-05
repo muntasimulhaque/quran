@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 15.5 (versionCode 157)
+Version: 15.6 (versionCode 158)
 
 ## Listing
 
@@ -167,6 +167,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (one answer and no close), so every frame that wants a clean
 page is taken before it.
+
+## Release notes (15.6, 261 characters)
+15.6 re-encodes the recitation in Opus at 64 kbps mono, about half the size, with the same word timing. The Quran text, both translations, and both tafsirs are unchanged. The new packages download one surah at a time as before. No ads, no trackers, no accounts.
 
 ## Release notes (15.5, 407 characters)
 15.5 opens on the Quran, in your phone's language, with both translations already on the device. The reading keeps a quiet line with your surah and juz, Aa opens the type page, a tap on a word shows its meaning, and a tafsir you do not have is offered where you ask for it. Search shows the verse for a reference result. The audio offer has a clear Not now. Text, translations, tafsirs, and packs unchanged.

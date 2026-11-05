@@ -13,7 +13,10 @@ import java.io.IOException
  */
 object SafeFiles {
 
-    private val AUDIO = Regex("^[A-Za-z0-9][A-Za-z0-9._-]{0,63}/[0-9]{6}\\.mp3")
+    private val AUDIO = Regex("^[A-Za-z0-9][A-Za-z0-9._-]{0,63}/[0-9]{6}\\.opus$")
+
+    /** The source export on the CDN is still MP3, and its pins are keyed by that path. */
+    private val SOURCE_AUDIO = Regex("^[A-Za-z0-9][A-Za-z0-9._-]{0,63}/[0-9]{6}\\.mp3$")
     private val SEGMENT = Regex("^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
 
     fun resolveUnder(root: File, relative: String): File? {
@@ -35,8 +38,13 @@ object SafeFiles {
             ?.takeIf { under(base, it) }
     }
 
-    fun audioFile(base: File, path: String): File? {
-        if (!AUDIO.matches(path) || path.split('/').any { it == "." || it == ".." || it.contains("..") }) {
+    fun audioFile(base: File, path: String): File? = fileUnder(base, path, AUDIO)
+
+    /** A source MP3 under the staging root, for the hash pins and the encoder. */
+    fun sourceAudioFile(base: File, path: String): File? = fileUnder(base, path, SOURCE_AUDIO)
+
+    private fun fileUnder(base: File, path: String, pattern: Regex): File? {
+        if (!pattern.matches(path) || path.split('/').any { it == "." || it == ".." || it.contains("..") }) {
             return null
         }
         return runCatching { File(base, path).canonicalFile }
