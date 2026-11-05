@@ -4,17 +4,16 @@ A free, open source Quran reader for Android. It opens where you left off
 and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 15.9 (versionCode 161) was submitted to Play review from commit
-`e3f5a5ec`. The signed bundle `quran-15.9-vc161.aab` has SHA-256
-`e0a2b51202599009b8d2d4c8b6d8849635a2570c51da0482bcdeda59cbdb4730`, signed by the
+**Status:** 16.0 (versionCode 162) is ready for Play review from commit
+`3526fdee`. The signed bundle `quran-16.0-vc162.aab` has SHA-256
+`17fa19135643520274bfc4e4b2dab0a95b75131e345b0e89f77766544da9826e`, signed by the
 upload key `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-Build run `41990405088` is green and the store capture is run `41990405116`.
-The eight store frames are pixel-identical to 15.8; the word sheet's frame is
-new in the evidence set. Content 1.5.0, the database `content-db-12c95dbe`.
-The Quran text, both translations, and both tafsirs are unchanged; the
-recitation is the original MP3 set under the `recitation-minshawi` and
-`recitation-husary` tags. The app now carries Al-Fatiha in both voices and
-both reciter timing packs.
+Build run `42034914113` is green and the store capture is run `42034913960`.
+The eight store frames show the page with no bar over it and the offer card
+alone at the foot; every frame was read on all three form factors. Content
+1.5.0, the database `content-db-12c95dbe`. The Quran text, both translations,
+both tafsirs, and the recitation are unchanged; the app still carries
+Al-Fatiha in both voices and both reciter timing packs.
 
 **In 16.0.** The page belongs to the text. The quiet folio line at the foot is gone, and with it the duplicate of the surah and juz that the top bar already carries. Aa leaves the bar, so the bar is Browse, the surah and juz, Search, and Settings, and the juz fits again on a phone; the text size lives in Settings with its live sample. The bar leaves when the reader's own drag begins and returns on a tap, with no timer. The recitation pill and the pack card are the only things at the foot, composed only while raised, and the reading ends at its own margin. The Quran text, both translations, both tafsirs, and the content database are unchanged.
 
