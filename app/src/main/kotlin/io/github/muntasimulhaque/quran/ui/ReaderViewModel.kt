@@ -1071,12 +1071,14 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * Listening needs two things that may both be missing: the reciter's word
      * timings, and the surah's own audio. They are asked for once, named in
      * full, with the reciter changeable in the offer itself. Nothing is
-     * fetched until the reader says so.
+     * fetched until the reader says so. A surah whose audio is already in the
+     * app's assets, whole, is not missing anything (owner decision, this
+     * session).
      */
     private suspend fun missingForListen(recitation: String, ayah: Ayah): Long? {
         val timingsId = ContentDatabase.reciterPack(recitation)
         val timingsMissing = !library.isInstalled(timingsId)
-        val audioMissing = library.downloadedSurahs(recitation).none { it.surah == ayah.surah }
+        val audioMissing = !library.hasSurahAudio(recitation, ayah.surah)
         val audioBytes = library.packageFor(recitation, ayah.surah)?.bytes
         if (!timingsMissing && !audioMissing) return null
         // A surah with no published package is not a download, it is an
@@ -1105,7 +1107,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     private suspend fun listenBytes(recitation: String, surah: Int): Long {
         val timingsId = ContentDatabase.reciterPack(recitation)
         val timings = if (library.isInstalled(timingsId)) 0L else library.pack(timingsId)?.bytes ?: 0L
-        val audio = if (library.downloadedSurahs(recitation).any { it.surah == surah }) {
+        val audio = if (library.hasSurahAudio(recitation, surah)) {
             0L
         } else {
             library.packageFor(recitation, surah)?.bytes ?: 0L
@@ -1135,7 +1137,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         val timingsId = ContentDatabase.reciterPack(offer.reciter)
         val timings = library.pack(timingsId)
         val timingsBytes = if (library.isInstalled(timingsId)) 0L else timings?.bytes ?: 0L
-        val audioBytes = if (library.downloadedSurahs(offer.reciter).any { it.surah == offer.surah }) {
+        val audioBytes = if (library.hasSurahAudio(offer.reciter, offer.surah)) {
             0L
         } else {
             library.packageFor(offer.reciter, offer.surah)?.bytes ?: 0L

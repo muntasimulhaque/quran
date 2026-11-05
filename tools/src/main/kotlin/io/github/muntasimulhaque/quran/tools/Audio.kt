@@ -29,6 +29,12 @@ import java.util.zip.ZipOutputStream
  * content database names them. The manifest carries each package's size and
  * SHA-256, and it is what the app ships: a package is only accepted after its
  * hash matches, so a bad download or a tampered file can never play.
+ *
+ * The first surah is also carried inside the app: `audio bundle` writes the
+ * seven Al-Fatiha ayahs of both reciters into `content/bundled/audio`, taken
+ * byte for byte from the published surah 1 packages and checked against the
+ * source pins. The app's own assets then answer the first Play with no
+ * network (owner decision, this session).
  */
 class Audio(private val root: File) {
 
@@ -127,6 +133,141 @@ class Audio(private val root: File) {
         println("AUDIO FAILURES (${failures.size})")
         failures.take(10).forEach { println("  - $it") }
         return 1
+    }
+
+    // ------------------------------------------------------------------ bundle
+
+    /**
+     * Writes the fourteen Al-Fatiha ayah files the app carries, both reciters,
+     * from the published surah 1 packages.
+     *
+     * The files are not re-encoded and not downloaded into the app at run
+     * time. Each package is verified against `recitation-manifest.json` before
+     * it is opened, and each member is verified against its pin in
+     * `audio-sources.json` before it is written, so the bundle is the same
+     * recording the reader would download and a changed source cannot slip in
+     * (owner decision, this session).
+     */
+    fun bundle(): Int {
+        val database = File(root, "content/quran.db")
+        if (!database.exists()) {
+            println("audio: content/quran.db is missing; run tools build first")
+            return 1
+        }
+        val existing = readManifest(File(root, "content/recitation-manifest.json"))
+        if (existing.isEmpty()) {
+            println("audio: content/recitation-manifest.json is missing or empty; run audio packs first")
+            return 1
+        }
+        if (sourceHashes.isEmpty()) {
+            println("audio: content/audio-sources.json is missing or empty; run audio packs first")
+            return 1
+        }
+        val pathsByReciter = linkedMapOf<String, MutableList<String>>()
+        openSqlite(database).use { connection ->
+            connection.each(
+                "SELECT ra.recitation, ra.audio_path FROM recitation_ayah ra " +
+                    "JOIN ayah a ON a.number = ra.ayah_number " +
+                    "WHERE a.surah = 1 ORDER BY ra.recitation, a.ayah",
+            ) { rs ->
+                val reciter = rs.getString(1) ?: return@each
+                val path = rs.getString(2) ?: return@each
+                pathsByReciter.getOrPut(reciter) { mutableListOf() } += path
+            }
+        }
+        if (pathsByReciter.isEmpty()) {
+            println("audio: the database names no Al-Fatiha recitation rows")
+            return 1
+        }
+        val staging = File(root, "content/work/audio-bundle")
+        staging.deleteRecursively()
+        val failures = mutableListOf<String>()
+        for ((reciter, paths) in pathsByReciter) {
+            val known = existing[reciter]?.get(1)
+            if (known == null) {
+                failures += "$reciter: surah 1 has no published package"
+                continue
+            }
+            if (paths.size != 7) {
+                failures += "$reciter: surah 1 has ${paths.size} ayah path(s), expected 7"
+                continue
+            }
+            val folder = paths.first().substringBefore('/')
+            if (paths.any { it.substringBefore('/') != folder }) {
+                failures += "$reciter: surah 1 paths span more than one folder"
+                continue
+            }
+            val zip = File(root, "content/work/audio-packs/$reciter/surah-001.zip")
+            if (!zip.isFile || zip.length() != known.first ||
+                !sha256(zip).equals(known.second, ignoreCase = true)
+            ) {
+                try {
+                    downloadPublished(reciter, 1, zip, known.first, known.second)
+                    println("audio: fetched $reciter surah 1 package")
+                } catch (error: Exception) {
+                    failures += "$reciter: ${error.message ?: error::class.java.simpleName}"
+                    continue
+                }
+            }
+            try {
+                extractPackage(zip, paths, File(staging, folder))
+            } catch (error: Exception) {
+                failures += "$reciter: ${error.message ?: error::class.java.simpleName}"
+                continue
+            }
+            println("audio: bundled ${paths.size} ayah(s) for $reciter from ${zip.name}")
+        }
+        if (failures.isNotEmpty()) {
+            staging.deleteRecursively()
+            println("AUDIO FAILURES (${failures.size})")
+            failures.forEach { println("  - $it") }
+            return 1
+        }
+        val output = File(root, "content/bundled/audio/recitation")
+        output.mkdirs()
+        // Replace only the folders this command wrote, so a future bundled
+        // surah in another folder is not thrown away by a rerun.
+        for (folder in staging.listFiles().orEmpty()) {
+            val destination = File(output, folder.name)
+            destination.deleteRecursively()
+            if (!folder.renameTo(destination)) {
+                folder.copyRecursively(destination, overwrite = true)
+                folder.deleteRecursively()
+            }
+        }
+        staging.deleteRecursively()
+        val files = output.walkTopDown().filter { it.isFile }.toList()
+        println(
+            "audio: bundled ${files.size} file(s), ${files.sumOf { it.length() }} bytes at " +
+                output.relativeTo(root),
+        )
+        return 0
+    }
+
+    /** Reads one published package's seven ayah members into [target]. */
+    private fun extractPackage(zip: File, paths: List<String>, target: File) {
+        target.deleteRecursively()
+        target.mkdirs()
+        java.util.zip.ZipFile(zip).use { archive ->
+            for (path in paths) {
+                val name = path.substringAfterLast('/')
+                val entry = archive.getEntry(name)
+                    ?: throw IllegalStateException("the package has no $name")
+                if (entry.isDirectory) throw IllegalStateException("$name is a directory")
+                val bytes = archive.getInputStream(entry).use { it.readBytes() }
+                val expected = sourceHashes[path]
+                    ?: throw IllegalStateException("$path has no source pin")
+                val actual = MessageDigest.getInstance("SHA-256").digest(bytes)
+                    .joinToString("") { "%02x".format(it) }
+                if (!actual.equals(expected, ignoreCase = true)) {
+                    throw IllegalStateException("$path does not match its source pin")
+                }
+                val file = SafeFiles.childUnder(target, name)
+                    ?: throw IllegalStateException("$name is not a safe audio name")
+                Files.write(file.toPath(), bytes)
+                if (!looksLikeAudio(file)) throw IllegalStateException("$name is not an mp3")
+            }
+        }
     }
 
     // ------------------------------------------------------------------- packs
@@ -508,16 +649,17 @@ class Audio(private val root: File) {
     private fun getRequest(url: String): HttpRequest =
         HttpRequest.newBuilder(URI.create(url)).GET().build()
 
-    /** `audio sample`, `audio packs [surahs] [reciters]`, `audio publish [reciters]`. */
+    /** `audio sample`, `audio bundle`, `audio packs [surahs] [reciters]`, `audio publish [reciters]`. */
     fun run(args: List<String>): Int = when (args.firstOrNull()) {
         "sample" -> sample()
+        "bundle" -> bundle()
         "packs" -> packs(
             surahFilter = parseNumbers(args.getOrNull(1)),
             reciterFilter = parseNames(args.getOrNull(2)),
         )
         "publish" -> publish(parseNames(args.getOrNull(1)))
         else -> {
-            println("usage: tools audio <sample|packs|publish>")
+            println("usage: tools audio <sample|bundle|packs|publish>")
             2
         }
     }

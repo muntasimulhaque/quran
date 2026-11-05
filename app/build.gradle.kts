@@ -54,11 +54,13 @@ val canSignRelease = keystoreStoreFile != null &&
 
 // The fonts, the core pack, and the catalog are owned by :content-assets;
 // this module generates the runtime assets (the text font,
-// the core pack, the catalog, and the recitation manifest) and wires them in.
+// the core pack, the catalog, the recitation manifest, and the bundled
+// Al-Fatiha audio) and wires them in.
 //
 // The packs a build carries are decided by its variant, not by a condition:
-// the main assets hold the core pack and the catalog, and only the debug
-// variant adds the rest, so a release bundle cannot contain them by accident.
+// the main assets hold the core pack, the shipped translations, the shipped
+// reciter timings, and the catalog, and only the debug variant adds the rest,
+// so a release bundle cannot contain them by accident.
 val contentAssets = layout.buildDirectory.dir("generated/contentAssets")
 val devPackAssets = layout.buildDirectory.dir("generated/devPackAssets")
 
@@ -66,6 +68,7 @@ val devPackAssets = layout.buildDirectory.dir("generated/devPackAssets")
 // project at execution time: the configuration cache forbids that.
 val contentDir = rootProject.file("content")
 val contentPacksDir = File(contentDir, "packs")
+val contentBundledAudioDir = File(contentDir, "bundled/audio/recitation")
 val contentFontsHafsDir = File(contentDir, "work/fonts-hafs")
 val contentBuildReport = File(contentDir, "build-report.json")
 val contentCatalogFile = File(contentDir, "catalog.json")
@@ -93,9 +96,16 @@ val screenshotPacks = setOf(
 // The two translations every install carries. The first page is the Quran
 // in the reader's language, offline, with no download and no language screen;
 // the tafsir and the word lists stay downloads (owner decision, this session).
+//
+// The two reciter timing packs ride with them: a downloaded surah is then
+// audio on its own, and Al-Fatiha's audio is already in the assets, so the
+// first Play on 1:1 needs neither an offer nor a network (owner decision,
+// this session).
 val shippedPacks = setOf(
     "translation-saheeh-en.db",
     "translation-al-bayan-bn.db",
+    "reciter-minshawi.db",
+    "reciter-husary.db",
 )
 
 /**
@@ -115,9 +125,14 @@ abstract class PrepareContentAssets : DefaultTask() {
     @get:Input
     abstract val packNames: SetProperty<String>
 
-    /** The translations every install carries. */
+    /** The translations and reciter timings every install carries. */
     @get:Input
     abstract val shippedPackNames: SetProperty<String>
+
+    /** The Fatiha audio both reciters carry, copied to `recitation/`. */
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val bundledAudioDir: DirectoryProperty
 
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -149,10 +164,11 @@ abstract class PrepareContentAssets : DefaultTask() {
     fun copyAssets() {
         val out = contentAssetsOut.get().asFile
         out.deleteRecursively()
-        // The app ships the Quran text and the two translations, and nothing
-        // else: the core pack, the translations, and the catalog of what can
-        // be downloaded. The first page needs no network (owner decision,
-        // this session).
+        // The app ships the Quran text, the two translations, and the two
+        // reciter timing packs, and nothing else: the core pack, the shipped
+        // packs, and the catalog of what can be downloaded. The first page
+        // needs no network, and the first Play on Al-Fatiha needs none either
+        // (owner decision, this session).
         val content = File(out, "content").apply { mkdirs() }
         File(packsDir.get().asFile, "core.db").copyTo(File(content, "core.db"), overwrite = true)
         catalogFile.get().asFile.copyTo(File(content, "catalog.json"), overwrite = true)
@@ -161,10 +177,23 @@ abstract class PrepareContentAssets : DefaultTask() {
         for (name in shipped) {
             val source = File(packsDir.get().asFile, name)
             if (!source.isFile) {
-                throw GradleException("the shipped translation $name is missing; run ./gradlew :tools:run --args=\"packs build\"")
+                throw GradleException("the shipped pack $name is missing; run ./gradlew :tools:run --args=\"packs build\"")
             }
             source.copyTo(File(shippedOut, name), overwrite = true)
         }
+        // The fourteen Al-Fatiha files are read from the app's own assets,
+        // under the one prefix RecitationStore already searches. They are
+        // checked as a set here so a half-copied source cannot ship a surah
+        // that only plays some of its ayahs.
+        val bundledAudio = bundledAudioDir.get().asFile
+        if (!bundledAudio.isDirectory) {
+            throw GradleException("the bundled Al-Fatiha audio is missing; run ./gradlew :tools:run --args=\"audio bundle\"")
+        }
+        val bundledFiles = bundledAudio.walkTopDown().filter { it.isFile && it.extension == "mp3" }.toList()
+        if (bundledFiles.size != 14) {
+            throw GradleException("the bundled Al-Fatiha audio has ${bundledFiles.size} mp3 file(s), expected 14")
+        }
+        bundledAudio.copyRecursively(File(out, "recitation"), overwrite = true)
         // Development builds carry every pack, so the whole app works with no
         // network at all while it is being built and tested. They are written
         // to the debug variant's own asset directory, never to the main one.
@@ -195,7 +224,8 @@ abstract class PrepareContentAssets : DefaultTask() {
 
 val prepareContentAssets = tasks.register<PrepareContentAssets>("prepareContentAssets") {
     group = "content"
-    description = "Copies the core pack, the pack catalog, the text font, and the recitation manifest."
+    description = "Copies the core pack, the shipped packs, the catalog, the text font, " +
+        "the recitation manifest, and the bundled Al-Fatiha audio."
     dependsOn(":tools:fetchAssets")
     leanScreenshot.set(leanDevPacks)
     packNames.set(screenshotPacks)
@@ -204,6 +234,7 @@ val prepareContentAssets = tasks.register<PrepareContentAssets>("prepareContentA
     catalogFile.fileValue(contentCatalogFile)
     recitationManifestFile.fileValue(contentRecitationManifest)
     packsDir.fileValue(contentPacksDir)
+    bundledAudioDir.fileValue(contentBundledAudioDir)
     fontsHafsDir.fileValue(contentFontsHafsDir)
     contentAssetsOut.set(contentAssets)
     devPackAssetsOut.set(devPackAssets)
@@ -229,8 +260,8 @@ android {
         // (owner decision, security audit).
         minSdk = 24
         targetSdk = 37
-        versionCode = 159
-        versionName = "15.7"
+        versionCode = 160
+        versionName = "15.8"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

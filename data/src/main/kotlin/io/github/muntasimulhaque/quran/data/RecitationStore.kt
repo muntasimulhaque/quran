@@ -17,6 +17,7 @@ class RecitationStore(private val context: Context) {
     private val imported = File(context.filesDir, "recitations")
     private val assetPrefixes = listOf("recitation/", "audio-dev/")
     private val assetCache = java.util.concurrent.ConcurrentHashMap<String, Boolean>()
+    private val assetListCache = java.util.concurrent.ConcurrentHashMap<String, Set<String>>()
 
     /** The playable location of one ayah's audio, or null when it is absent. */
     fun uri(audioPath: String): Uri? {
@@ -27,6 +28,30 @@ class RecitationStore(private val context: Context) {
             if (assetExists(path)) return Uri.parse("asset:///$path")
         }
         return null
+    }
+
+    /**
+     * Whether every path in one surah has a playable file, downloaded or
+     * bundled.
+     *
+     * The whole surah is the unit: a package installs all of its ayahs and a
+     * bundled surah is whole, so a partial set is a missing download, not a
+     * surah to play in pieces. The check reads the imported folder only when
+     * all of it is there, and otherwise reads each asset folder's name list
+     * once, so a surah the app does not carry costs no exception per ayah.
+     * Both `file://` and `asset:///` are covered, the two places [uri] reads
+     * (owner decision, this session).
+     */
+    fun hasAllAudio(paths: List<String>): Boolean {
+        if (paths.isEmpty()) return false
+        val folder = SafePaths.folderOf(paths.first()) ?: return false
+        if (paths.any { SafePaths.folderOf(it) != folder }) return false
+        if (paths.all { SafePaths.audioFile(imported, it)?.isFile == true }) return true
+        val names = paths.map { it.substringAfterLast('/') }
+        return assetPrefixes.any { prefix ->
+            val listing = assetNames(prefix + folder)
+            names.all { it in listing }
+        }
     }
 
     /**
@@ -76,6 +101,11 @@ class RecitationStore(private val context: Context) {
 
     private fun assetExists(path: String): Boolean = assetCache.getOrPut(path) {
         runCatching { context.assets.open(path).close() }.isSuccess
+    }
+
+    /** The names directly under one asset folder, empty when it is absent. */
+    private fun assetNames(path: String): Set<String> = assetListCache.getOrPut(path) {
+        runCatching { context.assets.list(path)?.toSet() }.getOrNull().orEmpty()
     }
 
     private companion object {

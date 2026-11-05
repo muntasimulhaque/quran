@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 15.7 (versionCode 159)
+Version: 15.8 (versionCode 160)
 
 ## Listing
 
@@ -44,12 +44,14 @@ ayah. There is no bottom tab bar to learn. More than one translation may be on
 at once, and each one draws in its own place under the ayah.
 
 Recitation plays Minshawi or Husary, with the page following the reciter
-and the word being recited marked. Audio is not bundled and not streamed:
-when you tap Play on a surah, the app tells you its size and downloads
-that one surah from the project's own release page. If you turn on Continue
-to the next surah in the player's listening menu, the following surahs
-download as the recitation reaches them, each with its own name and size on
-the player. Everything you download works offline forever after.
+and the word being recited marked. Al-Fatiha is bundled for both voices, so
+the first Play on 1:1 needs no network and asks for nothing. Every other
+surah is not streamed: when you tap Play, the app tells you its size and
+downloads that one surah from the project's own release page. The word
+timings for both reciters ship inside the app. If you turn on Continue to
+the next surah in the player's listening menu, the following surahs download
+as the recitation reaches them, each with its own name and size on the
+player. Everything you download works offline forever after.
 
 There are no ads, no trackers, no analytics, and no account. The app is
 free and its source code is public. It reaches the project's own release
@@ -168,6 +170,9 @@ The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (one answer and no close), so every frame that wants a clean
 page is taken before it.
 
+## Release notes (15.8, 388 characters)
+15.8 ships Al-Fatiha's seven ayahs in both voices inside the app, so the first Play on 1:1 works offline with no download offer. The two reciter timing packs ship too; every other surah still downloads its audio on your word, with the timings already on the device. The Quran text, both translations, both tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
+
 ## Release notes (15.7, 373 characters)
 15.7 restores the original recitation files: 128 kbps stereo MP3, the same Al-Minshawi and Al-Husary recordings and word timings the app shipped before 15.6. The 64 kbps Opus encode is withdrawn. A surah is about twice the size, and one downloaded in 15.6 downloads again. The Quran text, both translations, and both tafsirs are unchanged. No ads, no trackers, no accounts.
 
@@ -234,19 +239,21 @@ something Play would reject.
 
 ## What the app carries, and what a reader adds
 
-The app ships the Quran text and both translations: a complete offline
-reading that needs no network and no account. The tafsir, the word lists,
-and the recitations are added by the reader, from the project's own GitHub
-Releases, with the size named before a tap or on the player while a Continue
-package downloads, and a SHA-256 check before it is used:
+The app ships the Quran text, both translations, both reciters' word
+timings, and Al-Fatiha's audio in both voices: a complete offline reading
+that needs no network and no account. The tafsir, the word lists, and every
+other surah's recitation are added by the reader, from the project's own
+GitHub Releases, with the size named before a tap or on the player while a
+Continue package downloads, and a SHA-256 check before it is used:
 
 | Language | Translation | Tafsir | Word by word |
 |---|---|---|---|
 | English | Saheeh International (ships) | Ibn Kathir (29.5 MB) | 6.3 MB |
 | Bangla | Al-Bayan Simple Translation (ships) | Ibn Kathir (56.0 MB) | 8.4 MB |
 
-Recitations: Minshawi and Husary, one surah at a time (about 0.2 to 185 MB
-each), plus 1.7 MB of timing data per reciter.
+Recitations: Al-Fatiha ships in both voices; every other surah downloads
+one at a time (about 0.2 to 185 MB each). The 1.7 MB of word timings per
+reciter ships with the app.
 
 Content updates arrive on their own: when a pack you already have is
 superseded, the app replaces it quietly on Wi-Fi, so the tafsir and the

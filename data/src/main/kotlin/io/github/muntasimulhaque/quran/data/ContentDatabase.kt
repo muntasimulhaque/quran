@@ -509,6 +509,12 @@ class ContentDatabase private constructor(
             }
         }
 
+    /** How many ayahs a surah has, without loading the text of any of them. */
+    fun ayahCount(surah: Int): Int =
+        query("SELECT COUNT(*) FROM ayah WHERE surah = ?", arrayOf(surah.toString())).use { cursor ->
+            if (cursor.moveToFirst()) cursor.getInt(0) else 0
+        }
+
     // -------------------------------------------------------------- reciters
 
     fun recitations(): List<Recitation> =
@@ -532,6 +538,27 @@ class ContentDatabase private constructor(
                 audioPath = cursor.getString(0) ?: "",
                 segments = segments(cursor.getString(1)),
             )
+        }
+    }
+
+    /**
+     * The audio paths of one surah, in ayah order, for the whole-surah check
+     * the listening offer makes. Empty when the reciter's timing pack is not
+     * attached, so a pack that is not on the device cannot make audio look
+     * present.
+     */
+    fun recitationAudioPaths(recitation: String, surah: Int): List<String> {
+        val pack = reciterPack(recitation)
+        if (!installedPack(pack)) return emptyList()
+        return query(
+            "SELECT ra.audio_path FROM ${schema(pack)}.recitation_ayah ra " +
+                "JOIN ayah a ON a.number = ra.ayah_number " +
+                "WHERE a.surah = ? ORDER BY a.ayah",
+            arrayOf(surah.toString()),
+        ).use { cursor ->
+            buildList(cursor.count) {
+                while (cursor.moveToNext()) add(cursor.getString(0) ?: "")
+            }
         }
     }
 

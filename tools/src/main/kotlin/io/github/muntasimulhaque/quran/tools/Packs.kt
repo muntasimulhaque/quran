@@ -20,8 +20,10 @@ import java.sql.Connection
  *
  * A pack is one unit of content a reader can have, or not have: the core
  * text and layout, a translation, a tafsir, a word list, a script. The app
- * ships the core pack and nothing else; everything else is downloaded on the
- * reader's word, verified by SHA-256, and removable.
+ * ships the core pack, the two translations, and the two reciter timing
+ * packs; the recitation audio itself is downloaded per surah on the reader's
+ * word, except Al-Fatiha, whose fourteen ayahs the app carries as assets
+ * (owner decision, this session).
  *
  * The pack files are derived from the audited database, so there is exactly
  * one place where content is assembled and one set of gates that guard it.
@@ -126,7 +128,7 @@ class Packs(private val root: File) {
             credit = "Muhammad Siddiq Al-Minshawi, via the Quranic Universal Library",
             creditBn = "\u09ae\u09c1\u09b9\u09be\u09ae\u09cd\u09ae\u09a6 \u09b8\u09bf\u09a6\u09cd\u09a6\u09bf\u0995 \u0986\u09b2-\u09ae\u09bf\u09a8\u09b6\u09be\u09ac\u09bf, \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
             version = "QUL",
-            shipped = false,
+            shipped = true,
             ayahs = 6236,
         ),
         Pack(
@@ -137,7 +139,7 @@ class Packs(private val root: File) {
             credit = "Mahmoud Khalil Al-Husary, via the Quranic Universal Library",
             creditBn = "\u09ae\u09be\u09b9\u09ae\u09c1\u09a6 \u0996\u09b2\u09bf\u09b2 \u0986\u09b2-\u09b9\u09c1\u09b8\u09be\u09b0\u09bf, \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
             version = "QUL",
-            shipped = false,
+            shipped = true,
             ayahs = 6236,
         ),
         Pack(

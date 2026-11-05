@@ -24,6 +24,7 @@ fun main(args: Array<String>) {
         "help", "--help" -> {
             println("usage: tools <verify|audit|search|audio|build|fonts|fetch|checkdb|packs>")
         println("       tools packs [build|publish]")
+        println("       tools audio [sample|bundle|packs|publish]")
             0
         }
         else -> {

@@ -210,7 +210,10 @@ class PlaybackController(
         if (items.isEmpty()) {
             // Without the reciter's word timings there is no audio to point
             // at, and downloading the surah would not change that: say so
-            // rather than offer a download that cannot help.
+            // rather than offer a download that cannot help. A partial surah
+            // lands here too, and that is a package the reader has not got:
+            // it is offered rather than played in pieces (owner decision,
+            // this session).
             val timings = withContext(Dispatchers.IO) {
                 database.recitationAyah(recitation, ayah.number)
             }
@@ -732,6 +735,16 @@ class PlaybackController(
      */
     private val artwork: ByteArray? by lazy { mediaArtwork(context) }
 
+    /**
+     * The playlist for one surah, or nothing when any of its ayahs has no
+     * audio.
+     *
+     * A surah is installed whole and a bundled surah is whole, so a partial
+     * set is a missing download, not a surah to play in pieces. The debug
+     * sample carries three Al-Baqarah ayahs; before this rule the end of
+     * Al-Fatiha could auto-play that fragment instead of asking for the surah
+     * (owner decision, this session).
+     */
     private fun itemsFor(recitation: String, surah: Int): List<MediaItem> {
         val database = content ?: return emptyList()
         val spoken = spokenContext()
@@ -742,7 +755,8 @@ class PlaybackController(
             recitation,
             database.recitations().firstOrNull { it.id == recitation }?.name.orEmpty(),
         )
-        return database.ayahsOfSurah(surah).mapNotNull { ayah ->
+        val ayahs = database.ayahsOfSurah(surah)
+        val items = ayahs.mapNotNull { ayah ->
             val audio = database.recitationAyah(recitation, ayah.number) ?: return@mapNotNull null
             val uri = store.uri(audio.audioPath) ?: return@mapNotNull null
             MediaItem.Builder()
@@ -767,6 +781,7 @@ class PlaybackController(
                 )
                 .build()
         }
+        return items.takeIf { it.size == ayahs.size }.orEmpty()
     }
 
     /**

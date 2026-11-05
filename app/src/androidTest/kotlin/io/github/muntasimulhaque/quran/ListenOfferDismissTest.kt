@@ -13,7 +13,6 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.LanguagePreference
-import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.feature.reading.R as ReadingR
 import kotlinx.coroutines.runBlocking
@@ -44,9 +43,11 @@ class ListenOfferDismissTest {
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
 
     /**
-     * A reading with no translation, so 1:1 is on screen, and no recitation
-     * timings for either reciter, so Play raises the offer rather than
-     * starting a download the test did not ask for.
+     * A reading with no translation, on 2:1, whose audio is not bundled and
+     * not downloaded, so Play raises the offer rather than starting a
+     * download the test did not ask for. Al-Fatiha cannot raise it any more:
+     * both reciters' first surah travels in the app's assets (owner decision,
+     * this session).
      */
     private val library = object : ExternalResource() {
         override fun before() {
@@ -65,7 +66,7 @@ class ListenOfferDismissTest {
             runBlocking {
                 SettingsStore(context).apply {
                     setUiLanguage("en")
-                    setAyah(1)
+                    setAyah(8)
                     setTranslationPacks(emptySet())
                     setTafsirPacks(emptySet())
                     setShowTranslation(true)
@@ -73,24 +74,20 @@ class ListenOfferDismissTest {
                     setRecitation("husary")
                 }
             }
-            PackStore(context).apply {
-                remove("reciter-husary")
-                remove("reciter-minshawi")
-            }
         }
     }
 
     @get:Rule
     val rule: TestRule = RuleChain.outerRule(library).around(compose)
 
-    /** The offer, raised by the reader's own Play on the first ayah. */
+    /** The offer, raised by the reader's own Play on 2:1. */
     private fun raiseTheOffer() {
         val readingPage = compose.activity.getString(ReadingR.string.reading_page_description)
         compose.waitUntil(timeoutMillis = 90_000) {
             compose.onAllNodesWithContentDescription(readingPage).fetchSemanticsNodes().isNotEmpty()
         }
-        // The first ayah's own door, at the head of its block.
-        compose.onAllNodesWithText("1:1", substring = true).onFirst()
+        // The ayah's own door, at the head of its block.
+        compose.onAllNodesWithText("2:1", substring = true).onFirst()
             .performClick()
         val play = compose.activity.getString(R.string.action_play)
         compose.waitUntil(timeoutMillis = 60_000) {

@@ -100,6 +100,7 @@ class CheckDb(private val root: File) {
             if (badTajweed == 0) println("checkdb: every ayah's tajweed code matches its text")
             failures += checkWordsAndMeanings(connection)
             failures += checkRecitationSegments(connection, catalogReciters)
+            failures += checkBundledAudio(connection)
             // Every pack must cover every ayah, or the reader would meet a
             // silent hole when that pack is chosen. The number of packs is not
             // pinned: a pack is content, not structure, and the catalog below
@@ -470,5 +471,31 @@ class CheckDb(private val root: File) {
         }
         if (failures == 0) println("checkdb: $rows recitation rows, every word in range and covered")
         return failures
+    }
+
+    /**
+     * The app's bundled Al-Fatiha files must be exactly the surah 1 paths the
+     * database names, for every reciter, and nothing else. A missing file is a
+     * first Play that falls back to a download; an extra file is content the
+     * app carries without the database saying so.
+     */
+    private fun checkBundledAudio(connection: java.sql.Connection): Int {
+        val expected = mutableSetOf<String>()
+        connection.each(
+            "SELECT ra.audio_path FROM recitation_ayah ra " +
+                "JOIN ayah a ON a.number = ra.ayah_number " +
+                "WHERE a.surah = 1 ORDER BY ra.recitation, a.ayah",
+        ) { rs -> expected += rs.getString(1) ?: "" }
+        val bundle = File(root, "content/bundled/audio/recitation")
+        val found = bundle.walkTopDown()
+            .filter { it.isFile }
+            .map { it.relativeTo(bundle).invariantSeparatorsPath }
+            .toSet()
+        if (expected != found) {
+            println("checkdb: bundled audio has $found, the database names $expected")
+            return 1
+        }
+        println("checkdb: ${found.size} bundled ayah file(s) match the database's surah 1 paths")
+        return 0
     }
 }

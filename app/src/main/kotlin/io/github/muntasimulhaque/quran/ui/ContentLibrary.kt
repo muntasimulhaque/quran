@@ -633,6 +633,22 @@ class ContentLibrary(
     /** Whether a pack is attached and readable, for the listening flow's price. */
     fun isInstalled(id: String): Boolean = database?.installedPack(id) ?: (id in installed)
 
+    /**
+     * Whether every ayah of one surah has audio the reader can play now,
+     * downloaded or bundled.
+     *
+     * The timing pack is the door to the paths: a pack that is not attached
+     * answers false, so a missing pack is still an offer even when some files
+     * linger. The bundled Al-Fatiha files are found by
+     * [RecitationStore.hasAllAudio], the same place [RecitationStore.uri]
+     * finds them when the reader presses Play (owner decision, this session).
+     */
+    suspend fun hasSurahAudio(recitation: String, surah: Int): Boolean = withContext(Dispatchers.IO) {
+        val db = database ?: return@withContext false
+        val paths = db.recitationAudioPaths(recitation, surah)
+        paths.size == db.ayahCount(surah) && recitationStore.hasAllAudio(paths)
+    }
+
     /** The catalog's entry for a pack, for its size and its type. */
     fun pack(id: String): ContentPack? = catalog.get(id)
 
