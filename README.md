@@ -4,15 +4,17 @@ A free, open source Quran reader for Android. It opens where you left off
 and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 15.8 (versionCode 160) was submitted to Play review from commit
-`b9ddbfe9`. The signed bundle `quran-15.8-vc160.aab` has SHA-256
-`8dd5c52bcc0e3bc882d18fffe18efce73fd4b040010b9cb2b25ca27ac0a2332d`, signed by the
+**Status:** 15.9 (versionCode 161) is ready for Play review from commit
+`e3f5a5ec`. The signed bundle `quran-15.9-vc161.aab` has SHA-256
+`e0a2b51202599009b8d2d4c8b6d8849635a2570c51da0482bcdeda59cbdb4730`, signed by the
 upload key `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-Build run `41982572110` is green and the store capture is run `41982572303`.
-Content 1.5.0, the database `content-db-12c95dbe`. The Quran text, both
-translations, and both tafsirs are unchanged; the recitation is the original
-MP3 set under the `recitation-minshawi` and `recitation-husary` tags. The app
-now carries Al-Fatiha in both voices and both reciter timing packs.
+Build run `41990405088` is green and the store capture is run `41990405116`.
+The eight store frames are pixel-identical to 15.8; the word sheet's frame is
+new in the evidence set. Content 1.5.0, the database `content-db-12c95dbe`.
+The Quran text, both translations, and both tafsirs are unchanged; the
+recitation is the original MP3 set under the `recitation-minshawi` and
+`recitation-husary` tags. The app now carries Al-Fatiha in both voices and
+both reciter timing packs.
 
 **In 15.9.** Pressing and holding a word opens its meaning on its own sheet: the word at the reader's word-meaning size, its meaning under it, and the ayah named above, all on one center line. The reciter's word is a rounded wash again, not a recolored word, so the letters keep their own ink and their tajweed colors while the voice is on them. The wash is set at the strongest tint the seven rule colors can still be read on, and the ayah-level recitation wash is gone because the two together could not. The Quran text, both translations, both tafsirs, and the content database are unchanged.
 
