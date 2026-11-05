@@ -245,8 +245,8 @@ class RecitationDownloader(private val context: Context) {
         /** One unpack at a time, so the staging root can be swept whole. */
         val unpackGate = Mutex()
 
-        /** One ayah file, flat under its reciter folder. The package holds Ogg Opus. */
-        val AYAH_FILE = Regex("""^[0-9]{6}\.opus\z""")
+        /** One ayah file, flat under its reciter folder. */
+        val AYAH_FILE = Regex("""^[0-9]{6}\.mp3\z""")
 
         /** A surah package larger than this is not one the manifest offers. */
         const val MAX_RECITATION_BYTES = 512L * 1024 * 1024

@@ -859,18 +859,9 @@ class Build(private val root: File) {
                                 fail("recitation ${dataset.id}: $surah:$ayah has no ayah")
                                 return@each
                             }
-                            // The export and the CDN name an MP3; the packages
-                            // carry Opus. The database names the file the
-                            // package holds, so the store and the manifest
-                            // resolve the same path (owner decision, the Opus
-                            // migration).
-                            if (!path.endsWith(".mp3")) {
-                                fail("recitation ${dataset.id}: $path is not an MP3 source")
-                                return@each
-                            }
                             insertAyah.setString(1, dataset.id.removePrefix("recitation-"))
                             insertAyah.setInt(2, number)
-                            insertAyah.setString(3, path.dropLast(4) + ".opus")
+                            insertAyah.setString(3, path)
                             val raw = rs.getString(4) ?: "[]"
                             val regions = RecitationSegments.parse(raw)
                             if (regions == null) {

@@ -39,18 +39,11 @@ class SafeFilesTest {
 
     @Test
     fun anAudioPathIsOneFolderAndOneFile() {
-        assertTrue(SafeFiles.audioFile(root, "husary/001001.opus") != null)
-        assertNull(SafeFiles.audioFile(root, "husary/001001.mp3"))
+        assertTrue(SafeFiles.audioFile(root, "husary/001001.mp3") != null)
+        assertNull(SafeFiles.audioFile(root, "husary/001001.opus"))
         assertNull(SafeFiles.audioFile(root, "../../databases/saved.db"))
-        assertNull(SafeFiles.audioFile(root, "husary/../001001.opus"))
+        assertNull(SafeFiles.audioFile(root, "husary/../001001.mp3"))
         assertNull(SafeFiles.childUnder(root, ".."))
         assertFalse(SafeFiles.under(root, File(root, "../outside")))
-    }
-
-    @Test
-    fun aSourcePinIsOneFolderAndOneMp3() {
-        assertTrue(SafeFiles.sourceAudioFile(root, "husary/001001.mp3") != null)
-        assertNull(SafeFiles.sourceAudioFile(root, "husary/001001.opus"))
-        assertNull(SafeFiles.sourceAudioFile(root, "../../001001.mp3"))
     }
 }

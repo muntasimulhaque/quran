@@ -32,13 +32,11 @@ class RecitationStore(private val context: Context) {
     /**
      * The ayah files of one surah for one reciter folder, for sizes and removal.
      *
-     * A surah downloaded from a build before the Opus re-encode is MP3, and
-     * this build neither counts nor plays MP3. Those files are removed as
-     * soon as the folder is read, so an update does not keep a surah twice on
-     * the phone and the reader sees the download offer for it again. The
-     * package installs a whole surah folder, so a fresh download would replace
-     * them anyway; the sweep is for a reader who updates and does not tap
-     * Play for a while (owner decision, the Opus migration).
+     * A surah downloaded in 15.6 is Ogg Opus. This build plays the original
+     * MP3 set, so those files are removed as soon as the folder is read. The
+     * package installs a whole surah folder, so a fresh download replaces them
+     * anyway; the sweep is for a reader who updates and does not tap Play for a
+     * while (owner decision, the recitation restore).
      */
     fun filesForSurah(folder: String, surah: Int): List<File> {
         if (surah !in 1..114) return emptyList()
@@ -81,10 +79,10 @@ class RecitationStore(private val context: Context) {
     }
 
     private companion object {
-        /** The one extension a current recitation package carries. */
-        const val AYAH_SUFFIX = ".opus"
+        /** The one extension a recitation package carries. */
+        const val AYAH_SUFFIX = ".mp3"
 
-        /** The extension of a surah downloaded before the Opus re-encode. */
-        const val LEGACY_SUFFIX = ".mp3"
+        /** The extension of a surah downloaded in 15.6. */
+        const val LEGACY_SUFFIX = ".opus"
     }
 }

@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 15.6 (versionCode 158)
+Version: 15.7 (versionCode 159)
 
 ## Listing
 
@@ -168,6 +168,9 @@ The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (one answer and no close), so every frame that wants a clean
 page is taken before it.
 
+## Release notes (15.7, 373 characters)
+15.7 restores the original recitation files: 128 kbps stereo MP3, the same Al-Minshawi and Al-Husary recordings and word timings the app shipped before 15.6. The 64 kbps Opus encode is withdrawn. A surah is about twice the size, and one downloaded in 15.6 downloads again. The Quran text, both translations, and both tafsirs are unchanged. No ads, no trackers, no accounts.
+
 ## Release notes (15.6, 261 characters)
 15.6 re-encodes the recitation in Opus at 64 kbps mono, about half the size, with the same word timing. The Quran text, both translations, and both tafsirs are unchanged. The new packages download one surah at a time as before. No ads, no trackers, no accounts.
 
@@ -242,7 +245,7 @@ package downloads, and a SHA-256 check before it is used:
 | English | Saheeh International (ships) | Ibn Kathir (29.5 MB) | 6.3 MB |
 | Bangla | Al-Bayan Simple Translation (ships) | Ibn Kathir (56.0 MB) | 8.4 MB |
 
-Recitations: Minshawi and Husary, one surah at a time (about 0.2 to 97 MB
+Recitations: Minshawi and Husary, one surah at a time (about 0.2 to 185 MB
 each), plus 1.7 MB of timing data per reciter.
 
 Content updates arrive on their own: when a pack you already have is

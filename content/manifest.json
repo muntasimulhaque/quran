@@ -14,8 +14,8 @@
       "credit": "King Fahd Glorious Quran Printing Complex (KFGQPC), tajweed annotation via QUL",
       "usedFor": "Canonical QPC Hafs text, word positions, and tajweed rules; QUL's 2026 export, whose text, tags, and word positions are identical to the 2025 export the database was built from",
       "path": "content/raw/qul/qpc-hafs-tajweed-word-by-word.sqlite.zip",
-      "bytes": 1889767,
-      "sha256": "132ec6392a61d1f2f4e0b607b3dfd8cc9657331fab0c765d20758ade009d3bae",
+      "bytes": 1861550,
+      "sha256": "2f441e6702e3025d1e740dcf68e4bcc7bcafb5098b1244b7b32a8ddc6e02d850",
       "assetUrl": null
     },
     {
@@ -30,8 +30,8 @@
       "credit": "King Fahd Glorious Quran Printing Complex (KFGQPC), tajweed annotation via QUL",
       "usedFor": "Independent QUL reference for the QPC Hafs text and its tags; QUL's 2026 export, whose text and tags are identical to the 2025 export the database was built from",
       "path": "content/raw/qul/qpc-hafs-tajweed-ayah.sqlite.zip",
-      "bytes": 549218,
-      "sha256": "9b8174f424a984892a0cd74e201209598f087570178bdd5fba7ae1b668daba58",
+      "bytes": 559375,
+      "sha256": "cea13d0f9e77a33bfb9e182ec521cfe1d8b6173318e35e3537035797e8a4663a",
       "assetUrl": null
     },
     {
@@ -366,8 +366,8 @@
       "credit": "Al-Bayan Foundation Bangladesh, via the Quranic Universal Library",
       "usedFor": "Bangla translation pack (QUL resource 185, 2026 export; one object keyed by verse with the sentence under t); the export's lost-glyph U+00AC sign is removed and the ধরন spelling is corrected to ধরণ; the translation text is otherwise identical to the 2025 export",
       "path": "content/raw/qul/bengali-al-bayan.json",
-      "bytes": 3485007,
-      "sha256": "27290b9647b6d39f3ab4fde988e8522268752e02595f6e4df7291e8fd0555932",
+      "bytes": 413302,
+      "sha256": "ce75a8941fadc84e65fff8f222c98b94c1aa010317c7b47539200689daba769b",
       "assetUrl": null
     },
     {

@@ -4,7 +4,7 @@ A free, open source Quran reader for Android. It opens where you left off
 and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 15.6 (versionCode 158) was submitted to Play review from commit
+**Status:** 15.6 (versionCode 158) is live from commit
 `330b6b81`. The signed bundle `quran-15.6-vc158.aab` has SHA-256
 `9cec6abd87df1c36d7f4e6c5f2250cfb3c8a130d190e3ca973094b576abc7ae4`, signed by the
 upload key `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
@@ -14,9 +14,11 @@ translations, and both tafsirs are unchanged; the content database now names
 the Opus recitation files, and the recitation packages are new under the
 `recitation-minshawi-opus` and `recitation-husary-opus` tags.
 
-**In 15.6.** The recitation is re-encoded in Ogg Opus at 64 kbps mono, about half the size of the old MP3 set, with the same word timings and the same reciters. The old MP3 packages stay under their old tags for readers still on 15.5; the new app reads the new Opus packages, one surah at a time as before. The Quran text, both translations, and both tafsirs are unchanged.
+**In 15.7.** The recitation is the original 128 kbps stereo MP3 set again, the same Al-Minshawi and Al-Husary recordings and word timings the app shipped before 15.6. The 64 kbps Ogg Opus encode is withdrawn from the app; its packages remain published for 15.6. Each surah is about twice the size, and a surah downloaded in 15.6 downloads again. The Quran text, both translations, and both tafsirs are unchanged.
 
-**In 15.5.** The app opens in the phone's language, with both translations already on the device, and no language screen. The reminder is offered after the first surah, not before the text. A quiet folio line keeps the surah and juz on the page; the full chrome is on tap, with no timer. Aa opens the type page, the reading has two sizes, a tap on a word shows its meaning, and a tafsir you do not have is offered where you ask for it. Search shows the verse for a reference result, the ayah menu is paper, and the audio offer has a clear Not now. Tajweed colors and word meanings start off. The recitation re-encode and the Al-Fatiha bundle are later releases.
+**In 15.6.** The recitation was re-encoded in Ogg Opus at 64 kbps mono, about half the size, with the same word timings. 15.7 restores the original MP3 set.
+
+**In 15.5.** The app opens in the phone's language, with both translations already on the device, and no language screen. The reminder is offered after the first surah, not before the text. A quiet folio line keeps the surah and juz on the page; the full chrome is on tap, with no timer. Aa opens the type page, the reading has two sizes, a tap on a word shows its meaning, and a tafsir you do not have is offered where you ask for it. Search shows the verse for a reference result, the ayah menu is paper, and the audio offer has a clear Not now. Tajweed colors and word meanings start off.
 
 
 **In 15.4.** The Font size sample is a type specimen again: the ayah and its translation, without the translation's name, and with the translation shown even when the reading's Show translation switch is off, because the page is there to judge the size of the type. The reading still names each translation column when the rule calls for it. The Quran text, every translation, every tafsir, every pack, and the content database are unchanged.

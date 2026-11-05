@@ -43,21 +43,20 @@ class SafePathsTest {
 
     @Test
     fun anAudioPathIsOneFolderAndOneAyahFile() {
-        assertTrue(SafePaths.validAudioPath("husary/001001.opus"))
+        assertTrue(SafePaths.validAudioPath("husary/001001.mp3"))
+        // An Opus path is a 15.6 package, not an ayah file this build plays.
+        assertFalse(SafePaths.validAudioPath("husary/001001.opus"))
         assertFalse(SafePaths.validAudioPath("../../databases/saved.db"))
-        assertFalse(SafePaths.validAudioPath("husary/../001001.opus"))
+        assertFalse(SafePaths.validAudioPath("husary/../001001.mp3"))
         assertFalse(SafePaths.validAudioPath("/data/user/0/package/databases/saved.db"))
-        // A package from before the Opus re-encode is not an ayah file this
-        // app reads or plays.
-        assertFalse(SafePaths.validAudioPath("husary/001001.mp3"))
-        assertEquals("husary", SafePaths.folderOf("husary/001001.opus"))
+        assertEquals("husary", SafePaths.folderOf("husary/001001.mp3"))
         assertNull(SafePaths.folderOf("../../databases/saved.db"))
     }
 
     @Test
     fun anAudioFileNeverLeavesItsFolder() {
         val recitations = File(root, "recitations").apply { mkdirs() }
-        val file = SafePaths.audioFile(recitations, "husary/001001.opus")
+        val file = SafePaths.audioFile(recitations, "husary/001001.mp3")
         assertTrue(file != null && file.path.startsWith(recitations.canonicalPath))
         assertNull(SafePaths.audioFile(recitations, "../../databases/saved.db"))
     }
