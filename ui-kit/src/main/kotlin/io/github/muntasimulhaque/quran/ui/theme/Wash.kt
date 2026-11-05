@@ -16,9 +16,13 @@ package io.github.muntasimulhaque.quran.ui.theme
  * 0.25 doing five jobs, and the next session that painted a chosen thing had
  * no way to know which number a chosen thing wore.
  *
- * The one wash that is not here is the reciter's: it follows a word being
- * heard rather than a thing being chosen, and it turns over with the theme,
- * so it lives in [PagePalette.highlight], louder than [Match].
+ * The one wash that is not here is the page's word mark: the reciter's word
+ * and the word a search arrived on follow a place on the Quran's own line
+ * rather than a thing being chosen, they turn over with the theme, and their
+ * alpha is the ceiling the seven rule colors keep, so they live in
+ * [PagePalette.highlight]. That mark is a ground under the tajweed colors,
+ * not under the interface's ink, so it is a quieter number than [Match]; the
+ * search result's own line keeps [Match] for its text.
  *
  * A control's fill has three levels, and the app keeps them apart (owner
  * decision, this session): the accent at [Control] is a chosen state inside a

@@ -138,6 +138,11 @@ fun ReadingList(
     LaunchedEffect(surah.number, content, effective.wordByWord) { onReadAhead(surah.number) }
 
     var footnote by remember { mutableStateOf<OpenFootnote?>(null) }
+    // The word the reader pressed and held. It is a sheet of its own, at the
+    // reading's level rather than inside the ayah, so the page never grows
+    // under the finger and the word survives the item being recycled (owner
+    // decision, this session).
+    var word by remember { mutableStateOf<OpenWord?>(null) }
     if (ayahs.isEmpty()) {
         // The paper is already there; the text is a frame away.
         Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
@@ -179,6 +184,8 @@ fun ReadingList(
         contentPaddingBottom = contentPaddingBottom,
         footnote = footnote,
         onFootnote = { footnote = it },
+        word = word,
+        onWord = { word = it },
         modifier = modifier,
     )
 }

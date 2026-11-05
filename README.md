@@ -14,6 +14,8 @@ translations, and both tafsirs are unchanged; the recitation is the original
 MP3 set under the `recitation-minshawi` and `recitation-husary` tags. The app
 now carries Al-Fatiha in both voices and both reciter timing packs.
 
+**In 15.9.** Pressing and holding a word opens its meaning on its own sheet: the word at the reader's word-meaning size, its meaning under it, and the ayah named above, all on one center line. The reciter's word is a rounded wash again, not a recolored word, so the letters keep their own ink and their tajweed colors while the voice is on them. The wash is set at the strongest tint the seven rule colors can still be read on, and the ayah-level recitation wash is gone because the two together could not. The Quran text, both translations, both tafsirs, and the content database are unchanged.
+
 **In 15.8.** Al-Fatiha's seven ayahs for both reciters now ship inside the app, so the first Play on 1:1 works offline with no download offer. The two reciter timing packs ship too; every other surah still downloads its audio on the reader's word, with the word timings already in the app. The Quran text, both translations, both tafsirs, and the content database are unchanged.
 
 **In 15.7.** The recitation is the original 128 kbps stereo MP3 set again, the same Al-Minshawi and Al-Husary recordings and word timings the app shipped before 15.6. The 64 kbps Ogg Opus encode is withdrawn from the app; its packages remain published for 15.6. Each surah is about twice the size, and a surah downloaded in 15.6 downloads again. The Quran text, both translations, and both tafsirs are unchanged.

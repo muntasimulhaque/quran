@@ -51,14 +51,6 @@ val NightMuted = Color(0xFFC1BCB2)
 val NightHairline = NightOutline
 val NightGold = Color(0xFFDCB870)
 
-// The reciter's own ink: the word being heard is drawn in this tone, not
-// washed behind. The paper tone is a deep plum and the night tone a pale
-// lavender, both far enough from the seven tajweed families to read as a
-// second mark rather than as another rule, and both past 4.5:1 on the page,
-// the sheet, and the reciter's own wash (owner decision, this session).
-val RecitationInk = Color(0xFF4B1D5E)
-val NightRecitationInk = Color(0xFFD6B8FF)
-
 // The one interactive accent, and the ornament gold that belongs to the
 // Reading.
 //

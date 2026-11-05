@@ -105,8 +105,8 @@ fun TafsirsPage(
 }
 
 /**
- * The word list, on its own page: the switch that draws meanings under the
- * ayah, and the one list the reading speaks.
+ * The word list, on its own page: the switch that opens a word's meaning on
+ * its own sheet, and the one list the reading speaks.
  *
  * The list is the reader's language's list and no other, so the page shows
  * one pack and not a catalog: there is nothing to choose between, and a

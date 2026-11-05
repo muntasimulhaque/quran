@@ -126,8 +126,9 @@ internal val DarkScheme = darkColorScheme(
 internal val LightPage = PagePalette(
     ink = PaperInk,
     ornament = Gold,
-    highlight = Color(0x381B4D7A),
-    recitationInk = RecitationInk,
+    // 0.13 of the lapis: the strongest tint the seven paper families keep
+    // their 4.5:1 on. The reciter's word and a search arrival both wear it.
+    highlight = Color(0x211B4D7A),
     tajweed = PaperTajweed,
     introInk = PaperInk.copy(alpha = 0.78f),
     mastheadInk = PaperInk.copy(alpha = 0.9f),
@@ -136,8 +137,8 @@ internal val LightPage = PagePalette(
 internal val DarkPage = PagePalette(
     ink = NightInk,
     ornament = NightGold,
-    highlight = Color(0x4795C0EA),
-    recitationInk = NightRecitationInk,
+    // 0.15 of the night lapis: the same ceiling for the night families.
+    highlight = Color(0x2695C0EA),
     tajweed = NightTajweed,
     introInk = NightInk.copy(alpha = 0.78f),
     mastheadInk = NightText.copy(alpha = 0.9f),

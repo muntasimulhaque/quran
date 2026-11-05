@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 15.8 (versionCode 160)
+Version: 15.9 (versionCode 161)
 
 ## Listing
 
@@ -21,9 +21,9 @@ The Arabic is the QPC Hafs print, word by word, with the rules of recitation
 drawn in the printed mushaf's seven color families and a Tajweed page that
 explains every color in English and Bangla. The reading gives each ayah its
 Saheeh International translation with the original footnotes; when word
-meanings are turned on, a tap on any word opens its meaning under the verse;
-and the ayah card opens Ibn Kathir in English, with the Quran quotations set
-apart. Bangla readers
+meanings are turned on, pressing and holding any word opens its meaning in a
+quiet sheet, with the ayah named above it; and the ayah card opens Ibn Kathir
+in English, with the Quran quotations set apart. Bangla readers
 get the Al-Bayan Simple Translation, Ibn Kathir in Bangla, Bangla word
 meanings, and the surah names in Bengali script, and the whole interface can
 be read in English or Bangla.

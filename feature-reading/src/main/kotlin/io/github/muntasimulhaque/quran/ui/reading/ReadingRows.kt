@@ -86,6 +86,9 @@ internal fun ReadingRows(
     contentPaddingBottom: Dp,
     footnote: OpenFootnote?,
     onFootnote: (OpenFootnote?) -> Unit,
+    /** The word the reader pressed and held, and the sheet that holds it. */
+    word: OpenWord?,
+    onWord: (OpenWord?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // The stored place is the ayah, so the list opens on it and needs nothing
@@ -298,6 +301,7 @@ internal fun ReadingRows(
                         )
                     }
                 },
+                onWord = { onWord(it) },
             )
         }
         item(key = "end-${surah.number}", contentType = "end") {
@@ -325,6 +329,16 @@ internal fun ReadingRows(
             sizeSp = open.sizeSp,
             lineSp = open.lineSp,
             onDismiss = { onFootnote(null) },
+        )
+    }
+
+    word?.let { open ->
+        WordSheet(
+            word = open,
+            surahName = surah.nameSimple,
+            metrics = metrics,
+            hafs = hafs,
+            onDismiss = { onWord(null) },
         )
     }
 }

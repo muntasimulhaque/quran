@@ -7,7 +7,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,9 +18,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
@@ -32,13 +31,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
@@ -48,7 +47,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
@@ -62,7 +60,6 @@ import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.data.ReadingRow
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TranslationLine
-import io.github.muntasimulhaque.quran.data.WordMeaning
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
@@ -74,7 +71,6 @@ import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.Wash
-import io.github.muntasimulhaque.quran.ui.theme.prose
 import kotlin.math.max
 import kotlin.math.min
 
@@ -102,17 +98,18 @@ internal fun AyahBlock(
     onMenu: (Ayah, IntRect) -> Unit,
     onBackgroundTap: () -> Unit,
     onFootnote: (TranslationLine, Int) -> Unit,
+    /** The word the reader pressed and held, with its own meaning. */
+    onWord: (OpenWord) -> Unit,
 ) {
     val palette = LocalPagePalette.current
     val playing = row.ayah.number == playingAyah
-    // The word the reader last asked for. A tap on a word opens its meaning in
-    // one quiet line; another tap replaces it, and a tap on the page puts it
-    // away. The page never carries the whole dictionary at once (owner
-    // decision, this session).
-    var tappedWord by remember(row.ayah.number) { mutableStateOf<WordMeaning?>(null) }
-    LaunchedEffect(showWordAid) {
-        if (!showWordAid) tappedWord = null
-    }
+    val haptics = LocalHapticFeedback.current
+    // The gesture's two callbacks are read through their latest value: a
+    // pointerInput's lambda is not restarted by a recomposition, and a long
+    // press that began before the page rebuilt must still open the current
+    // sheet (owner decision, this session).
+    val currentWord by rememberUpdatedState(onWord)
+    val currentPageTap by rememberUpdatedState(onBackgroundTap)
     val ayahActions = stringResource(R.string.reading_ayah_actions)
     val paperActions = stringResource(R.string.reading_paper_actions)
     // The end of an ayah in an Arabic-only reading: the KFGQPC face's own
@@ -130,7 +127,11 @@ internal fun AyahBlock(
     val reference = localizedDigits(row.ayah.verseKey)
     val referenceLabel = stringResource(R.string.reading_ayah_reference, reference)
     val revealWords = reveal?.words.orEmpty()
-    val matchWash = MaterialTheme.colorScheme.primary.copy(alpha = Wash.Match)
+    // A search that matched a word's meaning marks the word it matched, by
+    // its text. The reading used to draw the whole aid to show this; the
+    // page now carries the same mark as an Arabic hit, on the one word that
+    // answered (owner decision, this session).
+    val revealMeanings = reveal?.meanings.orEmpty()
     // The one spoken shape of the whole ayah. The reference and the Arabic
     // used to carry their own descriptions inside a merged clickable block,
     // and TalkBack preferred those descriptions to the translation and the
@@ -177,10 +178,15 @@ internal fun AyahBlock(
             color = palette.ornament,
         )
     }
-    val wash = when {
-        isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = Wash.Selected)
-        playing -> palette.highlight.copy(alpha = palette.highlight.alpha * 0.55f)
-        else -> androidx.compose.ui.graphics.Color.Transparent
+    // The block's own ground is the selected ayah's wash and nothing else.
+    // The reciter's word is marked on the word, not on the whole ayah: the
+    // ayah-level recitation wash was removed when the word wash came back,
+    // because the two tints together put the seven rule colors under their
+    // contrast floor (owner decision, this session).
+    val wash = if (isSelected) {
+        MaterialTheme.colorScheme.primary.copy(alpha = Wash.Selected)
+    } else {
+        Color.Transparent
     }
     // The padding belongs to the paper, so the gaps between ayahs still
     // answer a tap with the reading chrome. The block is set apart by the
@@ -249,15 +255,16 @@ internal fun AyahBlock(
                 // ayah's own door is its number, at the head of the block,
                 // so the tap carries no ripple over the Quran's own letters
                 // (owner decision, this session: the one-tap ayah of 6.5 and
-                // the long press that followed it are both gone, because a
-                // signifier that has to be taught is not a signifier).
+                // the ayah's long press that followed it are both gone,
+                // because a signifier that has to be taught is not a
+                // signifier). The word's own long press is the one hold the
+                // reading keeps: it is the word meanings aid, turned on by
+                // its own Settings row, and it opens the word's sheet rather
+                // than the ayah's actions (owner decision, this session).
                 .clickable(
                     interactionSource = press,
                     indication = null,
-                    onClick = {
-                        tappedWord = null
-                        onBackgroundTap()
-                    },
+                    onClick = onBackgroundTap,
                 )
                 // Every ayah gives a screen reader the same two doors a finger
                 // has: the ayah's own actions, and the paper's own tap. The
@@ -327,8 +334,17 @@ internal fun AyahBlock(
                 arabicOnly,
                 ornamentStyle,
                 revealWords,
+                revealMeanings,
             ) {
-                arabic(row, playing, recitedWord, arabicOnly, ornamentStyle, revealWords)
+                arabic(
+                    row,
+                    playing,
+                    recitedWord,
+                    arabicOnly,
+                    ornamentStyle,
+                    revealWords,
+                    revealMeanings,
+                )
             }
             var textLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
             // The Arabic line's own place on the glass, so the medallion's tap
@@ -374,7 +390,6 @@ internal fun AyahBlock(
                                             ornamentAnchor(layout, range, textBounds.value),
                                         )
                                     } else {
-                                        tappedWord = null
                                         onBackgroundTap()
                                     }
                                 }
@@ -386,23 +401,36 @@ internal fun AyahBlock(
                     .then(
                         if (showWordAid) {
                             Modifier.pointerInput(arabicLine.wordRanges, row.meanings) {
-                                detectTapGestures { position ->
-                                    val layout = textLayout
-                                    if (layout == null) {
-                                        onBackgroundTap()
-                                        return@detectTapGestures
-                                    }
-                                    val offset = layout.getOffsetForPosition(position)
-                                    val index = arabicLine.wordRanges.indexOfFirst {
-                                        offset in it
-                                    }
-                                    if (index >= 0) {
-                                        tappedWord = row.meanings.getOrNull(index)
-                                    } else {
-                                        tappedWord = null
-                                        onBackgroundTap()
-                                    }
-                                }
+                                detectTapGestures(
+                                    // The tap is still the page's: a word is
+                                    // asked for by holding it, so the reading
+                                    // keeps its one tap everywhere (owner
+                                    // decision, this session).
+                                    onTap = { currentPageTap() },
+                                    onLongPress = { position ->
+                                        val layout = textLayout
+                                        if (layout != null) {
+                                            val offset = layout.getOffsetForPosition(position)
+                                            val index = arabicLine.wordRanges
+                                                .indexOfFirst { offset in it }
+                                            val word = row.meanings.getOrNull(index)
+                                            val meaning = word?.meaning
+                                            if (word != null && !meaning.isNullOrBlank()) {
+                                                haptics.performHapticFeedback(
+                                                    HapticFeedbackType.LongPress,
+                                                )
+                                                currentWord(
+                                                    OpenWord(
+                                                        word = word.word,
+                                                        meaning = meaning,
+                                                        tajweed = word.tajweed,
+                                                        reference = row.ayah.verseKey,
+                                                    ),
+                                                )
+                                            }
+                                        }
+                                    },
+                                )
                             }
                         } else {
                             Modifier
@@ -415,49 +443,28 @@ internal fun AyahBlock(
                             drawContent()
                             return@drawWithContent
                         }
-                        arabicLine.matchRanges.forEach { range ->
-                            drawWordWash(layout, range, matchWash)
+                        // The page has one word wash: the word a search
+                        // arrived on and the word the reciter is saying are
+                        // both a place on the Quran's own line, and the seven
+                        // rule colors have to stay readable on it. The
+                        // selected ayah is a ground of its own, so the word
+                        // wash is not laid over it (owner decision, this
+                        // session).
+                        if (!isSelected) {
+                            arabicLine.matchRanges.forEach { range ->
+                                drawWordWash(layout, range, palette.highlight)
+                            }
+                            if (
+                                recited != null &&
+                                arabicLine.matchRanges.none { it == recited }
+                            ) {
+                                drawWordWash(layout, recited, palette.highlight)
+                            }
                         }
                         drawContent()
                         drawTajweedColors(layout, tajweed, palette.tajweed, metrics.tajweed)
-                        if (recited != null) {
-                            drawRecitationWord(layout, recited, palette.recitationInk)
-                        }
                     },
             )
-            tappedWord?.let { word ->
-                val meaning = word.meaning
-                if (!meaning.isNullOrBlank()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = Space.Line),
-                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = word.word,
-                            style = arabicStyle(
-                                hafs,
-                                metrics.wordsSp,
-                                metrics.wordsLineSp,
-                                palette.ink,
-                            ),
-                            textAlign = TextAlign.Right,
-                        )
-                        Text(
-                            text = meaning,
-                            style = io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice.current.prose(
-                                metrics.wordsMeaningSp,
-                                metrics.wordsMeaningLineSp,
-                            ),
-                            color = palette.ink,
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(start = Space.Row),
-                        )
-                    }
-                }
-            }
             // More than one translation may be on, and each is drawn in its
             // own column; a column is named when there is more than one, and
             // when it is the only one but not in the reader's language, so
@@ -530,7 +537,7 @@ private data class ArabicLine(
     val text: AnnotatedString,
     val recitedRange: IntRange?,
     val matchRanges: List<IntRange>,
-    /** Each word's own span, in the verse's order, for a tap to find its meaning. */
+    /** Each word's own span, in the verse's order, for a long press to find its meaning. */
     val wordRanges: List<IntRange>,
     /** The printed medallion's own span, which is the ayah's door in Arabic only. */
     val ornamentRange: IntRange?,
@@ -538,9 +545,9 @@ private data class ArabicLine(
 
 /**
  * The ayah as whole words. The recited word carries its range instead of a
- * style span, so the surface above can paint its own glyphs in the recitation
- * ink: a style boundary inside an Arabic word breaks its letter joining, and
- * a color span would re-shape the line the reading has already settled.
+ * style span, so the surface above can wash it in the recitation's own color:
+ * a style boundary inside an Arabic word breaks its letter joining, and a
+ * color span would re-shape the line the reading has already settled.
  *
  * The tajweed colors are not spans either. The line is shaped once and
  * [drawTajweedColors] paints over that one layout, because a color span would
@@ -560,6 +567,7 @@ private fun arabic(
     ornament: Boolean,
     ornamentStyle: SpanStyle,
     revealWords: Set<Int>,
+    revealMeanings: Set<String>,
 ): ArabicLine {
     val words = row.words
     var recitedRange: IntRange? = null
@@ -576,7 +584,9 @@ private fun arabic(
                 append(word.text)
                 wordRanges += start until length
                 if (playing && word.position == playingWord) recitedRange = start until length
-                if (word.position in revealWords) matchRanges += start until length
+                if (word.position in revealWords || word.text in revealMeanings) {
+                    matchRanges += start until length
+                }
             }
         }
         if (ornament) {
@@ -659,8 +669,9 @@ private fun PointerInputScope.ornamentTarget(
 /**
  * A word's wash, one rounded shape per line it spans. The geometry comes from
  * the text layout itself, so the wash sits exactly on the word, in the
- * reading direction too. Used by a search match; the reciter's word is painted
- * in the recitation ink instead.
+ * reading direction too. Used by a search match and by the reciter's word:
+ * the page's one place mark, under the letters, at the strongest tint the
+ * seven rule colors keep their contrast on.
  */
 private fun DrawScope.drawWordWash(
     layout: TextLayoutResult,
@@ -668,25 +679,6 @@ private fun DrawScope.drawWordWash(
     wash: Color,
 ) {
     forEachWordBox(layout, range) { box -> drawWashBox(box, wash) }
-}
-
-/**
- * The reciter's word, painted in the recitation ink. The color is a paint
- * pass over the line that was shaped once, not a style span: a span would
- * re-shape the run and can break a join or drop a mark. The word's own glyph
- * boxes are the clip, so the ink lands on its letters and nowhere else, and
- * the pass comes after the tajweed colors so the reciter's word is one mark,
- * not a rule color under a wash (owner decision, this session).
- */
-private fun DrawScope.drawRecitationWord(
-    layout: TextLayoutResult,
-    range: IntRange,
-    color: Color,
-) {
-    val path = Path()
-    forEachWordBox(layout, range) { path.addRect(it) }
-    if (path.isEmpty) return
-    clipPath(path) { drawText(textLayoutResult = layout, color = color) }
 }
 
 /** Every line's box of one word, in text order, handed to the caller. */

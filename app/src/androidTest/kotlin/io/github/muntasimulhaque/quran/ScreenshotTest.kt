@@ -319,14 +319,11 @@ class ScreenshotTest {
     /**
      * A tap on the reading's own quiet margin brings the chrome up.
      *
-     * The page's exact centre is not a safe place to tap, and this tour found
-     * that the hard way: a control can sit under the finger there. A word by
-     * word tile is a control, and the reading now carries the aid in the
-     * store's own frames, so a centre tap could open one of those tiles and the
-     * bar never came up, and the tour then reached for a door that was not
-     * there. The margin is the reading's quiet edge, where no control lives,
-     * which is the same rule the rest of the suite already follows through
-     * `tapThePaper`.
+     * The page's exact centre is not a safe place to tap: a control can sit
+     * under the finger there, and a selected translation line is not the
+     * paper either. The margin is the reading's quiet edge, where no control
+     * lives, which is the same rule the rest of the suite already follows
+     * through `tapThePaper`.
      */
     private fun tapTheReading() {
         readingPage().performTouchInput { click(Offset(4f, height * 0.5f)) }
@@ -435,16 +432,16 @@ class ScreenshotTest {
             settings.setTafsirPacks(setOf("tafsir-ibn-kathir-en", "tafsir-ibn-kathir-bn"))
             settings.setShowTranslation(true)
             // The first frame is the reading at its default: the word aid is
-            // a tap now, not a field of pairs under every ayah (owner
+            // a long press now, not a field of pairs under every ayah (owner
             // decision, this session).
             settings.setWordByWord(false)
             // The colors are the 10.3 change; a test that left the switch off
             // would silently strip them from every store frame.
             settings.setTajweed(true)
             // The store set is the steady reading, not the first minute: the
-            // one-time long-press note has been read in this install, so no
-            // frame catches it floating over the opening (owner report, this
-            // session: the note belongs to the first run, not the listing).
+            // word aid is off, so no frame catches a word sheet over the
+            // opening, and the reminder's one-time offer is not this tour's
+            // subject.
             for (role in TypeRole.entries) settings.setTypeSize(role, TextSize.DEFAULT)
         }
         Thread.sleep(500)

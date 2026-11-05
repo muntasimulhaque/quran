@@ -35,15 +35,6 @@ class ContrastTest {
         assertReadable(Lapis, PaperBackground)
         assertReadable(Lapis, PaperSurface)
         assertReadable(PaperOnPrimary, Lapis)
-        // The reciter's word is recolored, not washed: its ink must clear the
-        // floor on the page, the sheet, and the reciter's own wash (owner
-        // decision, this session).
-        assertReadable(LightPage.recitationInk, PaperBackground)
-        assertReadable(LightPage.recitationInk, PaperSurface)
-        assertReadable(
-            LightPage.recitationInk,
-            blend(LightScheme.primary, PaperBackground, LightPage.highlight.alpha * 0.55f),
-        )
         // The four container roles a Material component may ask for, so a
         // stock surface can never fall back to the baseline purple (owner
         // decision, this session).
@@ -62,15 +53,22 @@ class ContrastTest {
         assertReadable(PaperTajweed.idgham, PaperBackground)
         assertReadable(PaperTajweed.madda, PaperBackground)
         // The rules page draws its swatches on the sheet, and the reading
-        // draws the words on the selected and reciter washes as well as on
-        // the plain page.
+        // draws the words on the selected wash and on the word mark as well
+        // as on the plain page. The word mark is a wash and not a recolored
+        // word: the letters keep their own ink and rule colors, so every one
+        // of them is measured on the full mark, which is the strongest ground
+        // the palette allows (owner decision, this session).
         assertTajweedOn(PaperTajweed, PaperSurface)
         assertTajweedOnWash(PaperTajweed, PaperBackground, LightScheme.primary, Wash.Selected)
         assertTajweedOnWash(
             PaperTajweed,
             PaperBackground,
             LightPage.highlight,
-            LightPage.highlight.alpha * 0.55f,
+            LightPage.highlight.alpha,
+        )
+        assertReadable(
+            PaperInk,
+            blend(LightPage.highlight, PaperBackground, LightPage.highlight.alpha),
         )
         // The search result's match wash: the result line is ink, not a
         // family, for the reason the class notes. The sheet is the ground
@@ -116,12 +114,6 @@ class ContrastTest {
         assertReadable(LapisLight, NightBackground)
         assertReadable(LapisLight, NightSurface)
         assertReadable(NightOnPrimary, LapisLight)
-        assertReadable(DarkPage.recitationInk, NightBackground)
-        assertReadable(DarkPage.recitationInk, NightSurface)
-        assertReadable(
-            DarkPage.recitationInk,
-            blend(DarkScheme.primary, NightBackground, DarkPage.highlight.alpha * 0.55f),
-        )
         assertReadable(DarkScheme.onSecondaryContainer, DarkScheme.secondaryContainer)
         assertReadable(DarkScheme.onTertiaryContainer, DarkScheme.tertiaryContainer)
         // The error roles are the quiet voice on this ground too (owner
@@ -141,7 +133,11 @@ class ContrastTest {
             NightTajweed,
             NightBackground,
             DarkPage.highlight,
-            DarkPage.highlight.alpha * 0.55f,
+            DarkPage.highlight.alpha,
+        )
+        assertReadable(
+            NightInk,
+            blend(DarkPage.highlight, NightBackground, DarkPage.highlight.alpha),
         )
         assertReadable(NightInk, blend(DarkScheme.primary, NightSurface, Wash.Match))
         // The night sheet's current row, on the same selected wash (owner
