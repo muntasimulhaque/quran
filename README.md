@@ -4,14 +4,15 @@ A free, open source Quran reader for Android. It opens where you left off
 and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 15.5 (versionCode 157) was submitted to Play review from commit
-`3e3a37c3`. The signed bundle `quran-15.5-vc157.aab` had SHA-256
-`16c8e36e178d009f3d1867a7352fb96f6e09690a2213f3fe9d317f20fce80022`, signed by the
+**Status:** 15.6 (versionCode 158) is ready for Play review from commit
+`330b6b81`. The signed bundle `quran-15.6-vc158.aab` has SHA-256
+`9cec6abd87df1c36d7f4e6c5f2250cfb3c8a130d190e3ca973094b576abc7ae4`, signed by the
 upload key `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-Build run `41822729377` is green and the store capture is run `41822729245`.
-Content 1.5.0, the database `content-db-12c95dbe`. The Quran text, every
-translation, every tafsir, every pack, and the content database are unchanged;
-the catalog marks the two translations as shipped.
+Build run `41945683243` is green and the store capture is run `41945683301`.
+Content 1.5.0, the database `content-db-8fb17cbe`. The Quran text, both
+translations, and both tafsirs are unchanged; the content database now names
+the Opus recitation files, and the recitation packages are new under the
+`recitation-minshawi-opus` and `recitation-husary-opus` tags.
 
 **In 15.6.** The recitation is re-encoded in Ogg Opus at 64 kbps mono, about half the size of the old MP3 set, with the same word timings and the same reciters. The old MP3 packages stay under their old tags for readers still on 15.5; the new app reads the new Opus packages, one surah at a time as before. The Quran text, both translations, and both tafsirs are unchanged.
 

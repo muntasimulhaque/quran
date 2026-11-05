@@ -242,7 +242,7 @@ package downloads, and a SHA-256 check before it is used:
 | English | Saheeh International (ships) | Ibn Kathir (29.5 MB) | 6.3 MB |
 | Bangla | Al-Bayan Simple Translation (ships) | Ibn Kathir (56.0 MB) | 8.4 MB |
 
-Recitations: Minshawi and Husary, one surah at a time (about 0.2 to 185 MB
+Recitations: Minshawi and Husary, one surah at a time (about 0.2 to 97 MB
 each), plus 1.7 MB of timing data per reciter.
 
 Content updates arrive on their own: when a pack you already have is
