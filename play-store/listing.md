@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 16.2 (versionCode 164)
+Version: 16.3 (versionCode 165)
 
 ## Listing
 
@@ -140,7 +140,9 @@ safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
 The set is from capture run 42173518186 on 16.2: all three legs green,
-eleven frames each, every frame read. The eight are a reader's path through
+eleven frames each, every frame read. 16.3 changes when the wash moves, not
+a single layout, so no frame changes and nothing was captured. The eight are
+a reader's path through
 the app rather than the app's own map, and the last frame is the two-row
 offer, its line a 48 dp door to the voice list. The offer is the visible
 change in the eight; the word sheet's own frame in the evidence set shows
@@ -171,6 +173,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Not now, Download, the page, or Back), so every frame that
 wants a clean page is taken before it.
+
+## Release notes (16.3, 478 characters)
+16.3 makes the reciter's word follow the voice. The highlight waits for each ayah's first sound and clears when the voice stops, instead of starting early and lingering. It moves at the screen's own rate, so it keeps up at any speed, and it no longer blinks when the ayah changes. Where the timing cannot explain a long stretch, it rests instead of sitting on the wrong word. Text, translations, tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (16.2, 443 characters)
 16.2 gives the recitation offer its voice back: tap the reciter's name to choose who reads the surah, with each voice's size in view. The offer and the playing pill are one line of words over one row of controls. The word meaning sheet's head moves to the page's left edge, its word is the Quran's own size, and its gloss the translation's. Text, translations, tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
