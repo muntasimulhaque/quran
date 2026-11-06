@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 16.1 (versionCode 163)
+Version: 16.2 (versionCode 164)
 
 ## Listing
 
@@ -139,12 +139,13 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 42083216251 on 16.1: all three legs green, eight
-frames each, every frame read. The eight are a reader's path through the app
-rather than the app's own map, and the last frame is the compact centered
-offer. The page under the clock and the offer are the two visible changes in
-the set; the word sheet's own frame is in the evidence set. No frame carries
-the version line, because the settings hub is not one of the eight.
+The set is from capture run 42173518186 on 16.2: all three legs green,
+eleven frames each, every frame read. The eight are a reader's path through
+the app rather than the app's own map, and the last frame is the two-row
+offer, its line a 48 dp door to the voice list. The offer is the visible
+change in the eight; the word sheet's own frame in the evidence set shows
+its left head and the Quran-sized word. No frame carries the version line,
+because the settings hub is not one of the eight.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
@@ -163,12 +164,16 @@ What each set shows, in order:
    "Search in" door
 6. The Tajweed page: seven color families, each with its word and its rules
 7. The reading at night
-8. The recitation's own offer: the compact capsule naming the surah, the
-   reciter, and the size before a tap, with Not now and Download under it
+8. The recitation's own offer: the two-row capsule naming the surah, the
+   reciter, and the size before a tap, its line a door to the voice list, with
+   Not now and Download under it
 
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Not now, Download, the page, or Back), so every frame that
 wants a clean page is taken before it.
+
+## Release notes (16.2, 443 characters)
+16.2 gives the recitation offer its voice back: tap the reciter's name to choose who reads the surah, with each voice's size in view. The offer and the playing pill are one line of words over one row of controls. The word meaning sheet's head moves to the page's left edge, its word is the Quran's own size, and its gloss the translation's. Text, translations, tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (16.1, 491 characters)
 16.1 makes the quiet parts fit together. The recitation offer is a compact centered capsule: the reciter, surah, and size on one line, with Not now and Download under it. The reading runs under the clock again. Footnotes and word meanings share the app's sheet title and place line, the Reciters page lists the bundled Al-Fatiha, and Send feedback opens your mail app. The Quran text, both translations, both tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.

@@ -4,16 +4,18 @@ A free, open source Quran reader for Android. It opens where you left off
 and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 16.1 (versionCode 163) was submitted to Play review from commit
-`9ecf8310`. The signed bundle `quran-16.1-vc163.aab` has SHA-256
-`b2dbe024416b25bfc2ad74f75a00a39ff4231d72ae1a99126efc0b59d385902f`, signed by the
+**Status:** 16.2 (versionCode 164) is ready for Play review from commit
+`2cc41380`. The signed bundle `quran-16.2-vc164.aab` has SHA-256
+`b7677532c9236bc46f6f47473ce1a9c882f3f7fcb9c53de9c9797db87cc79c2e`, signed by the
 upload key `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-Build run `42083216359` is green and the store capture is run `42083216251`.
-The eight store frames show the page under the clock and the compact centered
-offer; every frame was read on all three form factors. Content 1.5.0, the
-database `content-db-12c95dbe`. The Quran text, both translations, both
-tafsirs, and the recitation are unchanged; the app still carries Al-Fatiha in
-both voices and both reciter timing packs.
+Build run `42173518221` is green and the store capture is run `42173518186`.
+The eight store frames show the two-row offer with its voice door, and the
+word sheet's own frame in the evidence set shows its left head and new sizes;
+the playing pill's two rows and one line are pinned by `PlaybackPillTest`.
+Every frame was read on all three form factors. Content 1.5.0, the database
+`content-db-12c95dbe`. The Quran text, both translations, both tafsirs, and the
+recitation are unchanged; the app still carries Al-Fatiha in both voices and
+both reciter timing packs.
 
 **In 16.2.** The recitation offer is a two-row capsule again: its line is a 48 dp door that opens the voice list for the surah at hand, with the chevron back, and Not now and Download stay centered under it. The playing pill is one line of words over the transport: the reciter and its pace, then the surah and its ayah. The word meaning sheet's head takes the page's left edge with the footnote's, its word is the Quran's own size and its gloss the translation's, and the word aid's own size is gone with its role. The Quran text, both translations, both tafsirs, and the content database are unchanged.
 
