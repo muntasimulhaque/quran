@@ -4,20 +4,20 @@ A free, open source Quran reader for Android. It opens where you left off
 and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 16.2 (versionCode 164) was submitted to Play review from commit
-`2cc41380`. The signed bundle `quran-16.2-vc164.aab` has SHA-256
-`b7677532c9236bc46f6f47473ce1a9c882f3f7fcb9c53de9c9797db87cc79c2e`, signed by the
+**Status:** 16.3 (versionCode 165) is built from commit `9fe31ff5` and ready
+for Play review. The signed bundle `quran-16.3-vc165.aab` has SHA-256
+`4a9be1f2a07642a4dbca13735a748095197ed0c0f9ba36c1ad5360d3d3c1b5f1`, signed by the
 upload key `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-Build run `42173518221` is green and the store capture is run `42173518186`.
-The eight store frames show the two-row offer with its voice door, and the
-word sheet's own frame in the evidence set shows its left head and new sizes;
-the playing pill's two rows and one line are pinned by `PlaybackPillTest`.
-Every frame was read on all three form factors. Content 1.5.0, the database
-`content-db-12c95dbe`. The Quran text, both translations, both tafsirs, and the
-recitation are unchanged; the app still carries Al-Fatiha in both voices and
-both reciter timing packs.
+Build run `42199045798` is green. No visible UI changed in 16.3: the wash
+moves at a different moment, not in a different place, so the eight store
+frames stand from capture run `42173518186` on 16.2 and no new set was used.
+Content 1.5.0, the database `content-db-12c95dbe`, and the recitation packs
+are unchanged; the app now ships the voice edge table `audio-edges-dd21e5f4`,
+measured from the same audio. The Quran text, both translations, both tafsirs,
+and the audio are unchanged; the app still carries Al-Fatiha in both voices
+and both reciter timing packs.
 
-**In 16.3.** The reciter's word is drawn from the file's own voice, not from the export's marks alone. The build listens to every shipped ayah file and records its first and last voiced millisecond; the highlight waits for the first sound and clears at the last, instead of starting at 0:00 and holding through the closing pause. The reading asks for the word at each screen frame, so it keeps up at 0.5x, 1x, and 1.5x, and the surah's word regions are kept from the playlist build, so the wash no longer blanks at an ayah turn. Where the export leaves a gap of more than six seconds, the wash rests instead of lying. The Quran text, both translations, both tafsirs, and the audio are unchanged; the content database is unchanged, and the recitation timing packs are unchanged, with the new edge table shipped beside them.
+**In 16.3.** The reciter's word is drawn from the file's own voice, not from the export's marks alone. The build listens to every shipped ayah file and records its first and last voiced millisecond; the highlight waits for the first sound and clears at the last, instead of starting at 0:00 and holding through the closing pause. The reading sleeps to each word's own boundary, in the reader's pace, so it keeps up at 0.5x, 1x, and 1.5x, and the surah's word regions are kept from the playlist build, so the wash no longer blanks at an ayah turn. Where the export leaves a gap of more than six seconds, the wash rests instead of lying. The Quran text, both translations, both tafsirs, and the audio are unchanged; the content database is unchanged, and the recitation timing packs are unchanged, with the new edge table shipped beside them.
 
 **In 16.2.** The recitation offer is a two-row capsule again: its line is a 48 dp door that opens the voice list for the surah at hand, with the chevron back, and Not now and Download stay centered under it. The playing pill is one line of words over the transport: the reciter and its pace, then the surah and its ayah. The word meaning sheet's head takes the page's left edge with the footnote's, its word is the Quran's own size and its gloss the translation's, and the word aid's own size is gone with its role. The Quran text, both translations, both tafsirs, and the content database are unchanged.
 
