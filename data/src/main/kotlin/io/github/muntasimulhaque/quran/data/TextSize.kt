@@ -9,7 +9,7 @@ import kotlin.math.abs
  * each is its own choice.
  *
  */
-enum class TypeRole { Arabic, Translation, Tafsir, Words }
+enum class TypeRole { Arabic, Translation, Tafsir }
 
 /**
  * The five scales every sized text is drawn at, as a multiplier over the base
@@ -116,30 +116,6 @@ object TextSize {
     fun lineSp(role: TypeRole, step: Float): Float = sp(role, step) * lineRatio(role)
 
     /**
-     * The meaning under a word in the word by word aid: the size the meaning
-     * is read at, 15 sp at the middle step. It is one point under the
-     * translation's 16, where the aid used to stand at nine tenths: the word
-     * grid and the point keep the meaning a gloss, while the smallest step
-     * lands on 12 sp, the platform's own body floor (owner decision, this
-     * session). At the largest step it is 18 sp, under the translation's
-     * 19.2.
-     */
-    fun meaningSp(step: Float): Float = MEANING_BASE * step(step)
-
-    /**
-     * The Arabic word in the word by word aid: 22 sp at the middle step, four
-     * points under the Quran's own 26, so the aid reads as a small copy of the
-     * page and not as a footnote to itself.
-     *
-     * It is a copy of the verse's own word, so it follows the Quran's size and
-     * never the gloss's. It used to be derived from the meaning by a ratio,
-     * which was one rule while both took the Latin base; the two scripts now
-     * share one size ladder, so the word stays here on both languages (owner
-     * decision, this session).
-     */
-    fun wordSp(step: Float): Float = WORD_BASE * step(step)
-
-    /**
      * The one rule for Arabic beside prose, in the translation and in the
      * tafsir both: 24 sp at the default, 24/26 of the reader's own Quran
      * size. At that stand an inline quotation reads as the Quran's own text
@@ -171,9 +147,6 @@ object TextSize {
         // translation's own size and not a point under it (owner decision,
         // this session; the two sizes read as one voice now).
         TypeRole.Tafsir -> 16f
-        // The aid's Arabic word, the stand the Quran's own text takes four
-        // points down; see [wordSp].
-        TypeRole.Words -> WORD_BASE
     }
 
     /**
@@ -190,24 +163,11 @@ object TextSize {
         // matches the field the app was compared with (owner decision, this
         // session).
         TypeRole.Arabic -> 2f
-        TypeRole.Words -> 1.8f
         else -> LATIN_PROSE_RATIO
     }
 
-    /**
-     * The size the meaning under a word is read at, before any scaling: one
-     * point under the translation's 16 sp base, 15. See [meaningSp].
-     */
-    private const val MEANING_BASE = 15f
-
     /** The Quran's own base, the anchor every other reading size is read against. */
     private const val ARABIC_BASE = 26f
-
-    /**
-     * The Arabic word in the aid, before any scaling: four points under the
-     * Quran's [ARABIC_BASE]. See [wordSp].
-     */
-    private const val WORD_BASE = ARABIC_BASE - 4f
 
     /**
      * The one stand for Arabic beside prose, in the translation and the

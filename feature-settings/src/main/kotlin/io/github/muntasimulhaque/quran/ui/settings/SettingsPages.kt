@@ -95,9 +95,9 @@ fun AppearancePage(
 }
 
 /**
- * The text page: each kind of text has its own size, and the sample above
- * them is the reader's own ayah, so a change is judged on the page it is
- * about to change.
+ * The text page: the Quran's size and the meaning's size, and the sample
+ * above them is the reader's own ayah, so a change is judged on the page it
+ * is about to change.
  */
 @Composable
 fun TextPage(
@@ -112,11 +112,12 @@ fun TextPage(
     ) { value = preview() }
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         row?.let { sample -> SizeSample(row = sample, settings = settings) }
-        // Two sizes, not four. The Quran is its own text and has its own
+        // Two controls, not three. The Quran is its own text and has its own
         // step; the meaning the reader reads under it is one step for the
-        // translation, the tafsir, and the word glosses, because a reader
-        // thinks "make the meaning bigger," not four roles (owner decision,
-        // this session).
+        // translation and the tafsir, because a reader thinks "make the
+        // meaning bigger," not two roles. The word meaning sheet reads the
+        // Quran's word at the Arabic step and its gloss at the translation's,
+        // so the two controls reach it too (owner decision, this session).
         SizeRow(TypeRole.Arabic, settings.arabicSize) { onSize(TypeRole.Arabic, it) }
         SizeRow(TypeRole.Translation, settings.translationSize) { onSize(TypeRole.Translation, it) }
         Spacer(Modifier.height(Space.Section))
@@ -131,7 +132,7 @@ private fun SizeSample(row: ReadingRow, settings: AppSettings) {
             .fillMaxWidth()
             // The sample is its own block, not the first row's label: the
             // page keeps a block's gap under it and a block's gap between
-            // every two rows, so the four controls read as four blocks under
+            // every two rows, so the two controls read as two blocks under
             // one page of text (owner decision, this session).
             .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Row, bottom = Space.Block),
     ) {

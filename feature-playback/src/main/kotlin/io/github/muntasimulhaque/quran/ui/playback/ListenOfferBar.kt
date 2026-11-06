@@ -7,11 +7,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,7 +24,9 @@ import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.DownloadError
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.playback.ListenOffer
+import io.github.muntasimulhaque.quran.ui.kit.AppPopup
 import io.github.muntasimulhaque.quran.ui.kit.DownloadLine
+import io.github.muntasimulhaque.quran.ui.kit.PopupAlignment
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
@@ -34,19 +39,24 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * downloads the word timings and the audio together, under one progress bar,
  * and then it plays.
  *
- * **The offer is a compact centered capsule** (owner decision, this session).
- * Its first line names the request, the reciter then the surah and its size,
- * and its second row is the two answers: Not now and Download, side by side.
- * The capsule is 76 dp tall: the 8 dp top air, one 20 dp line, and the 48 dp
- * targets the two buttons own. The visible pills are 34 dp inside those
- * targets, so the capsule's foot keeps its 7 dp of air without a second empty
- * row.
+ * **The offer is a two-row capsule, 96 dp tall** (owner decision, this
+ * session). Its first row is a 48 dp door around the whole line: the
+ * reciter's name, the chevron that says the line opens, then the surah and
+ * its size. Its second row is the two answers, Not now and Download, side by
+ * side. The line sits 14 dp under the crown, the answer row is the capsule's
+ * 48 dp foot, and the visible pills keep their 7 dp of air. Before this the
+ * line was a 20 dp notice, because a 20 dp line cannot also be a 48 dp
+ * target; the door is the 20 dp the capsule gained, and it gives the name its
+ * chooser back.
  *
- * The line is a name and a fact, not a door. A 20 dp line cannot also be the
- * 48 dp target a finger needs, and a target that reached into the buttons'
- * row would steal the air above them. The reciter is changed in Settings or
- * on the playing pill's own panel; the offer's one question is the download
- * (owner decision, this session).
+ * **The line is the door to the voice list** (owner decision, this session).
+ * It opens the same reciter list the playing pill carries, hung from the
+ * capsule's centre: the chosen voice's mark, and what each voice would still
+ * need for this surah, so the choice is made with its price in view. A chosen
+ * voice is the app's reciter, and the offer is asked again with that voice's
+ * name and size, so the Download spends the size the reader just saw. An
+ * offer with no published voice to offer keeps the line as a notice, because
+ * a door with nothing behind it is a door that lies.
  *
  * **An offer has no X** (owner decision, an earlier session). A page tap and
  * Back put it away; Not now is the same answer made visible. The only X the
@@ -55,10 +65,9 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  *
  * The bar stands at the pill's own [PillMeasure] in every state, so an offer
  * and the transfer that follows it are one width. The transfer keeps its one
- * row, with the X at its end and the progress line under it; the offer's two
- * centered rows are the ask alone. The capsule's width never follows its
- * words, and the progress line stands in the room kept under the transfer's
- * row, never across a control's press shape.
+ * row, with the X at its end and the progress line under it. The capsule's
+ * width never follows its words, and the progress line stands in the room
+ * kept under the transfer's row, never across a control's press shape.
  */
 @Composable
 internal fun ListenOfferBar(
@@ -67,8 +76,15 @@ internal fun ListenOfferBar(
     onConfirm: () -> Unit,
     /** The one X the app keeps: abort a package on its way. */
     onCancelDownload: () -> Unit,
+    /** The voice the reader chose from the offer's own list. */
+    onReciter: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // The chooser belongs to this request. A new voice or a new surah is
+    // another request, so the list that belonged to the old one closes with
+    // it, the same way the playing pill's panel closes when its pill becomes
+    // another pill.
+    var chooser by remember(offer.surah, offer.reciter) { mutableStateOf(false) }
     val progress = offer.progress
     val failure = if (offer.failed) {
         stringResource(
@@ -99,32 +115,33 @@ internal fun ListenOfferBar(
         contentAlignment = Alignment.Center,
     ) {
         if (progress == null) {
-            // The ask: one centered line over one centered pair. The line
-            // keeps its 8 dp from the capsule's top, and the buttons' own
-            // 48 dp targets are the capsule's foot, so the capsule is 76 dp
-            // tall at the default step and grows with the reader's type.
+            // The ask: one 48 dp door over the 48 dp answer row. The door's
+            // target is the line's own content, so the flash hugs the words
+            // the reader is choosing, and the question is not the whole
+            // capsule's width.
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                OfferLine(
-                    name = reciterShortName(offer.reciter, offer.reciterName),
-                    title = failure ?: title,
-                    announce = offer.failed,
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(
-                            start = Space.Section,
-                            end = Space.Section,
-                            top = PillAir,
-                        )
-                        // The line keeps a 20 dp floor, one compact line,
-                        // so the capsule is 76 at the default step. A larger
-                        // system scale lets the line grow instead of clipping
-                        // its type (owner decision, this session).
-                        .heightIn(min = 20.dp)
-                        .testTag("offer-words"),
-                )
+                        .padding(horizontal = Space.Section),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    OfferLine(
+                        name = reciterShortName(offer.reciter, offer.reciterName),
+                        title = failure ?: title,
+                        onOpen = if (offer.options.isEmpty()) {
+                            null
+                        } else {
+                            { chooser = true }
+                        },
+                        announce = offer.failed,
+                        modifier = Modifier.testTag("offer-words"),
+                    )
+                }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(
@@ -216,6 +233,32 @@ internal fun ListenOfferBar(
                         .height(2.dp)
                         .testTag("download-line"),
                 )
+            }
+        }
+        // The chooser hangs from the capsule's own centre, exactly as it does
+        // on the playing pill: one list opens the same way in both of its
+        // homes. It is composed only while it is asked for, and only while
+        // there is still an ask to change; a transfer has no voice to choose.
+        if (progress == null) {
+            Box(Modifier.matchParentSize()) {
+                PillMenuAnchor { anchor ->
+                    if (chooser && offer.options.isNotEmpty()) {
+                        AppPopup(
+                            anchor = anchor,
+                            onDismiss = { chooser = false },
+                            alignment = PopupAlignment.Center,
+                        ) {
+                            ReciterChoices(
+                                options = offer.options,
+                                selected = offer.reciter,
+                                onChoose = {
+                                    chooser = false
+                                    onReciter(it)
+                                },
+                            )
+                        }
+                    }
+                }
             }
         }
     }

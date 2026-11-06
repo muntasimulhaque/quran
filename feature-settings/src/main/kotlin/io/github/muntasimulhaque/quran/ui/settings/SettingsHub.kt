@@ -149,7 +149,7 @@ fun SettingsHub(
 }
 
 /**
- * The four sizes in the hub's one line: "Default" while every kind of text
+ * The three sizes in the hub's one line: "Default" while every kind of text
  * stands on the middle step, and "Adjusted" once the reader has moved one
  * of them.
  *
@@ -165,7 +165,6 @@ private fun fontSizeSummary(settings: AppSettings): String {
         settings.arabicSize,
         settings.translationSize,
         settings.tafsirSize,
-        settings.wordsSize,
     )
     return stringResource(
         if (steps.all { it == TextSize.DEFAULT }) {

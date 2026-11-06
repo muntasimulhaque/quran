@@ -20,9 +20,9 @@ import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
  * still need for the surah at hand, so the choice is made with the price in
  * view rather than by trying it (owner decision, forty-eighth session).
  *
- * The download offer does not carry this list: its one line names the chosen
- * voice, and its height belongs to the two answers (owner decision, this
- * session).
+ * The download offer carries this list too, in its own popup: its line is a
+ * 48 dp door, and a reader who is about to spend a megabyte can choose the
+ * voice it is spent on (owner decision, this session).
  *
  * The rows fill the popup, which is drawn at the pill's own
  * [PopupMeasure], also the measure of the anchor the playing pill hangs it

@@ -639,7 +639,6 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             TypeRole.Arabic -> settings.copy(arabicSize = value)
             TypeRole.Translation -> settings.copy(translationSize = value)
             TypeRole.Tafsir -> settings.copy(tafsirSize = value)
-            TypeRole.Words -> settings.copy(wordsSize = value)
         }
         viewModelScope.launch { settingsStore.setTypeSize(role, value) }
     }
@@ -1091,6 +1090,13 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
                 ?: getApplication<Application>().getString(R.string.surah_fallback_name, ayah.surah),
             ayah = ayah.number,
             bytes = bytes,
+            // The offer's own chooser names every voice with what it would
+            // still need for this surah. It is read here, for this request,
+            // not borrowed from the playing pill: the offer may be about a
+            // surah the player has never seen, and the reader who is about
+            // to spend a megabyte chooses with its price in view (owner
+            // decision, this session).
+            options = listenOptions(ayah.surah),
         )
 
     /** What one reciter would still need for one surah, in bytes. */

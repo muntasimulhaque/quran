@@ -195,14 +195,14 @@ fun AppTheme.name(): String = stringResource(
  * The row used to be a name with a 250 dp pill of five 48 dp cells under it, a
  * line of its own for every kind of text. The cells were the targets the
  * accessibility rule asked for, and the name moved above them for it; the rail
- * is one target that fits beside the name, so four kinds of text come down by
+ * is one target that fits beside the name, so the kinds of text come down by
  * a line each and the page still offers every size (owner decision, this
  * session). The smallest and largest marks at the ends say which way the scale
  * runs, and the chosen stop's halo says where the reader is.
  *
- * **The four rails are one length** (owner report, this session). The label
+ * **The rails are one length** (owner report, this session). The label
  * and the two end marks used to take their own intrinsic width, so "Quran
- * text" left a longer rail than "Word meanings" and the page read as four
+ * text" left a longer rail than a longer name and the page read as
  * different controls. The label now keeps a fixed column and each mark a
  * fixed slot, both scaled with the system font scale, so the rail between
  * them is the same on every row of a given page. On a tablet the page is
@@ -230,10 +230,9 @@ fun SizeRow(
             TypeRole.Arabic -> R.string.settings_size_arabic
             TypeRole.Translation -> R.string.settings_size_translation
             TypeRole.Tafsir -> R.string.settings_size_tafsir
-            TypeRole.Words -> R.string.settings_size_words
         },
     )
-    val scale = if (role == TypeRole.Arabic || role == TypeRole.Words) 0.75f else 1f
+    val scale = if (role == TypeRole.Arabic) 0.75f else 1f
     val fontScale = LocalDensity.current.fontScale
     val labelSlot = SizeLabel * fontScale
     val markSlot = SizeMarkSlot * fontScale
@@ -249,8 +248,8 @@ fun SizeRow(
             // A control's name wears the same words every other row's name
             // wears, so the sheet reads as one voice (owner decision, the
             // theme and consistency session). The fixed column is the rail's
-            // leading line: the four names may be different lengths, the
-            // four rails may not start on four different ones.
+            // leading line: the names may be different lengths, the rails
+            // may not start on different ones.
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.width(labelSlot),

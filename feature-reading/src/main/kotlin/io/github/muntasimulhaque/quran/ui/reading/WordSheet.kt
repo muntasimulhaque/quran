@@ -1,6 +1,5 @@
 package io.github.muntasimulhaque.quran.ui.reading
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -8,7 +7,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -37,21 +35,23 @@ import io.github.muntasimulhaque.quran.ui.theme.prose
  * A word the reader pressed and held, with the meaning the word list gives it
  * and the reference that says where it stands.
  *
- * The sheet is the footnote's container and the word aid's own page. It is
- * centered on purpose: one Arabic word and one short gloss are a card, not a
+ * The sheet is the footnote's container and the word aid's own page. Its
+ * head is the footnote's head: the app's one sheet title at 20 SemiBold and
+ * the place at 13, both on the page's 28 dp edge. Under it the card is
+ * centered: one Arabic word and one short gloss are one entry, not a
  * paragraph. The word list's meanings are short (median nine characters, 99
  * percent under thirty), so the gloss is one line, and the rare longest is
- * two; the centered stack reads as one entry, and the reference above it is
- * the card's quiet label. Centering all three lines is the owner's own call,
- * and the card the app already draws for a share keeps the same center line
- * for its labels (owner decision, this session).
+ * two; the centered stack reads as one entry. The head takes the left edge
+ * because every sheet in the app names itself there (owner decision, this
+ * session).
  *
- * The word is the page's word: the reader's word-meaning size, the page ink,
- * and the tajweed colors when the reader has them on. The meaning is the
- * reader's language in the reading voice, and the place is the app's own meta
- * line under the sheet's title. The sheet is not a second reading of the
- * ayah; it holds the one word the reader asked for and the place it holds
- * (owner decision, this session).
+ * The word is the Quran's own word: the ayah's 26 sp on its 2.0 line, the
+ * page ink, and the tajweed colors when the reader has them on. The meaning
+ * is the reader's language in the translation's voice and size, 16 sp on the
+ * reading's own line. The place is the app's own meta line under the sheet's
+ * title. The sheet is not a second reading of the ayah; it holds the one word
+ * the reader asked for and the place it holds (owner decision, this
+ * session).
  *
  * The sheet names itself where every sheet does: [SheetTitle]'s 20 at
  * SemiBold, then the place in the same 13 meta line the footnote sheet
@@ -91,40 +91,36 @@ internal fun WordSheet(
                 .sheetVerticalScroll(rememberScrollState())
                 .padding(start = Space.Gutter, end = Space.Gutter, bottom = Space.SheetFoot)
                 .testTag("word-sheet"),
-            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             // The sheet names itself where every sheet does, then the place
-            // under it: the word is the subject, and a reader who opened the
-            // wrong word still knows the ayah before reading the meaning, the
-            // same duty the footnote's head does.
-            Box(
+            // under it, on the page's own left edge: the word is the subject,
+            // and a reader who opened the wrong word still knows the ayah
+            // before reading the meaning, the same head the footnote wears.
+            SheetTitle(
+                text = stringResource(R.string.reading_word_sheet_name),
                 modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center,
-            ) {
-                SheetTitle(text = stringResource(R.string.reading_word_sheet_name))
-            }
+            )
             SheetPlace(
                 text = stringResource(
                     R.string.reading_sheet_where,
                     surahName,
                     localizedDigits(word.reference),
                 ),
-                textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = Space.Tight),
             )
             // The word is the one subject on the sheet. It is drawn from the
             // page's palette so the reader meets the same word and the same
-            // rule colors they pressed and held, and it speaks the portable
-            // form rather than the print's encoding (owner decision, this
-            // session).
+            // rule colors they pressed and held, at the ayah's own size, and
+            // it speaks the portable form rather than the print's encoding
+            // (owner decision, this session).
             TajweedText(
                 text = AnnotatedString(word.word),
                 code = word.tajweed,
                 colors = palette.tajweed,
                 enabled = metrics.tajweed,
-                style = arabicStyle(hafs, metrics.wordsSp, metrics.wordsLineSp, palette.ink),
+                style = arabicStyle(hafs, metrics.arabicSp, metrics.arabicLineSp, palette.ink),
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 modifier = Modifier
@@ -137,8 +133,8 @@ internal fun WordSheet(
             Text(
                 text = word.meaning,
                 style = LocalReadingVoice.current.prose(
-                    metrics.wordsMeaningSp,
-                    metrics.wordsMeaningLineSp,
+                    metrics.translationSp,
+                    metrics.translationLineSp,
                 ),
                 color = palette.ink,
                 textAlign = TextAlign.Center,

@@ -201,17 +201,15 @@ class TypographyTest {
 
     @Test
     fun theQuranVoiceKeepsTheAgreedStaircase() {
-        // The Quran is the page's anchor at 26; the prose is 16; the aid's
-        // word is 22, four points under the verse; the inline Arabic and the
-        // medallion are 24, a step under the verse; and the gloss is 15, one
-        // point under the prose. The verse to prose ratio is 1.625 (owner
-        // decision, this session).
+        // The Quran is the page's anchor at 26; the prose is 16; the inline
+        // Arabic and the medallion are 24, a step under the verse. The verse
+        // to prose ratio is 1.625 (owner decision, this session). The word
+        // meaning sheet draws the Quran's word at 26 and its gloss at 16, so
+        // there is no separate aid size to pin.
         assertEquals(26f, TextSize.sp(TypeRole.Arabic, TextSize.DEFAULT), 0.001f)
         assertEquals(52f, TextSize.lineSp(TypeRole.Arabic, TextSize.DEFAULT), 0.001f)
-        assertEquals(22f, TextSize.wordSp(TextSize.DEFAULT), 0.001f)
         assertEquals(24f, TextSize.inlineArabic(TextSize.DEFAULT), 0.001f)
         assertEquals(24f, TextSize.medallionSp(TextSize.DEFAULT), 0.001f)
-        assertEquals(15f, TextSize.meaningSp(TextSize.DEFAULT), 0.001f)
         assertEquals(
             26f / 16f,
             TextSize.sp(TypeRole.Arabic, TextSize.DEFAULT) /
@@ -220,20 +218,12 @@ class TypographyTest {
         )
         for (step in TextSize.STEPS) {
             assertTrue(
-                "the aid's word must stay under the verse at $step",
-                TextSize.wordSp(step) < TextSize.sp(TypeRole.Arabic, step),
-            )
-            assertTrue(
                 "the inline Arabic must stay under the verse at $step",
                 TextSize.inlineArabic(step) < TextSize.sp(TypeRole.Arabic, step),
             )
             assertTrue(
                 "the medallion must stay under the verse at $step",
                 TextSize.medallionSp(step) < TextSize.sp(TypeRole.Arabic, step),
-            )
-            assertTrue(
-                "the gloss must stay under the translation at $step",
-                TextSize.meaningSp(step) < TextSize.sp(TypeRole.Translation, step),
             )
         }
     }

@@ -75,34 +75,32 @@ import java.util.Locale
  *    session).
  * 3. The automatic download says what it is fetching: the name and the size
  *    are on the pill even when no offer preceded it (owner decision).
- * 4. The playing pill is one row in every voice: the words block at the
- *    leading end and one answer at the trailing end, 64 dp tall. The offer is
- *    its own compact capsule, 76 dp tall, with one centered line over one
- *    centered pair; the transfer keeps the one-row shape. The three stand at
- *    one width. The place's line and the voice's line give way only at the
- *    extreme of the system scale; a voice that is not a recitation keeps one
- *    line and the voice list alone, because the pace and the end answer a
- *    recitation that is not there (owner decision, this version).
- * 5. The block's two lines are the place over the ayah's key, the reciter's
- *    name, and the pace when it is not 1x while playing, and the reciter's
- *    name over the state's sentence when there is no recitation (owner
- *    decision, this version). Nothing in the pill touches a neighbour or the
- *    capsule: the block keeps the app's air above and below, the answer keeps
- *    it at its end, and the words' own end keeps the shoulder's air, where an
- *    8 dp pad read as a name touching the border (owner decision, this
- *    session).
- * 6. The reciter is chosen on the playing pill and in the settings, and the
- *    chooser carries every voice with what it would still cost for the surah
- *    at hand, so the choice is made with the number in view (owner report).
- *    The offer does not carry a chooser: its one line names the chosen voice
- *    and its height belongs to the two answers (owner decision, this session).
- * 7. The pill says where the reader is: the surah's name over the ayah's
- *    key, the voice, and the pace when it is not 1x. The key and the pace
- *    never give way; the voice does, because the key says which ayah and the
- *    pace says how fast (owner decision, this session). The pace is read back
- *    from the listening panel, where it is set. It does not say what happens
- *    at the end of the audio: the switch that carries the answer says its own
- *    state where the reader turned it (owner report).
+ * 4. The playing pill is two rows, and the offer is its sibling (owner
+ *    decision, this session): one 48 dp line of words over one 48 dp
+ *    transport row, 96 dp tall, in the playing voice. The offer is the same
+ *    96 dp skeleton: a 48 dp line that is the door to the voice list over the
+ *    48 dp pair. The voices that are not a recitation keep one row, 64 dp
+ *    tall, or 74 with a download's line under it. The three stand at one
+ *    width.
+ * 5. The playing line is one block and one door: the voice and its pace, then
+ *    the place and its key, with the chevron at the end. The one-row voices
+ *    lead with the reciter's name beside the state's sentence. Nothing in the
+ *    pill touches a neighbour or the capsule: the playing line keeps the
+ *    shoulder's air at each end, the one-row voices keep it at their words'
+ *    end, and the transport's targets stand edge to edge with their circles
+ *    an [Space.Line] apart.
+ * 6. The reciter is chosen on the playing pill, in the settings, and on the
+ *    offer's own line, each with what every voice would still cost for the
+ *    surah at hand, so the choice is made with the number in view (owner
+ *    report). The offer's list is read for the offer's surah, not the playing
+ *    pill's (owner decision, this session).
+ * 7. The pill says who is reading, where, and how fast: the voice and the pace
+ *    when it is not 1x, then the place and its key. The place, the key, and
+ *    the pace never give way; the voice does, at the largest place with a
+ *    non-1x pace (owner decision, this session). The pace is read back from
+ *    the listening panel, where it is set. It does not say what happens at the
+ *    end of the audio: the switch that carries the answer says its own state
+ *    where the reader turned it (owner report).
  * 8. The popup stands on the capsule's own centre, on the phone and on the
  *    wide glass alike. A menu is placed from the box it hangs on, and an
  *    anchor on the word the reader touched put the reciter chooser at one
@@ -120,10 +118,10 @@ import java.util.Locale
  *     places, the page's own 328 at the longest, about 230 for an offer, and
  *     about 210 for a transfer that widened again as its percent did. The
  *     playing capsule, the offer, and the transfer now stand at 328 dp on a
- *     360 dp glass. The playing and transfer rows keep the words and the
- *     answer at the ends; the offer centers its one line and its pair. The
- *     place's line is whole at the app's text sizes, and the ayah's key is
- *     whole at every one.
+ *     360 dp glass. The playing line and the transport are centered; the
+ *     offer centers its door line and its pair; the transfer keeps the words
+ *     and the X at its ends. The place's line is whole at the app's text
+ *     sizes, and the ayah's key is whole at every one.
  * 11. The offer prints the surah's own name whole in the line it shares with
  *     the reciter and the size, in either language: the size may give way at
  *     the end of the line, the name never does (owner decision, this
@@ -142,12 +140,11 @@ import java.util.Locale
  *     edge while the circles keep the app's air, and gives the place 20 dp
  *     more of the capsule than a circle the size of its target allowed (owner
  *     decision, this session).
- * 16. The offer is a compact centered capsule: one line names the request,
- *     and Not now and Download stand as one centered pair under it. The
- *     capsule is 76 dp tall, the least that still gives both buttons their
- *     48 dp targets. The line is not a door: a 20 dp line cannot also be a
- *     48 dp target, so the reciter is changed in Settings or on the playing
- *     pill (owner decision, this session).
+ * 16. The offer is a two-row capsule, 96 dp tall: a 48 dp line that is the
+ *     door to the voice list, then Not now and Download as one centered pair.
+ *     The line's crown is 14 dp and the answers' foot 7. An offer with no
+ *     voice to offer keeps the line as a notice and draws no chevron (owner
+ *     decision, this session).
  */
 @RunWith(AndroidJUnit4::class)
 class PlaybackPillTest {
@@ -487,78 +484,95 @@ class PlaybackPillTest {
     }
 
     /**
-     * The playing pill is one row (owner decision, this session): the words
-     * block at the leading end and the transport at the trailing end, on one
-     * line, in the capsule's playing shape. It used to take two rows on a
-     * phone, with the words on a line of their own above the transport.
+     * The playing pill is two rows (owner decision, this session): one 48 dp
+     * line of words over one 48 dp transport row, and the capsule is 96 dp.
+     * The words and the transport are centered on the capsule's axis; the
+     * one-row voices keep their own shape.
      */
     @Test
-    fun thePlayingPillIsOneRow() {
+    fun thePlayingPillStacksTheTransportBelowTheWords() {
         showPill()
         val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
         val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
         val play = compose.onNodeWithContentDescription("Play or pause").getUnclippedBoundsInRoot()
-        assertTrue(
-            "the transport must stand beside the words: play $play, words $words",
-            play.left.value > words.right.value,
-        )
-        assertTrue(
-            "the transport must share the words' row: play $play, words $words",
-            play.top.value < words.bottom.value && play.bottom.value > words.top.value,
-        )
         assertEquals(
-            "the phone's row stands 64 dp tall",
-            64f,
+            "the playing capsule stands 96 dp tall",
+            96f,
             (bar.bottom - bar.top).value,
             1f,
+        )
+        assertEquals(
+            "the words' line is the capsule's 48 dp crown",
+            48f,
+            (words.bottom - words.top).value,
+            1f,
+        )
+        assertEquals(
+            "the words stand at the capsule's top",
+            bar.top.value,
+            words.top.value,
+            1f,
+        )
+        assertEquals(
+            "the transport's target is the capsule's 48 dp foot",
+            bar.bottom.value,
+            play.bottom.value,
+            1f,
+        )
+        assertEquals(
+            "the words' row and the transport's row meet",
+            0f,
+            (play.top - words.bottom).value,
+            1f,
+        )
+        assertEquals(
+            "the words stand on the capsule's middle",
+            (bar.left + bar.right).value / 2f,
+            (words.left + words.right).value / 2f,
+            1.5f,
+        )
+        assertEquals(
+            "the transport stands on the capsule's middle",
+            (bar.left + bar.right).value / 2f,
+            (play.left + play.right).value / 2f,
+            1.5f,
         )
     }
 
     /**
-     * The block's two lines: the place over the ayah's key and the reciter's
-     * name, both inside one door, and the block's own shape keeps the capsule's
-     * air above and below it, and the words' own air at its end.
+     * The playing line, in the offer's own order (owner decision, this
+     * session): the voice and its pace, then the place and its key, all on
+     * one 48 dp door. The voice leads, the place follows, and the key closes
+     * the place.
      */
     @Test
-    fun thePlayingPillLeadsWithThePlace() {
-        showPill()
-        val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
-        val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
-        val place = compose.onNodeWithText("Al-Baqarah", useUnmergedTree = true)
+    fun thePlayingPillLeadsWithTheVoiceThenThePlace() {
+        showPill(speed = 0.75f)
+        val voice = compose.onNodeWithText("Husary", useUnmergedTree = true)
             .getUnclippedBoundsInRoot()
-        val name = compose.onNodeWithText("Husary", useUnmergedTree = true)
+        val pace = compose.onNodeWithText("0.75x", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
+        val place = compose.onNodeWithText("Al-Baqarah", useUnmergedTree = true)
             .getUnclippedBoundsInRoot()
         val key = compose.onNodeWithText("2:255", useUnmergedTree = true)
             .getUnclippedBoundsInRoot()
         assertTrue(
-            "the place must stand above the voice: $place and $name",
-            place.bottom.value <= name.top.value + 0.5f,
+            "the voice must lead the pace: $voice and $pace",
+            voice.right.value <= pace.left.value + 0.5f,
         )
         assertTrue(
-            "the voice and the key share one line: $name and $key",
-            name.top.value < key.bottom.value && name.bottom.value > key.top.value,
+            "the pace must lead the place: $pace and $place",
+            pace.right.value <= place.left.value + 0.5f,
         )
         assertTrue(
-            "the key leads the voice: $key and $name",
-            key.right.value <= name.left.value + 0.5f,
+            "the place must lead its key: $place and $key",
+            place.right.value <= key.left.value + 0.5f,
         )
-        assertEquals(
-            "the block keeps the app's air above it",
-            Space.Line.value,
-            (words.top - bar.top).value,
-            1f,
-        )
-        assertEquals(
-            "the block keeps the app's air under it",
-            Space.Line.value,
-            (bar.bottom - words.bottom).value,
-            1f,
-        )
-        assertEquals(
-            "the block's end keeps the shoulder's air",
-            Space.Block.value + Space.Tight.value,
-            (words.left - bar.left).value,
-            1f,
+        assertTrue(
+            "the voice, the pace, the place, and the key share one line: " +
+                "$voice, $pace, $place, $key",
+            maxOf(voice.top.value, pace.top.value, place.top.value, key.top.value) <
+                minOf(voice.bottom.value, pace.bottom.value, place.bottom.value, key.bottom.value),
         )
     }
 
@@ -600,7 +614,9 @@ class PlaybackPillTest {
      * of that while an offer or a transfer stood: one download was two widths,
      * and the transfer's edge moved as its percent did. Now the playing
      * capsule, the offer, and the transfer stand at the page's own 328 on a
-     * 360 dp glass, and the words and the answer keep its two ends.
+     * 360 dp glass. The playing line and the transport are centered; the
+     * offer centers its door and its pair; the transfer keeps its words and
+     * its X at the two ends.
      */
     @Test
     fun theCapsuleIsOneMeasure() {
@@ -608,7 +624,7 @@ class PlaybackPillTest {
         val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
         val root = compose.onRoot().getUnclippedBoundsInRoot()
         val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
-        val next = compose.onNodeWithContentDescription("Next ayah").getUnclippedBoundsInRoot()
+        val play = compose.onNodeWithContentDescription("Play or pause").getUnclippedBoundsInRoot()
         assertEquals(
             "the capsule stands at the page's own 328",
             328f,
@@ -622,16 +638,22 @@ class PlaybackPillTest {
             1f,
         )
         assertEquals(
-            "the words' end keeps the shoulder's air from the capsule",
-            Space.Block.value + Space.Tight.value,
-            (words.left - bar.left).value,
-            1f,
+            "the words stand on the capsule's own middle",
+            (bar.left + bar.right).value / 2f,
+            (words.left + words.right).value / 2f,
+            1.5f,
         )
         assertEquals(
-            "the transport keeps the app's air at its end",
-            Space.Line.value,
-            (bar.right - next.right).value,
-            1f,
+            "the transport stands on the capsule's own middle",
+            (bar.left + bar.right).value / 2f,
+            (play.left + play.right).value / 2f,
+            1.5f,
+        )
+        assertTrue(
+            "the words keep the shoulder at each end of the capsule: " +
+                "words $words, bar $bar",
+            words.left.value - bar.left.value >= Space.Block.value + Space.Tight.value - 0.5f &&
+                bar.right.value - words.right.value >= Space.Block.value + Space.Tight.value - 0.5f,
         )
     }
 
@@ -720,12 +742,11 @@ class PlaybackPillTest {
 
     /**
      * The place and the key are whole at the pill's capped type (owner
-     * decision, this version). The pill's type follows the system scale only
-     * up to the app's largest step, 1.2: past it the longest surah name would
-     * take 139.7 dp of the line's 140 at 1.3 and the meta line 146, so the
-     * type stops at 1.2, where the place is 128.9 and the key line 136.9. The
-     * block keeps the cap, so the place is whole at every system scale and
-     * the key is never the thing an ellipsis takes.
+     * decision, this session). The pill's type follows the system scale only
+     * up to the app's largest step, 1.2, and stops there. The line is the
+     * capsule's width less the shoulder at each end, 288 dp; the place and
+     * the key never give way, so they are whole at every system scale and the
+     * voice is the part an ellipsis would take.
      */
     @Test
     fun thePlaceAndTheKeyStayWholeAtTheLargestStep() {
@@ -754,11 +775,10 @@ class PlaybackPillTest {
     }
 
     /**
-     * The playing pill wears its own one-row shape (owner decision): one 64 dp
-     * capsule whose words block is 48 dp tall, whose transport circles stand
-     * inside their own 48 dp targets, and whose airs are the app's own above,
-     * below, between, and at the end. Nothing in it touches a neighbour or the
-     * capsule's edge.
+     * The playing pill wears its own two-row shape (owner decision, this
+     * session): one 96 dp capsule whose words row is 48 dp, whose transport
+     * row is 48 dp, and whose visible air is the type's own inset and the
+     * circles' inset. Nothing in it touches a neighbour or the capsule's edge.
      */
     @Test
     fun thePlayingPillWearsItsOwnShape() {
@@ -766,10 +786,13 @@ class PlaybackPillTest {
         val bar = compose.onNodeWithTag("playback-bar").getUnclippedBoundsInRoot()
         val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
         val circles = compose.onAllNodesWithTag("glyph-press", useUnmergedTree = true)
-        val next = compose.onNodeWithContentDescription("Next ayah").getUnclippedBoundsInRoot()
+        val first = circles.onFirst().getUnclippedBoundsInRoot()
+        val play = compose.onNodeWithContentDescription("Play or pause").getUnclippedBoundsInRoot()
+        val place = compose.onNodeWithText("Al-Baqarah", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
         assertEquals(
-            "the playing capsule stands 64 dp tall",
-            64f,
+            "the playing capsule stands 96 dp tall",
+            96f,
             (bar.bottom - bar.top).value,
             1f,
         )
@@ -780,53 +803,61 @@ class PlaybackPillTest {
             1f,
         )
         assertEquals(
-            "the block keeps the app's air above it",
-            Space.Line.value,
-            (words.top - bar.top).value,
+            "the words stand at the capsule's top",
+            bar.top.value,
+            words.top.value,
             1f,
         )
         assertEquals(
-            "the block keeps the app's air under it",
-            Space.Line.value,
-            (bar.bottom - words.bottom).value,
+            "the transport's target is the capsule's foot",
+            bar.bottom.value,
+            play.bottom.value,
+            1f,
+        )
+        assertTrue(
+            "the words keep the shoulder at each end: words $words, bar $bar",
+            words.left.value - bar.left.value >= Space.Block.value + Space.Tight.value - 0.5f &&
+                bar.right.value - words.right.value >=
+                Space.Block.value + Space.Tight.value - 0.5f,
+        )
+        assertTrue(
+            "the type and the first circle keep the app's row air: " +
+                "place $place, circle $first",
+            first.top.value - place.bottom.value >= Space.Row.value - 0.5f,
+        )
+        assertEquals(
+            "the circle keeps its inset at the capsule's foot",
+            (GlyphTarget.value - GlyphPress.value) / 2f,
+            (bar.bottom - first.bottom).value,
             1f,
         )
         assertEquals(
-            "the block's end keeps the shoulder's air",
-            Space.Block.value + Space.Tight.value,
-            (words.left - bar.left).value,
-            1f,
-        )
-        assertEquals(
-            "the block and the transport stand the app's row air apart, between the shapes",
-            Space.Row.value,
-            (circles.onFirst().getUnclippedBoundsInRoot().left - words.right).value,
-            1f,
-        )
-        assertEquals(
-            "the transport keeps the app's air at its end",
-            Space.Line.value,
-            (bar.right - next.right).value,
-            1f,
+            "the transport stands on the capsule's middle",
+            (bar.left + bar.right).value / 2f,
+            (play.left + play.right).value / 2f,
+            1.5f,
         )
     }
 
     /**
      * Nothing in the pill touches, and nothing sits on a dead pixel either
-     * (owner decision, this session): the block and the first circle stand the
-     * app's row air apart, the three circles stand the app's line air apart,
-     * and the targets under them stand edge to edge, so a finger that slides
-     * from one control to the next never falls between them.
+     * (owner decision, this session): the words' row and the transport's row
+     * meet at one edge, the three circles stand the app's line air apart, and
+     * the targets under them stand edge to edge, so a finger that slides from
+     * one control to the next never falls between them.
      *
      * The air is measured between the shapes the reader sees, never between
      * the invisible targets: each circle is 4 dp inside its own target, and
      * that inset is the whole of what lets three of them stand edge to edge
-     * with their circles apart.
+     * with their circles apart. The type and the first circle keep the app's
+     * row air between the rows.
      */
     @Test
     fun theTouchedShapesKeepTheCapsulesAir() {
         showPill()
         val words = compose.onNodeWithTag("playback-words").getUnclippedBoundsInRoot()
+        val place = compose.onNodeWithText("Al-Baqarah", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
         val circles = compose.onAllNodesWithTag("glyph-press", useUnmergedTree = true)
         circles.assertCountEquals(3)
         val first = circles[0].getUnclippedBoundsInRoot()
@@ -838,10 +869,15 @@ class PlaybackPillTest {
             .getUnclippedBoundsInRoot()
         val nextTarget = compose.onNodeWithContentDescription("Next ayah")
             .getUnclippedBoundsInRoot()
+        assertTrue(
+            "the type and the first circle keep the app's row air: " +
+                "place $place, circle $first",
+            first.top.value - place.bottom.value >= Space.Row.value - 0.5f,
+        )
         assertEquals(
-            "the block and the transport stand the app's row air apart, between the shapes",
-            Space.Row.value,
-            (first.left - words.right).value,
+            "the words' row and the first target meet at one edge",
+            0f,
+            (previousTarget.top - words.bottom).value,
             1f,
         )
         assertEquals(
@@ -926,13 +962,13 @@ class PlaybackPillTest {
     }
 
     /**
-     * The offer is a compact centered capsule: one line names the request, and
-     * the two answers stand as one centered pair under it. The capsule is 76
-     * dp tall, the least that still gives both buttons their 48 dp targets
-     * (owner decision, this session).
+     * The offer is a two-row capsule (owner decision, this session): one 48 dp
+     * line that is the door to the voice list, then the two answers as one
+     * centered pair. The capsule is 96 dp tall, the least that gives the door
+     * its 48 dp target and the buttons theirs.
      */
     @Test
-    fun theOfferIsCompactAndCentered() {
+    fun theOfferIsTwoRowsAndCentered() {
         showPill(
             offer = ListenOffer(
                 reciter = "husary",
@@ -941,6 +977,7 @@ class PlaybackPillTest {
                 surahName = "Maryam",
                 ayah = 1,
                 bytes = 22L * 1024 * 1024,
+                options = offerOptions(),
             ),
         )
         val bar = compose.onNodeWithTag("listen-offer-bar").getUnclippedBoundsInRoot()
@@ -949,8 +986,8 @@ class PlaybackPillTest {
         val answer = compose.onNodeWithTag("offer-answer", useUnmergedTree = true).getUnclippedBoundsInRoot()
         val center = (bar.left + bar.right) / 2
         assertEquals(
-            "the ask is the compact 76 dp capsule",
-            76f,
+            "the ask is the 96 dp capsule",
+            96f,
             (bar.bottom - bar.top).value,
             1f,
         )
@@ -961,9 +998,15 @@ class PlaybackPillTest {
             1f,
         )
         assertEquals(
-            "the words keep the capsule's top air",
-            Space.Line.value,
-            (words.top - bar.top).value,
+            "the door stands at the capsule's top",
+            bar.top.value,
+            words.top.value,
+            1f,
+        )
+        assertEquals(
+            "the door is a 48 dp target",
+            48f,
+            (words.bottom - words.top).value,
             1f,
         )
         assertEquals(
@@ -1007,6 +1050,44 @@ class PlaybackPillTest {
     }
 
     /**
+     * The offer's line is the door to its own voice list (owner decision, this
+     * session): the same reciter rows the playing pill carries, with what each
+     * voice would still need for the offer's surah. A chosen voice reaches the
+     * pill's one setter, which re-asks the offer with its name and size.
+     */
+    @Test
+    fun theOfferLineOpensTheVoiceListForItsOwnSurah() {
+        var chosen: String? = null
+        showPill(
+            offer = ListenOffer(
+                reciter = "husary",
+                reciterName = "Husary",
+                surah = 19,
+                surahName = "Maryam",
+                ayah = 1,
+                bytes = 22L * 1024 * 1024,
+                options = offerOptions(),
+            ),
+            onReciter = { chosen = it },
+        )
+        compose.onNodeWithTag("offer-words").performClick()
+        compose.onNodeWithTag("app-popup").assertExists()
+        compose.onNodeWithText("Minshawi").assertIsDisplayed()
+        compose.onNodeWithText(
+            formatBytes(177_000_000L, Locale.US, "KB", "MB"),
+        ).assertIsDisplayed()
+        compose.onNodeWithText("Minshawi").performClick()
+        assertEquals("the offer's own list must reach the pill's setter", "minshawi", chosen)
+        compose.onNodeWithTag("app-popup").assertDoesNotExist()
+    }
+
+    /** The two voices the offer's own chooser lists in these legs. */
+    private fun offerOptions(): List<ListenOption> = listOf(
+        ListenOption("husary", "Husary", 22L * 1024 * 1024),
+        ListenOption("minshawi", "Minshawi", 177_000_000L),
+    )
+
+    /**
      * The offer prints the surah's own name whole in the line it shares with
      * the reciter and the size, in the reader's own language: the name is what
      * the reader reads, so it is the promise, and the size is what gives way
@@ -1028,6 +1109,7 @@ class PlaybackPillTest {
                 surahName = "Al-Mumtahanah",
                 ayah = 1,
                 bytes = 9_395_684L,
+                options = offerOptions(),
             ),
             offerTitle = "Al-Mumtahanah \u00b7 9.0 MB",
         )
@@ -1049,6 +1131,7 @@ class PlaybackPillTest {
                 surahName = "আল-মুতাফফিফীন",
                 ayah = 1,
                 bytes = 6_077_998L,
+                options = offerOptions(),
             ),
             offerTitle = "আল-মুতাফফিফীন \u00b7 ৫.৮ এমবি",
         )
@@ -1240,25 +1323,12 @@ class PlaybackPillTest {
     @Test
     fun thePillReadsBackAPaceThatIsNotTheDefault() {
         // The panel is where the pace is set; the pill is where it is read
-        // back after the panel closes. The line leads with the reference,
-        // then the voice, then the pace, so the immutable place comes before
-        // the chosen voice (owner decision, this session).
+        // back after the panel closes. The line leads with the voice, then
+        // the pace, then the place and its key (owner decision, this
+        // session).
         showPill(speed = 0.75f)
         compose.onNodeWithText("Al-Baqarah").assertIsDisplayed()
-        val reference = compose.onNodeWithText("2:255", useUnmergedTree = true)
-            .getUnclippedBoundsInRoot()
-        val voice = compose.onNodeWithText("Husary", useUnmergedTree = true)
-            .getUnclippedBoundsInRoot()
-        val pace = compose.onNodeWithText("0.75x", useUnmergedTree = true)
-            .getUnclippedBoundsInRoot()
-        assertTrue(
-            "the ayah key must lead the voice: $reference, $voice",
-            reference.right.value <= voice.left.value + 0.5f,
-        )
-        assertTrue(
-            "the pace must trail the voice: $voice, $pace",
-            voice.right.value <= pace.left.value + 0.5f,
-        )
+        compose.onNodeWithText("0.75x", useUnmergedTree = true).assertExists()
     }
 
     @Test

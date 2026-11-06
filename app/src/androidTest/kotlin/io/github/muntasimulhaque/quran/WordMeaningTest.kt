@@ -36,9 +36,11 @@ import java.io.File
  * opens its meaning on the word's own sheet.
  *
  * The sheet is the footnote's container and the word aid's own page: the
- * word, its meaning under it, and the ayah named above, all on one center
- * line. The frame this test keeps is the evidence the centered card is read
- * from, not only the semantics tree.
+ * head (the sheet's name and the ayah's place) on the page's left edge, then
+ * the word and its meaning centered as the card they are. The word is the
+ * Quran's own size and the gloss the translation's. The frame this test
+ * keeps is the evidence the head and the card are read from, not only the
+ * semantics tree.
  *
  * The library is assembled before the activity starts, so no network is
  * involved; development builds carry every pack. The test hands the app back
@@ -116,8 +118,8 @@ class WordMeaningTest {
                 .fetchSemanticsNodes().isNotEmpty()
         }
 
-        // The frame the centered card is reviewed from. The sheet is its own
-        // window, so the root at this moment is the sheet the reader sees.
+        // The frame the head and the card are reviewed from. The sheet is its
+        // own window, so the root at this moment is the sheet the reader sees.
         compose.waitForIdle()
         val frame = compose.onRoot().captureToImage().asAndroidBitmap()
         File(screenshotOutputDirectory(), "word-meaning.png").outputStream().use { output ->

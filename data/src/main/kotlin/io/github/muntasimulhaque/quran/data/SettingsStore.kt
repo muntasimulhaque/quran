@@ -106,7 +106,6 @@ data class AppSettings(
     val arabicSize: Float = TextSize.DEFAULT,
     val translationSize: Float = TextSize.DEFAULT,
     val tafsirSize: Float = TextSize.DEFAULT,
-    val wordsSize: Float = TextSize.DEFAULT,
     /**
      * The reader's reciter. Husary is the default for a new install (owner
      * decision, 4.5): the murattal voice most readers know, with the quiet
@@ -209,21 +208,11 @@ data class AppSettings(
     val translationLineSp: Float get() = translationSp * proseLine
     val tafsirSp: Float get() = TextSize.sp(TypeRole.Tafsir, tafsirSize)
     val tafsirLineSp: Float get() = tafsirSp * proseLine
-    /**
-     * The aid's Arabic word stays where the verse is, four points under it: it
-     * is the Quran's own word, not a line of prose, so the script's prose step
-     * does not reach it (owner decision, this session).
-     */
-    val wordsSp: Float get() = TextSize.wordSp(wordsSize)
-    val wordsLineSp: Float get() = TextSize.lineSp(TypeRole.Words, wordsSize)
-    val wordsMeaningSp: Float get() = TextSize.meaningSp(wordsSize)
-    val wordsMeaningLineSp: Float get() = wordsMeaningSp * proseLine
 
     fun sizeOf(role: TypeRole): Float = when (role) {
         TypeRole.Arabic -> arabicSize
         TypeRole.Translation -> translationSize
         TypeRole.Tafsir -> tafsirSize
-        TypeRole.Words -> wordsSize
     }
 }
 
@@ -257,10 +246,6 @@ data class ReadingMetrics(
     val arabicInlineSp: Float,
     val translationSp: Float,
     val translationLineSp: Float,
-    val wordsSp: Float,
-    val wordsLineSp: Float,
-    val wordsMeaningSp: Float,
-    val wordsMeaningLineSp: Float,
 )
 
 /**
@@ -268,12 +253,11 @@ data class ReadingMetrics(
  * drawn in.
  *
  * The sizes are the getters above, which carry the reader's script's line:
- * a Bangla reading takes the translation, the tafsir, and the meaning at the
- * same sizes as English but at its 1.722 line, while the Arabic does not move,
- * because the Quran's text is data and not a locale. The aid's Arabic word
- * does not move either: it is a copy of the verse's word, four points under
- * it, so a larger gloss can never push it past the verse (owner decision,
- * this session).
+ * a Bangla reading takes the translation and the tafsir at the same sizes as
+ * English but at its 1.722 line, while the Arabic does not move, because the
+ * Quran's text is data and not a locale. The word meaning sheet draws its
+ * word at the Arabic size and its gloss at the translation size, so a second
+ * size role for the aid is not carried (owner decision, this session).
  */
 fun AppSettings.readingMetrics(): ReadingMetrics = ReadingMetrics(
     showTranslation = showTranslation,
@@ -287,10 +271,6 @@ fun AppSettings.readingMetrics(): ReadingMetrics = ReadingMetrics(
     arabicInlineSp = arabicInlineSp,
     translationSp = translationSp,
     translationLineSp = translationLineSp,
-    wordsSp = wordsSp,
-    wordsLineSp = wordsLineSp,
-    wordsMeaningSp = wordsMeaningSp,
-    wordsMeaningLineSp = wordsMeaningLineSp,
 )
 
 /**
@@ -320,11 +300,14 @@ class SettingsStore(private val context: Context) {
      * left behind (owner decision, this session).
      */
     val settings: Flow<AppSettings> = context.settingsStore.data
-        .onStart { carryRetiredTafsirSwitch() }
+        .onStart {
+            carryRetiredTafsirSwitch()
+            carryRetiredWordSize()
+        }
         .map { preferences ->
         val choices = preferences.asMap()
         val ayah = preferences[AYAH] ?: 1
-        // The four sizes arrived after the one size did, so a reader who had
+        // The sizes arrived after the one size did, so a reader who had
         // chosen one keeps that choice for every kind of text, and a step
         // stored as an index by the build that shipped it keeps its scale.
         val legacy = sizeOf(choices, TEXT_SIZE)
@@ -335,7 +318,6 @@ class SettingsStore(private val context: Context) {
             arabicSize = sizeOf(choices, ARABIC_SIZE, legacy),
             translationSize = sizeOf(choices, TRANSLATION_SIZE, legacy),
             tafsirSize = sizeOf(choices, TAFSIR_SIZE, legacy),
-            wordsSize = sizeOf(choices, WORDS_SIZE, legacy),
             recitation = preferences[RECITATION] ?: "husary",
             followReciter = preferences[FOLLOW_RECITER] ?: true,
             playbackSpeed = (preferences[PLAYBACK_SPEED] ?: 1f).coerceIn(MIN_SPEED, MAX_SPEED),
@@ -514,6 +496,19 @@ class SettingsStore(private val context: Context) {
     }
 
     /**
+     * The word aid's own size is gone with its role (owner decision, this
+     * session): the word meaning sheet draws the Quran's word at the Arabic
+     * size and its gloss at the translation size. The stored key is removed
+     * once rather than left in the reader's file forever, the same way the
+     * tafsir switch above is carried and closed.
+     */
+    private suspend fun carryRetiredWordSize() {
+        context.settingsStore.edit { preferences ->
+            preferences.remove(LEGACY_WORDS_SIZE)
+        }
+    }
+
+    /**
      * The packs a language choice asked for, kept across a launch: the reader
      * chose a language, so its reading arrives without another question, and a
      * download interrupted by the process or the connection continues on the
@@ -650,7 +645,6 @@ class SettingsStore(private val context: Context) {
         TypeRole.Arabic -> ARABIC_SIZE
         TypeRole.Translation -> TRANSLATION_SIZE
         TypeRole.Tafsir -> TAFSIR_SIZE
-        TypeRole.Words -> WORDS_SIZE
     }
 
     private companion object {
@@ -671,7 +665,12 @@ class SettingsStore(private val context: Context) {
         val ARABIC_SIZE = floatPreferencesKey("arabic_size")
         val TRANSLATION_SIZE = floatPreferencesKey("translation_size")
         val TAFSIR_SIZE = floatPreferencesKey("tafsir_size")
-        val WORDS_SIZE = floatPreferencesKey("words_size")
+        /**
+         * The word aid's own size, removed with its role (owner decision, this
+         * session). Written by no build since the sheet took the Arabic and
+         * translation sizes; read only to be removed at that one migration.
+         */
+        val LEGACY_WORDS_SIZE = floatPreferencesKey("words_size")
         val RECITATION = stringPreferencesKey("recitation")
         val FOLLOW_RECITER = booleanPreferencesKey("follow_reciter")
         val PLAYBACK_SPEED = floatPreferencesKey("playback_speed")

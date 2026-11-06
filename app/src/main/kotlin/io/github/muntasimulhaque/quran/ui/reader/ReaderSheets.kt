@@ -167,13 +167,13 @@ internal fun ReaderSheets(
                 onTheme = { viewModel.setTheme(it) },
                 onTypeSize = { role, step ->
                     viewModel.setTypeSize(role, step)
-                    // The translation's step is the meaning's step: the
-                    // tafsir and the word glosses follow it, so two controls
-                    // govern three kinds of prose (owner decision, this
-                    // session).
+                    // The translation's step is the tafsir's step: two
+                    // controls govern the prose the reading draws (owner
+                    // decision, this session). The word meaning sheet reads
+                    // the Quran's word at the Arabic size and its gloss at
+                    // the translation size, so there is no aid size to set.
                     if (role == io.github.muntasimulhaque.quran.data.TypeRole.Translation) {
                         viewModel.setTypeSize(io.github.muntasimulhaque.quran.data.TypeRole.Tafsir, step)
-                        viewModel.setTypeSize(io.github.muntasimulhaque.quran.data.TypeRole.Words, step)
                     }
                 },
                 onFollowReciter = { viewModel.setFollowReciter(it) },

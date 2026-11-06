@@ -1,7 +1,6 @@
 package io.github.muntasimulhaque.quran.data
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -100,37 +99,19 @@ class TextSizeTest {
     }
 
     @Test
-    fun theWordMeaningSitsAStepUnderTheTranslation() {
-        // 15 sp against the translation's 16: one point under, the smallest
-        // step of the platform's 12 sp body floor, and the word grid does the
-        // rest of the separating (owner decision, this session).
-        assertEquals(15f, TextSize.meaningSp(1f), 0.001f)
-        assertEquals(12f, TextSize.meaningSp(0.8f), 0.001f)
-        // The aid's Arabic word follows the verse and never the gloss, so a
-        // bigger gloss cannot carry it past the Quran's own size.
-        for (step in TextSize.STEPS) {
-            assertTrue(
-                "the aid's word must stay under the verse at $step",
-                TextSize.wordSp(step) < TextSize.sp(TypeRole.Arabic, step),
-            )
-        }
-    }
-
-    @Test
     fun theLadderIsPinned() {
         // The session's ladder, one line per relationship the reader was
-        // promised: the Quran is the anchor at 1.733 times the prose, the word
-        // list reads four points under it, Arabic beside prose is one rule at
-        // 0.9 from the Quran in both the translation and the tafsir, the
-        // prose stands at the reading voice's own size, and the meaning sits
-        // under the word it glosses (owner decision, this session).
+        // promised: the Quran is the anchor at 1.625 times the prose, Arabic
+        // beside prose is one rule at 0.9 from the Quran in both the
+        // translation and the tafsir, and the prose stands at the reading
+        // voice's own size. The word meaning sheet reads the Quran's word at
+        // 26 and its gloss at the translation's 16, so no separate size for
+        // the aid is carried (owner decision, this session).
         assertEquals(26f, TextSize.sp(TypeRole.Arabic, 1f))
-        assertEquals(22f, TextSize.wordSp(1f), 0.001f)
         assertEquals(24f, TextSize.inlineArabic(1f), 0.001f)
         assertEquals(24f, TextSize.medallionSp(1f), 0.001f)
         assertEquals(24f, TextSize.medallionAt(26f), 0.001f)
         assertEquals(16f, TextSize.sp(TypeRole.Translation, 1f))
         assertEquals(16f, TextSize.sp(TypeRole.Tafsir, 1f))
-        assertEquals(15f, TextSize.meaningSp(1f), 0.001f)
     }
 }

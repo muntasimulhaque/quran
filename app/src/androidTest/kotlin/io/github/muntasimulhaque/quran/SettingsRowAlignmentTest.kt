@@ -125,7 +125,7 @@ class SettingsRowAlignmentTest {
     }
 
     @Test
-    fun theFourSizeRailsAreOneLength() {
+    fun theSizeRailsAreOneLength() {
         compose.setContent {
             QuranTheme(theme = AppTheme.Light) {
                 Column {
@@ -138,7 +138,7 @@ class SettingsRowAlignmentTest {
 
         val rails = compose.onAllNodesWithTag("scale-rail", useUnmergedTree = true)
             .fetchSemanticsNodes()
-        assertEquals("one rail for each kind of text", 4, rails.size)
+        assertEquals("one rail for each kind of text", 3, rails.size)
         val first = rails.first().boundsInRoot
         rails.forEach { node ->
             val rail = node.boundsInRoot

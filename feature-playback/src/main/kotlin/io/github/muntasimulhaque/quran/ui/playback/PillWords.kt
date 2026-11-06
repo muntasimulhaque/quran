@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -29,6 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.TextSize
+import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.ui.kit.focusRing
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.speedText
@@ -82,25 +84,55 @@ internal fun TransferWordsBlock(
 }
 
 /**
- * The offer's one line: the reciter's name, then the surah and its size, in
- * one centered line.
+ * The offer's one line: the reciter's name, the chevron that says the line
+ * opens, then the surah and its size.
  *
- * The line is a name and a fact, not a door. A 20 dp line cannot also be the
- * 48 dp target a finger needs, and a target that reached into the buttons'
- * row would steal the air above them; the compact offer spends its height on
- * the two answers instead. The reciter is changed in Settings or on the
- * playing pill (owner decision, this session).
+ * **The line is a door** (owner decision, this session). Its row carries the
+ * app's 48 dp target around a 35 dp flash, so the name can open the voice
+ * list without reaching into the answers' row. The chevron stands 4 dp after
+ * the name, the same door mark the playing pill wears, and the surah follows
+ * 8 dp after it. The name is the accent's 13, the surah and its size the
+ * compact 14; when the line is long the size is what gives way, because the
+ * surah's name is the fact the reader is judging.
  */
 @Composable
 internal fun OfferLine(
     name: String,
     title: String,
+    /** The door the line is, or null where the voice cannot be chosen now. */
+    onOpen: (() -> Unit)?,
     modifier: Modifier = Modifier,
     /** True while the title is a failure the reader has to hear. */
     announce: Boolean = false,
 ) {
+    val press = remember { MutableInteractionSource() }
     Row(
-        modifier = modifier,
+        modifier = modifier
+            .then(
+                if (onOpen == null) {
+                    Modifier
+                } else {
+                    Modifier
+                        .clickable(
+                            interactionSource = press,
+                            indication = null,
+                            role = Role.Button,
+                            onClickLabel = stringResource(R.string.playback_change_reciter),
+                            onClick = onOpen,
+                        )
+                        .minimumInteractiveComponentSize()
+                },
+            )
+            .clip(Radii.Pill)
+            .focusRing(press, Radii.Pill)
+            .then(
+                if (onOpen == null) {
+                    Modifier
+                } else {
+                    Modifier.indication(press, ripple(color = MaterialTheme.colorScheme.primary))
+                },
+            )
+            .padding(horizontal = Space.Tight, vertical = Space.Line),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -111,6 +143,15 @@ internal fun OfferLine(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
+        if (onOpen != null) {
+            IconGlyph(
+                icon = Icon.Chevron,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .padding(start = Space.Tight)
+                    .size(GlyphSize.ChevronInline),
+            )
+        }
         Text(
             text = title,
             style = compactLabel(),
@@ -131,33 +172,30 @@ internal fun OfferLine(
 }
 
 /**
- * The playing pill's words: the place on the first line, the ayah key, the
- * voice, and the pace on the second.
+ * The playing pill's words: the voice and its pace, then the place and its
+ * key, on one line.
  *
- * The place is the surah's own name at the card's 14 Medium, in the page's
- * ink. Under it, the app's ayah reference (2:255) in the ink, the reciter's
- * name in the accent, and the pace when it is not 1x in the quiet ink, with
- * the door's chevron at the end. The whole block is the one door to the
- * listening panel, where the full place and the pace scale live.
+ * **The voice leads, then the place** (owner decision, this session). The
+ * offer says who, then which surah; the playing pill now says who, then
+ * where, so the pill's two states read with one grammar and every voice of
+ * the pill leads with the reciter's name. The order is the chosen voice, the
+ * pace when it is not 1x, the surah's own name at the card's 14 Medium, and
+ * the ayah's key; the door's chevron closes the line. The pace is drawn only
+ * when it is not 1x, because 1x is the pace the app starts at and a line does
+ * not need to say it.
  *
- * **The place leads, and the key never gives way** (owner decision, this
- * version). The pill's type follows the system scale only up to the app's
- * largest step, 1.2, and stops there: at that size the longest surah name is
- * 128.9 dp of the line's 140, and the voice and the ayah key are 136.9, so
- * the place is whole at every system scale instead of being cut at 1.3. The
- * reading and the listening panel still take the reader's scale; the pill is
- * a control with a fixed line (owner decision, this version). If the glass is
- * narrower than the app's reference phone, the reciter's name gives way
- * first, because the key is the fact and the name is the voice. The
- * reference leads the meta line, the voice follows, and the pace trails it:
- * the immutable place, then the chosen voice, then how fast it is read. The
- * pace is drawn only when it is not 1x, because 1x is the pace the app starts
- * at and a line does not need to say it.
+ * **The place and the key never give way; the voice does** (owner decision,
+ * this session). The pill's type follows the system scale only up to the
+ * app's largest step, 1.2, and stops there. The place, the key, and the pace
+ * keep their ends; at the longest place with a non-1x pace the voice is the
+ * part an ellipsis takes, which is the rule the pill already kept. The
+ * reading and the listening panel still take the reader's own scale; the pill
+ * is a control with a fixed line.
  *
- * The block is 48 dp tall inside the capsule, so the two lines and the
- * chevron are not the whole of what a finger has to hit; its 4 dp inset
- * keeps the type off its own press shape, and the caller gives its end
- * [PillEndAir].
+ * The block is 48 dp tall inside the capsule, so the line and the chevron
+ * are not the whole of what a finger has to hit; its 8 dp inset keeps the
+ * type off its own press shape, and the caller keeps [PillEndAir] at each end
+ * where the capsule's end is a sphere.
  */
 @Composable
 internal fun PlayingWordsBlock(
@@ -178,10 +216,10 @@ internal fun PlayingWordsBlock(
     // scale only up to the app's largest text step. Past it the line would
     // cut the place, and a cut place is worse than a control that holds its
     // measure; the reading and the listening panel still take the reader's
-    // own scale (owner decision, this version).
+    // own scale (owner decision, this session).
     val density = LocalDensity.current
     val capped = Density(density.density, min(density.fontScale, TextSize.STEPS.last()))
-    Column(
+    Row(
         modifier = modifier
             .then(
                 if (onOpen == null) {
@@ -206,67 +244,64 @@ internal fun PlayingWordsBlock(
                     Modifier.indication(press, ripple(color = MaterialTheme.colorScheme.primary))
                 },
             )
-            .padding(horizontal = Space.Tight, vertical = 2.dp),
+            .padding(horizontal = Space.Tight, vertical = Space.Line),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         CompositionLocalProvider(LocalDensity provides capped) {
+            Text(
+                text = reciter,
+                // The voice leads: the accent's 13, and the one part of the
+                // line that gives way when the top step and the pace leave
+                // it no room (owner decision, this session).
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false),
+            )
+            if (speed != 1f) {
+                Text(
+                    text = speedText(speed),
+                    // The pace is the pill's read-back after the panel closes:
+                    // the quiet value beside the voice, not a second title
+                    // (owner decision, this session).
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    modifier = Modifier.padding(start = Space.Line),
+                )
+            }
             if (!placeName.isNullOrBlank()) {
                 Text(
                     text = placeName,
-                    // The place leads: the card's 14 Medium, in the page's
-                    // ink. It is whole at the pill's capped type; the ayah key
-                    // below is never cut (owner decision, this version).
+                    // The place follows the voice: the card's 14 Medium, in
+                    // the page's ink, and it is never the thing an ellipsis
+                    // takes (owner decision, this session).
                     style = compactLabel(),
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(start = Space.Line),
                 )
             }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = reference,
-                    // The app's reference leads the meta line: 13 at Regular,
-                    // the precise place under the surah's name. The key never
-                    // gives way; the voice after it does (owner decision, this
-                    // version).
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                )
-                Text(
-                    text = reciter,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    // The voice gives way first: the key, the pace, and the
-                    // chevron are measured before the name, so neither the
-                    // ayah key nor the pace can be the thing an ellipsis takes
-                    // (owner decision, this version).
+            Text(
+                text = reference,
+                // The ayah key closes the place: 13 at Regular, the precise
+                // reference beside the surah's own name. The key never gives
+                // way (owner decision, this session).
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                modifier = Modifier.padding(start = Space.Tight),
+            )
+            if (onOpen != null) {
+                IconGlyph(
+                    icon = Icon.Chevron,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
-                        .weight(1f, fill = false)
-                        .padding(start = Space.Line),
+                        .padding(start = Space.Tight)
+                        .size(GlyphSize.ChevronInline),
                 )
-                if (speed != 1f) {
-                    Text(
-                        text = speedText(speed),
-                        // The pace is the pill's read-back after the panel
-                        // closes: the quiet value beside the voice, not a
-                        // second title (owner decision, this session).
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        modifier = Modifier.padding(start = Space.Line),
-                    )
-                }
-                if (onOpen != null) {
-                    IconGlyph(
-                        icon = Icon.Chevron,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .padding(start = Space.Tight)
-                            .size(GlyphSize.ChevronInline),
-                    )
-                }
             }
         }
     }
