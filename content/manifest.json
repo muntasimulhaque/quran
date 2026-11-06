@@ -385,6 +385,21 @@
       "bytes": 1305276,
       "sha256": "d8132d6a49f6c00b40ec94b41a1c16ff43d7f8f33b5026ee98f9667d99d1e294",
       "assetUrl": null
+    },
+    {
+      "id": "audio-edges",
+      "name": "Recitation voice edges, first and last sound",
+      "source": "This project, measured from the recitation packages with ffmpeg",
+      "url": "https://github.com/muntasimulhaque/quran",
+      "format": "text",
+      "license": "Derived from the QUL recitation audio, distributed via QUL; no Quran text",
+      "licenseBn": "QUL-এর মাধ্যমে বিতরণকৃত তিলাওয়াতের অডিও থেকে এই অ্যাপের জন্য পরিমাপকৃত; কোনো কুরআনের লেখা নয়",
+      "credit": "Measured by this project from the Al-Minshawi and Al-Husary recordings published via QUL",
+      "usedFor": "The first and last voiced millisecond of every ayah file, so the word wash starts and stops with the voice",
+      "path": "content/audio-edges.txt",
+      "bytes": 353811,
+      "sha256": "dd21e5f4fde6a3b62e630476bc5e7c05996d17f2de248edccdc53e28f1919a80",
+      "assetUrl": null
     }
   ]
 }

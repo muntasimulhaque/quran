@@ -23,7 +23,7 @@ class RecitedWordTest {
     }
 
     @Test
-    fun `the last word stays marked to the end of the ayah`() {
+    fun `the last word stays marked to the end of the ayah without an edge`() {
         val segments = listOf(segment(1, 0, 1000), segment(2, 1000, 2000))
         assertEquals(2, recitedWordAt(segments, 1500))
         assertEquals(2, recitedWordAt(segments, 5000))
@@ -39,6 +39,43 @@ class RecitedWordTest {
         )
         assertEquals(1, recitedWordAt(segments, 2500))
         assertEquals(2, recitedWordAt(segments, 3500))
+    }
+
+    @Test
+    fun `no word is marked before the first sound, whatever the export says`() {
+        val segments = listOf(segment(1, 0, 840), segment(2, 1040, 1440))
+        assertNull(recitedWordAt(segments, 0, firstSpeechMs = 540))
+        assertNull(recitedWordAt(segments, 539, firstSpeechMs = 540))
+        assertEquals(1, recitedWordAt(segments, 540, firstSpeechMs = 540))
+    }
+
+    @Test
+    fun `no word is marked after the last sound`() {
+        val segments = listOf(segment(1, 0, 840), segment(2, 2880, 4920))
+        assertEquals(2, recitedWordAt(segments, 4200, lastSpeechMs = 4200))
+        assertNull(recitedWordAt(segments, 4201, lastSpeechMs = 4200))
+        assertNull(recitedWordAt(segments, 4900, lastSpeechMs = 4200))
+    }
+
+    @Test
+    fun `a gap the export cannot explain rests instead of lying`() {
+        val segments = listOf(segment(1, 0, 1000), segment(2, 20_000, 21_000))
+        assertEquals(1, recitedWordAt(segments, 5_900))
+        assertNull(recitedWordAt(segments, 6_100))
+        assertNull(recitedWordAt(segments, 15_000))
+        assertEquals(2, recitedWordAt(segments, 20_000))
+    }
+
+    @Test
+    fun `an edge pair that contradicts itself is no edge`() {
+        val segments = listOf(segment(1, 0, 840), segment(2, 1040, 1440))
+        assertEquals(1, recitedWordAt(segments, 500, firstSpeechMs = 900, lastSpeechMs = 300))
+    }
+
+    @Test
+    fun `the first sound at zero is still an edge`() {
+        val segments = listOf(segment(1, 0, 840), segment(2, 1040, 1440))
+        assertEquals(1, recitedWordAt(segments, 0, firstSpeechMs = 0, lastSpeechMs = 2000))
     }
 
     private fun segment(word: Int, startMs: Long, endMs: Long) =

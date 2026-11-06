@@ -6,17 +6,17 @@ import org.junit.Test
 class PlaybackCadenceTest {
 
     @Test
-    fun `the wash ticks only while the reading is on the glass`() {
+    fun `a visible reading keeps no player timer`() {
         assertEquals(
-            PlaybackCadence(tick = true, checkpoint = false),
+            PlaybackCadence(checkpoint = false),
             playbackCadence(isPlaying = true, visible = true),
         )
     }
 
     @Test
-    fun `a hidden reading keeps the place without the tick`() {
+    fun `a hidden reading keeps the place`() {
         assertEquals(
-            PlaybackCadence(tick = false, checkpoint = true),
+            PlaybackCadence(checkpoint = true),
             playbackCadence(isPlaying = true, visible = false),
         )
     }
@@ -24,11 +24,11 @@ class PlaybackCadenceTest {
     @Test
     fun `a paused reading has no timer at all`() {
         assertEquals(
-            PlaybackCadence(tick = false, checkpoint = false),
+            PlaybackCadence(checkpoint = false),
             playbackCadence(isPlaying = false, visible = true),
         )
         assertEquals(
-            PlaybackCadence(tick = false, checkpoint = false),
+            PlaybackCadence(checkpoint = false),
             playbackCadence(isPlaying = false, visible = false),
         )
     }

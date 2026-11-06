@@ -30,6 +30,7 @@ import io.github.muntasimulhaque.quran.data.RecitationDownloader
 import io.github.muntasimulhaque.quran.data.RecitationManifest
 import io.github.muntasimulhaque.quran.data.RecitationStore
 import io.github.muntasimulhaque.quran.data.SafePaths
+import io.github.muntasimulhaque.quran.data.WordSegment
 import io.github.muntasimulhaque.quran.data.downloadError
 import io.github.muntasimulhaque.quran.feature.playback.R
 import io.github.muntasimulhaque.quran.ui.kit.reciterName
@@ -86,17 +87,29 @@ class PlaybackController(
     private var controller: MediaController? = null
     private val queue = RecitationQueue()
     private var recitationId: String? = null
-    private var segments: List<io.github.muntasimulhaque.quran.data.WordSegment> = emptyList()
-    private var segmentedAyah: Int? = null
-    private var ticker: Job? = null
+
+    /**
+     * Every ayah's word regions, read once when the surah's playlist is
+     * built and kept until the recitation or the reading ends. [itemsFor]
+     * already asks the database for each ayah's [RecitationAyah], which
+     * parses the regions, so keeping them costs a map insertion instead of a
+     * second disk read and a blank wash at every ayah turn.
+     */
+    private val segmentsByAyah = java.util.concurrent.ConcurrentHashMap<Int, List<WordSegment>>()
+
+    /** The voice edges of every shipped file, or null until they are read. */
+    @Volatile
+    private var edges: AudioEdges? = null
+
     private var checkpoint: Job? = null
     private var downloadJob: Job? = null
     private var requestedAyah: Int? = null
 
     /**
      * Whether the reading that draws the recited word is on the glass. The
-     * tick exists for that wash, and a wash nobody can see is a loop that
-     * wakes the processor for nothing (owner decision, this session).
+     * wash moves on the reading's own frame clock now, so the player keeps no
+     * wash timer. This flag is what keeps the place checkpoint off while the
+     * eyes are there (owner decision, this session).
      */
     private var tracking = false
 
@@ -132,43 +145,58 @@ class PlaybackController(
      */
     private val placeNames = mutableMapOf<Int, String>()
 
-    /**
-     * The word under the reciter, on a flow of its own.
-     *
-     * It moves ten times a second. It used to travel inside [PlaybackUiState],
-     * so every screen that read the player was recomposed on every tick to
-     * move one wash. The reading now reads this flow inside the one ayah being
-     * heard, so a tick costs one block instead of the page (owner decision,
-     * this session).
-     */
-    private val _wordPosition = MutableStateFlow<Int?>(null)
-    val wordPosition: StateFlow<Int?> = _wordPosition.asStateFlow()
-
     fun attach(content: ContentDatabase) {
         this.content = content
-        // The tick is for the word being recited, and it runs only while
-        // something is being recited.
+        if (edges == null) {
+            scope.launch {
+                val loaded = withContext(Dispatchers.IO) { AudioEdges.load(context) }
+                edges = loaded
+            }
+        }
         syncTicker()
     }
 
     /**
      * Tells the player whether the reading is on the glass.
      *
-     * The wash moves ten times a second for the reader's eyes. When the eyes
-     * are not there, the wash is not there either, so the tick stops and the
-     * place is written on a ten-second checkpoint instead. That checkpoint is
-     * what keeps a process that dies mid-ayah answered by the rest of the ayah
-     * rather than by its top (owner decision, this session).
+     * The wash is drawn from the reading's own frame clock, so this flag is
+     * only about the place: while the eyes are not there, the heard offset is
+     * written on a ten-second checkpoint. That checkpoint is what keeps a
+     * process that dies mid-ayah answered by the rest of the ayah rather than
+     * by its top (owner decision, this session).
      */
     fun setWordTracking(visible: Boolean) {
         if (tracking == visible) return
         tracking = visible
-        if (visible) {
-            controller?.let { publish(it) }
-        } else {
-            checkpointPlace()
-        }
+        if (!visible) checkpointPlace()
         syncTicker()
+    }
+
+    /**
+     * The word under the reciter at the player's own position, read at the
+     * moment the frame is drawn.
+     *
+     * The reading calls this from its frame clock, so the wash is as fresh as
+     * the glass and a speed change needs no correction: the position is in
+     * media time and the player has already scaled it. The segments were read
+     * with the playlist, so this is a map lookup and an arithmetic walk, not
+     * a disk read on the frame.
+     */
+    fun heardWordNow(): Int? {
+        val player = controller ?: return null
+        if (player.playbackState == Player.STATE_ENDED) return null
+        if (stoppedAtAyahEnd && !player.playWhenReady) return null
+        val id = player.currentMediaItem?.mediaId ?: return null
+        val ayahNumber = RecitationPlaylist.ayahOf(id) ?: return null
+        val segments = segmentsByAyah[ayahNumber] ?: return null
+        val recitation = recitationId ?: return null
+        val edges = edges
+        return recitedWordAt(
+            segments = segments,
+            positionMs = player.currentPosition.coerceAtLeast(0L),
+            firstSpeechMs = edges?.firstMs(recitation, ayahNumber) ?: NO_EDGE_MS,
+            lastSpeechMs = edges?.lastMs(recitation, ayahNumber) ?: NO_EDGE_MS,
+        )
     }
 
     /**
@@ -204,6 +232,7 @@ class PlaybackController(
         val ayah = withContext(Dispatchers.IO) {
             database.ayah(ayahNumber)
         } ?: return
+        if (recitationId != recitation) segmentsByAyah.clear()
         recitationId = recitation
         requestedAyah = ayahNumber
         val items = withContext(Dispatchers.IO) { itemsFor(recitation, ayah.surah) }
@@ -287,7 +316,6 @@ class PlaybackController(
             _state.value = _state.value.copy(isPlaying = false, error = true)
             return
         }
-        startTicker()
         _state.value = _state.value.copy(
             recitation = recitation,
             unavailable = false,
@@ -635,7 +663,7 @@ class PlaybackController(
         player?.stop()
         player?.clearMediaItems()
         stoppedAtAyahEnd = false
-        _wordPosition.value = null
+        segmentsByAyah.clear()
         _state.value = PlaybackUiState(connected = true)
         // Where the recitation was heard is not a place to offer the reader
         // again: they put it away, or it reached the end they asked for.
@@ -653,7 +681,7 @@ class PlaybackController(
      * place to come back to either.
      */
     private fun restTheMark() {
-        _wordPosition.value = null
+        segmentsByAyah.clear()
         _state.value = _state.value.copy(
             isPlaying = false,
             ayahNumber = null,
@@ -667,10 +695,9 @@ class PlaybackController(
     fun release() {
         downloadJob?.cancel()
         downloadJob = null
-        ticker?.cancel()
-        ticker = null
         checkpoint?.cancel()
         checkpoint = null
+        segmentsByAyah.clear()
         controller?.release()
         controller = null
     }
@@ -756,9 +783,11 @@ class PlaybackController(
             database.recitations().firstOrNull { it.id == recitation }?.name.orEmpty(),
         )
         val ayahs = database.ayahsOfSurah(surah)
+        val segmentsForSurah = HashMap<Int, List<WordSegment>>(ayahs.size)
         val items = ayahs.mapNotNull { ayah ->
             val audio = database.recitationAyah(recitation, ayah.number) ?: return@mapNotNull null
             val uri = store.uri(audio.audioPath) ?: return@mapNotNull null
+            segmentsForSurah[ayah.number] = audio.segments
             MediaItem.Builder()
                 .setMediaId(RecitationPlaylist.mediaId(ayah.number, ayah.surah))
                 .setUri(uri)
@@ -781,7 +810,9 @@ class PlaybackController(
                 )
                 .build()
         }
-        return items.takeIf { it.size == ayahs.size }.orEmpty()
+        if (items.size != ayahs.size) return emptyList()
+        if (recitationId == recitation) segmentsByAyah.putAll(segmentsForSurah)
+        return items
     }
 
     /**
@@ -896,7 +927,6 @@ class PlaybackController(
             }
             if (reason != Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM) return
             stoppedAtAyahEnd = true
-            _wordPosition.value = null
             _state.value = _state.value.copy(
                 isPlaying = false,
                 ayahNumber = null,
@@ -935,35 +965,11 @@ class PlaybackController(
     }
 
     /**
-     * The tick that keeps the recited word marked. It publishes ten times a
-     * second while something is being heard and the reading is on the glass,
-     * and does not run at all otherwise: a word cannot move inside a paused
-     * player, and a wash nobody can see is a loop that wakes four cores to
-     * learn nothing. Ten times a second keeps the wash within a tenth of a
-     * region boundary, where five left it visibly behind a fast recitation
-     * (owner report, this session).
-     */
-    private fun startTicker() {
-        if (!tracking) return
-        if (ticker?.isActive == true) return
-        ticker = scope.launch {
-            while (isActive) {
-                controller?.let { publish(it) }
-                delay(TICK_MILLIS)
-            }
-        }
-    }
-
-    private fun stopTicker() {
-        ticker?.cancel()
-        ticker = null
-    }
-
-    /**
-     * The place written while the reading is hidden. The tick is off, so
-     * nothing moves the wash; this is only the memory of where the recitation
-     * had reached, at a pace that costs the disk almost nothing and still
-     * answers a process that died mid-ayah (owner decision, this session).
+     * The place written while the reading is hidden. The wash is drawn from
+     * the reading's own frame clock, so the player has no wash timer at all;
+     * this is only the memory of where the recitation had reached, at a pace
+     * that costs the disk almost nothing and still answers a process that
+     * died mid-ayah (owner decision, this session).
      */
     private fun startCheckpoint() {
         if (tracking) return
@@ -997,13 +1003,13 @@ class PlaybackController(
     }
 
     /**
-     * The one cadence the player needs: the wash while the reading is on the
-     * glass, the place while it is not, and neither while the player is
-     * paused (owner decision, this session).
+     * The one cadence the player needs: the place while the reading is hidden,
+     * and neither while the player is paused. The wash is not the player's
+     * timer any more; the reading draws it on the frame clock (owner decision,
+     * this session).
      */
     private fun syncTicker() {
         val cadence = playbackCadence(_state.value.isPlaying, tracking)
-        if (cadence.tick) startTicker() else stopTicker()
         if (cadence.checkpoint) startCheckpoint() else stopCheckpoint()
     }
 
@@ -1022,8 +1028,6 @@ class PlaybackController(
         val ayahNumber = RecitationPlaylist.ayahOf(id) ?: return
         val surah = RecitationPlaylist.surahOf(id)
         val at = player.currentPosition.coerceAtLeast(0)
-        if (segmentedAyah != ayahNumber) loadSegments(ayahNumber)
-        _wordPosition.value = wordAt(at)
         _state.value = _state.value.copy(
             connected = true,
             isPlaying = player.isPlaying,
@@ -1042,11 +1046,11 @@ class PlaybackController(
      * mid-ayah is answered by the same ayah at the same offset rather than by
      * the top of it.
      *
-     * The offset is written on a throttle: it moves ten times a second and
-     * the disk does not need to, and a resume a few seconds out is one nobody
-     * can tell from the real one. A change of ayah and a pause are each
-     * written at once, because the ayah is the part nothing else can put back
-     * and the pause is the moment the reader stepped away.
+     * The offset is written on a throttle: it moves with every frame and the
+     * disk does not need to, and a resume a few seconds out is one nobody can
+     * tell from the real one. A change of ayah and a pause are each written at
+     * once, because the ayah is the part nothing else can put back and the
+     * pause is the moment the reader stepped away.
      */
     private fun rememberHeard(recitation: String?, ayahNumber: Int, at: Long, playing: Boolean) {
         if (recitation == null) return
@@ -1057,23 +1061,6 @@ class PlaybackController(
         heardWrittenAt = now
         scope.launch { positionStore.write(PlaybackPosition(recitation, ayahNumber, at)) }
     }
-
-    private fun loadSegments(ayahNumber: Int) {
-        val recitation = recitationId ?: return
-        segmentedAyah = ayahNumber
-        segments = emptyList()
-        val database = content ?: return
-        scope.launch {
-            val recitationAyah: RecitationAyah? = withContext(Dispatchers.IO) {
-                database.recitationAyah(recitation, ayahNumber)
-            }
-            if (segmentedAyah == ayahNumber) {
-                segments = recitationAyah?.segments.orEmpty()
-            }
-        }
-    }
-
-    private fun wordAt(positionMs: Long): Int? = recitedWordAt(segments, positionMs)
 
     /**
      * Keeps one surah loaded after the one being heard, whatever the answer
@@ -1110,9 +1097,6 @@ class PlaybackController(
         /** The pace the reader may choose, and its bounds. */
         const val MIN_SPEED = 0.5f
         const val MAX_SPEED = 1.5f
-
-        /** How often the recited word is published while something is heard. */
-        const val TICK_MILLIS = 100L
 
         /**
          * How far apart two writes of the heard offset may be. The ayah it

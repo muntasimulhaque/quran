@@ -1,2 +1,7 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# The voice edge table is read byte for byte by the content gate and shipped
+# as an app asset; its hash is recorded in content/manifest.json, so git must
+# never rewrite its line endings.
+content/audio-edges.txt -text

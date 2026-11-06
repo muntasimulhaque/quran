@@ -27,6 +27,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
@@ -65,6 +66,7 @@ import io.github.muntasimulhaque.quran.ui.reading.ReadingList
 import io.github.muntasimulhaque.quran.ui.reading.SelectionClearer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -132,11 +134,11 @@ fun ReaderScreen(
     val settings = viewModel.settings
     val reducedMotion by rememberReducedMotion()
     val playback by viewModel.playbackState.collectAsStateWithLifecycle()
-    // The recited word travels on a flow of its own and is handed down as a
-    // State that this screen never reads, so the tick that moves the wash
-    // invalidates the one ayah being heard instead of the page (owner
-    // decision, this session).
-    val playedWord = viewModel.playedWord.collectAsStateWithLifecycle()
+    // The wash is read on the reading's own frame clock and handed down as a
+    // State this screen never reads, so a frame that moves it invalidates the
+    // one ayah being heard instead of the page (owner decision, this
+    // session).
+    val playedWord = remember { mutableStateOf<Int?>(null) }
     val saved by viewModel.saved.collectAsStateWithLifecycle()
     // The Save marks, by ayah, so a door can say what the reader kept. A note
     // alone is not a Save: the two marks are the reader's own and the app
@@ -449,11 +451,23 @@ fun ReaderScreen(
         keepAwake = false
     }
 
-    // The recited word is drawn for the reader's eyes, so the ten-times-a-
-    // second tick belongs to the reading being on the glass. A screen that has
-    // gone dark, a backgrounded app, and a phone in someone else's hand keep
-    // the place instead, at a ten-second checkpoint, and the processor is left
-    // to sleep (owner decision, this session).
+    // The word is read from the player at the moment each frame is drawn, so
+    // the wash is as fresh as the glass and a speed change needs no
+    // correction: the position is in media time, which the player has already
+    // scaled to the reader's pace. Ten times a second left it visibly behind
+    // at 1.5x (owner decision, this session).
+    LaunchedEffect(playback.isPlaying, playback.ayahNumber) {
+        if (!playback.isPlaying || playback.ayahNumber == null) return@LaunchedEffect
+        while (isActive) {
+            withFrameNanos { playedWord.value = viewModel.playedWordNow() }
+        }
+    }
+
+    // The recited word is drawn on the reading's own frame clock, so the only
+    // timer the player keeps is the place. A screen that has gone dark, a
+    // backgrounded app, and a phone in someone else's hand keep the place
+    // instead, at a ten-second checkpoint, and the processor is left to sleep
+    // (owner decision, this session).
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle) {
         val observer = LifecycleEventObserver { _, event ->

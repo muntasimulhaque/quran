@@ -157,11 +157,11 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     val playbackState: StateFlow<PlaybackUiState> = playback.state
 
     /**
-     * The word the reciter is on, which only the ayah being heard reads. It
-     * keeps its own flow so a tick that moves the wash cannot recompose the
-     * screen around it (owner decision, this session).
+     * The word the reciter is on, read at the frame the reading draws. The
+     * reading asks for it on its own frame clock, so there is no tick to fall
+     * behind and no speed to correct (owner decision, this session).
      */
-    val playedWord: StateFlow<Int?> = playback.wordPosition
+    fun playedWordNow(): Int? = playback.heardWordNow()
 
     /**
      * Tells the player whether the reading that draws the wash is on the
@@ -332,9 +332,9 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         }
         // The pill's chooser names every reciter with that reciter's price for
         // the surah under the reader's finger, so the list is read again
-        // when the surah or the reciter changes and never on a tick: the
-        // state publishes ten times a second, and a directory listing that
-        // often would be a directory listing the reader never asked for.
+        // when the surah or the reciter changes and never on a player event:
+        // a directory listing on that cadence would be a listing the reader
+        // never asked for.
         viewModelScope.launch {
             playback.state
                 .map { PillScope(it.recitation, it.surah ?: it.pendingDownloadSurah) }

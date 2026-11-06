@@ -145,6 +145,15 @@ abstract class PrepareContentAssets : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val recitationManifestFile: RegularFileProperty
 
+    /**
+     * The first and last voiced millisecond of every shipped file, written by
+     * the content pipeline from the audio itself. The build fails without it:
+     * a wash with no edges is the defect the table exists to remove.
+     */
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val audioEdgesFile: RegularFileProperty
+
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val packsDir: DirectoryProperty
@@ -218,6 +227,13 @@ abstract class PrepareContentAssets : DefaultTask() {
             val recitations = File(out, "recitations").apply { mkdirs() }
             manifest.copyTo(File(recitations, "manifest.json"), overwrite = true)
         }
+        // The voice edges travel beside the text: two numbers per ayah, read
+        // by the wash so it holds its tongue before the first sound and after
+        // the last. The file is tiny and the reading never queries it.
+        val edges = audioEdgesFile.get().asFile
+        if (edges.isFile) {
+            edges.copyTo(File(content, "audio-edges.txt"), overwrite = true)
+        }
     }
 }
 
@@ -232,6 +248,7 @@ val prepareContentAssets = tasks.register<PrepareContentAssets>("prepareContentA
     buildReportFile.fileValue(contentBuildReport)
     catalogFile.fileValue(contentCatalogFile)
     recitationManifestFile.fileValue(contentRecitationManifest)
+    audioEdgesFile.fileValue(rootProject.file("content/audio-edges.txt"))
     packsDir.fileValue(contentPacksDir)
     bundledAudioDir.fileValue(contentBundledAudioDir)
     fontsHafsDir.fileValue(contentFontsHafsDir)

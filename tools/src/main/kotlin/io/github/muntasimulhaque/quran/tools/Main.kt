@@ -12,7 +12,11 @@ fun main(args: Array<String>) {
         "verify" -> Verify(root).run()
         "audit" -> Audit(root).run()
         "search" -> SearchCheck(root).run()
-        "audio" -> Audio(root).run(args.drop(1))
+        "audio" -> if (args.getOrNull(1) == "edges") {
+            AudioEdges(root).run(resume = args.getOrNull(2) == "resume")
+        } else {
+            Audio(root).run(args.drop(1))
+        }
         "build" -> Build(root).run()
         "fonts" -> Fonts(root).run()
         "packs" -> when (args.getOrNull(1)) {
@@ -24,7 +28,8 @@ fun main(args: Array<String>) {
         "help", "--help" -> {
             println("usage: tools <verify|audit|search|audio|build|fonts|fetch|checkdb|packs>")
         println("       tools packs [build|publish]")
-        println("       tools audio [sample|bundle|packs|publish]")
+        println("       tools audio [sample|bundle|packs|publish|edges]")
+        println("       tools audio edges [resume]")
             0
         }
         else -> {
