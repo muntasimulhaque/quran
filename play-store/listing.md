@@ -141,7 +141,7 @@ safe area, well clear of the edges Play may crop or overlay, and the file is
 
 The set is from capture run 42173518186 on 16.2: all three legs green,
 eleven frames each, every frame read. 16.3 changes when the wash moves, not
-a single layout, so no frame changes and nothing was captured. The eight are
+a single layout, so no frame changes and the 16.2 set stands. The eight are
 a reader's path through
 the app rather than the app's own map, and the last frame is the two-row
 offer, its line a 48 dp door to the voice list. The offer is the visible
