@@ -27,7 +27,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
@@ -87,6 +86,13 @@ private const val LISTENING_AWAKE_MILLIS = 60_000L
  */
 private const val READING_AWAKE_MILLIS = 10 * 60_000L
 
+/**
+ * The longest the wash sleeps between checks. The wait to the next word is
+ * exact, and this is only a ceiling so a missed event cannot park the wash for
+ * the length of a surah (owner decision, this session).
+ */
+private const val MAX_WORD_WAIT_MILLIS = 2_000L
+
 /** Which sheet is over the reader, if any. */
 internal enum class ReaderSheet { None, Browse, Search, Settings }
 
@@ -134,10 +140,9 @@ fun ReaderScreen(
     val settings = viewModel.settings
     val reducedMotion by rememberReducedMotion()
     val playback by viewModel.playbackState.collectAsStateWithLifecycle()
-    // The wash is read on the reading's own frame clock and handed down as a
-    // State this screen never reads, so a frame that moves it invalidates the
-    // one ayah being heard instead of the page (owner decision, this
-    // session).
+    // The wash is read at each scheduled change and handed down as a State
+    // this screen never reads, so a change that moves it invalidates the one
+    // ayah being heard instead of the page (owner decision, this session).
     val playedWord = remember { mutableStateOf<Int?>(null) }
     val saved by viewModel.saved.collectAsStateWithLifecycle()
     // The Save marks, by ayah, so a door can say what the reader kept. A note
@@ -451,19 +456,21 @@ fun ReaderScreen(
         keepAwake = false
     }
 
-    // The word is read from the player at the moment each frame is drawn, so
-    // the wash is as fresh as the glass and a speed change needs no
-    // correction: the position is in media time, which the player has already
-    // scaled to the reader's pace. Ten times a second left it visibly behind
-    // at 1.5x (owner decision, this session).
-    LaunchedEffect(playback.isPlaying, playback.ayahNumber) {
+    // The wash changes only at a word boundary, the first voice, the last, or
+    // the resting hold, so the reading sleeps to the next of those moments
+    // instead of asking every frame. The wait is media time in the reader's
+    // pace, and a change of pace restarts it. A frame-by-frame loop kept
+    // Compose permanently busy, which is how the store test found it.
+    LaunchedEffect(playback.isPlaying, playback.ayahNumber, playback.speed) {
         if (!playback.isPlaying || playback.ayahNumber == null) return@LaunchedEffect
         while (isActive) {
-            withFrameNanos { playedWord.value = viewModel.playedWordNow() }
+            playedWord.value = viewModel.playedWordNow()
+            val wait = viewModel.millisToNextWord() ?: break
+            delay(wait.coerceAtMost(MAX_WORD_WAIT_MILLIS))
         }
     }
 
-    // The recited word is drawn on the reading's own frame clock, so the only
+    // The recited word is scheduled by the reading, so the only
     // timer the player keeps is the place. A screen that has gone dark, a
     // backgrounded app, and a phone in someone else's hand keep the place
     // instead, at a ten-second checkpoint, and the processor is left to sleep

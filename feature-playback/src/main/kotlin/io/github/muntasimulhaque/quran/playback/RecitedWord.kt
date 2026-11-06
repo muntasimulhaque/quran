@@ -59,6 +59,46 @@ internal fun recitedWordAt(
     return word
 }
 
+/**
+ * How long the wash may sleep before its next change, in media milliseconds.
+ *
+ * The wash changes only at a word boundary, at the first voice, at the last,
+ * and at the resting hold, so asking the player every frame is work for a
+ * change that comes every half second. This is the wait to the next of those
+ * moments; null means nothing can change until the player moves to another
+ * item. The reading scales it by the reader's pace and sleeps exactly that
+ * long, which keeps a 1.5x recitation on time without a poll (owner decision,
+ * this session).
+ */
+internal fun nextWordChangeMs(
+    segments: List<WordSegment>,
+    positionMs: Long,
+    firstSpeechMs: Long = NO_EDGE_MS,
+    lastSpeechMs: Long = NO_EDGE_MS,
+    holdMaxMs: Long = HOLD_MAX_MS,
+): Long? {
+    if (segments.isEmpty()) return null
+    var current: WordSegment? = null
+    var nextStart: Long? = null
+    for (segment in segments) {
+        if (segment.startMs > positionMs) {
+            nextStart = segment.startMs
+            break
+        }
+        current = segment
+    }
+    val candidates = ArrayList<Long>(4)
+    if (firstSpeechMs != NO_EDGE_MS && firstSpeechMs > positionMs) candidates += firstSpeechMs
+    if (lastSpeechMs != NO_EDGE_MS && lastSpeechMs > positionMs) candidates += lastSpeechMs
+    if (nextStart != null) candidates += nextStart
+    val now = current
+    if (now != null && nextStart != null && nextStart - now.startMs > holdMaxMs) {
+        val cap = now.startMs + holdMaxMs
+        if (cap > positionMs) candidates += cap
+    }
+    return candidates.filter { it > positionMs }.minOrNull()?.let { it - positionMs }
+}
+
 /** No measured voice edge for this file. */
 internal const val NO_EDGE_MS = -1L
 

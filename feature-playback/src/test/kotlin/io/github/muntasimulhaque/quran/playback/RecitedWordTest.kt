@@ -78,6 +78,38 @@ class RecitedWordTest {
         assertEquals(1, recitedWordAt(segments, 0, firstSpeechMs = 0, lastSpeechMs = 2000))
     }
 
+    @Test
+    fun `the next change is the first sound`() {
+        val segments = listOf(segment(1, 0, 840), segment(2, 1040, 1440))
+        assertEquals(540L, nextWordChangeMs(segments, 0, firstSpeechMs = 540))
+        assertEquals(1040L, nextWordChangeMs(segments, 0))
+    }
+
+    @Test
+    fun `the next change is the next word`() {
+        val segments = listOf(segment(1, 0, 840), segment(2, 1040, 1440))
+        assertEquals(140L, nextWordChangeMs(segments, 900))
+    }
+
+    @Test
+    fun `the last sound ends the wash`() {
+        val segments = listOf(segment(1, 0, 840), segment(2, 1040, 1440))
+        assertEquals(560L, nextWordChangeMs(segments, 1440, lastSpeechMs = 2000))
+    }
+
+    @Test
+    fun `a long gap rests at the hold and wakes again at the next word`() {
+        val segments = listOf(segment(1, 0, 1000), segment(2, 20_000, 21_000))
+        assertEquals(6_000L, nextWordChangeMs(segments, 0))
+        assertEquals(13_000L, nextWordChangeMs(segments, 7_000))
+    }
+
+    @Test
+    fun `nothing can change after the last word without an edge`() {
+        val segments = listOf(segment(1, 0, 1000), segment(2, 1000, 2000))
+        assertNull(nextWordChangeMs(segments, 2_000))
+    }
+
     private fun segment(word: Int, startMs: Long, endMs: Long) =
         WordSegment(wordFrom = word - 1, wordTo = word, startMs = startMs, endMs = endMs)
 }

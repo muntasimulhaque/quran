@@ -3,7 +3,7 @@ package io.github.muntasimulhaque.quran.playback
 /**
  * What the player's timer does at one moment.
  *
- * The wash is drawn from the reading's own frame clock now, so the player
+ * The wash is scheduled by the reading now, so the player
  * keeps no wash tick at all: a second clock ten times a second was a source
  * of lag, not precision, and it grew when the reader sped the reciter up. The
  * checkpoint is the only timer left. It writes the heard place for the

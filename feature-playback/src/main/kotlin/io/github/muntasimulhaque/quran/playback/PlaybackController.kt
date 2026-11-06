@@ -48,6 +48,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Locale
+import kotlin.math.roundToLong
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -107,7 +108,7 @@ class PlaybackController(
 
     /**
      * Whether the reading that draws the recited word is on the glass. The
-     * wash moves on the reading's own frame clock now, so the player keeps no
+     * wash is scheduled by the reading now, so the player keeps no
      * wash timer. This flag is what keeps the place checkpoint off while the
      * eyes are there (owner decision, this session).
      */
@@ -159,7 +160,7 @@ class PlaybackController(
     /**
      * Tells the player whether the reading is on the glass.
      *
-     * The wash is drawn from the reading's own frame clock, so this flag is
+     * The wash is scheduled by the reading, so this flag is
      * only about the place: while the eyes are not there, the heard offset is
      * written on a ten-second checkpoint. That checkpoint is what keeps a
      * process that dies mid-ayah answered by the rest of the ayah rather than
@@ -176,11 +177,11 @@ class PlaybackController(
      * The word under the reciter at the player's own position, read at the
      * moment the frame is drawn.
      *
-     * The reading calls this from its frame clock, so the wash is as fresh as
-     * the glass and a speed change needs no correction: the position is in
-     * media time and the player has already scaled it. The segments were read
-     * with the playlist, so this is a map lookup and an arithmetic walk, not
-     * a disk read on the frame.
+     * The reading calls this at each scheduled change, so the wash is as
+     * fresh as the glass, and a speed change needs no correction: the position
+     * is in media time and the player has already scaled it. The segments were
+     * read with the playlist, so this is a map lookup and an arithmetic walk,
+     * not a disk read on the frame.
      */
     fun heardWordNow(): Int? {
         val player = controller ?: return null
@@ -197,6 +198,34 @@ class PlaybackController(
             firstSpeechMs = edges?.firstMs(recitation, ayahNumber) ?: NO_EDGE_MS,
             lastSpeechMs = edges?.lastMs(recitation, ayahNumber) ?: NO_EDGE_MS,
         )
+    }
+
+    /**
+     * How long the wash may sleep before its next change, in wall
+     * milliseconds.
+     *
+     * The reading schedules its next word instead of polling for it: the wash
+     * changes only at a boundary, and every boundary is in the same table the
+     * word itself comes from. The wait is media time divided by the reader's
+     * pace, and a change of pace restarts the sleep, so 0.5x and 1.5x are both
+     * on time (owner decision, this session).
+     */
+    fun millisToNextWord(): Long? {
+        val player = controller ?: return null
+        if (player.playbackState == Player.STATE_ENDED) return null
+        if (stoppedAtAyahEnd && !player.playWhenReady) return null
+        val id = player.currentMediaItem?.mediaId ?: return null
+        val ayahNumber = RecitationPlaylist.ayahOf(id) ?: return null
+        val segments = segmentsByAyah[ayahNumber] ?: return null
+        val recitation = recitationId ?: return null
+        val edges = edges
+        val wait = nextWordChangeMs(
+            segments = segments,
+            positionMs = player.currentPosition.coerceAtLeast(0L),
+            firstSpeechMs = edges?.firstMs(recitation, ayahNumber) ?: NO_EDGE_MS,
+            lastSpeechMs = edges?.lastMs(recitation, ayahNumber) ?: NO_EDGE_MS,
+        ) ?: return null
+        return (wait / speed.coerceAtLeast(0.1f)).roundToLong().coerceAtLeast(1L)
     }
 
     /**
@@ -577,6 +606,7 @@ class PlaybackController(
     fun setSpeed(value: Float) {
         speed = value.coerceIn(MIN_SPEED, MAX_SPEED)
         controller?.setPlaybackSpeed(speed)
+        _state.update { it.copy(speed = speed) }
     }
 
     /**
@@ -664,7 +694,7 @@ class PlaybackController(
         player?.clearMediaItems()
         stoppedAtAyahEnd = false
         segmentsByAyah.clear()
-        _state.value = PlaybackUiState(connected = true)
+        _state.value = PlaybackUiState(connected = true, speed = speed)
         // Where the recitation was heard is not a place to offer the reader
         // again: they put it away, or it reached the end they asked for.
         heardAyah = null
@@ -742,7 +772,7 @@ class PlaybackController(
                             applyEndOfAudio(it, end)
                         }
                         controller = player
-                        _state.value = _state.value.copy(connected = true)
+                        _state.value = _state.value.copy(connected = true, speed = speed)
                         continuation.resume(player)
                     } catch (error: Throwable) {
                         continuation.resumeWithException(error)
@@ -965,11 +995,11 @@ class PlaybackController(
     }
 
     /**
-     * The place written while the reading is hidden. The wash is drawn from
-     * the reading's own frame clock, so the player has no wash timer at all;
-     * this is only the memory of where the recitation had reached, at a pace
-     * that costs the disk almost nothing and still answers a process that
-     * died mid-ayah (owner decision, this session).
+     * The place written while the reading is hidden. The wash is scheduled
+     * by the reading, so the player has no wash timer at all; this is only
+     * the memory of where the recitation had reached, at a pace that costs
+     * the disk almost nothing and still answers a process that died mid-ayah
+     * (owner decision, this session).
      */
     private fun startCheckpoint() {
         if (tracking) return
@@ -1005,7 +1035,7 @@ class PlaybackController(
     /**
      * The one cadence the player needs: the place while the reading is hidden,
      * and neither while the player is paused. The wash is not the player's
-     * timer any more; the reading draws it on the frame clock (owner decision,
+     * timer any more; the reading schedules it (owner decision,
      * this session).
      */
     private fun syncTicker() {

@@ -5,6 +5,12 @@ import io.github.muntasimulhaque.quran.data.DownloadError
 data class PlaybackUiState(
     val connected: Boolean = false,
     val isPlaying: Boolean = false,
+    /**
+     * The reader's pace, the same value the player was given. The reading
+     * turns a media-time wait into wall time from it without asking the
+     * player, so a scheduled word change stays on time at 0.5x and 1.5x.
+     */
+    val speed: Float = 1f,
     val recitation: String? = null,
     val ayahNumber: Int? = null,
     val surah: Int? = null,

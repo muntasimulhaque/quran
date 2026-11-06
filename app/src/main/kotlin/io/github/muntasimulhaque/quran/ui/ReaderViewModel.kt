@@ -157,11 +157,14 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
     val playbackState: StateFlow<PlaybackUiState> = playback.state
 
     /**
-     * The word the reciter is on, read at the frame the reading draws. The
-     * reading asks for it on its own frame clock, so there is no tick to fall
-     * behind and no speed to correct (owner decision, this session).
+     * The word the reciter is on at this moment, and the wait to the next
+     * moment it can change. The reading sleeps to that wait instead of
+     * polling, so the wash is on time at any pace and the page is idle
+     * between words (owner decision, this session).
      */
     fun playedWordNow(): Int? = playback.heardWordNow()
+
+    fun millisToNextWord(): Long? = playback.millisToNextWord()
 
     /**
      * Tells the player whether the reading that draws the wash is on the
