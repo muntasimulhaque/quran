@@ -139,15 +139,14 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 42173518186 on 16.2: all three legs green,
-eleven frames each, every frame read. 16.3 changes when the wash moves, not
-a single layout, so no frame changes and the 16.2 set stands. The eight are
-a reader's path through
+The set is from capture run 42273634908 on 16.4: all three legs green,
+eleven frames each, every frame read. The eight are a reader's path through
 the app rather than the app's own map, and the last frame is the two-row
-offer, its line a 48 dp door to the voice list. The offer is the visible
-change in the eight; the word sheet's own frame in the evidence set shows
-its left head and the Quran-sized word. No frame carries the version line,
-because the settings hub is not one of the eight.
+offer, its line a 48 dp door to the voice list. The ayah's open door is the
+app's blue, the search result no longer carries a down chevron that opened a
+page, and the tafsir's source line is the row name's 15. The rest keep their
+composition, now on the shared pill measure. No frame carries the version
+line, because the settings hub is not one of the eight.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for

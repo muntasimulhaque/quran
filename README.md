@@ -4,18 +4,17 @@ A free, open source Quran reader for Android. It opens where you left off
 and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 16.3 (versionCode 165) was submitted to Play review from commit
-`9fe31ff5`. The signed bundle `quran-16.3-vc165.aab` has SHA-256
-`4a9be1f2a07642a4dbca13735a748095197ed0c0f9ba36c1ad5360d3d3c1b5f1`, signed by the
+**Status:** 16.4 (versionCode 166) is ready for Play review from commit
+`046b8ae2`. The signed bundle `quran-16.4-vc166.aab` has SHA-256
+`4821e954d46caffe0c9a12ad48ad7576c9914a6f39979bbf36d2ac7ebc5c11b0`, signed by the
 upload key `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-Build run `42199045798` is green. No visible UI changed in 16.3: the wash
-moves at a different moment, not in a different place, so the eight store
-frames stand from capture run `42173518186` on 16.2 and no new set was used.
-Content 1.5.0, the database `content-db-12c95dbe`, and the recitation packs
-are unchanged; the app now ships the voice edge table `audio-edges-dd21e5f4`,
-measured from the same audio. The Quran text, both translations, both tafsirs,
-and the audio are unchanged; the app still carries Al-Fatiha in both voices
-and both reciter timing packs.
+Build run `42273634938` is green. The eight store frames are from capture run
+`42273634908` on 16.4; all three legs are green, eleven frames each, and
+every one of the eight was read. Content 1.5.0, the database
+`content-db-12c95dbe`, and the recitation packs are unchanged. The Quran text,
+both translations, both tafsirs, and the audio are unchanged.
+
+**In 16.4.** The interface is one hand. The ayah's number is the app's blue, not a second gold action. The theme swatches keep a visible edge, every text button, chip, and AM/PM pair is one 36 dp pill, and a button that cannot answer has a real disabled state. Browse and Search share one chip and one disclosure row: a search result no longer carries a down chevron that opened a page, and the tafsir source line is the row name's 15. At 200 percent text, Browse chips keep their gap, the size rails keep their room, and ayah numbers grow instead of clipping. The snackbar's action is a pill and the remove-saved Keep is the solid answer. The Quran text, both translations, both tafsirs, and the content database are unchanged.
 
 **In 16.3.** The reciter's word is drawn from the file's own voice, not from the export's marks alone. The build listens to every shipped ayah file and records its first and last voiced millisecond; the highlight waits for the first sound and clears at the last, instead of starting at 0:00 and holding through the closing pause. The reading sleeps to each word's own boundary, in the reader's pace, so it keeps up at 0.5x, 1x, and 1.5x, and the surah's word regions are kept from the playlist build, so the wash no longer blanks at an ayah turn. Where the export leaves a gap of more than six seconds, the wash rests instead of lying. The Quran text, both translations, both tafsirs, and the audio are unchanged; the content database is unchanged, and the recitation timing packs are unchanged, with the new edge table shipped beside them.
 
