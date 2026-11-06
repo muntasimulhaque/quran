@@ -3,6 +3,7 @@ package io.github.muntasimulhaque.quran.ui.settings
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,6 +45,7 @@ import io.github.muntasimulhaque.quran.ui.theme.PaperInk
 import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
 import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.theme.controlEdge
 import io.github.muntasimulhaque.quran.ui.theme.rememberHafs
 
 /**
@@ -111,9 +113,10 @@ fun ThemeRow(
  * The chosen swatch wears its halo outside the fill, with a gap: a ring on
  * the fill's own edge read as a border and ate the page's color where the eye
  * looks for it, and a ring around the fill reads as the choice (owner report).
- * The edge is the page's own shade, not the theme's hairline, so a pale page
- * on a pale sheet and a dark page on a dark sheet both keep their circle
- * (owner report).
+ * The edge is the app's control boundary, not a hairline: it clears 3:1 on
+ * the page and on the sheet, so a pale page on a pale sheet and a dark page
+ * on a dark sheet both keep their circle (owner report; measured again in
+ * the consistency audit).
  */
 @Composable
 private fun ThemeSwatch(theme: AppTheme, chosen: Boolean) {
@@ -139,7 +142,7 @@ private fun ThemeSwatch(theme: AppTheme, chosen: Boolean) {
                 .clip(CircleShape)
                 .border(
                     width = 1.dp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.10f),
+                    color = controlEdge(),
                     shape = CircleShape,
                 ),
             contentAlignment = Alignment.Center,
@@ -234,44 +237,67 @@ fun SizeRow(
     )
     val scale = if (role == TypeRole.Arabic) 0.75f else 1f
     val fontScale = LocalDensity.current.fontScale
-    val labelSlot = SizeLabel * fontScale
-    val markSlot = SizeMarkSlot * fontScale
-    Row(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = gutter, end = gutter, top = Space.Block)
-            .heightIn(min = 48.dp),
-        verticalAlignment = Alignment.CenterVertically,
+            .padding(start = gutter, end = gutter, top = Space.Block),
     ) {
-        Text(
-            text = label,
-            // A control's name wears the same words every other row's name
-            // wears, so the sheet reads as one voice (owner decision, the
-            // theme and consistency session). The fixed column is the rail's
-            // leading line: the names may be different lengths, the rails
-            // may not start on different ones.
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.width(labelSlot),
-            maxLines = 1,
-            softWrap = false,
-            overflow = TextOverflow.Ellipsis,
-        )
-        ScaleRow(
-            label = label,
-            steps = TextSize.STEPS,
-            value = step,
-            onSelect = onChange,
-            startMark = {
-                SizeMark(role, TextSize.STEPS.first(), scale, Modifier.width(markSlot))
-            },
-            endMark = {
-                SizeMark(role, TextSize.STEPS.last(), scale, Modifier.width(markSlot))
-            },
+        // The rail's own floor is 48 dp. The label and the two end marks
+        // scale with the system font, but they may not eat the rail: at 200
+        // percent on a 360 dp phone the old fixed columns needed 392 dp
+        // before the rail began. The label gives way first, and the two end
+        // marks are the first thing to go when even that is not enough; the
+        // rail keeps its floor either way (owner decision, the consistency
+        // audit).
+        val railFloor = 48.dp
+        val labelSlot = (SizeLabel * fontScale)
+            .coerceAtMost(((maxWidth - railFloor) * 0.55f).coerceAtLeast(0.dp))
+        val wantedMark = SizeMarkSlot * fontScale
+        val markSlot = if (maxWidth - labelSlot - Space.Line - railFloor >= wantedMark * 2) {
+            wantedMark
+        } else {
+            0.dp
+        }
+        Row(
             modifier = Modifier
-                .weight(1f)
-                .padding(start = Space.Line),
-        )
+                .fillMaxWidth()
+                .heightIn(min = 48.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = label,
+                // A control's name wears the same words every other row's name
+                // wears, so the sheet reads as one voice (owner decision, the
+                // theme and consistency session). The column is the rail's
+                // leading line: the names may be different lengths, the rails
+                // may not start on different ones.
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.width(labelSlot),
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis,
+            )
+            ScaleRow(
+                label = label,
+                steps = TextSize.STEPS,
+                value = step,
+                onSelect = onChange,
+                startMark = {
+                    if (markSlot > 0.dp) {
+                        SizeMark(role, TextSize.STEPS.first(), scale, Modifier.width(markSlot))
+                    }
+                },
+                endMark = {
+                    if (markSlot > 0.dp) {
+                        SizeMark(role, TextSize.STEPS.last(), scale, Modifier.width(markSlot))
+                    }
+                },
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = Space.Line),
+            )
+        }
     }
 }
 

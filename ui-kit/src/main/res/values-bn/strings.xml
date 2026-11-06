@@ -10,6 +10,9 @@
     <string name="unit_kb">কেবি</string>
     <string name="unit_mb">এমবি</string>
     <string name="action_undo">ফিরিয়ে আনুন</string>
+
+    <string name="door_expanded">খোলা</string>
+    <string name="door_collapsed">বন্ধ</string>
     <string name="failure_download">ডাউনলোড করা যায়নি। সংযোগ পরীক্ষা করুন।</string>
     <string name="failure_storage">জায়গা নেই। কিছু জায়গা খালি করে আবার চেষ্টা করুন।</string>
     <string name="failure_storage_words">শব্দের অর্থ যোগ করার জায়গা নেই। কিছু জায়গা খালি করে আবার চেষ্টা করুন।</string>

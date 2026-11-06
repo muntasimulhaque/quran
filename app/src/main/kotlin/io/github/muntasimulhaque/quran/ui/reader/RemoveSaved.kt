@@ -33,9 +33,9 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * the note is the reader's own writing, and removing the save removes it too,
  * so the reader is asked rather than having their words taken by one tap. The
  * note itself is drawn in the sheet, so the reader sees what is at stake
- * before they answer. Keep is the filled door, because the safe answer is the
- * one the sheet leads with; Remove keeps the quiet shape every removing word
- * wears (owner decision).
+ * before they answer. Keep is the one prominent shape, because the safe
+ * answer is the one the sheet leads with; Remove keeps the quiet shape every
+ * removing word wears (owner decision, the consistency audit).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -106,6 +106,7 @@ fun RemoveSavedSheet(
                     modifier = Modifier
                         .padding(start = Space.Action)
                         .testTag("remove-saved-keep"),
+                    prominent = true,
                 )
             }
         }

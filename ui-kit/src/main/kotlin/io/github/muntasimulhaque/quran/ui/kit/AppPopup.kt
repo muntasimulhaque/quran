@@ -76,8 +76,9 @@ val PopupGutter = 10.dp
 /**
  * The ground a popup keeps between its own foot and the anchor's edge.
  *
- * The popup wears the control's own cloth, carries no border, and wears its
- * own lift as well (owner decision, forty-seventh session). The ground is
+ * The popup wears the page's own paper and a hairline, and its own lift as
+ * well (owner decision, the consistency audit: the prose had said otherwise).
+ * The ground is
  * what keeps the two silhouettes apart: with the popup's foot on the
  * capsule's own top edge the flat edges met along the middle, where no seam
  * can be seen, and the popup's foot corners and the capsule's shoulders
@@ -123,7 +124,7 @@ val PopupEdge = 16.dp
 enum class PopupAlignment { Center, Start }
 
 /**
- * The app's one popup: a menu over the page, in the control's own cloth and
+ * The app's one popup: a menu over the page, on the page's own paper and
  * hung from the control it answers.
  *
  * Material's own dropdown takes the left edge of the box it is given and puts

@@ -155,6 +155,7 @@ private fun NoteEditor(
                     label = stringResource(R.string.action_clear),
                     onClick = onClear,
                     modifier = Modifier.padding(start = Space.Row),
+                    enabled = !saving,
                     quiet = true,
                 )
             }
@@ -162,14 +163,15 @@ private fun NoteEditor(
                 label = stringResource(
                     if (saving) R.string.reading_note_saving else R.string.reading_note_save,
                 ),
-                onClick = {
-                    if (!saving) onSave(draft.text.trim().takeIf { it.isNotEmpty() })
-                },
+                onClick = { onSave(draft.text.trim().takeIf { it.isNotEmpty() }) },
                 // Save and Clear are two standalone actions, so they stand
                 // the action gap apart (owner decision, this session). Save
                 // is the one act the sheet exists for, so it is the app's
-                // one prominent shape (owner decision, this session).
+                // one prominent shape (owner decision, this session). It is
+                // disabled while the write is in flight, and while an empty
+                // draft has nothing to write and no note to clear.
                 modifier = Modifier.padding(start = Space.Action),
+                enabled = !saving && (draft.text.isNotBlank() || !initial.isNullOrBlank()),
                 prominent = true,
             )
         }

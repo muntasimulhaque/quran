@@ -38,7 +38,7 @@ object Space {
      * and Close. It was 12 dp, and the reminder dialog's pair drew 20 (the
      * platform lays its own action row 8 dp apart and the app added the 12 on
      * top), which is the one the owner's eye approved (owner decision, this
-     * session). The shapes are about 33 dp tall, so 20 dp between them reads as
+     * session). The shapes are 36 dp tall at the default type, so 20 dp between them reads as
      * two answers; 12 read as one crowded pair, and a pair that changes width
      * with a platform constant is not a decision at all.
      */

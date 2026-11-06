@@ -15,8 +15,6 @@
     <string name="reading_paper_actions">উপরের বার দেখান বা লুকান</string>
     <string name="reading_ayah_reference">আয়াত %1$s</string>
     <string name="reading_ayah_door">আয়াত %1$s-এর কাজ</string>
-    <string name="reading_door_expanded">খোলা</string>
-    <string name="reading_door_collapsed">বন্ধ</string>
     <string name="reading_door_saved">সংরক্ষিত</string>
 
     <string name="card_tafsir_label">তাফসীর</string>
@@ -27,8 +25,6 @@
     <string name="card_tafsir_offer_body">এই ভাষার তাফসীর, %1$s। একবার ডাউনলোড করলে পরে অফলাইনে কাজ করবে।</string>
     <string name="card_tafsir_add">যোগ করুন · %1$s</string>
     <string name="card_tafsir_not_now">এখন নয়</string>
-    <string name="card_door_shown">দেখানো</string>
-    <string name="card_door_hidden">লুকানো</string>
     <string name="card_note_take">নোট লিখুন</string>
     <string name="card_note_edit">নোট সম্পাদনা করুন</string>
     <string name="card_note_hint">এই আয়াতের জন্য একটি নোট লিখুন</string>

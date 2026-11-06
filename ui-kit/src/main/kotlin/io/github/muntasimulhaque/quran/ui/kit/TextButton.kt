@@ -6,6 +6,7 @@ import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,7 +21,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.ui.theme.ControlMetrics
 import io.github.muntasimulhaque.quran.ui.theme.Wash
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 
@@ -53,10 +54,15 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * gives a removal the loudest mark on the page. M3 would reach for the error
  * color; this app reaches for a question.
  *
- * The visible pill is about 34 dp tall, a chip's measure, inside the 48 dp
- * target every finger gets. It is not Material's 40 dp small button: the
- * app's actions are compact shapes, and the target is the finger's, not the
- * eye's.
+ * The visible pill is 36 dp tall at the default type, the same measure the
+ * app's chips and tabs wear, inside the 48 dp target every finger gets. It is
+ * not Material's 40 dp small button: the app's actions are compact shapes,
+ * and the target is the finger's, not the eye's.
+ *
+ * A button that cannot be used says so. [enabled] is the app's one disabled
+ * state: the pill keeps its shape, loses the accent, and stops answering a
+ * finger or a screen reader. A word that is only a status ("Saving…") is not
+ * a button at all, or it is a disabled one.
  *
  * The click and the node a screen reader focuses own a full 48 dp slab,
  * while the shape the eye reads is drawn on the pill inside it. The ripple
@@ -94,6 +100,7 @@ fun TextButton(
     label: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     quiet: Boolean = false,
     /**
      * The one answer a surface exists to ask for: a solid accent shape with
@@ -108,18 +115,22 @@ fun TextButton(
      */
     pillTag: String? = null,
 ) {
-    val fill = buttonFill(quiet = quiet, prominent = prominent)
-    val ink = buttonInk(quiet = quiet, prominent = prominent)
+    val fill = buttonFill(enabled = enabled, quiet = quiet, prominent = prominent)
+    val ink = buttonInk(enabled = enabled, quiet = quiet, prominent = prominent)
     val press = remember { MutableInteractionSource() }
     Box(
         modifier = modifier
             .clickable(
                 interactionSource = press,
                 indication = null,
+                enabled = enabled,
                 role = Role.Button,
                 onClick = onClick,
             )
-            .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp),
+            .defaultMinSize(
+                minWidth = ControlMetrics.Target,
+                minHeight = ControlMetrics.Target,
+            ),
         contentAlignment = Alignment.Center,
     ) {
         PillBox(
@@ -160,8 +171,8 @@ fun ActionPill(
 ) {
     PillBox(
         label = label,
-        fill = buttonFill(quiet = quiet, prominent = false),
-        ink = buttonInk(quiet = quiet, prominent = false),
+        fill = buttonFill(enabled = true, quiet = quiet, prominent = false),
+        ink = buttonInk(enabled = true, quiet = quiet, prominent = false),
         modifier = modifier,
     )
 }
@@ -182,7 +193,8 @@ private fun PillBox(
             .clip(Radii.Pill)
             .background(fill)
             .then(modifier)
-            .padding(horizontal = ButtonPad, vertical = 7.dp),
+            .heightIn(min = ControlMetrics.PillHeight)
+            .padding(horizontal = ButtonPad, vertical = ControlMetrics.PillPad),
     ) {
         Text(
             text = label,
@@ -199,14 +211,16 @@ private fun PillBox(
 }
 
 @Composable
-private fun buttonFill(quiet: Boolean, prominent: Boolean): Color = when {
+private fun buttonFill(enabled: Boolean, quiet: Boolean, prominent: Boolean): Color = when {
+    !enabled -> MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Disabled)
     prominent -> MaterialTheme.colorScheme.primary
     quiet -> MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
     else -> MaterialTheme.colorScheme.primary.copy(alpha = Wash.Button)
 }
 
 @Composable
-private fun buttonInk(quiet: Boolean, prominent: Boolean): Color = when {
+private fun buttonInk(enabled: Boolean, quiet: Boolean, prominent: Boolean): Color = when {
+    !enabled -> MaterialTheme.colorScheme.onSurfaceVariant
     prominent -> MaterialTheme.colorScheme.onPrimary
     quiet -> MaterialTheme.colorScheme.onSurfaceVariant
     else -> MaterialTheme.colorScheme.primary

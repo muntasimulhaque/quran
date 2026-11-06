@@ -62,14 +62,16 @@ val Lapis = Color(0xFF1B4D7A)
 // nothing at all here.
 val LapisLight = Color(0xFF95C0EA)
 
-// Gold is the ornament tone, and it is read:
-// juz, the surah names drawn into the page, and the ornamental name at the
-// head of the reading. It therefore meets the same 4.5:1 rule every
-// other text tone does, on each ground it is drawn on: 6.0:1 on the day page
-// and 8.4:1 on the night page. The night gold is the light honey this page
-// needs: the first #C09A50 measured APCA -50 on the night ground, the one
-// ornament tone under the small-text floor the rest of the night voice
-// already held (owner decision, the theme and consistency session).
+// Gold is the ornament tone, and it is read: juz, the surah names drawn into
+// the page, and the ornamental name at the head of the reading. It is never a
+// control's color: every control that answers a tap wears Lapis, including
+// the ayah's number (owner decision, the consistency audit). Gold therefore
+// meets the same 4.5:1 rule every other text tone does, on each ground it is
+// drawn on: 6.0:1 on the day page and 8.4:1 on the night page. The night gold
+// is the light honey this page needs: the first #C09A50 measured APCA -50 on
+// the night ground, the one ornament tone under the small-text floor the rest
+// of the night voice already held (owner decision, the theme and consistency
+// session).
 val Gold = Color(0xFF7A5A12)
 
 // The one shadow the app casts, black at ten percent, where the platform's

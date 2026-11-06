@@ -99,6 +99,18 @@ class ContrastTest {
     }
 
     @Test
+    fun controlBoundariesHold() {
+        // A control's edge is not a hairline: a swatch, a door, or any shape
+        // whose boundary identifies it owes 3:1. The edge is the ground's own
+        // ink at [Edge.Control], so the four pairs are the four grounds a
+        // sheet or a page can stand on.
+        assertBoundary(PaperInk, PaperBackground)
+        assertBoundary(PaperInk, PaperSurface)
+        assertBoundary(NightText, NightBackground)
+        assertBoundary(NightText, NightSurface)
+    }
+
+    @Test
     fun darkHolds() {
         assertReadable(NightText, NightBackground)
         assertReadable(NightText, NightSurface)
@@ -196,6 +208,17 @@ class ContrastTest {
         blue = tint.blue * alpha + ground.blue * (1f - alpha),
         alpha = 1f,
     )
+
+    private fun assertBoundary(ink: Color, ground: Color) {
+        val edge = blend(ink, ground, Edge.Control)
+        val ratio = contrast(edge, ground)
+        assertTrue(
+            "the control edge 0x${edge.value.toString(16).uppercase()} on " +
+                "0x${ground.value.toString(16).uppercase()} is ${"%.2f".format(ratio)}:1, " +
+                "under the 3:1 non-text floor",
+            ratio >= 3.0,
+        )
+    }
 
     private fun assertReadable(ink: Color, ground: Color) {
         val ratio = contrast(ink, ground)

@@ -8,7 +8,13 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 
 /**
- * The one name a sheet wears, wherever the app raises one.
+ * The one visible name a sheet wears when it draws one.
+ *
+ * Some sheets are content-first and draw no visible title: Search is its
+ * field, Browse is its tabs, the share sheet is its preview, and the ayah
+ * card opens on the commentary. Those still name themselves to a screen
+ * reader through the sheet's pane title. A sheet that does draw a name draws
+ * this one.
  *
  * The app had four: Settings named itself at 20, the note sheet at 16, and
  * the tafsir and footnote sheets at 12, which made the tafsir card's own name

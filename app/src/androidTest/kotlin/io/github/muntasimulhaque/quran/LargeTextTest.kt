@@ -1,10 +1,14 @@
 package io.github.muntasimulhaque.quran
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -12,9 +16,11 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -22,13 +28,22 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.AppTheme
+import io.github.muntasimulhaque.quran.data.TextSize
+import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
+import io.github.muntasimulhaque.quran.ui.kit.AppChip
+import io.github.muntasimulhaque.quran.ui.kit.ChipKind
+import io.github.muntasimulhaque.quran.ui.kit.ChipStyle
+import io.github.muntasimulhaque.quran.ui.kit.chipMeasure
 import io.github.muntasimulhaque.quran.ui.reader.ReaderTopBar
 import io.github.muntasimulhaque.quran.ui.playback.PlaybackBar
 import io.github.muntasimulhaque.quran.ui.settings.DailyPage
+import io.github.muntasimulhaque.quran.ui.settings.SizeRow
 import io.github.muntasimulhaque.quran.ui.settings.SettingsHub
 import io.github.muntasimulhaque.quran.ui.theme.QuranTheme
+import io.github.muntasimulhaque.quran.ui.theme.Space
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -166,6 +181,81 @@ class LargeTextTest {
         }
         compose.onNodeWithText("Set").assertIsDisplayed()
         compose.onNodeWithText("Cancel").assertIsDisplayed()
+    }
+
+    @OptIn(ExperimentalLayoutApi::class)
+    @Test
+    fun chipsKeepTheirRowsApartAtTwoHundredPercent() {
+        var rowGap = 0f
+        compose.setContent {
+            QuranTheme(theme = AppTheme.Light, language = UiLanguage.English) {
+                AtFontScale(2f) {
+                    Box(Modifier.width(360.dp)) {
+                        val chip = chipMeasure()
+                        rowGap = chip.rowGap.value
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(Space.Line),
+                            verticalArrangement = Arrangement.spacedBy(chip.rowGap),
+                        ) {
+                            listOf("Surahs", "Juz", "Last Read", "Saved").forEach { label ->
+                                AppChip(
+                                    label = label,
+                                    selected = label == "Surahs",
+                                    onClick = {},
+                                    kind = ChipKind.Tab,
+                                    style = ChipStyle.Place,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        val nodes = listOf("Surahs", "Juz", "Last Read", "Saved").map { label ->
+            compose.onNodeWithText(label).getUnclippedBoundsInRoot()
+        }
+        nodes.forEach { node ->
+            assertTrue(
+                "a chip must keep the 48 dp target",
+                (node.bottom.value - node.top.value) >= 48f - 1f,
+            )
+        }
+        val rows = nodes
+            .groupBy { it.top.value }
+            .values
+            .map { row -> row.minOf { it.top.value } to row.maxOf { it.bottom.value } }
+            .sortedBy { it.first }
+        assertTrue("the chips must wrap to at least two rows in this frame", rows.size >= 2)
+        rows.zipWithNext().forEach { (above, below) ->
+            assertTrue(
+                "two chip rows must keep the chip measure's row gap, not touch",
+                below.first - above.second >= rowGap - 1f,
+            )
+        }
+    }
+
+    @Test
+    fun sizeRowsKeepTheirRailAtTwoHundredPercent() {
+        compose.setContent {
+            QuranTheme(theme = AppTheme.Light, language = UiLanguage.English) {
+                AtFontScale(2f) {
+                    Box(Modifier.width(360.dp)) {
+                        SizeRow(
+                            role = TypeRole.Translation,
+                            step = TextSize.DEFAULT,
+                            onChange = {},
+                        )
+                    }
+                }
+            }
+        }
+        val rail = compose.onNodeWithTag("scale-rail", useUnmergedTree = true)
+            .getUnclippedBoundsInRoot()
+        assertTrue(
+            "the size rail must keep its 48 dp measure at 200 percent",
+            (rail.right.value - rail.left.value) >= 48f - 1f,
+        )
     }
 }
 

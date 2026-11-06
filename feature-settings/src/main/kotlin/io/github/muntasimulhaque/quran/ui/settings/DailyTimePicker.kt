@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
@@ -28,12 +29,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -53,6 +52,11 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -60,8 +64,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.paneTitle
@@ -86,14 +90,18 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
+import io.github.muntasimulhaque.quran.ui.kit.AppChip
+import io.github.muntasimulhaque.quran.ui.kit.ChipKind
+import io.github.muntasimulhaque.quran.ui.kit.ChipStyle
 import io.github.muntasimulhaque.quran.ui.kit.RoundedSelectionColors
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.floatingLift
+import io.github.muntasimulhaque.quran.ui.kit.focusRing
+import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
 import io.github.muntasimulhaque.quran.ui.kit.roundedSelection
 import io.github.muntasimulhaque.quran.ui.reader.IconButton
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
-import io.github.muntasimulhaque.quran.ui.theme.Wash
 import io.github.muntasimulhaque.quran.ui.theme.screenSubtitle
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
@@ -610,9 +618,11 @@ private fun TimeField(
                 .combinedClickable(
                     interactionSource = press,
                     indication = null,
+                    role = Role.Button,
                     onClick = onClick,
                     onLongClick = onClick,
                 )
+                .focusRing(press, Radii.Pill)
                 .semantics {
                     contentDescription = name
                     stateDescription = value
@@ -654,6 +664,8 @@ private fun TimeTape(
     val state = rememberLazyListState(initialFirstVisibleItemIndex = initial)
     val scope = rememberCoroutineScope()
     val report = rememberUpdatedState(onSelect)
+    val reducedMotion by rememberReducedMotion()
+    val focusSource = remember { MutableInteractionSource() }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -713,6 +725,29 @@ private fun TimeTape(
                 contentPadding = PaddingValues(horizontal = pad),
                 modifier = Modifier
                     .fillMaxSize()
+                    .focusable(interactionSource = focusSource)
+                    .focusRing(focusSource, Radii.Pill)
+                    .onKeyEvent { event ->
+                        if (event.type != KeyEventType.KeyDown) return@onKeyEvent false
+                        val direction = when (event.key) {
+                            Key.DirectionLeft -> -1
+                            Key.DirectionRight -> 1
+                            else -> return@onKeyEvent false
+                        }
+                        val next = (values.indexOf(selected) + direction)
+                            .coerceIn(0, values.lastIndex)
+                        if (next != values.indexOf(selected)) {
+                            report.value(values[next])
+                            scope.launch {
+                                if (reducedMotion) {
+                                    state.scrollToItem(next)
+                                } else {
+                                    state.animateScrollToItem(next)
+                                }
+                            }
+                        }
+                        true
+                    }
                     .semantics {
                         contentDescription = label
                         stateDescription = describe
@@ -725,7 +760,11 @@ private fun TimeTape(
                             val index = target.roundToInt().coerceIn(0, values.lastIndex)
                             report.value(values[index])
                             scope.launch {
-                                state.animateScrollToItem(index)
+                                if (reducedMotion) {
+                                    state.scrollToItem(index)
+                                } else {
+                                    state.animateScrollToItem(index)
+                                }
                             }
                             true
                         }
@@ -739,7 +778,11 @@ private fun TimeTape(
                             .fillMaxSize()
                             .clickable {
                                 scope.launch {
-                                    state.animateScrollToItem(index)
+                                    if (reducedMotion) {
+                                        state.scrollToItem(index)
+                                    } else {
+                                        state.animateScrollToItem(index)
+                                    }
                                 }
                             }
                             // The tape is one adjustable node; its cells are
@@ -785,31 +828,13 @@ private fun PeriodChoice(
     chosen: Boolean,
     onClick: () -> Unit,
 ) {
-    Box(
-        modifier = Modifier
-            .selectable(selected = chosen, role = Role.RadioButton, onClick = onClick)
-            .minimumInteractiveComponentSize()
-            .clip(Radii.Pill)
-            .background(
-                if (chosen) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
-                },
-            )
-            .padding(horizontal = Space.Block, vertical = 6.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            color = if (chosen) {
-                MaterialTheme.colorScheme.onPrimary
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            },
-        )
-    }
+    AppChip(
+        label = label,
+        selected = chosen,
+        onClick = onClick,
+        kind = ChipKind.Radio,
+        style = ChipStyle.Place,
+    )
 }
 
 /** The hour as the phone's clock reads it: two digits on a 24 hour clock. */

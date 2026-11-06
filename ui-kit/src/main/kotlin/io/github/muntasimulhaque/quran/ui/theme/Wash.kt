@@ -42,6 +42,9 @@ package io.github.muntasimulhaque.quran.ui.theme
  */
 object Wash {
 
+    /** The ground of a control that cannot answer: under a door's own quiet. */
+    const val Disabled = 0.04f
+
     /** The ground under a quiet door or row: the quietest step. */
     const val Door = 0.06f
 

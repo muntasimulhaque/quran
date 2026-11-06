@@ -43,7 +43,11 @@ import io.github.muntasimulhaque.quran.data.ReadPlace
 import io.github.muntasimulhaque.quran.data.SavedAyah
 import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.feature.browse.R
+import io.github.muntasimulhaque.quran.ui.kit.AppChip
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
+import io.github.muntasimulhaque.quran.ui.kit.ChipKind
+import io.github.muntasimulhaque.quran.ui.kit.ChipStyle
+import io.github.muntasimulhaque.quran.ui.kit.chipMeasure
 import io.github.muntasimulhaque.quran.ui.kit.AppSnackbar
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
@@ -289,6 +293,7 @@ fun BrowseSheet(
                 // visible and whole. Each tab is its own rounded chip, the
                 // shape search already taught the reader, rather than one
                 // strip that would have to break its own outline to wrap.
+                val chip = chipMeasure()
                 FlowRow(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -298,13 +303,15 @@ fun BrowseSheet(
                     // filters apply to a list below them (owner decision,
                     // the theme and consistency session).
                     horizontalArrangement = Arrangement.spacedBy(Space.Line, Alignment.CenterHorizontally),
-                    verticalArrangement = Arrangement.spacedBy(0.dp),
+                    verticalArrangement = Arrangement.spacedBy(chip.rowGap),
                 ) {
                     BrowseTab.entries.forEach { entry ->
-                        BrowseTabChip(
+                        AppChip(
                             label = stringResource(entry.labelRes),
-                            active = entry == tab,
+                            selected = entry == tab,
                             onClick = { tab = entry },
+                            kind = ChipKind.Tab,
+                            style = ChipStyle.Place,
                         )
                     }
                 }

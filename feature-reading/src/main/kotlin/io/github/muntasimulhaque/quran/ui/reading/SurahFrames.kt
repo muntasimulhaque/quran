@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
@@ -21,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -41,11 +39,11 @@ import io.github.muntasimulhaque.quran.data.Surah
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
 import io.github.muntasimulhaque.quran.feature.reading.R
+import io.github.muntasimulhaque.quran.ui.kit.AppChevron
+import io.github.muntasimulhaque.quran.ui.kit.ChevronRole
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
+import io.github.muntasimulhaque.quran.ui.kit.focusRing
 import io.github.muntasimulhaque.quran.ui.rich.RichBlocks
-import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
-import io.github.muntasimulhaque.quran.ui.glyph.Icon
-import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
 import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
@@ -193,6 +191,7 @@ internal fun SurahOpening(
                     .padding(top = Space.Block)
                     .clip(Radii.Card)
                     .background(wash)
+                    .focusRing(press, Radii.Card)
                     .clickable(
                         interactionSource = press,
                         indication = ripple(color = MaterialTheme.colorScheme.primary),
@@ -247,7 +246,7 @@ internal fun ReadingReminderOffer(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = Space.Section, bottom = Space.Row)
-            .clip(Radii.Card)
+            .clip(Radii.Tile)
             .background(MaterialTheme.colorScheme.primary.copy(alpha = Wash.Door))
             .padding(horizontal = Space.Block, vertical = Space.Block)
             .testTag("reading-reminder-offer"),
@@ -300,6 +299,7 @@ internal fun SurahEnd(
     onNextSurah: (Int) -> Unit,
 ) {
     val next = surah.number + 1
+    val nextPress = remember { MutableInteractionSource() }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -327,14 +327,20 @@ internal fun SurahEnd(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = Space.Block)
-                    .clip(Radii.Card)
+                    .clip(Radii.Tile)
                     .background(MaterialTheme.colorScheme.primary.copy(alpha = Wash.Door))
                     // A card that opens a surah is a door, and every door says
                     // so to TalkBack; this one answered a tap with the words
                     // alone (owner decision, the theme and consistency
                     // session).
                     .semantics { role = Role.Button }
-                    .clickable { onNextSurah(next) }
+                    .focusRing(nextPress, Radii.Tile)
+                    .clickable(
+                        interactionSource = nextPress,
+                        indication = ripple(color = MaterialTheme.colorScheme.primary),
+                        role = Role.Button,
+                        onClick = { onNextSurah(next) },
+                    )
                     .padding(horizontal = Space.Block, vertical = Space.Row),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -354,12 +360,9 @@ internal fun SurahEnd(
                         modifier = Modifier.padding(top = Space.Tight),
                     )
                 }
-                IconGlyph(
-                    icon = Icon.Chevron,
+                AppChevron(
+                    role = ChevronRole.Next,
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .size(GlyphSize.ChevronRow)
-                        .rotate(-90f),
                 )
             }
         } else if (next > 114) {

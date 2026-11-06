@@ -5,21 +5,13 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.indication
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,27 +19,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.SearchSources
 import io.github.muntasimulhaque.quran.feature.search.R
-import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
-import io.github.muntasimulhaque.quran.ui.glyph.Icon
-import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
+import io.github.muntasimulhaque.quran.ui.kit.AppChip
+import io.github.muntasimulhaque.quran.ui.kit.DisclosurePress
+import io.github.muntasimulhaque.quran.ui.kit.DisclosureRow
+import io.github.muntasimulhaque.quran.ui.kit.ChipKind
+import io.github.muntasimulhaque.quran.ui.kit.ChipStyle
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
-import io.github.muntasimulhaque.quran.ui.kit.focusRing
+import io.github.muntasimulhaque.quran.ui.kit.chipMeasure
 import io.github.muntasimulhaque.quran.ui.kit.rememberReducedMotion
-import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
-import io.github.muntasimulhaque.quran.ui.theme.Wash
 
 /**
  * One source the reader's search can read, with the words it wears and the
@@ -82,7 +67,7 @@ private data class OfferedSource(
  * Seven sources start on, and seven solid pills over the results read as
  * seven pressed buttons: the accent became the page's background instead of
  * the one chosen thing. A chosen chip now wears the ayah door's own open
- * state, the accent at [Wash.Control] with the accent's ink, so a set of
+ * state, the accent at `Wash.Control` with the accent's ink, so a set of
  * chosen sources reads as what the reader turned on and the solid accent
  * stays for the one place and the one answer. The check stays beside the
  * word, so the state survives a color the reader cannot see.
@@ -207,51 +192,21 @@ internal fun FilterRow(
         if (open) focusManager.clearFocus()
     }
     val reducedMotion = rememberReducedMotion()
-    val expanded = stringResource(R.string.search_filter_state_expanded)
-    val collapsed = stringResource(R.string.search_filter_state_collapsed)
-    val press = remember { MutableInteractionSource() }
     val chip = chipMeasure()
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = Space.Line, bottom = Space.Tight),
     ) {
-        // The header is a door, drawn the way the app draws every status line
-        // that opens something: the words, the state, and a chevron that
-        // turns to say which way the list will move, with no fill, so it is
-        // read as a door and never as a chip that happens to be off. The
-        // whole row is the target, and its own gap keeps the words off the
-        // ripple (owner decision, this session).
-        //
-        // The 12 dp gap the words keep from the press shape is paid outside
-        // the click, not inside it: the words stand on the page's own gutter
-        // and the press shape hangs to their left, so the door's label lands
-        // on the same rail as the chips it opens (owner decision, this
-        // session: the words stood 12 dp inside every other block).
-        Row(
-            modifier = Modifier
-                .padding(start = Space.Gutter - Space.Row)
-                // The door is built the way every other shape in the app is:
-                // the click owns the 48 dp target, and the fill and the ripple
-                // are drawn on the pill inside it, the chip's own 8 dp around
-                // the label's 20 dp line. Left the other way round the clip
-                // wrapped the whole target, so the highlight read as a 48 dp
-                // slab over a chip-sized row (owner report, this session).
-                .clickable(
-                    interactionSource = press,
-                    indication = null,
-                    role = Role.Button,
-                    onClick = { open = !open },
-                )
-                .minimumInteractiveComponentSize()
-                .clip(Radii.Pill)
-                .focusRing(press, Radii.Pill)
-                .indication(press, ripple(color = MaterialTheme.colorScheme.onSurfaceVariant))
-                .semantics {
-                    stateDescription = if (open) expanded else collapsed
-                }
-                .padding(horizontal = Space.Row, vertical = Space.Line),
-            verticalAlignment = Alignment.CenterVertically,
+        // The header is the app's one disclosure row: the words, the state,
+        // and the chevron that turns. The press is a pill inside the 48 dp
+        // target, hung to the left of the page's own gutter, so the words
+        // land on the rail the chips below them stand on.
+        DisclosureRow(
+            expanded = open,
+            onToggle = { open = !open },
+            modifier = Modifier.padding(start = Space.Gutter - Space.Row),
+            press = DisclosurePress.Pill,
         ) {
             Text(
                 text = stringResource(R.string.search_filter),
@@ -267,17 +222,6 @@ internal fun FilterRow(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = Space.Line),
-            )
-            // The arrow sits with the words it belongs to, and turns to say
-            // which way the list will move: down while it is hidden, up once
-            // it is open.
-            IconGlyph(
-                icon = Icon.Chevron,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .padding(start = 6.dp)
-                    .size(GlyphSize.ChevronRow)
-                    .rotate(if (open) 180f else 0f),
             )
         }
         AnimatedVisibility(
@@ -307,7 +251,13 @@ internal fun FilterRow(
                     verticalArrangement = Arrangement.spacedBy(chip.rowGap),
                 ) {
                     offered.forEach { source ->
-                        FilterChip(source.label, source.on) { on -> onChange(source.set(on)) }
+                        AppChip(
+                            label = source.label,
+                            selected = source.on,
+                            onClick = { onChange(source.set(!source.on)) },
+                            kind = ChipKind.Toggle,
+                            style = ChipStyle.Toggle,
+                        )
                     }
                 }
                 // Seven ways to narrow and no way back to everything is a
@@ -324,85 +274,5 @@ internal fun FilterRow(
                 }
             }
         }
-    }
-}
-
-/**
- * One source, on or off, as a chip the reader taps. A chosen chip carries the
- * check the app uses for a mark, so its state is read at a glance instead of
- * being guessed from the fill alone; the whole chip is one checkbox to
- * TalkBack, which says whether it is on.
- */
-@Composable
-internal fun FilterChip(label: String, on: Boolean, onChange: (Boolean) -> Unit) {
-    // A chip is a small word around a small mark, and it is the same chip the
-    // app draws everywhere: the pill is the label's own 20 dp line with 8 dp
-    // above and below, so it reads as a chip and not as a slab, and it follows
-    // the system font scale because it is the type plus padding and not a
-    // fixed box (owner decision, this session: the pill had grown to 48 dp,
-    // the size of the whole touch target, and a chip is not a target's size).
-    // The click and the node a screen reader focuses still carry the app's
-    // 48 dp target, so the source a reader cannot hit is not a source they can
-    // turn off (owner decision, the accessibility test): the minimum wraps
-    // the pill, the finger gets 48 dp, and the eye gets the chip. The gap the
-    // flow leaves between two chips is the gap the eye reads: a chip's target
-    // is the pill's own width across, so the flow's own Space.Line is what
-    // stands between two chips, the app's cluster gap, which the standalone
-    // action pairs do not share (owner decision, this session). The ripple is
-    // drawn on the pill inside the click node, not on the node itself: an
-    // indication left on the click would flash a rectangle over the shape the
-    // reader is looking at.
-    //
-    // The chosen chip wears the accent at [Wash.Control] with the accent's
-    // own ink, the ayah door's open state, rather than the solid accent: seven
-    // sources start on, and seven full-strength pills read as seven pressed
-    // buttons over the results (owner decision, this session). The check is
-    // the second signal, so the state is still read by a reader who cannot
-    // tell the two tints apart.
-    val press = remember { MutableInteractionSource() }
-    val ink = if (on) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    }
-    Row(
-        modifier = Modifier
-            .toggleable(
-                value = on,
-                role = Role.Checkbox,
-                interactionSource = press,
-                indication = null,
-                onValueChange = onChange,
-            )
-            .minimumInteractiveComponentSize()
-            .clip(Radii.Pill)
-            .focusRing(press, Radii.Pill)
-            .background(
-                if (on) {
-                    MaterialTheme.colorScheme.primary.copy(alpha = Wash.Control)
-                } else {
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = Wash.Door)
-                },
-            )
-            .indication(press, ripple(color = ink))
-            .padding(horizontal = Space.Row, vertical = Space.Line),
-        verticalAlignment = Alignment.CenterVertically,
-        // The mark and the word are one thought, but not one crowded glyph:
-        // the app's cluster gap sits between them, where 5 dp read as if the
-        // check belonged to the first letter (owner decision, this session).
-        horizontalArrangement = Arrangement.spacedBy(Space.Line),
-    ) {
-        if (on) {
-            IconGlyph(
-                icon = Icon.Check,
-                tint = ink,
-                modifier = Modifier.size(GlyphSize.Check),
-            )
-        }
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            color = ink,
-        )
     }
 }

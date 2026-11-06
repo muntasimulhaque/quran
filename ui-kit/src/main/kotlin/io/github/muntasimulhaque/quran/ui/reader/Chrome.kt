@@ -61,20 +61,18 @@ fun IconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     tint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    active: Boolean = false,
     /** A quarter turn for a mark that points a way, like the back chevron. */
     rotation: Float = 0f,
 ) {
-    val ink = if (active) MaterialTheme.colorScheme.primary else tint
     GlyphButton(
         description = description,
         onClick = onClick,
-        tint = ink,
+        tint = tint,
         modifier = modifier,
     ) {
         IconGlyph(
             icon = icon,
-            tint = ink,
+            tint = tint,
             modifier = Modifier
                 .size(GlyphSize.Control)
                 .then(if (rotation != 0f) Modifier.rotate(rotation) else Modifier),

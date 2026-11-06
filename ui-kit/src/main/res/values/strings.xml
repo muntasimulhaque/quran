@@ -24,6 +24,11 @@
          the reading and Browse both draw the same undo action. -->
     <string name="action_undo">Undo</string>
 
+    <!-- The one state a door speaks when it opens or closes. A row that
+         unfolds says so in the same words wherever it stands. -->
+    <string name="door_expanded">Expanded</string>
+    <string name="door_collapsed">Collapsed</string>
+
     <!-- The app's one failure vocabulary: one sentence for one cause, drawn
          by every surface that can fail, so a download that dies in the pill
          says the same words as the row in Settings that asked for it. The

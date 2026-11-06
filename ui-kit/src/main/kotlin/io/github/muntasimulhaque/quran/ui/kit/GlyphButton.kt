@@ -20,7 +20,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
+import io.github.muntasimulhaque.quran.ui.theme.ControlMetrics
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 
 /**
@@ -55,10 +55,10 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  */
 
 /** The touch target a round control owes a finger. */
-val GlyphTarget = 48.dp
+val GlyphTarget = ControlMetrics.Target
 
 /** The circle a round control's press lights, inside [GlyphTarget]. */
-val GlyphPress = 40.dp
+val GlyphPress = ControlMetrics.Press
 
 /**
  * One round control: the target, the spoken name, the press, and the mark the

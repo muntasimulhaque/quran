@@ -4,6 +4,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import io.github.muntasimulhaque.quran.ui.theme.Radii
@@ -18,6 +19,11 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * fill, and the ink were typed twice, so the two could drift the way the
  * app's failure sentences already had. There is one shape now, and the
  * surfaces differ only in where they hang it.
+ *
+ * The action is the app's own [TextButton], not Material's bare action text:
+ * a snackbar is not the one place a word that acts stops wearing a shape.
+ * The pill sits inside the same sentence, and Undo or Settings reads as the
+ * one thing the reader can do without becoming a second voice.
  */
 @Composable
 fun AppSnackbar(
@@ -26,13 +32,26 @@ fun AppSnackbar(
 ) {
     SnackbarHost(hostState = hostState, modifier = modifier) { data ->
         Snackbar(
-            snackbarData = data,
             shape = Radii.Card,
             // The one step above the sheet, so the sentence stands on the page
             // it interrupts rather than a shade of its own.
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             contentColor = MaterialTheme.colorScheme.onSurface,
-            actionColor = MaterialTheme.colorScheme.primary,
-        )
+            action = data.visuals.actionLabel?.let { label ->
+                {
+                    TextButton(
+                        label = label,
+                        onClick = { data.performAction() },
+                        pillTag = "snackbar-action-pill",
+                    )
+                }
+            },
+        ) {
+            Text(
+                text = data.visuals.message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
     }
 }

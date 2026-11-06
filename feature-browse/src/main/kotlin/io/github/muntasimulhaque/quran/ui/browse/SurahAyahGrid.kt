@@ -8,13 +8,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -28,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -43,8 +41,8 @@ import io.github.muntasimulhaque.quran.feature.browse.R
 import io.github.muntasimulhaque.quran.ui.kit.SheetDragGate
 import io.github.muntasimulhaque.quran.ui.kit.focusRing
 import io.github.muntasimulhaque.quran.ui.kit.sheetDragGate
-import io.github.muntasimulhaque.quran.ui.glyph.Icon
-import io.github.muntasimulhaque.quran.ui.reader.IconButton
+import io.github.muntasimulhaque.quran.ui.kit.PageHead
+import io.github.muntasimulhaque.quran.ui.theme.ControlMetrics
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
@@ -137,24 +135,11 @@ internal fun SurahAyahGrid(
  */
 @Composable
 private fun SurahGridHeader(surah: Surah, onBack: () -> Unit) {
-    val back = stringResource(R.string.browse_back)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 6.dp, end = Space.Gutter, top = 2.dp, bottom = Space.Line),
-        verticalAlignment = Alignment.CenterVertically,
+    PageHead(
+        onBack = onBack,
+        backDescription = stringResource(R.string.browse_back),
+        backModifier = Modifier.testTag("surah-ayah-back"),
     ) {
-        // One back button for every page head, the same the settings pages
-        // draw; the test tag stays with the control a tour taps (owner
-        // decision, the theme and consistency session).
-        IconButton(
-            icon = Icon.Chevron,
-            description = back,
-            onClick = onBack,
-            modifier = Modifier.testTag("surah-ayah-back"),
-            tint = MaterialTheme.colorScheme.onSurface,
-            rotation = 90f,
-        )
         SurahNameBlock(
             surah = surah,
             modifier = Modifier
@@ -175,9 +160,11 @@ private fun SurahGridHeader(surah: Surah, onBack: () -> Unit) {
  * The cell is 48 dp tall, the floor for a thing a finger aims at, and the
  * grid's columns are as wide as that. The number is the content, so it is
  * 15 at Medium with tabular figures; it is not a caption. The reader's place
- * is a 40 dp filled circle, the only resting shape in the grid, and the press
- * is a 40 dp circular ripple, so the target the finger gets is larger than
- * the shape the eye reads. Both states are spoken, so the grid means the same
+ * is a filled circle at least 40 dp across, the only resting shape in the
+ * grid, and the press is the same circular ripple, so the target the finger
+ * gets is larger than the shape the eye reads. The circle grows with the
+ * number, so a three-digit ayah at 200 percent is never clipped. Both states
+ * are spoken, so the grid means the same
  * thing to TalkBack.
  */
 @Composable
@@ -193,7 +180,7 @@ private fun AyahNumberCell(number: Int, current: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 48.dp)
+            .heightIn(min = ControlMetrics.Target)
             .clickable(
                 interactionSource = press,
                 indication = null,
@@ -208,7 +195,10 @@ private fun AyahNumberCell(number: Int, current: Boolean, onClick: () -> Unit) {
     ) {
         Box(
             modifier = Modifier
-                .size(40.dp)
+                .defaultMinSize(
+                    minWidth = ControlMetrics.Press,
+                    minHeight = ControlMetrics.Press,
+                )
                 .clip(CircleShape)
                 .focusRing(press, CircleShape)
                 .then(

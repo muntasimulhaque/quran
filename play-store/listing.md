@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 16.3 (versionCode 165)
+Version: 16.4 (versionCode 166)
 
 ## Listing
 
@@ -173,6 +173,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Not now, Download, the page, or Back), so every frame that
 wants a clean page is taken before it.
+
+## Release notes (16.4, 494 characters)
+16.4 makes the interface one hand. Every action is one blue, every chip and door shares one measure, and the theme swatches keep a visible edge. Search results lose the arrow that pointed the wrong way, the snackbar's action is a pill, and the safe Keep is the solid answer. At 200 percent text, Browse chips keep their gap, size rails keep their room, and ayah numbers no longer clip. Quran text, translations, tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (16.3, 478 characters)
 16.3 makes the reciter's word follow the voice. The highlight waits for each ayah's first sound and clears when the voice stops, instead of starting early and lingering. It moves at the screen's own rate, so it keeps up at any speed, and it no longer blinks when the ayah changes. Where the timing cannot explain a long stretch, it rests instead of sitting on the wrong word. Text, translations, tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.

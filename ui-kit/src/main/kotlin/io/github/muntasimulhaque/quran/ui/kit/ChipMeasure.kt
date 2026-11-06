@@ -1,4 +1,4 @@
-package io.github.muntasimulhaque.quran.ui.search
+package io.github.muntasimulhaque.quran.ui.kit
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -25,7 +25,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * the reader's text is smaller than the default. A mark stays 18 dp: it is a
  * drawing, and the word beside it is the thing that scales.
  */
-internal data class ChipMeasure(
+data class ChipMeasure(
     /** The capsule the reader sees. */
     val pill: Dp,
     /** The target the finger gets, never under the app's 48 dp floor. */
@@ -46,7 +46,7 @@ internal data class ChipMeasure(
  * line unspecified; every theme this app ships sets it.
  */
 @Composable
-internal fun chipMeasure(): ChipMeasure {
+fun chipMeasure(): ChipMeasure {
     val density = LocalDensity.current
     val line = MaterialTheme.typography.labelLarge.lineHeight
     val pill = if (line.isSp) {

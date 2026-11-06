@@ -27,6 +27,7 @@ import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.SavedStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.feature.reading.R as ReadingR
+import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -192,7 +193,7 @@ class AyahActionsTest {
         waitForMenuClosed()
         assertEquals(
             "the door is closed again once its menu is away",
-            compose.activity.getString(ReadingR.string.reading_door_collapsed),
+            compose.activity.getString(UiKitR.string.door_collapsed),
             doorState(),
         )
 

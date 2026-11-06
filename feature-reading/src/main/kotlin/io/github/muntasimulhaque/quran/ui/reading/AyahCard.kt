@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.text.selection.SelectionState
@@ -25,16 +24,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.stateDescription
 import io.github.muntasimulhaque.quran.core.RichText
 import io.github.muntasimulhaque.quran.core.TextBlock
 import io.github.muntasimulhaque.quran.core.ayahSpan
@@ -45,6 +41,7 @@ import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.AddDoor
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
+import io.github.muntasimulhaque.quran.ui.kit.DisclosureRow
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
@@ -52,11 +49,7 @@ import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
-import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
-import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
-import io.github.muntasimulhaque.quran.ui.glyph.Icon
-import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.rich.RichBlocks
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
@@ -376,30 +369,12 @@ private fun DoorRow(
     eyebrow: String,
     title: String,
     subtitle: String,
-    open: Boolean?,
+    open: Boolean,
     onClick: () -> Unit,
 ) {
-    // A door that unfolds says whether its content is shown; the row that
-    // only opens the settings for a missing pack is an action, not a door,
-    // and it says nothing about a state it does not have.
-    val state = open?.let {
-        stringResource(if (it) R.string.card_door_shown else R.string.card_door_hidden)
-    }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .sheetRow(onClick = onClick, role = Role.Button)
-            .semantics {
-                if (state != null) stateDescription = state
-            }
-            // The row's own room is the app's row gap, not the block gap: the
-            // sheet row keeps its own 2 dp card gap, and each door keeps 12
-            // above and below, so two doors' heads stand about 28 dp apart,
-            // the room the card keeps between two things of one kind; the
-            // sheet's name sits closer to the first door than a section break
-            // (owner decision, this session).
-            .padding(horizontal = Space.Gutter - SheetRowGutter, vertical = Space.Row),
-        verticalAlignment = Alignment.CenterVertically,
+    DisclosureRow(
+        expanded = open,
+        onToggle = onClick,
     ) {
         // The value is under its name, the way every row in every sheet
         // reads: it stood in a right-hand column, the one grammar the card
@@ -416,21 +391,6 @@ private fun DoorRow(
                 )
             }
         }
-        // The arrow is the door's only sign: a row whose content unfolds
-        // under it has to say so, and it has to say it loudly enough to be
-        // seen without a tap. It points down while the content is hidden and
-        // turns up once the content is under it.
-        IconGlyph(
-            icon = Icon.Chevron,
-            tint = if (open == true) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            },
-            modifier = Modifier
-                .size(GlyphSize.ChevronRow)
-                .rotate(if (open == true) 180f else 0f),
-        )
     }
 }
 
@@ -571,7 +531,10 @@ private fun TafsirOffer(
         )
         Text(
             text = contentPackName(pack.id, pack.name),
-            style = MaterialTheme.typography.titleMedium,
+            // The same pack name the card and the settings list draw: a row's
+            // name, not a page's Book line (owner decision, the consistency
+            // audit).
+            style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(top = Space.Tight),
         )

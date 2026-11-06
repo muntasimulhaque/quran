@@ -18,8 +18,6 @@
          caret turns and the capsule takes the accent while it is open, the way
          the search sheet's filter door says which way it will move. -->
     <string name="reading_ayah_door">Ayah %1$s actions</string>
-    <string name="reading_door_expanded">Expanded</string>
-    <string name="reading_door_collapsed">Collapsed</string>
     <!-- The keep the reader made with Save, spoken with the door. -->
     <string name="reading_door_saved">Saved</string>
 
@@ -31,8 +29,6 @@
     <string name="card_tafsir_offer_body">The commentary in this language, %1$s. It downloads once and then works offline.</string>
     <string name="card_tafsir_add">Add · %1$s</string>
     <string name="card_tafsir_not_now">Not now</string>
-    <string name="card_door_shown">Shown</string>
-    <string name="card_door_hidden">Hidden</string>
     <string name="card_note_take">Take a note</string>
     <string name="card_note_edit">Edit note</string>
     <string name="card_note_hint">Write a note for this ayah</string>

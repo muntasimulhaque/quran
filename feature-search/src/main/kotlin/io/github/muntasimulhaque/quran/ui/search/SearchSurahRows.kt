@@ -23,9 +23,6 @@ import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.rich.TajweedText
-import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
-import io.github.muntasimulhaque.quran.ui.glyph.Icon
-import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
 import io.github.muntasimulhaque.quran.ui.theme.amiriDisplay
 import io.github.muntasimulhaque.quran.ui.theme.arabicStyle
@@ -53,7 +50,7 @@ internal fun ReferenceRow(
             Text(
                 text = listOfNotNull(surahName, localizedDigits(ayah.verseKey))
                     .joinToString("  ·  "),
-                style = MaterialTheme.typography.titleMedium,
+                style = bookRowName(),
                 color = MaterialTheme.colorScheme.onSurface,
             )
             TajweedText(
@@ -71,13 +68,6 @@ internal fun ReferenceRow(
                     .padding(top = Space.Line),
             )
         }
-        IconGlyph(
-            icon = Icon.Chevron,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-                .padding(start = Space.Tight)
-                .size(GlyphSize.ChevronRow),
-        )
     }
 }
 
@@ -93,8 +83,11 @@ internal fun SurahRow(surah: Surah, onSurah: (Surah) -> Unit) {
         Column(Modifier.weight(1f)) {
             Text(
                 text = stringResource(R.string.search_label_surah),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary,
+                // The label names the kind of result; it is not an action, so
+                // it wears the group label's voice and the quiet ink (owner
+                // decision, the consistency audit).
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
                 text = surah.nameSimple,
@@ -119,13 +112,6 @@ internal fun SurahRow(surah: Surah, onSurah: (Surah) -> Unit) {
         Text(
             text = surah.nameArabic,
             style = amiriDisplay(TypeLadder.LIST_ARABIC_SP, MaterialTheme.colorScheme.onSurfaceVariant),
-        )
-        IconGlyph(
-            icon = Icon.Chevron,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-                .padding(start = Space.Tight)
-                .size(GlyphSize.ChevronRow),
         )
     }
 }

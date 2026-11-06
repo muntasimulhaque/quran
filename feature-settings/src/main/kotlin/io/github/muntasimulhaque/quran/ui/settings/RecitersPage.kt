@@ -3,6 +3,7 @@ package io.github.muntasimulhaque.quran.ui.settings
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -22,7 +22,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -35,17 +34,14 @@ import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.data.Recitation
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRow
+import io.github.muntasimulhaque.quran.ui.kit.DisclosureRow
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRowNameInset
 import io.github.muntasimulhaque.quran.ui.kit.ChoiceRowTrailingInset
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
-import io.github.muntasimulhaque.quran.ui.kit.sheetRow
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
-import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
-import io.github.muntasimulhaque.quran.ui.glyph.Icon
-import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Space
 /** The pages the settings hub opens, one at a time. */
 /**
@@ -209,16 +205,13 @@ private fun ReciterDownloads(
  */
 @Composable
 private fun ReciterDownloadsDoor(open: Boolean, count: Int?, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            // The click owns the 48 dp node, not a wrapper outside it (owner
-            // decision, the accessibility test), and the press is drawn on a
-            // card inset from the sheet's edge.
-            .sheetRow(onClick = onClick)
-            .minimumInteractiveComponentSize()
-            .padding(start = ChoiceRowNameInset - SheetRowGutter, end = Space.Row - SheetRowGutter),
-        verticalAlignment = Alignment.CenterVertically,
+    DisclosureRow(
+        expanded = open,
+        onToggle = onClick,
+        contentPadding = PaddingValues(
+            start = ChoiceRowNameInset - SheetRowGutter,
+            end = Space.Row - SheetRowGutter,
+        ),
     ) {
         Text(
             text = if (count == null) {
@@ -228,16 +221,6 @@ private fun ReciterDownloadsDoor(open: Boolean, count: Int?, onClick: () -> Unit
             },
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary,
-        )
-        // The arrow sits with the name it belongs to, and turns to say which
-        // way the list will move: down while it is hidden, up once it is open.
-        IconGlyph(
-            icon = Icon.Chevron,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .padding(start = 6.dp)
-                .size(GlyphSize.ChevronRow)
-                .rotate(if (open) 180f else 0f),
         )
     }
 }

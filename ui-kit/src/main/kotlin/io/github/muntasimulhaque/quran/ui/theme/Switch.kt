@@ -10,14 +10,12 @@ import androidx.compose.ui.graphics.Color
  * Material's switch takes its unchecked colors from the scheme, and the
  * scheme gives it two tones that each already mean something else: the knob
  * is `outline` and the track is `surfaceContainerHighest`. On a night ground
- * those two are the same paint. The night hairline is `#2A3644` and its
- * container tone is `#263443`, four levels away, so the knob measured 1.03:1
- * against the track it sits in: an off switch was one
- * flat lump with no knob in it, and the ring that was supposed to draw its
- * edge was the same lump again (owner report, forty-sixth session). Paper
- * only read because its hairline happens to sit 24 levels off white, which
- * is luck and not a choice, and it still measured 1.30:1, under the 3:1 a
- * control boundary owes.
+ * those two can collapse to one paint, so the knob has no edge against the
+ * track it sits in, and the ring that was supposed to draw its edge is the
+ * same lump again (owner report, forty-sixth session). The paper ground only
+ * read because its hairline happened to sit a few levels off white, which is
+ * luck and not a choice, and it still measured under the 3:1 a control
+ * boundary owes.
  *
  * So the switch is declared, per ground, in the app's own tones. The knob and
  * the ring take the ground's muted voice, which is the tone every quiet word

@@ -41,6 +41,8 @@ import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.kit.SectionHead
+import io.github.muntasimulhaque.quran.ui.kit.ChipMeasure
+import io.github.muntasimulhaque.quran.ui.kit.chipMeasure
 import io.github.muntasimulhaque.quran.ui.kit.focusRing
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
@@ -93,7 +95,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
  * system scale the mark stays 18 dp while the capsule and the target grow
  * around it, because the mark is a fixed drawing and the word beside it is
  * the thing that scales. The query is the thing the reader came back for, so
- * its word takes the primary ink and the X stays in the quiet tone. Its
+ * its word takes the row's own ink and the X stays in the quiet tone. Its
  * spoken name is "Remove <query>", so a screen reader reaches the one word
  * without a custom action and without the long press the chip used to hide.
  *
