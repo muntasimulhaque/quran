@@ -275,8 +275,13 @@ object Search {
         val readable = RichText.plain(text)
         val ranges = matchRanges(readable, terms, arabic)
         if (ranges.isEmpty() || readable.length <= window * 2) return readable to ranges
+        // The window is one match's, not the span of every match: a tafsir
+        // passage can carry the query in two places thousands of letters
+        // apart, and a window that reached from the first to the last was
+        // the whole passage, with a Quran quotation in the middle of it that
+        // the trim never looked at (owner report, this build).
         val first = ranges.first().first
-        val last = ranges.last().last + 1
+        val last = ranges.first().last + 1
         var start = (first - window).coerceAtLeast(0)
         var end = (last + window).coerceAtMost(readable.length)
         while (start > 0 && !readable[start - 1].isWhitespace()) start--
