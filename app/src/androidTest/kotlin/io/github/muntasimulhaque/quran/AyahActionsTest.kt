@@ -5,9 +5,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.assertWidthIsEqualTo
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
@@ -28,7 +25,6 @@ import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.SavedStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.feature.reading.R as ReadingR
-import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -41,21 +37,20 @@ import org.junit.runner.RunWith
 /**
  * The ayah's own door, and the one menu it opens.
  *
- * The reading's signifier is the number at each ayah's head: quiet at rest, a
- * capsule with a caret while its menu is open, and the same door whether the
- * reader is sighted or using a screen reader (owner decision, this session:
- * the one-tap ayah of 6.5 and the long press that followed it are both gone,
- * because a signifier that has to be taught is not a signifier). The menu is
- * the app's one popup, the same one the playback pill opens, and every answer
- * closes it and then does its work.
+ * The reading's signifier is the number at each ayah's head: the app's action
+ * color, no capsule, and the same door whether the reader is sighted or using
+ * a screen reader. The whole verse is not a button: a tap on the Quran is the
+ * page's own tap, and the menu the number opens is the app's one popup, so a
+ * tap outside it puts it away instead of choosing another ayah (owner
+ * decision, this session: 16.6's whole-verse tap was half a solution, because
+ * the page has almost no room left for a tap that means something else).
  *
  * The deeper door always stands in the menu. Without a pack it opens the
  * offer that names the language, the pack, and the size, rather than hiding
- * the reader's question (owner decision, this session). The two marked rows
- * say the truth of their own mark: a note keeps its ayah in Saved and never
- * presses Save, one tap of Save then lights both because the reader has now
- * pressed Save, and the second tap asks before it takes the note with it
- * (owner report).
+ * the reader's question. The two marked rows say the truth of their own mark:
+ * a note keeps its ayah in Saved and never presses Save, one tap of Save then
+ * lights both because the reader has now pressed Save, and the second tap asks
+ * before it takes the note with it (owner report).
  *
  * The library is prepared before the activity starts, the order a reader
  * creates it in, and the door is the only thing the test touches.
@@ -179,22 +174,23 @@ class AyahActionsTest {
     }
 
     @Test
-    fun theBarIsAWholeTargetAndSaysItsState() {
+    fun theDoorIsAWholeTargetAndThePagePutsItsMenuAway() {
         waitForReading()
-        compose.onNodeWithTag(doorName()).assertIsDisplayed()
+        // The door is the number alone, but its target is the 48 dp every
+        // control owes a finger.
+        compose.onNodeWithTag(doorName()).assertIsDisplayed().assertHeightIsEqualTo(48.dp)
 
         openTheDoor()
-        compose.onNodeWithTag("ayah-bar", useUnmergedTree = true).assertHeightIsEqualTo(48.dp)
 
-        // A tap on the page puts the menu away, and the door says it is
-        // closed again while it is still on the glass.
+        // A tap on the page puts the menu away, and it cannot land on another
+        // verse: the popup is a window of its own, and a tap outside it only
+        // dismisses it (owner decision, this session).
         val page = compose.activity.getString(ReadingR.string.reading_page_description)
         compose.onAllNodesWithContentDescription(page).onFirst().tapThePaper()
         waitForMenuClosed()
-        compose.onAllNodesWithTag("ayah-bar", useUnmergedTree = true).assertCountEquals(0)
 
         // And a scroll of the reader's own puts it away too, because its door
-        // moves under it (owner decision, this session).
+        // moves under it.
         openTheDoor()
         compose.onNodeWithContentDescription(page).performTouchInput {
             swipe(
@@ -207,13 +203,11 @@ class AyahActionsTest {
     }
 
     @Test
-    fun theBarCarriesEveryActOnOneRow() {
+    fun theMenuCarriesEveryAct() {
         waitForReading()
         openTheDoor()
 
-        // The bar is one capsule of five equal cells, all of them on the
-        // reading's line: no act is behind a sideways drag.
-        compose.onNodeWithTag("ayah-bar", useUnmergedTree = true).assertIsDisplayed()
+        // The menu is the app's one popup, and it carries every act.
         listOf(
             R.string.action_play,
             R.string.action_tafsir,
@@ -277,13 +271,6 @@ class AyahActionsTest {
         }
     }
 
-    /** What the door says about its own state, in the app's words. */
-    private fun doorState(): String? = compose
-        .onNodeWithTag(doorName())
-        .fetchSemanticsNode()
-        .config
-        .getOrElseNullable(SemanticsProperties.StateDescription) { null }
-
     /** What a row of the menu says about its own mark, in the app's words. */
     private fun markOf(label: String): String? = compose
         .onNodeWithText(label)
@@ -291,8 +278,8 @@ class AyahActionsTest {
         .config
         .getOrElseNullable(SemanticsProperties.StateDescription) { null }
 
-    /** The first verse's own node, the tap the head door used to answer. */
-    private fun doorName(): String = "ayah-1:1"
+    /** The first verse's own number, and the tap it answers. */
+    private fun doorName(): String = "door-1:1"
 
     private fun waitForReading() {
         val readingPage = compose.activity.getString(ReadingR.string.reading_page_description)
@@ -304,12 +291,9 @@ class AyahActionsTest {
         }
     }
 
-    /** Opens the first verse's own bar and waits for its cells. */
+    /** Opens the first verse's own menu and waits for its rows. */
     private fun openTheDoor() {
-        compose.onAllNodesWithTag(doorName()).onFirst().performClick()
-        compose.waitUntil(timeoutMillis = 60_000) {
-            compose.onAllNodesWithTag("ayah-bar", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
-        }
+        compose.onNodeWithTag(doorName()).performClick()
         compose.waitUntil(timeoutMillis = 60_000) {
             compose.onAllNodesWithText(compose.activity.getString(R.string.action_play))
                 .fetchSemanticsNodes().isNotEmpty()
@@ -318,7 +302,8 @@ class AyahActionsTest {
 
     private fun waitForMenuClosed() {
         compose.waitUntil(timeoutMillis = 30_000) {
-            compose.onAllNodesWithTag("ayah-bar", useUnmergedTree = true).fetchSemanticsNodes().isEmpty()
+            compose.onAllNodesWithText(compose.activity.getString(R.string.action_play))
+                .fetchSemanticsNodes().isEmpty()
         }
     }
 

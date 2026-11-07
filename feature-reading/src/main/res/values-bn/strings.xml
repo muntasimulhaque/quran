@@ -14,6 +14,7 @@
     <string name="reading_ayah_actions">আয়াতের কাজগুলো</string>
     <string name="reading_paper_actions">উপরের বার দেখান বা লুকান</string>
     <string name="reading_ayah_reference">আয়াত %1$s</string>
+    <string name="reading_door">আয়াত %1$s, কাজগুলো</string>
     <string name="reading_door_saved">সংরক্ষিত</string>
 
     <string name="card_tafsir_label">তাফসীর</string>
@@ -44,12 +45,5 @@
     <string name="reading_footnote_heading">টীকা %1$s</string>
     <string name="reading_word_sheet_name">শব্দের অর্থ</string>
     <string name="reading_sheet_where">%1$s %2$s</string>
-    <string name="reading_bar_play">শুনুন</string>
-    <string name="reading_bar_tafsir">তাফসীর</string>
-    <string name="reading_bar_save">সংরক্ষণ</string>
-    <string name="reading_bar_note">নোট</string>
-    <string name="reading_bar_share">শেয়ার</string>
     <string name="reading_door_noted">টীকা আছে</string>
-    <string name="reading_action_state_on">চালু</string>
-    <string name="reading_action_state_off">বন্ধ</string>
 </resources>

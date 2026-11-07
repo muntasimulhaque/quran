@@ -101,7 +101,7 @@ class ShareSheetPreviewTest {
             compose.onAllNodesWithContentDescription(page).fetchSemanticsNodes().isNotEmpty()
         }
         compose.onAllNodesWithContentDescription(page).onFirst().tapThePaper()
-        compose.onNodeWithTag("ayah-15:22").performClick()
+        compose.onNodeWithTag("door-15:22").performClick()
         val share = compose.activity.getString(R.string.action_share)
         compose.waitUntil(timeoutMillis = 60_000) {
             compose.onAllNodesWithText(share).fetchSemanticsNodes().isNotEmpty()

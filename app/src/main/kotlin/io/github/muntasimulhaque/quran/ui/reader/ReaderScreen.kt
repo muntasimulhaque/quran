@@ -61,7 +61,6 @@ import io.github.muntasimulhaque.quran.ui.reading.AyahCard
 import io.github.muntasimulhaque.quran.ui.reading.ReadingReveal
 import io.github.muntasimulhaque.quran.ui.search.SearchArrival
 import io.github.muntasimulhaque.quran.ui.reading.AyahNoteSheet
-import io.github.muntasimulhaque.quran.ui.reading.AyahBarActions
 import io.github.muntasimulhaque.quran.ui.reading.ReadingList
 import io.github.muntasimulhaque.quran.ui.reading.SelectionClearer
 import kotlinx.coroutines.Dispatchers
@@ -656,33 +655,6 @@ fun ReaderScreen(
                     nextSurahName = viewModel.surahs
                         .firstOrNull { it.number == surah.number + 1 }?.nameSimple,
                     selectedAyah = washedAyah,
-                    barActions = AyahBarActions(
-                        tafsir = true,
-                        play = { ayah -> viewModel.playAyah(ayah.number) },
-                        tafsirOn = { ayah ->
-                            cardTafsirPack = null
-                            cardAyah = ayah
-                        },
-                        save = { ayah ->
-                            val savedRow = saved.firstOrNull { it.ayahNumber == ayah.number }
-                            if (savedRow?.marked == true && !savedRow.note.isNullOrBlank()) {
-                                pendingRemove = ayah.number
-                                pendingRemoveUndoable = true
-                            } else {
-                                viewModel.toggleSaved(ayah)
-                            }
-                            touch++
-                        },
-                        note = { ayah ->
-                            noteSaving = false
-                            noteFailed = false
-                            cardNote = ayah.number
-                        },
-                        share = { ayah ->
-                            capturing = false
-                            scope.launch { sharing = loadShareCard(context, viewModel, ayah) }
-                        },
-                    ),
                     notedAyahs = saved
                         .filter { !it.note.isNullOrBlank() }
                         .map { it.ayahNumber }

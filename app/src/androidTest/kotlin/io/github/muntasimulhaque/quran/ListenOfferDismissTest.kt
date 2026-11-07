@@ -88,7 +88,7 @@ class ListenOfferDismissTest {
             compose.onAllNodesWithContentDescription(readingPage).fetchSemanticsNodes().isNotEmpty()
         }
         // The verse's own tap, and its bar's Play.
-        compose.onNodeWithTag("ayah-2:1").performClick()
+        compose.onNodeWithTag("door-2:1").performClick()
         val play = compose.activity.getString(R.string.action_play)
         compose.waitUntil(timeoutMillis = 60_000) {
             compose.onAllNodesWithText(play).fetchSemanticsNodes().isNotEmpty()

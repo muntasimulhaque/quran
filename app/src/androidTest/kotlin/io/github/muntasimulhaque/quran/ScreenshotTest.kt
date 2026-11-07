@@ -618,13 +618,13 @@ class ScreenshotTest {
         Thread.sleep(900)
     }
 
-    /** The ayah's actions, raised in its own head row. */
+    /** The ayah's actions, opened from its own number. */
     private fun openTheAyahActions() {
         var raised = false
         repeat(3) {
             if (raised) return@repeat
             runCatching {
-                rule.onNodeWithTag("ayah-2:255").performClick()
+                rule.onNodeWithTag("door-2:255").performClick()
             }
             raised = runCatching {
                 rule.waitUntil(timeoutMillis = 20_000) {
@@ -635,7 +635,7 @@ class ScreenshotTest {
         }
         if (!raised) {
             runCatching { capture("09-ayah-tap-failed") }
-            throw AssertionError("the ayah's tap did not raise the actions bar")
+            throw AssertionError("the door's tap did not open its menu")
         }
     }
 

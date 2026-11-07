@@ -190,7 +190,6 @@ class SemanticsTest {
     }
 
     private fun openDoor() {
-        revealChrome()
         compose.waitUntil(30_000) {
             compose.onAllNodesWithTag(doorName()).fetchSemanticsNodes().isNotEmpty()
         }
@@ -202,7 +201,7 @@ class SemanticsTest {
     }
 
     /** The first verse's own node, the tap the head door used to answer. */
-    private fun doorName(): String = "ayah-1:1"
+    private fun doorName(): String = "door-1:1"
 
     private fun waitForTag(tag: String, timeout: Long = 20_000) {
         compose.waitUntil(timeout) {

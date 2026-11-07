@@ -95,18 +95,6 @@ internal fun AyahBlock(
     reveal: ReadingReveal? = null,
     /** True when the reader's own word-by-word switch is on. */
     showWordAid: Boolean = metrics.wordByWord,
-    /** True while this ayah's action bar is open. */
-    barOpen: Boolean = false,
-    /** What the bar's cells do; the app owns the acts. */
-    barActions: AyahBarActions = AyahBarActions(),
-    /** Whether the bar fits this page, measured once by the list. */
-    barFits: Boolean = true,
-    /** The verse was tapped: raise its bar. */
-    onBarOpen: () -> Unit = {},
-    /** The bar was answered or tapped away. */
-    onBarClose: () -> Unit = {},
-    /** True while the list is scrolling or settling, so a tap is not an action. */
-    scrollInProgress: () -> Boolean = { false },
     /** True when the reader has written a note on this ayah. */
     noted: Boolean = false,
     /** True when the reader has pressed Save on this ayah. */
@@ -128,7 +116,7 @@ internal fun AyahBlock(
     // press that began before the page rebuilt must still open the current
     // sheet (owner decision, this session).
     val currentWord by rememberUpdatedState(onWord)
-    val currentPageTap by rememberUpdatedState(onBackgroundTap)
+    val currentVerseTap by rememberUpdatedState(onBackgroundTap)
     val ayahActions = stringResource(R.string.reading_ayah_actions)
     val savedState = stringResource(R.string.reading_door_saved)
     val notedState = stringResource(R.string.reading_door_noted)
@@ -250,20 +238,6 @@ internal fun AyahBlock(
         // a reader who cannot reach the door still has the same door offered
         // as an action, and it opens where the block stands.
         val blockBounds = remember { mutableStateOf(IntRect.Zero) }
-        // The verse's own tap, shared by the block and by the word aid's
-        // pointer input: the aid consumes the down before the block's
-        // clickable sees it (detectTapGestures consumes every down), so it
-        // hands the tap back to this same rule instead of swallowing it.
-        val verseTap: () -> Unit = {
-            when {
-                scrollInProgress() -> Unit
-                selectionClearer.clear() -> Unit
-                barOpen -> onBarClose()
-                barFits -> onBarOpen()
-                else -> onMenu(row.ayah, blockBounds.value)
-            }
-        }
-        val currentVerseTap by rememberUpdatedState(verseTap)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -286,23 +260,20 @@ internal fun AyahBlock(
                         Modifier
                     },
                 )
-                // A tap on the verse is the verse's own: it raises the
-                // action bar in the head row, and a second tap puts it
-                // away. Three things come first, and each is the reader's
-                // own work (owner decision, this build):
-                //
-                // - a tap while the page is moving is the reader stopping
-                //   it, not choosing a verse;
-                // - a tap that clears a selection puts the reader's own
-                //   words away and does nothing else;
-                // - a footnote marker is a door of its own and wins.
-                //
-                // The paper around the verse keeps the chrome's tap. A tap
-                // carries no ripple over the Quran's own letters.
+                // A tap belongs to the page and only to the page: it brings
+                // or puts away the bar, and it never chooses a verse. The
+                // ayah's own door is its number, at the head of the block, so
+                // the tap carries no ripple over the Quran's own letters (owner
+                // decision, this session: 16.6's whole-verse tap made the
+                // page's own tap impossible, because almost the whole page is
+                // verse). The word's own long press is the one hold the
+                // reading keeps: it is the word meanings aid, turned on by its
+                // own Settings row, and it opens the word's sheet rather than
+                // the ayah's actions (owner decision, this session).
                 .clickable(
                     interactionSource = press,
                     indication = null,
-                    onClick = verseTap,
+                    onClick = { currentVerseTap.invoke() },
                 )
                 // Every ayah gives a screen reader the same two doors a finger
                 // has: the ayah's own actions, and the paper's own tap. The
@@ -313,8 +284,7 @@ internal fun AyahBlock(
                     contentDescription = spokenContent
                     // The reader's own marks are a state of the verse, not a
                     // drawing: the bookmark and the note are spoken here, where
-                    // the verse is, because the head that used to carry them as
-                    // a door is gone (owner decision, this build).
+                    // the verse is, as they are on the door.
                     if (saved || noted) {
                         stateDescription = buildList {
                             if (saved) add(savedState)
@@ -339,35 +309,29 @@ internal fun AyahBlock(
                     vertical = if (arabicOnly) Space.Tight else 10.dp,
                 ),
         ) {
-            // The verse's head: the action bar while it is up, and the
-            // reader's own marks while it is not. The row is one height
-            // whether or not the bar stands in it, so opening and closing
-            // cost no layout at all (owner decision, this build).
-            // The head is always there on a page that carries a translation,
-            // because the verse is a card and the row is its own air. On a page
-            // that draws the Quran alone it stands only when it has something
-            // to say, so the mushaf keeps the rhythm of its lines and opening
-            // the bar is the only moment the row costs (owner decision, this
-            // build).
-            val showHead = !arabicOnly || barOpen || saved || noted
-            if (showHead) {
+            // The reader's own marks, and the reader's own door. On a page
+            // that carries a translation the head is the reference: the one
+            // visible signifier on the reading, in the action color, with the
+            // bookmark and the note beside it. On a page that draws the Quran
+            // alone there is no reference line: the verse's printed medallion
+            // is its number and its door, and the head stands only when the
+            // reader's own marks have something to say (owner decision, this
+            // session).
+            if (!arabicOnly) {
+                AyahDoor(
+                    reference = reference,
+                    key = row.ayah.verseKey,
+                    marked = saved,
+                    noted = noted,
+                    onOpen = { onMenu(row.ayah, it) },
+                )
+            } else if (saved || noted) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(AyahBarHeight),
+                        .height(48.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                if (barOpen && barFits) {
-                    AyahBar(
-                        actions = barActions,
-                        saved = saved,
-                        noted = noted,
-                        onAct = { action ->
-                            onBarClose()
-                            action(row.ayah)
-                        },
-                    )
-                } else {
                     if (saved) {
                         IconGlyph(
                             icon = Icon.BookmarkFilled,
@@ -387,7 +351,6 @@ internal fun AyahBlock(
                                 .testTag("door-noted"),
                         )
                     }
-                }
                 }
             }
             // The roundel's own span is a key as well as the words: the
@@ -428,6 +391,9 @@ internal fun AyahBlock(
                 )
             }
             var textLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
+            // The Arabic line's own place on the glass, so the medallion's tap
+            // can become the rect its menu hangs from.
+            val textBounds = remember { mutableStateOf(IntRect.Zero) }
             Text(
                 text = arabicLine.text,
                 style = arabicStyle(hafs, metrics.arabicSp, metrics.arabicLineSp, palette.ink),
@@ -435,6 +401,46 @@ internal fun AyahBlock(
                 onTextLayout = { textLayout = it },
                 modifier = Modifier
                     .fillMaxWidth()
+                    .onGloballyPositioned {
+                        val box = it.boundsInWindow()
+                        textBounds.value = IntRect(
+                            box.left.toInt(),
+                            box.top.toInt(),
+                            box.right.toInt(),
+                            box.bottom.toInt(),
+                        )
+                    }
+                    // In an Arabic-only reading there is no reference line, so
+                    // the verse's own printed medallion closes it and is the
+                    // ayah's only number and its door: a tap on the medallion
+                    // opens the actions, and a tap anywhere else on the line
+                    // is the page's own tap, exactly as it is on the paper
+                    // around it. The medallion is a few dp of ink, so its
+                    // target is grown around the ink to the 48 dp every
+                    // control owes a finger; the ink and the page do not move
+                    // (owner decision, this session).
+                    .then(
+                        if (arabicOnly) {
+                            Modifier.pointerInput(arabicLine.ornamentRange) {
+                                detectTapGestures { position ->
+                                    val layout = textLayout
+                                    val range = arabicLine.ornamentRange
+                                    if (layout != null && range != null &&
+                                        ornamentTarget(layout, range).contains(position)
+                                    ) {
+                                        onMenu(
+                                            row.ayah,
+                                            ornamentAnchor(layout, range, textBounds.value),
+                                        )
+                                    } else {
+                                        currentVerseTap.invoke()
+                                    }
+                                }
+                            }
+                        } else {
+                            Modifier
+                        },
+                    )
                     .then(
                         if (showWordAid) {
                             Modifier.pointerInput(arabicLine.wordRanges, row.meanings) {

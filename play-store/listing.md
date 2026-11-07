@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 16.6 (versionCode 168)
+Version: 16.7 (versionCode 169)
 
 ## Listing
 
@@ -172,6 +172,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Not now, Download, the page, or Back), so every frame that
 wants a clean page is taken before it.
+
+## Release notes (16.7, 492 characters)
+16.7 gives the page back to the reader. A tap on an ayah no longer selects it: the verse's number is the one door to its actions, and the menu it opens closes on any tap outside without choosing another verse. In the mushaf, the printed medallion is that door. The five-action capsule inside the verse is gone, and the number stands at the head again in the app's blue. The Quran text, both translations, both tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (16.5, 412 characters)
 16.5 makes the recitation pill's doors answer. When the voice list or the listening panel is open, the chevron now turns up, and the line says Expanded or Collapsed to TalkBack, like every other door in the app. The offer, the playing pill, and a pill with no recitation all read the same. The Quran text, both translations, both tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.

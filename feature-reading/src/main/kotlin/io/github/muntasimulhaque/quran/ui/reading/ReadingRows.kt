@@ -23,14 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.IntRect
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
 import io.github.muntasimulhaque.quran.core.AyahList
 import io.github.muntasimulhaque.quran.data.Ayah
@@ -61,10 +58,8 @@ internal fun ReadingRows(
     hasTranslation: Boolean,
     contentLanguage: String,
     nextSurahName: String?,
+    /** The ayah whose menu is open, so the page can paint it. */
     selectedAyah: Int?,
-    /** The ayah whose menu is open, so its own door can say so. */
-    /** What the verse bar's cells do; the app owns the acts. */
-    barActions: AyahBarActions = AyahBarActions(),
     /** The ayahs the reader wrote a note on, so their head can say so. */
     notedAyahs: Set<Int> = emptySet(),
     /** The ayahs the reader has pressed Save on, so their doors say so. */
@@ -122,13 +117,7 @@ internal fun ReadingRows(
     // looking for the way out. The state lives here rather than inside the
     // opening item because the taps that dismiss it land outside that item.
     var aboutOpen by rememberSaveable(surah.number) { mutableStateOf(false) }
-    // The one verse whose action bar is up. It lives here, in the list,
-    // because there is one bar on the page and the page owns it: a tap on
-    // another verse moves it, a drag puts it away, and the paper puts it
-    // away with the chrome (owner decision, this build).
-    var openAyah by rememberSaveable(surah.number) { mutableStateOf<Int?>(null) }
     val dismissAbout: () -> Unit = {
-        openAyah = null
         if (aboutOpen) aboutOpen = false else onBackgroundTap()
     }
 
@@ -144,7 +133,6 @@ internal fun ReadingRows(
         listState.interactionSource.interactions.collect { interaction ->
             if (interaction is DragInteraction.Start) {
                 dragged = true
-                openAyah = null
                 onScrolled()
             }
         }
@@ -227,24 +215,15 @@ internal fun ReadingRows(
     // inch tablet already reads instead of a line as long as the glass
     // (owner decision, this session).
     val side = rememberPageMargin() - Space.WashInset
-    // The bar's fit is the page's, not the verse's: the same six labels,
-    // the same face, the same line for every verse on the glass, so it is
-    // measured once here and handed down (owner decision, this build).
-    val barFits = barFits(
-        width = rememberAyahBarWidth(barActions),
-        line = (LocalConfiguration.current.screenWidthDp.dp - rememberPageMargin() * 2)
-            .coerceAtLeast(0.dp),
-        fontScale = LocalDensity.current.fontScale,
-    )
     LazyColumn(
         state = listState,
         modifier = modifier
             .fillMaxSize()
             .semantics { contentDescription = pageDescription }
             .pointerInput(Unit) {
-                // The paper around the text brings the chrome; the text
-                // itself belongs to its ayah, and every ayah answers its own
-                // tap.
+                // The paper around the text brings the chrome, and so does the
+                // text: the whole page is the page's own tap, and an ayah's
+                // actions are its number, never the verse around it.
                 detectTapGestures(onTap = { dismissAbout() })
             },
         contentPadding = PaddingValues(
@@ -294,7 +273,7 @@ internal fun ReadingRows(
                 hafs = hafs,
                 selectionClearer = selectionClearer,
                 metrics = metrics,
-                isSelected = selectedAyah == row.ayah.number || openAyah == row.ayah.number,
+                isSelected = selectedAyah == row.ayah.number,
                 playingAyah = playingAyah,
                 // The word is read here, inside this item, and only for the
                 // ayah being recited: a tick that moves the wash invalidates
@@ -305,13 +284,7 @@ internal fun ReadingRows(
                 reveal = reveal?.takeIf { it.ayah == row.ayah.number },
                 showWordAid = wordAid ||
                     (reveal?.wordByWord == true && reveal.ayah == row.ayah.number),
-                barOpen = openAyah == row.ayah.number,
-                barActions = barActions,
-                barFits = barFits,
                 noted = row.ayah.number in notedAyahs,
-                onBarOpen = { openAyah = row.ayah.number },
-                onBarClose = { openAyah = null },
-                scrollInProgress = { listState.isScrollInProgress },
                 saved = row.ayah.number in savedAyahs,
                 focusRequester = if (jumpAyah == row.ayah.number) jumpFocus else null,
                 onMenu = onAyahMenu,

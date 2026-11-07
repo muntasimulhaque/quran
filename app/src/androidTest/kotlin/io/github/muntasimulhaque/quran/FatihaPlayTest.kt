@@ -93,7 +93,7 @@ class FatihaPlayTest {
         compose.waitUntil(timeoutMillis = 90_000) {
             compose.onAllNodesWithContentDescription(readingPage).fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithTag("ayah-1:1").performClick()
+        compose.onNodeWithTag("door-1:1").performClick()
         val play = compose.activity.getString(R.string.action_play)
         compose.waitUntil(timeoutMillis = 60_000) {
             compose.onAllNodesWithText(play).fetchSemanticsNodes().isNotEmpty()

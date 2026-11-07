@@ -14,10 +14,7 @@
     <string name="reading_ayah_actions">Ayah actions</string>
     <string name="reading_paper_actions">Show or hide the bar</string>
     <string name="reading_ayah_reference">Ayah %1$s</string>
-    <!-- The ayah's own door: the number at its head opens the actions. The
-         caret turns and the capsule takes the accent while it is open, the way
-         the search sheet's filter door says which way it will move. -->
-    <!-- The keep the reader made with Save, spoken with the door. -->
+    <string name="reading_door">Ayah %1$s, actions</string>
     <string name="reading_door_saved">Saved</string>
 
     <string name="card_tafsir_label">Tafsir</string>
@@ -48,12 +45,5 @@
     <string name="reading_footnote_heading">Footnote %1$s</string>
     <string name="reading_word_sheet_name">Word meaning</string>
     <string name="reading_sheet_where">%1$s %2$s</string>
-    <string name="reading_bar_play">Play</string>
-    <string name="reading_bar_tafsir">Tafsir</string>
-    <string name="reading_bar_save">Save</string>
-    <string name="reading_bar_note">Note</string>
-    <string name="reading_bar_share">Share</string>
     <string name="reading_door_noted">Has a note</string>
-    <string name="reading_action_state_on">on</string>
-    <string name="reading_action_state_off">off</string>
 </resources>

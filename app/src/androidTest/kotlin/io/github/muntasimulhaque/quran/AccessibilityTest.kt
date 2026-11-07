@@ -239,7 +239,7 @@ class AccessibilityTest {
 
         // The ayah's own actions, the note editor, and the share preview.
         revealChrome()
-        compose.onNodeWithTag("ayah-1:1").performClick()
+        compose.onNodeWithTag("door-1:1").performClick()
         compose.waitUntil(20_000) {
             compose.onAllNodesWithText(compose.activity.getString(R.string.action_note))
                 .fetchSemanticsNodes().isNotEmpty()
@@ -260,7 +260,7 @@ class AccessibilityTest {
         waitForTagGone("note-sheet")
 
         revealChrome()
-        compose.onNodeWithTag("ayah-1:1").performClick()
+        compose.onNodeWithTag("door-1:1").performClick()
         compose.waitUntil(20_000) {
             compose.onAllNodesWithText(compose.activity.getString(R.string.action_share))
                 .fetchSemanticsNodes().isNotEmpty()
