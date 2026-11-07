@@ -176,7 +176,7 @@ The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Not now, Download, the page, or Back), so every frame that
 wants a clean page is taken before it.
 
-## Release notes (16.7, 492 characters)
+## Release notes (16.7, 493 characters)
 16.7 gives the page back to the reader. A tap on an ayah no longer selects it: the verse's number is the one door to its actions, and the menu it opens closes on any tap outside without choosing another verse. In the mushaf, the printed medallion is that door. The five-action capsule inside the verse is gone, and the number stands at the head again in the app's blue. The Quran text, both translations, both tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (16.5, 412 characters)
