@@ -4,15 +4,16 @@ A free, open source Quran reader for Android. It opens where you left off
 and keeps the Quran text itself at the center: no ads, no
 trackers, no accounts, nothing collected, ever.
 
-**Status:** 16.4 (versionCode 166) was submitted for Play review from commit
-`046b8ae2`. The signed bundle `quran-16.4-vc166.aab` has SHA-256
-`4821e954d46caffe0c9a12ad48ad7576c9914a6f39979bbf36d2ac7ebc5c11b0`, signed by the
+**Status:** 16.5 (versionCode 167) is ready for Play review from commit
+`cefd1efe`. The signed bundle `quran-16.5-vc167.aab` has SHA-256
+`5b2b11f107b5b99a02fbb9c11748d7926ddd8232befd8b12dcc485365a0138ac`, signed by the
 upload key `53:7D:09:D2:03:00:12:9E:97:3B:79:45:31:6B:FE:24:CF:AD:CF:BC:77:EE:C5:22:9C:BF:30:17:0D:9D:E5:21`.
-Build run `42273634938` is green. The eight store frames are from capture run
-`42273634908` on 16.4; all three legs are green, eleven frames each, and
-every one of the eight was read. Content 1.5.0, the database
-`content-db-12c95dbe`, and the recitation packs are unchanged. The Quran text,
-both translations, both tafsirs, and the audio are unchanged.
+Build run `42343258063` is green. The eight store frames are visually
+unchanged from capture run `42273634908` on 16.4; the 16.5 capture run
+`42343257977` is green on all three legs, eleven frames each (twelve on the ten
+inch screen), and every one of the eight was read again. Content 1.5.0, the
+database `content-db-12c95dbe`, and the recitation packs are unchanged. The
+Quran text, both translations, both tafsirs, and the audio are unchanged.
 
 **In 16.5.** The recitation pill's doors say their state. The chevron on the playing pill, on the download offer, and on the voice list of a pill with no recitation turns up while its popup is open, and the line speaks Expanded or Collapsed to a screen reader, the words the ayah's door and every disclosure row already use. The pill's three doors are drawn by the app's one chevron now, at their compact 14 dp measure, so their turn is the same rule every other door follows. The Quran text, both translations, both tafsirs, and the content database are unchanged.
 
