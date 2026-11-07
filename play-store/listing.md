@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 16.5 (versionCode 167)
+Version: 16.6 (versionCode 168)
 
 ## Listing
 
