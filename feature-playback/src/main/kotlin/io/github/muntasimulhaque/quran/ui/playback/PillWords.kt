@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
@@ -26,21 +25,23 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.feature.playback.R
+import io.github.muntasimulhaque.quran.ui.kit.AppChevron
+import io.github.muntasimulhaque.quran.ui.kit.ChevronRole
 import io.github.muntasimulhaque.quran.ui.kit.focusRing
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
-import io.github.muntasimulhaque.quran.ui.glyph.Icon
-import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlin.math.min
 import io.github.muntasimulhaque.quran.ui.theme.compactLabel
+import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 
 /**
  * The transfer's words: the reciter's name over the state's sentence, with
@@ -94,6 +95,12 @@ internal fun TransferWordsBlock(
  * 8 dp after it. The name is the accent's 13, the surah and its size the
  * compact 14; when the line is long the size is what gives way, because the
  * surah's name is the fact the reader is judging.
+ *
+ * **The door says its state** (owner decision, this session). The chevron is
+ * [AppChevron]'s [ChevronRole.Expand], so it points down while the chooser is
+ * closed and up while it is open, and the row speaks the app's Expanded or
+ * Collapsed the way the ayah's door and every disclosure row do. A mark that
+ * cannot move cannot say that its chooser is open.
  */
 @Composable
 internal fun OfferLine(
@@ -101,11 +108,15 @@ internal fun OfferLine(
     title: String,
     /** The door the line is, or null where the voice cannot be chosen now. */
     onOpen: (() -> Unit)?,
+    /** True while the door's own chooser is on the glass. */
+    expanded: Boolean = false,
     modifier: Modifier = Modifier,
     /** True while the title is a failure the reader has to hear. */
     announce: Boolean = false,
 ) {
     val press = remember { MutableInteractionSource() }
+    val expandedText = stringResource(UiKitR.string.door_expanded)
+    val collapsedText = stringResource(UiKitR.string.door_collapsed)
     Row(
         modifier = modifier
             .then(
@@ -121,6 +132,10 @@ internal fun OfferLine(
                             onClick = onOpen,
                         )
                         .minimumInteractiveComponentSize()
+                        .semantics {
+                            stateDescription =
+                                if (expanded) expandedText else collapsedText
+                        }
                 },
             )
             .clip(Radii.Pill)
@@ -144,12 +159,12 @@ internal fun OfferLine(
             overflow = TextOverflow.Ellipsis,
         )
         if (onOpen != null) {
-            IconGlyph(
-                icon = Icon.Chevron,
+            AppChevron(
+                role = ChevronRole.Expand,
+                expanded = expanded,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .padding(start = Space.Tight)
-                    .size(GlyphSize.ChevronInline),
+                size = GlyphSize.ChevronInline,
+                modifier = Modifier.padding(start = Space.Tight),
             )
         }
         Text(
@@ -196,6 +211,12 @@ internal fun OfferLine(
  * are not the whole of what a finger has to hit; its 8 dp inset keeps the
  * type off its own press shape, and the caller keeps [PillEndAir] at each end
  * where the capsule's end is a sphere.
+ *
+ * **The door says its state** (owner decision, this session). The chevron is
+ * [AppChevron]'s [ChevronRole.Expand], so it points down while the listening
+ * panel is closed and up while it is open, and the block speaks the app's
+ * Expanded or Collapsed. The panel's own name is spoken when it opens; this is
+ * the line's half of the same answer.
  */
 @Composable
 internal fun PlayingWordsBlock(
@@ -209,9 +230,13 @@ internal fun PlayingWordsBlock(
     speed: Float,
     /** The door the block is, or null where there is nothing to open. */
     onOpen: (() -> Unit)?,
+    /** True while the listening panel is on the glass. */
+    expanded: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val press = remember { MutableInteractionSource() }
+    val expandedText = stringResource(UiKitR.string.door_expanded)
+    val collapsedText = stringResource(UiKitR.string.door_collapsed)
     // The pill is a control with a fixed line, so its type follows the system
     // scale only up to the app's largest text step. Past it the line would
     // cut the place, and a cut place is worse than a control that holds its
@@ -233,6 +258,10 @@ internal fun PlayingWordsBlock(
                             onClick = onOpen,
                         )
                         .minimumInteractiveComponentSize()
+                        .semantics {
+                            stateDescription =
+                                if (expanded) expandedText else collapsedText
+                        }
                 },
             )
             .clip(Radii.Pill)
@@ -295,12 +324,12 @@ internal fun PlayingWordsBlock(
                 modifier = Modifier.padding(start = Space.Tight),
             )
             if (onOpen != null) {
-                IconGlyph(
-                    icon = Icon.Chevron,
+                AppChevron(
+                    role = ChevronRole.Expand,
+                    expanded = expanded,
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .padding(start = Space.Tight)
-                        .size(GlyphSize.ChevronInline),
+                    size = GlyphSize.ChevronInline,
+                    modifier = Modifier.padding(start = Space.Tight),
                 )
             }
         }
@@ -329,6 +358,10 @@ internal fun PlayingWordsBlock(
  * highlight the reader sees is the shape the finger hits. The sentence is bare
  * type, and it gives way before the name: a long status is cut with an ellipsis
  * before the name is.
+ *
+ * The name's chevron is the door's own state: it turns up while the voice list
+ * is open, and the name speaks Expanded or Collapsed (owner decision, this
+ * session).
  */
 @Composable
 internal fun PlaybackWordsLine(
@@ -340,13 +373,15 @@ internal fun PlaybackWordsLine(
     modifier: Modifier = Modifier,
     /** True while the sentence is a failure or an answer the reader has to hear. */
     announce: Boolean = false,
+    /** True while the voice list is on the glass. */
+    expanded: Boolean = false,
 ) {
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(WordsGap, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        ReciterDoor(name = reciterName, onOpen = onOpenReciters)
+        ReciterDoor(name = reciterName, onOpen = onOpenReciters, expanded = expanded)
         // The reciter's name is measured first and keeps its whole width; the
         // status is the weighted line, so a long reference or percent gives way
         // to the name rather than squeezing it into an ellipsis. The name is
@@ -393,13 +428,22 @@ internal fun PlaybackWordsLine(
  *
  * Null where the voice cannot be chosen now, which is while a package is on
  * its way: the chevron is gone rather than a door that does nothing.
+ *
+ * **The door says its state** (owner decision, this session): the chevron is
+ * [AppChevron]'s [ChevronRole.Expand] and turns up while the list is open, and
+ * the name speaks Expanded or Collapsed. The list itself speaks when it opens;
+ * the door is where the closed state is read.
  */
 @Composable
 private fun ReciterDoor(
     name: String,
     onOpen: (() -> Unit)?,
+    /** True while the voice list is on the glass. */
+    expanded: Boolean = false,
 ) {
     val press = remember { MutableInteractionSource() }
+    val expandedText = stringResource(UiKitR.string.door_expanded)
+    val collapsedText = stringResource(UiKitR.string.door_collapsed)
     Row(
         modifier = Modifier
             .then(
@@ -430,7 +474,12 @@ private fun ReciterDoor(
             )
             .padding(horizontal = Space.Tight, vertical = Space.Line)
             .testTag("playback-reciter")
-            .semantics { contentDescription = name },
+            .semantics {
+                contentDescription = name
+                if (onOpen != null) {
+                    stateDescription = if (expanded) expandedText else collapsedText
+                }
+            },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -442,12 +491,12 @@ private fun ReciterDoor(
             modifier = Modifier.weight(1f, fill = false),
         )
         if (onOpen != null) {
-            IconGlyph(
-                icon = Icon.Chevron,
+            AppChevron(
+                role = ChevronRole.Expand,
+                expanded = expanded,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .padding(start = Space.Tight)
-                    .size(GlyphSize.ChevronInline),
+                size = GlyphSize.ChevronInline,
+                modifier = Modifier.padding(start = Space.Tight),
             )
         }
     }

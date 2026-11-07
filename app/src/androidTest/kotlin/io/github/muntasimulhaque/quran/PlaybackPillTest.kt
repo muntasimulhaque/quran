@@ -12,6 +12,7 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHeightIsAtLeast
@@ -145,6 +146,11 @@ import java.util.Locale
  *     The line's crown is 14 dp and the answers' foot 7. An offer with no
  *     voice to offer keeps the line as a notice and draws no chevron (owner
  *     decision, this session).
+ * 17. Every door says its state: the pill's three doors speak Expanded and
+ *     Collapsed the way the ayah's door and every disclosure row do, and
+ *     their chevron turns up while the popup they opened is on the glass
+ *     (owner decision, this session). The turn itself is arithmetic, pinned
+ *     in `AppChevronTurnTest`; this suite reads the spoken half.
  */
 @RunWith(AndroidJUnit4::class)
 class PlaybackPillTest {
@@ -1236,6 +1242,104 @@ class PlaybackPillTest {
     }
 
     /**
+     * A door says its state on the mark that opened it (owner decision, this
+     * session). The playing line's chevron turns up while the listening panel
+     * is on the glass, and the line speaks the app's Expanded and Collapsed
+     * words, so the reader who cannot see the turn is told the same thing.
+     */
+    @Test
+    fun thePlayingDoorSaysWhenItsPanelIsOpen() {
+        showPill()
+        assertEquals(
+            "the door starts closed",
+            "Collapsed",
+            doorState("playback-words"),
+        )
+        compose.onNodeWithTag("playback-words").performClick()
+        compose.onNodeWithTag("app-popup").assertExists()
+        assertEquals(
+            "the door says its panel is open",
+            "Expanded",
+            doorState("playback-words"),
+        )
+        compose.onNodeWithText("Minshawi").performClick()
+        compose.onNodeWithTag("app-popup").assertDoesNotExist()
+        assertEquals(
+            "the door is closed once its answer puts the panel away",
+            "Collapsed",
+            doorState("playback-words"),
+        )
+    }
+
+    /**
+     * The offer's line is a door too, so it says the same two words. It is the
+     * first pill the reader meets on an undownloaded surah, which makes its
+     * silent state the one a reader is most likely to meet first.
+     */
+    @Test
+    fun theOffersDoorSaysWhenItsChooserIsOpen() {
+        showPill(
+            offer = ListenOffer(
+                reciter = "husary",
+                reciterName = "Husary",
+                surah = 19,
+                surahName = "Maryam",
+                ayah = 1,
+                bytes = 22L * 1024 * 1024,
+                options = offerOptions(),
+            ),
+        )
+        assertEquals(
+            "the door starts closed",
+            "Collapsed",
+            doorState("offer-words"),
+        )
+        compose.onNodeWithTag("offer-words").performClick()
+        compose.onNodeWithTag("app-popup").assertExists()
+        assertEquals(
+            "the door says its chooser is open",
+            "Expanded",
+            doorState("offer-words"),
+        )
+        compose.onNodeWithText("Minshawi").performClick()
+        compose.onNodeWithTag("app-popup").assertDoesNotExist()
+        assertEquals(
+            "the door is closed once its choice puts the chooser away",
+            "Collapsed",
+            doorState("offer-words"),
+        )
+    }
+
+    /**
+     * The one-row voices keep the same door: the reciter's name opens the
+     * voice list alone, and it speaks and turns with it (owner decision, this
+     * session).
+     */
+    @Test
+    fun theVoiceDoorSaysWhenTheVoiceListIsOpen() {
+        showPill(state = PlaybackUiState(unavailable = true))
+        assertEquals(
+            "the door starts closed",
+            "Collapsed",
+            doorState("playback-reciter"),
+        )
+        compose.onNodeWithTag("playback-reciter").performClick()
+        compose.onNodeWithTag("app-popup").assertExists()
+        assertEquals(
+            "the door says the voice list is open",
+            "Expanded",
+            doorState("playback-reciter"),
+        )
+        compose.onNodeWithText("Minshawi").performClick()
+        compose.onNodeWithTag("app-popup").assertDoesNotExist()
+        assertEquals(
+            "the door is closed once its choice puts the list away",
+            "Collapsed",
+            doorState("playback-reciter"),
+        )
+    }
+
+    /**
      * The transport's press is the app's one round control: a 40 dp circle
      * inside the 48 dp target the finger gets, the same circle every icon
      * button in the app lights. It is not the 20 dp glyph, because an
@@ -1362,6 +1466,17 @@ class PlaybackPillTest {
         showPill(measureWidth = 840.dp)
         assertTheAnchorStandsOnThePillCentre()
     }
+
+    /**
+     * What a door says about itself, the way a screen reader hears it. The
+     * chevron's turn is not in the semantics, so the turn itself is pinned as
+     * arithmetic in `AppChevronTurnTest`; this reads the words beside it.
+     */
+    private fun doorState(tag: String): String? = compose
+        .onNodeWithTag(tag)
+        .fetchSemanticsNode()
+        .config
+        .getOrElseNullable(SemanticsProperties.StateDescription) { null }
 
     private fun assertTheAnchorStandsOnThePillCentre() {
         val pill = compose.onNodeWithTag("playback-bar").fetchSemanticsNode().boundsInWindow

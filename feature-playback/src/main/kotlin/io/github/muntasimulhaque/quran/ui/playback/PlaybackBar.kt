@@ -309,6 +309,7 @@ fun PlaybackBar(
                                 reference = playbackPlace(reference.orEmpty()),
                                 speed = speed,
                                 onOpen = { openMenu = PillMenu.Listening },
+                                expanded = openMenu == PillMenu.Listening,
                                 modifier = Modifier.testTag("playback-words"),
                             )
                         }
@@ -344,6 +345,7 @@ fun PlaybackBar(
                                 .weight(1f, fill = true)
                                 .testTag("playback-words"),
                             announce = state.error || state.downloadFailed || state.unavailable,
+                            expanded = openMenu == PillMenu.Reciters,
                         )
                         if (controls.isNotEmpty()) {
                             // The answer's own shape keeps the app's air. A

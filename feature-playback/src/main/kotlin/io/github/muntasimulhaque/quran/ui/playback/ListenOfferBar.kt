@@ -138,6 +138,7 @@ internal fun ListenOfferBar(
                         } else {
                             { chooser = true }
                         },
+                        expanded = chooser,
                         announce = offer.failed,
                         modifier = Modifier.testTag("offer-words"),
                     )
