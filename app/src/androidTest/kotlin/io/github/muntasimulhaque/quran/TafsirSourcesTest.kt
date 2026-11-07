@@ -113,12 +113,7 @@ class TafsirSourcesTest {
     private fun openTheCard() {
         val page = compose.activity.getString(ReadingR.string.reading_page_description)
         compose.onAllNodesWithContentDescription(page).onFirst().tapThePaper()
-        compose.waitUntil(timeoutMillis = 60_000) {
-            compose.onAllNodesWithText("1:1", substring = true)
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onAllNodesWithText("1:1", substring = true).onFirst()
-            .performClick()
+        compose.onNodeWithTag("ayah-1:1").performClick()
         val tafsir = compose.activity.getString(R.string.action_tafsir)
         compose.waitUntil(timeoutMillis = 60_000) {
             compose.onAllNodesWithText(tafsir).fetchSemanticsNodes().isNotEmpty()

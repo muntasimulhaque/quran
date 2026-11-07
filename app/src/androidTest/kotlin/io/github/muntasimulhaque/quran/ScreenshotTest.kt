@@ -618,13 +618,13 @@ class ScreenshotTest {
         Thread.sleep(900)
     }
 
-    /** The ayah's actions, hung from the number at its head. */
+    /** The ayah's actions, raised in its own head row. */
     private fun openTheAyahActions() {
         var raised = false
         repeat(3) {
             if (raised) return@repeat
             runCatching {
-                rule.onAllNodesWithText("2:255", substring = true).onFirst().performClick()
+                rule.onNodeWithTag("ayah-2:255").performClick()
             }
             raised = runCatching {
                 rule.waitUntil(timeoutMillis = 20_000) {

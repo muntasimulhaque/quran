@@ -51,8 +51,9 @@
     <string name="reading_bar_play">Play</string>
     <string name="reading_bar_tafsir">Tafsir</string>
     <string name="reading_bar_save">Save</string>
-    <string name="reading_bar_saved">Saved</string>
     <string name="reading_bar_note">Note</string>
     <string name="reading_bar_share">Share</string>
     <string name="reading_door_noted">Has a note</string>
+    <string name="reading_action_state_on">on</string>
+    <string name="reading_action_state_off">off</string>
 </resources>

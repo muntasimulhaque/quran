@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -92,7 +93,7 @@ class FatihaPlayTest {
         compose.waitUntil(timeoutMillis = 90_000) {
             compose.onAllNodesWithContentDescription(readingPage).fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onAllNodesWithText("1:1", substring = true).onFirst().performClick()
+        compose.onNodeWithTag("ayah-1:1").performClick()
         val play = compose.activity.getString(R.string.action_play)
         compose.waitUntil(timeoutMillis = 60_000) {
             compose.onAllNodesWithText(play).fetchSemanticsNodes().isNotEmpty()

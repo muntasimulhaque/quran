@@ -5,6 +5,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isRoot
@@ -178,24 +179,19 @@ class AyahActionsTest {
     }
 
     @Test
-    fun theDoorAndItsRowsAreAWholeTargetAndTheDoorSaysItsState() {
+    fun theBarIsAWholeTargetAndSaysItsState() {
         waitForReading()
         compose.onNodeWithTag(doorName()).assertIsDisplayed()
 
         openTheDoor()
-        val play = compose.activity.getString(R.string.action_play)
-        compose.onNodeWithText(play).assertHeightIsEqualTo(48.dp)
+        compose.onNodeWithTag("ayah-bar", useUnmergedTree = true).assertHeightIsEqualTo(48.dp)
 
         // A tap on the page puts the menu away, and the door says it is
         // closed again while it is still on the glass.
         val page = compose.activity.getString(ReadingR.string.reading_page_description)
-        compose.onNodeWithContentDescription(page).performClick()
+        compose.onAllNodesWithContentDescription(page).onFirst().tapThePaper()
         waitForMenuClosed()
-        assertEquals(
-            "the door is closed again once its menu is away",
-            compose.activity.getString(UiKitR.string.door_collapsed),
-            doorState(),
-        )
+        compose.onAllNodesWithTag("ayah-bar", useUnmergedTree = true).assertCountEquals(0)
 
         // And a scroll of the reader's own puts it away too, because its door
         // moves under it (owner decision, this session).
@@ -211,16 +207,22 @@ class AyahActionsTest {
     }
 
     @Test
-    fun theAyahMenuTakesItsOwnNarrowerMeasure() {
+    fun theBarCarriesEveryActOnOneRow() {
         waitForReading()
         openTheDoor()
 
-        // The five rows are one word each, so the menu no longer borrows the
-        // pill panel's 288 dp. The popup's own column carries the measure,
-        // and the widest row still has room on the glass.
-        compose.onNodeWithTag("app-popup").assertWidthIsEqualTo(216.dp)
-        compose.onNodeWithText(compose.activity.getString(R.string.action_share))
-            .assertIsDisplayed()
+        // The bar is one capsule of five equal cells, all of them on the
+        // reading's line: no act is behind a sideways drag.
+        compose.onNodeWithTag("ayah-bar", useUnmergedTree = true).assertIsDisplayed()
+        listOf(
+            R.string.action_play,
+            R.string.action_tafsir,
+            R.string.action_save,
+            R.string.action_note,
+            R.string.action_share,
+        ).forEach { act ->
+            compose.onNodeWithText(compose.activity.getString(act)).assertIsDisplayed()
+        }
     }
 
     @Test
@@ -302,11 +304,11 @@ class AyahActionsTest {
         }
     }
 
-    /** Opens the first ayah's own menu from its door and waits for its rows. */
+    /** Opens the first verse's own bar and waits for its cells. */
     private fun openTheDoor() {
         compose.onAllNodesWithTag(doorName()).onFirst().performClick()
         compose.waitUntil(timeoutMillis = 60_000) {
-            compose.onAllNodes(hasTestTag("app-popup")).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithTag("ayah-bar", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
         }
         compose.waitUntil(timeoutMillis = 60_000) {
             compose.onAllNodesWithText(compose.activity.getString(R.string.action_play))
@@ -316,7 +318,7 @@ class AyahActionsTest {
 
     private fun waitForMenuClosed() {
         compose.waitUntil(timeoutMillis = 30_000) {
-            compose.onAllNodesWithTag("app-popup").fetchSemanticsNodes().isEmpty()
+            compose.onAllNodesWithTag("ayah-bar", useUnmergedTree = true).fetchSemanticsNodes().isEmpty()
         }
     }
 

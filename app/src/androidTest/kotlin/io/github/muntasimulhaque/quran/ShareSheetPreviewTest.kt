@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -100,12 +101,7 @@ class ShareSheetPreviewTest {
             compose.onAllNodesWithContentDescription(page).fetchSemanticsNodes().isNotEmpty()
         }
         compose.onAllNodesWithContentDescription(page).onFirst().tapThePaper()
-        compose.waitUntil(timeoutMillis = 60_000) {
-            compose.onAllNodesWithText("15:22", substring = true)
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onAllNodesWithText("15:22", substring = true).onFirst()
-            .performClick()
+        compose.onNodeWithTag("ayah-15:22").performClick()
         val share = compose.activity.getString(R.string.action_share)
         compose.waitUntil(timeoutMillis = 60_000) {
             compose.onAllNodesWithText(share).fetchSemanticsNodes().isNotEmpty()

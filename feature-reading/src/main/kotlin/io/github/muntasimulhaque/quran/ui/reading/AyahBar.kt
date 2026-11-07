@@ -21,7 +21,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -98,15 +101,20 @@ internal fun AyahBar(
     actions: AyahBarActions,
     /** The verse is already kept, so its cell says what the tap will undo. */
     saved: Boolean,
+    /** The reader wrote a note on this verse, so its cell says so. */
+    noted: Boolean,
     onAct: ((Ayah) -> Unit) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val labels = barLabels(actions)
     val cell = rememberAyahBarCell(actions)
     val ink = MaterialTheme.colorScheme.primary
+    val on = stringResource(R.string.reading_action_state_on)
+    val off = stringResource(R.string.reading_action_state_off)
     Row(
         modifier = modifier
             .height(AyahBarHeight)
+            .testTag("ayah-bar")
             .clip(Radii.Pill)
             .floatingLift(Radii.Pill)
             .background(MaterialTheme.colorScheme.surfaceContainerHigh)
@@ -127,12 +135,19 @@ internal fun AyahBar(
             )
         }
         BarCell(
-            if (saved) Icon.BookmarkFilled else Icon.Bookmark,
-            if (saved) labels.saved else labels.save,
-            cell,
-            ink,
+            icon = if (saved) Icon.BookmarkFilled else Icon.Bookmark,
+            label = labels.save,
+            width = cell,
+            ink = ink,
+            state = if (saved) on else off,
         ) { onAct(actions.save) }
-        BarCell(Icon.Note, labels.note, cell, ink) { onAct(actions.note) }
+        BarCell(
+            icon = Icon.Note,
+            label = labels.note,
+            width = cell,
+            ink = ink,
+            state = if (noted) on else off,
+        ) { onAct(actions.note) }
         BarCell(Icon.Share, labels.share, cell, ink) { onAct(actions.share) }
     }
 }
@@ -185,6 +200,8 @@ private fun BarCell(
     label: String,
     width: Dp,
     ink: Color,
+    /** The mark is a color; this is its sentence, on the marked cells. */
+    state: String? = null,
     onClick: () -> Unit,
 ) {
     Column(
@@ -193,6 +210,9 @@ private fun BarCell(
             .fillMaxHeight()
             .clip(Radii.Pill)
             .clickable(onClick = onClick)
+            .semantics {
+                if (state != null) stateDescription = state
+            }
             .padding(vertical = CellPad),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -213,11 +233,10 @@ private class BarLabels(
     val play: String,
     val tafsir: String,
     val save: String,
-    val saved: String,
     val note: String,
     val share: String,
 ) {
-    val all: List<String> get() = listOf(play, tafsir, save, saved, note, share)
+    val all: List<String> get() = listOf(play, tafsir, save, note, share)
 }
 
 @Composable
@@ -225,7 +244,6 @@ private fun barLabels(actions: AyahBarActions): BarLabels = BarLabels(
     play = stringResource(R.string.reading_bar_play),
     tafsir = stringResource(R.string.reading_bar_tafsir),
     save = stringResource(R.string.reading_bar_save),
-    saved = stringResource(R.string.reading_bar_saved),
     note = stringResource(R.string.reading_bar_note),
     share = stringResource(R.string.reading_bar_share),
 )

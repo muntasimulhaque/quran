@@ -70,7 +70,7 @@ class SurahAyahsTest {
         compose.onNodeWithTag("surah-ayahs").performScrollToIndex(11)
         compose.onNodeWithContentDescription("Ayah 12").performClick()
         compose.waitUntil(timeoutMillis = 30_000) {
-            compose.onAllNodesWithText("2:12", substring = true).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithTag("ayah-2:12").fetchSemanticsNodes().isNotEmpty()
         }
     }
 

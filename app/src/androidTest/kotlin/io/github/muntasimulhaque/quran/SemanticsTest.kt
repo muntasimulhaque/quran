@@ -173,7 +173,7 @@ class SemanticsTest {
             if (compose.onAllNodesWithContentDescription("Settings").fetchSemanticsNodes().isNotEmpty()) {
                 return
             }
-            compose.onNodeWithContentDescription("Reading").performClick()
+            compose.onAllNodesWithContentDescription("Reading").onFirst().tapThePaper()
             runCatching {
                 compose.waitUntil(4_000) {
                     compose.onAllNodesWithContentDescription("Settings")

@@ -47,8 +47,9 @@
     <string name="reading_bar_play">শুনুন</string>
     <string name="reading_bar_tafsir">তাফসীর</string>
     <string name="reading_bar_save">সংরক্ষণ</string>
-    <string name="reading_bar_saved">সংরক্ষিত</string>
     <string name="reading_bar_note">নোট</string>
     <string name="reading_bar_share">শেয়ার</string>
     <string name="reading_door_noted">টীকা আছে</string>
+    <string name="reading_action_state_on">চালু</string>
+    <string name="reading_action_state_off">বন্ধ</string>
 </resources>

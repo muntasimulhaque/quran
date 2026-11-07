@@ -250,6 +250,20 @@ internal fun AyahBlock(
         // a reader who cannot reach the door still has the same door offered
         // as an action, and it opens where the block stands.
         val blockBounds = remember { mutableStateOf(IntRect.Zero) }
+        // The verse's own tap, shared by the block and by the word aid's
+        // pointer input: the aid consumes the down before the block's
+        // clickable sees it (detectTapGestures consumes every down), so it
+        // hands the tap back to this same rule instead of swallowing it.
+        val verseTap: () -> Unit = {
+            when {
+                scrollInProgress() -> Unit
+                selectionClearer.clear() -> Unit
+                barOpen -> onBarClose()
+                barFits -> onBarOpen()
+                else -> onMenu(row.ayah, blockBounds.value)
+            }
+        }
+        val currentVerseTap by rememberUpdatedState(verseTap)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -288,15 +302,7 @@ internal fun AyahBlock(
                 .clickable(
                     interactionSource = press,
                     indication = null,
-                    onClick = {
-                        when {
-                            scrollInProgress() -> Unit
-                            selectionClearer.clear() -> Unit
-                            barOpen -> onBarClose()
-                            barFits -> onBarOpen()
-                            else -> onMenu(row.ayah, blockBounds.value)
-                        }
-                    },
+                    onClick = verseTap,
                 )
                 // Every ayah gives a screen reader the same two doors a finger
                 // has: the ayah's own actions, and the paper's own tap. The
@@ -355,6 +361,7 @@ internal fun AyahBlock(
                     AyahBar(
                         actions = barActions,
                         saved = saved,
+                        noted = noted,
                         onAct = { action ->
                             onBarClose()
                             action(row.ayah)
@@ -436,7 +443,7 @@ internal fun AyahBlock(
                                     // asked for by holding it, so the reading
                                     // keeps its one tap everywhere (owner
                                     // decision, this session).
-                                    onTap = { currentPageTap() },
+                                    onTap = { currentVerseTap() },
                                     onLongPress = { position ->
                                         val layout = textLayout
                                         if (layout != null) {

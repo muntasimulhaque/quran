@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -86,9 +87,8 @@ class ListenOfferDismissTest {
         compose.waitUntil(timeoutMillis = 90_000) {
             compose.onAllNodesWithContentDescription(readingPage).fetchSemanticsNodes().isNotEmpty()
         }
-        // The ayah's own door, at the head of its block.
-        compose.onAllNodesWithText("2:1", substring = true).onFirst()
-            .performClick()
+        // The verse's own tap, and its bar's Play.
+        compose.onNodeWithTag("ayah-2:1").performClick()
         val play = compose.activity.getString(R.string.action_play)
         compose.waitUntil(timeoutMillis = 60_000) {
             compose.onAllNodesWithText(play).fetchSemanticsNodes().isNotEmpty()

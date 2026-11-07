@@ -7,6 +7,7 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -73,11 +74,11 @@ class ReadingSemanticsTest {
         // stop.
         compose.onAllNodesWithContentDescription(page).assertCountEquals(1)
         compose.waitUntil(timeoutMillis = 60_000) {
-            compose.onAllNodesWithText("1:1", substring = true).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithTag("ayah-1:1").fetchSemanticsNodes().isNotEmpty()
         }
         assertTrue(
-            "the first ayah's reference must be its own stop",
-            compose.onAllNodesWithText("1:1", substring = true).fetchSemanticsNodes().isNotEmpty(),
+            "the first verse must be its own stop",
+            compose.onAllNodesWithTag("ayah-1:1").fetchSemanticsNodes().isNotEmpty(),
         )
         // The Arabic of the first ayah is its own text node, not folded into
         // the page's description.
@@ -104,29 +105,37 @@ class ReadingSemanticsTest {
         }
 
     /**
-     * The reference under an ayah is a number the reader reads, so it is
-     * written in the reader's own digits: a Bangla reader meets ১:১ where an
-     * English one meets 1:1. The language choice recreates the Activity
-     * exactly as the app does, and the reference follows it (owner report,
-     * this session).
+     * The reference is a number the reader hears, so it is spoken in the
+     * reader's own digits even though the page's printed medallion is the
+     * print's own. A Bangla reader hears ১:১ where an English one hears 1:1,
+     * and the language choice recreates the Activity exactly as the app does
+     * (owner decision, this build).
      */
     @Test
-    fun theReferenceWearsTheLanguagesDigits() {
+    fun theSpokenReferenceWearsTheLanguagesDigits() {
         LanguagePreference(context).set("bn")
         runBlocking { SettingsStore(context).setUiLanguage("bn") }
-        compose.activityRule.scenario.recreate()
-        val page = compose.activity.getString(ReadingR.string.reading_page_description)
-        compose.waitUntil(timeoutMillis = 180_000) {
-            compose.onAllNodesWithContentDescription(page).fetchSemanticsNodes().isNotEmpty()
+        try {
+            compose.activityRule.scenario.recreate()
+            val page = compose.activity.getString(ReadingR.string.reading_page_description)
+            compose.waitUntil(timeoutMillis = 180_000) {
+                compose.onAllNodesWithContentDescription(page).fetchSemanticsNodes().isNotEmpty()
+            }
+            compose.waitUntil(timeoutMillis = 60_000) {
+                compose.onAllNodesWithContentDescription("\u09E7:\u09E7", substring = true)
+                    .fetchSemanticsNodes().isNotEmpty()
+            }
+            assertTrue(
+                "the spoken reference must wear the Bangla digits",
+                compose.onAllNodesWithContentDescription("\u09E7:\u09E7", substring = true)
+                    .fetchSemanticsNodes().isNotEmpty(),
+            )
+        } finally {
+            // The suite shares one process: the next class must meet
+            // English again, whatever this test saw.
+            LanguagePreference(context).set("en")
+            runBlocking { SettingsStore(context).setUiLanguage("en") }
+            compose.activityRule.scenario.recreate()
         }
-        compose.waitUntil(timeoutMillis = 60_000) {
-            compose.onAllNodesWithText("\u09E7:\u09E7", substring = true)
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-        assertTrue(
-            "the reference must wear the Bangla digits",
-            compose.onAllNodesWithText("\u09E7:\u09E7", substring = true)
-                .fetchSemanticsNodes().isNotEmpty(),
-        )
     }
 }
