@@ -235,7 +235,8 @@ class SearchTest {
 
     @Test
     fun `a latin excerpt stops at a quotation`() {
-        val quote = "الكتاب"
+        // Vocalized, as the sources carry it: the harakat must not break the run.
+        val quote = "بِسْمِ اللَّهِ"
         val text = "a ".repeat(30) + " needle " + quote + " " + "b ".repeat(300)
         val (excerpt, ranges) = Search.excerpt(text, listOf("needle"), arabic = false, window = 60)
         assertTrue(excerpt.contains("needle"))

@@ -19,8 +19,16 @@ data class SearchQuery(
 
 object Search {
 
-    /** A run of Arabic letters long enough to be a quotation, not a term. */
-    private val arabicQuote = Regex("""\p{IsArabic}{4,}""")
+    /**
+     * A run of two or more Arabic letters, their marks allowed between them.
+     *
+     * The property matches letters and not the harakat, so a vocalized word
+     * is a letter, a mark, a letter, and a plain {4,} never matches one: the
+     * excerpt kept its quotation. Two letters are enough to call a run a
+     * quotation in a Latin excerpt, and the window is cut at the run's first
+     * letter so no half-word is left behind (owner report, this build).
+     */
+    private val arabicQuote = Regex("""\p{IsArabic}(?:\p{M}*\p{IsArabic}){1,}""")
 
     /** One letter matches nearly everything; two is the shortest useful term. */
     const val MIN_TERM_LENGTH = 2
