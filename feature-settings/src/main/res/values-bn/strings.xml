@@ -35,7 +35,7 @@
     <string name="settings_words_title">শব্দের অর্থ জানতে শব্দ চেপে ধরে রাখুন</string>
     <string name="settings_words_lead">এটি চালু থাকলে পাঠে যেকোনো শব্দ চেপে ধরে রাখলে তার অর্থ দেখা যাবে।</string>
     <string name="settings_tajweed_title">তাজবীদ রঙ</string>
-    <string name="settings_tajweed_lead">প্রতিটি রঙ এক দল নিয়ম, পড়ার একটি শব্দে দেখানো হয়েছে। যে নিয়মগুলো এই রঙে পড়ে, প্রতিটির নাম নিচে লেখা আছে।</string>
+    <string name="settings_tajweed_lead">প্রতিটি রঙ এক দল নিয়ম; নামের পাশের শব্দটি পড়ারই একটি শব্দ। যে হরফগুলোতে রঙ আছে, নিয়মটি তাদেরই প্রযোজ্য; দলটির প্রতিটি নিয়মের নাম নিচে লেখা আছে।</string>
 
 
     <string name="settings_downloaded_label">এই ডিভাইসে থাকা সূরা (%1$d)</string>
@@ -99,8 +99,6 @@
     <string name="settings_title_translations">অনুবাদ</string>
     <string name="settings_title_tafsirs">তাফসীর</string>
     <string name="settings_title_about">অ্যাপ সম্পর্কে</string>
-    <string name="settings_summary_text_default">স্বাভাবিক</string>
-    <string name="settings_summary_text_adjusted">পরিবর্তিত</string>
     <string name="settings_version_short">সংস্করণ %1$s</string>
     <string name="settings_none_yet">এখনও নেই</string>
     <string name="settings_chosen_count">%1$dটি নির্বাচিত</string>

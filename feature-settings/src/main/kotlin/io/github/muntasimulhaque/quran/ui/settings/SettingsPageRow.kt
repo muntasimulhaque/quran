@@ -29,12 +29,18 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  *
  * A value longer than the row takes a second line under itself, and one longer
  * still is cut with an ellipsis.
+ *
+ * [valueContent] is for a value that is better shown than named: the Font
+ * size row draws the reader's own size instead of the word Default, because
+ * the size fits in the row and the word describes it (owner decision, this
+ * build). A row passes the string or the sample, never both.
  */
 @Composable
 fun PageRow(
     title: String,
     summary: String?,
     modifier: Modifier = Modifier,
+    valueContent: (@Composable () -> Unit)? = null,
     onClick: () -> Unit,
 ) {
     Row(
@@ -60,6 +66,7 @@ fun PageRow(
         RowName(
             title = title,
             value = summary,
+            valueContent = valueContent,
             modifier = Modifier.weight(1f).padding(end = Space.Row),
         )
         RowTail(chevron = true)

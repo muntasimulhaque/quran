@@ -92,7 +92,6 @@
     <string name="exact_alarm_settings_unavailable">This phone has no screen to allow alarms and reminders.</string>
     <!-- The one permission answer the first screen could not show on a page. -->
     <string name="permission_notifications_denied">Notifications are off, so the daily ayah cannot arrive.</string>
-    <string name="permission_exact_denied">Alarms and reminders are off, so the daily ayah may arrive late.</string>
     <string name="permission_notice_settings">Settings</string>
 
     <!-- The three home-screen shortcuts: the same doors the app already has. -->

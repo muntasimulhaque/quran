@@ -73,7 +73,6 @@
     <string name="notification_settings_unavailable">এই ফোনে নোটিফিকেশন সেটিংস নেই।</string>
     <string name="exact_alarm_settings_unavailable">আলার্ম ও রিমাইন্ডারের অনুমতি নেওয়ার কোনো পর্দা এই ফোনে নেই।</string>
     <string name="permission_notifications_denied">নোটিফিকেশন বন্ধ আছে, তাই প্রতিদিনের আয়াত পৌঁছাতে পারবে না।</string>
-    <string name="permission_exact_denied">আলার্ম ও রিমাইন্ডার বন্ধ আছে, তাই প্রতিদিনের আয়াত দেরিতে আসতে পারে।</string>
     <string name="permission_notice_settings">সেটিংস</string>
 
     <string name="shortcut_continue_short">পড়া চালিয়ে যান</string>

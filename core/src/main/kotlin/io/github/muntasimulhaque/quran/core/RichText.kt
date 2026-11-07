@@ -89,6 +89,36 @@ fun scriptMix(runs: List<TextRun>): ScriptMix {
     }
 }
 
+/**
+ * True when the only Arabic letters a block carries are the Prophet's
+ * ligature.
+ *
+ * The ligature is Arabic to the splitter, so a paragraph of English with one
+ * ﷺ in it is [ScriptMix.MIXED] and used to take the mixed paragraph's air:
+ * at the default tafsir size that lifted every line of the paragraph from
+ * 23.8 dp to 32.4, which a reader sees as double spacing. The ligature is
+ * not a quotation. It is drawn at the block's own size, not at the inline
+ * Arabic size, and in Kitab its ink measures 0.98 of the em, well inside the
+ * Latin line's 1.485. A block whose only Arabic is this symbol therefore
+ * needs the Latin line and no more (owner report, this build).
+ */
+fun isHonorificOnly(runs: List<TextRun>): Boolean {
+    var found = false
+    for (run in runs) {
+        if (run.marker != null) continue
+        var index = 0
+        while (index < run.text.length) {
+            val codepoint = run.text.codePointAt(index)
+            if (Character.isLetter(codepoint) && RichText.isArabic(codepoint)) {
+                if (codepoint != 0xFDFA) return false
+                found = true
+            }
+            index += Character.charCount(codepoint)
+        }
+    }
+    return found
+}
+
 object RichText {
 
     /** Arabic script ranges, including the presentation forms used by ﷺ. */

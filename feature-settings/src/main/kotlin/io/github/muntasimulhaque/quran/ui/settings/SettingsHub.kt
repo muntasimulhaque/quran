@@ -2,16 +2,19 @@ package io.github.muntasimulhaque.quran.ui.settings
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.DownloadError
 import io.github.muntasimulhaque.quran.data.Recitation
-import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.UiLanguage
+import io.github.muntasimulhaque.quran.data.readingMetrics
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.clockText
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
@@ -19,6 +22,7 @@ import io.github.muntasimulhaque.quran.ui.kit.languageChoiceName
 import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
+import io.github.muntasimulhaque.quran.ui.theme.Literata
 import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 
 /** The pages the settings hub opens, one at a time. */
@@ -55,16 +59,15 @@ private fun themeSummary(settings: AppSettings): String = settings.theme.name()
  * The hub: one row per setting, each carrying where it stands, so a reader
  * can see their own setup at a glance and open only what they came to change.
  *
- * The ten rows read as one list, the app's own surfaces first because they
- * are the words the reader reads everything else in, then the reading's own
- * choices, then the reciter, then the daily ayah. The four group headings
- * that used to stand over them named parts of one list, and a reader who has
- * opened the settings already knows which part they are in (owner decision,
- * this session). About is the list's last row like any other: it used to
- * stand after a section's gap, which was the one place the sheet broke its
- * own rhythm, and the reader counted the gap (owner report, this session).
- * Every row keeps the same room above and below it, so the list no longer
- * has one gap that reads as a section break.
+ * The ten rows read as one list, ordered by what a reader comes to change:
+ * the size of the text first, because that is the row this list is opened
+ * for most, then the ground and the language, then the reading's own choices,
+ * the voice, the reminder, and the app. It used to lead with the app's own
+ * surfaces on the reasoning that they are the words everything else is read
+ * in; that is a designer's reason and not a reader's (owner decision, this
+ * build). About is the list's last row like any other. Every row keeps the
+ * same room above and below it, so the list has no gap that reads as a
+ * section break.
  */
 @Composable
 fun SettingsHub(
@@ -79,24 +82,24 @@ fun SettingsHub(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier.fillMaxWidth().testTag("settings-hub")) {
-        // The app's own surfaces first: the words it speaks, the page it
-        // draws, and the size of its type. The language changes the words of
-        // every row below it, so a reader who changes it reads the whole sheet
-        // again in the new language, and it is said here rather than only
-        // behind its own page.
+        // The row a reader opens this list for, and it opens with the size
+        // itself: the sample is drawn at the reader's own reading size, so
+        // the row answers how big the text is without a word that describes
+        // it (owner decision, this build).
         PageRow(
-            title = stringResource(R.string.settings_title_language),
-            summary = languageChoiceName(settings.uiLanguage ?: UiLanguage.English.tag),
-        ) { onOpen(SettingsPage.Language) }
+            title = stringResource(R.string.settings_title_text),
+            summary = null,
+            valueContent = { FontSizeSample(settings) },
+            modifier = Modifier.testTag("row-text"),
+        ) { onOpen(SettingsPage.FontSize) }
         PageRow(
             title = stringResource(R.string.settings_title_appearance),
             summary = themeSummary(settings),
         ) { onOpen(SettingsPage.Theme) }
         PageRow(
-            title = stringResource(R.string.settings_title_text),
-            summary = fontSizeSummary(settings),
-            modifier = Modifier.testTag("row-text"),
-        ) { onOpen(SettingsPage.FontSize) }
+            title = stringResource(R.string.settings_title_language),
+            summary = languageChoiceName(settings.uiLanguage ?: UiLanguage.English.tag),
+        ) { onOpen(SettingsPage.Language) }
         // What the reading draws, in the order the page draws it: the tajweed
         // colors, which are the Arabic line itself, then the word meanings under
         // it, then the translation, then the tafsir behind the ayah card. Each
@@ -149,29 +152,22 @@ fun SettingsHub(
 }
 
 /**
- * The three sizes in the hub's one line: "Default" while every kind of text
- * stands on the middle step, and "Adjusted" once the reader has moved one
- * of them.
+ * The Font size row's value: the reader's reading size, drawn.
  *
- * It used to print the place of every kind ("Quran text 3 of 5, translation
- * 3 of 5, tafsir 3 of 5, word meanings 3 of 5"), which took two or three
- * lines of the row and said "Default" in four numbers. The page behind the
- * row shows every step as a filled cell beside the reader's own sample, so
- * the row's own job is only whether anything has moved (owner report).
+ * "Default" and "Adjusted" were a state and not a size: the row said whether
+ * the reader had moved a rail, never what the page looks like. The sample is
+ * the reading's own body at the reader's step, in the Book's face, so the row
+ * shows the thing it names. It takes the translation's step rather than the
+ * Quran's because this is the interface's own list, and the translation is
+ * the reading's body (owner decision, this build).
  */
 @Composable
-private fun fontSizeSummary(settings: AppSettings): String {
-    val steps = listOf(
-        settings.arabicSize,
-        settings.translationSize,
-        settings.tafsirSize,
-    )
-    return stringResource(
-        if (steps.all { it == TextSize.DEFAULT }) {
-            R.string.settings_summary_text_default
-        } else {
-            R.string.settings_summary_text_adjusted
-        },
+private fun FontSizeSample(settings: AppSettings) {
+    Text(
+        text = "Aa",
+        fontFamily = Literata,
+        fontSize = settings.readingMetrics().translationSp.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
 }
 

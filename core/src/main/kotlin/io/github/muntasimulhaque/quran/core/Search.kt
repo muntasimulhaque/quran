@@ -19,6 +19,9 @@ data class SearchQuery(
 
 object Search {
 
+    /** A run of Arabic letters long enough to be a quotation, not a term. */
+    private val arabicQuote = Regex("""\p{IsArabic}{4,}""")
+
     /** One letter matches nearly everything; two is the shortest useful term. */
     const val MIN_TERM_LENGTH = 2
 
@@ -278,6 +281,27 @@ object Search {
         var end = (last + window).coerceAtMost(readable.length)
         while (start > 0 && !readable[start - 1].isWhitespace()) start--
         while (end < readable.length && !readable[end].isWhitespace()) end++
+        // A Latin excerpt keeps Latin. A tafsir's Quran quotation is a block
+        // of its own in the sheet, and inline in a one-line snippet it
+        // collides with the sentence around it: the Arabic runs right to left
+        // across the Latin line and the punctuation lands on the wrong side.
+        // The window therefore stops at the nearest quotation rather than
+        // starting in the middle of one. A short term stays, because a term
+        // is not a passage, and an Arabic query keeps its Arabic (owner
+        // decision, this build).
+        if (!arabic) {
+            val quotes = arabicQuote.findAll(readable, start)
+                .takeWhile { it.range.first < end }
+                .toList()
+            quotes.lastOrNull { it.range.last < first }?.let { quote ->
+                start = maxOf(start, quote.range.last + 1)
+            }
+            quotes.firstOrNull { it.range.first > last }?.let { quote ->
+                end = minOf(end, quote.range.first)
+            }
+            while (start < first && readable[start].isWhitespace()) start++
+            while (end > last && readable[end - 1].isWhitespace()) end--
+        }
         start = minOf(start, first)
         end = maxOf(end, last)
         if (start >= end) return readable to ranges

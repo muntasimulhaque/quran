@@ -153,6 +153,20 @@ fun SettingsSheet(
                 PageHeader(
                     title = open.title(),
                     onBack = back,
+                    // The page whose switch is its subject carries the switch
+                    // in its own head, so the page's name is not repeated as
+                    // its first row (owner decision, this build).
+                    trailing = if (open == SettingsPage.Tajweed) {
+                        {
+                            HeadToggle(
+                                checked = settings.tajweed,
+                                onChange = actions.onTajweed,
+                                description = stringResource(R.string.settings_tajweed_title),
+                            )
+                        }
+                    } else {
+                        null
+                    },
                 )
                 when (open) {
                     SettingsPage.Language -> LanguagePage(
@@ -199,11 +213,7 @@ fun SettingsSheet(
                         packSetup = packSetup,
                         actions = actions,
                     )
-                    SettingsPage.Tajweed -> TajweedPage(
-                        settings = settings,
-                        sample = tajweedSample,
-                        onTajweed = actions.onTajweed,
-                    )
+                    SettingsPage.Tajweed -> TajweedPage(sample = tajweedSample)
                     SettingsPage.About -> AboutPage(
                         packs = packs,
                         version = version,

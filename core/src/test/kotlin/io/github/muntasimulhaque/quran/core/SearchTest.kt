@@ -234,6 +234,18 @@ class SearchTest {
     }
 
     @Test
+    fun `a latin excerpt stops at a quotation`() {
+        val quote = "الكتاب"
+        val text = "a ".repeat(30) + " needle " + quote + " " + "b ".repeat(300)
+        val (excerpt, ranges) = Search.excerpt(text, listOf("needle"), arabic = false, window = 60)
+        assertTrue(excerpt.contains("needle"))
+        assertTrue(ranges.isNotEmpty())
+        assertTrue(
+            "no quotation in a latin excerpt: $excerpt",
+            excerpt.codePoints().toArray().none { RichText.isArabic(it) },
+        )
+    }
+    @Test
     fun `the index shape answers both scripts`() {
         assertEquals("\u0628\u0633\u0645 \u0627\u0644\u0644\u0647", Search.normalizeForIndex("\u0628\u0650\u0633\u0652\u0645\u0650 \u0671\u0644\u0644\u0651\u064e\u0647\u0650"))
         assertEquals("allah", Search.normalizeForIndex("All\u0101h"))

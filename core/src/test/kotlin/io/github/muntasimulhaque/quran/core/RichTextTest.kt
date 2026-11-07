@@ -242,11 +242,25 @@ class RichTextTest {
 
     @Test
     fun `the prophet ligature alone makes a paragraph mixed`() {
-        // The ligature is Arabic inside English prose, and it is the case the
-        // mixed rule exists for: at the inline size its marks reach past a
-        // Latin line box (measured, not eyeballed).
+        // The ligature is Arabic inside English prose, so the paragraph is
+        // mixed for the splitter. It is not a quotation: the air it needs is
+        // the one its own size needs, and that is the Latin line (see the
+        // test below).
         val runs = RichText.runs("the Prophet ﷺ said")
         assertEquals(ScriptMix.MIXED, scriptMix(runs))
+        assertTrue(isHonorificOnly(runs))
+    }
+
+    @Test
+    fun `a quotation beside the ligature is not honorific only`() {
+        val runs = RichText.runs("the Prophet ﷺ said إِنَّ ٱللَّهَ")
+        assertFalse(isHonorificOnly(runs))
+    }
+
+    @Test
+    fun `a paragraph with no arabic is not honorific only`() {
+        assertFalse(isHonorificOnly(RichText.runs("In the Name of Allah.")))
+        assertFalse(isHonorificOnly(RichText.runs("إِنَّ ٱللَّهَ")))
     }
 
     @Test

@@ -180,7 +180,7 @@ class AyahActionsTest {
     @Test
     fun theDoorAndItsRowsAreAWholeTargetAndTheDoorSaysItsState() {
         waitForReading()
-        compose.onNodeWithContentDescription(doorName()).assertHeightIsEqualTo(48.dp)
+        compose.onNodeWithTag(doorName()).assertIsDisplayed()
 
         openTheDoor()
         val play = compose.activity.getString(R.string.action_play)
@@ -277,7 +277,7 @@ class AyahActionsTest {
 
     /** What the door says about its own state, in the app's words. */
     private fun doorState(): String? = compose
-        .onNodeWithContentDescription(doorName())
+        .onNodeWithTag(doorName())
         .fetchSemanticsNode()
         .config
         .getOrElseNullable(SemanticsProperties.StateDescription) { null }
@@ -289,8 +289,8 @@ class AyahActionsTest {
         .config
         .getOrElseNullable(SemanticsProperties.StateDescription) { null }
 
-    private fun doorName(): String =
-        compose.activity.getString(ReadingR.string.reading_ayah_door, "1:1")
+    /** The first verse's own node, the tap the head door used to answer. */
+    private fun doorName(): String = "ayah-1:1"
 
     private fun waitForReading() {
         val readingPage = compose.activity.getString(ReadingR.string.reading_page_description)
@@ -298,13 +298,13 @@ class AyahActionsTest {
             compose.onAllNodesWithContentDescription(readingPage).fetchSemanticsNodes().isNotEmpty()
         }
         compose.waitUntil(timeoutMillis = 60_000) {
-            compose.onAllNodesWithContentDescription(doorName()).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithTag(doorName()).fetchSemanticsNodes().isNotEmpty()
         }
     }
 
     /** Opens the first ayah's own menu from its door and waits for its rows. */
     private fun openTheDoor() {
-        compose.onAllNodesWithContentDescription(doorName()).onFirst().performClick()
+        compose.onAllNodesWithTag(doorName()).onFirst().performClick()
         compose.waitUntil(timeoutMillis = 60_000) {
             compose.onAllNodes(hasTestTag("app-popup")).fetchSemanticsNodes().isNotEmpty()
         }

@@ -84,9 +84,7 @@ class TajweedLegendTest {
         compose.setContent {
             QuranTheme(theme = AppTheme.Light) {
                 TajweedPage(
-                    settings = AppSettings(),
                     sample = { ayah },
-                    onTajweed = {},
                 )
             }
         }
@@ -113,9 +111,7 @@ class TajweedLegendTest {
         compose.setContent {
             QuranTheme(theme = AppTheme.Light) {
                 TajweedPage(
-                    settings = AppSettings(),
                     sample = { ayah },
-                    onTajweed = {},
                 )
             }
         }

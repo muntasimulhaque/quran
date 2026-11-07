@@ -26,11 +26,22 @@ class SelectionClearer {
     }
 
     /**
-     * Releases every selection on the surface. The list is copied first: a
-     * clear can recompose a line and dispose its state, and the set must not
-     * change under the loop.
+     * Releases every selection on the surface, and says whether there was
+     * one. A tap that puts a selection away is the reader finishing their own
+     * work, so it must not also become the verse's action: the caller clears
+     * first and returns when this is true (owner decision, this build).
+     *
+     * The list is copied first: a clear can recompose a line and dispose its
+     * state, and the set must not change under the loop.
      */
-    fun clear() {
-        states.toList().forEach { it.clear() }
+    fun clear(): Boolean {
+        var had = false
+        states.toList().forEach {
+            if (it.selectedTexts.isNotEmpty()) {
+                had = true
+                it.clear()
+            }
+        }
+        return had
     }
 }

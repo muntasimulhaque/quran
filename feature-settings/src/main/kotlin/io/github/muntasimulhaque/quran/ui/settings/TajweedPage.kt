@@ -30,7 +30,6 @@ import androidx.compose.ui.text.withStyle
 import io.github.muntasimulhaque.quran.core.TajweedFamily
 import io.github.muntasimulhaque.quran.core.TajweedRule
 import io.github.muntasimulhaque.quran.core.TajweedSamples
-import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.Ayah
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
@@ -60,12 +59,13 @@ import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
  * under it every rule it covers, named and explained.
  *
  * A rule is one paragraph, not two lines: the name runs into its sentence in
- * the family's ink and weight, and the sentence follows in the quiet tone, so
- * eighteen rules cost eighteen short paragraphs instead of eighteen headings
- * and eighteen notes with a block of air between each pair. The two spaces
- * that separate the name from its sentence are the whole of the punctuation,
- * because English ends a sentence with a period and Bangla with a danda, and
- * neither belongs between a name and the words that explain it.
+ * the page's ink and the app's medium weight, and the sentence follows after
+ * the app's own middot in the quiet tone, so eighteen rules cost eighteen
+ * short paragraphs instead of eighteen headings and eighteen notes with a
+ * block of air between each pair. The middot is the separator the interface
+ * already uses between a name and its fact ("Al-Kahf · 18:10"); it is neither
+ * a period nor a danda, so it belongs to neither language's sentence (owner
+ * decision, this build).
  *
  * The page used to print all eighteen names, a sentence for each, and one
  * sentence for the family above them, which said the same thing twice for the
@@ -89,17 +89,13 @@ import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
  * what the rule asks of the reciter, and it belongs to the same review as the
  * content. A qualified reviewer checks it before a release.
  *
- * The switch that draws all of this stands at the page's own top, in the same
- * words and the same state as the hub row that opened it. A reader reading the
- * colors and finding them not to their taste turns them off where they are,
- * rather than going back a page for the switch they came from (owner decision,
- * an earlier session). The switch carries no subtitle: the hub row that opens
- * this page dropped its own on the promise that the page would say what the
- * colors are, and that sentence stands over the legend instead, below the
- * switch, where the reader who wants to know what they are looking at reads
- * it. It says the page's own grammar too, because the word beside a family is
- * a sample from the reading and not decoration (owner decision, this
- * session).
+ * The switch that draws all of this stands in the page's own head, beside its
+ * name, so the page is not titled twice and the switch is still at the top of
+ * the page it governs. The host draws the head and the switch; the page below
+ * begins with the sentence that says what the colors are, where the reader who
+ * wants to know what they are looking at reads it. That sentence says the
+ * page's own grammar too, because the word beside a family is a sample from
+ * the reading and not decoration (owner decision, this build).
  *
  * The page is a list, and a family's head stays at the top of the glass while
  * the reader is inside that family's rules: the page is eighteen sentences
@@ -112,9 +108,7 @@ import io.github.muntasimulhaque.quran.ui.theme.TypeLadder
  */
 @Composable
 fun TajweedPage(
-    settings: AppSettings,
     sample: suspend () -> Ayah?,
-    onTajweed: (Boolean) -> Unit,
 ) {
     val palette = LocalPagePalette.current
     val hafs = rememberHafs()
@@ -135,15 +129,6 @@ fun TajweedPage(
             .sheetDragGate(gate),
         contentPadding = PaddingValues(bottom = Space.Section),
     ) {
-        item(key = "switch") {
-            ToggleRow(
-                title = stringResource(R.string.settings_tajweed_title),
-                subtitle = null,
-                checked = settings.tajweed,
-                onChange = onTajweed,
-                switchTag = "switch-tajweed-page",
-            )
-        }
         item(key = "lead") {
             Text(
                 text = stringResource(R.string.settings_tajweed_lead),
@@ -152,7 +137,7 @@ fun TajweedPage(
                 modifier = Modifier.padding(
                     start = Space.Gutter,
                     end = Space.Gutter,
-                    top = Space.Tight,
+                    top = Space.Line,
                     bottom = Space.Block,
                 ),
             )
@@ -257,13 +242,15 @@ private fun FamilyRules(family: TajweedFamily) {
 }
 
 /**
- * One rule: its name in the page's ink and the app's medium weight, its
- * sentence after it in the quiet tone, on one paragraph.
+ * One rule: its name in the page's ink and the app's medium weight, the
+ * app's own middot, and its sentence after it in the quiet tone, on one
+ * paragraph.
  *
  * The name is a run-in head, so a reader scanning for a word they have heard
  * finds it at the start of a line without the page paying for a line of its
  * own, and the sentence that explains it follows to the end of the same
- * thought.
+ * thought. The middot marks the step from the name to its sentence, in the
+ * one separator the app already uses between a name and its fact.
  */
 @Composable
 private fun Rule(name: String, sentence: String, modifier: Modifier = Modifier) {
@@ -272,7 +259,7 @@ private fun Rule(name: String, sentence: String, modifier: Modifier = Modifier) 
     Text(
         text = buildAnnotatedString {
             withStyle(SpanStyle(color = ink, fontWeight = FontWeight.Medium)) { append(name) }
-            append(RuleRunIn)
+            withStyle(SpanStyle(color = quiet)) { append(RuleDivider) }
             withStyle(SpanStyle(color = quiet)) { append(sentence) }
         },
         style = MaterialTheme.typography.bodyMedium,
@@ -280,12 +267,8 @@ private fun Rule(name: String, sentence: String, modifier: Modifier = Modifier) 
     )
 }
 
-/**
- * The room between a rule's name and its sentence: two spaces, so a run-in
- * head separates from its own sentence without a mark that belongs to one
- * language and not the other.
- */
-private const val RuleRunIn = "  "
+/** The step from a rule's name to its sentence: the app's own separator. */
+private const val RuleDivider = " · "
 
 /** The family's name in the reader's language. */
 private fun TajweedFamily.title(): Int = when (this) {

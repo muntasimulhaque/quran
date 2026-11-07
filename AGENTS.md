@@ -84,9 +84,10 @@ change, never left as a dead letter.
    targets live in the theme and are measured by a test.
 8. **Two UI languages, one content language each.** English is the default and
    the fallback, and the app follows the phone's language silently: no language
-   screen. English and Bangla ship together, the strings in each module's
-   `values-bn`; the reader's choice sets the translation, the tafsir, and the
-   word meanings too. Arabic is data, not a locale, so RTL stays on. A new
+   screen stands before the reading. English and Bangla ship together, the
+   strings in each module's `values-bn`; a reader who wants another language
+   chooses it in Settings, where it also sets the translation, the tafsir, and
+   the word meanings. Arabic is data, not a locale, so RTL stays on. A new
    language needs a real translation pass and a `values-xx` folder. The frozen
    names (`app_name`, `first_paint_title`, `first_paint_subtitle`, the store
    title) are never translated.

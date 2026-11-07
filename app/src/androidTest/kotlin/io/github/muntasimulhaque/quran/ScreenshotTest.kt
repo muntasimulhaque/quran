@@ -489,9 +489,11 @@ class ScreenshotTest {
         captureScreen("04-tafsir")
         leave(AYAH_CARD)
 
-        // 5. Search that reads a reference, with the places it reads behind
-        // the door: the one thing a reader cannot guess about this search is
-        // that "kahf 10" is an address and not a string to match.
+        // 5. Search that reads a reference. The frame is the state a reader
+        // meets: the field, the query, and the results, with the sources
+        // folded away as the first keystroke folds them (owner decision,
+        // this build). A frame that staged the open source list sold a
+        // screen the app hides.
         revealChrome()
         rule.onNodeWithContentDescription("Search").performClick()
         rule.waitUntil(timeoutMillis = 10_000) {
@@ -500,10 +502,6 @@ class ScreenshotTest {
         rule.onNode(hasSetTextAction()).performTextInput("kahf 10")
         rule.waitUntil(timeoutMillis = 180_000) {
             rule.onAllNodesWithText(REFERENCE_RESULT, substring = true).fetchSemanticsNodes().isNotEmpty()
-        }
-        rule.onAllNodesWithText(SEARCH_IN).onFirst().performClick()
-        rule.waitUntil(timeoutMillis = 10_000) {
-            rule.onAllNodesWithText(SOURCES).fetchSemanticsNodes().isNotEmpty()
         }
         // Close the keyboard before the frame: its contact-suggestion strip is
         // not the app, and the store should not show it. An emulator with a
@@ -686,8 +684,6 @@ class ScreenshotTest {
         const val SHARE = "Share"
         const val PLAY = "Play"
         const val REFERENCE_RESULT = "18:10"
-        const val SEARCH_IN = "Search in"
-        const val SOURCES = "Quran text"
         const val TAJWEED_FAMILY = "Silent letters"
         const val THEME = "Theme"
         const val BACK = "Back"

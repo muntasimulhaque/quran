@@ -48,6 +48,8 @@ internal fun RowName(
     /** Where the row stands, when the row has something to say about itself. */
     value: String?,
     modifier: Modifier = Modifier,
+    /** A value shown instead of named: the Font size row's own sample. */
+    valueContent: (@Composable () -> Unit)? = null,
 ) {
     Column(modifier) {
         Text(
@@ -61,7 +63,9 @@ internal fun RowName(
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
         )
-        if (!value.isNullOrBlank()) {
+        if (valueContent != null) {
+            valueContent()
+        } else if (!value.isNullOrBlank()) {
             Text(
                 text = value,
                 // A row's own value is the caption, 13 at Regular: the settings

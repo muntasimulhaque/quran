@@ -192,17 +192,17 @@ class SemanticsTest {
     private fun openDoor() {
         revealChrome()
         compose.waitUntil(30_000) {
-            compose.onAllNodesWithContentDescription(doorName()).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithTag(doorName()).fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onAllNodesWithContentDescription(doorName()).onFirst().performClick()
+        compose.onAllNodesWithTag(doorName()).onFirst().performClick()
         compose.waitUntil(30_000) {
             compose.onAllNodesWithText(context.getString(R.string.action_play))
                 .fetchSemanticsNodes().isNotEmpty()
         }
     }
 
-    private fun doorName(): String =
-        context.getString(ReadingR.string.reading_ayah_door, "1:1")
+    /** The first verse's own node, the tap the head door used to answer. */
+    private fun doorName(): String = "ayah-1:1"
 
     private fun waitForTag(tag: String, timeout: Long = 20_000) {
         compose.waitUntil(timeout) {

@@ -7,6 +7,7 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -78,10 +79,10 @@ class ReadingSavedMarkTest {
                 .fetchSemanticsNodes().isNotEmpty()
         }
         rule.onNodeWithTag("door-saved", useUnmergedTree = true).assertIsDisplayed()
-        // The mark is a drawing, so the state is the door's own words as well.
+        // The mark is a drawing, so the verse says its own state as well.
         rule.onNode(
-            hasContentDescription("Ayah 2:255 actions", substring = true) and
-                SemanticsMatcher("saved in the door's state") { node ->
+            hasTestTag("ayah-2:255") and
+                SemanticsMatcher("saved in the verse's state") { node ->
                     node.config.getOrNull(SemanticsProperties.StateDescription)
                         ?.contains("Saved") == true
                 },

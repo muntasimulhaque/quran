@@ -31,6 +31,7 @@ import io.github.muntasimulhaque.quran.core.TextBlock
 import io.github.muntasimulhaque.quran.core.TextBlockKind
 import io.github.muntasimulhaque.quran.core.TextRun
 import io.github.muntasimulhaque.quran.core.ScriptMix
+import io.github.muntasimulhaque.quran.core.isHonorificOnly
 import io.github.muntasimulhaque.quran.core.scriptMix
 import io.github.muntasimulhaque.quran.ui.theme.KitabBody
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
@@ -80,10 +81,14 @@ fun TranslationBody(
     val voice = LocalReadingVoice.current
     val body = sizeSp
     val mix = scriptMix(runs)
+    // A block whose only Arabic is the Prophet's ligature draws it at the
+    // body's own size, so the air it needs is the body's: the full inline
+    // Arabic air lifted every line of the paragraph by a third, which read
+    // as double spacing (owner report, this build).
     val line = lineHeightFor(
         mix = mix,
         latinLine = lineSp,
-        arabicSp = arabicSp,
+        arabicSp = if (isHonorificOnly(runs)) body else arabicSp,
     )
     val base = voice.prose(body, line)
     Text(
@@ -275,7 +280,9 @@ fun RichBlocks(
                 // 1.485 box would add about 6 dp above and below every head.
                 // An Arabic block still takes its own measured air below.
                 latinLine = if (head) drawn * voice.titleRatio else lineSp,
-                arabicSp = arabicSp,
+                // The ligature alone is drawn at the block's size, so it
+                // asks for the block's air and not the inline quotation's.
+                arabicSp = if (isHonorificOnly(block.runs)) drawn else arabicSp,
             )
             Text(
                 text = annotated(

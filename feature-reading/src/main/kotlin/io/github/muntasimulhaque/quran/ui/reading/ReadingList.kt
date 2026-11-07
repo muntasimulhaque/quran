@@ -64,7 +64,10 @@ fun ReadingList(
     nextSurahName: String?,
     selectedAyah: Int?,
     /** The ayah whose menu is open, so its own door can say so. */
-    menuAyah: Int? = null,
+    /** What the verse bar's cells do; the app owns the acts. */
+    barActions: AyahBarActions = AyahBarActions(),
+    /** The ayahs the reader wrote a note on, so their head can say so. */
+    notedAyahs: Set<Int> = emptySet(),
     /** The ayahs the reader has pressed Save on, so their doors say so. */
     savedAyahs: Set<Int> = emptySet(),
     playingAyah: Int?,
@@ -162,7 +165,8 @@ fun ReadingList(
         contentLanguage = contentLanguage,
         nextSurahName = nextSurahName,
         selectedAyah = selectedAyah,
-        menuAyah = menuAyah,
+        barActions = barActions,
+        notedAyahs = notedAyahs,
         savedAyahs = savedAyahs,
         playingAyah = playingAyah,
         playedWord = playedWord,
