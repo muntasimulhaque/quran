@@ -31,6 +31,8 @@ import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
+import io.github.muntasimulhaque.quran.ui.kit.AppChevron
+import io.github.muntasimulhaque.quran.ui.kit.ChevronRole
 import io.github.muntasimulhaque.quran.ui.kit.ReferenceLabel
 import io.github.muntasimulhaque.quran.ui.kit.focusRing
 import io.github.muntasimulhaque.quran.ui.theme.Radii
@@ -38,7 +40,8 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
  * The ayah's own door: the number at the head of the verse, in the app's one
- * action color, with the reader's marks beside it.
+ * action color, the one turn that says it opens, and the reader's marks
+ * beside them.
  *
  * **The verse is not a button** (owner decision, this session). A tap on the
  * Quran is the page's own tap: it brings or puts away the bar, and it never
@@ -50,11 +53,30 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * so a tap outside it can only put it away, never fall through to another
  * verse (owner decision, this session).
  *
- * It has no capsule and no caret. A shape around every number would turn the
- * page into a list of buttons, and the action color already says that a
- * number answers a tap. The visible line is the reference alone; the 48 dp
- * the finger needs is the row the head already keeps, so the numbers still
- * form one rail down the page and the card gap is untouched.
+ * **The door says it opens** (owner decision, this session). The number wore
+ * the action color and nothing else, and a number in the accent is a caption
+ * rather than a signifier: the head read as the verse's citation, so nothing
+ * told the reader that it answers a tap. Every other door in the app ends in
+ * the one turn the set draws, and the pill's reciter door, the closest
+ * sibling the app has, is a line of small type with that same 14 dp chevron
+ * standing 4 dp after it in the same ink. The reading's number wears the pair
+ * now, so a reader who has learned the pill has already learned the ayah.
+ *
+ * It has no capsule. A shape around every number would turn the page into a
+ * list of buttons, and the turn and the action color already say that a
+ * number answers a tap. The state is the turn and the page's own wash: while
+ * this ayah's menu is open the block wears the selected ground, so the door
+ * has only to say which way it went. The visible line is the reference and
+ * its turn; the 48 dp the finger needs is the row the head already keeps, so
+ * the numbers still form one rail down the page and the card gap is
+ * untouched.
+ *
+ * The turn is [ChevronRole.Expand], the pill's own mark for a panel that opens
+ * in place, and it turns up while the menu is open, so a door that has been
+ * answered goes on saying so. The mark is drawn and never spoken: a screen
+ * reader has the door as one named 48 dp button, and the menu names itself
+ * when it opens, so a state sentence on the door would be a stop that says
+ * nothing.
  *
  * [onOpen] hands the door's own place on the glass to the caller, measured in
  * the window, because the menu hangs from the door and a popup cannot read
@@ -69,6 +91,8 @@ internal fun AyahDoor(
     marked: Boolean = false,
     /** True when the reader wrote a note on this ayah. */
     noted: Boolean = false,
+    /** True while this ayah's menu is open, so its turn says which way. */
+    open: Boolean = false,
     onOpen: (IntRect) -> Unit,
 ) {
     val bounds = remember { mutableStateOf(IntRect.Zero) }
@@ -108,6 +132,21 @@ internal fun AyahDoor(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             ReferenceLabel(text = reference, color = ink)
+            AppChevron(
+                role = ChevronRole.Expand,
+                expanded = open,
+                tint = ink,
+                size = GlyphSize.ChevronInline,
+                modifier = Modifier
+                    // The gap the pill's own door keeps between its word and
+                    // its turn, so the number and the mark read as one thing
+                    // (owner decision, this session).
+                    .padding(start = Space.Tight)
+                    // The turn is a drawing, not a control, so it carries no
+                    // name of its own; the tag is how a test sees that the
+                    // door says it opens.
+                    .testTag("door-chevron"),
+            )
             if (marked) {
                 IconGlyph(
                     icon = Icon.BookmarkFilled,

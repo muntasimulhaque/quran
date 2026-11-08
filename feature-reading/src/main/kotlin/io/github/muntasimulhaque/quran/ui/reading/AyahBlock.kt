@@ -99,6 +99,8 @@ internal fun AyahBlock(
     noted: Boolean = false,
     /** True when the reader has pressed Save on this ayah. */
     saved: Boolean = false,
+    /** True while this ayah's menu is open, so its door can turn. */
+    menuOpen: Boolean = false,
     /** The focus target a jump lands on, when this is the ayah it landed on. */
     focusRequester: FocusRequester? = null,
     /** The ayah's door was tapped, with its own place on the glass. */
@@ -312,17 +314,18 @@ internal fun AyahBlock(
             // The reader's own marks, and the reader's own door. On a page
             // that carries a translation the head is the reference: the one
             // visible signifier on the reading, in the action color, with the
-            // bookmark and the note beside it. On a page that draws the Quran
-            // alone there is no reference line: the verse's printed medallion
-            // is its number and its door, and the head stands only when the
-            // reader's own marks have something to say (owner decision, this
-            // session).
+            // turn that says it opens, and the bookmark and the note beside
+            // them. On a page that draws the Quran alone there is no reference
+            // line: the verse's printed medallion is its number and its door,
+            // and the head stands only when the reader's own marks have
+            // something to say (owner decision, this session).
             if (!arabicOnly) {
                 AyahDoor(
                     reference = reference,
                     key = row.ayah.verseKey,
                     marked = saved,
                     noted = noted,
+                    open = menuOpen,
                     onOpen = { onMenu(row.ayah, it) },
                 )
             } else if (saved || noted) {

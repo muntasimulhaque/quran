@@ -367,11 +367,16 @@ fun ReaderScreen(
         reveal = null
     }
 
+    // The ayah whose own door raised the menu, so that door's turn can say
+    // which way it went. It is read apart from the wash below, because the
+    // wash also marks an ayah whose note is open over it, and a note is not a
+    // menu.
+    val menuAyah = menu?.ayah?.number
     // The wash under an ayah: the one whose menu is open, or the one whose
     // note is open over it. A note opened from Browse has no door behind it,
     // but the reader is still looking at the ayah the note belongs to, so it
     // wears the same mark while the sheet is up.
-    val washedAyah = menu?.ayah?.number ?: cardNote
+    val washedAyah = menuAyah ?: cardNote
 
     // What a tap on the page, and the phone's own Back, answer at the foot of
     // the reading. The pill wears no close any more, so this is the one way a
@@ -655,6 +660,7 @@ fun ReaderScreen(
                     nextSurahName = viewModel.surahs
                         .firstOrNull { it.number == surah.number + 1 }?.nameSimple,
                     selectedAyah = washedAyah,
+                    menuAyah = menuAyah,
                     notedAyahs = saved
                         .filter { !it.note.isNullOrBlank() }
                         .map { it.ayahNumber }

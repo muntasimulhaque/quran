@@ -3,8 +3,12 @@ package io.github.muntasimulhaque.quran
 import android.os.ParcelFileDescriptor
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
@@ -38,12 +42,13 @@ import org.junit.runner.RunWith
  * The ayah's own door, and the one menu it opens.
  *
  * The reading's signifier is the number at each ayah's head: the app's action
- * color, no capsule, and the same door whether the reader is sighted or using
- * a screen reader. The whole verse is not a button: a tap on the Quran is the
- * page's own tap, and the menu the number opens is the app's one popup, so a
- * tap outside it puts it away instead of choosing another ayah (owner
- * decision, this session: 16.6's whole-verse tap was half a solution, because
- * the page has almost no room left for a tap that means something else).
+ * color and the one turn that says it opens, no capsule, and the same door
+ * whether the reader is sighted or using a screen reader. The whole verse is
+ * not a button: a tap on the Quran is the page's own tap, and the menu the
+ * number opens is the app's one popup, so a tap outside it puts it away
+ * instead of choosing another ayah (owner decision, this session: 16.6's
+ * whole-verse tap was half a solution, because the page has almost no room
+ * left for a tap that means something else).
  *
  * The deeper door always stands in the menu. Without a pack it opens the
  * offer that names the language, the pack, and the size, rather than hiding
@@ -174,10 +179,33 @@ class AyahActionsTest {
     }
 
     @Test
+    fun theDoorSaysItOpensAndItsTurnIsNotAStop() {
+        waitForReading()
+        // The head is one line of type and one turn: the number, then the
+        // app's chevron 4 dp after it in the same ink, the pair the pill's
+        // own doors draw (owner decision, this session).
+        assertEquals(
+            "a door says it opens once",
+            1,
+            compose.onAllNodes(
+                hasTestTag("door-chevron") and hasAnyAncestor(hasTestTag(doorName())),
+                useUnmergedTree = true,
+            ).fetchSemanticsNodes().size,
+        )
+        // The turn is a drawing, so the door stays one named button and the
+        // menu's state adds no stop for a screen reader to walk through. The
+        // turn's own direction is `AppChevronTurnTest`'s arithmetic.
+        val name = compose.activity.getString(ReadingR.string.reading_door, "1:1")
+        compose.onNodeWithTag(doorName()).assert(hasContentDescription(name))
+        openTheDoor()
+        compose.onNodeWithTag(doorName()).assert(hasContentDescription(name))
+    }
+
+    @Test
     fun theDoorIsAWholeTargetAndThePagePutsItsMenuAway() {
         waitForReading()
-        // The door is the number alone, but its target is the 48 dp every
-        // control owes a finger.
+        // The door is one line of type and one turn, but its target is the
+        // 48 dp every control owes a finger.
         compose.onNodeWithTag(doorName()).assertIsDisplayed().assertHeightIsEqualTo(48.dp)
 
         openTheDoor()
