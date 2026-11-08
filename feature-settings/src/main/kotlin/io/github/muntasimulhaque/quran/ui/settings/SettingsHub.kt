@@ -11,7 +11,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.ContentPack
-import io.github.muntasimulhaque.quran.data.DownloadError
 import io.github.muntasimulhaque.quran.data.Recitation
 import io.github.muntasimulhaque.quran.data.UiLanguage
 import io.github.muntasimulhaque.quran.data.readingMetrics
@@ -23,7 +22,6 @@ import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.reciterShortName
 import io.github.muntasimulhaque.quran.ui.theme.Literata
-import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 
 /** The pages the settings hub opens, one at a time. */
 enum class SettingsPage {
@@ -234,21 +232,7 @@ private fun wordsSummary(
     val wanted = wantedWordsPack(settings, packs)
     val installed = wanted?.installed == true
     val setup = packSetup?.takeIf { it.packId == wanted?.id }
-    return when {
-        setup != null && setup.failed -> stringResource(
-            if (setup.failure == DownloadError.Storage) {
-                UiKitR.string.failure_storage_words
-            } else {
-                UiKitR.string.failure_download
-            },
-        )
-        setup != null && setup.progress != null -> stringResource(
-            R.string.settings_pack_downloading,
-            (setup.progress * 100).toInt(),
-        )
-        setup != null -> stringResource(R.string.settings_pack_preparing)
-        else -> onOff(settings.wordByWord && installed)
-    }
+    return packSetupLine(setup) ?: onOff(settings.wordByWord && installed)
 }
 
 /**

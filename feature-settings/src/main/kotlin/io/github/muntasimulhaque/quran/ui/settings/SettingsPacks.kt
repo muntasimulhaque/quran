@@ -10,12 +10,14 @@ import androidx.compose.ui.unit.dp
 import io.github.muntasimulhaque.quran.data.AppSettings
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ContentPack
+import io.github.muntasimulhaque.quran.data.DownloadError
 import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.feature.settings.R
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
 import io.github.muntasimulhaque.quran.ui.kit.formatBytes
 import io.github.muntasimulhaque.quran.ui.kit.languageName
 import io.github.muntasimulhaque.quran.ui.theme.Space
+import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 
 /**
  * What a list of packs says, in one place.
@@ -103,6 +105,33 @@ internal fun packSizeLine(pack: ContentPack): String =
     } else {
         formatBytes(pack.bytes)
     }
+
+/**
+ * What a pack on its way is doing, in one line, or null when nothing is.
+ *
+ * The hub and the pack's own page ask the same question of the same state,
+ * so they are answered here and cannot drift: a download names its percent,
+ * a preparing pack says so, and a failure says what the reader can do about
+ * it. The page under the words switch reads it under the switch itself, so
+ * the reader's tap is answered where the finger is rather than only at the
+ * pack row below (owner decision, this session).
+ */
+@Composable
+internal fun packSetupLine(setup: PackSetupState?): String? = when {
+    setup == null -> null
+    setup.failed -> stringResource(
+        if (setup.failure == DownloadError.Storage) {
+            UiKitR.string.failure_storage_words
+        } else {
+            UiKitR.string.failure_download
+        },
+    )
+    setup.progress != null -> stringResource(
+        R.string.settings_pack_downloading,
+        (setup.progress * 100).toInt(),
+    )
+    else -> stringResource(R.string.settings_pack_preparing)
+}
 
 /**
  * The packs of one kind, grouped by the language they speak, and alphabetical

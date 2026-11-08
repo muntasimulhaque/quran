@@ -8,10 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.muntasimulhaque.quran.core.EndOfAudio
@@ -23,7 +20,6 @@ import io.github.muntasimulhaque.quran.ui.kit.ScaleRow
 import io.github.muntasimulhaque.quran.ui.kit.SpeedSteps
 import io.github.muntasimulhaque.quran.ui.kit.speedText
 import io.github.muntasimulhaque.quran.ui.theme.Space
-import io.github.muntasimulhaque.quran.ui.theme.compactLabel
 
 /**
  * The whole of what a reader can change about the recitation, in one panel:
@@ -54,6 +50,17 @@ import io.github.muntasimulhaque.quran.ui.theme.compactLabel
  * that the ending has no read-back on the pill, which by a settled rule does
  * not write the ending down; the row's own mark was on screen when the tap
  * landed.
+ * **The place is the pill's, not the panel's** (owner decision, this session).
+ * The panel used to head itself with the whole place in the same words and
+ * type the capsule under it already wears, ten dp apart: the sentence was
+ * said twice, and the popup was the one panel in the app that drew a title
+ * (`AppPopup`'s name is spoken and never drawn). The place still reaches a
+ * screen reader as the popup's pane title, and the panel opens on its first
+ * question. The voices lead, because the block that opens the panel leads
+ * with the reciter's name; the pace and the answers follow, in the order the
+ * listening menu has always kept. One panel rather than two menus (owner
+ * decision, this session: the block is one door, and the three questions are
+ * one subject).
  */
 @Composable
 internal fun ColumnScope.ListeningPanel(
@@ -65,27 +72,7 @@ internal fun ColumnScope.ListeningPanel(
     end: EndOfAudio,
     onSpeed: (Float) -> Unit,
     onEndOfAudio: (EndOfAudio) -> Unit,
-    /** The whole place at the panel's head; null when it is unknown. */
-    place: String? = null,
 ) {
-    // The panel names the whole place before its first group: the compact
-    // pill has room for the surah and the key, and the sentence lives here,
-    // the same one the lock screen carries. It is a heading to a screen
-    // reader, which also hears it as the popup's pane title.
-    if (!place.isNullOrBlank()) {
-        Text(
-            text = place,
-            style = compactLabel(),
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Line)
-                .semantics { heading() }
-                .testTag("playback-place"),
-        )
-    }
     if (options.isNotEmpty()) {
         MenuLabel(stringResource(R.string.playback_reciter_label))
         ReciterChoices(options = options, selected = selected, onChoose = onChoose)

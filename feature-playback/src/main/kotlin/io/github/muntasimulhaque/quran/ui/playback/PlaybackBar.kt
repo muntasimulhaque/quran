@@ -45,9 +45,13 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  *
  * **The playing pill is two rows, and the offer is its sibling** (owner
  * decision, this session). A recitation's capsule is one 48 dp line of words
- * over one 48 dp transport row, 96 dp tall. The line is the voice and its
- * pace, then the surah's name and the ayah's key, with the door's chevron at
- * the end; the transport is the three circles, centered. The offer is the
+ * over one 48 dp transport row, 96 dp tall. The two rows are the finger's
+ * floor and fill the capsule, so there is no padding at its ends and the air
+ * the reader sees is each shape's own inset: the offer's 6 dp pills, the
+ * transport's 4 dp circles. The packed height was settled again against a
+ * padded 104 and 112, and it stands (owner decision, this session). The line
+ * is the voice and its pace, then the surah's name and the ayah's key, with
+ * the door's chevron at the end; the transport is the three circles, centered. The offer is the
  * same 96 dp skeleton: a 48 dp line that is the door to the voice list, over
  * the 48 dp pair Not now and Download. The voices that are not a recitation
  * keep the one-row shape, 64 dp tall, or 74 with a download's line under it,
@@ -412,8 +416,9 @@ fun PlaybackBar(
                         anchor = anchor,
                         onDismiss = { openMenu = null },
                         alignment = PopupAlignment.Center,
-                        // The panel names the whole place at its head and
-                        // to a screen reader; the voice list keeps no head.
+                        // The place is the panel's pane title, spoken and
+                        // never drawn: the capsule under the panel already
+                        // says it, and the voice list keeps no title.
                         name = fullPlace?.takeIf { openMenu == PillMenu.Listening },
                     ) {
                         PillMenuBody(
@@ -422,7 +427,6 @@ fun PlaybackBar(
                             selected = reciterId,
                             speed = speed,
                             end = end,
-                            place = fullPlace.takeIf { openMenu == PillMenu.Listening },
                             onDismiss = { openMenu = null },
                             onReciter = onReciter,
                             onSpeed = onSpeed,

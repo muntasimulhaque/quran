@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 16.8 (versionCode 170)
+Version: 16.9 (versionCode 171)
 
 ## Listing
 
@@ -175,6 +175,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Not now, Download, the page, or Back), so every frame that
 wants a clean page is taken before it.
+
+## Release notes (16.9, 484 characters)
+16.9 tidies the reading's edges. The ayah's number answers a press with a pill that leaves the digits room. A saved or noted mark on the page with the translation off rides the verse's first line, so a marked verse no longer stands apart. The listening panel no longer repeats the place the pill already says. The word meanings switch now fetches the word list. The Quran text, both translations, both tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (16.8, 427 characters)
 16.8 makes the reading say where the actions are. Every ayah's number now carries the app's small chevron, the mark the recitation pill's doors already wear, so the head reads as a door instead of a citation. The chevron turns up while that ayah's menu is open, and the number keeps no capsule around it. The Quran text, both translations, both tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.

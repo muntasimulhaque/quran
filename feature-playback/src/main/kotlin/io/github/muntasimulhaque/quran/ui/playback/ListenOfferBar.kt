@@ -44,10 +44,21 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * reciter's name, the chevron that says the line opens, then the surah and
  * its size. Its second row is the two answers, Not now and Download, side by
  * side. The line sits 14 dp under the crown, the answer row is the capsule's
- * 48 dp foot, and the visible pills keep their 7 dp of air. Before this the
+ * 48 dp foot, and the visible pills keep their 6 dp of air. Before this the
  * line was a 20 dp notice, because a 20 dp line cannot also be a 48 dp
  * target; the door is the 20 dp the capsule gained, and it gives the name its
  * chooser back.
+ *
+ * **The 96 is the whole of it, and it was settled again** (owner decision,
+ * this session). The two rows are the finger's 48 dp each and stand edge to
+ * edge, so the air at the capsule's ends is each row's own shape inside its
+ * target, 6 dp for the pills, 4 for a transport circle, and the band between
+ * the rows is the two inner insets added. That is why the middle reads as
+ * twice the ends: centering two equal rows produces it, and no centering
+ * changes it. Giving the ends more air means giving the capsule its own
+ * padding and more height, 104 at `Space.Tight` or 112 at `Space.Line`; the
+ * packed 96 was chosen over both, so the airs here are the promise and not a
+ * draft.
  *
  * **The line is the door to the voice list** (owner decision, this session).
  * It opens the same reciter list the playing pill carries, hung from the

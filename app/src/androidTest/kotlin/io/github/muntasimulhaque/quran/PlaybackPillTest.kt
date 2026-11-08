@@ -13,6 +13,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHeightIsAtLeast
@@ -143,7 +145,7 @@ import java.util.Locale
  *     decision, this session).
  * 16. The offer is a two-row capsule, 96 dp tall: a 48 dp line that is the
  *     door to the voice list, then Not now and Download as one centered pair.
- *     The line's crown is 14 dp and the answers' foot 7. An offer with no
+ *     The line's crown is 14 dp and the answers' foot 6. An offer with no
  *     voice to offer keeps the line as a notice and draws no chevron (owner
  *     decision, this session).
  * 17. Every door says its state: the pill's three doors speak Expanded and
@@ -769,15 +771,29 @@ class PlaybackPillTest {
     }
 
     /**
-     * The listening panel names the whole place at its head, the one sentence
-     * the compact pill cannot hold: the surah and the ayah, the same the lock
-     * screen carries (owner decision, this version).
+     * The place is the pill's and the pane's, not a line the panel draws
+     * (owner decision, this session). The compact pill says the surah and the
+     * key, the popup speaks the whole place as its pane title, and the panel
+     * opens on its first question: the same sentence in the same type, 10 dp
+     * apart, was the app's only drawn popup title.
      */
     @Test
-    fun theListeningPanelNamesTheWholePlace() {
+    fun thePlaceIsThePillsAndThePanes() {
         showPill(state = PlaybackUiState(ayahNumber = 255))
         compose.onNodeWithTag("playback-words").performClick()
-        compose.onNodeWithText("Al-Baqarah, Ayah 255").assertExists()
+        // The capsule under the panel still says the place and the key.
+        compose.onNodeWithText("Al-Baqarah", useUnmergedTree = true).assertExists()
+        compose.onNodeWithText("2:255", useUnmergedTree = true).assertExists()
+        // The panel still names the whole place to a screen reader, and draws
+        // none of it.
+        compose.onNode(
+            hasTestTag("app-popup") and
+                SemanticsMatcher("the panel's pane title") { node ->
+                    node.config.getOrNull(SemanticsProperties.PaneTitle)
+                        ?.contains("Al-Baqarah, Ayah 255") == true
+                },
+        ).assertExists()
+        compose.onNodeWithText("Al-Baqarah, Ayah 255").assertDoesNotExist()
     }
 
     /**

@@ -6,12 +6,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.text.selection.SelectionState
 import androidx.compose.material3.MaterialTheme
@@ -40,6 +43,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
@@ -54,6 +58,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -131,6 +136,15 @@ internal fun AyahBlock(
     // the head of the block is not drawn then, so the screen holds the Quran
     // and nothing else.
     val arabicOnly = !metrics.showTranslation && !showWordAid
+    // The page that draws the Quran alone keeps its line's rhythm, so the
+    // reader's own marks ride the verse's first line in a rail at its leading
+    // edge instead of standing in a head above it: the mark adds no height,
+    // and the block is the same height whether or not it carries one (owner
+    // decision, this session). The rail is the Arabic line's own box at the
+    // system's scale, the measure the mark is centred on.
+    val firstLine = with(LocalDensity.current) {
+        (metrics.arabicLineSp * fontScale).dp
+    }
     // The reader's digits, and a spoken name for them: the reference is a
     // number the reader reads, so it follows the interface's digits, and a
     // screen reader hears it named rather than as a bare key (owner decision,
@@ -317,8 +331,9 @@ internal fun AyahBlock(
             // turn that says it opens, and the bookmark and the note beside
             // them. On a page that draws the Quran alone there is no reference
             // line: the verse's printed medallion is its number and its door,
-            // and the head stands only when the reader's own marks have
-            // something to say (owner decision, this session).
+            // and the reader's own marks ride the verse's first line in a rail
+            // at its leading edge, so nothing stands above the verse and the
+            // page keeps its rhythm (owner decision, this session).
             if (!arabicOnly) {
                 AyahDoor(
                     reference = reference,
@@ -328,33 +343,6 @@ internal fun AyahBlock(
                     open = menuOpen,
                     onOpen = { onMenu(row.ayah, it) },
                 )
-            } else if (saved || noted) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    if (saved) {
-                        IconGlyph(
-                            icon = Icon.BookmarkFilled,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .size(GlyphSize.ChevronInline)
-                                .testTag("door-saved"),
-                        )
-                    }
-                    if (noted) {
-                        IconGlyph(
-                            icon = Icon.Note,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .padding(start = Space.Tight)
-                                .size(GlyphSize.ChevronInline)
-                                .testTag("door-noted"),
-                        )
-                    }
-                }
             }
             // The roundel's own span is a key as well as the words: the
             // reader's size change and a change of ground both reach the
@@ -397,120 +385,135 @@ internal fun AyahBlock(
             // The Arabic line's own place on the glass, so the medallion's tap
             // can become the rect its menu hangs from.
             val textBounds = remember { mutableStateOf(IntRect.Zero) }
-            Text(
-                text = arabicLine.text,
-                style = arabicStyle(hafs, metrics.arabicSp, metrics.arabicLineSp, palette.ink),
-                textAlign = TextAlign.Right,
-                onTextLayout = { textLayout = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onGloballyPositioned {
-                        val box = it.boundsInWindow()
-                        textBounds.value = IntRect(
-                            box.left.toInt(),
-                            box.top.toInt(),
-                            box.right.toInt(),
-                            box.bottom.toInt(),
-                        )
-                    }
-                    // In an Arabic-only reading there is no reference line, so
-                    // the verse's own printed medallion closes it and is the
-                    // ayah's only number and its door: a tap on the medallion
-                    // opens the actions, and a tap anywhere else on the line
-                    // is the page's own tap, exactly as it is on the paper
-                    // around it. The medallion is a few dp of ink, so its
-                    // target is grown around the ink to the 48 dp every
-                    // control owes a finger; the ink and the page do not move
-                    // (owner decision, this session).
-                    .then(
-                        if (arabicOnly) {
-                            Modifier.pointerInput(arabicLine.ornamentRange) {
-                                detectTapGestures { position ->
-                                    val layout = textLayout
-                                    val range = arabicLine.ornamentRange
-                                    if (layout != null && range != null &&
-                                        ornamentTarget(layout, range).contains(position)
-                                    ) {
-                                        onMenu(
-                                            row.ayah,
-                                            ornamentAnchor(layout, range, textBounds.value),
-                                        )
-                                    } else {
-                                        currentVerseTap.invoke()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Top,
+            ) {
+                // The rail is reserved on every Arabic-only verse, so a save
+                // never rewraps the Arabic: it is the width of a mark and its
+                // gap, and the words start after it on every verse alike.
+                if (arabicOnly) {
+                    MarksRail(
+                        saved = saved,
+                        noted = noted,
+                        lineHeight = firstLine,
+                    )
+                }
+                Text(
+                    text = arabicLine.text,
+                    style = arabicStyle(hafs, metrics.arabicSp, metrics.arabicLineSp, palette.ink),
+                    textAlign = TextAlign.Right,
+                    onTextLayout = { textLayout = it },
+                    modifier = Modifier
+                        .weight(1f)
+                        .onGloballyPositioned {
+                            val box = it.boundsInWindow()
+                            textBounds.value = IntRect(
+                                box.left.toInt(),
+                                box.top.toInt(),
+                                box.right.toInt(),
+                                box.bottom.toInt(),
+                            )
+                        }
+                        // In an Arabic-only reading there is no reference line, so
+                        // the verse's own printed medallion closes it and is the
+                        // ayah's only number and its door: a tap on the medallion
+                        // opens the actions, and a tap anywhere else on the line
+                        // is the page's own tap, exactly as it is on the paper
+                        // around it. The medallion is a few dp of ink, so its
+                        // target is grown around the ink to the 48 dp every
+                        // control owes a finger; the ink and the page do not move
+                        // (owner decision, this session).
+                        .then(
+                            if (arabicOnly) {
+                                Modifier.pointerInput(arabicLine.ornamentRange) {
+                                    detectTapGestures { position ->
+                                        val layout = textLayout
+                                        val range = arabicLine.ornamentRange
+                                        if (layout != null && range != null &&
+                                            ornamentTarget(layout, range).contains(position)
+                                        ) {
+                                            onMenu(
+                                                row.ayah,
+                                                ornamentAnchor(layout, range, textBounds.value),
+                                            )
+                                        } else {
+                                            currentVerseTap.invoke()
+                                        }
                                     }
                                 }
-                            }
-                        } else {
-                            Modifier
-                        },
-                    )
-                    .then(
-                        if (showWordAid) {
-                            Modifier.pointerInput(arabicLine.wordRanges, row.meanings) {
-                                detectTapGestures(
-                                    // The tap is still the page's: a word is
-                                    // asked for by holding it, so the reading
-                                    // keeps its one tap everywhere (owner
-                                    // decision, this session).
-                                    onTap = { currentVerseTap() },
-                                    onLongPress = { position ->
-                                        val layout = textLayout
-                                        if (layout != null) {
-                                            val offset = layout.getOffsetForPosition(position)
-                                            val index = arabicLine.wordRanges
-                                                .indexOfFirst { offset in it }
-                                            val word = row.meanings.getOrNull(index)
-                                            val meaning = word?.meaning
-                                            if (word != null && !meaning.isNullOrBlank()) {
-                                                haptics.performHapticFeedback(
-                                                    HapticFeedbackType.LongPress,
-                                                )
-                                                currentWord(
-                                                    OpenWord(
-                                                        word = word.word,
-                                                        meaning = meaning,
-                                                        tajweed = word.tajweed,
-                                                        reference = row.ayah.verseKey,
-                                                    ),
-                                                )
+                            } else {
+                                Modifier
+                            },
+                        )
+                        .then(
+                            if (showWordAid) {
+                                Modifier.pointerInput(arabicLine.wordRanges, row.meanings) {
+                                    detectTapGestures(
+                                        // The tap is still the page's: a word is
+                                        // asked for by holding it, so the reading
+                                        // keeps its one tap everywhere (owner
+                                        // decision, this session).
+                                        onTap = { currentVerseTap() },
+                                        onLongPress = { position ->
+                                            val layout = textLayout
+                                            if (layout != null) {
+                                                val offset = layout.getOffsetForPosition(position)
+                                                val index = arabicLine.wordRanges
+                                                    .indexOfFirst { offset in it }
+                                                val word = row.meanings.getOrNull(index)
+                                                val meaning = word?.meaning
+                                                if (word != null && !meaning.isNullOrBlank()) {
+                                                    haptics.performHapticFeedback(
+                                                        HapticFeedbackType.LongPress,
+                                                    )
+                                                    currentWord(
+                                                        OpenWord(
+                                                            word = word.word,
+                                                            meaning = meaning,
+                                                            tajweed = word.tajweed,
+                                                            reference = row.ayah.verseKey,
+                                                        ),
+                                                    )
+                                                }
                                             }
-                                        }
-                                    },
-                                )
+                                        },
+                                    )
+                                }
+                            } else {
+                                Modifier
+                            },
+                        )
+                        .drawWithContent {
+                            val recited = arabicLine.recitedRange
+                            val layout = textLayout
+                            if (layout == null) {
+                                drawContent()
+                                return@drawWithContent
                             }
-                        } else {
-                            Modifier
-                        },
-                    )
-                    .drawWithContent {
-                        val recited = arabicLine.recitedRange
-                        val layout = textLayout
-                        if (layout == null) {
+                            // The page has one word wash: the word a search
+                            // arrived on and the word the reciter is saying are
+                            // both a place on the Quran's own line, and the seven
+                            // rule colors have to stay readable on it. The
+                            // selected ayah is a ground of its own, so the word
+                            // wash is not laid over it (owner decision, this
+                            // session).
+                            if (!isSelected) {
+                                arabicLine.matchRanges.forEach { range ->
+                                    drawWordWash(layout, range, palette.highlight)
+                                }
+                                if (
+                                    recited != null &&
+                                    arabicLine.matchRanges.none { it == recited }
+                                ) {
+                                    drawWordWash(layout, recited, palette.highlight)
+                                }
+                            }
                             drawContent()
-                            return@drawWithContent
-                        }
-                        // The page has one word wash: the word a search
-                        // arrived on and the word the reciter is saying are
-                        // both a place on the Quran's own line, and the seven
-                        // rule colors have to stay readable on it. The
-                        // selected ayah is a ground of its own, so the word
-                        // wash is not laid over it (owner decision, this
-                        // session).
-                        if (!isSelected) {
-                            arabicLine.matchRanges.forEach { range ->
-                                drawWordWash(layout, range, palette.highlight)
-                            }
-                            if (
-                                recited != null &&
-                                arabicLine.matchRanges.none { it == recited }
-                            ) {
-                                drawWordWash(layout, recited, palette.highlight)
-                            }
-                        }
-                        drawContent()
-                        drawTajweedColors(layout, tajweed, palette.tajweed, metrics.tajweed)
-                    },
-            )
+                            drawTajweedColors(layout, tajweed, palette.tajweed, metrics.tajweed)
+                        },
+                )
+            }
             // More than one translation may be on, and each is drawn in its
             // own column; a column is named when there is more than one, and
             // when it is the only one but not in the reader's language, so
@@ -577,6 +580,63 @@ internal fun AyahBlock(
         }
     }
 }
+
+/**
+ * The reader's own marks on a page that draws the Quran alone.
+ *
+ * The page has no head: the verse's printed medallion is its number and its
+ * door, so the reader's marks have nothing to sit in. They used to sit in a
+ * 48 dp row above the verse, the height the door's finger needs, which made a
+ * marked verse stand 48 dp apart from its neighbours on a page whose whole
+ * rhythm is [Space.Tight] on each side of the wash. The mark rides the verse's
+ * first line in a rail the width of the mark and its gap, reserved on every
+ * verse so a save never rewraps the Arabic, and the block keeps the verse's
+ * own height whether or not it carries a mark (owner decision, this session).
+ *
+ * Two marks stack in the rail rather than widen it, because the rail is
+ * reserved on every verse and a second mark must not narrow the page. They
+ * stand centred on the first line's own box, so the marks read as notes in the
+ * page's margin and never as part of the Quran.
+ */
+@Composable
+private fun MarksRail(
+    saved: Boolean,
+    noted: Boolean,
+    /** The Arabic line's own box at the system's scale. */
+    lineHeight: Dp,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .width(MarkRail)
+            .height(lineHeight),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(Space.Tight)) {
+            if (saved) {
+                IconGlyph(
+                    icon = Icon.BookmarkFilled,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .size(GlyphSize.ChevronInline)
+                        .testTag("door-saved"),
+                )
+            }
+            if (noted) {
+                IconGlyph(
+                    icon = Icon.Note,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .size(GlyphSize.ChevronInline)
+                        .testTag("door-noted"),
+                )
+            }
+        }
+    }
+}
+
+/** The room the marks' rail keeps on a page that draws the Quran alone. */
+private val MarkRail = GlyphSize.ChevronInline + Space.Tight
 
 /** One Arabic line: its words, the range the reciter is on, and any search match. */
 private data class ArabicLine(

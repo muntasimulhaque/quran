@@ -114,6 +114,19 @@ fun TafsirsPage(
  * did not ask for. The row is still a choice row, because its tap is the crop
  * of the aid that sits behind the same question as the switch above it
  * (owner decision, this session).
+ *
+ * **The switch is the ask** (owner decision, this session). A fresh install
+ * carries no word list, and the switch used to stand disabled until the pack
+ * was added, a dead control under the name of the feature while two other
+ * rows did the same thing. It is the "tap that turns the aid on" the rule
+ * names: turning it on fetches the one list, through the same sized add every
+ * pack uses, and the aid turns on when the list lands. The row's own line says
+ * the transfer while it runs, so the tap is answered under the finger; a
+ * failure leaves the switch off and says why; and a language the catalog
+ * offers no list for keeps the switch disabled, because a switch that can
+ * fetch nothing is a switch that lies. The translations page keeps its own
+ * master switch disabled until a pack is installed, because there the switch
+ * cannot choose which translation to fetch; here there is exactly one list.
  */
 @Composable
 fun WordsPage(
@@ -125,13 +138,16 @@ fun WordsPage(
     Column(Modifier.fillMaxWidth().sheetVerticalScroll(rememberScrollState())) {
         val pack = wantedWordsPack(settings, packs)
         val installed = pack?.installed == true
+        val setup = packSetup?.takeIf { it.packId == pack?.id }
         ToggleRow(
             title = stringResource(R.string.settings_words_title),
-            subtitle = stringResource(R.string.settings_words_lead),
+            subtitle = packSetupLine(setup) ?: stringResource(R.string.settings_words_lead),
             checked = settings.wordByWord && installed,
             onChange = actions.onWordByWord,
             switchTag = "switch-words-page",
-            enabled = installed,
+            // The one list is offered by the catalog, so the switch has a
+            // list to fetch; a language with none keeps it disabled.
+            enabled = pack != null,
         )
         if (pack != null) {
             Spacer(Modifier.height(Space.Block))

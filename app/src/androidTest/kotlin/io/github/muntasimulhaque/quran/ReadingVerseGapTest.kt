@@ -7,6 +7,7 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.DpRect
 import androidx.compose.ui.unit.sp
 import androidx.test.core.app.ActivityScenario
@@ -14,10 +15,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.LanguagePreference
+import io.github.muntasimulhaque.quran.data.SavedStore
 import io.github.muntasimulhaque.quran.data.SettingsStore
 import io.github.muntasimulhaque.quran.data.TextSize
 import io.github.muntasimulhaque.quran.data.TypeRole
 import io.github.muntasimulhaque.quran.feature.reading.R as ReadingR
+import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
 import io.github.muntasimulhaque.quran.ui.theme.Space
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -107,6 +110,62 @@ class ReadingVerseGapTest {
     }
 
     /**
+     * A saved mark is the reader's, not the page's: it rides the verse's own
+     * first line in a rail, so an Arabic-only block keeps the edge-to-edge
+     * rhythm with or without one (owner decision, this session). The mark used
+     * to sit in a 48 dp head, the door's finger target on a page that has no
+     * door, which stood a saved verse six times the page's air from its
+     * neighbours.
+     */
+    @Test
+    fun aSavedMarkDoesNotChangeTheArabicOnlyGap() {
+        runBlocking {
+            SavedStore(context).apply {
+                toggle(AYAT_AL_FATIHA)
+                close()
+            }
+        }
+        try {
+            onReading(showTranslation = false) {
+                val verses = verseBlocks()
+                assertEquals(
+                    "a saved verse keeps the Arabic-only page edge to edge",
+                    0f,
+                    verses[1].top.value - verses[0].bottom.value,
+                    1f,
+                )
+                compose.onNodeWithTag("door-saved", useUnmergedTree = true).assertExists()
+                // The mark rides the verse's own first line, at the leading
+                // edge the block's words keep, and adds no height.
+                val mark = compose.onNodeWithTag("door-saved", useUnmergedTree = true)
+                    .getUnclippedBoundsInRoot()
+                val line = with(compose.density) {
+                    TextSize.lineSp(TypeRole.Arabic, TextSize.DEFAULT).sp.toDp().value
+                }
+                assertEquals(
+                    "the mark stands on the wash's own words rail",
+                    Space.WashInset.value,
+                    mark.left.value - verses[0].left.value,
+                    1f,
+                )
+                assertEquals(
+                    "the mark is centred on the first line's box",
+                    Space.Tight.value + (line - GlyphSize.ChevronInline.value) / 2f,
+                    mark.top.value - verses[0].top.value,
+                    2f,
+                )
+            }
+        } finally {
+            runBlocking {
+                SavedStore(context).apply {
+                    unsave(AYAT_AL_FATIHA)
+                    close()
+                }
+            }
+        }
+    }
+
+    /**
      * Seeds the reader's choices, opens the reading, and hands it to [check]
      * with its first two verses measured.
      */
@@ -164,4 +223,9 @@ class ReadingVerseGapTest {
             node.config.getOrNull(SemanticsActions.CustomActions)
                 ?.any { action: CustomAccessibilityAction -> action.label == label } == true
         }
+
+    private companion object {
+        /** 1:1 in the Quran's sequential numbering. */
+        const val AYAT_AL_FATIHA = 1
+    }
 }
