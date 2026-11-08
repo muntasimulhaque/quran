@@ -140,7 +140,7 @@ safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
 The set is from capture run 42452561263 on 16.8: all three legs green,
-eleven frames each (twelve on the ten inch screen), every frame read. The
+eleven frames each (twelve on the ten inch screen), every frame read. 16.9 changed no surface these eight frames show (the ayah's press, the marks on the page with the translation off, the listening panel, and the words switch), so the set stands from that run and nothing was captured. The
 eight are a reader's path through the app rather than the app's own map, and
 the last frame is the two-row offer, its line a 48 dp door to the voice list.
 The ayah's own door is its number at the head, in the app's blue, with the
