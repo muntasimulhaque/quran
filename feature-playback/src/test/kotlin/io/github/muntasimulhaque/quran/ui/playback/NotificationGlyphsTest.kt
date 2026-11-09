@@ -2,6 +2,7 @@ package io.github.muntasimulhaque.quran.ui.playback
 
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphGrid
 import io.github.muntasimulhaque.quran.ui.glyph.GlyphShape
+import io.github.muntasimulhaque.quran.playback.NotificationMark
 import io.github.muntasimulhaque.quran.ui.glyph.Glyphs
 import io.github.muntasimulhaque.quran.ui.glyph.Icon
 import org.junit.Assert.assertEquals
@@ -15,21 +16,32 @@ import java.io.File
  * The notification is the one surface the app cannot draw with Compose, so its
  * four transport marks are vector files beside the media session. They are not
  * a second hand: each file carries the numbers [Glyphs] draws, on the same 24
- * unit square, and this test reads the files against the set. The two shapes
- * had already drifted once, and nothing could see it (owner report, this
- * session).
+ * unit square, and this test reads the files against the set through
+ * [NotificationMark], which names the pair in the app's own code. The two
+ * shapes had already drifted once, and nothing could see it (owner report, an
+ * earlier session).
+ *
+ * Two of the four are the shade's alone now: the pill became one row with one
+ * mark (owner decision, this session), and its skips are the actions that mark
+ * offers to a screen reader. The drawings are still the app's, and this test
+ * still holds them to it.
  */
 class NotificationGlyphsTest {
 
     @Test
     fun eachTransportVectorCarriesTheSetsDrawing() {
-        transports.forEach { (icon, file) ->
-            val parts = partsOf(file)
-            val drawn = drawnParts(icon)
-            assertEquals("$file carries ${parts.size} parts for $icon", drawn.size, parts.size)
+        NotificationMark.entries.forEach { mark ->
+            val parts = partsOf(mark.fileName)
+            val drawn = drawnParts(mark.icon)
+            assertEquals(
+                "${mark.fileName} carries ${parts.size} parts for ${mark.icon}",
+                drawn.size,
+                parts.size,
+            )
             drawn.forEach { expected ->
                 assertTrue(
-                    "$file does not carry the $icon drawing: $expected is not among $parts",
+                    "${mark.fileName} does not carry the ${mark.icon} drawing: " +
+                        "$expected is not among $parts",
                     parts.any { it == expected },
                 )
             }
@@ -38,7 +50,9 @@ class NotificationGlyphsTest {
 
     @Test
     fun aBarInTheShadeIsTheSetsOwnBar() {
-        transports.forEach { (icon, file) ->
+        NotificationMark.entries.forEach { mark ->
+            val icon = mark.icon
+            val file = mark.fileName
             val bars = Glyphs.of(icon).filterIsInstance<GlyphShape.Bar>()
             if (bars.isEmpty()) return@forEach
             val text = vector(file).readText()
@@ -90,11 +104,5 @@ class NotificationGlyphsTest {
         val PATH_DATA = Regex("""android:pathData="([^"]*)"""")
         val NUMBER = Regex("""-?\d+(?:\.\d+)?""")
 
-        val transports = listOf(
-            Icon.Play to "ic_transport_play.xml",
-            Icon.Pause to "ic_transport_pause.xml",
-            Icon.Next to "ic_transport_next.xml",
-            Icon.Previous to "ic_transport_previous.xml",
-        )
     }
 }

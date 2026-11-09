@@ -57,17 +57,15 @@ open class AppMediaNotificationProvider(context: Context) :
      * the button itself when it is not a transport. Every field that decides
      * what the button does, what it is called, and where it sits is carried
      * over, so the replacement changes the drawing and nothing else.
+     *
+     * The four marks are named in [NotificationMark], with the app's own
+     * drawing and the file that carries it, so the shade's set is the app's set
+     * in one place and a test can read them against each other.
      */
     private fun CommandButton.withAppMark(): CommandButton {
-        val mark = when (icon) {
-            CommandButton.ICON_PLAY -> R.drawable.ic_transport_play
-            CommandButton.ICON_PAUSE -> R.drawable.ic_transport_pause
-            CommandButton.ICON_NEXT -> R.drawable.ic_transport_next
-            CommandButton.ICON_PREVIOUS -> R.drawable.ic_transport_previous
-            else -> return this
-        }
+        val mark = NotificationMark.of(icon) ?: return this
         val builder = CommandButton.Builder(icon)
-            .setCustomIconResId(mark)
+            .setCustomIconResId(mark.markResId)
             .setDisplayName(displayName)
             .setEnabled(isEnabled)
             .setExtras(extras)
