@@ -139,9 +139,11 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set stands from capture run 42452561263 on 16.9 and is captured again for 17.0, because the eighth frame is the offer and the offer leaves the sheet's white for the paper's control tone (the run is recorded at the hand-off). The
+The set is from capture run 42573823582 on 17.0: all three legs green,
+eleven frames each (twelve on the ten inch screen), every frame read. The
 eight are a reader's path through the app rather than the app's own map, and
-the last frame is the two-row offer, its line a 48 dp door to the voice list.
+the last frame is the two-row offer, its line a 48 dp door to the voice list,
+its capsule now the paper's own control tone instead of the sheet's white.
 The ayah's own door is its number at the head, in the app's blue, with the
 app's one chevron 4 dp after it: the menu it opens is the app's one popup, and
 the verse is not a button, so a tap on the page puts the menu away and chooses
