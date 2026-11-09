@@ -139,14 +139,15 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 42632590480 on 17.1: all three legs green,
+The set is from capture run 42667785519 on 17.2: all three legs green,
 eleven frames each (twelve on the ten inch screen), every frame read. The
 eight are a reader's path through the app rather than the app's own map. The
 reading frames carry the long read's palette: the seven tajweed families hold
 one weight, the paper ink is the reading's own 12:1 tone, and the night page's
 colors sit below the ink instead of glowing above it. The last frame is the
-two-row offer, its line a 48 dp door to the voice list, its capsule the
-paper's own control tone instead of the sheet's white.
+one-row offer, 64 dp, the reciter's name over the surah and its size, the
+whole block a door to the voice list, its capsule on the floating paper the
+pill already wears. The second frame's menu wears that same floating paper.
 The ayah's own door is its number at the head, in the app's blue, with the
 app's one chevron 4 dp after it: the menu it opens is the app's one popup, and
 the verse is not a button, so a tap on the page puts the menu away and chooses
@@ -172,13 +173,16 @@ What each set shows, in order:
    "Search in" door
 6. The Tajweed page: seven color families, each with its word and its rules
 7. The reading at night
-8. The recitation's own offer: the two-row capsule naming the surah, the
-   reciter, and the size before a tap, its line a door to the voice list, with
-   Not now and Download under it
+8. The recitation's own offer: the one-row capsule naming the reciter over the
+   surah and its size before a tap, the block a door to the voice list, with
+   Download at its end
 
 The last frame is last on purpose. The offer stays on the reading until the
-reader answers it (Not now, Download, the page, or Back), so every frame that
-wants a clean page is taken before it.
+reader answers it (Download, the page, or Back), so every frame that wants a
+clean page is taken before it.
+
+## Release notes (17.2, 485 characters)
+17.2 makes the floating paper readable. The pill, the offer, the snackbar, and their menus wear one warm tone a step from the day page, the step the night page already held, so a light pill no longer vanishes into the paper. The recited word keeps its tint without the accent edge, and the download offer is one 64 dp row naming the reciter, the surah, and the size before Download. Text, translations, tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (17.1, 473 characters)
 17.1 makes the colors read for the long sitting. The seven tajweed families hold one weight on the page, so no rule is louder than its neighbor, and the night colors are calmer, the green no longer saturated. The reading ink is softer on paper, the recited word gains a fine accent edge, and selecting a verse marks it in the page's own tone so its colors stay readable. Text, translations, tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
