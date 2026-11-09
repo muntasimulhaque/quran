@@ -33,8 +33,10 @@ fun AppSnackbar(
     SnackbarHost(hostState = hostState, modifier = modifier) { data ->
         Snackbar(
             shape = Radii.Card,
-            // The one step above the sheet, so the sentence stands on the page
-            // it interrupts rather than a shade of its own.
+            // The app's one floating tone, the same the playback pill and the
+            // offer wear: the sentence stands on the page it interrupts, one
+            // step under its paper, rather than a shade of its own (owner
+            // decision, this session).
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             contentColor = MaterialTheme.colorScheme.onSurface,
             action = data.visuals.actionLabel?.let { label ->

@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 16.9 (versionCode 171)
+Version: 17.0 (versionCode 172)
 
 ## Listing
 
@@ -139,8 +139,7 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 42452561263 on 16.8: all three legs green,
-eleven frames each (twelve on the ten inch screen), every frame read. 16.9 changed no surface these eight frames show (the ayah's press, the marks on the page with the translation off, the listening panel, and the words switch), so the set stands from that run and nothing was captured. The
+The set stands from capture run 42452561263 on 16.9 and is captured again for 17.0, because the eighth frame is the offer and the offer leaves the sheet's white for the paper's control tone (the run is recorded at the hand-off). The
 eight are a reader's path through the app rather than the app's own map, and
 the last frame is the two-row offer, its line a 48 dp door to the voice list.
 The ayah's own door is its number at the head, in the app's blue, with the
@@ -175,6 +174,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Not now, Download, the page, or Back), so every frame that
 wants a clean page is taken before it.
+
+## Release notes (17.0, 482 characters)
+17.0 makes the recitation pill one row. It stands 64 dp, the height its other voices already wear: the voice and its pace over the place and its key, with play or pause at the end. The two skips left the glass, where they cut the place, and are actions TalkBack finds on that mark; the notification keeps them. The pill and the offer wear the paper's tone, not the sheet's white. Text, translations, tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (16.9, 484 characters)
 16.9 tidies the reading's edges. The ayah's number answers a press with a pill that leaves the digits room. A saved or noted mark on the page with the translation off rides the verse's first line, so a marked verse no longer stands apart. The listening panel no longer repeats the place the pill already says. The word meanings switch now fetches the word list. The Quran text, both translations, both tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.

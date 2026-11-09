@@ -358,7 +358,12 @@ internal fun DailyTimeDialog(
                     .fillMaxWidth()
                     .floatingLift(Radii.Popup)
                     .clip(Radii.Popup)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                    // A panel, like the sheets and the menus it stands among,
+                    // so it wears their paper and not the tone of a control
+                    // that floats over the reading (owner decision, this
+                    // session: the day's exact time is a page the reader sets,
+                    // not a pill over the page).
+                    .background(MaterialTheme.colorScheme.surface)
                     .semantics { paneTitle = title }
                     .testTag("daily-time-picker"),
             ) {

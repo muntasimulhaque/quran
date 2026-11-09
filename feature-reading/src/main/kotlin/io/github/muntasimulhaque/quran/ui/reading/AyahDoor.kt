@@ -6,7 +6,6 @@ import androidx.compose.foundation.indication
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -72,15 +71,24 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * the numbers still form one rail down the page and the card gap is
  * untouched.
  *
- * **The press is the app's pill, and it keeps its air** (owner decision, this
- * session). The flash used to be the row's own bounds: no air on the leading
- * end, so the digits touched it, 4 dp above and below, and the reader's marks
- * stood inside it, which made one door three shapes. It is the compact
- * measure the pill's own doors wear now, 8 dp of air at each end and above
- * and below, the line plus 16 dp inside the 48 dp target, with the ring on
- * the same shape. The leading air belongs to the wash's own inset rather than
- * to the reference's rail, so the number still stands on the line the
- * translation under it keeps.
+ * **The press is the app's pill, and it stands on the card's own line**
+ * (owner decision, this session). The flash used to be the row's own bounds:
+ * no air on the leading end, so the digits touched it, 4 dp above and below,
+ * and the reader's marks stood inside it, which made one door three shapes. It
+ * is the compact measure the pill's own doors wear now, 8 dp of air at each end
+ * and above and below, the line plus 16 dp inside the 48 dp target, with the
+ * ring on the same shape.
+ *
+ * The flash is also a control *on* the washed card, so its shape begins where
+ * the card's content begins, one [Space.WashInset] inside the card's edge,
+ * and the digits sit one [Space.WashInset] inside the flash. It used to reach
+ * out to the card's own edge, so that the digits landed on the line the
+ * translation keeps, and the two rounded shapes met along that edge: two blues
+ * with one silhouette, which is the one thing a control over the reading must
+ * not do (owner report, this session). Now the flash keeps the card's air on
+ * every side, and the digits are a shape's content, inset inside it, the way
+ * the word on every pill in the app is. The card's content line is the line
+ * the flash's shape holds; the digits lead it by that shape's own inset.
  *
  * The turn is [ChevronRole.Expand], the pill's own mark for a panel that opens
  * in place, and it turns up while the menu is open, so a door that has been
@@ -114,85 +122,77 @@ internal fun AyahDoor(
     val ink = MaterialTheme.colorScheme.primary
     val name = stringResource(R.string.reading_door, reference)
     Box(
-        // The press shape reaches the wash's own air on the leading end: the
-        // wash keeps `Space.WashInset` around the page's words, and the flash
-        // takes exactly that room, so the digits stay on the rail the
-        // translation under them keeps (owner decision, this session).
-        modifier = Modifier.offset(x = -Space.WashInset),
+        modifier = Modifier
+            .onGloballyPositioned {
+                val box = it.boundsInWindow()
+                bounds.value = IntRect(
+                    box.left.toInt(),
+                    box.top.toInt(),
+                    box.right.toInt(),
+                    box.bottom.toInt(),
+                )
+            }
+            .testTag("door-$key")
+            .clickable(
+                interactionSource = press,
+                indication = null,
+                role = Role.Button,
+            ) { onOpen(bounds.value) }
+            .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp)
+            .semantics { contentDescription = name },
+        contentAlignment = Alignment.CenterStart,
     ) {
-        Box(
+        Row(
             modifier = Modifier
-                .onGloballyPositioned {
-                    val box = it.boundsInWindow()
-                    bounds.value = IntRect(
-                        box.left.toInt(),
-                        box.top.toInt(),
-                        box.right.toInt(),
-                        box.bottom.toInt(),
-                    )
-                }
-                .testTag("door-$key")
-                .clickable(
-                    interactionSource = press,
-                    indication = null,
-                    role = Role.Button,
-                ) { onOpen(bounds.value) }
-                .defaultMinSize(minWidth = 48.dp, minHeight = 48.dp)
-                .semantics { contentDescription = name },
-            contentAlignment = Alignment.CenterStart,
+                .clip(Radii.Pill)
+                .focusRing(press, Radii.Pill)
+                .indication(press, ripple(color = ink, bounded = false))
+                .testTag("door-flash")
+                .padding(horizontal = Space.WashInset, vertical = Space.Line),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
+            ReferenceLabel(
+                text = reference,
+                color = ink,
+                modifier = Modifier.testTag("door-reference"),
+            )
+            AppChevron(
+                role = ChevronRole.Expand,
+                expanded = open,
+                tint = ink,
+                size = GlyphSize.ChevronInline,
                 modifier = Modifier
-                    .clip(Radii.Pill)
-                    .focusRing(press, Radii.Pill)
-                    .indication(press, ripple(color = ink, bounded = false))
-                    .testTag("door-flash")
-                    .padding(horizontal = Space.WashInset, vertical = Space.Line),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                ReferenceLabel(
-                    text = reference,
-                    color = ink,
-                    modifier = Modifier.testTag("door-reference"),
-                )
-                AppChevron(
-                    role = ChevronRole.Expand,
-                    expanded = open,
+                    // The gap the pill's own door keeps between its word and
+                    // its turn, so the number and the mark read as one thing
+                    // (owner decision, this session).
+                    .padding(start = Space.Tight)
+                    // The turn is a drawing, not a control, so it carries no
+                    // name of its own; the tag is how a test sees that the
+                    // door says it opens.
+                    .testTag("door-chevron"),
+            )
+            if (marked) {
+                IconGlyph(
+                    icon = Icon.BookmarkFilled,
                     tint = ink,
-                    size = GlyphSize.ChevronInline,
                     modifier = Modifier
-                        // The gap the pill's own door keeps between its word and
-                        // its turn, so the number and the mark read as one thing
-                        // (owner decision, this session).
                         .padding(start = Space.Tight)
-                        // The turn is a drawing, not a control, so it carries no
-                        // name of its own; the tag is how a test sees that the
-                        // door says it opens.
-                        .testTag("door-chevron"),
+                        .size(GlyphSize.ChevronInline)
+                        // The mark is a drawing, not a control, so it
+                        // carries no name of its own; the tag is how a test
+                        // sees that the door of a saved ayah draws it.
+                        .testTag("door-saved"),
                 )
-                if (marked) {
-                    IconGlyph(
-                        icon = Icon.BookmarkFilled,
-                        tint = ink,
-                        modifier = Modifier
-                            .padding(start = Space.Tight)
-                            .size(GlyphSize.ChevronInline)
-                            // The mark is a drawing, not a control, so it
-                            // carries no name of its own; the tag is how a test
-                            // sees that the door of a saved ayah draws it.
-                            .testTag("door-saved"),
-                    )
-                }
-                if (noted) {
-                    IconGlyph(
-                        icon = Icon.Note,
-                        tint = ink,
-                        modifier = Modifier
-                            .padding(start = Space.Tight)
-                            .size(GlyphSize.ChevronInline)
-                            .testTag("door-noted"),
-                    )
-                }
+            }
+            if (noted) {
+                IconGlyph(
+                    icon = Icon.Note,
+                    tint = ink,
+                    modifier = Modifier
+                        .padding(start = Space.Tight)
+                        .size(GlyphSize.ChevronInline)
+                        .testTag("door-noted"),
+                )
             }
         }
     }

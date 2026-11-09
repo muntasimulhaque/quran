@@ -94,6 +94,15 @@ val FloatingShadow = Color(0x1A000000)
 // divider in the app wears, and on the night ground it measured 1.03:1
 // against its own track, so an off switch had no knob in it at all (owner
 // report, forty-sixth session). See `Switch.kt` for the whole control.
+//
+// [PaperControl] is also the tone of a control that floats over the reading,
+// since the day ground's `surfaceContainerHigh` took it: the playback pill,
+// the offer, the pack row, the snackbar (owner decision, this session). The
+// pill was pure white by day, the sheet's own tone, so it read as a colder
+// shape laid on the paper rather than as a control; one step under the page
+// lets the shadow and the tone together say that it floats, and the sheet and
+// the menu stay the only pure white on the ground. The night ground already
+// worked this way with [NightControl].
 val PaperControl = Color(0xFFF4F1EA)
 val PaperOnPrimary = Color(0xFFFFFFFF)
 val NightControl = Color(0xFF2E2B28)

@@ -88,6 +88,20 @@ internal enum class PillMenu { Reciters, Listening }
  * use the page tap pauses, then taps the page, which is the app's one
  * dismissal for everything it raises.
  *
+ * **The recitation's transport is one mark, and two more live on it** (owner
+ * decision, this session). The playing pill used to draw three circles, and
+ * the one-row shape cannot hold them beside the place: the three targets take
+ * 144 dp of the capsule's 328, which leaves the words a 148 dp block and 140
+ * dp of type, and the longest place with its key and its turn needs 149 dp in
+ * Bangla at the default type and 174 at the top step. Three marks therefore cut
+ * the place, which the pill never does, so the playing pill draws play or pause
+ * alone, the one act a recitation is asked for all the time, and Previous ayah
+ * and Next ayah are the two actions it offers beside the tap, where Stop
+ * already stands. A screen-reader reader keeps all three in the pill; the media
+ * notification keeps them for everyone (owner decision, this session: the
+ * measurement settled it, and the shape is the transfer's own, one mark at its
+ * trailing end).
+ *
  * The words and the answer stand in their row with the app's air between
  * them, and the words' own end keeps the larger air the shoulder asks for, so
  * no press shape touches another or the capsule (owner decision, this
@@ -142,23 +156,34 @@ internal fun pillControls(
         ),
     )
     state.unavailable -> emptyList()
+    // One mark, and the two skips it cannot carry as shapes are the actions it
+    // offers beside the tap. Three targets would take 144 dp of the capsule's
+    // 328, and the place the pill never cuts needs more than the 148 that are
+    // left at the top text step (owner decision, this session: see the note
+    // above).
     else -> listOf(
-        GlyphControl(Transport.Previous, stringResource(R.string.playback_previous_ayah), onPrevious),
         GlyphControl(
             kind = if (state.isPlaying) Transport.Pause else Transport.Play,
             description = stringResource(R.string.playback_play_pause),
             onClick = onToggle,
-            // The pill's own stop, offered to a screen reader where the mark
-            // used to stand: the same word, the same act, and no shape for a
-            // reader who has the page (owner decision, this session).
             actions = listOf(
+                CustomAccessibilityAction(stringResource(R.string.playback_previous_ayah)) {
+                    onPrevious()
+                    true
+                },
+                CustomAccessibilityAction(stringResource(R.string.playback_next_ayah)) {
+                    onNext()
+                    true
+                },
+                // The pill's own stop, offered to a screen reader where the
+                // mark used to stand: the same word, the same act, and no shape
+                // for a reader who has the page (owner decision, this session).
                 CustomAccessibilityAction(stringResource(R.string.playback_stop)) {
                     onStop()
                     true
                 },
             ),
         ),
-        GlyphControl(Transport.Next, stringResource(R.string.playback_next_ayah), onNext),
     )
 }
 
@@ -201,8 +226,8 @@ internal fun PillControls(
     }
 }
 
-/** The glyphs the transport row draws: one shape each, the app's own weight. */
-internal enum class Transport { Play, Pause, Next, Previous, Close }
+/** The glyphs the pill draws: one shape each, the app's own weight. */
+internal enum class Transport { Play, Pause, Close }
 
 /**
  * The app's one drawing for each transport mark. The pill used to carry a
@@ -215,8 +240,6 @@ private val Transport.icon: Icon
     get() = when (this) {
         Transport.Play -> Icon.Play
         Transport.Pause -> Icon.Pause
-        Transport.Next -> Icon.Next
-        Transport.Previous -> Icon.Previous
         Transport.Close -> Icon.Close
     }
 

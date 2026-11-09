@@ -187,36 +187,42 @@ internal fun OfferLine(
 }
 
 /**
- * The playing pill's words: the voice and its pace, then the place and its
- * key, on one line.
+ * The playing pill's words: the voice and its pace over the place and its
+ * key, a two-line lockup that shares one row with the transport.
  *
- * **The voice leads, then the place** (owner decision, this session). The
- * offer says who, then which surah; the playing pill now says who, then
- * where, so the pill's two states read with one grammar and every voice of
- * the pill leads with the reciter's name. The order is the chosen voice, the
- * pace when it is not 1x, the surah's own name at the card's 14 Medium, and
- * the ayah's key; the door's chevron closes the line. The pace is drawn only
- * when it is not 1x, because 1x is the pace the app starts at and a line does
- * not need to say it.
+ * **The words are stacked, because one line cannot hold them** (owner
+ * decision, this session). The capsule is 328 dp, and one line of words has
+ * 236 dp beside the answer's one mark. The four facts on one line measure 231
+ * dp in English at the default type, but 247 in Bangla, where the place's own
+ * name is longest, and 257 in English at the top step: one line cuts the
+ * place, which the pill never cuts. The lockup is the answer that keeps every
+ * fact: the two lines are read one after the other, so the block's width is
+ * the wider of the two and never their sum. The order is the one the app
+ * already speaks: who is reading, then where. The voice leads with its pace
+ * when the pace is not 1x, and the place follows at the card's 14 Medium with
+ * the ayah's key and the door's turn. The pace is drawn only when it is not
+ * 1x, because 1x is the pace the app starts at.
  *
  * **The place and the key never give way; the voice does** (owner decision,
  * this session). The pill's type follows the system scale only up to the
- * app's largest step, 1.2, and stops there. The place, the key, and the pace
- * keep their ends; at the longest place with a non-1x pace the voice is the
- * part an ellipsis takes, which is the rule the pill already kept. The
- * reading and the listening panel still take the reader's own scale; the pill
- * is a control with a fixed line.
+ * app's largest step, 1.2, and stops there. Each line is its own row, so the
+ * place and the key keep their ends, the pace keeps the voice's line, and the
+ * voice is the only part an ellipsis can take. The reading and the listening
+ * panel still take the reader's own scale; the pill is a control with a fixed
+ * measure.
  *
- * The block is 48 dp tall inside the capsule, so the line and the chevron
- * are not the whole of what a finger has to hit; its 8 dp inset keeps the
- * type off its own press shape, and the caller keeps [PillEndAir] at each end
- * where the capsule's end is a sphere.
+ * **The block is the transfer's own lockup** (owner decision, this session).
+ * The transfer's words are a name over a state at a 2 dp inset, and this is
+ * the same block with the place under the voice, in the same capsule: the
+ * offer, the transfer, and the recitation are one shape in three states. The
+ * 2 dp lets the two lines keep their own leading as the air between them, and
+ * the block stands inside a 48 dp target that the finger gets whole.
  *
  * **The door says its state** (owner decision, this session). The chevron is
  * [AppChevron]'s [ChevronRole.Expand], so it points down while the listening
  * panel is closed and up while it is open, and the block speaks the app's
  * Expanded or Collapsed. The panel's own name is spoken when it opens; this is
- * the line's half of the same answer.
+ * the block's half of the same answer.
  */
 @Composable
 internal fun PlayingWordsBlock(
@@ -244,7 +250,7 @@ internal fun PlayingWordsBlock(
     // own scale (owner decision, this session).
     val density = LocalDensity.current
     val capped = Density(density.density, min(density.fontScale, TextSize.STEPS.last()))
-    Row(
+    Column(
         modifier = modifier
             .then(
                 if (onOpen == null) {
@@ -273,64 +279,73 @@ internal fun PlayingWordsBlock(
                     Modifier.indication(press, ripple(color = MaterialTheme.colorScheme.primary))
                 },
             )
-            .padding(horizontal = Space.Tight, vertical = Space.Line),
-        verticalAlignment = Alignment.CenterVertically,
+            // The transfer's own inset: 2 dp holds a lockup whose two lines
+            // keep their own leading, so the block is 42 dp inside the 48 dp
+            // target and the air the reader sees is the line boxes' own
+            // (owner decision, this session).
+            .padding(horizontal = Space.Tight, vertical = 2.dp),
+        verticalArrangement = Arrangement.Center,
     ) {
         CompositionLocalProvider(LocalDensity provides capped) {
-            Text(
-                text = reciter,
-                // The voice leads: the accent's 13, and the one part of the
-                // line that gives way when the top step and the pace leave
-                // it no room (owner decision, this session).
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f, fill = false),
-            )
-            if (speed != 1f) {
+            // The voice's line: who is reading, and how fast when the pace is
+            // not the app's own 1x. The voice is the part that gives way.
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = speedText(speed),
-                    // The pace is the pill's read-back after the panel closes:
-                    // the quiet value beside the voice, not a second title
-                    // (owner decision, this session).
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    modifier = Modifier.padding(start = Space.Line),
-                )
-            }
-            if (!placeName.isNullOrBlank()) {
-                Text(
-                    text = placeName,
-                    // The place follows the voice: the card's 14 Medium, in
-                    // the page's ink, and it is never the thing an ellipsis
-                    // takes (owner decision, this session).
-                    style = compactLabel(),
-                    color = MaterialTheme.colorScheme.onSurface,
+                    text = reciter,
+                    // The voice leads: the accent's 13, and the one part of
+                    // the block that gives way when a long name meets the top
+                    // step (owner decision, this session).
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(start = Space.Line),
+                    modifier = Modifier.weight(1f, fill = false),
                 )
+                if (speed != 1f) {
+                    Text(
+                        text = speedText(speed),
+                        // The pace is the pill's read-back after the panel
+                        // closes: the quiet value beside the voice, not a
+                        // second title (owner decision, this session).
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        modifier = Modifier.padding(start = Space.Line),
+                    )
+                }
             }
-            Text(
-                text = reference,
-                // The ayah key closes the place: 13 at Regular, the precise
-                // reference beside the surah's own name. The key never gives
-                // way (owner decision, this session).
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                modifier = Modifier.padding(start = Space.Tight),
-            )
-            if (onOpen != null) {
-                AppChevron(
-                    role = ChevronRole.Expand,
-                    expanded = expanded,
-                    tint = MaterialTheme.colorScheme.primary,
-                    size = GlyphSize.ChevronInline,
+            // The place's line: the surah at the card's 14 Medium, its key,
+            // and the turn. The place is never the thing an ellipsis takes.
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (!placeName.isNullOrBlank()) {
+                    Text(
+                        text = placeName,
+                        style = compactLabel(),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                }
+                Text(
+                    text = reference,
+                    // The ayah key closes the place: 13 at Regular, the
+                    // precise reference beside the surah's own name, and it
+                    // never gives way (owner decision, this session).
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
                     modifier = Modifier.padding(start = Space.Tight),
                 )
+                if (onOpen != null) {
+                    AppChevron(
+                        role = ChevronRole.Expand,
+                        expanded = expanded,
+                        tint = MaterialTheme.colorScheme.primary,
+                        size = GlyphSize.ChevronInline,
+                        modifier = Modifier.padding(start = Space.Tight),
+                    )
+                }
             }
         }
     }

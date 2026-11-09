@@ -23,11 +23,21 @@ import io.github.muntasimulhaque.quran.data.resolved
  * gets the tone this app meant by one:
  *
  * - `background` is the reading itself, the page or the reading paper.
- * - `surface` is anything that covers the reading: a sheet, a panel.
+ * - `surface` is anything that covers the reading: a sheet, a panel, a menu.
  * - `surfaceContainerHigh` is a control that floats *over* the reading with
- *   the page still visible around it: the ayah pill, the playback bar. It
- *   sits a step away from both the page and the sheet, so a floating thing
- *   reads as floating without needing a hard border.
+ *   the page still visible around it: the playback pill, the offer, the pack
+ *   row, the snackbar. It sits a step away from both the page and the sheet,
+ *   so a floating thing reads as floating without needing a hard border.
+ *
+ * The floating control wears [PaperControl] on the day ground, one step *under*
+ * the page's paper, and `NightControl` on the night ground, one step over it
+ * (owner decision, this session). Before this it was `#FFFFFF` by day, which
+ * is the sheet's own white: the pill was not a step away from the sheet, it
+ * was the sheet, and over a warm page it read as a colder shape laid on top
+ * rather than as a control of the app's own paper. The night ground already
+ * held the rule (its `surfaceContainerHigh` and its highest are one warm
+ * charcoal), so only the day needed to move. Everything that floats over the
+ * reading takes this role and this tone; a panel keeps `surface`.
  * - `outline` and `outlineVariant` are the hairlines, never carrying meaning
  *   on their own.
  *
@@ -70,7 +80,7 @@ internal val LightScheme = lightColorScheme(
     surfaceContainerLowest = Color(0xFFFFFFFF),
     surfaceContainerLow = Color(0xFFFDFCF9),
     surfaceContainer = Color(0xFFF8F5EE),
-    surfaceContainerHigh = Color(0xFFFFFFFF),
+    surfaceContainerHigh = PaperControl,
     surfaceContainerHighest = PaperControl,
     surfaceTint = Color.Transparent,
     inverseSurface = PaperInk,

@@ -43,29 +43,41 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * recitation is not there. Downloading only ever starts from the reader's own
  * tap on Download, and only for one surah.
  *
- * **The playing pill is two rows, and the offer is its sibling** (owner
- * decision, this session). A recitation's capsule is one 48 dp line of words
- * over one 48 dp transport row, 96 dp tall. The two rows are the finger's
- * floor and fill the capsule, so there is no padding at its ends and the air
- * the reader sees is each shape's own inset: the offer's 6 dp pills, the
- * transport's 4 dp circles. The packed height was settled again against a
- * padded 104 and 112, and it stands (owner decision, this session). The line
- * is the voice and its pace, then the surah's name and the ayah's key, with
- * the door's chevron at the end; the transport is the three circles, centered. The offer is the
- * same 96 dp skeleton: a 48 dp line that is the door to the voice list, over
- * the 48 dp pair Not now and Download. The voices that are not a recitation
- * keep the one-row shape, 64 dp tall, or 74 with a download's line under it,
- * with their words and their answer at the two ends. Before this the offer
- * was a 76 dp notice with no door, and the playing pill was one row.
+ * **The playing pill is one row, and the offer is its sibling** (owner
+ * decision, this session). A recitation's capsule is one 64 dp row: the words'
+ * two-line lockup at the leading end, play or pause at the trailing end. It
+ * used to be two rows of 48, the words over a transport row, and the second
+ * row was 144 dp of circles centered in 328: the reader saw a capsule twice as
+ * tall as the words it carried, with an empty band in it (owner report, this
+ * session). 64 is the height the pill already stands at in its one-row voices
+ * (8 + the finger's 48 + 8), so the capsule is now one height in every voice
+ * but the offer. The offer keeps its 96: it is a question with two answers, so
+ * it is two 48 dp rows, and the arithmetic of a single row does not close (a
+ * line, its size, Not now, and Download need about 470 dp, and even without
+ * Not now they need 369).
  *
- * **The playing words are one block, and one door.** Its line leads with the
- * chosen voice, then the pace when it is not 1x, then the place and its key;
- * the panel it opens is one panel: the voices, the pace, and what happens at
- * the end of the audio. The order is the offer's own grammar, who is reading
- * before where. The voices that are not a recitation keep one line, the name
- * beside the state's sentence, and their name opens the voice list alone,
- * because the pace and the end answer a recitation that is not there (owner
- * decision, this session).
+ * **The one row carries one mark, because the place never gives way** (owner
+ * decision, this session). Three 48 dp targets take 144 dp of the capsule's
+ * 328 and leave the words 148; the longest place with its key and its turn
+ * needs 149 dp in Bangla at the default type and 174 at the top step, so three
+ * marks cut the place. Play or pause is the mark that stays, and Previous ayah
+ * and Next ayah are the actions it offers beside the tap, where Stop already
+ * stands: a screen reader keeps all three in the pill, and the media
+ * notification keeps them for everyone. See `pillControls`.
+ *
+ * **The playing words are one block, one door, and two lines.** The voice and
+ * its pace stand over the place and its key, in the transfer's own lockup: a
+ * name over a state, at the transfer's 2 dp inset. One line cannot hold the
+ * four facts at the top step in either language, and the lockup pays nothing for the
+ * second line because the block is as wide as its wider line, not the sum of
+ * both: one line of the four facts is 247 dp in Bangla at the default type,
+ * where 236 are there. The panel it opens is one panel: the voices, the pace,
+ * and what happens at the end of the audio. The order is the offer's own grammar, who
+ * is reading before where, and now it is the reading order of a lockup too.
+ * The voices that are not a recitation keep one line, the name beside the
+ * state's sentence, and their name opens the voice list alone, because the
+ * pace and the end answer a recitation that is not there (owner decision, this
+ * session).
  *
  * **The capsule is one measure, and it never changes it** (owner decision,
  * this session). Its width used to follow its words: about 285 dp at the
@@ -80,15 +92,16 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * width to be at, so it snaps to nothing and animates nothing.
  *
  * **The voice leads, the place follows, and the key never gives way** (owner
- * decision, this session). The line's order is the chosen voice at 13 in the
- * accent, the pace at 12 in the quiet ink when it is not 1x, the surah's own
- * name at the card's 14 Medium, and the ayah's key at 13 in the ink; the
- * chevron closes it. The order is the offer's: who, then which surah, then
- * the ayah. The pill's type follows the system scale only up to the app's
- * largest step, 1.2, and stops there. The place, the key, and the pace keep
- * their ends; the voice is the part that gives way at the largest place with
- * a non-1x pace, because the key says which ayah and the name says who. The
- * reading and the panel still follow the reader's scale.
+ * decision, this session). The lockup's first line is the chosen voice at 13
+ * in the accent, with the pace at 13 in the quiet ink after it when it is not
+ * 1x; its second line is the surah's own name at the card's 14 Medium, the
+ * ayah's key at 13 in the ink, and the chevron that closes it. The order is
+ * the offer's: who, then which surah, then the ayah. The pill's type follows
+ * the system scale only up to the app's largest step, 1.2, and stops there.
+ * The place and the key keep their ends on their own line, the pace keeps the
+ * voice's, and the voice is the only part that gives way, because the key says
+ * which ayah and the name says who. The reading and the panel still follow the
+ * reader's scale.
  *
  * **The pace lives in the listening panel, and the pill reads it back**
  * (owner decision, this session). The panel is where the pace is set, and
@@ -97,18 +110,15 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * fast the recitation is. The pill says who, where, and how fast; the panel
  * also says what happens at the end.
  *
- * **Nothing touches.** The playing words keep [PillEndAir] at each end,
- * because a capsule's end is a sphere; the words' 48 dp row and the
- * transport's 48 dp row stand edge to edge, and the air the reader sees is
- * the type's own inset and the circles' [TransportInset]. On the one-row
+ * **Nothing touches.** The playing words keep [PillEndAir] at the leading end,
+ * because a capsule's end is a sphere, and the transport keeps [PillAir] at the
+ * trailing end; between them, the words' block takes its own room and the
+ * answer's circle keeps [GlyphLead] of target air, which is [WordsGap] between
+ * the shapes the reader sees. On the one-row
  * voices the words keep [PillEndAir] at their own end, the answer keeps
  * [PillAir] at its end, and [WordsGap] stands between the two. On the
  * unavailable pill, which is words alone, both ends keep [PillEndAir], so
- * the sentence is held as the name is (owner decision, this session). The
- * transport is the one answer whose air is measured between circles rather
- * than between targets: its three circles stand [PillAir] apart, and the
- * targets under them stand [TransportAir] apart, which is no air at all
- * (owner decision, this session).
+ * the sentence is held as the name is (owner decision, this session).
  *
  * The pill is also where its popup hangs. A menu takes the shape of the anchor
  * it is given, and an anchor on the word the reader touched stood the reciter
@@ -290,22 +300,29 @@ fun PlaybackBar(
                 ),
             ) {
                 if (playing) {
-                    // The playing capsule is two rows: one 48 dp line of
-                    // words over the 48 dp transport row. The words keep
-                    // [PillEndAir] at each end, where the capsule is a
-                    // sphere; the transport is centred on the capsule's own
-                    // axis. The two targets stand edge to edge, and the air
-                    // the reader sees is the type's and the circles' own
+                    // The playing capsule is one 64 dp row: the words' lockup
+                    // at the leading end, play or pause at the trailing end.
+                    // The words keep [PillEndAir] at the leading end, where the
+                    // capsule is a sphere, and the answer keeps [PillAir] at
+                    // the trailing one. The lockup is content-sized inside the
+                    // room that is left, so a long place would ellipsize rather
+                    // than push the answer out; the capsule's measure and the
+                    // answer's one mark are chosen so that it never has to
                     // (owner decision, this session).
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth(),
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(
+                                start = PillEndAir,
+                                end = PillAir,
+                                top = PillAir,
+                                bottom = PillAir,
+                            ),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = PillEndAir),
-                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.weight(1f),
+                            contentAlignment = Alignment.CenterStart,
                         ) {
                             PlayingWordsBlock(
                                 placeName = placeName,
@@ -318,6 +335,12 @@ fun PlaybackBar(
                             )
                         }
                         if (controls.isNotEmpty()) {
+                            // The first circle keeps [WordsGap] from the words'
+                            // own shape: a glyph answer draws its circle
+                            // [TransportInset] inside its target, so its lead
+                            // gives that inset back (owner decision, this
+                            // session).
+                            Spacer(Modifier.width(GlyphLead))
                             PillControls(controls)
                         }
                     }

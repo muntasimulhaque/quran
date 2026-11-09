@@ -40,16 +40,17 @@ internal val BarGutter = 16.dp
  *
  * 328 is the page's own width on the app's reference 360 dp phone, 360 less
  * the two [BarGutter]s, which is the widest the capsule ever stood while
- * hugging. So nothing that fits stops fitting: the playing line keeps the
- * capsule's width less [PillEndAir] at each end, 288, and the offer's line
- * keeps [Space.Section] at each end, 280, where the voice, the pace, the
- * place, and the key stand on one line. The transfer's status gets that room
- * at every percent instead of the room its digits happen to need, and the
- * offer's name and size get it before the download starts.
+ * hugging. So nothing that fits stops fitting: the playing words keep the
+ * room the answer's one 48 dp target leaves, 260 dp less the airs at the two
+ * ends, and the offer's line keeps [Space.Section] at each end, 280,
+ * where the reciter, the surah, and the size stand on one line. The
+ * transfer's status gets that room at every percent instead of the room its
+ * digits happen to need, and the offer's name and size get it before the
+ * download starts.
  *
- * The pill's other numbers are fixed rather than derived from the glass (96 dp
- * while playing, 64 dp on the one-row voices, the 48 dp targets, the 40 dp
- * press, the 288 dp menu), so its width is too: a tablet does not get a
+ * The pill's other numbers are fixed rather than derived from the glass (64 dp
+ * in every one voice, 96 dp for the offer's two rows, the 48 dp targets, the
+ * 40 dp press, the 288 dp menu), so its width is too: a tablet does not get a
  * taller pill, and it does not get a wider one. The same control stands at
  * the same measure on all three store profiles. A glass narrower than the
  * measure takes the glass less the gutters instead, where the 288 dp menu
@@ -62,10 +63,10 @@ internal val PillMeasure = 328.dp
  * between the one-row voices' words and the answer beside them.
  *
  * It is the app's `Space.Line`, the gap a cluster of same-kind small controls
- * keeps, and the transport is that cluster. On the playing capsule the
- * words' 48 dp row and the transport's 48 dp row stand edge to edge as
- * targets; the air the reader sees is the type's own inset and the circles'
- * [TransportInset], never a gap between two targets (owner decision, this
+ * keeps, and the transport was that cluster when the pill carried three marks.
+ * A circle stands [TransportInset] inside its own target, so two circles keep
+ * this number between them with no target air at all, and the pill keeps the
+ * measure for the day it carries a cluster again (owner decision, this
  * session).
  *
  * Every shape in the pill but the transport's circles fills its target: the
@@ -79,36 +80,35 @@ internal val PillMeasure = 328.dp
 internal val PillAir = Space.Line
 
 /**
- * The air the words keep from the capsule's curved end: the playing line's
- * whole measure is centered with this at each end, the transfer's words keep
- * it at their leading end, and the unavailable pill, which is words alone,
- * keeps it at both. The offer's line keeps [Space.Section] at each end
- * instead, because it is the capsule's whole first row and its door's flash
- * has to stand clear of the sphere (owner decision, this session).
+ * The air the words keep from the capsule's curved end: the playing words
+ * keep it at the leading end, the transfer's words keep it at their leading
+ * end, and the unavailable pill, which is words alone, keeps it at both. The
+ * offer's line keeps [Space.Section] at each end instead, because it is the
+ * capsule's whole first row and its door's flash has to stand clear of the
+ * sphere (owner decision, this session).
  *
  * The capsule's end is a sphere, and a line that starts at its widest point
- * meets the curve. The playing line sits 14 dp into a 96 dp capsule, where
- * the edge has already curved in 13 dp; an [PillAir] measured from the widest
- * point would read as almost nothing at the words' own height, and the name
- * would meet the border. `Space.Block + Space.Tight` is the app's 8 dp air
- * plus that shoulder, which is what makes the name read as held rather than
- * crowded (owner decision: the name looked cut in Bangla, whose matra reaches
- * the top of its line).
+ * meets the curve. The capsule is 64 dp, so its end is a 32 dp radius; the
+ * lockup is 42 dp tall, and the edge has already curved in about 8 dp at the
+ * lockup's own top and foot. An [PillAir] measured from the widest point would
+ * read as almost nothing at the words' own height, and the name would meet the
+ * border. `Space.Block + Space.Tight` is the app's 8 dp air plus that
+ * shoulder, which is what makes the name read as held rather than crowded
+ * (owner decision: the name looked cut in Bangla, whose matra reaches the top
+ * of its line).
  *
  * It is the words' side only, and it is worn at whichever end the words stand
- * alone at: the playing line at both ends, the one-row voices' leading end
- * when an answer follows, and both ends on the unavailable pill. The
- * transport, the Download, and the X keep [PillAir] at their end, because
- * they stand at the capsule's widest height or wear a round shape of their
- * own, where the air reads true.
+ * alone at: the playing words and the transfer's at their leading end, and both
+ * ends on the unavailable pill. The transport, the Download, and the X keep
+ * [PillAir] at their end, because they stand at the capsule's widest height or
+ * wear a round shape of their own, where the air reads true.
  */
 internal val PillEndAir = Space.Block + Space.Tight
 
 /**
- * The gap between the words and what answers them on the one-row voices:
- * the Download, the Retry, or the X. The playing capsule's transport has its
- * own row, so this gap is not between it and the words; their air is the two
- * rows' own insets.
+ * The gap between the words and what answers them: the Download, the Retry,
+ * the X, and the playing capsule's own transport, which keeps it through
+ * [GlyphLead] because its first answer is a circle inside its target.
  *
  * They are two standalone shapes rather than one cluster, so this is the
  * app's `Space.Row` (owner decision, the theme and consistency session).

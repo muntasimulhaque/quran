@@ -117,8 +117,14 @@ class LargeTextTest {
         compose.onNodeWithText("About").performScrollTo().assertIsDisplayed()
     }
 
+    /**
+     * The pill at 200 percent: one row, its answer on the glass, and the place
+     * whole. The two skips are the actions that mark offers to a screen reader
+     * now (owner decision, this session: three 48 dp targets cut the place), so
+     * this leg reads the one mark and the words it shares the row with.
+     */
     @Test
-    fun thePlaybackPillKeepsItsTransportAtTwoHundredPercent() {
+    fun thePlaybackPillKeepsItsAnswerAtTwoHundredPercent() {
         compose.setContent {
             QuranTheme(theme = AppTheme.Light, language = UiLanguage.English) {
                 AtFontScale(2f) {
@@ -152,8 +158,8 @@ class LargeTextTest {
             }
         }
         compose.onNodeWithContentDescription("Play or pause").assertIsDisplayed()
-        compose.onNodeWithContentDescription("Previous ayah").assertIsDisplayed()
-        compose.onNodeWithContentDescription("Next ayah").assertIsDisplayed()
+        compose.onNodeWithText("Al-Baqarah", useUnmergedTree = true).assertIsDisplayed()
+        compose.onNodeWithText("2:255", useUnmergedTree = true).assertIsDisplayed()
     }
 
     @Test
