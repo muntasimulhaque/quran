@@ -26,13 +26,14 @@ import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 
 /**
- * The offer names its way out: Not now, the page, and Back all put it away.
+ * The offer names its way out: the page and Back put it away.
  *
  * The app's raised controls answer a tap on the page: the chrome goes, the
- * ayah pill goes, and a paused transport pill stops. The download offer now
- * shows the same answer as a word, so a reader who does not want the package
- * can see the way out instead of guessing at a gesture (owner decision, this
- * session).
+ * ayah pill goes, and a paused transport pill stops. The download offer used
+ * to show Not now as a word beside Download; the one-row capsule cannot hold
+ * a third answer, and the page tap and Back were already the app's answer
+ * for every raised control (owner decision, this session). A reader who does
+ * not want the package taps the page, and Back answers it just as it did.
  *
  * The transfer's own cancel is the app's only remaining X, because a stray
  * tap must never throw away a package the reader asked for.
@@ -98,10 +99,10 @@ class ListenOfferDismissTest {
             compose.onAllNodesWithTag("listen-offer-bar", useUnmergedTree = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
-        // The offer shows its own way out, in the reader's language.
+        // The one-row offer has one answer and the page for its way out.
         assertFalse(
-            "the offer must show a way out",
-            compose.onAllNodesWithText("Not now").fetchSemanticsNodes().isEmpty(),
+            "the offer carries no Not now now that the page and Back answer it",
+            compose.onAllNodesWithText("Not now").fetchSemanticsNodes().isNotEmpty(),
         )
     }
 
@@ -123,7 +124,7 @@ class ListenOfferDismissTest {
     }
 
     @Test
-    fun backAnswersTheOfferWithNotNow() {
+    fun backPutsTheOfferAway() {
         raiseTheOffer()
         compose.runOnUiThread { compose.activity.onBackPressedDispatcher.onBackPressed() }
         waitForTheOfferToGo()

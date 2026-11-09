@@ -80,10 +80,10 @@ import java.util.Locale
  *    are on the pill even when no offer preceded it (owner decision).
  * 4. The playing pill is one row, and the offer is its sibling (owner
  *    decision, this session): a 64 dp capsule with the words' lockup at the
- *    leading end and play or pause at the trailing one. The offer keeps its
- *    two rows, 96 dp: a 48 dp line that is the door to the voice list over the
- *    48 dp pair. The voices that are not a recitation keep the same 64 dp row,
- *    or 74 with a download's line under it. The three stand at one width.
+ *    leading end and one answer at the trailing one. The offer is the pill's
+ *    own two-line block: the reciter's name over the surah and its size, with
+ *    Download. The voices that are not a recitation keep the same 64 dp row,
+ *    or 74 with a download's line under it. The four stand at one width.
  * 5. The playing words are one block, one door, and a lockup: the voice and
  *    its pace over the place and its key, with the chevron at the end of the
  *    place's line. The one-row voices lead with the reciter's name beside the
@@ -140,11 +140,12 @@ import java.util.Locale
  *     the page must never end (owner decision, this session).
  * 15. The answer is the app's one round control: a 40 dp press circle inside
  *     its 48 dp target (owner decision, this session).
- * 16. The offer is a two-row capsule, 96 dp tall: a 48 dp line that is the
- *     door to the voice list, then Not now and Download as one centered pair.
- *     The line's crown is 14 dp and the answers' foot 6. An offer with no
- *     voice to offer keeps the line as a notice and draws no chevron (owner
- *     decision, this session).
+ * 16. The offer is one row, 64 dp tall: the whole two-line block is the door
+ *     to the voice list, the reciter's name over the surah and its size, and
+ *     Download is the only answer. The size stays on the line, and the block
+ *     gives way only at the very longest place. An offer with no voice to
+ *     offer keeps the block as a notice and draws no chevron (owner decision,
+ *     this session).
  * 17. Every door says its state: the pill's three doors speak Expanded and
  *     Collapsed the way the ayah's door and every disclosure row do, and
  *     their chevron turns up while the popup they opened is on the glass
@@ -986,13 +987,14 @@ class PlaybackPillTest {
     }
 
     /**
-     * The offer is a two-row capsule (owner decision, this session): one 48 dp
-     * line that is the door to the voice list, then the two answers as one
-     * centered pair. The capsule is 96 dp tall, the least that gives the door
-     * its 48 dp target and the buttons theirs.
+     * The offer is one row (owner decision, this session): the words' lockup
+     * at the leading end and the one answer at the trailing one. Its 64 dp is
+     * the playing pill's own height, 8 + 48 + 8; the 96 dp of the two-row
+     * capsule went with Not now, and the place line keeps the surah and its
+     * size whole.
      */
     @Test
-    fun theOfferIsTwoRowsAndCentered() {
+    fun theOfferIsOneRow() {
         showPill(
             offer = ListenOffer(
                 reciter = "husary",
@@ -1006,12 +1008,11 @@ class PlaybackPillTest {
         )
         val bar = compose.onNodeWithTag("listen-offer-bar").getUnclippedBoundsInRoot()
         val words = compose.onNodeWithTag("offer-words").getUnclippedBoundsInRoot()
-        val notNow = compose.onNodeWithTag("offer-not-now", useUnmergedTree = true).getUnclippedBoundsInRoot()
         val answer = compose.onNodeWithTag("offer-answer", useUnmergedTree = true).getUnclippedBoundsInRoot()
-        val center = (bar.left + bar.right) / 2
+        val centerY = (bar.top + bar.bottom) / 2
         assertEquals(
-            "the ask is the 96 dp capsule",
-            96f,
+            "the ask is the 64 dp capsule",
+            64f,
             (bar.bottom - bar.top).value,
             1f,
         )
@@ -1022,55 +1023,42 @@ class PlaybackPillTest {
             1f,
         )
         assertEquals(
-            "the door stands at the capsule's top",
-            bar.top.value,
-            words.top.value,
-            1f,
-        )
-        assertEquals(
-            "the door is a 48 dp target",
+            "the words are the finger's 48 dp row",
             48f,
             (words.bottom - words.top).value,
             1f,
         )
         assertEquals(
-            "the request's one line stands on the capsule's middle",
-            center.value,
-            ((words.left + words.right) / 2).value,
-            1.5f,
-        )
-        assertEquals(
-            "the answer row is the capsule's 48 dp foot",
-            48f,
-            (bar.bottom - words.bottom).value,
+            "the words keep the capsule's shoulder",
+            Space.Block.value + Space.Tight.value,
+            (words.left - bar.left).value,
             1f,
         )
         assertEquals(
-            "the two answers stand as one centered pair",
-            center.value,
-            ((notNow.left + answer.right) / 2).value,
-            1.5f,
-        )
-        assertEquals(
-            "the answers share one row under the words",
-            answer.top.value,
-            notNow.top.value,
+            "the answer keeps the capsule's air at its end",
+            Space.Line.value,
+            (bar.right - answer.right).value,
             1f,
         )
-        assertTrue(
-            "the answers stand under the request: words $words, answer $answer",
-            answer.top.value >= words.bottom.value,
-        )
-        assertTrue(
-            "Not now leads and the answer trails",
-            notNow.right.value < answer.left.value,
-        )
         assertEquals(
-            "the pair keeps the app's action gap between the pills",
-            Space.Action.value,
-            (answer.left - notNow.right).value,
+            "the words and the answer keep the app's row air",
+            Space.Row.value,
+            (answer.left - words.right).value,
             1.5f,
         )
+        assertEquals(
+            "the words stand on the capsule's middle",
+            centerY.value,
+            ((words.top + words.bottom) / 2).value,
+            1f,
+        )
+        assertEquals(
+            "the answer stands on the capsule's middle",
+            centerY.value,
+            ((answer.top + answer.bottom) / 2).value,
+            1f,
+        )
+        compose.onNodeWithTag("offer-not-now", useUnmergedTree = true).assertDoesNotExist()
     }
 
     /**

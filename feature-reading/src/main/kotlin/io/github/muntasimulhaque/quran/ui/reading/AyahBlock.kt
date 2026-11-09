@@ -37,7 +37,6 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
@@ -215,9 +214,6 @@ internal fun AyahBlock(
     } else {
         Color.Transparent
     }
-    // The reciter's mark wears the accent, and it is read in the draw phase,
-    // where the theme's own composable cannot be reached.
-    val accent = MaterialTheme.colorScheme.primary
     // The padding belongs to the paper, so the gaps between ayahs still
     // answer a tap with the reading chrome. The block is set apart by the
     // room around it, not by a rule: the app draws no separators.
@@ -513,17 +509,6 @@ internal fun AyahBlock(
                                 ) {
                                     drawWordWash(layout, recited, palette.highlight)
                                 }
-                            }
-                            // The word the reciter is saying also wears the
-                            // accent's own edge, because the tint alone is
-                            // capped by the rule colors and a reader who looks
-                            // up from a long listen needs to find the place
-                            // again at a glance. The edge is not a tint under
-                            // the letters, so it stays when the ayah is
-                            // chosen and its wash steps aside (owner decision,
-                            // the long read session).
-                            if (recited != null) {
-                                drawRecitedEdge(layout, recited, accent)
                             }
                             drawContent()
                             drawTajweedColors(layout, tajweed, palette.tajweed, metrics.tajweed)
@@ -834,35 +819,6 @@ private inline fun forEachWordBox(
         } ?: charBox
     }
     box?.let(action)
-}
-
-/**
- * The reciter's word's own edge: the accent, one rounded box per line the word
- * spans, on the wash's exact geometry.
- *
- * The tint behind the word is the strongest the seven rule colors allow, so it
- * cannot say more. The edge is a shape and not a ground: it sits at the box's
- * boundary, clear of the letters and of their marks, so it can be drawn on the
- * selected ayah's wash as well as on the page, and it does not touch a single
- * contrast pair. A reader who looks up from a long listen finds one edged box
- * on the page instead of hunting a tint (owner decision, the long read
- * session).
- */
-private fun DrawScope.drawRecitedEdge(
-    layout: TextLayoutResult,
-    range: IntRange,
-    accent: Color,
-) {
-    forEachWordBox(layout, range) { box ->
-        val pad = box.height * 0.08f
-        drawRoundRect(
-            color = accent,
-            topLeft = Offset(box.left - pad, box.top + pad * 0.5f),
-            size = Size(box.width + pad * 2, box.height - pad),
-            cornerRadius = CornerRadius(box.height * 0.26f),
-            style = Stroke(width = 1.5.dp.toPx()),
-        )
-    }
 }
 
 /** One word's wash box: rounded, with the room a mark needs around the glyphs. */

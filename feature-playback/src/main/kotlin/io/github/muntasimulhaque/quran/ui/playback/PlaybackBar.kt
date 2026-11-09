@@ -50,11 +50,11 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * row was 144 dp of circles centered in 328: the reader saw a capsule twice as
  * tall as the words it carried, with an empty band in it (owner report, this
  * session). 64 is the height the pill already stands at in its one-row voices
- * (8 + the finger's 48 + 8), so the capsule is now one height in every voice
- * but the offer. The offer keeps its 96: it is a question with two answers, so
- * it is two 48 dp rows, and the arithmetic of a single row does not close (a
- * line, its size, Not now, and Download need about 470 dp, and even without
- * Not now they need 369).
+ * (8 + the finger's 48 + 8), and the offer is one row at 64 too: the place
+ * line gives way at its size before the surah's name, and Download is the one
+ * answer. The transfer keeps 10 dp more for its progress line. The capsule is
+ * one height in every voice that asks a question, and the only taller state
+ * is a transfer with a line to show.
  *
  * **The one row carries one mark, because the place never gives way** (owner
  * decision, this session). Three 48 dp targets take 144 dp of the capsule's

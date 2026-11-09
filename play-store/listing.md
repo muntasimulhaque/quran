@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 17.1 (versionCode 173)
+Version: 17.2 (versionCode 174)
 
 ## Listing
 

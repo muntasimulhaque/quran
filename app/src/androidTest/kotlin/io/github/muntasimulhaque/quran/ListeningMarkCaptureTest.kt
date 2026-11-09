@@ -18,6 +18,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.AppSettings
+import io.github.muntasimulhaque.quran.data.AppTheme
 import io.github.muntasimulhaque.quran.data.LanguagePreference
 import io.github.muntasimulhaque.quran.data.PackStore
 import io.github.muntasimulhaque.quran.data.PlaybackPositionStore
@@ -38,15 +39,14 @@ import java.io.File
 
 /**
  * The listening mark, as it is drawn: the reciter's word wearing the page's
- * word mark and the accent's own edge around it, over the reading, with the
- * pill at the foot.
+ * word mark, over the reading, with the pill at the foot.
  *
- * The ring is a shape and not a word, so no semantics tree can carry it: the
+ * The mark is a tint and not a word, so no semantics tree can carry it: the
  * frame is the whole evidence. Al-Fatiha is bundled in both voices and the
  * timing pack ships beside the app, so Play on 1:1 starts with no offer and
  * the first word's mark lands on its own, which is what the two frames keep,
  * a few seconds apart. Whether the mark has moved by the second frame is the
- * word clock's business and not the ring's: an emulator whose audio timestamp
+ * word clock's business and not the mark's: an emulator whose audio timestamp
  * stalls holds the first word, and the pair is then one frame twice. Nothing
  * here depends on the two differing.
  *
@@ -83,6 +83,10 @@ class ListeningMarkCaptureTest {
                     setShowTranslation(true)
                     setWordByWord(false)
                     setRecitation("husary")
+                    // The frame is the day ground, not the emulator's own
+                    // setting: a capture that follows the machine is a frame
+                    // of the machine (owner decision, this session).
+                    setTheme(AppTheme.Light)
                 }
                 PackStore(context).apply {
                     remove("reciter-husary")
@@ -101,7 +105,7 @@ class ListeningMarkCaptureTest {
     val rule: TestRule = RuleChain.outerRule(library).around(compose)
 
     @Test
-    fun theRecitersWordWearsTheWordMarkAndTheAccentsEdge() {
+    fun theRecitersWordWearsTheWordMark() {
         val page = compose.activity.getString(ReadingR.string.reading_page_description)
         compose.waitUntil(timeoutMillis = 180_000) {
             compose.onAllNodesWithContentDescription(page).fetchSemanticsNodes().isNotEmpty()
@@ -142,6 +146,7 @@ class ListeningMarkCaptureTest {
                 setTafsirPacks(original.tafsirPacks)
                 setShowTranslation(original.showTranslation)
                 setWordByWord(original.wordByWord)
+                setTheme(original.theme)
                 original.uiLanguage?.let { setUiLanguage(it) }
             }
             PlaybackPositionStore(context).clear()

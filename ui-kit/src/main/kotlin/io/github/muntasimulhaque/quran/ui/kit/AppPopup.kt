@@ -1,7 +1,6 @@
 package io.github.muntasimulhaque.quran.ui.kit
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.WindowInsets
@@ -76,15 +75,16 @@ val PopupGutter = 10.dp
 /**
  * The ground a popup keeps between its own foot and the anchor's edge.
  *
- * The popup wears the page's own paper and a hairline, and its own lift as
- * well (owner decision, the consistency audit: the prose had said otherwise).
- * The ground is
- * what keeps the two silhouettes apart: with the popup's foot on the
- * capsule's own top edge the flat edges met along the middle, where no seam
- * can be seen, and the popup's foot corners and the capsule's shoulders
- * kissed at each end, so the two read as one shape with a waist. Ten dp keeps
- * the capsule's own lift from reaching the popup's foot and sits well inside
- * the popup's 20 dp corner, so the two silhouettes never meet.
+ * The popup wears the floating family's own paper, the same
+ * `surfaceContainerHigh` the pill, the offer, and the snackbar wear, and its
+ * own lift as well (owner decision, this session). It used to wear the
+ * reading page's tone, so a menu over the page was held by a hairline and a
+ * 10% shadow rather than by a surface of its own; in the night theme the
+ * shadow is invisible and the menu read as a hole in the page while the pill
+ * above it stood a full step away (owner report). The ground between the
+ * two silhouettes is now the page, not a seam: the popup's foot and the
+ * capsule's own top never meet, and ten dp keeps the capsule's lift from
+ * reaching the popup's foot.
  */
 val PopupGap = 10.dp
 
@@ -124,8 +124,8 @@ val PopupEdge = 16.dp
 enum class PopupAlignment { Center, Start }
 
 /**
- * The app's one popup: a menu over the page, on the page's own paper and
- * hung from the control it answers.
+ * The app's one popup: a menu over the page, on the floating paper the pill
+ * and the offer wear, and hung from the control it answers.
  *
  * Material's own dropdown takes the left edge of the box it is given and puts
  * itself where that box's left edge stands, so on the pill the reciter chooser
@@ -152,10 +152,11 @@ enum class PopupAlignment { Center, Start }
  * popup fades at the edge that has more.
  *
  * The popup takes `width` wide, [PopupMeasure] by default, the popup's own
- * corners and lift, the page's own paper and a hairline, and [PopupGutter] at
- * the head and foot, so the first and last rows stay clear of the curve. A
- * menu over the reading is a piece of the page, not a white system panel
- * dropped on it (owner decision, this session).
+ * corners and lift, the floating paper and no drawn border, and [PopupGutter]
+ * at the head and foot, so the first and last rows stay clear of the curve. A
+ * menu over the reading is a piece of the app's floating paper, the pill's own
+ * tone unfolded, not a white system panel dropped on it (owner decision, this
+ * session).
  * [name] is its pane title, spoken and never drawn, the same shape the share
  * sheet's announcement already wears: a reader who cannot see the menu hears
  * what it belongs to before its first row. The panel takes the focus once it
@@ -202,7 +203,7 @@ fun AppPopup(
     val below = popupRoomBelow(anchor, windowHeight, navigation, gap)
     val side = popupSide(above = above, below = below)
     val room = with(density) { band.toDp() }
-    val surface = MaterialTheme.colorScheme.background
+    val surface = MaterialTheme.colorScheme.surfaceContainerHigh
     val scroll = rememberScrollState()
     Popup(
         onDismissRequest = onDismiss,
@@ -236,7 +237,6 @@ fun AppPopup(
                 .floatingLift(Radii.Popup)
                 .clip(Radii.Popup)
                 .background(surface)
-                .border(1.dp, MaterialTheme.colorScheme.outline, Radii.Popup)
                 .drawWithContent {
                     drawContent()
                     // The fade is on the viewport, not on the scrolling

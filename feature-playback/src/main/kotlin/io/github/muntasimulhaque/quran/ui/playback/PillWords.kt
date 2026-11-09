@@ -85,108 +85,6 @@ internal fun TransferWordsBlock(
 }
 
 /**
- * The offer's one line: the reciter's name, the chevron that says the line
- * opens, then the surah and its size.
- *
- * **The line is a door** (owner decision, this session). Its row carries the
- * app's 48 dp target around a 35 dp flash, so the name can open the voice
- * list without reaching into the answers' row. The chevron stands 4 dp after
- * the name, the same door mark the playing pill wears, and the surah follows
- * 8 dp after it. The name is the accent's 13, the surah and its size the
- * compact 14; when the line is long the size is what gives way, because the
- * surah's name is the fact the reader is judging.
- *
- * **The door says its state** (owner decision, this session). The chevron is
- * [AppChevron]'s [ChevronRole.Expand], so it points down while the chooser is
- * closed and up while it is open, and the row speaks the app's Expanded or
- * Collapsed the way the ayah's door and every disclosure row do. A mark that
- * cannot move cannot say that its chooser is open.
- */
-@Composable
-internal fun OfferLine(
-    name: String,
-    title: String,
-    /** The door the line is, or null where the voice cannot be chosen now. */
-    onOpen: (() -> Unit)?,
-    /** True while the door's own chooser is on the glass. */
-    expanded: Boolean = false,
-    modifier: Modifier = Modifier,
-    /** True while the title is a failure the reader has to hear. */
-    announce: Boolean = false,
-) {
-    val press = remember { MutableInteractionSource() }
-    val expandedText = stringResource(UiKitR.string.door_expanded)
-    val collapsedText = stringResource(UiKitR.string.door_collapsed)
-    Row(
-        modifier = modifier
-            .then(
-                if (onOpen == null) {
-                    Modifier
-                } else {
-                    Modifier
-                        .clickable(
-                            interactionSource = press,
-                            indication = null,
-                            role = Role.Button,
-                            onClickLabel = stringResource(R.string.playback_change_reciter),
-                            onClick = onOpen,
-                        )
-                        .minimumInteractiveComponentSize()
-                        .semantics {
-                            stateDescription =
-                                if (expanded) expandedText else collapsedText
-                        }
-                },
-            )
-            .clip(Radii.Pill)
-            .focusRing(press, Radii.Pill)
-            .then(
-                if (onOpen == null) {
-                    Modifier
-                } else {
-                    Modifier.indication(press, ripple(color = MaterialTheme.colorScheme.primary))
-                },
-            )
-            .padding(horizontal = Space.Tight, vertical = Space.Line),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = name,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.primary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        if (onOpen != null) {
-            AppChevron(
-                role = ChevronRole.Expand,
-                expanded = expanded,
-                tint = MaterialTheme.colorScheme.primary,
-                size = GlyphSize.ChevronInline,
-                modifier = Modifier.padding(start = Space.Tight),
-            )
-        }
-        Text(
-            text = title,
-            style = compactLabel(),
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier
-                .padding(start = Space.Line)
-                .then(
-                    if (announce) {
-                        Modifier.semantics { liveRegion = LiveRegionMode.Polite }
-                    } else {
-                        Modifier
-                    },
-                ),
-        )
-    }
-}
-
-/**
  * The playing pill's words: the voice and its pace over the place and its
  * key, a two-line lockup that shares one row with the transport.
  *
@@ -218,6 +116,13 @@ internal fun OfferLine(
  * 2 dp lets the two lines keep their own leading as the air between them, and
  * the block stands inside a 48 dp target that the finger gets whole.
  *
+ * **The offer borrows the block** (owner decision, this session). The surah
+ * and its size stand on the place line with no key, and the whole block is
+ * the door to the offer's voice list, so the offer, the transfer, and the
+ * recitation are one two-line lockup and the offer is the playing pill's own
+ * height. The size is the fact the reader is spending; it stays on the line
+ * instead of being the first thing an ellipsis takes.
+ *
  * **The door says its state** (owner decision, this session). The chevron is
  * [AppChevron]'s [ChevronRole.Expand], so it points down while the listening
  * panel is closed and up while it is open, and the block speaks the app's
@@ -230,7 +135,11 @@ internal fun PlayingWordsBlock(
     placeName: String?,
     /** The reciter's name. */
     reciter: String,
-    /** The ayah's reference, already in the reader's digits. */
+    /**
+     * The ayah's reference, already in the reader's digits. Empty on the
+     * offer, whose place line is the surah and its size and closes with the
+     * turn alone.
+     */
     reference: String,
     /** The reader's pace, drawn only when it is not the app's own 1x. */
     speed: Float,
@@ -238,6 +147,8 @@ internal fun PlayingWordsBlock(
     onOpen: (() -> Unit)?,
     /** True while the listening panel is on the glass. */
     expanded: Boolean = false,
+    /** True while the place's line is a failure the reader has to hear. */
+    announce: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val press = remember { MutableInteractionSource() }
@@ -316,6 +227,9 @@ internal fun PlayingWordsBlock(
             }
             // The place's line: the surah at the card's 14 Medium, its key,
             // and the turn. The place is never the thing an ellipsis takes.
+            // The offer borrows this line with no key and its size after the
+            // surah's name, so the block is the same two-line lockup in both
+            // of its homes.
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (!placeName.isNullOrBlank()) {
                     Text(
@@ -324,19 +238,29 @@ internal fun PlayingWordsBlock(
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false),
+                        modifier = Modifier
+                            .weight(1f, fill = false)
+                            .then(
+                                if (announce) {
+                                    Modifier.semantics { liveRegion = LiveRegionMode.Polite }
+                                } else {
+                                    Modifier
+                                },
+                            ),
                     )
                 }
-                Text(
-                    text = reference,
-                    // The ayah key closes the place: 13 at Regular, the
-                    // precise reference beside the surah's own name, and it
-                    // never gives way (owner decision, this session).
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    modifier = Modifier.padding(start = Space.Tight),
-                )
+                if (reference.isNotBlank()) {
+                    Text(
+                        text = reference,
+                        // The ayah key closes the place: 13 at Regular, the
+                        // precise reference beside the surah's own name, and it
+                        // never gives way (owner decision, this session).
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        modifier = Modifier.padding(start = Space.Tight),
+                    )
+                }
                 if (onOpen != null) {
                     AppChevron(
                         role = ChevronRole.Expand,

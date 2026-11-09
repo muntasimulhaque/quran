@@ -40,21 +40,19 @@ internal val BarGutter = 16.dp
  *
  * 328 is the page's own width on the app's reference 360 dp phone, 360 less
  * the two [BarGutter]s, which is the widest the capsule ever stood while
- * hugging. So nothing that fits stops fitting: the playing words keep the
- * room the answer's one 48 dp target leaves, 260 dp less the airs at the two
- * ends, and the offer's line keeps [Space.Section] at each end, 280,
- * where the reciter, the surah, and the size stand on one line. The
- * transfer's status gets that room at every percent instead of the room its
- * digits happen to need, and the offer's name and size get it before the
- * download starts.
+ * hugging. So nothing that fits stops fitting: the playing words and the
+ * offer's words keep the room their answer leaves, less the airs at the two
+ * ends. The transfer's status gets that room at every percent instead of the
+ * room its digits happen to need, and the offer's name and size get it before
+ * the download starts.
  *
  * The pill's other numbers are fixed rather than derived from the glass (64 dp
- * in every one voice, 96 dp for the offer's two rows, the 48 dp targets, the
- * 40 dp press, the 288 dp menu), so its width is too: a tablet does not get a
- * taller pill, and it does not get a wider one. The same control stands at
- * the same measure on all three store profiles. A glass narrower than the
- * measure takes the glass less the gutters instead, where the 288 dp menu
- * still stands on the capsule's middle.
+ * in every voice, 74 dp for the transfer with its progress line, the 48 dp
+ * targets, the 40 dp press, the 288 dp menu), so its width is too: a tablet
+ * does not get a taller pill, and it does not get a wider one. The same
+ * control stands at the same measure on all three store profiles. A glass
+ * narrower than the measure takes the glass less the gutters instead, where
+ * the 288 dp menu still stands on the capsule's middle.
  */
 internal val PillMeasure = 328.dp
 
@@ -83,9 +81,8 @@ internal val PillAir = Space.Line
  * The air the words keep from the capsule's curved end: the playing words
  * keep it at the leading end, the transfer's words keep it at their leading
  * end, and the unavailable pill, which is words alone, keeps it at both. The
- * offer's line keeps [Space.Section] at each end instead, because it is the
- * capsule's whole first row and its door's flash has to stand clear of the
- * sphere (owner decision, this session).
+ * offer is one row now, so its words keep it at their leading end too; the
+ * Download keeps [PillAir] at the trailing one.
  *
  * The capsule's end is a sphere, and a line that starts at its widest point
  * meets the curve. The capsule is 64 dp, so its end is a 32 dp radius; the

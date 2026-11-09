@@ -112,15 +112,27 @@ val FloatingShadow = Color(0x1A000000)
 // against its own track, so an off switch had no knob in it at all (owner
 // report, forty-sixth session). See `Switch.kt` for the whole control.
 //
-// [PaperControl] is also the tone of a control that floats over the reading,
-// since the day ground's `surfaceContainerHigh` took it: the playback pill,
-// the offer, the pack row, the snackbar (owner decision, this session). The
-// pill was pure white by day, the sheet's own tone, so it read as a colder
-// shape laid on the paper rather than as a control; one step under the page
-// lets the shadow and the tone together say that it floats, and the sheet and
-// the menu stay the only pure white on the ground. The night ground already
-// worked this way with [NightControl].
+// [PaperControl] is the switch's track, and it is measured against the sheet
+// the switch stands on: 4.8 L* and 1.13:1 from [PaperSurface]. It stays the
+// switch's own tone. A track is a small groove on the white sheet, not a bar
+// over the paper page.
+//
+// [PaperFloating] is the tone a control floats on over the reading: the
+// playback pill, the offer, the pack row, the snackbar, and the menu that
+// hangs from one (owner decision, this session). It needed a tone of its own
+// because the day page is only 2.8 L* under [PaperControl], so a 64 dp
+// capsule in the track's tone had no edge to read at a glance. [PaperFloating]
+// stands at L* 90.0, 1.23:1 from [PaperBackground] and 1.29:1 from the sheet,
+// which is the same step the night page already holds with [NightControl]
+// (1.23:1). The pill was pure white by day before 17.0, the sheet's own tone,
+// so it read as a colder shape laid on the paper rather than as a control;
+// one warm step under the page lets the tone and the shadow together say that
+// it floats, and the sheet stays the only pure white on the ground. The night
+// ground needs one warm charcoal for both jobs, because its page (L* 9.4) and
+// its sheet (L* 13.4) are close enough that [NightControl] at L* 17.7 is a
+// step from both.
 val PaperControl = Color(0xFFF4F1EA)
+val PaperFloating = Color(0xFFE8E2D5)
 val PaperOnPrimary = Color(0xFFFFFFFF)
 val NightControl = Color(0xFF2E2B28)
 val NightOnPrimary = Color(0xFF08243D)

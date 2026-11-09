@@ -39,46 +39,42 @@ import io.github.muntasimulhaque.quran.uikit.R as UiKitR
  * downloads the word timings and the audio together, under one progress bar,
  * and then it plays.
  *
- * **The offer is a two-row capsule, 96 dp tall** (owner decision, this
- * session). Its first row is a 48 dp door around the whole line: the
- * reciter's name, the chevron that says the line opens, then the surah and
- * its size. Its second row is the two answers, Not now and Download, side by
- * side. The line sits 14 dp under the crown, the answer row is the capsule's
- * 48 dp foot, and the visible pills keep their 6 dp of air. Before this the
- * line was a 20 dp notice, because a 20 dp line cannot also be a 48 dp
- * target; the door is the 20 dp the capsule gained, and it gives the name its
- * chooser back.
+ * **The offer is one row, 64 dp, the pill's own shape** (owner decision,
+ * this session). It used to be a two-row capsule of 96: a 48 dp line over a
+ * 48 dp pair of answers, because the line and the two buttons could not share
+ * the capsule's 328. The one-row form already existed beside it: the pill's
+ * own pending-download voice asks the same question in one 64 dp row. The
+ * offer is that shape with the playing pill's own two-line block: the
+ * reciter's name over the surah and its size, the turn closing the place
+ * line, and Download as the one answer at the trailing end. The whole block
+ * is the door, so the name is not the only part a finger can reach, and the
+ * size stays whole instead of being the first thing an ellipsis takes. 8 dp,
+ * the finger's 48 dp, and 8 dp are the height the playing pill already stands
+ * at.
  *
- * **The 96 is the whole of it, and it was settled again** (owner decision,
- * this session). The two rows are the finger's 48 dp each and stand edge to
- * edge, so the air at the capsule's ends is each row's own shape inside its
- * target, 6 dp for the pills, 4 for a transport circle, and the band between
- * the rows is the two inner insets added. That is why the middle reads as
- * twice the ends: centering two equal rows produces it, and no centering
- * changes it. Giving the ends more air means giving the capsule its own
- * padding and more height, 104 at `Space.Tight` or 112 at `Space.Line`; the
- * packed 96 was chosen over both, so the airs here are the promise and not a
- * draft.
+ * **The block is the door, and the price is in view** (owner decision, this
+ * session). The block opens the same reciter list the playing pill carries,
+ * hung from the capsule's centre: the chosen voice's mark, and what each
+ * voice would still need for this surah, so the choice is made with its price
+ * in view. A chosen voice is the app's reciter, and the offer is asked again
+ * with that voice's name and size, so the Download spends the size the reader
+ * just saw. An offer with no published voice to offer keeps the block as a
+ * notice, because a door with nothing behind it is a door that lies.
  *
- * **The line is the door to the voice list** (owner decision, this session).
- * It opens the same reciter list the playing pill carries, hung from the
- * capsule's centre: the chosen voice's mark, and what each voice would still
- * need for this surah, so the choice is made with its price in view. A chosen
- * voice is the app's reciter, and the offer is asked again with that voice's
- * name and size, so the Download spends the size the reader just saw. An
- * offer with no published voice to offer keeps the line as a notice, because
- * a door with nothing behind it is a door that lies.
- *
- * **An offer has no X** (owner decision, an earlier session). A page tap and
- * Back put it away; Not now is the same answer made visible. The only X the
- * bar draws is the cancel of a package already on its way, which is the one
- * thing a stray tap must not do.
+ * **An offer has no X and no Not now** (owner decision, this session). A page
+ * tap and Back put it away; the answer is Download or Retry, and the way out
+ * is the page. The offer used to carry Not now as the visible "no"; the
+ * one-row form cannot hold a third answer at the pill's 328 without cutting
+ * the line, and the page tap was already the app's answer for every raised
+ * control. The only X the bar draws is the cancel of a package already on its
+ * way, which is the one thing a stray tap must not do.
  *
  * The bar stands at the pill's own [PillMeasure] in every state, so an offer
  * and the transfer that follows it are one width. The transfer keeps its one
- * row, with the X at its end and the progress line under it. The capsule's
- * width never follows its words, and the progress line stands in the room
- * kept under the transfer's row, never across a control's press shape.
+ * row, with the X at its end and the progress line under it, 74 dp with the
+ * line's own room. The capsule's width never follows its words, and the
+ * progress line stands in the room kept under the transfer's row, never
+ * across a control's press shape.
  */
 @Composable
 internal fun ListenOfferBar(
@@ -126,70 +122,60 @@ internal fun ListenOfferBar(
         contentAlignment = Alignment.Center,
     ) {
         if (progress == null) {
-            // The ask: one 48 dp door over the 48 dp answer row. The door's
-            // target is the line's own content, so the flash hugs the words
-            // the reader is choosing, and the question is not the whole
-            // capsule's width.
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = Space.Section),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    OfferLine(
-                        name = reciterShortName(offer.reciter, offer.reciterName),
-                        title = failure ?: title,
-                        onOpen = if (offer.options.isEmpty()) {
-                            null
-                        } else {
-                            { chooser = true }
-                        },
-                        expanded = chooser,
-                        announce = offer.failed,
-                        modifier = Modifier.testTag("offer-words"),
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(
-                        Space.Action,
-                        Alignment.CenterHorizontally,
+            // The ask is the pill's own one row: the words' block at the
+            // leading end and the one answer at the trailing one. The block
+            // is the playing pill's lockup, so the surah is whole and only
+            // the size can give way at the very longest place (owner
+            // decision, this session).
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = PillEndAir,
+                        end = PillAir,
+                        top = PillAir,
+                        bottom = PillAir,
                     ),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    TextButton(
-                        label = stringResource(R.string.playback_not_now),
-                        onClick = onCancelDownload,
-                        quiet = true,
-                        pillTag = "offer-not-now",
-                    )
-                    TextButton(
-                        label = stringResource(
-                            if (offer.failed) {
-                                R.string.playback_retry
-                            } else {
-                                R.string.playback_download
-                            },
-                        ),
-                        onClick = onConfirm,
-                        // The bar exists for this one answer, so it is the
-                        // prominent shape on both paths (owner decision, an
-                        // earlier session).
-                        prominent = true,
-                        pillTag = "offer-answer",
-                    )
-                }
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                PlayingWordsBlock(
+                    placeName = failure ?: title,
+                    reciter = reciterShortName(offer.reciter, offer.reciterName),
+                    reference = "",
+                    speed = 1f,
+                    onOpen = if (offer.options.isEmpty()) {
+                        null
+                    } else {
+                        { chooser = true }
+                    },
+                    expanded = chooser,
+                    announce = offer.failed,
+                    modifier = Modifier
+                        .weight(1f, fill = true)
+                        .testTag("offer-words"),
+                )
+                TextButton(
+                    label = stringResource(
+                        if (offer.failed) {
+                            R.string.playback_retry
+                        } else {
+                            R.string.playback_download
+                        },
+                    ),
+                    onClick = onConfirm,
+                    // The bar exists for this one answer, so it is the
+                    // prominent shape on both paths (owner decision, an
+                    // earlier session).
+                    prominent = true,
+                    pillTag = "offer-answer",
+                    modifier = Modifier.padding(start = WordsGap),
+                )
             }
         } else {
             // The transfer keeps its one row: the words, the percent, and the
             // app's one X at the end. It is a state, not a question, so it
-            // does not carry Not now; the X is the one thing a stray tap must
-            // never do (owner decision, an earlier session).
+            // carries neither the ask nor its answer; the X is the one thing
+            // a stray tap must never do (owner decision, an earlier session).
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(bottom = ProgressRoom),

@@ -39,6 +39,7 @@ class ContrastTest {
         assertReadable(PaperMuted, PaperBackground)
         assertReadable(PaperMuted, PaperSurface)
         assertSheetGrounds(LightScheme)
+        assertFloatingGrounds(LightScheme)
         assertReadable(Gold, PaperBackground)
         assertReadable(Lapis, PaperBackground)
         assertReadable(Lapis, PaperSurface)
@@ -214,6 +215,7 @@ class ContrastTest {
         assertReadable(NightMuted, NightBackground)
         assertReadable(NightMuted, NightSurface)
         assertSheetGrounds(DarkScheme)
+        assertFloatingGrounds(DarkScheme)
         assertReadable(NightGold, NightBackground)
         assertReadable(LapisLight, NightBackground)
         assertReadable(LapisLight, NightSurface)
@@ -290,6 +292,36 @@ class ContrastTest {
         assertReadable(quiet, scheme.surfaceContainer)
         assertReadable(quiet, scheme.surfaceContainerHigh)
         assertReadable(quiet, scheme.surfaceContainerHighest)
+    }
+
+    /**
+     * The floating tone is a step of its own, not the page and not the sheet.
+     *
+     * The pill, the offer, the snackbar, the pack row, and the popup all wear
+     * `surfaceContainerHigh`, and the page is visible around every one of
+     * them: a menu is a separate surface over a reading whose own words are
+     * still on the glass. The tone has to say that at a glance, without a
+     * hard border, so it owes a perceptible step from the page it floats over
+     * and from the sheet a panel rises in. The day ground used to stand at
+     * 1.07:1 from its page while the night stood at 1.23:1, which is why a
+     * light pill went missing and a night pill did not (owner report). The
+     * floors are the app's own chosen steps, written here so a palette edit
+     * that sinks the day tone again fails on the machine.
+     */
+    private fun assertFloatingGrounds(scheme: ColorScheme) {
+        val floating = scheme.surfaceContainerHigh
+        assertReadable(scheme.onSurface, floating)
+        assertFloating("the floating tone on the page", floating, scheme.background, 1.20)
+        assertFloating("the floating tone on the sheet", floating, scheme.surface, 1.10)
+    }
+
+    private fun assertFloating(what: String, floating: Color, behind: Color, floor: Double) {
+        val ratio = contrast(floating, behind)
+        assertTrue(
+            "$what: ${"%.2f".format(ratio)}:1, under the ${"%.2f".format(floor)}:1 " +
+                "the floating paper is drawn at",
+            ratio >= floor,
+        )
     }
 
     private fun assertTajweedOn(colors: TajweedColors, ground: Color) {

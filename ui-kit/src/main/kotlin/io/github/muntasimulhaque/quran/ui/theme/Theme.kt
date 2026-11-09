@@ -23,21 +23,24 @@ import io.github.muntasimulhaque.quran.data.resolved
  * gets the tone this app meant by one:
  *
  * - `background` is the reading itself, the page or the reading paper.
- * - `surface` is anything that covers the reading: a sheet, a panel, a menu.
- * - `surfaceContainerHigh` is a control that floats *over* the reading with
- *   the page still visible around it: the playback pill, the offer, the pack
- *   row, the snackbar. It sits a step away from both the page and the sheet,
- *   so a floating thing reads as floating without needing a hard border.
+ * - `surface` is a sheet or a panel that covers the reading.
+ * - `surfaceContainerHigh` is a control or a menu that floats *over* the
+ *   reading with the page still visible around it: the playback pill, the
+ *   offer, the pack row, the snackbar, and the popup they open. It sits a
+ *   step away from the page, so a floating thing reads as floating without
+ *   needing a hard border.
  *
- * The floating control wears [PaperControl] on the day ground, one step *under*
- * the page's paper, and `NightControl` on the night ground, one step over it
- * (owner decision, this session). Before this it was `#FFFFFF` by day, which
- * is the sheet's own white: the pill was not a step away from the sheet, it
- * was the sheet, and over a warm page it read as a colder shape laid on top
- * rather than as a control of the app's own paper. The night ground already
- * held the rule (its `surfaceContainerHigh` and its highest are one warm
- * charcoal), so only the day needed to move. Everything that floats over the
- * reading takes this role and this tone; a panel keeps `surface`.
+ * The floating control wears [PaperFloating] on the day ground and
+ * [NightControl] on the night ground, one step away from the page in each
+ * (owner decision, this session). The day ground used to borrow
+ * [PaperControl], the switch's track, and that tone is measured against the
+ * white sheet: the day page is only 2.8 L* under it, so a 64 dp capsule stood
+ * 1.07:1 from the paper and all but disappeared (owner report).
+ * [PaperFloating] stands at 1.23:1 from the page, the same step the night page
+ * already holds. The switch's track keeps [PaperControl] in `Switch.kt`,
+ * because a track is a groove on the sheet, not a bar over the page.
+ * Everything that floats over the reading takes the high role and this tone;
+ * a sheet keeps `surface`.
  * - `outline` and `outlineVariant` are the hairlines, never carrying meaning
  *   on their own.
  *
@@ -45,10 +48,11 @@ import io.github.muntasimulhaque.quran.data.resolved
  * by tinting it toward the primary; on a manuscript that would awake a blue
  * wash under every sheet, so the lift is a chosen tone and a shadow instead.
  *
- * `surfaceContainerHighest` is the ground a switch's own track is filled
- * with, and it is named with the switch in `Switch.kt`: a control that reads
- * as a control is the one thing a scheme role should not be left to answer
- * for by accident.
+ * `surfaceContainerHighest` is the floating tone as well, so a Material
+ * component that asks for either high container gets the paper the app draws.
+ * The switch's track is named in `Switch.kt` and is not read from a scheme
+ * role: a control that reads as a control is the one thing a scheme role
+ * should not be left to answer for by accident.
  *
  * The error roles are the app's quiet voice in both grounds, because this app
  * has no red. The Quran's own qalaqah is the page's only red, and a red the
@@ -80,8 +84,8 @@ internal val LightScheme = lightColorScheme(
     surfaceContainerLowest = Color(0xFFFFFFFF),
     surfaceContainerLow = Color(0xFFFDFCF9),
     surfaceContainer = Color(0xFFF8F5EE),
-    surfaceContainerHigh = PaperControl,
-    surfaceContainerHighest = PaperControl,
+    surfaceContainerHigh = PaperFloating,
+    surfaceContainerHighest = PaperFloating,
     surfaceTint = Color.Transparent,
     inverseSurface = PaperInk,
     inverseOnSurface = PaperSurface,
@@ -117,7 +121,7 @@ internal val DarkScheme = darkColorScheme(
     surfaceContainerLowest = Color(0xFF191715),
     surfaceContainerLow = Color(0xFF201E1C),
     surfaceContainer = Color(0xFF282522),
-    surfaceContainerHigh = Color(0xFF2E2B28),
+    surfaceContainerHigh = NightControl,
     surfaceContainerHighest = NightControl,
     surfaceTint = Color.Transparent,
     inverseSurface = NightText,
