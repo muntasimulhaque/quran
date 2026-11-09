@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
+import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.Radii
 import io.github.muntasimulhaque.quran.ui.theme.Wash
 
@@ -38,6 +39,14 @@ import io.github.muntasimulhaque.quran.ui.theme.Wash
  * search match wears. It is not the platform's 40 percent tint: a reader
  * selects words to read them again or copy them, and the words must stay
  * readable through their own selection.
+ *
+ * The one surface that did not follow that rule was the reading itself, which
+ * kept Material's own selection: the accent at forty percent. Forty percent is
+ * above every ceiling the page keeps, and on the ground it produced six of the
+ * seven rule colors fell under 4.5:1 on paper and all seven on night, on the
+ * one surface where a rule color matters most. [ReadingSelection] is the
+ * reading's own pair, and [readingSelectionColors] is what the contrast test
+ * measures (owner decision, the long read session).
  */
 @Composable
 fun RoundedSelectionColors(content: @Composable () -> Unit) {
@@ -47,6 +56,33 @@ fun RoundedSelectionColors(content: @Composable () -> Unit) {
     }
     CompositionLocalProvider(LocalTextSelectionColors provides colors, content = content)
 }
+
+/**
+ * The reading's copy selection: the page's own word mark behind the selected
+ * words, and the accent's handles and cursor around them.
+ *
+ * The mark is [PagePalette.highlight], the tone the reciter's word and a
+ * search arrival already wear and the strongest tint the seven rule colors
+ * keep their 4.5:1 on, so selecting a verse cannot make its tajweed unreadable.
+ * The day page's mark is 1.30 against the paper, the night's 1.40, and every
+ * family clears the floor on both (the contrast test measures them there).
+ *
+ * The selection keeps the platform's rectangular shape, for the reason the
+ * file notes: a range can span a translation and a tafsir at once, and Compose
+ * does not expose the pieces needed to round it. The color is the app's, and
+ * that is what the reading owed (owner decision, the long read session).
+ */
+@Composable
+fun ReadingSelection(content: @Composable () -> Unit) {
+    val primary = MaterialTheme.colorScheme.primary
+    val mark = LocalPagePalette.current.highlight
+    val colors = remember(primary, mark) { readingSelectionColors(primary, mark) }
+    CompositionLocalProvider(LocalTextSelectionColors provides colors, content = content)
+}
+
+/** The reading's selection pair, named so the contrast test can measure it. */
+internal fun readingSelectionColors(handle: Color, mark: Color): TextSelectionColors =
+    TextSelectionColors(handleColor = handle, backgroundColor = mark)
 
 /**
  * The rounded wash under a field's selection, drawn behind the field's own

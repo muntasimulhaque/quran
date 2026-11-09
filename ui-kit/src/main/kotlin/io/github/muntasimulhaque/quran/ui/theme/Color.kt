@@ -10,14 +10,31 @@ import androidx.compose.ui.graphics.Color
 // sepia rather than as paper. The warmth stays, but it lives in the ink, the
 // gold, and the hairlines now, and the page itself sits 95 percent bright, in
 // line with Instapaper's sepia (#F8F2E3) and Apple Books' day page
-// (#F8F1E3) without their density. The reading ink is a warm near black at
-// 13.2:1 and up, soft enough not to glare on a bright ground (owner decision,
-// the theme and consistency session).
+// (#F8F1E3) without their density. The page keeps the light it had, and the
+// reading's own ink steps under the interface's word below, so the pair that
+// carries an hour of reading is a 95 percent page and a 12:1 ink rather than
+// the 14.3:1 a label needs (owner decision, the long read session).
 val PaperBackground = Color(0xFFFBF9F4)
 val PaperSurface = Color(0xFFFFFFFF)
 /** The hairline and the tint of a control that floats over the reading. */
 val PaperOutline = Color(0xFFE8E3D9)
 val PaperInk = Color(0xFF2A2620)
+
+/**
+ * The reading's own ink on the day page, one step under the interface's word,
+ * the way [NightInk] is under the night's.
+ *
+ * The Quran, the translation, the tafsir, and the word meanings are read for
+ * an hour at a time, and the interface's near black is the tone a label and a
+ * button want. On the night page the separation was made for bloom; on paper
+ * it is made for glare, since the same 14.3:1 against a 95 percent ground is
+ * the harshest pair the app owns. At 12.1:1 on the page, 12.7:1 on a sheet,
+ * and 9.8:1 on the word mark, the page reads as ink rather than as a laser and
+ * the rule colors keep every floor they owe (owner decision, the long read
+ * session). A label, a value, a button, and a sheet's own word keep
+ * [PaperInk].
+ */
+val PaperReadingInk = Color(0xFF37322A)
 val PaperMuted = Color(0xFF5E594F)
 val PaperHairline = PaperOutline
 

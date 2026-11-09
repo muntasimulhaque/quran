@@ -22,9 +22,9 @@ import kotlin.math.sqrt
  * session; it was 0.085 while the palette spent its lightness on a ladder).
  * The paper palette's closest pair is the quiet gray and the teal at 0.101;
  * the night palette's closest is the warm pair, ghunnah and qalaqah, at
- * 0.116. Every family is at least 0.14 from the ink: the reading's ink is the
- * lightest tone on the night page, so it is the tone closest to the families
- * by construction, and the quiet gray sits 0.145 from it there.
+ * 0.106. Every family is at least 0.13 from the reading's ink (the iqlab on
+ * paper, the quiet gray on night): the night ink is the lightest tone on its
+ * page, so it is the tone closest to the families by construction.
  *
  * OKLab is used rather than a hue difference because it is the space where a
  * unit of distance is roughly a just-noticeable difference, so the numbers
@@ -34,7 +34,7 @@ import kotlin.math.sqrt
 class TajweedPaletteTest {
 
     @Test
-    fun paperFamiliesSeparate() = assertSeparated(PaperTajweed, PaperInk)
+    fun paperFamiliesSeparate() = assertSeparated(PaperTajweed, LightPage.ink)
 
     @Test
     fun nightFamiliesSeparate() = assertSeparated(NightTajweed, NightInk)

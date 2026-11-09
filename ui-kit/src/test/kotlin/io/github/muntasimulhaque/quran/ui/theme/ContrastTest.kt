@@ -2,6 +2,7 @@ package io.github.muntasimulhaque.quran.ui.theme
 
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
+import io.github.muntasimulhaque.quran.ui.kit.readingSelectionColors
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -28,6 +29,13 @@ class ContrastTest {
     fun lightHolds() {
         assertReadable(PaperInk, PaperBackground)
         assertReadable(PaperInk, PaperSurface)
+        // The reading's own ink, one step under the interface's word on the
+        // day page as the night's is under its own: the verse, the
+        // translation, and the tafsir are read for an hour, and a label is
+        // not (owner decision, the long read session).
+        assertReadable(LightPage.ink, PaperBackground)
+        assertReadable(LightPage.ink, PaperSurface)
+        assertReadable(LightPage.ink, blend(LightScheme.primary, PaperBackground, Wash.Selected))
         assertReadable(PaperMuted, PaperBackground)
         assertReadable(PaperMuted, PaperSurface)
         assertSheetGrounds(LightScheme)
@@ -67,7 +75,7 @@ class ContrastTest {
             LightPage.highlight.alpha,
         )
         assertReadable(
-            PaperInk,
+            LightPage.ink,
             blend(LightPage.highlight, PaperBackground, LightPage.highlight.alpha),
         )
         // The search result's match wash: the result line is ink, not a
@@ -96,6 +104,90 @@ class ContrastTest {
             blend(LightScheme.primary, PaperBackground, Wash.Selected),
         )
         assertReadable(blend(LightPage.mastheadInk, PaperBackground, LightPage.mastheadInk.alpha), PaperBackground)
+        // The reading's copy selection, which is the page's own word mark and
+        // not Material's forty percent accent: every family and the reading's
+        // ink are read on it (owner decision, the long read session).
+        val lightSelection = readingSelectionColors(LightScheme.primary, LightPage.highlight)
+        assertTrue(
+            "the reading selects in the page's word mark",
+            lightSelection.backgroundColor == LightPage.highlight,
+        )
+        // The mark is translucent, so it is measured the way it is drawn: over
+        // the page and over a sheet, the two grounds a selected word can stand
+        // on.
+        val selectedOnPage = blend(
+            lightSelection.backgroundColor,
+            PaperBackground,
+            lightSelection.backgroundColor.alpha,
+        )
+        val selectedOnSheet = blend(
+            lightSelection.backgroundColor,
+            PaperSurface,
+            lightSelection.backgroundColor.alpha,
+        )
+        // A rule color is drawn on the page, never on a sheet: the ayah card
+        // repeats nothing of the verse. The reading's ink is read on both.
+        assertTajweedOn(PaperTajweed, selectedOnPage)
+        assertReadable(LightPage.ink, selectedOnPage)
+        assertReadable(LightPage.ink, selectedOnSheet)
+    }
+
+    /**
+     * The seven rule colors are one weight on the page, not seven.
+     *
+     * A long read made the old palette flicker: its families spanned 1.76 in
+     * contrast on paper, so the lightest read as the only colored words and
+     * the darkest read as emphasis on the ink. The band is the decision the
+     * long read session made, and it is pinned here so a later tone cannot
+     * quietly walk out of it (owner decision, the long read session).
+     */
+    @Test
+    fun readingWeightsHoldOneBand() {
+        assertBand(PaperTajweed, PaperBackground, 6.0, 7.8)
+        assertBand(NightTajweed, NightBackground, 6.5, 8.2)
+        // The ink is above every family on both grounds, so a colored letter
+        // never outweighs the plain word beside it.
+        assertTrue(contrast(LightPage.ink, PaperBackground) > 10.0)
+        assertTrue(contrast(NightInk, NightBackground) > 10.0)
+    }
+
+    /**
+     * The reading ink's own band: soft enough for an hour of paper and still
+     * far past every floor. The pair a reader actually looks at is pinned the
+     * same way the rule colors are.
+     */
+    @Test
+    fun readingInkHoldsItsBand() {
+        val day = contrast(LightPage.ink, PaperBackground)
+        assertTrue("the day reading ink is ${"%.2f".format(day)}:1, outside 11 to 13", day in 11.0..13.0)
+        val night = contrast(NightInk, NightBackground)
+        assertTrue(
+            "the night reading ink is ${"%.2f".format(night)}:1, outside 11 to 13",
+            night in 11.0..13.0,
+        )
+    }
+
+    private fun assertBand(colors: TajweedColors, ground: Color, low: Double, high: Double) {
+        val ratios = listOf(
+            colors.silent,
+            colors.ghunnah,
+            colors.qalaqah,
+            colors.ikhafa,
+            colors.iqlab,
+            colors.idgham,
+            colors.madda,
+        ).map { contrast(it, ground) }
+        ratios.forEach { ratio ->
+            assertTrue(
+                "a family is ${"%.2f".format(ratio)}:1 on the page, outside the $low to $high band",
+                ratio in low..high,
+            )
+        }
+        val spread = ratios.max() / ratios.min()
+        assertTrue(
+            "the seven span ${"%.2f".format(spread)}, over the 1.30 the band allows",
+            spread <= 1.30,
+        )
     }
 
     @Test
@@ -147,10 +239,7 @@ class ContrastTest {
             DarkPage.highlight,
             DarkPage.highlight.alpha,
         )
-        assertReadable(
-            NightInk,
-            blend(DarkPage.highlight, NightBackground, DarkPage.highlight.alpha),
-        )
+        assertReadable(NightInk, blend(DarkPage.highlight, NightBackground, DarkPage.highlight.alpha))
         assertReadable(NightInk, blend(DarkScheme.primary, NightSurface, Wash.Match))
         // The night sheet's current row, on the same selected wash (owner
         // decision, this session).
@@ -166,6 +255,26 @@ class ContrastTest {
             blend(DarkScheme.primary, NightBackground, Wash.Selected),
         )
         assertReadable(blend(DarkPage.mastheadInk, NightBackground, DarkPage.mastheadInk.alpha), NightBackground)
+        // The night reading's copy selection, the same word mark the reciter's
+        // word wears on that ground (owner decision, the long read session).
+        val darkSelection = readingSelectionColors(DarkScheme.primary, DarkPage.highlight)
+        assertTrue(
+            "the night reading selects in the page's word mark",
+            darkSelection.backgroundColor == DarkPage.highlight,
+        )
+        val nightSelectedOnPage = blend(
+            darkSelection.backgroundColor,
+            NightBackground,
+            darkSelection.backgroundColor.alpha,
+        )
+        val nightSelectedOnSheet = blend(
+            darkSelection.backgroundColor,
+            NightSurface,
+            darkSelection.backgroundColor.alpha,
+        )
+        assertTajweedOn(NightTajweed, nightSelectedOnPage)
+        assertReadable(NightInk, nightSelectedOnPage)
+        assertReadable(NightInk, nightSelectedOnSheet)
     }
 
     /**

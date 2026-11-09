@@ -8,8 +8,12 @@ import androidx.compose.ui.graphics.Color
  *
  * [ink] is the reading's own text: the Quran, the translation, the tafsir,
  * and the word meanings. It is deliberately softer than the interface's word
- * on the night page, where a bright white word blooms on a dark ground over a
- * long read; on paper it is the same near black every other word wears.
+ * on both grounds: on the night page a bright white word blooms on a dark
+ * ground over a long read, and on paper the interface's near black is the tone
+ * a label wants while a page read for an hour wants ink. The day page carries
+ * [PaperReadingInk] at 12.1:1 and the night [NightInk] at 12.1:1, each one a
+ * step under the word its buttons and labels wear (owner decision, the long
+ * read session).
  *
  * [highlight] is the word mark on the reading's line: the word the reciter
  * is saying and the word a search arrived on. Each theme sets its own,

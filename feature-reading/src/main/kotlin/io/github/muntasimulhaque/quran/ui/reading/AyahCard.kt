@@ -42,6 +42,7 @@ import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.AddDoor
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
 import io.github.muntasimulhaque.quran.ui.kit.DisclosureRow
+import io.github.muntasimulhaque.quran.ui.kit.ReadingSelection
 import io.github.muntasimulhaque.quran.ui.kit.SheetRowGutter
 import io.github.muntasimulhaque.quran.ui.kit.TextButton
 import io.github.muntasimulhaque.quran.ui.kit.contentPackName
@@ -485,13 +486,15 @@ private fun TafsirPanel(
         // the selection: a reference is the card's, not the commentary's. The
         // passage registers with the card's clearer, so a touch anywhere on
         // the card puts the menu away.
-        SelectionContainer(selection) {
-            RichBlocks(
-                blocks = view.blocks,
-                sizeSp = settings.tafsirSp,
-                lineSp = settings.tafsirLineSp,
-                arabicSp = settings.arabicInlineSp,
-            )
+        ReadingSelection {
+            SelectionContainer(selection) {
+                RichBlocks(
+                    blocks = view.blocks,
+                    sizeSp = settings.tafsirSp,
+                    lineSp = settings.tafsirLineSp,
+                    arabicSp = settings.arabicInlineSp,
+                )
+            }
         }
     }
 }

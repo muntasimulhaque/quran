@@ -134,7 +134,7 @@ internal val DarkScheme = darkColorScheme(
 
 /** The reading colors, which turn over with the theme. */
 internal val LightPage = PagePalette(
-    ink = PaperInk,
+    ink = PaperReadingInk,
     ornament = Gold,
     // 0.13 of the lapis: the strongest tint the seven paper families keep
     // their 4.5:1 on. The reciter's word and a search arrival both wear it.
