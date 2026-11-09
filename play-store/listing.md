@@ -139,11 +139,14 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 42573823582 on 17.0: all three legs green,
+The set is from capture run 42632590480 on 17.1: all three legs green,
 eleven frames each (twelve on the ten inch screen), every frame read. The
-eight are a reader's path through the app rather than the app's own map, and
-the last frame is the two-row offer, its line a 48 dp door to the voice list,
-its capsule now the paper's own control tone instead of the sheet's white.
+eight are a reader's path through the app rather than the app's own map. The
+reading frames carry the long read's palette: the seven tajweed families hold
+one weight, the paper ink is the reading's own 12:1 tone, and the night page's
+colors sit below the ink instead of glowing above it. The last frame is the
+two-row offer, its line a 48 dp door to the voice list, its capsule the
+paper's own control tone instead of the sheet's white.
 The ayah's own door is its number at the head, in the app's blue, with the
 app's one chevron 4 dp after it: the menu it opens is the app's one popup, and
 the verse is not a button, so a tap on the page puts the menu away and chooses
@@ -176,6 +179,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Not now, Download, the page, or Back), so every frame that
 wants a clean page is taken before it.
+
+## Release notes (17.1, 473 characters)
+17.1 makes the colors read for the long sitting. The seven tajweed families hold one weight on the page, so no rule is louder than its neighbor, and the night colors are calmer, the green no longer saturated. The reading ink is softer on paper, the recited word gains a fine accent edge, and selecting a verse marks it in the page's own tone so its colors stay readable. Text, translations, tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (17.0, 482 characters)
 17.0 makes the recitation pill one row. It stands 64 dp, the height its other voices already wear: the voice and its pace over the place and its key, with play or pause at the end. The two skips left the glass, where they cut the place, and are actions TalkBack finds on that mark; the notification keeps them. The pill and the offer wear the paper's tone, not the sheet's white. Text, translations, tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
