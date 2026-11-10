@@ -26,29 +26,25 @@ import io.github.muntasimulhaque.quran.data.resolved
  * - `surface` is a sheet or a panel that covers the reading.
  * - `surfaceContainerHigh` is a control or a menu that floats *over* the
  *   reading with the page still visible around it: the playback pill, the
- *   offer, the pack row, the snackbar, and the popup they open. It sits a
- *   step away from the page, so a floating thing reads as floating without
- *   needing a hard border.
+ *   offer, the pack row, the snackbar, and the popup they open. It stands a
+ *   step above the page and above the block a menu is raised on, so a
+ *   floating thing reads as floating without needing a hard border.
  *
  * The floating control wears [PaperFloating] on the day ground and
- * [NightControl] on the night ground (owner decision, this session). The day
- * ground used to borrow [PaperControl], the switch's track, and that tone is
- * measured against the white sheet: the day page is only 2.8 L* under it, so a
- * 64 dp capsule stood 1.07:1 from the paper and all but disappeared (owner
- * report). The switch's track keeps [PaperControl] in `Switch.kt`, because a
- * track is a groove on the sheet, not a bar over the page.
- *
- * **The day's step is warmth.** The page stands at L* 98.0 with two points of
- * headroom to white, and the block a menu is raised over, `Wash.Selected` at 8
- * percent of the accent, stands at L* 92.9, so the lightness has no room to
- * give and every tone that asked it to do the whole job read wrong: 17.2's
- * darkened sepia as an overlay, 17.3's neutral as a smudge (owner report). The
- * floating paper is the page's own paper now, 4.4 L* down and warmed to three
- * times the page's chroma, so a menu meets that wash as ivory over a cool gray
- * and the edge is a hue at one lightness. `ContrastTest` pins the warmth, the
- * band the step may take, and the distance from that wash, so a later edit
- * cannot bring either fault back. Everything that floats over the reading
- * takes the high role and this tone; a sheet keeps `surface`.
+ * [NightFloating] on the night ground (owner decision, this session). A
+ * floating panel is the highest paper on its ground, not a shade of the page:
+ * the day wears the sheet's white (100.0 over the page's 98.0 and the block's
+ * 92.9), and the night wears one step above its sheet (#322E2A at 19.2 over
+ * the page's 9.4, the sheet's 13.4, and the block's 15.6), because the lapis
+ * wash lifts a dark page where it darkens a light one. The four day tones
+ * before it went down and asked the fill to carry the step, and each read as a
+ * slip, a shade, a smudge, or a veneer. The lift is the edge: the day's shadow
+ * is visible on paper, and the night's is not, which is why the night's fill
+ * step is the larger one. `ContrastTest` pins the direction and the distance,
+ * so a later edit cannot bring the darker tones back. The switch's track keeps
+ * [PaperControl] on the day and [NightControl] on the night, because a track is
+ * a groove on the sheet, not a bar over the page. Everything that floats over
+ * the reading takes the high role and this tone; a sheet keeps `surface`.
  * - `outline` and `outlineVariant` are the hairlines, never carrying meaning
  *   on their own.
  *
@@ -129,8 +125,8 @@ internal val DarkScheme = darkColorScheme(
     surfaceContainerLowest = Color(0xFF191715),
     surfaceContainerLow = Color(0xFF201E1C),
     surfaceContainer = Color(0xFF282522),
-    surfaceContainerHigh = NightControl,
-    surfaceContainerHighest = NightControl,
+    surfaceContainerHigh = NightFloating,
+    surfaceContainerHighest = NightFloating,
     surfaceTint = Color.Transparent,
     inverseSurface = NightText,
     inverseOnSurface = NightBackground,

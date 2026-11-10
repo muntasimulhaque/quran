@@ -22,8 +22,10 @@ import io.github.muntasimulhaque.quran.ui.theme.FloatingShadow
  * Android version the app runs on, so the lift is one look and not a
  * device's.
  *
- * It is also deliberately shallow. The floating tone is what says the
- * control stands above the page; the shadow only anchors it, so the Quran
+ * It is also deliberately shallow. The floating paper and the shadow say the
+ * control stands above the page together: on the day the paper is the sheet's
+ * own white, so this shadow is the edge; on the night the shadow is invisible,
+ * so the paper's step is the edge. The shadow is soft enough that the Quran
  * line under the pill keeps its contrast and the page keeps its quiet. Ten
  * dp of blur with two dp of drop is the softest edge that still reads as a
  * lift at ten percent black, about a third of the black the platform's own

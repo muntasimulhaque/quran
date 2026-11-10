@@ -81,18 +81,19 @@ val PopupGutter = 10.dp
  * reading page's tone, so a menu over the page was held by a hairline and a
  * 10% shadow rather than by a surface of its own; in the night theme the
  * shadow is invisible and the menu read as a hole in the page while the pill
- * above it stood a full step away (owner report). The tone is the page's paper
- * warmed and not its shade, and that choice is made for this exact ground: a
- * menu is never raised over the plain page, because the ayah whose menu is open
+ * above it stood a full step away (owner report).
+ *
+ * A menu is never raised over the plain page: the ayah whose menu is open
  * paints its own block at 8 percent of the accent (`Wash.Selected`), so the
- * menu's edge is read against that wash and not against the paper. The wash is
- * a near gray at L* 92.9 with chroma 0.71 and the floating paper is a warm
- * ivory at L* 93.6 with chroma 8.11, one lightness and dE76 8.4 apart, which is
- * the pair the eye reads as a card laid on a block. A floating tone closer to
- * that wash in chroma read as a veil over the same block instead (owner report,
- * this session). The ground between the two silhouettes is now the page, not a
- * seam: the popup's foot and the capsule's own top never meet, and ten dp keeps
- * the capsule's lift from reaching the popup's foot.
+ * menu's edge is read against that block. The day's block is L* 92.9 and the
+ * floating paper is the sheet's white at 100.0, dE76 7.2 apart, so the menu is
+ * a card laid on the wash with no border. The night's block is L* 15.6 and the
+ * floating paper is #322E2A at 19.2, dE76 5.9 apart; the night's shadow is
+ * invisible, so that fill step is the whole edge. Both grounds use the highest
+ * paper, never a shade of the page (owner decision, this session). The ground
+ * between the two silhouettes is the page, not a seam: the popup's foot and
+ * the capsule's own top never meet, and ten dp keeps the capsule's lift from
+ * reaching the popup's foot.
  */
 val PopupGap = 10.dp
 
@@ -162,9 +163,9 @@ enum class PopupAlignment { Center, Start }
  * The popup takes `width` wide, [PopupMeasure] by default, the popup's own
  * corners and lift, the floating paper and no drawn border, and [PopupGutter]
  * at the head and foot, so the first and last rows stay clear of the curve. A
- * menu over the reading is a piece of the app's floating paper, the pill's own
- * tone unfolded, not a white system panel dropped on it (owner decision, this
- * session).
+ * menu over the reading is the app's floating paper, the pill's own tone
+ * unfolded: the sheet's paper on the day and the one-step night paper, held by
+ * the same lift (owner decision, this session).
  * [name] is its pane title, spoken and never drawn, the same shape the share
  * sheet's announcement already wears: a reader who cannot see the menu hears
  * what it belongs to before its first row. The panel takes the focus once it

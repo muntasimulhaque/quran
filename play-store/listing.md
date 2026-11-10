@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 17.4 (versionCode 176)
+Version: 17.5 (versionCode 177)
 
 ## Listing
 
@@ -147,9 +147,9 @@ one weight, the paper ink is the reading's own 12:1 tone, and the night page's
 colors sit below the ink instead of glowing above it. The last frame is the
 one-row offer, 64 dp, the reciter's name over the surah and its size, the
 whole block a door to the voice list, its capsule on the floating paper the
-pill already wears, an ivory slip: the page's own paper 4.4 L* under it and
-warmed to three times its chroma. The second frame's menu wears that same
-paper, and it is read against the washed block it hangs over. The ayah's own
+pill already wears: the sheet's own white, 2 L* over the page and 7 L* over
+the washed block. The second frame's menu wears that same paper, and it is
+read against the washed block it hangs over without a border. The ayah's own
 door is its number at the head, in the app's blue, with the app's one chevron
 4 dp after it: the menu it opens is the app's one popup, and the verse is not
 a button, so a tap on the page puts the menu away and chooses nothing.
@@ -182,6 +182,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (17.5, 445 characters)
+17.5 makes the floating paper the sheet's own white. The pill, the offer, the snackbar, and the menus they open stand 2 L* over the day page instead of 4.4 L* under it, so they read as paper raised over the page and the ivory slip is gone. The night's floating paper steps up one tone so its menu clears the washed verse by the same distance. Text, translations, tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (17.4, 417 characters)
 17.4 makes the floating paper warm paper. The pill, the offer, the snackbar, and the menus they open wear the page's own tone a shade under it and warmed, so they read as an ivory slip laid on the page instead of the gray veil they became, and a menu over a washed verse keeps a clean edge. The night is unchanged. Text, translations, tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
