@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 17.5 (versionCode 177)
+Version: 17.6 (versionCode 178)
 
 ## Listing
 
@@ -182,6 +182,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (17.6, 490 characters)
+17.6 gives the page more of the glass. Every surface keeps 20 dp at its edge, not 28, so the reading, search, tafsir, footnotes, the word sheet, browse, and settings run wider. The page itself is unchanged: a wide screen still holds the same column, and the ten inch tablet reads the lines it read before. The search field's head, the back mark, and a choice ring now stand on that line. Text, translations, tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (17.5, 445 characters)
 17.5 makes the floating paper the sheet's own white. The pill, the offer, the snackbar, and the menus they open stand 2 L* over the day page instead of 4.4 L* under it, so they read as paper raised over the page and the ivory slip is gone. The night's floating paper steps up one tone so its menu clears the washed verse by the same distance. Text, translations, tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.

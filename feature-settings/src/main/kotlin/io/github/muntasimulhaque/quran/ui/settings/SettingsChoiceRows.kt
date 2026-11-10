@@ -62,9 +62,9 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * that cannot be unchecked would be a lie. The word at the trailing end is a
  * pill in the same shape and on the same rail as Remove in both states, so
  * the row does not change its grammar with its file. It used to be a bare word
- * at the sheet's 12 dp edge, 14 dp outside the page's 28 dp word line, while
- * Remove sat on the choice row's 22 dp rail; the eye read two kinds of action
- * in one list (owner report, this session). Remove still deletes the pack and
+ * at the sheet's edge, well outside the page's word line, while Remove sat on
+ * the choice row's rail; the eye read two kinds of action in one list (owner
+ * report, an earlier session). Remove still deletes the pack and
  * clears the reader's choice: the row then draws the off ring, not a blank
  * column, and the page's switch says there is no translation. A chosen pack
  * whose file disappears outside the app keeps its check, because the choice is

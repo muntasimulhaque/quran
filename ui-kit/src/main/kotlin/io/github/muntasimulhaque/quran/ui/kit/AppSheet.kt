@@ -36,11 +36,11 @@ import io.github.muntasimulhaque.quran.ui.theme.Radii
  * The width is [rememberSheetWidth], which is the page and its two gutters: on
  * a phone and on the seven inch tablet standing up the glass is narrower than
  * that and the sheet is the glass, and on the ten inch screen the sheet is a
- * 656 dp page centered on it, with the reading's own 600 dp page behind and
+ * 640 dp page centered on it, with the reading's own 600 dp page behind and
  * the rest of the glass as margin. A sheet is always the page it holds and
  * never more, so a settings row's switch stays as close to the words that
  * name it on the ten inch screen as it is on the seven inch tablet (owner
- * decision, this session).
+ * decision, an earlier session).
  *
  * The sheet's own name is spoken when the window opens and never drawn. A
  * modal surface has to name itself before its first row, or a screen reader

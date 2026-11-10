@@ -38,9 +38,12 @@ internal val CapsuleGutter = 6.dp
 /** The capsule's own vertical inset: the chip's own 8 dp. */
 internal val CapsulePad = 8.dp
 
-/** The room from the row's edge to the capsule: 10 plus the row's own 12
- * stands the mark on the app's 22 dp gutter. */
-internal val RowGutter = 10.dp
+/** The room from the row's edge to the capsule: 8 plus the row's own 12
+ * stands the mark's own edge on the app's 20 dp gutter, so a choice's ring
+ * lands on the same line as the words of the row above it. The 8 is the press
+ * card a sheet row already wears, so the shape a finger gets and the shape a
+ * ring stands on are one inset (owner decision, this session). */
+internal val RowGutter = 8.dp
 
 /**
  * The mark's own measure: the ring every choice row wears, and the column a
@@ -62,10 +65,11 @@ val ChoiceRowNameInset = RowGutter + 12.dp + ChoiceMarkSize + 16.dp
  * The rail a choice row's trailing action ends on: the row's own gutter plus
  * the capsule's padding.
  *
- * A pill that ends here keeps its word inside the page's [Space.Gutter],
- * where a bare mark may reach further out. A choice row's Remove and the Add
- * that takes its place on a pack row end on this one line, so a pack does not
- * change its right edge with its file (owner decision, this session).
+ * A pill that ends here stands on the page's [Space.Gutter] with its word
+ * inside it, where a bare mark may reach further out. A choice row's Remove
+ * and the Add that takes its place on a pack row end on this one line, so a
+ * pack does not change its right edge with its file (owner decision, an
+ * earlier session).
  */
 val ChoiceRowTrailingInset = RowGutter + Space.Row
 
@@ -91,12 +95,13 @@ val ChoiceRowTrailingInset = RowGutter + Space.Row
  *
  * The measurements are the app's one rhythm, so a list in the settings sheet
  * and the same list in the playback pill's menu cannot drift: a 22 dp mark,
- * 16 dp from it to the name, an 8 dp inset for the capsule the reader
+ * 16 dp from it to the name, an 8 dp inset inside the capsule the reader
  * presses, and the 48 dp minimum target every row owes a finger. The capsule
- * keeps a 6 dp gutter from the row's own edge and the row's own 22 dp gutter
- * from the sheet, so stacked rows read as a list and the first and last
- * capsules never meet the sheet they stand on (owner report, this session:
- * the capsule had carried the row's own room and met the popup's edge).
+ * keeps 8 dp from the row's own edge and 6 dp over and under itself, so the
+ * ring's outer edge lands on the page's gutter, stacked rows read as a list,
+ * and the first and last capsules never meet the sheet they stand on (owner
+ * report, an earlier session: the capsule had carried the row's own room and
+ * met the popup's edge).
  * [bottomPadding] closes the foot of a row that has a block under it. The
  * ripple is drawn on the capsule inside that target, so a row that answers a
  * tap wears the same shape the chips and the doors wear, wherever it stands

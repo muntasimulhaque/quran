@@ -65,13 +65,27 @@ object Space {
      * seven inch tablet standing up, so a line runs as far as its paper
      * allows. A glass wider than a page keeps this much air inside the page
      * and puts the rest of its width outside it, and that half of the rule
-     * belongs to [Measure] (owner decision, this session).
+     * belongs to [Measure] (owner decision, an earlier session).
+     *
+     * It was 28, and 28 was a page's own air rather than the app's: the
+     * platform's own compact margin is 16, so every phone ran 12 dp inside
+     * its own paper at every edge, from the search field's head to the last
+     * footnote. On the store's phone the line then held about 44 characters
+     * of the translation at the shipped size, under the 45 to 75 a line of
+     * reading is drawn for, and the sheet's words stood so far in from the
+     * sheet's edge that a tafsir read as a page inside a page. 20 is the cut
+     * that leaves the paper's own strip: the wash of a chosen ayah still
+     * stands 12 dp from the glass, a 48 dp control still keeps 8, and every
+     * line moved into the range it is read in. The width of a page did not
+     * move with it: [Measure] still holds a wide glass to 600 dp, so the ten
+     * inch screen reads the line it read before and only a sheet's own edge
+     * moved out (owner decision, this session: 28 to 20).
      *
      * A shape that answers a touch may reach outside the line (a row's press
      * card, the wash of a chosen ayah), and a card holds its own words inside
      * its own padding. The words that stand on the page are these.
      */
-    val Gutter = 28.dp
+    val Gutter = 20.dp
 
     /**
      * The widest a line of reading may run: the page's measure.

@@ -92,9 +92,9 @@ internal fun ColumnScope.ListeningPanel(
  * see the panel can jump from the voices to the pace to the ending.
  *
  * The air is this popup's own, not the settings sheet's: the panel keeps the
- * popup's 22 dp gutters and a line's room above it, where the hub opens a
- * group with a block's. The head still stands nearer the control it names than
- * the space above it.
+ * app's gutter for its labels and a line's room above it, where the hub opens
+ * a group with a block's. The head still stands nearer the control it names
+ * than the space above it.
  */
 @Composable
 private fun MenuLabel(text: String) {

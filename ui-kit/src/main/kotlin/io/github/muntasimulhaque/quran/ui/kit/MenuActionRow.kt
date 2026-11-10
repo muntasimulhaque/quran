@@ -32,7 +32,7 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * One action a menu offers: a mark, its word, and the whole row as the tap.
  *
  * It is [ChoiceRow]'s sibling and shares its rhythm to the dp: the same
- * [RowGutter] to the mark's column, the same 22 dp mark at the app's 22 dp
+ * [RowGutter] to the mark's column, the same 22 dp mark standing on the app's
  * gutter, the same [Space.Block] from the mark to the name, the same 48 dp
  * target, the same [CapsuleGutter] and [CapsulePad] around the capsule the
  * press draws, and the same 12 dp foot. A menu of answers and a menu of

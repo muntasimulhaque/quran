@@ -68,7 +68,8 @@ val PopupMeasure = 288.dp
  * The popup's corner is 20 dp, so content left at its edge sat hard against
  * the curve and the first and last highlights read as touching the menu they
  * hang in (owner report). Ten dp keeps the first and last rows off the curve
- * above and below them; the rows keep their own 22 dp gutter at the sides.
+ * above and below them; the rows keep their ring on the app's gutter at the
+ * sides, so a menu's list stands on the same line as the sheet it opened from.
  */
 val PopupGutter = 10.dp
 

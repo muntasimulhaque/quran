@@ -37,7 +37,7 @@ import io.github.muntasimulhaque.quran.ui.theme.prose
  *
  * The sheet is the footnote's container and the word aid's own page. Its
  * head is the footnote's head: the app's one sheet title at 20 SemiBold and
- * the place at 13, both on the page's 28 dp edge. Under it the card is
+ * the place at 13, both on the page's 20 dp edge. Under it the card is
  * centered: one Arabic word and one short gloss are one entry, not a
  * paragraph. The word list's meanings are short (median nine characters, 99
  * percent under thirty), so the gloss is one line, and the rare longest is

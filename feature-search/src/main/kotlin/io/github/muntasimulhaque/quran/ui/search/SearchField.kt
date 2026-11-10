@@ -80,13 +80,17 @@ internal fun SearchField(
             modifier = Modifier
                 .fillMaxWidth()
                 // The field is the one shape at the sheet's head, and it runs
-                // from the page's own 18 dp line on one side to its mirror on
-                // the other. The Close that used to stand beside it took the
+                // from the app's one gutter on one side to its mirror on the
+                // other, so the sheet's first line stands on the same line as
+                // every row under it. It was 18 while the rows were 28, which
+                // made the field the one line in the app that was wider than
+                // the page it stood on (owner decision, this session).
+                // The Close that used to stand beside it took the
                 // last 60 dp of the line and was the only visible dismissal of
                 // its kind in the app; the sheet closes by its handle, the
-                // scrim, and Back like every other sheet (owner decision, this
-                // session).
-                .padding(start = 18.dp, end = 18.dp, top = Space.Line, bottom = Space.Tight),
+                // scrim, and Back like every other sheet (owner decision, an
+                // earlier session).
+                .padding(start = Space.Gutter, end = Space.Gutter, top = Space.Line, bottom = Space.Tight),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(

@@ -14,8 +14,13 @@ import io.github.muntasimulhaque.quran.ui.reader.IconButton
 import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /** The line a page head's back mark starts on: the sheet's words less the
- * air inside a round target. */
-private val HeadStart = 6.dp
+ * air inside a round target. The mark is a 48 dp target holding a 24 dp
+ * drawing, so half of the difference is the drawing's own air and the head
+ * takes only the other half: the chevron lands on the page's line and the
+ * target reaches [Space.Gutter] less 12 dp out, which is nearer the glass than
+ * any word may stand (owner decision, this session: the head's drawing stands
+ * on the sheet's line, as the top bar's marks stand on the reading's). */
+private val HeadStart = Space.Gutter - 12.dp
 
 /** The head's own top air, so the back mark sits above the page's title. */
 private val HeadTop = 2.dp

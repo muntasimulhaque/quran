@@ -50,8 +50,8 @@ fun pageMargin(windowWidth: Dp): Dp {
  * the glass is narrower than that.
  *
  * So the sheet is the page. On the phone and the seven inch tablet it is the
- * whole window, exactly as before. On the ten inch screen it is 656 dp
- * centered, and the reading behind it is a 600 dp page with 28 dp of its own
+ * whole window, exactly as before. On the ten inch screen it is 640 dp
+ * centered, and the reading behind it is a 600 dp page with 20 dp of its own
  * air on each side: the sheet's edge and the page's edge are the same line.
  */
 fun sheetWidth(windowWidth: Dp): Dp {

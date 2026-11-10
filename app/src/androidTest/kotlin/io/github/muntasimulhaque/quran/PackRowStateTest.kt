@@ -119,9 +119,9 @@ class PackRowStateTest {
      * The two states of one row end on one line.
      *
      * Add and Remove are the same act slot in the same list. Add used to be a
-     * bare word at the sheet's 12 dp edge while Remove was a pill on the
-     * choice row's 22 dp rail, so the eye read two kinds of action and the Add
-     * stood outside the page's 28 dp word line (owner report, this session).
+     * bare word at the sheet's edge while Remove was a pill on the choice
+     * row's rail, so the eye read two kinds of action and the Add stood
+     * outside the page's word line (owner report, an earlier session).
      * The test reads the pills themselves, not their words: a word's ink edge
      * depends on its letters, a shape's edge does not.
      */

@@ -95,8 +95,8 @@ class PageEdgeTest {
         // words one inset inside it.
         val side = pageMargin(phone) - Space.WashInset
         assertEquals("the reading's words", Space.Gutter, side + Space.WashInset)
-        assertEquals("the wash's line", 20f, side.value, 0.001f)
-        assertEquals("the app's edge", 28f, Space.Gutter.value, 0.001f)
+        assertEquals("the wash's line", 12f, side.value, 0.001f)
+        assertEquals("the app's edge", 20f, Space.Gutter.value, 0.001f)
     }
 
     @Test
@@ -111,11 +111,11 @@ class PageEdgeTest {
     @Test
     fun aChoiceRowsActionKeepsItsWordInsideTheGutter() {
         // A choice row's trailing action is a shape, so it may reach outside
-        // the page's line; the word inside it may not. The 22 dp rail plus the
-        // pill's 14 dp inset puts the word 8 dp inside the 28 dp gutter while
-        // the shape stands 6 dp outside it, and that is the rail a pack's Add
-        // and Remove share (owner decision, this session).
-        assertEquals("the shape's line", 22f, ChoiceRowTrailingInset.value, 0.001f)
+        // the page's line; the word inside it may not. The 20 dp rail stands
+        // the pill's own edge on the page's line, so its 14 dp inset puts the
+        // word 14 dp inside the gutter, and that is the rail a pack's Add and
+        // Remove share (owner decision, this session).
+        assertEquals("the shape's line", 20f, ChoiceRowTrailingInset.value, 0.001f)
         assertTrue(
             "the button's word must stand inside the page's gutter",
             ChoiceRowTrailingInset + ButtonPad >= Space.Gutter,
