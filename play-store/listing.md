@@ -139,7 +139,7 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 42667785519 on 17.2: all three legs green,
+The set is from capture run 42759107193 on 17.3: all three legs green,
 eleven frames each (twelve on the ten inch screen), every frame read. The
 eight are a reader's path through the app rather than the app's own map. The
 reading frames carry the long read's palette: the seven tajweed families hold
@@ -147,14 +147,15 @@ one weight, the paper ink is the reading's own 12:1 tone, and the night page's
 colors sit below the ink instead of glowing above it. The last frame is the
 one-row offer, 64 dp, the reciter's name over the surah and its size, the
 whole block a door to the voice list, its capsule on the floating paper the
-pill already wears. The second frame's menu wears that same floating paper.
-The ayah's own door is its number at the head, in the app's blue, with the
-app's one chevron 4 dp after it: the menu it opens is the app's one popup, and
-the verse is not a button, so a tap on the page puts the menu away and chooses
-nothing. In the second frame that chevron has turned up on the washed card,
-which is the whole of the door's open state. The rest keep their composition,
-now on the shared pill measure. No frame carries the version line, because the
-settings hub is not one of the eight.
+pill already wears, a neutral stone one step under the page. The second
+frame's menu wears that same paper, and it is read against the washed block it
+hangs over. The ayah's own door is its number at the head, in the app's blue,
+with the app's one chevron 4 dp after it: the menu it opens is the app's one
+popup, and the verse is not a button, so a tap on the page puts the menu away
+and chooses nothing. In the second frame that chevron has turned up on the
+washed card, which is the whole of the door's open state. The rest keep their
+composition, on the shared pill measure. No frame carries the version line,
+because the settings hub is not one of the eight.
 
 The workflow runs the capture test on three emulator profiles (phone, 7 inch,
 10 inch), caches the AVD per profile so only the first run of each pays for
@@ -180,6 +181,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (17.3, 430 characters)
+17.3 takes the tint out of the floating paper. The pill, the offer, the snackbar, and the menus they open keep the 1.23:1 step from the day page and give up the sepia that came with it, so a menu over a washed verse reads as paper one step in shade rather than as a warm cast, and the accent stays blue. The night is unchanged. Text, translations, tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (17.2, 485 characters)
 17.2 makes the floating paper readable. The pill, the offer, the snackbar, and their menus wear one warm tone a step from the day page, the step the night page already held, so a light pill no longer vanishes into the paper. The recited word keeps its tint without the accent edge, and the download offer is one 64 dp row naming the reciter, the surah, and the size before Download. Text, translations, tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
