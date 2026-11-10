@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 17.3 (versionCode 175)
+Version: 17.4 (versionCode 176)
 
 ## Listing
 
@@ -181,6 +181,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (17.4, 417 characters)
+17.4 makes the floating paper warm paper. The pill, the offer, the snackbar, and the menus they open wear the page's own tone a shade under it and warmed, so they read as an ivory slip laid on the page instead of the gray veil they became, and a menu over a washed verse keeps a clean edge. The night is unchanged. Text, translations, tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (17.3, 430 characters)
 17.3 takes the tint out of the floating paper. The pill, the offer, the snackbar, and the menus they open keep the 1.23:1 step from the day page and give up the sepia that came with it, so a menu over a washed verse reads as paper one step in shade rather than as a warm cast, and the accent stays blue. The night is unchanged. Text, translations, tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.

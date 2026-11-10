@@ -31,24 +31,24 @@ import io.github.muntasimulhaque.quran.data.resolved
  *   needing a hard border.
  *
  * The floating control wears [PaperFloating] on the day ground and
- * [NightControl] on the night ground, one step away from the page in each
- * (owner decision, this session). The day ground used to borrow
- * [PaperControl], the switch's track, and that tone is measured against the
- * white sheet: the day page is only 2.8 L* under it, so a 64 dp capsule stood
- * 1.07:1 from the paper and all but disappeared (owner report).
- * [PaperFloating] stands at 1.23:1 from the page, the same step the night page
- * already holds. The switch's track keeps [PaperControl] in `Switch.kt`,
- * because a track is a groove on the sheet, not a bar over the page.
+ * [NightControl] on the night ground (owner decision, this session). The day
+ * ground used to borrow [PaperControl], the switch's track, and that tone is
+ * measured against the white sheet: the day page is only 2.8 L* under it, so a
+ * 64 dp capsule stood 1.07:1 from the paper and all but disappeared (owner
+ * report). The switch's track keeps [PaperControl] in `Switch.kt`, because a
+ * track is a groove on the sheet, not a bar over the page.
  *
- * The step is lightness only. The first floating paper, the 17.2 tone, reached
- * the step by darkening and tinting at once, 2.7 times the page's own chroma,
- * and a flat capsule or a 215 dp menu in it read as a sepia over the paper
- * (owner report). The tone now holds the page's hue and the page's own chroma,
- * so a menu meets the wash it is always raised over, `Wash.Selected`
- * at 8 percent of the accent on the block behind it, as a step of lightness
- * and not as a second hue. `ContrastTest` pins the warmth as well as the
- * ratio, so a later edit cannot bring the tint back. Everything that floats
- * over the reading takes the high role and this tone; a sheet keeps `surface`.
+ * **The day's step is warmth.** The page stands at L* 98.0 with two points of
+ * headroom to white, and the block a menu is raised over, `Wash.Selected` at 8
+ * percent of the accent, stands at L* 92.9, so the lightness has no room to
+ * give and every tone that asked it to do the whole job read wrong: 17.2's
+ * darkened sepia as an overlay, 17.3's neutral as a smudge (owner report). The
+ * floating paper is the page's own paper now, 4.4 L* down and warmed to three
+ * times the page's chroma, so a menu meets that wash as ivory over a cool gray
+ * and the edge is a hue at one lightness. `ContrastTest` pins the warmth, the
+ * band the step may take, and the distance from that wash, so a later edit
+ * cannot bring either fault back. Everything that floats over the reading
+ * takes the high role and this tone; a sheet keeps `surface`.
  * - `outline` and `outlineVariant` are the hairlines, never carrying meaning
  *   on their own.
  *

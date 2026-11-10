@@ -39,7 +39,7 @@ class ContrastTest {
         assertReadable(PaperMuted, PaperBackground)
         assertReadable(PaperMuted, PaperSurface)
         assertSheetGrounds(LightScheme)
-        assertFloatingGrounds(LightScheme)
+        assertFloatingGrounds(LightScheme, day = true)
         assertReadable(Gold, PaperBackground)
         assertReadable(Lapis, PaperBackground)
         assertReadable(Lapis, PaperSurface)
@@ -215,7 +215,7 @@ class ContrastTest {
         assertReadable(NightMuted, NightBackground)
         assertReadable(NightMuted, NightSurface)
         assertSheetGrounds(DarkScheme)
-        assertFloatingGrounds(DarkScheme)
+        assertFloatingGrounds(DarkScheme, day = false)
         assertReadable(NightGold, NightBackground)
         assertReadable(LapisLight, NightBackground)
         assertReadable(LapisLight, NightSurface)
@@ -300,28 +300,92 @@ class ContrastTest {
      * The pill, the offer, the snackbar, the pack row, and the popup all wear
      * `surfaceContainerHigh`, and the page is visible around every one of
      * them: a menu is a separate surface over a reading whose own words are
-     * still on the glass. The tone has to say that at a glance, without a
-     * hard border, so it owes a perceptible step from the page it floats over
-     * and from the sheet a panel rises in. The day ground used to stand at
-     * 1.07:1 from its page while the night stood at 1.23:1, which is why a
-     * light pill went missing and a night pill did not (owner report). The
-     * floors are the app's own chosen steps, written here so a palette edit
-     * that sinks the day tone again fails on the machine.
+     * still on the glass. The tone has to say that at a glance, without a hard
+     * border, so it owes a perceptible step from the page it floats over and
+     * from the sheet a panel rises in. The day ground used to stand at 1.07:1
+     * from its page while the night stood at 1.23:1, which is why a light pill
+     * went missing and a night pill did not (owner report).
      *
-     * The ratio is not the whole rule. A tone can hold every floor and still
-     * read as a tint laid over the page, which is what the eye reported of the
-     * 17.2 paper: it reached the step by darkening and by warming at once, and
-     * a flat shape in a warmer tone than the paper it covers is a sepia rather
-     * than a surface. So the warmth is pinned too: the floating tone may not
-     * carry much more chroma than the page it is drawn on (owner decision, this
-     * session).
+     * The two grounds take two rules, because they have two amounts of room.
+     * The night lifts its tone 8.3 L* above its page, and a step of lightness
+     * on a dark ground is a step the eye reads on its own, so the floor there
+     * stays a ratio. The day has two points of headroom to white and a chosen
+     * block at L* 92.9, so its step has to be a warmth, and its rules are
+     * CIELAB ones: the warmth itself, the band the step may take, and the
+     * distance from the block a menu is actually drawn on. All of them are
+     * pinned here, so a palette edit fails on the machine and not on a
+     * reader's eyes (owner decision, this session).
      */
-    private fun assertFloatingGrounds(scheme: ColorScheme) {
+    private fun assertFloatingGrounds(scheme: ColorScheme, day: Boolean) {
         val floating = scheme.surfaceContainerHigh
         assertReadable(scheme.onSurface, floating)
-        assertFloating("the floating tone on the page", floating, scheme.background, 1.20)
         assertFloating("the floating tone on the sheet", floating, scheme.surface, 1.10)
-        assertFloatingWarmth(floating, scheme.background)
+        if (day) {
+            assertWarmthIsTheStep(floating, scheme.background)
+            assertClearOfTheChosenBlock(
+                floating,
+                blend(scheme.primary, scheme.background, Wash.Selected),
+            )
+        } else {
+            assertFloating("the night floating tone on the page", floating, scheme.background, 1.20)
+        }
+    }
+
+    /**
+     * The day's step is warmth, not shade (owner decision, this session).
+     *
+     * The page stands at L* 98.0 and the block a menu is raised over stands at
+     * L* 92.9, so the lightness has no room to give, and both tones that asked
+     * it for the whole step read wrong: the 17.2 paper at 8.0 L* down with a
+     * warm tint read as a sepia over the page, and the 17.3 paper at the same
+     * 8.0 L* down with the page's own chroma read as a smudge (owner reports).
+     * The floating paper is therefore the page's own paper: three times its
+     * chroma at its hue to within thirty degrees, dropped 3.0 to 6.5 L* and no
+     * further. That band keeps the step off both failures, since a shade is
+     * what 8.0 L* down is and a card with no tone of its own is what 0.4 L*
+     * down and no chroma was (the white pill before 17.0).
+     */
+    private fun assertWarmthIsTheStep(floating: Color, page: Color) {
+        val drop = lightness(floating) - lightness(page)
+        assertTrue(
+            "the floating paper stands ${"%.1f".format(-drop)} L* under the page, outside the 3.0 to " +
+                "6.5 a warmth step allows",
+            drop <= -3.0 && drop >= -6.5,
+        )
+        val times = chroma(floating) / chroma(page)
+        assertTrue(
+            "the floating paper carries ${"%.2f".format(times)} times the page's chroma, under the 3.0 " +
+                "that makes the step a hue",
+            times >= 3.0,
+        )
+        val turned = hueGap(floating, page)
+        assertTrue(
+            "the floating paper stands ${"%.1f".format(turned)} degrees of hue from the page, outside " +
+                "the 30 that keep it the page's own paper",
+            turned <= 30.0,
+        )
+    }
+
+    /**
+     * The distance a menu's edge needs, measured from the ground the menu is
+     * actually drawn on.
+     *
+     * A menu is never raised over the plain page: the ayah whose menu is open
+     * paints its own block at [Wash.Selected] of the accent, which lands at
+     * L* 92.9 and chroma 0.71, so the edge is read against that block. The
+     * floating tone that read as a veil stood dE76 4.2 from it while holding
+     * every ratio it was asked for (owner report), because the two tones sat at
+     * one lightness and differed only in a chroma that no WCAG ratio can see.
+     * A CIELAB distance is the honest measure of that pair, and 6.0 is the
+     * distance at which the edge reads as a card at a glance.
+     */
+    private fun assertClearOfTheChosenBlock(floating: Color, block: Color) {
+        val distance = deltaE(floating, block)
+        assertTrue(
+            "the floating paper stands dE76 ${"%.1f".format(distance)} from the chosen block, under " +
+                "the 6.0 a menu's edge is read at",
+            distance >= 6.0,
+        )
     }
 
     private fun assertFloating(what: String, floating: Color, behind: Color, floor: Double) {
@@ -330,15 +394,6 @@ class ContrastTest {
             "$what: ${"%.2f".format(ratio)}:1, under the ${"%.2f".format(floor)}:1 " +
                 "the floating paper is drawn at",
             ratio >= floor,
-        )
-    }
-
-    private fun assertFloatingWarmth(floating: Color, page: Color) {
-        val times = chroma(floating) / chroma(page)
-        assertTrue(
-            "the floating tone carries ${"%.2f".format(times)} times the page's chroma, " +
-                "over the 1.75 a step of lightness allows",
-            times <= 1.75,
         )
     }
 
@@ -404,14 +459,21 @@ class ContrastTest {
     }
 
     /**
-     * A tone's CIELAB chroma, the distance from the gray axis, in the D65
-     * white the palette is chosen in.
+     * A tone in CIELAB, in the D65 white the palette is chosen in.
      *
-     * This is the number a ratio cannot see: two tones can stand the same
-     * distance apart in luminance and still read as one paper and one tint,
-     * which is what the eye said of the 17.2 floating paper (owner report).
+     * CIELAB is where an adjacent surface's step is decided, because the
+     * numbers a step needs are not the numbers a ratio carries: two tones can
+     * hold every ratio asked of them and still sit at one lightness, which is
+     * what the eye said of the 17.2 paper and again of the 17.3 paper (owner
+     * reports). The lightness, the chroma, and the hue of a tone are read from
+     * here, and so is the distance between two of them.
      */
-    private fun chroma(color: Color): Double {
+    private data class Lab(val lightness: Double, val a: Double, val b: Double) {
+        val chroma: Double get() = Math.hypot(a, b)
+        val hue: Double get() = (Math.toDegrees(Math.atan2(b, a)) + 360.0) % 360.0
+    }
+
+    private fun lab(color: Color): Lab {
         fun linear(channel: Float): Double =
             if (channel <= 0.04045f) channel / 12.92 else Math.pow((channel + 0.055) / 1.055, 2.4)
         val red = linear(color.red)
@@ -424,8 +486,32 @@ class ContrastTest {
         val fx = f(x / 0.95047)
         val fy = f(y)
         val fz = f(z / 1.08883)
-        val a = 500.0 * (fx - fy)
-        val b = 200.0 * (fy - fz)
-        return Math.hypot(a, b)
+        return Lab(116.0 * fy - 16.0, 500.0 * (fx - fy), 200.0 * (fy - fz))
+    }
+
+    /** A tone's CIELAB lightness, which is what a step of paper is measured by. */
+    private fun lightness(color: Color): Double = lab(color).lightness
+
+    /** A tone's CIELAB chroma, the distance from the gray axis. */
+    private fun chroma(color: Color): Double = lab(color).chroma
+
+    /**
+     * The shortest turn between two tones' hues, in degrees: the one measure of
+     * "the same paper, warmed" that no step of lightness can give.
+     */
+    private fun hueGap(a: Color, b: Color): Double {
+        val gap = Math.abs(lab(a).hue - lab(b).hue) % 360.0
+        return if (gap > 180.0) 360.0 - gap else gap
+    }
+
+    /** CIE76, the straight-line distance between two tones in CIELAB. */
+    private fun deltaE(a: Color, b: Color): Double {
+        val first = lab(a)
+        val second = lab(b)
+        return Math.sqrt(
+            Math.pow(first.lightness - second.lightness, 2.0) +
+                Math.pow(first.a - second.a, 2.0) +
+                Math.pow(first.b - second.b, 2.0),
+        )
     }
 }

@@ -120,40 +120,51 @@ val FloatingShadow = Color(0x1A000000)
 // [PaperFloating] is the tone a control floats on over the reading: the
 // playback pill, the offer, the pack row, the snackbar, and the menu that
 // hangs from one (owner decision, this session). It needed a tone of its own
-// because the day page is only 2.8 L* under [PaperControl], so a 64 dp
-// capsule in the track's tone had no edge to read at a glance. [PaperFloating]
-// stands at L* 90.0, 1.23:1 from [PaperBackground] and 1.28:1 from the sheet,
-// which is the same step the night page already holds with [NightControl]
-// (1.23:1).
+// because the day page is only 2.8 L* under [PaperControl], so a 64 dp capsule
+// in the track's tone had no edge to read at a glance.
 //
-// The step is the whole of it, and the tone keeps the page's own warmth and no
-// more of it (owner decision, this session). The first floating paper, the
-// 17.2 `#E8E2D5`, reached the step by darkening *and* by tinting, at chroma
-// 7.07 where the page carries 2.64, which is 2.7 times the paper's own
-// warmth: a flat 64 dp capsule and a 215 dp menu in that tone read as a sepia
-// laid over the page rather than as paper one step in shade (owner report).
-// The tone it landed on was the hairline's own, since [PaperOutline] is
-// 1.009:1 from it, and a hairline is chosen to disappear at one dp and cannot
-// serve as a surface. A menu is also never raised over the plain page: an ayah
-// whose menu is open paints its own block at 8 percent of the accent
-// (`Wash.Selected`), which lands at L* 92.9, so the old tone stood 2.9 L* and
-// 1.08:1 under its own ground on the opposite hue, and two chromatic
-// neighbours at one lightness is the pair the eye reads as a flicker rather
-// than as an edge.
+// **The day's step is warmth, not shade** (owner decision, this session). The
+// day page leaves no lightness to give: it stands at L* 98.0, two points under
+// white, and the block a menu is always raised over, an ayah painted at 8
+// percent of the accent (`Wash.Selected`), stands at L* 92.9. So the floating
+// paper is the page's own paper carried 4.4 L* down and warmed to three times
+// its own chroma: L* 93.6, C 8.11, h 91, which is three degrees of hue from the
+// page itself. An ivory slip rather than a second, dimmer paper, and it stands
+// a touch above the chosen block rather than under it, which is the direction
+// a card stands over its ground.
 //
-// This tone holds the page's hue (94) and the page's own chroma (2.68 against
-// 2.64), so the step is one of lightness and not a tint, and it is the same
-// 1.23:1 step the night already wears. The pill was pure white by day before
-// 17.0, the sheet's own tone, so it read as a colder shape laid on the paper
-// rather than as a control; one step under the page lets the tone and the
-// shadow together say that it floats, and the sheet stays the only pure white
-// on the ground. The night ground needs one warm charcoal for both jobs,
-// because its page (L* 9.4) and its sheet (L* 13.4) are close enough that
-// [NightControl] at L* 17.7 is a step from both, and chroma 2.54 on that
-// ground is the room's own lamplight rather than a tint, which is why the
-// night never read as one.
+// The three tones before it each asked the lightness to do the whole job.
+// 17.2's `#E8E2D5` darkened by 8.0 L* and warmed to chroma 7.07 at once, and it
+// read as a sepia laid over the page (owner report). 17.3's `#E4E2DD` kept the
+// page's own chroma to a hundredth (2.68 against 2.64) at the same 8.0 L* down,
+// and it read as a smudge (owner report): over a chosen block it stood 3.0 L*
+// and dE76 4.2 away, at chroma 2.68 against that block's 0.71, which is two
+// grays at one lightness, so the edge was left to the shadow and the shape
+// became a veil. The number this tone is chosen by is chroma, and a ratio
+// cannot see it: 1.02 to 1 against the block it is drawn on.
+//
+// The accent's own porcelain, a pale lapis, was drawn over the page in the same
+// session and read as a second material on a surface whose subject is the text
+// (owner decision), so the day's floating paper stays paper. What it must hold
+// is arithmetic in `ContrastTest`: at least three times the page's chroma at
+// the page's hue within thirty degrees, 3.0 to 6.5 L* under the page so the
+// step can never become a shade, and dE76 6.0 clear of the chosen block. This
+// tone reads 3.07 times, 3 degrees, 4.4 L* and 8.4.
+//
+// The pairs it lands in: 1.12:1 from the page (dE00 5.1) and 1.18:1 from the
+// sheet, and on it the quiet word reads 5.92:1, the reading's ink 10.81:1 and
+// lapis 7.47:1. The two stock container slots the scheme fills only so a stock
+// Material control cannot paint purple (`#EDE8DD` at `secondaryContainer`,
+// `#F2E7CE` at `tertiaryContainer`) now stand dE76 2.6 and 5.7 from it; nothing
+// draws either of them, so neither moves.
+//
+// The night does not follow it. Its page (L* 9.4) and its sheet (L* 13.4) are
+// close enough that [NightControl] at L* 17.7 is 8.3 L* above the page, a step
+// the dark ground reads without any hue at all, and chroma 2.54 there is the
+// room's own lamplight rather than a tint, which is why no night floating paper
+// was ever reported.
 val PaperControl = Color(0xFFF4F1EA)
-val PaperFloating = Color(0xFFE4E2DD)
+val PaperFloating = Color(0xFFF3ECDD)
 val PaperOnPrimary = Color(0xFFFFFFFF)
 val NightControl = Color(0xFF2E2B28)
 val NightOnPrimary = Color(0xFF08243D)
