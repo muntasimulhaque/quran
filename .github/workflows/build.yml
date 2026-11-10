@@ -258,6 +258,11 @@ jobs:
           sudo udevadm trigger --name-match=kvm
 
       - name: App instrumented tests
+        id: app-tests
+        # The first attempt is allowed to lose its emulator without losing the
+        # job: the recovery step below boots a new one and runs the shard
+        # again. A red shard is then a red suite, not a dead machine.
+        continue-on-error: true
         uses: reactivecircus/android-emulator-runner@c9c93e6ba9c4194322e114c40970d5983d9a07cc # v2.38.0
         with:
           # API 34 for this job, not 35, and this is an infra fix rather than
@@ -267,7 +272,25 @@ jobs:
           # tests, while the same shard and the whole 214 test suite are green
           # on the same Pixel 2 profile on the owner's machine. The data tests
           # and the two tablets keep 35. Every test that reads the platform
-          # gates on 33 or 37, not 34, so nothing in the suite is lost.
+          # gates on 33, not 34, so nothing in the suite is lost.
+          api-level: 34
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: |
+            for i in $(seq 1 60); do adb -s emulator-5554 shell ls /sdcard/Android >/dev/null 2>&1 && break; sleep 2; done
+            ./gradlew :app:connectedDebugAndroidTest --console=plain -Pandroid.testInstrumentationRunnerArguments.numShards=3 -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }}
+
+      # One recovery attempt on a fresh machine. An emulator that has gone
+      # offline cannot be talked to, so the only repair is a new one: the
+      # shard runs from boot again, and whatever it reports stands. This is
+      # the same job, the same image, and the same shard; it is not a second
+      # build of anything.
+      - name: App instrumented tests (one recovery emulator)
+        if: steps.app-tests.outcome == 'failure'
+        uses: reactivecircus/android-emulator-runner@c9c93e6ba9c4194322e114c40970d5983d9a07cc # v2.38.0
+        with:
           api-level: 34
           arch: x86_64
           profile: pixel_2
