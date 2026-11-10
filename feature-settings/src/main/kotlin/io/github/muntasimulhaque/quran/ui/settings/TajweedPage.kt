@@ -16,6 +16,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
@@ -229,6 +230,13 @@ private fun FamilyRules(family: TajweedFamily) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            // The family's own block, named so a test can put it on the glass.
+            // The page is lazy and the head is sticky: a head can be the last
+            // thing in a short window, and the block under it is then not
+            // composed yet. This tag is the seam a test scrolls to before it
+            // reads the rule names (owner decision, this session: the legend
+            // test named a rule the window had never composed).
+            .testTag("tajweed-rules-${family.name}")
             .padding(start = Space.Gutter, end = Space.Gutter, bottom = Space.Section),
     ) {
         family.rules.forEachIndexed { index, rule ->
