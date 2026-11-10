@@ -62,28 +62,19 @@ jobs:
             profile: pixel_2        # 1080x1920
             # The store's eight, the dark and large readings, and the word
             # meaning's own frame.
-            # API 34 for this leg only, an infra fix rather than a change of
-            # what the store shows: the API 35 phone image died with adb
-            # "device offline" under the software renderer on the hosted
-            # runners in five runs in a row (17.6), while the same tour is
-            # green on the same profile on the owner's machine and both
-            # tablets stay green on 35. The frames are the same 1080x1920
-            # phone; only the platform under them is one step back.
-            api: 34
             expected: 11
           - name: tablet7
             profile: Nexus 7 2013   # 1200x1920, 7 inch
-            api: 35
             expected: 11
           - name: tablet10
             profile: pixel_c        # 2560x1800, 10 inch
             # The ten inch screen's own frames, the word meaning's frame, and,
             # when the emulator accepts the rotation, the reading standing up.
             # The standing frame is best effort and is not counted in the floor.
-            api: 35
             expected: 11
     env:
       GH_TOKEN: ${{ github.token }}
+      API_LEVEL: "35"
     steps:
       - name: Check out source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -160,13 +151,13 @@ jobs:
           # capture's own windows do not need a fresh machine for a code
           # change. What the image can carry between runs is handled where it
           # matters, by the uninstall below.
-          key: avd-${{ matrix.api }}-${{ matrix.profile }}
+          key: avd-${{ env.API_LEVEL }}-${{ matrix.profile }}
 
       - name: Create AVD and generate a snapshot to cache
         if: steps.avd-cache.outputs.cache-hit != 'true'
         uses: reactivecircus/android-emulator-runner@c9c93e6ba9c4194322e114c40970d5983d9a07cc # v2.38.0
         with:
-          api-level: ${{ matrix.api }}
+          api-level: ${{ env.API_LEVEL }}
           target: google_apis
           arch: x86_64
           profile: ${{ matrix.profile }}
@@ -178,7 +169,7 @@ jobs:
       - name: Capture on emulator
         uses: reactivecircus/android-emulator-runner@c9c93e6ba9c4194322e114c40970d5983d9a07cc # v2.38.0
         with:
-          api-level: ${{ matrix.api }}
+          api-level: ${{ env.API_LEVEL }}
           target: google_apis
           arch: x86_64
           profile: ${{ matrix.profile }}

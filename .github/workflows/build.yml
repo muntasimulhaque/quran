@@ -265,15 +265,10 @@ jobs:
         continue-on-error: true
         uses: reactivecircus/android-emulator-runner@c9c93e6ba9c4194322e114c40970d5983d9a07cc # v2.38.0
         with:
-          # API 34 for this job, not 35, and this is an infra fix rather than
-          # a change of what the app owes: the API 35 phone image died with
-          # adb "device offline" under the software renderer on the hosted
-          # runners in five runs in a row (17.6), always within the first four
-          # tests, while the same shard and the whole 214 test suite are green
-          # on the same Pixel 2 profile on the owner's machine. The data tests
-          # and the two tablets keep 35. Every test that reads the platform
-          # gates on 33, not 34, so nothing in the suite is lost.
-          api-level: 34
+          # API 35, as this repo has always run (owner decision, 17.6). The
+          # image's own fault was a lost emulator, and the repair for that is
+          # the recovery step below, never a change of platform.
+          api-level: 35
           arch: x86_64
           profile: pixel_2
           disable-animations: true
@@ -291,7 +286,7 @@ jobs:
         if: steps.app-tests.outcome == 'failure'
         uses: reactivecircus/android-emulator-runner@c9c93e6ba9c4194322e114c40970d5983d9a07cc # v2.38.0
         with:
-          api-level: 34
+          api-level: 35
           arch: x86_64
           profile: pixel_2
           disable-animations: true
