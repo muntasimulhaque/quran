@@ -307,12 +307,21 @@ class ContrastTest {
      * light pill went missing and a night pill did not (owner report). The
      * floors are the app's own chosen steps, written here so a palette edit
      * that sinks the day tone again fails on the machine.
+     *
+     * The ratio is not the whole rule. A tone can hold every floor and still
+     * read as a tint laid over the page, which is what the eye reported of the
+     * 17.2 paper: it reached the step by darkening and by warming at once, and
+     * a flat shape in a warmer tone than the paper it covers is a sepia rather
+     * than a surface. So the warmth is pinned too: the floating tone may not
+     * carry much more chroma than the page it is drawn on (owner decision, this
+     * session).
      */
     private fun assertFloatingGrounds(scheme: ColorScheme) {
         val floating = scheme.surfaceContainerHigh
         assertReadable(scheme.onSurface, floating)
         assertFloating("the floating tone on the page", floating, scheme.background, 1.20)
         assertFloating("the floating tone on the sheet", floating, scheme.surface, 1.10)
+        assertFloatingWarmth(floating, scheme.background)
     }
 
     private fun assertFloating(what: String, floating: Color, behind: Color, floor: Double) {
@@ -321,6 +330,15 @@ class ContrastTest {
             "$what: ${"%.2f".format(ratio)}:1, under the ${"%.2f".format(floor)}:1 " +
                 "the floating paper is drawn at",
             ratio >= floor,
+        )
+    }
+
+    private fun assertFloatingWarmth(floating: Color, page: Color) {
+        val times = chroma(floating) / chroma(page)
+        assertTrue(
+            "the floating tone carries ${"%.2f".format(times)} times the page's chroma, " +
+                "over the 1.75 a step of lightness allows",
+            times <= 1.75,
         )
     }
 
@@ -383,5 +401,31 @@ class ContrastTest {
         fun linear(channel: Float): Double =
             if (channel <= 0.04045f) channel / 12.92 else Math.pow((channel + 0.055) / 1.055, 2.4)
         return 0.2126 * linear(color.red) + 0.7152 * linear(color.green) + 0.0722 * linear(color.blue)
+    }
+
+    /**
+     * A tone's CIELAB chroma, the distance from the gray axis, in the D65
+     * white the palette is chosen in.
+     *
+     * This is the number a ratio cannot see: two tones can stand the same
+     * distance apart in luminance and still read as one paper and one tint,
+     * which is what the eye said of the 17.2 floating paper (owner report).
+     */
+    private fun chroma(color: Color): Double {
+        fun linear(channel: Float): Double =
+            if (channel <= 0.04045f) channel / 12.92 else Math.pow((channel + 0.055) / 1.055, 2.4)
+        val red = linear(color.red)
+        val green = linear(color.green)
+        val blue = linear(color.blue)
+        val x = red * 0.4124564 + green * 0.3575761 + blue * 0.1804375
+        val y = red * 0.2126729 + green * 0.7151522 + blue * 0.0721750
+        val z = red * 0.0193339 + green * 0.1191920 + blue * 0.9503041
+        fun f(t: Double): Double = if (t > 0.008856) Math.cbrt(t) else 7.787 * t + 16.0 / 116.0
+        val fx = f(x / 0.95047)
+        val fy = f(y)
+        val fz = f(z / 1.08883)
+        val a = 500.0 * (fx - fy)
+        val b = 200.0 * (fy - fz)
+        return Math.hypot(a, b)
     }
 }

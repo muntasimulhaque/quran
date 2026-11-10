@@ -81,10 +81,15 @@ val PopupGutter = 10.dp
  * reading page's tone, so a menu over the page was held by a hairline and a
  * 10% shadow rather than by a surface of its own; in the night theme the
  * shadow is invisible and the menu read as a hole in the page while the pill
- * above it stood a full step away (owner report). The ground between the
- * two silhouettes is now the page, not a seam: the popup's foot and the
- * capsule's own top never meet, and ten dp keeps the capsule's lift from
- * reaching the popup's foot.
+ * above it stood a full step away (owner report). The tone also keeps the
+ * page's own warmth and no more of it, because a menu is never raised over the
+ * plain page: the ayah whose menu is open paints its own block at 8 percent of
+ * the accent (`Wash.Selected`), so the menu's edge is read against the wash and
+ * not against the paper, and a warmer tone than the page would meet that wash
+ * as a second hue at the same lightness (owner decision, this session). The
+ * ground between the two silhouettes is now the page, not a seam: the popup's
+ * foot and the capsule's own top never meet, and ten dp keeps the capsule's
+ * lift from reaching the popup's foot.
  */
 val PopupGap = 10.dp
 

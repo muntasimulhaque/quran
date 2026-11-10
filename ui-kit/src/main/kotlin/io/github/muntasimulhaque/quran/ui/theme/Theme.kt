@@ -39,8 +39,16 @@ import io.github.muntasimulhaque.quran.data.resolved
  * [PaperFloating] stands at 1.23:1 from the page, the same step the night page
  * already holds. The switch's track keeps [PaperControl] in `Switch.kt`,
  * because a track is a groove on the sheet, not a bar over the page.
- * Everything that floats over the reading takes the high role and this tone;
- * a sheet keeps `surface`.
+ *
+ * The step is lightness only. The first floating paper, the 17.2 tone, reached
+ * the step by darkening and tinting at once, 2.7 times the page's own chroma,
+ * and a flat capsule or a 215 dp menu in it read as a sepia over the paper
+ * (owner report). The tone now holds the page's hue and the page's own chroma,
+ * so a menu meets the wash it is always raised over, `Wash.Selected`
+ * at 8 percent of the accent on the block behind it, as a step of lightness
+ * and not as a second hue. `ContrastTest` pins the warmth as well as the
+ * ratio, so a later edit cannot bring the tint back. Everything that floats
+ * over the reading takes the high role and this tone; a sheet keeps `surface`.
  * - `outline` and `outlineVariant` are the hairlines, never carrying meaning
  *   on their own.
  *

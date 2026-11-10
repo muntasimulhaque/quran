@@ -122,17 +122,38 @@ val FloatingShadow = Color(0x1A000000)
 // hangs from one (owner decision, this session). It needed a tone of its own
 // because the day page is only 2.8 L* under [PaperControl], so a 64 dp
 // capsule in the track's tone had no edge to read at a glance. [PaperFloating]
-// stands at L* 90.0, 1.23:1 from [PaperBackground] and 1.29:1 from the sheet,
+// stands at L* 90.0, 1.23:1 from [PaperBackground] and 1.28:1 from the sheet,
 // which is the same step the night page already holds with [NightControl]
-// (1.23:1). The pill was pure white by day before 17.0, the sheet's own tone,
-// so it read as a colder shape laid on the paper rather than as a control;
-// one warm step under the page lets the tone and the shadow together say that
-// it floats, and the sheet stays the only pure white on the ground. The night
-// ground needs one warm charcoal for both jobs, because its page (L* 9.4) and
-// its sheet (L* 13.4) are close enough that [NightControl] at L* 17.7 is a
-// step from both.
+// (1.23:1).
+//
+// The step is the whole of it, and the tone keeps the page's own warmth and no
+// more of it (owner decision, this session). The first floating paper, the
+// 17.2 `#E8E2D5`, reached the step by darkening *and* by tinting, at chroma
+// 7.07 where the page carries 2.64, which is 2.7 times the paper's own
+// warmth: a flat 64 dp capsule and a 215 dp menu in that tone read as a sepia
+// laid over the page rather than as paper one step in shade (owner report).
+// The tone it landed on was the hairline's own, since [PaperOutline] is
+// 1.009:1 from it, and a hairline is chosen to disappear at one dp and cannot
+// serve as a surface. A menu is also never raised over the plain page: an ayah
+// whose menu is open paints its own block at 8 percent of the accent
+// (`Wash.Selected`), which lands at L* 92.9, so the old tone stood 2.9 L* and
+// 1.08:1 under its own ground on the opposite hue, and two chromatic
+// neighbours at one lightness is the pair the eye reads as a flicker rather
+// than as an edge.
+//
+// This tone holds the page's hue (94) and the page's own chroma (2.68 against
+// 2.64), so the step is one of lightness and not a tint, and it is the same
+// 1.23:1 step the night already wears. The pill was pure white by day before
+// 17.0, the sheet's own tone, so it read as a colder shape laid on the paper
+// rather than as a control; one step under the page lets the tone and the
+// shadow together say that it floats, and the sheet stays the only pure white
+// on the ground. The night ground needs one warm charcoal for both jobs,
+// because its page (L* 9.4) and its sheet (L* 13.4) are close enough that
+// [NightControl] at L* 17.7 is a step from both, and chroma 2.54 on that
+// ground is the room's own lamplight rather than a tint, which is why the
+// night never read as one.
 val PaperControl = Color(0xFFF4F1EA)
-val PaperFloating = Color(0xFFE8E2D5)
+val PaperFloating = Color(0xFFE4E2DD)
 val PaperOnPrimary = Color(0xFFFFFFFF)
 val NightControl = Color(0xFF2E2B28)
 val NightOnPrimary = Color(0xFF08243D)
