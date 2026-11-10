@@ -139,7 +139,7 @@ frame's foot. Every element stands inside the
 safe area, well clear of the edges Play may crop or overlay, and the file is
 1024 x 500, 24-bit PNG with no alpha.
 
-The set is from capture run 42789603350 on 17.4: all three legs green,
+The set is from capture run 42826202144 on 17.5: all three legs green,
 eleven frames each (twelve on the ten inch screen), every frame read. The
 eight are a reader's path through the app rather than the app's own map. The
 reading frames carry the long read's palette: the seven tajweed families hold
