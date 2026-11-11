@@ -107,6 +107,11 @@ change, never left as a dead letter.
 12. **The owner's law.** The build waits for the owner's word, and one build
     carries the whole session. `versionCode` by 1; `versionName` up one tenth
     within the major line, 0.9 then 1.0 (never 0.10, never two digits).
+13. **No workflow may gate on a hosted emulator.** A hosted emulator is a
+    signal, never a stop: the release gates and the store capture run on
+    this machine's own AVDs. The build workflow holds no emulator, the
+    screenshot workflow is dispatch-only and cannot fail a run, and the
+    nightly instrumented run is signal only.
 
 ## Style
 
@@ -224,10 +229,26 @@ the counts. CI instrumented runs are signal, not a gate; they run nightly in
 message itself as bare paragraphs under 500 characters, never only in a file.
 The bundle comes from the newest green `build` run on `main`, not the first one
 after the version bump, and signing is proved by `jarsigner`'s words and its
-certificate SHA-256, never by exit code alone. Screenshots are collected whole
-from one run whenever visible UI changed, all three form factors, eight frames
-each, every frame read; without a visible change the hand-over says so and
-nothing is captured. Delete the hand-off copy in `play-store/aab/` once Play has
+certificate SHA-256, never by exit code alone. Screenshots are collected
+locally and are the delivery's, never a hosted emulator's: one Gradle call per
+form factor, on `quran_phone`, `quran_tablet7`, and `quran_tablet10` in turn,
+with
+
+```bash
+./gradlew :app:connectedDebugAndroidTest -Pquran.devPacks=screenshot \
+  -Pandroid.testInstrumentationRunnerArguments.class=io.github.muntasimulhaque.quran.ScreenshotTest,io.github.muntasimulhaque.quran.ScreenshotVariantsTest,io.github.muntasimulhaque.quran.WordMeaningTest
+```
+
+the frames collected from
+`app/build/outputs/connected_android_test_additional_output/debugAndroidTest/connected/<AVD>/`
+before the next leg because a second call replaces the folder. The eight store
+frames are read and committed to `play-store/screenshots/<form factor>/`; the
+store set in `play-store/screenshots/` comes from that run. The capture is
+whole from that run whenever visible UI changed, all three form factors, eight
+frames each, every frame read; without a visible change the hand-over says so
+and nothing is captured. A hosted emulator is a signal, never a gate:
+`screenshots.yml` is dispatch-only and `continue-on-error`, and no workflow may
+stop a release on a hosted emulator. Delete the hand-off copy in `play-store/aab/` once Play has
 it.
 
 ## This machine

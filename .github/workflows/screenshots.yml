@@ -2,8 +2,9 @@ name: Capture store screenshots
 
 # Renders real Play Store screenshots from the app's own Compose UI on an
 # Android emulator, for all three form factors Play asks for: phone, 7 inch
-# tablet, and 10 inch tablet. Trigger manually, or automatically when any
-# module that draws the UI changes.
+# tablet, and 10 inch tablet. Dispatch only: the store capture is local
+# (AGENTS.md, Release), and this workflow is a manual signal that never
+# gates a release.
 #
 # This follows the house screenshot workflow (the family's other apps in
 # Documents/GitHub): the Gradle build cache is restored, not just the
@@ -13,34 +14,10 @@ name: Capture store screenshots
 # snapshot are cached per form factor, so only the first run of a form factor
 # pays for creating the machine.
 on:
+  # Dispatch only, and every job below is continue-on-error: a hosted
+  # emulator that dies without a device is a signal, never a red run and
+  # never a release's stop.
   workflow_dispatch:
-  push:
-    branches: [main]
-    # Every module that can put a pixel on the screen. A UI label lives in
-    # its feature's `strings.xml`, and the reading chrome, the sheets, and
-    # the shared look are drawn from `ui-kit`, so a change in any of them
-    # must recapture: a filter that watched only `app/` would let a settings
-    # rename ship a stale store set.
-    paths:
-      - "app/src/main/**"
-      - "app/src/androidTest/**"
-      - "app/build.gradle.kts"
-      - "ui-kit/src/main/**"
-      - "feature-*/src/main/**"
-      - "content-assets/src/main/**"
-      - "content/**"
-      - "stability-config.txt"
-      - "gradle/libs.versions.toml"
-      - "gradle/wrapper/**"
-      - "*.gradle.kts"
-      # `data` and `core` put no pixels on the screen themselves, but they
-      # decide what the pixels say: a search rule (`arabicLineFor`), a display
-      # model, or a formatter changes a frame without touching a UI module. A
-      # capture that skipped them shipped a store set of the old frames once,
-      # which is wasted work by this workflow's own definition.
-      - "data/src/main/**"
-      - "core/src/main/**"
-      - ".github/workflows/screenshots.yml"
 
 permissions:
   contents: read
@@ -53,6 +30,9 @@ jobs:
   screenshots:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    # A matrix leg is a signal: a hosted emulator that dies is a short
+    # artifact and a green run, never a failed release (AGENTS.md, Release).
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -167,6 +147,8 @@ jobs:
           script: echo "Generated AVD snapshot."
 
       - name: Capture on emulator
+        # A dead hosted emulator must not fail this workflow or a release.
+        continue-on-error: true
         uses: reactivecircus/android-emulator-runner@c9c93e6ba9c4194322e114c40970d5983d9a07cc # v2.38.0
         with:
           api-level: ${{ env.API_LEVEL }}
