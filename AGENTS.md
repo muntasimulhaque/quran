@@ -138,7 +138,7 @@ change, never left as a dead letter.
 | `play-store/` | the listing, the screenshots per form factor, the hand-off AAB |
 | `benchmark/` | the startup profile's generator, development only, never in the bundle |
 | `docs/` | the Pages site and the privacy policy Play links to |
-| `.github/workflows/` | `build.yml` (gates, data tests, signed bundle), `screenshots.yml` (the store set) |
+| `.github/workflows/` | `build.yml` (gates, signed bundle), `instrumented.yml` (nightly data and app tests, signal only), `screenshots.yml` (the store set) |
 
 ## Where the rest lives
 
@@ -217,14 +217,18 @@ release starts.
 ## Release
 
 The bundle, the store note, and the screenshots are one delivery, handed over
-together before the owner submits anything. The note stands in the hand-over
-message itself as bare paragraphs under 500 characters, never only in a file. The
-bundle comes from the newest green `build` run on `main`, not the first one after
-the version bump, and signing is proved by `jarsigner`'s words and its certificate
-SHA-256, never by exit code alone. Screenshots are collected whole from one run
-whenever visible UI changed, all three form factors, eight frames each, every
-frame read; without a visible change the hand-over says so and nothing is
-captured. Delete the hand-off copy in `play-store/aab/` once Play has it.
+together before the owner submits anything. A release requires the gates green
+plus one local instrumented run recorded in the hand-off, with the command and
+the counts. CI instrumented runs are signal, not a gate; they run nightly in
+`instrumented.yml` and never hold a bundle. The note stands in the hand-over
+message itself as bare paragraphs under 500 characters, never only in a file.
+The bundle comes from the newest green `build` run on `main`, not the first one
+after the version bump, and signing is proved by `jarsigner`'s words and its
+certificate SHA-256, never by exit code alone. Screenshots are collected whole
+from one run whenever visible UI changed, all three form factors, eight frames
+each, every frame read; without a visible change the hand-over says so and
+nothing is captured. Delete the hand-off copy in `play-store/aab/` once Play has
+it.
 
 ## This machine
 

@@ -4,8 +4,8 @@ on:
   push:
     branches: [main]
     # Only rebuild when something that affects the app actually changes, so
-    # doc-only commits (README, AGENTS.md, play-store notes) do not burn an
-    # emulator boot, a signed release build, and the content gates. The same
+    # doc-only commits (README, AGENTS.md, play-store notes) do not burn a
+    # signed release build and the content gates. The same
     # list covers every module the build carries, the build files, and the
     # content the build reads; a path outside it cannot change the app. The
     # benchmark module is a development tool the build never carries, so it
@@ -137,163 +137,10 @@ jobs:
 # QuranEnc exports, which are not in the repository. Run them locally with
 # ./gradlew :tools:run --args="verify|audit|fonts" before a release.
 #
-# The app's instrumented tests run in the app-tests job below, sharded across
-# three runners. The store capture runs in the screenshots workflow, on all
-# three store form factors, so the two do not repeat each other's work.
-
-  # The data layer's instrumented tests: the saved store, the last-read
-  # history, and the recitation manifest. They read and write small SQLite
-  # files, so they need a device but not a fast one, and a phone profile is
-  # enough.
-  data-tests:
-    name: Data instrumented tests
-    runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ github.token }}
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - name: Validate Gradle wrapper
-        uses: gradle/actions/wrapper-validation@48b5f213c81028ace310571dc5ec0fbbca0b2947 # v4.4.3
-
-
-      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - uses: gradle/actions/setup-gradle@48b5f213c81028ace310571dc5ec0fbbca0b2947 # v4.4.3
-
-      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
-        with:
-          packages: platform-tools
-      - name: Accept SDK licenses
-        run: yes | sdkmanager --licenses > /dev/null 2>&1 || true
-
-      - name: Cache content work
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
-        with:
-          path: |
-            content/work
-            content/quran.db
-          key: content-work-${{ hashFiles('content/manifest.json', 'content/build-report.json', 'content/catalog.json') }}
-
-      - name: Enable KVM
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
-            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
-      - name: Data instrumented tests
-        uses: reactivecircus/android-emulator-runner@c9c93e6ba9c4194322e114c40970d5983d9a07cc # v2.38.0
-        with:
-          api-level: 35
-          arch: x86_64
-          profile: pixel_2
-          disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          script: |
-            for i in $(seq 1 60); do adb -s emulator-5554 shell ls /sdcard/Android >/dev/null 2>&1 && break; sleep 2; done
-            ./gradlew :data:connectedDebugAndroidTest --console=plain
-
-  # The app's own instrumented tests, including accessibility, the reading
-  # semantics, playback, and the daily reminder. The screenshot tour runs in
-  # the capture workflow on the three store form factors; this job is the
-  # gate that says the app's surfaces still answer before a bundle is signed.
-  #
-  # Three shards, because the suite is the wall: the job spends about 220 s on
-  # Gradle, install, and the emulator's boot before a test runs and about
-  # 250 s on the tests. Two shards left the slowest leg just over five
-  # minutes; the third machine buys the margin the owner asked for. Each leg
-  # pays its own fixed cost, which is why the saving is less than a third.
-  app-tests:
-    name: App instrumented tests (${{ matrix.shard }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [0, 1, 2]
-    env:
-      GH_TOKEN: ${{ github.token }}
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - name: Validate Gradle wrapper
-        uses: gradle/actions/wrapper-validation@48b5f213c81028ace310571dc5ec0fbbca0b2947 # v4.4.3
-
-
-      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - uses: gradle/actions/setup-gradle@48b5f213c81028ace310571dc5ec0fbbca0b2947 # v4.4.3
-
-      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
-        with:
-          packages: platform-tools
-      - name: Accept SDK licenses
-        run: yes | sdkmanager --licenses > /dev/null 2>&1 || true
-
-      - name: Cache content work
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
-        with:
-          path: |
-            content/work
-            content/quran.db
-            content/packs
-          key: content-work-${{ hashFiles('content/manifest.json', 'content/build-report.json', 'content/catalog.json') }}
-
-      # The app's tests read the core pack and the dev packs from the app's
-      # assets. A fresh runner has no content/packs, so the fetch is what
-      # puts the same files the gates job reads on this machine.
-      - name: Fetch content
-        run: ./gradlew :tools:run --args="fetch" --console=plain
-
-      - name: Enable KVM
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
-            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
-      - name: App instrumented tests
-        id: app-tests
-        # The first attempt is allowed to lose its emulator without losing the
-        # job: the recovery step below boots a new one and runs the shard
-        # again. A red shard is then a red suite, not a dead machine.
-        continue-on-error: true
-        uses: reactivecircus/android-emulator-runner@c9c93e6ba9c4194322e114c40970d5983d9a07cc # v2.38.0
-        with:
-          # API 35, as this repo has always run (owner decision, 17.6). The
-          # image's own fault was a lost emulator, and the repair for that is
-          # the recovery step below, never a change of platform.
-          api-level: 35
-          arch: x86_64
-          profile: pixel_2
-          disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          script: |
-            for i in $(seq 1 60); do adb -s emulator-5554 shell ls /sdcard/Android >/dev/null 2>&1 && break; sleep 2; done
-            ./gradlew :app:connectedDebugAndroidTest --console=plain -Pandroid.testInstrumentationRunnerArguments.numShards=3 -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }}
-
-      # One recovery attempt on a fresh machine. An emulator that has gone
-      # offline cannot be talked to, so the only repair is a new one: the
-      # shard runs from boot again, and whatever it reports stands. This is
-      # the same job, the same image, and the same shard; it is not a second
-      # build of anything.
-      - name: App instrumented tests (one recovery emulator)
-        if: steps.app-tests.outcome == 'failure'
-        uses: reactivecircus/android-emulator-runner@c9c93e6ba9c4194322e114c40970d5983d9a07cc # v2.38.0
-        with:
-          api-level: 35
-          arch: x86_64
-          profile: pixel_2
-          disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          script: |
-            for i in $(seq 1 60); do adb -s emulator-5554 shell ls /sdcard/Android >/dev/null 2>&1 && break; sleep 2; done
-            ./gradlew :app:connectedDebugAndroidTest --console=plain -Pandroid.testInstrumentationRunnerArguments.numShards=3 -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }}
+# The instrumented suites, data and app, live in instrumented.yml, on a
+# nightly schedule and by dispatch. They are signal, not a release gate.
+# The store capture runs in the screenshots workflow, on all three store
+# form factors, so the two do not repeat each other's work.
 
   # The signed bundle, built here once and handed over to Play from the run's
   # own artifacts. It runs on main, by a push or by the owner's manual
@@ -314,7 +161,7 @@ jobs:
     name: Signed bundle
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    needs: [gates, data-tests, app-tests]
+    needs: [gates]
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     env:
       GH_TOKEN: ${{ github.token }}
@@ -357,9 +204,11 @@ jobs:
       # The bundle is only as good as the content inside it, so the content is
       # fetched before it is built. The unit tests and the two content gates
       # are not run here: the gates job runs them on this same commit, and a
-      # bundle is handed over only from a run whose every job is green, so a
-      # bundle whose tests failed is a bundle nobody ever uses. This job
-      # builds and signs, and does nothing a green run already did.
+      # bundle is handed over only from a run whose gates job is green, so a
+      # bundle whose tests failed is a bundle nobody ever uses. The
+      # instrumented suites are signal in instrumented.yml and never gate
+      # this job. This job builds and signs, and does nothing a green run
+      # already did.
       - name: Fetch content
         run: ./gradlew :tools:run --args="fetch" --console=plain
 
