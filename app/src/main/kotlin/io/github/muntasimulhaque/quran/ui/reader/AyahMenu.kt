@@ -47,10 +47,18 @@ private val AyahMenuMeasure = 216.dp
  * last, so the three fixed actions never move and only the deep door comes
  * and goes with the reader's own choice.
  *
- * The two marked actions say their state: the note mark is lit by a note and
- * the bookmark by a Save, never the one by the other, and both say their
- * state out loud, because a lit glyph is a color and a color is not a
- * sentence (owner report).
+ * The two marked actions say their state. The note mark is lit by a note and
+ * the bookmark by a Save, never the one by the other, so a lit glyph is not
+ * the only way a reader learns that an ayah is kept or noted (owner report).
+ *
+ * The Save row says the keep in its own word while the ayah is kept: the page
+ * used to carry a bookmark beside the ayah's number, so the row could name
+ * only the act; the page has stopped drawing the save, and the word is where
+ * the state is read now (owner decision, this session). Its state is therefore
+ * the word and not a second sentence, because "Saved, on" says the same thing
+ * twice to the reader who hears it. The Note row keeps the sentence, because
+ * its word names the act alone. The tap on either still does the thing, and
+ * the Snackbar's Removed and Undo are what answer a removed keep.
  *
  * **Every tap closes the menu and then does its work** (owner decision, this
  * session: the pill's own rule, one panel asks one question and the tap
@@ -80,7 +88,9 @@ internal fun AyahMenu(
 ) {
     val play = stringResource(R.string.action_play)
     val tafsir = stringResource(R.string.action_tafsir)
-    val save = stringResource(R.string.action_save)
+    // The kept ayah's row says the keep in its own word, because the reading
+    // no longer draws it (owner decision, this session).
+    val save = stringResource(if (isSaved) R.string.action_saved else R.string.action_save)
     val note = stringResource(R.string.action_note)
     val share = stringResource(R.string.action_share)
     val name = stringResource(R.string.ayah_menu_title, reference)
@@ -117,7 +127,8 @@ internal fun AyahMenu(
                 onSave()
             },
             active = isSaved,
-            state = markState(isSaved),
+            // The label is the state: see the head of this file.
+            state = null,
         )
         MenuActionRow(
             icon = Icon.Note,

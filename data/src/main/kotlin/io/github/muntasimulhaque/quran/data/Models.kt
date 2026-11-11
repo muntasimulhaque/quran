@@ -216,7 +216,10 @@ enum class PackType {
     Tafsir,
     Script,
     Recitation,
-    Words;
+    Words,
+
+    /** A word's root, one table for the whole Book. */
+    WordRoot;
 
     companion object {
         fun of(raw: String): PackType = ofOrNull(raw) ?: Translation
@@ -228,6 +231,7 @@ enum class PackType {
             "script" -> Script
             "recitation" -> Recitation
             "words" -> Words
+            "word-root" -> WordRoot
             else -> null
         }
     }
@@ -296,4 +300,20 @@ data class ReadingRow(
     val words: List<Word>,
     val translations: List<TranslationLine> = emptyList(),
     val meanings: List<WordMeaning> = emptyList(),
+    /** Each drawn word's root, in the verse's order; null where it has none. */
+    val roots: List<WordRoot?> = emptyList(),
+    /**
+     * Whether the surah's audio is on the device under the reader's reciter,
+     * so the word sheet may offer the word's own voice. Read with the rows,
+     * because a sheet that asked the disk on the tap would ask it on the
+     * frame (owner decision, this session).
+     */
+    val hears: Boolean = false,
 )
+
+/**
+ * A word's triliteral root: the letters as the page writes them, and the same
+ * letters read out, so a reader who does not read Arabic script still meets
+ * the root the sheet is describing (owner decision, this session).
+ */
+data class WordRoot(val arabic: String, val latin: String)

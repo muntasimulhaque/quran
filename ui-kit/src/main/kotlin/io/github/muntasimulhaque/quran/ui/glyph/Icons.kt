@@ -116,6 +116,18 @@ fun IconGlyph(
                     drawPath(solidPath(shape.points, weight / 2f * unit, { at(it) }), tint)
                 is GlyphShape.Ring ->
                     drawCircle(tint, shape.radius * unit, at(shape.center), style = stroke)
+                is GlyphShape.Arc -> drawArc(
+                    color = tint,
+                    startAngle = shape.startDegrees,
+                    sweepAngle = shape.sweepDegrees,
+                    useCenter = false,
+                    topLeft = Offset(
+                        (shape.center.x - shape.radius) * unit + left,
+                        (shape.center.y - shape.radius) * unit + top,
+                    ),
+                    size = Size(shape.radius * 2f * unit, shape.radius * 2f * unit),
+                    style = stroke,
+                )
                 is GlyphShape.Dot ->
                     drawCircle(tint, shape.radius * unit, at(shape.center))
                 is GlyphShape.Bar ->

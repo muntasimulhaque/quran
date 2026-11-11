@@ -226,6 +226,8 @@ class GlyphsTest {
                 is GlyphShape.Solid ->
                     shape.points.forEach { add(it.x, it.y, it.x, it.y) }
                 is GlyphShape.Ring -> addPoint(shape.center.x, shape.center.y, shape.radius + half)
+                // An arc keeps inside its own circle, so the circle is its box.
+                is GlyphShape.Arc -> addPoint(shape.center.x, shape.center.y, shape.radius + half)
                 is GlyphShape.Dot -> addPoint(shape.center.x, shape.center.y, shape.radius)
                 is GlyphShape.Bar -> {
                     val bar = GlyphGrid.Bar / 2f

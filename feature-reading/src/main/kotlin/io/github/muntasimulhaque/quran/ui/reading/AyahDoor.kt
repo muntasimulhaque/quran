@@ -40,8 +40,18 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
 
 /**
  * The ayah's own door: the number at the head of the verse, in the app's one
- * action color, the one turn that says it opens, and the reader's marks
- * beside them.
+ * action color, the one turn that says it opens, and the reader's note beside
+ * them when the verse carries one.
+ *
+ * **The save is not drawn here** (owner decision, this session). A saved ayah
+ * used to wear the app's filled bookmark in this row. The mark answered no
+ * touch, and it was the third place for one fact: the Saved sheet lists the
+ * ayah, and the ayah menu's own Save row says the keep where the tap that
+ * made it lives. A note is the different case and keeps its mark, because a
+ * note's content is nowhere on the page: the mark is the only cue that
+ * something of the reader's own is attached, and it has somewhere to lead.
+ * A save's content is the ayah the reader is looking at, so the page marks
+ * what the page cannot show and says nothing about what it already does.
  *
  * **The verse is not a button** (owner decision, this session). A tap on the
  * Quran is the page's own tap: it brings or puts away the bar, and it never
@@ -106,8 +116,6 @@ internal fun AyahDoor(
     reference: String,
     /** The verse's key in the app's own digits, for the test's tag. */
     key: String = reference,
-    /** True when the reader pressed Save on this ayah. */
-    marked: Boolean = false,
     /** True when the reader wrote a note on this ayah. */
     noted: Boolean = false,
     /** True while this ayah's menu is open, so its turn says which way. */
@@ -171,19 +179,6 @@ internal fun AyahDoor(
                     // door says it opens.
                     .testTag("door-chevron"),
             )
-            if (marked) {
-                IconGlyph(
-                    icon = Icon.BookmarkFilled,
-                    tint = ink,
-                    modifier = Modifier
-                        .padding(start = Space.Tight)
-                        .size(GlyphSize.ChevronInline)
-                        // The mark is a drawing, not a control, so it
-                        // carries no name of its own; the tag is how a test
-                        // sees that the door of a saved ayah draws it.
-                        .testTag("door-saved"),
-                )
-            }
             if (noted) {
                 IconGlyph(
                     icon = Icon.Note,

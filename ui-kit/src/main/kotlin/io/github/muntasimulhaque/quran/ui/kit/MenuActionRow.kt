@@ -47,7 +47,9 @@ import io.github.muntasimulhaque.quran.ui.theme.Space
  * actions that are switches. Save and Note are those two: their mark and
  * their word take the accent while they are on, and [state] says the same
  * thing to a screen reader, so a lit mark is never the only way a reader
- * learns that an ayah is kept or noted (owner report).
+ * learns that an ayah is kept or noted (owner report). [state] is the
+ * caller's: a row whose own word already names the state passes none, and
+ * the reader is not told the same thing twice (owner decision, this session).
  *
  * The press is drawn on the capsule inside the target, never on the target,
  * for the reason every other control in the app gives: the shape the reader
@@ -62,7 +64,8 @@ fun MenuActionRow(
     modifier: Modifier = Modifier,
     /** True while the action is in its on state: Save on a kept ayah. */
     active: Boolean = false,
-    /** What the mark says about itself, in the words of the module that owns it. */
+    /** What the mark says about itself, in the words of the module that owns
+     * it. A row whose own word names the state passes none. */
     state: String? = null,
     /** The room under the row; a row that ends a list keeps the popup's own. */
     bottomPadding: Dp = 12.dp,

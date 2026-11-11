@@ -90,6 +90,7 @@ val screenshotPacks = setOf(
     "tafsir-ibn-kathir-bn.db",
     "translation-al-bayan-bn.db",
     "words-bn.db",
+    "word-root.db",
 )
 
 // The two translations every install carries. The first page is the Quran
@@ -276,8 +277,8 @@ android {
         // (owner decision, security audit).
         minSdk = 24
         targetSdk = 37
-        versionCode = 178
-        versionName = "17.6"
+        versionCode = 179
+        versionName = "17.7"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

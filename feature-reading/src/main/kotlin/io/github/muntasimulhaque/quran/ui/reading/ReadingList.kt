@@ -56,6 +56,8 @@ fun ReadingList(
     reveal: ReadingReveal? = null,
     /** The reader's own word-by-word switch, before any arrival turns it on. */
     wordAid: Boolean = metrics.wordByWord,
+    /** The word sheet's speaker: one word of the verse, in the reader's voice. */
+    onHearWord: (ayahNumber: Int, position: Int) -> Unit = { _, _ -> },
     /** The reader's place: the ayah, which the list shows and never corrects. */
     place: Int,
     hasTranslation: Boolean,
@@ -120,6 +122,10 @@ fun ReadingList(
         surah.number,
         effective.translationPacks,
         effective.wordByWord,
+        // The reciter is a key because the word sheet's speaker is drawn
+        // from the audio it names, and a surah downloaded under one voice is
+        // not on the device under another (owner decision, this session).
+        effective.recitation,
     ) { value = surah.number to loadRows() }
     // The copy read ahead in the surah before this one. It is this surah's
     // own, checked against the surah's number, so a stale list can never be
@@ -133,6 +139,7 @@ fun ReadingList(
         effective.wordByWord,
         effective.translationPacks,
         contentLanguage,
+        effective.recitation,
     ) {
         cachedRows(surah.number)
     }
@@ -141,7 +148,9 @@ fun ReadingList(
 
     // The surah after this one is read while the reader is still in this one,
     // so the turn at its end has its text on hand when it comes.
-    LaunchedEffect(surah.number, content, effective.wordByWord) { onReadAhead(surah.number) }
+    LaunchedEffect(surah.number, content, effective.wordByWord, effective.recitation) {
+        onReadAhead(surah.number)
+    }
 
     var footnote by remember { mutableStateOf<OpenFootnote?>(null) }
     // The word the reader pressed and held. It is a sheet of its own, at the
@@ -193,6 +202,7 @@ fun ReadingList(
         onFootnote = { footnote = it },
         word = word,
         onWord = { word = it },
+        onHearWord = onHearWord,
         modifier = modifier,
     )
 }

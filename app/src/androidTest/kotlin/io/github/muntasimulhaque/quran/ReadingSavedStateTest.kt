@@ -5,12 +5,15 @@ import android.content.Intent
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -26,17 +29,22 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * A saved ayah's own door says so.
+ * A saved ayah says so where the tap that made it lives.
  *
- * Save closes the menu and the page looked exactly as it did before, so the
- * only way to learn that the tap worked was to open the menu again. The door
- * now draws the app's filled bookmark beside its number, and says the keep to
- * a screen reader with the menu's own state. This test saves 2:255 before the
- * reading starts and reads the mark back on the page (owner decision, this
- * session).
+ * The reading used to draw the app's filled bookmark beside a saved ayah's
+ * number. The mark answered no touch, and it was the third place for one
+ * fact: Browse's Saved sheet lists the ayah, and this ayah's own menu says
+ * the keep on the row that made it. So the page draws nothing for a save and
+ * the menu's row wears the state in its own word, while the verse goes on
+ * saying the keep to a screen reader, because the reader who cannot see a
+ * lit row is the one who needed the mark most (owner decision, this session).
+ *
+ * This test saves 2:255 before the reading starts, reads the page back, and
+ * then takes the keep away from the row that says it, so the word, the state
+ * and the tap are all measured on the glass.
  */
 @RunWith(AndroidJUnit4::class)
-class ReadingSavedMarkTest {
+class ReadingSavedStateTest {
 
     @get:Rule
     val rule = createEmptyComposeRule()
@@ -72,14 +80,16 @@ class ReadingSavedMarkTest {
     }
 
     @Test
-    fun aSavedAyahWearsTheBookmarkAndSaysIt() {
+    fun theSaveIsDrawnNowhereAndSaidAtTheRowThatMadeIt() {
         ActivityScenario.launch<MainActivity>(Intent(context, MainActivity::class.java))
         rule.waitUntil(timeoutMillis = 60_000) {
-            rule.onAllNodesWithTag("door-saved", useUnmergedTree = true)
+            rule.onAllNodesWithTag("door-2:255", useUnmergedTree = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
-        rule.onNodeWithTag("door-saved", useUnmergedTree = true).assertIsDisplayed()
-        // The mark is a drawing, so the verse says its own state as well.
+        // The page draws nothing of the reader's Save.
+        rule.onAllNodesWithTag("door-saved", useUnmergedTree = true).assertCountEquals(0)
+        // The verse still speaks it, so a reader who cannot see the menu's
+        // lit row learns it while reading.
         rule.onNode(
             hasTestTag("ayah-2:255") and
                 SemanticsMatcher("saved in the verse's state") { node ->
@@ -87,6 +97,19 @@ class ReadingSavedMarkTest {
                         ?.contains("Saved") == true
                 },
         ).assertExists()
+        // The row that made the keep is where the state is read, in a word.
+        rule.onNodeWithTag("door-2:255").performClick()
+        rule.onNodeWithText("Saved").assertIsDisplayed()
+        // And it is the same row that takes the keep away.
+        rule.onNodeWithText("Saved").performClick()
+        rule.waitUntil(timeoutMillis = 30_000) {
+            rule.onAllNodesWithText("Removed").fetchSemanticsNodes().isNotEmpty()
+        }
+        rule.onNodeWithTag("door-2:255").performClick()
+        rule.waitUntil(timeoutMillis = 30_000) {
+            rule.onAllNodesWithText("Save").fetchSemanticsNodes().isNotEmpty()
+        }
+        rule.onNodeWithText("Save").assertIsDisplayed()
     }
 
     private companion object {

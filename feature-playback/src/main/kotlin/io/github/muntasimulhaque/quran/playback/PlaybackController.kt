@@ -236,6 +236,7 @@ class PlaybackController(
      * new request, and its job is the one this door would cancel.
      */
     suspend fun play(recitation: String, ayahNumber: Int, resume: Boolean = true) {
+        clearPauseAt()
         downloadJob?.cancel()
         downloadJob = null
         // The pill's download voice goes at once, not at the end of the
@@ -252,15 +253,32 @@ class PlaybackController(
         startPlayback(recitation, ayahNumber, resume)
     }
 
-    /** Where Play lands once the reader's own request is the only one left. */
-    private suspend fun startPlayback(recitation: String, ayahNumber: Int, resume: Boolean) {
-        val database = content ?: return
+    /**
+     * Where Play lands once the reader's own request is the only one left.
+     *
+     * True when the player was handed the playlist and told to play. The
+     * word's own voice needs the answer, because the stop it sends is a
+     * position in a player that must be the one it just asked for; and
+     * [offerDownload] is false for that caller, because a word tapped on the
+     * sheet is not a question about a whole surah (owner decision, this
+     * session).
+     */
+    private suspend fun startPlayback(
+        recitation: String,
+        ayahNumber: Int,
+        resume: Boolean,
+        /** A media millisecond to start at, for the word's own voice. */
+        fromMs: Long? = null,
+        /** Whether a package that is not here may be offered to the reader. */
+        offerDownload: Boolean = true,
+    ): Boolean {
+        val database = content ?: return false
         // A fresh play is the reader asking for the audio back, so the end
         // that Stop after this ayah reached is behind them now.
         stoppedAtAyahEnd = false
         val ayah = withContext(Dispatchers.IO) {
             database.ayah(ayahNumber)
-        } ?: return
+        } ?: return false
         if (recitationId != recitation) segmentsByAyah.clear()
         recitationId = recitation
         requestedAyah = ayahNumber
@@ -275,6 +293,7 @@ class PlaybackController(
             val timings = withContext(Dispatchers.IO) {
                 database.recitationAyah(recitation, ayah.number)
             }
+            if (!offerDownload) return false
             val packageToFetch = manifest.packageFor(recitation, ayah.surah)
                 ?.takeIf { timings != null }
             _state.value = _state.value.copy(
@@ -287,13 +306,16 @@ class PlaybackController(
                 downloadFailed = false,
                 downloadFailure = null,
             )
-            return
+            return false
         }
         val index = items.indexOfFirst {
             it.mediaId == RecitationPlaylist.mediaId(ayah.number, ayah.surah)
         }
         if (index < 0) {
-            // The surah is not fully on the device; ask before fetching it.
+            // The surah is not fully on the device; ask before fetching it,
+            // unless the caller is the word's own voice, which cannot ask
+            // that question (owner decision, this session).
+            if (!offerDownload) return false
             val packageToFetch = manifest.packageFor(recitation, ayah.surah)
             _state.value = _state.value.copy(
                 recitation = recitation,
@@ -305,7 +327,7 @@ class PlaybackController(
                 downloadFailed = false,
                 downloadFailure = null,
             )
-            return
+            return false
         }
         val player = runCatching { connect() }.getOrElse { failure ->
             // A service the phone will not bind, or a session the controller
@@ -317,7 +339,7 @@ class PlaybackController(
                 isPlaying = false,
                 error = true,
             )
-            return
+            return false
         }
         // The surah the playlist is loaded through is recorded before the
         // player is handed the playlist: a new playlist is reported to its
@@ -332,7 +354,7 @@ class PlaybackController(
         // different ayah, a different reciter, and a surah whose audio has
         // just been fetched all start at the beginning, because none of them
         // is the place the reader left.
-        val startAt = if (resume) resumeOffset(recitation, ayahNumber) else 0L
+        val startAt = fromMs ?: if (resume) resumeOffset(recitation, ayahNumber) else 0L
         val started = runCatching {
             withContext(Dispatchers.Main) {
                 player.setMediaItems(items, index, startAt)
@@ -343,7 +365,7 @@ class PlaybackController(
         if (started.isFailure) {
             android.util.Log.w(TAG, "the recitation could not start", started.exceptionOrNull())
             _state.value = _state.value.copy(isPlaying = false, error = true)
-            return
+            return false
         }
         _state.value = _state.value.copy(
             recitation = recitation,
@@ -354,6 +376,7 @@ class PlaybackController(
             downloadFailed = false,
             downloadFailure = null,
         )
+        return true
     }
 
     /**
@@ -591,7 +614,75 @@ class PlaybackController(
         return database.recitationAyah(recitation, first.number)?.audioPath?.let(SafePaths::folderOf)
     }
 
+    /**
+     * The word's own voice: one word of the verse, in the reader's reciter,
+     * from the word's first sound to its last.
+     *
+     * The reader pressed and held a word and then asked to hear it, so the
+     * answer is that word and not the verse: the player is handed the word's
+     * own region, which the timings already carry, and the service pauses at
+     * its end. The pill follows, because the word is heard in the same one
+     * player as everything else, and a reader who wants the rest of the verse
+     * is one tap from it (owner decision, this session).
+     *
+     * False when the audio or the word's own region is not on the device: the
+     * sheet only offers the mark for a surah it can hear, so this is the
+     * guard behind that mark rather than a state a reader meets.
+     */
+    suspend fun hearWord(recitation: String, ayahNumber: Int, position: Int): Boolean {
+        val database = content ?: return false
+        withContext(Dispatchers.IO) { database.ayah(ayahNumber) } ?: return false
+        val audio = withContext(Dispatchers.IO) {
+            database.recitationAyah(recitation, ayahNumber)
+        } ?: return false
+        val segment = audio.segments.firstOrNull {
+            position >= it.wordFrom && position <= it.wordTo
+        } ?: return false
+        // The word's own tap may not ask for a whole surah: if the playlist
+        // is not here, the answer is nothing, and the sheet's mark is gone
+        // the next time the rows are read.
+        if (!startPlayback(recitation, ayahNumber, resume = false, fromMs = segment.startMs, offerDownload = false)) {
+            return false
+        }
+        val player = controller ?: return false
+        pauseAt(player, segment.endMs)
+        return true
+    }
+
+    /**
+     * The stop the word's voice needs, sent to the one player that can keep
+     * it: the pause position is a media millisecond, and the service watches
+     * for it because the Player interface a controller speaks has no such
+     * method (owner decision, this session).
+     */
+    private fun pauseAt(player: MediaController, atMs: Long) {
+        val command = SessionCommand(PlaybackService.COMMAND_PAUSE_AT, Bundle.EMPTY)
+        if (!player.availableSessionCommands.contains(command)) return
+        player.sendCustomCommand(
+            command,
+            Bundle().apply { putLong(PlaybackService.ARG_PAUSE_AT_MS, atMs) },
+        )
+    }
+
+    /** Takes the word's stop off the player, so no later event inherits it. */
+    private fun clearPauseAt() {
+        val player = controller ?: return
+        val command = SessionCommand(PlaybackService.COMMAND_PAUSE_AT, Bundle.EMPTY)
+        if (!player.availableSessionCommands.contains(command)) return
+        player.sendCustomCommand(
+            command,
+            Bundle().apply { putLong(PlaybackService.ARG_PAUSE_AT_MS, -1L) },
+        )
+    }
+
+    /**
+     * The reader's Stop after this ayah is a stop, and the word's own stop is
+     * a different one: a real transport action clears it, so a word heard on
+     * the sheet can never leave a pause waiting in the middle of a verse the
+     * reader is now hearing (owner decision, this session).
+     */
     fun toggle() {
+        clearPauseAt()
         val player = controller ?: return
         stoppedAtAyahEnd = false
         if (player.isPlaying) player.pause() else player.play()
@@ -651,16 +742,19 @@ class PlaybackController(
     }
 
     fun next() {
+        clearPauseAt()
         stoppedAtAyahEnd = false
         controller?.seekToNextMediaItem()
     }
 
     fun previous() {
+        clearPauseAt()
         stoppedAtAyahEnd = false
         controller?.seekToPreviousMediaItem()
     }
 
     fun stop() {
+        clearPauseAt()
         // A package on its way is part of the pill's own control: a stop puts
         // the whole of it away, so the transfer goes with it instead of
         // surfacing later as a surah that starts playing on its own.
@@ -686,6 +780,7 @@ class PlaybackController(
      * is marked, and the next Play starts from the reader's place.
      */
     private fun clearRecitation() {
+        clearPauseAt()
         val player = controller
         // Paused first, so a player that was ready to play is not left armed
         // with nothing to play, and every later event sees one state.

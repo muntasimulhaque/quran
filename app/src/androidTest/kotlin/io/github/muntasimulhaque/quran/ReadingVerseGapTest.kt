@@ -110,18 +110,20 @@ class ReadingVerseGapTest {
     }
 
     /**
-     * A saved mark is the reader's, not the page's: it rides the verse's own
+     * A note mark is the reader's, not the page's: it rides the verse's own
      * first line in a rail, so an Arabic-only block keeps the edge-to-edge
      * rhythm with or without one (owner decision, this session). The mark used
      * to sit in a 48 dp head, the door's finger target on a page that has no
-     * door, which stood a saved verse six times the page's air from its
-     * neighbours.
+     * door, which stood a noted verse six times the page's air from its
+     * neighbours. The rail is reserved on every verse, so it must keep its
+     * measure and its place now that the save draws nothing in it (owner
+     * decision, this session).
      */
     @Test
-    fun aSavedMarkDoesNotChangeTheArabicOnlyGap() {
+    fun aNoteMarkDoesNotChangeTheArabicOnlyGap() {
         runBlocking {
             SavedStore(context).apply {
-                toggle(AYAT_AL_FATIHA)
+                setNote(AYAT_AL_FATIHA, "A note kept on the first verse.")
                 close()
             }
         }
@@ -129,15 +131,15 @@ class ReadingVerseGapTest {
             onReading(showTranslation = false) {
                 val verses = verseBlocks()
                 assertEquals(
-                    "a saved verse keeps the Arabic-only page edge to edge",
+                    "a noted verse keeps the Arabic-only page edge to edge",
                     0f,
                     verses[1].top.value - verses[0].bottom.value,
                     1f,
                 )
-                compose.onNodeWithTag("door-saved", useUnmergedTree = true).assertExists()
+                compose.onNodeWithTag("door-noted", useUnmergedTree = true).assertExists()
                 // The mark rides the verse's own first line, at the leading
                 // edge the block's words keep, and adds no height.
-                val mark = compose.onNodeWithTag("door-saved", useUnmergedTree = true)
+                val mark = compose.onNodeWithTag("door-noted", useUnmergedTree = true)
                     .getUnclippedBoundsInRoot()
                 val line = with(compose.density) {
                     TextSize.lineSp(TypeRole.Arabic, TextSize.DEFAULT).sp.toDp().value

@@ -8,6 +8,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
+import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.TrackSelectionParameters
 import androidx.media3.exoplayer.ExoPlayer
@@ -38,7 +39,44 @@ class PlaybackService : MediaSessionService() {
     /** The service's player, held so the pause timeout can look at it. */
     private var player: ExoPlayer? = null
 
+    /**
+     * Where the word's own voice stops, in media milliseconds, or
+     * [C.TIME_UNSET]. The sheet asks for one word and no more: the player is
+     * handed a position and pauses at the word's end, which is the one thing
+     * a MediaController cannot ask of the Player interface itself (owner
+     * decision, this session).
+     */
+    private var pauseAtMs = C.TIME_UNSET
+
     private val mainHandler = Handler(Looper.getMainLooper())
+
+
+    /**
+     * The check the word's stop runs on. Fifty milliseconds is a twentieth of
+     * the shortest word on the page and a fraction of a syllable, so the stop
+     * lands where the word does and never clips its last letter.
+     */
+    private val pauseAtTick = object : Runnable {
+        override fun run() {
+            val player = player ?: return
+            val at = pauseAtMs
+            if (at == C.TIME_UNSET) return
+            // The word's stop belongs to the playback that was asked for and
+            // to nothing else: a finish, an end, or a pause from anywhere
+            // (the reader, a headset, the shade) takes it off the player
+            // instead of leaving a tick running behind a paused verse.
+            if (player.playbackState == Player.STATE_ENDED || !player.playWhenReady) {
+                pauseAtMs = C.TIME_UNSET
+                return
+            }
+            if (player.playbackState == Player.STATE_READY && player.currentPosition >= at) {
+                pauseAtMs = C.TIME_UNSET
+                player.pause()
+                return
+            }
+            mainHandler.postDelayed(this, PAUSE_AT_STEP_MS)
+        }
+    }
 
     /**
      * The reader paused and stepped away. The notification and the service are
@@ -146,6 +184,10 @@ class PlaybackService : MediaSessionService() {
                     }
                 }
 
+                override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                    clearPauseAt()
+                }
+
                 override fun onPlaybackStateChanged(playbackState: Int) {
                     if (playbackState == Player.STATE_READY && !player.playWhenReady) {
                         mainHandler.removeCallbacks(pauseTimeout)
@@ -164,11 +206,12 @@ class PlaybackService : MediaSessionService() {
                 // Only this app and the phone's trusted controllers receive
                 // the write commands. A notification listener or another
                 // ordinary controller gets the read-only set, and never the
-                // app's own pause-at-end command.
+                // app's own pause-at-end or pause-at-offset commands.
                 val commands = if (controller.isTrusted || controller.packageName == packageName) {
                     MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS
                         .buildUpon()
                         .add(SessionCommand(COMMAND_PAUSE_AT_END, Bundle.EMPTY))
+                        .add(SessionCommand(COMMAND_PAUSE_AT, Bundle.EMPTY))
                         .build()
                 } else {
                     MediaSession.ConnectionResult.DEFAULT_UNTRUSTED_SESSION_AND_LIBRARY_COMMANDS
@@ -193,6 +236,20 @@ class PlaybackService : MediaSessionService() {
                     player.setPauseAtEndOfMediaItems(args.getBoolean(ARG_PAUSE_AT_END))
                     return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
                 }
+                if (customCommand.customAction == COMMAND_PAUSE_AT) {
+                    if (!controller.isTrusted && controller.packageName != packageName) {
+                        return Futures.immediateFuture(
+                            SessionResult(SessionResult.RESULT_ERROR_PERMISSION_DENIED),
+                        )
+                    }
+                    clearPauseAt()
+                    val at = args.getLong(ARG_PAUSE_AT_MS, -1L)
+                    if (at >= 0) {
+                        pauseAtMs = at
+                        mainHandler.postDelayed(pauseAtTick, PAUSE_AT_STEP_MS)
+                    }
+                    return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+                }
                 return super.onCustomCommand(session, controller, customCommand, args)
             }
         }
@@ -200,6 +257,12 @@ class PlaybackService : MediaSessionService() {
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? = session
+
+    /** Takes the word's stop off the player, tick and all. */
+    private fun clearPauseAt() {
+        mainHandler.removeCallbacks(pauseAtTick)
+        pauseAtMs = C.TIME_UNSET
+    }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         val player = session?.player
@@ -210,6 +273,8 @@ class PlaybackService : MediaSessionService() {
 
     override fun onDestroy() {
         mainHandler.removeCallbacks(pauseTimeout)
+        mainHandler.removeCallbacks(pauseAtTick)
+        pauseAtMs = C.TIME_UNSET
         session?.run {
             player.release()
             release()
@@ -225,6 +290,15 @@ class PlaybackService : MediaSessionService() {
 
         /** The command's one argument: true to stop at the end of each ayah. */
         const val ARG_PAUSE_AT_END = "pause_at_end"
+
+        /** The custom action that stops the word's own voice at its end. */
+        const val COMMAND_PAUSE_AT = "io.github.muntasimulhaque.quran.PAUSE_AT"
+
+        /** The command's one argument: the media millisecond to pause at. */
+        const val ARG_PAUSE_AT_MS = "pause_at_ms"
+
+        /** How often the word's stop looks at the player: a fraction of a word. */
+        const val PAUSE_AT_STEP_MS = 50L
 
         /**
          * How long a paused recitation keeps its notification and its service.

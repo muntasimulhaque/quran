@@ -54,6 +54,13 @@ enum class Icon {
     Tafsir,
 
     /**
+     * A cone with two waves: a word said aloud. The word sheet's one
+     * control, and the only mark in the set that is about hearing one word
+     * rather than a verse (owner decision, this session).
+     */
+    Speaker,
+
+    /**
      * The one turn the set draws, and it turns to five jobs: a door beside a
      * word, a tail that ends a row, a fold that opens, a way back, and the
      * surah after this one. It is the size of the job, never of the turn.

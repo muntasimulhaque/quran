@@ -652,6 +652,7 @@ fun ReaderScreen(
                     // land on text rather than on the paper.
                     cachedRows = { viewModel.cachedRows(it) },
                     onReadAhead = { viewModel.readAheadSurah(it) },
+                    onHearWord = { ayah, position -> viewModel.hearWord(ayah, position) },
                     metrics = settings.readingMetrics(),
                     reveal = revealForSurah,
                     place = settings.ayah,

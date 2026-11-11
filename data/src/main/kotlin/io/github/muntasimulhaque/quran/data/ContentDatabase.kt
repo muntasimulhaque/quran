@@ -335,6 +335,31 @@ class ContentDatabase private constructor(
         }
     }
 
+    /**
+     * The installed root pack, or null: it has no language of its own, and a
+     * reader without it gets a sheet with no root rather than an empty line.
+     */
+    fun rootPack(): String? = if (installedPack(WORD_ROOT_PACK)) WORD_ROOT_PACK else null
+
+    /** Every word's root in a set of ayahs: ayah to position to the root. */
+    fun wordRoots(ayahNumbers: List<Int>): Map<Int, Map<Int, WordRoot>> {
+        if (ayahNumbers.isEmpty()) return emptyMap()
+        val chosen = rootPack() ?: return emptyMap()
+        val inClause = ayahNumbers.joinToString(",")
+        return query(
+            "SELECT ayah_number, position, arabic, latin FROM ${schema(chosen)}.word_root " +
+                "WHERE ayah_number IN ($inClause) ORDER BY ayah_number, position",
+            null,
+        ).use { cursor ->
+            val out = HashMap<Int, MutableMap<Int, WordRoot>>()
+            while (cursor.moveToNext()) {
+                out.getOrPut(cursor.getInt(0)) { HashMap() }[cursor.getInt(1)] =
+                    WordRoot(cursor.getString(2) ?: "", cursor.getString(3) ?: "")
+            }
+            out
+        }
+    }
+
     /** The word by word aid for one ayah. */
     fun wordMeanings(ayahNumber: Int, language: String = "en"): List<WordMeaning> {
         val chosen = meaningPack(language)
@@ -1393,6 +1418,9 @@ class ContentDatabase private constructor(
         /** The id of the word list that speaks a language. */
         fun wordsPackId(language: String): String = "words-$language"
 
+        /** The word root pack, one table and no language. */
+        const val WORD_ROOT_PACK = "word-root"
+
         /**
          * Opens the reader's library: the core pack, which ships inside the
          * app, and every pack this device has installed. A pack that is not
@@ -1508,6 +1536,9 @@ class ContentDatabase private constructor(
             )
             PackType.Words -> mapOf(
                 "word_meaning" to setOf("ayah_number", "position", "meaning"),
+            )
+            PackType.WordRoot -> mapOf(
+                "word_root" to setOf("ayah_number", "position", "arabic", "latin"),
             )
             PackType.Recitation -> mapOf(
                 "recitation" to setOf("id", "name", "credit"),

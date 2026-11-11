@@ -33,6 +33,8 @@ internal class ReadingRowsCache(
     private val translationPacks: () -> List<ContentPack>,
     /** The reader's own language: the word meanings speak it and no other. */
     private val language: () -> String,
+    /** Whether a surah's audio is on the device under the reader's reciter. */
+    private val hasAudio: suspend (Int) -> Boolean = { false },
 ) {
 
     /**
@@ -106,12 +108,17 @@ internal class ReadingRowsCache(
                 } else {
                     emptyMap()
                 }
+                val roots = open.wordRoots(numbers)
+                val hears = hasAudio(surah)
                 ayahs.map { ayah ->
+                    val drawn = words[ayah.number].orEmpty()
                     ReadingRow(
                         ayah = ayah,
-                        words = words[ayah.number].orEmpty(),
+                        words = drawn,
                         translations = lines[ayah.number].orEmpty(),
                         meanings = meanings[ayah.number].orEmpty(),
+                        roots = drawn.map { roots[ayah.number]?.get(it.position) },
+                        hears = hears,
                     )
                 }
             }.getOrElse { failure ->
@@ -146,7 +153,18 @@ internal class ReadingRowsCache(
         } else {
             emptyList()
         }
-        val row = ReadingRow(ayah, words, translations, meanings)
+        val roots = open.wordRoots(listOf(ayahNumber))[ayahNumber].orEmpty()
+        val row = ReadingRow(
+            ayah = ayah,
+            words = words,
+            translations = translations,
+            meanings = meanings,
+            roots = words.map { roots[it.position] },
+            // The one-row surfaces are the size sample and the share card,
+            // and neither opens the word sheet: the speaker is read with the
+            // list, where the audio question can be asked off the frame.
+            hears = false,
+        )
         synchronized(lock) {
             if (generation != readUnder) return null
             rowCache[ayahNumber] = row

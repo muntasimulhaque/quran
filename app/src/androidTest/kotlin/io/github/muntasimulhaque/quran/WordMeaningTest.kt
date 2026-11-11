@@ -61,6 +61,10 @@ class WordMeaningTest {
             val store = PackStore(context)
             store.install("translation-al-bayan-bn")
             store.install("words-bn")
+            // The roots travel with the word list in the app, so the store
+            // frame the sheet is judged from carries them too (owner
+            // decision, this session).
+            store.install("word-root")
             runBlocking {
                 SettingsStore(context).apply {
                     setUiLanguage("bn")

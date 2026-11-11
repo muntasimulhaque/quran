@@ -15,9 +15,9 @@
             "shipped": true,
             "ayahs": 6236,
             "bytes": 9957376,
-            "sha256": "a951bb9703d01006a9ab2a5183a31304019ace9d78b49f38aee6a16a2c6f9f9d",
-            "tag": "pack-core-a951bb97",
-            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-a951bb97/core.db"
+            "sha256": "6046d3a82c931522295ec666a4923a40b318f757bc8ad3c8466bcaa4171ca496",
+            "tag": "pack-core-6046d3a8",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-core-6046d3a8/core.db"
         },
         {
             "id": "translation-saheeh-en",
@@ -154,6 +154,23 @@
             "sha256": "087fb8f31030dc967cf7ffb91745a05f007ea58b4492d4120564c7c4e4aa5d41",
             "tag": "pack-words-bn-087fb8f3",
             "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-words-bn-087fb8f3/words-bn.db"
+        },
+        {
+            "id": "word-root",
+            "type": "word-root",
+            "name": "Word roots",
+            "language": "ar",
+            "credit": "Quranic morphology, via the Quranic Universal Library",
+            "creditBn": "কুরআনিক মরফোলজি, কুরআনিক ইউনিভার্সাল লাইব্রেরি থেকে",
+            "license": "Distributed via QUL",
+            "licenseBn": "QUL-এর মাধ্যমে বিতরণ",
+            "version": "QUL",
+            "shipped": false,
+            "ayahs": 6236,
+            "bytes": 2154496,
+            "sha256": "97fd42f40087fa0cce27f8b7d08bc485e6aec11e48aad998d3afd4022b31c8d8",
+            "tag": "pack-word-root-97fd42f4",
+            "url": "https://github.com/muntasimulhaque/quran/releases/download/pack-word-root-97fd42f4/word-root.db"
         }
     ]
 }

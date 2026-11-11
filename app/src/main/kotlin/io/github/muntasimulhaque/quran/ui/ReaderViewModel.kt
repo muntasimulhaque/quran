@@ -41,6 +41,7 @@ import io.github.muntasimulhaque.quran.playback.PlaybackController
 import io.github.muntasimulhaque.quran.playback.ListenOffer
 import io.github.muntasimulhaque.quran.playback.ListenOption
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
+import io.github.muntasimulhaque.quran.playback.reciterTarget
 import io.github.muntasimulhaque.quran.uikit.R as UiKitR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -247,6 +248,7 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         database = { library.database },
         translationPacks = { enabledTranslationPacks },
         language = { readingLanguage },
+        hasAudio = { surah -> library.hasSurahAudio(settings.recitation, surah) },
     )
 
     /**
@@ -413,6 +415,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         if (pack.id in settings.tafsirPacks) toggleTafsirPack(pack.id)
         if (fallbackReciter != null) {
             settings = settings.copy(recitation = fallbackReciter)
+            // The voice the page was measured under is gone, so the rows are
+            // read again under the one that replaced it (owner decision,
+            // this session).
+            clearRowCache()
             viewModelScope.launch { settingsStore.setRecitation(fallbackReciter) }
         }
     }
@@ -758,6 +764,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             viewModelScope.launch { settingsStore.setWordByWord(true) }
             return
         }
+        // The root travels with the meanings: the sheet names it under the
+        // gloss, and a reader who asked for the words asked for what the
+        // words are (owner decision, this session).
+        library.installIfMissing(ContentDatabase.WORD_ROOT_PACK, select = false)
         library.install(pack.id, select = true)
     }
 
@@ -865,6 +875,10 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      */
     fun selectRecitation(id: String) {
         if (!setRecitation(id)) return
+        // The audio a surah has is the audio one voice has: a new reciter
+        // reads the rows again, so a word sheet's speaker is never drawn for
+        // a voice that has nothing to play (owner decision, this session).
+        clearRowCache()
         playback.state.value.ayahNumber?.let { playAyah(it) }
     }
 
@@ -1193,10 +1207,19 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
      * through the same door Play uses, so a reciter whose audio is not on
      * the device is offered with its size instead of reported as
      * unavailable (owner decision).
+     *
+     * The ayah is the one being heard now, and the one Play was pressed on
+     * only when nothing is playing yet: [listenTarget] is a snapshot and the
+     * audio moves on by itself, so a voice chosen three ayahs in was heard
+     * from the ayah the reader started on, and a surah the audio had carried
+     * on into was left entirely (owner report, this session).
      */
     fun choosePillReciter(reciter: String) {
-        val target = listenTarget
+        val target = reciterTarget(playback.state.value.ayahNumber, listenTarget)
         if (target <= 0 || reciter == settings.recitation) return
+        // The choice is a request now, so a package still on its way is asked
+        // about the ayah the reader is actually on.
+        listenTarget = target
         setRecitation(reciter)
         viewModelScope.launch {
             val ayah = library.database?.ayah(target) ?: return@launch
@@ -1208,6 +1231,16 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
             }
             listenOffer = offerFor(reciter, ayah, bytes)
         }
+    }
+
+    /**
+     * The reader's tap on the word sheet's speaker: the one word they asked
+     * about, in their own reciter, and nothing after it. The sheet only
+     * offers the mark when the surah's audio is on the device, so this is the
+     * answer to a tap rather than a state to explain.
+     */
+    fun hearWord(ayahNumber: Int, position: Int) {
+        viewModelScope.launch { playback.hearWord(settings.recitation, ayahNumber, position) }
     }
 
     fun togglePlayback() = playback.toggle()

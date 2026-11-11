@@ -1,12 +1,19 @@
 package io.github.muntasimulhaque.quran.ui.reading
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -17,6 +24,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import io.github.muntasimulhaque.quran.core.Arabic
 import io.github.muntasimulhaque.quran.data.ReadingMetrics
+import io.github.muntasimulhaque.quran.data.TextSize
+import io.github.muntasimulhaque.quran.data.WordRoot
 import io.github.muntasimulhaque.quran.feature.reading.R
 import io.github.muntasimulhaque.quran.ui.kit.AppSheet
 import io.github.muntasimulhaque.quran.ui.kit.SheetPlace
@@ -24,6 +33,10 @@ import io.github.muntasimulhaque.quran.ui.kit.SheetTitle
 import io.github.muntasimulhaque.quran.ui.kit.localizedDigits
 import io.github.muntasimulhaque.quran.ui.kit.rememberExpandedSheetState
 import io.github.muntasimulhaque.quran.ui.kit.sheetVerticalScroll
+import io.github.muntasimulhaque.quran.ui.glyph.GlyphSize
+import io.github.muntasimulhaque.quran.ui.glyph.Icon
+import io.github.muntasimulhaque.quran.ui.glyph.IconGlyph
+import io.github.muntasimulhaque.quran.ui.kit.GlyphButton
 import io.github.muntasimulhaque.quran.ui.rich.TajweedText
 import io.github.muntasimulhaque.quran.ui.theme.LocalPagePalette
 import io.github.muntasimulhaque.quran.ui.theme.LocalReadingVoice
@@ -65,9 +78,17 @@ internal data class OpenWord(
     val tajweed: String,
     /** The ayah's key, for example 1:1, in the app's own digits. */
     val reference: String,
+    /** The word's triliteral root; null for the third of the words with none. */
+    val root: WordRoot? = null,
+    /** The ayah the word stands in, for the voice that says it. */
+    val ayahNumber: Int = 0,
+    /** The word's position in its ayah, which the timings name. */
+    val position: Int = 0,
+    /** True when the surah's audio is on the device, so the mark can answer. */
+    val canHear: Boolean = false,
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 internal fun WordSheet(
     word: OpenWord,
@@ -75,6 +96,8 @@ internal fun WordSheet(
     metrics: ReadingMetrics,
     hafs: FontFamily,
     onDismiss: () -> Unit,
+    /** The word's own voice, when the audio for it is on the device. */
+    onHear: (() -> Unit)? = null,
 ) {
     val sheetState = rememberExpandedSheetState()
     val palette = LocalPagePalette.current
@@ -92,14 +115,44 @@ internal fun WordSheet(
                 .padding(start = Space.Gutter, end = Space.Gutter, bottom = Space.SheetFoot)
                 .testTag("word-sheet"),
         ) {
-            // The sheet names itself where every sheet does, then the place
-            // under it, on the page's own left edge: the word is the subject,
-            // and a reader who opened the wrong word still knows the ayah
-            // before reading the meaning, the same head the footnote wears.
-            SheetTitle(
-                text = stringResource(R.string.reading_word_sheet_name),
+            // The sheet names itself where every sheet does, and the one
+            // action it owns stands at the head's trailing edge: the title's
+            // line is left aligned, so the room beside it is the only room on
+            // the sheet that is not the entry's, and a reader looking for
+            // "hear it" looks where every other surface in the app keeps its
+            // own control. The mark and the title share one center, and the
+            // place stays under both on the page's own edge, so the head
+            // reads as one line with a door at its end (owner decision, this
+            // session).
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-            )
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = Space.Block),
+                ) {
+                    SheetTitle(
+                        text = stringResource(R.string.reading_word_sheet_name),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+                if (onHear != null) {
+                    GlyphButton(
+                        description = stringResource(R.string.reading_hear_word),
+                        onClick = onHear,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.testTag("word-sheet-hear"),
+                    ) {
+                        IconGlyph(
+                            icon = Icon.Speaker,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(GlyphSize.Control),
+                        )
+                    }
+                }
+            }
             SheetPlace(
                 text = stringResource(
                     R.string.reading_sheet_where,
@@ -142,6 +195,63 @@ internal fun WordSheet(
                     .fillMaxWidth()
                     .padding(top = Space.Tight),
             )
+            // The root, when the word has one: the letters the page writes,
+            // and the same letters read out for a reader who does not read
+            // them. A bare line, not a door: it answers no tap (owner
+            // decision, this session).
+            //
+            // It wraps rather than overflows: three words in a row are one
+            // line at the app's own size and two at the largest system scale,
+            // and the sheet is the one surface a reader may reach at 200
+            // percent. A row would have clipped the letters at the right edge
+            // instead of folding them (owner decision, this session).
+            word.root?.let { root ->
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = Space.Block)
+                        .testTag("word-sheet-root"),
+                    horizontalArrangement = Arrangement.spacedBy(
+                        Space.Line,
+                        Alignment.CenterHorizontally,
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(Space.Tight),
+                ) {
+                    Text(
+                        text = stringResource(R.string.reading_word_root),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                    )
+                    Text(
+                        text = root.arabic,
+                        // The root is a fragment, not a verse: the medallion's
+                        // own measure, which is the size the reading already
+                        // draws Arabic below the Quran's line (owner
+                        // decision, this session).
+                        style = arabicStyle(
+                            hafs,
+                            TextSize.medallionAt(metrics.arabicSp),
+                            TextSize.medallionAt(metrics.arabicSp) * 2f,
+                            palette.ink,
+                        ),
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                    )
+                    // The Latin rendering belongs to the page that is read in
+                    // Latin script: a Bangla reader reads the root letters or
+                    // nothing, and a line of Latin on a Bangla page is a third
+                    // script the sheet never promised (owner decision, this
+                    // session).
+                    if (root.latin.isNotBlank() && metrics.readingLanguage == "en") {
+                        Text(
+                            text = root.latin,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.align(Alignment.CenterVertically),
+                        )
+                    }
+                }
+            }
         }
     }
 }

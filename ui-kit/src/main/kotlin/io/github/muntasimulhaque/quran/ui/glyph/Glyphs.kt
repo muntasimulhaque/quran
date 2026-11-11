@@ -107,6 +107,19 @@ sealed interface GlyphShape {
         val bottom: Float,
         val corner: Float,
     ) : GlyphShape
+
+    /**
+     * A part of the ring: the speaker's two waves. The set draws its corners
+     * at 45 degrees, and an arc has no corners at all; it is the ring's own
+     * curvature, cut, and a sound wave is the one thing in the set that is
+     * not a straight line (owner decision, this session).
+     */
+    data class Arc(
+        val center: GlyphPoint,
+        val radius: Float,
+        val startDegrees: Float,
+        val sweepDegrees: Float,
+    ) : GlyphShape
 }
 
 /**
@@ -246,6 +259,21 @@ object Glyphs {
             line(16.1f, 11f, 17.1f, 11f),
         ),
 
+        // A cone and two waves. The cone is one closed line whose slants are
+        // 45 degrees, so its mouth is a vertical edge the waves can leave
+        // from, and the waves are the ring's curvature in two lengths. The
+        // mark is the sheet's one control, so both ends are drawn to the live
+        // area: the cone's tail on the left keyline and the outer wave on the
+        // right (owner decision, this session).
+        Icon.Speaker to listOf(
+            closed(
+                3.25f, 9.25f, 7.75f, 9.25f, 12.75f, 4.25f,
+                12.75f, 19.75f, 7.75f, 14.75f, 3.25f, 14.75f,
+            ),
+            arc(12.75f, 12f, 3.6f, -55f, 110f),
+            arc(12.75f, 12f, 6.8f, -55f, 110f),
+        ),
+
         // A turn, round at both tips and at the elbow. The width is the one
         // place the set departs from its live area: a chevron drawn to 20
         // units reads as a mountain rather than a turn.
@@ -295,6 +323,9 @@ private fun solid(vararg values: Float) = GlyphShape.Solid(points(*values))
 
 private fun ring(x: Float, y: Float, radius: Float) =
     GlyphShape.Ring(point(x, y), radius)
+
+private fun arc(x: Float, y: Float, radius: Float, start: Float, sweep: Float) =
+    GlyphShape.Arc(point(x, y), radius, start, sweep)
 
 private fun dot(x: Float, y: Float, radius: Float) =
     GlyphShape.Dot(point(x, y), radius)

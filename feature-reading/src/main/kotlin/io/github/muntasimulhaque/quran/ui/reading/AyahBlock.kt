@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -103,7 +102,8 @@ internal fun AyahBlock(
     showWordAid: Boolean = metrics.wordByWord,
     /** True when the reader has written a note on this ayah. */
     noted: Boolean = false,
-    /** True when the reader has pressed Save on this ayah. */
+    /** True when the reader has pressed Save on this ayah. It is spoken, and
+     * no longer drawn: the save is said where the tap that made it lives. */
     saved: Boolean = false,
     /** True while this ayah's menu is open, so its door can turn. */
     menuOpen: Boolean = false,
@@ -299,9 +299,12 @@ internal fun AyahBlock(
                 // the door.
                 .semantics {
                     contentDescription = spokenContent
-                    // The reader's own marks are a state of the verse, not a
-                    // drawing: the bookmark and the note are spoken here, where
-                    // the verse is, as they are on the door.
+                    // The reader's own mark is a state of the verse, not a
+                    // drawing: the note is spoken here, where the verse is, as
+                    // it is on the door. The save is spoken too, though the
+                    // page draws nothing for it: a reader who cannot see the
+                    // menu's lit row still learns, while reading, that this
+                    // ayah is one of their own (owner decision, this session).
                     if (saved || noted) {
                         stateDescription = buildList {
                             if (saved) add(savedState)
@@ -329,17 +332,16 @@ internal fun AyahBlock(
             // The reader's own marks, and the reader's own door. On a page
             // that carries a translation the head is the reference: the one
             // visible signifier on the reading, in the action color, with the
-            // turn that says it opens, and the bookmark and the note beside
-            // them. On a page that draws the Quran alone there is no reference
-            // line: the verse's printed medallion is its number and its door,
-            // and the reader's own marks ride the verse's first line in a rail
-            // at its leading edge, so nothing stands above the verse and the
-            // page keeps its rhythm (owner decision, this session).
+            // turn that says it opens, and the note beside them when the
+            // reader wrote one. On a page that draws the Quran alone there is
+            // no reference line: the verse's printed medallion is its number
+            // and its door, and the reader's note rides the verse's first line
+            // in a rail at its leading edge, so nothing stands above the verse
+            // and the page keeps its rhythm (owner decision, this session).
             if (!arabicOnly) {
                 AyahDoor(
                     reference = reference,
                     key = row.ayah.verseKey,
-                    marked = saved,
                     noted = noted,
                     open = menuOpen,
                     onOpen = { onMenu(row.ayah, it) },
@@ -395,7 +397,6 @@ internal fun AyahBlock(
                 // gap, and the words start after it on every verse alike.
                 if (arabicOnly) {
                     MarksRail(
-                        saved = saved,
                         noted = noted,
                         lineHeight = firstLine,
                     )
@@ -474,6 +475,11 @@ internal fun AyahBlock(
                                                             meaning = meaning,
                                                             tajweed = word.tajweed,
                                                             reference = row.ayah.verseKey,
+                                                            root = row.roots.getOrNull(index),
+                                                            ayahNumber = row.ayah.number,
+                                                            position = row.words.getOrNull(index)?.position
+                                                                ?: 0,
+                                                            canHear = row.hears,
                                                         ),
                                                     )
                                                 }
@@ -585,25 +591,25 @@ internal fun AyahBlock(
 }
 
 /**
- * The reader's own marks on a page that draws the Quran alone.
+ * The reader's own note on a page that draws the Quran alone.
  *
  * The page has no head: the verse's printed medallion is its number and its
- * door, so the reader's marks have nothing to sit in. They used to sit in a
- * 48 dp row above the verse, the height the door's finger needs, which made a
- * marked verse stand 48 dp apart from its neighbours on a page whose whole
- * rhythm is [Space.Tight] on each side of the wash. The mark rides the verse's
- * first line in a rail the width of the mark and its gap, reserved on every
- * verse so a save never rewraps the Arabic, and the block keeps the verse's
- * own height whether or not it carries a mark (owner decision, this session).
+ * door, so a note has nothing to sit in. It used to sit in a 48 dp row above
+ * the verse, the height the door's finger needs, which made a noted verse
+ * stand 48 dp apart from its neighbours on a page whose whole rhythm is
+ * [Space.Tight] on each side of the wash. The mark rides the verse's first
+ * line in a rail the width of the mark and its gap, reserved on every verse
+ * so a note never rewraps the Arabic, and the block keeps the verse's own
+ * height whether or not it carries a note (owner decision, this session).
  *
- * Two marks stack in the rail rather than widen it, because the rail is
- * reserved on every verse and a second mark must not narrow the page. They
- * stand centred on the first line's own box, so the marks read as notes in the
- * page's margin and never as part of the Quran.
+ * The rail is reserved on every verse, so it must never widen: it held two
+ * marks while the saved ayah wore a bookmark, and it holds the note's one now
+ * that the save is said where the tap that made it lives (owner decision,
+ * this session). The note stands centred on the first line's own box, so it
+ * reads as a note in the page's margin and never as part of the Quran.
  */
 @Composable
 private fun MarksRail(
-    saved: Boolean,
     noted: Boolean,
     /** The Arabic line's own box at the system's scale. */
     lineHeight: Dp,
@@ -615,25 +621,14 @@ private fun MarksRail(
             .height(lineHeight),
         contentAlignment = Alignment.CenterStart,
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(Space.Tight)) {
-            if (saved) {
-                IconGlyph(
-                    icon = Icon.BookmarkFilled,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .size(GlyphSize.ChevronInline)
-                        .testTag("door-saved"),
-                )
-            }
-            if (noted) {
-                IconGlyph(
-                    icon = Icon.Note,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .size(GlyphSize.ChevronInline)
-                        .testTag("door-noted"),
-                )
-            }
+        if (noted) {
+            IconGlyph(
+                icon = Icon.Note,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .size(GlyphSize.ChevronInline)
+                    .testTag("door-noted"),
+            )
         }
     }
 }

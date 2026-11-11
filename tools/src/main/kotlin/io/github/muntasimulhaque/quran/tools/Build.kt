@@ -68,6 +68,10 @@ class Build(private val root: File) {
             put("en", readWordList("word-by-word-english"))
             put("bn", readWordList("word-by-word-bengali"))
         }
+        // The word's own detail: its root, keyed by the source's word
+        // number, the same key the word lists use, so the merge of the four
+        // QPC pairs needs no second rule (owner decision, this session).
+        val roots = readRoots()
         val surahs = readSurahs()
         val navigation = readNavigation(ayahNumbers)
 
@@ -77,7 +81,9 @@ class Build(private val root: File) {
             connection.autoCommit = false
             schema(connection)
             insertSurahs(connection, surahs)
-            val inserted = insertAyahsAndWords(connection, words, ayahNumbers, wordLists, navigation)
+            val inserted = insertAyahsAndWords(
+                connection, words, ayahNumbers, wordLists, roots, navigation,
+            )
             insertTranslation(connection, translation)
             insertTafsirIbnKathir(connection, ayahNumbers)
             // The Bangla translation, built when its source is present, so a
@@ -342,6 +348,76 @@ class Build(private val root: File) {
         return out
     }
 
+    /**
+     * A word's triliteral root: the letters, their Latin rendering, and how
+     * many words of the Book come from it.
+     *
+     * QUL writes the root's letters with a gap between them and its Latin as
+     * Buckwalter, which is a keyboard not a spelling (`Ebd`, `Alh`). The gap
+     * is closed here and the Buckwalter is read as the letters it stands for,
+     * so the sheet shows `ع ب د` and `ʿ-b-d` and not the export's own
+     * shorthand (owner decision, this session).
+     */
+    private fun readRoots(): Map<String, Root> {
+        if (sourceDb("word-root") == null) {
+            println("build: skipping word-root (source not present)")
+            return emptyMap()
+        }
+        val out = HashMap<String, Root>(60_000)
+        openSqlite(sourceDb("word-root")).use { connection ->
+            connection.each(
+                "SELECT r.arabic_trilateral, r.english_trilateral, r.words_count, w.word_location " +
+                    "FROM root_words w JOIN roots r ON r.id = w.root_id",
+            ) { rs ->
+                val letters = rs.getString(1).orEmpty().trim().split(Regex("\\s+"))
+                val latin = rs.getString(2).orEmpty().trim().map { buckwalter(it) }
+                out[rs.getString(4) ?: ""] = Root(
+                    arabic = letters.joinToString(" "),
+                    latin = latin.joinToString("-"),
+                    wordsCount = rs.getInt(3),
+                )
+            }
+        }
+        return out
+    }
+
+    /** One Buckwalter letter as the letter it is read as. */
+    private fun buckwalter(letter: Char): String = when (letter) {
+        '\'' , 'A', '|', '>', '<', '&', '}' -> "ʾ"
+        'b' -> "b"
+        't' -> "t"
+        'v' -> "th"
+        'j' -> "j"
+        'H' -> "ḥ"
+        'x' -> "kh"
+        'd' -> "d"
+        '*' -> "dh"
+        'r' -> "r"
+        'z' -> "z"
+        's' -> "s"
+        '$' -> "sh"
+        'S' -> "ṣ"
+        'D' -> "ḍ"
+        'T' -> "ṭ"
+        'Z' -> "ẓ"
+        'E' -> "ʿ"
+        'g' -> "gh"
+        'f' -> "f"
+        'q' -> "q"
+        'k' -> "k"
+        'l' -> "l"
+        'm' -> "m"
+        'n' -> "n"
+        'h' -> "h"
+        'w' -> "w"
+        'y' -> "y"
+        'Y' -> "y"
+        'p' -> "h"
+        else -> ""
+    }
+
+    private data class Root(val arabic: String, val latin: String, val wordsCount: Int)
+
     private data class Surah(
         val number: Int,
         val nameArabic: String,
@@ -487,6 +563,16 @@ class Build(private val root: File) {
                 "CREATE TABLE word_meaning (word_id INTEGER NOT NULL, ayah_number INTEGER NOT NULL, " +
                     "position INTEGER NOT NULL, language TEXT NOT NULL, meaning TEXT NOT NULL, " +
                     "meaning_search TEXT NOT NULL, PRIMARY KEY (language, word_id))",
+            )
+            // A word's root and its sound in the reader's script are their
+            // own small tables, keyed the way the word lists are, and they
+            // travel in their own packs: a reader who wants the meanings is
+            // not made to carry the morphology, and the Bangla line is not
+            // downloaded on an English page (owner decision, this session).
+            statement.execute(
+                "CREATE TABLE word_root (ayah_number INTEGER NOT NULL, position INTEGER NOT NULL, " +
+                    "arabic TEXT NOT NULL, latin TEXT NOT NULL, words_count INTEGER NOT NULL, " +
+                    "PRIMARY KEY (ayah_number, position))",
             )
             statement.execute(
                 "CREATE TABLE pack (id TEXT PRIMARY KEY, type TEXT NOT NULL, name TEXT NOT NULL, " +
@@ -639,6 +725,7 @@ class Build(private val root: File) {
         words: List<Word>,
         ayahNumbers: Map<String, Int>,
         wordLists: Map<String, Map<String, String>>,
+        roots: Map<String, Root>,
         nav: Navigation,
     ): Int {
         val grouped = LinkedHashMap<String, MutableList<Word>>(7000)
@@ -698,6 +785,29 @@ class Build(private val root: File) {
                 meanings.executeBatch()
             }
             println("build: word meanings in $language: ${list.size}")
+        }
+
+        // The root of the words that have one, and the sound of every word
+        // in each language the app carries. A word with no root is not a
+        // gap to fill: particles and pronouns have none, and the sheet says
+        // nothing rather than drawing a line with nothing behind it.
+        connection.prepareStatement(
+            "INSERT INTO word_root(ayah_number, position, arabic, latin, words_count) VALUES(?,?,?,?,?)",
+        ).use { statement ->
+            var inserted = 0
+            for (word in words) {
+                if (word.marker) continue
+                val root = roots["${word.surah}:${word.ayah}:${word.sourcePosition}"] ?: continue
+                statement.setInt(1, ayahNumbers["${word.surah}:${word.ayah}"] ?: 0)
+                statement.setInt(2, word.position)
+                statement.setString(3, root.arabic)
+                statement.setString(4, root.latin)
+                statement.setInt(5, root.wordsCount)
+                statement.addBatch()
+                inserted += 1
+            }
+            statement.executeBatch()
+            println("build: word roots: $inserted")
         }
 
         connection.prepareStatement(

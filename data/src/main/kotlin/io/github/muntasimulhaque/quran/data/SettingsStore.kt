@@ -143,6 +143,7 @@ data class AppSettings(
      */
     val showTranslation: Boolean = true,
     val wordByWord: Boolean = false,
+
     /**
      * Whether the reading draws the QPC tajweed colors. Off on a fresh
      * install, so the first page is the Quran in one ink; the reader turns
@@ -234,6 +235,14 @@ data class ReadingMetrics(
     val tajweed: Boolean,
     /** Whether the reading follows the reciter as it moves from ayah to ayah. */
     val followReciter: Boolean,
+    /**
+     * The reader's reciter. The word sheet's speaker is the one control on a
+     * row that depends on it: the surah's audio is on the device under one
+     * voice and not another, so a voice the reader changed has to read the
+     * rows again or the mark outlives the audio it was drawn for (owner
+     * decision, this session).
+     */
+    val recitation: String,
     /** The packs the reading draws, which shape every row it loads. */
     val translationPacks: Set<String>,
     /**
@@ -264,6 +273,7 @@ fun AppSettings.readingMetrics(): ReadingMetrics = ReadingMetrics(
     wordByWord = wordByWord,
     tajweed = tajweed,
     followReciter = followReciter,
+    recitation = recitation,
     translationPacks = translationPacks,
     readingLanguage = readingLanguage,
     arabicSp = arabicSp,

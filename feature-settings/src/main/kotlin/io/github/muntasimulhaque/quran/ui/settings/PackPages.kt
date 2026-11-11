@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import io.github.muntasimulhaque.quran.data.AppSettings
+import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.ContentPack
 import io.github.muntasimulhaque.quran.data.PackType
 import io.github.muntasimulhaque.quran.feature.settings.R
@@ -139,6 +140,12 @@ fun WordsPage(
         val pack = wantedWordsPack(settings, packs)
         val installed = pack?.installed == true
         val setup = packSetup?.takeIf { it.packId == pack?.id }
+        // The root travels with the list, so the row says what the tap will
+        // fetch and not only what the list's own file weighs. The line names
+        // the root while it is still to come, and goes back to the list's
+        // size once it is on the device (owner decision, this session).
+        val root = packs.firstOrNull { it.id == ContentDatabase.WORD_ROOT_PACK }
+        val rootToCome = root != null && !root.installed
         ToggleRow(
             title = stringResource(R.string.settings_words_title),
             subtitle = packSetupLine(setup) ?: stringResource(R.string.settings_words_lead),
@@ -153,7 +160,15 @@ fun WordsPage(
             Spacer(Modifier.height(Space.Block))
             PackChoiceRow(
                 pack = pack,
-                subtitle = packSizeLine(pack),
+                subtitle = if (rootToCome && root != null) {
+                    stringResource(
+                        R.string.settings_words_size_with_root,
+                        packSizeLine(pack),
+                        packSizeLine(root),
+                    )
+                } else {
+                    packSizeLine(pack)
+                },
                 // The one list the reading speaks: a check says the file is
                 // here, and the switch above says whether it is drawn.
                 selected = installed,

@@ -34,6 +34,7 @@
     <string name="settings_title_words">শব্দের অর্থ</string>
     <string name="settings_words_title">শব্দের অর্থ জানতে শব্দ চেপে ধরে রাখুন</string>
     <string name="settings_words_lead">এটি চালু থাকলে পাঠে যেকোনো শব্দ চেপে ধরে রাখলে তার অর্থ দেখা যাবে।</string>
+    <string name="settings_words_size_with_root">%1$s · মূল %2$s</string>
     <string name="settings_tajweed_title">তাজবীদ রঙ</string>
     <string name="settings_tajweed_lead">প্রতিটি রঙ এক দল নিয়ম; নামের পাশের শব্দটি পড়ারই একটি শব্দ। যে হরফগুলোতে রঙ আছে, নিয়মটি তাদেরই প্রযোজ্য; দলটির প্রতিটি নিয়মের নাম নিচে লেখা আছে।</string>
 

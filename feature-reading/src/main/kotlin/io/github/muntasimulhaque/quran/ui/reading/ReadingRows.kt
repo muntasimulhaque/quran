@@ -95,6 +95,8 @@ internal fun ReadingRows(
     /** The word the reader pressed and held, and the sheet that holds it. */
     word: OpenWord?,
     onWord: (OpenWord?) -> Unit,
+    /** The word sheet's speaker: one word of the verse, in the reader's voice. */
+    onHearWord: (ayahNumber: Int, position: Int) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier,
 ) {
     // The stored place is the ayah, so the list opens on it and needs nothing
@@ -346,6 +348,11 @@ internal fun ReadingRows(
             metrics = metrics,
             hafs = hafs,
             onDismiss = { onWord(null) },
+            onHear = if (open.canHear) {
+                { onHearWord(open.ayahNumber, open.position) }
+            } else {
+                null
+            },
         )
     }
 }

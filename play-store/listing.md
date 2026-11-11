@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 17.6 (versionCode 178)
+Version: 17.7 (versionCode 179)
 
 ## Listing
 
@@ -182,6 +182,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (17.7, 496 characters)
+17.7 rights four things. A voice chosen on the playing pill is heard from the ayah playing now, not the one Play was pressed on. A saved ayah no longer wears a bookmark beside its number; its menu row says Saved, and the verse still tells a screen reader. The word sheet names the word's root and offers a speaker that says it in your reciter, stopping at its end. The content adds the roots of 50,298 words; text, translations, tafsirs, and audio are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (17.6, 490 characters)
 17.6 gives the page more of the glass. Every surface keeps 20 dp at its edge, not 28, so the reading, search, tafsir, footnotes, the word sheet, browse, and settings run wider. The page itself is unchanged: a wide screen still holds the same column, and the ten inch tablet reads the lines it read before. The search field's head, the back mark, and a choice ring now stand on that line. Text, translations, tafsirs, and the content database are unchanged. No ads, no trackers, no accounts.

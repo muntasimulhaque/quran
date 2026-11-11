@@ -38,6 +38,9 @@ object PackSources {
         "tafsir-ibn-kathir-bn" to listOf("tafsir-ibn-kathir-bn"),
         "words-en" to listOf("word-by-word-english", "surah-info-en"),
         "words-bn" to listOf("word-by-word-bengali"),
+        // The root is one language-neutral table and travels beside the
+        // word list the reader has (owner decision, this session).
+        "word-root" to listOf("word-root"),
         "reciter-minshawi" to listOf("recitation-minshawi"),
         "reciter-husary" to listOf("recitation-husary"),
     )

@@ -1,5 +1,5 @@
 {
-  "contentVersion": "1.5.0",
+  "contentVersion": "1.7.0",
   "note": "Machine-readable source of truth for bundled content.",
   "datasets": [
     {
@@ -384,6 +384,22 @@
       "path": "content/raw/qul/bengali-word-by-word.sqlite.zip",
       "bytes": 1305276,
       "sha256": "d8132d6a49f6c00b40ec94b41a1c16ff43d7f8f33b5026ee98f9667d99d1e294",
+      "assetUrl": null
+    },
+    {
+      "id": "word-root",
+      "name": "Word root, morphology",
+      "source": "Quranic Universal Library (QUL) by Tarteel",
+      "url": "https://qul.tarteel.ai/resources/morphology/76",
+      "resourceId": "76",
+      "format": "sqlite",
+      "license": "Distributed via QUL",
+      "licenseBn": "QUL-এর মাধ্যমে বিতরণ",
+      "credit": "Quranic morphology via the Quranic Universal Library",
+      "usedFor": "The root of every word, for the word sheet: 1,642 roots, and the 50,298 words that have one",
+      "path": "content/raw/qul/word-root.sqlite.zip",
+      "bytes": 472972,
+      "sha256": "a85c325c669fdf3295f8c150f9fbe780391ec9fc3c29b2c8b37b93083038db69",
       "assetUrl": null
     },
     {

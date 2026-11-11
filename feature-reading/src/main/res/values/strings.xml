@@ -44,6 +44,8 @@
     <string name="reading_footnote_sheet_name">Footnote</string>
     <string name="reading_footnote_heading">Footnote %1$s</string>
     <string name="reading_word_sheet_name">Word meaning</string>
+    <string name="reading_word_root">Root</string>
+    <string name="reading_hear_word">Hear this word</string>
     <string name="reading_sheet_where">%1$s %2$s</string>
     <string name="reading_door_noted">Has a note</string>
 </resources>

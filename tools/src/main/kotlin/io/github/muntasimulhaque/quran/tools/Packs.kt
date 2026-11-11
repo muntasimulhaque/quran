@@ -164,6 +164,20 @@ class Packs(private val root: File) {
             shipped = false,
             ayahs = 6236,
         ),
+        // The root is one small table for the whole Book and no language of
+        // its own: the letters are Arabic and the Latin beside them is the
+        // letters' names (owner decision, this session).
+        Pack(
+            id = "word-root",
+            type = "word-root",
+            name = "Word roots",
+            language = "ar",
+            credit = "Quranic morphology, via the Quranic Universal Library",
+            creditBn = "\u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u09ae\u09b0\u09ab\u09cb\u09b2\u099c\u09bf, \u0995\u09c1\u09b0\u0986\u09a8\u09bf\u0995 \u0987\u0989\u09a8\u09bf\u09ad\u09be\u09b0\u09cd\u09b8\u09be\u09b2 \u09b2\u09be\u0987\u09ac\u09cd\u09b0\u09c7\u09b0\u09bf \u09a5\u09c7\u0995\u09c7",
+            version = "QUL",
+            shipped = false,
+            ayahs = 6236,
+        ),
     )
 
     fun run(): Int {
@@ -506,6 +520,13 @@ class Packs(private val root: File) {
                                 "FROM src.recitation_ayah WHERE recitation = '$reciter'",
                         )
                         statement.execute("CREATE INDEX recitation_ayah_ayah ON recitation_ayah(ayah_number)")
+                    }
+                    "word-root" -> {
+                        statement.execute(
+                            "CREATE TABLE word_root AS SELECT ayah_number, position, arabic, latin, " +
+                                "words_count FROM src.word_root",
+                        )
+                        statement.execute("CREATE INDEX word_root_ayah ON word_root(ayah_number, position)")
                     }
                 }
             }
