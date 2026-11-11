@@ -143,7 +143,7 @@ change, never left as a dead letter.
 | `play-store/` | the listing, the screenshots per form factor, the hand-off AAB |
 | `benchmark/` | the startup profile's generator, development only, never in the bundle |
 | `docs/` | the Pages site and the privacy policy Play links to |
-| `.github/workflows/` | `build.yml` (gates, signed bundle), `instrumented.yml` (nightly data and app tests, signal only), `screenshots.yml` (the store set) |
+| `.github/workflows/` | `build.yml` (gates, signed bundle), `instrumented.yml` (nightly data and app tests, signal only), `screenshots.yml` (dispatch-only capture signal; the store set is local) |
 
 ## Where the rest lives
 
