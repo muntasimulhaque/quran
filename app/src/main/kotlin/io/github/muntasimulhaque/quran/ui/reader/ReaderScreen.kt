@@ -668,6 +668,11 @@ fun ReaderScreen(
                         .toSet(),
                     savedAyahs = savedAyahs,
                     playingAyah = playback.ayahNumber,
+                    // The word whose own voice is sounding, when the sound is
+                    // a sample: the sheet washes it and the pill stays away
+                    // (owner decision, this session).
+                    hearingAyah = playback.sample?.takeIf { playback.isPlaying }?.ayahNumber,
+                    hearingWord = playback.sample?.takeIf { playback.isPlaying }?.position,
                     playedWord = playedWord,
                     onAyahMenu = { ayah, anchor ->
                         menu = AyahMenuRequest(ayah, anchor)

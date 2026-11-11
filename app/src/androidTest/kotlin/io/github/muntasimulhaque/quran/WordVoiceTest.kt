@@ -8,6 +8,7 @@ import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -93,6 +94,29 @@ class WordVoiceTest {
                 compose.onAllNodesWithTag("word-sheet-hear", useUnmergedTree = true)
                     .fetchSemanticsNodes().isNotEmpty()
             }
+        }
+    }
+
+    /**
+     * The speaker answers on the sheet and nowhere else. A word is a sample,
+     * not a session: no capsule rises behind the sheet while it sounds, and
+     * none is left paused after the word ends (owner decision, this session).
+     */
+    @Test
+    fun theWordsVoiceRaisesNoCapsule() {
+        atAyah(FATIHA_FIRST)
+        onTheSheetOf("بِسۡمِ") {
+            compose.onAllNodesWithTag("word-sheet-hear", useUnmergedTree = true)
+                .onFirst()
+                .performClick()
+            // The word is a second or so: past its end, the old rule would
+            // have left the capsule paused at the word's last millisecond.
+            Thread.sleep(2_500)
+            assertTrue(
+                "the word's own voice must raise no capsule",
+                compose.onAllNodesWithTag("playback-bar", useUnmergedTree = true)
+                    .fetchSemanticsNodes().isEmpty(),
+            )
         }
     }
 

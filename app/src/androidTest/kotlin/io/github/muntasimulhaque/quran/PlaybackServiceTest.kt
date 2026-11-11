@@ -19,6 +19,8 @@ import com.google.common.util.concurrent.ListenableFuture
 import io.github.muntasimulhaque.quran.data.ContentDatabase
 import io.github.muntasimulhaque.quran.data.PackCatalog
 import io.github.muntasimulhaque.quran.data.PackStore
+import io.github.muntasimulhaque.quran.data.PlaybackPosition
+import io.github.muntasimulhaque.quran.data.PlaybackPositionStore
 import io.github.muntasimulhaque.quran.playback.PlaybackController
 import io.github.muntasimulhaque.quran.playback.PlaybackService
 import kotlinx.coroutines.CoroutineScope
@@ -32,6 +34,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -187,6 +190,11 @@ class PlaybackServiceTest {
         val playback = PlaybackController(context, scope)
         val database = ContentDatabase.open(context, PackCatalog.load(context), store.installed())
         playback.attach(database)
+        // A place the reader left behind before the word was asked for: the
+        // sample must neither write it nor wipe it (owner decision, this
+        // session).
+        val place = PlaybackPosition("husary", 7, 1_234L)
+        withContext(Dispatchers.IO) { PlaybackPositionStore(context).write(place) }
         val token = SessionToken(context, ComponentName(context, PlaybackService::class.java))
         val main = ContextCompat.getMainExecutor(context)
         val watcherRef = AtomicReference<MediaController>()
@@ -214,10 +222,22 @@ class PlaybackServiceTest {
                 "the word must stop at its end",
                 await(watcher, 5_000) { playing, _ -> !playing },
             )
-            val stopped = readMain { watcher.currentPosition }
+            // The sample is over, so its player is over: no items, no capsule,
+            // and no notification left standing for one word (owner decision,
+            // this session).
             assertTrue(
-                "the stop must land at the word's end: $stopped",
-                stopped in 350L..1_500L,
+                "the sample must take its player with it",
+                await(watcher, 5_000) { _, _ ->
+                    readMain { watcher.mediaItemCount == 0 }
+                },
+            )
+            val state = readMain { playback.state.value }
+            assertNull("a sample must leave no capsule", state.sample)
+            assertNull("a sample must leave no ayah marked", state.ayahNumber)
+            assertEquals(
+                "a word's end is not the listening place",
+                place,
+                withContext(Dispatchers.IO) { PlaybackPositionStore(context).read() },
             )
         } finally {
             InstrumentationRegistry.getInstrumentation().runOnMainSync {
@@ -231,6 +251,7 @@ class PlaybackServiceTest {
             InstrumentationRegistry.getInstrumentation().runOnMainSync {
                 playback.release()
             }
+            withContext(Dispatchers.IO) { PlaybackPositionStore(context).clear() }
             scope.cancel()
             reading.close()
         }

@@ -13,13 +13,19 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import io.github.muntasimulhaque.quran.core.Arabic
@@ -70,6 +76,12 @@ import io.github.muntasimulhaque.quran.ui.theme.prose
  * SemiBold, then the place in the same 13 meta line the footnote sheet
  * wears. The word remains the subject under both (owner decision, this
  * session).
+ *
+ * **While the word sounds, the word is washed** (owner decision, this
+ * session). One word is a sample, not a session, so there is no capsule and
+ * no notification left behind; the sheet gives the tap its answer where the
+ * finger is. The word wears the reading's own recited-word mark, the same
+ * rounded wash the verse uses, and it rests when the word does.
  */
 internal data class OpenWord(
     val word: String,
@@ -98,9 +110,14 @@ internal fun WordSheet(
     onDismiss: () -> Unit,
     /** The word's own voice, when the audio for it is on the device. */
     onHear: (() -> Unit)? = null,
+    /** True while this word's own voice is sounding. */
+    hearing: Boolean = false,
 ) {
     val sheetState = rememberExpandedSheetState()
     val palette = LocalPagePalette.current
+    // The word's shaped line, so the wash can sit on the letters rather than
+    // on the width the sheet gives it (owner decision, this session).
+    var wordLayout by remember(word.word) { mutableStateOf<TextLayoutResult?>(null) }
     AppSheet(
         onDismiss = onDismiss,
         sheetState = sheetState,
@@ -176,9 +193,21 @@ internal fun WordSheet(
                 style = arabicStyle(hafs, metrics.arabicSp, metrics.arabicLineSp, palette.ink),
                 textAlign = TextAlign.Center,
                 maxLines = 1,
+                onTextLayout = { wordLayout = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = Space.Block)
+                    .drawWithContent {
+                        val layout = wordLayout
+                        if (hearing && layout != null) {
+                            drawWordWash(
+                                layout,
+                                layout.layoutInput.text.indices,
+                                palette.highlight,
+                            )
+                        }
+                        drawContent()
+                    }
                     .semantics {
                         contentDescription = Arabic.portableText(word.word)
                     },

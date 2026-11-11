@@ -203,6 +203,14 @@ internal fun BottomStack(
     }
 }
 
-/** How anything playing or pending shows at the foot of the page. */
+/**
+ * How anything playing or pending shows at the foot of the page.
+ *
+ * A word's own voice is a sample, not a session: it raises no capsule, so a
+ * sample is never anything (owner decision, this session).
+ */
 internal fun PlaybackUiState.isAnything(): Boolean =
-    ayahNumber != null || unavailable || pendingDownloadSurah != null || downloadFailed || error
+    sample == null && (
+        ayahNumber != null || unavailable || pendingDownloadSurah != null ||
+            downloadFailed || error
+        )

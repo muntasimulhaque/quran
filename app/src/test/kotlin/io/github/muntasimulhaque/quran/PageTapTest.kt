@@ -2,9 +2,13 @@ package io.github.muntasimulhaque.quran
 
 import io.github.muntasimulhaque.quran.playback.ListenOffer
 import io.github.muntasimulhaque.quran.playback.PlaybackUiState
+import io.github.muntasimulhaque.quran.playback.WordSample
 import io.github.muntasimulhaque.quran.ui.reader.RaisedAnswer
+import io.github.muntasimulhaque.quran.ui.reader.isAnything
 import io.github.muntasimulhaque.quran.ui.reader.raisedAnswer
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -32,6 +36,7 @@ class PageTapTest {
         progress: Float? = null,
         downloadFailed: Boolean = false,
         error: Boolean = false,
+        sample: WordSample? = null,
     ) = PlaybackUiState(
         connected = true,
         isPlaying = isPlaying,
@@ -42,6 +47,7 @@ class PageTapTest {
         downloadProgress = progress,
         downloadFailed = downloadFailed,
         error = error,
+        sample = sample,
     )
 
     private fun offer(progress: Float?, failed: Boolean = false) = ListenOffer(
@@ -133,6 +139,41 @@ class PageTapTest {
         assertEquals(
             RaisedAnswer.Nothing,
             raisedAnswer(PlaybackUiState(), offer(0.42f)),
+        )
+    }
+
+    @Test
+    fun aWordSampleRaisesNoCapsule() {
+        assertFalse(
+            "a sample must raise nothing at the foot",
+            PlaybackUiState(
+                sample = WordSample(1, 1),
+                isPlaying = true,
+                ayahNumber = 1,
+            ).isAnything(),
+        )
+        assertFalse(
+            "a sample that has ended must raise nothing either",
+            PlaybackUiState(sample = WordSample(1, 1), ayahNumber = 1).isAnything(),
+        )
+        assertTrue(
+            "a recitation is still a capsule",
+            PlaybackUiState(ayahNumber = 1).isAnything(),
+        )
+    }
+
+    @Test
+    fun aWordSampleHasNothingToPutAway() {
+        assertEquals(
+            RaisedAnswer.Nothing,
+            raisedAnswer(
+                state(isPlaying = true, ayahNumber = 1, sample = WordSample(1, 1)),
+                null,
+            ),
+        )
+        assertEquals(
+            RaisedAnswer.Nothing,
+            raisedAnswer(state(ayahNumber = 1, sample = WordSample(1, 1)), null),
         )
     }
 }

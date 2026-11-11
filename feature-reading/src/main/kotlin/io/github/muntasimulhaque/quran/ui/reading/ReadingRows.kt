@@ -72,6 +72,10 @@ internal fun ReadingRows(
     playingAyah: Int?,
     /** The word being recited, read inside the one ayah being heard. */
     playedWord: State<Int?>,
+    /** The ayah whose word is sounding, when the sound is a word sample. */
+    hearingAyah: Int? = null,
+    /** The sounding word's position in its ayah, when the sound is a sample. */
+    hearingWord: Int? = null,
     hafs: FontFamily,
     pageDescription: String,
     onAyahMenu: (Ayah, IntRect) -> Unit,
@@ -353,6 +357,7 @@ internal fun ReadingRows(
             } else {
                 null
             },
+            hearing = open.ayahNumber == hearingAyah && open.position == hearingWord,
         )
     }
 }

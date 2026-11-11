@@ -135,6 +135,29 @@ class PlaybackController(
      */
     private var stoppedAtAyahEnd = false
 
+    /**
+     * True once the word's own voice has started, so its pause is its end.
+     * A sample that never starts is not finished by the start's own pause.
+     */
+    private var sampleStarted = false
+
+    /**
+     * The word's last millisecond, so a pause that arrives before the app has
+     * seen the sample start is still read as the end when it lands there. A
+     * short word can begin and finish between two listener events (owner
+     * decision, this session).
+     */
+    private var sampleEndMs: Long? = null
+
+    /** The media item the sample sounds in, so another item's pause is not its end. */
+    private var sampleItemId: String? = null
+
+    /**
+     * True while the sample's player is being taken apart, so the events that
+     * teardown raises are not published as a recitation.
+     */
+    private var sampleClearing = false
+
     private val _state = MutableStateFlow(PlaybackUiState())
     val state: StateFlow<PlaybackUiState> = _state.asStateFlow()
 
@@ -237,6 +260,10 @@ class PlaybackController(
      */
     suspend fun play(recitation: String, ayahNumber: Int, resume: Boolean = true) {
         clearPauseAt()
+        // A real Play is a session, and a word sample is not one: the sample
+        // and its player go first, so no stop is left armed in the verse the
+        // reader is now hearing (owner decision, this session).
+        if (_state.value.sample != null) finishSample()
         downloadJob?.cancel()
         downloadJob = null
         // The pill's download voice goes at once, not at the end of the
@@ -621,9 +648,10 @@ class PlaybackController(
      * The reader pressed and held a word and then asked to hear it, so the
      * answer is that word and not the verse: the player is handed the word's
      * own region, which the timings already carry, and the service pauses at
-     * its end. The pill follows, because the word is heard in the same one
-     * player as everything else, and a reader who wants the rest of the verse
-     * is one tap from it (owner decision, this session).
+     * its end. The pill does not follow: one word is a sample, not a session.
+     * The sheet's speaker is the whole of it, the state says which word is
+     * sounding so the sheet can wash it, and the sample takes the player away
+     * at the word's last millisecond (owner decision, this session).
      *
      * False when the audio or the word's own region is not on the device: the
      * sheet only offers the mark for a surah it can hear, so this is the
@@ -648,10 +676,23 @@ class PlaybackController(
         // The word's own tap may not ask for a whole surah: if the playlist
         // is not here, the answer is nothing, and the sheet's mark is gone
         // the next time the rows are read.
+        sampleStarted = false
+        sampleEndMs = segment.endMs
+        sampleItemId = RecitationPlaylist.mediaId(ayah.number, ayah.surah)
+        _state.value = _state.value.copy(sample = WordSample(ayahNumber, position))
         if (!startPlayback(recitation, ayahNumber, resume = false, fromMs = segment.startMs, offerDownload = false)) {
+            sampleEndMs = null
+            sampleItemId = null
+            _state.value = _state.value.copy(sample = null)
             return false
         }
-        val player = controller ?: return false
+        val player = controller
+        if (player == null) {
+            sampleEndMs = null
+            sampleItemId = null
+            _state.value = _state.value.copy(sample = null)
+            return false
+        }
         // The stop names the item it belongs to. The service keeps it across
         // the start's own item change, so the word is heard from its first
         // sound and the stop is armed without waiting for the player.
@@ -793,6 +834,27 @@ class PlaybackController(
      * is marked, and the next Play starts from the reader's place.
      */
     private fun clearRecitation() {
+        sampleStarted = false
+        sampleEndMs = null
+        sampleItemId = null
+        releaseItems()
+        _state.value = PlaybackUiState(connected = true, speed = speed)
+        // Where the recitation was heard is not a place to offer the reader
+        // again: they put it away, or it reached the end they asked for.
+        heardAyah = null
+        syncTicker()
+        scope.launch { positionStore.clear() }
+    }
+
+    /**
+     * Takes everything the player holds away, so the pill, the phone's own
+     * notification, and the reading's mark have nothing left to stand on.
+     *
+     * The place is the caller's to keep or clear. A word sample never touched
+     * it, so its end takes the player and nothing else (owner decision, this
+     * session).
+     */
+    private fun releaseItems() {
         clearPauseAt()
         val player = controller
         // Paused first, so a player that was ready to play is not left armed
@@ -802,12 +864,56 @@ class PlaybackController(
         player?.clearMediaItems()
         stoppedAtAyahEnd = false
         segmentsByAyah.clear()
+    }
+
+    /**
+     * The word's own voice is over, so the sample goes with it.
+     *
+     * A word is heard, not kept: the pill and the media notification are a
+     * session's, and a sample raises neither. The player's items go, and the
+     * state returns to nothing. The saved listening place is left as it was,
+     * because a glance at a word is not where the recitation was heard (owner
+     * decision, this session).
+     */
+    private fun finishSample() {
+        if (sampleClearing || _state.value.sample == null) return
+        sampleClearing = true
+        sampleStarted = false
+        sampleEndMs = null
+        sampleItemId = null
+        releaseItems()
         _state.value = PlaybackUiState(connected = true, speed = speed)
-        // Where the recitation was heard is not a place to offer the reader
-        // again: they put it away, or it reached the end they asked for.
-        heardAyah = null
         syncTicker()
-        scope.launch { positionStore.clear() }
+        sampleClearing = false
+    }
+
+    /**
+     * True when the word's own voice has just finished, and the sample was put
+     * away with it.
+     *
+     * The player's pause is the end: its play flag goes false at the word's
+     * last millisecond. A stall that keeps the play armed is not an end, and a
+     * sample that never started (the item is still on its way) is not one
+     * either, so [sampleStarted] is the gate. A word short enough to begin and
+     * finish between two events is read from the position it paused at, which
+     * is its own end (owner decision, this session).
+     */
+    private fun finishSampleIfDone(player: Player): Boolean {
+        if (_state.value.sample == null) {
+            sampleStarted = false
+            return false
+        }
+        if (player.playWhenReady) {
+            sampleStarted = true
+            return false
+        }
+        if (!sampleStarted) {
+            val end = sampleEndMs ?: return false
+            if (player.currentMediaItem?.mediaId != sampleItemId) return false
+            if (player.currentPosition < end) return false
+        }
+        finishSample()
+        return true
     }
 
     /**
@@ -1045,6 +1151,12 @@ class PlaybackController(
             // One file that will not play is not a reason to take the reading
             // down: the pill says so and offers the one action that can help.
             android.util.Log.w(TAG, "the recitation could not be played", error)
+            // A word that will not sound leaves no pill to retry: the sample
+            // is over the moment it failed (owner decision, this session).
+            if (_state.value.sample != null) {
+                finishSample()
+                return
+            }
             _state.value = _state.value.copy(isPlaying = false, error = true)
             heardAyah = null
             syncTicker()
@@ -1059,6 +1171,10 @@ class PlaybackController(
          * keeps its place and its transport (owner decision).
          */
         override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+            // A sample's pause is its end, and [publish] finishes it; it is
+            // not the reader's Stop after this ayah (owner decision, this
+            // session).
+            if (_state.value.sample != null) return
             if (playWhenReady) {
                 stoppedAtAyahEnd = false
                 return
@@ -1076,6 +1192,12 @@ class PlaybackController(
 
         override fun onPlaybackStateChanged(playbackState: Int) {
             if (playbackState != Player.STATE_ENDED) return
+            // A sample that reaches the file's end ends with it; it never
+            // walks the surah's ending rule (owner decision, this session).
+            if (_state.value.sample != null) {
+                finishSample()
+                return
+            }
             val player = controller
             val surah = _state.value.surah
             // The playlist ran out, so the surah is over whatever the answer
@@ -1127,6 +1249,7 @@ class PlaybackController(
 
     /** The place, written once at the pace the hidden reading needs and no faster. */
     private fun checkpointPlace() {
+        if (_state.value.sample != null || sampleClearing) return
         val player = controller ?: return
         if (player.playbackState == Player.STATE_ENDED) return
         if (stoppedAtAyahEnd && !player.playWhenReady) return
@@ -1153,6 +1276,8 @@ class PlaybackController(
 
     private fun publish(player: Player?) {
         val player = player ?: return
+        if (sampleClearing) return
+        if (finishSampleIfDone(player)) return
         // An ended player still carries its last media item, and reading it
         // would light the final ayah as if it were being recited. When the
         // surah is over the state says so itself, with no ayah marked.
@@ -1192,6 +1317,9 @@ class PlaybackController(
      */
     private fun rememberHeard(recitation: String?, ayahNumber: Int, at: Long, playing: Boolean) {
         if (recitation == null) return
+        // A word's own voice is a sample, not the recitation: its offset is
+        // never the place the reader left (owner decision, this session).
+        if (_state.value.sample != null) return
         val moved = heardAyah != ayahNumber
         heardAyah = ayahNumber
         val now = System.currentTimeMillis()

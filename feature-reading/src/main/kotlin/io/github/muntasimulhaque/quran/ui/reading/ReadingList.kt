@@ -78,6 +78,10 @@ fun ReadingList(
     playingAyah: Int?,
     /** The word being recited, read only by the ayah being heard. */
     playedWord: State<Int?>,
+    /** The ayah whose word is sounding, when the sound is a word sample. */
+    hearingAyah: Int? = null,
+    /** The sounding word's position in its ayah, when the sound is a sample. */
+    hearingWord: Int? = null,
     onAyahMenu: (Ayah, IntRect) -> Unit,
     onBackgroundTap: () -> Unit,
     onScrolled: () -> Unit,
@@ -182,6 +186,8 @@ fun ReadingList(
         savedAyahs = savedAyahs,
         playingAyah = playingAyah,
         playedWord = playedWord,
+        hearingAyah = hearingAyah,
+        hearingWord = hearingWord,
         hafs = hafs,
         pageDescription = pageDescription,
         onAyahMenu = onAyahMenu,

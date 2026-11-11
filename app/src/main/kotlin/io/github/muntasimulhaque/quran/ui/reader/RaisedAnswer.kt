@@ -27,6 +27,10 @@ import io.github.muntasimulhaque.quran.playback.PlaybackUiState
  *    would strand that mark with no control left to clear it; a failure and
  *    an unavailable answer are cleared the same way; the offer is answered
  *    "not now" exactly as its own close used to answer it.
+ *
+ * A word's own voice is not one of these: it is a sample, not a session, it
+ * raises no capsule, and it ends itself. So a tap on the page has nothing to
+ * put away while one sounds (owner decision, this session).
  */
 internal enum class RaisedAnswer {
 
@@ -59,6 +63,9 @@ internal fun raisedAnswer(
     } else {
         RaisedAnswer.Nothing
     }
+    // A sample is a word's own voice, not a session: nothing at the foot
+    // answers it, and it takes itself away at the word's end.
+    state.sample != null -> RaisedAnswer.Nothing
     state.error -> RaisedAnswer.StopRecitation
     state.downloadFailed -> RaisedAnswer.CancelDownload
     state.downloadProgress != null -> RaisedAnswer.Nothing

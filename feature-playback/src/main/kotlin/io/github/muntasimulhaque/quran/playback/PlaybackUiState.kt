@@ -40,4 +40,20 @@ data class PlaybackUiState(
     val downloadFailure: DownloadError? = null,
     /** True when the player itself could not play: a missing file, a dead service. */
     val error: Boolean = false,
+    /**
+     * The word whose own voice is sounding, or null while no sample is.
+     *
+     * A word is a sample, not a session: it raises no capsule and leaves no
+     * place to come back to. The reading washes that word on the sheet while
+     * it sounds, and the sample takes its player away at the word's last
+     * millisecond rather than staying paused as a recitation does (owner
+     * decision, this session).
+     */
+    val sample: WordSample? = null,
+)
+
+/** The one word the reader asked to hear: its ayah and its position in it. */
+data class WordSample(
+    val ayahNumber: Int,
+    val position: Int,
 )
