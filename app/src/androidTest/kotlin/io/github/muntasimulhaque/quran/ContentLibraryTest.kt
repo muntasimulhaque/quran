@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertFalse
@@ -202,12 +203,17 @@ class ContentLibraryTest {
         val context = ApplicationProvider.getApplicationContext<Application>()
         val store = PackStore(context)
         val settings = SettingsStore(context)
+        val original = settings.settings.first()
         // The state a reader who turned the aid on before the root existed
         // is in: the list is here, the root is not, and the aid is on. The
         // app has to bring the root without another tap (owner report).
+        settings.setUiLanguage("en")
         store.install("words-en")
         store.remove("word-root")
-        settings.removePendingPacks(setOf("word-root"))
+        // Another class in this process may have left a pack on the queue;
+        // the drain would stop at a tafsir waiting for Wi-Fi and never reach
+        // the root. The test owns the queue while it runs.
+        settings.removePendingPacks(settings.pendingPacks())
         settings.setWordByWord(true)
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
         val opened = CompletableDeferred<ContentLibrary.Opening>()
@@ -242,6 +248,7 @@ class ContentLibraryTest {
             scope.cancel()
             settings.setWordByWord(false)
             settings.removePendingPacks(setOf("word-root"))
+            original.uiLanguage?.let { settings.setUiLanguage(it) }
             store.remove("word-root")
         }
     }

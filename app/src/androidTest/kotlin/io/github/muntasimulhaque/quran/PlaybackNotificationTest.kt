@@ -102,8 +102,15 @@ class PlaybackNotificationTest {
                 controller.prepare()
             }
 
+            // The notification is rebuilt as the player's commands settle.
+            // Waiting for the play mark alone read a list that still had only
+            // previous and play, so the next mark was asserted before the
+            // player had offered it (owner report, this session).
             val posted = awaitNotification(manager, context) { actions ->
-                actions.any { it.getIcon().resId == PlaybackR.drawable.ic_transport_play }
+                val icons = actions.map { it.getIcon().resId }
+                PlaybackR.drawable.ic_transport_previous in icons &&
+                    PlaybackR.drawable.ic_transport_play in icons &&
+                    PlaybackR.drawable.ic_transport_next in icons
             }
             assertTheNotificationCarriesAppMarks(posted.notification.actions.map { it.getIcon().resId })
 
