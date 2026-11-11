@@ -747,7 +747,13 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         if (!show) {
             settings = settings.copy(wordByWord = false)
             clearRowCache()
-            viewModelScope.launch { settingsStore.setWordByWord(false) }
+            viewModelScope.launch {
+                settingsStore.setWordByWord(false)
+                // A root still to come was the aid's other half, so it
+                // leaves the queue with the aid. Bytes already here stay
+                // (owner report, this session).
+                settingsStore.removePendingPacks(setOf(ContentDatabase.WORD_ROOT_PACK))
+            }
             return
         }
         // The meanings speak the reader's own language, the same one search
@@ -758,16 +764,19 @@ class ReaderViewModel(application: Application) : AndroidViewModel(application) 
         // aid on, because a switch that shows nothing is not a working switch.
         val wanted = wantedWordsPack()
         val pack = library.pack(wanted) ?: return
+        // The root travels with the meanings: the sheet names it under the
+        // gloss, and a reader who asked for the words asked for what the
+        // words are. It is asked for before the list's own check, because a
+        // list downloaded before this build has no root beside it and the
+        // switch is the one door that fetches the pair (owner report, this
+        // session).
+        library.installIfMissing(ContentDatabase.WORD_ROOT_PACK, select = false)
         if (library.isInstalled(wanted)) {
             settings = settings.copy(wordByWord = true)
             clearRowCache()
             viewModelScope.launch { settingsStore.setWordByWord(true) }
             return
         }
-        // The root travels with the meanings: the sheet names it under the
-        // gloss, and a reader who asked for the words asked for what the
-        // words are (owner decision, this session).
-        library.installIfMissing(ContentDatabase.WORD_ROOT_PACK, select = false)
         library.install(pack.id, select = true)
     }
 

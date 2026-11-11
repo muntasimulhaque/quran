@@ -631,13 +631,20 @@ class PlaybackController(
      */
     suspend fun hearWord(recitation: String, ayahNumber: Int, position: Int): Boolean {
         val database = content ?: return false
-        withContext(Dispatchers.IO) { database.ayah(ayahNumber) } ?: return false
+        val ayah = withContext(Dispatchers.IO) { database.ayah(ayahNumber) } ?: return false
         val audio = withContext(Dispatchers.IO) {
             database.recitationAyah(recitation, ayahNumber)
         } ?: return false
         val segment = audio.segments.firstOrNull {
             position >= it.wordFrom && position <= it.wordTo
         } ?: return false
+        // The stop is a position in the item this request is for, and the
+        // service takes a stop off whenever the player's item changes. A
+        // stop sent before the word's own item is taken is cleared by the
+        // start itself, and the word plays on into the verse (owner report,
+        // this session). The previous stop goes first, then the item is
+        // waited for, and only then is the new stop armed.
+        clearPauseAt()
         // The word's own tap may not ask for a whole surah: if the playlist
         // is not here, the answer is nothing, and the sheet's mark is gone
         // the next time the rows are read.
@@ -645,7 +652,10 @@ class PlaybackController(
             return false
         }
         val player = controller ?: return false
-        pauseAt(player, segment.endMs)
+        // The stop names the item it belongs to. The service keeps it across
+        // the start's own item change, so the word is heard from its first
+        // sound and the stop is armed without waiting for the player.
+        pauseAt(player, segment.endMs, RecitationPlaylist.mediaId(ayah.number, ayah.surah))
         return true
     }
 
@@ -655,12 +665,15 @@ class PlaybackController(
      * for it because the Player interface a controller speaks has no such
      * method (owner decision, this session).
      */
-    private fun pauseAt(player: MediaController, atMs: Long) {
+    private fun pauseAt(player: MediaController, atMs: Long, itemId: String) {
         val command = SessionCommand(PlaybackService.COMMAND_PAUSE_AT, Bundle.EMPTY)
         if (!player.availableSessionCommands.contains(command)) return
         player.sendCustomCommand(
             command,
-            Bundle().apply { putLong(PlaybackService.ARG_PAUSE_AT_MS, atMs) },
+            Bundle().apply {
+                putLong(PlaybackService.ARG_PAUSE_AT_MS, atMs)
+                putString(PlaybackService.ARG_PAUSE_AT_ITEM, itemId)
+            },
         )
     }
 

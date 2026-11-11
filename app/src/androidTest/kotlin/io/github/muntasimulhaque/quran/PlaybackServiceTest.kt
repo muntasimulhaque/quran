@@ -16,7 +16,17 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.util.concurrent.ListenableFuture
+import io.github.muntasimulhaque.quran.data.ContentDatabase
+import io.github.muntasimulhaque.quran.data.PackCatalog
+import io.github.muntasimulhaque.quran.data.PackStore
+import io.github.muntasimulhaque.quran.playback.PlaybackController
 import io.github.muntasimulhaque.quran.playback.PlaybackService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -161,6 +171,67 @@ class PlaybackServiceTest {
                 controller.stop()
             }
             release(controller, future)
+            reading.close()
+        }
+    }
+
+    @Test
+    fun theWordsOwnVoiceStopsAtItsEnd() = runBlocking {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val reading = ActivityScenario.launch<MainActivity>(
+            Intent(context, MainActivity::class.java),
+        )
+        val store = PackStore(context)
+        store.install("reciter-husary")
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+        val playback = PlaybackController(context, scope)
+        val database = ContentDatabase.open(context, PackCatalog.load(context), store.installed())
+        playback.attach(database)
+        val token = SessionToken(context, ComponentName(context, PlaybackService::class.java))
+        val main = ContextCompat.getMainExecutor(context)
+        val watcherRef = AtomicReference<MediaController>()
+        val connected = CountDownLatch(1)
+        val built = MediaController.Builder(context, token).buildAsync()
+        built.addListener(
+            {
+                watcherRef.set(built.get())
+                connected.countDown()
+            },
+            main,
+        )
+        assertTrue("the watcher must connect", connected.await(20, TimeUnit.SECONDS))
+        val watcher = watcherRef.get()
+        try {
+            assertTrue(
+                "the word must start",
+                withContext(Dispatchers.Main) { playback.hearWord("husary", 1, 1) },
+            )
+            assertTrue(
+                "the word must start playing",
+                await(watcher, 15_000) { playing, _ -> playing },
+            )
+            assertTrue(
+                "the word must stop at its end",
+                await(watcher, 5_000) { playing, _ -> !playing },
+            )
+            val stopped = readMain { watcher.currentPosition }
+            assertTrue(
+                "the stop must land at the word's end: $stopped",
+                stopped in 350L..1_500L,
+            )
+        } finally {
+            InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                watcher.pause()
+                watcher.clearMediaItems()
+                watcher.stop()
+            }
+            InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                MediaController.releaseFuture(built)
+            }
+            InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                playback.release()
+            }
+            scope.cancel()
             reading.close()
         }
     }

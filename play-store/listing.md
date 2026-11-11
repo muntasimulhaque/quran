@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 17.7 (versionCode 179)
+Version: 17.8 (versionCode 180)
 
 ## Listing
 
@@ -184,6 +184,9 @@ What each set shows, in order:
 The last frame is last on purpose. The offer stays on the reading until the
 reader answers it (Download, the page, or Back), so every frame that wants a
 clean page is taken before it.
+
+## Release notes (17.8, 487 characters)
+17.8 brings the word root to readers who already had word meanings on, and keeps a word's voice to that word. The root was in 17.7's content, but an existing word list never asked for it; it now arrives once on Wi-Fi after the first page, and turning word meanings off and on fetches it at once. The speaker on the word sheet stops at the word's end instead of playing on into the verse. Text, translations, tafsirs, word lists, and audio are unchanged. No ads, no trackers, no accounts.
 
 ## Release notes (17.7, 496 characters)
 17.7 rights four things. A voice chosen on the playing pill is heard from the ayah playing now, not the one Play was pressed on. A saved ayah no longer wears a bookmark beside its number; its menu row says Saved, and the verse still tells a screen reader. The word sheet names the word's root and offers a speaker that says it in your reciter, stopping at its end. The content adds the roots of 50,298 words; text, translations, tafsirs, and audio are unchanged. No ads, no trackers, no accounts.

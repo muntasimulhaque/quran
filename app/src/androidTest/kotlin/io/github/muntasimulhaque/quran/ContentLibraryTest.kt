@@ -197,6 +197,55 @@ class ContentLibraryTest {
         }
     }
 
+    @Test
+    fun aWordAidWhoseListWasAlreadyHereIsGivenItsRoot() = runBlocking {
+        val context = ApplicationProvider.getApplicationContext<Application>()
+        val store = PackStore(context)
+        val settings = SettingsStore(context)
+        // The state a reader who turned the aid on before the root existed
+        // is in: the list is here, the root is not, and the aid is on. The
+        // app has to bring the root without another tap (owner report).
+        store.install("words-en")
+        store.remove("word-root")
+        settings.removePendingPacks(setOf("word-root"))
+        settings.setWordByWord(true)
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+        val opened = CompletableDeferred<ContentLibrary.Opening>()
+        val library = ContentLibrary(
+            application = context,
+            scope = scope,
+            settingsStore = settings,
+            settings = { AppSettings(wordByWord = true) },
+            onInstalled = { _, _ -> },
+            onOpened = { opening -> opened.complete(opening) },
+            onReopened = { },
+            onRemoved = { _, _ -> },
+        )
+        try {
+            library.open()
+            withTimeout(60_000) { opened.await() }
+            // The build carries the root, so the queue places it without a
+            // network; the wait is for the copy and the reopen, not a
+            // download.
+            withTimeout(60_000) {
+                while (!library.isInstalled("word-root")) delay(50)
+            }
+            withTimeout(60_000) {
+                while ("word-root" in settings.pendingPacks()) delay(50)
+            }
+            assertTrue(
+                "the aid's root follows the list already on the device",
+                library.isInstalled("word-root"),
+            )
+        } finally {
+            library.retire()
+            scope.cancel()
+            settings.setWordByWord(false)
+            settings.removePendingPacks(setOf("word-root"))
+            store.remove("word-root")
+        }
+    }
+
     /** Waits for the library's own state to catch up with its callback. */
     private suspend fun awaitInstalled(library: ContentLibrary, id: String, present: Boolean) {
         withTimeout(60_000) {

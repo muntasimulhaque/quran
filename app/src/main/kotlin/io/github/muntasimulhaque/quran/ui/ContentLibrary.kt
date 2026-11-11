@@ -228,6 +228,18 @@ class ContentLibrary(
             // A pack this build no longer offers leaves the reader's choices
             // and the device before the library is opened over them.
             val repaired = repairTranslations(storedNow, catalogNow)
+            // The root is the other half of a word list the reader already
+            // asked for. A reader whose aid was on before this build asked
+            // before the root existed, so the root joins the queue and
+            // arrives quietly on an unmetered connection, after the first
+            // page (owner report, this session).
+            if (repaired.wordByWord) {
+                val words = catalogNow.get(ContentDatabase.wordsPackId(repaired.readingLanguage))
+                val root = catalogNow.get(ContentDatabase.WORD_ROOT_PACK)
+                if (words?.installed == true && root?.installed == false) {
+                    settingsStore.addPendingPacks(setOf(root.id))
+                }
+            }
             val installedAfter = store.installed()
             val catalogAfter = catalogNow.withInstalled(installedAfter)
             val opened = runCatching {
@@ -513,7 +525,10 @@ class ContentLibrary(
      * connection interrupts is picked up on the next attempt instead of being
      * forgotten. The tafsir waits for an unmetered connection, so a language
      * choice never spends the reader's data on the big pack without being
-     * told; the translation, which is small, arrives on any connection.
+     * told, and a root the app brings on its own waits for Wi-Fi; the
+     * translation, which is small, arrives on any connection. A pack the
+     * build itself carries is placed without a network, so no connection
+     * can hold it back (owner decision, this session).
      */
     suspend fun drainPending() {
         drainPendingPacks()
@@ -537,7 +552,8 @@ class ContentLibrary(
                 val next = settingsStore.pendingPacks().firstOrNull { id ->
                     val pack = catalog.get(id) ?: return@firstOrNull false
                     database?.installedPack(id) != true &&
-                        (pack.type != PackType.Tafsir || packUpdater.canRefresh())
+                        (pack.type != PackType.Tafsir && pack.type != PackType.WordRoot ||
+                            packUpdater.canRefresh() || store.hasAsset(pack.id))
                 } ?: break
                 if (!installNow(next)) break
                 // The queue is the reader's past ask, not this moment's: its

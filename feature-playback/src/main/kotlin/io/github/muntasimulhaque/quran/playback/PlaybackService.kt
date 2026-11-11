@@ -6,6 +6,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -48,6 +49,15 @@ class PlaybackService : MediaSessionService() {
      */
     private var pauseAtMs = C.TIME_UNSET
 
+    /** The media item the stop belongs to, so the start's own change keeps it. */
+    private var pauseAtItem: String? = null
+
+    /** Whether the word's item has played since the stop was armed. */
+    private var pauseAtStarted = false
+
+    /** When the stop was armed, so a request that never starts is given up. */
+    private var pauseAtArmedAt = 0L
+
     private val mainHandler = Handler(Looper.getMainLooper())
 
 
@@ -61,16 +71,42 @@ class PlaybackService : MediaSessionService() {
             val player = player ?: return
             val at = pauseAtMs
             if (at == C.TIME_UNSET) return
-            // The word's stop belongs to the playback that was asked for and
-            // to nothing else: a finish, an end, or a pause from anywhere
-            // (the reader, a headset, the shade) takes it off the player
-            // instead of leaving a tick running behind a paused verse.
-            if (player.playbackState == Player.STATE_ENDED || !player.playWhenReady) {
-                pauseAtMs = C.TIME_UNSET
+            val expected = pauseAtItem
+            val current = player.currentMediaItem?.mediaId
+            val now = SystemClock.uptimeMillis()
+            // The stop belongs to one item. The word's own start is the item
+            // change the stop was armed for, so it waits for that item
+            // instead of being taken off by the start (owner report, this
+            // session). An item that never arrives is given up.
+            if (expected != null && current != expected) {
+                if (now - pauseAtArmedAt > PAUSE_AT_WAIT_MS) {
+                    clearPauseAt()
+                    return
+                }
+                mainHandler.postDelayed(this, PAUSE_AT_STEP_MS)
+                return
+            }
+            if (player.playbackState == Player.STATE_ENDED) {
+                clearPauseAt()
+                return
+            }
+            if (player.playWhenReady) {
+                pauseAtStarted = true
+            } else if (pauseAtStarted) {
+                // A real pause after the word started takes the stop with it.
+                clearPauseAt()
+                return
+            } else if (now - pauseAtArmedAt > PAUSE_AT_WAIT_MS) {
+                // The play never started; do not leave a stop waiting.
+                clearPauseAt()
+                return
+            } else {
+                // The play command may still be on its way; keep the stop.
+                mainHandler.postDelayed(this, PAUSE_AT_STEP_MS)
                 return
             }
             if (player.playbackState == Player.STATE_READY && player.currentPosition >= at) {
-                pauseAtMs = C.TIME_UNSET
+                clearPauseAt()
                 player.pause()
                 return
             }
@@ -185,7 +221,11 @@ class PlaybackService : MediaSessionService() {
                 }
 
                 override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-                    clearPauseAt()
+                    // A stop belongs to one item. A move to another item takes
+                    // it off; the word's own start is the move the stop was
+                    // armed for, so that one keeps it (owner report, this
+                    // session).
+                    if (mediaItem?.mediaId != pauseAtItem) clearPauseAt()
                 }
 
                 override fun onPlaybackStateChanged(playbackState: Int) {
@@ -246,6 +286,12 @@ class PlaybackService : MediaSessionService() {
                     val at = args.getLong(ARG_PAUSE_AT_MS, -1L)
                     if (at >= 0) {
                         pauseAtMs = at
+                        pauseAtItem = args.getString(ARG_PAUSE_AT_ITEM)
+                        // A stop sent to a player already playing is a pause
+                        // away from clearing; one sent for a start still on
+                        // its way waits for the first play.
+                        pauseAtStarted = player?.playWhenReady == true
+                        pauseAtArmedAt = SystemClock.uptimeMillis()
                         mainHandler.postDelayed(pauseAtTick, PAUSE_AT_STEP_MS)
                     }
                     return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
@@ -262,6 +308,9 @@ class PlaybackService : MediaSessionService() {
     private fun clearPauseAt() {
         mainHandler.removeCallbacks(pauseAtTick)
         pauseAtMs = C.TIME_UNSET
+        pauseAtItem = null
+        pauseAtStarted = false
+        pauseAtArmedAt = 0L
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
@@ -296,6 +345,16 @@ class PlaybackService : MediaSessionService() {
 
         /** The command's one argument: the media millisecond to pause at. */
         const val ARG_PAUSE_AT_MS = "pause_at_ms"
+
+        /** The command's second argument: the media item the stop belongs to. */
+        const val ARG_PAUSE_AT_ITEM = "pause_at_item"
+
+        /**
+         * How long a stop waits for its item and its play before it is given
+         * up. This is a guard on a request that never starts, never a delay
+         * before the word is heard.
+         */
+        const val PAUSE_AT_WAIT_MS = 3_000L
 
         /** How often the word's stop looks at the player: a fraction of a word. */
         const val PAUSE_AT_STEP_MS = 50L

@@ -179,6 +179,15 @@ class PackStore(private val context: Context) {
         ?: emptySet()
 
     /**
+     * Whether this build carries the pack in its own assets, so placing it
+     * needs no network. A development build carries every pack; a release
+     * carries the shipped ones. The asset is the same door [install] opens
+     * first (owner decision, this session).
+     */
+    fun hasAsset(id: String): Boolean =
+        SafePaths.validId(id) && context.assets.list("packs")?.contains("$id.db") == true
+
+    /**
      * Installs a pack from a file the caller has already verified, or from
      * the app's own assets when the build carried it (development builds and
      * tests work with no network at all). The catalog is the expectation:
