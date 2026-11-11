@@ -128,7 +128,8 @@ class AyahActionsTest {
     @Test
     fun anAyahsNoteIsNotItsSave() {
         val on = compose.activity.getString(R.string.action_state_on)
-        val off = compose.activity.getString(R.string.action_state_off)
+        val save = compose.activity.getString(R.string.action_save)
+        val saved = compose.activity.getString(R.string.action_saved)
         waitForReading()
         openTheDoor()
 
@@ -139,27 +140,34 @@ class AyahActionsTest {
             on,
             markOf(compose.activity.getString(R.string.action_note)),
         )
+        // The page draws no bookmark, so the row that keeps an ayah says the
+        // keep in its own word: an ayah a note brought into Saved is not an
+        // ayah the reader saved, and the row still says Save (owner decision,
+        // this session).
         assertEquals(
-            "a note keeps the ayah in Saved, and never presses Save",
-            off,
-            markOf(compose.activity.getString(R.string.action_save)),
+            "a note never presses Save",
+            1,
+            compose.onAllNodesWithText(save).fetchSemanticsNodes().size,
+        )
+        assertEquals(
+            "a note never presses Save",
+            0,
+            compose.onAllNodesWithText(saved).fetchSemanticsNodes().size,
         )
 
         // One tap of Save on an ayah a note kept marks it rather than asking to
         // take away a keep the reader never made. The menu closes on the
         // answer, and the door is opened again to read the new truth.
-        compose.onNodeWithText(compose.activity.getString(R.string.action_save))
-            .performClick()
+        compose.onNodeWithText(save).performClick()
         waitForMenuClosed()
         openTheDoor()
-        val saveLabel = compose.activity.getString(R.string.action_save)
         compose.waitUntil(timeoutMillis = 15_000) {
-            compose.onAllNodesWithText(saveLabel).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithText(saved).fetchSemanticsNodes().isNotEmpty()
         }
         assertEquals(
-            "the reader's own tap marks the ayah",
-            on,
-            markOf(saveLabel),
+            "the reader's own tap marks the ayah, and the row says so",
+            0,
+            compose.onAllNodesWithText(save).fetchSemanticsNodes().size,
         )
         assertEquals(
             "the note is still there, and is still the note's own mark",
@@ -169,9 +177,8 @@ class AyahActionsTest {
 
         // The second tap is a save of the reader's own, so it asks first: the
         // note goes with it, and the reader's own words are not taken by one
-        // tap of a button. The row keeps the action word Save and lets the
-        // filled bookmark and its state say that the save is on.
-        compose.onNodeWithText(saveLabel).performClick()
+        // tap of a button.
+        compose.onNodeWithText(saved).performClick()
         compose.waitUntil(timeoutMillis = 15_000) {
             compose.onAllNodesWithTag("remove-saved-confirm", useUnmergedTree = true)
                 .fetchSemanticsNodes().isNotEmpty()
