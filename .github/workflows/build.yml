@@ -137,8 +137,8 @@ jobs:
 # QuranEnc exports, which are not in the repository. Run them locally with
 # ./gradlew :tools:run --args="verify|audit|fonts" before a release.
 #
-# The instrumented suites, data and app, live in instrumented.yml, on a
-# nightly schedule and by dispatch. They are signal, not a release gate.
+# The instrumented suites, data and app, live in instrumented.yml, on
+# dispatch alone. They are signal, not a release gate.
 # The store capture runs in the screenshots workflow, on all three store
 # form factors, so the two do not repeat each other's work.
 

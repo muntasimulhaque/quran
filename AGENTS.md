@@ -111,7 +111,7 @@ change, never left as a dead letter.
     signal, never a stop: the release gates and the store capture run on
     this machine's own AVDs. The build workflow holds no emulator, the
     screenshot workflow is dispatch-only and cannot fail a run, and the
-    nightly instrumented run is signal only.
+    instrumented workflow is dispatch-only too, so it never runs on its own.
 
 ## Style
 
@@ -143,7 +143,7 @@ change, never left as a dead letter.
 | `play-store/` | the listing, the screenshots per form factor, the hand-off AAB |
 | `benchmark/` | the startup profile's generator, development only, never in the bundle |
 | `docs/` | the Pages site and the privacy policy Play links to |
-| `.github/workflows/` | `build.yml` (gates, signed bundle), `instrumented.yml` (nightly data and app tests, signal only), `screenshots.yml` (dispatch-only capture signal; the store set is local) |
+| `.github/workflows/` | `build.yml` (gates, signed bundle), `instrumented.yml` (dispatch-only data and app tests, signal only), `screenshots.yml` (dispatch-only capture signal; the store set is local) |
 
 ## Where the rest lives
 
@@ -229,9 +229,10 @@ release starts.
 The bundle, the store note, and the screenshots are one delivery, handed over
 together before the owner submits anything. A release requires the gates green
 plus one local instrumented run recorded in the hand-off, with the command and
-the counts. CI instrumented runs are signal, not a gate; they run nightly in
-`instrumented.yml` and never hold a bundle. The note stands in the hand-over
-message itself as bare paragraphs under 500 characters, never only in a file.
+the counts. CI instrumented runs are signal, not a gate; they run only when
+dispatched in `instrumented.yml` and never hold a bundle. The note stands in
+the hand-over message itself as bare paragraphs under 500 characters, never
+only in a file.
 The bundle comes from the newest green `build` run on `main`, not the first one
 after the version bump, and signing is proved by `jarsigner`'s words and its
 certificate SHA-256, never by exit code alone. Screenshots are collected

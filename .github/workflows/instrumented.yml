@@ -1,17 +1,17 @@
 name: instrumented tests
 
-# The data and app instrumented suites, on a nightly schedule and by manual
-# dispatch. They are signal, not a release gate: build.yml hands over a signed
-# bundle from its gates job alone, and never waits on an emulator.
+# The data and app instrumented suites, by manual dispatch. They are signal,
+# not a release gate: build.yml hands over a signed bundle from its gates job
+# alone, and never waits on an emulator.
+#
+# Nothing here runs on its own: no schedule, no push, no pull request, so a
+# red run is never the night's. It is the run the owner dispatched.
 #
 # A lost emulator is a red signal to read and fix here. It is never a code
 # failure and never a reason a release waits. No test is skipped: the data
 # suite and all three app shards run exactly as they always have, with the
 # same KVM and the same one recovery emulator.
 on:
-  schedule:
-    # Nightly at 01:17 in the owner's time zone (UTC+6).
-    - cron: "17 19 * * *"
   workflow_dispatch:
 
 permissions:
@@ -79,8 +79,9 @@ jobs:
 
   # The app's own instrumented tests, including accessibility, the reading
   # semantics, playback, and the daily reminder. The screenshot tour runs in
-  # the capture workflow on the three store form factors. This is the nightly
-  # signal that the app's surfaces still answer; it is not a release gate.
+  # the capture workflow on the three store form factors. This is the
+  # dispatched signal that the app's surfaces still answer; it is not a
+  # release gate.
   #
   # Three shards, because the suite is the wall: the job spends about 220 s on
   # Gradle, install, and the emulator's boot before a test runs and about
