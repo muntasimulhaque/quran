@@ -1,6 +1,6 @@
 # Store kit
 
-Version: 18.1 (versionCode 183)
+Version: 18.2 (versionCode 184)
 
 ## Listing
 
