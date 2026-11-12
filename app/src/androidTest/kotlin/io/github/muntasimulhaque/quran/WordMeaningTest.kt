@@ -1,17 +1,17 @@
 package io.github.muntasimulhaque.quran
 
 import android.graphics.Bitmap
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
-import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.muntasimulhaque.quran.data.AppSettings
@@ -109,25 +109,30 @@ class WordMeaningTest {
             compose.onAllNodesWithContentDescription(page)
                 .fetchSemanticsNodes().isNotEmpty()
         }
-        // The first word of Al-Fatihah 1:1, in the print's own spelling. The
-        // line is right-aligned, so the first word stands at its right edge.
+        // The first word of Al-Fatihah 1:1, in the print's own spelling, held
+        // where it is drawn: the line runs right to left, so the word begins
+        // at the line's right edge.
         val line = compose.onAllNodesWithText(
             "بِسۡمِ",
             substring = true,
             useUnmergedTree = true,
         ).onFirst()
-        line.performTouchInput {
-            longClick(Offset(width - 32f, height / 2f))
-        }
-        // The sheet is the word's own page, and the first Bangla meaning of
-        // the word stands under it.
+        line.holdTheFirstWord()
+        // The sheet is the word's own page: the word it names is the one the
+        // reader held, and the first Bangla meaning of that word stands under
+        // it. The meaning is read inside the sheet, not on the page: the
+        // verse's own translation carries the same word, so a gloss found
+        // anywhere on the glass was no proof that the sheet had opened.
         compose.waitUntil(timeoutMillis = 60_000) {
             compose.onAllNodesWithTag("word-sheet", useUnmergedTree = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
         compose.waitUntil(timeoutMillis = 60_000) {
-            compose.onAllNodesWithText("নামে", substring = true, useUnmergedTree = true)
-                .fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodes(
+                hasAnyAncestor(hasTestTag("word-sheet")) and
+                    hasText("নামে", substring = true),
+                useUnmergedTree = true,
+            ).fetchSemanticsNodes().isNotEmpty()
         }
         // The study lines the word pack carries: the dictionary form and the
         // grammar, on the same sheet and in the reader's language. The word

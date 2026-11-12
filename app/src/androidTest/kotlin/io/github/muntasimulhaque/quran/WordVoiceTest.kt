@@ -2,14 +2,11 @@ package io.github.muntasimulhaque.quran
 
 import android.content.Context
 import android.content.Intent
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTouchInput
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -173,7 +170,7 @@ class WordVoiceTest {
             }
             compose.onAllNodesWithText(word, substring = true, useUnmergedTree = true)
                 .onFirst()
-                .performTouchInput { longClick(Offset(width - 32f, height / 2f)) }
+                .holdTheFirstWord()
             compose.waitUntil(timeoutMillis = 60_000) {
                 compose.onAllNodesWithTag("word-sheet", useUnmergedTree = true)
                     .fetchSemanticsNodes().isNotEmpty()
