@@ -66,6 +66,14 @@ private fun themeSummary(settings: AppSettings): String = settings.theme.name()
  * build). About is the list's last row like any other. Every row keeps the
  * same room above and below it, so the list has no gap that reads as a
  * section break.
+ *
+ * **The hub carries no leading icons** (owner decision, this session). The
+ * value under each name is the row's sign: Aa is the text size, System is
+ * the ground, English is the language, the pack names are the reading,
+ * Minshawi is the voice, 8:00 is the reminder. A 20 dp leading mark would
+ * take 32 dp from the words and move them off the page's gutter, and the
+ * icon set is a vocabulary of controls and states, not categories. The row's
+ * one mark is the chevron that says it opens.
  */
 @Composable
 fun SettingsHub(

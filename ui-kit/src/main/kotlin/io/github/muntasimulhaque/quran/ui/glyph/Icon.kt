@@ -10,6 +10,13 @@ package io.github.muntasimulhaque.quran.ui.glyph
  * tafsir's commentary, drawn in another hand beside them (owner decision, this
  * session).
  *
+ * **A mark is a control or a state, never a category label** (owner decision,
+ * this session). The settings hub carries its values instead: Aa, System,
+ * English, the pack names, the reciter's name, the time. A category rail
+ * would need seven new drawings and would take 32 dp from every row's
+ * words, and this set would stop being the vocabulary of things that answer
+ * a touch.
+ *
  * A mark never carries its own size. The job does, through [GlyphSize], and the
  * job is the control the mark stands in, never the screen it is drawn on.
  */
