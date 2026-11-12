@@ -186,6 +186,11 @@ change, never left as a dead letter.
   parent commit and run the class there before believing a change of yours did
   it. A retry is worth one when it names the failure; a re-wait is worth
   nothing.
+- **A local instrumented run starts with a clean install.** Uninstall both
+  packages from the target AVD before the run: the app and the test APK. A
+  `ClassNotFoundException` for a test class means a stale test APK, not a code
+  fault. Reinstall before believing a change of yours did it (owner decision,
+  this session).
 - **A capture class borrows the tour's two rules, or it costs a run.** A frame
   goes where the runner says (`screenshotOutputDirectory()`, which reads
   `additionalTestOutputDir`), never into a directory the class spells out: a
